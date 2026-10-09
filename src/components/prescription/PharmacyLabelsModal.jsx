@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye } from '@/lib/icons';
+import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye, Pill, ChevronLeft, ChevronRight, Share2 } from '@/lib/icons';
 import { db } from '@/firebase';
 import { doc, updateDoc, getDoc, collection, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import PharmapolisLabelSvg from './PharmapolisLabelSvg';
@@ -196,11 +196,14 @@ export default function PharmacyLabelsModal({
   onClose,
   labels = [],
   initialLabelIndex = 0,
-  isEs = false
+  isEs = false,
+  initialEditMode = false,
+  isStandalone = false
 }) {
   const [selectedProductIdx, setSelectedProductIdx] = useState(initialLabelIndex || 0);
   const [activeVariant, setActiveVariant] = useState('backQr'); // 'front' | 'backQr' | 'frontWithQr'
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [exportFormat, setExportFormat] = useState('pdf'); // 'pdf' | 'png'
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -209,7 +212,7 @@ export default function PharmacyLabelsModal({
   const [zoomLevel, setZoomLevel] = useState('fit'); // 'fit' | 1 | 1.5 | 2
 
   // Live Online Editing & Markdown Support
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(Boolean(initialEditMode));
   const [editorTab, setEditorTab] = useState('fields'); // 'fields' | 'markdown'
   const [editedOverrides, setEditedOverrides] = useState({});
   const [markdownText, setMarkdownText] = useState('');
@@ -319,6 +322,20 @@ export default function PharmacyLabelsModal({
     a.download = `PHARMAPOLIS_${patientClean || 'LABEL'}_${rxCodeClean}_spec.md`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleShareEditor = () => {
+    if (typeof window === 'undefined') return;
+    const rawCode = currentItem.fileNumber || currentItem.rxCode || baseItem.fileNumber || baseItem.rxCode || baseItem.id || '';
+    const cleanCode = encodeURIComponent(String(rawCode).trim());
+    const origin = window.location.origin;
+    const phaseParam = (selectedProductIdx != null && selectedProductIdx > 0) ? `&phase=${selectedProductIdx + 1}` : '';
+    const url = `${origin}/rx/${cleanCode}/labels?edit=true${phaseParam}`;
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(url);
+      setCopiedShareLink(true);
+      setTimeout(() => setCopiedShareLink(false), 2500);
+    }
   };
 
   const handleSaveToFirebase = async () => {
@@ -799,7 +816,7 @@ export default function PharmacyLabelsModal({
   };
 
   return (
-    <div className="gcp-labels-backdrop">
+    <div className={`gcp-labels-backdrop ${isStandalone ? 'is-standalone-page' : ''}`}>
       <style>{`
         .gcp-labels-backdrop {
           position: fixed;
@@ -813,6 +830,26 @@ export default function PharmacyLabelsModal({
           padding: 16px;
           overflow-y: auto;
           box-sizing: border-box;
+        }
+        .gcp-labels-backdrop.is-standalone-page {
+          position: static;
+          inset: auto;
+          z-index: 1;
+          background: transparent;
+          backdrop-filter: none;
+          padding: 16px 20px 48px 20px;
+          min-height: auto;
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+        }
+        .gcp-labels-backdrop.is-standalone-page .gcp-labels-dialog {
+          max-width: 960px;
+          max-height: none;
+          height: auto;
+          box-shadow: 0 1px 3px rgba(60, 64, 67, 0.12), 0 2px 8px rgba(60, 64, 67, 0.08);
+          border: 1px solid #dadce0;
+          border-radius: 8px;
         }
         .gcp-labels-dialog {
           background: #ffffff;
@@ -844,13 +881,15 @@ export default function PharmacyLabelsModal({
           flex: 1 1 auto;
           min-height: 0;
           overflow-y: auto;
-          padding: 12px 18px;
+          padding: 12px 18px 28px 18px;
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: 12px;
           align-items: center;
           -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
           box-sizing: border-box;
+          width: 100%;
         }
         .gcp-labels-sticky-footer {
           flex-shrink: 0;
@@ -862,7 +901,7 @@ export default function PharmacyLabelsModal({
           justify-content: space-between;
           gap: 12px;
           z-index: 20;
-          box-shadow: 0 -2px 6px rgba(60, 64, 67, 0.05);
+          box-shadow: 0 -2px 8px rgba(60, 64, 67, 0.08);
           box-sizing: border-box;
           width: 100%;
         }
@@ -893,12 +932,12 @@ export default function PharmacyLabelsModal({
           align-items: center;
           justify-content: center;
           gap: 6px;
-          height: 34px;
-          padding: 0 14px;
+          height: 36px;
+          padding: 0 16px;
           border-radius: 4px;
           background: #1a73e8;
           color: #ffffff;
-          font-size: 0.80rem;
+          font-size: 0.82rem;
           font-weight: 600;
           cursor: pointer;
           border: 1px solid #1a73e8;
@@ -916,13 +955,13 @@ export default function PharmacyLabelsModal({
           align-items: center;
           justify-content: center;
           gap: 6px;
-          height: 34px;
+          height: 36px;
           padding: 0 12px;
           border-radius: 4px;
           background: #ffffff;
           border: 1px solid #dadce0;
           color: #1a73e8;
-          font-size: 0.78rem;
+          font-size: 0.80rem;
           font-weight: 600;
           cursor: pointer;
           transition: background 0.15s, border-color 0.15s;
@@ -941,68 +980,451 @@ export default function PharmacyLabelsModal({
           color: #202124;
         }
 
-        /* ── Compact screens (<= 768px) ── */
+        /* ── Google Cloud Resource Selector (Dedicated Full-Width Banner) ── */
+        .gcp-resource-selector-card {
+          width: 100%;
+          max-width: 760px;
+          background: #ffffff;
+          border: 1px solid #c2e7ff;
+          border-left: 4px solid #1a73e8;
+          border-radius: 8px;
+          padding: 10px 14px;
+          box-shadow: 0 1px 3px rgba(60, 64, 67, 0.08);
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+        .gcp-resource-header-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .gcp-resource-icon-box {
+          width: 28px;
+          height: 28px;
+          border-radius: 6px;
+          background: #e8f0fe;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .gcp-resource-title-label {
+          font-size: 0.68rem;
+          font-weight: 700;
+          color: #5f6368;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .gcp-resource-subtitle-code {
+          font-size: 0.74rem;
+          font-weight: 600;
+          color: #1a73e8;
+        }
+        .gcp-resource-count-badge {
+          font-size: 0.70rem;
+          font-weight: 600;
+          color: #1a73e8;
+          background: #e8f0fe;
+          padding: 2px 8px;
+          border-radius: 12px;
+          border: 1px solid #d2e3fc;
+          white-space: nowrap;
+        }
+        .gcp-resource-nav-btn {
+          width: 30px;
+          height: 30px;
+          border-radius: 4px;
+          border: 1px solid #dadce0;
+          background: #ffffff;
+          color: #5f6368;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.15s;
+        }
+        .gcp-resource-nav-btn:hover:not(:disabled) {
+          background: #f1f3f4;
+          color: #202124;
+          border-color: #1a73e8;
+        }
+        .gcp-resource-nav-btn:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+        .gcp-resource-select {
+          width: 100%;
+          height: 40px;
+          padding: 0 34px 0 12px;
+          border-radius: 6px;
+          border: 1.5px solid #1a73e8;
+          background: #ffffff;
+          font-size: 0.88rem;
+          font-weight: 600;
+          color: #202124;
+          cursor: pointer;
+          appearance: none;
+          -webkit-appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231a73e8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 12px center;
+          outline: none;
+          box-sizing: border-box;
+        }
+        .gcp-resource-select:focus {
+          box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+        }
+        .gcp-resource-details-strip {
+          display: flex;
+          align-items: center;
+          gap: 8px 14px;
+          flex-wrap: wrap;
+          background: #f8fafd;
+          border: 1px solid #e8eaed;
+          border-radius: 6px;
+          padding: 8px 12px;
+        }
+        .gcp-resource-detail-item {
+          display: inline-flex;
+          align-items: baseline;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+        .gcp-detail-tag {
+          font-size: 0.68rem;
+          font-weight: 700;
+          color: #5f6368;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+        .gcp-detail-text {
+          font-size: 0.82rem;
+          font-weight: 600;
+          color: #202124;
+          word-break: break-word;
+        }
+        .gcp-detail-patient {
+          color: #202124;
+          font-weight: 700;
+        }
+        .gcp-detail-formula {
+          color: #1a73e8;
+          font-weight: 700;
+        }
+
+        /* ── Controls Toolbar ── */
+        .gcp-controls-toolbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 8px;
+          background: #f8fafc;
+          padding: 8px 12px;
+          border-radius: 6px;
+          border: 1px solid #dadce0;
+          width: 100%;
+          maxWidth: 760px;
+          box-sizing: border-box;
+        }
+        .gcp-toolbar-items-wrap {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          flex: 1;
+        }
+        .gcp-toolbar-control {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .gcp-toolbar-label {
+          font-size: 0.70rem;
+          font-weight: 600;
+          color: #5f6368;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          white-space: nowrap;
+        }
+        .gcp-toolbar-select {
+          height: 32px;
+          padding: 0 24px 0 8px;
+          border-radius: 4px;
+          border: 1px solid #dadce0;
+          background: #ffffff;
+          font-size: 0.78rem;
+          font-weight: 600;
+          color: #202124;
+          cursor: pointer;
+          appearance: none;
+          -webkit-appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 6px center;
+          outline: none;
+        }
+        .gcp-toolbar-btn {
+          height: 32px;
+          padding: 0 10px;
+          border-radius: 4px;
+          border: 1px solid #dadce0;
+          background: #ffffff;
+          color: #3c4043;
+          font-size: 0.76rem;
+          font-weight: 600;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          transition: all 0.15s;
+        }
+
+        /* ── Responsive 12-Column Google Cloud Editor Form (NO INNER SCROLL TRAP) ── */
+        .gcp-editor-container {
+          padding: 14px 16px;
+          background: #fafbfc;
+          overflow: visible;
+          box-sizing: border-box;
+          width: 100%;
+        }
+        .gcp-editor-fields-grid {
+          display: grid;
+          grid-template-columns: repeat(12, 1fr);
+          gap: 12px;
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .gcp-col-12 { grid-column: span 12; }
+        .gcp-col-6  { grid-column: span 6; }
+        .gcp-col-4  { grid-column: span 4; }
+        .gcp-col-3  { grid-column: span 3; }
+
+        .gcp-field-wrap {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          box-sizing: border-box;
+        }
+        .gcp-form-label {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 0.70rem;
+          font-weight: 700;
+          color: #5f6368;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          margin-bottom: 2px;
+        }
+        .gcp-form-input {
+          width: 100%;
+          height: 38px;
+          font-size: 0.86rem;
+          font-weight: 500;
+          color: #202124;
+          background: #ffffff;
+          border: 1px solid #dadce0;
+          border-radius: 4px;
+          padding: 0 10px;
+          box-sizing: border-box;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .gcp-form-input:focus {
+          border-color: #1a73e8;
+          outline: none;
+          box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        .gcp-form-textarea {
+          width: 100%;
+          font-size: 0.84rem;
+          line-height: 1.45;
+          padding: 8px 10px;
+          border: 1px solid #dadce0;
+          border-radius: 4px;
+          box-sizing: border-box;
+          background: #ffffff;
+          color: #202124;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .gcp-form-textarea:focus {
+          border-color: #1a73e8;
+          outline: none;
+          box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+
+        /* ── Compact screens (<= 768px): Strictly following Rule #23 and Google Cloud Mobile UX ── */
         @media (max-width: 768px) {
-          .gcp-labels-backdrop {
-            padding: 8px;
-            align-items: flex-end;
+          .gcp-labels-backdrop:not(.is-standalone-page) {
+            padding: 0 !important;
+            align-items: flex-end !important;
           }
-          .gcp-labels-dialog {
-            max-height: calc(100dvh - 16px);
-            height: 100%;
-            border-radius: 14px 14px 0 0;
-            border: none;
-            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.25);
+          .gcp-labels-backdrop.is-standalone-page {
+            padding: 8px 8px 32px 8px !important;
+          }
+          .gcp-labels-backdrop:not(.is-standalone-page) .gcp-labels-dialog {
+            max-height: 100dvh !important;
+            height: 100dvh !important;
+            border-radius: 14px 14px 0 0 !important;
+            border: none !important;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.25) !important;
+          }
+          .gcp-labels-backdrop.is-standalone-page .gcp-labels-dialog {
+            border-radius: 8px !important;
+            height: auto !important;
+            max-height: none !important;
           }
           .gcp-labels-header {
-            padding: 10px 14px;
+            padding: 10px 14px !important;
           }
           .gcp-labels-body {
-            padding: 10px 12px 14px 12px;
-            gap: 8px;
+            padding: 10px 12px 32px 12px !important;
+            gap: 10px !important;
           }
           .gcp-labels-sticky-footer {
-            padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 8px)) 14px;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 8px;
-            background: #ffffff;
-            border-top: 1px solid #e0e0e0;
-            box-shadow: 0 -4px 18px rgba(60, 64, 67, 0.12), 0 -1px 3px rgba(60, 64, 67, 0.08);
+            padding: 10px 14px calc(12px + env(safe-area-inset-bottom, 10px)) 14px !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+            background: #ffffff !important;
+            border-top: 1px solid #dadce0 !important;
+            box-shadow: 0 -4px 18px rgba(60, 64, 67, 0.12) !important;
           }
           .gcp-footer-desktop-specs {
-            display: none;
+            display: none !important;
           }
           .gcp-footer-mobile-specs {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            font-size: 0.74rem;
-            color: #5f6368;
-            padding: 0 2px;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 8px !important;
+            font-size: 0.76rem !important;
+            color: #5f6368 !important;
+            padding: 0 2px !important;
           }
           .gcp-footer-actions-wrap {
-            width: 100%;
-            flex-direction: column;
-            gap: 8px;
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
           }
           .gcp-btn-primary {
-            width: 100%;
-            height: 40px;
-            font-size: 0.84rem;
-            border-radius: 6px;
-          }
-          .gcp-footer-secondary-grid {
-            display: flex;
-            gap: 8px;
-            width: 100%;
+            width: 100% !important;
+            height: 44px !important;
+            min-height: 44px !important;
+            font-size: 0.88rem !important;
+            border-radius: 6px !important;
+            font-weight: 700 !important;
           }
           .gcp-btn-secondary {
-            flex: 1 1 auto;
-            height: 36px;
-            font-size: 0.78rem;
-            border-radius: 6px;
+            width: 100% !important;
+            height: 42px !important;
+            min-height: 42px !important;
+            font-size: 0.82rem !important;
+            border-radius: 6px !important;
+          }
+          .gcp-footer-secondary-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
+            width: 100% !important;
+          }
+          .gcp-footer-secondary-grid .gcp-btn-secondary {
+            width: 100% !important;
+            height: 40px !important;
+            min-height: 40px !important;
+            justify-content: center !important;
+          }
+          .gcp-editor-container {
+            padding: 10px 10px 24px 10px !important;
+            max-height: none !important;
+            overflow: visible !important;
+          }
+          .gcp-editor-fields-grid {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+          }
+          .gcp-col-12, .gcp-col-6, .gcp-col-4, .gcp-col-3 {
+            grid-column: span 1 !important;
+          }
+          .gcp-form-input {
+            height: 44px !important;
+            min-height: 44px !important;
+            font-size: 16px !important; /* Prevents iOS Safari 120% auto-zoom */
+            padding: 0 12px !important;
+            border-radius: 6px !important;
+          }
+          .gcp-form-textarea {
+            font-size: 15px !important;
+            padding: 10px 12px !important;
+            border-radius: 6px !important;
+            min-height: 96px !important;
+          }
+          .gcp-form-label {
+            font-size: 0.72rem !important;
+            margin-bottom: 4px !important;
+          }
+          .gcp-resource-select {
+            height: 44px !important;
+            font-size: 15px !important;
+            border-radius: 6px !important;
+          }
+          .gcp-resource-nav-btn {
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 6px !important;
+          }
+          .gcp-resource-details-strip {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 6px !important;
+          }
+          .gcp-toolbar-select {
+            height: 36px !important;
+            font-size: 13px !important;
+          }
+          .gcp-toolbar-btn {
+            height: 36px !important;
+            font-size: 13px !important;
+            padding: 0 10px !important;
+          }
+          .gcp-editor-header-bar {
+            padding: 8px 10px !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+          }
+          .gcp-editor-tabs-wrap {
+            width: 100% !important;
+            display: flex !important;
+          }
+          .gcp-editor-tab-btn {
+            flex: 1 1 50% !important;
+            justify-content: center !important;
+            height: 36px !important;
+          }
+          .gcp-editor-actions-wrap {
+            width: 100% !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+          }
+          .gcp-editor-save-btn {
+            width: 100% !important;
+            height: 40px !important;
+            justify-content: center !important;
+            font-size: 0.82rem !important;
+          }
+          .gcp-editor-aux-btn {
+            flex: 1 1 calc(25% - 6px) !important;
+            min-width: 66px !important;
+            height: 36px !important;
+            justify-content: center !important;
           }
         }
       `}</style>
@@ -1074,95 +1496,121 @@ export default function PharmacyLabelsModal({
 
         {/* Content Body */}
         <div className="gcp-labels-body">
-          {/* Google Cloud Compact Controls Toolbar (Dropdown Fields) */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '8px',
-            background: '#f8fafc',
-            padding: '8px 12px',
-            borderRadius: '6px',
-            border: '1px solid #dadce0',
-            width: '100%',
-            maxWidth: '760px',
-            boxSizing: 'border-box'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
-              {/* Field 1: Preparation / Phase (if multi-product or bulk) */}
+          {/* Google Cloud Dedicated Primary Resource / Formula Selector Card */}
+          <div className="gcp-resource-selector-card">
+            <div className="gcp-resource-header-row">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                <div className="gcp-resource-icon-box">
+                  <Pill size={16} color="#1a73e8" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                  <span className="gcp-resource-title-label">
+                    {isEs ? 'Prescripción y Fórmula Seleccionada' : 'Selected Prescription & Formula'}
+                  </span>
+                  <span className="gcp-resource-subtitle-code">
+                    {currentItem.fileNumber || currentItem.rxCode || 'RX-COMPOUND'}
+                  </span>
+                </div>
+              </div>
+
               {labels.length > 1 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <label htmlFor="gcp-label-phase" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
-                    {isEs ? 'Etiqueta:' : 'Label:'}
-                  </label>
-                  <select
-                    id="gcp-label-phase"
-                    value={selectedProductIdx}
-                    onChange={(e) => setSelectedProductIdx(Number(e.target.value))}
-                    style={{
-                      height: 30,
-                      minWidth: '220px',
-                      maxWidth: '480px',
-                      padding: '0 24px 0 8px',
-                      borderRadius: '4px',
-                      border: '1px solid #dadce0',
-                      background: '#ffffff',
-                      fontSize: '0.76rem',
-                      fontWeight: 600,
-                      color: '#202124',
-                      cursor: 'pointer',
-                      appearance: 'none',
-                      WebkitAppearance: 'none',
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 6px center',
-                      outline: 'none',
-                      textOverflow: 'ellipsis',
-                      overflow: 'hidden',
-                      whiteSpace: 'nowrap'
-                    }}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                  <span className="gcp-resource-count-badge">
+                    {selectedProductIdx + 1} / {labels.length}
+                  </span>
+                  <button
+                    type="button"
+                    className="gcp-resource-nav-btn"
+                    disabled={selectedProductIdx === 0}
+                    onClick={() => setSelectedProductIdx(prev => Math.max(0, prev - 1))}
+                    title={isEs ? 'Fórmula Anterior' : 'Previous Formula'}
+                    aria-label="Previous Formula"
                   >
-                    {labels.map((lbl, idx) => {
-                      const prefix = lbl.patientName ? `${lbl.patientName} — ` : '';
-                      const part = lbl.phaseNumber ? `Phase ${lbl.phaseNumber}: ` : `${idx + 1}. `;
-                      const title = lbl.productName || lbl.productTitle || 'Compounded Protocol';
-                      return (
-                        <option key={lbl.id || idx} value={idx}>
-                          {prefix}{part}{title}
-                        </option>
-                      );
-                    })}
-                  </select>
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="gcp-resource-nav-btn"
+                    disabled={selectedProductIdx >= labels.length - 1}
+                    onClick={() => setSelectedProductIdx(prev => Math.min(labels.length - 1, prev + 1))}
+                    title={isEs ? 'Siguiente Fórmula' : 'Next Formula'}
+                    aria-label="Next Formula"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
                 </div>
               )}
+            </div>
 
-              {/* Field 2: Label Variant (Type) */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <label htmlFor="gcp-label-variant" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+            {/* If multi-product / multi-phase, large full-width responsive dropdown */}
+            {labels.length > 1 && (
+              <div style={{ position: 'relative', width: '100%' }}>
+                <label htmlFor="gcp-label-phase-primary" style={{ display: 'none' }}>
+                  {isEs ? 'Seleccionar Fórmula:' : 'Select Formula:'}
+                </label>
+                <select
+                  id="gcp-label-phase-primary"
+                  value={selectedProductIdx}
+                  onChange={(e) => setSelectedProductIdx(Number(e.target.value))}
+                  className="gcp-resource-select"
+                >
+                  {labels.map((lbl, idx) => {
+                    const prefix = lbl.patientName ? `${lbl.patientName} — ` : '';
+                    const phase = lbl.phaseNumber ? `Phase ${lbl.phaseNumber}: ` : `${idx + 1}. `;
+                    const title = lbl.productName || lbl.productTitle || 'Compounded Formula';
+                    const vol = lbl.volume ? ` (${lbl.volume})` : '';
+                    return (
+                      <option key={lbl.id || idx} value={idx}>
+                        {prefix}{phase}{title}{vol}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
+
+            {/* Unwrapped Full Name and Formula Details Banner (Zero ellipsis · 100% visible on both mobile and laptop) */}
+            <div className="gcp-resource-details-strip">
+              <div className="gcp-resource-detail-item">
+                <span className="gcp-detail-tag">{isEs ? 'Paciente:' : 'Patient:'}</span>
+                <span className="gcp-detail-text gcp-detail-patient">
+                  {currentItem.patientName || currentItem.patient?.name || 'N/A'}
+                </span>
+              </div>
+              <div className="gcp-resource-detail-item">
+                <span className="gcp-detail-tag">{isEs ? 'Fórmula:' : 'Formula:'}</span>
+                <span className="gcp-detail-text gcp-detail-formula">
+                  {currentItem.phaseNumber ? `Phase ${currentItem.phaseNumber}: ` : ''}{currentItem.productTitle || currentItem.productName || 'Compounded Protocol'}
+                </span>
+              </div>
+              {currentItem.volume && (
+                <div className="gcp-resource-detail-item">
+                  <span className="gcp-detail-tag">{isEs ? 'Cantidad:' : 'Net:'}</span>
+                  <span className="gcp-detail-text">🧴 {currentItem.volume}</span>
+                </div>
+              )}
+              {currentItem.batchCode && (
+                <div className="gcp-resource-detail-item">
+                  <span className="gcp-detail-tag">{isEs ? 'Lote:' : 'Batch:'}</span>
+                  <span className="gcp-detail-text">🏷️ {currentItem.batchCode}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Google Cloud Compact Controls Toolbar (Dropdown Fields) */}
+          <div className="gcp-controls-toolbar">
+            <div className="gcp-toolbar-items-wrap">
+              {/* Field 1: Label Variant (Type) */}
+              <div className="gcp-toolbar-control">
+                <label htmlFor="gcp-label-variant" className="gcp-toolbar-label">
                   {isEs ? 'Tipo:' : 'Label:'}
                 </label>
                 <select
                   id="gcp-label-variant"
                   value={activeVariant}
                   onChange={(e) => setActiveVariant(e.target.value)}
-                  style={{
-                    height: 30,
-                    padding: '0 24px 0 8px',
-                    borderRadius: '4px',
-                    border: '1px solid #dadce0',
-                    background: '#ffffff',
-                    fontSize: '0.76rem',
-                    fontWeight: 600,
-                    color: '#202124',
-                    cursor: 'pointer',
-                    appearance: 'none',
-                    WebkitAppearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 6px center',
-                    outline: 'none'
-                  }}
+                  className="gcp-toolbar-select"
                 >
                   <option value="backQr">{isEs ? 'Reverso con QR (Trazabilidad)' : 'Back Label with QR (Traceability)'}</option>
                   <option value="front">{isEs ? 'Frontal Estándar' : 'Front Label (Standard)'}</option>
@@ -1170,9 +1618,9 @@ export default function PharmacyLabelsModal({
                 </select>
               </div>
 
-              {/* Field 3: Label Size / Format */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <label htmlFor="gcp-label-size" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+              {/* Field 2: Label Size / Format */}
+              <div className="gcp-toolbar-control">
+                <label htmlFor="gcp-label-size" className="gcp-toolbar-label">
                   {isEs ? 'Medida:' : 'Size:'}
                 </label>
                 <select
@@ -1182,23 +1630,7 @@ export default function PharmacyLabelsModal({
                     const p = PRESETS.find(x => x.id === e.target.value);
                     if (p) handleSelectPreset(p);
                   }}
-                  style={{
-                    height: 30,
-                    padding: '0 24px 0 8px',
-                    borderRadius: '4px',
-                    border: '1px solid #dadce0',
-                    background: '#ffffff',
-                    fontSize: '0.76rem',
-                    fontWeight: 600,
-                    color: '#202124',
-                    cursor: 'pointer',
-                    appearance: 'none',
-                    WebkitAppearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 6px center',
-                    outline: 'none'
-                  }}
+                  className="gcp-toolbar-select"
                 >
                   {PRESETS.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -1221,9 +1653,9 @@ export default function PharmacyLabelsModal({
                       onChange={(e) => handleCustomWidthChange(e.target.value)}
                       style={{
                         width: '42px',
-                        height: 26,
+                        height: 28,
                         padding: '0 3px',
-                        fontSize: '0.74rem',
+                        fontSize: '0.76rem',
                         border: '1px solid #dadce0',
                         borderRadius: '4px',
                         textAlign: 'center',
@@ -1242,9 +1674,9 @@ export default function PharmacyLabelsModal({
                       onChange={(e) => handleCustomHeightChange(e.target.value)}
                       style={{
                         width: '42px',
-                        height: 26,
+                        height: 28,
                         padding: '0 3px',
-                        fontSize: '0.74rem',
+                        fontSize: '0.76rem',
                         border: '1px solid #dadce0',
                         borderRadius: '4px',
                         textAlign: 'center',
@@ -1256,32 +1688,16 @@ export default function PharmacyLabelsModal({
                 </div>
               )}
 
-              {/* Field 4: Print Resolution / DPI */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <label htmlFor="gcp-label-dpi" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+              {/* Field 3: Print Resolution / DPI */}
+              <div className="gcp-toolbar-control">
+                <label htmlFor="gcp-label-dpi" className="gcp-toolbar-label">
                   DPI:
                 </label>
                 <select
                   id="gcp-label-dpi"
                   value={dpi}
                   onChange={(e) => setDpi(Number(e.target.value))}
-                  style={{
-                    height: 30,
-                    padding: '0 22px 0 8px',
-                    borderRadius: '4px',
-                    border: '1px solid #dadce0',
-                    background: '#ffffff',
-                    fontSize: '0.76rem',
-                    fontWeight: 600,
-                    color: '#202124',
-                    cursor: 'pointer',
-                    appearance: 'none',
-                    WebkitAppearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 6px center',
-                    outline: 'none'
-                  }}
+                  className="gcp-toolbar-select"
                 >
                   <option value={300}>300 DPI (Standard)</option>
                   <option value={600}>600 DPI (Micro-Print)</option>
@@ -1289,32 +1705,16 @@ export default function PharmacyLabelsModal({
                 </select>
               </div>
 
-              {/* Field 5: Export Format Selector (PDF / PNG / MD) */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <label htmlFor="gcp-label-format" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+              {/* Field 4: Export Format Selector (PDF / PNG / MD) */}
+              <div className="gcp-toolbar-control">
+                <label htmlFor="gcp-label-format" className="gcp-toolbar-label">
                   {isEs ? 'Formato:' : 'Format:'}
                 </label>
                 <select
                   id="gcp-label-format"
                   value={exportFormat}
                   onChange={(e) => setExportFormat(e.target.value)}
-                  style={{
-                    height: 30,
-                    padding: '0 24px 0 8px',
-                    borderRadius: '4px',
-                    border: '1px solid #dadce0',
-                    background: '#ffffff',
-                    fontSize: '0.76rem',
-                    fontWeight: 600,
-                    color: '#202124',
-                    cursor: 'pointer',
-                    appearance: 'none',
-                    WebkitAppearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 6px center',
-                    outline: 'none'
-                  }}
+                  className="gcp-toolbar-select"
                 >
                   <option value="pdf">{isEs ? `PDF (Esta Etiqueta · ${dimensions.widthMm}×${dimensions.heightMm}mm)` : `PDF (Current Label · ${dimensions.widthMm}×${dimensions.heightMm}mm)`}</option>
                   {labels.length > 1 && (
@@ -1332,20 +1732,11 @@ export default function PharmacyLabelsModal({
               <button
                 type="button"
                 onClick={() => setShowCutGuides(prev => !prev)}
+                className="gcp-toolbar-btn"
                 style={{
-                  height: 30,
-                  padding: '0 10px',
-                  borderRadius: '4px',
                   border: showCutGuides ? '1px solid #1a73e8' : '1px solid #dadce0',
                   background: showCutGuides ? '#e8f0fe' : '#ffffff',
-                  color: showCutGuides ? '#1a73e8' : '#5f6368',
-                  fontSize: '0.76rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s'
+                  color: showCutGuides ? '#1a73e8' : '#5f6368'
                 }}
                 title={isEs ? 'Mostrar/Ocultar guías de corte con tijera' : 'Toggle scissor cut lines & crop marks'}
               >
@@ -1364,20 +1755,11 @@ export default function PharmacyLabelsModal({
               <button
                 type="button"
                 onClick={() => setIsEditing(prev => !prev)}
+                className="gcp-toolbar-btn"
                 style={{
-                  height: 30,
-                  padding: '0 10px',
-                  borderRadius: '4px',
                   border: isEditing ? '1px solid #1a73e8' : '1px solid #dadce0',
                   background: isEditing ? '#e8f0fe' : '#ffffff',
-                  color: isEditing ? '#1a73e8' : '#3c4043',
-                  fontSize: '0.76rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s'
+                  color: isEditing ? '#1a73e8' : '#3c4043'
                 }}
                 title={isEs ? 'Editar campos de la etiqueta' : 'Edit label fields'}
               >
@@ -1390,6 +1772,22 @@ export default function PharmacyLabelsModal({
                   background: isEditing ? '#1a73e8' : '#dadce0',
                   display: 'inline-block'
                 }} />
+              </button>
+
+              {/* Field 7: Compartir Editor (Enlace Directo) */}
+              <button
+                type="button"
+                onClick={handleShareEditor}
+                className="gcp-toolbar-btn"
+                style={{
+                  border: copiedShareLink ? '1px solid #137333' : '1px solid #dadce0',
+                  background: copiedShareLink ? '#e6f4ea' : '#ffffff',
+                  color: copiedShareLink ? '#137333' : '#3c4043'
+                }}
+                title={isEs ? 'Copiar enlace directo del editor para compartir con un tercero' : 'Copy direct link to share editor with third party'}
+              >
+                {copiedShareLink ? <Check size={13} color="#137333" /> : <Share2 size={13} />}
+                <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
               </button>
             </div>
 
@@ -1430,21 +1828,13 @@ export default function PharmacyLabelsModal({
               marginBottom: '6px'
             }}>
               {/* Editor Header Bar with Tabs and Actions */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 12px',
-                background: '#f8fafd',
-                borderBottom: '1px solid #d2e3fc',
-                flexWrap: 'wrap',
-                gap: '8px'
-              }}>
+              <div className="gcp-editor-header-bar">
                 {/* Tabs */}
-                <div style={{ display: 'inline-flex', background: '#e8f0fe', padding: '2px', borderRadius: '4px', gap: '2px' }}>
+                <div className="gcp-editor-tabs-wrap" style={{ display: 'inline-flex', background: '#e8f0fe', padding: '2px', borderRadius: '4px', gap: '2px' }}>
                   <button
                     type="button"
                     onClick={() => setEditorTab('fields')}
+                    className="gcp-editor-tab-btn"
                     style={{
                       padding: '4px 10px',
                       borderRadius: '3px',
@@ -1466,6 +1856,7 @@ export default function PharmacyLabelsModal({
                   <button
                     type="button"
                     onClick={() => setEditorTab('markdown')}
+                    className="gcp-editor-tab-btn"
                     style={{
                       padding: '4px 10px',
                       borderRadius: '3px',
@@ -1486,15 +1877,16 @@ export default function PharmacyLabelsModal({
                   </button>
                 </div>
 
-                {/* Editor Action Buttons: Save to Firebase, Copy .md, Download .md, Reset */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                {/* Editor Action Buttons: Save to Firebase, Share, Copy .md, Download .md, Reset */}
+                <div className="gcp-editor-actions-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                   {/* SAVE TO FIREBASE BUTTON */}
                   <button
                     type="button"
                     onClick={handleSaveToFirebase}
                     disabled={isSavingToFirebase}
+                    className="gcp-editor-save-btn"
                     style={{
-                      padding: '4px 10px',
+                      padding: '4px 12px',
                       borderRadius: '4px',
                       border: firebaseSaveSuccess ? '1px solid #137333' : '1px solid #1a73e8',
                       background: firebaseSaveSuccess ? '#e6f4ea' : '#1a73e8',
@@ -1523,9 +1915,35 @@ export default function PharmacyLabelsModal({
                     )}
                   </button>
 
+                  {/* SHARE EDITOR LINK BUTTON */}
+                  <button
+                    type="button"
+                    onClick={handleShareEditor}
+                    className="gcp-editor-aux-btn"
+                    style={{
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      border: copiedShareLink ? '1px solid #137333' : '1px solid #1a73e8',
+                      background: copiedShareLink ? '#e6f4ea' : '#ffffff',
+                      color: copiedShareLink ? '#137333' : '#1a73e8',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      transition: 'all 0.15s'
+                    }}
+                    title={isEs ? 'Copiar enlace directo para que un tercero edite y guarde' : 'Copy link to share editor with a third party'}
+                  >
+                    {copiedShareLink ? <Check size={12} color="#137333" /> : <Share2 size={12} />}
+                    <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={handleCopyMarkdown}
+                    className="gcp-editor-aux-btn"
                     style={{
                       padding: '4px 8px',
                       borderRadius: '4px',
@@ -1548,6 +1966,7 @@ export default function PharmacyLabelsModal({
                   <button
                     type="button"
                     onClick={handleDownloadMarkdown}
+                    className="gcp-editor-aux-btn"
                     style={{
                       padding: '4px 8px',
                       borderRadius: '4px',
@@ -1570,6 +1989,7 @@ export default function PharmacyLabelsModal({
                   <button
                     type="button"
                     onClick={handleResetOriginal}
+                    className="gcp-editor-aux-btn"
                     style={{
                       padding: '4px 8px',
                       borderRadius: '4px',
@@ -1599,158 +2019,170 @@ export default function PharmacyLabelsModal({
               )}
 
               {/* Tab Body */}
-              <div style={{
-                padding: '12px 14px',
-                background: '#fafbfc',
-                maxHeight: '340px',
-                minHeight: '220px',
-                overflowY: 'auto',
-                flexShrink: 0,
-                boxSizing: 'border-box',
-                width: '100%'
-              }}>
+              <div className="gcp-editor-container">
                 {editorTab === 'fields' ? (
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-                    gap: '10px',
-                    width: '100%',
-                    boxSizing: 'border-box'
-                  }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
+                  <div className="gcp-editor-fields-grid">
+                    <div className="gcp-col-6 gcp-field-wrap">
+                      <label className="gcp-form-label">
                         {isEs ? 'Nombre Paciente' : 'Patient Name'}
                       </label>
                       <input
                         type="text"
                         value={currentItem.patientName || currentItem.patient?.name || ''}
                         onChange={(e) => handleFieldChange('patientName', e.target.value)}
-                        style={{ width: '100%', height: 28, fontSize: '0.78rem', padding: '0 8px', border: '1px solid #dadce0', borderRadius: '4px', boxSizing: 'border-box', fontWeight: 600 }}
+                        className="gcp-form-input"
+                        placeholder="e.g. Amna Sultan Mohamed Ahmed Alotaiba"
                       />
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
+                    <div className="gcp-col-6 gcp-field-wrap">
+                      <label className="gcp-form-label">
                         {isEs ? 'Título Producto / Fórmula' : 'Product Title / Formula'}
                       </label>
                       <input
                         type="text"
                         value={currentItem.productTitle || currentItem.productName || ''}
                         onChange={(e) => handleFieldChange('productTitle', e.target.value)}
-                        style={{ width: '100%', height: 28, fontSize: '0.78rem', padding: '0 8px', border: '1px solid #dadce0', borderRadius: '4px', boxSizing: 'border-box' }}
+                        className="gcp-form-input"
+                        placeholder="e.g. Phase 1: Morning Formula | With Breakfast"
                       />
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
-                        {isEs ? 'Cantidad Neta (Net Quantity)' : 'Net Quantity'}
+                    <div className="gcp-col-3 gcp-field-wrap">
+                      <label className="gcp-form-label">
+                        {isEs ? 'Cantidad Neta' : 'Net Quantity'}
                       </label>
                       <input
                         type="text"
                         value={currentItem.volume || currentItem.size || currentItem.netContent || ''}
                         onChange={(e) => handleFieldChange('volume', e.target.value)}
-                        style={{ width: '100%', height: 28, fontSize: '0.78rem', padding: '0 8px', border: '1px solid #dadce0', borderRadius: '4px', boxSizing: 'border-box' }}
+                        className="gcp-form-input"
+                        placeholder="60 Caps / 100 mL"
                       />
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
-                        {isEs ? 'Lote (Dispensing Batch)' : 'Dispensing Batch'}
+                    <div className="gcp-col-3 gcp-field-wrap">
+                      <label className="gcp-form-label">
+                        {isEs ? 'Lote (Batch)' : 'Dispensing Batch'}
                       </label>
                       <input
                         type="text"
                         value={currentItem.batchCode || currentItem.lote || currentItem.fileNumber || ''}
                         onChange={(e) => handleFieldChange('batchCode', e.target.value)}
-                        style={{ width: '100%', height: 28, fontSize: '0.78rem', padding: '0 8px', border: '1px solid #dadce0', borderRadius: '4px', boxSizing: 'border-box' }}
+                        className="gcp-form-input"
+                        placeholder="PHARM-2026-..."
                       />
                     </div>
 
-                    <div style={{ gridColumn: '1 / -1' }}>
-                      <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
-                        {isEs ? 'Principios Activos y Concentración (uno por línea)' : 'Active Ingredients & Strength (one per line)'}
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={formatApisForEditor(currentItem)}
-                        onChange={(e) => handleApisFieldChange(e.target.value)}
-                        style={{ width: '100%', fontSize: '0.78rem', padding: '6px 8px', border: '1px solid #dadce0', borderRadius: '4px', boxSizing: 'border-box', fontFamily: 'monospace' }}
-                        placeholder="Minoxidil: 4%&#10;Spironolactone: 1%&#10;Arginine: 1.5%"
-                      />
-                    </div>
-
-                    <div style={{ gridColumn: '1 / -1' }}>
-                      <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
-                        {isEs ? 'Vehículo de Formulación (Compounding Vehicle)' : 'Compounding Vehicle'}
-                      </label>
-                      <input
-                        type="text"
-                        value={typeof currentItem.vehicle === 'string' ? currentItem.vehicle : (currentItem.vehicle?.name || '')}
-                        onChange={(e) => handleFieldChange('vehicle', e.target.value)}
-                        style={{ width: '100%', height: 28, fontSize: '0.78rem', padding: '0 8px', border: '1px solid #dadce0', borderRadius: '4px', boxSizing: 'border-box' }}
-                        placeholder="TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle, 100 mL)"
-                      />
-                    </div>
-
-                    <div style={{ gridColumn: '1 / -1' }}>
-                      <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
-                        {isEs ? 'Posología / Modo de Empleo (Directions for Use)' : 'Directions for Use'}
-                      </label>
-                      <input
-                        type="text"
-                        value={currentItem.directions || currentItem.instructions || ''}
-                        onChange={(e) => handleFieldChange('directions', e.target.value)}
-                        style={{ width: '100%', height: 28, fontSize: '0.78rem', padding: '0 8px', border: '1px solid #dadce0', borderRadius: '4px', boxSizing: 'border-box' }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
+                    <div className="gcp-col-3 gcp-field-wrap">
+                      <label className="gcp-form-label">
                         {isEs ? 'Médico Prescriptor' : 'Prescribing Doctor'}
                       </label>
                       <input
                         type="text"
                         value={currentItem.doctorName || currentItem.physician || ''}
                         onChange={(e) => handleFieldChange('doctorName', e.target.value)}
-                        style={{ width: '100%', height: 28, fontSize: '0.78rem', padding: '0 8px', border: '1px solid #dadce0', borderRadius: '4px', boxSizing: 'border-box' }}
+                        className="gcp-form-input"
+                        placeholder="Dr. Marina Cordeiro Fernandes"
                       />
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
+                    <div className="gcp-col-3 gcp-field-wrap">
+                      <label className="gcp-form-label">
                         {isEs ? 'Clínica' : 'Clinic'}
                       </label>
                       <input
                         type="text"
                         value={currentItem.clinicName || ''}
                         onChange={(e) => handleFieldChange('clinicName', e.target.value)}
-                        style={{ width: '100%', height: 28, fontSize: '0.78rem', padding: '0 8px', border: '1px solid #dadce0', borderRadius: '4px', boxSizing: 'border-box' }}
+                        className="gcp-form-input"
+                        placeholder="NOVA Clinic, Dubai"
                       />
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
+                    <div className="gcp-col-12 gcp-field-wrap">
+                      <label className="gcp-form-label">
+                        <span>{isEs ? 'Principios Activos y Concentración' : 'Active Ingredients & Strength'}</span>
+                        <span style={{ fontSize: '0.66rem', color: '#5f6368', textTransform: 'none', fontWeight: 500 }}>
+                          {isEs ? '(un ingrediente por línea · formato: Fármaco: Dosis)' : '(one per line · Drug: Dose)'}
+                        </span>
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={formatApisForEditor(currentItem)}
+                        onChange={(e) => handleApisFieldChange(e.target.value)}
+                        className="gcp-form-textarea"
+                        style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }}
+                        placeholder="Ubiquinol (Kaneka® CoQ10): 250 mg&#10;Saw Palmetto Extract: 250 mg&#10;Arginine: 1.5%"
+                      />
+                    </div>
+
+                    <div className="gcp-col-12 gcp-field-wrap">
+                      <label className="gcp-form-label">
+                        {isEs ? 'Vehículo de Formulación (Compounding Vehicle)' : 'Compounding Vehicle'}
+                      </label>
+                      <input
+                        type="text"
+                        value={typeof currentItem.vehicle === 'string' ? currentItem.vehicle : (currentItem.vehicle?.name || '')}
+                        onChange={(e) => handleFieldChange('vehicle', e.target.value)}
+                        className="gcp-form-input"
+                        placeholder="Vegetable capsules. Gluten-free, lactose-free..."
+                      />
+                    </div>
+
+                    <div className="gcp-col-12 gcp-field-wrap">
+                      <label className="gcp-form-label">
+                        {isEs ? 'Posología / Modo de Empleo (Directions for Use)' : 'Directions for Use'}
+                      </label>
+                      <input
+                        type="text"
+                        value={currentItem.directions || currentItem.instructions || ''}
+                        onChange={(e) => handleFieldChange('directions', e.target.value)}
+                        className="gcp-form-input"
+                        placeholder="Take 1 capsule once daily with breakfast."
+                      />
+                    </div>
+
+                    <div className="gcp-col-3 gcp-field-wrap">
+                      <label className="gcp-form-label">
                         {isEs ? 'Fecha Fabricación (Mfg)' : 'Mfg Date'}
                       </label>
                       <input
                         type="text"
                         value={currentItem.prodDate || currentItem.mfgDate || ''}
                         onChange={(e) => handleFieldChange('prodDate', e.target.value)}
-                        style={{ width: '100%', height: 28, fontSize: '0.78rem', padding: '0 8px', border: '1px solid #dadce0', borderRadius: '4px', boxSizing: 'border-box' }}
+                        className="gcp-form-input"
+                        placeholder="DD-MM-YYYY"
                       />
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
+                    <div className="gcp-col-3 gcp-field-wrap">
+                      <label className="gcp-form-label">
                         {isEs ? 'Fecha Caducidad (Exp)' : 'Expiry Date'}
                       </label>
                       <input
                         type="text"
                         value={currentItem.expDate || ''}
                         onChange={(e) => handleFieldChange('expDate', e.target.value)}
-                        style={{ width: '100%', height: 28, fontSize: '0.78rem', padding: '0 8px', border: '1px solid #dadce0', borderRadius: '4px', boxSizing: 'border-box' }}
+                        className="gcp-form-input"
+                        placeholder="DD-MM-YYYY"
+                      />
+                    </div>
+
+                    <div className="gcp-col-6 gcp-field-wrap">
+                      <label className="gcp-form-label">
+                        {isEs ? 'Conservación / Almacenamiento' : 'Storage Conditions'}
+                      </label>
+                      <input
+                        type="text"
+                        value={currentItem.storage || ''}
+                        onChange={(e) => handleFieldChange('storage', e.target.value)}
+                        className="gcp-form-input"
+                        placeholder="Store in a cool dry place, below 25°C."
                       />
                     </div>
                   </div>
+
                 ) : (
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
@@ -2039,9 +2471,24 @@ export default function PharmacyLabelsModal({
               </button>
             )}
 
-            {/* Secondary Actions */}
-            {currentItem.targetRxUrl && (
-              <div className="gcp-footer-secondary-grid">
+            {/* Secondary Actions (Share & QR Link Grid) */}
+            <div className="gcp-footer-secondary-grid">
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={handleShareEditor}
+                style={{
+                  color: copiedShareLink ? '#137333' : '#3c4043',
+                  background: copiedShareLink ? '#e6f4ea' : '#ffffff',
+                  borderColor: copiedShareLink ? '#ceead6' : '#dadce0'
+                }}
+                title={isEs ? 'Copiar enlace directo del editor para compartir con un tercero' : 'Copy direct link to share editor with a third party'}
+              >
+                {copiedShareLink ? <Check size={14} color="#137333" /> : <Share2 size={14} />}
+                <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
+              </button>
+
+              {currentItem.targetRxUrl && (
                 <button
                   type="button"
                   className="gcp-btn-secondary gcp-btn-copy"
@@ -2054,10 +2501,10 @@ export default function PharmacyLabelsModal({
                   title={currentItem.targetRxUrl}
                 >
                   {copiedLink ? <Check size={14} color="#137333" /> : <ExternalLink size={14} />}
-                  <span>{copiedLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy QR Link')}</span>
+                  <span>{copiedLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar QR' : 'Copy QR Link')}</span>
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
