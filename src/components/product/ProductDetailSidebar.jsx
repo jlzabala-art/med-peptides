@@ -50,10 +50,12 @@ export default function ProductDetailSidebar({
   isSolventProduct = false,
   isCorporateService = false,
   isSupplementProduct = false,
-  hideFloatingTrigger = true
+  hideFloatingTrigger = true,
+  activeSection = '',
+  onSelectSection = null
 }) {
   const isEs = lang === 'es';
-  const [activeId, setActiveId] = useState(sections[0]?.id || '');
+  const [activeId, setActiveId] = useState(activeSection || sections[0]?.id || '');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   // Check if current peptide is FDA Approved (e.g. Tirzepatide, Semaglutide, etc.)
@@ -76,9 +78,9 @@ export default function ProductDetailSidebar({
     return () => window.removeEventListener('open-datasheet-toc', handleExternalOpen);
   }, []);
 
-  // Real-time ScrollSpy via IntersectionObserver
+  // Real-time ScrollSpy via IntersectionObserver (only when not in controlled single-section mode)
   useEffect(() => {
-    if (typeof window === 'undefined' || !availableSections.length) return;
+    if (onSelectSection || typeof window === 'undefined' || !availableSections.length) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -103,13 +105,21 @@ export default function ProductDetailSidebar({
     });
 
     return () => observer.disconnect();
-  }, [availableSections]);
+  }, [availableSections, onSelectSection]);
+
+  const currentActiveId = activeSection || activeId || availableSections[0]?.id || '';
 
   const scrollToSection = (e, targetId) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!targetId) return;
 
     triggerHaptic('light');
+
+    if (onSelectSection) {
+      onSelectSection(targetId);
+      setIsMobileDrawerOpen(false);
+      return;
+    }
 
     const el = document.getElementById(targetId);
     if (el) {
@@ -126,14 +136,18 @@ export default function ProductDetailSidebar({
   const scrollToTop = () => {
     triggerHaptic('light');
     setIsMobileDrawerOpen(false);
+    if (onSelectSection) {
+      onSelectSection('overview');
+      return;
+    }
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  const activeIndex = availableSections.findIndex(s => s.id === activeId);
+  const activeIndex = availableSections.findIndex(s => s.id === currentActiveId);
   const currentProgress = activeIndex >= 0 ? activeIndex + 1 : 1;
-  const activeLabel = availableSections.find(s => s.id === activeId)?.label || '';
+  const activeLabel = availableSections.find(s => s.id === currentActiveId)?.label || '';
 
   // Broadcast TOC progress to bottom sticky action bar
   useEffect(() => {
@@ -249,7 +263,7 @@ export default function ProductDetailSidebar({
       <nav className="pds-toc-nav" role="navigation">
         <ul className="pds-toc-list">
           {availableSections.map((sec, idx) => {
-            const isActive = activeId === sec.id;
+            const isActive = currentActiveId === sec.id;
             const IconComponent = sec.icon;
 
             return (
@@ -440,7 +454,7 @@ export default function ProductDetailSidebar({
             <div className="pds-drawer-body">
               <ul className="pds-drawer-list">
                 {availableSections.map((sec, idx) => {
-                  const isActive = activeId === sec.id;
+                  const isActive = currentActiveId === sec.id;
                   const IconComponent = sec.icon;
 
                   return (

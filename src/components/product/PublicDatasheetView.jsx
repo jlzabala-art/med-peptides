@@ -37,7 +37,9 @@ import {
   Beaker,
   Microscope,
   ClipboardList,
-  ChevronDown
+  ChevronDown,
+  Clock,
+  Dna
 } from '@/lib/icons';
 import ImageModal from '@/snippets/ImageModal';
 import { 
@@ -84,6 +86,11 @@ import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicPageHero from '@/components/shared/public/PublicPageHero';
 import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
 import ProductDetailSidebar from './ProductDetailSidebar';
+import EternaPublicOverviewShowcase from './EternaPublicOverviewShowcase';
+import SupplementPublicOverviewShowcase from './SupplementPublicOverviewShowcase';
+import ProductOverviewQuickNav from './ProductOverviewQuickNav';
+import ProductSectionHeaderBanner from './ProductSectionHeaderBanner';
+import ProductSectionFooterNav from './ProductSectionFooterNav';
 import PeptideMonographWorkspace from './monograph/PeptideMonographWorkspace';
 import { Mail, Lock } from 'lucide-react';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
@@ -131,6 +138,47 @@ export default function PublicDatasheetView({
   const [isTranslating, setIsTranslating] = useState(false);
   const [copiedLabelType, setCopiedLabelType] = useState(null);
   const [downloadingType, setDownloadingType] = useState(null);
+
+  // Active section management (Single-section display rule)
+  const [activeSection, setActiveSection] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash) return hash;
+    }
+    return 'overview';
+  });
+
+  const handleSelectSection = useCallback((targetId) => {
+    if (!targetId) return;
+    setActiveSection(targetId);
+    if (typeof window !== 'undefined') {
+      if (window.history?.replaceState) {
+        window.history.replaceState(null, '', `#${targetId}`);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash) {
+        setActiveSection(hash);
+      } else {
+        setActiveSection('overview');
+      }
+    };
+
+    if (window.location.hash) {
+      const initialHash = window.location.hash.replace('#', '').trim();
+      if (initialHash) setActiveSection(initialHash);
+    }
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const { user } = useAuth();
   const router = useRouter();
@@ -1035,6 +1083,18 @@ export default function PublicDatasheetView({
   const isPenAndCartridgeEcosystem = Boolean(distinctPenFmt && distinctCartridgeFmt);
 
   const tocSections = useMemo(() => {
+    if (isEternaDiagnostic) {
+      return [
+        { id: 'overview', label: lang === 'es' ? 'Longevidad & Edad Biológica' : 'Longevity & Epigenetic Overview', icon: Clock },
+        { id: 'reconstitution-section', label: lang === 'es' ? '5 Pilares Epigenéticos & Dianas' : '5 Epigenetic Pillars & Targets', icon: Dna },
+        { id: 'presentations-matrix', label: lang === 'es' ? 'Kit y Presentaciones de Muestreo' : 'Kit Presentations & Sampling', icon: Layers },
+        { id: 'specs-section', label: lang === 'es' ? 'Certificación y Trazabilidad' : 'Lab Traceability & Standards', icon: ShieldCheck },
+        { id: 'publications-section', label: lang === 'es' ? 'Evidencia y Relojes Epigenéticos' : 'Clinical Evidence & Clocks', icon: FileText },
+        { id: 'labels-section', label: lang === 'es' ? 'Identificador y Código de Muestra' : 'Sample Barcode & Clinical Labels', icon: Tag },
+        { id: 'related-peptides-section', label: lang === 'es' ? 'Protocolos de Intervención Longevidad' : 'Companion Longevity Protocols', icon: FlaskConical }
+      ];
+    }
+
     if (isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) {
       return [
         { id: 'overview', label: lang === 'es' ? 'Descripción y Utilidad' : 'Overview & Utility', icon: FileText },
@@ -1104,7 +1164,7 @@ export default function PublicDatasheetView({
       ] : []),
       { id: 'related-peptides-section', label: lang === 'es' ? 'Protocolos Clínicos' : 'Clinical Protocols', icon: FlaskConical }
     ];
-  }, [isDiagnosticKit, isCorporateService, isPenOrCart, isSprayFormat, isSolventProduct, isCosmeticProduct, isSupplementProduct, product, lang]);
+  }, [isEternaDiagnostic, isDiagnosticKit, isCorporateService, isPenOrCart, isSprayFormat, isSolventProduct, isCosmeticProduct, isSupplementProduct, product, lang]);
 
   // Deterministic discreet batch code fallback
   const effectiveBatchCode = useMemo(() => {
@@ -1119,6 +1179,13 @@ export default function PublicDatasheetView({
       supplier: currentSupplier
     });
   }, [initialBatch, slug, product?.slug, selectedStrength?.name, selectedStrengthId, activeSupplierId, supplierName]);
+
+  // Guaranteed fallback to 'overview' if activeSection is not in current tocSections
+  const effectiveActiveSection = useMemo(() => {
+    if (!activeSection || activeSection === 'overview') return 'overview';
+    const exists = tocSections.some(s => s.id === activeSection);
+    return exists ? activeSection : 'overview';
+  }, [activeSection, tocSections]);
 
   // Reactive Dynamic Share URL respecting active state — Guaranteed https://med-peptides.com
   const dynamicPublicUrl = useMemo(() => {
@@ -1567,9 +1634,12 @@ export default function PublicDatasheetView({
         />
       ) : (
         <PublicPageShell>
-        {/* Universal Clinical / Institutional Page Hero */}
-        <div id="overview">
-          <PublicPageHero
+        {/* ── Google Cloud Console Dynamic Dual Navigation Layout ── */}
+        <div className="pds-content-with-sidebar">
+          <div className="pds-main-column">
+            {effectiveActiveSection === 'overview' ? (
+              <div id="overview">
+                <PublicPageHero
             badges={
             <>
               <span className="pds-cat-tag">
@@ -1933,13 +2003,42 @@ export default function PublicDatasheetView({
             ) : null
           }
         />
+        {isEternaDiagnostic && (
+          <EternaPublicOverviewShowcase
+            product={product}
+            lang={lang}
+            onSelectSection={handleSelectSection}
+          />
+        )}
+        {isSupplementProduct && (
+          <SupplementPublicOverviewShowcase
+            product={product}
+            lang={lang}
+            onSelectSection={handleSelectSection}
+          />
+        )}
+        <ProductOverviewQuickNav
+          sections={tocSections}
+          activeSection={effectiveActiveSection}
+          onSelectSection={handleSelectSection}
+          lang={lang}
+        />
         </div>
+      ) : (
+        <div className="pds-single-section-view">
+          <ProductSectionHeaderBanner
+            productName={name}
+            category={category}
+            activeSection={effectiveActiveSection}
+            sections={tocSections}
+            onSelectSection={handleSelectSection}
+            lang={lang}
+          />
 
-        {/* ── Google Cloud Console Dynamic Dual Navigation Layout ── */}
-        <div className="pds-content-with-sidebar">
-          <div className="pds-main-column">
-            {/* ── Multi-Formulation / Laboratory Switcher (Golden Rule #28 & #4) ── */}
-        {!isCorporateService && !product?.isSingleSupplierLocked && Array.isArray(product?.availableSuppliers) && product.availableSuppliers.length > 1 && (
+          {effectiveActiveSection === 'presentations-matrix' && (
+            <>
+              {/* ── Multi-Formulation / Laboratory Switcher (Golden Rule #28 & #4) ── */}
+              {!isCorporateService && !product?.isSingleSupplierLocked && Array.isArray(product?.availableSuppliers) && product.availableSuppliers.length > 1 && (
           <div style={{
             margin: '0 0 1.25rem 0',
             padding: '12px 16px',
@@ -2640,9 +2739,12 @@ export default function PublicDatasheetView({
           </div>
         </section>
         )}
+      </>
+    )}
 
-        {/* ── Block 2: Corporate & Clinical Services or Reconstitution/Specs ── */}
-        {isSpainResidency ? (
+    {/* ── Block 2: Corporate & Clinical Services or Reconstitution/Specs ── */}
+    {effectiveActiveSection === 'reconstitution-section' && (
+      isSpainResidency ? (
           <SpainCompanyResidencyTechnicalSpecs
             product={product}
             lang={lang}
@@ -2763,33 +2865,34 @@ export default function PublicDatasheetView({
               </>
             )}
           </section>
-        )}
+        )
+      )}
 
-        {/* ── Block 3: Analytical Certificate & Molecular Profile (Elevated Top-Level Section) ── */}
-        {!isCorporateService && !isCosmeticProduct && (
-          <section id="specs-section" className="pds-traceability-wrapper">
-            <ProductTraceabilityCard
-              product={product}
-              baseUrl={baseUrl}
-              lang={lang}
-              monographUrl={dynamicPublicUrl}
-              batchCode={effectiveBatchCode}
-            />
-          </section>
-        )}
+      {/* ── Block 3: Analytical Certificate & Molecular Profile (Elevated Top-Level Section) ── */}
+      {effectiveActiveSection === 'specs-section' && !isCorporateService && !isCosmeticProduct && (
+        <section id="specs-section" className="pds-traceability-wrapper">
+          <ProductTraceabilityCard
+            product={product}
+            baseUrl={baseUrl}
+            lang={lang}
+            monographUrl={dynamicPublicUrl}
+            batchCode={effectiveBatchCode}
+          />
+        </section>
+      )}
 
-        {/* ── Peer-Reviewed Scientific Literature & Clinical Trials ── */}
-        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && (
-          <PeptidePublicationsSection product={product} lang={lang} />
-        )}
+      {/* ── Peer-Reviewed Scientific Literature & Clinical Trials ── */}
+      {effectiveActiveSection === 'publications-section' && !isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && (
+        <PeptidePublicationsSection product={product} lang={lang} />
+      )}
 
-        {/* ── Clinical Safety Profile: Contraindications & Precautions ── */}
-        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && (
-          <PeptideContraindicationsSection product={product} lang={lang} />
-        )}
+      {/* ── Clinical Safety Profile: Contraindications & Precautions ── */}
+      {effectiveActiveSection === 'contraindications-section' && !isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && (
+        <PeptideContraindicationsSection product={product} lang={lang} />
+      )}
 
-        {!isDiagnosticKit && !isCorporateService && !isCosmeticProduct && (
-          <section id="labels-section" className="pds-section-card">
+      {effectiveActiveSection === 'labels-section' && !isDiagnosticKit && !isCorporateService && !isCosmeticProduct && (
+        <section id="labels-section" className="pds-section-card">
             <div className="pds-section-header">
               <div className="pds-section-header-left">
                 <div className="pds-section-header-shield">
@@ -2965,7 +3068,7 @@ export default function PublicDatasheetView({
         )}
 
         {/* ── Block 4.5: Analytical Quality Verification & Clinical Dosing Parameters (EQNO Inspired) ── */}
-        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && !isSupplementProduct && (
+        {effectiveActiveSection === 'analytical-specs' && !isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && !isSupplementProduct && (
           <PeptideAnalyticalSpecsCard
             product={product}
             selectedStrength={selectedStrength}
@@ -2975,24 +3078,58 @@ export default function PublicDatasheetView({
         )}
 
         {/* ── Block 4.8: Bloodo™ Clinical Diagnostic FAQ & WhatsApp Share ── */}
-        {!isCosmeticProduct && (isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo') || (Array.isArray(product?.clinical_faq) && product.clinical_faq.length > 0)) && (
+        {effectiveActiveSection === 'nad-clinical-faq' && !isCosmeticProduct && (isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo') || (Array.isArray(product?.clinical_faq) && product.clinical_faq.length > 0)) && (
           <BloodoNadFaqCard product={product} lang={lang} />
         )}
 
         {/* ── Block 5: Targeted Therapeutic Peptides (Lotusland Limited) ── */}
-        <BloodoRelatedPeptidesSection product={product} lang={lang} />
+        {effectiveActiveSection === 'related-peptides-section' && (
+          <BloodoRelatedPeptidesSection product={product} lang={lang} />
+        )}
 
         {/* ── Block 6: Bloodo™ Diagnostic Suite Switcher (All 6 Clinical DBS Tests) ── */}
-        {isBloodoDiagnostic && (
+        {effectiveActiveSection === 'bloodo-suite' && isBloodoDiagnostic && (
           <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
         )}
 
         {/* ── Block 7: In-Office Clinical Advantage (Capillary DBS vs Traditional Phlebotomy) ── */}
-        {(isBloodoDiagnostic || isDiagnosticKit) && (
+        {effectiveActiveSection === 'clinical-dbs-advantages' && (isBloodoDiagnostic || isDiagnosticKit) && (
           <BloodoClinicalAdvantageCard lang={lang} />
         )}
 
-        {/* ── Block 8: Product Regulatory Warnings & Safety Governance ── */}
+        {/* Diagnostic kit specific sub-sections */}
+        {['diagnostic-specs', 'biomarker-simulator', 'collection-protocol', 'pre-analytical-prep', 'kit-contents'].includes(effectiveActiveSection) && (
+          <section id={effectiveActiveSection} className="pds-section-card">
+            <DiagnosticTestTechnicalSpecs
+              product={product}
+              selectedDose={selectedStrength?.name || 'Standard'}
+              supplierName={displaySupplierName}
+              lang={lang}
+            />
+          </section>
+        )}
+
+        {/* Cosmetic specific sub-sections */}
+        {['clinical-evidence', 'inci-dossier', 'application-protocol', 'colway-system'].includes(effectiveActiveSection) && (
+          <section id={effectiveActiveSection} className="pds-section-card">
+            <CosmeticTechnicalSpecs
+              product={product}
+              lang={lang}
+              onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+            />
+          </section>
+        )}
+
+        <ProductSectionFooterNav
+          activeSection={effectiveActiveSection}
+          sections={tocSections}
+          onSelectSection={handleSelectSection}
+          lang={lang}
+        />
+      </div>
+    )}
+
+    {/* ── Block 8: Product Regulatory Warnings & Safety Governance ── */}
         <ProductRegulatoryWarningsSection
           product={product}
           lang={lang}
@@ -3087,6 +3224,8 @@ export default function PublicDatasheetView({
             isCorporateService={isCorporateService}
             isSupplementProduct={isSupplementProduct}
             hideFloatingTrigger={true}
+            activeSection={effectiveActiveSection}
+            onSelectSection={handleSelectSection}
           />
         </div>
       </PublicPageShell>
