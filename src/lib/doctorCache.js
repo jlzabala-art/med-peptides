@@ -428,8 +428,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         if (!existingTask.codes.includes(rx.code)) existingTask.codes.push(rx.code);
         if (!existingTask.patient && rx.patient) existingTask.patient = rx.patient;
         if (!existingTask.patientDob && rx.patient?.dob) existingTask.patientDob = rx.patient.dob;
-        existingTask.title = `Prescription Verification & Sign-off (${existingTask.pendingCount} Formulations)`;
-        existingTask.description = `${existingTask.pendingCount} imported formulations (${existingTask.codes.map(c => '#' + c).join(', ')}) awaiting physician clinical verification.`;
+        existingTask.title = `Prescription Sign-off (${existingTask.pendingCount} Formulations)`;
+        existingTask.description = `${existingTask.pendingCount} compounded formulations awaiting physician digital authorization.`;
       } else {
         clinicalTasks.push({
           id: `task-sign-${rx.id}`,
@@ -442,8 +442,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
           type: 'approval',
           priority: 'action_required',
           pendingCount: 1,
-          title: `Prescription Verification & Sign-off`,
-          description: `Imported compounded formulation #${rx.code} awaiting physician clinical verification and authorization.`,
+          title: `Prescription Sign-off`,
+          description: `Compounded formulation awaiting physician digital authorization for pharmacy dispensing.`,
           dueDate: 'Immediate',
           actionLabel: 'Review & Sign-off',
           actionUrl: `/rx/${rx.code}`
@@ -464,8 +464,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         patientDob: rx.patient?.dob || null,
         type: 'refill',
         priority: 'medium',
-        title: 'Prescription Supply Refill Assessment',
-        description: `Patient 30-day dispensary supply reaching completion. Verify clinical adherence before refilling.`,
+        title: 'Prescription Supply Refill',
+        description: `30-day dispensary supply completing. Review patient adherence before refilling.`,
         dueDate: 'Next 7 days',
         actionLabel: 'Issue Refill',
         actionUrl: `/rx/${rx.code}`

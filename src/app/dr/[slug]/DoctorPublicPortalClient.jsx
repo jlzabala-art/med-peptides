@@ -1179,6 +1179,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       key: 'patientName',
       header: 'Patient Dossier',
       width: '26%',
+      align: 'left',
       sortable: true,
       render: (t) => {
         const dob = t.patient?.dob || t.patientDob || t.dob || (
@@ -1201,27 +1202,45 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     },
     {
       key: 'title',
-      header: 'Clinical Task & Action Plan',
+      header: 'Clinical Task & Details',
       width: '54%',
+      align: 'left',
       sortable: true,
       render: (t) => {
-        let cleanTitle = t.title || '';
-        cleanTitle = cleanTitle.replace(/^Clinical Verification:\s*/i, '');
-        if (t.patientName && cleanTitle.startsWith(t.patientName)) {
-          cleanTitle = cleanTitle.replace(t.patientName, '').trim();
-          cleanTitle = cleanTitle.replace(/^[-:–]\s*/, '').trim();
-        }
-        if (!cleanTitle) cleanTitle = 'Prescription Sign-off';
-
         const isSigned = t.isSigned || t.status === 'approved';
+        const rxMatch = allPrescriptions.find(
+          (p) => p.code === t.code || p.id === t.rxId || (p.code && t.codes?.includes(p.code))
+        );
+
+        // Derive high-signal title and details following GCP UX standards
+        const codeDisplay = t.code || (t.codes && t.codes[0]) || null;
+        const medicationSummary = rxMatch?.treatmentTitle || rxMatch?.items?.map(i => i.name).filter(Boolean).slice(0, 2).join(' + ') || null;
+
+        let taskActionName = 'Prescription Sign-off';
+        if (t.type === 'refill') taskActionName = 'Supply Refill Assessment';
+        else if (t.type === 'milestone') taskActionName = 'Clinical Milestone Review';
+        else if (t.pendingCount > 1) taskActionName = `Prescription Sign-off (${t.pendingCount} Formulations)`;
+
+        let taskDescription = t.description;
+        // Clean up legacy repetitive phrases following GCP UX guidelines
+        if (!taskDescription || taskDescription.includes('awaiting physician clinical verification and authorization')) {
+          taskDescription = medicationSummary
+            ? `${medicationSummary} • Awaiting physician digital authorization for dispensing.`
+            : 'Compounded formulation awaiting physician digital authorization.';
+        } else if (taskDescription.includes('awaiting physician clinical verification')) {
+          taskDescription = `${t.pendingCount || 'Multiple'} compounded formulations awaiting physician digital authorization.`;
+        }
 
         return (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          <div style={{ textAlign: 'left', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
               <span style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.86rem' }}>
-                {cleanTitle}
+                {taskActionName}
               </span>
-              {isSigned && (
+              {codeDisplay && (
+                <CopyableId value={codeDisplay} />
+              )}
+              {isSigned ? (
                 <span
                   style={{
                     display: 'inline-flex',
@@ -1239,10 +1258,28 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   <CheckCircle2 size={11} />
                   Authorized
                 </span>
+              ) : (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '0.68rem',
+                    fontWeight: 650,
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    background: '#fffbeb',
+                    color: '#b45309',
+                    border: '1px solid #fde68a'
+                  }}
+                >
+                  <Clock size={11} />
+                  Pending Sign-off
+                </span>
               )}
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px', lineHeight: 1.35 }}>
-              {t.description}
+            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px', lineHeight: 1.35, textAlign: 'left' }}>
+              {taskDescription}
             </div>
           </div>
         );
@@ -1473,9 +1510,13 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       width: '12%',
       sortable: true,
       render: (rx) => (
-        <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <Calendar size={12} style={{ color: '#64748b' }} />
-          <span>{rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Active'}</span>
+        <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
+          <Calendar size={12} style={{ color: '#64748b', flexShrink: 0 }} />
+          <span>
+            {rx.createdAt
+              ? new Date(rx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              : 'Active'}
+          </span>
         </div>
       )
     },
@@ -2340,9 +2381,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                         fontWeight: 700,
                         color: '#0f172a',
                         lineHeight: 1.25,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
+                        wordBreak: 'break-word'
                       }}
                     >
                       {doctor.name || 'Treating Physician'}
@@ -2352,10 +2391,9 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                         fontSize: '0.64rem',
                         color: '#0d9488',
                         fontWeight: 600,
-                        lineHeight: 1.15,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
+                        lineHeight: 1.2,
+                        wordBreak: 'break-word',
+                        marginTop: '2px'
                       }}
                     >
                       {doctor.clinic || doctor.specialty || 'Verified Medical Practice'}
@@ -4272,9 +4310,12 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             const ghkMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-ghk-cu-50mg');
             const glowMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-glow-blend');
             const epithalonMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-epithalon-10mg');
+            const cjcMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-cjc-ipam-blend');
+            const dsipMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-dsip-5mg');
+            const bpcMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-bpc-157-10mg');
             const colwayMatches = analyzedItems.filter(item => Boolean(item.recs?.colway));
 
-            const masterSolutions = [
+            const candidateSolutions = [
               {
                 id: 'atlas-ghk-cu-50mg',
                 category: 'peptide',
@@ -4324,6 +4365,54 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 protocolUrl: '/proto/epithalon-telomere-extension'
               },
               {
+                id: 'atlas-cjc-ipam-blend',
+                category: 'peptide',
+                badge: 'ENDOCRINE GH AXIS REGULATOR',
+                title: 'CJC-1295 (No DAC) & Ipamorelin 5 mg / 5 mg',
+                badgeColor: '#0284c7',
+                badgeBg: '#e0f2fe',
+                borderColor: '#bae6fd',
+                matchScore: '97% Endocrine Synergy',
+                target: 'Pulsatile Pituitary GH Axis & Body Composition Bioregulator',
+                summary: 'Dual-action secretagogue stimulating physiological, pulsatile growth hormone and IGF-1 secretion without pituitary desensitization, synergizing with BHRT/TRT regimens.',
+                synergisticApis: ['Testosterone', 'Estradiol', 'Progesterone', 'DHEA', 'Pentravan'],
+                matchingItems: cjcMatches,
+                protocolTitle: 'CJC-1295 & Ipamorelin Synergistic HGH Protocol',
+                protocolUrl: '/proto/gh-rejuvenation-cjc-ipam'
+              },
+              {
+                id: 'atlas-dsip-5mg',
+                category: 'peptide',
+                badge: 'NEURO-CIRCADIAN REGULATOR',
+                title: 'DSIP (Delta Sleep-Inducing Peptide) 5 mg / vial',
+                badgeColor: '#6366f1',
+                badgeBg: '#e0e7ff',
+                borderColor: '#c7d2fe',
+                matchScore: '98% Neuro-Circadian Synergy',
+                target: 'Central GABAergic & Pineal Circadian Neuro-Reset',
+                summary: 'Nonapeptide crossing the blood-brain barrier to restore physiological slow-wave sleep (SWS) architecture, blunting hypercortisolemia and stabilizing autonomic tone.',
+                synergisticApis: ['Melatonin', 'L-Theanine', 'GABA', 'Magnesium Glycinate'],
+                matchingItems: dsipMatches,
+                protocolTitle: 'DSIP Circadian Sleep Restoration Protocol',
+                protocolUrl: '/proto/dsip-circadian-deep-sleep'
+              },
+              {
+                id: 'atlas-bpc-157-10mg',
+                category: 'peptide',
+                badge: 'CYTOPROTECTIVE TISSUE REGULATOR',
+                title: 'BPC-157 (Body Protection Compound) 10 mg / vial',
+                badgeColor: '#0369a1',
+                badgeBg: '#e0f2fe',
+                borderColor: '#bae6fd',
+                matchScore: '95% Biological Synergy',
+                target: 'Endothelial Nitric Oxide Signaling & Cytoprotection',
+                summary: 'Penta-decapeptide accelerating local tissue repair through endothelial nitric oxide synthase (eNOS) upregulation and VEGFR2 phosphorylation, stabilizing cellular extracellular matrices.',
+                synergisticApis: ['Arginine', 'Glutamine', 'Zinc Carnosine', 'Hyaluronic Acid'],
+                matchingItems: bpcMatches,
+                protocolTitle: 'BPC-157 & TB-500 Cellular Repair Protocol',
+                protocolUrl: '/proto/bpc-157-tb-500-protocol'
+              },
+              {
                 id: 'colway-hair-system',
                 category: 'colway',
                 badge: 'SCALP BARRIER INTEGRITY & NATIVE ECM',
@@ -4341,10 +4430,22 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               }
             ];
 
+            // Strict Clinical Rule: Only display recommendations with at least 1 actual applicable prescription in practice
+            const masterSolutions = candidateSolutions.filter(sol => Array.isArray(sol.matchingItems) && sol.matchingItems.length > 0);
+            const peptideSolutions = masterSolutions.filter(sol => sol.category === 'peptide');
+            const colwaySolutions = masterSolutions.filter(sol => sol.category === 'colway');
+
+            // If active category filter has no solutions, gracefully fallback to 'all'
+            const effectiveCategoryFilter = 
+              (recCategoryFilter === 'peptides' && peptideSolutions.length === 0) ||
+              (recCategoryFilter === 'colway' && colwaySolutions.length === 0)
+                ? 'all'
+                : recCategoryFilter;
+
             // Filter by Category and Search Query
             const filteredSolutions = masterSolutions.filter(sol => {
-              if (recCategoryFilter === 'peptides' && sol.category !== 'peptide') return false;
-              if (recCategoryFilter === 'colway' && sol.category !== 'colway') return false;
+              if (effectiveCategoryFilter === 'peptides' && sol.category !== 'peptide') return false;
+              if (effectiveCategoryFilter === 'colway' && sol.category !== 'colway') return false;
               if (recSearchQuery.trim()) {
                 const q = recSearchQuery.toLowerCase().trim();
                 const matchTitle = sol.title.toLowerCase().includes(q);
@@ -4387,7 +4488,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                       </h2>
                     </div>
                     <p style={{ margin: 0, fontSize: '0.84rem', color: '#5f6368', maxWidth: '780px', lineHeight: 1.5 }}>
-                      Master formulary of bioactive adjuvants and cuticular ECM barrier care. Consolidated across 4 core synergies matched to active prescriptions in your practice.
+                      Master formulary of bioactive adjuvants and cuticular ECM barrier care. Consolidated across {masterSolutions.length} core {masterSolutions.length === 1 ? 'synergy' : 'synergies'} matched to active prescriptions in your practice.
                     </p>
                   </div>
 
@@ -4408,7 +4509,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                       <span><strong>{totalCoveredRxs}</strong> of {allPrescriptions.length} prescriptions with synergy</span>
                     </div>
                     <span style={{ fontSize: '0.74rem', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '6px 12px', borderRadius: '6px', fontWeight: 650 }}>
-                      ✓ 4 Master Formulations
+                      ✓ {masterSolutions.length} Master Formulation{masterSolutions.length === 1 ? '' : 's'}
                     </span>
                   </div>
                 </div>
@@ -4437,51 +4538,55 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                         fontWeight: 650,
                         borderRadius: '6px',
                         border: '1px solid',
-                        borderColor: recCategoryFilter === 'all' ? '#2563eb' : '#d1d5db',
-                        background: recCategoryFilter === 'all' ? '#eff6ff' : '#ffffff',
-                        color: recCategoryFilter === 'all' ? '#1d4ed8' : '#4b5563',
+                        borderColor: effectiveCategoryFilter === 'all' ? '#2563eb' : '#d1d5db',
+                        background: effectiveCategoryFilter === 'all' ? '#eff6ff' : '#ffffff',
+                        color: effectiveCategoryFilter === 'all' ? '#1d4ed8' : '#4b5563',
                         cursor: 'pointer',
                         transition: 'all 0.15s ease'
                       }}
                     >
                       All ({masterSolutions.length})
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setRecCategoryFilter('peptides')}
-                      style={{
-                        padding: '5px 12px',
-                        fontSize: '0.76rem',
-                        fontWeight: 650,
-                        borderRadius: '6px',
-                        border: '1px solid',
-                        borderColor: recCategoryFilter === 'peptides' ? '#4338ca' : '#d1d5db',
-                        background: recCategoryFilter === 'peptides' ? '#e0e7ff' : '#ffffff',
-                        color: recCategoryFilter === 'peptides' ? '#3730a3' : '#4b5563',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      Bioactive Peptides (3)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRecCategoryFilter('colway')}
-                      style={{
-                        padding: '5px 12px',
-                        fontSize: '0.76rem',
-                        fontWeight: 650,
-                        borderRadius: '6px',
-                        border: '1px solid',
-                        borderColor: recCategoryFilter === 'colway' ? '#047857' : '#d1d5db',
-                        background: recCategoryFilter === 'colway' ? '#ecfdf5' : '#ffffff',
-                        color: recCategoryFilter === 'colway' ? '#065f46' : '#4b5563',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      Barrier &amp; Cuticular ECM (1)
-                    </button>
+                    {peptideSolutions.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setRecCategoryFilter('peptides')}
+                        style={{
+                          padding: '5px 12px',
+                          fontSize: '0.76rem',
+                          fontWeight: 650,
+                          borderRadius: '6px',
+                          border: '1px solid',
+                          borderColor: effectiveCategoryFilter === 'peptides' ? '#4338ca' : '#d1d5db',
+                          background: effectiveCategoryFilter === 'peptides' ? '#e0e7ff' : '#ffffff',
+                          color: effectiveCategoryFilter === 'peptides' ? '#3730a3' : '#4b5563',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        Bioactive Peptides ({peptideSolutions.length})
+                      </button>
+                    )}
+                    {colwaySolutions.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setRecCategoryFilter('colway')}
+                        style={{
+                          padding: '5px 12px',
+                          fontSize: '0.76rem',
+                          fontWeight: 650,
+                          borderRadius: '6px',
+                          border: '1px solid',
+                          borderColor: effectiveCategoryFilter === 'colway' ? '#047857' : '#d1d5db',
+                          background: effectiveCategoryFilter === 'colway' ? '#ecfdf5' : '#ffffff',
+                          color: effectiveCategoryFilter === 'colway' ? '#065f46' : '#4b5563',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        Barrier &amp; Cuticular ECM ({colwaySolutions.length})
+                      </button>
+                    )}
                   </div>
 
                   {/* Instant Search Bar */}
@@ -7106,7 +7211,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           },
           {
             key: 'email',
-            label: 'Clinical Email',
+            label: 'Physician Email',
             value: doctor.email || '',
             placeholder: 'doctor@clinic.com',
             icon: Mail,

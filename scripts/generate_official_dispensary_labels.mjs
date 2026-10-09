@@ -260,19 +260,19 @@ async function exportBoth(svgStr, baseFilename) {
 async function main() {
   console.log('🚀 Generating updated labels directly from Katarzyna WhatsApp specs...');
 
-  // 1. Part 1: Morning Formula (60 capsules, 2 months, 05/10/26 -> 04/10/27)
+  // 1. Part 1: Morning Formula (60 caps, 2 months treatment)
   const part1 = {
     patientName: 'AMNA SULTAN MOHAMED AHMED ALOTAIBA',
     fileNumber: '51857',
-    volume: '60 Capsules (2 Months)',
+    volume: '60 Caps, 2 Months Treatment',
     batchCode: 'PHARM-2026-UBISWP',
     lote: '2609-AMN1',
     apis: [
-      'Ubiquinol (Kaneka® CoQ10) 250 mg',
+      'Ubiquinol 250 mg',
       'Saw Palmetto Extract 250 mg'
     ],
     base: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.',
-    directions: 'Take 1 capsule every morning with breakfast.',
+    directions: 'Take 1 capsule once daily with breakfast.',
     caution: 'CAUTION: FOR ORAL USE ONLY • TAKE WITH WATER • KEEP OUT OF REACH OF CHILDREN',
     rxLine: 'Rx: Dr. Marina Cordeiro Fernandes • NOVA Clinic - Dubai Healthcare City, Dubai, UAE (DHA-91105367)',
     mfg: '05/10/26',
@@ -285,21 +285,18 @@ async function main() {
   await exportBoth(svgPart1, 'PHARMAPOLIS_51857_PART-1_60CAPS_75x45mm_BACK-QR_300DPI');
   await exportBoth(svgPart1, 'PHARMAPOLIS_51857_PART-1_60CAPS_75x45mm_BACK-QR');
 
-  // 2. Part 2: Metabolic Formula (120 capsules, 2 months, 05/10/26 -> 04/10/27)
+  // 2. Part 2: Red Yeast Rice Extract 600 mg (120 caps, 1 month treatment)
   const part2 = {
     patientName: 'AMNA SULTAN MOHAMED AHMED ALOTAIBA',
     fileNumber: '51857',
-    volume: '120 Capsules (2 Months)',
-    batchCode: 'PHARM-2026-RYRBER',
+    volume: '120 Caps, 1 Month Treatment',
+    batchCode: 'PHARM-2026-RYR',
     lote: '2609-AMN2',
     apis: [
-      'Red Yeast Rice Extract 600 mg',
-      'Berberine HCl 500 mg',
-      'Citrus Bergamot Extract 500 mg',
-      'Chromium Picolinate 100 mcg'
+      'Red Yeast Rice Extract 600 mg'
     ],
     base: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.',
-    directions: 'Take 1 dose with lunch and 1 dose with dinner.',
+    directions: 'Take 2 caps with lunch and 2 caps with dinner.',
     caution: 'CAUTION: FOR ORAL USE ONLY • TAKE WITH WATER • KEEP OUT OF REACH OF CHILDREN',
     rxLine: 'Rx: Dr. Marina Cordeiro Fernandes • NOVA Clinic - Dubai Healthcare City, Dubai, UAE (DHA-91105367)',
     mfg: '05/10/26',

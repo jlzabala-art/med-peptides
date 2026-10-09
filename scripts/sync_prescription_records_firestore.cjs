@@ -30,7 +30,7 @@ const db = admin.firestore();
 async function runSync() {
   console.log('🔄 [Firestore Sync] Updating prescription records...');
 
-  // 1. RX-51857-A
+  // 1. RX-51857-A (Amna Sultan - Morning Formula)
   const rx51857ARef = db.collection('prescriptions').doc('RX-51857-A');
   await rx51857ARef.set({
     date: '23/09/2026',
@@ -47,11 +47,11 @@ async function runSync() {
     quantity: '60 capsules (2 Months)',
     volume: '60 capsules (2 Months)',
     posology: {
-      regimen: 'Take 1 dose once daily with breakfast.',
+      regimen: 'Take 1 capsule once daily with breakfast.',
       timing: 'Morning with breakfast',
       notes: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives. Duration: 2 months.'
     },
-    dosageInstructions: 'Take 1 dose once daily with breakfast.',
+    dosageInstructions: 'Take 1 capsule once daily with breakfast.',
     mfgDate: '05-10-2026',
     expDate: '04-10-2027',
     batchCode: 'PHARM-2026-UBISWP',
@@ -64,7 +64,7 @@ async function runSync() {
   }, { merge: true });
   console.log('✅ Updated RX-51857-A');
 
-  // 2. RX-51857-B
+  // 2. RX-51857-B (Amna Sultan - Red Yeast Rice 600 mg, 120 caps, 1 month)
   const rx51857BRef = db.collection('prescriptions').doc('RX-51857-B');
   await rx51857BRef.set({
     date: '23/09/2026',
@@ -77,19 +77,23 @@ async function runSync() {
     },
     clinicName: 'NOVA Plastic Surgery Clinic, Dubai',
     clinic: 'NOVA Plastic Surgery Clinic, Dubai',
-    duration: '2 months',
-    quantity: '120 capsules (2 Months)',
-    volume: '120 capsules (2 Months)',
+    treatmentTitle: 'Red Yeast Rice Extract 600 mg',
+    items: [
+      { name: 'Red Yeast Rice Extract', dose: '600 mg', strength: '600 mg' }
+    ],
+    duration: '1 month',
+    quantity: '120 capsules (1 Month)',
+    volume: '120 capsules (1 Month)',
     posology: {
-      regimen: 'Take 1 dose with lunch and 1 dose with dinner.',
-      timing: 'With lunch and with dinner (twice daily)',
-      notes: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives. Duration: 2 months.'
+      regimen: 'Take 2 caps with lunch and 2 caps with dinner.',
+      timing: '2 caps with lunch and 2 caps with dinner (4 caps daily)',
+      notes: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives. Duration: 1 month.'
     },
-    dosageInstructions: 'Take 1 dose with lunch and 1 dose with dinner.',
+    dosageInstructions: 'Take 2 caps with lunch and 2 caps with dinner.',
     mfgDate: '05-10-2026',
     expDate: '04-10-2027',
-    batchCode: 'PHARM-2026-RYRBER',
-    batchNumber: 'PHARM-2026-RYRBER',
+    batchCode: 'PHARM-2026-RYR',
+    batchNumber: 'PHARM-2026-RYR',
     lote: '2609-AMN2',
     storageInstructions: 'Store in a cool dry place',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
