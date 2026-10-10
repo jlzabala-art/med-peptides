@@ -1570,19 +1570,21 @@ export default function PublicDatasheetView({
     });
   }, [activeSupplierId, activeSupplierObj, availableFormats, sortedStrengths, hierarchy.variantIndex, activeFormatId, selectedStrengthId, isSolventProduct, isDiagnosticKit, suppliersList, lang]);
 
-  // Official Bloodo Product Packaging Photo for Datasheet Hero
-  const diagnosticHeroImage = (isDiagnosticKit || isBloodoDiagnostic)
-    ? (product?.imageUrl || product?.image || (
-        slug.includes('nad') ? '/images/products/bloodo/nad.jpg' :
-        slug.includes('cortisol') ? '/images/products/bloodo/cortisol.jpg' :
-        slug.includes('hba1c') || slug.includes('hemoglobin') ? '/images/products/bloodo/hba1c.jpg' :
-        slug.includes('omega-index') ? '/images/products/bloodo/omega-index.jpg' :
-        slug.includes('omega') ? '/images/products/bloodo/omega.jpg' :
-        slug.includes('testosterone') ? '/images/products/bloodo/testosterone.jpg' :
-        slug.includes('vitamin-d') || slug.includes('vit-d') ? '/images/products/bloodo/vitamin-d.jpg' :
-        '/images/products/bloodo/nad.jpg'
-      ))
-    : null;
+  // Official Diagnostic Product Packaging Photo for Datasheet Hero
+  const diagnosticHeroImage = isEternaDiagnostic
+    ? (product?.imageUrl || product?.image || '/images/products/eterna/eterna-kit-box.png')
+    : (isDiagnosticKit || isBloodoDiagnostic)
+      ? (product?.imageUrl || product?.image || (
+          slug.includes('nad') ? '/images/products/bloodo/nad.jpg' :
+          slug.includes('cortisol') ? '/images/products/bloodo/cortisol.jpg' :
+          slug.includes('hba1c') || slug.includes('hemoglobin') ? '/images/products/bloodo/hba1c.jpg' :
+          slug.includes('omega-index') ? '/images/products/bloodo/omega-index.jpg' :
+          slug.includes('omega') ? '/images/products/bloodo/omega.jpg' :
+          slug.includes('testosterone') ? '/images/products/bloodo/testosterone.jpg' :
+          slug.includes('vitamin-d') || slug.includes('vit-d') ? '/images/products/bloodo/vitamin-d.jpg' :
+          '/images/products/bloodo/nad.jpg'
+        ))
+      : null;
 
   return (
     <div className="public-datasheet-root">
@@ -1942,7 +1944,11 @@ export default function PublicDatasheetView({
                 <div className="pds-square-badge-strip">
                   <div className="pds-square-frosted-pill">
                     <ShieldCheck size={13} color="#0d9488" />
-                    <span>{lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit'}</span>
+                    <span>
+                      {isEternaDiagnostic
+                        ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
+                        : (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')}
+                    </span>
                   </div>
                   <div className="pds-square-zoom-btn" title={lang === 'es' ? 'Ampliar imagen' : 'Enlarge image'}>
                     <ZoomIn size={14} />
@@ -1962,13 +1968,17 @@ export default function PublicDatasheetView({
                 {/* 3. High-End Technical Spec Strip */}
                 <div className="pds-square-footer-spec">
                   <div className="pds-square-lab-row">
-                    <span className="pds-square-lab-name">LifeLab1 Central Lab (Vilnius)</span>
-                    <span className="pds-square-ce-tag">CE-IVDR</span>
+                    <span className="pds-square-lab-name">
+                      {isEternaDiagnostic ? 'Fagron Genomics / European Lab' : 'LifeLab1 Central Lab (Vilnius)'}
+                    </span>
+                    <span className="pds-square-ce-tag">
+                      {isEternaDiagnostic ? 'CE-IVD' : 'CE-IVDR'}
+                    </span>
                   </div>
                   <div className="pds-square-sub-meta">
-                    <span>Whatman® 903 Card</span>
+                    <span>{isEternaDiagnostic ? 'Saliva DNA Buffer' : 'Whatman® 903 Card'}</span>
                     <span>•</span>
-                    <span>Capillary DBS LC-MS</span>
+                    <span>{isEternaDiagnostic ? '+700K Microarray' : 'Capillary DBS LC-MS'}</span>
                   </div>
                 </div>
               </div>
@@ -1993,10 +2003,18 @@ export default function PublicDatasheetView({
                 <div className="pds-mobile-square-content">
                   <div className="pds-mobile-square-badge">
                     <ShieldCheck size={11} color="#0d9488" />
-                    <span>{lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit'}</span>
+                    <span>
+                      {isEternaDiagnostic
+                        ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
+                        : (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')}
+                    </span>
                   </div>
-                  <strong className="pds-mobile-square-title">LifeLab1 Clinical Laboratory</strong>
-                  <span className="pds-mobile-square-sub">CE-IVDR Certified · Whatman® 903 Card</span>
+                  <strong className="pds-mobile-square-title">
+                    {isEternaDiagnostic ? 'Fagron Genomics / European Lab' : 'LifeLab1 Clinical Laboratory'}
+                  </strong>
+                  <span className="pds-mobile-square-sub">
+                    {isEternaDiagnostic ? 'CE-IVD Certified · Saliva DNA Kit' : 'CE-IVDR Certified · Whatman® 903 Card'}
+                  </span>
                 </div>
                 <div className="pds-mobile-square-action">
                   <ZoomIn size={16} color="#0284c7" />

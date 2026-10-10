@@ -171,6 +171,7 @@ export function getBloodoTestBySlug(slug = '') {
  */
 export function isBloodoProduct(product = {}, slug = '') {
   const target = `${product?.id || ''} ${product?.slug || ''} ${product?.supplierId || ''} ${product?.canonicalKey || ''} ${slug || ''}`.toLowerCase();
+  if (target.includes('eterna')) return false; // Strictly ETERNA DX, never Bloodo
   return target.includes('bloodo') || 
          target.includes('supplier-bloodo') || 
          target.includes('nad-level-test') || 

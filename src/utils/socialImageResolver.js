@@ -62,6 +62,11 @@ const COMPOUND_IMAGE_MAP = {
   'omega-index-test': '/images/products/bloodo/omega-index.jpg',
   'bloodo-vitamin-d-test': '/images/products/bloodo/vitamin-d.jpg',
   'vitamin-d-test': '/images/products/bloodo/vitamin-d.jpg',
+
+  // ETERNA DX Official Genomics & Longevity Packaging Assets
+  'eterna-epigenetic-age-test': '/images/products/eterna/eterna-kit-box.png',
+  'eterna-longevity-platform': '/images/products/eterna/eterna-kit-box.png',
+  'eterna': '/images/products/eterna/eterna-kit-box.png',
 };
 
 // Delivery format visual fallbacks
@@ -235,7 +240,9 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
       title = `${pName} — ${cleanBrand} Native Collagen & Cellular Monograph`.trim();
     }
   } else if (isDiagnostic) {
-    if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
+    if (slugLower.includes('eterna') || nameLower.includes('eterna')) {
+      title = `🧬 ETERNA® DNA & Epigenetic Longevity Test (+700K SNPs) | ETERNA DX · Fagron Genomics`;
+    } else if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
       title = `⚡ Bloodo™ Testosterona+ Test (Total & Libre) | CE-IVDR Kit`;
     } else if (slugLower.includes('cortisol') || nameLower.includes('cortisol')) {
       title = `⏱️ Bloodo™ Cortisol Ritmo Circadiano (CAR) | CE-IVDR Kit`;
@@ -284,7 +291,9 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
         : 'Fórmula dermocosmética celular de alta pureza con activos biofuncionales certificados bajo normativa europea (Reg. CE 1223/2009). Monografía técnica e INCI.';
     }
   } else if (isDiagnostic) {
-    if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
+    if (slugLower.includes('eterna') || nameLower.includes('eterna')) {
+      description = 'Genómica y epigenética de alta resolución a partir de saliva (+700.000 SNPs). Evalúa velocidad de envejecimiento celular, 5 pilares de salud y sincronización con wearables. ETERNA DX · Fagron Genomics.';
+    } else if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
       description = 'LC-MS/MS Gold Standard para cuantificar Testosterona Total, Libre, SHBG e Índice FAI por punción capilar DBS. Evalúa tu vitalidad hormonal y eje HPTA con LifeLab1.';
     } else if (slugLower.includes('cortisol') || nameLower.includes('cortisol')) {
       description = 'Curva de Cortisol Diurno y Respuesta al Despertar (CAR) por punción capilar DBS. Mide estrés neuroendocrino, fatiga suprarrenal y calidad de descanso con LifeLab1.';

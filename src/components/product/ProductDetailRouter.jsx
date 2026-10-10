@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 
 const PeptideDetail = dynamic(() => import('./layouts/PeptideDetail'));
 const ConsumableDetail = dynamic(() => import('./layouts/ConsumableDetail'));
+const EternaGenomicsDetail = dynamic(() => import('./layouts/EternaGenomicsDetail'));
 const EternaDiagnosticDetail = dynamic(() => import('./layouts/EternaDiagnosticDetail'));
 const BloodDiagnosticDetail = dynamic(() => import('./layouts/BloodDiagnosticDetail'));
 const CosmeticsDetail = dynamic(() => import('./layouts/CosmeticsDetail'));
@@ -49,9 +50,11 @@ export default function ProductDetailRouter(props) {
     'other compounding material'
   ];
 
-  // Eterna is a specific product
-  if (props.product?.id === 'eterna-longevity-platform' || props.product?.slug === 'eterna-longevity-platform') {
-    return <EternaDiagnosticDetail {...props} />;
+  // ETERNA DX is a specialized genomics & longevity platform
+  const pSlug = (props.product?.slug || props.product?.id || '').toLowerCase();
+  const pName = (props.product?.name || '').toLowerCase();
+  if (pSlug.includes('eterna') || pName.includes('eterna') || props.product?.supplierId === 'supplier-eternadx') {
+    return <EternaGenomicsDetail {...props} />;
   }
 
   // Blood Biomarkers & Lab Diagnostics

@@ -9,6 +9,7 @@ import PublicDatasheetView from '../../../components/product/PublicDatasheetView
 import AestheticInjectableDetail from '../../../components/product/layouts/AestheticInjectableDetail';
 import CosmeticsDetail from '../../../components/product/layouts/CosmeticsDetail';
 import RawApiDatasheetView from '../../../components/product/layouts/RawApiDatasheetView';
+import EternaGenomicsDetail from '../../../components/product/layouts/EternaGenomicsDetail';
 import { getClinicalSupplementBySlug } from '../../../data/clinicalSupplementsRegistry';
 
 export const revalidate = 3600; // ISR: regenerate at most every 60 min
@@ -284,23 +285,35 @@ export async function generateMetadata({ params, searchParams }) {
   const cat = (product.category || product.type || '').toLowerCase();
   const isCosmetic = cat === 'cosmetic' || cat === 'cosmetics' || cat === 'topical' || cat === 'hair cosmetics' || cat === 'cosmeceutical' || product.is_cosmetic === true;
   const isAesthetic = cat === 'aesthetic' || cat === 'aesthetic_injectable' || cat === 'injectable' || product.is_aesthetic === true;
+  const isEterna = slug.toLowerCase().includes('eterna') || 
+    (product.supplierId || '').toLowerCase().includes('eternadx') || 
+    (product.canonicalKey || '').toLowerCase().includes('eterna') || 
+    (product.name || '').toLowerCase().includes('eterna');
 
   let typeSuffix = 'Clinical Monograph';
   if (isCosmetic) {
     typeSuffix = 'Premium Cosmetic Care';
   } else if (isAesthetic) {
     typeSuffix = 'Clinical Aesthetics Monograph';
+  } else if (isEterna) {
+    typeSuffix = 'Precision Genomics & Epigenetics';
   }
 
-  const pageTitle = resolvedSocial.title || `${name}${formatSuffix}${doseSuffix} — ${typeSuffix}`;
-  const pageDesc = resolvedSocial.description;
+  const pageTitle = isEterna
+    ? 'ETERNA® DNA & Epigenetic Longevity Test | ETERNA DX · Fagron Genomics'
+    : (resolvedSocial.title || `${name}${formatSuffix}${doseSuffix} — ${typeSuffix}`);
+  const pageDesc = isEterna
+    ? 'Prueba genética y epigenética de alta resolución a partir de saliva (+700.000 SNPs). Mide edad biológica, 5 pilares de salud y sincronización con wearables (Apple, Garmin, Oura).'
+    : resolvedSocial.description;
   const explicitProductImage = product.image_url || product.imageUrl || product.photo_url || null;
-  const previewImageUrl = (isCosmetic && explicitProductImage)
-    ? explicitProductImage
-    : resolveSocialImage(product, formatParam);
+  const previewImageUrl = isEterna
+    ? `${BASE_URL}/images/products/eterna/eterna-kit-box.png`
+    : ((isCosmetic && explicitProductImage)
+      ? explicitProductImage
+      : resolveSocialImage(product, formatParam));
   const isPng = previewImageUrl.toLowerCase().endsWith('.png');
   const imageType = isPng ? 'image/png' : 'image/jpeg';
-  const canonicalUrl = isCosmetic || isAesthetic || product.isSingleSupplierLocked
+  const canonicalUrl = isCosmetic || isAesthetic || isEterna || product.isSingleSupplierLocked
     ? `${BASE_URL}/p/${slug}`
     : `${BASE_URL}/p/${slug}${supplierFilter ? `?supplier=${encodeURIComponent(supplierFilter)}` : ''}`;
 
@@ -314,7 +327,7 @@ export async function generateMetadata({ params, searchParams }) {
       title: pageTitle,
       description: pageDesc,
       url: canonicalUrl,
-      siteName: isCosmetic ? 'Colway Clinical Care' : 'Atlas Health Services',
+      siteName: isEterna ? 'ETERNA Diagnostics · Fagron Genomics' : isCosmetic ? 'Colway Clinical Care' : 'Atlas Health Services',
       images: [
         {
           url: previewImageUrl,
@@ -339,7 +352,7 @@ export async function generateMetadata({ params, searchParams }) {
       'og:image:width': '1200',
       'og:image:height': '630',
       'og:image:alt': pageTitle,
-      'article:section': isCosmetic ? 'Dermocosmetic Care' : 'Clinical Reference Documentation',
+      'article:section': isEterna ? 'Precision Genomics & Epigenetics' : isCosmetic ? 'Dermocosmetic Care' : 'Clinical Reference Documentation',
     },
     robots: { index: true, follow: true },
   };
@@ -507,14 +520,44 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const isAesthetic = catLower === 'aesthetic injectables' || catLower === 'aesthetic injectable' || safeProduct.is_aesthetic_injectable === true;
   const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || safeProduct.is_cosmetic === true;
   const isRawApi = typeLower === 'raw_api' || typeLower === 'raw_material' || catLower === 'raw_material' || catLower === 'compounding_material' || safeProduct.is_raw_api === true;
+  const isEterna = slug.toLowerCase().includes('eterna') || 
+    (safeProduct.supplierId || '').toLowerCase().includes('eternadx') || 
+    (safeProduct.canonicalKey || '').toLowerCase().includes('eterna') || 
+    (safeProduct.name || '').toLowerCase().includes('eterna');
 
   const productName = safeProduct.canonicalName || safeProduct.name || slug;
-  const sectionLabel = isCosmetics ? 'Cosmetics' : isAesthetic ? 'Aesthetics' : isRawApi ? 'Compounding APIs' : 'Catalog';
+  const sectionLabel = isEterna ? 'Genomics & Longevity' : isCosmetics ? 'Cosmetics' : isAesthetic ? 'Aesthetics' : isRawApi ? 'Compounding APIs' : 'Catalog';
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
     { name: 'Home', url: '/' },
-    { name: sectionLabel, url: '/catalog' },
+    { name: sectionLabel, url: isEterna ? '/c/CAT-MU9L9GBN' : '/catalog' },
     { name: productName, url: `/p/${slug}` }
   ], BASE_URL);
+
+  if (isEterna) {
+    return (
+      <>
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        {breadcrumbJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+          />
+        )}
+        <EternaGenomicsDetail 
+          product={safeProduct} 
+          slug={slug} 
+          initialBatch={initialBatch} 
+          initialStrength={initialStrength}
+          baseUrl={BASE_URL}
+        />
+      </>
+    );
+  }
 
   if (isAesthetic) {
     return (
