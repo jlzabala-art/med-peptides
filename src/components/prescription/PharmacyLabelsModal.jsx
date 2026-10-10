@@ -1850,13 +1850,6 @@ export default function PharmacyLabelsModal({
                   </select>
                 </div>
               </div>
-
-              {/* Active Output Pixel Resolution Badge */}
-              <div className="gcp-toolbar-badge">
-                <span>{exportWidthPx} × {exportHeightPx} px</span>
-                <span>·</span>
-                <span>{dpi} DPI</span>
-              </div>
             </div>
 
             {/* Bottom Row: Tool Actions (Cut Guides, Edit, Share) */}
@@ -1991,9 +1984,9 @@ export default function PharmacyLabelsModal({
                   </button>
                 </div>
 
-                {/* Editor Action Buttons: Save to Firebase, Share, Copy .md, Download .md, Reset */}
+                {/* Editor Action Buttons: Save to Atlas, Download .md, Reset */}
                 <div className="gcp-editor-actions-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                  {/* SAVE TO FIREBASE BUTTON */}
+                  {/* SAVE TO ATLAS BUTTON */}
                   <button
                     type="button"
                     onClick={handleSaveToFirebase}
@@ -2014,67 +2007,19 @@ export default function PharmacyLabelsModal({
                       transition: 'all 0.15s',
                       boxShadow: '0 1px 2px rgba(60,64,67,0.2)'
                     }}
-                    title={isEs ? 'Guardar cambios directamente en Firebase (base de datos oficial)' : 'Save changes directly to Firebase'}
+                    title={isEs ? 'Guardar cambios directamente en Atlas (base de datos oficial)' : 'Save changes directly to Atlas'}
                   >
                     {firebaseSaveSuccess ? (
                       <>
                         <Check size={13} color="#137333" />
-                        <span>{isEs ? 'Guardado en Firebase ✓' : 'Saved in Firebase ✓'}</span>
+                        <span>{isEs ? 'Guardado en Atlas ✓' : 'Saved to Atlas ✓'}</span>
                       </>
                     ) : (
                       <>
                         <Database size={13} />
-                        <span>{isSavingToFirebase ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar en Firebase' : 'Save to Firebase')}</span>
+                        <span>{isSavingToFirebase ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar en Atlas' : 'Save to Atlas')}</span>
                       </>
                     )}
-                  </button>
-
-                  {/* SHARE EDITOR LINK BUTTON */}
-                  <button
-                    type="button"
-                    onClick={handleShareEditor}
-                    className="gcp-editor-aux-btn"
-                    style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      border: copiedShareLink ? '1px solid #137333' : '1px solid #1a73e8',
-                      background: copiedShareLink ? '#e6f4ea' : '#ffffff',
-                      color: copiedShareLink ? '#137333' : '#1a73e8',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      transition: 'all 0.15s'
-                    }}
-                    title={isEs ? 'Copiar enlace directo para que un tercero edite y guarde' : 'Copy link to share editor with a third party'}
-                  >
-                    {copiedShareLink ? <Check size={12} color="#137333" /> : <Share2 size={12} />}
-                    <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleCopyMarkdown}
-                    className="gcp-editor-aux-btn"
-                    style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      border: '1px solid #dadce0',
-                      background: copiedMd ? '#e6f4ea' : '#ffffff',
-                      color: copiedMd ? '#137333' : '#3c4043',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                    title={isEs ? 'Copiar especificación en Markdown al portapapeles' : 'Copy Markdown specification to clipboard'}
-                  >
-                    {copiedMd ? <Check size={12} color="#137333" /> : <Copy size={12} />}
-                    <span>{copiedMd ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar .md' : 'Copy .md')}</span>
                   </button>
 
                   <button
@@ -2440,43 +2385,35 @@ export default function PharmacyLabelsModal({
         {/* ── GCP Sticky Action Footer / Mobile Dock Sticker ── */}
         <div className="gcp-labels-sticky-footer">
           {/* Desktop Single-Line Specs */}
-          <div className="gcp-footer-desktop-specs" style={{ minWidth: 0, flex: '0 1 auto', maxWidth: '340px', overflow: 'hidden' }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.78rem',
-              color: '#5f6368',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
+          <div className="gcp-footer-desktop-specs" style={{ minWidth: 0, flex: '0 1 auto', overflow: 'hidden' }}>
+            <span style={{
+              background: '#e8f0fe',
+              color: '#1a73e8',
+              padding: '3px 10px',
+              borderRadius: '4px',
+              fontSize: '0.76rem',
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+              whiteSpace: 'nowrap'
             }}>
-              <span style={{ fontWeight: 600, color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={currentItem.dosageForm}>
-                {currentItem.dosageForm || 'Compounded Protocol'}
-              </span>
-              <span style={{ color: '#dadce0', flexShrink: 0 }}>•</span>
-              <span style={{ flexShrink: 0, color: '#5f6368' }}>
-                {currentItem.volume || '100 mL'}
-              </span>
-              {labels.length > 1 && (
-                <>
-                  <span style={{ color: '#dadce0', flexShrink: 0 }}>•</span>
-                  <span style={{ background: '#e8f0fe', color: '#1a73e8', padding: '1px 6px', borderRadius: '4px', fontSize: '0.70rem', fontWeight: 600, flexShrink: 0 }}>
-                    {selectedProductIdx + 1} / {labels.length}
-                  </span>
-                </>
-              )}
-            </div>
+              {isEs ? `Parte ${selectedProductIdx + 1}` : `Part ${selectedProductIdx + 1}`}
+            </span>
           </div>
 
-          {/* Mobile Top Micro-Specs Strip (Visible Only on Mobile) */}
-          <div className="gcp-footer-mobile-specs">
-            <div style={{ fontWeight: 600, color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {currentItem.dosageForm || 'Topical Solution'}
-            </div>
-            <div style={{ color: '#5f6368', whiteSpace: 'nowrap', fontSize: '0.72rem' }}>
-              {currentItem.volume || '100 mL'}
-            </div>
+          {/* Mobile Part Badge */}
+          <div className="gcp-footer-mobile-specs" style={{ display: 'none' }}>
+            <span style={{
+              background: '#e8f0fe',
+              color: '#1a73e8',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+              whiteSpace: 'nowrap'
+            }}>
+              {isEs ? `Parte ${selectedProductIdx + 1}` : `Part ${selectedProductIdx + 1}`}
+            </span>
           </div>
 
           {/* Action Buttons Group (Google Cloud UX Hierarchy) */}

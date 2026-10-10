@@ -23,7 +23,7 @@ export async function generateMetadata({ params, searchParams }) {
 
   const title = isEs 
     ? `${isEditing ? 'Editor de Etiquetas' : 'Etiquetas Oficiales'} • #${rxCode} (${patientName}) • Pharmapolis Compounding`
-    : `${isEditing ? 'Compounding Label Editor' : 'Official Compounding Labels'} • #${rxCode} (${patientName}) • Pharmapolis Compounding`;
+    : `${isEditing ? 'Label Editor' : 'Official Labels'} • #${rxCode} (${patientName}) • Pharmapolis Compounding`;
   const description = isEs
     ? `Editor interactivo y generador de etiquetas de formulación magistral EU GMP para la prescripción #${rxCode}.`
     : `Interactive vector editor and EU GMP compounding label generator for prescription #${rxCode}.`;

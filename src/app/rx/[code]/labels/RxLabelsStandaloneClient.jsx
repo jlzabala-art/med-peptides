@@ -20,6 +20,13 @@ export default function RxLabelsStandaloneClient({
   const patientName = rx?.patient?.name || rx?.patientName || 'Patient';
   const rxCode = rx?.fileNumber || rx?.code || code;
 
+  React.useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const mode = initialEditMode ? (isEs ? 'Editor de Etiquetas' : 'Label Editor') : (isEs ? 'Etiquetas Oficiales' : 'Official Labels');
+      document.title = `${mode} • #${rxCode} (${patientName}) • Pharmapolis Compounding`;
+    }
+  }, [isEs, initialEditMode, rxCode, patientName]);
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -170,7 +177,7 @@ export default function RxLabelsStandaloneClient({
             gap: '4px'
           }}>
             <Database size={12} />
-            <span>Firebase Sync</span>
+            <span>Atlas Sync</span>
           </span>
         </div>
       </header>
