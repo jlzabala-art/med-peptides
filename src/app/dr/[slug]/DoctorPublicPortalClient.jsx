@@ -11,6 +11,7 @@ import {
   Clock,
   Pill,
   Sparkles,
+  Award,
   FileText,
   Users,
   AlertCircle,
@@ -67,6 +68,7 @@ import PrescriptionIntakeWorkspace from '@/features/prescriptions/components/Pre
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 import ClinicalIntelligenceBanner from '@/components/doctor/ClinicalIntelligenceBanner';
 import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
+import DoctorServicesMembershipModal from '@/components/doctor/DoctorServicesMembershipModal';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
 import { getFagronClinicalMonograph } from '@/data/fagronClinicalMonographs';
 import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
@@ -397,6 +399,7 @@ export default function DoctorPublicPortalClient({
   const [activeLabelRx, setActiveLabelRx] = useState(null);
   const [isLabelsModalOpen, setIsLabelsModalOpen] = useState(false);
   const [isCredentialsModalOpen, setIsCredentialsModalOpen] = useState(false);
+  const [isServicesModalOpen, setIsServicesModalOpen] = useState(false);
 
   // GCP Resource Inspector Drawer State (Golden Rule #4: Master-Detail sin abandonar contexto)
   const [selectedInspectorItem, setSelectedInspectorItem] = useState(null);
@@ -692,11 +695,12 @@ export default function DoctorPublicPortalClient({
       } else if (e.key === 'Escape') {
         if (isDiscoveryDrawerOpen) setIsDiscoveryDrawerOpen(false);
         if (isCredentialsModalOpen) setIsCredentialsModalOpen(false);
+        if (isServicesModalOpen) setIsServicesModalOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDiscoveryDrawerOpen, isCredentialsModalOpen]);
+  }, [isDiscoveryDrawerOpen, isCredentialsModalOpen, isServicesModalOpen]);
 
   // Opaque Doctor Slug (Protects Doctor Identity in URL)
   const opaqueCode = doctor.opaqueCode || doctor.slug || slug;
@@ -1935,6 +1939,7 @@ export default function DoctorPublicPortalClient({
 
   const sidebarNavGroups = useMemo(() => [
     {
+      group: 'CLINICAL OPERATIONS',
       groupTitle: 'CLINICAL OPERATIONS',
       items: [
         {
@@ -1960,6 +1965,7 @@ export default function DoctorPublicPortalClient({
       ]
     },
     {
+      group: 'CLINICAL INTELLIGENCE',
       groupTitle: 'CLINICAL INTELLIGENCE',
       items: [
         {
@@ -1972,6 +1978,7 @@ export default function DoctorPublicPortalClient({
       ]
     },
     {
+      group: 'PRACTICE & TOOLS',
       groupTitle: 'PRACTICE & TOOLS',
       items: [
         {
@@ -1987,6 +1994,14 @@ export default function DoctorPublicPortalClient({
           icon: ShieldCheck,
           action: () => setIsCredentialsModalOpen(true),
           badge: 'Verified'
+        },
+        {
+          id: 'services_tiers',
+          label: 'Atlas Platform & Services',
+          icon: Award,
+          action: () => setIsServicesModalOpen(true),
+          badge: 'Free vs Pro',
+          badgeColor: '#137333'
         }
       ]
     }
@@ -1997,6 +2012,11 @@ export default function DoctorPublicPortalClient({
     const id = typeof itemOrId === 'string' ? itemOrId : itemOrId?.id;
     if (id === 'credentials') {
       setIsCredentialsModalOpen(true);
+      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      return;
+    }
+    if (id === 'services_tiers') {
+      setIsServicesModalOpen(true);
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
       return;
     }
@@ -7820,6 +7840,15 @@ export default function DoctorPublicPortalClient({
           </div>
         );
       })()}
+
+      {/* ── Atlas Platform Services & Membership Tiers Modal (GCP UX Style) ── */}
+      <DoctorServicesMembershipModal
+        isOpen={isServicesModalOpen}
+        onClose={() => setIsServicesModalOpen(false)}
+        doctorName={doctor.name || 'Doctor'}
+        clinicName={doctor.clinic || 'Medical Practice'}
+        currentTier="basic"
+      />
     </div>
   );
 }
