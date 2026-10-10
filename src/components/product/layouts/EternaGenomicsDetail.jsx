@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Dna,
@@ -26,6 +26,8 @@ import {
   FileText,
   Lock,
   ChevronRight,
+  ChevronLeft,
+  Download,
   Sparkle
 } from '@/lib/icons';
 import ImageModal from '@/snippets/ImageModal';
@@ -56,8 +58,13 @@ export default function EternaGenomicsDetail({
   
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity] = useState(1);
   const [copiedBatch, setCopiedBatch] = useState(false);
+
+  // Interactive Epigenetic Pace of Aging Simulator State
+  const [simAge, setSimAge] = useState(48);
+  const [simPace, setSimPace] = useState(0.82);
+  const [simYears, setSimYears] = useState(3);
 
   const { updateCart } = useCart() || {};
 
@@ -155,6 +162,54 @@ export default function EternaGenomicsDetail({
     { id: 'traceability', label: isEs ? 'Acreditación Lab Eurofins' : 'Eurofins Lab Accreditation', icon: ShieldCheck },
     { id: 'companion-protocols', label: isEs ? 'Protocolos de Longevidad' : 'Companion Longevity Protocols', icon: FlaskConical }
   ];
+
+  // Hash deep-linking
+  useEffect(() => {
+    const handleHashSync = () => {
+      if (typeof window !== 'undefined' && window.location.hash) {
+        const hashId = window.location.hash.replace('#', '');
+        const validIds = ['patient-tracking', 'biological-age', 'five-pillars', 'wearables-sync', 'saliva-protocol', 'traceability', 'companion-protocols'];
+        if (validIds.includes(hashId)) {
+          setActiveTab(hashId);
+        }
+      }
+    };
+    handleHashSync();
+    window.addEventListener('hashchange', handleHashSync);
+    return () => window.removeEventListener('hashchange', handleHashSync);
+  }, []);
+
+  const handleTabSelect = (tabId) => {
+    setActiveTab(tabId);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `#${tabId}`);
+    }
+  };
+
+  // Keyboard navigation for image gallery
+  useEffect(() => {
+    const handleKeyNav = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+      if (e.key === 'ArrowRight') {
+        setSelectedMediaIdx((prev) => (prev + 1) % galleryItems.length);
+      } else if (e.key === 'ArrowLeft') {
+        setSelectedMediaIdx((prev) => (prev - 1 + galleryItems.length) % galleryItems.length);
+      }
+    };
+    window.addEventListener('keydown', handleKeyNav);
+    return () => window.removeEventListener('keydown', handleKeyNav);
+  }, [galleryItems.length]);
+
+  // Epigenetic Pace of Aging Simulator Calculations
+  const simBioYearsPassed = Math.round(simPace * simYears * 100) / 100;
+  const simYearsSaved = Math.round((simYears - simBioYearsPassed) * 100) / 100;
+  const simNewBioAge = Math.round((simAge - simYearsSaved) * 10) / 10;
+  
+  const simStatus = simPace < 0.92 
+    ? { label: isEs ? 'Desaceleración Celular Óptima' : 'Optimal Cellular Deceleration', color: '#2dd4bf', bg: 'rgba(45, 212, 191, 0.15)', border: 'rgba(45, 212, 191, 0.4)' }
+    : simPace <= 1.05
+    ? { label: isEs ? 'Ritmo Poblacional Normal' : 'Standard Population Aging Rate', color: '#facc15', bg: 'rgba(250, 204, 21, 0.15)', border: 'rgba(250, 204, 21, 0.4)' }
+    : { label: isEs ? 'Senescencia Celular Acelerada' : 'Accelerated Cellular Senescence', color: '#f87171', bg: 'rgba(248, 113, 113, 0.15)', border: 'rgba(248, 113, 113, 0.4)' };
 
   // 5 Pillars Detailed Science
   const pillarsData = {
@@ -416,6 +471,30 @@ export default function EternaGenomicsDetail({
                 <ZoomIn size={13} />
                 <span>{isEs ? 'Ampliar Imagen' : 'Inspect High-Res'}</span>
               </div>
+
+              {/* Prev / Next Arrows */}
+              <button
+                type="button"
+                className="eterna-media-arrow left"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedMediaIdx((prev) => (prev - 1 + galleryItems.length) % galleryItems.length);
+                }}
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                type="button"
+                className="eterna-media-arrow right"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedMediaIdx((prev) => (prev + 1) % galleryItems.length);
+                }}
+                aria-label="Next image"
+              >
+                <ChevronRight size={16} />
+              </button>
             </div>
 
             {/* Media Thumbnails Selector (Original App & Kit Photos) */}
@@ -489,7 +568,7 @@ export default function EternaGenomicsDetail({
                   key={tab.id}
                   type="button"
                   className={`eterna-tab-btn ${isActive ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabSelect(tab.id)}
                 >
                   <Icon size={14} />
                   <span>{tab.label}</span>
@@ -644,6 +723,123 @@ export default function EternaGenomicsDetail({
                       <div className="eterna-app-screen-caption">
                         <strong>{isEs ? 'Telemetría Diaria y Wearables' : 'Daily Biometrics & Sleep'}</strong>
                         <span>{isEs ? 'Sincronización 24/7 con smartwatch y Oura' : '24/7 continuous wearable synchronization'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Interactive Epigenetic Pace of Aging Simulator ── */}
+                <div className="eterna-simulator-card">
+                  <div className="eterna-simulator-header">
+                    <div className="eterna-simulator-title">
+                      <TrendingUp size={18} color="#2dd4bf" />
+                      <span>{isEs ? 'Simulador Clínico de Desaceleración Epigenética' : 'Epigenetic Pace of Aging & Deceleration Simulator'}</span>
+                    </div>
+                    <span 
+                      className="eterna-simulator-badge"
+                      style={{ 
+                        color: simStatus.color, 
+                        background: simStatus.bg, 
+                        border: `1px solid ${simStatus.border}` 
+                      }}
+                    >
+                      {simStatus.label}
+                    </span>
+                  </div>
+
+                  <div className="eterna-simulator-body">
+                    {/* Controls */}
+                    <div className="eterna-simulator-controls">
+                      <div className="eterna-sim-control-group">
+                        <div className="eterna-sim-label-row">
+                          <span>{isEs ? 'Edad Cronológica Actual' : 'Current Chronological Age'}:</span>
+                          <span className="eterna-sim-val">{simAge} {isEs ? 'años' : 'yrs'}</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="20"
+                          max="85"
+                          step="1"
+                          value={simAge}
+                          onChange={(e) => setSimAge(Number(e.target.value))}
+                          className="eterna-sim-slider"
+                        />
+                      </div>
+
+                      <div className="eterna-sim-control-group">
+                        <div className="eterna-sim-label-row">
+                          <span>{isEs ? 'Velocidad de Envejecimiento (Pace of Aging)' : 'Pace of Aging Velocity'}:</span>
+                          <span className="eterna-sim-val" style={{ color: simStatus.color }}>
+                            {simPace.toFixed(2)}x {isEs ? 'años biol./año cron.' : 'bio yrs/calendar yr'}
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0.65"
+                          max="1.35"
+                          step="0.01"
+                          value={simPace}
+                          onChange={(e) => setSimPace(Number(e.target.value))}
+                          className="eterna-sim-slider"
+                        />
+                      </div>
+
+                      <div className="eterna-sim-control-group">
+                        <div className="eterna-sim-label-row">
+                          <span>{isEs ? 'Duración del Protocolo de Longevidad' : 'Follow-up Protocol Duration'}:</span>
+                          <span className="eterna-sim-val">{simYears} {isEs ? 'años' : 'years'}</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="1"
+                          max="10"
+                          step="1"
+                          value={simYears}
+                          onChange={(e) => setSimYears(Number(e.target.value))}
+                          className="eterna-sim-slider"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Results Card */}
+                    <div className="eterna-simulator-results">
+                      <div className="eterna-sim-kpi-grid">
+                        <div className="eterna-sim-kpi-item">
+                          <div className="eterna-sim-kpi-num" style={{ color: '#2dd4bf' }}>
+                            {simNewBioAge}
+                          </div>
+                          <div className="eterna-sim-kpi-label">
+                            {isEs ? 'Edad Biológica Proyectada' : 'Projected Bio Age'}
+                          </div>
+                        </div>
+
+                        <div className="eterna-sim-kpi-item">
+                          <div 
+                            className="eterna-sim-kpi-num" 
+                            style={{ color: simYearsSaved >= 0 ? '#4ade80' : '#f87171' }}
+                          >
+                            {simYearsSaved >= 0 ? `-${simYearsSaved}` : `+${Math.abs(simYearsSaved)}`}
+                          </div>
+                          <div className="eterna-sim-kpi-label">
+                            {isEs ? 'Años Biológicos Ganados' : 'Biological Yrs Saved'}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="eterna-sim-summary-box">
+                        {simPace < 1.0 ? (
+                          <span>
+                            {isEs
+                              ? `Con un ritmo de ${simPace.toFixed(2)}x, el paciente acumula solo ${simBioYearsPassed} años de envejecimiento celular en ${simYears} años reales, frenando la senescencia en ${simYearsSaved} años biológicos.`
+                              : `At ${simPace.toFixed(2)}x velocity, your patient accumulates only ${simBioYearsPassed} years of cellular damage over ${simYears} calendar years, preserving ${simYearsSaved} biological years.`}
+                          </span>
+                        ) : (
+                          <span>
+                            {isEs
+                              ? `A un ritmo de ${simPace.toFixed(2)}x, el paciente envejece a velocidad acelerada (+${Math.abs(simYearsSaved)} años biológicos añadidos). Se recomienda intervención inmediata con péptidos biorreguladores y analítica Eurofins.`
+                              : `At ${simPace.toFixed(2)}x velocity, biological age advances faster than chronological time (+${Math.abs(simYearsSaved)} accelerated biological years). Targeted peptide bioregulator protocols recommended.`}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1004,6 +1200,7 @@ export default function EternaGenomicsDetail({
                   </div>
                 </div>
 
+                {/* eslint-disable-next-line no-restricted-syntax */}
                 <table className="eterna-traceability-table">
                   <tbody>
                     <tr>
@@ -1204,6 +1401,18 @@ export default function EternaGenomicsDetail({
                 >
                   <HelpCircle size={15} />
                   <span>{isEs ? 'Consulta para Médicos' : 'Physician Inquiry'}</span>
+                </button>
+                <button
+                  type="button"
+                  className="eterna-btn-secondary full-width"
+                  style={{ borderColor: 'rgba(45, 212, 191, 0.4)', color: '#2dd4bf', background: 'rgba(45, 212, 191, 0.05)' }}
+                  onClick={() => {
+                    toast.success(isEs ? 'Abriendo solicitud de informe clínico de muestra...' : 'Opening sample clinical report request...');
+                    setIsInquiryDrawerOpen(true);
+                  }}
+                >
+                  <Download size={14} />
+                  <span>{isEs ? 'Muestra de Informe Clínico (PDF)' : 'Sample Clinical Report (PDF)'}</span>
                 </button>
               </div>
 

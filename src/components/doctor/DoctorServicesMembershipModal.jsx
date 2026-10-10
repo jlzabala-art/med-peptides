@@ -505,6 +505,7 @@ export default function DoctorServicesMembershipModal({
               backgroundColor: '#ffffff'
             }}
           >
+            {/* eslint-disable-next-line no-restricted-syntax */}
             <table
               style={{
                 width: '100%',

@@ -411,6 +411,30 @@ export default function DoctorPublicPortalClient({
     setIsSidebarCollapsed(false);
   }, []);
 
+  // Deep-link synchronization: Check URL query param for ?modal=services or #services
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('modal') === 'services' || params.get('tab') === 'services' || window.location.hash === '#services') {
+        setIsServicesModalOpen(true);
+      }
+    }
+  }, []);
+
+  const handleCloseServicesModal = () => {
+    setIsServicesModalOpen(false);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('modal') === 'services' || url.searchParams.get('tab') === 'services') {
+        url.searchParams.delete('modal');
+        url.searchParams.delete('tab');
+        const newSearch = url.searchParams.toString() ? `?${url.searchParams.toString()}` : '';
+        const newHash = url.hash && url.hash !== '#services' ? url.hash : '';
+        window.history.replaceState({}, '', `${url.pathname}${newSearch}${newHash}`);
+      }
+    }
+  };
+
   // Therapeutic Pharmacopeia & Compounding APIs State (Lotusland Clinical Directory)
   const [formularyGoal, setFormularyGoal] = useState('all');
   const [formularySearch, setFormularySearch] = useState('');
@@ -7844,10 +7868,11 @@ export default function DoctorPublicPortalClient({
       {/* ── Atlas Platform Services & Membership Tiers Modal (GCP UX Style) ── */}
       <DoctorServicesMembershipModal
         isOpen={isServicesModalOpen}
-        onClose={() => setIsServicesModalOpen(false)}
+        onClose={handleCloseServicesModal}
+        doctor={doctor}
         doctorName={doctor.name || 'Doctor'}
         clinicName={doctor.clinic || 'Medical Practice'}
-        currentTier="basic"
+        currentTier={doctor.tier || doctor.membershipTier || doctor.subscriptionTier || 'basic'}
       />
     </div>
   );

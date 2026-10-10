@@ -1475,3 +1475,172 @@
 .eterna-footer-bottom-links button:hover {
   color: #2dd4bf;
 }
+
+/* ── Interactive Media Arrows ── */
+.eterna-media-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.eterna-media-arrow:hover {
+  background: #2dd4bf;
+  color: #07090e;
+  border-color: #2dd4bf;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.eterna-media-arrow.left {
+  left: 0.75rem;
+}
+
+.eterna-media-arrow.right {
+  right: 0.75rem;
+}
+
+/* ── Interactive Epigenetic Pace of Aging Simulator ── */
+.eterna-simulator-card {
+  background: linear-gradient(145deg, #0f172a 0%, #090e17 100%);
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.75rem 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.eterna-simulator-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.eterna-simulator-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.eterna-simulator-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 99px;
+  letter-spacing: 0.03em;
+}
+
+.eterna-simulator-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .eterna-simulator-body {
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 2rem;
+  }
+}
+
+.eterna-simulator-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.eterna-sim-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.eterna-sim-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.eterna-sim-val {
+  font-weight: 700;
+  color: #2dd4bf;
+  font-size: 0.9rem;
+}
+
+.eterna-sim-slider {
+  width: 100%;
+  accent-color: #2dd4bf;
+  cursor: pointer;
+}
+
+.eterna-simulator-results {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.eterna-sim-kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.eterna-sim-kpi-item {
+  background: rgba(2, 6, 23, 0.5);
+  border-radius: 8px;
+  padding: 0.75rem;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.eterna-sim-kpi-num {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+.eterna-sim-kpi-label {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.eterna-sim-summary-box {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+  background: rgba(45, 212, 191, 0.08);
+  border-left: 3px solid #2dd4bf;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0 6px 6px 0;
+}
+
