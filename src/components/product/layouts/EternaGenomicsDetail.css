@@ -1,6 +1,8 @@
 /* ==========================================================================
    EternaGenomicsDetail.css — ETERNA DX Dedicated Public Product Layout
    Aesthetic: Ultra-premium dark canvas with clinical cyan/teal & gold accents.
+   Features: Dual-column grid with right sidebar, multi-photo original gallery,
+             patient wellness tracking application modules & institutional footer.
    ========================================================================== */
 
 .eterna-page-root {
@@ -8,7 +10,7 @@
   background-color: #07090e;
   color: #f1f5f9;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  padding-bottom: 6rem;
+  padding-bottom: 5rem;
   position: relative;
   overflow-x: hidden;
 }
@@ -22,7 +24,7 @@
   width: 100%;
   max-width: 1200px;
   height: 550px;
-  background: radial-gradient(circle at 50% 15%, rgba(13, 148, 136, 0.14) 0%, rgba(20, 184, 166, 0.05) 45%, transparent 70%);
+  background: radial-gradient(circle at 50% 15%, rgba(13, 148, 136, 0.16) 0%, rgba(20, 184, 166, 0.05) 45%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -40,7 +42,7 @@
 
 /* Container */
 .eterna-container {
-  max-width: 1240px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 1.25rem;
   position: relative;
@@ -52,7 +54,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 2.5rem;
-  padding: 2.5rem 0 3.5rem;
+  padding: 2.5rem 0 3rem;
   align-items: center;
 }
 
@@ -112,22 +114,22 @@
 }
 
 .eterna-hero-title {
-  font-size: 2.25rem;
+  font-size: 2.15rem;
   font-weight: 900;
   color: #ffffff;
-  line-height: 1.15;
+  line-height: 1.18;
   letter-spacing: -0.02em;
   margin: 0 0 1rem 0;
 }
 
 @media (min-width: 768px) {
   .eterna-hero-title {
-    font-size: 3rem;
+    font-size: 2.85rem;
   }
 }
 
 .eterna-hero-tagline {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #2dd4bf;
   margin-bottom: 0.85rem;
@@ -135,7 +137,7 @@
 }
 
 .eterna-hero-subtitle {
-  font-size: 0.98rem;
+  font-size: 0.96rem;
   color: #94a3b8;
   line-height: 1.65;
   margin: 0 0 1.75rem 0;
@@ -147,7 +149,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.85rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
 }
 
 @media (min-width: 576px) {
@@ -158,208 +160,308 @@
 
 .eterna-stat-card {
   background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  border: 1px solid rgba(51, 65, 85, 0.4);
   border-radius: 12px;
   padding: 0.85rem 1rem;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
 }
 
 .eterna-stat-num {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #ffffff;
-  line-height: 1.2;
+  font-size: 1.45rem;
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
 }
 
 .eterna-stat-num.teal { color: #2dd4bf; }
-.eterna-stat-num.gold { color: #fbbf24; }
+.eterna-stat-num.gold { color: #facc15; }
 .eterna-stat-num.cyan { color: #38bdf8; }
 .eterna-stat-num.purple { color: #c084fc; }
 
 .eterna-stat-label {
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #94a3b8;
-  margin-top: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
-/* ── Hero Media Showcase Card (Right Column) ── */
+.eterna-credentials-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding-top: 0.35rem;
+}
+
+.eterna-credential-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+/* ── Hero Media Showcase with Multi-Photo Gallery ── */
 .eterna-hero-media-card {
-  background: linear-gradient(145deg, #0e1420 0%, #090c14 100%);
+  background: #0d121c;
   border: 1px solid rgba(45, 212, 191, 0.25);
-  border-radius: 24px;
-  padding: 1.75rem;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 40px rgba(13, 148, 136, 0.12);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7), 0 0 30px rgba(13, 148, 136, 0.12);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  position: relative;
-  overflow: hidden;
 }
 
 .eterna-media-viewport {
   position: relative;
-  background: radial-gradient(circle at 50% 50%, #151d2c 0%, #0b0f19 100%);
-  border-radius: 18px;
-  border: 1px solid rgba(51, 65, 85, 0.6);
-  padding: 1.5rem;
+  background: radial-gradient(circle at 50% 50%, #151d2a 0%, #0d121c 100%);
+  padding: 1.75rem;
   display: flex;
-  align-items: center;
   justify-content: center;
-  min-height: 280px;
-  cursor: pointer;
+  align-items: center;
+  cursor: zoom-in;
+  min-height: 310px;
   overflow: hidden;
-  transition: transform 0.25s ease, border-color 0.25s ease;
-}
-
-.eterna-media-viewport:hover {
-  transform: translateY(-2px);
-  border-color: rgba(45, 212, 191, 0.5);
 }
 
 .eterna-kit-img {
   max-width: 100%;
-  max-height: 250px;
+  max-height: 290px;
   object-fit: contain;
-  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.7));
   transition: transform 0.3s ease;
+  filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.6));
 }
 
 .eterna-media-viewport:hover .eterna-kit-img {
-  transform: scale(1.04);
+  transform: scale(1.03);
+}
+
+.eterna-media-tag-overlay {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+}
+
+.eterna-media-pill-tag {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  color: #2dd4bf;
+  padding: 0.25rem 0.65rem;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(6px);
 }
 
 .eterna-zoom-overlay {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(51, 65, 85, 0.7);
-  color: #e2e8f0;
+  bottom: 1rem;
+  right: 1rem;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(51, 65, 85, 0.6);
   border-radius: 99px;
-  padding: 0.35rem 0.65rem;
-  font-size: 0.7rem;
-  font-weight: 700;
+  padding: 0.35rem 0.75rem;
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  backdrop-filter: blur(8px);
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
 }
 
-/* Pricing & Procurement Bar inside Hero Card */
-.eterna-hero-procurement-bar {
+.eterna-media-viewport:hover .eterna-zoom-overlay {
+  background: #2dd4bf;
+  color: #07090e;
+  border-color: #2dd4bf;
+}
+
+/* Media Thumbnails Selector */
+.eterna-media-thumbs-strip {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #090e17;
+  border-top: 1px solid rgba(51, 65, 85, 0.4);
+  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.eterna-thumb-btn {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  border-radius: 8px;
+  padding: 0.35rem 0.45rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 68px;
+  flex-shrink: 0;
+}
+
+.eterna-thumb-btn:hover {
+  border-color: rgba(45, 212, 191, 0.5);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.eterna-thumb-btn.active {
+  border-color: #2dd4bf;
+  background: rgba(45, 212, 191, 0.12);
+  box-shadow: 0 0 10px rgba(45, 212, 191, 0.2);
+}
+
+.eterna-thumb-img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.eterna-thumb-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #94a3b8;
+  white-space: nowrap;
+  max-width: 66px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.eterna-thumb-btn.active .eterna-thumb-label {
+  color: #2dd4bf;
+}
+
+/* Procurement Bar in Hero */
+.eterna-hero-procurement-bar {
+  padding: 1.25rem;
+  background: #0d121c;
 }
 
 .eterna-price-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-  padding-bottom: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
 }
 
 .eterna-price-val {
-  font-size: 2.25rem;
+  font-size: 1.85rem;
   font-weight: 900;
   color: #ffffff;
   line-height: 1;
 }
 
 .eterna-price-sub {
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   color: #94a3b8;
-  font-weight: 600;
-  margin-top: 0.35rem;
-}
-
-.eterna-batch-tag {
-  text-align: right;
-  font-size: 0.75rem;
-}
-
-.eterna-batch-code {
-  font-family: monospace;
-  font-weight: 700;
-  color: #2dd4bf;
-  background: rgba(13, 148, 136, 0.15);
-  border: 1px solid rgba(13, 148, 136, 0.3);
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
   margin-top: 0.25rem;
 }
 
+.eterna-batch-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+}
+
+.eterna-batch-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #2dd4bf;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
 .eterna-batch-code:hover {
-  background: rgba(13, 148, 136, 0.25);
+  border-color: #2dd4bf;
+  background: rgba(45, 212, 191, 0.1);
 }
 
 .eterna-order-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
   gap: 0.75rem;
 }
 
 .eterna-btn-primary {
-  flex: 1;
-  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-  border: 1px solid #14b8a6;
-  border-radius: 12px;
-  color: #ffffff;
-  font-size: 0.95rem;
-  font-weight: 800;
-  padding: 0.95rem 1.25rem;
-  cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  border: 1px solid #14b8a6;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
+  transition: all 0.2s ease;
 }
 
 .eterna-btn-primary:hover {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.45);
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.45);
+}
+
+.eterna-btn-primary.full-width {
+  width: 100%;
 }
 
 .eterna-btn-secondary {
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.8);
-  border-radius: 12px;
-  color: #e2e8f0;
-  font-size: 0.85rem;
-  font-weight: 700;
-  padding: 0.95rem 1.15rem;
-  cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  transition: background 0.15s ease;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  color: #f1f5f9;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.75rem 1.1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .eterna-btn-secondary:hover {
   background: rgba(51, 65, 85, 0.8);
-  color: #ffffff;
+  border-color: #94a3b8;
 }
 
-/* ── Section Navigation Tabs (Segmented Control) ── */
+.eterna-btn-secondary.full-width {
+  width: 100%;
+}
+
+/* ── Segmented Navigation Tabs ── */
 .eterna-tabs-wrapper {
+  margin: 1.5rem 0 2rem;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
   position: sticky;
-  top: 72px;
-  z-index: 25;
-  background: rgba(7, 9, 14, 0.92);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-  padding: 0.75rem 0;
-  margin-bottom: 2.5rem;
+  top: 56px;
+  background: rgba(7, 9, 14, 0.95);
+  backdrop-filter: blur(12px);
+  z-index: 10;
+  padding: 0.5rem 0;
 }
 
 .eterna-tabs-scroll {
@@ -367,8 +469,7 @@
   gap: 0.5rem;
   overflow-x: auto;
   scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  padding: 0 0.25rem;
+  padding-bottom: 0.25rem;
 }
 
 .eterna-tabs-scroll::-webkit-scrollbar {
@@ -376,80 +477,102 @@
 }
 
 .eterna-tab-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1.1rem;
-  border-radius: 99px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  gap: 0.45rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
   color: #94a3b8;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
-  flex-shrink: 0;
 }
 
 .eterna-tab-btn:hover {
   color: #f1f5f9;
-  border-color: rgba(45, 212, 191, 0.4);
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(30, 41, 59, 0.4);
 }
 
 .eterna-tab-btn.active {
-  color: #07090e;
-  background: #2dd4bf;
-  border-color: #2dd4bf;
-  font-weight: 800;
-  box-shadow: 0 2px 10px rgba(45, 212, 191, 0.35);
+  color: #2dd4bf;
+  background: rgba(13, 148, 136, 0.15);
+  border-color: rgba(13, 148, 136, 0.35);
+  font-weight: 700;
 }
 
-/* ── Main Section Cards ── */
+/* ── Dual-Column Layout: Main Content + Right Sidebar ── */
+.eterna-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (min-width: 992px) {
+  .eterna-layout-grid {
+    grid-template-columns: 1fr 340px;
+    gap: 2.25rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .eterna-layout-grid {
+    grid-template-columns: 1fr 360px;
+    gap: 2.75rem;
+  }
+}
+
+.eterna-main-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Section Cards (Main Content Area) ── */
 .eterna-section-card {
   background: #0d121c;
-  border: 1px solid rgba(51, 65, 85, 0.6);
-  border-radius: 20px;
-  padding: 2rem;
-  margin-bottom: 2.5rem;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(51, 65, 85, 0.45);
+  border-radius: 18px;
+  padding: 1.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
-@media (max-width: 640px) {
+@media (min-width: 768px) {
   .eterna-section-card {
-    padding: 1.25rem;
-    border-radius: 16px;
+    padding: 2.25rem;
   }
 }
 
 .eterna-section-header {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
-  padding-bottom: 1.25rem;
+  align-items: flex-start;
   margin-bottom: 1.75rem;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
 .eterna-section-title-wrap {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  align-items: flex-start;
+  gap: 0.85rem;
 }
 
 .eterna-section-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   background: rgba(13, 148, 136, 0.15);
-  border: 1px solid rgba(13, 148, 136, 0.35);
-  color: #2dd4bf;
+  border: 1px solid rgba(13, 148, 136, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #2dd4bf;
   flex-shrink: 0;
 }
 
@@ -457,33 +580,211 @@
   font-size: 1.35rem;
   font-weight: 800;
   color: #ffffff;
-  margin: 0;
+  margin: 0 0 0.35rem 0;
 }
 
 .eterna-section-subtitle {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   color: #94a3b8;
-  margin: 0.25rem 0 0 0;
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.5;
 }
 
-/* ── Biological Age & Epigenetic Clocks Module ── */
+/* ── Featured Patient Wellness Tracking Features ── */
+.eterna-tracking-features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.15rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 640px) {
+  .eterna-tracking-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.eterna-tracking-feature-box {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.45);
+  border-radius: 14px;
+  padding: 1.15rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.eterna-tracking-feature-box:hover {
+  border-color: rgba(45, 212, 191, 0.4);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.eterna-feature-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+.eterna-feature-header h4 {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.eterna-tracking-feature-box p {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* App Screenshots Gallery Strip */
+.eterna-app-gallery-section {
+  background: #090e17;
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.eterna-app-gallery-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #2dd4bf;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 1.25rem;
+}
+
+.eterna-app-screenshots-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .eterna-app-screenshots-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.eterna-app-screen-card {
+  background: #0d121c;
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.eterna-app-screen-card:hover {
+  border-color: #2dd4bf;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(45, 212, 191, 0.15);
+}
+
+.eterna-app-img-wrap {
+  position: relative;
+  height: 240px;
+  background: #06090e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.eterna-app-screen-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.eterna-app-screen-card:hover .eterna-app-screen-img {
+  transform: scale(1.04);
+}
+
+.eterna-app-zoom-badge {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  border-radius: 99px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2dd4bf;
+  backdrop-filter: blur(4px);
+}
+
+.eterna-app-screen-caption {
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  background: #0d121c;
+}
+
+.eterna-app-screen-caption strong {
+  font-size: 0.78rem;
+  color: #f1f5f9;
+  font-weight: 700;
+}
+
+.eterna-app-screen-caption span {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+/* Doctor Callout Box */
+.eterna-doctor-callout-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(15, 23, 42, 0.6) 100%);
+  border: 1px solid rgba(45, 212, 191, 0.3);
+  border-radius: 14px;
+}
+
+.eterna-doctor-callout-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(13, 148, 136, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Biological Age & Epigenetic Clocks ── */
 .eterna-bioage-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
 }
 
-@media (min-width: 840px) {
+@media (min-width: 768px) {
   .eterna-bioage-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.1fr 1fr;
   }
 }
 
 .eterna-rate-meter-box {
-  background: linear-gradient(145deg, #121824 0%, #0a0e17 100%);
-  border: 1px solid rgba(45, 212, 191, 0.25);
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(51, 65, 85, 0.5);
   border-radius: 16px;
-  padding: 1.75rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -492,126 +793,91 @@
 .eterna-rate-val-row {
   display: flex;
   align-items: baseline;
-  gap: 0.75rem;
-  margin: 0.85rem 0;
+  gap: 1rem;
+  margin: 0.75rem 0 1rem;
 }
 
 .eterna-rate-huge {
-  font-size: 3.25rem;
+  font-size: 3.5rem;
   font-weight: 900;
   color: #2dd4bf;
   line-height: 1;
+  letter-spacing: -0.03em;
 }
 
-.eterna-rate-unit {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #94a3b8;
-}
-
-.eterna-rate-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  color: #4ade80;
-  padding: 0.3rem 0.75rem;
-  border-radius: 99px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  width: fit-content;
-}
-
-.eterna-organ-age-list {
+.eterna-rate-subtext {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.15rem;
 }
 
-.eterna-organ-row {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  border-radius: 12px;
-  padding: 0.85rem 1.15rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: border-color 0.2s ease;
-}
-
-.eterna-organ-row:hover {
-  border-color: rgba(45, 212, 191, 0.4);
-}
-
-.eterna-organ-name {
-  font-size: 0.88rem;
+.eterna-rate-status-good {
+  color: #4ade80;
   font-weight: 700;
-  color: #f1f5f9;
+  font-size: 0.88rem;
 }
 
-.eterna-organ-meta {
-  font-size: 0.72rem;
+.eterna-bio-compare-box {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.eterna-organ-pill {
+  font-size: 0.73rem;
   color: #94a3b8;
-  margin-top: 0.2rem;
+  background: rgba(30, 41, 59, 0.6);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(51, 65, 85, 0.4);
 }
 
-.eterna-organ-delta {
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: #2dd4bf;
-  text-align: right;
-}
-
-/* ── 5 Pillars Interactive Grid ── */
-.eterna-pillars-selector {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
+/* ── 5 Genomic Pillars Navigation & Content ── */
+.eterna-pillars-nav {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 0.5rem;
   margin-bottom: 1.5rem;
 }
 
-@media (min-width: 768px) {
-  .eterna-pillars-selector {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-
 .eterna-pillar-card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
   background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  border-radius: 14px;
-  padding: 1rem 0.85rem;
+  border: 1px solid rgba(51, 65, 85, 0.45);
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  text-align: left;
-  transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  white-space: nowrap;
+  transition: all 0.15s ease;
 }
 
 .eterna-pillar-card-btn:hover {
-  background: rgba(30, 41, 59, 0.6);
-  border-color: rgba(45, 212, 191, 0.4);
+  background: rgba(30, 41, 59, 0.8);
+  border-color: #94a3b8;
 }
 
 .eterna-pillar-card-btn.active {
-  background: linear-gradient(145deg, #111a28 0%, #0d1522 100%);
+  background: rgba(15, 23, 42, 0.95);
   border-color: #2dd4bf;
-  box-shadow: 0 4px 15px rgba(45, 212, 191, 0.15);
-}
-
-.eterna-pillar-title {
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: #f1f5f9;
-  line-height: 1.3;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(45, 212, 191, 0.2);
 }
 
 .eterna-pillar-dossier {
-  background: #111724;
-  border: 1px solid rgba(51, 65, 85, 0.6);
-  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  border-radius: 14px;
   padding: 1.5rem;
 }
 
@@ -629,30 +895,33 @@
 }
 
 .eterna-gene-card {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  border-radius: 12px;
+  background: #090e17;
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  border-radius: 10px;
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .eterna-gene-symbol {
-  font-size: 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.88rem;
   font-weight: 800;
   color: #2dd4bf;
-  font-family: monospace;
+  margin-bottom: 0.2rem;
 }
 
 .eterna-gene-name {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #f1f5f9;
-  margin: 0.25rem 0 0.5rem 0;
+  font-size: 0.74rem;
+  color: #94a3b8;
+  margin-bottom: 0.65rem;
 }
 
 .eterna-gene-finding {
-  font-size: 0.74rem;
-  color: #94a3b8;
-  line-height: 1.5;
+  font-size: 0.8rem;
+  color: #e2e8f0;
+  line-height: 1.45;
 }
 
 /* ── Wearables Showcase ── */
@@ -663,183 +932,110 @@
   align-items: center;
 }
 
-@media (min-width: 860px) {
+@media (min-width: 768px) {
   .eterna-wearables-showcase {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.2fr 0.8fr;
   }
-}
-
-.eterna-wearables-img-card {
-  position: relative;
-  background: #080c14;
-  border-radius: 18px;
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  padding: 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.eterna-wearables-img {
-  max-width: 100%;
-  border-radius: 12px;
-  object-fit: cover;
 }
 
 .eterna-devices-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-top: 1.25rem;
+  gap: 0.45rem;
 }
 
 .eterna-device-pill {
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(51, 65, 85, 0.6);
-  color: #cbd5e1;
   font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.35rem 0.75rem;
-  border-radius: 8px;
+  font-weight: 600;
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
 }
 
-/* ── 2-Minute Saliva Protocol Stepper ── */
+.eterna-wearables-img-card {
+  position: relative;
+  background: radial-gradient(circle at 50% 50%, #151d2a 0%, #0d121c 100%);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  border-radius: 16px;
+  padding: 1rem;
+  cursor: zoom-in;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eterna-wearables-img {
+  max-width: 100%;
+  border-radius: 10px;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+  transition: transform 0.3s ease;
+}
+
+.eterna-wearables-img-card:hover .eterna-wearables-img {
+  transform: scale(1.03);
+}
+
+/* ── Saliva Protocol Steps ── */
 .eterna-protocol-steps {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 576px) {
   .eterna-protocol-steps {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 992px) {
   .eterna-protocol-steps {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
 .eterna-step-card {
-  background: #111724;
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  border-radius: 12px;
   padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
   position: relative;
 }
 
 .eterna-step-number {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: #2dd4bf;
-  color: #07090e;
-  font-size: 0.85rem;
+  font-size: 1.75rem;
   font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: rgba(45, 212, 191, 0.25);
+  line-height: 1;
+  margin-bottom: 0.5rem;
 }
 
 .eterna-step-title {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 800;
-  color: #ffffff;
-  margin: 0;
+  color: #f1f5f9;
+  margin: 0 0 0.4rem 0;
 }
 
 .eterna-step-desc {
-  font-size: 0.76rem;
-  color: #94a3b8;
-  line-height: 1.55;
-  margin: 0;
-}
-
-/* ── Companion Longevity Protocols ── */
-.eterna-protocols-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-@media (min-width: 768px) {
-  .eterna-protocols-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.eterna-protocol-card {
-  background: #111724;
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  border-radius: 14px;
-  padding: 1.25rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}
-
-.eterna-protocol-target {
-  font-size: 0.72rem;
-  color: #2dd4bf;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.eterna-protocol-name {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0.25rem 0 0.4rem 0;
-}
-
-.eterna-protocol-desc {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   color: #94a3b8;
   line-height: 1.5;
   margin: 0;
 }
 
-.eterna-protocol-link {
-  color: #2dd4bf;
-  font-size: 0.78rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  text-decoration: none;
-  flex-shrink: 0;
-  background: rgba(13, 148, 136, 0.15);
-  border: 1px solid rgba(13, 148, 136, 0.3);
-  padding: 0.5rem 0.85rem;
-  border-radius: 8px;
-  transition: background 0.15s ease;
-}
-
-.eterna-protocol-link:hover {
-  background: rgba(13, 148, 136, 0.3);
-}
-
-/* ── Institutional Traceability Card ── */
+/* ── Traceability Table ── */
 .eterna-traceability-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
 }
 
 .eterna-traceability-table tr {
   border-bottom: 1px solid rgba(51, 65, 85, 0.4);
-}
-
-.eterna-traceability-table tr:last-child {
-  border-bottom: none;
 }
 
 .eterna-traceability-table td {
@@ -849,10 +1045,433 @@
 .eterna-traceability-table td:first-child {
   color: #94a3b8;
   font-weight: 600;
-  width: 35%;
+  width: 32%;
 }
 
 .eterna-traceability-table td:last-child {
   color: #f1f5f9;
+}
+
+/* ── Companion Protocols ── */
+.eterna-protocols-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .eterna-protocols-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.eterna-protocol-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.eterna-protocol-target {
+  font-size: 0.72rem;
   font-weight: 700;
+  color: #2dd4bf;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.35rem;
+}
+
+.eterna-protocol-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+}
+
+.eterna-protocol-desc {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.eterna-protocol-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #38bdf8;
+  text-decoration: none;
+  align-self: flex-start;
+  transition: gap 0.2s ease;
+}
+
+.eterna-protocol-link:hover {
+  gap: 0.55rem;
+  color: #2dd4bf;
+}
+
+/* ── RIGHT COLUMN: DEDICATED CLINICAL SIDEBAR ── */
+.eterna-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: sticky;
+  top: 130px;
+}
+
+.eterna-sidebar-card {
+  background: #0d121c;
+  border: 1px solid rgba(51, 65, 85, 0.45);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.eterna-sidebar-card.highlight {
+  border-color: rgba(45, 212, 191, 0.4);
+  background: linear-gradient(180deg, rgba(13, 148, 136, 0.1) 0%, #0d121c 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 20px rgba(45, 212, 191, 0.1);
+}
+
+.eterna-sidebar-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(13, 148, 136, 0.2);
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  color: #2dd4bf;
+  padding: 0.25rem 0.55rem;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.eterna-sidebar-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.45rem 0;
+}
+
+.eterna-sidebar-desc {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+}
+
+.eterna-sidebar-specs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.4);
+  padding-top: 0.85rem;
+}
+
+.eterna-sidebar-spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.76rem;
+}
+
+.eterna-spec-label {
+  color: #94a3b8;
+}
+
+.eterna-spec-val {
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+/* Sidebar Pricing & Actions */
+.eterna-sidebar-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.85rem;
+}
+
+.eterna-sidebar-price {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.eterna-sidebar-price-sub {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+.eterna-sidebar-batch-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.eterna-sidebar-cta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.eterna-sidebar-guarantee-note {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+/* Sidebar Lab Credentials */
+.eterna-sidebar-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.65rem 0;
+}
+
+.eterna-sidebar-checks-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.eterna-sidebar-checks-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.76rem;
+  color: #cbd5e1;
+}
+
+/* Sidebar Quick Links */
+.eterna-sidebar-quick-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.eterna-quick-nav-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.eterna-quick-nav-btn:hover {
+  background: rgba(30, 41, 59, 0.5);
+  color: #f1f5f9;
+}
+
+.eterna-quick-nav-btn.active {
+  background: rgba(13, 148, 136, 0.12);
+  border-color: rgba(45, 212, 191, 0.3);
+  color: #2dd4bf;
+  font-weight: 700;
+}
+
+/* ── Comprehensive Institutional Dark Footer ── */
+.eterna-footer {
+  margin-top: 5rem;
+  background: #04060a;
+  border-top: 1px solid rgba(51, 65, 85, 0.4);
+  padding: 4rem 0 2.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.eterna-footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.eterna-footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+@media (min-width: 640px) {
+  .eterna-footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .eterna-footer-grid {
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 3rem;
+  }
+}
+
+.eterna-footer-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.eterna-footer-logo-text {
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.eterna-footer-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #2dd4bf;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.eterna-footer-text {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin: 0 0 1.25rem 0;
+  max-width: 320px;
+}
+
+.eterna-footer-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(13, 148, 136, 0.12);
+  border: 1px solid rgba(45, 212, 191, 0.3);
+  padding: 0.35rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #2dd4bf;
+}
+
+.eterna-footer-heading {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1.15rem 0;
+}
+
+.eterna-footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.eterna-footer-links li button,
+.eterna-footer-links li a,
+.eterna-footer-links li span {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.eterna-footer-links li button:hover,
+.eterna-footer-links li a:hover {
+  color: #2dd4bf;
+}
+
+.eterna-footer-disclaimer-box {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(51, 65, 85, 0.35);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.eterna-footer-disclaimer-box p {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.eterna-footer-disclaimer-box strong {
+  color: #94a3b8;
+}
+
+.eterna-footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.3);
+  padding-top: 1.75rem;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.eterna-footer-bottom-links {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.eterna-footer-bottom-links a,
+.eterna-footer-bottom-links button {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.eterna-footer-bottom-links a:hover,
+.eterna-footer-bottom-links button:hover {
+  color: #2dd4bf;
 }

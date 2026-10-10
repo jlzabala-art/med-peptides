@@ -11,7 +11,7 @@ import { Sparkles, ArrowUpRight, Activity, Pill, FlaskConical, Droplets, ShieldC
  * - 2. Precision Oral Nutraceutical (UltraPerson by PharmaPolis)
  * - 3. Diagnostic Biomarker Monitoring (Bloodo Diagnostic Suite)
  * - 4. Scalp Barrier & ECM Support (Colway Clinical Care, conditional)
- * - 5. Precision Genomics & Epigenetics (ETERNA® · Fagron Genomics, always visible)
+ * - 5. Precision Genomics & Epigenetics (ETERNA® · Eurofins Lab, always visible)
  * 
  * Styled according to Google Cloud Console design principles:
  * - Full-width stacked horizontal rows (not vertical cards)
