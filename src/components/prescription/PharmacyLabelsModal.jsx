@@ -1675,9 +1675,24 @@ export default function PharmacyLabelsModal({
                   <span className="gcp-resource-title-label">
                     {isEs ? 'Prescripción y Fórmula Seleccionada' : 'Selected Prescription & Formula'}
                   </span>
-                  <span className="gcp-resource-subtitle-code">
-                    {currentItem.fileNumber || currentItem.rxCode || 'RX-COMPOUND'}
-                  </span>
+                  <a
+                    href={`/rx/${encodeURIComponent(String(currentItem.fileNumber || currentItem.rxCode || '').replace(/^#/, '').trim())}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="gcp-resource-subtitle-code"
+                    style={{
+                      textDecoration: 'none',
+                      color: '#1a73e8',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      cursor: 'pointer'
+                    }}
+                    title={isEs ? 'Abrir expediente de prescripción pública (nueva pestaña)' : 'Open public prescription dossier (new tab)'}
+                  >
+                    <span>{currentItem.fileNumber || currentItem.rxCode || 'RX-COMPOUND'}</span>
+                    <ExternalLink size={11} style={{ opacity: 0.6 }} />
+                  </a>
                 </div>
               </div>
 
@@ -1896,34 +1911,60 @@ export default function PharmacyLabelsModal({
                     <option value="md">Markdown (.md)</option>
                   </select>
                 </div>
+
+                {/* Field 5: Cut Guides (✂) Print & Layout Setting */}
+                <div className="gcp-toolbar-control">
+                  <label htmlFor="gcp-label-guides" className="gcp-toolbar-label">
+                    {isEs ? 'Guías:' : 'Guides:'}
+                  </label>
+                  <button
+                    type="button"
+                    id="gcp-label-guides"
+                    onClick={() => setShowCutGuides(prev => !prev)}
+                    className="gcp-toolbar-btn"
+                    style={{
+                      height: 32,
+                      padding: '0 10px',
+                      border: showCutGuides ? '1px solid #1a73e8' : '1px solid #dadce0',
+                      background: showCutGuides ? '#e8f0fe' : '#ffffff',
+                      color: showCutGuides ? '#1a73e8' : '#5f6368',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontWeight: 600,
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={showCutGuides
+                      ? (isEs ? 'Guías de corte: ACTIVADAS (imprime líneas punteadas de tijera y recorte)' : 'Cut Guides: ON (scissor crop lines & trim marks visible)')
+                      : (isEs ? 'Guías de corte: DESACTIVADAS (etiqueta limpia sin marcas de corte)' : 'Cut Guides: OFF (clean label without cut marks)')
+                    }
+                  >
+                    <span style={{ fontSize: '0.88rem' }}>✂</span>
+                    <span style={{
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.03em',
+                      color: showCutGuides ? '#1a73e8' : '#70757a'
+                    }}>
+                      {showCutGuides ? (isEs ? 'ON (Activas)' : 'ON') : (isEs ? 'OFF (Inactivas)' : 'OFF')}
+                    </span>
+                    <span style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: '50%',
+                      background: showCutGuides ? '#1a73e8' : '#dadce0',
+                      display: 'inline-block',
+                      boxShadow: showCutGuides ? '0 0 0 2px rgba(26,115,232,0.25)' : 'none'
+                    }} />
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Bottom Row: Tool Actions (Cut Guides, Edit, Share) */}
+            {/* Bottom Row: Tool Actions (Edit, Share) */}
             <div className="gcp-toolbar-row-bottom">
-              {/* Field 5: Cut Guides (✂) Toggle */}
-              <button
-                type="button"
-                onClick={() => setShowCutGuides(prev => !prev)}
-                className="gcp-toolbar-btn"
-                style={{
-                  border: showCutGuides ? '1px solid #1a73e8' : '1px solid #dadce0',
-                  background: showCutGuides ? '#e8f0fe' : '#ffffff',
-                  color: showCutGuides ? '#1a73e8' : '#5f6368'
-                }}
-                title={isEs ? 'Mostrar/Ocultar guías de corte con tijera' : 'Toggle scissor cut lines & crop marks'}
-              >
-                <span style={{ fontSize: '0.88rem' }}>✂</span>
-                <span>{isEs ? 'Guías de Corte' : 'Cut Guides'}</span>
-                <span style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: '50%',
-                  background: showCutGuides ? '#1a73e8' : '#dadce0',
-                  display: 'inline-block'
-                }} />
-              </button>
-
               {/* Field 6: Online Label Editor Toggle */}
               <button
                 type="button"

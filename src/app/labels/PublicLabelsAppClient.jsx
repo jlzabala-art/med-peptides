@@ -65,6 +65,24 @@ function saveRecentPrescription(item) {
   }
 }
 
+function getDoctorSlug(rx, fallbackDocName) {
+  if (rx?.doctorSlug) return rx.doctorSlug;
+  if (rx?.doctor?.slug) return rx.doctor.slug;
+  if (rx?.doctor?.opaqueCode) return rx.doctor.opaqueCode;
+  if (rx?.treatingDoctor?.slug) return rx.treatingDoctor.slug;
+  if (rx?.treatingDoctor?.opaqueCode) return rx.treatingDoctor.opaqueCode;
+  if (rx?.doctorCode) return rx.doctorCode;
+  
+  const name = rx?.doctorName || rx?.physician || rx?.doctor?.name || rx?.treatingDoctor?.name || fallbackDocName || 'Marina Cordeiro Fernandes';
+  return String(name)
+    .toLowerCase()
+    .replace(/^dr[a]?\.\s*/i, '')
+    .replace(/^dr[a]?\s*/i, '')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
 export default function PublicLabelsAppClient({
   initialRx,
   initialLabels = [],
@@ -101,6 +119,9 @@ export default function PublicLabelsAppClient({
   // Sync title dynamically
   const patientName = currentRx?.patient?.name || currentRx?.patientName || 'Patient';
   const rxCode = currentRx?.fileNumber || currentRx?.code || activeCode;
+  const cleanRxCode = String(rxCode || '').replace(/^#/, '').trim();
+  const docName = currentRx?.doctorName || currentRx?.physician || currentRx?.doctor?.name || currentRx?.treatingDoctor?.name || 'Dr. Marina Cordeiro Fernandes';
+  const doctorSlug = getDoctorSlug(currentRx, docName);
 
   // Hydrate recents from localStorage
   useEffect(() => {
@@ -570,23 +591,67 @@ export default function PublicLabelsAppClient({
           display: flex;
           align-items: center;
           gap: 6px;
+          flex-wrap: wrap;
         }
-        .pls-code-pill {
+        .pls-code-pill-wrap {
           background: #ffffff;
           border: 1px solid #dadce0;
-          padding: 2px 7px;
           border-radius: 4px;
+          display: inline-flex;
+          align-items: center;
+          overflow: hidden;
+          transition: border-color 0.15s;
+        }
+        .pls-code-pill-wrap:hover {
+          border-color: #1a73e8;
+        }
+        .pls-code-pill-link {
           font-family: monospace;
           font-weight: 600;
+          font-size: 0.76rem;
           color: #1a73e8;
-          cursor: pointer;
+          text-decoration: none;
+          padding: 2px 7px;
           display: inline-flex;
           align-items: center;
           gap: 4px;
+          transition: background 0.15s;
         }
-        .pls-code-pill:hover {
+        .pls-code-pill-link:hover {
           background: #e8f0fe;
-          border-color: #1a73e8;
+          text-decoration: underline;
+        }
+        .pls-code-pill-copy {
+          background: transparent;
+          border: none;
+          border-left: 1px solid #dadce0;
+          padding: 3px 6px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: #5f6368;
+          cursor: pointer;
+          transition: background 0.15s, color 0.15s;
+        }
+        .pls-code-pill-copy:hover {
+          background: #f1f3f4;
+          color: #1a73e8;
+        }
+        .pls-doctor-link {
+          color: #202124;
+          font-weight: 600;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 2px 6px;
+          border-radius: 4px;
+          transition: all 0.15s;
+        }
+        .pls-doctor-link:hover {
+          background: #e8f0fe;
+          color: #1a73e8;
+          text-decoration: underline;
         }
 
         /* Formula parts pills */
@@ -821,19 +886,33 @@ export default function PublicLabelsAppClient({
           </div>
           <div className="pls-context-meta">
             <span>Prescription</span>
-            <button
-              type="button"
-              className="pls-code-pill"
-              onClick={handleCopyCode}
-              title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
-            >
-              <span>#{rxCode}</span>
-              {copyCodeSuccess ? <Check size={11} color="#137333" /> : <Copy size={11} />}
-            </button>
+            <div className="pls-code-pill-wrap">
+              <Link
+                href={`/rx/${encodeURIComponent(cleanRxCode)}`}
+                className="pls-code-pill-link"
+                title={isEs ? `Ir a la prescripción #${cleanRxCode}` : `Go to prescription #${cleanRxCode}`}
+              >
+                <span>#{cleanRxCode}</span>
+                <ExternalLink size={10} style={{ opacity: 0.6 }} />
+              </Link>
+              <button
+                type="button"
+                className="pls-code-pill-copy"
+                onClick={handleCopyCode}
+                title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
+              >
+                {copyCodeSuccess ? <Check size={11} color="#137333" /> : <Copy size={11} />}
+              </button>
+            </div>
             <span>•</span>
-            <span style={{ color: '#202124', fontWeight: 600 }}>
-              {currentRx?.doctorName || 'Dr. Marina Cordeiro Fernandes'}
-            </span>
+            <Link
+              href={`/dr/${encodeURIComponent(doctorSlug)}`}
+              className="pls-doctor-link"
+              title={isEs ? `Ir al portal clínico de ${docName}` : `Go to doctor portal of ${docName}`}
+            >
+              <span>{docName}</span>
+              <ExternalLink size={10} style={{ opacity: 0.6 }} />
+            </Link>
           </div>
         </div>
 
