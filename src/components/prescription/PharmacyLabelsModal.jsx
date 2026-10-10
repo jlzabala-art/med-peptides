@@ -1356,6 +1356,132 @@ export default function PharmacyLabelsModal({
           color: #1a73e8;
         }
 
+        /* ── Google Cloud Resource Editor Header & Toolbar Bar ── */
+        .gcp-editor-header-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: #f8fafd;
+          border-bottom: 1px solid #dadce0;
+          padding: 0 12px;
+          min-height: 42px;
+          box-sizing: border-box;
+          gap: 12px;
+        }
+        .gcp-editor-tabs-wrap {
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          height: 100%;
+        }
+        .gcp-editor-tab-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 0 12px;
+          height: 42px;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid transparent;
+          color: #5f6368;
+          font-size: 0.76rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          box-sizing: border-box;
+        }
+        .gcp-editor-tab-btn:hover {
+          color: #202124;
+          background: rgba(0, 0, 0, 0.02);
+        }
+        .gcp-editor-tab-btn.active {
+          color: #1a73e8;
+          font-weight: 600;
+          border-bottom: 2px solid #1a73e8;
+          background: transparent;
+        }
+        .gcp-editor-actions-wrap {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .gcp-editor-save-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          height: 30px;
+          padding: 0 12px;
+          border-radius: 4px;
+          background: #1a73e8;
+          color: #ffffff;
+          border: 1px solid #1a73e8;
+          font-size: 0.74rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s;
+          box-shadow: 0 1px 2px rgba(60,64,67,0.2);
+          white-space: nowrap;
+        }
+        .gcp-editor-save-btn:hover:not(:disabled) {
+          background: #1557b0;
+          border-color: #1557b0;
+          box-shadow: 0 1px 3px rgba(60,64,67,0.3);
+        }
+        .gcp-editor-save-btn:disabled {
+          opacity: 0.7;
+          cursor: wait;
+        }
+        .gcp-editor-save-btn.is-success {
+          background: #e6f4ea;
+          color: #137333;
+          border-color: #ceead6;
+          box-shadow: none;
+        }
+        .gcp-editor-aux-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          height: 30px;
+          padding: 0 10px;
+          border-radius: 4px;
+          background: #ffffff;
+          border: 1px solid #dadce0;
+          color: #3c4043;
+          font-size: 0.74rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.15s;
+          white-space: nowrap;
+        }
+        .gcp-editor-aux-btn:hover {
+          background: #f1f3f4;
+          border-color: #bdc1c6;
+          color: #202124;
+        }
+        .gcp-editor-reset-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          height: 30px;
+          padding: 0 10px;
+          border-radius: 4px;
+          background: #ffffff;
+          border: 1px solid #dadce0;
+          color: #d93025;
+          font-size: 0.74rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.15s;
+          white-space: nowrap;
+        }
+        .gcp-editor-reset-btn:hover {
+          background: #fce8e6;
+          border-color: #fad2cf;
+        }
+
         /* ── Responsive 12-Column Google Cloud Editor Form (NO INNER SCROLL TRAP) ── */
         .gcp-editor-container {
           padding: 14px 16px;
@@ -1591,8 +1717,9 @@ export default function PharmacyLabelsModal({
             justify-content: center !important;
             font-size: 0.82rem !important;
           }
-          .gcp-editor-aux-btn {
-            flex: 1 1 calc(25% - 6px) !important;
+          .gcp-editor-aux-btn,
+          .gcp-editor-reset-btn {
+            flex: 1 1 calc(50% - 3px) !important;
             min-width: 66px !important;
             height: 36px !important;
             justify-content: center !important;
@@ -2032,76 +2159,33 @@ export default function PharmacyLabelsModal({
               {/* Editor Header Bar with Tabs and Actions */}
               <div className="gcp-editor-header-bar">
                 {/* Tabs */}
-                <div className="gcp-editor-tabs-wrap" style={{ display: 'inline-flex', background: '#e8f0fe', padding: '2px', borderRadius: '4px', gap: '2px' }}>
+                <div className="gcp-editor-tabs-wrap">
                   <button
                     type="button"
                     onClick={() => setEditorTab('fields')}
-                    className="gcp-editor-tab-btn"
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '3px',
-                      border: 'none',
-                      background: editorTab === 'fields' ? '#ffffff' : 'transparent',
-                      color: editorTab === 'fields' ? '#1a73e8' : '#5f6368',
-                      fontSize: '0.74rem',
-                      fontWeight: editorTab === 'fields' ? 700 : 500,
-                      cursor: 'pointer',
-                      boxShadow: editorTab === 'fields' ? '0 1px 2px rgba(60,64,67,0.15)' : 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px'
-                    }}
+                    className={`gcp-editor-tab-btn ${editorTab === 'fields' ? 'active' : ''}`}
                   >
-                    <Edit3 size={12} />
+                    <Edit3 size={13} />
                     <span>{isEs ? 'Campos' : 'Fields'}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditorTab('markdown')}
-                    className="gcp-editor-tab-btn"
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '3px',
-                      border: 'none',
-                      background: editorTab === 'markdown' ? '#ffffff' : 'transparent',
-                      color: editorTab === 'markdown' ? '#1a73e8' : '#5f6368',
-                      fontSize: '0.74rem',
-                      fontWeight: editorTab === 'markdown' ? 700 : 500,
-                      cursor: 'pointer',
-                      boxShadow: editorTab === 'markdown' ? '0 1px 2px rgba(60,64,67,0.15)' : 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px'
-                    }}
+                    className={`gcp-editor-tab-btn ${editorTab === 'markdown' ? 'active' : ''}`}
                   >
-                    <FileText size={12} />
+                    <FileText size={13} />
                     <span>Markdown (.md)</span>
                   </button>
                 </div>
 
                 {/* Editor Action Buttons: Save to Atlas, Download .md, Reset */}
-                <div className="gcp-editor-actions-wrap" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <div className="gcp-editor-actions-wrap">
                   {/* SAVE TO ATLAS BUTTON */}
                   <button
                     type="button"
                     onClick={handleSaveToFirebase}
                     disabled={isSavingToFirebase}
-                    className="gcp-editor-save-btn"
-                    style={{
-                      padding: '4px 12px',
-                      borderRadius: '4px',
-                      border: firebaseSaveSuccess ? '1px solid #137333' : '1px solid #1a73e8',
-                      background: firebaseSaveSuccess ? '#e6f4ea' : '#1a73e8',
-                      color: firebaseSaveSuccess ? '#137333' : '#ffffff',
-                      fontSize: '0.74rem',
-                      fontWeight: 700,
-                      cursor: isSavingToFirebase ? 'wait' : 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      transition: 'all 0.15s',
-                      boxShadow: '0 1px 2px rgba(60,64,67,0.2)'
-                    }}
+                    className={`gcp-editor-save-btn ${firebaseSaveSuccess ? 'is-success' : ''}`}
                     title={isEs ? 'Guardar cambios directamente en Atlas (base de datos oficial)' : 'Save changes directly to Atlas'}
                   >
                     {firebaseSaveSuccess ? (
@@ -2121,45 +2205,19 @@ export default function PharmacyLabelsModal({
                     type="button"
                     onClick={handleDownloadMarkdown}
                     className="gcp-editor-aux-btn"
-                    style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      border: '1px solid #dadce0',
-                      background: '#ffffff',
-                      color: '#3c4043',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
                     title={isEs ? 'Descargar monografía en formato Markdown' : 'Download monograph in Markdown format'}
                   >
-                    <Download size={12} />
+                    <Download size={13} />
                     <span>{isEs ? 'Descargar .md' : 'Download .md'}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={handleResetOriginal}
-                    className="gcp-editor-aux-btn"
-                    style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      border: '1px solid #dadce0',
-                      background: '#ffffff',
-                      color: '#d93025',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
+                    className="gcp-editor-reset-btn"
                     title={isEs ? 'Restablecer datos originales de la prescripción' : 'Reset to original prescription data'}
                   >
-                    <RotateCcw size={12} />
+                    <RotateCcw size={13} />
                     <span>{isEs ? 'Restablecer' : 'Reset'}</span>
                   </button>
                 </div>
