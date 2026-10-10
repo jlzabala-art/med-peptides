@@ -325,18 +325,39 @@ export default function PharmacyLabelsModal({
     URL.revokeObjectURL(url);
   };
 
-  const handleShareEditor = () => {
-    if (typeof window === 'undefined') return;
+  const getShareUrl = () => {
+    if (typeof window === 'undefined') return '';
     const rawCode = currentItem.fileNumber || currentItem.rxCode || baseItem.fileNumber || baseItem.rxCode || baseItem.id || '';
     const cleanCode = encodeURIComponent(String(rawCode).trim());
     const origin = window.location.origin;
     const phaseParam = (selectedProductIdx != null && selectedProductIdx > 0) ? `&phase=${selectedProductIdx + 1}` : '';
-    const url = `${origin}/rx/${cleanCode}/labels?edit=true${phaseParam}`;
+    return `${origin}/labels?rx=${cleanCode}${phaseParam}&edit=true`;
+  };
+
+  const handleShareEditor = () => {
+    if (typeof window === 'undefined') return;
+    const url = getShareUrl();
     if (navigator?.clipboard) {
       navigator.clipboard.writeText(url);
       setCopiedShareLink(true);
       setTimeout(() => setCopiedShareLink(false), 2500);
     }
+  };
+
+  const handleShareWhatsApp = () => {
+    if (typeof window === 'undefined') return;
+    const url = getShareUrl();
+    const rawPatient = currentItem.patientName || currentItem.patient?.name || baseItem.patientName || 'Patient';
+    const rawCode = currentItem.fileNumber || currentItem.rxCode || baseItem.fileNumber || baseItem.id || '';
+    const title = currentItem.productTitle || currentItem.productName || 'Compounded Pharmaceutical Formulation';
+    const partText = labels.length > 1 ? ` (Part ${(selectedProductIdx || 0) + 1})` : '';
+
+    const text = isEs
+      ? `🏷️ *Pharmapolis Compounding Label Studio*\n👤 *Paciente:* ${rawPatient}\n📋 *Prescripción:* #${rawCode}\n💊 *Fórmula${partText}:* ${title}\n🔗 *Ver y Editar Etiqueta:* ${url}`
+      : `🏷️ *Pharmapolis Compounding Label Studio*\n👤 *Patient:* ${rawPatient}\n📋 *Prescription:* #${rawCode}\n💊 *Formula${partText}:* ${title}\n🔗 *View & Edit Label:* ${url}`;
+
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleSaveToFirebase = async () => {
@@ -1915,6 +1936,26 @@ export default function PharmacyLabelsModal({
                 {copiedShareLink ? <Check size={13} color="#137333" /> : <Share2 size={13} />}
                 <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
               </button>
+
+              {/* Field 8: Compartir por WhatsApp */}
+              <button
+                type="button"
+                onClick={handleShareWhatsApp}
+                className="gcp-toolbar-btn"
+                style={{
+                  border: '1px solid #25d366',
+                  background: '#f0fdf4',
+                  color: '#15803d',
+                  fontWeight: 600
+                }}
+                title={isEs ? 'Compartir por WhatsApp' : 'Share via WhatsApp'}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
+                  <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.07-.945.07-.63 0-1.472-.258-2.607-1.077-1.631-1.178-2.693-2.92-2.775-3.033-.082-.113-.664-.882-.664-1.684 0-.802.422-1.196.572-1.356.15-.16.328-.201.437-.201.109 0 .219.001.314.006.101.005.235-.038.368.281.137.33.468 1.144.509 1.228.041.084.068.183.013.295-.054.112-.082.182-.163.279-.082.097-.172.217-.246.291-.082.082-.168.172-.072.337.096.165.426.703.914 1.138.629.56 1.159.734 1.324.816.165.082.261.069.358-.041.096-.11.413-.48.523-.645.11-.165.22-.138.371-.083.151.055.959.452 1.124.535.165.083.275.124.316.193.041.069.041.4-.103.805z"/>
+                  <path d="M12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.662 1.435 5.178L2 22l4.958-1.402C8.423 21.492 10.154 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.628 0-3.141-.453-4.437-1.24l-.318-.194-2.937.83.843-2.861-.212-.338C4.12 15.087 3.6 13.593 3.6 12c0-4.632 3.768-8.4 8.4-8.4 4.633 0 8.4 3.768 8.4 8.4 0 4.633-3.767 8.4-8.4 8.4z"/>
+                </svg>
+                <span>WhatsApp</span>
+              </button>
             </div>
           </div>
 
@@ -2540,6 +2581,25 @@ export default function PharmacyLabelsModal({
               >
                 {copiedShareLink ? <Check size={14} color="#137333" /> : <Share2 size={14} />}
                 <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
+              </button>
+
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={handleShareWhatsApp}
+                style={{
+                  color: '#15803d',
+                  background: '#f0fdf4',
+                  borderColor: '#bbf7d0',
+                  fontWeight: 600
+                }}
+                title={isEs ? 'Compartir por WhatsApp' : 'Share via WhatsApp'}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#25d366" style={{ flexShrink: 0 }}>
+                  <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.07-.945.07-.63 0-1.472-.258-2.607-1.077-1.631-1.178-2.693-2.92-2.775-3.033-.082-.113-.664-.882-.664-1.684 0-.802.422-1.196.572-1.356.15-.16.328-.201.437-.201.109 0 .219.001.314.006.101.005.235-.038.368.281.137.33.468 1.144.509 1.228.041.084.068.183.013.295-.054.112-.082.182-.163.279-.082.097-.172.217-.246.291-.082.082-.168.172-.072.337.096.165.426.703.914 1.138.629.56 1.159.734 1.324.816.165.082.261.069.358-.041.096-.11.413-.48.523-.645.11-.165.22-.138.371-.083.151.055.959.452 1.124.535.165.083.275.124.316.193.041.069.041.4-.103.805z"/>
+                  <path d="M12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.662 1.435 5.178L2 22l4.958-1.402C8.423 21.492 10.154 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.628 0-3.141-.453-4.437-1.24l-.318-.194-2.937.83.843-2.861-.212-.338C4.12 15.087 3.6 13.593 3.6 12c0-4.632 3.768-8.4 8.4-8.4 4.633 0 8.4 3.768 8.4 8.4 0 4.633-3.767 8.4-8.4 8.4z"/>
+                </svg>
+                <span>WhatsApp</span>
               </button>
 
               {currentItem.targetRxUrl && (
