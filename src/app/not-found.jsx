@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Search, Compass, BookOpen, Home, ArrowLeft } from 'lucide-react';
+import { Search, Compass, BookOpen, ArrowLeft, ShieldAlert } from 'lucide-react';
 
 export const metadata = {
   title: 'Page Not Found | Atlas Health Clinical',
@@ -10,17 +10,50 @@ export const metadata = {
 export default function NotFound() {
   return (
     <div style={{
-      minHeight: '80vh',
+      minHeight: '100vh',
+      minHeight: '100dvh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '3rem 1.5rem',
+      padding: '2rem 1.5rem',
       backgroundColor: '#f8fafc',
       color: '#0f172a',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      position: 'relative',
+      zIndex: 99999
     }}>
+      {/* 
+        SECURITY ENFORCEMENT:
+        When a route is not found, completely hide any header, navbar, admin bar, 
+        or impersonation banner to prevent public visitors from discovering or 
+        clicking internal B2B / Admin portal links.
+      */}
+      <style>{`
+        header, 
+        .site-header, 
+        .header-disclaimer-bar, 
+        .impersonation-banner, 
+        [class*="site-header"], 
+        #site-header, 
+        .portal-header, 
+        [data-portal-header], 
+        .admin-topbar, 
+        .admin-view-bar,
+        .rp-desktop-only, 
+        nav.mobile-tab-bar, 
+        .bottom-tab-bar,
+        footer {
+          display: none !important;
+        }
+        body {
+          padding-top: 0 !important;
+          margin-top: 0 !important;
+          background-color: #f8fafc !important;
+        }
+      `}</style>
+
       <div style={{
-        maxWidth: '580px',
+        maxWidth: '560px',
         width: '100%',
         backgroundColor: '#ffffff',
         borderRadius: '16px',
@@ -59,7 +92,7 @@ export default function NotFound() {
         </h1>
 
         <p style={{
-          fontSize: '0.95rem',
+          fontSize: '0.92rem',
           color: '#64748b',
           lineHeight: '1.6',
           margin: '0 0 2rem'
@@ -67,116 +100,33 @@ export default function NotFound() {
           The product, analytical batch, or clinical protocol you are looking for is not available at this link. It may have been updated, reassigned, or is currently under technical review.
         </p>
 
-        {/* Quick Search */}
-        <form 
-          action="/catalog" 
-          method="GET"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            backgroundColor: '#f1f5f9',
-            borderRadius: '10px',
-            padding: '0.35rem 0.5rem 0.35rem 0.85rem',
-            border: '1px solid #cbd5e1',
-            marginBottom: '2rem'
-          }}
-        >
-          <Search size={18} color="#64748b" style={{ flexShrink: 0, marginRight: '0.5rem' }} />
-          <input 
-            type="text" 
-            name="q" 
-            placeholder="Search by peptide, active ingredient, or protocol..." 
-            style={{
-              flex: 1,
-              border: 'none',
-              background: 'transparent',
-              fontSize: '0.9rem',
-              color: '#0f172a',
-              outline: 'none'
-            }}
-          />
-          <button 
-            type="submit"
-            style={{
-              backgroundColor: '#003666',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '0.5rem 0.9rem',
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            Search
-          </button>
-        </form>
-
-        {/* Navigation Action Links */}
+        {/* Action Link: Return Home */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          display: 'flex',
+          flexDirection: 'column',
           gap: '0.75rem',
-          marginBottom: '1.5rem'
+          marginBottom: '1rem'
         }}>
-          <Link
-            href="/catalog"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem 1rem',
-              backgroundColor: '#003666',
-              color: '#ffffff',
-              borderRadius: '10px',
-              textDecoration: 'none',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              transition: 'background-color 0.2s'
-            }}
-          >
-            <Compass size={16} />
-            Catalog
-          </Link>
-          <Link
-            href="/protocols"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem 1rem',
-              backgroundColor: '#f8fafc',
-              color: '#0f172a',
-              border: '1px solid #cbd5e1',
-              borderRadius: '10px',
-              textDecoration: 'none',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              transition: 'background-color 0.2s'
-            }}
-          >
-            <BookOpen size={16} />
-            Protocols
-          </Link>
-        </div>
-
-        <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem' }}>
           <Link
             href="/"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.35rem',
-              color: '#64748b',
-              fontSize: '0.8125rem',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              padding: '0.8rem 1.5rem',
+              backgroundColor: '#003666',
+              color: '#ffffff',
+              borderRadius: '10px',
               textDecoration: 'none',
-              fontWeight: 500
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              transition: 'background-color 0.2s',
+              boxShadow: '0 1px 3px rgba(0,54,102,0.2)'
             }}
           >
-            <ArrowLeft size={14} />
-            Return to Home
+            <ArrowLeft size={16} />
+            Return to Homepage
           </Link>
         </div>
       </div>
