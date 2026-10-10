@@ -28,6 +28,8 @@ import {
   ChevronRight,
   ChevronLeft,
   Download,
+  ExternalLink,
+  X,
   Sparkle
 } from '@/lib/icons';
 import ImageModal from '@/snippets/ImageModal';
@@ -58,6 +60,7 @@ export default function EternaGenomicsDetail({
   
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
+  const [isB2BPortalModalOpen, setIsB2BPortalModalOpen] = useState(false);
   const [quantity] = useState(1);
   const [copiedBatch, setCopiedBatch] = useState(false);
 
@@ -155,6 +158,7 @@ export default function EternaGenomicsDetail({
   // Nav tabs
   const tabs = [
     { id: 'patient-tracking', label: isEs ? 'App de Seguimiento del Paciente' : 'Patient Wellness App & Tracking', icon: TrendingUp },
+    { id: 'sample-report', label: isEs ? 'Informe Clínico PDF (34 Páginas)' : 'Sample Clinical Report (34-Page PDF)', icon: FileText },
     { id: 'biological-age', label: isEs ? 'Edad Biológica & Algoritmo' : 'Biological Age & Epigenetic Clocks', icon: Clock },
     { id: 'five-pillars', label: isEs ? '5 Pilares Genómicos (+700K SNPs)' : '5 Genomic Pillars (+700K SNPs)', icon: Dna },
     { id: 'wearables-sync', label: isEs ? 'Integración Wearables' : 'Wearables Telemetry Integration', icon: Smartphone },
@@ -168,7 +172,7 @@ export default function EternaGenomicsDetail({
     const handleHashSync = () => {
       if (typeof window !== 'undefined' && window.location.hash) {
         const hashId = window.location.hash.replace('#', '');
-        const validIds = ['patient-tracking', 'biological-age', 'five-pillars', 'wearables-sync', 'saliva-protocol', 'traceability', 'companion-protocols'];
+        const validIds = ['patient-tracking', 'sample-report', 'biological-age', 'five-pillars', 'wearables-sync', 'saliva-protocol', 'traceability', 'companion-protocols'];
         if (validIds.includes(hashId)) {
           setActiveTab(hashId);
         }
@@ -864,6 +868,186 @@ export default function EternaGenomicsDetail({
               </div>
             )}
 
+            {/* TAB: SAMPLE CLINICAL REPORT (34 PAGES BREAKDOWN & DIRECT DOWNLOAD) */}
+            {activeTab === 'sample-report' && (
+              <div className="eterna-section-card">
+                <div className="eterna-section-header">
+                  <div className="eterna-section-title-wrap">
+                    <div className="eterna-section-icon">
+                      <FileText size={22} />
+                    </div>
+                    <div>
+                      <h2 className="eterna-section-title">
+                        {isEs ? 'Informe Genómico Oficial ETERNA® (Muestra de 34 Páginas)' : 'Official ETERNA® ProGen 34-Page Clinical Report'}
+                      </h2>
+                      <p className="eterna-section-subtitle">
+                        {isEs
+                          ? 'Estructura analítica completa entregada al médico y paciente: radar de 5 dominios, cribado de 10 sistemas orgánicos, farmacogenética y polimorfismos maestros de longevidad.'
+                          : 'Complete diagnostic dossier delivered to clinicians and patients: 5-domain executive radar, 10-system pathology screening, pharmacogenetics, and master longevity polymorphisms.'}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <a
+                      href="/documents/ETERNA_Genetic_Risk_Analysis_Sample_Report.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="eterna-badge-brand"
+                      style={{ textDecoration: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                    >
+                      <Download size={13} />
+                      <span>{isEs ? 'Descargar PDF (7.7 MB)' : 'Download PDF (7.7 MB)'}</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => setIsB2BPortalModalOpen(true)}
+                      className="eterna-badge-saliva"
+                      style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgba(20, 184, 166, 0.15)', borderColor: 'rgba(20, 184, 166, 0.4)', color: '#2dd4bf' }}
+                    >
+                      <ExternalLink size={13} />
+                      <span>{isEs ? 'Demo Portal B2B' : 'Launch B2B Portal Demo'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 5-Domain Radar Score Breakdown */}
+                <div className="eterna-report-radar-grid">
+                  <div className="eterna-report-radar-card">
+                    <div className="eterna-radar-score" style={{ color: '#38bdf8' }}>54/100</div>
+                    <div className="eterna-radar-name">Sports & Performance</div>
+                    <div className="eterna-radar-tag">Under Review</div>
+                  </div>
+                  <div className="eterna-report-radar-card">
+                    <div className="eterna-radar-score" style={{ color: '#f59e0b' }}>46/100</div>
+                    <div className="eterna-radar-name">Longevity & Aging</div>
+                    <div className="eterna-radar-tag">Under Review</div>
+                  </div>
+                  <div className="eterna-report-radar-card">
+                    <div className="eterna-radar-score" style={{ color: '#a855f7' }}>47/100</div>
+                    <div className="eterna-radar-name">Nutrigenomics & Diet</div>
+                    <div className="eterna-radar-tag">Under Review</div>
+                  </div>
+                  <div className="eterna-report-radar-card">
+                    <div className="eterna-radar-score" style={{ color: '#10b981' }}>55/100</div>
+                    <div className="eterna-radar-name">Prevention & Pathology</div>
+                    <div className="eterna-radar-tag">Adequate Balance</div>
+                  </div>
+                  <div className="eterna-report-radar-card">
+                    <div className="eterna-radar-score" style={{ color: '#ec4899' }}>45/100</div>
+                    <div className="eterna-radar-name">Social & Neurogenetics</div>
+                    <div className="eterna-radar-tag">Under Review</div>
+                  </div>
+                </div>
+
+                {/* Detailed Sections Grid of the 34-page report */}
+                <div className="eterna-report-sections-list">
+                  {/* Section 1 */}
+                  <div className="eterna-report-section-box">
+                    <div className="eterna-report-section-header">
+                      <div className="eterna-report-section-badge">PAGES 5–12</div>
+                      <h4>1. Systemic Pathology Risk Screening (10 Biological Systems)</h4>
+                    </div>
+                    <p>
+                      Longitudinal predisposition across 10 vital axes: <strong>Musculoskeletal</strong> (Osteoporosis 40.9%, Inguinal hernia 40.8%), <strong>Excretory</strong> (Chronic renal disease 45%), <strong>Integumentary</strong> (Androgenetic alopecia 99%, Melanoma), <strong>Nervous</strong> (Restless legs, Depression), <strong>Immune</strong> (Hodgkin 99%, Sjögren 61.6%), <strong>Endocrine</strong> (Metabolic syndrome 54%, T2D), <strong>Respiratory</strong> (Sleep apnea, COPD), <strong>Digestive</strong> (Ulcerative colitis, NAFLD), <strong>Reproductive</strong>, and <strong>Circulatory</strong> (Hypertension 15.8%, Myocardial infarction 21.7%, Venous thrombosis 40.9%).
+                    </p>
+                  </div>
+
+                  {/* Section 2 */}
+                  <div className="eterna-report-section-box">
+                    <div className="eterna-report-section-header">
+                      <div className="eterna-report-section-badge">PAGES 13–15</div>
+                      <h4>2. Precision Pharmacogenetics (Drug Response & Toxicity)</h4>
+                    </div>
+                    <p>
+                      Tailors medication efficacy and flags adverse metabolic risks: <strong>Analgesics & NSAIDs (22/100 Priority)</strong> with 100% NSAID/Opioid sensitivity, <strong>Anti-Allergics (100/100 Excellent)</strong>, <strong>Anti-Asthmatics (Salbutamol response)</strong>, <strong>Antibiotics (Amoxicillin 100/100)</strong>, and <strong>Cardiovascular Statins (Atorvastatin therapy 99%)</strong>.
+                    </p>
+                  </div>
+
+                  {/* Section 3 */}
+                  <div className="eterna-report-section-box">
+                    <div className="eterna-report-section-header">
+                      <div className="eterna-report-section-badge">PAGES 16–19</div>
+                      <h4>3. Nutrigenomics, Intolerances & Micronutrient Transport</h4>
+                    </div>
+                    <p>
+                      Analyzes food sensitivities: <strong>Histamine intolerance (99.0%)</strong>, <strong>Egg intolerance (99.0%)</strong>, and <strong>Celiac disease (-83.5%)</strong>. Examines micronutrient processing including Folate (MTHFR cycle), Beta-Carotene to Vitamin A conversion (BCO1 deficit), Vitamin D/E/K, Iron transport (99%), and Visceral Adipose Tissue propensity (54.6%).
+                    </p>
+                  </div>
+
+                  {/* Section 4 */}
+                  <div className="eterna-report-section-box">
+                    <div className="eterna-report-section-header">
+                      <div className="eterna-report-section-badge">PAGES 20–23</div>
+                      <h4>4. Sports Biomechanics, Injury Susceptibility & Recovery</h4>
+                    </div>
+                    <p>
+                      Quantifies cardiorespiratory efficiency (VO2 max response), muscle fiber dynamics (ACTN3 fast-twitch vs endurance), tendon vulnerability (Achilles & Tendinitis 99.0%), and post-exercise recovery kinetics (Creatine Kinase 100%, sleep duration recovery).
+                    </p>
+                  </div>
+
+                  {/* Section 5 */}
+                  <div className="eterna-report-section-box">
+                    <div className="eterna-report-section-header">
+                      <div className="eterna-report-section-badge">PAGES 24–31</div>
+                      <h4>5. Master Longevity Polymorphisms & Epigenetic Clocks</h4>
+                    </div>
+                    <p>
+                      Specific genotyping for key human longevity genes: <strong>ACE (ID)</strong> blood pressure & vascular tone, <strong>FOXO3 (GT)</strong> autophagy & cellular resilience, <strong>APOE</strong> neuronal lipid clearance, <strong>COL1A1 / COL5A1 (-/CT)</strong> fibrillar collagen synthesis, <strong>CETP (B1/B1)</strong> HDL cholesterol remodeling, <strong>CYP1A2 (AA)</strong> rapid caffeine clearance, and <strong>BRCA1/2 (86/100)</strong> genomic stability.
+                    </p>
+                  </div>
+
+                  {/* Section 6 */}
+                  <div className="eterna-report-section-box">
+                    <div className="eterna-report-section-header">
+                      <div className="eterna-report-section-badge">PAGES 32–34</div>
+                      <h4>6. Social Neurogenetics & Medical Validation Signature</h4>
+                    </div>
+                    <p>
+                      Evaluates neurochemical and behavioral traits (dopamine/serotonin stress resilience, circadian stability). Concludes with official medical validation signed by <strong>Dr. Alberto Melón Fernández (College of Physicians #333706994)</strong> and continuous real-time monitoring through the ETERNA app.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Embedded PDF Preview / Download Banner */}
+                <div className="eterna-report-download-banner">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ width: '44px', height: '44px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f87171' }}>
+                      <FileText size={24} />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#ffffff' }}>
+                        ETERNA_Genetic_Risk_Analysis_Sample_Report.pdf
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                        Official 34-Page Diagnostic Dossier · 7.7 MB · CE-IVD Marked & Eurofins ISO 15189
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <a
+                      href="/documents/ETERNA_Genetic_Risk_Analysis_Sample_Report.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="eterna-btn-primary"
+                      style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Eye size={15} />
+                      <span>{isEs ? 'Ver Informe en el Navegador' : 'View Full PDF in Browser'}</span>
+                    </a>
+                    <a
+                      href="/documents/ETERNA_Genetic_Risk_Analysis_Sample_Report.pdf"
+                      download="ETERNA_Genetic_Risk_Analysis_Sample_Report.pdf"
+                      className="eterna-btn-secondary"
+                      style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Download size={15} />
+                      <span>{isEs ? 'Descargar Archivo' : 'Download File'}</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* TAB 1: BIOLOGICAL AGE & EPIGENETIC CLOCKS */}
             {activeTab === 'biological-age' && (
               <div className="eterna-section-card">
@@ -1402,17 +1586,24 @@ export default function EternaGenomicsDetail({
                   <HelpCircle size={15} />
                   <span>{isEs ? 'Consulta para Médicos' : 'Physician Inquiry'}</span>
                 </button>
+                <a
+                  href="/documents/ETERNA_Genetic_Risk_Analysis_Sample_Report.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="eterna-btn-secondary full-width"
+                  style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', borderColor: 'rgba(45, 212, 191, 0.4)', color: '#2dd4bf', background: 'rgba(45, 212, 191, 0.05)' }}
+                >
+                  <Download size={14} />
+                  <span>{isEs ? 'Ver Informe Clínico (PDF · 34 Págs)' : 'Sample Clinical Report (PDF · 34 Pgs)'}</span>
+                </a>
                 <button
                   type="button"
                   className="eterna-btn-secondary full-width"
-                  style={{ borderColor: 'rgba(45, 212, 191, 0.4)', color: '#2dd4bf', background: 'rgba(45, 212, 191, 0.05)' }}
-                  onClick={() => {
-                    toast.success(isEs ? 'Abriendo solicitud de informe clínico de muestra...' : 'Opening sample clinical report request...');
-                    setIsInquiryDrawerOpen(true);
-                  }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', borderColor: 'rgba(234, 179, 8, 0.35)', color: '#facc15', background: 'rgba(234, 179, 8, 0.05)' }}
+                  onClick={() => setIsB2BPortalModalOpen(true)}
                 >
-                  <Download size={14} />
-                  <span>{isEs ? 'Muestra de Informe Clínico (PDF)' : 'Sample Clinical Report (PDF)'}</span>
+                  <ExternalLink size={14} />
+                  <span>{isEs ? 'Demo Portal B2B Interactivo' : 'Live B2B Clinic Portal Demo'}</span>
                 </button>
               </div>
 
@@ -1611,6 +1802,49 @@ export default function EternaGenomicsDetail({
           }}
           lang={lang}
         />
+      )}
+
+      {/* ── Live Eterna B2B Portal Modal ── */}
+      {isB2BPortalModalOpen && (
+        <div className="eterna-b2b-modal-overlay" onClick={() => setIsB2BPortalModalOpen(false)}>
+          <div className="eterna-b2b-modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="eterna-b2b-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2dd4bf' }} />
+                <strong style={{ color: '#ffffff', fontSize: '0.9rem' }}>
+                  {isEs ? 'Eterna · Portal de Salud Preventiva (Demo B2B)' : 'Eterna · Preventive Health Clinic Portal (Live B2B Demo)'}
+                </strong>
+                <span style={{ fontSize: '0.72rem', background: 'rgba(45, 212, 191, 0.15)', color: '#2dd4bf', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                  INTERACTIVE B2B DEMO
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <a
+                  href="/eterna/eterna-b2b-portal.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="eterna-btn-secondary"
+                  style={{ padding: '4px 10px', fontSize: '0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                >
+                  <ExternalLink size={12} />
+                  <span>{isEs ? 'Abrir en pestaña completa' : 'Open in New Tab'}</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setIsB2BPortalModalOpen(false)}
+                  style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            <iframe
+              src="/eterna/eterna-b2b-portal.html"
+              title="Eterna B2B Preventive Clinic Portal Demo"
+              className="eterna-b2b-modal-iframe"
+            />
+          </div>
+        </div>
       )}
     </div>
   );

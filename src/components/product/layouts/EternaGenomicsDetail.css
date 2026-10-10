@@ -1644,3 +1644,152 @@
   border-radius: 0 6px 6px 0;
 }
 
+/* ── 34-Page Sample Clinical Report Module ── */
+.eterna-report-radar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.75rem;
+}
+
+.eterna-report-radar-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1rem 0.75rem;
+  text-align: center;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.eterna-report-radar-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+.eterna-radar-score {
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+.eterna-radar-name {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 0.25rem;
+}
+
+.eterna-radar-tag {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.eterna-report-sections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.eterna-report-section-box {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  border-radius: 8px;
+  padding: 1.1rem 1.25rem;
+}
+
+.eterna-report-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.eterna-report-section-badge {
+  background: rgba(45, 212, 191, 0.15);
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  color: #2dd4bf;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.eterna-report-section-header h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.eterna-report-section-box p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #94a3b8;
+}
+
+.eterna-report-section-box strong {
+  color: #e2e8f0;
+}
+
+.eterna-report-download-banner {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(20, 30, 48, 0.95) 100%);
+  border: 1px solid rgba(45, 212, 191, 0.3);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* ── Live B2B Portal Modal / Iframe Viewer ── */
+.eterna-b2b-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+}
+
+.eterna-b2b-modal-container {
+  width: 100%;
+  max-width: 1240px;
+  height: 90vh;
+  background: #0d0e11;
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+.eterna-b2b-modal-header {
+  padding: 0.75rem 1.25rem;
+  background: #11141c;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.eterna-b2b-modal-iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #0d0e11;
+}
+
+
