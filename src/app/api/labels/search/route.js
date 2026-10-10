@@ -21,15 +21,30 @@ export async function GET(request) {
     const results = [];
     const seenCodes = new Set();
 
+    // Helper to format/extract date cleanly
+    const extractDate = (raw) => {
+      if (!raw) return null;
+      if (typeof raw === 'object' && raw.seconds) {
+        try {
+          const d = new Date(raw.seconds * 1000);
+          return d.toISOString().slice(0, 10);
+        } catch {
+          return null;
+        }
+      }
+      if (typeof raw === 'string') return raw.trim();
+      return null;
+    };
+
     // ── 1. If query is empty, return popular / recent prescriptions ──
     if (!query) {
       // Return top clinical cases from registry
       const topCases = [
-        { code: '51812', name: 'Abdulla Sultan Mohamed Ahmed Alotaiba', title: 'Metabolic & Longevity Protocol (Parts 1 & 2)' },
-        { code: '51857', name: 'Amna Sultan Mohamed Ahmed Alotaiba', title: 'Metabolic & Lipid Optimization (Parts 1 & 2)' },
-        { code: '50957', name: 'Alan Maclean Rutledge', title: 'Proteolytic & Mitochondrial Anti-Inflammatory' },
-        { code: '51861', name: 'Basma Haitham K Bouzo', title: 'Topical Scalp & Metabolic Restoration' },
-        { code: '51811', name: 'Sarah Al Nuaimi', title: 'Hormonal & Transdermal Longevity' },
+        { code: '51812', name: 'Abdulla Sultan Mohamed Ahmed Alotaiba', title: 'Metabolic & Longevity Protocol (Parts 1 & 2)', date: '04-10-2026' },
+        { code: '51857', name: 'Amna Sultan Mohamed Ahmed Alotaiba', title: 'Metabolic & Lipid Optimization (Parts 1 & 2)', date: '04-10-2026' },
+        { code: '50957', name: 'Alan Maclean Rutledge', title: 'Proteolytic & Mitochondrial Anti-Inflammatory', date: '28-09-2026' },
+        { code: '51861', name: 'Basma Haitham K Bouzo', title: 'Topical Scalp & Metabolic Restoration', date: '05-10-2026' },
+        { code: '51811', name: 'Sarah Al Nuaimi', title: 'Hormonal & Transdermal Longevity', date: '04-10-2026' },
       ];
 
       for (const item of topCases) {
@@ -40,6 +55,7 @@ export async function GET(request) {
           fileNumber: item.code,
           patientName: item.name,
           title: item.title,
+          date: item.date,
           source: 'featured'
         });
       }
@@ -71,6 +87,7 @@ export async function GET(request) {
           doctorName: item.doctorName,
           clinicName: item.clinicName,
           title: item.productTitle || item.productName || 'Compounded Pharmaceutical Protocol',
+          date: extractDate(item.prodDate || item.date || item.createdAt),
           source: 'registry'
         });
       }
@@ -93,6 +110,7 @@ export async function GET(request) {
             doctorName: hit.doctorName || hit.treatingDoctor?.name || 'Treating Physician',
             clinicName: hit.clinicName || hit.clinic || '',
             title: hit.treatmentTitle || hit.title || hit.formulaName || 'Compounded Prescription',
+            date: extractDate(hit.prescriptionDate || hit.date || hit.dispensedDate || hit.createdAt || hit.created_at),
             source: 'algolia'
           });
         }
@@ -112,6 +130,7 @@ export async function GET(request) {
             doctorName: hit.treatingDoctor || hit.doctorName || '',
             clinicName: hit.clinic || '',
             title: `Patient Record (${pName})`,
+            date: extractDate(hit.lastPrescriptionDate || hit.date || hit.createdAt || hit.created_at),
             source: 'algolia_patient'
           });
         }
@@ -140,6 +159,7 @@ export async function GET(request) {
               doctorName: d.doctorName || d.treatingDoctor?.name || 'Treating Physician',
               clinicName: d.clinicName || d.clinic || '',
               title: d.treatmentTitle || d.title || 'Compounded Prescription',
+              date: extractDate(d.prescriptionDate || d.date || d.dispensedDate || d.createdAt || d.created_at),
               source: 'firestore'
             });
           }

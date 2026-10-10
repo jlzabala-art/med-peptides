@@ -29,6 +29,42 @@ const FEATURED_PATIENTS = [
   { code: '51811', name: 'Sarah Al Nuaimi', title: 'Hormonal & Transdermal' },
 ];
 
+// LocalStorage key for tracking the last 5 consulted prescriptions (GCP UX Rule #7)
+const RECENT_KEY = 'pls_recent_prescriptions_v1';
+
+function getRecentPrescriptions() {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentPrescription(item) {
+  if (typeof window === 'undefined' || !item?.code) return [];
+  try {
+    const list = getRecentPrescriptions();
+    const filtered = list.filter(p => String(p.code) !== String(item.code));
+    const updated = [
+      {
+        code: String(item.code),
+        patientName: item.patientName || item.name || 'Patient',
+        title: item.title || item.treatmentTitle || 'Compounded Formula',
+        date: item.date || item.prodDate || item.prescriptionDate || null,
+        timestamp: Date.now()
+      },
+      ...filtered
+    ].slice(0, 5); // Keep exactly last 5
+    localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+    return updated;
+  } catch (e) {
+    console.warn('Failed to save recent prescription to localStorage:', e);
+    return [];
+  }
+}
+
 export default function PublicLabelsAppClient({
   initialRx,
   initialLabels = [],
@@ -49,11 +85,12 @@ export default function PublicLabelsAppClient({
   const [lang, setLang] = useState(initialLang || 'en');
   const isEs = lang === 'es';
 
-  // Search state
+  // Search & Recent State
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [recentPrescriptions, setRecentPrescriptions] = useState([]);
   const [isLoadingRx, setIsLoadingRx] = useState(false);
   const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
@@ -64,6 +101,34 @@ export default function PublicLabelsAppClient({
   // Sync title dynamically
   const patientName = currentRx?.patient?.name || currentRx?.patientName || 'Patient';
   const rxCode = currentRx?.fileNumber || currentRx?.code || activeCode;
+
+  // Hydrate recents from localStorage
+  useEffect(() => {
+    setRecentPrescriptions(getRecentPrescriptions());
+  }, []);
+
+  // Save active prescription to recents when loaded
+  useEffect(() => {
+    if (currentRx) {
+      const pName = currentRx?.patient?.name || currentRx?.patientName || 'Patient';
+      const cCode = currentRx?.fileNumber || currentRx?.code || activeCode;
+      const title = currentRx?.treatmentTitle || currentRx?.productTitle || (labels[0]?.productTitle) || 'Compounded Formula';
+      const date = currentRx?.prescriptionDate || currentRx?.date || currentRx?.prodDate || (labels[0]?.prodDate) || null;
+      const updated = saveRecentPrescription({ code: cCode, patientName: pName, title, date });
+      if (updated && updated.length > 0) {
+        setRecentPrescriptions(updated);
+      }
+    }
+  }, [currentRx, activeCode, labels]);
+
+  // Clear recents handler
+  const handleClearRecent = (e) => {
+    e.stopPropagation();
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(RECENT_KEY);
+      setRecentPrescriptions([]);
+    }
+  };
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -100,6 +165,11 @@ export default function PublicLabelsAppClient({
 
   // Perform search query (debounced)
   useEffect(() => {
+    if (!searchQuery.trim()) {
+      setIsSearching(false);
+      return;
+    }
+
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
@@ -135,6 +205,17 @@ export default function PublicLabelsAppClient({
         setActiveCode(code);
         setLabelIndex(0);
 
+        // Update recents
+        const updated = saveRecentPrescription({
+          code,
+          patientName: data.rx.patient?.name || data.rx.patientName || 'Patient',
+          title: data.rx.treatmentTitle || 'Compounded Formula',
+          date: data.rx.prescriptionDate || data.rx.date || null
+        });
+        if (updated && updated.length > 0) {
+          setRecentPrescriptions(updated);
+        }
+
         // Update URL query parameters without full reload
         const newUrl = `/labels?rx=${encodeURIComponent(code)}&phase=1&edit=true&lang=${lang}`;
         window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
@@ -149,6 +230,36 @@ export default function PublicLabelsAppClient({
     }
   };
 
+  // Helper to format result dates cleanly
+  const formatResultDate = (rawDate) => {
+    if (!rawDate) return '';
+    if (typeof rawDate === 'string') {
+      const trimmed = rawDate.trim();
+      const ddmmyyyy = trimmed.match(/^(\d{2})[-/](\d{2})[-/](\d{4})$/);
+      if (ddmmyyyy) {
+        const d = new Date(`${ddmmyyyy[3]}-${ddmmyyyy[2]}-${ddmmyyyy[1]}`);
+        if (!isNaN(d.getTime())) {
+          return d.toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        return trimmed;
+      }
+      const yyyymmdd = trimmed.match(/^(\d{4})[-/](\d{2})[-/](\d{2})$/);
+      if (yyyymmdd) {
+        const d = new Date(`${yyyymmdd[1]}-${yyyymmdd[2]}-${yyyymmdd[3]}`);
+        if (!isNaN(d.getTime())) {
+          return d.toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        return trimmed;
+      }
+      const d = new Date(trimmed);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+      return trimmed;
+    }
+    return '';
+  };
+
   // Build current shareable deep-link
   const getShareUrl = () => {
     if (typeof window === 'undefined') return '';
@@ -157,26 +268,33 @@ export default function PublicLabelsAppClient({
     return `${origin}/labels?rx=${encodeURIComponent(activeCode)}${phaseParam}&edit=true&lang=${lang}`;
   };
 
-  // WhatsApp Share handler
-  const handleShareWhatsApp = () => {
+  // Native Web Share with Clipboard fallback (GCP mobile-friendly)
+  const handleShare = async () => {
     if (typeof window === 'undefined') return;
     const url = getShareUrl();
     const currentLabel = labels[labelIndex] || {};
     const formulaTitle = currentLabel.productTitle || currentLabel.productName || currentRx?.treatmentTitle || 'Compounded Pharmaceutical Formula';
     const partInfo = labels.length > 1 ? ` (Part ${labelIndex + 1}/${labels.length})` : '';
 
-    const text = isEs
-      ? `🏷️ *Pharmapolis Compounding Label Studio*\n👤 *Paciente:* ${patientName}\n📋 *Prescripción:* #${rxCode}\n💊 *Fórmula${partInfo}:* ${formulaTitle}\n📐 *Especificación:* Vector EU GMP (300 DPI)\n🔗 *Ver y Editar Etiqueta:* ${url}`
-      : `🏷️ *Pharmapolis Compounding Label Studio*\n👤 *Patient:* ${patientName}\n📋 *Prescription:* #${rxCode}\n💊 *Formula${partInfo}:* ${formulaTitle}\n📐 *Specification:* Vector EU GMP (300 DPI)\n🔗 *View & Edit Label:* ${url}`;
+    const shareData = {
+      title: `${patientName} • #${rxCode} Compounding Label`,
+      text: isEs
+        ? `🏷️ Pharmapolis Label Studio • Paciente: ${patientName} • Prescripción: #${rxCode} • Fórmula${partInfo}: ${formulaTitle}`
+        : `🏷️ Pharmapolis Label Studio • Patient: ${patientName} • Prescription: #${rxCode} • Formula${partInfo}: ${formulaTitle}`,
+      url: url,
+    };
 
-    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
-  };
+    if (navigator?.share && typeof navigator.canShare === 'function' && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.warn('Web Share API error:', err);
+        }
+      }
+    }
 
-  // Copy share URL to clipboard
-  const handleCopyShareLink = () => {
-    if (typeof window === 'undefined') return;
-    const url = getShareUrl();
     if (navigator?.clipboard) {
       navigator.clipboard.writeText(url);
       setCopiedShareLink(true);
@@ -359,6 +477,17 @@ export default function PublicLabelsAppClient({
           border-radius: 4px;
           flex-shrink: 0;
         }
+        .pls-search-item-date {
+          font-size: 0.70rem;
+          color: #5f6368;
+          font-weight: 500;
+          background: #f1f3f4;
+          padding: 1px 6px;
+          border-radius: 4px;
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+        }
 
         /* Header Actions */
         .pls-actions-wrap {
@@ -366,24 +495,6 @@ export default function PublicLabelsAppClient({
           align-items: center;
           gap: 8px;
           flex-shrink: 0;
-        }
-        .pls-btn-whatsapp {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          background: #25d366;
-          color: #ffffff;
-          border: none;
-          padding: 6px 12px;
-          border-radius: 6px;
-          font-size: 0.78rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.15s;
-          box-shadow: 0 1px 2px rgba(37,211,102,0.3);
-        }
-        .pls-btn-whatsapp:hover {
-          background: #20ba5a;
         }
         .pls-btn-share {
           display: inline-flex;
@@ -429,56 +540,6 @@ export default function PublicLabelsAppClient({
           background: transparent;
           color: #5f6368;
           font-weight: 500;
-        }
-
-        /* Patient selector bar */
-        .pls-patients-bar {
-          background: #ffffff;
-          border-bottom: 1px solid #e8eaed;
-          padding: 6px 16px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          overflow-x: auto;
-          white-space: nowrap;
-          scrollbar-width: none;
-        }
-        .pls-patients-bar::-webkit-scrollbar {
-          display: none;
-        }
-        .pls-patients-label {
-          font-size: 0.72rem;
-          font-weight: 600;
-          color: #5f6368;
-          text-transform: uppercase;
-          letter-spacing: 0.4px;
-          margin-right: 4px;
-          flex-shrink: 0;
-        }
-        .pls-patient-chip {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 4px 10px;
-          border-radius: 16px;
-          font-size: 0.75rem;
-          border: 1px solid #dadce0;
-          background: #ffffff;
-          color: #3c4043;
-          cursor: pointer;
-          transition: all 0.15s;
-          flex-shrink: 0;
-        }
-        .pls-patient-chip:hover {
-          border-color: #1a73e8;
-          background: #f8fafd;
-          color: #1a73e8;
-        }
-        .pls-patient-chip.active {
-          background: #e8f0fe;
-          border-color: #1a73e8;
-          color: #1a73e8;
-          font-weight: 600;
         }
 
         /* Active Patient Context Strip */
@@ -559,31 +620,35 @@ export default function PublicLabelsAppClient({
         @media (max-width: 768px) {
           .pls-header {
             padding: 8px 12px !important;
-            flex-wrap: wrap !important;
-          }
-          .pls-search-container {
-            order: 3 !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            margin-top: 4px !important;
-          }
-          .pls-actions-wrap {
-            order: 2 !important;
-            gap: 6px !important;
+            gap: 8px !important;
           }
           .pls-brand-text {
             display: none !important;
           }
-          .pls-btn-whatsapp span,
-          .pls-btn-share span {
+          .pls-search-container {
+            max-width: 100% !important;
+            min-width: 0 !important;
+            flex: 1 !important;
+          }
+          .pls-search-input {
+            font-size: 16px !important; /* Prevents iOS Safari auto-zoom */
+          }
+          .pls-search-badge {
             display: none !important;
           }
-          .pls-btn-whatsapp,
+          .pls-actions-wrap {
+            gap: 6px !important;
+          }
           .pls-btn-share {
-            padding: 6px 8px !important;
+            padding: 6px 10px !important;
+            font-size: 0.74rem !important;
           }
           .pls-context-strip {
             padding: 8px 12px !important;
+            gap: 8px !important;
+          }
+          .pls-context-patient {
+            gap: 8px !important;
           }
         }
       `}</style>
@@ -630,72 +695,99 @@ export default function PublicLabelsAppClient({
           {searchOpen && (
             <div className="pls-search-dropdown">
               <div style={{ padding: '8px 12px', background: '#f8fafc', borderBottom: '1px solid #e8eaed', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>
-                  {searchQuery ? 'Algolia & Portal Matches' : 'Featured Prescriptions'}
+                <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  {searchQuery 
+                    ? (isEs ? 'Resultados de Algolia y Portal' : 'Algolia & Portal Matches')
+                    : (recentPrescriptions.length > 0 
+                        ? (isEs ? '🕒 Últimos 5 consultados' : '🕒 Recently Consulted (Last 5)')
+                        : (isEs ? 'Prescripciones Destacadas' : 'Featured Prescriptions'))}
                 </span>
-                {isSearching && (
-                  <span style={{ fontSize: '0.68rem', color: '#1a73e8' }}>
-                    Searching...
-                  </span>
+                {searchQuery ? (
+                  isSearching ? (
+                    <span style={{ fontSize: '0.68rem', color: '#1a73e8' }}>Searching...</span>
+                  ) : (
+                    <span style={{ fontSize: '0.68rem', color: '#5f6368' }}>{searchResults.length} {searchResults.length === 1 ? 'match' : 'matches'}</span>
+                  )
+                ) : (
+                  recentPrescriptions.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleClearRecent}
+                      style={{ border: 'none', background: 'transparent', color: '#1a73e8', fontSize: '0.68rem', fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      {isEs ? 'Borrar Historial' : 'Clear History'}
+                    </button>
+                  )
                 )}
               </div>
 
-              {searchResults.length === 0 && !isSearching ? (
-                <div style={{ padding: '16px', textAlign: 'center', fontSize: '0.80rem', color: '#80868b' }}>
-                  No matching records found.
-                </div>
-              ) : (
-                searchResults.map((item) => (
-                  <div
-                    key={`${item.code}-${item.id}`}
-                    className="pls-search-item"
-                    onClick={() => handleSelectPatient(item.code)}
-                  >
-                    <div className="pls-search-item-info">
-                      <div className="pls-search-item-name">
-                        {item.patientName || item.name || 'Patient'}
-                      </div>
-                      <div className="pls-search-item-desc">
-                        #{item.code} • {item.title || 'Compounded Pharmaceutical Protocol'}
-                      </div>
+              {/* Items List */}
+              {(() => {
+                const itemsToRender = searchQuery.trim() 
+                  ? searchResults 
+                  : (recentPrescriptions.length > 0 ? recentPrescriptions : FEATURED_PATIENTS);
+
+                if (itemsToRender.length === 0 && !isSearching) {
+                  return (
+                    <div style={{ padding: '16px', textAlign: 'center', fontSize: '0.80rem', color: '#80868b' }}>
+                      {isEs ? 'No se encontraron registros.' : 'No matching records found.'}
                     </div>
-                    <span className="pls-search-item-badge">
-                      #{item.code}
-                    </span>
-                  </div>
-                ))
-              )}
+                  );
+                }
+
+                return itemsToRender.map((item) => {
+                  const dateStr = formatResultDate(item.date);
+                  const isRecent = !searchQuery.trim() && recentPrescriptions.length > 0;
+                  return (
+                    <div
+                      key={`${item.code}-${item.id || item.timestamp || item.name}`}
+                      className="pls-search-item"
+                      onClick={() => handleSelectPatient(item.code)}
+                    >
+                      <div className="pls-search-item-info">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span className="pls-search-item-name">
+                            {item.patientName || item.name || 'Patient'}
+                          </span>
+                          {dateStr && (
+                            <span className="pls-search-item-date" title={isEs ? 'Fecha de Prescripción' : 'Prescription Date'}>
+                              📅 {dateStr}
+                            </span>
+                          )}
+                          {isRecent && (
+                            <span style={{ fontSize: '0.65rem', color: '#137333', background: '#e6f4ea', padding: '1px 5px', borderRadius: '4px', fontWeight: 600 }}>
+                              {isEs ? 'Reciente' : 'Recent'}
+                            </span>
+                          )}
+                        </div>
+                        <div className="pls-search-item-desc">
+                          #{item.code} • {item.title || item.treatmentTitle || 'Compounded Pharmaceutical Protocol'}
+                        </div>
+                      </div>
+                      <span className="pls-search-item-badge">
+                        #{item.code}
+                      </span>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           )}
         </div>
 
-        {/* Action Buttons: WhatsApp, Share, Language */}
+        {/* Action Buttons: Share, Language */}
         <div className="pls-actions-wrap">
-          {/* WhatsApp 1-Click Share */}
-          <button
-            type="button"
-            className="pls-btn-whatsapp"
-            onClick={handleShareWhatsApp}
-            title={isEs ? 'Compartir etiqueta por WhatsApp' : 'Share label via WhatsApp'}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.07-.945.07-.63 0-1.472-.258-2.607-1.077-1.631-1.178-2.693-2.92-2.775-3.033-.082-.113-.664-.882-.664-1.684 0-.802.422-1.196.572-1.356.15-.16.328-.201.437-.201.109 0 .219.001.314.006.101.005.235-.038.368.281.137.33.468 1.144.509 1.228.041.084.068.183.013.295-.054.112-.082.182-.163.279-.082.097-.172.217-.246.291-.082.082-.168.172-.072.337.096.165.426.703.914 1.138.629.56 1.159.734 1.324.816.165.082.261.069.358-.041.096-.11.413-.48.523-.645.11-.165.22-.138.371-.083.151.055.959.452 1.124.535.165.083.275.124.316.193.041.069.041.4-.103.805z"/>
-              <path d="M12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.662 1.435 5.178L2 22l4.958-1.402C8.423 21.492 10.154 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.628 0-3.141-.453-4.437-1.24l-.318-.194-2.937.83.843-2.861-.212-.338C4.12 15.087 3.6 13.593 3.6 12c0-4.632 3.768-8.4 8.4-8.4 4.633 0 8.4 3.768 8.4 8.4 0 4.633-3.767 8.4-8.4 8.4z"/>
-            </svg>
-            <span>WhatsApp</span>
-          </button>
-
-          {/* Copy Share Link */}
+          {/* Share Button (Web Share API on mobile, Copy link fallback) */}
           <button
             type="button"
             className="pls-btn-share"
-            onClick={handleCopyShareLink}
+            onClick={handleShare}
             style={{
               borderColor: copiedShareLink ? '#ceead6' : '#dadce0',
               background: copiedShareLink ? '#e6f4ea' : '#ffffff',
               color: copiedShareLink ? '#137333' : '#3c4043'
             }}
-            title={isEs ? 'Copiar enlace público del estudio' : 'Copy public studio link'}
+            title={isEs ? 'Compartir enlace público del estudio' : 'Share public studio link'}
           >
             {copiedShareLink ? <Check size={14} color="#137333" /> : <Share2 size={14} />}
             <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
@@ -720,27 +812,6 @@ export default function PublicLabelsAppClient({
           </div>
         </div>
       </header>
-
-      {/* ── 2. Quick-Pick Patient Bar (Flagship Clinical Cases) ── */}
-      <div className="pls-patients-bar">
-        <span className="pls-patients-label">
-          {isEs ? 'Pacientes:' : 'Patients:'}
-        </span>
-        {FEATURED_PATIENTS.map((p) => {
-          const isActive = String(activeCode) === String(p.code);
-          return (
-            <button
-              key={p.code}
-              type="button"
-              className={`pls-patient-chip ${isActive ? 'active' : ''}`}
-              onClick={() => handleSelectPatient(p.code)}
-            >
-              <User size={12} />
-              <span>#{p.code} • {p.name}</span>
-            </button>
-          );
-        })}
-      </div>
 
       {/* ── 3. Active Patient & Formula Context Strip ── */}
       <div className="pls-context-strip">
