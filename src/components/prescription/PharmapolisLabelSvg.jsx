@@ -88,11 +88,11 @@ export default function PharmapolisLabelSvg({
   const footerLineGap = 0; // single-line compact footer, zero vertical waste
 
   // Header & Patient Box coordinates
-  const headerY = isShort ? 24 : 32;
-  const headerTitleSize = isShort ? 44 : 52; // ~9.5-10 pt
-  const headerSubSize = isShort ? 20 : 25;   // ~5.5-6 pt
+  const headerY = isShort ? 24 : 30;
+  const headerTitleSize = isShort ? 44 : 50; // ~9.5-10 pt
+  const headerSubSize = isShort ? 20 : 23;   // ~5.5-6 pt
 
-  const patientBoxY = isShort ? 140 : 166;
+  const patientBoxY = isShort ? 118 : 136;
   const patientBoxHeight = isShort ? 64 : 76;
   const patientBoxBottom = patientBoxY + patientBoxHeight;
   // Extraction of clinical parameters with defensive fallbacks
@@ -321,22 +321,23 @@ export default function PharmapolisLabelSvg({
   // VARIANT 1: BACK LABEL WITH LARGE PROMINENT QR CODE (Reverso con QR)
   // ───────────────────────────────────────────────────────────────────────────
   if (variant === 'backQr') {
-    const colY = patientBoxBottom + (isShort ? 12 : 18);
-    const colHeight = footerLineY - colY - (isShort ? 12 : 18);
+    const colY = patientBoxBottom + (isShort ? 12 : 16);
+    const colHeight = footerLineY - colY - (isShort ? 12 : 16);
     const backQrSize = isShort ? 200 : Math.min(colHeight - 64, 275);
-    const qrStartY = Math.max(isShort ? 12 : 18, Math.round((colHeight - backQrSize - (isShort ? 32 : 44)) / 2));
+    const backQrTotalHeight = backQrSize + (isShort ? 30 : 40);
+    const qrStartY = Math.max(isShort ? 14 : 20, Math.round((colHeight - backQrTotalHeight) / 2));
 
     // ── RIGHT COLUMN LAYOUT: FULL HORIZONTAL SPACE UTILIZATION (826 px usable width) ──
-    const b1Y = isShort ? 14 : 18;
+    const b1Y = isShort ? 14 : 16;
 
     // Block 1: Dispensing Batch & Net Quantity / Size
-    const b1SizeY = isShort ? 20 : 25;
-    const b1BatchY = b1SizeY + (isShort ? 20 : 25);
-    const b1DividerY = b1BatchY + (isShort ? 14 : 16);
+    const b1SizeY = isShort ? 20 : 24;
+    const b1BatchY = b1SizeY + (isShort ? 20 : 24);
+    const b1DividerY = b1BatchY + (isShort ? 12 : 15);
 
     // Block 2: Ingredients & Compounding Base
-    const b2Y = b1Y + b1DividerY + (isShort ? 14 : 18);
-    const bSafetyY = colHeight - (isShort ? 46 : 56);
+    const b2Y = b1Y + b1DividerY + (isShort ? 14 : 16);
+    const bSafetyY = colHeight - (isShort ? 46 : 54);
 
     return (
       <svg
@@ -352,8 +353,7 @@ export default function PharmapolisLabelSvg({
         {/* ── HEADER ── */}
         <g transform={`translate(60, ${headerY})`}>
           <text x="0" y="34" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">PHARMAPOLIS</text>
-          <text x="0" y="60" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#334155">Verification &amp; Digital Monograph Registry</text>
-          <text x="0" y="84" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize - 2} fontWeight="400" fill="#64748b">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
+          <text x="0" y="62" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#475569">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
         </g>
 
         {/* EU GMP CERTIFIED BADGE */}
@@ -434,8 +434,8 @@ export default function PharmapolisLabelSvg({
           {/* Block 2 & Block 3: ACTIVE COMPOUNDED INGREDIENTS & HIGH-PRIORITY CLINICAL POSOLOGY */}
           {(() => {
             const ingCount = activeIngredientsList.length;
-            let ingFontSize = isShort ? 18 : 22;
-            let ingLineGap = isShort ? 24 : 29;
+            let ingFontSize = isShort ? 18 : (ingCount <= 2 ? 23 : 22);
+            let ingLineGap = isShort ? 24 : (ingCount <= 2 ? 30 : 29);
             if (ingCount >= 5) {
               ingFontSize = isShort ? 14 : 16;
               ingLineGap = isShort ? 18 : 22;
@@ -484,12 +484,19 @@ export default function PharmapolisLabelSvg({
             const baseLineGap = isShort ? 16 : 20;
             const b2TotalHeight = baseStartY + (baseLines.length * baseLineGap);
 
-            // Dynamic Posology Box placement
-            const b3Y = b2Y + b2TotalHeight + (isShort ? 12 : 16);
+            // Calculate available vertical space to rebalance and eliminate awkward empty gaps
+            const availableMidSpace = Math.max(80, bSafetyY - (isShort ? 18 : 24) - (b2Y + b2TotalHeight));
             const posologyLines = wrapLines(directions, isShort ? 50 : 60);
-            const posFontSize = isShort ? 15 : 19;
-            const posLineGap = isShort ? 20 : 25;
-            const posBoxHeight = (isShort ? 30 : 38) + (posologyLines.length * posLineGap);
+            const posFontSize = isShort ? 15 : (posologyLines.length <= 2 ? 20 : 19);
+            const posLineGap = isShort ? 20 : 26;
+            const basePosBoxHeight = (isShort ? 34 : 44) + (posologyLines.length * posLineGap);
+            const extraMidSpace = Math.max(0, availableMidSpace - basePosBoxHeight);
+
+            // Reorganize gaps smoothly: give breathing room between B2 and B3, and expand posology box gracefully
+            const gapB2toB3 = (isShort ? 12 : 16) + Math.min(26, Math.round(extraMidSpace * 0.35));
+            const b3Y = b2Y + b2TotalHeight + gapB2toB3;
+            const posBoxHeight = Math.max(basePosBoxHeight, Math.min(basePosBoxHeight + Math.round(extraMidSpace * 0.45), isShort ? 130 : 160));
+            const posTextPadTop = isShort ? 38 : (posBoxHeight > basePosBoxHeight + 10 ? 48 : 44);
 
             return (
               <>
@@ -541,7 +548,7 @@ export default function PharmapolisLabelSvg({
                     <text
                       key={`pos-${pIdx}`}
                       x="18"
-                      y={(isShort ? 38 : 46) + (pIdx * posLineGap)}
+                      y={posTextPadTop + (pIdx * posLineGap)}
                       fontFamily="Arial, Helvetica, sans-serif"
                       fontSize={posFontSize}
                       fontWeight="700"
@@ -606,13 +613,13 @@ export default function PharmapolisLabelSvg({
   const withMicroQr = variant === 'frontWithQr';
 
   // Micro-QR dimensions and coordinates (engineered to NEVER collide with patient box)
-  const microQrY = isShort ? 12 : 16;
+  const microQrY = isShort ? 10 : 12;
   const microQrWidth = isShort ? 136 : 156;
-  const microQrHeight = isShort ? 130 : 144;
+  const microQrHeight = isShort ? 102 : 116;
   const microQrX = 1440 - microQrWidth;
-  const qrInnerSize = isShort ? 98 : 112;
-  const scanRxY = isShort ? 118 : 132;
-  const scanRxSize = isShort ? 12 : 14;
+  const qrInnerSize = isShort ? 78 : 90;
+  const scanRxY = isShort ? 92 : 105;
+  const scanRxSize = isShort ? 11 : 13;
 
   // Text Wrapping with clean boundaries - utilizing wide right horizontal canvas (up to 1380px)
   const maxFormulaChars = isShort ? 54 : 68;
@@ -661,8 +668,7 @@ export default function PharmapolisLabelSvg({
       {/* ── HEADER ── */}
       <g transform={`translate(60, ${headerY})`}>
         <text x="0" y="34" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">PHARMAPOLIS</text>
-        <text x="0" y="60" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="400" fill="#222222">g.k. Hristo Botev-North/Yuzhen</text>
-        <text x="0" y="84" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize - 2} fontWeight="400" fill="#222222">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
+        <text x="0" y="62" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#475569">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
       </g>
 
       {/* MICRO-QR (IF ENABLED): Guaranteed zero overlap with patient box */}

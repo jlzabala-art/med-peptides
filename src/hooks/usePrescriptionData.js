@@ -42,7 +42,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
   const rxId = rx.id || rx.prescriptionNumber || 'RX-PRESCRIPTION';
   const posology = rx.structuredPosology || {};
   const patient = rx.patient || {};
-  const patientName = patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
+  const patientName = rx.pharmacyLabels?.[0]?.patientName || patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
   const patientAlias = rx.patientAlias || patient.alias ? ` (${rx.patientAlias || patient.alias})` : '';
 
   // ── Two-Doctor Clinical Architecture (Strict Segregation) ───────────────────
@@ -58,7 +58,8 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
   const treatingDocObj = (rx.treatingDoctor && typeof rx.treatingDoctor === 'object' && !isInternalProdDoc(rx.treatingDoctor.name)) ? rx.treatingDoctor : {};
   const rawCandidateName = is50957Rutledge
     ? 'Dr. Marina Cordeiro Fernandes'
-    : ((typeof rx.treatingDoctor === 'string' && !isInternalProdDoc(rx.treatingDoctor) ? rx.treatingDoctor : treatingDocObj.name) ||
+    : (rx.pharmacyLabels?.[0]?.doctorName ||
+      (typeof rx.treatingDoctor === 'string' && !isInternalProdDoc(rx.treatingDoctor) ? rx.treatingDoctor : treatingDocObj.name) ||
       docObj.name ||
       (rx.doctorName && !isInternalProdDoc(rx.doctorName) ? rx.doctorName : null) ||
       (rx.prescribingDoctor && !isInternalProdDoc(rx.prescribingDoctor) ? rx.prescribingDoctor : null) ||
@@ -332,6 +333,48 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         }))
       };
     };
+
+    // ⚡ Priority 0: If authoritative pharmacyLabels are saved in Firestore (e.g. from manual label editor)
+    if (Array.isArray(rx.pharmacyLabels) && rx.pharmacyLabels.length > 0) {
+      return rx.pharmacyLabels.map((lbl, idx) => {
+        const rawPartApis = lbl.apis || lbl.items || lbl.activeIngredients || [];
+        const partApis = rawPartApis.map(a => ({
+          ...a,
+          name: a.name || a.drugName || a.productName || a.activeIngredient || 'Active API',
+          dose: a.dose || a.dosage || a.strength || '—',
+          dosage: a.dosage || a.dose || a.strength || '—'
+        }));
+
+        const vehicleData = buildVehicleData({
+          index: lbl.phaseNumber || (idx + 1),
+          totalCount: rx.pharmacyLabels.length,
+          vehicleName: lbl.vehicle || lbl.compoundingVehicle || rx.vehicle || 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.',
+          treatmentTitle: lbl.productTitle || lbl.productName || lbl.title || (isEs ? `Fórmula Fase ${idx + 1}` : `Formula Phase ${idx + 1}`),
+          dosageForm: lbl.format || lbl.dosageForm || (isEs ? 'Cápsulas Orales (Vegetales)' : 'Oral Capsules (Vegetable)'),
+          route: lbl.route || (isEs ? 'Vía Oral' : 'Oral Route'),
+          volume: lbl.volume || lbl.netContent || lbl.size || rx.volume,
+          customPosology: lbl.directions || lbl.posology || lbl.instructions || rx.dosageInstructions,
+          apis: partApis
+        });
+
+        if (lbl.accentColor) vehicleData.accentColor = lbl.accentColor;
+        if (lbl.accentBg) vehicleData.accentBg = lbl.accentBg;
+        if (lbl.borderAccent) vehicleData.borderAccent = lbl.borderAccent;
+        if (lbl.badge) vehicleData.badgeText = lbl.badge;
+        if (lbl.productTitle || lbl.productName || lbl.title) {
+          const fullTitle = lbl.productTitle || lbl.productName || lbl.title;
+          vehicleData.title = fullTitle;
+          vehicleData.shortTitle = fullTitle.split('·')[0].split('(')[0].trim();
+        }
+        if (lbl.directions || lbl.posology || lbl.instructions) {
+          const posVal = lbl.directions || lbl.posology || lbl.instructions;
+          vehicleData.posology.regimen = posVal;
+          vehicleData.posology.timing = posVal;
+        }
+
+        return vehicleData;
+      });
+    }
 
     // If the prescription explicitly defines multi-part sequential phases (e.g., rx.parts with length > 1)
     if (Array.isArray(rx.parts) && rx.parts.length > 1) {

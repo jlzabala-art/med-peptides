@@ -47,7 +47,8 @@ export default function PrescriptionModalsContainer({
   showRxSwitcherModal = false,
   setShowRxSwitcherModal,
   showPatientRxModal = false,
-  setShowPatientRxModal
+  setShowPatientRxModal,
+  onPrescriptionUpdated = null
 }) {
   return (
     <>
@@ -157,6 +158,7 @@ export default function PrescriptionModalsContainer({
         labels={prescriptionLabels}
         initialLabelIndex={selectedLabelIndex}
         isEs={isEs}
+        onPrescriptionUpdated={onPrescriptionUpdated}
       />
 
       {/* Official Clinical & Patient Brochure Live Preview Modal */}

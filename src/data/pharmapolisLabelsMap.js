@@ -1185,6 +1185,62 @@ export function getAuthoritativeClinicalData(rx) {
  */
 export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = null) {
   if (!rx) return [];
+
+  // ⚡ Priority 0: Authoritative saved Firestore pharmacyLabels (from manual label editor)
+  if (Array.isArray(rx.pharmacyLabels) && rx.pharmacyLabels.length > 0) {
+    const auth = getAuthoritativeClinicalData(rx);
+    const formatIsoDate = (d, fallback = '05-10-2026') => {
+      if (!d) return fallback;
+      if (typeof d === 'object' && (d._seconds || d.seconds)) {
+        const s = d._seconds ?? d.seconds;
+        const dt = new Date(s * 1000);
+        return `${String(dt.getDate()).padStart(2, '0')}-${String(dt.getMonth() + 1).padStart(2, '0')}-${dt.getFullYear()}`;
+      }
+      if (typeof d === 'string') {
+        const m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+        const dClean = d.replace(/T.*$/, '');
+        if (dClean.includes('/')) return dClean.replace(/\//g, '-');
+        return dClean;
+      }
+      return fallback;
+    };
+
+    const fallbackUrl = `https://med-peptides.com/rx/${encodeURIComponent(rx.prescriptionNumber || rx.code || rx.id || 'RX')}`;
+
+    return rx.pharmacyLabels.map((lbl, idx) => {
+      const phaseNum = lbl.phaseNumber || (idx + 1);
+      const rawApis = lbl.apis || lbl.items || lbl.activeIngredients || [];
+      const activeIngredientsList = Array.isArray(rawApis) && rawApis.length > 0
+        ? rawApis.map(a => typeof a === 'string' ? a : `${a.name || a.drugName || a.activeIngredient || 'API'} ${a.dose || a.dosage || a.strength || ''}`.trim())
+        : (Array.isArray(lbl.activeIngredientsList) ? lbl.activeIngredientsList : []);
+
+      return {
+        ...lbl,
+        id: lbl.id || `pharm-label-${idx + 1}`,
+        phaseNumber: phaseNum,
+        patientName: (lbl.patientName || rx.patientName || rx.patient?.name || auth.patientName || 'PATIENT RECORD').toUpperCase(),
+        fileNumber: lbl.fileNumber || rx.fileNumber || rx.code || rx.prescriptionNumber || rx.id || '51857',
+        rxCode: lbl.rxCode || rx.code || rx.prescriptionNumber || rx.id,
+        doctorName: lbl.doctorName || auth.doctorName || rx.doctorName || 'Dr. Marina Cordeiro Fernandes',
+        clinicName: lbl.clinicName || auth.clinicName || rx.clinicName || 'NOVA Clinic Day Surgery Center, Dubai',
+        doctorLicense: lbl.doctorLicense || auth.doctorLicense || rx.doctorLicense || 'DHA-91105367',
+        batchCode: lbl.batchCode || rx.batchCode || rx.dispensingBatch || 'PHARM-2026-B948',
+        lote: lbl.lote || rx.lote || '2609-PLV',
+        volume: lbl.volume || lbl.netContent || lbl.size || rx.volume || '100 mL',
+        productTitle: lbl.productTitle || lbl.productName || lbl.title || 'Compounded Pharmaceutical Protocol',
+        vehicle: lbl.vehicle || lbl.compoundingVehicle || rx.vehicle || 'Vegetable capsules. Gluten-free, lactose-free, colorant-free.',
+        directions: lbl.directions || lbl.instructions || rx.directions || rx.dosageInstructions || 'Take / apply as directed by physician.',
+        prodDate: formatIsoDate(lbl.prodDate || lbl.mfgDate || rx.mfgDate || rx.prodDate || rx.createdAt, '05-10-2026'),
+        expDate: formatIsoDate(lbl.expDate || rx.expDate || rx.expiryDate, '04-10-2027'),
+        storage: lbl.storage || rx.storage || 'Store at room temperature (15°C - 25°C)',
+        warnings: lbl.warnings || rx.warnings || 'For external / patient use only. Keep out of reach of children.',
+        activeIngredientsList,
+        targetRxUrl: lbl.targetRxUrl || fallbackUrl
+      };
+    });
+  }
+
   const rxId = String(rx.id || '').trim().toUpperCase();
   const rxNum = String(rx.prescriptionNumber || '').trim().toUpperCase();
   const rxCode = String(rx.code || rx.prescriptionCode || '').trim().toUpperCase();

@@ -75,6 +75,12 @@ import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendat
 import { usePrescriptionData, getPosologyText } from '@/hooks/usePrescriptionData';
 
 export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake: _onBackToIntake = null, initialView = null }) {
+  const [currentRx, setCurrentRx] = useState(rx || {});
+
+  useEffect(() => {
+    if (rx) setCurrentRx(rx);
+  }, [rx]);
+
   const searchParams = useSearchParams();
   const viewParam = initialView || searchParams?.get('view') || searchParams?.get('mode');
   const isPatientView = viewParam === 'patient';
@@ -97,8 +103,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     quotation: true
   });
   const atlasRecs = React.useMemo(() => {
-    return rx?.atlasRecommendations || getPrescriptionAtlasRecommendations(rx);
-  }, [rx]);
+    return currentRx?.atlasRecommendations || getPrescriptionAtlasRecommendations(currentRx);
+  }, [currentRx]);
   const [, setSelectedPhase] = useState('all'); // 'all' | 'formulation-0' | 'formulation-1' | 'formulation-2'
   const [expandedPhases, setExpandedPhases] = useState({});
   const [showLabelsModal, setShowLabelsModal] = useState(false);
@@ -169,14 +175,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     resolvedDosageSummary,
     resolvedPrice,
     timeline
-  } = usePrescriptionData(rx, { lang, isEs, isPatientView, atlasRecs });
+  } = usePrescriptionData(currentRx, { lang, isEs, isPatientView, atlasRecs });
 
   const baseUrl = 'https://med-peptides.com';
   const publicUrl = `${baseUrl}/rx/${rxId}`;
   const patientPublicUrl = `${baseUrl}/rx/${rxId}?view=patient`;
 
   const [currentStatus, setCurrentStatus] = useState(() => {
-    return String(rx.status || rx.state || rx.fagronStatus || rx.orderStatus || 'approved').toLowerCase().trim();
+    return String(currentRx.status || currentRx.state || currentRx.fagronStatus || currentRx.orderStatus || 'approved').toLowerCase().trim();
   });
   const [isSigning, setIsSigning] = useState(false);
 
@@ -245,14 +251,19 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     return { label: s.toUpperCase(), color: '#475569', bg: '#f1f5f9', border: '#cbd5e1' };
   }, [currentStatus]);
 
-  // Real-time Firestore sync: updates status whenever changed in doctor/admin portal
+  // Real-time Firestore sync: updates status & full clinical data whenever changed in doctor/admin portal or label editor
   useEffect(() => {
     if (!rxId || !db) return;
     try {
-      const docRef = doc(db, 'prescriptions', String(rx.id || rxId));
+      const docRef = doc(db, 'prescriptions', String(currentRx.id || rx?.id || rxId));
       const unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
+          setCurrentRx(prev => ({
+            ...prev,
+            ...data,
+            id: docSnap.id
+          }));
           const newStatus = data.status || data.state || data.orderStatus || data.fagronStatus;
           if (newStatus) {
             setCurrentStatus(String(newStatus).toLowerCase().trim());
@@ -265,7 +276,38 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     } catch (err) {
       console.warn('[PublicPrescriptionClient] Status sync listener warning:', err?.message || err);
     }
-  }, [rxId, rx.id]);
+  }, [rxId, rx?.id, currentRx?.id]);
+
+  // Listen to manual label editor saved events for instantaneous local reactivity
+  useEffect(() => {
+    const handlePrescriptionUpdated = (e) => {
+      const { updatedFields, updatedData, item } = e.detail || {};
+      if (!updatedFields && !updatedData && !item) return;
+      setCurrentRx(prev => {
+        const merged = { ...prev };
+        if (updatedFields) Object.assign(merged, updatedFields);
+        if (updatedData) Object.assign(merged, updatedData);
+        if (item) {
+          if (item.patientName) merged.patientName = item.patientName;
+          if (item.productTitle) {
+            merged.title = item.productTitle;
+            merged.productTitle = item.productTitle;
+          }
+          if (item.volume) merged.volume = item.volume;
+          if (item.directions) {
+            merged.directions = item.directions;
+            merged.instructions = item.directions;
+          }
+          if (item.batchCode) merged.batchCode = item.batchCode;
+          if (item.doctorName) merged.doctorName = item.doctorName;
+          if (item.clinicName) merged.clinicName = item.clinicName;
+        }
+        return merged;
+      });
+    };
+    window.addEventListener('prescription-updated', handlePrescriptionUpdated);
+    return () => window.removeEventListener('prescription-updated', handlePrescriptionUpdated);
+  }, []);
 
   // Document Dropdown & Brochure Modal States
   const [showBrochureModal, setShowBrochureModal] = useState(false);
@@ -1976,7 +2018,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
       {/* ── Prescription Modals Container ── */}
       <PrescriptionModalsContainer
-        rx={rx}
+        rx={currentRx}
         rxId={rxId}
         isEs={isEs}
         lang={lang}
@@ -2007,6 +2049,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         setShowRxSwitcherModal={setShowRxSwitcherModal}
         showPatientRxModal={showPatientRxModal}
         setShowPatientRxModal={setShowPatientRxModal}
+        onPrescriptionUpdated={(payload) => {
+          if (payload?.updatedFields) {
+            setCurrentRx(prev => ({ ...prev, ...payload.updatedFields }));
+          }
+        }}
       />
     </div>
   );

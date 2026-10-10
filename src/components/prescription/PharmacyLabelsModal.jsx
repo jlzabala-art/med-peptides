@@ -198,7 +198,8 @@ export default function PharmacyLabelsModal({
   initialLabelIndex = 0,
   isEs = false,
   initialEditMode = false,
-  isStandalone = false
+  isStandalone = false,
+  onPrescriptionUpdated = null
 }) {
   const [selectedProductIdx, setSelectedProductIdx] = useState(initialLabelIndex || 0);
   const [activeVariant, setActiveVariant] = useState('backQr'); // 'front' | 'backQr' | 'frontWithQr'
@@ -424,6 +425,30 @@ export default function PharmacyLabelsModal({
         }
       }
 
+      if (currentItem.productTitle || currentItem.productName || currentItem.title) {
+        const fullTitle = currentItem.productTitle || currentItem.productName || currentItem.title;
+        updatePayload.productTitle = fullTitle;
+        updatePayload.productName = fullTitle;
+        updatePayload.title = fullTitle;
+        updatePayload.medicationName = fullTitle;
+      }
+
+      if (currentItem.vehicle || currentItem.compoundingVehicle) {
+        const vVal = currentItem.vehicle || currentItem.compoundingVehicle;
+        updatePayload.vehicle = vVal;
+        updatePayload.compoundingVehicle = vVal;
+      }
+
+      if (Array.isArray(currentItem.apis) && currentItem.apis.length > 0) {
+        updatePayload.apis = currentItem.apis;
+        updatePayload.items = currentItem.apis;
+        updatePayload.compounds = currentItem.apis;
+      } else if (Array.isArray(currentItem.items) && currentItem.items.length > 0) {
+        updatePayload.apis = currentItem.items;
+        updatePayload.items = currentItem.items;
+        updatePayload.compounds = currentItem.items;
+      }
+
       if (currentItem.batchCode) {
         updatePayload.batchCode = currentItem.batchCode;
         updatePayload.dispensingBatch = currentItem.batchCode;
@@ -453,6 +478,10 @@ export default function PharmacyLabelsModal({
         }
       }
 
+      if (currentItem.storage) {
+        updatePayload.storage = currentItem.storage;
+      }
+
       if (currentItem.warnings) {
         updatePayload.warnings = currentItem.warnings;
       }
@@ -461,9 +490,33 @@ export default function PharmacyLabelsModal({
         updatePayload.formula = currentItem.formula;
       }
 
-      // Preserve full label snapshot in pharmacyLabels array
-      const currentLabelsSnapshot = Array.isArray(existingData?.pharmacyLabels) ? [...existingData.pharmacyLabels] : [];
       const phaseIdx = Math.max(0, (currentItem.phaseNumber || 1) - 1);
+
+      // Also sync multi-part sequential phases in rx.parts if present
+      if (Array.isArray(existingData?.parts)) {
+        const updatedParts = [...existingData.parts];
+        if (updatedParts[phaseIdx]) {
+          updatedParts[phaseIdx] = {
+            ...updatedParts[phaseIdx],
+            title: currentItem.productTitle || updatedParts[phaseIdx].title,
+            volume: currentItem.volume || updatedParts[phaseIdx].volume,
+            directions: currentItem.directions || updatedParts[phaseIdx].directions,
+            posology: currentItem.directions || updatedParts[phaseIdx].posology,
+            vehicle: currentItem.vehicle || updatedParts[phaseIdx].vehicle,
+            apis: currentItem.apis || updatedParts[phaseIdx].apis
+          };
+          updatePayload.parts = updatedParts;
+        }
+      }
+
+      // Preserve full label snapshot across all phases in pharmacyLabels array
+      const allModalLabels = labels.map((lbl, idx) => {
+        const ovr = editedOverrides[idx];
+        return ovr ? { ...lbl, ...ovr } : lbl;
+      });
+      const currentLabelsSnapshot = Array.isArray(existingData?.pharmacyLabels) && existingData.pharmacyLabels.length >= allModalLabels.length
+        ? [...existingData.pharmacyLabels]
+        : [...allModalLabels];
       currentLabelsSnapshot[phaseIdx] = {
         ...(currentLabelsSnapshot[phaseIdx] || {}),
         ...currentItem
@@ -472,14 +525,41 @@ export default function PharmacyLabelsModal({
 
       await updateDoc(targetDocRef, updatePayload);
 
+      // Invalidate server cache immediately
+      try {
+        fetch('/api/prescriptions/invalidate-cache', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: rawId || targetDocRef.id })
+        }).catch(err => console.warn('[PharmacyLabelsModal] Invalidate cache warning:', err));
+      } catch (cacheErr) {
+        console.warn('[PharmacyLabelsModal] Cache invalidation call failed:', cacheErr);
+      }
+
       setFirebaseSaveSuccess(true);
       setTimeout(() => setFirebaseSaveSuccess(false), 3000);
 
       // Dispatch event to inform other active components (e.g. prescription views)
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('prescription-updated', {
-          detail: { id: targetDocRef.id, updatedFields: updatePayload }
+          detail: {
+            id: targetDocRef.id,
+            rxId: rawId,
+            updatedFields: updatePayload,
+            updatedData: updatePayload,
+            item: currentItem
+          }
         }));
+      }
+
+      if (typeof onPrescriptionUpdated === 'function') {
+        onPrescriptionUpdated({
+          id: targetDocRef.id,
+          rxId: rawId,
+          updatedFields: updatePayload,
+          updatedData: updatePayload,
+          item: currentItem
+        });
       }
     } catch (err) {
       console.error('[PharmacyLabelsModal] Error saving to Firebase:', err);
