@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Sparkles, ArrowUpRight, Activity, Pill, FlaskConical, Droplets, ShieldCheck, CheckCircle2 } from '@/lib/icons';
+import { Sparkles, ArrowUpRight, Activity, Pill, FlaskConical, Droplets, ShieldCheck, CheckCircle2, Dna } from '@/lib/icons';
 
 /**
  * AtlasSynergyRecommendationsSection
@@ -11,6 +11,7 @@ import { Sparkles, ArrowUpRight, Activity, Pill, FlaskConical, Droplets, ShieldC
  * - 2. Precision Oral Nutraceutical (UltraPerson by PharmaPolis)
  * - 3. Diagnostic Biomarker Monitoring (Bloodo Diagnostic Suite)
  * - 4. Scalp Barrier & ECM Support (Colway Clinical Care, conditional)
+ * - 5. Precision Genomics & Epigenetics (ETERNA® · Fagron Genomics, always visible)
  * 
  * Styled according to Google Cloud Console design principles:
  * - Full-width stacked horizontal rows (not vertical cards)
@@ -708,6 +709,136 @@ export default function AtlasSynergyRecommendationsSection({
               </div>
             </div>
           )}
+
+          {/* ── ROW 5: PRECISION GENOMICS & EPIGENETICS (ETERNA® · EUROFINS) ── */}
+          {/* Always visible — universal platform recommendation for every prescription */}
+          <div
+            style={{
+              background: '#ffffff',
+              border: '1px solid #e0e0e0',
+              borderLeft: '4px solid #0d9488',
+              borderRadius: '6px',
+              padding: '14px 16px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              gap: '16px',
+              flexWrap: 'wrap',
+              transition: 'border-color 0.15s ease'
+            }}
+          >
+            {/* Left Column: Pillar & Match Badge (~210px) */}
+            <div style={{ minWidth: '190px', maxWidth: '220px', flex: '0 0 auto' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                <span
+                  style={{
+                    fontSize: '0.67rem',
+                    fontWeight: 700,
+                    color: '#0d9488',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    background: '#ccfbf1',
+                    padding: '2px 8px',
+                    borderRadius: '4px'
+                  }}
+                >
+                  Patient Wellness Tracking
+                </span>
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
+                ETERNA DX · Eurofins Lab
+              </div>
+              <div style={{ marginTop: '6px' }}>
+                <span
+                  style={{
+                    fontSize: '0.68rem',
+                    color: '#0d9488',
+                    background: '#f0fdfa',
+                    border: '1px solid #99f6e4',
+                    padding: '2px 7px',
+                    borderRadius: '4px',
+                    fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Dna size={10} />
+                  +700K SNPs · Saliva · Track
+                </span>
+              </div>
+            </div>
+
+            {/* Center Column: Information & Clinical Rationale (flex: 1) */}
+            <div style={{ flex: '1 1 340px', minWidth: '260px' }}>
+              <h4 style={{ margin: '0 0 3px 0', fontSize: '0.94rem', fontWeight: 800, color: '#0f172a' }}>
+                ETERNA® DNA & Epigenetic Longevity Test
+              </h4>
+              <p style={{ margin: '0 0 8px 0', fontSize: '0.73rem', color: '#0d9488', fontWeight: 600 }}>
+                Genomic & epigenetic baseline for ongoing patient wellness monitoring
+              </p>
+
+              <div
+                style={{
+                  fontSize: '0.75rem',
+                  color: '#334155',
+                  lineHeight: 1.48,
+                  background: '#f8fafc',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #edf2f7',
+                  marginBottom: '6px'
+                }}
+              >
+                <strong style={{ color: '#0f172a' }}>Track your patients' wellness with molecular precision. </strong>
+                ETERNA® gives you a genomic and epigenetic baseline for each patient — biological age
+                (Horvath / Hannum clocks), nutrigenomic profile, cardiovascular risk markers, and
+                pharmacogenomic response — so you can personalize peptide protocols, monitor treatment
+                effectiveness over time, and make data-driven adjustments. Repeat testing reveals
+                measurable epigenetic age reversal and validates your clinical interventions.
+              </div>
+
+              <div
+                style={{
+                  fontSize: '0.73rem',
+                  color: '#475569',
+                  background: '#f0fdfa',
+                  border: '1px solid #99f6e4',
+                  padding: '6px 10px',
+                  borderRadius: '6px'
+                }}
+              >
+                <strong style={{ color: '#115e59' }}>Simple 2-minute saliva collection: </strong>
+                Processed by Eurofins (ISO 17025). Downloadable clinical report in 15–20 days. Re-test every 6–12 months to measure patient progress.
+              </div>
+            </div>
+
+            {/* Right Column: GCP Button Action */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flex: '0 0 auto', alignSelf: 'center' }}>
+              <a
+                href="/p/eterna-epigenetic-age-test"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  color: '#0d9488',
+                  background: '#f0fdfa',
+                  border: '1px solid #99f6e4',
+                  padding: '6px 14px',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>Learn More</span>
+                <ArrowUpRight size={13} />
+              </a>
+            </div>
+          </div>
 
         </div>
       </div>
