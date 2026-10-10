@@ -351,7 +351,20 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     const result = [];
     
     for (const rx of rawData) {
-      const groupKey = rx.rxGroupId || rx.sessionId || rx.groupCode || (rx.fagron?.boxId ? `box_${rx.fagron.boxId}` : null);
+      let groupKey = rx.rxGroupId || rx.sessionId || rx.groupCode || (rx.fagron?.boxId ? `box_${rx.fagron.boxId}` : null);
+      
+      // Heuristic auto-grouping: prevent false duplicates for prescriptions with multiple phases/parts (e.g. -A, -B, _1, _2)
+      if (!groupKey) {
+        const rawCode = (rx.prescriptionNumber || rx.code || rx.id || '').trim();
+        const phaseMatch = rawCode.match(/^(RX-[A-Z0-9]+|RX_[A-Z0-9]+|[A-Z0-9]+)[-_]([A-Z]|[0-9]+)$/i);
+        if (phaseMatch) {
+          const pName = (rx.patientName || rx.patient?.name || '').trim().toLowerCase();
+          if (pName) {
+            groupKey = `auto_phase_${pName}_${phaseMatch[1].toUpperCase()}`;
+          }
+        }
+      }
+
       if (groupKey) {
         if (!groups[groupKey]) {
           groups[groupKey] = [];
