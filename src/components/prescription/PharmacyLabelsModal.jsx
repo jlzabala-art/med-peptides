@@ -5,6 +5,7 @@ import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, C
 import { db } from '@/firebase';
 import { doc, updateDoc, getDoc, collection, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import PharmapolisLabelSvg from './PharmapolisLabelSvg';
+import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
 
 function formatApisForEditor(item) {
   if (!item) return '';
@@ -672,7 +673,7 @@ export default function PharmacyLabelsModal({
       const svgUrl = URL.createObjectURL(svgBlob);
 
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         const canvas = document.createElement('canvas');
         canvas.width = widthPx;
         canvas.height = heightPx;
@@ -682,9 +683,12 @@ export default function PharmacyLabelsModal({
         ctx.drawImage(img, 0, 0, widthPx, heightPx);
         URL.revokeObjectURL(svgUrl);
 
-        const pngDataUrl = canvas.toDataURL('image/png');
+        // Embed the selected DPI in the PNG metadata (pHYs) so viewers/printers
+        // read the same resolution that was selected (canvas defaults to 72 DPI).
+        const pngBlob = await canvasToPngBlobWithDpi(canvas, dpi);
+        const pngObjectUrl = URL.createObjectURL(pngBlob);
         const downloadLink = document.createElement('a');
-        downloadLink.href = pngDataUrl;
+        downloadLink.href = pngObjectUrl;
 
         // ── Standardized Clinical File Naming Engine (Supplier + Patient + Rx + Part + Size + Specs) ──
         const rawSupplier = currentItem.pharmacy || currentItem.supplier || 'Pharmapolis';
@@ -718,6 +722,7 @@ export default function PharmacyLabelsModal({
         const nameSegments = [supplierClean, patientClean, rxCodeClean, partTag, sizeTag, `${dimensions.widthMm}x${dimensions.heightMm}mm`, variantClean, `${dpi}DPI`].filter(Boolean);
         downloadLink.download = `${nameSegments.join('_')}.png`;
         downloadLink.click();
+        setTimeout(() => URL.revokeObjectURL(pngObjectUrl), 2000);
         setIsGeneratingPng(false);
       };
       img.onerror = () => {
@@ -1900,7 +1905,7 @@ export default function PharmacyLabelsModal({
                     onChange={(e) => setExportFormat(e.target.value)}
                     className="gcp-toolbar-select"
                   >
-                    <option value="png">{isEs ? 'PNG (Imagen Vectorial HD · 300 DPI)' : 'PNG (Vector HD Graphic · 300 DPI)'}</option>
+                    <option value="png">{isEs ? `PNG (Imagen HD · ${dpi} DPI)` : `PNG (HD Graphic · ${dpi} DPI)`}</option>
                     <option value="pdf">{isEs ? `PDF (Esta Etiqueta · ${dimensions.widthMm}×${dimensions.heightMm}mm)` : `PDF (Current Label · ${dimensions.widthMm}×${dimensions.heightMm}mm)`}</option>
                     {labels.length > 1 && (
                       <>

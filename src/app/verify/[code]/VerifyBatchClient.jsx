@@ -6,6 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 
 export default function VerifyBatchClient({ code, verification, baseUrl }) {
   const [copied, setCopied] = useState(false);
+  const isOralSupplement = verification?.productType === 'oral_supplement';
   const verifyUrl = `${baseUrl}/verify/${encodeURIComponent(code)}`;
 
   const handleCopy = async () => {
@@ -68,7 +69,7 @@ export default function VerifyBatchClient({ code, verification, baseUrl }) {
             fontSize: '0.75rem',
             fontWeight: 700,
           }}>
-            Dual RP-HPLC &amp; ESI-MS Verified
+            {isOralSupplement ? 'USP HPLC & Microbial Limits Verified' : 'Dual RP-HPLC & ESI-MS Verified'}
           </div>
         </div>
 

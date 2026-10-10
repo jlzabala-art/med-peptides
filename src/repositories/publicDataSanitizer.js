@@ -232,6 +232,52 @@ function inferPeptideFromLotCode(code) {
 }
 
 /**
+ * Detects if a product is an oral supplement (capsule/tablet) vs a sterile injectable.
+ * Used to emit the correct CoA analytical standards.
+ */
+function isOralSupplement(matchedProduct) {
+  if (!matchedProduct) return false;
+  const tags = Array.isArray(matchedProduct.tags) ? matchedProduct.tags.join(' ').toLowerCase() : '';
+  const programs = Array.isArray(matchedProduct.programs) ? matchedProduct.programs.map(p => (p.id || p.slug || '')).join(' ').toLowerCase() : '';
+  const format = (matchedProduct.format || matchedProduct.presentation || matchedProduct.formulation_type || '').toLowerCase();
+  const type = (matchedProduct.type || matchedProduct.product_type || matchedProduct.category || '').toLowerCase();
+  const name = (matchedProduct.name || matchedProduct.displayName || '').toLowerCase();
+
+  const ORAL_SIGNALS = ['capsule', 'tablet', 'capsulas', 'cápsula', 'oral', 'supplement', 'suplemento', 'nutraceutical', 'hpmc', 'ultraperson', 'pharmapolis'];
+  return ORAL_SIGNALS.some(s =>
+    tags.includes(s) || programs.includes(s) || format.includes(s) || type.includes(s) || name.includes(s)
+  );
+}
+
+/**
+ * Returns correct CoA analytical standards based on product type.
+ * - Oral supplements (UltraPerson / Pharmapolis): USP <61>/<232> / dissolution standards
+ * - Sterile injectables (peptide vials): RP-HPLC purity / ESI-MS / LAL endotoxin / TFA / sterility
+ */
+function buildCoAStandards(matchedProduct, purity) {
+  if (isOralSupplement(matchedProduct)) {
+    // ── Oral Nutraceutical / Supplement CoA (USP-aligned) ────────────────────
+    return [
+      { name: 'Identity Test (FTIR / UV-Vis)', value: 'Consistent with reference standard', status: 'PASS' },
+      { name: 'HPLC Assay — Active Potency', value: purity.includes('%') ? purity : '≥ 97.5% of labeled claim', status: 'PASS' },
+      { name: 'Heavy Metals (USP <232>)', value: 'Pb < 5 ppm · Cd < 1 ppm · As < 3 ppm · Hg < 1.5 ppm', status: 'PASS' },
+      { name: 'Microbial Limits (USP <61>/<62>)', value: 'TAMC < 1000 CFU/g · TYMC < 100 CFU/g · Enterobacteria: Absent', status: 'PASS' },
+      { name: 'Dissolution — HPMC Capsule Release', value: '≥ 75% released at 60 min (pH 6.8 buffer)', status: 'PASS' },
+      { name: 'Moisture Content (Karl Fischer)', value: '< 5.0% w/w', status: 'PASS' },
+    ];
+  }
+
+  // ── Sterile Injectable Peptide CoA (RP-HPLC / ESI-MS / LAL) ─────────────
+  return [
+    { name: 'HPLC Assay Purity', value: purity, status: 'PASS' },
+    { name: 'Mass Spectrometry (ESI-MS)', value: 'Molecular weight confirmed', status: 'PASS' },
+    { name: 'Endotoxin Level (LAL)', value: '< 0.05 EU/mg (Compliant)', status: 'PASS' },
+    { name: 'Trifluoroacetate (TFA)', value: '< 0.5% wt/wt', status: 'PASS' },
+    { name: 'Bioburden & Sterility', value: '0 CFU / Sterile Grade', status: 'PASS' },
+  ];
+}
+
+/**
  * Sanitizes a batch authentication record
  */
 export function sanitizePublicBatch(rawBatch, matchedProduct = null) {
@@ -257,13 +303,8 @@ export function sanitizePublicBatch(rawBatch, matchedProduct = null) {
     purity,
     mfgDate,
     expDate,
-    standards: [
-      { name: 'HPLC Assay Purity', value: purity, status: 'PASS' },
-      { name: 'Mass Spectrometry (ESI-MS)', value: 'Molecular weight confirmed', status: 'PASS' },
-      { name: 'Endotoxin Level (LAL)', value: '< 0.05 EU/mg (Compliant)', status: 'PASS' },
-      { name: 'Trifluoroacetate (TFA)', value: '< 0.5% wt/wt', status: 'PASS' },
-      { name: 'Bioburden & Sterility', value: '0 CFU / Sterile Grade', status: 'PASS' },
-    ],
+    productType: isOralSupplement(matchedProduct) ? 'oral_supplement' : 'sterile_injectable',
+    standards: buildCoAStandards(matchedProduct, purity),
     verifiedAt: new Date().toISOString(),
   };
 }

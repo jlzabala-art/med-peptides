@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
+import ImportPrescriptionModal from '@/features/prescriptions/components/ImportPrescriptionModal';
 import {
   Search,
   Check,
@@ -17,7 +18,9 @@ import {
   ExternalLink,
   ChevronRight,
   X,
-  Copy
+  Copy,
+  Upload,
+  Stethoscope
 } from '@/lib/icons';
 
 // Flagship featured cases for instant 1-click access
@@ -112,6 +115,7 @@ export default function PublicLabelsAppClient({
   const [isLoadingRx, setIsLoadingRx] = useState(false);
   const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
+  const [showImport, setShowImport] = useState(false);
 
   const searchBoxRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -681,19 +685,130 @@ export default function PublicLabelsAppClient({
           box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
+        /* Import button */
+        .pls-btn-import {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          height: 32px;
+          padding: 0 12px;
+          border-radius: 4px;
+          border: 1px solid #1a73e8;
+          background: #1a73e8;
+          color: #ffffff;
+          font-size: 0.78rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.15s, box-shadow 0.15s;
+          white-space: nowrap;
+        }
+        .pls-btn-import:hover {
+          background: #1765cc;
+          box-shadow: 0 1px 3px rgba(60,64,67,0.3);
+        }
+
+        /* Identity strip: Patient · Prescription · Doctor (single source) */
+        .pls-identity {
+          display: flex;
+          align-items: stretch;
+          gap: 8px;
+          flex-wrap: wrap;
+          min-width: 0;
+        }
+        .pls-id-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          min-height: 40px;
+          padding: 4px 10px;
+          background: #ffffff;
+          border: 1px solid #dadce0;
+          border-radius: 8px;
+          text-decoration: none;
+          color: #202124;
+          cursor: pointer;
+          transition: border-color 0.15s, background 0.15s;
+          min-width: 0;
+          font: inherit;
+          text-align: left;
+        }
+        .pls-id-chip:hover {
+          border-color: #1a73e8;
+          background: #f8fbff;
+        }
+        .pls-id-icon {
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .pls-id-text {
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+          line-height: 1.15;
+        }
+        .pls-id-label {
+          font-size: 0.62rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: #5f6368;
+        }
+        .pls-id-value {
+          font-size: 0.84rem;
+          font-weight: 700;
+          color: #202124;
+          overflow-wrap: anywhere;
+        }
+        .pls-id-value.mono {
+          font-family: monospace;
+          color: #1a73e8;
+        }
+
         /* Mobile Adjustments (Golden Rule #23) */
         @media (max-width: 768px) {
           .pls-header {
             padding: 8px 12px !important;
             gap: 8px !important;
+            flex-wrap: wrap !important;
           }
           .pls-brand-text {
             display: none !important;
           }
+          .pls-actions-wrap {
+            margin-left: auto;
+          }
+          /* Search drops to its own full-width line */
           .pls-search-container {
+            order: 3 !important;
+            flex: 1 1 100% !important;
+            width: 100% !important;
             max-width: 100% !important;
             min-width: 0 !important;
-            flex: 1 !important;
+          }
+          .pls-btn-import .pls-btn-label {
+            display: none;
+          }
+          .pls-btn-import {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            justify-content: center;
+          }
+          .pls-identity {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+          }
+          .pls-id-chip.patient {
+            grid-column: 1 / -1;
+          }
+          .pls-id-chip {
+            min-height: 44px;
           }
           .pls-search-input {
             font-size: 16px !important; /* Prevents iOS Safari auto-zoom */
@@ -840,8 +955,21 @@ export default function PublicLabelsAppClient({
           )}
         </div>
 
-        {/* Action Buttons: Share, Language */}
+        {/* Action Buttons: Import, Share, Language */}
         <div className="pls-actions-wrap">
+          {/* Import Prescription (Account Managers · no Atlas validation) */}
+          <button
+            type="button"
+            id="pls-import-rx-btn"
+            className="pls-btn-import"
+            onClick={() => setShowImport(true)}
+            title={isEs ? 'Importar prescripción (Account Managers · sin validación Atlas)' : 'Import prescription (Account Managers · no Atlas validation)'}
+            aria-label={isEs ? 'Importar prescripción' : 'Import prescription'}
+          >
+            <Upload size={14} />
+            <span className="pls-btn-label">{isEs ? 'Importar Rx' : 'Import Rx'}</span>
+          </button>
+
           {/* Share Button (Web Share API on mobile, Copy link fallback) */}
           <button
             type="button"
@@ -880,40 +1008,69 @@ export default function PublicLabelsAppClient({
 
       {/* ── 3. Active Patient & Formula Context Strip ── */}
       <div className="pls-context-strip">
-        <div className="pls-context-patient">
-          <div className="pls-context-name">
-            {patientName}
-          </div>
-          <div className="pls-context-meta">
-            <span>Prescription</span>
-            <div className="pls-code-pill-wrap">
-              <Link
-                href={`/rx/${encodeURIComponent(cleanRxCode)}`}
-                className="pls-code-pill-link"
-                title={isEs ? `Ir a la prescripción #${cleanRxCode}` : `Go to prescription #${cleanRxCode}`}
-              >
-                <span>#{cleanRxCode}</span>
-                <ExternalLink size={10} style={{ opacity: 0.6 }} />
-              </Link>
-              <button
-                type="button"
-                className="pls-code-pill-copy"
-                onClick={handleCopyCode}
-                title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
-              >
-                {copyCodeSuccess ? <Check size={11} color="#137333" /> : <Copy size={11} />}
-              </button>
-            </div>
-            <span>•</span>
+        <div className="pls-identity">
+          {/* Patient → shows all prescriptions of this patient */}
+          <button
+            type="button"
+            id="pls-id-patient"
+            className="pls-id-chip patient"
+            onClick={() => {
+              setSearchQuery(patientName);
+              setSearchOpen(true);
+              searchInputRef.current?.focus();
+            }}
+            title={isEs ? `Ver todas las prescripciones de ${patientName}` : `View all prescriptions for ${patientName}`}
+          >
+            <span className="pls-id-icon" style={{ background: '#f3e8fd', color: '#8430ce' }}><User size={14} /></span>
+            <span className="pls-id-text">
+              <span className="pls-id-label">{isEs ? 'Paciente' : 'Patient'}</span>
+              <span className="pls-id-value">{patientName}</span>
+            </span>
+            <Search size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
+          </button>
+
+          {/* Prescription → public RX page (+ copy) */}
+          <div className="pls-id-chip" style={{ padding: 0, cursor: 'default' }}>
             <Link
-              href={`/dr/${encodeURIComponent(doctorSlug)}`}
-              className="pls-doctor-link"
-              title={isEs ? `Ir al portal clínico de ${docName}` : `Go to doctor portal of ${docName}`}
+              href={`/rx/${encodeURIComponent(cleanRxCode)}`}
+              id="pls-id-rx"
+              className="pls-id-chip"
+              style={{ border: 'none', background: 'transparent' }}
+              title={isEs ? `Ir a la prescripción #${cleanRxCode}` : `Go to prescription #${cleanRxCode}`}
             >
-              <span>{docName}</span>
-              <ExternalLink size={10} style={{ opacity: 0.6 }} />
+              <span className="pls-id-icon" style={{ background: '#e8f0fe', color: '#1a73e8' }}><FileText size={14} /></span>
+              <span className="pls-id-text">
+                <span className="pls-id-label">{isEs ? 'Prescripción' : 'Prescription'}</span>
+                <span className="pls-id-value mono">#{cleanRxCode}</span>
+              </span>
+              <ExternalLink size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
             </Link>
+            <button
+              type="button"
+              className="pls-code-pill-copy"
+              style={{ alignSelf: 'stretch', minWidth: 32 }}
+              onClick={handleCopyCode}
+              title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
+              aria-label={isEs ? 'Copiar código' : 'Copy code'}
+            >
+              {copyCodeSuccess ? <Check size={12} color="#137333" /> : <Copy size={12} />}
+            </button>
           </div>
+
+          {/* Doctor → public doctor page */}
+          <Link
+            href={`/dr/${encodeURIComponent(doctorSlug)}`}
+            id="pls-id-doctor"
+            className="pls-id-chip"
+            title={isEs ? `Ir al portal clínico de ${docName}` : `Go to doctor portal of ${docName}`}
+          >
+            <span className="pls-id-icon" style={{ background: '#e6f4ea', color: '#137333' }}><Stethoscope size={14} /></span>
+            <span className="pls-id-text">
+              <span className="pls-id-label">{isEs ? 'Médico' : 'Doctor'}</span>
+              <span className="pls-id-value">{docName}</span>
+            </span>
+            <ExternalLink size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
+          </Link>
         </div>
 
         {/* Formula Parts Switcher (Part 1 / Part 2) */}
@@ -967,6 +1124,22 @@ export default function PublicLabelsAppClient({
           />
         )}
       </main>
+
+      {/* Import Prescription — shared engine, server-side persistence without Atlas validation */}
+      <ImportPrescriptionModal
+        isOpen={showImport}
+        onClose={() => setShowImport(false)}
+        title={isEs ? 'Importar Prescripción (Account Manager)' : 'Import Prescription (Account Manager)'}
+        persistEndpoint="/api/labels/import"
+        note={isEs
+          ? 'Modo Account Manager: la prescripción se guarda como borrador sin validación de Atlas y se abre aquí para generar sus etiquetas.'
+          : 'Account Manager mode: the prescription is saved as a draft without Atlas validation and opened here to generate its labels.'}
+        onImported={(created) => {
+          setShowImport(false);
+          const first = Array.isArray(created) ? created[0] : null;
+          if (first?.id || first?.code) handleSelectPatient(first.id || first.code);
+        }}
+      />
     </div>
   );
 }

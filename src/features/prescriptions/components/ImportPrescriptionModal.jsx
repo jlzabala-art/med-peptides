@@ -9,12 +9,23 @@ import { resolveIngredients } from '../../../services/apiIngredientMatcher';
 import { syncPrescriptionToAlgolia, syncPatientToAlgolia } from '../../../services/algoliaSyncService';
 import AIContextBadge from '../../../components/ui/AIContextBadge';
 
+/**
+ * @param {string}   [persistEndpoint] - When set (e.g. '/api/labels/import'), the built
+ *   prescription docs are POSTed to this server route instead of being written with the
+ *   client Firestore SDK. Used by the public Label Studio (Account Managers) where no
+ *   authenticated Atlas session exists, so Atlas validation is skipped server-side.
+ * @param {Function} [onImported] - Called with an array of `{ id, code, patientName }`
+ *   for each created prescription.
+ */
 export default function ImportPrescriptionModal({ 
   isOpen, 
   onClose, 
   context = {}, 
   title = "Import Prescription",
-  onExtractionComplete
+  onExtractionComplete,
+  persistEndpoint = null,
+  onImported = null,
+  note = null
 }) {
   const [uploading, setUploading] = useState(false);
 
@@ -60,6 +71,8 @@ export default function ImportPrescriptionModal({
         let totalNewPlaceholders = 0;
         let totalMatchedCatalog = 0;
         const sessionId = blocks.length > 1 ? crypto.randomUUID() : null;
+        const pendingDocs = [];
+        const created = [];
 
         for (const block of blocks) {
           /**
@@ -160,7 +173,15 @@ export default function ImportPrescriptionModal({
             },
           };
 
+          if (persistEndpoint) {
+            // Server-side persistence (public Label Studio). Timestamps are set by the server.
+            const { createdAt: _c, updatedAt: _u, ...serializable } = newRx;
+            pendingDocs.push(serializable);
+            continue;
+          }
+
           const docRef = await addDoc(collection(db, 'prescriptions'), newRx);
+          created.push({ id: docRef.id, code: docRef.id, patientName });
           
           // Incremental Algolia sync
           syncPrescriptionToAlgolia({ ...newRx, id: docRef.id }).catch(err => {
@@ -177,6 +198,19 @@ export default function ImportPrescriptionModal({
           }
         }
 
+        if (persistEndpoint && pendingDocs.length > 0) {
+          const saveRes = await fetch(persistEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prescriptions: pendingDocs })
+          });
+          const saveJson = await saveRes.json().catch(() => ({}));
+          if (!saveRes.ok || !saveJson.success) {
+            throw new Error(saveJson.error || 'Failed to save imported prescription');
+          }
+          created.push(...(saveJson.created || []));
+        }
+
         // Final toast summary
         const baseMsg = blocks.length > 1
           ? `${blocks.length} formulaciones importadas (${blocks.map(b => b.treatmentType || 'Form.').join(', ')})`
@@ -189,6 +223,7 @@ export default function ImportPrescriptionModal({
           : '';
 
         toast.success(`${baseMsg}${matchMsg}${placeholderMsg}`, { id: 'upload-toast' });
+        if (onImported) onImported(created);
       }
       
       onClose();
@@ -198,7 +233,7 @@ export default function ImportPrescriptionModal({
     } finally {
       setUploading(false);
     }
-  }, [context, onClose, onExtractionComplete]);
+  }, [context, onClose, onExtractionComplete, persistEndpoint, onImported]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
     onDrop, 
@@ -331,7 +366,7 @@ export default function ImportPrescriptionModal({
           }}>
             <AlertCircle size={18} color="#64748b" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: '1.5' }}>
-              <strong>Note:</strong> Uploaded prescriptions will be immediately analyzed and mapped into the creation flow.
+              <strong>Note:</strong> {note || 'Uploaded prescriptions will be immediately analyzed and mapped into the creation flow.'}
             </div>
           </div>
         </div>
