@@ -10,106 +10,49 @@ import {
   MessageCircle,
   Award,
   Info,
-  Layers,
   Clock,
   CheckCircle2,
-  ArrowUpRight,
+  Building,
   FileText,
-  Users,
-  Smartphone
+  User,
+  Stethoscope
 } from '@/lib/icons';
+import {
+  DOCTOR_TIERS,
+  DOCTOR_CAPABILITIES_MATRIX,
+  resolveDoctorTier
+} from '@/data/doctorMembershipTiers';
 
 export default function DoctorServicesMembershipModal({
   isOpen,
   onClose,
+  doctor = {},
   doctorName = 'Doctor',
   clinicName = 'Medical Practice',
   currentTier = 'basic'
 }) {
   const [activeTabFilter, setActiveTabFilter] = useState('all'); // 'all' | 'highlight'
+  const [showWhiteLabelPreview, setShowWhiteLabelPreview] = useState(false);
 
   if (!isOpen) return null;
 
-  const isPro = currentTier === 'advanced' || currentTier === 'pro';
+  const resolved = resolveDoctorTier(doctor);
+  const isPro = resolved.isPro || currentTier === 'advanced' || currentTier === 'pro';
+
+  const effectiveDoctorName = doctor.name || doctorName || 'Dr. Hanieh Erdmann';
+  const effectiveClinicName = doctor.clinic || clinicName || 'Bedaya Polyclinic L.L.C.';
 
   const handleContactWhatsApp = (subject = 'Atlas Health Services & Pro Tier Inquiry') => {
     const text = encodeURIComponent(
-      `Hello Atlas Health Team, I am Dr. ${doctorName} (${clinicName}). I am reviewing the Atlas Platform Services & Capabilities Matrix and would like more information regarding ${subject}.`
+      `Hello Atlas Health Team, I am Dr. ${effectiveDoctorName} (${effectiveClinicName}). I am reviewing the Atlas Platform Services & Capabilities Matrix and would like more information regarding ${subject}.`
     );
     const waUrl = `https://wa.me/971553561058?text=${text}`; // Atlas Conciergerie line
     window.open(waUrl, '_blank');
   };
 
-  const COMPARISON_ROWS = [
-    {
-      category: 'PRESCRIPTION & PROTOCOLS',
-      feature: 'Clinical Prescription Issuance',
-      basic: 'Manual (product by product)',
-      pro: 'Unlimited + Pre-Configured 1-Tap Protocols',
-      description: 'Save custom multi-vial regimens (e.g. GHK-Cu Hair Protocol, Epithalon Reset) and issue them in one tap.',
-      highlight: true
-    },
-    {
-      category: 'CLINICAL INTELLIGENCE',
-      feature: 'Atlas AI Clinical Scribe & Copilot',
-      basic: '5 queries / session',
-      pro: 'UNLIMITED • Blood panels & genetics interpretation',
-      description: 'Synthesizes patient biomarkers, flags contraindications, and calculates reconstitution mL & U-100 syringe units.',
-      highlight: true
-    },
-    {
-      category: 'PRACTICE AUTHORITY',
-      feature: 'Patient Admin Guide (Reconstitution & Syringes)',
-      basic: 'Standard Atlas Health format',
-      pro: '100% White-Label with your clinic logo & branding',
-      description: 'Patients receive an interactive portal and printable PDF stamped with your clinic authority and direct contacts.',
-      highlight: true
-    },
-    {
-      category: 'RETENTION & ADHERENCE',
-      feature: 'WhatsApp Predictive Refill Alerts',
-      basic: 'Manual clinic follow-up',
-      pro: 'Automated 5 days before vial completion',
-      description: 'Proactive reminders with direct renewal links, boosting longitudinal patient adherence by +40%.',
-      highlight: true
-    },
-    {
-      category: 'PATIENT DIRECTORY',
-      feature: 'Active Patients Directory & Records',
-      basic: 'Up to 30 active patients',
-      pro: 'Unlimited Patients + Longitudinal SOAP Notes',
-      description: 'Complete longitudinal therapy tracking, biometric evolution, and structured clinical timeline.',
-      highlight: false
-    },
-    {
-      category: 'PHARMACOPEIA ACCESS',
-      feature: 'Lotusland Formulary & Compounding Pricing',
-      basic: 'Standard verified catalog access',
-      pro: 'VIP Access + Bioequivalence & Thermal Stability Matrix',
-      description: 'In-depth pharmacokinetics, bioequivalence benchmarks, and compounding stability data.',
-      highlight: false
-    },
-    {
-      category: 'TELEHEALTH & APPOINTMENTS',
-      feature: 'Telemedicine & Video Consultation Rooms',
-      basic: 'Manual scheduling',
-      pro: 'Integrated appointments & encrypted video consults',
-      description: 'Conduct follow-ups for local and international longevity patients within the portal.',
-      highlight: false
-    },
-    {
-      category: 'CLINICAL SUPPORT',
-      feature: 'Pharmacological & Technical Support',
-      basic: 'Standard email & ticketing (24-48h response)',
-      pro: '24/7 Direct VIP WhatsApp Line',
-      description: 'Instant direct communication with the Compounding Technical Director for formulation inquiries.',
-      highlight: true
-    }
-  ];
-
   const filteredRows = activeTabFilter === 'highlight' 
-    ? COMPARISON_ROWS.filter(r => r.highlight) 
-    : COMPARISON_ROWS;
+    ? DOCTOR_CAPABILITIES_MATRIX.filter(r => r.highlight) 
+    : DOCTOR_CAPABILITIES_MATRIX;
 
   return (
     <div
@@ -117,7 +60,7 @@ export default function DoctorServicesMembershipModal({
         position: 'fixed',
         inset: 0,
         zIndex: 1200,
-        backgroundColor: 'rgba(15, 23, 42, 0.7)',
+        backgroundColor: 'rgba(15, 23, 42, 0.72)',
         backdropFilter: 'blur(6px)',
         WebkitBackdropFilter: 'blur(6px)',
         display: 'flex',
@@ -133,7 +76,7 @@ export default function DoctorServicesMembershipModal({
       <div
         style={{
           width: '100%',
-          maxWidth: '920px',
+          maxWidth: '940px',
           maxHeight: '92vh',
           backgroundColor: '#ffffff',
           borderRadius: '8px',
@@ -251,7 +194,7 @@ export default function DoctorServicesMembershipModal({
             <Info size={18} color="#1a73e8" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div style={{ fontSize: '0.82rem', color: '#174ea6', lineHeight: 1.5 }}>
               <strong>Complimentary Access for Licensed Physicians: </strong>
-              Every verified medical professional has free lifetime access to browse formularies, prescribe compounding therapies, and provide patient care. The <strong>Advanced Pro Plan</strong> is an optional suite designed for clinics seeking automated white-label guides, custom branding, and WhatsApp refill workflows.
+              Every verified medical practitioner has free lifetime access to browse formularies, prescribe compounding therapies, and manage up to 30 active patients at zero cost. The <strong>Advanced Pro Plan</strong> is an optional suite designed for practices seeking automated white-label guides, custom branding, and WhatsApp refill workflows.
             </div>
           </div>
 
@@ -281,42 +224,35 @@ export default function DoctorServicesMembershipModal({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#188038' }} />
                     <span style={{ fontSize: '0.96rem', fontWeight: 700, color: '#202124' }}>
-                      Basic Plan
+                      {DOCTOR_TIERS.BASIC.name}
                     </span>
                   </div>
                   <span
                     style={{
                       fontSize: '0.68rem',
                       fontWeight: 700,
-                      backgroundColor: '#e6f4ea',
-                      color: '#137333',
+                      backgroundColor: DOCTOR_TIERS.BASIC.badgeBg,
+                      color: DOCTOR_TIERS.BASIC.badgeColor,
                       border: '1px solid #ceead6',
                       padding: '2px 8px',
                       borderRadius: '4px'
                     }}
                   >
-                    ACTIVE BY DEFAULT
+                    {!isPro ? 'YOUR CURRENT TIER' : DOCTOR_TIERS.BASIC.badge}
                   </span>
                 </div>
 
                 <div style={{ marginBottom: '10px' }}>
                   <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#202124' }}>
-                    $0 <span style={{ fontSize: '0.82rem', fontWeight: 500, color: '#5f6368' }}>/ free forever</span>
+                    {DOCTOR_TIERS.BASIC.priceDisplay} <span style={{ fontSize: '0.82rem', fontWeight: 500, color: '#5f6368' }}>/ {DOCTOR_TIERS.BASIC.frequency}</span>
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#5f6368', marginTop: '2px' }}>
-                    Standard clinical access for all licensed practitioners.
+                    {DOCTOR_TIERS.BASIC.summary}
                   </div>
                 </div>
 
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {[
-                    'Full Lotusland & Compounding Formulary Access',
-                    'Individual Product Prescription Issuance',
-                    'Up to 30 Active Patients Directory',
-                    'Standard Med-Peptides Posology & Syringe Guide',
-                    '5 Clinical AI queries per browser session',
-                    'Standard Email / Ticketing Support (24-48h)'
-                  ].map((feat, i) => (
+                  {DOCTOR_TIERS.BASIC.keyHighlights.map((feat, i) => (
                     <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.79rem', color: '#3c4043' }}>
                       <Check size={14} color="#188038" strokeWidth={2.5} style={{ flexShrink: 0 }} />
                       <span>{feat}</span>
@@ -338,7 +274,7 @@ export default function DoctorServicesMembershipModal({
                 }}
               >
                 <CheckCircle2 size={13} color="#188038" />
-                <span>Included with verified medical registration</span>
+                <span>Verified medical registration for Dr. {effectiveDoctorName}</span>
               </div>
             </div>
 
@@ -360,42 +296,35 @@ export default function DoctorServicesMembershipModal({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Sparkles size={16} color="#1a73e8" />
                     <span style={{ fontSize: '0.96rem', fontWeight: 800, color: '#1a73e8' }}>
-                      Advanced Pro
+                      {DOCTOR_TIERS.PRO.name}
                     </span>
                   </div>
                   <span
                     style={{
                       fontSize: '0.68rem',
                       fontWeight: 700,
-                      backgroundColor: '#e8f0fe',
-                      color: '#1a73e8',
-                      border: '1px solid #d2e3fc',
+                      backgroundColor: isPro ? '#e6f4ea' : DOCTOR_TIERS.PRO.badgeBg,
+                      color: isPro ? '#137333' : DOCTOR_TIERS.PRO.badgeColor,
+                      border: isPro ? '1px solid #ceead6' : '1px solid #d2e3fc',
                       padding: '2px 8px',
                       borderRadius: '4px'
                     }}
                   >
-                    PRACTICE SUITE
+                    {isPro ? 'ACTIVE PRO MEMBER 💎' : DOCTOR_TIERS.PRO.badge}
                   </span>
                 </div>
 
                 <div style={{ marginBottom: '10px' }}>
                   <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#202124' }}>
-                    Custom <span style={{ fontSize: '0.82rem', fontWeight: 500, color: '#5f6368' }}>/ monthly practice billing</span>
+                    {DOCTOR_TIERS.PRO.priceDisplay} <span style={{ fontSize: '0.82rem', fontWeight: 500, color: '#5f6368' }}>/ {DOCTOR_TIERS.PRO.frequency}</span>
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#1a73e8', fontWeight: 600, marginTop: '2px' }}>
-                    White-label branding & automated adherence workflows.
+                    {DOCTOR_TIERS.PRO.summary}
                   </div>
                 </div>
 
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {[
-                    'Unlimited 1-Tap Protocol Regimens (GHK-Cu, Epithalon, etc.)',
-                    '100% White-Label Patient Guides stamped with Clinic Logo',
-                    'Automated WhatsApp Predictive Refill Alerts (5 days prior)',
-                    'Unlimited Active Patients + Longitudinal SOAP Notes',
-                    'UNLIMITED Atlas AI Clinical Scribe & Genetics/Labs interpretation',
-                    '24/7 Direct VIP WhatsApp Line with Compounding Director'
-                  ].map((feat, i) => (
+                  {DOCTOR_TIERS.PRO.keyHighlights.map((feat, i) => (
                     <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.79rem', color: '#174ea6' }}>
                       <Sparkles size={13} color="#1a73e8" style={{ flexShrink: 0 }} />
                       <strong style={{ fontWeight: 600 }}>{feat}</strong>
@@ -410,38 +339,112 @@ export default function DoctorServicesMembershipModal({
                   paddingTop: '10px',
                   borderTop: '1px solid #d2e3fc',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
+                  flexDirection: 'column',
+                  gap: '8px'
                 }}
               >
-                <button
-                  type="button"
-                  onClick={() => handleContactWhatsApp('Advanced Pro Plan Activation')}
-                  style={{
-                    width: '100%',
-                    padding: '8px 14px',
-                    borderRadius: '4px',
-                    backgroundColor: '#1a73e8',
-                    color: '#ffffff',
-                    border: 'none',
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    transition: 'background 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#1557b0'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#1a73e8'; }}
-                >
-                  <MessageCircle size={14} />
-                  <span>Request Pro Plan Upgrade via WhatsApp</span>
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowWhiteLabelPreview(!showWhiteLabelPreview)}
+                    style={{
+                      flex: 1,
+                      padding: '7px 10px',
+                      borderRadius: '4px',
+                      backgroundColor: '#ffffff',
+                      color: '#1a73e8',
+                      border: '1px solid #dadce0',
+                      fontSize: '0.76rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <Building size={13} />
+                    <span>{showWhiteLabelPreview ? 'Hide Clinic Preview' : 'Preview White-Label'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleContactWhatsApp('Advanced Pro Plan Activation')}
+                    style={{
+                      flex: 1.4,
+                      padding: '7px 12px',
+                      borderRadius: '4px',
+                      backgroundColor: '#1a73e8',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <MessageCircle size={14} />
+                    <span>{isPro ? 'Contact Concierge' : 'Inquire via WhatsApp'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* ── Dynamic Interactive White-Label Clinic Preview ── */}
+          {showWhiteLabelPreview && (
+            <div
+              style={{
+                padding: '14px 18px',
+                borderRadius: '8px',
+                backgroundColor: '#f1f5f9',
+                border: '1px solid #cbd5e1',
+                animation: 'fadeIn 0.2s ease-out'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  ⚡ Interactive White-Label Guide Simulation
+                </span>
+                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                  Preview for: <strong>{effectiveClinicName}</strong>
+                </span>
+              </div>
+
+              {/* Mock Patient Handout Header */}
+              <div
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  padding: '12px 16px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', marginBottom: '8px' }}>
+                  <div>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                      {effectiveClinicName}
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                      {effectiveDoctorName} · Specialist in Longevity & Dermatology
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: '0.68rem', background: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                      OFFICIAL PATIENT POSOLOGY
+                    </span>
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.4 }}>
+                  "Your personalized peptide protocol has been configured by {effectiveDoctorName} at {effectiveClinicName}. Follow the interactive reconstitution steps below."
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ── Table Filter Selector (All vs Pro Highlights) ── */}
           <div
@@ -472,7 +475,7 @@ export default function DoctorServicesMembershipModal({
                   cursor: 'pointer'
                 }}
               >
-                All Capabilities ({COMPARISON_ROWS.length})
+                All Capabilities ({DOCTOR_CAPABILITIES_MATRIX.length})
               </button>
               <button
                 type="button"
@@ -488,7 +491,7 @@ export default function DoctorServicesMembershipModal({
                   cursor: 'pointer'
                 }}
               >
-                Pro Highlights ({COMPARISON_ROWS.filter(r => r.highlight).length})
+                Pro Highlights ({DOCTOR_CAPABILITIES_MATRIX.filter(r => r.highlight).length})
               </button>
             </div>
           </div>
@@ -615,7 +618,7 @@ export default function DoctorServicesMembershipModal({
           }}
         >
           <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>
-            <span>Questions on practice onboarding? </span>
+            <span>Practice Onboarding & Registration: </span>
             <strong style={{ color: '#202124' }}>WhatsApp Concierge: +971 55 356 1058</strong>
           </div>
 

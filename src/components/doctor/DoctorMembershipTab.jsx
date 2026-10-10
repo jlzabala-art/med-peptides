@@ -21,6 +21,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { DoctorContext } from '../../templates/DoctorDashboard';
 import notifier from '../../services/NotificationService';
+import { DOCTOR_CAPABILITIES_MATRIX } from '@/data/doctorMembershipTiers';
 
 export default function DoctorMembershipTab() {
   const context = useContext(DoctorContext) || {};
@@ -73,72 +74,7 @@ export default function DoctorMembershipTab() {
     }
   };
 
-  const COMPARISON_ROWS = [
-    {
-      category: 'Prescription & Dosing',
-      feature: 'Clinical Prescription Issuance',
-      basic: 'Manual product by product',
-      pro: 'Unlimited + Pre-configured 1-Tap Protocols',
-      description: 'In the Pro Plan, you can save custom regimens (e.g. GHK-Cu Hair Protocol or Epithalon Longevity) and prescribe them in a single tap.',
-      highlight: true
-    },
-    {
-      category: 'Clinical Intelligence',
-      feature: 'Atlas AI Clinical Scribe & Copilot',
-      basic: '5 basic monthly queries',
-      pro: 'UNLIMITED • Blood panel & genetics interpretation',
-      description: 'The copilot synthesizes biomarkers, flags contraindications, and calculates reconstitution milliliters and U-100 syringe units in seconds.',
-      highlight: true
-    },
-    {
-      category: 'Practice Identity',
-      feature: 'Patient Admin Guide (Reconstitution & Syringe)',
-      basic: 'Standard Med-Peptides format',
-      pro: '100% White-Label with your clinic logo',
-      description: 'Your patients receive an interactive guide and official PDF stamped with your clinic logo and contact info (e.g., Bedaya Polyclinic), reinforcing your clinical authority.',
-      highlight: true
-    },
-    {
-      category: 'Retention & Adherence',
-      feature: 'WhatsApp Predictive Refill Alerts',
-      basic: 'Manual follow-up by clinic staff',
-      pro: 'Automated 5 days before vial depletion',
-      description: 'Patients receive an automated reminder with a direct renewal link, boosting treatment continuity by +40% with zero administrative burden.',
-      highlight: true
-    },
-    {
-      category: 'Patient Management',
-      feature: 'Active Patients Directory',
-      basic: 'Up to 30 active patients',
-      pro: 'Unlimited Patients + Advanced SOAP Notes',
-      description: 'Complete longitudinal therapy history, biomarker tracking, and structured clinical notes.',
-      highlight: false
-    },
-    {
-      category: 'Formulary & Compounding',
-      feature: 'Lotusland Formulary Clinical Pricing',
-      basic: 'Standard catalog access',
-      pro: 'VIP Access + Bioequivalence Comparator',
-      description: 'In-depth pharmacokinetics and thermal stability comparison for all Lotusland peptide preparations.',
-      highlight: false
-    },
-    {
-      category: 'Telemedicine',
-      feature: 'Telehealth & Appointment Scheduling',
-      basic: 'Not available',
-      pro: 'Integrated appointments & secure video consults',
-      description: 'Organize follow-ups for local and international patients with encrypted telehealth rooms.',
-      highlight: false
-    },
-    {
-      category: 'Support & Guidance',
-      feature: 'Clinical & Pharmacological Support',
-      basic: 'Email & ticketing (24-48h response)',
-      pro: '24/7 Direct VIP WhatsApp Line',
-      description: 'Real-time communication with the Compounding Technical Director for complex reconstitution questions or vial compatibility.',
-      highlight: true
-    }
-  ];
+  const COMPARISON_ROWS = DOCTOR_CAPABILITIES_MATRIX;
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', paddingBottom: '3rem' }}>
