@@ -1413,19 +1413,19 @@ export default function EternaGenomicsDetail({
                     </tr>
                     <tr>
                       <td>{isEs ? 'Acreditaciones del Laboratorio' : 'Laboratory Accreditations'}</td>
-                      <td>ISO 15189 (Laboratorios Clínicos) · ISO 17025 (Ensayos de Calibración) · CAP / CLIA</td>
+                      <td>{isEs ? 'ISO 15189 (Laboratorios Clínicos) · ISO 17025 (Ensayos de Calibración) · CAP / CLIA' : 'ISO 15189 (Medical Diagnostic Labs) · ISO 17025 (Testing & Calibration) · CAP / CLIA'}</td>
                     </tr>
                     <tr>
                       <td>{isEs ? 'Marcado Regulatorio' : 'Regulatory Compliance'}</td>
-                      <td>CE-IVD Marked (Directiva EU 2017/746 sobre diagnóstico in vitro)</td>
+                      <td>{isEs ? 'Marcado CE-IVD (Directiva EU 2017/746 sobre diagnóstico in vitro)' : 'CE-IVD Marked (EU 2017/746 In Vitro Diagnostic Regulation)'}</td>
                     </tr>
                     <tr>
                       <td>{isEs ? 'Tecnología de Genotipado' : 'Genotyping Platform'}</td>
-                      <td>High-Density DNA Microarray (+700,000 SNPs en GRCh38 / hg38)</td>
+                      <td>{isEs ? 'Microarray de ADN de Alta Densidad (+700.000 SNPs en GRCh38 / hg38)' : 'High-Density DNA Microarray (+700,000 SNPs on GRCh38 / hg38)'}</td>
                     </tr>
                     <tr>
                       <td>{isEs ? 'Tipo de Muestra' : 'Specimen Matrix'}</td>
-                      <td>Saliva humana estabilizada (2 mL de saliva total, sin punción)</td>
+                      <td>{isEs ? 'Saliva humana estabilizada (2 mL de saliva total, sin punción)' : 'Preserved human saliva (2 mL total volume, painless needle-free)'}</td>
                     </tr>
                     <tr>
                       <td>{isEs ? 'Tiempo de Respuesta' : 'Clinical Turnaround Time'}</td>
