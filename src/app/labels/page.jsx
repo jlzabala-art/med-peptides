@@ -36,16 +36,10 @@ export async function generateMetadata({ searchParams }) {
   }
 
   const title = patientName 
-    ? (isEs 
-        ? `Estudio de Etiquetas Compounding • #${rxCode} (${patientName}) • Pharmapolis & Atlas Health`
-        : `Compounding Label Studio • #${rxCode} (${patientName}) • Pharmapolis & Atlas Health`)
-    : (isEs
-        ? `Estudio de Etiquetas de Formulación Magistral • Pharmapolis & Atlas Health`
-        : `Compounding Label Studio • Pharmapolis & Atlas Health`);
+    ? `Compounding Label Studio • #${rxCode} (${patientName}) • Pharmapolis & Atlas Health`
+    : `Compounding Label Studio • Pharmapolis & Atlas Health`;
 
-  const description = isEs
-    ? `Estudio profesional de diseño e impresión vectorial de etiquetas de formulación magistral EU GMP. Búsqueda instantánea de pacientes, personalización de fórmulas y exportación a 300 DPI, PDF vectorial y hojas A4.`
-    : `Professional EU GMP vector compounding label designer & pharmacy print studio. Search patients, customize formulas, and export high-resolution pharmaceutical labels (300 DPI, Vector PDF, A4 Sheets, Zebra thermal).`;
+  const description = `Professional EU GMP vector compounding label designer & pharmacy print studio. Search patients, customize formulas, and export high-resolution pharmaceutical labels (300 DPI, Vector PDF, A4 Sheets, Zebra thermal).`;
 
   const canonicalUrl = `${BASE_URL}/labels${code ? `?rx=${encodeURIComponent(code)}` : ''}`;
 

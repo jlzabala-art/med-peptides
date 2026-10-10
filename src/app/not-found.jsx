@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { Search, Compass, BookOpen, Home, ArrowLeft } from 'lucide-react';
 
 export const metadata = {
-  title: 'Página No Encontrada | Atlas Health Clinical',
-  description: 'El recurso, ficha técnica o protocolo clínico solicitado no existe o ha sido reubicado.',
+  title: 'Page Not Found | Atlas Health Clinical',
+  description: 'The requested clinical resource, product datasheet, or treatment protocol is not available or has been moved.',
   robots: { index: false, follow: false },
 };
 
@@ -44,7 +44,7 @@ export default function NotFound() {
           border: '1px solid #bfdbfe'
         }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#2563eb' }}></span>
-          Error 404 · Registro No Encontrado
+          Error 404 · Record Not Found
         </div>
 
         {/* Title */}
@@ -55,7 +55,7 @@ export default function NotFound() {
           margin: '0 0 0.75rem',
           letterSpacing: '-0.025em'
         }}>
-          Recurso Clínico No Disponible
+          Clinical Resource Not Available
         </h1>
 
         <p style={{
@@ -64,7 +64,7 @@ export default function NotFound() {
           lineHeight: '1.6',
           margin: '0 0 2rem'
         }}>
-          El producto, lote analítico o protocolo clínico que estás buscando no se encuentra disponible en este enlace. Puede haber sido actualizado, reasignado o encontrarse en revisión técnica.
+          The product, analytical batch, or clinical protocol you are looking for is not available at this link. It may have been updated, reassigned, or is currently under technical review.
         </p>
 
         {/* Quick Search */}
@@ -85,7 +85,7 @@ export default function NotFound() {
           <input 
             type="text" 
             name="q" 
-            placeholder="Buscar por péptido, activo o protocolo..." 
+            placeholder="Search by peptide, active ingredient, or protocol..." 
             style={{
               flex: 1,
               border: 'none',
@@ -108,7 +108,7 @@ export default function NotFound() {
               cursor: 'pointer'
             }}
           >
-            Buscar
+            Search
           </button>
         </form>
 
@@ -137,7 +137,7 @@ export default function NotFound() {
             }}
           >
             <Compass size={16} />
-            Catálogo
+            Catalog
           </Link>
           <Link
             href="/protocols"
@@ -158,7 +158,7 @@ export default function NotFound() {
             }}
           >
             <BookOpen size={16} />
-            Protocolos
+            Protocols
           </Link>
         </div>
 
@@ -176,7 +176,7 @@ export default function NotFound() {
             }}
           >
             <ArrowLeft size={14} />
-            Regresar a la página principal
+            Return to Home
           </Link>
         </div>
       </div>

@@ -612,7 +612,7 @@ export default function PublicLabelsAppClient({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setSearchOpen(true)}
-              placeholder={isEs ? 'Buscar paciente, expediente o prescripción... (⌘K)' : 'Search patient, file #, or prescription code... (⌘K)'}
+              placeholder="Search patient, file #, or prescription code... (⌘K)"
             />
             {searchQuery && (
               <button
@@ -631,18 +631,18 @@ export default function PublicLabelsAppClient({
             <div className="pls-search-dropdown">
               <div style={{ padding: '8px 12px', background: '#f8fafc', borderBottom: '1px solid #e8eaed', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>
-                  {searchQuery ? (isEs ? 'Resultados Algolia / Portal' : 'Algolia & Portal Matches') : (isEs ? 'Prescripciones Frecuentes' : 'Featured Prescriptions')}
+                  {searchQuery ? 'Algolia & Portal Matches' : 'Featured Prescriptions'}
                 </span>
                 {isSearching && (
                   <span style={{ fontSize: '0.68rem', color: '#1a73e8' }}>
-                    {isEs ? 'Buscando...' : 'Searching...'}
+                    Searching...
                   </span>
                 )}
               </div>
 
               {searchResults.length === 0 && !isSearching ? (
                 <div style={{ padding: '16px', textAlign: 'center', fontSize: '0.80rem', color: '#80868b' }}>
-                  {isEs ? 'No se encontraron registros coincidentes.' : 'No matching records found.'}
+                  No matching records found.
                 </div>
               ) : (
                 searchResults.map((item) => (
