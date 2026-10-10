@@ -18,9 +18,15 @@ export async function generateMetadata({ params, searchParams }) {
   const patientName = rx?.patient?.name || rx?.patientName || 'Patient';
   const rxCode = rx?.fileNumber || rx?.code || code;
   const isEditing = resolvedSearchParams?.edit === 'true' || resolvedSearchParams?.edit === '1';
+  const lang = resolvedSearchParams?.lang || 'en';
+  const isEs = lang === 'es';
 
-  const title = `${isEditing ? 'Editor de Etiquetas' : 'Etiquetas Oficiales'} • #${rxCode} (${patientName}) • Pharmapolis Compounding`;
-  const description = `Editor interactivo y generador de etiquetas de formulación magistral EU GMP para la prescripción #${rxCode}.`;
+  const title = isEs 
+    ? `${isEditing ? 'Editor de Etiquetas' : 'Etiquetas Oficiales'} • #${rxCode} (${patientName}) • Pharmapolis Compounding`
+    : `${isEditing ? 'Compounding Label Editor' : 'Official Compounding Labels'} • #${rxCode} (${patientName}) • Pharmapolis Compounding`;
+  const description = isEs
+    ? `Editor interactivo y generador de etiquetas de formulación magistral EU GMP para la prescripción #${rxCode}.`
+    : `Interactive vector editor and EU GMP compounding label generator for prescription #${rxCode}.`;
 
   return {
     title,
@@ -42,6 +48,7 @@ export default async function RxLabelsStandalonePage({ params, searchParams }) {
   const code = resolvedParams?.code;
   const initialEditMode = resolvedSearchParams?.edit === 'true' || resolvedSearchParams?.edit === '1';
   const initialPhaseIdx = Number(resolvedSearchParams?.phase) ? Math.max(0, Number(resolvedSearchParams.phase) - 1) : 0;
+  const initialLang = resolvedSearchParams?.lang || 'en';
 
   const rx = await getPrescriptionData(code);
 
@@ -59,6 +66,7 @@ export default async function RxLabelsStandalonePage({ params, searchParams }) {
       code={code}
       initialEditMode={initialEditMode}
       initialLabelIndex={initialPhaseIdx}
+      initialLang={initialLang}
     />
   );
 }

@@ -6,8 +6,10 @@ import { Layers, ChevronRight } from '@/lib/icons';
 /**
  * ProductOverviewQuickNav
  * ─────────────────────────────────────────────────────────────────────────────
- * Google Cloud Console-compliant bottom action strip for Overview pages.
- * Displays quick-jump buttons to explore all other sections of the datasheet.
+ * Google Cloud Console UX-compliant sub-navigation strip for Overview pages.
+ * - Desktop: Sleek, low-profile quick-jump chips in a clean horizontal layout.
+ * - Mobile: Single-line horizontal scrollable rail (zero line-wrapping or viewport clutter).
+ * - Avoids bulky duplicate UI while providing instant 1-click access to all technical sections.
  */
 export default function ProductOverviewQuickNav({
   sections = [],
@@ -17,76 +19,135 @@ export default function ProductOverviewQuickNav({
 }) {
   const isEs = lang === 'es';
 
-  // Exclude overview from the destination links
+  // Exclude overview from destination chips
   const targetSections = sections.filter(s => s && s.id && s.id !== 'overview');
 
   if (!targetSections.length || !onSelectSection) return null;
 
   return (
-    <div style={{
-      marginTop: '1.5rem',
-      marginBottom: '1rem',
-      padding: '16px 20px',
-      background: 'var(--surface-alt, #f8fafc)',
-      border: '1px solid var(--border, #e2e8f0)',
-      borderRadius: '14px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px'
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Layers size={17} color="#003666" />
-          <strong style={{ fontSize: '0.85rem', color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            {isEs ? 'Explorar Secciones Técnicas de la Ficha:' : 'Explore Technical Monograph Sections:'}
-          </strong>
+    <nav 
+      className="gcp-quicknav-strip"
+      aria-label={isEs ? 'Navegación rápida de secciones' : 'Quick section navigation'}
+    >
+      <style>{`
+        .gcp-quicknav-strip {
+          margin-top: 1.25rem;
+          margin-bottom: 1rem;
+          padding: 10px 14px;
+          background: #ffffff;
+          border: 1px solid #dadce0;
+          border-radius: 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          box-shadow: 0 1px 2px rgba(60,64,67,0.05);
+        }
+        .gcp-quicknav-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+        .gcp-quicknav-title {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: #202124;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+        .gcp-quicknav-sub {
+          font-size: 0.68rem;
+          color: #5f6368;
+        }
+        .gcp-quicknav-rail {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+        .gcp-quicknav-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          padding: 5px 11px;
+          border-radius: 4px;
+          background: #f8fafd;
+          border: 1px solid #dadce0;
+          color: #1a73e8;
+          font-size: 0.74rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          white-space: nowrap;
+          text-decoration: none;
+        }
+        .gcp-quicknav-chip:hover {
+          background: #e8f0fe;
+          border-color: #aecbfa;
+          color: #174ea6;
+        }
+        @media (max-width: 768px) {
+          .gcp-quicknav-strip {
+            padding: 8px 10px !important;
+            margin-top: 0.85rem !important;
+            margin-bottom: 0.85rem !important;
+            border-radius: 6px !important;
+          }
+          .gcp-quicknav-sub {
+            display: none !important;
+          }
+          /* On mobile: single horizontal scroll rail so it NEVER wraps or clutters the vertical screen */
+          .gcp-quicknav-rail {
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: none !important;
+            padding-bottom: 2px !important;
+          }
+          .gcp-quicknav-rail::-webkit-scrollbar {
+            display: none !important;
+          }
+          .gcp-quicknav-chip {
+            padding: 5px 9px !important;
+            font-size: 0.70rem !important;
+            flex-shrink: 0 !important;
+          }
+        }
+      `}</style>
+
+      <div className="gcp-quicknav-header">
+        <div className="gcp-quicknav-title">
+          <Layers size={13} color="#1a73e8" />
+          <span>{isEs ? 'Secciones de la Ficha:' : 'Monograph Sections:'}</span>
         </div>
-        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-          {isEs ? 'Acceso directo con un solo clic' : 'Single-click direct section navigation'}
+        <span className="gcp-quicknav-sub">
+          {isEs ? 'Acceso directo con un clic' : 'Direct 1-click access'}
         </span>
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-        {targetSections.map((sec, idx) => {
+      <div className="gcp-quicknav-rail" role="tablist">
+        {targetSections.map((sec) => {
           const IconComp = sec.icon;
           return (
             <button
               key={sec.id}
               type="button"
               onClick={() => onSelectSection(sec.id)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '7px',
-                padding: '7px 14px',
-                borderRadius: '8px',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                color: '#003666',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#003666';
-                e.currentTarget.style.color = '#ffffff';
-                e.currentTarget.style.borderColor = '#003666';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#ffffff';
-                e.currentTarget.style.color = '#003666';
-                e.currentTarget.style.borderColor = '#cbd5e1';
-              }}
+              className="gcp-quicknav-chip"
+              title={sec.label}
+              role="tab"
             >
-              {IconComp && <IconComp size={14} />}
+              {IconComp && <IconComp size={12} />}
               <span>{sec.label}</span>
-              <ChevronRight size={13} style={{ opacity: 0.6 }} />
+              <ChevronRight size={11} style={{ opacity: 0.6 }} />
             </button>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }
