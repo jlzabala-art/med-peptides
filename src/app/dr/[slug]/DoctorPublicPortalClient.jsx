@@ -460,7 +460,7 @@ export default function DoctorPublicPortalClient({
   const [apiFilter, setApiFilter] = useState(null); // Active pharmaceutical ingredient filter from Analytics
 
   // Atlas Recommendations UI State (Consolidated Master Catalog)
-  const [recCategoryFilter, setRecCategoryFilter] = useState('all'); // 'all' | 'peptides' | 'colway'
+  const [recCategoryFilter, setRecCategoryFilter] = useState('all'); // 'all' | 'peptides' | 'supplements' | 'eterna' | 'colway'
   const [recSearchQuery, setRecSearchQuery] = useState('');
   const [expandedRecId, setExpandedRecId] = useState(null);
   const [recFilter, setRecFilter] = useState(null); // { id: string, title: string, rxIds: string[] }
@@ -4558,15 +4558,56 @@ export default function DoctorPublicPortalClient({
               recs: rx.atlasRecommendations || getPrescriptionAtlasRecommendations(rx)
             }));
 
+            // Category 1: Bioactive Peptides Matches
             const ghkMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-ghk-cu-50mg');
             const glowMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-glow-blend');
             const epithalonMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-epithalon-10mg');
             const cjcMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-cjc-ipam-blend');
             const dsipMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-dsip-5mg');
             const bpcMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-bpc-157-10mg');
+
+            // Category 2: Scalp Barrier & ECM Matches
             const colwayMatches = analyzedItems.filter(item => Boolean(item.recs?.colway));
 
+            // Category 3: Precision Nutraceuticals (UltraPerson by PharmaPolis) Matches
+            const ultrapersonEnergyMatches = analyzedItems.filter(item => {
+              const slug = item.recs?.supplement?.catalogSlug;
+              const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
+              return slug === 'ultraperson-energy-metabolic-vitality' || raw.includes('minoxidil') || raw.includes('coq10') || raw.includes('ubiquinol');
+            });
+            const ultrapersonLongevityMatches = analyzedItems.filter(item => {
+              const slug = item.recs?.supplement?.catalogSlug;
+              const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
+              return slug === 'ultraperson-longevity-cellular-renewal' || raw.includes('finasteride') || raw.includes('dutasteride') || raw.includes('resveratrol') || raw.includes('metformin');
+            });
+            const ultrapersonStressMatches = analyzedItems.filter(item => {
+              const slug = item.recs?.supplement?.catalogSlug;
+              const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
+              return slug === 'ultraperson-stress-resilience-emotional-balance' || raw.includes('stress') || raw.includes('cortisol') || raw.includes('ashwagandha') || raw.includes('bhrt') || raw.includes('dhea');
+            });
+            const ultrapersonSleepMatches = analyzedItems.filter(item => {
+              const slug = item.recs?.supplement?.catalogSlug;
+              const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
+              return slug === 'ultraperson-sleep-quality-restoration' || raw.includes('sleep') || raw.includes('melatonin') || raw.includes('theanine') || raw.includes('gaba');
+            });
+
+            // Category 4: ETERNA® Longevity & Pharmacogenomics Saliva/DNA Test Matches
+            const eternaMatches = analyzedItems.filter(item => {
+              const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
+              return raw.includes('finasteride') ||
+                     raw.includes('dutasteride') ||
+                     raw.includes('minoxidil') ||
+                     raw.includes('epithalon') ||
+                     raw.includes('metformin') ||
+                     raw.includes('spironolactone') ||
+                     raw.includes('latanoprost') ||
+                     raw.includes('tricho') ||
+                     raw.includes('alopecia') ||
+                     raw.includes('longevity');
+            });
+
             const candidateSolutions = [
+              // ─── Bioactive Peptides (Lotusland Research) ───
               {
                 id: 'atlas-ghk-cu-50mg',
                 category: 'peptide',
@@ -4663,6 +4704,92 @@ export default function DoctorPublicPortalClient({
                 protocolTitle: 'BPC-157 & TB-500 Cellular Repair Protocol',
                 protocolUrl: '/proto/bpc-157-tb-500-protocol'
               },
+
+              // ─── Precision Nutraceuticals (UltraPerson by PharmaPolis) ───
+              {
+                id: 'ultraperson-energy-metabolic-vitality',
+                category: 'supplement',
+                badge: 'NUTRACÉUTICO METABÓLICO & MITOCONDRIAL',
+                title: 'UltraPerson Energy & Metabolic Vitality (CoQ10 / PQQ / Ginseng)',
+                badgeColor: '#d97706',
+                badgeBg: '#fef3c7',
+                borderColor: '#fde68a',
+                matchScore: '99% Metabolic Synergy',
+                target: 'Síntesis de ATP Mitocondrial & Neutralización de Radicales Libres',
+                summary: 'Cofactores mitocondriales de tasa limitante (PQQ, Ubiquinol/CoQ10 125mg, Ácido Alfa-Lipoico y Ginseng). Multiplica la eficiencia bioenergética celular y amortigua el estrés oxidativo tisular derivado de terapias activas.',
+                synergisticApis: ['Minoxidil Oral & Tópico', 'Metformina', 'CoQ10', 'Antioxidantes', 'Ácido Alfa-Lipoico'],
+                matchingItems: ultrapersonEnergyMatches,
+                protocolTitle: 'Ver Ficha UltraPerson Energy',
+                protocolUrl: '/p/ultraperson-energy-metabolic-vitality'
+              },
+              {
+                id: 'ultraperson-longevity-cellular-renewal',
+                category: 'supplement',
+                badge: 'ACTIVADOR DE SIRTUINAS & SENOLÍTICO',
+                title: 'UltraPerson Longevity & Cellular Renewal (Sirtuin & Senolytic)',
+                badgeColor: '#b45309',
+                badgeBg: '#fef3c7',
+                borderColor: '#fde68a',
+                matchScore: '98% Sirtuin Synergy',
+                target: 'Activación SIRT1 & Depuración Selectiva de Células Senescentes (SASP)',
+                summary: 'Trans-Resveratrol micronizado bioidéntico, Fisetina liposomal 100mg y Curcumina fitosomada. Induce autofagia selectiva y elimina células senescentes que secretan citoquinas proinflamatorias en el microambiente peribulbar y vascular.',
+                synergisticApis: ['Finasteride', 'Dutasteride', 'Epithalon', 'Metformina', 'Resveratrol'],
+                matchingItems: ultrapersonLongevityMatches,
+                protocolTitle: 'Ver Ficha UltraPerson Longevity',
+                protocolUrl: '/p/ultraperson-longevity-cellular-renewal'
+              },
+              {
+                id: 'ultraperson-stress-resilience-emotional-balance',
+                category: 'supplement',
+                badge: 'MODULADOR DEL EJE HPA & CORTISOL',
+                title: 'UltraPerson Stress Resilience & Emotional Balance',
+                badgeColor: '#d97706',
+                badgeBg: '#fef3c7',
+                borderColor: '#fde68a',
+                matchScore: '97% Endocrine Balance',
+                target: 'Homeostasis del Eje Suprarrenal HPA & Bloqueo de Cortisol Periférico',
+                summary: 'Ashwagandha KSM-66 estandarizada en withanólidos y L-Teanina pura. Normaliza picos de ACTH y cortisol sérico, previniendo el efluvio telógeno inducido por estrés y la inhibición periférica de receptores hormonales.',
+                synergisticApis: ['DHEA', 'BHRT Hormonoterapia', 'L-Teanina', 'Ashwagandha', 'Magnesio'],
+                matchingItems: ultrapersonStressMatches,
+                protocolTitle: 'Ver Ficha UltraPerson Stress',
+                protocolUrl: '/p/ultraperson-stress-resilience-emotional-balance'
+              },
+              {
+                id: 'ultraperson-sleep-quality-restoration',
+                category: 'supplement',
+                badge: 'RESTAURADOR DE SUEÑO PROFUNDO DELTA',
+                title: 'UltraPerson Sleep Quality & Restoration (Melatonin-Free)',
+                badgeColor: '#4f46e5',
+                badgeBg: '#e0e7ff',
+                borderColor: '#c7d2fe',
+                matchScore: '98% Restorative Sleep',
+                target: 'Modulación Alostérica GABAérgica sin Desensibilización Melatonínica',
+                summary: 'Honokiol/Magnolol de corteza de magnolia, Apigenina y Melisa. Extiende la fase 3/4 del sueño no-REM para maximizar la liberación nocturna de hormona de crecimiento fisiológica y reparación tisular.',
+                synergisticApis: ['Melatonina', 'GABA', 'DSIP', 'L-Teanina', 'Magnesio'],
+                matchingItems: ultrapersonSleepMatches,
+                protocolTitle: 'Ver Ficha UltraPerson Sleep',
+                protocolUrl: '/p/ultraperson-sleep-quality-restoration'
+              },
+
+              // ─── Precision Genomics & Pharmacogenetics (ETERNA® Diagnostics) ───
+              {
+                id: 'eterna-longevity-pharmacogenomics-test',
+                category: 'eterna',
+                badge: 'GENÓMICA DE PRECISIÓN & FARMACOGENÉTICA',
+                title: 'ETERNA® Longevity & Pharmacogenomics Saliva/DNA Test Kit',
+                badgeColor: '#7c3aed',
+                badgeBg: '#ede9fe',
+                borderColor: '#ddd6fe',
+                matchScore: '99% Pharmacogenetic Match',
+                target: 'Mapeo de Polimorfismos CYP, Enzima SULT1A1, Genes AR/SRD5A2 & Desgaste Telomérico',
+                summary: 'Test genético no invasivo de saliva (72 biomarcadores clave). Evalúa la tasa de sulfotransferasa (SULT1A1) que activa el Minoxidil, la sensibilidad del receptor androgénico (AR) y polimorfismos CYP hepáticos para calibrar dosis magistrales exactas y predecir la respuesta terapéutica con cero ensayo-error.',
+                synergisticApis: ['Minoxidil Tópico/Oral', 'Finasteride', 'Dutasteride', 'Epithalon', 'Metformina', 'TeloTest™'],
+                matchingItems: eternaMatches,
+                protocolTitle: 'Solicitar Kit Diagnóstico ETERNA® DX',
+                protocolUrl: '/p/eternadx-genetic-test'
+              },
+
+              // ─── Barrier & Cuticular ECM (Colway Clinical Care) ───
               {
                 id: 'colway-hair-system',
                 category: 'colway',
@@ -4682,13 +4809,21 @@ export default function DoctorPublicPortalClient({
             ];
 
             // Strict Clinical Rule: Only display recommendations with at least 1 actual applicable prescription in practice
-            const masterSolutions = candidateSolutions.filter(sol => Array.isArray(sol.matchingItems) && sol.matchingItems.length > 0);
+            // Priority Order (Descending): Sorted by number of matching patients/prescriptions in practice
+            const masterSolutions = candidateSolutions
+              .filter(sol => Array.isArray(sol.matchingItems) && sol.matchingItems.length > 0)
+              .sort((a, b) => b.matchingItems.length - a.matchingItems.length);
+
             const peptideSolutions = masterSolutions.filter(sol => sol.category === 'peptide');
+            const supplementSolutions = masterSolutions.filter(sol => sol.category === 'supplement');
+            const eternaSolutions = masterSolutions.filter(sol => sol.category === 'eterna');
             const colwaySolutions = masterSolutions.filter(sol => sol.category === 'colway');
 
             // If active category filter has no solutions, gracefully fallback to 'all'
             const effectiveCategoryFilter = 
               (recCategoryFilter === 'peptides' && peptideSolutions.length === 0) ||
+              (recCategoryFilter === 'supplements' && supplementSolutions.length === 0) ||
+              (recCategoryFilter === 'eterna' && eternaSolutions.length === 0) ||
               (recCategoryFilter === 'colway' && colwaySolutions.length === 0)
                 ? 'all'
                 : recCategoryFilter;
@@ -4696,6 +4831,8 @@ export default function DoctorPublicPortalClient({
             // Filter by Category and Search Query
             const filteredSolutions = masterSolutions.filter(sol => {
               if (effectiveCategoryFilter === 'peptides' && sol.category !== 'peptide') return false;
+              if (effectiveCategoryFilter === 'supplements' && sol.category !== 'supplement') return false;
+              if (effectiveCategoryFilter === 'eterna' && sol.category !== 'eterna') return false;
               if (effectiveCategoryFilter === 'colway' && sol.category !== 'colway') return false;
               if (recSearchQuery.trim()) {
                 const q = recSearchQuery.toLowerCase().trim();
@@ -4739,7 +4876,7 @@ export default function DoctorPublicPortalClient({
                       </h2>
                     </div>
                     <p style={{ margin: 0, fontSize: '0.84rem', color: '#5f6368', maxWidth: '780px', lineHeight: 1.5 }}>
-                      Master formulary of bioactive adjuvants and cuticular ECM barrier care. Consolidated across {masterSolutions.length} core {masterSolutions.length === 1 ? 'synergy' : 'synergies'} matched to active prescriptions in your practice.
+                      Master formulary of bioactive adjuvants, UltraPerson nutraceuticals, ETERNA® genomics, and cuticular ECM barrier care. Consolidated across {masterSolutions.length} core {masterSolutions.length === 1 ? 'synergy' : 'synergies'} prioritized by patient prevalence in your practice.
                     </p>
                   </div>
 
@@ -4760,7 +4897,7 @@ export default function DoctorPublicPortalClient({
                       <span><strong>{totalCoveredRxs}</strong> of {allPrescriptions.length} prescriptions with synergy</span>
                     </div>
                     <span style={{ fontSize: '0.74rem', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '6px 12px', borderRadius: '6px', fontWeight: 650 }}>
-                      ✓ {masterSolutions.length} Master Formulation{masterSolutions.length === 1 ? '' : 's'}
+                      ✓ {masterSolutions.length} Prioritized Master Formulation{masterSolutions.length === 1 ? '' : 's'}
                     </span>
                   </div>
                 </div>
@@ -4815,7 +4952,47 @@ export default function DoctorPublicPortalClient({
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        Bioactive Peptides ({peptideSolutions.length})
+                        🧬 Bioactive Peptides ({peptideSolutions.length})
+                      </button>
+                    )}
+                    {supplementSolutions.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setRecCategoryFilter('supplements')}
+                        style={{
+                          padding: '5px 12px',
+                          fontSize: '0.76rem',
+                          fontWeight: 650,
+                          borderRadius: '6px',
+                          border: '1px solid',
+                          borderColor: effectiveCategoryFilter === 'supplements' ? '#d97706' : '#d1d5db',
+                          background: effectiveCategoryFilter === 'supplements' ? '#fef3c7' : '#ffffff',
+                          color: effectiveCategoryFilter === 'supplements' ? '#b45309' : '#4b5563',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        ⚡ UltraPerson Supplements ({supplementSolutions.length})
+                      </button>
+                    )}
+                    {eternaSolutions.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setRecCategoryFilter('eterna')}
+                        style={{
+                          padding: '5px 12px',
+                          fontSize: '0.76rem',
+                          fontWeight: 650,
+                          borderRadius: '6px',
+                          border: '1px solid',
+                          borderColor: effectiveCategoryFilter === 'eterna' ? '#7c3aed' : '#d1d5db',
+                          background: effectiveCategoryFilter === 'eterna' ? '#ede9fe' : '#ffffff',
+                          color: effectiveCategoryFilter === 'eterna' ? '#6d28d9' : '#4b5563',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        ⏳ ETERNA® Longevity &amp; DNA ({eternaSolutions.length})
                       </button>
                     )}
                     {colwaySolutions.length > 0 && (
@@ -4835,7 +5012,7 @@ export default function DoctorPublicPortalClient({
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        Barrier &amp; Cuticular ECM ({colwaySolutions.length})
+                        🛡️ Barrier &amp; Cuticular ECM ({colwaySolutions.length})
                       </button>
                     )}
                   </div>
@@ -4881,115 +5058,105 @@ export default function DoctorPublicPortalClient({
                   </div>
                 </div>
 
-                {/* Master Solutions Cards Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '18px' }}>
-                  {filteredSolutions.map((sol) => {
-                    const isExpanded = expandedRecId === sol.id;
+                {/* Master Solutions High-Density Horizontal Rows (Google Cloud Console UX - Full Width 100%, No Orphan Cards) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {filteredSolutions.map((sol, index) => {
                     const count = sol.matchingItems.length;
+                    const totalCount = allPrescriptions.length;
+                    const coveragePct = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0;
 
                     return (
                       <div
                         key={sol.id}
                         style={{
                           background: '#ffffff',
-                          border: `1px solid ${sol.borderColor}`,
-                          borderRadius: '10px',
-                          padding: '18px',
+                          border: `1px solid ${sol.borderColor || '#e2e8f0'}`,
+                          borderLeft: `5px solid ${sol.badgeColor}`,
+                          borderRadius: '8px',
+                          padding: '16px 20px',
                           display: 'flex',
                           flexDirection: 'column',
-                          justifyContent: 'space-between',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                          gap: '12px',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        <div>
-                          {/* Top Badge & Match Pill */}
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '8px' }}>
+                        {/* Top Sub-Row: Priority Rank + Pillar Badge + Title + Match Score + Coverage + Primary Actions */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '12px',
+                          borderBottom: '1px solid #f1f5f9',
+                          paddingBottom: '10px'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                            {/* Priority Rank Badge */}
+                            <span style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              background: '#f1f5f9',
+                              color: '#334155',
+                              padding: '3px 8px',
+                              borderRadius: '4px',
+                              border: '1px solid #e2e8f0'
+                            }}>
+                              #{index + 1}
+                            </span>
+
+                            {/* Pillar Badge */}
                             <span style={{
                               fontSize: '0.68rem',
                               fontWeight: 750,
                               color: sol.badgeColor,
                               background: sol.badgeBg,
-                              padding: '2px 8px',
+                              padding: '3px 8px',
                               borderRadius: '4px',
                               textTransform: 'uppercase',
                               letterSpacing: '0.03em'
                             }}>
                               {sol.badge}
                             </span>
+
+                            {/* Formulation / Test Title */}
+                            <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                              {sol.title}
+                            </h3>
+                          </div>
+
+                          {/* Right Badges & Action Buttons */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                             <span style={{
-                              fontSize: '0.68rem',
+                              fontSize: '0.70rem',
                               color: '#047857',
                               background: '#ecfdf5',
                               border: '1px solid #a7f3d0',
-                              padding: '2px 8px',
+                              padding: '3px 8px',
                               borderRadius: '4px',
                               fontWeight: 700
                             }}>
                               {sol.matchScore}
                             </span>
-                          </div>
 
-                          {/* Title & Target */}
-                          <h3 style={{ margin: '0 0 4px 0', fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
-                            {sol.title}
-                          </h3>
-                          <div style={{ fontSize: '0.76rem', color: sol.badgeColor, fontWeight: 650, marginBottom: '8px' }}>
-                            🎯 {sol.target}
-                          </div>
-
-                          {/* Summary Rationale (2 lines max) */}
-                          <p style={{ margin: '0 0 12px 0', fontSize: '0.78rem', color: '#475569', lineHeight: 1.45 }}>
-                            {sol.summary}
-                          </p>
-
-                          {/* Synergistic APIs in Practice */}
-                          <div style={{ marginBottom: '14px' }}>
-                            <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>
-                              Proven synergy with:
-                            </div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                              {sol.synergisticApis.map((api, aIdx) => (
-                                <span
-                                  key={aIdx}
-                                  style={{
-                                    fontSize: '0.70rem',
-                                    background: '#f8fafc',
-                                    color: '#334155',
-                                    border: '1px solid #e2e8f0',
-                                    padding: '2px 7px',
-                                    borderRadius: '4px',
-                                    fontWeight: 600
-                                  }}
-                                >
-                                  {api}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Practice Match Filter Pill (Rule #7 & User Request: Direct table filter navigation) */}
-                          <div style={{
-                            background: '#f8fafc',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px',
-                            padding: '10px 14px',
-                            marginBottom: '14px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '10px',
-                            flexWrap: 'wrap'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.80rem', color: '#1e293b', fontWeight: 650 }}>
-                              <Users size={15} style={{ color: count > 0 ? '#1a73e8' : '#94a3b8', flexShrink: 0 }} />
-                              <span>
-                                {count > 0
-                                  ? `Applies to ${count} patient${count > 1 ? 's' : ''} in your practice`
-                                  : 'No active patients currently matched'}
-                              </span>
+                            {/* Patient Coverage Tag */}
+                            <div style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              fontSize: '0.74rem',
+                              fontWeight: 650,
+                              color: '#1e293b',
+                              background: '#f8fafc',
+                              border: '1px solid #e2e8f0',
+                              padding: '3px 8px',
+                              borderRadius: '4px'
+                            }}>
+                              <Users size={13} style={{ color: count > 0 ? '#2563eb' : '#94a3b8' }} />
+                              <span><strong>{count}</strong> {count === 1 ? 'patient' : 'patients'} ({coveragePct}%)</span>
                             </div>
 
+                            {/* View Patients Filter Button */}
                             {count > 0 && (
                               <button
                                 type="button"
@@ -5012,58 +5179,83 @@ export default function DoctorPublicPortalClient({
                                 style={{
                                   display: 'inline-flex',
                                   alignItems: 'center',
-                                  gap: '5px',
-                                  fontSize: '0.74rem',
+                                  gap: '4px',
+                                  fontSize: '0.72rem',
                                   fontWeight: 650,
-                                  color: '#1a73e8',
-                                  background: '#e8f0fe',
-                                  border: '1px solid #d2e3fc',
-                                  padding: '5px 12px',
-                                  borderRadius: '6px',
+                                  color: '#1d4ed8',
+                                  background: '#eff6ff',
+                                  border: '1px solid #bfdbfe',
+                                  padding: '4px 10px',
+                                  borderRadius: '5px',
                                   cursor: 'pointer',
                                   transition: 'all 0.15s ease'
                                 }}
-                                title="Filter prescriptions list by these matched patients"
+                                title="Filter prescriptions table by these matched patients"
                               >
-                                <span>View filtered patients ({count})</span>
-                                <ArrowUpRight size={13} />
+                                <span>View patients ({count})</span>
+                                <ArrowUpRight size={12} />
                               </button>
                             )}
+
+                            {/* Link to Protocol / Catalog */}
+                            <a
+                              href={sol.protocolUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 650,
+                                color: sol.badgeColor,
+                                background: sol.badgeBg,
+                                border: `1px solid ${sol.borderColor}`,
+                                padding: '4px 10px',
+                                borderRadius: '5px',
+                                textDecoration: 'none',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <span>{sol.protocolTitle}</span>
+                              <ArrowUpRight size={12} />
+                            </a>
                           </div>
                         </div>
 
-                        {/* Direct Action Link */}
-                        <div style={{ paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
-                          <a
-                            href={sol.protocolUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              fontSize: '0.76rem',
-                              fontWeight: 650,
-                              color: sol.category === 'colway' ? '#047857' : '#1d4ed8',
-                              background: sol.category === 'colway' ? '#ecfdf5' : '#eff6ff',
-                              border: `1px solid ${sol.category === 'colway' ? '#a7f3d0' : '#bfdbfe'}`,
-                              padding: '8px 12px',
-                              borderRadius: '6px',
-                              textDecoration: 'none',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '6px',
-                              width: '100%',
-                              transition: 'all 0.15s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.opacity = '0.85';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.opacity = '1';
-                            }}
-                          >
-                            <span>{sol.protocolTitle}</span>
-                            <ArrowUpRight size={14} />
-                          </a>
+                        {/* Middle Sub-Row: Cellular Target & Rationale */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <div style={{ fontSize: '0.78rem', color: sol.badgeColor, fontWeight: 700 }}>
+                            🎯 {sol.target}
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.48 }}>
+                            {sol.summary}
+                          </p>
+                        </div>
+
+                        {/* Bottom Sub-Row: Synergistic APIs Chips */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '2px' }}>
+                          <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 650 }}>
+                            Proven synergy with:
+                          </span>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                            {sol.synergisticApis.map((api, aIdx) => (
+                              <span
+                                key={aIdx}
+                                style={{
+                                  fontSize: '0.70rem',
+                                  background: '#f8fafc',
+                                  color: '#334155',
+                                  border: '1px solid #e2e8f0',
+                                  padding: '2px 7px',
+                                  borderRadius: '4px',
+                                  fontWeight: 600
+                                }}
+                              >
+                                {api}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     );
