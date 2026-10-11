@@ -25,7 +25,8 @@ import EmptyState from '../../ui/EmptyState';
 import AppActionGroup from '../../ui/AppActionGroup';
 import MobileDoctorCard from './mobile/MobileDoctorCard';
 import MobileActionSheet from '../../ui/MobileActionSheet';
-import { Eye, Edit3, XCircle, Layers } from '@/lib/icons';
+import { Eye, Edit3, XCircle, Layers, ExternalLink } from '@/lib/icons';
+import { slugify } from '@/lib/doctorCache';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 
 export default function AdminPhysiciansTab() {
@@ -658,6 +659,15 @@ export default function AdminPhysiciansTab() {
             }
           },
           {
+            type: 'view_public_page',
+            label: 'View Public Page',
+            icon: ExternalLink,
+            onClick: () => {
+              const drSlug = d.slug || slugify(getDoctorName(d));
+              window.open(`/dr/${encodeURIComponent(drSlug)}`, '_blank');
+            }
+          },
+          {
             type: 'view_patients',
             label: 'View Patients',
             onClick: () => setSelectedDoctor({ ...d, activeTab: 'patients' })
@@ -693,6 +703,29 @@ export default function AdminPhysiciansTab() {
         ];
         return (
           <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }} onClick={e => e.stopPropagation()}>
+            <a
+              href={`/dr/${encodeURIComponent(d.slug || slugify(getDoctorName(d)))}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`View public page of Dr. ${getDoctorName(d)}`}
+              style={{
+                width: '30px',
+                height: '30px',
+                borderRadius: '6px',
+                border: '1px solid #bbf7d0',
+                backgroundColor: '#f0fdf4',
+                color: '#16a34a',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 0,
+                flexShrink: 0,
+                textDecoration: 'none'
+              }}
+            >
+              <ExternalLink size={14} />
+            </a>
             <button
               type="button"
               onClick={() => {
