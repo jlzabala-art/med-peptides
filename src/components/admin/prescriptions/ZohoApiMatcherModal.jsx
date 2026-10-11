@@ -3,13 +3,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   X, Check, AlertCircle, RefreshCw, Link2, Plus, ExternalLink,
-  ChevronDown, ChevronUp, Search, CheckCircle2, ShieldCheck, Sparkles, Box
+  ChevronDown, ChevronUp, Search, CheckCircle2, ShieldCheck, Sparkles, Box, Edit3
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import {
   matchPrescriptionApisAction,
   confirmApiZohoAssociationAction,
   createZohoItemAndAssociateAction,
+  updateZohoItemAndConfirmAction,
   searchZohoBooksLiveItems
 } from '../../../actions/zohoItemMatchingActions';
 import { useAuth } from '../../../context/AuthContext';
@@ -27,6 +28,8 @@ export default function ZohoApiMatcherModal({
   const [selectedCandidate, setSelectedCandidate] = useState({});
   const [creatingIndex, setCreatingIndex] = useState(null);
   const [createForm, setCreateForm] = useState({});
+  const [editingCandidateIndex, setEditingCandidateIndex] = useState(null);
+  const [editCandidateForm, setEditCandidateForm] = useState({});
   const [liveSearchingIndex, setLiveSearchingIndex] = useState(null);
   const [liveQuery, setLiveQuery] = useState('');
 
@@ -53,6 +56,7 @@ export default function ZohoApiMatcherModal({
       setEvalData([]);
       setSelectedCandidate({});
       setCreatingIndex(null);
+      setEditingCandidateIndex(null);
     }
   }, [isOpen, prescription]);
 
@@ -99,7 +103,7 @@ export default function ZohoApiMatcherModal({
     }
 
     if (!zohoItem || !zohoItem.item_id) {
-      toast.error('Please select a valid Zoho candidate item to link.');
+      toast.error('Por favor, selecciona un ítem válido de Zoho Books para vincular.');
       return;
     }
 
@@ -117,7 +121,6 @@ export default function ZohoApiMatcherModal({
 
       if (res.success) {
         toast.success(`✓ ${itemEval.coreName} vinculado permanentemente`, { id: toastId });
-        // Update local status
         setEvalData(prev => {
           const next = [...prev];
           next[apiIndex] = {
@@ -138,6 +141,85 @@ export default function ZohoApiMatcherModal({
     }
   };
 
+  // ── Open Inline Editor to edit Zoho Item BEFORE confirming ──────────
+  const handleOpenEditCandidate = (apiIndex) => {
+    const itemEval = evalData[apiIndex];
+    const candidateId = selectedCandidate[apiIndex];
+    const candidate = itemEval.candidates.find(c => c.item_id === candidateId) || itemEval.linkedItem;
+
+    if (!candidate) {
+      toast.error('Selecciona primero un candidato para editar');
+      return;
+    }
+
+    setEditingCandidateIndex(apiIndex);
+    setEditCandidateForm({
+      itemId: candidate.item_id,
+      name: candidate.name || candidate.item_name || '',
+      sku: candidate.sku || itemEval.suggestedSku || '',
+      rate: candidate.rate || 0,
+      purchase_rate: candidate.purchase_rate || 0,
+      unit: candidate.unit || 'Piece',
+      description: candidate.description || ''
+    });
+  };
+
+  const handleAppendDoseToName = (apiIndex) => {
+    const itemEval = evalData[apiIndex];
+    if (!itemEval.dose) return;
+    const currentName = editCandidateForm.name || '';
+    if (!currentName.toLowerCase().includes(itemEval.dose.toLowerCase())) {
+      setEditCandidateForm(prev => ({
+        ...prev,
+        name: `${currentName} ${itemEval.dose}`.trim(),
+        sku: prev.sku ? `${prev.sku}-${itemEval.dose.toUpperCase().replace(/[^A-Z0-9]/g, '')}` : prev.sku
+      }));
+    }
+  };
+
+  const handleSubmitUpdateCandidate = async (apiIndex) => {
+    const itemEval = evalData[apiIndex];
+    if (!editCandidateForm.name || !editCandidateForm.name.trim()) {
+      toast.error('El nombre del ítem en Zoho es obligatorio.');
+      return;
+    }
+
+    setActingIndex(apiIndex);
+    const toastId = toast.loading(`Actualizando '${editCandidateForm.name}' en Zoho Books...`);
+
+    try {
+      const res = await updateZohoItemAndConfirmAction({
+        itemId: editCandidateForm.itemId,
+        updatedFields: editCandidateForm,
+        apiData: itemEval,
+        prescriptionId: prescription?.id,
+        userEmail: user?.email || 'admin'
+      });
+
+      if (res.success) {
+        toast.success(`✓ Actualizado en Zoho y vinculado permanentemente`, { id: toastId });
+        setEditingCandidateIndex(null);
+        setEvalData(prev => {
+          const next = [...prev];
+          next[apiIndex] = {
+            ...next[apiIndex],
+            isPersistent: true,
+            linkedItem: res.updatedItem
+          };
+          return next;
+        });
+        if (onSaved) onSaved();
+      } else {
+        toast.error(res.error || 'Error al actualizar ítem en Zoho', { id: toastId });
+      }
+    } catch (err) {
+      toast.error(err.message, { id: toastId });
+    } finally {
+      setActingIndex(null);
+    }
+  };
+
+  // ── Open Inline Creator for brand new Zoho Item ─────────────────────
   const handleOpenCreate = (apiIndex) => {
     const itemEval = evalData[apiIndex];
     setCreatingIndex(apiIndex);
@@ -147,14 +229,14 @@ export default function ZohoApiMatcherModal({
       unit: itemEval.dose && itemEval.dose.toLowerCase().includes('ml') ? 'mL' : 'g',
       rate: 0,
       purchase_rate: 0,
-      description: `Active Compounded Pharmaceutical Ingredient (API): ${itemEval.coreName}. Pharmaceutical compounding material.`
+      description: `Active Compounded Pharmaceutical Ingredient (API): ${itemEval.coreName}. Dosage: ${itemEval.dose || 'N/A'}.`
     });
   };
 
   const handleSubmitCreate = async (apiIndex) => {
     const itemEval = evalData[apiIndex];
     if (!createForm.name || !createForm.sku) {
-      toast.error('Item name and SKU are required.');
+      toast.error('Nombre y SKU son requeridos.');
       return;
     }
 
@@ -183,7 +265,7 @@ export default function ZohoApiMatcherModal({
         });
         if (onSaved) onSaved();
       } else {
-        toast.error(res.error || 'Failed to create item in Zoho', { id: toastId });
+        toast.error(res.error || 'Error al crear ítem en Zoho', { id: toastId });
       }
     } catch (err) {
       toast.error(err.message, { id: toastId });
@@ -245,8 +327,8 @@ export default function ZohoApiMatcherModal({
       <div
         style={{
           width: '100%',
-          maxWidth: '820px',
-          maxHeight: '92vh',
+          maxWidth: '860px',
+          maxHeight: '94vh',
           background: '#ffffff',
           borderRadius: '12px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
@@ -285,7 +367,7 @@ export default function ZohoApiMatcherModal({
             </div>
             <div>
               <div style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                Vincular APIs con Zoho Books
+                Vincular APIs & Concentraciones con Zoho Books
                 <span
                   style={{
                     fontSize: '0.72rem',
@@ -330,10 +412,10 @@ export default function ZohoApiMatcherModal({
             <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
               <RefreshCw size={28} className="animate-spin" style={{ margin: '0 auto 12px auto', color: '#0284c7' }} />
               <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1e293b' }}>
-                Buscando candidatos en Zoho Books y Diccionario Maestro...
+                Buscando candidatos en Zoho Books y validando concentraciones...
               </div>
               <div style={{ fontSize: '0.75rem', marginTop: '4px' }}>
-                Comparando tokens y concentraciones farmacológicas
+                Comparando tokens, dosis farmacológica y materias primas
               </div>
             </div>
           ) : evalData.length === 0 ? (
@@ -359,7 +441,7 @@ export default function ZohoApiMatcherModal({
               >
                 <Sparkles size={16} style={{ flexShrink: 0 }} />
                 <span>
-                  <strong>Asociación Permanente:</strong> Al confirmar un ítem, Atlas aprende la correspondencia en el Diccionario Maestro. Cualquier receta futura con este API lo asociará automáticamente.
+                  <strong>Control de Dosis & Compras:</strong> El nombre y concentración en Zoho Books deben coincidir exactamente para que los pedidos de compra a proveedores salgan calibrados. Puedes pulsar <strong>✏️ Editar en Zoho</strong> para ajustar el nombre antes de confirmar.
                 </span>
               </div>
 
@@ -367,7 +449,12 @@ export default function ZohoApiMatcherModal({
               {evalData.map((apiItem, idx) => {
                 const isLinked = apiItem.isPersistent || (apiItem.linkedItem && apiItem.isPersistent);
                 const isCreating = creatingIndex === idx;
+                const isEditing = editingCandidateIndex === idx;
                 const isActing = actingIndex === idx;
+
+                const candidateId = selectedCandidate[idx];
+                const selectedCand = apiItem.candidates.find(c => c.item_id === candidateId) || apiItem.candidates[0] || null;
+                const dosageEval = selectedCand?.dosageEval || null;
 
                 return (
                   <div
@@ -404,26 +491,26 @@ export default function ZohoApiMatcherModal({
                           {idx + 1}
                         </span>
                         <div>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a' }}>
-                            {apiItem.coreName}
+                          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span>{apiItem.coreName}</span>
                             {apiItem.dose && (
                               <span
                                 style={{
-                                  marginLeft: '8px',
                                   fontSize: '0.75rem',
-                                  fontWeight: 600,
+                                  fontWeight: 700,
                                   color: '#0284c7',
                                   background: '#e0f2fe',
                                   padding: '1px 6px',
-                                  borderRadius: '4px'
+                                  borderRadius: '4px',
+                                  border: '1px solid #bae6fd'
                                 }}
                               >
-                                {apiItem.dose}
+                                Concentración: {apiItem.dose}
                               </span>
                             )}
                           </div>
                           <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                            Identificador normalizado: <code style={{ color: '#475569' }}>{apiItem.slug}</code>
+                            Identificador único: <code style={{ color: '#475569' }}>{apiItem.slug}</code>
                           </div>
                         </div>
                       </div>
@@ -484,7 +571,7 @@ export default function ZohoApiMatcherModal({
                       )}
                     </div>
 
-                    {/* Middle Row: Selection / Active Zoho Link */}
+                    {/* Middle Row: Active Zoho Link Display */}
                     {isLinked && apiItem.linkedItem ? (
                       <div
                         style={{
@@ -514,7 +601,6 @@ export default function ZohoApiMatcherModal({
 
                         <button
                           onClick={() => {
-                            // Allow re-linking
                             setEvalData(prev => {
                               const next = [...prev];
                               next[idx] = { ...next[idx], isPersistent: false };
@@ -536,8 +622,67 @@ export default function ZohoApiMatcherModal({
                         </button>
                       </div>
                     ) : (
-                      /* Not linked yet -> show Candidate Selector & Action Buttons */
+                      /* Not linked yet -> show Candidate Selector & Dosage Validation */
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {/* Dosage Mismatch / Match Alert Callout */}
+                        {dosageEval && dosageEval.status === 'mismatch' && (
+                          <div
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: '6px',
+                              background: '#fffbeb',
+                              border: '1px solid #fde68a',
+                              fontSize: '0.73rem',
+                              color: '#92400e',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '8px'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <AlertCircle size={14} style={{ color: '#d97706', flexShrink: 0 }} />
+                              <span>{dosageEval.label}</span>
+                            </div>
+                            <button
+                              onClick={() => handleOpenEditCandidate(idx)}
+                              style={{
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                border: '1px solid #d97706',
+                                background: '#ffffff',
+                                color: '#b45309',
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                flexShrink: 0
+                              }}
+                            >
+                              ✏️ Ajustar nombre en Zoho
+                            </button>
+                          </div>
+                        )}
+
+                        {dosageEval && dosageEval.status === 'exact' && (
+                          <div
+                            style={{
+                              padding: '6px 10px',
+                              borderRadius: '6px',
+                              background: '#f0fdf4',
+                              border: '1px solid #bbf7d0',
+                              fontSize: '0.73rem',
+                              color: '#15803d',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            <CheckCircle2 size={13} style={{ color: '#16a34a' }} />
+                            <span>{dosageEval.label}</span>
+                          </div>
+                        )}
+
+                        {/* Candidates Selector & Actions Row */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <div style={{ flex: 1, minWidth: '240px' }}>
                             <select
@@ -565,7 +710,6 @@ export default function ZohoApiMatcherModal({
                             </select>
                           </div>
 
-                          {/* Quick Live Search Toggle if needed */}
                           <button
                             onClick={() => {
                               const promptVal = window.prompt(`Buscar en Zoho Books para '${apiItem.coreName}':`, apiItem.coreName);
@@ -590,7 +734,30 @@ export default function ZohoApiMatcherModal({
                             }}
                           >
                             <Search size={13} />
-                            Buscar en Zoho
+                            Buscar
+                          </button>
+
+                          {/* EDIT BEFORE CONFIRMING BUTTON */}
+                          <button
+                            onClick={() => isEditing ? setEditingCandidateIndex(null) : handleOpenEditCandidate(idx)}
+                            disabled={!selectedCandidate[idx]}
+                            style={{
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              background: isEditing ? '#f1f5f9' : '#fffbeb',
+                              border: '1px solid #fde68a',
+                              color: '#b45309',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                            title="Editar el nombre o SKU en Zoho Books antes de vincular"
+                          >
+                            <Edit3 size={13} />
+                            {isEditing ? 'Cancelar Edición' : 'Editar en Zoho'}
                           </button>
 
                           <button
@@ -631,9 +798,99 @@ export default function ZohoApiMatcherModal({
                             }}
                           >
                             <Plus size={14} />
-                            {isCreating ? 'Cancelar Alta' : 'Dar de Alta en Zoho'}
+                            {isCreating ? 'Cancelar Alta' : 'Dar de Alta'}
                           </button>
                         </div>
+
+                        {/* Inline Edit Form (Edit Zoho Item before matching) */}
+                        {isEditing && (
+                          <div
+                            style={{
+                              marginTop: '8px',
+                              padding: '12px',
+                              borderRadius: '8px',
+                              background: '#fffdf5',
+                              border: '1px solid #fde68a',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '10px'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#92400e' }}>
+                                ✏️ Editar ítem en Zoho Books antes de vincular:
+                              </div>
+                              {apiItem.dose && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleAppendDoseToName(idx)}
+                                  style={{
+                                    padding: '2px 8px',
+                                    borderRadius: '4px',
+                                    background: '#e0f2fe',
+                                    border: '1px solid #bae6fd',
+                                    color: '#0369a1',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  + Añadir Dosis ({apiItem.dose}) al Nombre
+                                </button>
+                              )}
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+                              <div style={{ gridColumn: 'span 2' }}>
+                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#475569' }}>
+                                  Nombre en Zoho Books (Debe incluir fármaco y concentración)
+                                </label>
+                                <input
+                                  type="text"
+                                  value={editCandidateForm.name || ''}
+                                  onChange={(e) => setEditCandidateForm(prev => ({ ...prev, name: e.target.value }))}
+                                  style={{ width: '100%', padding: '6px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }}
+                                />
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#475569' }}>SKU Código</label>
+                                <input
+                                  type="text"
+                                  value={editCandidateForm.sku || ''}
+                                  onChange={(e) => setEditCandidateForm(prev => ({ ...prev, sku: e.target.value }))}
+                                  style={{ width: '100%', padding: '6px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }}
+                                />
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: '#475569' }}>Precio Venta (AED)</label>
+                                <input
+                                  type="number"
+                                  value={editCandidateForm.rate || 0}
+                                  onChange={(e) => setEditCandidateForm(prev => ({ ...prev, rate: parseFloat(e.target.value) || 0 }))}
+                                  style={{ width: '100%', padding: '6px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }}
+                                />
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                              <button
+                                onClick={() => setEditingCandidateIndex(null)}
+                                style={{ padding: '6px 10px', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#ffffff', cursor: 'pointer' }}
+                              >
+                                Descartar
+                              </button>
+                              <button
+                                onClick={() => handleSubmitUpdateCandidate(idx)}
+                                disabled={isActing}
+                                style={{ padding: '6px 14px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '4px', border: 'none', background: '#b45309', color: '#ffffff', cursor: 'pointer' }}
+                              >
+                                {isActing ? 'Actualizando en Zoho...' : '💾 Actualizar en Zoho y Vincular'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Inline Create Form */}
                         {isCreating && (

@@ -403,3 +403,72 @@ export async function createZohoItemAndAssociateAction({
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * Updates an existing item in Zoho Books (e.g. adjusts name to include dosage, SKU, or rates)
+ * and confirms the permanent association in the Master Dictionary and prescription.
+ */
+export async function updateZohoItemAndConfirmAction({
+  itemId,
+  updatedFields = {},
+  apiData,
+  prescriptionId = null,
+  userEmail = 'admin'
+}) {
+  if (!itemId) return { success: false, error: 'No itemId provided for update.' };
+  const token = await getZohoAccessToken();
+  if (!token) return { success: false, error: 'No se pudo obtener el token de Zoho Books.' };
+
+  const payload = {};
+  if (updatedFields.name) payload.name = updatedFields.name.trim();
+  if (updatedFields.sku) payload.sku = updatedFields.sku.trim();
+  if (updatedFields.rate !== undefined) payload.rate = parseFloat(updatedFields.rate) || 0;
+  if (updatedFields.purchase_rate !== undefined) payload.purchase_rate = parseFloat(updatedFields.purchase_rate) || 0;
+  if (updatedFields.unit) payload.unit = updatedFields.unit.trim();
+  if (updatedFields.description) payload.description = updatedFields.description.trim();
+
+  try {
+    const res = await fetch(`${ZOHO_BOOKS_BASE}/items/${itemId}?organization_id=${ZOHO_ORG_ID}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Zoho-oauthtoken ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const json = await res.json();
+    if (!res.ok || json.code !== 0) {
+      throw new Error(json.message || `Error actualizando en Zoho Books HTTP ${res.status}`);
+    }
+
+    const itemResult = json.item || { ...payload, item_id: itemId };
+    const updatedZohoItem = {
+      item_id: String(itemResult.item_id || itemId),
+      name: itemResult.name || payload.name,
+      sku: itemResult.sku || payload.sku,
+      rate: itemResult.rate || payload.rate,
+      purchase_rate: itemResult.purchase_rate || payload.purchase_rate,
+      unit: itemResult.unit || payload.unit
+    };
+
+    // Permanently link in Master Dictionary & prescription
+    await confirmApiZohoAssociationAction({
+      apiRawName: apiData.rawInput || apiData.coreName,
+      apiDose: apiData.dose || '',
+      zohoItem: updatedZohoItem,
+      prescriptionId,
+      userEmail
+    });
+
+    return {
+      success: true,
+      message: `Ítem actualizado en Zoho Books ('${updatedZohoItem.name}') y vinculado permanentemente.`,
+      updatedItem: updatedZohoItem
+    };
+  } catch (err) {
+    console.error('[updateZohoItemAndConfirmAction] Error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
