@@ -26,7 +26,6 @@ import AppActionGroup from '../../ui/AppActionGroup';
 import MobileDoctorCard from './mobile/MobileDoctorCard';
 import MobileActionSheet from '../../ui/MobileActionSheet';
 import { Eye, Edit3, XCircle, Layers, ExternalLink } from '@/lib/icons';
-import { slugify } from '@/lib/doctorCache';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 
 export default function AdminPhysiciansTab() {
@@ -402,6 +401,17 @@ export default function AdminPhysiciansTab() {
     return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
   };
   const getDoctorName = (d) => capitalizeName(d.displayName || [d.firstName, d.lastName].filter(Boolean).join(' ') || 'Unnamed Physician');
+  const getDoctorSlug = (d) => {
+    if (d?.slug) return d.slug;
+    const name = getDoctorName(d);
+    return String(name || '')
+      .toLowerCase()
+      .replace(/^dr[a]?\.\s*/i, '')
+      .replace(/^dr[a]?\s*/i, '')
+      .replace(/[^\w\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+  };
   const getPatientsCount = (d) => d.patientCount ?? 0;
   const getOrdersData = (d) => ({ count: d.orderCount ?? 0, revenue: d.totalRevenue ?? 0 });
 
@@ -663,7 +673,7 @@ export default function AdminPhysiciansTab() {
             label: 'View Public Page',
             icon: ExternalLink,
             onClick: () => {
-              const drSlug = d.slug || slugify(getDoctorName(d));
+              const drSlug = getDoctorSlug(d);
               window.open(`/dr/${encodeURIComponent(drSlug)}`, '_blank');
             }
           },
@@ -704,7 +714,7 @@ export default function AdminPhysiciansTab() {
         return (
           <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }} onClick={e => e.stopPropagation()}>
             <a
-              href={`/dr/${encodeURIComponent(d.slug || slugify(getDoctorName(d)))}`}
+              href={`/dr/${encodeURIComponent(getDoctorSlug(d))}`}
               target="_blank"
               rel="noopener noreferrer"
               title={`View public page of Dr. ${getDoctorName(d)}`}
