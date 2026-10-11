@@ -211,7 +211,7 @@ async function executeIngestion() {
           name: existingData.name || item.name,
           canonicalName: existingData.canonicalName || item.canonicalName || item.name,
           slug: masterSlug,
-          category: existingData.category || item.category,
+          category: item.category || existingData.category || 'peptide',
           status: 'active',
           updatedAt: new Date().toISOString(),
           variants: mergedVariants
