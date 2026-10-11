@@ -86,6 +86,8 @@ export function extractProductPresentation(product) {
     if (/capsule/i.test(p)) return 'Oral Capsule';
     if (/sublingual/i.test(p)) return 'Sublingual';
     if (/cartridge/i.test(p)) return 'Refill Cartridge';
+    if (/foam|espuma/i.test(p)) return 'Topical Foam';
+    if (/serum|suero/i.test(p)) return 'Dermal Serum';
     if (/cream|topical/i.test(p)) return 'Topical Cream';
     if (/oil/i.test(p)) return 'Topical Oil';
     if (/tablet/i.test(p)) return 'Oral Tablet';
@@ -102,6 +104,8 @@ export function extractProductPresentation(product) {
   if (/capsule|oral/i.test(str)) return 'Oral Capsule';
   if (/sublingual/i.test(str)) return 'Sublingual';
   if (/cartridge/i.test(str)) return 'Refill Cartridge';
+  if (/foam|espuma/i.test(str)) return 'Topical Foam';
+  if (/serum|suero/i.test(str)) return 'Dermal Serum';
   if (/cream|topical/i.test(str)) return 'Topical Cream';
   if (/oil/i.test(str)) return 'Topical Oil';
   if (/tablet/i.test(str)) return 'Oral Tablet';

@@ -123,22 +123,64 @@ export const PEPTIDE_SYNONYM_DICTIONARY = [
  * Maps common symptom or goal queries to specific clinical peptide keywords
  */
 export const CLINICAL_INDICATION_MAP = {
-  'gut healing': 'bpc-157 kpv',
+  'gut healing': 'bpc-157 kpv larazotide vip',
+  'gut health': 'bpc-157 kpv larazotide vip',
+  'gut repair': 'bpc-157 kpv larazotide vip',
   'gut inflammation': 'bpc-157 kpv',
   'tendon repair': 'bpc-157 tb-500',
   'ligament injury': 'bpc-157 tb-500',
-  'fat loss': 'semaglutide tirzepatide aod-9604 tesamorelin',
-  'weight loss': 'semaglutide tirzepatide retatrutide',
+  'fat loss': 'semaglutide tirzepatide retatrutide aod-9604 tesamorelin cagrilintide 5-amino-1mq',
+  'weight loss': 'semaglutide tirzepatide retatrutide cagrilintide aod-9604 tesamorelin liraglutide 5-amino-1mq',
+  'weight management': 'semaglutide tirzepatide retatrutide cagrilintide',
+  'glp-1': 'semaglutide tirzepatide retatrutide liraglutide',
+  'glp1': 'semaglutide tirzepatide retatrutide liraglutide',
+  'appetite suppression': 'semaglutide tirzepatide retatrutide cagrilintide',
   'cognitive focus': 'semax selank',
   'brain fog': 'semax selank nad+',
   'deep sleep': 'dsip epitalon',
   'sleep recovery': 'dsip epitalon',
-  'anti aging': 'epitalon mots-c ghk-cu',
+  'anti aging': 'epitalon mots-c ghk-cu nad+ urolithin',
+  'longevity': 'epitalon mots-c ghk-cu nad+ urolithin',
   'cellular longevity': 'epitalon mots-c nad+',
-  'muscle growth': 'cjc-1295 ipamorelin igf-1 lr3',
+  'muscle growth': 'cjc-1295 ipamorelin igf-1 lr3 sermorelin mk-677',
+  'muscle recovery': 'bpc-157 tb-500 cjc-1295 ipamorelin',
   'skin elasticity': 'ghk-cu collagen',
   'libido enhancement': 'pt-141 bremelanotide'
 };
+
+/**
+ * Returns an array of clinical synonym tokens for a given search query
+ */
+export function getClinicalSynonyms(rawQuery = '') {
+  if (!rawQuery) return [];
+  const clean = rawQuery.toLowerCase().trim();
+  const matched = [];
+
+  // Direct map match
+  if (CLINICAL_INDICATION_MAP[clean]) {
+    matched.push(...CLINICAL_INDICATION_MAP[clean].split(/\s+/));
+  }
+
+  // Substring match in keys (e.g. query contains "weight loss" or "fat loss")
+  for (const [key, values] of Object.entries(CLINICAL_INDICATION_MAP)) {
+    if (clean.includes(key) || key.includes(clean)) {
+      matched.push(...values.split(/\s+/));
+    }
+  }
+
+  // Also map common clinical goal enum keys
+  if (clean.includes('weight') || clean.includes('loss') || clean.includes('fat') || clean.includes('diet')) {
+    matched.push('weight_management', 'fat_loss', 'weight_loss', 'appetite_suppression', 'semaglutide', 'tirzepatide', 'retatrutide', 'cagrilintide', 'aod-9604', 'tesamorelin');
+  }
+  if (clean.includes('gut') || clean.includes('digest')) {
+    matched.push('gut_health', 'tissue_repair', 'bpc-157', 'kpv');
+  }
+  if (clean.includes('aging') || clean.includes('longev') || clean.includes('edad')) {
+    matched.push('anti_aging', 'anti_aging_longevity', 'epitalon', 'mots-c');
+  }
+
+  return Array.from(new Set(matched.filter(Boolean)));
+}
 
 /**
  * Normalizes query string with clinical indication expansions if direct matches exist
@@ -151,3 +193,4 @@ export function expandClinicalQuery(rawQuery = '') {
   }
   return clean;
 }
+

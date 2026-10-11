@@ -140,7 +140,8 @@ export async function searchAlgolia(query, { distinct = true, hitsPerPage = 15, 
       query: cleanQuery,
       hitsPerPage,
       distinct: distinct ? 1 : 0,
-      clickAnalytics: true
+      clickAnalytics: true,
+      removeWordsIfNoResults: 'allOptional'
     };
     if (facetFilters) productReq.facetFilters = facetFilters;
     if (filters) productReq.filters = filters;
@@ -149,7 +150,8 @@ export async function searchAlgolia(query, { distinct = true, hitsPerPage = 15, 
       indexName: 'protocols',
       query: cleanQuery,
       hitsPerPage: 6,
-      clickAnalytics: true
+      clickAnalytics: true,
+      removeWordsIfNoResults: 'allOptional'
     };
 
     const results = await currentClient.search({
@@ -207,7 +209,8 @@ export async function searchAlgoliaProducts(query, { hitsPerPage = 40, supplier 
       query: cleanQuery,
       hitsPerPage,
       distinct: distinct ? 1 : 0,
-      clickAnalytics: true
+      clickAnalytics: true,
+      removeWordsIfNoResults: 'allOptional'
     };
     if (supplier) {
       const cleanSup = String(supplier).toLowerCase().replace(/[\s-_]/g, '');

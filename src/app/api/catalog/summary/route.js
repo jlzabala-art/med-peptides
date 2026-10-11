@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 import { sanitizeForClient } from '../../../../utils/sanitizeForClient';
 import { searchAlgolia } from '../../../../services/algoliaSearch';
+import { getClinicalSynonyms } from '../../../../data/algoliaMedicalSynonyms';
 
 // ── In-Memory Server RAM Cache (L1 Cache: 0ms response) ───────────────────────
 const catalogSummaryCache = new Map();
@@ -89,29 +90,45 @@ export async function buildCatalogSummary(searchParams) {
         const algoliaRes = await searchAlgolia(qParam);
         if (algoliaRes && Array.isArray(algoliaRes.products) && algoliaRes.products.length > 0) {
           const term = qParam.toLowerCase();
-          // Filter out false-positive typo tolerance matches (e.g. "bloodo" matching "blood" in "Metabolic & Blood Sugar")
+          const clinicalSynonyms = getClinicalSynonyms(term);
+          const expandedTerms = [term, ...clinicalSynonyms];
+
+          // Filter out false-positive typo tolerance matches while preserving clinical synonym expansions
           const validProducts = algoliaRes.products.filter(p => {
             const hr = p._highlightResult || {};
-            // Accept if name, supplier, or sku had an explicit match
+            const pName = (p.name || '').toLowerCase();
+            const pSlug = (p.slug || '').toLowerCase();
+            const tags = Array.isArray(p.tags) ? p.tags.map(t => typeof t === 'string' ? t.toLowerCase() : String(t.value || '').toLowerCase()) : [];
+            const pTokens = Array.isArray(p.searchTokens) ? p.searchTokens.map(t => String(t).toLowerCase()) : [];
+            const pCategory = (p.category || '').toLowerCase();
+            const pGoals = Array.isArray(p.goals) ? p.goals.map(g => String(g).toLowerCase()) : [];
+
+            // 1. Check direct match against product fields or expanded clinical terms
+            if (expandedTerms.some(st => 
+              pName.includes(st) || 
+              pSlug.includes(st) || 
+              pCategory.includes(st) ||
+              tags.some(t => t.includes(st) || st.includes(t)) ||
+              pTokens.some(tok => tok.includes(st)) ||
+              pGoals.some(g => g.includes(st) || st.includes(g))
+            )) {
+              return true;
+            }
+
+            // 2. Accept if name, supplier, or sku had an explicit match in Algolia
             if (hr.name && hr.name.matchLevel !== 'none') {
-              const pName = (p.name || '').toLowerCase();
-              if (pName.includes(term) || hr.name.fullyHighlighted) return true;
-              if (hr.name.matchLevel === 'full' && (hr.name.value || '').toLowerCase().includes(term)) return true;
+              if (hr.name.matchLevel === 'full' || hr.name.fullyHighlighted) return true;
+              if (expandedTerms.some(st => (hr.name.value || '').toLowerCase().includes(st))) return true;
+              if (Array.isArray(hr.name.matchedWords) && hr.name.matchedWords.length > 0) return true;
             }
             if (hr.supplier && hr.supplier.matchLevel !== 'none') return true;
             if (hr.sku && hr.sku.matchLevel !== 'none') return true;
-            // If match was in tags, only accept if at least one tag actually contains the search term
-            const tags = Array.isArray(p.tags) ? p.tags.map(t => typeof t === 'string' ? t.toLowerCase() : String(t.value || '').toLowerCase()) : [];
-            if (tags.some(t => t.includes(term))) return true;
-            const pSlug = (p.slug || '').toLowerCase();
-            if (pSlug.includes(term)) return true;
-            const pTokens = Array.isArray(p.searchTokens) ? p.searchTokens.map(t => String(t).toLowerCase()) : [];
-            if (pTokens.some(t => t.includes(term))) return true;
+
             return false;
           });
 
           algoliaMatchedIds = new Set(
-            validProducts.flatMap(p => [p.objectID, p.id, p.productId, p.slug].filter(Boolean).map(s => String(s).toLowerCase()))
+            validProducts.flatMap(p => [p.objectID, p.id, p.productId, p.slug, p.canonicalKey].filter(Boolean).map(s => String(s).toLowerCase()))
           );
         }
       } catch (e) {
@@ -242,7 +259,7 @@ export async function buildCatalogSummary(searchParams) {
       const isInactive = (['inactive', 'archived', 'draft'].includes(rawStatus)) || data.isActive === false;
       const computedStatus = (rawStatus === 'published' ? 'active' : rawStatus) || (isInactive ? 'archived' : 'active');
 
-      // Search term filter (case-insensitive substring match with tags/aliases/programs/suppliers)
+      // Search term filter (case-insensitive substring match with tags/aliases/programs/suppliers/clinical goals)
       if (qParam.length > 0) {
         const term = qParam.toLowerCase();
         const docId = item.id.toLowerCase();
@@ -253,6 +270,10 @@ export async function buildCatalogSummary(searchParams) {
         const pSku  = (data.sku || '').toLowerCase();
         const pCas  = (data.casNumber || data.molecular?.casNumber || '').toLowerCase();
         const pDesc = (data.description || '').toLowerCase();
+        const pCategory = (data.category || data.categoryId || '').toLowerCase();
+        const pSubcategory = (data.subcategory || '').toLowerCase();
+        const pGoals = (Array.isArray(data.goals) ? data.goals : []).map(g => String(g).toLowerCase());
+        const pIndications = (Array.isArray(data.clinicalIndications) ? data.clinicalIndications : []).map(i => String(i).toLowerCase());
         const pTokens = Array.isArray(data.searchTokens) ? data.searchTokens.map(t => String(t).toLowerCase()) : [];
         const pTags = Array.isArray(data.tags) ? data.tags.map(t => String(t).toLowerCase()) : [];
         const pAliases = Array.isArray(data.searchAliases) ? data.searchAliases.map(a => String(a).toLowerCase()) : [];
@@ -270,22 +291,37 @@ export async function buildCatalogSummary(searchParams) {
           pSuppliers.some(s => s.includes(term)) ||
           pSupplierIds.some(s => s.includes(term));
 
+        const clinicalSynonyms = getClinicalSynonyms(term);
+        const searchTerms = [term, ...clinicalSynonyms];
+
         const matchesSearch = 
-          (algoliaMatchedIds && (algoliaMatchedIds.has(docId) || algoliaMatchedIds.has(pSlug) || algoliaMatchedIds.has(cName) || algoliaMatchedIds.has(pName))) ||
-          docId.includes(term) ||
-          pName.includes(term) ||
-          cName.includes(term) ||
-          dName.includes(term) ||
-          pSlug.includes(term) ||
-          pSku.includes(term) ||
-          pCas.includes(term) ||
-          pDesc.includes(term) ||
-          matchesSupplier ||
-          pTokens.some(t => t.includes(term)) ||
-          pTags.some(t => t.includes(term)) ||
-          pAliases.some(a => a.includes(term)) ||
-          pProgNames.some(pn => pn.includes(term)) ||
-          pProgSlugs.some(ps => ps.includes(term));
+          (algoliaMatchedIds && (
+            algoliaMatchedIds.has(docId) || 
+            algoliaMatchedIds.has(pSlug) || 
+            algoliaMatchedIds.has(cName) || 
+            algoliaMatchedIds.has(pName) ||
+            searchTerms.some(st => algoliaMatchedIds.has(st))
+          )) ||
+          searchTerms.some(st => (
+            docId.includes(st) ||
+            pName.includes(st) ||
+            cName.includes(st) ||
+            dName.includes(st) ||
+            pSlug.includes(st) ||
+            pSku.includes(st) ||
+            pCas.includes(st) ||
+            pCategory.includes(st) ||
+            pSubcategory.includes(st) ||
+            pDesc.includes(st) ||
+            pGoals.some(g => g.includes(st) || st.includes(g)) ||
+            pIndications.some(i => i.includes(st) || st.includes(i)) ||
+            pTokens.some(t => t.includes(st)) ||
+            pTags.some(t => t.includes(st)) ||
+            pAliases.some(a => a.includes(st)) ||
+            pProgNames.some(pn => pn.includes(st)) ||
+            pProgSlugs.some(ps => ps.includes(st))
+          )) ||
+          matchesSupplier;
 
         if (!matchesSearch) return;
       }
