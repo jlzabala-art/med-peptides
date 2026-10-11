@@ -25,6 +25,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Supresión de DHT folicular, reversión de miniaturización & mantenimiento de densidad capilar',
     mechanismOfAction: 'Inhibe selectivamente la enzima esteroide 5α-reductasa tipo II, bloqueando la conversión de testosterona en dihidrotestosterona (DHT) en la papila dérmica folicular. Reduce los niveles de DHT en >70% frenando la apoptosis folicular.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'Cápsulas Micronizadas USP'],
+    cellularTarget: 'Follicular Dermal Papilla Type II 5α-Reductase',
     standardDosages: '0.1% - 1% Tópico · 1 mg - 5 mg Oral',
     fagronPrograms: ['TrichoTest']
   },
@@ -36,6 +37,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Inhibición androgénica folicular profunda en alopecia androgenética refractaria',
     mechanismOfAction: 'Bloqueador dual de isoenzimas 5α-reductasa tipo I y II. Suprime los niveles de DHT folicular en >90%, con afinidad 3 veces superior a la isoenzima tipo II y 100 veces superior a la tipo I respecto a finasteride.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'Mesoterapia Capilar', 'Cápsulas Micronizadas'],
+    cellularTarget: 'Dual Type I, II & III 5α-Reductase Isoenzymes (Dermal Papilla & Sebaceous Gland)',
     standardDosages: '0.01% - 0.5% Tópico · 0.5 mg Oral',
     fagronPrograms: ['TrichoTest']
   },
@@ -47,6 +49,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Inducción de fase anágena, estimulación de perfusión microvascular folicular y grosor del tallo',
     mechanismOfAction: 'Bioactivado enzimáticamente por la sulfotransferasa folicular (SULT1A1) a sulfato de minoxidil activo. Abre los canales de potasio sensibles a ATP (K_ATP), provocando hiperpolarización celular, vasodilatación papilar y estimulación mitogénica de queratinocitos.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'Solución Hidroalcohólica Fagron'],
+    cellularTarget: 'Follicular Dermal Papilla K_ATP Channels & Microvascular Endothelium (SULT1A1 Activation)',
     standardDosages: '2% - 7% Tópico · 0.25 mg - 5 mg Oral',
     fagronPrograms: ['TrichoTest']
   },
@@ -58,6 +61,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Estimulación de microperfusión capilar papilar, angiogénesis y bioenergía del bulbo',
     mechanismOfAction: 'Sustrato biológico primordial para la óxido nítrico sintasa endotelial (eNOS/NOS3). Incrementa la síntesis de óxido nítrico (NO), favoreciendo la vasodilatación fisiológica en el lecho microvascular de la papila dérmica y aportando nutrientes esenciales a la matriz queratinocítica.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'Cápsulas Orales Micronizadas'],
+    cellularTarget: 'Endothelial Nitric Oxide Synthase (eNOS/NOS3) & Follicular Bulb Microcirculation',
     standardDosages: '0.5% - 2% Tópico · 500 mg - 3,000 mg Oral',
     fagronPrograms: ['TrichoTest', 'NutriGen']
   },
@@ -69,6 +73,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Inmunidad dérmica, control de hiperseborrea folicular y cofactor de división celular en el bulbo piloso',
     mechanismOfAction: 'Forma biodisponible de zinc inorgánico. Actúa como cofactor estructural de más de 300 enzimas celulares, estabiliza las membranas celulares del folículo, modula la secreción de sebo a través de la inhibición de 5α-reductasa y estimula la síntesis de proteínas queratínicas.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'Cápsulas Orales Micronizadas'],
+    cellularTarget: 'MMP Metalloenzymes, 5α-Reductase Allosteric Binding & Keratinocyte Ribosomes',
     standardDosages: '0.2% - 1% Tópico · 50 mg - 220 mg Oral (10 mg - 50 mg Zn elemental)',
     fagronPrograms: ['TrichoTest', 'NutriGen']
   },
@@ -80,6 +85,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Inmunidad celular, síntesis de queratina e inhibición coadyuvante de 5α-reductasa',
     mechanismOfAction: 'Cofactor de más de 300 metaloenzimas esenciales para la replicación del ADN y síntesis proteica en queratinocitos. Ejerce una inhibición alostérica no competitiva sinérgica sobre la 5α-reductasa folicular.',
     compatibleVehicles: ['Cápsulas Orales', 'TrichoSol™'],
+    cellularTarget: 'Metalloenzyme Catalytic Sites, ZIP4 Transporters & Follicular Keratin Filaments',
     standardDosages: '15 mg - 30 mg Zinc Elemental Oral',
     fagronPrograms: ['TrichoTest', 'NutriGen']
   },
@@ -91,6 +97,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Protección mitocondrial frente a estrés oxidativo severo, anti-fotoenvejecimiento dérmico y longevidad folicular',
     mechanismOfAction: 'Potente carotenoide antioxidante con capacidad de cruzar completamente la bicapa lipídica de las membranas celulares (efecto transmembrana). Su capacidad de neutralización de radicales de oxígeno singlete es 6,000 veces superior a la vitamina C y 550 veces superior a la vitamina E. Inhibe la peroxidación lipídica en la papila dérmica y preserva la microvasculatura folicular.',
     compatibleVehicles: ['Cápsulas Blandas Lipídicas USP', 'TrichoOil™', 'Cápsulas Micronizadas'],
+    cellularTarget: 'Transmembrane Follicular Lipid Bilayer & Mitochondrial ROS Scavenging Cascade',
     standardDosages: '4 mg - 12 mg Oral Diaria',
     fagronPrograms: ['NutriGen', 'TeloTest', 'TrichoTest']
   },
@@ -102,6 +109,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Optimización del ciclo de un carbono, oxigenación microvascular periférica y replicación celular en la matriz capilar',
     mechanismOfAction: 'Cofactor esencial para la síntesis de purinas y pirimidinas durante la división celular de alta frecuencia de los queratinocitos de la matriz folicular. Participa en la conversión de homocisteína a metionina (ciclo de metilación), previniendo la isquemia microvascular perifolicular y garantizando una eritropoyesis normal.',
     compatibleVehicles: ['Cápsulas Sublinguales / Orales', 'TrichoSol™'],
+    cellularTarget: 'Methionine Synthase (MTR) & Homocysteine Remethylation in Follicular Matrix',
     standardDosages: '500 mcg - 2,500 mcg Oral / Sublingual',
     fagronPrograms: ['NutriGen', 'TeloTest']
   },
@@ -113,6 +121,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Protección frente a peroxidación lipídica, función tiroidea folicular y calidad estructural del cabello',
     mechanismOfAction: 'Componente catalítico de las selenoproteínas humanas, incluidas las glutatión peroxidasas (GPx1, GPx4) y las tiorredoxina reductasas. Cataliza la degradación de peróxidos de hidrógeno y lípidos, previniendo el daño oxidativo en la membrana celular folicular.',
     compatibleVehicles: ['Cápsulas Orales'],
+    cellularTarget: 'Glutathione Peroxidase (GPx1/GPx4) Selenoproteins & Follicular Redox Bilayer',
     standardDosages: '50 mcg - 200 mcg Selenio Elemental Oral Diaria',
     fagronPrograms: ['NutriGen', 'TeloTest', 'TrichoTest']
   },
@@ -124,6 +133,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Elongación del tallo piloso, retraso de fase catágena y optimización de bioenergética folicular',
     mechanismOfAction: 'Transporta ácidos grasos de cadena larga a través de la membrana mitocondrial interna para β-oxidación y generación de ATP en las células de la papila dérmica. Estimula significativamente la proliferación de queratinocitos foliculares y regula al alza factores de proliferación celular retrasando la apoptosis de fase catágena.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'Cápsulas Orales Micronizadas'],
+    cellularTarget: 'Carnitine Palmitoyltransferase-1 (CPT-1) & Mitochondrial β-Oxidation in Papilla',
     standardDosages: '1% - 2% Tópico · 1,000 mg - 2,000 mg Oral Diaria',
     fagronPrograms: ['TrichoTest', 'NutriGen']
   },
@@ -135,6 +145,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Inhibición de peroxidación lipídica en cuero cabelludo, protección de la cutícula y microperfusión capilar',
     mechanismOfAction: 'Principal antioxidante liposoluble endógeno de las membranas celulares. Interrumpe la cascada de radicales libres reaccionando con radicales peroxilo lipídicos (LOO•), protegiendo los ácidos grasos poliinsaturados de la barrera cutánea folicular y manteniendo la integridad vascular de la papila dérmica.',
     compatibleVehicles: ['TrichoOil™', 'TrichoSol™', 'Cápsulas Blandas Lipídicas USP'],
+    cellularTarget: 'Perifollicular Membrane Phospholipids & Lipid Peroxidation Arrest',
     standardDosages: '0.5% - 2% Tópico · 200 UI - 800 UI (134 mg - 536 mg) Oral',
     fagronPrograms: ['TrichoTest', 'NutriGen', 'TeloTest']
   },
@@ -146,6 +157,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Neutralización del freno microinflamatorio perifolicular y desbloqueo de fase anágena',
     mechanismOfAction: 'Antagoniza de forma competitiva los receptores de prostaglandina D2 (PGD2/CRTH2) sobreexpresados en cuero cabelludo alopécico. Bloquea la apoptosis de queratinocitos foliculares y suprime el infiltrado inflamatorio mastocitario perifolicular.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™'],
+    cellularTarget: 'Prostaglandin D2 (PGD2) Receptors (CRTH2/GPR44) & Mast Cell Infiltration',
     standardDosages: '0.5% - 1% Tópico',
     fagronPrograms: ['TrichoTest']
   },
@@ -157,6 +169,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Bioenergía folicular (ATP), reparación de cutícula y resistencia tensil de la fibra capilar',
     mechanismOfAction: 'Precursor fisiológico del ácido pantoténico y la Coenzima A. Impulsa la biosíntesis de ATP celular y lípidos de la vaina epitelial externa, optimizando la capacidad higroscópica del tallo y reparando el daño térmico y mecánico.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'TrichoOil™'],
+    cellularTarget: 'Coenzyme A (CoA) Biosynthesis & Outer Root Sheath Keratinocyte Membranes',
     standardDosages: '0.25% - 2% Tópico',
     fagronPrograms: ['TrichoTest']
   },
@@ -168,6 +181,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Inducción de anagénesis precoz, hipertrofia folicular y estimulación de melanogénesis',
     mechanismOfAction: 'Activa directamente los receptores FP de la papila dérmica, induciendo la transición de folículos de fase telógena a anágena. Estimula el reclutamiento microvascular y aumenta el diámetro y pigmentación de cabellos miniaturizados.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™'],
+    cellularTarget: 'Prostaglandin F2α (FP) Receptors in Dermal Papilla Fibroblasts',
     standardDosages: '0.005% - 0.05% Tópico',
     fagronPrograms: ['TrichoTest']
   },
@@ -179,6 +193,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Alargamiento del ciclo anágeno, hipertrofia del tallo capilar y pigmentación del bulbo',
     mechanismOfAction: 'Estimula la transición de telógeno a anágeno mediante activación de receptores prostanoides FP en la papila dérmica, aumentando el tiempo en fase de crecimiento activo y la síntesis de eumelanina.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™'],
+    cellularTarget: 'Prostamide Receptors & Follicular Matrix Melanocytes',
     standardDosages: '0.01% - 0.03% Tópico',
     fagronPrograms: ['TrichoTest']
   },
@@ -190,6 +205,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Bloqueo androgénico folicular localizado sin alteración hormonal sistémica',
     mechanismOfAction: 'Compite con la dihidrotestosterona por el receptor androgénico intracelular en las células de la papila dérmica folicular. Previene la translocación nuclear del receptor y detiene la expresión de señales paracrinas miniaturizantes.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™'],
+    cellularTarget: 'Intracellular Androgen Receptors (AR) in Dermal Papilla & 5α-Reductase Binding',
     standardDosages: '1% - 5% Tópico · 25 mg - 100 mg Oral',
     fagronPrograms: ['TrichoTest']
   },
@@ -201,6 +217,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Terapia antiandrogénica tópica segura en hombres y mujeres sin feminización sistémica',
     mechanismOfAction: 'Estereoisómero no feminizante del 17-β-estradiol. Inhibe la 5α-reductasa folicular e incrementa la actividad aromatasa local en el bulbo piloso, favoreciendo la conversión de andrógenos a estrógenos protectores.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™'],
+    cellularTarget: 'Bulb Aromatase (CYP19A1) Activation & Local 5α-Reductase Type I Inhibition',
     standardDosages: '0.025% - 0.05% Topical',
     fagronPrograms: ['TrichoTest']
   },
@@ -212,6 +229,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Bloqueo folicular de PGD2, reducción de microinflamación perifolicular y prevención de miniaturización capilar',
     mechanismOfAction: 'Extracto estandarizado de Nigella sativa (Fagron) rico en timoquinona. Inhibe competitivamente la unión de la prostaglandina D2 (PGD2) a sus receptores foliculares (GPR44/PTGDR2), revirtiendo la detención del crecimiento folicular y la miniaturización inducida por PGD2.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'TrichoOil™'],
+    cellularTarget: 'Prostaglandin D2 GPR44/PTGDR2 Receptors & Perifollicular Mast Cells',
     standardDosages: '3% Topical (3% - 4%)',
     fagronPrograms: ['TrichoTest']
   },
@@ -223,6 +241,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Supresión de alopecia areata y procesos inflamatorios autoinmunes del cuero cabelludo',
     mechanismOfAction: 'Unión de alta afinidad a receptores glucocorticoides citoplasmáticos. Inhibe la transcripción de citoquinas proinflamatorias (IL-1, IL-2, TNF-α) y suprime el ataque linfocitario al privilegio inmune folicular.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™'],
+    cellularTarget: 'Cytoplasmic Glucocorticoid Receptors (NR3C1) & Perifollicular Lymphocytic Infiltration',
     standardDosages: '0.05% Tópico',
     fagronPrograms: ['TrichoTest']
   },
@@ -234,6 +253,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Estimulación de proliferación celular folicular y neutralización del freno por testosterona',
     mechanismOfAction: 'Inhibe la fosfodiesterasa intracelular incrementando los niveles de adenosín monofosfato cíclico (cAMP). Estimula el metabolismo celular, promueve la elongación folicular y contrarresta el freno inducido por andrógenos.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'TrichoOil™'],
+    cellularTarget: 'Phosphodiesterase (PDE) / Intracellular cAMP & Mitochondrial Matrix in Follicular Bulb',
     standardDosages: '0.5% - 2% Tópico',
     fagronPrograms: ['TrichoTest']
   },
@@ -245,6 +265,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Liberación prolongada de cafeína folicular con penetración transdérmica optimizada',
     mechanismOfAction: 'Sistema nanovesicular liposomal que transporta cafeína purificada profundamente hacia el bulbo folicular sin evaporación en la superficie cutánea, manteniendo niveles estimulantes durante 24 horas.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™'],
+    cellularTarget: 'Nanovesicular Follicular Infundibulum & Phosphodiesterase (PDE) Inhibition',
     standardDosages: '1% - 3% Tópico',
     fagronPrograms: ['TrichoTest']
   },
@@ -256,6 +277,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Cronobiología folicular, mantenimiento del anágeno y eliminación de radicales libres',
     mechanismOfAction: 'Se une a receptores melatonérgicos MT1/MT2 en queratinocitos foliculares y fibroblastos de la papila. Regula los ritmos circadianos del ciclo capilar y actúa como potente captador de radicales hidroxilo.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'TrichoOil™', 'Cápsulas Orales'],
+    cellularTarget: 'Melatonergic MT1/MT2 Receptors & Mitochondrial ROS Scavenging in Dermal Papilla',
     standardDosages: '0.0033% - 0.1% Tópico · 1 mg - 5 mg Oral',
     fagronPrograms: ['TrichoTest', 'TeloTest']
   },
@@ -267,6 +289,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Optimización de microcirculación capilar papilar y escudo antioxidante dérmico',
     mechanismOfAction: 'Flavonoides y terpenoides estandarizados que estimulan la síntesis endotelial de óxido nítrico (eNOS). Mejoran la deformabilidad eritrocitaria en capilares terminales y protegen las membranas del bulbo piloso.',
     compatibleVehicles: ['TrichoOil™', 'TrichoSol™', 'Cápsulas Orales'],
+    cellularTarget: 'Microvascular Endothelium, eNOS Synthesis & PAF Receptors',
     standardDosages: '1% - 3% Tópico · 60 mg - 240 mg Oral',
     fagronPrograms: ['TrichoTest', 'NutriGen', 'TeloTest']
   },
@@ -278,6 +301,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Proliferación celular en la matriz papilar y retraso de entrada en fase catágena',
     mechanismOfAction: 'Ginsenósidos bioactivos (Rb1, Rg1) que sobreexpresan VEGF y FGF-7 en la papila dérmica. Inhiben la caspasa-3 y sobreexpresan Bcl-2, protegiendo las células madre del folículo contra la involución prematura.',
     compatibleVehicles: ['TrichoOil™', 'TrichoSol™', 'Cápsulas Orales'],
+    cellularTarget: 'Dermal Papilla ERK/Akt Signaling, Wnt/β-Catenin Cascade & Bcl-2 Anti-Apoptotic Pathway',
     standardDosages: '1% - 3% Tópico · 100 mg - 500 mg Oral',
     fagronPrograms: ['TrichoTest', 'NutriGen']
   },
@@ -289,6 +313,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Fortalecimiento estructural del tallo piloso y metabolismo de aminoácidos azufrados',
     mechanismOfAction: 'Coenzima indispensable para carboxilasas mitocondriales. Facilita la síntesis de ácidos grasos y el metabolismo de aminoácidos como la cisteína, reforzando los puentes disulfuro de la queratina capilar.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'Cápsulas Orales'],
+    cellularTarget: 'Mitochondrial Carboxylases (ACC, PCC, MCC) & Keratin Disulfide Bonds',
     standardDosages: '0.1% - 0.5% Tópico · 2.5 mg - 10 mg Oral',
     fagronPrograms: ['TrichoTest', 'NutriGen']
   },
@@ -300,6 +325,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Reactivación de células madre foliculares, angiogénesis papilar e hipertrofia del folículo',
     mechanismOfAction: 'Estimula la proliferación de células de la papila dérmica y fibroblastos. Aumenta la producción de colágeno, elastina y proteoglicanos, protegiendo al folículo del daño oxidativo y favoreciendo el engrosamiento del tallo capilar.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'Solución Liposomal'],
+    cellularTarget: 'Follicular Stem Cells (Lgr5+), VEGF/bFGF Secretion & Extracellular Procollagen',
     standardDosages: '0.1% - 1% Tópico',
     fagronPrograms: ['TrichoTest', 'TeloTest']
   },
@@ -311,6 +337,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Control de dermatitis seborreica, sobrecrecimiento de Malassezia y reducción de DHT folicular',
     mechanismOfAction: 'Inhibe la síntesis de ergosterol en membranas fúngicas y ejerce una acción antiinflamatoria y antiandrogénica tópica en el receptor de andrógenos, reduciendo la descamación y el microambiente inflamatorio perifolicular.',
     compatibleVehicles: ['TrichoWash™', 'TrichoSol™', 'TrichoFoam™'],
+    cellularTarget: 'Fungal 14α-Demethylase (CYP51), Sebaceous Lipids & 5α-Reductase',
     standardDosages: '1% - 2% Tópico',
     fagronPrograms: ['TrichoTest']
   },
@@ -322,6 +349,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Tratamiento sinérgico antiandrogénico, queratolítico y antiinflamatorio folicular',
     mechanismOfAction: 'Inhibe competitivamente la 5α-reductasa tipo I y II folicular. Normaliza la hiperqueratosis en el infundíbulo folicular y neutraliza radicales libres derivados del sebo oxigenado.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™'],
+    cellularTarget: 'Mitochondrial Oxidoreductases, 5α-Reductase & Follicular Infundibulum Keratinocytes',
     standardDosages: '1% - 15% Tópico',
     fagronPrograms: ['TrichoTest']
   },
@@ -333,6 +361,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Potenciador de absorción dérmica y sobreexpresión de sulfotransferasa para minoxidil',
     mechanismOfAction: 'Aumenta la expresión y actividad de la enzima sulfotransferasa (SULT1A1) en la papila dérmica, transformando respondedores deficientes a minoxidil en respondedores óptimos. Incrementa el recambio celular infundibular y la penetración de principios activos.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™'],
+    cellularTarget: 'Nuclear Retinoic Acid Receptors (RAR-α/β/γ) & SULT1A1 Sulfotransferase Upregulation',
     standardDosages: '0.01% - 0.05% Tópico',
     fagronPrograms: ['TrichoTest']
   },
@@ -344,6 +373,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Inducción de factores de crecimiento capilar (FGF-7, VEGF) y aumento de grosor folicular',
     mechanismOfAction: 'Activa receptores de adenosina A2A en la papila dérmica, induciendo la expresión de FGF-7 y VEGF. Favorece la entrada y permanencia en fase anágena, incrementando el diámetro de los cabellos miniaturizados.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™'],
+    cellularTarget: 'Adenosine A2A/A2B Receptors in Dermal Papilla & Endogenous FGF-7 / VEGF Induction',
     standardDosages: '0.5% - 1.5% Tópico',
     fagronPrograms: ['TrichoTest']
   },
@@ -355,6 +385,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Reducción de DHT folicular, prevención de miniaturización y alternativa fitoterápica a finasteride',
     mechanismOfAction: 'Ácidos grasos libres (láurico, mirístico, oleico) y fitoesteroles (β-sitosterol) que inhiben de manera dual las isoformas 1 y 2 de la 5α-reductasa, reduciendo la producción local de dihidrotestosterona (DHT) y antagonizando competitivamente los receptores androgénicos en la papila dérmica.',
     compatibleVehicles: ['Cápsulas Blandas Lipídicas USP', 'TrichoOil™', 'TrichoSol™'],
+    cellularTarget: 'Dual 5α-Reductase (Type I & II) & Nuclear Androgen Receptor (AR) Translocation',
     standardDosages: '160 mg - 320 mg Oral Diaria · 1% - 3% Tópico',
     fagronPrograms: ['TrichoTest', 'NutriGen']
   },
@@ -366,6 +397,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Longevidad folicular, regeneración mitocondrial dérmica y supresión de senescencia prematura',
     mechanismOfAction: 'Polifenol estilbenoide natural que actúa como potente mimético de restricción calórica activando alostéricamente la desacetilasa SIRT1 y la vía AMPK. Fomenta la autofagia mitocondrial en células madre del bulbo, incrementa la expresión de enzimas antioxidantes y preserva la capacidad proliferativa del nicho folicular.',
     compatibleVehicles: ['Cápsulas Micronizadas USP', 'TrichoSol™', 'TrichoOil™'],
+    cellularTarget: 'SIRT1 Deacetylase Nuclear Complex & AMPK Phosphorylation in Stem Cell Niche',
     standardDosages: '250 mg - 500 mg Oral Diaria · 0.5% - 1% Tópico',
     fagronPrograms: ['TeloTest', 'NutriGen', 'TrichoTest']
   },
@@ -377,6 +409,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Detoxificación celular, síntesis de enlaces disulfuro en queratina y protección contra estrés oxidativo ambiental',
     mechanismOfAction: 'Aporta cisteína biodisponible, el aminoácido limitante para la biosíntesis intracelular de glutatión (GSH). Incrementa las defensas redox intracelulares en el bulbo piloso, protege contra el estrés oxidativo por toxinas y radiación UV, y proporciona puentes de azufre para la cohesión y resistencia de la fibra queratínica.',
     compatibleVehicles: ['Cápsulas Orales Micronizadas'],
+    cellularTarget: 'Intracellular Glutathione (GSH) Rate-Limiting Biosynthesis & Keratin Disulfide Cross-Links',
     standardDosages: '600 mg - 1,200 mg Oral Diaria',
     fagronPrograms: ['NutriGen', 'TeloTest', 'TrichoTest']
   },
@@ -388,6 +421,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Proliferación celular en queratinocitos del bulbo piloso y metilación del ADN',
     mechanismOfAction: 'Forma activa del folato esencial para la síntesis de timidina y metilación del ADN. Garantiza la división celular mitótica acelerada de los queratinocitos foliculares en fase anágena y previene la elevación de homocisteína dañina para el endotelio dérmico.',
     compatibleVehicles: ['Cápsulas Orales Micronizadas'],
+    cellularTarget: 'Tetrahydrofolate (THF) Methylation Pool & Keratinocyte DNA Thymidylate Synthesis',
     standardDosages: '400 mcg - 1,000 mcg (1 mg) Oral Diaria',
     fagronPrograms: ['NutriGen', 'TrichoTest']
   },
@@ -399,6 +433,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Activación del ciclo folicular y diferenciación de células madre en el bulbo piloso',
     mechanismOfAction: 'Se une al receptor nuclear VDR expresado abundantemente en queratinocitos del folículo piloso. Induce la expresión de genes esenciales para el inicio del ciclo anágeno y previene la alopecia mediada por fallo de VDR.',
     compatibleVehicles: ['Cápsulas Orales', 'TrichoOil™'],
+    cellularTarget: 'Nuclear Vitamin D Receptors (VDR) in Follicular Keratinocytes & Anagen Initiation',
     standardDosages: '1,000 UI - 10,000 UI Oral',
     fagronPrograms: ['TrichoTest', 'NutriGen', 'TeloTest']
   },
@@ -410,6 +445,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Bioenergética celular mitocondrial, prevención de senescencia celular y salud vascular',
     mechanismOfAction: 'Componente indispensable de la cadena de transporte de electrones (Complejos I, II y III) para fosforilación oxidativa mitocondrial. Previene la peroxidación de lípidos de membrana y preserva la función endotelial.',
     compatibleVehicles: ['Cápsulas Orales', 'TrichoOil™'],
+    cellularTarget: 'Inner Mitochondrial Respiratory Chain (Complex I-III) & ATP Bioenergetics',
     standardDosages: '100 mg - 300 mg Oral',
     fagronPrograms: ['NutriGen', 'TeloTest']
   },
@@ -421,6 +457,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Metabolismo de aminoácidos de queratina e inhibición sinérgica de 5α-reductasa junto con Zinc',
     mechanismOfAction: 'Coenzima esencial para el metabolismo de cisteína y metionina en la síntesis de queratina capilar. Ejerce inhibición sinérgica sobre la 5α-reductasa cuando se combina con sales de zinc.',
     compatibleVehicles: ['Cápsulas Orales Micronizadas', 'TrichoSol™'],
+    cellularTarget: "Pyridoxal 5'-Phosphate (PLP) Transaminases & Cystathionine-β-Synthase",
     standardDosages: '10 mg - 50 mg Oral Diaria · 0.2% - 0.5% Tópico',
     fagronPrograms: ['TrichoTest', 'NutriGen']
   },
@@ -432,6 +469,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Decelerates telomere attrition, promotes autophagy, downregulates mTOR, and modulates metabolic senescence',
     mechanismOfAction: 'Activates AMP-activated protein kinase (AMPK) and suppresses mTOR signaling, mimicking caloric restriction. Promotes DNA damage repair pathways and preserves telomeric integrity during cellular replication cycles.',
     compatibleVehicles: ['Pentravan® Transdermal Base', 'Liposomal Gel', 'Oral Capsules'],
+    cellularTarget: 'Mitochondrial Complex I, AMPK Phosphorylation & Follicular Stem Cell Autophagy',
     standardDosages: '50 mg - 100 mg Transdermal (e.g. 88 mg/g) · 500 mg - 1000 mg Oral',
     fagronPrograms: ['TeloTest', 'Compounding']
   },
@@ -443,6 +481,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Restores physiological tissue regeneration, stimulates telomerase reverse transcriptase (TERT), and prevents sarcopenia',
     mechanismOfAction: 'Upregulates telomerase enzyme activity (TERT expression) via androgen receptor-mediated transcriptional activation. Stimulates cellular protein synthesis, tissue repair, and bone/muscle anabolism in transdermal delivery.',
     compatibleVehicles: ['Pentravan® Transdermal Base', 'Liposomal Transdermal Cream'],
+    cellularTarget: 'Nuclear Androgen Receptors (AR), TERT Promoter & Myocyte/Osteocyte Protein Synthesis',
     standardDosages: '1 mg - 5 mg/g Transdermal (e.g. 3 mg/g Pentravan)',
     fagronPrograms: ['TeloTest', 'BHRT']
   },
@@ -454,6 +493,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Quenches singlet oxygen, halts telomeric DNA oxidative cross-linking, and protects mitochondrial membranes',
     mechanismOfAction: 'Spans the cellular lipid bilayer with polar end groups, neutralizing reactive oxygen species (ROS) with 6,000x greater efficacy than Vitamin C. Protects telomeric repeat sequences (TTAGGG) against oxidative fragmentation.',
     compatibleVehicles: ['Pentravan® Transdermal Base', 'Oral Softgels', 'Vegetarian Capsules'],
+    cellularTarget: 'Transmembrane Follicular Lipid Bilayer & Mitochondrial ROS Scavenging Cascade',
     standardDosages: '10 mg - 25 mg/g Transdermal (e.g. 17 mg/g) · 4 mg - 12 mg Oral',
     fagronPrograms: ['TeloTest', 'NutriGen']
   },
@@ -465,6 +505,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Suppresses systemic chronic micro-inflammation (inflammaging) and protects genomic chromatin structure',
     mechanismOfAction: 'Potent blocker of IκB kinase (IKK) and NF-κB nuclear translocation. Upregulates SIRT1 expression and defends telomere repeat domains against inflammatory decay and free radical damage.',
     compatibleVehicles: ['Hygrocaps Vegetarian Capsules', 'Phytosome Oral Capsules'],
+    cellularTarget: 'IκB Kinase (IKK) / NF-κB Nuclear Translocation & COX-2 Inflammatory Cascade',
     standardDosages: '200 mg - 500 mg Oral Daily',
     fagronPrograms: ['TeloTest', 'NutriGen']
   },
@@ -476,6 +517,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Optimizes ATP production, reduces mitochondrial superoxide generation, and preserves stem cell telomeres',
     mechanismOfAction: 'Crucial electron transporter in complexes I/II to complex III of the inner mitochondrial respiratory chain. Regenerates alpha-tocopherol and shields mitochondrial and nuclear DNA from metabolic oxidative stress.',
     compatibleVehicles: ['Hygrocaps Vegetarian Capsules', 'Liposomal Oral Suspension'],
+    cellularTarget: 'Inner Mitochondrial Respiratory Chain (Complex I-III) & ATP Bioenergetics',
     standardDosages: '40 mg - 100 mg Oral Daily',
     fagronPrograms: ['TeloTest', 'NutriGen']
   },
@@ -487,6 +529,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Enhances cellular detox, replenishes intracellular glutathione, and protects against telomeric shortening',
     mechanismOfAction: 'Direct source of bioavailable sulfhydryl (-SH) groups. Acts as the rate-limiting substrate for glutathione synthesis (GSH), providing the principal endogenous enzymatic antioxidant defense for chromosomal telomeres.',
     compatibleVehicles: ['Hygrocaps Vegetarian Capsules', 'Oral Sachet'],
+    cellularTarget: 'Intracellular Glutathione (GSH) Sulfhydryl Pools & Telomeric DNA Protection',
     standardDosages: '100 mg - 600 mg Oral Daily',
     fagronPrograms: ['TeloTest', 'NutriGen']
   },
@@ -498,6 +541,7 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     clinicalIndication: 'Strengthens dermal and vascular extracellular matrix, supports vascular elasticity and cellular integrity',
     mechanismOfAction: 'Provides bioavailable monomeric orthosilicic acid, cross-linking glycosaminoglycans and stabilizing collagen and elastin networks against age-dependent matrix metalloproteinase (MMP) breakdown.',
     compatibleVehicles: ['Hygrocaps Vegetarian Capsules', 'Oral Powder'],
+    cellularTarget: 'Prolyl-4-Hydroxylase Activation, Fibroblast GAGs & Collagen Fibrillogenesis',
     standardDosages: '100 mg - 300 mg Oral Daily',
     fagronPrograms: ['TeloTest', 'NutriGen']
   }
@@ -678,4 +722,186 @@ export function checkDosageSafety(apiName, dosageStr, route = 'topical') {
   }
 
   return { evaluated: true, isWithinStandardRange: true, level: 'standard', standardRange: cleanRange, message: `Standard reference range: ${cleanRange}` };
+}
+
+/**
+ * Resolves complete clinical monograph data, guaranteed cellular target,
+ * pharmacological mechanism, and gene targets for ANY active ingredient (API).
+ * Works for standard Fagron APIs, regenerative peptides, compounding drugs, and custom APIs.
+ * 
+ * @param {Object|string} apiOrName - API object (e.g. { name: "Minoxidil 4%", dosage: "4%" }) or name string
+ * @param {boolean} isEs - Whether to return localized labels
+ * @returns {{
+ *   name: string,
+ *   cellularTarget: string,
+ *   pharmacologicalClass: string,
+ *   clinicalIndication: string,
+ *   mechanismOfAction: string,
+ *   geneTargets: string[],
+ *   tag: string,
+ *   role: string,
+ *   indication: string,
+ *   action: string
+ * }}
+ */
+export function resolveApiClinicalData(apiOrName, isEs = false) {
+  if (!apiOrName) {
+    return {
+      name: isEs ? 'Principio Activo' : 'Active Ingredient',
+      cellularTarget: isEs ? 'Diana Celular No Especificada' : 'Targeted Cellular Receptor',
+      pharmacologicalClass: isEs ? 'Principio Activo Terapéutico' : 'Therapeutic Active Ingredient (API)',
+      clinicalIndication: isEs ? 'Optimización Clínica Tisular & Terapia Personalizada' : 'Targeted Clinical Optimization & Therapy',
+      mechanismOfAction: '',
+      geneTargets: [],
+      tag: 'API',
+      role: isEs ? 'Principio Activo Terapéutico' : 'Therapeutic Active Ingredient (API)',
+      indication: isEs ? 'Optimización Clínica Tisular' : 'Clinical Optimization',
+      action: ''
+    };
+  }
+
+  const rawName = typeof apiOrName === 'string'
+    ? apiOrName
+    : (apiOrName.name || apiOrName.drugName || apiOrName.productName || apiOrName.activeIngredient || '');
+
+  // Strip dosage percentages, milligrams, etc. to get base name
+  const cleanBaseName = rawName.replace(/\s*\d+(?:[.,]\d+)?\s*(?:%|mg|mcg|g|ui|iu|ml)\b/gi, '').trim();
+
+  // 1. Direct monograph lookup
+  const mono = getFagronClinicalMonograph(rawName) ||
+               getFagronClinicalMonograph(cleanBaseName) ||
+               (typeof apiOrName === 'object' && apiOrName.productId ? getFagronClinicalMonograph(apiOrName.productId) : null);
+
+  let cellularTarget = mono?.cellularTarget || (typeof apiOrName === 'object' ? apiOrName.cellularTarget : null);
+  let pharmacologicalClass = mono?.pharmacologicalClass || (typeof apiOrName === 'object' ? (apiOrName.role || apiOrName.pharmacologicalClass || apiOrName.category) : null);
+  let clinicalIndication = mono?.clinicalIndication || (typeof apiOrName === 'object' ? (apiOrName.indication || apiOrName.clinicalIndication) : null);
+  let mechanismOfAction = mono?.mechanismOfAction || (typeof apiOrName === 'object' ? (apiOrName.action || apiOrName.mechanismOfAction || apiOrName.mechanism) : null);
+  let geneTargets = (mono?.geneTargets && mono.geneTargets.length > 0)
+    ? mono.geneTargets
+    : (Array.isArray(apiOrName?.geneTargets) && apiOrName.geneTargets.length > 0 ? apiOrName.geneTargets : []);
+
+  // 2. Intelligent biochemical cellular target synthesis if still missing
+  if (!cellularTarget) {
+    const low = cleanNormalizeKey(rawName);
+    if (low.includes('minoxidil')) {
+      cellularTarget = isEs ? 'Canales K_ATP de Papila Dérmica & Endotelio Microvascular (Activación SULT1A1)' : 'Follicular Dermal Papilla K_ATP Channels & Microvascular Endothelium (SULT1A1 Activation)';
+      if (!pharmacologicalClass) pharmacologicalClass = isEs ? 'Activador de Sulfotransferasa & Canales K_ATP Foliculares' : 'Follicular K_ATP Channel Opener & SULT1A1 Activator';
+      if (!clinicalIndication) clinicalIndication = isEs ? 'Inducción anágena & vasodilatación papilar' : 'Anagen phase induction & microvascular perfusion';
+      if (!geneTargets.length) geneTargets = ['SULT1A1', 'KCNJ8', 'ABCC9'];
+    } else if (low.includes('spironolacton') || low.includes('espironolacton')) {
+      cellularTarget = isEs ? 'Receptores Androgénicos Intracelulares (AR) en Papila Dérmica & Unión 5α-Reductasa' : 'Intracellular Androgen Receptors (AR) in Dermal Papilla & 5α-Reductase Binding';
+      if (!pharmacologicalClass) pharmacologicalClass = isEs ? 'Antagonista Competitivo de Receptores Androgénicos' : 'Competitive Androgen Receptor Antagonist';
+      if (!clinicalIndication) clinicalIndication = isEs ? 'Bloqueo androgénico folicular localizado sin alteración hormonal sistémica' : 'Localized follicular androgen blockade without systemic disruption';
+      if (!geneTargets.length) geneTargets = ['AR', 'NR3C2'];
+    } else if (low.includes('arginin')) {
+      cellularTarget = isEs ? 'Óxido Nítrico Sintasa Endotelial (eNOS/NOS3) & Microcirculación Folicular' : 'Endothelial Nitric Oxide Synthase (eNOS/NOS3) & Follicular Bulb Microcirculation';
+      if (!pharmacologicalClass) pharmacologicalClass = isEs ? 'Precursor Esencial de Óxido Nítrico (NO) & Vasodilatador Folicular' : 'Nitric Oxide (NO) Precursor & Follicular Vasodilator';
+      if (!clinicalIndication) clinicalIndication = isEs ? 'Estimulación de microperfusión capilar papilar y bioenergía del bulbo' : 'Papillary capillary microperfusion & bulb bioenergetics';
+      if (!geneTargets.length) geneTargets = ['NOS1', 'NOS2', 'NOS3', 'GATM'];
+    } else if (low.includes('finasterid')) {
+      cellularTarget = isEs ? 'Enzima 5α-Reductasa Tipo II en Papila Dérmica Folicular' : 'Follicular Dermal Papilla Type II 5α-Reductase';
+      if (!geneTargets.length) geneTargets = ['SRD5A2', 'SRD5A1'];
+    } else if (low.includes('dutasterid')) {
+      cellularTarget = isEs ? 'Isoenzimas Duales 5α-Reductasa Tipo I, II y III (Papila y Glándula Sebácea)' : 'Dual Type I, II & III 5α-Reductase Isoenzymes (Dermal Papilla & Sebaceous Gland)';
+      if (!geneTargets.length) geneTargets = ['SRD5A1', 'SRD5A2', 'SRD5A3'];
+    } else if (low.includes('latanoprost') || low.includes('bimatoprost')) {
+      cellularTarget = isEs ? 'Receptores de Prostaglandina F2α (FP) en Fibroblastos de Papila Dérmica' : 'Prostaglandin F2α (FP) Receptors in Dermal Papilla Fibroblasts';
+      if (!geneTargets.length) geneTargets = ['PTGFR'];
+    } else if (low.includes('caffein') || low.includes('cafein')) {
+      cellularTarget = isEs ? 'Fosfodiesterasa (PDE) / cAMP Intracelular en Bulbo Folicular' : 'Phosphodiesterase (PDE) / Intracellular cAMP in Follicular Bulb';
+      if (!geneTargets.length) geneTargets = ['PDE4'];
+    } else if (low.includes('melatonin')) {
+      cellularTarget = isEs ? 'Receptores Melatonérgicos MT1/MT2 & Escudo Redox Mitocondrial en Papila' : 'Melatonergic MT1/MT2 Receptors & Mitochondrial Redox Cascade in Papilla';
+      if (!geneTargets.length) geneTargets = ['MTNR1A', 'MTNR1B'];
+    } else if (low.includes('zinc')) {
+      cellularTarget = isEs ? 'Metaloenzimas MMP, Unión Alostérica a 5α-Reductasa & Síntesis de Queratina' : 'MMP Metalloenzymes, 5α-Reductase Allosteric Binding & Keratin Ribosomes';
+      if (!geneTargets.length) geneTargets = ['MT1A', 'ZNT1'];
+    } else if (low.includes('biotin')) {
+      cellularTarget = isEs ? 'Carboxilasas Mitocondriales & Puentes Disulfuro de Queratina' : 'Mitochondrial Carboxylases (ACC, PCC, MCC) & Keratin Disulfide Bonds';
+      if (!geneTargets.length) geneTargets = ['BTD', 'HLCS'];
+    } else if (low.includes('ghk') || low.includes('copper tripeptide')) {
+      cellularTarget = isEs ? 'Células Madre Foliculares (Lgr5+), VEGF & Matriz Extracelular de Procolágeno' : 'Follicular Stem Cells (Lgr5+), VEGF Secretion & Extracellular Procollagen';
+      if (!geneTargets.length) geneTargets = ['COL1A1', 'VEGFA', 'MMP2'];
+    } else if (low.includes('tretinoin') || low.includes('retinoic')) {
+      cellularTarget = isEs ? 'Receptores Nucleares RAR-α/β/γ & Expresión Génica de SULT1A1' : 'Nuclear Retinoic Acid Receptors (RAR-α/β/γ) & SULT1A1 Sulfotransferase Upregulation';
+      if (!geneTargets.length) geneTargets = ['RARA', 'SULT1A1'];
+    } else if (low.includes('bpc') || low.includes('bpc 157') || low.includes('bpc157')) {
+      cellularTarget = isEs ? 'Fosforilación del Receptor VEGFR2 & Cascada FAK-Paxilina Endotelial' : 'VEGFR2 Phosphorylation & FAK-Paxillin Cytoskeletal Signaling in Endothelium';
+      if (!pharmacologicalClass) pharmacologicalClass = isEs ? 'Péptido Regenerativo Cito-Protector & Pro-Angiogénico' : 'Cyto-Protective & Pro-Angiogenic Regenerative Peptide';
+      if (!clinicalIndication) clinicalIndication = isEs ? 'Reparación endotelial, angiogénesis y regeneración tisular profunda' : 'Endothelial repair, angiogenesis and deep tissue regeneration';
+      if (!geneTargets.length) geneTargets = ['VEGFR2', 'PTK2', 'NOS3'];
+    } else if (low.includes('tb 500') || low.includes('tb500') || low.includes('thymosin')) {
+      cellularTarget = isEs ? 'Secuestro de Monómeros de G-Actina & Migración de Células Madre Lgr5+' : 'G-Actin Monomer Sequestration & Follicular Stem Cell (Lgr5+) Migration';
+      if (!pharmacologicalClass) pharmacologicalClass = isEs ? 'Péptido Regulador de Citoesqueleto & Migración Celular' : 'Actin-Regulating Cytoskeletal Peptide & Stem Cell Migration Promoter';
+      if (!geneTargets.length) geneTargets = ['ACTA1', 'LGR5'];
+    } else if (low.includes('epithalon') || low.includes('epitalon')) {
+      cellularTarget = isEs ? 'Subunidad TERT de Telomerasa & Ritmo Circadiano de Melatonina' : 'Telomerase Reverse Transcriptase (TERT) & Pineal Melatonin Circadian Rhythm';
+      if (!pharmacologicalClass) pharmacologicalClass = isEs ? 'Biorregulador Peptídico Epifisario & Activador de Telomerasa' : 'Epiphyseal Peptide Bioregulator & Telomerase Activator';
+      if (!geneTargets.length) geneTargets = ['TERT', 'MTNR1A'];
+    } else if (low.includes('semaglutid') || low.includes('tirzepatid') || low.includes('retatrutid')) {
+      cellularTarget = isEs ? 'Receptores GLP-1R / GIPR en Células Beta Pancreáticas & Neuronas POMC' : 'GLP-1R / GIPR Incretin Receptors in Pancreatic Beta Cells & POMC Neurons';
+      if (!pharmacologicalClass) pharmacologicalClass = isEs ? 'Agonista de Receptores de Incretinas GLP-1 / GIP' : 'Incretin GLP-1 / GIP Receptor Agonist';
+      if (!geneTargets.length) geneTargets = ['GLP1R', 'GIPR'];
+    } else if (low.includes('nad') || low.includes('nmn')) {
+      cellularTarget = isEs ? 'Desacetilasas Mitocondriales SIRT1/SIRT3 & Enzimas de Reparación PARP' : 'Mitochondrial SIRT1/SIRT3 Deacetylases, PARP Repair Enzymes & ATP Biosynthesis';
+      if (!pharmacologicalClass) pharmacologicalClass = isEs ? 'Cofactor de Coenzima Redox & Activador de Sirtuinas' : 'Redox Coenzyme Cofactor & Sirtuin Activator';
+      if (!geneTargets.length) geneTargets = ['SIRT1', 'SIRT3', 'PARP1'];
+    } else if (low.includes('clobetasol')) {
+      cellularTarget = isEs ? 'Receptores Glucocorticoides Citoplasmáticos (NR3C1) & Infiltrado Linfocitario' : 'Cytoplasmic Glucocorticoid Receptors (NR3C1) & Perifollicular Lymphocytic Infiltration';
+      if (!geneTargets.length) geneTargets = ['NR3C1'];
+    } else if (low.includes('ketoconazol')) {
+      cellularTarget = isEs ? '14α-Desmetilasa Fúngica (CYP51), Lípidos de Sebo & 5α-Reductasa' : 'Fungal 14α-Demethylase (CYP51), Sebaceous Lipids & 5α-Reductase';
+      if (!geneTargets.length) geneTargets = ['CYP51A1'];
+    } else if (low.includes('azelaic')) {
+      cellularTarget = isEs ? 'Oxidorreductasas Mitocondriales, 5α-Reductasa & Queratinocitos Foliculares' : 'Mitochondrial Oxidoreductases, 5α-Reductase & Follicular Infundibulum Keratinocytes';
+      if (!geneTargets.length) geneTargets = ['SRD5A1', 'SRD5A2'];
+    } else if (low.includes('astaxanthin') || low.includes('astaxantin')) {
+      cellularTarget = isEs ? 'Bicapa Lipídica Transmembrana & Neutralización de Radicales Singlete' : 'Transmembrane Follicular Lipid Bilayer & Mitochondrial ROS Scavenging Cascade';
+      if (!geneTargets.length) geneTargets = ['NFE2L2', 'SOD1'];
+    } else if (low.includes('metformin')) {
+      cellularTarget = isEs ? 'Complejo I Mitocondrial, Activación de AMPK & Autofagia Celular' : 'Mitochondrial Complex I, AMPK Phosphorylation & Follicular Stem Cell Autophagy';
+      if (!geneTargets.length) geneTargets = ['AMPK', 'MTOR'];
+    } else if (low.includes('glutathion') || low.includes('glutacion') || low.includes('nac') || low.includes('acetylcyst')) {
+      cellularTarget = isEs ? 'Glutatión Intracelular (GSH) & Protección Redox Cromosómica' : 'Intracellular Glutathione (GSH) Sulfhydryl Pools & Telomeric DNA Protection';
+      if (!geneTargets.length) geneTargets = ['GCLC', 'GSS'];
+    } else if (low.includes('hormon') || low.includes('estrogen') || low.includes('progesteron') || low.includes('testosteron')) {
+      cellularTarget = isEs ? 'Receptores Nucleares de Hormonas Esteroideas & Transcripción Tisular' : 'Nuclear Steroid Hormone Receptors & Transcriptional Tissue Modulation';
+    } else if (low.includes('peptid') || low.includes('peptide')) {
+      cellularTarget = isEs ? 'Receptores de Señalización Peptídica de Superficie & Cascada Intracelular' : 'Cell-Surface Peptide Receptors & Intracellular Signaling Cascade';
+    } else if (low.includes('vitam') || low.includes('antioxidant')) {
+      cellularTarget = isEs ? 'Integridad de Membranas Celulares & Escudo Redox Mitocondrial' : 'Cellular Membrane Integrity & Mitochondrial Redox Shield';
+    } else {
+      cellularTarget = isEs ? 'Receptor Celular Específico & Lecho Microvascular Tisular' : 'Targeted Cellular Receptor & Microvascular Tissue Bed';
+    }
+  }
+
+  if (!pharmacologicalClass) {
+    pharmacologicalClass = isEs ? 'Principio Activo Terapéutico (API)' : 'Therapeutic Active Ingredient (API)';
+  }
+  if (!clinicalIndication) {
+    clinicalIndication = isEs ? 'Optimización Clínica Tisular & Terapia Personalizada' : 'Targeted Clinical Optimization & Therapy';
+  }
+  if (!mechanismOfAction) {
+    mechanismOfAction = isEs
+      ? `Modula vías celulares diana en ${cellularTarget}, optimizando la respuesta fisiológica tisular.`
+      : `Modulates targeted biological pathways at ${cellularTarget}, optimizing physiological tissue response.`;
+  }
+
+  // Derive tag
+  const tag = (typeof apiOrName === 'object' && apiOrName.tag && apiOrName.tag !== '—' && apiOrName.tag !== '-')
+    ? apiOrName.tag
+    : (mono?.fagronPrograms?.[0] ? 'Fagron API' : 'Active API');
+
+  return {
+    name: cleanBaseName || rawName,
+    cellularTarget,
+    pharmacologicalClass,
+    clinicalIndication,
+    mechanismOfAction,
+    geneTargets,
+    tag,
+    role: pharmacologicalClass,
+    indication: clinicalIndication,
+    action: mechanismOfAction
+  };
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Stethoscope, Download, Copy, Trash2, Loader2, Sparkles, FileText,
   Tag, Package, RotateCcw, MessageCircle, Eye, RefreshCw, Merge,
-  ClipboardCheck, Syringe, Send, Receipt, Share2, Briefcase, Building2, Bookmark
+  ClipboardCheck, Syringe, Send, Receipt, Share2, Briefcase, Building2, Bookmark, Link2
 } from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
 
@@ -691,6 +691,14 @@ export const getPrescriptionColumns = (options = {}) => {
                   }))
                 }
               }));
+            }
+          }] : []),
+          ...(!isDoctor ? [{
+            type: 'action',
+            label: 'Vincular APIs con Zoho Books',
+            icon: Link2,
+            onClick: () => {
+              window.dispatchEvent(new CustomEvent('OPEN_ZOHO_API_MATCHER', { detail: { rx } }));
             }
           }] : []),
           // ── EXPORTS ─────────────────────────────────────────────────────

@@ -31,18 +31,20 @@ import { PRESCRIPTION_SOURCES } from '../../schemas/prescriptionSchema';
 import BuilderProtocolSearch from './order-builder/BuilderProtocolSearch';
 import MobilePrescriptionCard from './mobile/MobilePrescriptionCard';
 import MobileActionSheet from '../ui/MobileActionSheet';
-import { Eye, Edit3, XCircle, Tag, Package } from '@/lib/icons';
+import { Eye, Edit3, XCircle, Tag, Package, Link2 } from '@/lib/icons';
 import notifier from '../../services/NotificationService';
 import { exportToCSV, triggerServerExport } from '../../utils/universalExporter';
 import { useRoleAccess } from '../../hooks/useRoleAccess';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import PatientAdministrationGuideModal from '../doctor/PatientAdministrationGuideModal';
 import { usePharmacyLabels } from '../../hooks/usePharmacyLabels';
+import ZohoApiMatcherModal from '../admin/prescriptions/ZohoApiMatcherModal';
 
 export default function UniversalPrescriptionsTable({ doctorId, patientId, readOnly = false, hideHeader = false, title = 'Prescriptions', subtitle = 'System of record for all patient prescriptions and recommendations.', serverKPIs, enableAskAtlas = false, initialData }) {
   const { openDrawer } = useDrawer();
   const { openLabels, LabelsModal } = usePharmacyLabels();
   const [selectedItem, setSelectedItem] = useState(null);
+  const [zohoMatcherRx, setZohoMatcherRx] = useState(null);
   const [mobileActionRx, setMobileActionRx] = useState(null);
 
   const handleMobileQuickAction = useCallback((action, rx) => {
@@ -603,20 +605,58 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         {/* Items list */}
         {items.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '2px' }}>
-              Compounded APIs ({items.length})
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px', flexWrap: 'wrap', gap: '6px' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Compounded APIs ({items.length})
+              </div>
+              {!readOnly && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setZohoMatcherRx(row);
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    color: '#15803d',
+                    fontSize: '0.68rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                  title="Vincular o comprobar ítems en Zoho Books"
+                >
+                  <Link2 size={11} />
+                  Zoho Matching
+                </button>
+              )}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-              {items.map((item, idx) => (
-                <span key={idx} style={{
-                  padding: '2px 8px', borderRadius: '5px',
-                  background: '#ffffff', border: '1px solid #e2e8f0',
-                  fontSize: '0.76rem', color: '#334155', fontWeight: 500,
-                }}>
-                  {item.name || item.productName || `Item ${idx + 1}`}
-                  {item.dosage || item.dose ? <span style={{ color: '#94a3b8', marginLeft: '4px' }}>{item.dosage || item.dose}</span> : null}
-                </span>
-              ))}
+              {items.map((item, idx) => {
+                const isZohoLinked = Boolean(item.zoho_item_id || item.zoho_sku);
+                return (
+                  <span key={idx} style={{
+                    padding: '2px 8px', borderRadius: '5px',
+                    background: '#ffffff',
+                    border: isZohoLinked ? '1px solid #86efac' : '1px solid #e2e8f0',
+                    fontSize: '0.76rem', color: '#334155', fontWeight: 500,
+                    display: 'inline-flex', alignItems: 'center', gap: '4px'
+                  }}>
+                    {item.name || item.productName || `Item ${idx + 1}`}
+                    {item.dosage || item.dose ? <span style={{ color: '#94a3b8' }}>{item.dosage || item.dose}</span> : null}
+                    {isZohoLinked && (
+                      <span style={{ fontSize: '0.62rem', color: '#16a34a', fontWeight: 700, background: '#dcfce7', padding: '0 4px', borderRadius: '3px' }}>
+                        ✓ Zoho
+                      </span>
+                    )}
+                  </span>
+                );
+              })}
             </div>
           </div>
         )}
@@ -687,8 +727,15 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     const handleOpenGuide = (e) => {
       if (e.detail?.rx) setPatientGuideRx(e.detail.rx);
     };
+    const handleOpenZohoMatcher = (e) => {
+      if (e.detail?.rx) setZohoMatcherRx(e.detail.rx);
+    };
     window.addEventListener('OPEN_PATIENT_GUIDE_MODAL', handleOpenGuide);
-    return () => window.removeEventListener('OPEN_PATIENT_GUIDE_MODAL', handleOpenGuide);
+    window.addEventListener('OPEN_ZOHO_API_MATCHER', handleOpenZohoMatcher);
+    return () => {
+      window.removeEventListener('OPEN_PATIENT_GUIDE_MODAL', handleOpenGuide);
+      window.removeEventListener('OPEN_ZOHO_API_MATCHER', handleOpenZohoMatcher);
+    };
   }, []);
 
   const handleRefill = useCallback((rx) => {
@@ -1621,6 +1668,13 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         />
 
         <LabelsModal />
+
+        <ZohoApiMatcherModal
+          isOpen={Boolean(zohoMatcherRx)}
+          onClose={() => setZohoMatcherRx(null)}
+          prescription={zohoMatcherRx}
+          onSaved={refresh}
+        />
       </DataModule>
     </>
   );

@@ -5,6 +5,7 @@ import { resolveDoctorProfile, formatMedicalLicense } from '@/services/doctorDir
 import { classifyPrescription } from '@/data/prescriptionTypeClassifier';
 import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
+import { resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
 
 export function slugify(text) {
   return String(text || '')
@@ -325,12 +326,25 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         isBHRT,
         vehicle: vehicleObj,
         posology: posologyObj,
-        apis: apis.map(a => ({
-          ...a,
-          name: a.name || a.drugName || a.productName || a.activeIngredient || 'Active API',
-          dose: a.dosage || a.dose || a.strength || '—',
-          dosage: a.dosage || a.dose || a.strength || '—'
-        }))
+        apis: apis.map(a => {
+          const apiName = a.name || a.drugName || a.productName || a.activeIngredient || 'Active API';
+          const clinical = resolveApiClinicalData({ ...a, name: apiName }, isEs);
+          return {
+            ...a,
+            name: apiName,
+            dose: a.dosage || a.dose || a.strength || '—',
+            dosage: a.dosage || a.dose || a.strength || '—',
+            cellularTarget: a.cellularTarget || clinical.cellularTarget,
+            role: a.role || a.pharmacologicalClass || clinical.pharmacologicalClass,
+            pharmacologicalClass: a.pharmacologicalClass || a.role || clinical.pharmacologicalClass,
+            indication: a.indication || a.clinicalIndication || clinical.clinicalIndication,
+            clinicalIndication: a.clinicalIndication || a.indication || clinical.clinicalIndication,
+            action: a.action || a.mechanismOfAction || a.mechanism || clinical.mechanismOfAction,
+            mechanismOfAction: a.mechanismOfAction || a.action || a.mechanism || clinical.mechanismOfAction,
+            geneTargets: (Array.isArray(a.geneTargets) && a.geneTargets.length > 0) ? a.geneTargets : clinical.geneTargets,
+            tag: (a.tag && a.tag !== '—' && a.tag !== '-') ? a.tag : clinical.tag
+          };
+        })
       };
     };
 

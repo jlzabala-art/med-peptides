@@ -70,7 +70,7 @@ import ClinicalIntelligenceBanner from '@/components/doctor/ClinicalIntelligence
 import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
 import DoctorServicesMembershipModal from '@/components/doctor/DoctorServicesMembershipModal';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
-import { getFagronClinicalMonograph } from '@/data/fagronClinicalMonographs';
+import { getFagronClinicalMonograph, resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
 import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
 import { triggerHaptic } from '@/utils/haptics';
 import { COUNTRIES } from '@/data/countries';
@@ -95,16 +95,17 @@ export function enrichApiClinicalDetails(api) {
   const rawName = api.name || api.drugName || api.activeIngredient || api.productName || 'Active Pharmaceutical Ingredient';
   const rawDose = api.dose || api.dosage || api.strength || api.concentration || 'Compounded Strength';
 
+  const resolved = resolveApiClinicalData(api, false);
   const mono = getFagronClinicalMonograph(api.productId) ||
     getFagronClinicalMonograph(rawName) ||
     getFagronClinicalMonograph(api.activeIngredient) ||
     getFagronClinicalMonograph(rawName.toLowerCase());
 
-  const pharmacologicalClass = api.therapeuticClass || api.pharmacologicalClass || mono?.pharmacologicalClass || api.category || 'Therapeutic Active Ingredient (API)';
-  const clinicalIndication = api.clinicalIndication || mono?.clinicalIndication || 'Targeted Follicular / Metabolic Clinical Optimization';
-  const mechanismOfAction = api.mechanism || api.mechanismOfAction || mono?.mechanismOfAction || null;
-  const cellularTarget = api.cellularTarget || null;
-  const geneTargets = (mono?.geneTargets && mono.geneTargets.length > 0) ? mono.geneTargets : (api.geneTargets || []);
+  const pharmacologicalClass = api.therapeuticClass || api.pharmacologicalClass || resolved.pharmacologicalClass || mono?.pharmacologicalClass || api.category || 'Therapeutic Active Ingredient (API)';
+  const clinicalIndication = api.clinicalIndication || resolved.clinicalIndication || mono?.clinicalIndication || 'Targeted Follicular / Metabolic Clinical Optimization';
+  const mechanismOfAction = api.mechanism || api.mechanismOfAction || resolved.mechanismOfAction || mono?.mechanismOfAction || null;
+  const cellularTarget = api.cellularTarget || resolved.cellularTarget || null;
+  const geneTargets = (mono?.geneTargets && mono.geneTargets.length > 0) ? mono.geneTargets : ((resolved.geneTargets && resolved.geneTargets.length > 0) ? resolved.geneTargets : (api.geneTargets || []));
 
   return {
     id: api.id,

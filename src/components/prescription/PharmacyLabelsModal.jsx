@@ -40,7 +40,7 @@ export default function PharmacyLabelsModal({
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isGeneratingZip, setIsGeneratingZip] = useState(false);
-  const [compareMode, setCompareMode] = useState(false); // show Delivery + Shipping side by side
+  const [compareMode, setCompareMode] = useState(true); // show Delivery + Shipping side by side by default
   const [shippingDraft, setShippingDraft] = useState(null); // null = not editing
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [showCutGuides, setShowCutGuides] = useState(false); // Scissor cut lines & crop marks toggle (default false for clean label)

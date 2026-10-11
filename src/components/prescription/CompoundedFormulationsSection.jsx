@@ -15,6 +15,7 @@ import {
   Info 
 } from '@/lib/icons';
 import { AlertTriangle } from 'lucide-react';
+import { resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
 
 /**
  * CompoundedFormulationsSection
@@ -376,139 +377,188 @@ export default function CompoundedFormulationsSection({
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {formulation.apis.map((api) => (
-                      <div
-                        key={api.id}
-                        style={{
-                          background: '#ffffff',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '10px',
-                          padding: '1rem 1.15rem',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.45rem',
-                          boxShadow: '0 1px 4px rgba(15, 23, 42, 0.02)'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-                            <span style={{
-                              fontSize: '0.68rem',
-                              fontWeight: 800,
-                              textTransform: 'uppercase',
-                              padding: '2px 7px',
-                              borderRadius: '4px',
-                              background: '#e0f2fe',
-                              color: '#0369a1'
-                            }}>
-                              {api.tag}
-                            </span>
-                            <span style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
-                              {api.name}
-                            </span>
-                            <span style={{
-                              fontSize: '0.78rem',
-                              fontWeight: 800,
-                              color: formulation.isOral ? '#047857' : '#0284c7',
-                              background: formulation.isOral ? '#ecfdf5' : '#f0f9ff',
-                              border: `1px solid ${formulation.isOral ? '#a7f3d0' : '#bae6fd'}`,
-                              padding: '2px 8px',
-                              borderRadius: '6px',
-                              fontFamily: 'monospace',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '3px'
-                            }}>
-                              {formulation.isOral 
-                                ? (String(api.dosage).includes('Ref:') || String(api.dosage).includes('Dosis') || String(api.dosage).includes('Dose') || String(api.dosage).toLowerCase().includes('/ cap') || String(api.dosage).toLowerCase().includes('/cap')
-                                    ? `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}` 
-                                    : `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')} / capsule`) 
-                                : String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}
-                            </span>
-                            {api.dosageSafety?.evaluated && (
-                              <span 
-                                style={{
-                                  fontSize: '0.67rem',
-                                  fontWeight: 700,
-                                  padding: '2px 7px',
-                                  borderRadius: '5px',
-                                  background: api.dosageSafety.level === 'high' ? '#fef2f2' : (api.dosageSafety.level === 'low' ? '#fffbeb' : '#f0fdf4'),
-                                  color: api.dosageSafety.level === 'high' ? '#dc2626' : (api.dosageSafety.level === 'low' ? '#b45309' : '#15803d'),
-                                  border: `1px solid ${api.dosageSafety.level === 'high' ? '#fca5a5' : (api.dosageSafety.level === 'low' ? '#fde68a' : '#bbf7d0')}`,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px'
-                                }} 
-                                title={api.dosageSafety.message}
-                              >
-                                <span>{api.dosageSafety.level === 'high' ? '⚠️' : (api.dosageSafety.level === 'low' ? 'ℹ️' : '✓')}</span>
-                                <span>
-                                  {api.dosageSafety.level === 'high' 
-                                    ? (isEs ? 'Dosis Elevada' : 'High Dose') 
-                                    : (api.dosageSafety.level === 'low' 
-                                      ? (isEs ? 'Dosis Baja' : 'Low Dose') 
-                                      : (isEs ? 'Dosis Estándar' : 'Standard Dose'))}
-                                </span>
-                              </span>
-                            )}
-                          </div>
-                          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
-                            {api.role} · <span style={{ color: '#0369a1', fontWeight: 700 }}>{api.indication}</span>
-                          </div>
-                        </div>
+                    {formulation.apis.map((rawApi) => {
+                      const clinical = resolveApiClinicalData(rawApi, isEs);
+                      const api = {
+                        ...rawApi,
+                        name: rawApi.name || clinical.name,
+                        cellularTarget: rawApi.cellularTarget || clinical.cellularTarget,
+                        role: rawApi.role || rawApi.pharmacologicalClass || clinical.pharmacologicalClass,
+                        indication: rawApi.indication || rawApi.clinicalIndication || clinical.clinicalIndication,
+                        action: rawApi.action || rawApi.mechanismOfAction || clinical.mechanismOfAction,
+                        geneTargets: (Array.isArray(rawApi.geneTargets) && rawApi.geneTargets.length > 0) ? rawApi.geneTargets : clinical.geneTargets,
+                        tag: (rawApi.tag && rawApi.tag !== '—' && rawApi.tag !== '-') ? rawApi.tag : clinical.tag
+                      };
 
-                        <div style={{ fontSize: '0.79rem', color: '#334155', lineHeight: 1.5 }}>
-                          {api.action}
-                        </div>
-
-                        {api.geneTargets && api.geneTargets.length > 0 && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
-                            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#4338ca', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <span>🧬</span> {isEs ? 'Genes Diana:' : 'Target Genes:'}
-                            </span>
-                            {api.geneTargets.map((g, gIdx) => (
-                              <span key={gIdx} style={{
+                      return (
+                        <div
+                          key={api.id || api.name}
+                          style={{
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '10px',
+                            padding: '1rem 1.15rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.55rem',
+                            boxShadow: '0 1px 4px rgba(15, 23, 42, 0.02)'
+                          }}
+                        >
+                          {/* Top Row: Tag + Name + Dosage + Safety & Pharmacological Role */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                              <span style={{
                                 fontSize: '0.68rem',
                                 fontWeight: 800,
-                                color: '#3730a3',
-                                background: '#e0e7ff',
-                                border: '1px solid #c7d2fe',
-                                padding: '1px 6px',
+                                textTransform: 'uppercase',
+                                padding: '2px 7px',
                                 borderRadius: '4px',
-                                fontFamily: 'monospace'
+                                background: '#e0f2fe',
+                                color: '#0369a1'
                               }}>
-                                {g}
+                                {api.tag}
                               </span>
-                            ))}
+                              <span style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                                {api.name}
+                              </span>
+                              <span style={{
+                                fontSize: '0.78rem',
+                                fontWeight: 800,
+                                color: formulation.isOral ? '#047857' : '#0284c7',
+                                background: formulation.isOral ? '#ecfdf5' : '#f0f9ff',
+                                border: `1px solid ${formulation.isOral ? '#a7f3d0' : '#bae6fd'}`,
+                                padding: '2px 8px',
+                                borderRadius: '6px',
+                                fontFamily: 'monospace',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px'
+                              }}>
+                                {formulation.isOral 
+                                  ? (String(api.dosage).includes('Ref:') || String(api.dosage).includes('Dosis') || String(api.dosage).includes('Dose') || String(api.dosage).toLowerCase().includes('/ cap') || String(api.dosage).toLowerCase().includes('/cap')
+                                      ? `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}` 
+                                      : `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')} / capsule`) 
+                                  : String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}
+                              </span>
+                              {api.dosageSafety?.evaluated && (
+                                <span 
+                                  style={{
+                                    fontSize: '0.67rem',
+                                    fontWeight: 700,
+                                    padding: '2px 7px',
+                                    borderRadius: '5px',
+                                    background: api.dosageSafety.level === 'high' ? '#fef2f2' : (api.dosageSafety.level === 'low' ? '#fffbeb' : '#f0fdf4'),
+                                    color: api.dosageSafety.level === 'high' ? '#dc2626' : (api.dosageSafety.level === 'low' ? '#b45309' : '#15803d'),
+                                    border: `1px solid ${api.dosageSafety.level === 'high' ? '#fca5a5' : (api.dosageSafety.level === 'low' ? '#fde68a' : '#bbf7d0')}`,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px'
+                                  }} 
+                                  title={api.dosageSafety.message}
+                                >
+                                  <span>{api.dosageSafety.level === 'high' ? '⚠️' : (api.dosageSafety.level === 'low' ? 'ℹ️' : '✓')}</span>
+                                  <span>
+                                    {api.dosageSafety.level === 'high' 
+                                      ? (isEs ? 'Dosis Elevada' : 'High Dose') 
+                                      : (api.dosageSafety.level === 'low' 
+                                        ? (isEs ? 'Dosis Baja' : 'Low Dose') 
+                                        : (isEs ? 'Dosis Estándar' : 'Standard Dose'))}
+                                  </span>
+                                </span>
+                              )}
+                            </div>
+                            {(api.role || api.indication) && (
+                              <div style={{ fontSize: '0.74rem', fontWeight: 600, color: '#64748b', textAlign: 'right' }}>
+                                {api.role && <span>{api.role}</span>}
+                                {api.role && api.indication && <span> · </span>}
+                                {api.indication && <span style={{ color: '#0369a1', fontWeight: 700 }}>{api.indication}</span>}
+                              </div>
+                            )}
                           </div>
-                        )}
 
-                        {api.rationale && (
-                          <div style={{
-                            fontSize: '0.72rem',
-                            color: '#047857',
-                            background: '#f0fdf4',
-                            border: '1px solid #bbf7d0',
-                            borderRadius: '6px',
-                            padding: '3px 8px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            width: 'fit-content'
-                          }}>
-                            <span>🧬</span>
-                            <span>{api.rationale}</span>
-                          </div>
-                        )}
+                          {/* Guaranteed Cellular Target High-Visibility Callout */}
+                          {api.cellularTarget && (
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: '8px',
+                              padding: '7px 11px',
+                              borderRadius: '7px',
+                              background: '#f8fafc',
+                              border: '1px solid #e2e8f0',
+                              boxShadow: '0 1px 2px rgba(15, 23, 42, 0.02)'
+                            }}>
+                              <span style={{
+                                fontSize: '0.68rem',
+                                fontWeight: 800,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.04em',
+                                color: '#0f172a',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                flexShrink: 0,
+                                marginTop: '1px'
+                              }}>
+                                <span>🎯</span> {isEs ? 'Diana Celular:' : 'Cellular Target:'}
+                              </span>
+                              <span style={{ fontSize: '0.79rem', color: '#1e293b', fontWeight: 600, lineHeight: 1.45 }}>
+                                {api.cellularTarget}
+                              </span>
+                            </div>
+                          )}
 
-                        {api.cellularTarget && (
-                          <div style={{ fontSize: '0.74rem', color: '#5f6368', display: 'flex', gap: '6px', alignItems: 'baseline' }}>
-                            <span style={{ fontWeight: 600, color: '#202124' }}>{isEs ? 'Diana celular:' : 'Cellular target:'}</span>
-                            <span>{api.cellularTarget}</span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                          {/* Mechanism of Action / Pharmacological Action */}
+                          {api.action && (
+                            <div style={{ fontSize: '0.78rem', color: '#334155', lineHeight: 1.5, marginTop: '1px' }}>
+                              {api.action}
+                            </div>
+                          )}
+
+                          {/* Target Genes */}
+                          {api.geneTargets && api.geneTargets.length > 0 && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '1px' }}>
+                              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#4338ca', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span>🧬</span> {isEs ? 'Genes Diana:' : 'Target Genes:'}
+                              </span>
+                              {api.geneTargets.map((g, gIdx) => (
+                                <span key={gIdx} style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: 800,
+                                  color: '#3730a3',
+                                  background: '#e0e7ff',
+                                  border: '1px solid #c7d2fe',
+                                  padding: '1px 6px',
+                                  borderRadius: '4px',
+                                  fontFamily: 'monospace'
+                                }}>
+                                  {g}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Clinical Rationale */}
+                          {api.rationale && (
+                            <div style={{
+                              fontSize: '0.72rem',
+                              color: '#047857',
+                              background: '#f0fdf4',
+                              border: '1px solid #bbf7d0',
+                              borderRadius: '6px',
+                              padding: '3px 8px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              width: 'fit-content'
+                            }}>
+                              <span>🧬</span>
+                              <span>{api.rationale}</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
