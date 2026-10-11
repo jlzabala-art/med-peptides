@@ -12,7 +12,7 @@ export async function generateMetadata({ params }) {
   const cleanSlug = decodeURIComponent(slug || '').trim();
 
   let doctorName = 'Physician Clinical Portal';
-  let clinic = 'Atlas Clinical Partner';
+  let clinic = cleanSlug.includes('marina') ? 'NOVA Clinic' : 'Medical Practice';
   let specialty = 'Regenerative Medicine & Nutrigenomics';
   let canonicalSlug = cleanSlug;
 

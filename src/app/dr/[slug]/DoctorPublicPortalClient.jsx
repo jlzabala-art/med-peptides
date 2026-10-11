@@ -528,6 +528,9 @@ export default function DoctorPublicPortalClient({
       if (fieldKey === 'license') {
         updates.licenseNumber = finalValue;
       }
+      if (fieldKey === 'clinic') {
+        updates.clinicName = finalValue;
+      }
 
       const res = await fetch(`/api/doctor/${encodeURIComponent(slug)}`, {
         method: 'PUT',
@@ -540,13 +543,20 @@ export default function DoctorPublicPortalClient({
         throw new Error(json.error || 'Failed to update field');
       }
 
-      setData(prev => ({
-        ...prev,
-        doctor: {
-          ...prev?.doctor,
-          ...updates
-        }
-      }));
+      // Immediately merge returned doctor profile and updates into reactive state
+      // Guarantees zero page-refresh needed for user updates (Golden Rule #25)
+      setData(prev => {
+        const serverDoctor = json?.doctor || {};
+        return {
+          ...prev,
+          ...(json || {}),
+          doctor: {
+            ...prev?.doctor,
+            ...updates,
+            ...serverDoctor
+          }
+        };
+      });
 
       setEditingDoctorField(null);
       toast.success(`Doctor ${fieldKey} updated successfully ✓`);
@@ -2258,6 +2268,24 @@ export default function DoctorPublicPortalClient({
             padding: 0 12px;
             font-size: 0.74rem;
             flex-shrink: 0;
+          }
+          .doctor-recommendations-section {
+            padding: 16px 12px !important;
+            margin-bottom: 120px !important;
+            border-radius: 8px !important;
+          }
+          .doctor-recommendation-row {
+            padding: 14px 12px !important;
+          }
+          .doctor-recommendation-header-actions {
+            width: 100% !important;
+            justify-content: flex-start !important;
+            margin-top: 4px !important;
+          }
+          .doctor-recommendation-action-btn {
+            flex: 1 1 auto !important;
+            justify-content: center !important;
+            min-height: 38px !important;
           }
         }
         .gcp-mobile-nav-trigger {
@@ -4855,12 +4883,13 @@ export default function DoctorPublicPortalClient({
             return (
               <section
                 id="recommendations"
+                className="doctor-recommendations-section"
                 style={{
                   background: '#ffffff',
                   border: '1px solid #dadce0',
                   borderRadius: '8px',
                   padding: '24px',
-                  marginBottom: '32px',
+                  marginBottom: '110px',
                   boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
                 }}
               >
@@ -4915,13 +4944,24 @@ export default function DoctorPublicPortalClient({
                   borderRadius: '8px',
                   marginBottom: '20px'
                 }}>
-                  {/* Category Pills */}
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {/* Category Pills (Horizontal Scroll on Mobile per Google Cloud UX) */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '6px',
+                      flexWrap: 'nowrap',
+                      overflowX: 'auto',
+                      WebkitOverflowScrolling: 'touch',
+                      paddingBottom: '4px',
+                      maxWidth: '100%',
+                      scrollbarWidth: 'none'
+                    }}
+                  >
                     <button
                       type="button"
                       onClick={() => setRecCategoryFilter('all')}
                       style={{
-                        padding: '5px 12px',
+                        padding: '6px 12px',
                         fontSize: '0.76rem',
                         fontWeight: 650,
                         borderRadius: '6px',
@@ -4930,7 +4970,10 @@ export default function DoctorPublicPortalClient({
                         background: effectiveCategoryFilter === 'all' ? '#eff6ff' : '#ffffff',
                         color: effectiveCategoryFilter === 'all' ? '#1d4ed8' : '#4b5563',
                         cursor: 'pointer',
-                        transition: 'all 0.15s ease'
+                        transition: 'all 0.15s ease',
+                        flexShrink: 0,
+                        whiteSpace: 'nowrap',
+                        minHeight: '34px'
                       }}
                     >
                       All ({masterSolutions.length})
@@ -4940,7 +4983,7 @@ export default function DoctorPublicPortalClient({
                         type="button"
                         onClick={() => setRecCategoryFilter('peptides')}
                         style={{
-                          padding: '5px 12px',
+                          padding: '6px 12px',
                           fontSize: '0.76rem',
                           fontWeight: 650,
                           borderRadius: '6px',
@@ -4949,7 +4992,10 @@ export default function DoctorPublicPortalClient({
                           background: effectiveCategoryFilter === 'peptides' ? '#e0e7ff' : '#ffffff',
                           color: effectiveCategoryFilter === 'peptides' ? '#3730a3' : '#4b5563',
                           cursor: 'pointer',
-                          transition: 'all 0.15s ease'
+                          transition: 'all 0.15s ease',
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap',
+                          minHeight: '34px'
                         }}
                       >
                         🧬 Bioactive Peptides ({peptideSolutions.length})
@@ -4960,7 +5006,7 @@ export default function DoctorPublicPortalClient({
                         type="button"
                         onClick={() => setRecCategoryFilter('supplements')}
                         style={{
-                          padding: '5px 12px',
+                          padding: '6px 12px',
                           fontSize: '0.76rem',
                           fontWeight: 650,
                           borderRadius: '6px',
@@ -4969,7 +5015,10 @@ export default function DoctorPublicPortalClient({
                           background: effectiveCategoryFilter === 'supplements' ? '#fef3c7' : '#ffffff',
                           color: effectiveCategoryFilter === 'supplements' ? '#b45309' : '#4b5563',
                           cursor: 'pointer',
-                          transition: 'all 0.15s ease'
+                          transition: 'all 0.15s ease',
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap',
+                          minHeight: '34px'
                         }}
                       >
                         ⚡ UltraPerson Supplements ({supplementSolutions.length})
@@ -4980,7 +5029,7 @@ export default function DoctorPublicPortalClient({
                         type="button"
                         onClick={() => setRecCategoryFilter('eterna')}
                         style={{
-                          padding: '5px 12px',
+                          padding: '6px 12px',
                           fontSize: '0.76rem',
                           fontWeight: 650,
                           borderRadius: '6px',
@@ -4989,7 +5038,10 @@ export default function DoctorPublicPortalClient({
                           background: effectiveCategoryFilter === 'eterna' ? '#ede9fe' : '#ffffff',
                           color: effectiveCategoryFilter === 'eterna' ? '#6d28d9' : '#4b5563',
                           cursor: 'pointer',
-                          transition: 'all 0.15s ease'
+                          transition: 'all 0.15s ease',
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap',
+                          minHeight: '34px'
                         }}
                       >
                         ⏳ ETERNA® Longevity &amp; DNA ({eternaSolutions.length})
@@ -5000,7 +5052,7 @@ export default function DoctorPublicPortalClient({
                         type="button"
                         onClick={() => setRecCategoryFilter('colway')}
                         style={{
-                          padding: '5px 12px',
+                          padding: '6px 12px',
                           fontSize: '0.76rem',
                           fontWeight: 650,
                           borderRadius: '6px',
@@ -5009,7 +5061,10 @@ export default function DoctorPublicPortalClient({
                           background: effectiveCategoryFilter === 'colway' ? '#ecfdf5' : '#ffffff',
                           color: effectiveCategoryFilter === 'colway' ? '#065f46' : '#4b5563',
                           cursor: 'pointer',
-                          transition: 'all 0.15s ease'
+                          transition: 'all 0.15s ease',
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap',
+                          minHeight: '34px'
                         }}
                       >
                         🛡️ Barrier &amp; Cuticular ECM ({colwaySolutions.length})
@@ -5018,7 +5073,7 @@ export default function DoctorPublicPortalClient({
                   </div>
 
                   {/* Instant Search Bar */}
-                  <div style={{ position: 'relative', minWidth: '280px', flex: '1', maxWidth: '420px' }}>
+                  <div style={{ position: 'relative', minWidth: '260px', flex: '1', maxWidth: '420px' }}>
                     <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                     <input
                       type="text"
@@ -5068,6 +5123,7 @@ export default function DoctorPublicPortalClient({
                     return (
                       <div
                         key={sol.id}
+                        className="doctor-recommendation-row"
                         style={{
                           background: '#ffffff',
                           border: `1px solid ${sol.borderColor || '#e2e8f0'}`,
@@ -5126,7 +5182,7 @@ export default function DoctorPublicPortalClient({
                           </div>
 
                           {/* Right Badges & Action Buttons */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <div className="doctor-recommendation-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                             <span style={{
                               fontSize: '0.70rem',
                               color: '#047857',
@@ -5160,6 +5216,7 @@ export default function DoctorPublicPortalClient({
                             {count > 0 && (
                               <button
                                 type="button"
+                                className="doctor-recommendation-action-btn"
                                 onClick={() => {
                                   triggerHaptic('selection');
                                   const matchedRxIds = sol.matchingItems.map(item => item.rx.id || item.rx.code || item.rx.prescriptionNumber);
@@ -5185,7 +5242,7 @@ export default function DoctorPublicPortalClient({
                                   color: '#1d4ed8',
                                   background: '#eff6ff',
                                   border: '1px solid #bfdbfe',
-                                  padding: '4px 10px',
+                                  padding: '5px 12px',
                                   borderRadius: '5px',
                                   cursor: 'pointer',
                                   transition: 'all 0.15s ease'
@@ -5200,6 +5257,7 @@ export default function DoctorPublicPortalClient({
                             {/* Link to Protocol / Catalog */}
                             <a
                               href={sol.protocolUrl}
+                              className="doctor-recommendation-action-btn"
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{
@@ -5208,7 +5266,7 @@ export default function DoctorPublicPortalClient({
                                 color: sol.badgeColor,
                                 background: sol.badgeBg,
                                 border: `1px solid ${sol.borderColor}`,
-                                padding: '4px 10px',
+                                padding: '5px 12px',
                                 borderRadius: '5px',
                                 textDecoration: 'none',
                                 display: 'inline-flex',

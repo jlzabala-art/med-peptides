@@ -529,13 +529,20 @@ export default function DoctorClinicalAnalytics({
       {/* ── Main Analytics Grid ────────────────────────────────────────────── */}
       {!isCollapsed && (
         <div style={{ padding: '20px' }}>
-          <div 
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '18px'
-            }}
-          >
+          <style>{`
+            .doctor-clinical-analytics-grid {
+              display: grid;
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 18px;
+            }
+            @media (max-width: 768px) {
+              .doctor-clinical-analytics-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+              }
+            }
+          `}</style>
+          <div className="doctor-clinical-analytics-grid">
             {/* ── CARD 1: Monthly Prescription Volume ──────────────────────── */}
             <div 
               style={{

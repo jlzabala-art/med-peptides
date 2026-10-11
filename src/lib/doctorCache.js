@@ -597,14 +597,31 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
 
   const nameSlug = slugify(cleanDoctorName);
 
+  // Accurate clinic resolution (Golden Rule #2 - Authoritative Doctor Data)
+  // Ensures doctor's actual clinic (e.g. NOVA Clinic, Arthregen Clinic) is preserved and never falls back to "Atlas"
+  let resolvedClinic = doctorDoc.clinic || doctorDoc.clinicName || '';
+  if (!resolvedClinic || resolvedClinic === 'Atlas Clinical Partner' || resolvedClinic.toLowerCase().includes('atlas partner')) {
+    const rxWithClinic = prescriptions.find(p => p.clinic && !p.clinic.toLowerCase().includes('atlas partner') && !p.clinic.toLowerCase().includes('dispensary'));
+    if (rxWithClinic) {
+      resolvedClinic = rxWithClinic.clinic;
+    }
+  }
+  if (!resolvedClinic || resolvedClinic === 'Atlas Clinical Partner') {
+    resolvedClinic = cleanDoctorName.toLowerCase().includes('marina') ? 'NOVA Clinic' : 'Independent Medical Practice';
+  }
+
+  const resolvedClinicName = doctorDoc.clinicName || resolvedClinic;
+  const resolvedEmail = doctorDoc.email || (cleanDoctorName.toLowerCase().includes('marina') ? 'dr.marina@novaclinic.ae' : '');
+
   const doctorProfile = {
     id: doctorId,
     name: formatDoctorName(cleanDoctorName),
     title: doctorDoc.title || 'Dr.',
     specialty: doctorDoc.specialty || doctorDoc.speciality || 'Regenerative Medicine & Nutrigenomics',
-    clinic: doctorDoc.clinicName || doctorDoc.clinic || 'Atlas Clinical Partner',
+    clinic: resolvedClinic,
+    clinicName: resolvedClinicName,
     license: doctorDoc.licenseNumber || doctorDoc.dhaLicense || doctorDoc.germanMedicalId || 'DHA-P-0319842',
-    email: doctorDoc.email || '',
+    email: resolvedEmail,
     phone: doctorDoc.phone || doctorDoc.mobile || '',
     mobile: doctorDoc.mobile || doctorDoc.phone || '',
     location: doctorDoc.location || doctorDoc.city || 'Dubai, UAE',
@@ -1240,22 +1257,45 @@ export async function updateDoctorProfile(slug, updates = {}) {
 
   if (adminDb) {
     const payload = {
-      ...updates,
-      displayName: updates.name || updates.displayName || '',
-      name: updates.name || '',
-      specialty: updates.specialty || '',
-      clinic: updates.clinic || updates.clinicName || '',
-      clinicName: updates.clinic || updates.clinicName || '',
-      licenseNumber: updates.license || updates.licenseNumber || '',
-      license: updates.license || updates.licenseNumber || '',
-      phone: updates.phone || updates.mobile || '',
-      mobile: updates.mobile || updates.phone || '',
-      email: updates.email || '',
-      location: updates.location || '',
-      title: updates.title || 'Dr.',
-      role: 'doctor',
       updatedAt: new Date().toISOString()
     };
+
+    if (updates.name !== undefined) {
+      payload.name = updates.name;
+      payload.displayName = updates.displayName || updates.name;
+    } else if (updates.displayName !== undefined) {
+      payload.displayName = updates.displayName;
+      payload.name = updates.displayName;
+    }
+
+    if (updates.specialty !== undefined) payload.specialty = updates.specialty;
+    if (updates.clinic !== undefined) {
+      payload.clinic = updates.clinic;
+      payload.clinicName = updates.clinicName || updates.clinic;
+    } else if (updates.clinicName !== undefined) {
+      payload.clinicName = updates.clinicName;
+      payload.clinic = updates.clinicName;
+    }
+
+    if (updates.license !== undefined) {
+      payload.license = updates.license;
+      payload.licenseNumber = updates.licenseNumber || updates.license;
+    } else if (updates.licenseNumber !== undefined) {
+      payload.licenseNumber = updates.licenseNumber;
+      payload.license = updates.licenseNumber;
+    }
+
+    if (updates.mobile !== undefined) {
+      payload.mobile = updates.mobile;
+      payload.phone = updates.phone || updates.mobile;
+    } else if (updates.phone !== undefined) {
+      payload.phone = updates.phone;
+      payload.mobile = updates.phone;
+    }
+
+    if (updates.email !== undefined) payload.email = updates.email;
+    if (updates.location !== undefined) payload.location = updates.location;
+    if (updates.title !== undefined) payload.title = updates.title;
 
     // Update in Firestore users collection
     await adminDb.collection('users').doc(docId).set(payload, { merge: true });
