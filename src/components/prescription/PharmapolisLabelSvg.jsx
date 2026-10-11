@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { formatCustomsDate, getCustomsFriendlyDefault } from '@/utils/labels/customsNaming';
 
 /**
  * Wraps text into lines with a maximum character limit.
@@ -56,7 +57,8 @@ function wrapDirections(text, firstLineMaxChars = 44, otherLinesMaxChars = 56) {
 /**
  * PharmapolisLabelSvg
  * ─────────────────────────────────────────────────────────────────────────────
- * High-precision vector SVG pharmaceutical label generator.
+ * High-precision vector SVG pharmaceutical & dispensary label generator.
+ * Supports Delivery (Clinical EU GMP) and Shipping (Simple Pharmacy Bottle) modes.
  * Standard 7.5 cm × 4.5 cm (75 mm × 45 mm) base = 1500 × 900 px canvas.
  * Compliant with EU GMP, EMA, and USP <17> / USP <795> compounding font standards:
  *  - Prominent Patient Name (≥ 10 pt print equivalent)
@@ -147,6 +149,16 @@ export default function PharmapolisLabelSvg({
   const lote = labelData.lote || '2609-PLV';
   const volume = labelData.volume || labelData.netVolume || labelData.size || labelData.netContent || labelData.totalVolume || labelData.quantity || '100 mL';
   
+  // Dynamic Dispensing Pharmacy Name & Address
+  const rawPharmacyName = (labelData.pharmacyName || labelData.pharmacy || labelData.dispensingPharmacy || 'PHARMAPOLIS').trim();
+  const pharmacyName = rawPharmacyName.toUpperCase();
+  const pharmacyAddress = labelData.pharmacyAddress || labelData.dispensaryAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria';
+  const dynHeaderTitleSize = pharmacyName.length > 26 
+    ? Math.round(headerTitleSize * 0.72) 
+    : pharmacyName.length > 18 
+      ? Math.round(headerTitleSize * 0.84) 
+      : headerTitleSize;
+
   // Unique QR URL strictly bound to this prescription (pointing to patient view)
   const targetRxUrl = labelData.targetRxUrl || labelData.url || `https://med-peptides.com/rx/${fileNumber}?view=patient`;
   const cleanDisplayUrl = targetRxUrl.replace(/^https?:\/\//, '');
@@ -318,6 +330,172 @@ export default function PharmapolisLabelSvg({
   };
 
   // ───────────────────────────────────────────────────────────────────────────
+  // VARIANT 0: SHIPPING LABEL (Etiqueta de Bote / Farmacia Simple, sin QR/Barras)
+  // ───────────────────────────────────────────────────────────────────────────
+  if (variant === 'shipping') {
+    const rawPatient = labelData.patientName || labelData.patient?.name || 'Patient Record';
+    const patientDisplayName = rawPatient.replace(/\b([a-zA-Z])/g, m => m.toUpperCase());
+
+    const shippingTitle = (
+      labelData.shippingTitle ||
+      labelData.shippingName ||
+      getCustomsFriendlyDefault(labelData)
+    ).trim();
+
+    const quantityDisplay = labelData.quantity || labelData.volume || labelData.netContent || (isShort ? '90 capsules' : '120 capsules');
+    const storageDisplay = labelData.storage || 'Store at room temperature.';
+    const pharmacyContact = labelData.pharmacyContact || labelData.pharmacyEmail
+      ? `${rawPharmacyName.toLowerCase()}lab / ${labelData.pharmacyEmail || labelData.pharmacyContact}`
+      : 'Pharmapolislab/pharmapolisplovdiv@gmail.com';
+
+    const prepDateFormatted = formatCustomsDate(labelData.prodDate || labelData.mfgDate, 'full');
+    const budDateFormatted = formatCustomsDate(labelData.expDate, 'bud');
+
+    // Directions text with wrapping
+    const rawDir = labelData.directions || labelData.instructions || 'Take 2 capsules (one dose) with lunch and 2 capsules (one dose) with dinner.';
+    const dirClean = String(rawDir).replace(/^directions\s*(for\s*use)?:\s*/i, '').trim();
+    const dirLines = wrapDirections(dirClean, 42, 54);
+
+    const baseFontSize = Math.min(35, Math.max(24, Math.round(HEIGHT * 0.040)));
+    const titleFontSize = Math.min(48, Math.max(32, Math.round(HEIGHT * 0.054)));
+    const headerFontSize = Math.min(22, Math.max(16, Math.round(HEIGHT * 0.024)));
+    const lineStep = Math.round(baseFontSize * 1.8);
+
+    // Vertical spacing
+    const topMargin = Math.round(HEIGHT * 0.09);
+    const titleY = topMargin + Math.round(lineStep * 1.4);
+    const qtyY = titleY + lineStep;
+    const dirY = qtyY + lineStep;
+    const extraDirHeight = Math.max(0, dirLines.length - 1) * Math.round(baseFontSize * 1.35);
+    const prepY = dirY + lineStep + extraDirHeight;
+    const budY = prepY + lineStep;
+    const storageY = budY + lineStep;
+    const patientY = storageY + Math.round(lineStep * 1.35);
+
+    return (
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        width="100%"
+        height="100%"
+        style={{ display: 'block', background: '#ffffff', borderRadius: '4px' }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect width={WIDTH} height={HEIGHT} fill="#ffffff" />
+
+        {/* ── HEADER PHARMACY CONTACT ── */}
+        <text
+          x="75"
+          y={topMargin}
+          fontFamily="Georgia, 'Times New Roman', Garamond, serif"
+          fontSize={headerFontSize}
+          fontStyle="italic"
+          fill="#1e293b"
+        >
+          {pharmacyContact}
+        </text>
+
+        {/* ── PRODUCT TITLE (Customs-Safe Name) ── */}
+        <text
+          x="75"
+          y={titleY}
+          fontFamily="Georgia, 'Times New Roman', Garamond, serif"
+          fontSize={titleFontSize}
+          fontWeight="bold"
+          fill="#000000"
+        >
+          {shippingTitle}
+        </text>
+
+        {/* ── QUANTITY ── */}
+        <text
+          x="75"
+          y={qtyY}
+          fontFamily="Georgia, 'Times New Roman', Garamond, serif"
+          fontSize={baseFontSize}
+          fill="#000000"
+        >
+          <tspan fontWeight="bold">Quantity: </tspan>
+          <tspan fontWeight="normal">{quantityDisplay}</tspan>
+        </text>
+
+        {/* ── DIRECTIONS FOR USE ── */}
+        <text
+          x="75"
+          y={dirY}
+          fontFamily="Georgia, 'Times New Roman', Garamond, serif"
+          fontSize={baseFontSize}
+          fill="#000000"
+        >
+          <tspan fontWeight="bold">Directions for use: </tspan>
+          <tspan fontWeight="normal">{dirLines[0] || 'Take as directed.'}</tspan>
+          {dirLines.slice(1).map((l, i) => (
+            <tspan
+              key={i}
+              x="75"
+              dy={Math.round(baseFontSize * 1.35)}
+              fontWeight="normal"
+            >
+              {l}
+            </tspan>
+          ))}
+        </text>
+
+        {/* ── DATE OF PREPARATION ── */}
+        <text
+          x="75"
+          y={prepY}
+          fontFamily="Georgia, 'Times New Roman', Garamond, serif"
+          fontSize={baseFontSize}
+          fill="#000000"
+        >
+          <tspan fontWeight="bold">Date of preparation: </tspan>
+          <tspan fontWeight="normal">{prepDateFormatted}</tspan>
+        </text>
+
+        {/* ── USE-BY DATE / BUD ── */}
+        <text
+          x="75"
+          y={budY}
+          fontFamily="Georgia, 'Times New Roman', Garamond, serif"
+          fontSize={baseFontSize}
+          fill="#000000"
+        >
+          <tspan fontWeight="bold">Use-by date / BUD: </tspan>
+          <tspan fontWeight="normal">{budDateFormatted}</tspan>
+        </text>
+
+        {/* ── STORAGE CONDITIONS ── */}
+        <text
+          x="75"
+          y={storageY}
+          fontFamily="Georgia, 'Times New Roman', Garamond, serif"
+          fontSize={baseFontSize}
+          fill="#000000"
+        >
+          <tspan fontWeight="bold">Storage conditions: </tspan>
+          <tspan fontWeight="normal">{storageDisplay}</tspan>
+        </text>
+
+        {/* ── PATIENT NAME ── */}
+        <text
+          x="75"
+          y={patientY}
+          fontFamily="Georgia, 'Times New Roman', Garamond, serif"
+          fontSize={Math.round(baseFontSize * 1.08)}
+          fontWeight="bold"
+          fill="#000000"
+        >
+          {patientDisplayName}
+        </text>
+
+        {/* Scissor cut lines & corner marks */}
+        {renderCutGuides()}
+      </svg>
+    );
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
   // VARIANT 1: BACK LABEL WITH LARGE PROMINENT QR CODE (Reverso con QR)
   // ───────────────────────────────────────────────────────────────────────────
   if (variant === 'backQr') {
@@ -352,8 +530,8 @@ export default function PharmapolisLabelSvg({
 
         {/* ── HEADER ── */}
         <g transform={`translate(60, ${headerY})`}>
-          <text x="0" y="34" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">PHARMAPOLIS</text>
-          <text x="0" y="62" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#475569">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
+          <text x="0" y="34" fontFamily="Arial, Helvetica, sans-serif" fontSize={dynHeaderTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">{pharmacyName}</text>
+          <text x="0" y="62" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#475569">{pharmacyAddress}</text>
         </g>
 
         {/* EU GMP CERTIFIED BADGE */}
@@ -667,8 +845,8 @@ export default function PharmapolisLabelSvg({
 
       {/* ── HEADER ── */}
       <g transform={`translate(60, ${headerY})`}>
-        <text x="0" y="34" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">PHARMAPOLIS</text>
-        <text x="0" y="62" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#475569">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
+        <text x="0" y="34" fontFamily="Arial, Helvetica, sans-serif" fontSize={dynHeaderTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">{pharmacyName}</text>
+        <text x="0" y="62" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#475569">{pharmacyAddress}</text>
       </g>
 
       {/* MICRO-QR (IF ENABLED): Guaranteed zero overlap with patient box */}

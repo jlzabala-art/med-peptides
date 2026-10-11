@@ -60,6 +60,7 @@
     "idb-keyval": "^6.2.6",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
+    "jszip": "^3.10.2",
     "libphonenumber-js": "^1.10.0",
     "lucide-react": "^1.23.0",
     "next": "^16.2.10",

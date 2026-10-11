@@ -2,195 +2,12 @@
 
 import React, { useState, useRef } from 'react';
 import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye, Pill, ChevronLeft, ChevronRight, Share2 } from '@/lib/icons';
-import { db } from '@/firebase';
-import { doc, updateDoc, getDoc, collection, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
+import StatusBadge from '@/components/ui/StatusBadge';
+import { labelsRepository } from '@/repositories/labelsRepository';
 import PharmapolisLabelSvg from './PharmapolisLabelSvg';
+import { getCustomsFriendlySuggestions, findCustomsRisks } from '@/utils/labels/customsNaming';
+import { formatApisForEditor, labelToMarkdown, parseMarkdownToLabel } from '@/utils/labels/labelMarkdown';
 import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
-
-function formatApisForEditor(item) {
-  if (!item) return '';
-  if (Array.isArray(item.apis) && item.apis.length > 0) {
-    const list = item.apis.filter(a => {
-      if (typeof a === 'string') return Boolean(a.trim());
-      return !a.isVehicle && !a.isVehicleOrBase;
-    });
-    if (list.length > 0) {
-      return list.map(a => {
-        if (typeof a === 'string') return a.trim();
-        const drug = a.drugName || a.drug || a.name || a.productName || '';
-        const dose = a.dosage || a.dose || a.strength || '';
-        return dose ? `${drug}: ${dose}` : drug;
-      }).filter(Boolean).join('\n');
-    }
-  }
-  if (item.formula) {
-    return item.formula
-      .split(/\s*(?:\+|\bin\b)\s*/i)
-      .map(p => p.trim())
-      .filter(Boolean)
-      .join('\n');
-  }
-  return '';
-}
-
-function labelToMarkdown(item) {
-  if (!item) return '';
-  const patient = item.patientName || item.patient?.name || '';
-  const fileNo = item.fileNumber || item.rxCode || item.fileNo || item.id || '';
-  const batch = item.batchCode || item.lote || fileNo || '';
-  const volume = item.volume || item.size || item.netContent || '100 mL';
-  const dosageForm = item.dosageForm || 'Topical Scalp Solution';
-  const mfg = item.prodDate || item.mfgDate || '05-10-2026';
-  const exp = item.expDate || '04-10-2027';
-  const doctor = item.doctorName || item.physician || 'Dr. Marina Cordeiro Fernandes';
-  const clinic = item.clinicName || 'NOVA Clinic Day Surgery Center, Dubai';
-  const license = item.doctorLicense || 'DHA-91105367';
-  const storage = item.storage || 'Store at room temperature';
-  const title = item.productTitle || item.productName || 'Compounded Pharmaceutical Protocol';
-
-  let apisText = '';
-  if (Array.isArray(item.apis) && item.apis.length > 0) {
-    const list = item.apis.filter(a => {
-      if (typeof a === 'string') return Boolean(a.trim());
-      return !a.isVehicle && !a.isVehicleOrBase;
-    });
-    if (list.length > 0) {
-      apisText = list.map(a => {
-        if (typeof a === 'string') return `- ${a.replace(/^[*-]\s*/, '').trim()}`;
-        const drug = a.drugName || a.drug || a.name || a.productName || '';
-        const dose = a.dosage || a.dose || a.strength || '';
-        return dose ? `- ${drug}: ${dose}` : `- ${drug}`;
-      }).join('\n');
-    }
-  }
-  if (!apisText && item.formula) {
-    apisText = item.formula
-      .split(/\s*(?:\+|\bin\b)\s*/i)
-      .map(p => `- ${p.trim()}`)
-      .join('\n');
-  }
-  if (!apisText) {
-    apisText = '- Active Compounded Formulation';
-  }
-
-  const vehicle = typeof item.vehicle === 'string' ? item.vehicle : (item.vehicle?.name || '');
-  const directions = item.directions || item.instructions || 'Apply / take as directed by prescribing physician.';
-  const warnings = item.warnings || item.warning || 'For external / patient use only. Keep out of reach of children.';
-
-  return `---
-patient: ${patient}
-fileNumber: ${fileNo}
-batch: ${batch}
-volume: ${volume}
-dosageForm: ${dosageForm}
-mfg: ${mfg}
-exp: ${exp}
-doctor: ${doctor}
-clinic: ${clinic}
-license: ${license}
-storage: ${storage}
----
-
-# ${title}
-
-## ACTIVE COMPOUNDED INGREDIENTS
-${apisText}
-
-## COMPOUNDING VEHICLE
-${vehicle || ''}
-
-## DIRECTIONS FOR USE
-${directions}
-
-## WARNINGS & PRECAUTIONS
-${warnings}
-`;
-}
-
-function parseMarkdownToLabel(mdText, baseItem = {}) {
-  const result = { ...baseItem };
-  if (!mdText) return result;
-
-  const cleanMd = mdText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-  const fmMatch = cleanMd.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
-  let body = cleanMd;
-  if (fmMatch) {
-    body = cleanMd.slice(fmMatch[0].length);
-    const lines = fmMatch[1].split('\n');
-    lines.forEach(line => {
-      const idx = line.indexOf(':');
-      if (idx > 0) {
-        const key = line.slice(0, idx).trim().toLowerCase();
-        const val = line.slice(idx + 1).trim();
-        if (key === 'patient' || key === 'patientname') result.patientName = val;
-        else if (key === 'filenumber' || key === 'rxcode' || key === 'file' || key === 'rx') {
-          result.fileNumber = val;
-          result.rxCode = val;
-        }
-        else if (key === 'batch' || key === 'batchcode' || key === 'lote') {
-          result.batchCode = val;
-          result.lote = val;
-        }
-        else if (key === 'volume' || key === 'size' || key === 'netcontent' || key === 'net') result.volume = val;
-        else if (key === 'dosageform' || key === 'form') result.dosageForm = val;
-        else if (key === 'mfg' || key === 'proddate' || key === 'mfgdate') {
-          result.prodDate = val;
-          result.mfgDate = val;
-        }
-        else if (key === 'exp' || key === 'expdate' || key === 'expiry') result.expDate = val;
-        else if (key === 'doctor' || key === 'doctorname' || key === 'physician') result.doctorName = val;
-        else if (key === 'clinic' || key === 'clinicname') result.clinicName = val;
-        else if (key === 'license' || key === 'doctorlicense') result.doctorLicense = val;
-        else if (key === 'storage') result.storage = val;
-      }
-    });
-  }
-
-  const titleMatch = body.match(/^#\s+(.+)$/m);
-  if (titleMatch) {
-    result.productTitle = titleMatch[1].trim();
-    result.productName = titleMatch[1].trim();
-  }
-
-  const apiMatch = body.match(/##\s+ACTIVE\s+COMPOUNDED\s+INGREDIENTS\s*\n([\s\S]*?)(?=\n##|$)/i);
-  if (apiMatch) {
-    const rawApis = apiMatch[1]
-      .split('\n')
-      .map(l => l.replace(/^[*-]\s*/, '').trim())
-      .filter(Boolean);
-    if (rawApis.length > 0) {
-      result.apis = rawApis.map(line => {
-        const colonIdx = line.indexOf(':');
-        if (colonIdx > 0) {
-          return {
-            drugName: line.slice(0, colonIdx).trim(),
-            dosage: line.slice(colonIdx + 1).trim()
-          };
-        }
-        return { drugName: line };
-      });
-      result.formula = rawApis.join(' + ');
-    }
-  }
-
-  const vehMatch = body.match(/##\s+(?:COMPOUNDING\s+)?VEHICLE(?:\s*&\s*BASE)?\s*\n([\s\S]*?)(?=\n##|$)/i);
-  if (vehMatch) {
-    const veh = vehMatch[1].trim();
-    result.vehicle = (veh.toLowerCase().includes('none') || veh.toLowerCase().includes('n/a')) ? '' : veh;
-  }
-
-  const dirMatch = body.match(/##\s+DIRECTIONS\s*(?:FOR\s*USE)?\s*\n([\s\S]*?)(?=\n##|$)/i);
-  if (dirMatch) {
-    result.directions = dirMatch[1].trim();
-  }
-
-  const warnMatch = body.match(/##\s+WARNINGS?\s*(?:&|AND)?\s*PRECAUTIONS?\s*\n([\s\S]*?)(?=\n##|$)/i);
-  if (warnMatch) {
-    result.warnings = warnMatch[1].trim();
-  }
-
-  return result;
-}
 
 export default function PharmacyLabelsModal({
   isOpen,
@@ -203,12 +20,28 @@ export default function PharmacyLabelsModal({
   onPrescriptionUpdated = null
 }) {
   const [selectedProductIdx, setSelectedProductIdx] = useState(initialLabelIndex || 0);
-  const [activeVariant, setActiveVariant] = useState('backQr'); // 'front' | 'backQr' | 'frontWithQr'
+  const [activeVariant, setActiveVariantState] = useState(() => {
+    const valid = ['front', 'backQr', 'frontWithQr', 'shipping'];
+    const saved = labels?.[initialLabelIndex]?.lastVariant || labels?.[0]?.lastVariant;
+    if (valid.includes(saved)) return saved;
+    try {
+      const ls = typeof window !== 'undefined' ? window.localStorage.getItem('pharmacyLabelVariant') : null;
+      if (valid.includes(ls)) return ls;
+    } catch { /* storage unavailable */ }
+    return 'backQr';
+  }); // 'front' | 'backQr' | 'frontWithQr' | 'shipping'
+  const setActiveVariant = (v) => {
+    setActiveVariantState(v);
+    try { window.localStorage.setItem('pharmacyLabelVariant', v); } catch { /* storage unavailable */ }
+  };
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [exportFormat, setExportFormat] = useState('png'); // 'png' | 'pdf' (Default to PNG as requested)
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isGeneratingZip, setIsGeneratingZip] = useState(false);
+  const [compareMode, setCompareMode] = useState(false); // show Delivery + Shipping side by side
+  const [shippingDraft, setShippingDraft] = useState(null); // null = not editing
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [showCutGuides, setShowCutGuides] = useState(false); // Scissor cut lines & crop marks toggle (default false for clean label)
   const [zoomLevel, setZoomLevel] = useState('fit'); // 'fit' | 1 | 1.5 | 2
@@ -245,9 +78,9 @@ export default function PharmacyLabelsModal({
     const active = editedOverrides[selectedProductIdx] || labels[selectedProductIdx] || labels[0];
     if (active) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setMarkdownText(labelToMarkdown(active));
+      setMarkdownText(active.labelMarkdown || labelToMarkdown(active));
     }
-  }, [isOpen, selectedProductIdx, labels, editedOverrides]);
+  }, [isOpen, selectedProductIdx, labels]);
 
   if (!isOpen || !labels || labels.length === 0) return null;
 
@@ -256,11 +89,13 @@ export default function PharmacyLabelsModal({
 
   const handleFieldChange = (key, val) => {
     const updated = { ...currentItem, [key]: val };
+    const newMd = labelToMarkdown(updated);
+    updated.labelMarkdown = newMd;
     setEditedOverrides(prev => ({
       ...prev,
       [selectedProductIdx]: updated
     }));
-    setMarkdownText(labelToMarkdown(updated));
+    setMarkdownText(newMd);
   };
 
   const handleApisFieldChange = (rawText) => {
@@ -280,16 +115,19 @@ export default function PharmacyLabelsModal({
       apis: apisArray,
       formula: lines.join(' + ')
     };
+    const newMd = labelToMarkdown(updated);
+    updated.labelMarkdown = newMd;
     setEditedOverrides(prev => ({
       ...prev,
       [selectedProductIdx]: updated
     }));
-    setMarkdownText(labelToMarkdown(updated));
+    setMarkdownText(newMd);
   };
 
   const handleMarkdownChange = (newMd) => {
     setMarkdownText(newMd);
     const parsed = parseMarkdownToLabel(newMd, baseItem);
+    parsed.labelMarkdown = newMd;
     setEditedOverrides(prev => ({
       ...prev,
       [selectedProductIdx]: parsed
@@ -302,7 +140,7 @@ export default function PharmacyLabelsModal({
       delete copy[selectedProductIdx];
       return copy;
     });
-    setMarkdownText(labelToMarkdown(baseItem));
+    setMarkdownText(baseItem?.labelMarkdown || labelToMarkdown(baseItem));
   };
 
   const handleCopyMarkdown = () => {
@@ -385,201 +223,37 @@ export default function PharmacyLabelsModal({
     window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handleSaveToFirebase = async () => {
+  const handleSaveToFirebase = async (explicitStatus = null) => {
     try {
       setIsSavingToFirebase(true);
       setFirebaseSaveError(null);
       setFirebaseSaveSuccess(false);
 
-      if (!db) {
-        throw new Error(isEs ? 'Base de datos no inicializada' : 'Database not initialized');
-      }
-
       const rawId = currentItem.rxId || currentItem.prescriptionId || currentItem.fileNumber || currentItem.id;
-      let targetDocRef = null;
-      let existingData = null;
+      const targetStatus = explicitStatus || currentItem.approvalStatus || 'draft';
 
-      // 1. Direct doc lookup
-      if (rawId) {
-        try {
-          const directRef = doc(db, 'prescriptions', String(rawId));
-          const snap = await getDoc(directRef);
-          if (snap.exists()) {
-            targetDocRef = directRef;
-            existingData = snap.data();
-          }
-        } catch (err) {
-          console.warn('[PharmacyLabelsModal] Direct lookup fallback:', err);
-        }
-      }
-
-      // 2. Query fallback across identifiers
-      if (!targetDocRef) {
-        const candidates = [
-          String(rawId || ''),
-          String(currentItem.fileNumber || ''),
-          String(currentItem.rxCode || ''),
-          String(currentItem.batchCode || '')
-        ].filter(Boolean);
-
-        for (const cand of candidates) {
-          for (const field of ['code', 'prescriptionCode', 'fileNumber', 'id', 'fagron.boxId', 'fagronDetails.boxId']) {
-            const q = query(collection(db, 'prescriptions'), where(field, '==', cand));
-            const qSnap = await getDocs(q);
-            if (!qSnap.empty) {
-              targetDocRef = qSnap.docs[0].ref;
-              existingData = qSnap.docs[0].data();
-              break;
-            }
-          }
-          if (targetDocRef) break;
-        }
-      }
-
-      if (!targetDocRef) {
-        throw new Error(isEs ? `No se encontró la prescripción "${rawId || 'actual'}" en Firestore.` : `Prescription "${rawId || 'current'}" not found in Firestore.`);
-      }
-
-      // Build payload for Firestore
-      const updatePayload = {
-        updatedAt: serverTimestamp(),
-        lastModifiedBy: 'pharmacy_label_editor'
-      };
-
-      if (currentItem.patientName) {
-        updatePayload.patientName = currentItem.patientName;
-        if (existingData?.patient && typeof existingData.patient === 'object') {
-          updatePayload['patient.name'] = currentItem.patientName;
-          updatePayload['patient.displayName'] = currentItem.patientName;
-        }
-      }
-
-      if (currentItem.doctorName) {
-        updatePayload.doctorName = currentItem.doctorName;
-        if (existingData?.treatingDoctor && typeof existingData.treatingDoctor === 'object') {
-          updatePayload['treatingDoctor.name'] = currentItem.doctorName;
-        }
-        if (existingData?.doctor && typeof existingData.doctor === 'object') {
-          updatePayload['doctor.name'] = currentItem.doctorName;
-        }
-      }
-
-      if (currentItem.clinicName) {
-        updatePayload.clinicName = currentItem.clinicName;
-        if (existingData?.treatingClinic && typeof existingData.treatingClinic === 'object') {
-          updatePayload['treatingClinic.name'] = currentItem.clinicName;
-        }
-      }
-
-      if (currentItem.productTitle || currentItem.productName || currentItem.title) {
-        const fullTitle = currentItem.productTitle || currentItem.productName || currentItem.title;
-        updatePayload.productTitle = fullTitle;
-        updatePayload.productName = fullTitle;
-        updatePayload.title = fullTitle;
-        updatePayload.medicationName = fullTitle;
-      }
-
-      if (currentItem.vehicle || currentItem.compoundingVehicle) {
-        const vVal = currentItem.vehicle || currentItem.compoundingVehicle;
-        updatePayload.vehicle = vVal;
-        updatePayload.compoundingVehicle = vVal;
-      }
-
-      if (Array.isArray(currentItem.apis) && currentItem.apis.length > 0) {
-        updatePayload.apis = currentItem.apis;
-        updatePayload.items = currentItem.apis;
-        updatePayload.compounds = currentItem.apis;
-      } else if (Array.isArray(currentItem.items) && currentItem.items.length > 0) {
-        updatePayload.apis = currentItem.items;
-        updatePayload.items = currentItem.items;
-        updatePayload.compounds = currentItem.items;
-      }
-
-      if (currentItem.batchCode) {
-        updatePayload.batchCode = currentItem.batchCode;
-        updatePayload.dispensingBatch = currentItem.batchCode;
-        if (existingData?.fagron) {
-          updatePayload['fagron.boxId'] = currentItem.batchCode;
-        }
-      }
-
-      if (currentItem.volume) {
-        updatePayload.volume = currentItem.volume;
-      }
-
-      if (currentItem.expDate) {
-        updatePayload.expDate = currentItem.expDate;
-        updatePayload.expiryDate = currentItem.expDate;
-      }
-      if (currentItem.prodDate || currentItem.mfgDate) {
-        updatePayload.mfgDate = currentItem.prodDate || currentItem.mfgDate;
-        updatePayload.prodDate = currentItem.prodDate || currentItem.mfgDate;
-      }
-
-      if (currentItem.directions) {
-        updatePayload.directions = currentItem.directions;
-        updatePayload.instructions = currentItem.directions;
-        if (existingData?.posology && typeof existingData.posology === 'object') {
-          updatePayload['posology.regimen'] = currentItem.directions;
-        }
-      }
-
-      if (currentItem.storage) {
-        updatePayload.storage = currentItem.storage;
-      }
-
-      if (currentItem.warnings) {
-        updatePayload.warnings = currentItem.warnings;
-      }
-
-      if (currentItem.formula) {
-        updatePayload.formula = currentItem.formula;
-      }
-
-      const phaseIdx = Math.max(0, (currentItem.phaseNumber || 1) - 1);
-
-      // Also sync multi-part sequential phases in rx.parts if present
-      if (Array.isArray(existingData?.parts)) {
-        const updatedParts = [...existingData.parts];
-        if (updatedParts[phaseIdx]) {
-          updatedParts[phaseIdx] = {
-            ...updatedParts[phaseIdx],
-            title: currentItem.productTitle || updatedParts[phaseIdx].title,
-            volume: currentItem.volume || updatedParts[phaseIdx].volume,
-            directions: currentItem.directions || updatedParts[phaseIdx].directions,
-            posology: currentItem.directions || updatedParts[phaseIdx].posology,
-            vehicle: currentItem.vehicle || updatedParts[phaseIdx].vehicle,
-            apis: currentItem.apis || updatedParts[phaseIdx].apis
-          };
-          updatePayload.parts = updatedParts;
-        }
-      }
-
-      // Preserve full label snapshot across all phases in pharmacyLabels array
-      const allModalLabels = labels.map((lbl, idx) => {
-        const ovr = editedOverrides[idx];
-        return ovr ? { ...lbl, ...ovr } : lbl;
+      const saveResult = await labelsRepository.savePrescriptionLabel({
+        rawId,
+        currentItem: {
+          ...currentItem,
+          approvalStatus: targetStatus
+        },
+        markdownText,
+        activeVariant,
+        labels,
+        selectedProductIdx,
+        editedOverrides,
+        approvalStatus: targetStatus
       });
-      const currentLabelsSnapshot = Array.isArray(existingData?.pharmacyLabels) && existingData.pharmacyLabels.length >= allModalLabels.length
-        ? [...existingData.pharmacyLabels]
-        : [...allModalLabels];
-      currentLabelsSnapshot[phaseIdx] = {
-        ...(currentLabelsSnapshot[phaseIdx] || {}),
-        ...currentItem
-      };
-      updatePayload.pharmacyLabels = currentLabelsSnapshot;
 
-      await updateDoc(targetDocRef, updatePayload);
-
-      // Invalidate server cache immediately
-      try {
-        fetch('/api/prescriptions/invalidate-cache', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: rawId || targetDocRef.id })
-        }).catch(err => console.warn('[PharmacyLabelsModal] Invalidate cache warning:', err));
-      } catch (cacheErr) {
-        console.warn('[PharmacyLabelsModal] Cache invalidation call failed:', cacheErr);
+      if (saveResult.updatedLabel) {
+        setEditedOverrides(prev => ({
+          ...prev,
+          [selectedProductIdx]: {
+            ...(prev[selectedProductIdx] || {}),
+            ...saveResult.updatedLabel
+          }
+        }));
       }
 
       setFirebaseSaveSuccess(true);
@@ -589,26 +263,26 @@ export default function PharmacyLabelsModal({
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('prescription-updated', {
           detail: {
-            id: targetDocRef.id,
+            id: saveResult.docId,
             rxId: rawId,
-            updatedFields: updatePayload,
-            updatedData: updatePayload,
-            item: currentItem
+            updatedFields: saveResult.payload,
+            updatedData: saveResult.payload,
+            item: saveResult.updatedLabel || currentItem
           }
         }));
       }
 
       if (typeof onPrescriptionUpdated === 'function') {
         onPrescriptionUpdated({
-          id: targetDocRef.id,
+          id: saveResult.docId,
           rxId: rawId,
-          updatedFields: updatePayload,
-          updatedData: updatePayload,
-          item: currentItem
+          updatedFields: saveResult.payload,
+          updatedData: saveResult.payload,
+          item: saveResult.updatedLabel || currentItem
         });
       }
     } catch (err) {
-      console.error('[PharmacyLabelsModal] Error saving to Firebase:', err);
+      console.error('[PharmacyLabelsModal] Error saving to Firebase via labelsRepository:', err);
       setFirebaseSaveError(err.message || 'Error saving to Firebase');
       setTimeout(() => setFirebaseSaveError(null), 4000);
     } finally {
@@ -717,7 +391,7 @@ export default function PharmacyLabelsModal({
           sizeTag = rawVol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
         }
 
-        const variantClean = activeVariant === 'backQr' ? 'BACK-QR' : (activeVariant === 'frontWithQr' ? 'FRONT-QR' : 'FRONT');
+        const variantClean = activeVariant === 'backQr' ? 'BACK-QR' : activeVariant === 'frontWithQr' ? 'FRONT-QR' : activeVariant === 'shipping' ? 'SHIPPING' : 'FRONT';
 
         const nameSegments = [supplierClean, patientClean, rxCodeClean, partTag, sizeTag, `${dimensions.widthMm}x${dimensions.heightMm}mm`, variantClean, `${dpi}DPI`].filter(Boolean);
         downloadLink.download = `${nameSegments.join('_')}.png`;
@@ -823,7 +497,7 @@ export default function PharmacyLabelsModal({
         sizeTag = rawVol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
       }
 
-      const variantClean = activeVariant === 'backQr' ? 'BACK-QR' : (activeVariant === 'frontWithQr' ? 'FRONT-QR' : 'FRONT');
+      const variantClean = activeVariant === 'backQr' ? 'BACK-QR' : activeVariant === 'frontWithQr' ? 'FRONT-QR' : activeVariant === 'shipping' ? 'SHIPPING' : 'FRONT';
 
       const nameSegments = [supplierClean, patientClean, rxCodeClean, partTag, sizeTag, `${dimensions.widthMm}x${dimensions.heightMm}mm`, variantClean].filter(Boolean);
 
@@ -839,6 +513,83 @@ export default function PharmacyLabelsModal({
       console.error('Error generating PDF with jsPDF:', innerErr);
     } finally {
       setIsGeneratingPdf(false);
+    }
+  };
+
+  // Full package: every part × (Delivery + Shipping) as PNGs + manifest, bundled in one ZIP
+  const handleDownloadZipPackage = async () => {
+    setIsGeneratingZip(true);
+    let root = null;
+    let host = null;
+    try {
+      const [{ default: JSZip }, { createRoot }, { flushSync }] = await Promise.all([
+        import('jszip'),
+        import('react-dom/client'),
+        import('react-dom')
+      ]);
+      const zip = new JSZip();
+      host = document.createElement('div');
+      host.style.cssText = 'position:fixed;left:-99999px;top:0;width:1500px;pointer-events:none;';
+      document.body.appendChild(host);
+      root = createRoot(host);
+
+      const clean = (v, fallback = '') => String(v || fallback).trim().replace(/[^a-zA-Z0-9-]/g, '_').toUpperCase();
+      const variants = [['backQr', 'DELIVERY'], ['shipping', 'SHIPPING']];
+      const manifest = [];
+      const first = editedOverrides[0] ? { ...labels[0], ...editedOverrides[0] } : labels[0];
+      const rxClean = clean(first?.fileNumber || first?.rxCode || first?.id, 'RX');
+      const patientClean = clean(first?.patientName || first?.patient?.name);
+      const folder = [rxClean, patientClean].filter(Boolean).join('_');
+
+      for (let idx = 0; idx < labels.length; idx++) {
+        const item = editedOverrides[idx] ? { ...labels[idx], ...editedOverrides[idx] } : labels[idx];
+        const partTag = labels.length > 1 ? `PART-${item.phaseNumber || idx + 1}` : '';
+        for (const [variantKey, variantName] of variants) {
+          flushSync(() => {
+            root.render(
+              <PharmapolisLabelSvg
+                labelData={item}
+                variant={variantKey}
+                widthMm={dimensions.widthMm}
+                heightMm={dimensions.heightMm}
+                showCutGuides={false}
+              />
+            );
+          });
+          const svgEl = host.querySelector('svg');
+          if (!svgEl) continue;
+          const dataUrl = await svgElementToImageData(svgEl, dimensions.widthMm, dimensions.heightMm, dpi);
+          const blob = await (await fetch(dataUrl)).blob();
+          const fileName = [rxClean, patientClean, partTag, variantName, `${dpi}DPI`].filter(Boolean).join('_') + '.png';
+          zip.file(`${folder}/${variantName}/${fileName}`, blob);
+          manifest.push({
+            part: item.phaseNumber || idx + 1,
+            variant: variantName,
+            file: `${variantName}/${fileName}`,
+            title: variantKey === 'shipping'
+              ? (item.shippingTitle || getCustomsFriendlySuggestions(item)[0])
+              : (item.productTitle || item.productName || ''),
+            customsRisks: variantKey === 'shipping' ? findCustomsRisks(item) : undefined
+          });
+        }
+      }
+
+      zip.file(`${folder}/manifest.json`, JSON.stringify({ generatedAt: new Date().toISOString(), dpi, files: manifest }, null, 2));
+      const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${folder}_LABELS.zip`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    } catch (err) {
+      console.error('Error generating labels ZIP:', err);
+      setFirebaseSaveError(isEs ? 'No se pudo generar el ZIP' : 'Could not generate the ZIP');
+      setTimeout(() => setFirebaseSaveError(null), 4000);
+    } finally {
+      if (root) root.unmount();
+      if (host) host.remove();
+      setIsGeneratingZip(false);
     }
   };
 
@@ -1931,6 +1682,7 @@ export default function PharmacyLabelsModal({
                     <option value="backQr">{isEs ? 'Reverso con QR (Trazabilidad)' : 'Back Label with QR (Traceability)'}</option>
                     <option value="front">{isEs ? 'Frontal Estándar' : 'Front Label (Standard)'}</option>
                     <option value="frontWithQr">{isEs ? 'Frontal con Micro-QR' : 'Front Label with Micro-QR'}</option>
+                    <option value="shipping">{isEs ? '📦 Etiqueta de Envío (Aduanas)' : '📦 Shipping Label (Customs-Safe)'}</option>
                   </select>
                 </div>
 
@@ -2040,6 +1792,7 @@ export default function PharmacyLabelsModal({
                         <option value="pdf_a4">{isEs ? `Hoja A4 (10 por hoja · 2×5 Grid)` : `A4 Sheet (10 per page · 2×5 Grid)`}</option>
                       </>
                     )}
+                    <option value="zip">{isEs ? `Paquete ZIP (Delivery + Shipping · ${labels.length > 1 ? 'todas las partes' : 'esta etiqueta'})` : `ZIP Package (Delivery + Shipping · ${labels.length > 1 ? 'all parts' : 'this label'})`}</option>
                     <option value="md">Markdown (.md)</option>
                   </select>
                 </div>
@@ -2158,8 +1911,8 @@ export default function PharmacyLabelsModal({
             }}>
               {/* Editor Header Bar with Tabs and Actions */}
               <div className="gcp-editor-header-bar">
-                {/* Tabs */}
-                <div className="gcp-editor-tabs-wrap">
+                {/* Tabs & Approval Status (Golden Rule #8 & #28) */}
+                <div className="gcp-editor-tabs-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <button
                     type="button"
                     onClick={() => setEditorTab('fields')}
@@ -2176,6 +1929,38 @@ export default function PharmacyLabelsModal({
                     <FileText size={13} />
                     <span>Markdown (.md)</span>
                   </button>
+
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '4px' }}>
+                    <StatusBadge status={currentItem.approvalStatus || 'draft'} />
+                    <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700 }}>
+                      v{currentItem.version || 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = currentItem.approvalStatus === 'approved' ? 'draft' : 'approved';
+                        handleFieldChange('approvalStatus', next);
+                        handleSaveToFirebase(next);
+                      }}
+                      disabled={isSavingToFirebase}
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        border: currentItem.approvalStatus === 'approved' ? '1px solid #dadce0' : '1px solid #ceead6',
+                        background: currentItem.approvalStatus === 'approved' ? '#fff' : '#e6f4ea',
+                        color: currentItem.approvalStatus === 'approved' ? '#5f6368' : '#137333',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                      title={isEs ? 'Cambiar estado de aprobación clínica' : 'Change clinical approval status'}
+                    >
+                      {currentItem.approvalStatus === 'approved'
+                        ? (isEs ? '↺ Revertir a Borrador' : '↺ Revert to Draft')
+                        : (isEs ? '✓ Aprobar Etiqueta' : '✓ Approve Label')}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Editor Action Buttons: Save to Atlas, Download .md, Reset */}
@@ -2287,6 +2072,98 @@ export default function PharmacyLabelsModal({
                         placeholder="e.g. Phase 2: Metabolic & Lipid Optimization Evening Formula"
                       />
                     </div>
+
+                    {/* Customs-friendly quick suggestions (Shipping variant only) */}
+                    {activeVariant === 'shipping' && (
+                      <div className="gcp-col-12 gcp-field-wrap">
+                        <label className="gcp-form-label">
+                          {isEs ? 'Nombre para Aduanas / Shipping' : 'Customs / Shipping Name'}
+                        </label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <input
+                            type="text"
+                            value={shippingDraft !== null ? shippingDraft : (currentItem.shippingTitle || '')}
+                            onChange={(e) => setShippingDraft(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') { handleFieldChange('shippingTitle', shippingDraft ?? ''); setShippingDraft(null); }
+                              if (e.key === 'Escape') setShippingDraft(null);
+                            }}
+                            onBlur={() => {
+                              if (shippingDraft !== null) { handleFieldChange('shippingTitle', shippingDraft); setShippingDraft(null); }
+                            }}
+                            className="gcp-form-input"
+                            style={{ flex: 1, minWidth: 0 }}
+                            placeholder={getCustomsFriendlySuggestions(currentItem)[0]}
+                          />
+                          {shippingDraft !== null && (
+                            <>
+                              <button
+                                type="button"
+                                aria-label={isEs ? 'Guardar nombre' : 'Save name'}
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => { handleFieldChange('shippingTitle', shippingDraft); setShippingDraft(null); }}
+                                style={{ width: '44px', height: '44px', flexShrink: 0, borderRadius: '6px', border: '1px solid #137333', background: '#e6f4ea', color: '#137333', fontSize: '1rem', cursor: 'pointer' }}
+                              >
+                                ✔
+                              </button>
+                              <button
+                                type="button"
+                                aria-label={isEs ? 'Cancelar edición' : 'Cancel edit'}
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => setShippingDraft(null)}
+                                style={{ width: '44px', height: '44px', flexShrink: 0, borderRadius: '6px', border: '1px solid #c5221f', background: '#fce8e6', color: '#c5221f', fontSize: '1rem', cursor: 'pointer' }}
+                              >
+                                ❌
+                              </button>
+                            </>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+                          {getCustomsFriendlySuggestions(currentItem).map((s) => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => handleFieldChange('shippingTitle', s)}
+                              style={{
+                                padding: '6px 10px',
+                                minHeight: '44px',
+                                borderRadius: '999px',
+                                border: currentItem.shippingTitle === s ? '1px solid #1a73e8' : '1px solid #dadce0',
+                                background: currentItem.shippingTitle === s ? '#e8f0fe' : '#fff',
+                                color: currentItem.shippingTitle === s ? '#1a73e8' : '#3c4043',
+                                fontSize: '0.72rem',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                        {(() => {
+                          const risks = findCustomsRisks(currentItem);
+                          if (risks.length === 0) {
+                            return (
+                              <div style={{ marginTop: '8px', padding: '6px 10px', borderRadius: '6px', background: '#e6f4ea', color: '#137333', fontSize: '0.72rem', fontWeight: 600 }}>
+                                ✓ {isEs ? 'Sin términos de riesgo aduanero detectados' : 'No customs-risk terms detected'}
+                              </div>
+                            );
+                          }
+                          return (
+                            <div style={{ marginTop: '8px', padding: '8px 10px', borderRadius: '6px', background: '#fef7e0', border: '1px solid #f9e2a0', color: '#b06000', fontSize: '0.72rem', fontWeight: 600 }}>
+                              ⚠️ {isEs ? 'Posible retención en aduanas. Revisa:' : 'Possible customs hold. Review:'}
+                              <ul style={{ margin: '4px 0 0 16px', padding: 0, fontWeight: 500 }}>
+                                {risks.map((r, i) => (
+                                  <li key={`${r.field}-${r.term}-${i}`}>
+                                    <b>{r.field}</b>: &ldquo;{r.term}&rdquo;
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
 
                     {/* Row 3: Prescribing Doctor (6 cols) & Clinic (6 cols) -> generous width, zero truncation */}
                     <div className="gcp-col-6 gcp-field-wrap">
@@ -2400,26 +2277,31 @@ export default function PharmacyLabelsModal({
 
                 ) : (
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>
-                        {isEs ? 'Edita directamente el archivo Markdown. Los cambios se sincronizan en vivo con el SVG, PDFs y Firebase.' : 'Edit raw Markdown. Changes reflect live on the SVG, PDF outputs and Firebase.'}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.74rem', color: '#0f172a', fontWeight: '600' }}>
+                        {isEs 
+                          ? 'Edición Flexible Markdown (.md): Incluye fecha de caducidad (exp), farmacia dispensadora, dirección, principios activos y posología. Todo se sincroniza en vivo con el SVG y Firebase.' 
+                          : 'Flexible Markdown (.md) Editor: Full control of expiration (exp), dispensary pharmacy, address, active ingredients, and posology. Syncs live with SVG and Firebase.'}
                       </span>
                     </div>
                     <textarea
-                      rows={10}
+                      rows={16}
                       value={markdownText}
                       onChange={(e) => handleMarkdownChange(e.target.value)}
+                      spellCheck={false}
                       style={{
                         width: '100%',
-                        fontSize: '0.76rem',
-                        lineHeight: 1.45,
-                        padding: '8px',
-                        border: '1px solid #dadce0',
-                        borderRadius: '4px',
+                        minHeight: '340px',
+                        fontSize: '0.80rem',
+                        lineHeight: 1.5,
+                        padding: '12px',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '6px',
                         boxSizing: 'border-box',
                         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                        background: '#ffffff',
-                        color: '#1e293b'
+                        background: '#f8fafc',
+                        color: '#0f172a',
+                        resize: 'vertical'
                       }}
                     />
                   </div>
@@ -2449,6 +2331,25 @@ export default function PharmacyLabelsModal({
                   Vector SVG · Min 6.5pt Print Legible
                 </span>
               </div>
+
+              <button
+                type="button"
+                onClick={() => setCompareMode((v) => !v)}
+                aria-pressed={compareMode}
+                style={{
+                  padding: '6px 10px',
+                  minHeight: '32px',
+                  borderRadius: '4px',
+                  border: compareMode ? '1px solid #1a73e8' : '1px solid #dadce0',
+                  background: compareMode ? '#e8f0fe' : '#fff',
+                  color: compareMode ? '#1a73e8' : '#3c4043',
+                  fontSize: '0.70rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                {isEs ? 'Comparar Delivery / Shipping' : 'Compare Delivery / Shipping'}
+              </button>
 
               {/* Multi-step Zoom Bar */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -2531,6 +2432,37 @@ export default function PharmacyLabelsModal({
                 />
               </div>
             </div>
+
+            {compareMode && (() => {
+              const otherVariant = activeVariant === 'shipping' ? 'backQr' : 'shipping';
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {otherVariant === 'shipping' ? 'Shipping' : 'Delivery'}
+                  </span>
+                  <div style={{
+                    width: '100%',
+                    borderRadius: '8px',
+                    border: '1px solid #dadce0',
+                    background: '#ffffff',
+                    padding: '8px',
+                    boxSizing: 'border-box',
+                    display: 'flex',
+                    justifyContent: 'center'
+                  }}>
+                    <div style={{ width: '100%', maxWidth: '380px', aspectRatio: `${dimensions.widthMm} / ${dimensions.heightMm}` }}>
+                      <PharmapolisLabelSvg
+                        labelData={currentItem}
+                        variant={otherVariant}
+                        widthMm={dimensions.widthMm}
+                        heightMm={dimensions.heightMm}
+                        showCutGuides={false}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
         </div>
@@ -2538,7 +2470,7 @@ export default function PharmacyLabelsModal({
         {/* ── GCP Sticky Action Footer / Mobile Dock Sticker ── */}
         <div className="gcp-labels-sticky-footer">
           {/* Desktop Single-Line Specs */}
-          <div className="gcp-footer-desktop-specs" style={{ minWidth: 0, flex: '0 1 auto', overflow: 'hidden' }}>
+          <div className="gcp-footer-desktop-specs" style={{ minWidth: 0, flex: '0 1 auto', overflow: 'hidden', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{
               background: '#e8f0fe',
               color: '#1a73e8',
@@ -2550,6 +2482,10 @@ export default function PharmacyLabelsModal({
               whiteSpace: 'nowrap'
             }}>
               {isEs ? `Parte ${selectedProductIdx + 1}` : `Part ${selectedProductIdx + 1}`}
+            </span>
+            <StatusBadge status={currentItem.approvalStatus || 'draft'} />
+            <span style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 600 }}>
+              v{currentItem.version || 1}
             </span>
           </div>
 
@@ -2618,6 +2554,24 @@ export default function PharmacyLabelsModal({
                   {isGeneratingPdf 
                     ? (isEs ? 'Generando PDF...' : 'Creating PDF...') 
                     : (isEs ? `Descargar Todas (${labels.length})` : `Download All (${labels.length})`)}
+                </span>
+              </button>
+            ) : exportFormat === 'zip' ? (
+              <button
+                type="button"
+                className="gcp-btn-primary"
+                onClick={handleDownloadZipPackage}
+                disabled={isGeneratingZip}
+                style={{
+                  cursor: isGeneratingZip ? 'wait' : 'pointer',
+                  opacity: isGeneratingZip ? 0.75 : 1
+                }}
+              >
+                <Download size={15} />
+                <span>
+                  {isGeneratingZip
+                    ? (isEs ? 'Generando ZIP...' : 'Creating ZIP...')
+                    : (isEs ? `Descargar ZIP (${labels.length * 2} etiquetas)` : `Download ZIP (${labels.length * 2} labels)`)}
                 </span>
               </button>
             ) : exportFormat === 'pdf_a4' ? (

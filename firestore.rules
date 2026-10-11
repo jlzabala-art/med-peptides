@@ -486,6 +486,12 @@ service cloud.firestore {
                           resource.data.shareWithPatient == true
                        ) && request.resource.data.doctorId == resource.data.doctorId);
       allow delete: if false;
+
+      // Subcolección para trazabilidad y versionado de etiquetas clínicas
+      match /labels/{labelId} {
+        allow read: if isAdmin() || isDoctor() || isWholesaler();
+        allow write: if isAdmin() || isDoctor() || isWholesaler();
+      }
     }
 
     // ── bulk_orders — Wholesaler bulk order aggregation ──────────────────────

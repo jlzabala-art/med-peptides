@@ -1251,6 +1251,22 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
 
   const auth = getAuthoritativeClinicalData(rx);
 
+  // If custom modified labels were previously saved to Firebase for this prescription, prioritize them!
+  if (rx.pharmacyLabels && Array.isArray(rx.pharmacyLabels) && rx.pharmacyLabels.length > 0) {
+    return rx.pharmacyLabels.map(lbl => ({
+      ...lbl,
+      patientName: auth.patientName || lbl.patientName,
+      doctorName: auth.doctorName || lbl.doctorName,
+      doctorLicense: auth.doctorLicense || lbl.doctorLicense,
+      clinicName: auth.clinicName || lbl.clinicName,
+      pharmacy: lbl.pharmacyName || lbl.pharmacy || rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'PHARMAPOLIS',
+      pharmacyName: lbl.pharmacyName || lbl.pharmacy || rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'PHARMAPOLIS',
+      pharmacyAddress: lbl.pharmacyAddress || rx.pharmacyAddress || rx.dispensingPharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
+      expDate: lbl.expDate || rx.expDate || rx.expiryDate || '04-10-2027',
+      labelMarkdown: lbl.labelMarkdown || rx.labelMarkdown || null
+    }));
+  }
+
   const matches = PHARMAPOLIS_LABELS_REGISTRY.filter(item => {
     // Cross-patient safety guard: if prescription has a patient name, do not match a registry item intended for someone else
     if (patientName && item.patientMatches && item.patientMatches.length > 0) {
@@ -1405,6 +1421,11 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       clinicName: auth.clinicName || m.clinicName,
       fileNumber: auth.fileNumber || m.fileNumber,
       targetRxUrl: auth.targetRxUrl || m.targetRxUrl,
+      pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacy || 'PHARMAPOLIS',
+      pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacyName || m.pharmacy || 'PHARMAPOLIS',
+      pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || m.pharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
+      expDate: rx.expDate || rx.expiryDate || m.expDate || rxExpDate,
+      labelMarkdown: rx.labelMarkdown || m.labelMarkdown || null,
       apis: m.apis || rx.items || rx.prescriptionLines || [],
       formula: m.formula || ''
     }));
@@ -1441,12 +1462,15 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       dosageForm: pForm,
       volume: pVol,
       dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
-      pharmacy: 'Pharmapolis Compounding Pharmacy',
+      pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'Pharmapolis Compounding Pharmacy',
+      pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'PHARMAPOLIS',
+      pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
       formula: formulaText,
       directions: directionsText,
       warnings: warningsText,
       prodDate: rxProdDate,
-      expDate: rxExpDate,
+      expDate: rx.expDate || rx.expiryDate || rxExpDate,
+      labelMarkdown: rx.labelMarkdown || p.labelMarkdown || null,
       storage: p.storage || rx.storage || 'Store at room temperature',
       doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
       doctorLicense: auth.doctorLicense || 'DHA Registered',

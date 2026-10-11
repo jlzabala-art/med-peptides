@@ -25,5 +25,6 @@ export { default as appointmentRepository } from './appointmentRepository';
 export { default as biomarkersRepository } from './biomarkersRepository';
 export { default as quotationRepository } from './quotationRepository';
 export { customerRepository } from './customerRepository';
+export { default as labelsRepository } from './labelsRepository';
 
 
