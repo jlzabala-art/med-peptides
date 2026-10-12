@@ -2825,8 +2825,8 @@ export default function PharmacyLabelsModal({
                 <PharmapolisLabelSvg
                   labelData={{
                     ...currentItem,
-                    partLabel: currentItem.partLabel || (labels.length > 1 ? `Part ${labelIndex + 1} of ${labels.length}` : ''),
-                    partIndex: labelIndex,
+                    partLabel: currentItem.partLabel || (labels.length > 1 ? `Part ${(selectedProductIdx || 0) + 1} of ${labels.length}` : ''),
+                    partIndex: selectedProductIdx || 0,
                     totalParts: labels.length
                   }}
                   variant={activeVariant}
@@ -2858,8 +2858,8 @@ export default function PharmacyLabelsModal({
                       <PharmapolisLabelSvg
                         labelData={{
                           ...currentItem,
-                          partLabel: currentItem.partLabel || (labels.length > 1 ? `Part ${labelIndex + 1} of ${labels.length}` : ''),
-                          partIndex: labelIndex,
+                          partLabel: currentItem.partLabel || (labels.length > 1 ? `Part ${(selectedProductIdx || 0) + 1} of ${labels.length}` : ''),
+                          partIndex: selectedProductIdx || 0,
                           totalParts: labels.length
                         }}
                         variant={otherVariant}
