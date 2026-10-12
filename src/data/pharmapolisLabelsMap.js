@@ -178,7 +178,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
       { name: 'N-Acetyl-L-Cysteine (NAC)', dose: '600 mg', dosage: '600 mg' }
     ],
     vehicle: { name: 'Vegetable capsules. Gluten-free, lactose-free, sugar-free, without artificial additives.', volume: '180 capsules' },
-    directions: 'Take 1 daily dose (3 capsules) in the morning after breakfast.',
+    directions: 'Take 3 capsules in the morning after breakfast.',
     warnings: 'May cause harmless bright yellow urine discoloration. Take with adequate water and food.',
     prodDate: '04-10-2026',
     expDate: '04-10-2027',
@@ -207,14 +207,14 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     volume: '120 Capsules (2 Months)',
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
-    formula: 'Magnesium Bisglycinate 2,840 mg (eq. 400 mg Mg) + Glycine 1,000 mg + L-Theanine 200 mg',
+    formula: 'Magnesium Bisglycinate 2,840 mg + Glycine 1,000 mg + L-Theanine 200 mg',
     apis: [
-      { name: 'Magnesium Bisglycinate (eq. 400 mg elemental Mg)', dose: '2,840 mg', dosage: '2,840 mg', activeIngredient: 'Magnesium Bisglycinate Chelate' },
+      { name: 'Magnesium Bisglycinate', dose: '2,840 mg', dosage: '2,840 mg', activeIngredient: 'Magnesium Bisglycinate Chelate' },
       { name: 'Glycine', dose: '1,000 mg', dosage: '1,000 mg', activeIngredient: 'Free-Form Glycine USP' },
       { name: 'L-Theanine', dose: '200 mg', dosage: '200 mg', activeIngredient: 'Suntheanine® L-Theanine' }
     ],
     vehicle: { name: 'Vegetable capsules. Gluten-free, lactose-free, sugar-free, without artificial additives.', volume: '120 capsules' },
-    directions: 'Take 1 daily dose (2 capsules) 30-60 minutes before bedtime with water.',
+    directions: 'Take 2 capsules 30-60 minutes before bedtime.',
     warnings: 'Non-habit forming. Promotes restorative slow-wave sleep architecture. Store tightly sealed.',
     prodDate: '04-10-2026',
     expDate: '04-10-2027',
