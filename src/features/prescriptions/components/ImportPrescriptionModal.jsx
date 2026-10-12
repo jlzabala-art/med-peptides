@@ -152,6 +152,18 @@ export default function ImportPrescriptionModal({
             items: mappedItems,
             prescriptionLines: mappedItems,
             formulationBlocks: blocks,
+            isMultiPart: blocks.length > 1,
+            totalParts: blocks.length,
+            parts: blocks.length > 1 ? blocks.map((b, bIdx) => ({
+              partNumber: bIdx + 1,
+              title: b.treatmentType || b.treatmentProgram || `Part ${bIdx + 1}`,
+              treatmentType: b.treatmentType || null,
+              volume: b.volume || null,
+              dispensingForm: b.dispensingForm || null,
+              posology: b.posology || '',
+              items: Array.isArray(b.items) ? b.items : (Array.isArray(b.ingredients) ? b.ingredients : []),
+              totalParts: blocks.length
+            })) : null,
             fagron: extractedData.fagronDetails ? {
               boxId: extractedData.fagronDetails.boxId || null,
               testName: extractedData.fagronDetails.testName || 'TrichoTest',

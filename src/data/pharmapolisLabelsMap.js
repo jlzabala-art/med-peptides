@@ -1499,8 +1499,12 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
     }));
   }
 
-  // Fallback: dynamically construct label items from rx phases, compounds, or items
-  const rawItems = rx.phases || rx.treatmentPhases || rx.items || rx.formulations || rx.compounds || rx.products || (rx.product ? [rx.product] : [rx]);
+  // Fallback: dynamically construct label items from rx parts, formulationBlocks, phases, compounds, or items
+  const rawItems = (Array.isArray(rx.parts) && rx.parts.length > 0) 
+    ? rx.parts 
+    : (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length > 0)
+      ? rx.formulationBlocks
+      : (rx.phases || rx.treatmentPhases || rx.formulations || rx.compounds || rx.items || rx.products || (rx.product ? [rx.product] : [rx]));
 
   return rawItems.map((p, idx) => {
     const pName = p.name || p.productName || p.title || p.phaseTitle || rx.title || rx.medicationName || `Phase ${idx + 1} Compounded Protocol`;

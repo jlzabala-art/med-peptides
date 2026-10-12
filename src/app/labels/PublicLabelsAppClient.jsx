@@ -128,7 +128,7 @@ export default function PublicLabelsAppClient({
         code: String(item.code || item.rx?.fileNumber || item.rx?.code),
         rx: item.rx,
         labels: item.labels || [],
-        selectedPartIndex: (idx === 0 && initialLabelIndex != null) ? initialLabelIndex : 0,
+        selectedPartIndex: (idx === 0 && initialLabelIndex != null && initialLabelIndex !== 0) ? initialLabelIndex : 'all',
         variant: 'backQr',
         widthMm: 75,
         heightMm: 45
@@ -139,7 +139,7 @@ export default function PublicLabelsAppClient({
         code: String(initialCode || initialRx?.fileNumber || initialRx?.code || '51812'),
         rx: initialRx,
         labels: initialLabels || [],
-        selectedPartIndex: initialLabelIndex || 0,
+        selectedPartIndex: (initialLabelIndex != null && initialLabelIndex !== 0) ? initialLabelIndex : 'all',
         variant: 'backQr',
         widthMm: 75,
         heightMm: 45
@@ -152,6 +152,15 @@ export default function PublicLabelsAppClient({
   const [isGeneratingBatchPdf, setIsGeneratingBatchPdf] = useState(false);
   const [batchPdfProgress, setBatchPdfProgress] = useState(null);
   const [openConfigIdx, setOpenConfigIdx] = useState(null);
+
+  // Total label parts count across whole patient queue
+  const totalBatchLabelsCount = React.useMemo(() => {
+    return patientQueue.reduce((acc, pItem) => {
+      const pLabels = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels : [{}];
+      const count = (pItem.selectedPartIndex != null && pItem.selectedPartIndex !== 'all') ? 1 : pLabels.length;
+      return acc + count;
+    }, 0);
+  }, [patientQueue]);
 
   // Active Single Prescription State (mirrored from queue)
   const [currentRx, setCurrentRx] = useState(initialRx);
@@ -305,7 +314,7 @@ export default function PublicLabelsAppClient({
           code: cleanCode,
           rx: data.rx,
           labels: data.labels || [],
-          selectedPartIndex: 0,
+          selectedPartIndex: 'all',
           variant: 'backQr',
           widthMm: 75,
           heightMm: 45
@@ -777,13 +786,15 @@ export default function PublicLabelsAppClient({
         }
 
         /* Batch Patient Queue Strip */
+        /* Batch Patient Queue Strip (Stacked Cards, Zero Horizontal Scroll) */
         .pls-batch-bar {
           background: #ffffff;
           border-bottom: 1px solid #dadce0;
-          padding: 8px 16px;
+          padding: 10px 16px;
           display: flex;
-          align-items: center;
-          gap: 12px;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 10px;
           position: sticky;
           top: 49px;
           z-index: 55;
@@ -792,27 +803,26 @@ export default function PublicLabelsAppClient({
         .pls-batch-info-label {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
           flex-shrink: 0;
         }
         .pls-batch-count-badge {
           background: #e8f0fe;
           color: #1a73e8;
-          font-size: 0.70rem;
+          font-size: 0.74rem;
           font-weight: 700;
-          padding: 2px 7px;
+          padding: 3px 10px;
           border-radius: 12px;
+          border: 1px solid #d2e3fc;
         }
         .pls-batch-scroll {
           display: flex;
           align-items: center;
+          flex-wrap: wrap;
           gap: 8px;
-          flex: 1;
-          min-width: 0;
-          overflow-x: auto;
+          width: 100%;
           padding: 2px 0;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
+          overflow-x: visible;
         }
         .pls-batch-scroll::-webkit-scrollbar {
           display: none;
@@ -820,18 +830,16 @@ export default function PublicLabelsAppClient({
         .pls-batch-pill {
           display: inline-flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
           background: #f8fafc;
           border: 1px solid #cbd5e1;
-          border-radius: 6px;
-          padding: 4px 8px;
-          font-size: 0.76rem;
+          border-radius: 8px;
+          padding: 6px 12px;
+          font-size: 0.78rem;
           cursor: pointer;
-          white-space: nowrap;
-          flex-shrink: 0;
-          min-width: max-content;
           transition: all 0.15s ease;
           position: relative;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
         .pls-batch-pill:hover {
           background: #f1f5f9;
@@ -1561,22 +1569,26 @@ export default function PublicLabelsAppClient({
       {/* ── 2. Patient Batch Queue Strip (Multi-Patient & A4 Format) ── */}
       <section className="pls-batch-bar" aria-label="Patient Batch Queue">
         <div className="pls-batch-info-label">
-          <Layers size={15} color="#1a73e8" />
-          <span style={{ fontWeight: 700, fontSize: '0.80rem', color: '#1e293b' }}>
+          <Layers size={16} color="#1a73e8" />
+          <span style={{ fontWeight: 700, fontSize: '0.82rem', color: '#1e293b' }}>
             {isEs ? 'Lote de Pacientes:' : 'Patient Batch:'}
           </span>
           <span className="pls-batch-count-badge">
-            {patientQueue.length} {patientQueue.length === 1 ? (isEs ? 'paciente' : 'patient') : (isEs ? 'pacientes' : 'patients')}
+            {patientQueue.length} {patientQueue.length === 1 ? (isEs ? 'paciente' : 'patient') : (isEs ? 'pacientes' : 'patients')} · {totalBatchLabelsCount} {totalBatchLabelsCount === 1 ? (isEs ? 'etiqueta' : 'label') : (isEs ? 'etiquetas' : 'labels')}
           </span>
         </div>
 
-        {/* Scrollable list of patient pills with per-patient format toggles */}
+        {/* Fluid multiline list of patient cards (stacks vertically without horizontal scroll) */}
         <div className="pls-batch-scroll">
           {patientQueue.map((pItem, qIdx) => {
             const isActive = activeQueueIndex === qIdx;
             const pName = pItem.rx?.patient?.name || pItem.rx?.patientName || 'Patient';
             const sizeLabel = `${pItem.widthMm}×${pItem.heightMm}mm`;
             const isConfigOpen = openConfigIdx === qIdx;
+            const labelsCount = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels.length : 1;
+            const partInfo = (pItem.selectedPartIndex === 'all' || pItem.selectedPartIndex == null)
+              ? (labelsCount > 1 ? `${labelsCount} parts` : '1 part')
+              : `Part ${Number(pItem.selectedPartIndex) + 1}/${labelsCount}`;
 
             return (
               <div
@@ -1587,6 +1599,19 @@ export default function PublicLabelsAppClient({
               >
                 <span className="pls-batch-pill-name">{pName}</span>
                 <span className="pls-batch-pill-badge">#{pItem.code}</span>
+                {labelsCount > 1 && (
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    background: '#fef3c7',
+                    color: '#92400e',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    border: '1px solid #fde68a'
+                  }}>
+                    {partInfo}
+                  </span>
+                )}
                 
                 {/* Format badge & config toggle button */}
                 <button

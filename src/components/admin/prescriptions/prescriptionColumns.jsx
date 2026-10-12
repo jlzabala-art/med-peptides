@@ -358,6 +358,10 @@ export const getPrescriptionColumns = (options = {}) => {
         let count = 1;
         if (rx._isSessionGroup) {
           count = rx._sessionCount || rx._sessionMembers?.length || 2;
+        } else if (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length > 1) {
+          count = rx.formulationBlocks.length;
+        } else if (Array.isArray(rx.parts) && rx.parts.length > 1) {
+          count = rx.parts.length;
         } else if (rx.totalParts && rx.totalParts > 1) {
           count = rx.totalParts;
         } else if (rx.isMultiPart) {

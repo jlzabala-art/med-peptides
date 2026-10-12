@@ -149,6 +149,17 @@ export const getPrescriptionData = cache(async (code) => {
     }
   }
 
+  // Ensure isMultiPart and totalParts are properly set for multi-part or multi-formulation prescriptions
+  if (!rxDoc.isMultiPart) {
+    if (Array.isArray(rxDoc.parts) && rxDoc.parts.length > 1) {
+      rxDoc.isMultiPart = true;
+      rxDoc.totalParts = rxDoc.parts.length;
+    } else if (Array.isArray(rxDoc.formulationBlocks) && rxDoc.formulationBlocks.length > 1) {
+      rxDoc.isMultiPart = true;
+      rxDoc.totalParts = rxDoc.formulationBlocks.length;
+    }
+  }
+
   // Zero-trust sanitization for public access:
   // Convert timestamps to ISO strings
   const cleanRx = JSON.parse(JSON.stringify(rxDoc, (key, value) => {
