@@ -456,7 +456,7 @@ export default function DoctorPublicPortalClient({
 
   const [isHandoutOpen, setIsHandoutOpen] = useState(false);
   const [handoutRx, setHandoutRx] = useState(null);
-  const [quickRxFilter, setQuickRxFilter] = useState('all'); // 'all' | 'pending' | 'active' | 'multipart'
+  const [quickRxFilter, setQuickRxFilter] = useState('pending'); // 'pending' | 'all' | 'active' | 'multipart' (Default to actionable pending items)
   const [apiFilter, setApiFilter] = useState(null); // Active pharmaceutical ingredient filter from Analytics
 
   // Atlas Recommendations UI State (Consolidated Master Catalog)
@@ -833,10 +833,10 @@ export default function DoctorPublicPortalClient({
       if (!searchQuery.trim()) {
         // Quick Status / Category Filter (Proposal #3)
         if (quickRxFilter === 'pending') {
-          const s = (rx.status || '').toLowerCase();
-          if (!['draft', 'pending', 'awaiting'].includes(s)) return false;
+          const s = (rx.status || rx.state || '').toLowerCase();
+          if (!['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review') return false;
         } else if (quickRxFilter === 'active') {
-          const s = (rx.status || '').toLowerCase();
+          const s = (rx.status || rx.state || '').toLowerCase();
           if (!['active', 'approved', 'dispensed'].includes(s)) return false;
         } else if (quickRxFilter === 'multipart') {
           const parts = resolvePrescriptionParts(rx);
@@ -853,10 +853,10 @@ export default function DoctorPublicPortalClient({
 
       // Also apply quickRxFilter if search query is present
       if (quickRxFilter === 'pending') {
-        const s = (rx.status || '').toLowerCase();
-        if (!['draft', 'pending', 'awaiting'].includes(s)) return false;
+        const s = (rx.status || rx.state || '').toLowerCase();
+        if (!['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review') return false;
       } else if (quickRxFilter === 'active') {
-        const s = (rx.status || '').toLowerCase();
+        const s = (rx.status || rx.state || '').toLowerCase();
         if (!['active', 'approved', 'dispensed'].includes(s)) return false;
       } else if (quickRxFilter === 'multipart') {
         const parts = resolvePrescriptionParts(rx);
@@ -873,8 +873,8 @@ export default function DoctorPublicPortalClient({
     let activeCount = 0;
     let multipartCount = 0;
     allPrescriptions.forEach(p => {
-      const s = (p.status || '').toLowerCase();
-      if (['draft', 'pending', 'awaiting'].includes(s)) pendingCount++;
+      const s = (p.status || p.state || '').toLowerCase();
+      if (['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) || p.ingestionStage === 'awaiting_atlas_review') pendingCount++;
       if (['active', 'approved', 'dispensed'].includes(s)) activeCount++;
       const parts = resolvePrescriptionParts(p);
       if (parts.length > 1) multipartCount++;
@@ -3660,8 +3660,14 @@ export default function DoctorPublicPortalClient({
                 initialRowsPerPage={10}
                 alwaysShowPagination={true}
                 onRowClick={handleRowClickPrescription}
-                emptyTitle="No Prescriptions Found"
-                emptyDescription="No prescriptions match the active search criteria or filters. Adjust search keywords or register a new patient."
+                emptyTitle={quickRxFilter === 'pending' ? "No Prescriptions Awaiting Action" : "No Prescriptions Found"}
+                emptyDescription={
+                  quickRxFilter === 'pending'
+                    ? "All clinical prescriptions have been authorized or processed. There are no drafts or pending approvals requiring physician action."
+                    : "No prescriptions match the active search criteria or filters. Adjust search keywords or register a new patient."
+                }
+                emptyActionLabel={quickRxFilter === 'pending' && quickCounts.all > 0 ? `Show All Prescriptions (${quickCounts.all})` : undefined}
+                onEmptyAction={quickRxFilter === 'pending' && quickCounts.all > 0 ? () => setQuickRxFilter('all') : undefined}
                 expandableRender={(rx) => {
                   const parts = resolvePrescriptionParts(rx);
                   const totalApisCount = parts.reduce((acc, p) => acc + (p.apis?.length || 0), 0);
