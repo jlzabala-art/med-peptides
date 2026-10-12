@@ -2823,7 +2823,12 @@ export default function PharmacyLabelsModal({
                 margin: zoomLevel === 'fit' ? '0' : '0 auto'
               }}>
                 <PharmapolisLabelSvg
-                  labelData={currentItem}
+                  labelData={{
+                    ...currentItem,
+                    partLabel: currentItem.partLabel || (labels.length > 1 ? `Part ${labelIndex + 1} of ${labels.length}` : ''),
+                    partIndex: labelIndex,
+                    totalParts: labels.length
+                  }}
                   variant={activeVariant}
                   widthMm={dimensions.widthMm}
                   heightMm={dimensions.heightMm}
@@ -2851,7 +2856,12 @@ export default function PharmacyLabelsModal({
                   }}>
                     <div style={{ width: '100%', maxWidth: '380px', aspectRatio: `${dimensions.widthMm} / ${dimensions.heightMm}` }}>
                       <PharmapolisLabelSvg
-                        labelData={currentItem}
+                        labelData={{
+                          ...currentItem,
+                          partLabel: currentItem.partLabel || (labels.length > 1 ? `Part ${labelIndex + 1} of ${labels.length}` : ''),
+                          partIndex: labelIndex,
+                          totalParts: labels.length
+                        }}
                         variant={otherVariant}
                         widthMm={dimensions.widthMm}
                         heightMm={dimensions.heightMm}
@@ -3080,7 +3090,18 @@ export default function PharmacyLabelsModal({
           {labels.map((item, idx) => (
             <div key={item.id || idx} id={`pharmapolis-bulk-label-${idx}`}>
               <PharmapolisLabelSvg
-                data={editedOverrides[idx] || item}
+                data={{
+                  ...(editedOverrides[idx] || item),
+                  partLabel: (editedOverrides[idx] || item).partLabel || (labels.length > 1 ? `Part ${idx + 1} of ${labels.length}` : ''),
+                  partIndex: idx,
+                  totalParts: labels.length
+                }}
+                labelData={{
+                  ...(editedOverrides[idx] || item),
+                  partLabel: (editedOverrides[idx] || item).partLabel || (labels.length > 1 ? `Part ${idx + 1} of ${labels.length}` : ''),
+                  partIndex: idx,
+                  totalParts: labels.length
+                }}
                 variant={activeVariant}
                 widthMm={exportFormat === 'pdf_a4' ? 75 : dimensions.widthMm}
                 heightMm={exportFormat === 'pdf_a4' ? 45 : dimensions.heightMm}

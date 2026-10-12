@@ -83,9 +83,9 @@ export default function PharmapolisLabelSvg({
   const isShort = HEIGHT < 720; // e.g. 90x38 mm (633 px)
   const isMediumHeight = HEIGHT >= 720 && HEIGHT < 850; // e.g. 100x50 mm (750 px)
 
-  // Pin footer elements dynamically to bottom of canvas (Compact EU GMP / USP technical specs bar)
-  const footerLineY = HEIGHT - (isShort ? 44 : isMediumHeight ? 50 : 56);
-  const footerTextY = HEIGHT - (isShort ? 15 : isMediumHeight ? 17 : 19);
+  // Pin footer elements dynamically to bottom of canvas (with 4-5 mm safety bleed clearance)
+  const footerLineY = HEIGHT - (isShort ? 50 : isMediumHeight ? 56 : 64);
+  const footerTextY = HEIGHT - (isShort ? 20 : isMediumHeight ? 23 : 26);
   const footerFontSize = isShort ? 18 : isMediumHeight ? 21 : 23; // Boosted technical print size
   const footerLineGap = 0; // single-line compact footer, zero vertical waste
 
@@ -108,6 +108,21 @@ export default function PharmapolisLabelSvg({
   const patientFontSize = patientLabelFontSize;
   const patientTextY = isShort ? 42 : 48;
   const fileNumber = labelData.fileNumber || labelData.fileNo || labelData.rxCode || labelData.id || '51857';
+
+  // Extract multi-part prescription badge (e.g. "PART 1 OF 2")
+  const rawPart = labelData.partLabel || labelData.partTag || (labelData.totalParts > 1 ? `Part ${(Number(labelData.partIndex ?? labelData.phaseIndex ?? 0)) + 1} of ${labelData.totalParts}` : '');
+  let partBadge = '';
+  if (rawPart) {
+    const match = String(rawPart).match(/part\s*(\d+)(?:\s*(?:\/|of)\s*(\d+))?/i);
+    if (match) {
+      const pNum = match[1];
+      const pTot = match[2] || (labelData.totalParts ? String(labelData.totalParts) : '2');
+      partBadge = `PART ${pNum} OF ${pTot}`;
+    } else {
+      partBadge = String(rawPart).toUpperCase().trim();
+    }
+  }
+
   const productTitle = labelData.productTitle || labelData.productName || 'Compounded Pharmaceutical Protocol';
   const formula = labelData.formula || '';
   const rawDirections = labelData.directions || labelData.instructions || 'Take / apply as directed by prescribing physician.';
@@ -514,9 +529,21 @@ export default function PharmapolisLabelSvg({
           <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
             PATIENT: <tspan fontWeight="800" fontSize={patientNameFontSize}>{patientName}</tspan>
           </text>
-          <text x="1356" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
-            FILE #{fileNumber}
-          </text>
+          {partBadge ? (
+            <g transform="translate(1080, 0)">
+              <rect x="0" y={isShort ? 12 : 14} width="140" height={isShort ? 40 : 46} fill="#003666" rx="4" />
+              <text x="70" y={isShort ? 37 : 43} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill="#ffffff" letterSpacing="0.6">
+                {partBadge}
+              </text>
+              <text x="276" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
+                FILE #{fileNumber}
+              </text>
+            </g>
+          ) : (
+            <text x="1356" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
+              FILE #{fileNumber}
+            </text>
+          )}
         </g>
 
         {/* ── TWO-COLUMN WORKSPACE ── */}
@@ -584,6 +611,7 @@ export default function PharmapolisLabelSvg({
             const storageTitleY = batchBlockBottom + (isShort ? 14 : 18);
             const firstStorageLineY = storageTitleY + (isShort ? 14 : 17);
             const storageLineGap = isShort ? 14 : 17;
+            const storageBlockBottom = firstStorageLineY + ((storageLines.length - 1) * storageLineGap) + (isShort ? 8 : 12);
 
             return (
               <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${qrY + backQrSize + (isShort ? 36 : 44)})`}>
@@ -652,6 +680,22 @@ export default function PharmapolisLabelSvg({
                     </text>
                   ))}
                 </g>
+
+                {/* 4. CLINICAL STORAGE & HANDLING MONOGRAPH BADGE (Harmonious European Pharmacopeia Balance) */}
+                <g transform={`translate(0, ${storageBlockBottom + (isShort ? 8 : 12)})`}>
+                  <line x1="0" y1="0" x2={leftColWidth - 28} y2="0" stroke="#e2e8f0" strokeWidth="1.2" />
+                  <rect x="-4" y={isShort ? 6 : 10} width={leftColWidth - 20} height={isShort ? 56 : 64} fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1.2" rx="4" />
+                  
+                  <text x="4" y={isShort ? 22 : 28} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 9 : 10.5} fontWeight="800" fill="#003666" letterSpacing="0.3">
+                    🔒 KEEP TIGHTLY CLOSED
+                  </text>
+                  <text x="4" y={isShort ? 37 : 46} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 8 : 9.5} fontWeight="700" fill="#64748b" letterSpacing="0.2">
+                    PROTECT FROM LIGHT
+                  </text>
+                  <text x="4" y={isShort ? 51 : 62} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 7.5 : 9} fontWeight="700" fill="#0284c7" letterSpacing="0.3">
+                    15°C–25°C • ROOM TEMP.
+                  </text>
+                </g>
               </g>
             );
           })()}
@@ -704,7 +748,24 @@ export default function PharmapolisLabelSvg({
                 .replace(/\bnatural\s+lipidic\s+carrier\b/gi, '100% Natural Scalp Compounding Vehicle');
             }
 
-            // Raw continuous flowing text for active ingredients
+            // Multi-API layout strategy:
+            // If ingCount >= 3 and innerUsableWidth >= 700: Structured Dual-Column Clinical Bulleted Grid
+            // Else: Single-Column Prominent Bulleted Flow
+            const isMultiColumn = ingCount >= 3 && innerUsableWidth >= 700;
+            const halfColCount = Math.ceil(ingCount / 2);
+            const col1Items = isMultiColumn ? activeIngredientsList.slice(0, halfColCount) : [];
+            const col2Items = isMultiColumn ? activeIngredientsList.slice(halfColCount) : [];
+            const colWidth = Math.floor((innerUsableWidth - 36) / 2);
+
+            const multiColFontSize = isShort ? 18 : 22;
+            const multiColLineGap = Math.round(multiColFontSize * 1.34);
+            const multiColMaxChars = Math.max(20, Math.floor((colWidth - 20) / (multiColFontSize * 0.68)));
+
+            const col1Lines = isMultiColumn ? col1Items.flatMap(it => wrapLines(`• ${it}`, multiColMaxChars)) : [];
+            const col2Lines = isMultiColumn ? col2Items.flatMap(it => wrapLines(`• ${it}`, multiColMaxChars)) : [];
+            const multiColMaxLines = Math.max(col1Lines.length, col2Lines.length);
+
+            // Raw continuous flowing text for active ingredients (1-2 APIs)
             const rawIngText = ingCount === 1
               ? `• ${activeIngredientsList[0]}`
               : `• ${activeIngredientsList.join('  —  ')}`;
@@ -720,7 +781,7 @@ export default function PharmapolisLabelSvg({
             const ingLineGap = Math.round(ingFontSize * 1.36);
             const ingMaxChars = Math.max(20, Math.floor((innerUsableWidth - 48) / (ingFontSize * 0.70)));
             const ingLines = wrapLines(rawIngText, ingMaxChars);
-            const ingLineCount = ingLines.length;
+            const ingLineCount = isMultiColumn ? multiColMaxLines : ingLines.length;
 
             const baseFontSize = isShort
               ? (isUltraSparse ? 20 : isSparse ? 18 : 16)
@@ -749,8 +810,8 @@ export default function PharmapolisLabelSvg({
 
             // Typographical baseline offsets with safe font cap-height clearance (Zero overlap)
             const ingHeaderTitleY = isShort ? 14 : 16;
-            const firstIngLineY = ingHeaderTitleY + (isShort ? 12 : 16) + Math.round(ingFontSize * 0.82);
-            const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * ingLineGap) + (isUltraSparse ? 24 : isSparse ? 18 : 14) + Math.round(baseFontSize * 0.82);
+            const firstIngLineY = ingHeaderTitleY + (isShort ? 12 : 16) + Math.round((isMultiColumn ? multiColFontSize : ingFontSize) * 0.82);
+            const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * (isMultiColumn ? multiColLineGap : ingLineGap)) + (isUltraSparse ? 24 : isSparse ? 18 : 14) + Math.round(baseFontSize * 0.82);
             const ingBlockH = firstBaseLineY + ((baseLines.length - 1) * baseLineGap) + 10;
 
             const posHeaderTitleY = isShort ? 20 : 24;
@@ -778,19 +839,52 @@ export default function PharmapolisLabelSvg({
                     ACTIVE COMPOUNDED INGREDIENTS
                   </text>
                   
-                  {ingLines.map((line, lIdx) => (
-                    <text
-                      key={`ing-${lIdx}`}
-                      x="0"
-                      y={firstIngLineY + (lIdx * ingLineGap)}
-                      fontFamily="Arial, Helvetica, sans-serif"
-                      fontSize={ingFontSize}
-                      fontWeight="800"
-                      fill="#0f172a"
-                    >
-                      {line}
-                    </text>
-                  ))}
+                  {isMultiColumn ? (
+                    <g>
+                      {/* Column 1 */}
+                      {col1Lines.map((line, lIdx) => (
+                        <text
+                          key={`ing1-${lIdx}`}
+                          x="0"
+                          y={firstIngLineY + (lIdx * multiColLineGap)}
+                          fontFamily="Arial, Helvetica, sans-serif"
+                          fontSize={multiColFontSize}
+                          fontWeight="800"
+                          fill="#0f172a"
+                        >
+                          {line}
+                        </text>
+                      ))}
+                      {/* Column 2 */}
+                      {col2Lines.map((line, lIdx) => (
+                        <text
+                          key={`ing2-${lIdx}`}
+                          x={colWidth + 36}
+                          y={firstIngLineY + (lIdx * multiColLineGap)}
+                          fontFamily="Arial, Helvetica, sans-serif"
+                          fontSize={multiColFontSize}
+                          fontWeight="800"
+                          fill="#0f172a"
+                        >
+                          {line}
+                        </text>
+                      ))}
+                    </g>
+                  ) : (
+                    ingLines.map((line, lIdx) => (
+                      <text
+                        key={`ing-${lIdx}`}
+                        x="0"
+                        y={firstIngLineY + (lIdx * ingLineGap)}
+                        fontFamily="Arial, Helvetica, sans-serif"
+                        fontSize={ingFontSize}
+                        fontWeight="800"
+                        fill="#0f172a"
+                      >
+                        {line}
+                      </text>
+                    ))
+                  )}
 
                   {baseLines.map((bLine, bIdx) => (
                     <text
@@ -972,9 +1066,21 @@ export default function PharmapolisLabelSvg({
         <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
           PATIENT: <tspan fontWeight="800" fontSize={patientNameFontSize}>{patientName}</tspan>
         </text>
-        <text x="1356" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
-          RX #{fileNumber}
-        </text>
+        {partBadge ? (
+          <g transform="translate(1080, 0)">
+            <rect x="0" y={isShort ? 12 : 14} width="140" height={isShort ? 40 : 46} fill="#003666" rx="4" />
+            <text x="70" y={isShort ? 37 : 43} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill="#ffffff" letterSpacing="0.6">
+              {partBadge}
+            </text>
+            <text x="276" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
+              RX #{fileNumber}
+            </text>
+          </g>
+        ) : (
+          <text x="1356" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
+            RX #{fileNumber}
+          </text>
+        )}
       </g>
 
       {/* ── PRODUCT TITLE ── */}

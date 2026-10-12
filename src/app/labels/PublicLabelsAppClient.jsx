@@ -1943,7 +1943,12 @@ export default function PublicLabelsAppClient({
               return (
                 <div key={`offscreen-${pItem.code}-${partIdx}`}>
                   <PharmapolisLabelSvg
-                    labelData={pLabel}
+                    labelData={{
+                      ...pLabel,
+                      partLabel: pLabel.partLabel || (labels.length > 1 ? `Part ${partIdx + 1} of ${labels.length}` : ''),
+                      partIndex: partIdx,
+                      totalParts: labels.length
+                    }}
                     variant={pLabel.variant || pLabel.lastVariant || pItem.variant || 'backQr'}
                     widthMm={effectiveWidthMm}
                     heightMm={effectiveHeightMm}

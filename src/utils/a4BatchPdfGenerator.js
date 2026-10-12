@@ -50,7 +50,14 @@ export async function rasterizeSvgToImageData(svgEl, widthMm, heightMm, targetDp
  * and keeping multi-part prescriptions for the same patient paired together when possible.
  */
 function buildOptimizedRows(items, maxRowWidth, minGapX) {
-  const remaining = [...items];
+  // Sort items primarily by height (descending) so each row shares uniform height
+  // for straight 100% continuous horizontal guillotine cuts across the entire A4 sheet.
+  // Within the same height tier, preserve rxCode grouping.
+  const sorted = [...items].sort((a, b) => {
+    if (Math.abs(b.hMm - a.hMm) > 0.5) return b.hMm - a.hMm;
+    return (a.rxCode || '').localeCompare(b.rxCode || '') || (a.originalIdx - b.originalIdx);
+  });
+  const remaining = [...sorted];
   const rows = [];
 
   while (remaining.length > 0) {
@@ -67,13 +74,11 @@ function buildOptimizedRows(items, maxRowWidth, minGapX) {
       if (currentWidth + neededWidth <= maxRowWidth) {
         // If candidate is part of a multi-part prescription, check if remaining parts would be separated
         const rxCode = candidate.rxCode;
-        const siblingCandidates = remaining.filter((it, idx) => idx !== i && it.rxCode === rxCode);
+        const siblingCandidates = remaining.filter((it, idx) => idx !== i && it.rxCode === rxCode && Math.abs(it.hMm - candidate.hMm) <= 0.5);
 
         if (siblingCandidates.length > 0 && currentRow.length > 0) {
           const allSiblingsWidth = candidate.wMm + siblingCandidates.reduce((acc, s) => acc + s.wMm + minGapX, 0);
           if (currentWidth + allSiblingsWidth > maxRowWidth) {
-            // Cannot fit all parts of this prescription together in the current row.
-            // Check if there is another single-part label that can cleanly fill this row instead.
             const altIdx = remaining.findIndex((it, idx) => idx > i && it.rxCode !== rxCode && (currentWidth + it.wMm + minGapX <= maxRowWidth));
             if (altIdx !== -1) {
               const altItem = remaining.splice(altIdx, 1)[0];
@@ -93,7 +98,6 @@ function buildOptimizedRows(items, maxRowWidth, minGapX) {
     }
 
     if (currentRow.length === 0) {
-      // Fallback in case a single oversized label exists
       const single = remaining.shift();
       currentRow.push(single);
     }
@@ -251,9 +255,9 @@ export async function generateA4BatchPdf({
         pdf.setLineWidth(0.18);
         pdf.roundedRect(itemX, itemY, wMm, hMm, 1.0, 1.0, 'S');
 
-        // Draw crop marks at corners
-        pdf.setDrawColor(148, 163, 184); // slate-400
-        pdf.setLineWidth(0.15);
+        // Draw crop marks at corners with crisp professional line weight
+        pdf.setDrawColor(71, 85, 105); // slate-600 (sharp on B&W laser printers)
+        pdf.setLineWidth(0.18);
 
         const cropLeft = cIdx === 0 ? CROP_LEN : Math.min(CROP_LEN, (gapX / 2) - 0.2);
         const cropRight = cIdx === count - 1 ? CROP_LEN : Math.min(CROP_LEN, (gapX / 2) - 0.2);
@@ -279,15 +283,39 @@ export async function generateA4BatchPdf({
           const cutTickX = itemX + wMm + (gapX / 2);
           pdf.line(cutTickX, itemY - CROP_LEN, cutTickX, itemY - 0.3);
           pdf.line(cutTickX, itemY + hMm + 0.3, cutTickX, itemY + hMm + CROP_LEN);
+
+          // Top/bottom page-edge vertical guillotine ticks for the inter-column cut
+          pdf.line(cutTickX, 16.5, cutTickX, 18.5);
+          pdf.line(cutTickX, PAGE_HEIGHT - 3.5, cutTickX, PAGE_HEIGHT - 1.2);
         }
 
-        // Micro caption below label with patient info, container tag & dimensions
+        // Horizontal guillotine alignment ticks on the page margins (left and right edges)
+        if (cIdx === 0) {
+          pdf.line(0.8, itemY, 3.2, itemY);
+          pdf.line(0.8, itemY + hMm, 3.2, itemY + hMm);
+        }
+        if (cIdx === count - 1) {
+          pdf.line(PAGE_WIDTH - 3.2, itemY, PAGE_WIDTH - 0.8, itemY);
+          pdf.line(PAGE_WIDTH - 3.2, itemY + hMm, PAGE_WIDTH - 0.8, itemY + hMm);
+        }
+
+        // Top/bottom page-edge vertical guillotine ticks for outer label borders
+        if (cIdx === 0) {
+          pdf.line(itemX, 16.5, itemX, 18.5);
+          pdf.line(itemX, PAGE_HEIGHT - 3.5, itemX, PAGE_HEIGHT - 1.2);
+        }
+        if (cIdx === count - 1) {
+          pdf.line(itemX + wMm, 16.5, itemX + wMm, 18.5);
+          pdf.line(itemX + wMm, PAGE_HEIGHT - 3.5, itemX + wMm, PAGE_HEIGHT - 1.2);
+        }
+
+        // Micro caption safely tucked in the discard gutter below label
         pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(5.8);
+        pdf.setFontSize(5.2);
         pdf.setTextColor(100, 116, 139);
         const containerInfo = item.containerTag ? ` • ${item.containerTag}` : '';
         const caption = `[#${item.rxCode || 'RX'} - ${item.patientName || 'Patient'}${item.partLabel ? ` • ${item.partLabel}` : ''}] ${wMm}×${hMm}mm (${item.variantLabel || item.variant || 'Standard'}${containerInfo})`;
-        pdf.text(caption, itemX + 0.5, itemY + hMm + 2.8, { maxWidth: wMm - 1 });
+        pdf.text(caption, itemX + 0.5, itemY + hMm + 2.4, { maxWidth: wMm - 1 });
       }
 
       itemX += wMm + gapX;
