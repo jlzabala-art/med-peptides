@@ -609,32 +609,35 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
               <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Compounded APIs ({items.length})
               </div>
-              {!readOnly && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setZohoMatcherRx(row);
-                  }}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    background: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    color: '#15803d',
-                    fontSize: '0.68rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                  title="Vincular o comprobar ítems en Zoho Books"
-                >
-                  <Link2 size={11} />
-                  Zoho Matching
-                </button>
-              )}
+              {!readOnly && (() => {
+                const isAllZohoMatched = items.length > 0 && items.every(item => Boolean(item.zoho_item_id || item.zoho_sku));
+                return (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setZohoMatcherRx(row);
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      background: isAllZohoMatched ? '#dcfce7' : '#f0fdf4',
+                      border: isAllZohoMatched ? '1px solid #86efac' : '1px solid #bbf7d0',
+                      color: isAllZohoMatched ? '#166534' : '#15803d',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                    title={isAllZohoMatched ? `Todos los APIs (${items.length}/${items.length}) están sincronizados con Zoho Books` : 'Vincular o comprobar ítems en Zoho Books'}
+                  >
+                    {isAllZohoMatched ? <Check size={11} color="#16a34a" /> : <Link2 size={11} />}
+                    {isAllZohoMatched ? `Zoho Matched (${items.length}/${items.length})` : 'Zoho Matching'}
+                  </button>
+                );
+              })()}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
               {items.map((item, idx) => {

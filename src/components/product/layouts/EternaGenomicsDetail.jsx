@@ -29,6 +29,7 @@ import {
   ChevronLeft,
   Download,
   ExternalLink,
+  Share2,
   X,
   Sparkle
 } from '@/lib/icons';
@@ -517,24 +518,27 @@ export default function EternaGenomicsDetail({
               ))}
             </div>
 
-            {/* Quick Hero Procurement bar */}
+            {/* Quick Hero Procurement / Clinical Action Bar */}
             <div className="eterna-hero-procurement-bar">
               <div className="eterna-price-row">
-                <div>
-                  <div className="eterna-price-val">{currencySymbol}{price.toFixed(2)}</div>
+                <div className="eterna-clinical-status-block">
+                  <div className="eterna-clinical-cert-badge">
+                    <ShieldCheck size={14} color="#16a34a" />
+                    <span>CE-IVD In Vitro Diagnostic Directive · ISO 15189</span>
+                  </div>
                   <div className="eterna-price-sub">
-                    {isEs ? 'Incluye Kit de Saliva + Análisis Completo Eurofins' : 'Includes Saliva Kit + Full Eurofins Lab Analysis'}
+                    {isEs ? 'Acceso Clínico e Institucional B2B · Procesamiento Analítico Eurofins' : 'Institutional & B2B Clinical Access · Eurofins Analytical Processing'}
                   </div>
                 </div>
                 <div className="eterna-batch-tag">
-                  <span style={{ color: '#94a3b8' }}>{isEs ? 'Lote Asignado:' : 'Assigned Batch:'}</span>
+                  <span style={{ color: '#64748b', fontSize: '0.78rem' }}>{isEs ? 'Lote Asignado:' : 'Assigned Batch:'}</span>
                   <div 
                     className="eterna-batch-code" 
                     onClick={handleCopyBatch}
                     title={isEs ? 'Copiar código de lote' : 'Copy batch code'}
                   >
                     {effectiveBatchCode}
-                    {copiedBatch ? <Check size={12} color="#4ade80" /> : <Copy size={12} />}
+                    {copiedBatch ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
                   </div>
                 </div>
               </div>
@@ -543,18 +547,28 @@ export default function EternaGenomicsDetail({
                 <button
                   type="button"
                   className="eterna-btn-primary"
-                  onClick={handleAddToCart}
+                  onClick={() => setIsInquiryDrawerOpen(true)}
                 >
                   <Package size={17} />
-                  <span>{isEs ? 'Añadir Kit a la Orden' : 'Add Kit to Order'}</span>
+                  <span>{isEs ? 'Solicitar Kit / Consulta Médica' : 'Request Kit / Clinical Inquiry'}</span>
                 </button>
+                <a
+                  href="/documents/ETERNA_Genetic_Risk_Analysis_Sample_Report.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="eterna-btn-secondary"
+                  style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Download size={15} />
+                  <span>{isEs ? 'Informe de Muestra (PDF)' : 'Sample Report (PDF)'}</span>
+                </a>
                 <button
                   type="button"
                   className="eterna-btn-secondary"
-                  onClick={() => setIsInquiryDrawerOpen(true)}
+                  onClick={() => setIsB2BPortalModalOpen(true)}
                 >
-                  <HelpCircle size={15} />
-                  <span>{isEs ? 'Consulta Médica' : 'Clinical Inquiry'}</span>
+                  <ExternalLink size={15} />
+                  <span>{isEs ? 'Demo Portal B2B' : 'B2B Portal Demo'}</span>
                 </button>
               </div>
             </div>
@@ -582,9 +596,180 @@ export default function EternaGenomicsDetail({
           </div>
         </div>
 
-        {/* ── 3. Dual-Column Architecture: Main Tab Content + Dedicated Right Sidebar ── */}
+        {/* ── 3. Dual-Column Architecture: GCP Console Left Sidebar + Main Tab Content ── */}
         <div className="eterna-layout-grid">
-          {/* ── LEFT COLUMN: MAIN CLINICAL CONTENT MODULES ── */}
+          {/* ── LEFT COLUMN: DEDICATED CLINICAL & NAVIGATION CONSOLE ── */}
+          <aside className="eterna-sidebar">
+            {/* Widget 1: Institutional Clinical Console & Order Drawer */}
+            <div className="eterna-sidebar-card">
+              <div className="eterna-sidebar-header-row">
+                <div>
+                  <div className="eterna-sidebar-console-title">
+                    {isEs ? 'Consola Clínica ETERNA' : 'ETERNA Clinical Console'}
+                  </div>
+                  <div className="eterna-sidebar-price-sub">
+                    {isEs ? 'Acceso Médico e Institucional B2B' : 'Medical & Institutional Portal'}
+                  </div>
+                </div>
+                <span className="eterna-badge-ce" style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem' }}>
+                  CE-IVD
+                </span>
+              </div>
+
+              <div className="eterna-sidebar-batch-box">
+                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>{isEs ? 'Lote Activo:' : 'Active Batch:'}</span>
+                <span 
+                  className="eterna-batch-code" 
+                  onClick={handleCopyBatch}
+                  title={isEs ? 'Copiar código de lote' : 'Copy batch code'}
+                >
+                  {effectiveBatchCode}
+                  {copiedBatch ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
+                </span>
+              </div>
+
+              <div className="eterna-sidebar-cta-group">
+                <button
+                  type="button"
+                  className="eterna-btn-primary full-width"
+                  onClick={() => setIsInquiryDrawerOpen(true)}
+                >
+                  <Package size={16} />
+                  <span>{isEs ? 'Solicitar Kit / Consulta' : 'Request Kit / Inquiry'}</span>
+                </button>
+                <a
+                  href="/documents/ETERNA_Genetic_Risk_Analysis_Sample_Report.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="eterna-btn-secondary full-width"
+                  style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                >
+                  <Download size={14} />
+                  <span>{isEs ? 'Informe de Muestra (PDF · 34 Págs)' : 'Sample Report (PDF · 34 Pgs)'}</span>
+                </a>
+                <button
+                  type="button"
+                  className="eterna-btn-secondary full-width"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  onClick={() => setIsB2BPortalModalOpen(true)}
+                >
+                  <ExternalLink size={14} />
+                  <span>{isEs ? 'Demo Portal B2B Interactivo' : 'Live B2B Clinic Demo'}</span>
+                </button>
+                <button
+                  type="button"
+                  className="eterna-btn-secondary full-width"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  onClick={() => setIsShareDrawerOpen(true)}
+                >
+                  <Share2 size={14} />
+                  <span>{isEs ? 'Compartir Monografía' : 'Share Monograph'}</span>
+                </button>
+              </div>
+
+              <div className="eterna-sidebar-guarantee-note">
+                <Lock size={13} color="#0d9488" />
+                <span>{isEs ? 'Envío 24-48h con retorno prefranqueado a Eurofins' : '24-48h dispatch with prepaid Eurofins return'}</span>
+              </div>
+            </div>
+
+            {/* Widget 2: Table of Contents / Section Navigator */}
+            <div className="eterna-sidebar-card">
+              <h4 className="eterna-sidebar-section-heading">
+                <BarChart3 size={15} color="#003666" />
+                <span>{isEs ? 'Índice de Módulos' : 'Monograph Modules'}</span>
+              </h4>
+              <div className="eterna-sidebar-quick-links">
+                {tabs.map((t) => {
+                  const TabIcon = t.icon;
+                  const isActive = activeTab === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      className={`eterna-quick-nav-btn ${isActive ? 'active' : ''}`}
+                      onClick={() => setActiveTab(t.id)}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <TabIcon size={14} color={isActive ? '#003666' : '#64748b'} />
+                        <span>{t.label}</span>
+                      </span>
+                      <ChevronRight size={12} color={isActive ? '#003666' : '#94a3b8'} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Widget 3: Longitudinal Telemetry Specs */}
+            <div className="eterna-sidebar-card highlight">
+              <div className="eterna-sidebar-card-badge">
+                <Activity size={12} />
+                <span>{isEs ? 'Seguimiento Clínico' : 'Longitudinal Telemetry'}</span>
+              </div>
+              <h3 className="eterna-sidebar-title">
+                {isEs ? 'Plataforma para Médicos' : 'Physician Patient Tracker'}
+              </h3>
+              <p className="eterna-sidebar-desc">
+                {isEs 
+                  ? 'Permite a clínicas monitorear el progreso del paciente comparando su línea base genética con re-tests semestrales.'
+                  : 'Enables practices to track biological age velocity, validating lifestyle and peptide therapy outcomes over time.'}
+              </p>
+
+              <div className="eterna-sidebar-specs-list">
+                <div className="eterna-sidebar-spec-row">
+                  <span className="eterna-spec-label">{isEs ? 'Mapa Genético Basal:' : 'Genomic Baseline:'}</span>
+                  <span className="eterna-spec-val">+700,000 SNPs</span>
+                </div>
+                <div className="eterna-sidebar-spec-row">
+                  <span className="eterna-spec-label">{isEs ? 'Intervalo Re-Test:' : 'Tracking Interval:'}</span>
+                  <span className="eterna-spec-val">6–12 {isEs ? 'Meses' : 'Months'}</span>
+                </div>
+                <div className="eterna-sidebar-spec-row">
+                  <span className="eterna-spec-label">{isEs ? 'Sincronización Wearables:' : 'Wearable Telemetry:'}</span>
+                  <span className="eterna-spec-val">24/7 HRV & Sleep</span>
+                </div>
+                <div className="eterna-sidebar-spec-row">
+                  <span className="eterna-spec-label">{isEs ? 'Laboratorio Analítico:' : 'Accredited Lab:'}</span>
+                  <span className="eterna-spec-val">Eurofins (ISO 15189)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Widget 4: Laboratory Credentials */}
+            <div className="eterna-sidebar-card">
+              <h4 className="eterna-sidebar-section-heading">
+                <ShieldCheck size={15} color="#0d9488" />
+                <span>{isEs ? 'Credenciales de Laboratorio' : 'Laboratory Credentials'}</span>
+              </h4>
+              <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 0.85rem 0' }}>
+                {isEs
+                  ? 'Todas las muestras son procesadas en instalaciones europeas acreditadas de Eurofins Scientific bajo estrictos estándares analíticos ISO.'
+                  : 'All patient specimens are accessioned and processed in Eurofins Scientific European diagnostic facilities under strict ISO standards.'}
+              </p>
+              
+              <ul className="eterna-sidebar-checks-list">
+                <li>
+                  <CheckCircle2 size={13} color="#16a34a" />
+                  <span>ISO 15189 (Medical Laboratories)</span>
+                </li>
+                <li>
+                  <CheckCircle2 size={13} color="#16a34a" />
+                  <span>ISO 17025 (Testing & Calibration)</span>
+                </li>
+                <li>
+                  <CheckCircle2 size={13} color="#16a34a" />
+                  <span>CE-IVD Directive EU 2017/746</span>
+                </li>
+                <li>
+                  <CheckCircle2 size={13} color="#16a34a" />
+                  <span>100% GDPR & HIPAA Compliant</span>
+                </li>
+              </ul>
+            </div>
+          </aside>
+
+          {/* ── RIGHT COLUMN: MAIN CLINICAL CONTENT MODULES ── */}
           <div className="eterna-main-content">
             
             {/* TAB: PATIENT WELLNESS APP & LONGITUDINAL TRACKING (FEATURED) */}
@@ -1754,11 +1939,11 @@ export default function EternaGenomicsDetail({
       {/* ── Sticky Action Bar on Mobile/Desktop ── */}
       <PublicStickyActionBar
         productName={name}
-        price={price}
+        price={null}
         currency={currency}
         dose={initialStrength}
         batch={effectiveBatchCode}
-        onAddToCart={handleAddToCart}
+        onAddToCart={() => setIsInquiryDrawerOpen(true)}
         onInquire={() => setIsInquiryDrawerOpen(true)}
         onShare={() => setIsShareDrawerOpen(true)}
         lang={lang}

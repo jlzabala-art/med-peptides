@@ -2,9 +2,36 @@ import React, { useState } from 'react';
 import {
   Stethoscope, Download, Copy, Trash2, Loader2, Sparkles, FileText,
   Tag, Package, RotateCcw, MessageCircle, Eye, RefreshCw, Merge,
-  ClipboardCheck, Syringe, Send, Receipt, Share2, Briefcase, Building2, Bookmark, Link2
+  ClipboardCheck, Syringe, Send, Receipt, Share2, Briefcase, Building2, Bookmark, Link2, Check
 } from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
+
+// Helper to determine if all compounded APIs in a prescription are matched/synced with Zoho
+export function checkAllApisZohoMatched(rx) {
+  if (!rx) return false;
+  const members = rx._sessionMembers || [rx];
+  const items = [];
+
+  for (const m of members) {
+    if (Array.isArray(m.parts) && m.parts.length > 0) {
+      for (const p of m.parts) {
+        if (Array.isArray(p.apis)) items.push(...p.apis);
+        else if (Array.isArray(p.items)) items.push(...p.items);
+        else if (Array.isArray(p.prescriptionLines)) items.push(...p.prescriptionLines);
+      }
+    }
+    if (Array.isArray(m.prescriptionLines) && m.prescriptionLines.length > 0) {
+      items.push(...m.prescriptionLines);
+    } else if (Array.isArray(m.items) && m.items.length > 0) {
+      items.push(...m.items);
+    } else if (Array.isArray(m.apis) && m.apis.length > 0) {
+      items.push(...m.apis);
+    }
+  }
+
+  if (items.length === 0) return false;
+  return items.every(it => Boolean(it && (it.zoho_item_id || it.zoho_sku)));
+}
 
 // Determines whether a prescription contains injectable peptides / biologics.
 // Used only to gate the clinical 'Patient administration guide' action.
@@ -223,11 +250,12 @@ export const getPrescriptionColumns = (options = {}) => {
         const formattedDoc = formatDoctorName(doctor);
         const treatingDocClinic = typeof rx.treatingDoctor === 'object' ? rx.treatingDoctor?.clinic : null;
         const clinicName = treatingDocClinic || rx.doctor?.clinic || rx.clinic || rx.clinicName || (String(doctor).toLowerCase().includes('haytham') || String(doctor).toLowerCase().includes('heytham') ? 'Arthregen Clinic' : null);
+        const isZohoAllMatched = checkAllApisZohoMatched(rx);
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0, padding: '2px 0' }}>
             {/* Primary line: Patient Name (Google Cloud UX: full name visible with natural wrapping) */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', minWidth: 0, flexWrap: 'wrap' }}>
               <span 
                 title={patient}
                 style={{ 
@@ -245,6 +273,29 @@ export const getPrescriptionColumns = (options = {}) => {
                 <div style={{ flexShrink: 0, marginTop: '2px' }}>
                   <CopyableId value={patientId} iconOnly={true} />
                 </div>
+              )}
+              {isZohoAllMatched && (
+                <span
+                  title="Todos los APIs están sincronizados con Zoho Books"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '2px',
+                    padding: '1px 5px',
+                    borderRadius: '3px',
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    color: '#15803d',
+                    fontSize: '0.64rem',
+                    fontWeight: 700,
+                    lineHeight: 1.2,
+                    marginTop: '2px',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <Check size={9} color="#16a34a" /> Zoho
+                </span>
               )}
             </div>
 
@@ -416,37 +467,87 @@ export const getPrescriptionColumns = (options = {}) => {
           else if (statuses.every(s => s === 'approved' || s === 'completed')) aggregateStatus = 'approved';
           else aggregateStatus = statuses[0] || 'draft';
 
+          const isZohoAllMatched = checkAllApisZohoMatched(rx);
+
           return (
-            <StatusBadge status={aggregateStatus} label={RX_STATUS_LABELS[aggregateStatus]} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
+              <StatusBadge status={aggregateStatus} label={RX_STATUS_LABELS[aggregateStatus]} />
+              {isZohoAllMatched && (
+                <span
+                  title="Todos los APIs están sincronizados con Zoho Books"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    fontSize: '0.64rem',
+                    fontWeight: 700,
+                    color: '#15803d',
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    padding: '1px 5px',
+                    borderRadius: '4px',
+                    lineHeight: 1.2,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <Check size={9} color="#16a34a" /> Zoho Matched
+                </span>
+              )}
+            </div>
           );
         }
 
+        const isZohoAllMatched = checkAllApisZohoMatched(rx);
+
         return (
-          <InlineEditableCell
-            value={normalizeRxStatus(rx.status) || 'draft'}
-            type="select"
-            options={[
-              { label: 'Draft', value: 'draft' },
-              { label: 'Pending', value: 'pending' },
-              { label: 'Approved', value: 'approved' },
-              { label: 'Processing', value: 'processing' },
-              { label: 'In Transit', value: 'in_transit' },
-              { label: 'Completed', value: 'completed' },
-              { label: 'Cancelled', value: 'cancelled' }
-            ]}
-            format={(val) => <StatusBadge status={val} label={RX_STATUS_LABELS[val]} />}
-            onSave={async (newStatus) => {
-              try {
-                await prescriptionRepository.updatePrescription(rx.id, { status: newStatus });
-                toast.success('Status updated');
-                if (options.onRefresh) options.onRefresh();
-              } catch (err) {
-                console.error(err);
-                toast.error('Failed to update status');
-                throw err;
-              }
-            }}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
+            <InlineEditableCell
+              value={normalizeRxStatus(rx.status) || 'draft'}
+              type="select"
+              options={[
+                { label: 'Draft', value: 'draft' },
+                { label: 'Pending', value: 'pending' },
+                { label: 'Approved', value: 'approved' },
+                { label: 'Processing', value: 'processing' },
+                { label: 'In Transit', value: 'in_transit' },
+                { label: 'Completed', value: 'completed' },
+                { label: 'Cancelled', value: 'cancelled' }
+              ]}
+              format={(val) => <StatusBadge status={val} label={RX_STATUS_LABELS[val]} />}
+              onSave={async (newStatus) => {
+                try {
+                  await prescriptionRepository.updatePrescription(rx.id, { status: newStatus });
+                  toast.success('Status updated');
+                  if (options.onRefresh) options.onRefresh();
+                } catch (err) {
+                  console.error(err);
+                  toast.error('Failed to update status');
+                  throw err;
+                }
+              }}
+            />
+            {isZohoAllMatched && (
+              <span
+                title="Todos los APIs están sincronizados con Zoho Books"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  fontSize: '0.64rem',
+                  fontWeight: 700,
+                  color: '#15803d',
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  padding: '1px 5px',
+                  borderRadius: '4px',
+                  lineHeight: 1.2,
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <Check size={9} color="#16a34a" /> Zoho Matched
+              </span>
+            )}
+          </div>
         );
       },
     },

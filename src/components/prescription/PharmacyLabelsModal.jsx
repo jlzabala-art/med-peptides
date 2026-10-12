@@ -255,7 +255,11 @@ export default function PharmacyLabelsModal({
       setFirebaseSaveSuccess(false);
 
       const rawId = currentItem.rxId || currentItem.prescriptionId || currentItem.fileNumber || currentItem.id;
-      const targetStatus = explicitStatus || currentItem.approvalStatus || 'draft';
+      // Guard strictly against React SyntheticEvent being passed when used as onClick={handleSaveToFirebase}
+      const safeExplicitStatus = typeof explicitStatus === 'string' && explicitStatus.trim() ? explicitStatus.trim() : null;
+      const targetStatus = safeExplicitStatus 
+        || (typeof currentItem.approvalStatus === 'string' ? currentItem.approvalStatus : null) 
+        || 'draft';
 
       const saveResult = await labelsRepository.savePrescriptionLabel({
         rawId,
@@ -1993,7 +1997,7 @@ export default function PharmacyLabelsModal({
                   {/* SAVE TO ATLAS BUTTON */}
                   <button
                     type="button"
-                    onClick={handleSaveToFirebase}
+                    onClick={() => handleSaveToFirebase()}
                     disabled={isSavingToFirebase}
                     className={`gcp-editor-save-btn ${firebaseSaveSuccess ? 'is-success' : ''}`}
                     title={isEs ? 'Guardar cambios directamente en Atlas (base de datos oficial)' : 'Save changes directly to Atlas'}
@@ -2676,7 +2680,7 @@ export default function PharmacyLabelsModal({
               <button
                 type="button"
                 className="gcp-btn-secondary"
-                onClick={handleSaveToFirebase}
+                onClick={() => handleSaveToFirebase()}
                 disabled={isSavingToFirebase}
                 title={isEs ? 'Guardar cambios en Firebase' : 'Save changes to Firebase'}
                 style={{

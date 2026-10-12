@@ -90,45 +90,51 @@ export async function generateMetadata({ searchParams }) {
 
 export default async function PublicLabelsPage({ searchParams }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const code = (resolvedSearchParams?.rx || resolvedSearchParams?.code || '51812').trim();
+  const rawCodesParam = (resolvedSearchParams?.rx || resolvedSearchParams?.code || '51812').trim();
+  const codes = rawCodesParam.split(',').map(c => c.trim()).filter(Boolean);
+  const primaryCode = codes[0] || '51812';
   const initialEditMode = resolvedSearchParams?.edit === 'true' || resolvedSearchParams?.edit === '1';
   const initialPhaseIdx = Number(resolvedSearchParams?.phase) ? Math.max(0, Number(resolvedSearchParams.phase) - 1) : 0;
   const initialLang = resolvedSearchParams?.lang || 'en';
 
-  let rx = null;
-  let labels = [];
+  const initialQueue = [];
 
-  try {
-    rx = await getPrescriptionData(code);
-    if (!rx) {
-      // Fallback to registry
-      const regMatch = PHARMAPOLIS_LABELS_REGISTRY.find(item => item.fileNumber === code);
-      if (regMatch) {
-        rx = {
-          id: regMatch.fileNumber || code,
-          fileNumber: regMatch.fileNumber || code,
-          code: regMatch.fileNumber || code,
-          patientName: regMatch.patientName || 'Patient',
-          patient: { name: regMatch.patientName || 'Patient' },
-          doctorName: regMatch.doctorName || 'Treating Physician',
-          clinicName: regMatch.clinicName || 'Atlas Partner Clinic',
-          treatmentTitle: regMatch.productTitle || regMatch.productName || 'Compounded Protocol',
-          status: 'approved'
-        };
+  for (const c of codes) {
+    try {
+      let itemRx = await getPrescriptionData(c);
+      if (!itemRx) {
+        const regMatch = PHARMAPOLIS_LABELS_REGISTRY.find(item => item.fileNumber === c);
+        if (regMatch) {
+          itemRx = {
+            id: regMatch.fileNumber || c,
+            fileNumber: regMatch.fileNumber || c,
+            code: regMatch.fileNumber || c,
+            patientName: regMatch.patientName || 'Patient',
+            patient: { name: regMatch.patientName || 'Patient' },
+            doctorName: regMatch.doctorName || 'Treating Physician',
+            clinicName: regMatch.clinicName || 'Atlas Partner Clinic',
+            treatmentTitle: regMatch.productTitle || regMatch.productName || 'Compounded Protocol',
+            status: 'approved'
+          };
+        }
       }
+      if (itemRx) {
+        const itemLabels = getPharmapolisLabelsForPrescription(itemRx);
+        initialQueue.push({
+          code: c,
+          rx: itemRx,
+          labels: itemLabels || []
+        });
+      }
+    } catch (err) {
+      console.warn(`[PublicLabelsPage] Error loading rx code ${c}:`, err.message);
     }
-
-    if (rx) {
-      labels = getPharmapolisLabelsForPrescription(rx);
-    }
-  } catch (err) {
-    console.warn('[PublicLabelsPage] Error loading initial prescription:', err.message);
   }
 
   // Fallback to default registry if empty
-  if (!rx && PHARMAPOLIS_LABELS_REGISTRY.length > 0) {
+  if (initialQueue.length === 0 && PHARMAPOLIS_LABELS_REGISTRY.length > 0) {
     const regDefault = PHARMAPOLIS_LABELS_REGISTRY[0];
-    rx = {
+    const defaultRx = {
       id: regDefault.fileNumber || '51812',
       fileNumber: regDefault.fileNumber || '51812',
       code: regDefault.fileNumber || '51812',
@@ -139,14 +145,21 @@ export default async function PublicLabelsPage({ searchParams }) {
       treatmentTitle: regDefault.productTitle || 'Compounded Pharmaceutical Protocol',
       status: 'approved'
     };
-    labels = getPharmapolisLabelsForPrescription(rx);
+    initialQueue.push({
+      code: regDefault.fileNumber || '51812',
+      rx: defaultRx,
+      labels: getPharmapolisLabelsForPrescription(defaultRx)
+    });
   }
+
+  const primaryItem = initialQueue[0] || {};
 
   return (
     <PublicLabelsAppClient
-      initialRx={rx}
-      initialLabels={labels}
-      initialCode={code}
+      initialRx={primaryItem.rx}
+      initialLabels={primaryItem.labels || []}
+      initialCode={primaryItem.code || primaryCode}
+      initialQueue={initialQueue}
       initialEditMode={initialEditMode}
       initialLabelIndex={initialPhaseIdx}
       initialLang={initialLang}

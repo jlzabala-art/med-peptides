@@ -17,11 +17,20 @@ import {
   Sparkles,
   ExternalLink,
   ChevronRight,
+  ChevronDown,
   X,
   Copy,
   Upload,
-  Stethoscope
+  Stethoscope,
+  Printer,
+  Layers,
+  Plus,
+  Trash2,
+  CheckCircle,
+  Sliders
 } from '@/lib/icons';
+import PharmapolisLabelSvg from '@/components/prescription/PharmapolisLabelSvg';
+import { generateA4BatchPdf } from '@/utils/a4BatchPdfGenerator';
 
 // Flagship featured cases for instant 1-click access
 const FEATURED_PATIENTS = [
@@ -86,10 +95,24 @@ function getDoctorSlug(rx, fallbackDocName) {
     .replace(/\s+/g, '-');
 }
 
+// Label size presets and variants for individual patient customization
+const LABEL_SIZE_PRESETS = [
+  { id: '75x45', widthMm: 75, heightMm: 45, label: '75 × 45 mm (Estándar)' },
+  { id: '100x55', widthMm: 100, heightMm: 55, label: '100 × 55 mm (Frasco Grande)' },
+  { id: '90x38', widthMm: 90, heightMm: 38, label: '90 × 38 mm (Vial / Ampolla)' },
+];
+
+const LABEL_VARIANT_OPTIONS = [
+  { id: 'backQr', labelEs: 'Trasera con QR', labelEn: 'Back with QR' },
+  { id: 'front', labelEs: 'Frontal sin QR', labelEn: 'Front without QR' },
+  { id: 'frontWithQr', labelEs: 'Frontal con QR', labelEn: 'Front with QR' },
+];
+
 export default function PublicLabelsAppClient({
   initialRx,
   initialLabels = [],
   initialCode = '51812',
+  initialQueue = [],
   initialEditMode = true,
   initialLabelIndex = 0,
   initialLang = 'en'
@@ -97,7 +120,39 @@ export default function PublicLabelsAppClient({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // State
+  // Patient Batch Queue State
+  const [patientQueue, setPatientQueue] = useState(() => {
+    if (Array.isArray(initialQueue) && initialQueue.length > 0) {
+      return initialQueue.map((item, idx) => ({
+        code: String(item.code || item.rx?.fileNumber || item.rx?.code),
+        rx: item.rx,
+        labels: item.labels || [],
+        selectedPartIndex: (idx === 0 && initialLabelIndex != null) ? initialLabelIndex : 0,
+        variant: 'backQr',
+        widthMm: 75,
+        heightMm: 45
+      }));
+    }
+    if (initialRx) {
+      return [{
+        code: String(initialCode || initialRx?.fileNumber || initialRx?.code || '51812'),
+        rx: initialRx,
+        labels: initialLabels || [],
+        selectedPartIndex: initialLabelIndex || 0,
+        variant: 'backQr',
+        widthMm: 75,
+        heightMm: 45
+      }];
+    }
+    return [];
+  });
+
+  const [activeQueueIndex, setActiveQueueIndex] = useState(0);
+  const [isGeneratingBatchPdf, setIsGeneratingBatchPdf] = useState(false);
+  const [batchPdfProgress, setBatchPdfProgress] = useState(null);
+  const [openConfigIdx, setOpenConfigIdx] = useState(null);
+
+  // Active Single Prescription State (mirrored from queue)
   const [currentRx, setCurrentRx] = useState(initialRx);
   const [labels, setLabels] = useState(initialLabels);
   const [activeCode, setActiveCode] = useState(initialCode);
@@ -216,23 +271,64 @@ export default function PublicLabelsAppClient({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Load prescription by code
-  const handleSelectPatient = async (code) => {
+  // Synchronize URL query params with current batch queue
+  const updateUrlWithQueue = (queue, activeIdx = 0) => {
+    if (typeof window === 'undefined' || !queue.length) return;
+    const codesParam = queue.map(p => p.code).join(',');
+    const activeItem = queue[activeIdx] || queue[0];
+    const phaseParam = activeItem?.selectedPartIndex ? `&phase=${activeItem.selectedPartIndex + 1}` : '&phase=1';
+    const newUrl = `/labels?rx=${encodeURIComponent(codesParam)}${phaseParam}&edit=true&lang=${lang}`;
+    window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+  };
+
+  // Add or switch active patient in the batch queue
+  const handleSelectOrAddPatient = async (code, activateImmediately = true) => {
     if (!code) return;
-    setSearchOpen(false);
+    const cleanCode = String(code).trim();
+    const existingIdx = patientQueue.findIndex(p => String(p.code) === cleanCode);
+
+    if (existingIdx >= 0) {
+      if (activateImmediately) {
+        handleSwitchActivePatient(existingIdx);
+      }
+      setSearchOpen(false);
+      return;
+    }
+
     setIsLoadingRx(true);
     try {
-      const res = await fetch(`/api/labels/load?code=${encodeURIComponent(code)}`);
+      const res = await fetch(`/api/labels/load?code=${encodeURIComponent(cleanCode)}`);
       const data = await res.json();
       if (data?.success && data.rx) {
-        setCurrentRx(data.rx);
-        setLabels(data.labels || []);
-        setActiveCode(code);
-        setLabelIndex(0);
+        const newItem = {
+          code: cleanCode,
+          rx: data.rx,
+          labels: data.labels || [],
+          selectedPartIndex: 0,
+          variant: 'backQr',
+          widthMm: 75,
+          heightMm: 45
+        };
+
+        const nextQueue = [...patientQueue, newItem];
+        setPatientQueue(nextQueue);
+
+        if (activateImmediately) {
+          const newIdx = nextQueue.length - 1;
+          setActiveQueueIndex(newIdx);
+          setCurrentRx(data.rx);
+          setLabels(data.labels || []);
+          setActiveCode(cleanCode);
+          setLabelIndex(0);
+          updateUrlWithQueue(nextQueue, newIdx);
+          setSearchOpen(false);
+        } else {
+          updateUrlWithQueue(nextQueue, activeQueueIndex);
+        }
 
         // Update recents
         const updated = saveRecentPrescription({
-          code,
+          code: cleanCode,
           patientName: data.rx.patient?.name || data.rx.patientName || 'Patient',
           title: data.rx.treatmentTitle || 'Compounded Formula',
           date: data.rx.prescriptionDate || data.rx.date || null
@@ -240,18 +336,124 @@ export default function PublicLabelsAppClient({
         if (updated && updated.length > 0) {
           setRecentPrescriptions(updated);
         }
-
-        // Update URL query parameters without full reload
-        const newUrl = `/labels?rx=${encodeURIComponent(code)}&phase=1&edit=true&lang=${lang}`;
-        window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
       } else {
-        alert(isEs ? `No se encontraron datos para la prescripción #${code}` : `No data found for prescription #${code}`);
+        alert(isEs ? `No se encontraron datos para la prescripción #${cleanCode}` : `No data found for prescription #${cleanCode}`);
       }
     } catch (err) {
-      console.error('Error loading patient labels:', err);
+      console.error('Error adding patient to batch:', err);
       alert(isEs ? 'Error al cargar la prescripción' : 'Failed to load prescription');
     } finally {
       setIsLoadingRx(false);
+    }
+  };
+
+  // Legacy alias for existing callbacks
+  const handleSelectPatient = (code) => handleSelectOrAddPatient(code, true);
+
+  // Switch active patient in view
+  const handleSwitchActivePatient = (idx) => {
+    if (idx < 0 || idx >= patientQueue.length) return;
+    setActiveQueueIndex(idx);
+    const item = patientQueue[idx];
+    setCurrentRx(item.rx);
+    setLabels(item.labels);
+    setActiveCode(item.code);
+    setLabelIndex(item.selectedPartIndex || 0);
+    updateUrlWithQueue(patientQueue, idx);
+  };
+
+  // Remove a patient from the queue
+  const handleRemoveFromQueue = (idxToRemove, e) => {
+    if (e) e.stopPropagation();
+    if (patientQueue.length <= 1) return; // Keep at least one patient active
+
+    const nextQueue = patientQueue.filter((_, i) => i !== idxToRemove);
+    setPatientQueue(nextQueue);
+
+    let nextActiveIdx = activeQueueIndex;
+    if (activeQueueIndex >= nextQueue.length) {
+      nextActiveIdx = nextQueue.length - 1;
+    } else if (activeQueueIndex === idxToRemove) {
+      nextActiveIdx = Math.max(0, idxToRemove - 1);
+    }
+    setActiveQueueIndex(nextActiveIdx);
+    const activeItem = nextQueue[nextActiveIdx];
+    if (activeItem) {
+      setCurrentRx(activeItem.rx);
+      setLabels(activeItem.labels);
+      setActiveCode(activeItem.code);
+      setLabelIndex(activeItem.selectedPartIndex || 0);
+    }
+    updateUrlWithQueue(nextQueue, nextActiveIdx);
+  };
+
+  // Update specific patient label config (format, size, variant, part)
+  const handleUpdatePatientConfig = (idx, changes) => {
+    setPatientQueue(prev => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], ...changes };
+      return next;
+    });
+    if (idx === activeQueueIndex && changes.selectedPartIndex != null) {
+      setLabelIndex(changes.selectedPartIndex);
+    }
+  };
+
+  // Generate and download A4 Multi-Patient Batch PDF
+  const handleDownloadA4BatchPdf = async () => {
+    if (!patientQueue.length) return;
+    setIsGeneratingBatchPdf(true);
+    setBatchPdfProgress({ current: 0, total: patientQueue.length, patient: '' });
+
+    try {
+      const batchItems = [];
+
+      for (let i = 0; i < patientQueue.length; i++) {
+        const pItem = patientQueue[i];
+        const partIdx = pItem.selectedPartIndex || 0;
+        const pLabel = pItem.labels[partIdx] || pItem.labels[0] || {};
+        const pName = pItem.rx?.patient?.name || pItem.rx?.patientName || 'Patient';
+        const rxC = pItem.code;
+        const partLbl = pLabel.partLabel || (pItem.labels.length > 1 ? `Part ${partIdx + 1}` : '');
+
+        // Grab SVG element from offscreen renderer
+        const svgElId = `batch-svg-${rxC}-${partIdx}`;
+        const svgEl = document.getElementById(svgElId);
+
+        if (!svgEl) {
+          console.warn(`SVG element #${svgElId} not found in DOM`);
+          continue;
+        }
+
+        batchItems.push({
+          patientName: pName,
+          rxCode: rxC,
+          partLabel: partLbl,
+          widthMm: Number(pItem.widthMm) || 75,
+          heightMm: Number(pItem.heightMm) || 45,
+          svgElement: svgEl
+        });
+      }
+
+      if (batchItems.length === 0) {
+        alert(isEs ? 'No se encontraron las etiquetas SVG en el DOM' : 'Could not find rendered SVG labels in DOM');
+        return;
+      }
+
+      await generateA4BatchPdf({
+        items: batchItems,
+        isEs,
+        dpi: 600,
+        onProgress: (prog) => {
+          setBatchPdfProgress(prog);
+        }
+      });
+    } catch (err) {
+      console.error('Error generating A4 batch PDF:', err);
+      alert(isEs ? `Error al generar PDF A4: ${err.message}` : `Failed to generate A4 PDF: ${err.message}`);
+    } finally {
+      setIsGeneratingBatchPdf(false);
+      setBatchPdfProgress(null);
     }
   };
 
@@ -512,6 +714,196 @@ export default function PublicLabelsAppClient({
           display: inline-flex;
           align-items: center;
           gap: 3px;
+        }
+        .pls-search-btn-add-batch {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          background: #eff6ff;
+          border: 1px solid #bfdbfe;
+          color: #1d4ed8;
+          font-size: 0.68rem;
+          font-weight: 600;
+          padding: 3px 8px;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          flex-shrink: 0;
+        }
+        .pls-search-btn-add-batch:hover {
+          background: #dbeafe;
+          border-color: #93c5fd;
+        }
+
+        /* Batch Patient Queue Strip */
+        .pls-batch-bar {
+          background: #ffffff;
+          border-bottom: 1px solid #dadce0;
+          padding: 8px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          position: sticky;
+          top: 49px;
+          z-index: 55;
+          box-shadow: 0 1px 2px rgba(60,64,67,0.04);
+        }
+        .pls-batch-info-label {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+        .pls-batch-count-badge {
+          background: #e8f0fe;
+          color: #1a73e8;
+          font-size: 0.70rem;
+          font-weight: 700;
+          padding: 2px 7px;
+          border-radius: 12px;
+        }
+        .pls-batch-scroll {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex: 1;
+          min-width: 0;
+          overflow-x: auto;
+          padding: 2px 0;
+        }
+        .pls-batch-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #f8fafc;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          padding: 4px 8px;
+          font-size: 0.76rem;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.15s ease;
+          position: relative;
+        }
+        .pls-batch-pill:hover {
+          background: #f1f5f9;
+          border-color: #94a3b8;
+        }
+        .pls-batch-pill.active {
+          background: #eff6ff;
+          border-color: #1a73e8;
+          box-shadow: 0 1px 3px rgba(26,115,232,0.18);
+        }
+        .pls-batch-pill-name {
+          font-weight: 700;
+          color: #1e293b;
+        }
+        .pls-batch-pill.active .pls-batch-pill-name {
+          color: #1a73e8;
+        }
+        .pls-batch-pill-badge {
+          font-size: 0.66rem;
+          font-family: monospace;
+          background: #e2e8f0;
+          color: #475569;
+          padding: 1px 5px;
+          border-radius: 3px;
+          font-weight: 600;
+        }
+        .pls-batch-pill.active .pls-batch-pill-badge {
+          background: #dbeafe;
+          color: #1e40af;
+        }
+        .pls-batch-pill-format-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+          background: #ecfdf5;
+          border: 1px solid #a7f3d0;
+          color: #065f46;
+          font-size: 0.66rem;
+          font-weight: 700;
+          padding: 1px 5px;
+          border-radius: 3px;
+          cursor: pointer;
+        }
+        .pls-batch-pill-format-btn:hover {
+          background: #d1fae5;
+        }
+        .pls-batch-pill-remove {
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          color: #94a3b8;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2px;
+          border-radius: 50%;
+        }
+        .pls-batch-pill-remove:hover {
+          color: #ef4444;
+          background: #fee2e2;
+        }
+        .pls-batch-popover {
+          position: absolute;
+          top: calc(100% + 6px);
+          left: 0;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          padding: 10px;
+          box-shadow: 0 4px 16px rgba(15,23,42,0.15);
+          z-index: 120;
+          min-width: 220px;
+        }
+        .pls-popover-opt {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          text-align: left;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 4px;
+          padding: 4px 8px;
+          font-size: 0.72rem;
+          color: #334155;
+          cursor: pointer;
+          transition: background 0.1s;
+        }
+        .pls-popover-opt:hover {
+          background: #f1f5f9;
+        }
+        .pls-popover-opt.selected {
+          background: #eff6ff;
+          border-color: #93c5fd;
+          color: #1e40af;
+          font-weight: 700;
+        }
+        .pls-batch-btn-print {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #0f172a;
+          color: #ffffff;
+          border: 1px solid #0f172a;
+          border-radius: 6px;
+          padding: 6px 14px;
+          font-size: 0.78rem;
+          font-weight: 700;
+          cursor: pointer;
+          white-space: nowrap;
+          box-shadow: 0 1px 3px rgba(15,23,42,0.2);
+          transition: background 0.15s ease;
+        }
+        .pls-batch-btn-print:hover:not(:disabled) {
+          background: #1e293b;
+        }
+        .pls-batch-btn-print:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
 
         /* Header Actions */
@@ -857,7 +1249,9 @@ export default function PublicLabelsAppClient({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setSearchOpen(true)}
-              placeholder="Search patient, file #, or prescription code... (⌘K)"
+              placeholder={isEs
+                ? "Buscar paciente o nº historia (Selección múltiple: puedes añadir varios)... (⌘K)"
+                : "Search patient or file # (Multi-selection: add multiple to batch)... (⌘K)"}
             />
             {searchQuery && (
               <button
@@ -868,7 +1262,9 @@ export default function PublicLabelsAppClient({
                 <X size={14} />
               </button>
             )}
-            <span className="pls-search-badge">⌘K</span>
+            <span className="pls-search-badge" title={isEs ? "Selección múltiple disponible" : "Multi-selection enabled"}>
+              ⌘K • {isEs ? 'Múltiple' : 'Multi'}
+            </span>
           </div>
 
           {/* Search Dropdown Results */}
@@ -877,7 +1273,7 @@ export default function PublicLabelsAppClient({
               <div style={{ padding: '8px 12px', background: '#f8fafc', borderBottom: '1px solid #e8eaed', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   {searchQuery 
-                    ? (isEs ? 'Resultados de Algolia y Portal' : 'Algolia & Portal Matches')
+                    ? (isEs ? 'Resultados de Algolia y Portal (Selecciona o añade al lote)' : 'Algolia & Portal Matches (Select or Add to Batch)')
                     : (recentPrescriptions.length > 0 
                         ? (isEs ? '🕒 Últimos 5 consultados' : '🕒 Recently Consulted (Last 5)')
                         : (isEs ? 'Prescripciones Destacadas' : 'Featured Prescriptions'))}
@@ -918,17 +1314,24 @@ export default function PublicLabelsAppClient({
                 return itemsToRender.map((item) => {
                   const dateStr = formatResultDate(item.date);
                   const isRecent = !searchQuery.trim() && recentPrescriptions.length > 0;
+                  const isInBatch = patientQueue.some(p => String(p.code) === String(item.code));
+
                   return (
                     <div
                       key={`${item.code}-${item.id || item.timestamp || item.name}`}
                       className="pls-search-item"
-                      onClick={() => handleSelectPatient(item.code)}
+                      onClick={() => handleSelectOrAddPatient(item.code, true)}
                     >
                       <div className="pls-search-item-info">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <span className="pls-search-item-name">
                             {item.patientName || item.name || 'Patient'}
                           </span>
+                          {isInBatch && (
+                            <span style={{ fontSize: '0.65rem', color: '#1d4ed8', background: '#dbeafe', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>
+                              {isEs ? '✓ En Lote' : '✓ In Batch'}
+                            </span>
+                          )}
                           {dateStr && (
                             <span className="pls-search-item-date" title={isEs ? 'Fecha de Prescripción' : 'Prescription Date'}>
                               📅 {dateStr}
@@ -944,9 +1347,23 @@ export default function PublicLabelsAppClient({
                           #{item.code} • {item.title || item.treatmentTitle || 'Compounded Pharmaceutical Protocol'}
                         </div>
                       </div>
-                      <span className="pls-search-item-badge">
-                        #{item.code}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span className="pls-search-item-badge">
+                          #{item.code}
+                        </span>
+                        <button
+                          type="button"
+                          className="pls-search-btn-add-batch"
+                          title={isEs ? "Añadir a la cola de lote sin cerrar" : "Add to batch queue without closing"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectOrAddPatient(item.code, false);
+                          }}
+                        >
+                          <Plus size={11} />
+                          <span>{isInBatch ? (isEs ? 'Añadido' : 'Added') : (isEs ? 'Añadir' : 'Add')}</span>
+                        </button>
+                      </div>
                     </div>
                   );
                 });
@@ -1005,6 +1422,171 @@ export default function PublicLabelsAppClient({
           </div>
         </div>
       </header>
+
+      {/* ── 2. Patient Batch Queue Strip (Multi-Patient & A4 Format) ── */}
+      <section className="pls-batch-bar" aria-label="Patient Batch Queue">
+        <div className="pls-batch-info-label">
+          <Layers size={15} color="#1a73e8" />
+          <span style={{ fontWeight: 700, fontSize: '0.80rem', color: '#1e293b' }}>
+            {isEs ? 'Lote de Pacientes:' : 'Patient Batch:'}
+          </span>
+          <span className="pls-batch-count-badge">
+            {patientQueue.length} {patientQueue.length === 1 ? (isEs ? 'paciente' : 'patient') : (isEs ? 'pacientes' : 'patients')}
+          </span>
+        </div>
+
+        {/* Scrollable list of patient pills with per-patient format toggles */}
+        <div className="pls-batch-scroll">
+          {patientQueue.map((pItem, qIdx) => {
+            const isActive = activeQueueIndex === qIdx;
+            const pName = pItem.rx?.patient?.name || pItem.rx?.patientName || 'Patient';
+            const sizeLabel = `${pItem.widthMm}×${pItem.heightMm}mm`;
+            const isConfigOpen = openConfigIdx === qIdx;
+
+            return (
+              <div
+                key={`queue-${pItem.code}-${qIdx}`}
+                className={`pls-batch-pill ${isActive ? 'active' : ''}`}
+                onClick={() => handleSwitchActivePatient(qIdx)}
+                title={isEs ? `Activar etiquetas de ${pName}` : `Activate labels for ${pName}`}
+              >
+                <span className="pls-batch-pill-name">{pName}</span>
+                <span className="pls-batch-pill-badge">#{pItem.code}</span>
+                
+                {/* Format badge & config toggle button */}
+                <button
+                  type="button"
+                  className="pls-batch-pill-format-btn"
+                  title={isEs ? 'Configurar formato individual de esta etiqueta' : 'Configure individual format for this label'}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenConfigIdx(isConfigOpen ? null : qIdx);
+                  }}
+                >
+                  <span>{sizeLabel}</span>
+                  <ChevronDown size={11} />
+                </button>
+
+                {/* Remove button if more than 1 patient */}
+                {patientQueue.length > 1 && (
+                  <button
+                    type="button"
+                    className="pls-batch-pill-remove"
+                    title={isEs ? `Quitar a ${pName} del lote` : `Remove ${pName} from batch`}
+                    onClick={(e) => handleRemoveFromQueue(qIdx, e)}
+                    aria-label="Remove patient"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+
+                {/* Per-patient config popover */}
+                {isConfigOpen && (
+                  <div
+                    className="pls-batch-popover"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div style={{ fontWeight: 700, fontSize: '0.74rem', marginBottom: '6px', color: '#0f172a' }}>
+                      {isEs ? 'Formato de Etiqueta:' : 'Label Format:'}
+                    </div>
+
+                    {/* Size presets */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
+                      {LABEL_SIZE_PRESETS.map((preset) => {
+                        const isSelected = pItem.widthMm === preset.widthMm && pItem.heightMm === preset.heightMm;
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            className={`pls-popover-opt ${isSelected ? 'selected' : ''}`}
+                            onClick={() => handleUpdatePatientConfig(qIdx, { widthMm: preset.widthMm, heightMm: preset.heightMm })}
+                          >
+                            <span>{preset.label}</span>
+                            {isSelected && <Check size={12} color="#1a73e8" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Variant options */}
+                    <div style={{ fontWeight: 700, fontSize: '0.74rem', marginBottom: '4px', color: '#0f172a' }}>
+                      {isEs ? 'Tipo de Etiqueta:' : 'Label Variant:'}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
+                      {LABEL_VARIANT_OPTIONS.map((variantOpt) => {
+                        const isSelected = pItem.variant === variantOpt.id;
+                        return (
+                          <button
+                            key={variantOpt.id}
+                            type="button"
+                            className={`pls-popover-opt ${isSelected ? 'selected' : ''}`}
+                            onClick={() => handleUpdatePatientConfig(qIdx, { variant: variantOpt.id })}
+                          >
+                            <span>{isEs ? variantOpt.labelEs : variantOpt.labelEn}</span>
+                            {isSelected && <Check size={12} color="#1a73e8" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Formula part if multi-part */}
+                    {pItem.labels.length > 1 && (
+                      <>
+                        <div style={{ fontWeight: 700, fontSize: '0.74rem', marginBottom: '4px', color: '#0f172a' }}>
+                          {isEs ? 'Parte a Imprimir:' : 'Part to Print:'}
+                        </div>
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                          {pItem.labels.map((lbl, pIdx) => (
+                            <button
+                              key={pIdx}
+                              type="button"
+                              className={`pls-popover-opt ${pItem.selectedPartIndex === pIdx ? 'selected' : ''}`}
+                              style={{ flex: 1, justifyContent: 'center' }}
+                              onClick={() => handleUpdatePatientConfig(qIdx, { selectedPartIndex: pIdx })}
+                            >
+                              {lbl.partLabel || `Part ${pIdx + 1}`}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+
+                    <div style={{ marginTop: '8px', textAlign: 'right' }}>
+                      <button
+                        type="button"
+                        style={{ border: 'none', background: '#1a73e8', color: '#fff', fontSize: '0.72rem', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer' }}
+                        onClick={() => setOpenConfigIdx(null)}
+                      >
+                        {isEs ? 'Listo' : 'Done'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Global Action: Print All Patients in A4 PDF Sheet */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <button
+            type="button"
+            className="pls-batch-btn-print"
+            onClick={handleDownloadA4BatchPdf}
+            disabled={isGeneratingBatchPdf || patientQueue.length === 0}
+            title={isEs ? 'Imprimir todas las etiquetas del lote en un folio A4 en formato PDF' : 'Print all queued labels onto an A4 PDF sheet'}
+          >
+            <Printer size={15} />
+            <span>
+              {isGeneratingBatchPdf
+                ? (batchPdfProgress
+                    ? `${isEs ? 'Rasterizando' : 'Rendering'} ${batchPdfProgress.current}/${batchPdfProgress.total}...`
+                    : (isEs ? 'Generando A4 PDF...' : 'Generating A4 PDF...'))
+                : (isEs ? 'Imprimir Lote en A4 (PDF)' : 'Print Batch in A4 (PDF)')}
+            </span>
+          </button>
+        </div>
+      </section>
 
       {/* ── 3. Active Patient & Formula Context Strip ── */}
       <div className="pls-context-strip">
@@ -1123,6 +1705,43 @@ export default function PublicLabelsAppClient({
             isEs={isEs}
           />
         )}
+
+        {/* ── Hidden Offscreen Container for Batch High-Res SVG Rasterization ── */}
+        <div
+          id="pls-offscreen-batch-render"
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: '-9999px',
+            width: '1px',
+            height: '1px',
+            overflow: 'hidden',
+            pointerEvents: 'none',
+            visibility: 'hidden'
+          }}
+          aria-hidden="true"
+        >
+          {patientQueue.map((pItem) => {
+            const partIdx = pItem.selectedPartIndex || 0;
+            const pLabel = pItem.labels[partIdx] || pItem.labels[0] || {};
+            return (
+              <div key={`offscreen-${pItem.code}-${partIdx}`}>
+                <PharmapolisLabelSvg
+                  labelData={pLabel}
+                  variant={pItem.variant || 'backQr'}
+                  widthMm={pItem.widthMm || 75}
+                  heightMm={pItem.heightMm || 45}
+                  showCutGuides={true}
+                  svgRef={(node) => {
+                    if (node) {
+                      node.id = `batch-svg-${pItem.code}-${partIdx}`;
+                    }
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
       </main>
 
       {/* Import Prescription — shared engine, server-side persistence without Atlas validation */}

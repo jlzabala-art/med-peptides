@@ -165,7 +165,10 @@ export const labelsRepository = {
 
     const prevLabel = currentLabelsSnapshot[phaseIdx] || {};
     const nextVersion = (Number(prevLabel.version) || 0) + 1;
-    const resolvedStatus = approvalStatus || currentItem.approvalStatus || prevLabel.approvalStatus || 'draft';
+    const resolvedStatus = (typeof approvalStatus === 'string' && approvalStatus.trim())
+      || (typeof currentItem.approvalStatus === 'string' && currentItem.approvalStatus.trim())
+      || (typeof prevLabel.approvalStatus === 'string' && prevLabel.approvalStatus.trim())
+      || 'draft';
 
     const historyEntry = {
       version: nextVersion,
@@ -326,8 +329,14 @@ export const labelsRepository = {
       }
     }
 
-    // Execute atomic parent update
-    await updateDoc(targetDocRef, updatePayload);
+    // Execute atomic parent update with strict sanitization
+    // Remove any undefined or non-plain keys (except FieldValues like serverTimestamp)
+    const sanitizedPayload = Object.entries(updatePayload).reduce((acc, [key, value]) => {
+      if (value !== undefined) acc[key] = value;
+      return acc;
+    }, {});
+
+    await updateDoc(targetDocRef, sanitizedPayload);
 
     // Save into granular subcollection prescriptions/{rxId}/labels/{partKey}
     try {
