@@ -598,74 +598,93 @@ export default function PharmapolisLabelSvg({
             <rect x="0" y="0" width={leftColWidth} height={colHeight} rx="8" />
           </clipPath>
 
-          {/* Dispensing & Technical Packaging Specs (fully legible, multiline wrapped, zero cut-off) */}
-          <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${qrY + backQrSize + (isShort ? 40 : 48)})`}>
-            {/* Header badge */}
-            <rect x="-4" y="-14" width={leftColWidth - 20} height={isShort ? 20 : 22} fill="#f0f9ff" rx="4" />
-            <text x="2" y={isShort ? 0 : 2} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
-              DISPENSING SPECS
-            </text>
+          {/* Dispensing & Technical Packaging Specs (fully legible, dynamic vertical flow, zero cut-off or collision) */}
+          {(() => {
+            const volLines = wrapLines(volume, 16);
+            const batchLines = wrapLines(batchCode, 15);
+            const storageLines = wrapLines(storage, 17);
 
-            {/* 1. NET CONTENT */}
-            <g transform={`translate(0, ${isShort ? 18 : 24})`}>
-              <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
-                NET CONTENT
-              </text>
-              {wrapLines(volume, 16).map((vLine, vIdx) => (
-                <text
-                  key={`vol-${vIdx}`}
-                  x="0"
-                  y={(isShort ? 15 : 18) + (vIdx * (isShort ? 15 : 18))}
-                  fontFamily="Arial, Helvetica, sans-serif"
-                  fontSize={isShort ? 13 : 15}
-                  fontWeight="900"
-                  fill="#0f172a"
-                >
-                  {vLine}
-                </text>
-              ))}
-            </g>
+            const volY = isShort ? 16 : 22;
+            const volLineGap = isShort ? 15 : 18;
+            const volTotalH = volY + (volLines.length * volLineGap);
 
-            {/* 2. DISPENSING BATCH */}
-            <g transform={`translate(0, ${isShort ? 66 : 80})`}>
-              <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
-                DISPENSING BATCH
-              </text>
-              {wrapLines(batchCode, 15).map((bLine, bIdx) => (
-                <text
-                  key={`bch-${bIdx}`}
-                  x="0"
-                  y={(isShort ? 15 : 18) + (bIdx * (isShort ? 14 : 16))}
-                  fontFamily="monospace"
-                  fontSize={isShort ? 12 : 14}
-                  fontWeight="900"
-                  fill="#003666"
-                >
-                  {bLine}
-                </text>
-              ))}
-            </g>
+            const batchY = volTotalH + (isShort ? 10 : 14);
+            const batchLineGap = isShort ? 14 : 16;
+            const batchTotalH = batchY + (batchLines.length * batchLineGap);
 
-            {/* 3. STORAGE */}
-            <g transform={`translate(0, ${isShort ? 116 : 140})`}>
-              <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
-                STORAGE CONDITIONS
-              </text>
-              {wrapLines(storage, 17).map((sLine, sIdx) => (
-                <text
-                  key={`stg-${sIdx}`}
-                  x="0"
-                  y={(isShort ? 14 : 17) + (sIdx * (isShort ? 14 : 17))}
-                  fontFamily="Arial, Helvetica, sans-serif"
-                  fontSize={isShort ? 11 : 13}
-                  fontWeight="700"
-                  fill="#0f172a"
-                >
-                  {sLine}
+            const storageY = batchTotalH + (isShort ? 10 : 14);
+            const storageLineGap = isShort ? 13 : 16;
+
+            return (
+              <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${qrY + backQrSize + (isShort ? 40 : 48)})`}>
+                {/* Header badge */}
+                <rect x="-4" y="-14" width={leftColWidth - 20} height={isShort ? 20 : 22} fill="#f0f9ff" rx="4" />
+                <text x="2" y={isShort ? 0 : 2} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                  DISPENSING SPECS
                 </text>
-              ))}
-            </g>
-          </g>
+
+                {/* 1. NET CONTENT */}
+                <g transform={`translate(0, ${volY})`}>
+                  <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
+                    NET CONTENT
+                  </text>
+                  {volLines.map((vLine, vIdx) => (
+                    <text
+                      key={`vol-${vIdx}`}
+                      x="0"
+                      y={volLineGap + (vIdx * volLineGap)}
+                      fontFamily="Arial, Helvetica, sans-serif"
+                      fontSize={isShort ? 13 : 15}
+                      fontWeight="900"
+                      fill="#0f172a"
+                    >
+                      {vLine}
+                    </text>
+                  ))}
+                </g>
+
+                {/* 2. DISPENSING BATCH */}
+                <g transform={`translate(0, ${batchY})`}>
+                  <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
+                    DISPENSING BATCH
+                  </text>
+                  {batchLines.map((bLine, bIdx) => (
+                    <text
+                      key={`bch-${bIdx}`}
+                      x="0"
+                      y={batchLineGap + (bIdx * batchLineGap)}
+                      fontFamily="monospace"
+                      fontSize={isShort ? 12 : 14}
+                      fontWeight="900"
+                      fill="#003666"
+                    >
+                      {bLine}
+                    </text>
+                  ))}
+                </g>
+
+                {/* 3. STORAGE */}
+                <g transform={`translate(0, ${storageY})`}>
+                  <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
+                    STORAGE CONDITIONS
+                  </text>
+                  {storageLines.map((sLine, sIdx) => (
+                    <text
+                      key={`stg-${sIdx}`}
+                      x="0"
+                      y={storageLineGap + (sIdx * storageLineGap)}
+                      fontFamily="Arial, Helvetica, sans-serif"
+                      fontSize={isShort ? 11 : 13}
+                      fontWeight="700"
+                      fill="#0f172a"
+                    >
+                      {sLine}
+                    </text>
+                  ))}
+                </g>
+              </g>
+            );
+          })()}
         </g>
 
         {/* RIGHT COLUMN: EXPANDED HIGH-LEGIBILITY CLINICAL WORKSPACE (Width 1125 px) */}
@@ -693,14 +712,6 @@ export default function PharmapolisLabelSvg({
             const posBoxHeight = (isShort ? 36 : 42) + (posologyLines.length * posLineGap);
             const posBoxY = posBoxBottomY - posBoxHeight;
             const posTextPadTop = isShort ? 38 : 44;
-
-            // Space available for ingredients & base
-            const gapIngToDirections = isShort ? 12 : 16;
-            const availableIngHeight = posBoxY - topIngredientsY - gapIngToDirections;
-
-            // Generous dynamic font size scaling filling the expanded upper canvas
-            let ingFontSize = isShort ? 22 : (ingCount <= 2 ? 30 : ingCount <= 4 ? 27 : ingCount <= 6 ? 24 : 22);
-            let ingLineGap = isShort ? 28 : (ingCount <= 2 ? 42 : ingCount <= 4 ? 36 : ingCount <= 6 ? 32 : 28);
 
             let vehiclePrefix = 'Compounding Vehicle:';
             const vLower = (vehicleName || '').toLowerCase();
@@ -736,10 +747,24 @@ export default function PharmapolisLabelSvg({
                 .replace(/\bnatural\s+lipidic\s+carrier\b/gi, '100% Natural Scalp Compounding Vehicle');
             }
 
-            const baseStartY = (isShort ? 26 : 32) + (ingCount * ingLineGap) + (isShort ? 4 : 8);
             const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, isShort ? 70 : 86);
             const baseFontSize = isShort ? 17 : (cleanVehicleDisplay.length > 55 ? 20 : 22);
             const baseLineGap = isShort ? 23 : 28;
+
+            // Space available for ingredients & base above Posology
+            const gapIngToDirections = isShort ? 12 : 16;
+            const availableUpperH = Math.max(200, posBoxY - topIngredientsY - gapIngToDirections);
+            const estBaseH = (baseLines.length * baseLineGap) + (isShort ? 16 : 22);
+            const spaceForApis = Math.max(80, availableUpperH - estBaseH);
+
+            // Generous dynamic font size and spacing to evenly balance upper canvas with zero dead void
+            const rawIngGap = Math.floor(spaceForApis / Math.max(1, ingCount));
+            const ingLineGap = isShort
+              ? Math.max(26, Math.min(38, rawIngGap))
+              : Math.max(28, Math.min(44, rawIngGap));
+            const ingFontSize = Math.min(isShort ? 24 : 28, Math.max(isShort ? 18 : 21, Math.round(ingLineGap * 0.72)));
+
+            const baseStartY = (isShort ? 26 : 32) + (ingCount * ingLineGap) + (isShort ? 6 : 10);
 
             const rxParts = [];
             if (doctorName) rxParts.push(`Rx: ${doctorName}`);

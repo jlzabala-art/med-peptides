@@ -166,7 +166,7 @@ export default function PublicLabelsAppClient({
   const [currentRx, setCurrentRx] = useState(initialRx);
   const [labels, setLabels] = useState(initialLabels);
   const [activeCode, setActiveCode] = useState(initialCode);
-  const [labelIndex, setLabelIndex] = useState(initialLabelIndex);
+  const [labelIndex, setLabelIndex] = useState(typeof initialLabelIndex === 'number' ? initialLabelIndex : 0);
   const [isEditing, setIsEditing] = useState(initialEditMode);
   const [lang, setLang] = useState(initialLang || 'en');
   const isEs = lang === 'es';
@@ -368,7 +368,8 @@ export default function PublicLabelsAppClient({
     setCurrentRx(item.rx);
     setLabels(item.labels);
     setActiveCode(item.code);
-    setLabelIndex(item.selectedPartIndex || 0);
+    const safeIdx = typeof item.selectedPartIndex === 'number' ? item.selectedPartIndex : 0;
+    setLabelIndex(safeIdx);
     updateUrlWithQueue(patientQueue, idx);
   };
 
@@ -392,7 +393,8 @@ export default function PublicLabelsAppClient({
       setCurrentRx(activeItem.rx);
       setLabels(activeItem.labels);
       setActiveCode(activeItem.code);
-      setLabelIndex(activeItem.selectedPartIndex || 0);
+      const safeActiveIdx = typeof activeItem.selectedPartIndex === 'number' ? activeItem.selectedPartIndex : 0;
+      setLabelIndex(safeActiveIdx);
     }
     updateUrlWithQueue(nextQueue, nextActiveIdx);
   };
@@ -404,7 +406,7 @@ export default function PublicLabelsAppClient({
       next[idx] = { ...next[idx], ...changes };
       return next;
     });
-    if (idx === activeQueueIndex && changes.selectedPartIndex != null) {
+    if (idx === activeQueueIndex && typeof changes.selectedPartIndex === 'number') {
       setLabelIndex(changes.selectedPartIndex);
     }
   };
@@ -1865,6 +1867,7 @@ export default function PublicLabelsAppClient({
             }}
             labels={labels}
             initialLabelIndex={labelIndex}
+            onLabelIndexChange={(idx) => setLabelIndex(idx)}
             initialEditMode={isEditing}
             isStandalone={true}
             isEs={isEs}

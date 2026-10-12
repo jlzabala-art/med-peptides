@@ -14,8 +14,8 @@ import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
  * Optical Print Legibility Pill Badge
  * Alarms with warning red when font size drops below 6.0 pt legal pharmaceutical threshold.
  */
-function FontLegibilityPill({ pt = 0, isEs = false, compact = false }) {
-  const isAlarm = pt < 6.0;
+function FontLegibilityPill({ pt = 0, isEs = false, compact = false, threshold = 4.0 }) {
+  const isAlarm = pt < threshold;
   return (
     <span
       style={{
@@ -36,14 +36,14 @@ function FontLegibilityPill({ pt = 0, isEs = false, compact = false }) {
       }}
       title={
         isAlarm
-          ? (isEs ? `⚠️ Alarma de Legibilidad: ${pt} pt es menor que el mínimo legal recomendado de 6.0 pt. Ilegible sin lupa.` : `⚠️ Legibility Alarm: ${pt} pt is below the 6.0 pt regulatory threshold. Hard to read without magnification.`)
-          : (isEs ? `✓ ${pt} pt cumple el estándar farmacéutico (≥ 6.0 pt legible)` : `✓ ${pt} pt meets pharmaceutical standard (≥ 6.0 pt readable)`)
+          ? (isEs ? `⚠️ Alarma de Legibilidad: ${pt} pt es menor que el mínimo normativo de ${threshold} pt.` : `⚠️ Legibility Alarm: ${pt} pt is below the ${threshold} pt regulatory threshold.`)
+          : (isEs ? `✓ ${pt} pt cumple estándar farmacéutico (≥ ${threshold} pt)` : `✓ ${pt} pt meets pharmaceutical standard (≥ ${threshold} pt)`)
       }
     >
       <span>{isAlarm ? '⚠️' : '✓'}</span>
       <span>{pt} pt</span>
       <span style={{ opacity: 0.85, fontWeight: 600 }}>
-        {isAlarm ? (isEs ? '· ¡Alarma < 6 pt!' : '· Alarm < 6 pt!') : (isEs ? '· Legible' : '· Legible')}
+        {isAlarm ? (isEs ? `· < ${threshold} pt` : `· < ${threshold} pt`) : (isEs ? '· Legible' : '· Legible')}
       </span>
     </span>
   );
@@ -57,9 +57,10 @@ export default function PharmacyLabelsModal({
   isEs = false,
   initialEditMode = false,
   isStandalone = false,
-  onPrescriptionUpdated = null
+  onPrescriptionUpdated = null,
+  onLabelIndexChange = null
 }) {
-  const [selectedProductIdx, setSelectedProductIdx] = useState(initialLabelIndex || 0);
+  const [selectedProductIdx, setSelectedProductIdx] = useState(typeof initialLabelIndex === 'number' ? initialLabelIndex : 0);
   const [activeVariant, setActiveVariantState] = useState(() => {
     const valid = ['front', 'backQr', 'frontWithQr', 'shipping'];
     const saved = labels?.[initialLabelIndex]?.lastVariant || labels?.[0]?.lastVariant;
@@ -401,7 +402,8 @@ export default function PharmacyLabelsModal({
   const patientPt = calculatePhysicalPt(patSvgUnits);
   const titlePt = calculatePhysicalPt(titleSvgUnits);
   const minPatientPt = Math.min(dirPt, ingPt, patientPt);
-  const hasFontAlarm = minPatientPt < 6.0;
+  const legalThreshold = (dimensions.widthMm <= 80) ? 4.0 : 6.0;
+  const hasFontAlarm = minPatientPt < legalThreshold;
 
   const PRESETS = [
     { id: '100x55', label: '100 × 55 mm', sub: isEs ? 'Bote Cilíndrico 100ml' : 'Compounding Bottle 100ml', w: 100, h: 55 },
@@ -2168,14 +2170,32 @@ export default function PharmacyLabelsModal({
                 {hasFontAlarm && (
                   <div style={{ margin: '8px 12px 0', padding: '10px 14px', borderRadius: '8px', background: '#fef2f2', border: '1px solid #f87171', color: '#991b1b', display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.78rem' }}>
                     <AlertTriangle size={18} style={{ color: '#dc2626', flexShrink: 0, marginTop: '1px' }} />
-                    <div>
+                    <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 800 }}>
-                        {isEs ? '⚠️ Alarma de Legibilidad Física (< 6.0 pt)' : '⚠️ Optical Legibility Alarm (< 6.0 pt)'}
+                        {isEs ? `⚠️ Alarma de Legibilidad Física (< ${legalThreshold} pt)` : `⚠️ Optical Legibility Alarm (< ${legalThreshold} pt)`}
                       </div>
                       <div style={{ marginTop: '2px', lineHeight: 1.4, color: '#7f1d1d' }}>
                         {isEs
-                          ? `Al imprimir a ${dimensions.widthMm}×${dimensions.heightMm} mm, algunos textos clínicos quedan en ${minPatientPt} pt (< 6.0 pt recomendado por normativas farmacéuticas). Te recomendamos usar un formato más grande (ej. 100×55 mm) o acortar el texto para asegurar una lectura perfecta sin lupa.`
-                          : `When printed at ${dimensions.widthMm}×${dimensions.heightMm} mm, clinical typography drops to ${minPatientPt} pt (< 6.0 pt regulatory threshold). Consider selecting a wider label (e.g. 100×55 mm) or condensing text for clear readability.`}
+                          ? `Al imprimir a ${dimensions.widthMm}×${dimensions.heightMm} mm, algunos textos clínicos quedan en ${minPatientPt} pt (< ${legalThreshold} pt normativo). Te recomendamos usar un formato más grande (ej. 100×55 mm) o acortar el texto para asegurar una lectura perfecta.`
+                          : `When printed at ${dimensions.widthMm}×${dimensions.heightMm} mm, clinical typography drops to ${minPatientPt} pt (< ${legalThreshold} pt regulatory threshold). Consider selecting a wider label (e.g. 100×55 mm) or condensing text for clear readability.`}
+                      </div>
+                      <div style={{ marginTop: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleSelectPreset({ id: '100x55', w: 100, h: 55 })}
+                          style={{
+                            padding: '4px 10px',
+                            background: '#dc2626',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontWeight: 700,
+                            fontSize: '0.74rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {isEs ? 'Cambiar a 100 × 55 mm (≥ 6.0 pt)' : 'Switch to 100 × 55 mm (≥ 6.0 pt)'}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -2190,7 +2210,7 @@ export default function PharmacyLabelsModal({
                           <span>{isEs ? 'Nombre Paciente' : 'Patient Name'}</span>
                           <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                         </div>
-                        <FontLegibilityPill pt={patientPt} isEs={isEs} compact={true} />
+                        <FontLegibilityPill pt={patientPt} isEs={isEs} compact={true} threshold={legalThreshold} />
                       </label>
                       <input
                         type="text"
@@ -2236,7 +2256,7 @@ export default function PharmacyLabelsModal({
                           <span>{isEs ? 'Título Producto / Fórmula' : 'Product Title / Formula'}</span>
                           <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                         </div>
-                        <FontLegibilityPill pt={titlePt} isEs={isEs} compact={true} />
+                        <FontLegibilityPill pt={titlePt} isEs={isEs} compact={true} threshold={legalThreshold} />
                       </label>
                       <input
                         type="text"
@@ -2395,7 +2415,7 @@ export default function PharmacyLabelsModal({
                             {isEs ? '(un ingrediente por línea · formato: Fármaco: Dosis)' : '(one per line · Drug: Dose)'}
                           </span>
                         </div>
-                        <FontLegibilityPill pt={ingPt} isEs={isEs} compact={true} />
+                        <FontLegibilityPill pt={ingPt} isEs={isEs} compact={true} threshold={legalThreshold} />
                       </label>
                       <textarea
                         rows={4}
@@ -2429,7 +2449,7 @@ export default function PharmacyLabelsModal({
                           <span>{isEs ? 'Posología / Modo de Empleo (Directions for Use)' : 'Directions for Use'}</span>
                           <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                         </div>
-                        <FontLegibilityPill pt={dirPt} isEs={isEs} compact={true} />
+                        <FontLegibilityPill pt={dirPt} isEs={isEs} compact={true} threshold={legalThreshold} />
                       </label>
                       <input
                         type="text"
@@ -2538,7 +2558,7 @@ export default function PharmacyLabelsModal({
                 <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   {isEs ? 'Vista Previa en Vivo' : 'Live Preview'}
                 </span>
-                <FontLegibilityPill pt={minPatientPt} isEs={isEs} compact={false} />
+                <FontLegibilityPill pt={minPatientPt} isEs={isEs} compact={false} threshold={legalThreshold} />
               </div>
 
               <button
