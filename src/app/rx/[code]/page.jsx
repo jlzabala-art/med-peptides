@@ -9,6 +9,7 @@ export const dynamicParams = true;
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 
 import { getPrescriptionData, invalidateRxCache } from '@/lib/prescriptionFetcher';
+import { getAuthoritativeClinicalData } from '@/data/pharmapolisLabelsMap';
 export { invalidateRxCache };
 
 
@@ -17,11 +18,12 @@ export async function generateMetadata({ params }) {
   const code = resolvedParams?.code || '';
   const rx = await getPrescriptionData(code);
 
-  const patientName = rx?.patient?.name || rx?.patientName || 'Patient';
+  const auth = rx ? getAuthoritativeClinicalData(rx) : {};
+  const patientName = auth.patientName || rx?.patient?.name || rx?.patientName || 'Patient';
   const treatingDocName = typeof rx?.treatingDoctor === 'string' ? rx.treatingDoctor : rx?.treatingDoctor?.name;
-  const doctor = treatingDocName || rx?.doctor?.name || rx?.doctorName || rx?.prescribingDoctor || null;
+  const doctor = auth.doctorName || treatingDocName || rx?.doctor?.name || rx?.doctorName || rx?.prescribingDoctor || null;
   const treatingDocClinic = typeof rx?.treatingDoctor === 'object' ? rx?.treatingDoctor?.clinic : null;
-  let clinic = treatingDocClinic || rx?.doctor?.clinic || rx?.clinic || 'Atlas Health Services';
+  let clinic = auth.clinicName || treatingDocClinic || rx?.doctor?.clinic || rx?.clinic || 'Atlas Health Services';
   if (clinic.toLowerCase().includes('mediluxe') || clinic.toLowerCase().includes('bedaya')) {
     clinic = 'Atlas Health Services';
   }

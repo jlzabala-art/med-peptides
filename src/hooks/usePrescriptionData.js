@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { resolveDoctorProfile, formatMedicalLicense } from '@/services/doctorDirectoryService';
 import { classifyPrescription } from '@/data/prescriptionTypeClassifier';
 import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
-import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
+import { getPharmapolisLabelsForPrescription, getAuthoritativeClinicalData } from '@/data/pharmapolisLabelsMap';
 import { resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
 
 export function slugify(text) {
@@ -55,12 +55,22 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
   const is50957Rutledge = String(rx.code || rx.id || rx.fileNumber || '').includes('50957') ||
     String(rx.patient || rx.patientName || '').toLowerCase().includes('rutledge');
 
+  const authClinical = useMemo(() => {
+    try {
+      return getAuthoritativeClinicalData(rx);
+    } catch {
+      return {};
+    }
+  }, [rx]);
+
   const docObj = (rx.doctor && typeof rx.doctor === 'object' && rx.doctor.name && !isInternalProdDoc(rx.doctor.name)) ? rx.doctor : {};
   const treatingDocObj = (rx.treatingDoctor && typeof rx.treatingDoctor === 'object' && !isInternalProdDoc(rx.treatingDoctor.name)) ? rx.treatingDoctor : {};
   const rawCandidateName = is50957Rutledge
     ? 'Dr. Marina Cordeiro Fernandes'
-    : (rx.pharmacyLabels?.[0]?.doctorName ||
+    : (authClinical.doctorName ||
+      rx.pharmacyLabels?.[0]?.doctorName ||
       (typeof rx.treatingDoctor === 'string' && !isInternalProdDoc(rx.treatingDoctor) ? rx.treatingDoctor : treatingDocObj.name) ||
+      docObj.displayName ||
       docObj.name ||
       (rx.doctorName && !isInternalProdDoc(rx.doctorName) ? rx.doctorName : null) ||
       (rx.prescribingDoctor && !isInternalProdDoc(rx.prescribingDoctor) ? rx.prescribingDoctor : null) ||
@@ -71,8 +81,8 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     ...docObj,
     ...treatingDocObj,
     name: rawCandidateName,
-    license: treatingDocObj.license || docObj.license || rx.doctorLicense || rx.doctorLicenseNumber || '',
-    clinic: treatingDocObj.clinic || docObj.clinic || rx.clinic || rx.clinicName || '',
+    license: authClinical.doctorLicense || treatingDocObj.license || docObj.license || rx.doctorLicense || rx.doctorLicenseNumber || '',
+    clinic: authClinical.clinicName || treatingDocObj.clinic || docObj.clinic || rx.clinic || rx.clinicName || '',
     specialty: treatingDocObj.specialty || docObj.specialty || docObj.title || rx.doctorSpecialty || '',
     phone: treatingDocObj.phone || docObj.phone || rx.doctorPhone || '',
     email: treatingDocObj.email || docObj.email || rx.doctorEmail || '',
@@ -85,14 +95,15 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
   const resolvedProfile = hasTreatingDoctor ? resolveDoctorProfile(rawCandidate) : null;
   const treatingDoc = resolvedProfile || (hasTreatingDoctor ? rawCandidate : {});
   const rawDoctorName = treatingDoc.name || '';
-  const isHaytham = String(rawDoctorName).toLowerCase().includes('haytham') || String(rawDoctorName).toLowerCase().includes('heytham');
+  const isSezgin = String(rawDoctorName).toLowerCase().includes('sezgin') || String(rawDoctorName).toLowerCase().includes('cagatay');
+  const isHaytham = !isSezgin && (String(rawDoctorName).toLowerCase().includes('haytham') || String(rawDoctorName).toLowerCase().includes('heytham'));
 
-  const doctorName = isHaytham ? 'Dr. Haytham Salem' : rawDoctorName;
-  const clinic = isHaytham ? 'Arthregen Clinic' : (treatingDoc.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : (isEs ? 'Centro Médico Prescriptor' : 'Licensed Clinical Practice')));
+  const doctorName = isHaytham ? 'Dr. Haytham Salem' : (isSezgin ? (authClinical.doctorName || rawDoctorName) : rawDoctorName);
+  const clinic = isHaytham ? 'Arthregen Clinic' : (authClinical.clinicName || treatingDoc.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : (isEs ? 'Centro Médico Prescriptor' : 'Licensed Clinical Practice')));
   const doctorClinic = clinic;
   const doctorSpecialty = isHaytham 
     ? 'Consultant Orthopedic Surgeon & Regenerative Medicine Specialist' 
-    : (treatingDoc.specialty || (hasTreatingDoctor ? (isEs ? 'Médico Especialista' : 'Physician Consultant') : (isEs ? 'Práctica Médica Colaboradora' : 'Collaborating Medical Practice')));
+    : (isSezgin ? 'Hair Restoration Surgeon & Specialist Trichologist' : (treatingDoc.specialty || (hasTreatingDoctor ? (isEs ? 'Médico Especialista' : 'Physician Consultant') : (isEs ? 'Práctica Médica Colaboradora' : 'Collaborating Medical Practice'))));
   const doctorAddress = isHaytham 
     ? 'Med Art Clinic Day Surgery Center, Villa 823, Jumeirah St., Dubai, UAE' 
     : (treatingDoc.address || '');
@@ -101,7 +112,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     : (treatingDoc.phone || treatingDoc.mobile || '');
   const doctorLicense = isHaytham 
     ? 'DHA-P-0319842' 
-    : (treatingDoc.license || treatingDoc.licenseNumber || '');
+    : (authClinical.doctorLicense || treatingDoc.license || treatingDoc.licenseNumber || '');
   const formattedDoctorLicense = useMemo(() => {
     return formatMedicalLicense(doctorLicense, treatingDoc);
   }, [doctorLicense, treatingDoc]);
@@ -111,8 +122,8 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     if (rx.doctorSlug) return rx.doctorSlug;
     if (rx.doctor?.slug) return rx.doctor.slug;
     if (treatingDoc?.slug) return treatingDoc.slug;
-    return slugify(doctorName || 'haytham-salem');
-  }, [rx.doctorSlug, rx.doctor, treatingDoc, doctorName]);
+    return slugify(doctorName || (isSezgin ? 'cagatay-sezgin' : 'haytham-salem'));
+  }, [rx.doctorSlug, rx.doctor, treatingDoc, doctorName, isSezgin]);
 
   const doctorPublicUrl = `/dr/${doctorSlug}`;
 
