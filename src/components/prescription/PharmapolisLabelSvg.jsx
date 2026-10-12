@@ -572,10 +572,10 @@ export default function PharmapolisLabelSvg({
           {/* Under QR Refill Callout */}
           <text
             x={Math.round(leftColWidth / 2)}
-            y={qrY + backQrSize + (isShort ? 18 : 22)}
+            y={qrY + backQrSize + (isShort ? 16 : 20)}
             textAnchor="middle"
             fontFamily="Arial, Helvetica, sans-serif"
-            fontSize={isShort ? 13 : 15}
+            fontSize={isShort ? 12 : 14}
             fontWeight="900"
             fill="#003666"
             letterSpacing="0.4"
@@ -586,9 +586,9 @@ export default function PharmapolisLabelSvg({
           {/* Hairline Divider */}
           <line
             x1="14"
-            y1={qrY + backQrSize + (isShort ? 26 : 32)}
+            y1={qrY + backQrSize + (isShort ? 24 : 28)}
             x2={leftColWidth - 14}
-            y2={qrY + backQrSize + (isShort ? 26 : 32)}
+            y2={qrY + backQrSize + (isShort ? 24 : 28)}
             stroke="#e2e8f0"
             strokeWidth="1.5"
           />
@@ -598,28 +598,28 @@ export default function PharmapolisLabelSvg({
             <rect x="0" y="0" width={leftColWidth} height={colHeight} rx="8" />
           </clipPath>
 
-          {/* Dispensing & Technical Packaging Specs (fully legible, dynamic vertical flow, zero cut-off or collision) */}
+          {/* Dispensing & Technical Packaging Specs */}
           {(() => {
             const volLines = wrapLines(volume, 16);
             const batchLines = wrapLines(batchCode, 15);
             const storageLines = wrapLines(storage, 17);
 
-            const volY = isShort ? 16 : 22;
-            const volLineGap = isShort ? 15 : 18;
+            const volY = isShort ? 14 : 18;
+            const volLineGap = isShort ? 14 : 17;
             const volTotalH = volY + (volLines.length * volLineGap);
 
-            const batchY = volTotalH + (isShort ? 10 : 14);
-            const batchLineGap = isShort ? 14 : 16;
+            const batchY = volTotalH + (isShort ? 8 : 12);
+            const batchLineGap = isShort ? 13 : 15;
             const batchTotalH = batchY + (batchLines.length * batchLineGap);
 
-            const storageY = batchTotalH + (isShort ? 10 : 14);
-            const storageLineGap = isShort ? 13 : 16;
+            const storageY = batchTotalH + (isShort ? 8 : 12);
+            const storageLineGap = isShort ? 12 : 15;
 
             return (
-              <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${qrY + backQrSize + (isShort ? 40 : 48)})`}>
+              <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${qrY + backQrSize + (isShort ? 46 : 54)})`}>
                 {/* Header badge */}
-                <rect x="-4" y="-14" width={leftColWidth - 20} height={isShort ? 20 : 22} fill="#f0f9ff" rx="4" />
-                <text x="2" y={isShort ? 0 : 2} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                <rect x="-4" y="-12" width={leftColWidth - 20} height={isShort ? 18 : 20} fill="#f0f9ff" rx="4" />
+                <text x="2" y={isShort ? 1 : 2} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 9.5 : 10.5} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
                   DISPENSING SPECS
                 </text>
 
@@ -771,22 +771,22 @@ export default function PharmapolisLabelSvg({
             const bCautionDividerY = bCautionY - (isShort ? 12 : 14);
 
             const availableWorkHeight = bCautionDividerY - (isShort ? 12 : 18);
-            const ingHeaderH = isShort ? 22 : 28;
-            const ingTextH = ingLineCount * ingLineGap;
-            const baseGap = isUltraSparse ? 18 : isSparse ? 14 : 10;
-            const baseTextH = baseLines.length * baseLineGap;
-            const ingBlockH = ingHeaderH + ingTextH + baseGap + baseTextH;
+
+            // Typographical baseline offsets with safe font cap-height clearance (Zero overlap)
+            const ingHeaderTitleY = isShort ? 14 : 16;
+            const firstIngLineY = ingHeaderTitleY + (isShort ? 12 : 16) + Math.round(ingFontSize * 0.82);
+            const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * ingLineGap) + (isUltraSparse ? 24 : isSparse ? 18 : 14) + Math.round(baseFontSize * 0.82);
+            const ingBlockH = firstBaseLineY + ((baseLines.length - 1) * baseLineGap) + 10;
+
+            const posHeaderTitleY = isShort ? 20 : 24;
+            const firstPosLineY = posHeaderTitleY + (isShort ? 12 : 16) + Math.round(posFontSize * 0.82);
+            const posBoxHeight = firstPosLineY + ((posologyLines.length - 1) * posLineGap) + (isShort ? 18 : 24);
 
             // Harmonious vertical surplus distribution (eliminates desert-like empty white gaps)
-            const surplus = Math.max(0, availableWorkHeight - (ingBlockH + basePosBoxHeight));
-            const topIngredientsY = Math.max(isShort ? 14 : 18, Math.min(32, Math.round(surplus * 0.18)));
-            const midPad = Math.max(isShort ? 16 : 22, Math.min(75, Math.round(surplus * 0.38)));
-            const extraBoxH = Math.min(60, Math.max(0, Math.round(surplus * 0.25)));
-            const posBoxHeight = basePosBoxHeight + extraBoxH;
+            const surplus = Math.max(0, availableWorkHeight - (ingBlockH + posBoxHeight));
+            const topIngredientsY = Math.max(isShort ? 14 : 18, Math.min(32, Math.round(surplus * 0.20)));
+            const midPad = Math.max(isShort ? 16 : 22, Math.min(70, Math.round(surplus * 0.45)));
             const posBoxY = topIngredientsY + ingBlockH + midPad;
-
-            const baseStartY = ingHeaderH + (ingLineCount * ingLineGap) + baseGap;
-            const posTextPadTop = isShort ? 38 : (isUltraSparse ? 50 : 44);
 
             const rxParts = [];
             if (doctorName) rxParts.push(`Rx: ${doctorName}`);
@@ -799,7 +799,7 @@ export default function PharmapolisLabelSvg({
               <>
                 {/* Block 2: ACTIVE COMPOUNDED INGREDIENTS & BASE (Dynamic Auto-Fill Layout) */}
                 <g transform={`translate(24, ${topIngredientsY})`}>
-                  <text x="0" y={isShort ? 14 : 18} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                  <text x="0" y={ingHeaderTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
                     ACTIVE COMPOUNDED INGREDIENTS
                   </text>
                   
@@ -807,7 +807,7 @@ export default function PharmapolisLabelSvg({
                     <text
                       key={`ing-${lIdx}`}
                       x="0"
-                      y={ingHeaderH + (lIdx * ingLineGap)}
+                      y={firstIngLineY + (lIdx * ingLineGap)}
                       fontFamily="Arial, Helvetica, sans-serif"
                       fontSize={ingFontSize}
                       fontWeight="800"
@@ -821,7 +821,7 @@ export default function PharmapolisLabelSvg({
                     <text
                       key={`base-${bIdx}`}
                       x="0"
-                      y={baseStartY + (bIdx * baseLineGap)}
+                      y={firstBaseLineY + (bIdx * baseLineGap)}
                       fontFamily="Arial, Helvetica, sans-serif"
                       fontSize={baseFontSize}
                       fontWeight="700"
@@ -837,7 +837,7 @@ export default function PharmapolisLabelSvg({
                   <rect x="0" y="0" width={innerUsableWidth} height={posBoxHeight} fill="#f8fafc" stroke="#bae6fd" strokeWidth="1.8" rx="6" />
                   <rect x="0" y="0" width="6" height={posBoxHeight} fill="#0284c7" rx="3" />
                   
-                  <text x="18" y={isShort ? 20 : 25} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                  <text x="18" y={posHeaderTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
                     DIRECTIONS FOR USE / PRESCRIBED POSOLOGY
                   </text>
 
@@ -845,7 +845,7 @@ export default function PharmapolisLabelSvg({
                     <text
                       key={`pos-${pIdx}`}
                       x="18"
-                      y={posTextPadTop + (pIdx * posLineGap)}
+                      y={firstPosLineY + (pIdx * posLineGap)}
                       fontFamily="Arial, Helvetica, sans-serif"
                       fontSize={posFontSize}
                       fontWeight="700"
