@@ -60,6 +60,7 @@ export default function PharmacyLabelsModal({
   isEs = false,
   initialEditMode = false,
   isStandalone = false,
+  hideInternalPartsSwitcher = false,
   onPrescriptionUpdated = null,
   onLabelIndexChange = null,
   onConfigChange = null
@@ -412,10 +413,15 @@ export default function PharmacyLabelsModal({
     return Number(((svgUnits * (dimensions.widthMm || 75)) / 529.17).toFixed(1));
   };
 
-  const parsedApisCount = (apisEditorText || '').split('\n').filter(l => l.trim()).length || 1;
+  const parsedApis = (apisEditorText || '').split('\n').filter(l => l.trim());
+  const parsedApisCount = parsedApis.length || 1;
+  const rawIngText = parsedApis.join(' — ');
   const rawDirText = currentItem.directions || currentItem.instructions || '';
-  const dirLinesCount = Math.max(1, Math.ceil(rawDirText.length / 54));
   const patNameLength = (currentItem.patientName || '').length;
+
+  const isShort = (dimensions.heightMm || 45) < 40;
+  const isUltraSparse = parsedApisCount <= 3 && rawIngText.length < 130 && rawDirText.length < 110;
+  const isSparse = parsedApisCount <= 4 && rawIngText.length < 185 && rawDirText.length < 165;
 
   let dirSvgUnits = 26;
   let ingSvgUnits = 26;
@@ -423,9 +429,13 @@ export default function PharmacyLabelsModal({
   let titleSvgUnits = 38;
 
   if (activeVariant === 'backQr') {
-    // With continuous inline layout with em-dash (—), ingredients take only 2-3 lines, keeping typography large, bold and crisp
-    ingSvgUnits = dimensions.heightMm < 40 ? 25 : 28;
-    dirSvgUnits = dirLinesCount <= 2 ? 26 : 24;
+    // Dynamic Auto-Fill Font Sizing matching PharmapolisLabelSvg.jsx
+    ingSvgUnits = isShort
+      ? (isUltraSparse ? 29 : isSparse ? 25 : 22)
+      : (isUltraSparse ? 38 : isSparse ? 34 : 27);
+    dirSvgUnits = isShort
+      ? (isUltraSparse ? 24 : isSparse ? 21 : 19)
+      : (isUltraSparse ? 32 : isSparse ? 28 : 23);
     patSvgUnits = patNameLength > 36 ? 30 : (patNameLength > 28 ? 34 : 38);
     titleSvgUnits = 32;
   } else if (activeVariant === 'front' || activeVariant === 'frontWithQr') {
@@ -447,7 +457,7 @@ export default function PharmacyLabelsModal({
   const patientPt = calculatePhysicalPt(patSvgUnits);
   const titlePt = calculatePhysicalPt(titleSvgUnits);
   const minPatientPt = Math.min(dirPt, ingPt, patientPt);
-  const legalThreshold = (dimensions.widthMm <= 80) ? 4.0 : 6.0;
+  const legalThreshold = (dimensions.widthMm <= 80) ? 4.0 : 5.8;
   const hasFontAlarm = minPatientPt < legalThreshold;
 
   const PRESETS = [
@@ -2227,27 +2237,33 @@ export default function PharmacyLabelsModal({
                       </div>
                       <div style={{ marginTop: '2px', lineHeight: 1.4, color: '#7f1d1d' }}>
                         {isEs
-                          ? `Al imprimir a ${dimensions.widthMm}×${dimensions.heightMm} mm, algunos textos clínicos quedan en ${minPatientPt} pt (< ${legalThreshold} pt normativo). Te recomendamos usar un formato más grande (ej. 100×55 mm) o acortar el texto para asegurar una lectura perfecta.`
-                          : `When printed at ${dimensions.widthMm}×${dimensions.heightMm} mm, clinical typography drops to ${minPatientPt} pt (< ${legalThreshold} pt regulatory threshold). Consider selecting a wider label (e.g. 100×55 mm) or condensing text for clear readability.`}
+                          ? (dimensions.widthMm < 100
+                              ? `Al imprimir a ${dimensions.widthMm}×${dimensions.heightMm} mm, algunos textos clínicos quedan en ${minPatientPt} pt (< ${legalThreshold} pt normativo). Te recomendamos usar un formato más ancho (100×50 mm) o acortar el texto para asegurar una lectura perfecta.`
+                              : `El texto clínico es especialmente extenso para esta etiqueta (${minPatientPt} pt). Te recomendamos resumir las instrucciones o ingredientes para mantener una lectura óptima.`)
+                          : (dimensions.widthMm < 100
+                              ? `When printed at ${dimensions.widthMm}×${dimensions.heightMm} mm, clinical typography drops to ${minPatientPt} pt (< ${legalThreshold} pt regulatory threshold). Consider selecting a wider label (100×50 mm) or condensing text for clear readability.`
+                              : `The clinical text is unusually dense for this label (${minPatientPt} pt). Consider condensing the directions or ingredients text for optimal readability.`)}
                       </div>
-                      <div style={{ marginTop: '8px' }}>
-                        <button
-                          type="button"
-                          onClick={() => handleSelectPreset({ id: '100x55', w: 100, h: 55 })}
-                          style={{
-                            padding: '4px 10px',
-                            background: '#dc2626',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '4px',
-                            fontWeight: 700,
-                            fontSize: '0.74rem',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {isEs ? 'Cambiar a 100 × 55 mm (≥ 6.0 pt)' : 'Switch to 100 × 55 mm (≥ 6.0 pt)'}
-                        </button>
-                      </div>
+                      {dimensions.widthMm < 100 && (
+                        <div style={{ marginTop: '8px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectPreset({ id: '100x50', w: 100, h: 50 })}
+                            style={{
+                              padding: '4px 10px',
+                              background: '#dc2626',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              fontWeight: 700,
+                              fontSize: '0.74rem',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {isEs ? 'Cambiar a 100 × 50 mm (≥ 6.0 pt)' : 'Switch to 100 × 50 mm (≥ 6.0 pt)'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -2255,7 +2271,7 @@ export default function PharmacyLabelsModal({
                 {editorTab === 'fields' ? (
                   <div className="gcp-editor-fields-grid">
                     {/* Multi-Part Formulation Switcher Bar (Explicit & High Visibility) */}
-                    {labels.length > 1 && (
+                    {labels.length > 1 && !hideInternalPartsSwitcher && (
                       <div style={{
                         gridColumn: 'span 12',
                         background: '#f8fafc',
