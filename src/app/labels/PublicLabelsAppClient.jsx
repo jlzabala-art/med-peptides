@@ -1884,28 +1884,40 @@ export default function PublicLabelsAppClient({
             </div>
           </div>
 
-          {/* Formula Parts Switcher (Part 1 / Part 2) */}
+          {/* Formula Parts Switcher (Part 1 / Part 2) with Full Explicit Titles */}
           {labels.length > 1 && (
             <>
               <span className="pls-meta-divider" aria-hidden="true" />
               <div className="pls-meta-item pls-meta-parts">
                 <span className="pls-meta-k">{isEs ? 'Fórmula' : 'Formula'}:</span>
-                <div className="pls-parts-tabs">
+                <div className="pls-parts-tabs" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {labels.map((lbl, idx) => {
                     const isActive = labelIndex === idx;
-                    const labelText = lbl.partLabel || `Part ${idx + 1}`;
+                    const rawTitle = lbl.productTitle || lbl.productName || (lbl.formula ? lbl.formula.slice(0, 24) : `Part ${idx + 1}`);
+                    const cleanTitle = rawTitle.replace(/^Part\s*\d+\s*:\s*/i, '').trim();
+                    const volTag = lbl.volume ? ` (${lbl.volume})` : '';
+                    const labelText = `Parte ${idx + 1}: ${cleanTitle}${volTag}`;
                     return (
                       <button
                         key={idx}
                         type="button"
                         className={`pls-part-btn ${isActive ? 'active' : ''}`}
+                        style={{
+                          fontWeight: isActive ? 800 : 600,
+                          fontSize: '0.78rem',
+                          padding: '4px 10px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}
                         onClick={() => {
                           setLabelIndex(idx);
                           const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${idx + 1}&edit=true&lang=${lang}`;
                           window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
                         }}
                       >
-                        {labelText}
+                        {isActive && <span style={{ color: '#16a34a', fontWeight: 900 }}>✔</span>}
+                        <span>{labelText}</span>
                       </button>
                     );
                   })}
@@ -1931,6 +1943,11 @@ export default function PublicLabelsAppClient({
             }}
             labels={labels}
             initialLabelIndex={labelIndex}
+            onLabelIndexChange={(newIdx) => {
+              setLabelIndex(newIdx);
+              const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${newIdx + 1}&edit=true&lang=${lang}`;
+              window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+            }}
             initialWidthMm={patientQueue[activeQueueIndex]?.widthMm || 75}
             initialHeightMm={patientQueue[activeQueueIndex]?.heightMm || 45}
             initialVariant={patientQueue[activeQueueIndex]?.variant || 'backQr'}

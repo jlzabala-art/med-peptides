@@ -112,6 +112,11 @@ export default function PharmacyLabelsModal({
     }
   }, [initialLabelIndex, labels]);
 
+  const handleSelectProduct = (idx) => {
+    setSelectedProductIdx(idx);
+    onLabelIndexChange?.(idx);
+  };
+
   // Sizing Presets & Custom Dimensions
   const [selectedPreset, setSelectedPreset] = useState(() => {
     const match = [
@@ -1782,7 +1787,7 @@ export default function PharmacyLabelsModal({
                       type="button"
                       className="gcp-resource-nav-btn"
                       disabled={selectedProductIdx === 0}
-                      onClick={() => setSelectedProductIdx(prev => Math.max(0, prev - 1))}
+                      onClick={() => handleSelectProduct(Math.max(0, selectedProductIdx - 1))}
                       title={isEs ? 'Fórmula Anterior' : 'Previous Formula'}
                       aria-label="Previous Formula"
                     >
@@ -1792,7 +1797,7 @@ export default function PharmacyLabelsModal({
                       type="button"
                       className="gcp-resource-nav-btn"
                       disabled={selectedProductIdx >= labels.length - 1}
-                      onClick={() => setSelectedProductIdx(prev => Math.min(labels.length - 1, prev + 1))}
+                      onClick={() => handleSelectProduct(Math.min(labels.length - 1, selectedProductIdx + 1))}
                       title={isEs ? 'Siguiente Fórmula' : 'Next Formula'}
                       aria-label="Next Formula"
                     >
@@ -1811,7 +1816,7 @@ export default function PharmacyLabelsModal({
                   <select
                     id="gcp-label-phase-primary"
                     value={selectedProductIdx}
-                    onChange={(e) => setSelectedProductIdx(Number(e.target.value))}
+                    onChange={(e) => handleSelectProduct(Number(e.target.value))}
                     className="gcp-resource-select"
                   >
                     {labels.map((lbl, idx) => {
@@ -2249,6 +2254,66 @@ export default function PharmacyLabelsModal({
 
                 {editorTab === 'fields' ? (
                   <div className="gcp-editor-fields-grid">
+                    {/* Multi-Part Formulation Switcher Bar (Explicit & High Visibility) */}
+                    {labels.length > 1 && (
+                      <div style={{
+                        gridColumn: 'span 12',
+                        background: '#f8fafc',
+                        border: '1.5px solid #cbd5e1',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        marginBottom: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '12px',
+                        flexWrap: 'wrap'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Pill size={16} color="#003666" />
+                          <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+                            {isEs ? `Tratamiento Compuesto (${labels.length} Partes):` : `Compounded Protocol (${labels.length} Parts):`}
+                          </span>
+                          <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
+                            {isEs ? `Editando Fórmula ${selectedProductIdx + 1} de ${labels.length}` : `Editing Formula ${selectedProductIdx + 1} of ${labels.length}`}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          {labels.map((lbl, idx) => {
+                            const isActive = selectedProductIdx === idx;
+                            const rawPartTitle = lbl.productTitle || lbl.productName || (lbl.formula ? lbl.formula.slice(0, 24) : `Part ${idx + 1}`);
+                            const cleanPartTitle = rawPartTitle.replace(/^Part\s*\d+\s*:\s*/i, '').trim();
+                            const vol = lbl.volume ? ` (${lbl.volume})` : '';
+                            return (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => handleSelectProduct(idx)}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  border: isActive ? '2px solid #003666' : '1px solid #cbd5e1',
+                                  background: isActive ? '#003666' : '#ffffff',
+                                  color: isActive ? '#ffffff' : '#334155',
+                                  fontSize: '0.78rem',
+                                  fontWeight: isActive ? 800 : 600,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  boxShadow: isActive ? '0 1px 3px rgba(0,54,102,0.25)' : 'none',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                {isActive ? <Check size={13} color="#ffffff" /> : <span style={{ opacity: 0.6 }}>•</span>}
+                                <span>Parte {idx + 1}: {cleanPartTitle}{vol}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Row 1: Patient Name (6 cols) | Dispensing Batch (3 cols) | Net Quantity (3 cols) */}
                     <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
@@ -2661,6 +2726,49 @@ export default function PharmacyLabelsModal({
                 </div>
               </div>
             </div>
+
+            {/* Quick Multi-Part Label Preview Header */}
+            {labels.length > 1 && (
+              <div style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '5px 8px',
+                marginBottom: '4px',
+                background: '#f1f5f9',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                boxSizing: 'border-box'
+              }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Pill size={13} color="#003666" />
+                  <span>{isEs ? `Etiqueta Parte ${selectedProductIdx + 1} de ${labels.length}:` : `Label Part ${selectedProductIdx + 1} of ${labels.length}:`}</span>
+                  <span style={{ fontWeight: 600, color: '#334155' }}>{currentItem.productTitle || currentItem.productName}</span>
+                </span>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {labels.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleSelectProduct(idx)}
+                      style={{
+                        padding: '2px 8px',
+                        fontSize: '0.70rem',
+                        fontWeight: selectedProductIdx === idx ? 800 : 600,
+                        borderRadius: '4px',
+                        border: selectedProductIdx === idx ? '1.5px solid #003666' : '1px solid #cbd5e1',
+                        background: selectedProductIdx === idx ? '#003666' : '#ffffff',
+                        color: selectedProductIdx === idx ? '#ffffff' : '#475569',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Parte {idx + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div
               ref={svgContainerRef}
