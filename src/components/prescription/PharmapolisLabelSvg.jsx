@@ -751,6 +751,16 @@ export default function PharmapolisLabelSvg({
             const baseFontSize = isShort ? 17 : (cleanVehicleDisplay.length > 55 ? 20 : 22);
             const baseLineGap = isShort ? 23 : 28;
 
+            // ── COMPACT INLINE INGREDIENTS WITH EM-DASH (Flowing layout) ──
+            // Stacking every ingredient vertically wastes massive vertical space and forces tiny fonts.
+            // Joining them with ' — ' flows them continuously into 2-3 lines, saving ~140px of vertical space
+            // and allowing a much larger, high-contrast typography (USP / EU GMP compliant).
+            const rawIngText = activeIngredientsList.length === 1
+              ? `• ${activeIngredientsList[0]}`
+              : `• ${activeIngredientsList.join('  —  ')}`;
+            const ingLines = wrapLines(rawIngText, isShort ? 66 : 78);
+            const ingLineCount = ingLines.length;
+
             // Space available for ingredients & base above Posology
             const gapIngToDirections = isShort ? 12 : 16;
             const availableUpperH = Math.max(200, posBoxY - topIngredientsY - gapIngToDirections);
@@ -758,13 +768,13 @@ export default function PharmapolisLabelSvg({
             const spaceForApis = Math.max(80, availableUpperH - estBaseH);
 
             // Generous dynamic font size and spacing to evenly balance upper canvas with zero dead void
-            const rawIngGap = Math.floor(spaceForApis / Math.max(1, ingCount));
+            const rawIngGap = Math.floor(spaceForApis / Math.max(1, ingLineCount));
             const ingLineGap = isShort
-              ? Math.max(26, Math.min(38, rawIngGap))
-              : Math.max(28, Math.min(44, rawIngGap));
-            const ingFontSize = Math.min(isShort ? 24 : 28, Math.max(isShort ? 18 : 21, Math.round(ingLineGap * 0.72)));
+              ? Math.max(28, Math.min(42, rawIngGap))
+              : Math.max(30, Math.min(46, rawIngGap));
+            const ingFontSize = Math.min(isShort ? 25 : 29, Math.max(isShort ? 19 : 22, Math.round(ingLineGap * 0.72)));
 
-            const baseStartY = (isShort ? 26 : 32) + (ingCount * ingLineGap) + (isShort ? 6 : 10);
+            const baseStartY = (isShort ? 26 : 32) + (ingLineCount * ingLineGap) + (isShort ? 8 : 12);
 
             const rxParts = [];
             if (doctorName) rxParts.push(`Rx: ${doctorName}`);
@@ -775,23 +785,23 @@ export default function PharmapolisLabelSvg({
 
             return (
               <>
-                {/* Block 2: ACTIVE COMPOUNDED INGREDIENTS & BASE (Starts at top) */}
+                {/* Block 2: ACTIVE COMPOUNDED INGREDIENTS & BASE (Continuous Flowing Layout) */}
                 <g transform={`translate(24, ${topIngredientsY})`}>
                   <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
                     ACTIVE COMPOUNDED INGREDIENTS
                   </text>
                   
-                  {activeIngredientsList.map((ing, iIdx) => (
+                  {ingLines.map((line, lIdx) => (
                     <text
-                      key={iIdx}
+                      key={`ing-${lIdx}`}
                       x="0"
-                      y={(isShort ? 26 : 32) + (iIdx * ingLineGap)}
+                      y={(isShort ? 26 : 32) + (lIdx * ingLineGap)}
                       fontFamily="Arial, Helvetica, sans-serif"
                       fontSize={ingFontSize}
                       fontWeight="800"
                       fill="#0f172a"
                     >
-                      • {ing}
+                      {line}
                     </text>
                   ))}
 

@@ -418,11 +418,11 @@ async function run() {
     prescriptionLines: [
       { drugName: 'Methylcobalamin (B12)', strength: '500 mcg', instructions: '1 cap daily morning with breakfast' },
       { drugName: 'Pyridoxal-5-Phosphate (P5P)', strength: '25 mg', instructions: '1 cap daily morning with breakfast' },
-      { drugName: 'Riboflavin-5-Phosphate (B2)', strength: '10 mg', instructions: '1 cap daily morning with breakfast' },
-      { drugName: 'Trimethylglycine (TMG)', strength: '500 mg', instructions: '1 cap daily morning with breakfast' },
-      { drugName: 'Ubiquinol', strength: '200 mg', instructions: '1 cap daily morning with breakfast' },
+      { drugName: "Riboflavin-5'-Phosphate Sodium (Active Vitamin B2)", strength: '10 mg', instructions: '1 cap daily morning with breakfast' },
+      { drugName: 'Trimethylglycine (TMG / Betaine Anhydrous)', strength: '500 mg', instructions: '1 cap daily morning with breakfast' },
+      { drugName: 'Ubiquinol (Kaneka Ubiquinol)', strength: '200 mg', instructions: '1 cap daily morning with breakfast' },
       { drugName: 'Trans-Resveratrol', strength: '250 mg', instructions: '1 cap daily morning with breakfast' },
-      { drugName: 'N-Acetylcysteine (NAC)', strength: '600 mg', instructions: '1 cap daily morning with breakfast' }
+      { drugName: 'N-Acetyl-L-Cysteine (NAC)', strength: '600 mg', instructions: '1 cap daily morning with breakfast' }
     ],
     items: [
       {
@@ -449,7 +449,7 @@ async function run() {
       },
       {
         id: 'api-abd-3',
-        name: 'Riboflavin-5-Phosphate (B2)',
+        name: "Riboflavin-5'-Phosphate Sodium (Active Vitamin B2)",
         activeIngredient: 'Riboflavin-5-Phosphate Monosodium',
         dose: '10 mg',
         dosage: '10 mg',
@@ -460,7 +460,7 @@ async function run() {
       },
       {
         id: 'api-abd-4',
-        name: 'Trimethylglycine (TMG / Betaine)',
+        name: 'Trimethylglycine (TMG / Betaine Anhydrous)',
         activeIngredient: 'Betaine Anhydrous (Trimethylglycine)',
         dose: '500 mg',
         dosage: '500 mg',
@@ -471,7 +471,7 @@ async function run() {
       },
       {
         id: 'api-abd-5',
-        name: 'Ubiquinol',
+        name: 'Ubiquinol (Kaneka Ubiquinol)',
         activeIngredient: 'Ubiquinol (Reduced Kaneka CoQ10)',
         dose: '200 mg',
         dosage: '200 mg',
@@ -493,7 +493,7 @@ async function run() {
       },
       {
         id: 'api-abd-7',
-        name: 'N-Acetylcysteine (NAC)',
+        name: 'N-Acetyl-L-Cysteine (NAC)',
         activeIngredient: 'N-Acetyl-L-Cysteine',
         dose: '600 mg',
         dosage: '600 mg',

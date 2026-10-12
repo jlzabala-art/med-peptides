@@ -44,6 +44,8 @@ const FEATURED_PATIENTS = [
 
 // LocalStorage key for tracking the last 5 consulted prescriptions (GCP UX Rule #7)
 const RECENT_KEY = 'pls_recent_prescriptions_v1';
+const QUEUE_STORAGE_KEY = 'pls_patient_queue_formats_v2';
+const ACTIVE_RX_KEY = 'pls_last_active_rx_code';
 
 function getRecentPrescriptions() {
   if (typeof window === 'undefined') return [];
@@ -220,6 +222,65 @@ export default function PublicLabelsAppClient({
     }
   };
 
+  // Restore saved format settings per patient and restore last active prescription on refresh
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const rawSaved = localStorage.getItem(QUEUE_STORAGE_KEY);
+      if (rawSaved) {
+        const savedFormats = JSON.parse(rawSaved);
+        if (savedFormats && typeof savedFormats === 'object') {
+          setPatientQueue(prev => prev.map(p => {
+            const fmt = savedFormats[String(p.code).toUpperCase()];
+            if (fmt) {
+              return {
+                ...p,
+                widthMm: fmt.widthMm || p.widthMm,
+                heightMm: fmt.heightMm || p.heightMm,
+                variant: fmt.variant || p.variant,
+                selectedPreset: fmt.selectedPreset || p.selectedPreset,
+                selectedPartIndex: fmt.selectedPartIndex !== undefined ? fmt.selectedPartIndex : p.selectedPartIndex
+              };
+            }
+            return p;
+          }));
+        }
+      }
+
+      // If page was loaded without any ?rx or ?code in URL, restore last active prescription
+      const currentUrlParams = new URLSearchParams(window.location.search);
+      const hasRxInUrl = currentUrlParams.has('rx') || currentUrlParams.has('code');
+      const savedActiveRx = localStorage.getItem(ACTIVE_RX_KEY);
+      if (!hasRxInUrl && savedActiveRx && savedActiveRx !== activeCode) {
+        handleSelectOrAddPatient(savedActiveRx, true);
+      }
+    } catch { /* storage unavailable */ }
+  }, []);
+
+  // Save format settings per patient whenever queue changes
+  useEffect(() => {
+    if (typeof window === 'undefined' || !patientQueue.length) return;
+    try {
+      const formatsMap = {};
+      patientQueue.forEach(p => {
+        if (p.code) {
+          formatsMap[String(p.code).toUpperCase()] = {
+            widthMm: p.widthMm,
+            heightMm: p.heightMm,
+            variant: p.variant,
+            selectedPreset: p.selectedPreset,
+            selectedPartIndex: p.selectedPartIndex
+          };
+        }
+      });
+      localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(formatsMap));
+      const activeItem = patientQueue[activeQueueIndex] || patientQueue[0];
+      if (activeItem?.code) {
+        localStorage.setItem(ACTIVE_RX_KEY, activeItem.code);
+      }
+    } catch { /* storage unavailable */ }
+  }, [patientQueue, activeQueueIndex]);
+
   useEffect(() => {
     if (typeof document !== 'undefined') {
       const mode = isEs ? 'Estudio de Etiquetas' : 'Compounding Label Studio';
@@ -286,9 +347,12 @@ export default function PublicLabelsAppClient({
     if (typeof window === 'undefined' || !queue.length) return;
     const codesParam = queue.map(p => p.code).join(',');
     const activeItem = queue[activeIdx] || queue[0];
-    const phaseParam = activeItem?.selectedPartIndex ? `&phase=${activeItem.selectedPartIndex + 1}` : '&phase=1';
+    const phaseParam = (typeof activeItem?.selectedPartIndex === 'number') ? `&phase=${activeItem.selectedPartIndex + 1}` : '&phase=1';
     const newUrl = `/labels?rx=${encodeURIComponent(codesParam)}${phaseParam}&edit=true&lang=${lang}`;
     window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+    try {
+      if (activeItem?.code) localStorage.setItem(ACTIVE_RX_KEY, activeItem.code);
+    } catch { /* storage unavailable */ }
   };
 
   // Add or switch active patient in the batch queue
@@ -1867,6 +1931,17 @@ export default function PublicLabelsAppClient({
             }}
             labels={labels}
             initialLabelIndex={labelIndex}
+            initialWidthMm={patientQueue[activeQueueIndex]?.widthMm || 75}
+            initialHeightMm={patientQueue[activeQueueIndex]?.heightMm || 45}
+            initialVariant={patientQueue[activeQueueIndex]?.variant || 'backQr'}
+            onConfigChange={(cfg) => {
+              handleUpdatePatientConfig(activeQueueIndex, {
+                widthMm: cfg.widthMm,
+                heightMm: cfg.heightMm,
+                variant: cfg.variant,
+                selectedPreset: cfg.preset
+              });
+            }}
             onLabelIndexChange={(idx) => setLabelIndex(idx)}
             initialEditMode={isEditing}
             isStandalone={true}

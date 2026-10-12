@@ -54,14 +54,19 @@ export default function PharmacyLabelsModal({
   onClose,
   labels = [],
   initialLabelIndex = 0,
+  initialWidthMm = 75,
+  initialHeightMm = 45,
+  initialVariant = null,
   isEs = false,
   initialEditMode = false,
   isStandalone = false,
   onPrescriptionUpdated = null,
-  onLabelIndexChange = null
+  onLabelIndexChange = null,
+  onConfigChange = null
 }) {
   const [selectedProductIdx, setSelectedProductIdx] = useState(typeof initialLabelIndex === 'number' ? initialLabelIndex : 0);
   const [activeVariant, setActiveVariantState] = useState(() => {
+    if (initialVariant) return initialVariant;
     const valid = ['front', 'backQr', 'frontWithQr', 'shipping'];
     const saved = labels?.[initialLabelIndex]?.lastVariant || labels?.[0]?.lastVariant;
     if (valid.includes(saved)) return saved;
@@ -74,6 +79,7 @@ export default function PharmacyLabelsModal({
   const setActiveVariant = (v) => {
     setActiveVariantState(v);
     try { window.localStorage.setItem('pharmacyLabelVariant', v); } catch { /* storage unavailable */ }
+    onConfigChange?.({ widthMm: dimensions.widthMm, heightMm: dimensions.heightMm, variant: v, preset: selectedPreset });
   };
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
@@ -107,10 +113,43 @@ export default function PharmacyLabelsModal({
   }, [initialLabelIndex, labels]);
 
   // Sizing Presets & Custom Dimensions
-  const [selectedPreset, setSelectedPreset] = useState('75x45');
-  const [dimensions, setDimensions] = useState({ widthMm: 75, heightMm: 45 });
-  const [customWidth, setCustomWidth] = useState(75);
-  const [customHeight, setCustomHeight] = useState(45);
+  const [selectedPreset, setSelectedPreset] = useState(() => {
+    const match = [
+      { id: '100x55', w: 100, h: 55 },
+      { id: '70x35_pomade', w: 70, h: 35 },
+      { id: '75x45', w: 75, h: 45 },
+      { id: '90x38', w: 90, h: 38 },
+      { id: '100x50', w: 100, h: 50 },
+      { id: '50x30', w: 50, h: 30 }
+    ].find(p => p.w === initialWidthMm && p.h === initialHeightMm);
+    return match ? match.id : (initialWidthMm === 75 && initialHeightMm === 45 ? '75x45' : 'custom');
+  });
+  const [dimensions, setDimensions] = useState({ widthMm: initialWidthMm || 75, heightMm: initialHeightMm || 45 });
+  const [customWidth, setCustomWidth] = useState(initialWidthMm || 75);
+  const [customHeight, setCustomHeight] = useState(initialHeightMm || 45);
+
+  React.useEffect(() => {
+    if (initialWidthMm && initialHeightMm) {
+      setDimensions({ widthMm: initialWidthMm, heightMm: initialHeightMm });
+      setCustomWidth(initialWidthMm);
+      setCustomHeight(initialHeightMm);
+      const match = [
+        { id: '100x55', w: 100, h: 55 },
+        { id: '70x35_pomade', w: 70, h: 35 },
+        { id: '75x45', w: 75, h: 45 },
+        { id: '90x38', w: 90, h: 38 },
+        { id: '100x50', w: 100, h: 50 },
+        { id: '50x30', w: 50, h: 30 }
+      ].find(p => p.w === initialWidthMm && p.h === initialHeightMm);
+      setSelectedPreset(match ? match.id : 'custom');
+    }
+  }, [initialWidthMm, initialHeightMm]);
+
+  React.useEffect(() => {
+    if (initialVariant) {
+      setActiveVariantState(initialVariant);
+    }
+  }, [initialVariant]);
 
   const svgContainerRef = useRef(null);
 
@@ -379,8 +418,9 @@ export default function PharmacyLabelsModal({
   let titleSvgUnits = 38;
 
   if (activeVariant === 'backQr') {
-    ingSvgUnits = parsedApisCount <= 2 ? 28 : (parsedApisCount <= 4 ? 26 : 22);
-    dirSvgUnits = dirLinesCount <= 2 ? 26 : 23;
+    // With continuous inline layout with em-dash (—), ingredients take only 2-3 lines, keeping typography large, bold and crisp
+    ingSvgUnits = dimensions.heightMm < 40 ? 25 : 28;
+    dirSvgUnits = dirLinesCount <= 2 ? 26 : 24;
     patSvgUnits = patNameLength > 36 ? 30 : (patNameLength > 28 ? 34 : 38);
     titleSvgUnits = 32;
   } else if (activeVariant === 'front' || activeVariant === 'frontWithQr') {
@@ -418,22 +458,28 @@ export default function PharmacyLabelsModal({
   const handleSelectPreset = (preset) => {
     setSelectedPreset(preset.id);
     if (preset.id !== 'custom') {
-      setDimensions({ widthMm: preset.w, heightMm: preset.h });
+      const nextDims = { widthMm: preset.w, heightMm: preset.h };
+      setDimensions(nextDims);
       setCustomWidth(preset.w);
       setCustomHeight(preset.h);
+      onConfigChange?.({ widthMm: preset.w, heightMm: preset.h, variant: activeVariant, preset: preset.id });
     }
   };
 
   const handleCustomWidthChange = (val) => {
     const num = Math.max(25, Math.min(250, Number(val) || 25));
     setCustomWidth(num);
-    setDimensions(prev => ({ ...prev, widthMm: num }));
+    const nextDims = { widthMm: num, heightMm: dimensions.heightMm };
+    setDimensions(nextDims);
+    onConfigChange?.({ widthMm: num, heightMm: dimensions.heightMm, variant: activeVariant, preset: 'custom' });
   };
 
   const handleCustomHeightChange = (val) => {
     const num = Math.max(20, Math.min(200, Number(val) || 20));
     setCustomHeight(num);
-    setDimensions(prev => ({ ...prev, heightMm: num }));
+    const nextDims = { widthMm: dimensions.widthMm, heightMm: num };
+    setDimensions(nextDims);
+    onConfigChange?.({ widthMm: dimensions.widthMm, heightMm: num, variant: activeVariant, preset: 'custom' });
   };
 
   // Dynamic High-Resolution PNG Generator from SVG with user-selected DPI (300 / 600 / 1200)
