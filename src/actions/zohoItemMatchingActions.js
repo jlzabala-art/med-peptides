@@ -372,6 +372,9 @@ export async function createZohoItemAndAssociateAction({
 
     const json = await res.json();
     if (!res.ok || json.code !== 0 || !json.item) {
+      if (json.code === 57 || json.message?.includes('not authorized')) {
+        throw new Error("Zoho Books error (Código 57): El token OAuth actual no tiene permisos de creación en Zoho Books (falta scope ZohoBooks.settings.ALL o ZohoBooks.fullaccess.all).");
+      }
       throw new Error(json.message || `Zoho Books API error HTTP ${res.status}`);
     }
 
@@ -439,6 +442,9 @@ export async function updateZohoItemAndConfirmAction({
 
     const json = await res.json();
     if (!res.ok || json.code !== 0) {
+      if (json.code === 57 || json.message?.includes('not authorized')) {
+        throw new Error("Zoho Books error (Código 57): El token OAuth actual no tiene permisos de edición en Zoho Books (falta scope ZohoBooks.settings.UPDATE o ZohoBooks.fullaccess.all). Para vincular el ingrediente en Atlas sin modificar Zoho Books, pulsa 'Confirm Link'.");
+      }
       throw new Error(json.message || `Error actualizando en Zoho Books HTTP ${res.status}`);
     }
 

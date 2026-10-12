@@ -18,9 +18,8 @@
 import fetch from "node-fetch";
 
 const ZOHO_SCOPES = [
-  "ZohoBooks.items.READ",
-  "ZohoBooks.items.UPDATE",
-  "ZohoBooks.settings.READ",
+  "ZohoBooks.fullaccess.all",
+  "ZohoInventory.fullaccess.all",
 ].join(",");
 
 const [,, code, clientId, clientSecret] = process.argv;
