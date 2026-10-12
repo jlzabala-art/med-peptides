@@ -34,6 +34,7 @@ import { generateA4BatchPdf } from '@/utils/a4BatchPdfGenerator';
 
 // Flagship featured cases for instant 1-click access
 const FEATURED_PATIENTS = [
+  { code: 'BOX01399AATRI', name: 'Haya Hassen Al-Haidose', title: 'TrichoSol 100mL & TrichoWash 250mL' },
   { code: '51812', name: 'Abdulla Sultan Alotaiba', title: 'Metabolic & Longevity (Parts 1 & 2)' },
   { code: '51857', name: 'Amna Sultan Alotaiba', title: 'Metabolic & Lipid Optimization' },
   { code: '50957', name: 'Alan Maclean Rutledge', title: 'Proteolytic & Mitochondrial' },

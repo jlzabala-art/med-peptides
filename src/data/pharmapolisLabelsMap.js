@@ -410,6 +410,74 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     targetRxUrl: 'https://med-peptides.com/rx/BOX03483AATRI'
   },
 
+  // ── Haya Hassen Al-Haidose: BOX01399AATRI ──
+  {
+    id: 'box01399-trichosol-part1',
+    prescriptionMatches: ['BOX01399AATRI', 'BOX01399', 'RX-BOX01399AATRI', 'TRICHOTEST-01399', '29763404111'],
+    patientMatches: ['haya', 'hassen', 'haidose', 'al-haidose'],
+    phaseNumber: 1,
+    partLabel: 'Part 1: Topical Treatment (100 mL)',
+    patientName: 'Haya Hassen Al-Haidose',
+    fileNumber: 'BOX01399AATRI',
+    productName: 'TrichoSol 100ml',
+    productTitle: 'TrichoSol 100ml',
+    subTitle: 'Targeted Follicular Regeneration & 5αR Modulation Complex (Part 1)',
+    dosageForm: 'Topical Scalp Solution (TrichoSol™)',
+    volume: '100 mL',
+    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    formula: '17-α Estradiol 0.05% + IGrantine-F1 TM 0.5% in TrichoSol™ 100 mL',
+    apis: [
+      { name: '17-α Estradiol', dose: '0.05%', dosage: '0.05%', activeIngredient: '17-α Estradiol (Alfatradiol)' },
+      { name: 'IGrantine-F1 TM', dose: '0.5%', dosage: '0.5%', activeIngredient: 'IGrantine-F1™' }
+    ],
+    vehicle: { name: 'TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle, 100 mL)', volume: '100 mL' },
+    directions: 'Apply at night before bedtime. Leave the solution on your scalp for as long as possible. Wash your scalp the next day.',
+    warnings: 'For topical scalp use only. Leave on scalp as long as possible. Wash scalp the next day.',
+    prodDate: '29-05-2024',
+    expDate: '28-05-2025',
+    storage: 'Store at room temperature away from direct light',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2024-TRI-BOX01399',
+    lote: '2405-HAY1',
+    targetRxUrl: 'https://med-peptides.com/rx/BOX01399AATRI'
+  },
+  {
+    id: 'box01399-trichowash-part2',
+    prescriptionMatches: ['BOX01399AATRI', 'BOX01399', 'RX-BOX01399AATRI', 'TRICHOTEST-01399', '29763404111'],
+    patientMatches: ['haya', 'hassen', 'haidose', 'al-haidose'],
+    phaseNumber: 2,
+    partLabel: 'Part 2: Scalp Care & Hygiene (250 mL)',
+    patientName: 'Haya Hassen Al-Haidose',
+    fileNumber: 'BOX01399AATRI',
+    productName: 'TrichoWash 250ml',
+    productTitle: 'TrichoWash 250ml',
+    subTitle: 'Trichological Scalp Cleansing & Sebomodulating Shampoo (Part 2)',
+    dosageForm: 'Topical Scalp Wash / Shampoo (TrichoWash™)',
+    volume: '250 mL',
+    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    formula: 'Zinc acetate 0.5% + D-Panthenol 0.5% in TrichoWash™ 250 mL',
+    apis: [
+      { name: 'Zinc acetate', dose: '0.5%', dosage: '0.5%', activeIngredient: 'Zinc Acetate (USP)' },
+      { name: 'D-Panthenol', dose: '0.5%', dosage: '0.5%', activeIngredient: 'D-Panthenol (Pro-Vitamin B5)' }
+    ],
+    vehicle: { name: 'TrichoWash™ (Sulfate-Free Dermocompatible Cleansing Base, 250 mL)', volume: '250 mL' },
+    directions: 'Massage for 2 minutes and rinse.',
+    warnings: 'For topical scalp wash only. Rinse thoroughly with water. Avoid eye contact.',
+    prodDate: '29-05-2024',
+    expDate: '28-05-2025',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2024-WASH-BOX01399',
+    lote: '2405-HAY2',
+    targetRxUrl: 'https://med-peptides.com/rx/BOX01399AATRI'
+  },
+
   // ── Julien Boiteux: BOX03529AATRI ──
   {
     id: 'box03529-trichotest-part1',
