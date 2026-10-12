@@ -97,9 +97,9 @@ function getDoctorSlug(rx, fallbackDocName) {
 
 // Label size presets and variants for individual patient customization
 const LABEL_SIZE_PRESETS = [
-  { id: '75x45', widthMm: 75, heightMm: 45, label: '75 × 45 mm (Estándar)' },
-  { id: '100x55', widthMm: 100, heightMm: 55, label: '100 × 55 mm (Frasco Grande)' },
-  { id: '90x38', widthMm: 90, heightMm: 38, label: '90 × 38 mm (Vial / Ampolla)' },
+  { id: '75x45', widthMm: 75, heightMm: 45, labelEn: '75 × 45 mm (Standard)', labelEs: '75 × 45 mm (Estándar)' },
+  { id: '100x55', widthMm: 100, heightMm: 55, labelEn: '100 × 55 mm (Large Jar)', labelEs: '100 × 55 mm (Frasco Grande)' },
+  { id: '90x38', widthMm: 90, heightMm: 38, labelEn: '90 × 38 mm (Vial / Ampoule)', labelEs: '90 × 38 mm (Vial / Ampolla)' },
 ];
 
 const LABEL_VARIANT_OPTIONS = [
@@ -1501,7 +1501,7 @@ export default function PublicLabelsAppClient({
                             className={`pls-popover-opt ${isSelected ? 'selected' : ''}`}
                             onClick={() => handleUpdatePatientConfig(qIdx, { widthMm: preset.widthMm, heightMm: preset.heightMm })}
                           >
-                            <span>{preset.label}</span>
+                            <span>{isEs ? preset.labelEs : preset.labelEn}</span>
                             {isSelected && <Check size={12} color="#1a73e8" />}
                           </button>
                         );
