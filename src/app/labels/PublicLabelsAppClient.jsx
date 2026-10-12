@@ -174,7 +174,6 @@ export default function PublicLabelsAppClient({
   const [activeQueueIndex, setActiveQueueIndex] = useState(0);
   const [isGeneratingBatchPdf, setIsGeneratingBatchPdf] = useState(false);
   const [batchPdfProgress, setBatchPdfProgress] = useState(null);
-  const [openConfigIdx, setOpenConfigIdx] = useState(null);
 
   // Total label parts count across whole patient queue
   const totalBatchLabelsCount = React.useMemo(() => {
@@ -499,7 +498,25 @@ export default function PublicLabelsAppClient({
   const handleUpdatePatientConfig = (idx, changes) => {
     setPatientQueue(prev => {
       const next = [...prev];
-      next[idx] = { ...next[idx], ...changes };
+      if (!next[idx]) return prev;
+      const pItem = { ...next[idx] };
+      const labels = Array.isArray(pItem.labels) ? [...pItem.labels] : [{}];
+      const targetPart = typeof changes.selectedPartIndex === 'number' ? changes.selectedPartIndex : labelIndex;
+      if (labels[targetPart]) {
+        labels[targetPart] = {
+          ...labels[targetPart],
+          widthMm: changes.widthMm ?? labels[targetPart].widthMm,
+          heightMm: changes.heightMm ?? labels[targetPart].heightMm,
+          variant: changes.variant ?? labels[targetPart].variant,
+          lastVariant: changes.variant ?? labels[targetPart].lastVariant
+        };
+      }
+      pItem.labels = labels;
+      if (changes.widthMm != null) pItem.widthMm = changes.widthMm;
+      if (changes.heightMm != null) pItem.heightMm = changes.heightMm;
+      if (changes.variant != null) pItem.variant = changes.variant;
+      if (changes.selectedPreset != null) pItem.selectedPreset = changes.selectedPreset;
+      next[idx] = pItem;
       return next;
     });
     if (idx === activeQueueIndex && typeof changes.selectedPartIndex === 'number') {
@@ -553,13 +570,14 @@ export default function PublicLabelsAppClient({
           const effectiveWidthMm = Number(pLabel.widthMm || (pItem.widthMm !== 75 ? pItem.widthMm : optDims.widthMm)) || 75;
           const effectiveHeightMm = Number(pLabel.heightMm || (pItem.heightMm !== 45 ? pItem.heightMm : optDims.heightMm)) || 45;
           const containerTag = pLabel.containerTag || optDims.containerTag || '';
+          const effectiveVariant = pLabel.variant || pLabel.lastVariant || pItem.variant || 'backQr';
 
           batchItems.push({
             patientName: pName,
             rxCode: rxC,
             partLabel: partLbl,
-            variant: pItem.variant || 'backQr',
-            variantLabel: pItem.variant === 'shipping' ? 'Shipping' : (pItem.variant === 'front' ? 'Front' : (pItem.variant === 'frontWithQr' ? 'Front+MicroQR' : 'Delivery')),
+            variant: effectiveVariant,
+            variantLabel: effectiveVariant === 'shipping' ? 'Shipping' : (effectiveVariant === 'front' ? 'Standard' : (effectiveVariant === 'frontWithQr' ? 'Front+MicroQR' : 'Delivery')),
             widthMm: effectiveWidthMm,
             heightMm: effectiveHeightMm,
             containerTag: containerTag,
@@ -1688,8 +1706,6 @@ export default function PublicLabelsAppClient({
           {patientQueue.map((pItem, qIdx) => {
             const isActive = activeQueueIndex === qIdx;
             const pName = pItem.rx?.patient?.name || pItem.rx?.patientName || 'Patient';
-            const sizeLabel = pItem.containerTag ? `${pItem.widthMm}×${pItem.heightMm}mm · ${pItem.containerTag}` : `${pItem.widthMm}×${pItem.heightMm}mm`;
-            const isConfigOpen = openConfigIdx === qIdx;
             const labelsCount = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels.length : 1;
             const partInfo = (pItem.selectedPartIndex === 'all' || pItem.selectedPartIndex == null)
               ? (isEs ? `${labelsCount} ${labelsCount === 1 ? 'parte' : 'partes'}` : `${labelsCount} ${labelsCount === 1 ? 'part' : 'parts'}`)
@@ -1715,20 +1731,6 @@ export default function PublicLabelsAppClient({
                 }}>
                   {partInfo}
                 </span>
-                
-                {/* Format badge & config toggle button */}
-                <button
-                  type="button"
-                  className="pls-batch-pill-format-btn"
-                  title={isEs ? 'Configurar formato individual de esta etiqueta' : 'Configure individual format for this label'}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenConfigIdx(isConfigOpen ? null : qIdx);
-                  }}
-                >
-                  <span>{sizeLabel}</span>
-                  <ChevronDown size={11} />
-                </button>
 
                 {/* Remove button if more than 1 patient */}
                 {patientQueue.length > 1 && (
@@ -1741,99 +1743,6 @@ export default function PublicLabelsAppClient({
                   >
                     <X size={12} />
                   </button>
-                )}
-
-                {/* Per-patient config popover */}
-                {isConfigOpen && (
-                  <div
-                    className="pls-batch-popover"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div style={{ fontWeight: 700, fontSize: '0.74rem', marginBottom: '6px', color: '#0f172a' }}>
-                      {isEs ? 'Formato de Etiqueta:' : 'Label Format:'}
-                    </div>
-
-                    {/* Size presets */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
-                      {LABEL_SIZE_PRESETS.map((preset) => {
-                        const isSelected = pItem.widthMm === preset.widthMm && pItem.heightMm === preset.heightMm;
-                        return (
-                          <button
-                            key={preset.id}
-                            type="button"
-                            className={`pls-popover-opt ${isSelected ? 'selected' : ''}`}
-                            onClick={() => handleUpdatePatientConfig(qIdx, { widthMm: preset.widthMm, heightMm: preset.heightMm })}
-                          >
-                            <span>{isEs ? preset.labelEs : preset.labelEn}</span>
-                            {isSelected && <Check size={12} color="#1a73e8" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Variant options */}
-                    <div style={{ fontWeight: 700, fontSize: '0.74rem', marginBottom: '4px', color: '#0f172a' }}>
-                      {isEs ? 'Tipo de Etiqueta:' : 'Label Variant:'}
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
-                      {LABEL_VARIANT_OPTIONS.map((variantOpt) => {
-                        const isSelected = pItem.variant === variantOpt.id;
-                        return (
-                          <button
-                            key={variantOpt.id}
-                            type="button"
-                            className={`pls-popover-opt ${isSelected ? 'selected' : ''}`}
-                            onClick={() => handleUpdatePatientConfig(qIdx, { variant: variantOpt.id })}
-                          >
-                            <span>{isEs ? variantOpt.labelEs : variantOpt.labelEn}</span>
-                            {isSelected && <Check size={12} color="#1a73e8" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Formula part if multi-part */}
-                    {pItem.labels.length > 1 && (
-                      <>
-                        <div style={{ fontWeight: 700, fontSize: '0.74rem', marginBottom: '4px', color: '#0f172a' }}>
-                          {isEs ? 'Partes a Imprimir en Lote:' : 'Parts to Print in Batch:'}
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
-                          <button
-                            type="button"
-                            className={`pls-popover-opt ${(pItem.selectedPartIndex == null || pItem.selectedPartIndex === 'all') ? 'selected' : ''}`}
-                            onClick={() => handleUpdatePatientConfig(qIdx, { selectedPartIndex: 'all' })}
-                          >
-                            <span>{isEs ? `✓ Todas las partes (${pItem.labels.length})` : `✓ All parts (${pItem.labels.length})`}</span>
-                            {(pItem.selectedPartIndex == null || pItem.selectedPartIndex === 'all') && <Check size={12} color="#1a73e8" />}
-                          </button>
-                          <div style={{ display: 'flex', gap: '4px' }}>
-                            {pItem.labels.map((lbl, pIdx) => (
-                              <button
-                                key={pIdx}
-                                type="button"
-                                className={`pls-popover-opt ${pItem.selectedPartIndex === pIdx ? 'selected' : ''}`}
-                                style={{ flex: 1, justifyContent: 'center' }}
-                                onClick={() => handleUpdatePatientConfig(qIdx, { selectedPartIndex: pIdx })}
-                              >
-                                {lbl.partLabel || `Part ${pIdx + 1}`}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    <div style={{ marginTop: '8px', textAlign: 'right' }}>
-                      <button
-                        type="button"
-                        style={{ border: 'none', background: '#1a73e8', color: '#fff', fontSize: '0.72rem', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer' }}
-                        onClick={() => setOpenConfigIdx(null)}
-                      >
-                        {isEs ? 'Listo' : 'Done'}
-                      </button>
-                    </div>
-                  </div>
                 )}
               </div>
             );
@@ -1988,7 +1897,7 @@ export default function PublicLabelsAppClient({
             }}
             initialWidthMm={patientQueue[activeQueueIndex]?.labels?.[labelIndex]?.widthMm || patientQueue[activeQueueIndex]?.widthMm || 75}
             initialHeightMm={patientQueue[activeQueueIndex]?.labels?.[labelIndex]?.heightMm || patientQueue[activeQueueIndex]?.heightMm || 45}
-            initialVariant={patientQueue[activeQueueIndex]?.variant || 'backQr'}
+            initialVariant={patientQueue[activeQueueIndex]?.labels?.[labelIndex]?.variant || patientQueue[activeQueueIndex]?.variant || 'backQr'}
             onConfigChange={(cfg) => {
               handleUpdatePatientConfig(activeQueueIndex, {
                 widthMm: cfg.widthMm,
@@ -2035,10 +1944,10 @@ export default function PublicLabelsAppClient({
                 <div key={`offscreen-${pItem.code}-${partIdx}`}>
                   <PharmapolisLabelSvg
                     labelData={pLabel}
-                    variant={pItem.variant || 'backQr'}
+                    variant={pLabel.variant || pLabel.lastVariant || pItem.variant || 'backQr'}
                     widthMm={effectiveWidthMm}
                     heightMm={effectiveHeightMm}
-                    showCutGuides={true}
+                    showCutGuides={false}
                     svgRef={(node) => {
                       if (node) {
                         node.id = `batch-svg-${pItem.code}-${partIdx}`;

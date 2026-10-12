@@ -72,7 +72,7 @@ export default function PharmapolisLabelSvg({
   variant = 'backQr', // 'backQr' | 'front' | 'frontWithQr'
   widthMm = 75,
   heightMm = 45,
-  showCutGuides = true,
+  showCutGuides = false,
   svgRef = null
 }) {
   // Base coordinates: 1500 px base width, dynamic responsive height
@@ -291,40 +291,6 @@ export default function PharmapolisLabelSvg({
         {/* Bottom-Right */}
         <line x1={WIDTH} y1={HEIGHT} x2={WIDTH - 38} y2={HEIGHT} stroke="#475569" strokeWidth="3" />
         <line x1={WIDTH} y1={HEIGHT} x2={WIDTH} y2={HEIGHT - 38} stroke="#475569" strokeWidth="3" />
-
-        {/* Top Scissor Cut Indicator Badge */}
-        <g transform="translate(56, 0)">
-          <rect x="0" y="0" width="240" height="24" fill="#ffffff" stroke="#94a3b8" strokeWidth="1.2" rx="4" />
-          <text
-            x="120"
-            y="17"
-            textAnchor="middle"
-            fontFamily="Arial, Helvetica, sans-serif"
-            fontSize="14"
-            fontWeight="800"
-            fill="#475569"
-            letterSpacing="0.8"
-          >
-            ✂ CUT LINE · {widthMm}×{heightMm} mm
-          </text>
-        </g>
-
-        {/* Right Edge Scissor Cut Indicator Badge */}
-        <g transform={`translate(${WIDTH}, ${Math.round(HEIGHT / 2) - 40}) rotate(90)`}>
-          <rect x="0" y="-12" width="80" height="24" fill="#ffffff" stroke="#94a3b8" strokeWidth="1.2" rx="4" />
-          <text
-            x="40"
-            y="5"
-            textAnchor="middle"
-            fontFamily="Arial, Helvetica, sans-serif"
-            fontSize="13"
-            fontWeight="800"
-            fill="#475569"
-            letterSpacing="0.6"
-          >
-            ✂ CUT
-          </text>
-        </g>
       </g>
     );
   };
@@ -586,9 +552,9 @@ export default function PharmapolisLabelSvg({
           {/* Hairline Divider */}
           <line
             x1="14"
-            y1={qrY + backQrSize + (isShort ? 24 : 28)}
+            y1={qrY + backQrSize + (isShort ? 20 : 24)}
             x2={leftColWidth - 14}
-            y2={qrY + backQrSize + (isShort ? 24 : 28)}
+            y2={qrY + backQrSize + (isShort ? 20 : 24)}
             stroke="#e2e8f0"
             strokeWidth="1.5"
           />
@@ -604,35 +570,39 @@ export default function PharmapolisLabelSvg({
             const batchLines = wrapLines(batchCode, 15);
             const storageLines = wrapLines(storage, 17);
 
-            const volY = isShort ? 14 : 18;
-            const volLineGap = isShort ? 14 : 17;
-            const volTotalH = volY + (volLines.length * volLineGap);
+            // Explicit vertical coordinates guaranteeing zero overlap
+            const volTitleY = isShort ? 28 : 34;
+            const firstVolLineY = volTitleY + (isShort ? 14 : 18);
+            const volLineGap = isShort ? 15 : 18;
+            const volBlockBottom = firstVolLineY + ((volLines.length - 1) * volLineGap) + (isShort ? 6 : 8);
 
-            const batchY = volTotalH + (isShort ? 8 : 12);
-            const batchLineGap = isShort ? 13 : 15;
-            const batchTotalH = batchY + (batchLines.length * batchLineGap);
+            const batchTitleY = volBlockBottom + (isShort ? 14 : 18);
+            const firstBatchLineY = batchTitleY + (isShort ? 14 : 18);
+            const batchLineGap = isShort ? 15 : 18;
+            const batchBlockBottom = firstBatchLineY + ((batchLines.length - 1) * batchLineGap) + (isShort ? 6 : 8);
 
-            const storageY = batchTotalH + (isShort ? 8 : 12);
-            const storageLineGap = isShort ? 12 : 15;
+            const storageTitleY = batchBlockBottom + (isShort ? 14 : 18);
+            const firstStorageLineY = storageTitleY + (isShort ? 14 : 17);
+            const storageLineGap = isShort ? 14 : 17;
 
             return (
-              <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${qrY + backQrSize + (isShort ? 46 : 54)})`}>
+              <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${qrY + backQrSize + (isShort ? 36 : 44)})`}>
                 {/* Header badge */}
-                <rect x="-4" y="-12" width={leftColWidth - 20} height={isShort ? 18 : 20} fill="#f0f9ff" rx="4" />
-                <text x="2" y={isShort ? 1 : 2} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 9.5 : 10.5} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                <rect x="-4" y="0" width={leftColWidth - 20} height={isShort ? 18 : 20} fill="#f0f9ff" stroke="#bae6fd" strokeWidth="1" rx="4" />
+                <text x="4" y={isShort ? 13 : 14} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 9.5 : 10.5} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
                   DISPENSING SPECS
                 </text>
 
                 {/* 1. NET CONTENT */}
-                <g transform={`translate(0, ${volY})`}>
-                  <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
+                <g>
+                  <text x="0" y={volTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
                     NET CONTENT
                   </text>
                   {volLines.map((vLine, vIdx) => (
                     <text
                       key={`vol-${vIdx}`}
                       x="0"
-                      y={volLineGap + (vIdx * volLineGap)}
+                      y={firstVolLineY + (vIdx * volLineGap)}
                       fontFamily="Arial, Helvetica, sans-serif"
                       fontSize={isShort ? 13 : 15}
                       fontWeight="900"
@@ -644,15 +614,15 @@ export default function PharmapolisLabelSvg({
                 </g>
 
                 {/* 2. DISPENSING BATCH */}
-                <g transform={`translate(0, ${batchY})`}>
-                  <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
+                <g>
+                  <text x="0" y={batchTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
                     DISPENSING BATCH
                   </text>
                   {batchLines.map((bLine, bIdx) => (
                     <text
                       key={`bch-${bIdx}`}
                       x="0"
-                      y={batchLineGap + (bIdx * batchLineGap)}
+                      y={firstBatchLineY + (bIdx * batchLineGap)}
                       fontFamily="monospace"
                       fontSize={isShort ? 12 : 14}
                       fontWeight="900"
@@ -664,15 +634,15 @@ export default function PharmapolisLabelSvg({
                 </g>
 
                 {/* 3. STORAGE */}
-                <g transform={`translate(0, ${storageY})`}>
-                  <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
+                <g>
+                  <text x="0" y={storageTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
                     STORAGE CONDITIONS
                   </text>
                   {storageLines.map((sLine, sIdx) => (
                     <text
                       key={`stg-${sIdx}`}
                       x="0"
-                      y={storageLineGap + (sIdx * storageLineGap)}
+                      y={firstStorageLineY + (sIdx * storageLineGap)}
                       fontFamily="Arial, Helvetica, sans-serif"
                       fontSize={isShort ? 11 : 13}
                       fontWeight="700"
@@ -690,6 +660,11 @@ export default function PharmapolisLabelSvg({
         {/* RIGHT COLUMN: EXPANDED HIGH-LEGIBILITY CLINICAL WORKSPACE (Width 1125 px) */}
         <g transform={`translate(${rightColX}, ${colY})`}>
           <rect x="0" y="0" width={rightColWidth} height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" rx="8" />
+
+          {/* Clip path strictly bounding right column */}
+          <clipPath id="pls-right-col-clip">
+            <rect x="0" y="0" width={rightColWidth} height={colHeight} rx="8" />
+          </clipPath>
 
           {/* INGREDIENTS, DIRECTIONS, AND BALANCED VERTICAL AUTO-FILL ENGINE */}
           {(() => {
@@ -743,7 +718,7 @@ export default function PharmapolisLabelSvg({
               ? (isUltraSparse ? 29 : isSparse ? 25 : 22)
               : (isUltraSparse ? 38 : isSparse ? 34 : 27);
             const ingLineGap = Math.round(ingFontSize * 1.36);
-            const ingMaxChars = Math.max(28, Math.floor(innerUsableWidth / (ingFontSize * 0.58)));
+            const ingMaxChars = Math.max(20, Math.floor((innerUsableWidth - 48) / (ingFontSize * 0.70)));
             const ingLines = wrapLines(rawIngText, ingMaxChars);
             const ingLineCount = ingLines.length;
 
@@ -751,14 +726,14 @@ export default function PharmapolisLabelSvg({
               ? (isUltraSparse ? 20 : isSparse ? 18 : 16)
               : (isUltraSparse ? 26 : isSparse ? 23 : 20);
             const baseLineGap = Math.round(baseFontSize * 1.34);
-            const baseMaxChars = Math.max(34, Math.floor(innerUsableWidth / (baseFontSize * 0.58)));
+            const baseMaxChars = Math.max(24, Math.floor((innerUsableWidth - 48) / (baseFontSize * 0.68)));
             const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, baseMaxChars);
 
             const posFontSize = isShort
               ? (isUltraSparse ? 24 : isSparse ? 21 : 19)
               : (isUltraSparse ? 32 : isSparse ? 28 : 23);
             const posLineGap = Math.round(posFontSize * 1.35);
-            const posMaxChars = Math.max(28, Math.floor((innerUsableWidth - 36) / (posFontSize * 0.58)));
+            const posMaxChars = Math.max(22, Math.floor((innerUsableWidth - 64) / (posFontSize * 0.70)));
             const posologyLines = wrapLines(directions, posMaxChars);
             const posBoxInnerH = (posologyLines.length * posLineGap) + (isUltraSparse ? 52 : isSparse ? 44 : 38);
             const basePosBoxHeight = Math.max(isUltraSparse ? 120 : isSparse ? 100 : 80, posBoxInnerH);
