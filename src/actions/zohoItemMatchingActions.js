@@ -158,7 +158,9 @@ export async function matchPrescriptionApisAction({ prescriptionId, apis = [] })
     const evaluatedApis = [];
 
     for (const rawApi of apis) {
-      const rawName = typeof rawApi === 'string' ? rawApi : (rawApi.name || rawApi.productName || rawApi.activeIngredient || '');
+      const rawName = typeof rawApi === 'string'
+        ? rawApi
+        : (rawApi.name || rawApi.drugName || rawApi.productName || rawApi.activeIngredient || rawApi.product_title || rawApi.title || '');
       const rawDose = typeof rawApi === 'string' ? '' : (rawApi.dosage || rawApi.dose || rawApi.concentration || '');
       const normalized = normalizeApiName(rawName + (rawDose ? ` ${rawDose}` : ''));
 
@@ -218,6 +220,9 @@ export async function matchPrescriptionApisAction({ prescriptionId, apis = [] })
         dose: normalized.dose || rawDose,
         slug: normalized.slug,
         suggestedSku: generateSuggestedSku(normalized.coreName, normalized.dose || rawDose),
+        partNumber: rawApi.partNumber || null,
+        treatmentType: rawApi.treatmentType || null,
+        memberRxId: rawApi.memberRxId || null,
         isPersistent,
         linkedItem: linkedItem || (topCandidate && topCandidate.score >= 90 ? topCandidate : null),
         topScore: topCandidate ? topCandidate.score : 0,
@@ -245,6 +250,7 @@ export async function confirmApiZohoAssociationAction({
   apiDose = '',
   zohoItem,
   prescriptionId = null,
+  prescriptionIds = null,
   userEmail = 'admin'
 }) {
   if (!apiRawName || !zohoItem || !zohoItem.item_id) {
@@ -281,45 +287,59 @@ export async function confirmApiZohoAssociationAction({
       await adminDb.collection('zoho_api_dictionary').doc(coreKey).set(record, { merge: true });
     }
 
-    // 3. Update prescription document if ID is provided
-    if (prescriptionId) {
-      const rxRef = adminDb.collection('prescriptions').doc(prescriptionId);
-      const rxSnap = await rxRef.get();
-      if (rxSnap.exists) {
-        const rxData = rxSnap.data();
-        let itemsModified = false;
+    // 3. Update prescription document(s) if provided
+    const targetRxIds = Array.isArray(prescriptionIds) && prescriptionIds.length > 0
+      ? prescriptionIds
+      : (prescriptionId ? [prescriptionId] : []);
 
-        const updateLineItems = (items) => {
-          if (!Array.isArray(items)) return items;
-          return items.map(it => {
-            const itName = it.name || it.productName || it.activeIngredient || '';
-            const normIt = normalizeApiName(itName);
-            if (normIt.slug === dictDocId || normIt.coreName.toLowerCase() === normalized.coreName.toLowerCase()) {
-              itemsModified = true;
-              return {
-                ...it,
-                zoho_item_id: String(zohoItem.item_id),
-                zoho_item_name: zohoItem.name || zohoItem.item_name || '',
-                zoho_sku: zohoItem.sku || '',
-                zoho_rate: parseFloat(zohoItem.rate) || 0,
-                zoho_purchase_rate: parseFloat(zohoItem.purchase_rate) || 0,
-                zoho_linked_at: new Date().toISOString()
-              };
-            }
-            return it;
-          });
-        };
+    for (const rxId of targetRxIds) {
+      if (!rxId || typeof rxId !== 'string' || rxId.startsWith('multipart_')) continue;
 
-        const updatedItems = updateLineItems(rxData.items || []);
-        const updatedCompounds = updateLineItems(rxData.compounds || []);
+      try {
+        const rxRef = adminDb.collection('prescriptions').doc(rxId);
+        const rxSnap = await rxRef.get();
+        if (rxSnap.exists) {
+          const rxData = rxSnap.data();
+          let itemsModified = false;
 
-        if (itemsModified) {
-          await rxRef.update({
-            items: updatedItems,
-            compounds: updatedCompounds,
-            updatedAt: new Date()
-          });
+          const updateLineItems = (items) => {
+            if (!Array.isArray(items)) return items;
+            return items.map(it => {
+              const itName = it.name || it.drugName || it.productName || it.activeIngredient || it.product_title || '';
+              const normIt = normalizeApiName(itName);
+              if (
+                normIt.slug === dictDocId ||
+                normIt.coreName.toLowerCase() === normalized.coreName.toLowerCase() ||
+                (it.drugName && it.drugName.toLowerCase() === apiRawName.toLowerCase())
+              ) {
+                itemsModified = true;
+                return {
+                  ...it,
+                  zoho_item_id: String(zohoItem.item_id),
+                  zoho_item_name: zohoItem.name || zohoItem.item_name || '',
+                  zoho_sku: zohoItem.sku || '',
+                  zoho_rate: parseFloat(zohoItem.rate) || 0,
+                  zoho_purchase_rate: parseFloat(zohoItem.purchase_rate) || 0,
+                  zoho_linked_at: new Date().toISOString()
+                };
+              }
+              return it;
+            });
+          };
+
+          const updatedItems = updateLineItems(rxData.items || []);
+          const updatedCompounds = updateLineItems(rxData.compounds || []);
+
+          if (itemsModified) {
+            await rxRef.update({
+              items: updatedItems,
+              compounds: updatedCompounds,
+              updatedAt: new Date()
+            });
+          }
         }
+      } catch (docErr) {
+        console.warn(`[confirmApiZohoAssociationAction] Warning updating doc ${rxId}:`, docErr.message);
       }
     }
 
@@ -341,6 +361,7 @@ export async function createZohoItemAndAssociateAction({
   apiData,
   itemData,
   prescriptionId = null,
+  prescriptionIds = null,
   userEmail = 'admin'
 }) {
   const token = await getZohoAccessToken();
@@ -393,6 +414,7 @@ export async function createZohoItemAndAssociateAction({
       apiDose: apiData.dose || '',
       zohoItem: createdZohoItem,
       prescriptionId,
+      prescriptionIds,
       userEmail
     });
 
@@ -416,6 +438,7 @@ export async function updateZohoItemAndConfirmAction({
   updatedFields = {},
   apiData,
   prescriptionId = null,
+  prescriptionIds = null,
   userEmail = 'admin'
 }) {
   if (!itemId) return { success: false, error: 'No itemId provided for update.' };
@@ -464,6 +487,7 @@ export async function updateZohoItemAndConfirmAction({
       apiDose: apiData.dose || '',
       zohoItem: updatedZohoItem,
       prescriptionId,
+      prescriptionIds,
       userEmail
     });
 

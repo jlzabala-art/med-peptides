@@ -1569,7 +1569,7 @@ export default function PublicLabelsAppClient({
         </div>
 
         {/* Global Action: Print All Patients in A4 PDF Sheet */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+        <div className="pls-batch-btn-print-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           <button
             type="button"
             className="pls-batch-btn-print"
@@ -1612,48 +1612,50 @@ export default function PublicLabelsAppClient({
             <Search size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
           </button>
 
-          {/* Prescription → public RX page (+ copy) */}
-          <div className="pls-id-chip" style={{ padding: 0, cursor: 'default' }}>
+          <div className="pls-id-sub-row">
+            {/* Prescription → public RX page (+ copy) */}
+            <div className="pls-id-chip" style={{ padding: 0, cursor: 'default' }}>
+              <Link
+                href={`/rx/${encodeURIComponent(cleanRxCode)}`}
+                id="pls-id-rx"
+                className="pls-id-chip"
+                style={{ border: 'none', background: 'transparent' }}
+                title={isEs ? `Ir a la prescripción #${cleanRxCode}` : `Go to prescription #${cleanRxCode}`}
+              >
+                <span className="pls-id-icon" style={{ background: '#e8f0fe', color: '#1a73e8' }}><FileText size={14} /></span>
+                <span className="pls-id-text">
+                  <span className="pls-id-label">{isEs ? 'Prescripción' : 'Prescription'}</span>
+                  <span className="pls-id-value mono">#{cleanRxCode}</span>
+                </span>
+                <ExternalLink size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
+              </Link>
+              <button
+                type="button"
+                className="pls-code-pill-copy"
+                style={{ alignSelf: 'stretch', minWidth: 32 }}
+                onClick={handleCopyCode}
+                title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
+                aria-label={isEs ? 'Copiar código' : 'Copy code'}
+              >
+                {copyCodeSuccess ? <Check size={12} color="#137333" /> : <Copy size={12} />}
+              </button>
+            </div>
+
+            {/* Doctor → public doctor page */}
             <Link
-              href={`/rx/${encodeURIComponent(cleanRxCode)}`}
-              id="pls-id-rx"
+              href={`/dr/${encodeURIComponent(doctorSlug)}`}
+              id="pls-id-doctor"
               className="pls-id-chip"
-              style={{ border: 'none', background: 'transparent' }}
-              title={isEs ? `Ir a la prescripción #${cleanRxCode}` : `Go to prescription #${cleanRxCode}`}
+              title={isEs ? `Ir al portal clínico de ${docName}` : `Go to doctor portal of ${docName}`}
             >
-              <span className="pls-id-icon" style={{ background: '#e8f0fe', color: '#1a73e8' }}><FileText size={14} /></span>
+              <span className="pls-id-icon" style={{ background: '#e6f4ea', color: '#137333' }}><Stethoscope size={14} /></span>
               <span className="pls-id-text">
-                <span className="pls-id-label">{isEs ? 'Prescripción' : 'Prescription'}</span>
-                <span className="pls-id-value mono">#{cleanRxCode}</span>
+                <span className="pls-id-label">{isEs ? 'Médico' : 'Doctor'}</span>
+                <span className="pls-id-value">{docName}</span>
               </span>
               <ExternalLink size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
             </Link>
-            <button
-              type="button"
-              className="pls-code-pill-copy"
-              style={{ alignSelf: 'stretch', minWidth: 32 }}
-              onClick={handleCopyCode}
-              title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
-              aria-label={isEs ? 'Copiar código' : 'Copy code'}
-            >
-              {copyCodeSuccess ? <Check size={12} color="#137333" /> : <Copy size={12} />}
-            </button>
           </div>
-
-          {/* Doctor → public doctor page */}
-          <Link
-            href={`/dr/${encodeURIComponent(doctorSlug)}`}
-            id="pls-id-doctor"
-            className="pls-id-chip"
-            title={isEs ? `Ir al portal clínico de ${docName}` : `Go to doctor portal of ${docName}`}
-          >
-            <span className="pls-id-icon" style={{ background: '#e6f4ea', color: '#137333' }}><Stethoscope size={14} /></span>
-            <span className="pls-id-text">
-              <span className="pls-id-label">{isEs ? 'Médico' : 'Doctor'}</span>
-              <span className="pls-id-value">{docName}</span>
-            </span>
-            <ExternalLink size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
-          </Link>
         </div>
 
         {/* Formula Parts Switcher (Part 1 / Part 2) */}

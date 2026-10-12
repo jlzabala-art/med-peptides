@@ -533,32 +533,6 @@ export default async function PublicProductRoute({ params, searchParams }) {
     { name: productName, url: `/p/${slug}` }
   ], BASE_URL);
 
-  if (isEterna) {
-    return (
-      <>
-        {jsonLd && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-          />
-        )}
-        {breadcrumbJsonLd && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-          />
-        )}
-        <EternaGenomicsDetail 
-          product={safeProduct} 
-          slug={slug} 
-          initialBatch={initialBatch} 
-          initialStrength={initialStrength}
-          baseUrl={BASE_URL}
-        />
-      </>
-    );
-  }
-
   if (isAesthetic) {
     return (
       <>

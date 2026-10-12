@@ -95,6 +95,9 @@ export function normalizeApiName(rawName) {
     .replace(/\b\d+(?:\.\d+)?\s*%/g, ' ')
     .replace(/\b\d+(?:\.\d+)?\s*(?:mg\/ml|mcg\/ml|iu\/ml|mg|ml|mcg|g)\b/gi, ' ')
     .replace(/\b(?:vehicle|patented|compounded|active|ingredient|powder|raw)\b/gi, ' ')
+    .replace(/\b(?:q\.?s\.?)\b/gi, ' ')
+    .replace(/\/\s*(?:ml|l|mg|g)\b/gi, ' ')
+    .replace(/[.,;:/\-_]+(?=\s|$)/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 

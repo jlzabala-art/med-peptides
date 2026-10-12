@@ -398,8 +398,9 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
           _isSessionGroup: true,
           _sessionCount: members.length,
           _sessionMembers: members,
+          memberIds: members.map(m => m.id),
           source: isFagronGroup ? 'fagron' : first.source,
-          items: members.flatMap(m => m.prescriptionLines || m.items || []),
+          items: members.flatMap(m => (Array.isArray(m.items) && m.items.length > 0) ? m.items : (m.compounds || m.prescriptionLines || [])),
           prescriptionLines: members.flatMap(m => m.prescriptionLines || m.items || []),
         });
       }
@@ -475,9 +476,44 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
                 {typeInfo.sublabel && <span style={{ opacity: 0.85, fontWeight: 400 }}>· {typeInfo.sublabel}</span>}
               </span>
             </div>
-            <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>
-              Linked multi-part patient treatment sequence
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {!readOnly && (() => {
+                const multiApis = row._sessionMembers.flatMap(m => (m.items && m.items.length > 0) ? m.items : (m.compounds || m.prescriptionLines || []));
+                const syncedCount = multiApis.filter(item => Boolean(item.zoho_item_id || item.zoho_sku)).length;
+                const isAllZohoMatched = multiApis.length > 0 && syncedCount === multiApis.length;
+
+                return (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setZohoMatcherRx(row);
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '3px 9px',
+                      borderRadius: '4px',
+                      background: isAllZohoMatched ? '#dcfce7' : '#f0fdf4',
+                      border: isAllZohoMatched ? '1px solid #86efac' : '1px solid #bbf7d0',
+                      color: isAllZohoMatched ? '#166534' : '#15803d',
+                      fontSize: '0.70rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                    title={isAllZohoMatched 
+                      ? `Todos los APIs de las ${row._sessionMembers.length} partes (${syncedCount}/${multiApis.length}) sincronizados con Zoho Books`
+                      : `Vincular APIs de las ${row._sessionMembers.length} partes con Zoho Books (${syncedCount}/${multiApis.length} sincronizados)`}
+                  >
+                    <span>{isAllZohoMatched ? '✓ Zoho Sincronizado' : `Vincular en Zoho (${syncedCount}/${multiApis.length})`}</span>
+                  </button>
+                );
+              })()}
+              <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>
+                Linked multi-part patient treatment sequence
+              </span>
+            </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {row._sessionMembers.map((member, idx) => (

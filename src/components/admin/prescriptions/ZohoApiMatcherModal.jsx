@@ -37,19 +37,55 @@ export default function ZohoApiMatcherModal({
   const [liveQuery, setLiveQuery] = useState('');
   const [copiedSkuIndex, setCopiedSkuIndex] = useState(null);
 
-  // Extract raw API list from prescription
+  // Extract raw API list from prescription (supporting single prescriptions & multi-part session groups)
   const apis = useMemo(() => {
     if (!prescription) return [];
-    const items = prescription.items || prescription.compounds || prescription.products || prescription.prescriptionLines || [];
-    return items.map((it, idx) => ({
-      id: it.id || it.productId || `api_${idx}`,
-      name: it.name || it.productName || it.activeIngredient || it.product_title || `API #${idx + 1}`,
-      dosage: it.dosage || it.dose || it.strength || it.concentration || '',
-      quantity: it.quantity || 1,
-      zoho_item_id: it.zoho_item_id || null,
-      zoho_item_name: it.zoho_item_name || null,
-      zoho_sku: it.zoho_sku || null
-    }));
+
+    let rawList = [];
+    if (prescription._isSessionGroup && Array.isArray(prescription._sessionMembers)) {
+      rawList = prescription._sessionMembers.flatMap((member, memberIdx) => {
+        const memberItems = (Array.isArray(member.items) && member.items.length > 0)
+          ? member.items
+          : (member.compounds || member.products || member.prescriptionLines || []);
+        
+        return memberItems.map((it) => ({
+          ...it,
+          partNumber: member.partNumber || (memberIdx + 1),
+          treatmentType: member.treatmentType || `Part ${member.partNumber || memberIdx + 1}`,
+          memberRxId: member.id || null
+        }));
+      });
+    } else {
+      rawList = prescription.items || prescription.compounds || prescription.products || prescription.prescriptionLines || [];
+    }
+
+    return rawList.map((it, idx) => {
+      const resolvedName = it.name || it.drugName || it.productName || it.activeIngredient || it.product_title || it.title || '';
+      const resolvedDose = it.dosage || it.dose || it.strength || it.concentration || '';
+      return {
+        id: it.id || it.productId || `api_${idx}`,
+        name: resolvedName || `API #${idx + 1}`,
+        drugName: it.drugName || null,
+        activeIngredient: it.activeIngredient || null,
+        dosage: resolvedDose,
+        dose: it.dose || resolvedDose,
+        quantity: it.quantity || 1,
+        partNumber: it.partNumber || null,
+        treatmentType: it.treatmentType || null,
+        memberRxId: it.memberRxId || null,
+        zoho_item_id: it.zoho_item_id || null,
+        zoho_item_name: it.zoho_item_name || null,
+        zoho_sku: it.zoho_sku || null
+      };
+    });
+  }, [prescription]);
+
+  const targetRxIds = useMemo(() => {
+    if (!prescription) return [];
+    if (prescription._isSessionGroup && Array.isArray(prescription._sessionMembers)) {
+      return prescription._sessionMembers.map(m => m.id);
+    }
+    return prescription.id ? [prescription.id] : [];
   }, [prescription]);
 
   // Load matches whenever modal opens
