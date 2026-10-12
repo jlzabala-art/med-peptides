@@ -501,14 +501,14 @@ export default function PharmapolisLabelSvg({
   if (variant === 'backQr') {
     const colY = patientBoxBottom + (isShort ? 12 : 16);
     const colHeight = footerLineY - colY - (isShort ? 12 : 16);
-    // Narrow left column from 340 to 235 px to eliminate wide empty margins around QR
-    const leftColWidth = isShort ? 215 : 235;
-    const rightColX = 60 + leftColWidth + (isShort ? 14 : 18);
+    // Narrow left column to 210 px (195 in short mode) to maximize clinical workspace
+    const leftColWidth = isShort ? 195 : 210;
+    const rightColX = 60 + leftColWidth + (isShort ? 12 : 16);
     const rightColWidth = 1440 - rightColX;
     const innerUsableWidth = rightColWidth - 48;
 
-    // Compact QR size: 180 units (160 in short mode) - perfectly scannable at ~9mm physical
-    const backQrSize = isShort ? 160 : 180;
+    // Compact QR size: 165 units (150 in short mode) - perfectly scannable at ~8.5mm physical
+    const backQrSize = isShort ? 150 : 165;
     const qrX = Math.round((leftColWidth - backQrSize) / 2);
     const qrY = isShort ? 14 : 18;
 
@@ -691,27 +691,9 @@ export default function PharmapolisLabelSvg({
         <g transform={`translate(${rightColX}, ${colY})`}>
           <rect x="0" y="0" width={rightColWidth} height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" rx="8" />
 
-          {/* INGREDIENTS, DIRECTIONS, AND TIGHT CAUTION (Bottom-Up Anchored) */}
+          {/* INGREDIENTS, DIRECTIONS, AND BALANCED VERTICAL AUTO-FILL ENGINE */}
           {(() => {
             const ingCount = activeIngredientsList.length;
-            const topIngredientsY = isShort ? 16 : 22;
-
-            // ── BOTTOM-UP ANCHOR CALCULATIONS ──
-            const bottomMargin = isShort ? 14 : 18;
-            const bMonographsY = colHeight - bottomMargin;
-            const bRxY = bMonographsY - (isShort ? 16 : 20);
-            const bCautionY = bRxY - (isShort ? 18 : 22);
-            const bCautionDividerY = bCautionY - (isShort ? 12 : 14);
-            const gapDirectionsToCaution = isShort ? 12 : 14;
-            const posBoxBottomY = bCautionDividerY - gapDirectionsToCaution;
-
-            // Directions Box Dimensions
-            const posologyLines = wrapLines(directions, isShort ? 58 : 70);
-            const posFontSize = isShort ? 20 : (posologyLines.length <= 2 ? 26 : 23);
-            const posLineGap = isShort ? 26 : 33;
-            const posBoxHeight = (isShort ? 36 : 42) + (posologyLines.length * posLineGap);
-            const posBoxY = posBoxBottomY - posBoxHeight;
-            const posTextPadTop = isShort ? 38 : 44;
 
             let vehiclePrefix = 'Compounding Vehicle:';
             const vLower = (vehicleName || '').toLowerCase();
@@ -747,34 +729,64 @@ export default function PharmapolisLabelSvg({
                 .replace(/\bnatural\s+lipidic\s+carrier\b/gi, '100% Natural Scalp Compounding Vehicle');
             }
 
-            const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, isShort ? 70 : 86);
-            const baseFontSize = isShort ? 17 : (cleanVehicleDisplay.length > 55 ? 20 : 22);
-            const baseLineGap = isShort ? 23 : 28;
-
-            // ── COMPACT INLINE INGREDIENTS WITH EM-DASH (Flowing layout) ──
-            // Stacking every ingredient vertically wastes massive vertical space and forces tiny fonts.
-            // Joining them with ' — ' flows them continuously into 2-3 lines, saving ~140px of vertical space
-            // and allowing a much larger, high-contrast typography (USP / EU GMP compliant).
-            const rawIngText = activeIngredientsList.length === 1
+            // Raw continuous flowing text for active ingredients
+            const rawIngText = ingCount === 1
               ? `• ${activeIngredientsList[0]}`
               : `• ${activeIngredientsList.join('  —  ')}`;
-            const ingLines = wrapLines(rawIngText, isShort ? 66 : 78);
+
+            // Sparsity detection: allows short formulas (Julien, Mohammed, etc.) to boost typography to 38-42px
+            const isUltraSparse = ingCount <= 3 && (rawIngText.length < 130) && (directions.length < 110);
+            const isSparse = ingCount <= 4 && (rawIngText.length < 185) && (directions.length < 165);
+
+            // Dynamic Auto-Fill Font Sizing
+            const ingFontSize = isShort
+              ? (isUltraSparse ? 29 : isSparse ? 25 : 22)
+              : (isUltraSparse ? 38 : isSparse ? 34 : 27);
+            const ingLineGap = Math.round(ingFontSize * 1.36);
+            const ingMaxChars = Math.max(28, Math.floor(innerUsableWidth / (ingFontSize * 0.58)));
+            const ingLines = wrapLines(rawIngText, ingMaxChars);
             const ingLineCount = ingLines.length;
 
-            // Space available for ingredients & base above Posology
-            const gapIngToDirections = isShort ? 12 : 16;
-            const availableUpperH = Math.max(200, posBoxY - topIngredientsY - gapIngToDirections);
-            const estBaseH = (baseLines.length * baseLineGap) + (isShort ? 16 : 22);
-            const spaceForApis = Math.max(80, availableUpperH - estBaseH);
+            const baseFontSize = isShort
+              ? (isUltraSparse ? 20 : isSparse ? 18 : 16)
+              : (isUltraSparse ? 26 : isSparse ? 23 : 20);
+            const baseLineGap = Math.round(baseFontSize * 1.34);
+            const baseMaxChars = Math.max(34, Math.floor(innerUsableWidth / (baseFontSize * 0.58)));
+            const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, baseMaxChars);
 
-            // Generous dynamic font size and spacing to evenly balance upper canvas with zero dead void
-            const rawIngGap = Math.floor(spaceForApis / Math.max(1, ingLineCount));
-            const ingLineGap = isShort
-              ? Math.max(28, Math.min(42, rawIngGap))
-              : Math.max(30, Math.min(46, rawIngGap));
-            const ingFontSize = Math.min(isShort ? 25 : 29, Math.max(isShort ? 19 : 22, Math.round(ingLineGap * 0.72)));
+            const posFontSize = isShort
+              ? (isUltraSparse ? 24 : isSparse ? 21 : 19)
+              : (isUltraSparse ? 32 : isSparse ? 28 : 23);
+            const posLineGap = Math.round(posFontSize * 1.35);
+            const posMaxChars = Math.max(28, Math.floor((innerUsableWidth - 36) / (posFontSize * 0.58)));
+            const posologyLines = wrapLines(directions, posMaxChars);
+            const posBoxInnerH = (posologyLines.length * posLineGap) + (isUltraSparse ? 52 : isSparse ? 44 : 38);
+            const basePosBoxHeight = Math.max(isUltraSparse ? 120 : isSparse ? 100 : 80, posBoxInnerH);
 
-            const baseStartY = (isShort ? 26 : 32) + (ingLineCount * ingLineGap) + (isShort ? 8 : 12);
+            // Bottom-anchored Caution & Regulatory Monograph coordinates
+            const bottomMargin = isShort ? 14 : 18;
+            const bMonographsY = colHeight - bottomMargin;
+            const bRxY = bMonographsY - (isShort ? 16 : 20);
+            const bCautionY = bRxY - (isShort ? 18 : 22);
+            const bCautionDividerY = bCautionY - (isShort ? 12 : 14);
+
+            const availableWorkHeight = bCautionDividerY - (isShort ? 12 : 18);
+            const ingHeaderH = isShort ? 22 : 28;
+            const ingTextH = ingLineCount * ingLineGap;
+            const baseGap = isUltraSparse ? 18 : isSparse ? 14 : 10;
+            const baseTextH = baseLines.length * baseLineGap;
+            const ingBlockH = ingHeaderH + ingTextH + baseGap + baseTextH;
+
+            // Harmonious vertical surplus distribution (eliminates desert-like empty white gaps)
+            const surplus = Math.max(0, availableWorkHeight - (ingBlockH + basePosBoxHeight));
+            const topIngredientsY = Math.max(isShort ? 14 : 18, Math.min(32, Math.round(surplus * 0.18)));
+            const midPad = Math.max(isShort ? 16 : 22, Math.min(75, Math.round(surplus * 0.38)));
+            const extraBoxH = Math.min(60, Math.max(0, Math.round(surplus * 0.25)));
+            const posBoxHeight = basePosBoxHeight + extraBoxH;
+            const posBoxY = topIngredientsY + ingBlockH + midPad;
+
+            const baseStartY = ingHeaderH + (ingLineCount * ingLineGap) + baseGap;
+            const posTextPadTop = isShort ? 38 : (isUltraSparse ? 50 : 44);
 
             const rxParts = [];
             if (doctorName) rxParts.push(`Rx: ${doctorName}`);
@@ -785,9 +797,9 @@ export default function PharmapolisLabelSvg({
 
             return (
               <>
-                {/* Block 2: ACTIVE COMPOUNDED INGREDIENTS & BASE (Continuous Flowing Layout) */}
+                {/* Block 2: ACTIVE COMPOUNDED INGREDIENTS & BASE (Dynamic Auto-Fill Layout) */}
                 <g transform={`translate(24, ${topIngredientsY})`}>
-                  <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                  <text x="0" y={isShort ? 14 : 18} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
                     ACTIVE COMPOUNDED INGREDIENTS
                   </text>
                   
@@ -795,7 +807,7 @@ export default function PharmapolisLabelSvg({
                     <text
                       key={`ing-${lIdx}`}
                       x="0"
-                      y={(isShort ? 26 : 32) + (lIdx * ingLineGap)}
+                      y={ingHeaderH + (lIdx * ingLineGap)}
                       fontFamily="Arial, Helvetica, sans-serif"
                       fontSize={ingFontSize}
                       fontWeight="800"
@@ -820,12 +832,12 @@ export default function PharmapolisLabelSvg({
                   ))}
                 </g>
 
-                {/* Block 3: DEDICATED CLINICAL POSOLOGY & DIRECTIONS (Anchored above Caution) */}
+                {/* Block 3: DEDICATED CLINICAL POSOLOGY & DIRECTIONS (Harmoniously Weighted) */}
                 <g transform={`translate(24, ${posBoxY})`}>
                   <rect x="0" y="0" width={innerUsableWidth} height={posBoxHeight} fill="#f8fafc" stroke="#bae6fd" strokeWidth="1.8" rx="6" />
                   <rect x="0" y="0" width="6" height={posBoxHeight} fill="#0284c7" rx="3" />
                   
-                  <text x="18" y={isShort ? 20 : 24} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                  <text x="18" y={isShort ? 20 : 25} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
                     DIRECTIONS FOR USE / PRESCRIBED POSOLOGY
                   </text>
 

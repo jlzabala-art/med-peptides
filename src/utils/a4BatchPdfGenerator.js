@@ -94,7 +94,7 @@ export async function generateA4BatchPdf({
     pdf.setTextColor(100, 116, 139); // slate-500
     const today = new Date().toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     pdf.text(
-      `EU GMP Vector Standard • Physical 1:1 Scale Print • ${items.length} ${items.length === 1 ? 'Label' : 'Labels'} • Generated ${today}`,
+      `EU GMP Vector Standard • Physical 1:1 Scale Print • Container-Adaptive Packaging • ${items.length} ${items.length === 1 ? 'Label' : 'Labels'} • Generated ${today}`,
       MARGIN_LEFT,
       16
     );
@@ -167,11 +167,12 @@ export async function generateA4BatchPdf({
       pdf.line(currentX + wMm, currentY + hMm, currentX + wMm + CROP_LEN, currentY + hMm);
       pdf.line(currentX + wMm, currentY + hMm, currentX + wMm, currentY + hMm + CROP_LEN);
 
-      // Micro caption below label with patient info & dimensions
+      // Micro caption below label with patient info, container tag & dimensions
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(6);
       pdf.setTextColor(100, 116, 139);
-      const caption = `[#${item.rxCode || 'RX'} - ${item.patientName || 'Patient'}${item.partLabel ? ` • ${item.partLabel}` : ''}] ${wMm}×${hMm}mm (${item.variantLabel || item.variant || 'Standard'})`;
+      const containerInfo = item.containerTag ? ` • ${item.containerTag}` : '';
+      const caption = `[#${item.rxCode || 'RX'} - ${item.patientName || 'Patient'}${item.partLabel ? ` • ${item.partLabel}` : ''}] ${wMm}×${hMm}mm (${item.variantLabel || item.variant || 'Standard'}${containerInfo})`;
       pdf.text(caption, currentX + 1, currentY + hMm + 3.2);
     }
 

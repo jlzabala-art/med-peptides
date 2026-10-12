@@ -31,6 +31,7 @@ import {
 } from '@/lib/icons';
 import PharmapolisLabelSvg from '@/components/prescription/PharmapolisLabelSvg';
 import { generateA4BatchPdf } from '@/utils/a4BatchPdfGenerator';
+import { detectOptimalLabelDimensions, CONTAINER_SIZE_PRESETS } from '@/utils/labels/containerDimensionDetector';
 
 // Flagship featured cases for instant 1-click access
 const FEATURED_PATIENTS = [
@@ -98,12 +99,8 @@ function getDoctorSlug(rx, fallbackDocName) {
     .replace(/\s+/g, '-');
 }
 
-// Label size presets and variants for individual patient customization
-const LABEL_SIZE_PRESETS = [
-  { id: '75x45', widthMm: 75, heightMm: 45, labelEn: '75 × 45 mm (Standard)', labelEs: '75 × 45 mm (Estándar)' },
-  { id: '100x55', widthMm: 100, heightMm: 55, labelEn: '100 × 55 mm (Large Jar)', labelEs: '100 × 55 mm (Frasco Grande)' },
-  { id: '90x38', widthMm: 90, heightMm: 38, labelEn: '90 × 38 mm (Vial / Ampoule)', labelEs: '90 × 38 mm (Vial / Ampolla)' },
-];
+// Label size presets and variants for individual patient customization (Adaptive to Packaging)
+const LABEL_SIZE_PRESETS = CONTAINER_SIZE_PRESETS;
 
 const LABEL_VARIANT_OPTIONS = [
   { id: 'backQr', labelEs: 'Trasera con QR', labelEn: 'Back with QR' },
@@ -123,28 +120,52 @@ export default function PublicLabelsAppClient({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Patient Batch Queue State
+  // Patient Batch Queue State with Automatic Container Dimensions
   const [patientQueue, setPatientQueue] = useState(() => {
     if (Array.isArray(initialQueue) && initialQueue.length > 0) {
-      return initialQueue.map((item, idx) => ({
-        code: String(item.code || item.rx?.fileNumber || item.rx?.code),
-        rx: item.rx,
-        labels: item.labels || [],
-        selectedPartIndex: (idx === 0 && initialLabelIndex != null && initialLabelIndex !== 0) ? initialLabelIndex : 'all',
-        variant: 'backQr',
-        widthMm: 75,
-        heightMm: 45
-      }));
+      return initialQueue.map((item, idx) => {
+        const enrichedLabels = (item.labels || []).map((lbl) => {
+          const opt = detectOptimalLabelDimensions(lbl);
+          return {
+            ...lbl,
+            widthMm: lbl.widthMm || opt.widthMm,
+            heightMm: lbl.heightMm || opt.heightMm,
+            containerTag: opt.containerTag
+          };
+        });
+        const firstOpt = detectOptimalLabelDimensions(enrichedLabels[0] || item.rx);
+        return {
+          code: String(item.code || item.rx?.fileNumber || item.rx?.code),
+          rx: item.rx,
+          labels: enrichedLabels,
+          selectedPartIndex: (idx === 0 && initialLabelIndex != null && initialLabelIndex !== 0) ? initialLabelIndex : 'all',
+          variant: 'backQr',
+          widthMm: item.widthMm || firstOpt.widthMm,
+          heightMm: item.heightMm || firstOpt.heightMm,
+          containerTag: firstOpt.containerTag
+        };
+      });
     }
     if (initialRx) {
+      const enrichedLabels = (initialLabels || []).map((lbl) => {
+        const opt = detectOptimalLabelDimensions(lbl);
+        return {
+          ...lbl,
+          widthMm: lbl.widthMm || opt.widthMm,
+          heightMm: lbl.heightMm || opt.heightMm,
+          containerTag: opt.containerTag
+        };
+      });
+      const firstOpt = detectOptimalLabelDimensions(enrichedLabels[0] || initialRx);
       return [{
         code: String(initialCode || initialRx?.fileNumber || initialRx?.code || '51812'),
         rx: initialRx,
-        labels: initialLabels || [],
+        labels: enrichedLabels,
         selectedPartIndex: (initialLabelIndex != null && initialLabelIndex !== 0) ? initialLabelIndex : 'all',
         variant: 'backQr',
-        widthMm: 75,
-        heightMm: 45
+        widthMm: firstOpt.widthMm,
+        heightMm: firstOpt.heightMm,
+        containerTag: firstOpt.containerTag
       }];
     }
     return [];
@@ -374,14 +395,25 @@ export default function PublicLabelsAppClient({
       const res = await fetch(`/api/labels/load?code=${encodeURIComponent(cleanCode)}`);
       const data = await res.json();
       if (data?.success && data.rx) {
+        const enrichedLabels = (data.labels || []).map((lbl) => {
+          const opt = detectOptimalLabelDimensions(lbl);
+          return {
+            ...lbl,
+            widthMm: lbl.widthMm || opt.widthMm,
+            heightMm: lbl.heightMm || opt.heightMm,
+            containerTag: opt.containerTag
+          };
+        });
+        const firstOpt = detectOptimalLabelDimensions(enrichedLabels[0] || data.rx);
         const newItem = {
           code: cleanCode,
           rx: data.rx,
-          labels: data.labels || [],
+          labels: enrichedLabels,
           selectedPartIndex: 'all',
           variant: 'backQr',
-          widthMm: 75,
-          heightMm: 45
+          widthMm: firstOpt.widthMm,
+          heightMm: firstOpt.heightMm,
+          containerTag: firstOpt.containerTag
         };
 
         const nextQueue = [...patientQueue, newItem];
@@ -516,14 +548,21 @@ export default function PublicLabelsAppClient({
             continue;
           }
 
+          // Optimal container dimensions for this specific bottle/part
+          const optDims = detectOptimalLabelDimensions(pLabel);
+          const effectiveWidthMm = Number(pLabel.widthMm || (pItem.widthMm !== 75 ? pItem.widthMm : optDims.widthMm)) || 75;
+          const effectiveHeightMm = Number(pLabel.heightMm || (pItem.heightMm !== 45 ? pItem.heightMm : optDims.heightMm)) || 45;
+          const containerTag = pLabel.containerTag || optDims.containerTag || '';
+
           batchItems.push({
             patientName: pName,
             rxCode: rxC,
             partLabel: partLbl,
             variant: pItem.variant || 'backQr',
             variantLabel: pItem.variant === 'shipping' ? 'Shipping' : (pItem.variant === 'front' ? 'Front' : (pItem.variant === 'frontWithQr' ? 'Front+MicroQR' : 'Delivery')),
-            widthMm: Number(pItem.widthMm) || 75,
-            heightMm: Number(pItem.heightMm) || 45,
+            widthMm: effectiveWidthMm,
+            heightMm: effectiveHeightMm,
+            containerTag: containerTag,
             svgEl: svgEl,
             svgElement: svgEl
           });
@@ -1649,7 +1688,7 @@ export default function PublicLabelsAppClient({
           {patientQueue.map((pItem, qIdx) => {
             const isActive = activeQueueIndex === qIdx;
             const pName = pItem.rx?.patient?.name || pItem.rx?.patientName || 'Patient';
-            const sizeLabel = `${pItem.widthMm}×${pItem.heightMm}mm`;
+            const sizeLabel = pItem.containerTag ? `${pItem.widthMm}×${pItem.heightMm}mm · ${pItem.containerTag}` : `${pItem.widthMm}×${pItem.heightMm}mm`;
             const isConfigOpen = openConfigIdx === qIdx;
             const labelsCount = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels.length : 1;
             const partInfo = (pItem.selectedPartIndex === 'all' || pItem.selectedPartIndex == null)
@@ -1948,8 +1987,8 @@ export default function PublicLabelsAppClient({
               const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${newIdx + 1}&edit=true&lang=${lang}`;
               window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
             }}
-            initialWidthMm={patientQueue[activeQueueIndex]?.widthMm || 75}
-            initialHeightMm={patientQueue[activeQueueIndex]?.heightMm || 45}
+            initialWidthMm={patientQueue[activeQueueIndex]?.labels?.[labelIndex]?.widthMm || patientQueue[activeQueueIndex]?.widthMm || 75}
+            initialHeightMm={patientQueue[activeQueueIndex]?.labels?.[labelIndex]?.heightMm || patientQueue[activeQueueIndex]?.heightMm || 45}
             initialVariant={patientQueue[activeQueueIndex]?.variant || 'backQr'}
             onConfigChange={(cfg) => {
               handleUpdatePatientConfig(activeQueueIndex, {
@@ -1989,13 +2028,17 @@ export default function PublicLabelsAppClient({
 
             return partsToRender.map((partIdx) => {
               const pLabel = labels[partIdx] || labels[0] || {};
+              const optDims = detectOptimalLabelDimensions(pLabel);
+              const effectiveWidthMm = Number(pLabel.widthMm || (pItem.widthMm !== 75 ? pItem.widthMm : optDims.widthMm)) || 75;
+              const effectiveHeightMm = Number(pLabel.heightMm || (pItem.heightMm !== 45 ? pItem.heightMm : optDims.heightMm)) || 45;
+
               return (
                 <div key={`offscreen-${pItem.code}-${partIdx}`}>
                   <PharmapolisLabelSvg
                     labelData={pLabel}
                     variant={pItem.variant || 'backQr'}
-                    widthMm={pItem.widthMm || 75}
-                    heightMm={pItem.heightMm || 45}
+                    widthMm={effectiveWidthMm}
+                    heightMm={effectiveHeightMm}
                     showCutGuides={true}
                     svgRef={(node) => {
                       if (node) {
