@@ -480,3 +480,22 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   - Si la prescripción estipula requisitos como *"Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives"*, este texto DEBE vincularse fielmente al campo `base` / `vehicle` de la etiqueta. Prohibido reemplazarlo por textos genéricos como *"Micronized Compounded Hard Capsules Base"*.
 - **Atribución Médica Exacta**:
   - En informes genómicos o diagnósticos (como TrichoTest de Fagron), identificar siempre al médico prescriptor u ordenante real indicado en el informe (ej. Dr. Sezgin Cagatay en Hortman Clinics) con su número de licencia DHA, no al director de la clínica ni al personal de laboratorio.
+
+## 41. Integridad Tipográfica y Prohibición de Solapes en Etiquetas Farmacéuticas (Zero-Overlap Label Invariant — Golden Rule)
+- **Prohibición Total de Solapes Verticales (Zero-Overlap Invariant)**:
+  - En ninguna etiqueta farmacéutica (SVG o PDF, Delivery o Standard) se permite que un bloque de texto colisione o solape con otro bloque, línea divisoria o pie de página regulatorio.
+  - El contenedor de instrucciones de uso / posología (`posBox`) DEBE tener un **tope estricto de seguridad (Hard Clamp)**:
+    `posBoxY + posBoxHeight <= maxPosBoxBottom` (donde `maxPosBoxBottom = bCautionDividerY - 12px`).
+  - Bajo ninguna circunstancia `posBox` puede cruzar hacia abajo sobre la advertencia de precaución (`CAUTION: FOR ... USE ONLY`), la firma del médico (`Rx: Dr...`) o la monografía regulatoria.
+- **Escalado Responsivo por Tiers de Altura de Etiqueta**:
+  - Toda etiqueta debe ajustar dinámicamente sus tamaños tipográficos y saltos de línea según la relación de aspecto física del lienzo:
+    1. **Standard Height (HEIGHT ≥ 850 px, ej. 75×45 mm / 900 px canvas)**: Tipografía generosa (ingredientes 25–34 px, posología 21–28 px).
+    2. **Medium Height (HEIGHT 720–850 px, ej. 100×50 mm / 750 px canvas)**: Tipografía calibrada (ingredientes 21–28 px, posología 18–23 px).
+    3. **Short Height (HEIGHT < 720 px, ej. 90×38 mm / 633 px canvas)**: Tipografía compacta (ingredientes 19–25 px, posología 17–21 px).
+- **Estructuración a Dos Columnas para Fórmulas Complejas (≥ 3 Principios Activos)**:
+  - Cuando una prescripción contenga 3 o más principios activos (APIs), NUNCA deben encadenarse en un único párrafo continuo con guiones.
+  - Deben renderizarse en una cuadrícula clínica estructurada a **dos columnas** con viñetas individuales (`• Nombre Dosis`), maximizando la legibilidad médica y ahorrando altura vertical para la posología y advertencias.
+- **Idioma Estándar Obligatorio**:
+  - Todas las etiquetas, textos de posología, encabezados, advertencias, especificaciones técnicas y hojas de lote A4 DEBEN generarse **exclusivamente en inglés**.
+- **Márgenes de Seguridad para Guillotina (Bleed Safety)**:
+  - El pie de página con fechas (`Mfg`, `Exp`, `Batch`) DEBE mantener siempre un margen de guarda mínimo de 4–5 mm respecto a la línea de corte inferior para evitar amputaciones por tolerancia de cuchilla.

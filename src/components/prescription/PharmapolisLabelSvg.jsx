@@ -757,8 +757,12 @@ export default function PharmapolisLabelSvg({
             const col2Items = isMultiColumn ? activeIngredientsList.slice(halfColCount) : [];
             const colWidth = Math.floor((innerUsableWidth - 36) / 2);
 
-            const multiColFontSize = isShort ? 18 : 22;
-            const multiColLineGap = Math.round(multiColFontSize * 1.34);
+            // Dynamic Auto-Fill Font Sizing calibrated across all aspect ratios:
+            // - Standard (HEIGHT >= 850, e.g. 75x45 mm = 900 px canvas, colHeight ~600)
+            // - Medium (HEIGHT 720-850, e.g. 100x50 mm = 750 px canvas, colHeight ~490)
+            // - Short (HEIGHT < 720, e.g. 90x38 mm = 633 px canvas, colHeight ~390)
+            const multiColFontSize = isShort ? 16 : isMediumHeight ? 18 : 22;
+            const multiColLineGap = Math.round(multiColFontSize * 1.32);
             const multiColMaxChars = Math.max(20, Math.floor((colWidth - 20) / (multiColFontSize * 0.68)));
 
             const col1Lines = isMultiColumn ? col1Items.flatMap(it => wrapLines(`• ${it}`, multiColMaxChars)) : [];
@@ -770,66 +774,78 @@ export default function PharmapolisLabelSvg({
               ? `• ${activeIngredientsList[0]}`
               : `• ${activeIngredientsList.join('  —  ')}`;
 
-            // Sparsity detection: allows short formulas (Julien, Mohammed, etc.) to boost typography to 38-42px
-            const isUltraSparse = ingCount <= 3 && (rawIngText.length < 130) && (directions.length < 110);
-            const isSparse = ingCount <= 4 && (rawIngText.length < 185) && (directions.length < 165);
+            // Sparsity detection: allows short formulas to boost typography
+            const isUltraSparse = ingCount <= 2 && (rawIngText.length < 100) && (directions.length < 90);
+            const isSparse = ingCount <= 3 && (rawIngText.length < 150) && (directions.length < 130);
 
-            // Dynamic Auto-Fill Font Sizing
             const ingFontSize = isShort
-              ? (isUltraSparse ? 29 : isSparse ? 25 : 22)
-              : (isUltraSparse ? 38 : isSparse ? 34 : 27);
-            const ingLineGap = Math.round(ingFontSize * 1.36);
+              ? (isUltraSparse ? 25 : isSparse ? 22 : 19)
+              : isMediumHeight
+                ? (isUltraSparse ? 28 : isSparse ? 24 : 21)
+                : (isUltraSparse ? 34 : isSparse ? 30 : 25);
+            const ingLineGap = Math.round(ingFontSize * 1.34);
             const ingMaxChars = Math.max(20, Math.floor((innerUsableWidth - 48) / (ingFontSize * 0.70)));
             const ingLines = wrapLines(rawIngText, ingMaxChars);
             const ingLineCount = isMultiColumn ? multiColMaxLines : ingLines.length;
 
             const baseFontSize = isShort
-              ? (isUltraSparse ? 20 : isSparse ? 18 : 16)
-              : (isUltraSparse ? 26 : isSparse ? 23 : 20);
-            const baseLineGap = Math.round(baseFontSize * 1.34);
+              ? (isUltraSparse ? 18 : isSparse ? 16 : 14)
+              : isMediumHeight
+                ? (isUltraSparse ? 19 : isSparse ? 17 : 15)
+                : (isUltraSparse ? 23 : isSparse ? 20 : 18);
+            const baseLineGap = Math.round(baseFontSize * 1.32);
             const baseMaxChars = Math.max(24, Math.floor((innerUsableWidth - 48) / (baseFontSize * 0.68)));
             const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, baseMaxChars);
 
             const posFontSize = isShort
-              ? (isUltraSparse ? 24 : isSparse ? 21 : 19)
-              : (isUltraSparse ? 32 : isSparse ? 28 : 23);
-            const posLineGap = Math.round(posFontSize * 1.35);
+              ? (isUltraSparse ? 21 : isSparse ? 19 : 17)
+              : isMediumHeight
+                ? (isUltraSparse ? 23 : isSparse ? 20 : 18)
+                : (isUltraSparse ? 28 : isSparse ? 24 : 21);
+            const posLineGap = Math.round(posFontSize * 1.32);
             const posMaxChars = Math.max(22, Math.floor((innerUsableWidth - 64) / (posFontSize * 0.70)));
             const posologyLines = wrapLines(directions, posMaxChars);
-            const posBoxInnerH = (posologyLines.length * posLineGap) + (isUltraSparse ? 52 : isSparse ? 44 : 38);
-            const basePosBoxHeight = Math.max(isUltraSparse ? 120 : isSparse ? 100 : 80, posBoxInnerH);
 
             // Bottom-anchored Caution & Regulatory Monograph coordinates
-            const bottomMargin = isShort ? 14 : 18;
+            const bottomMargin = isShort ? 10 : isMediumHeight ? 12 : 16;
             const bMonographsY = colHeight - bottomMargin;
-            const bRxY = bMonographsY - (isShort ? 16 : 20);
-            const bCautionY = bRxY - (isShort ? 18 : 22);
-            const bCautionDividerY = bCautionY - (isShort ? 12 : 14);
+            const bRxY = bMonographsY - (isShort ? 14 : isMediumHeight ? 16 : 19);
+            const bCautionY = bRxY - (isShort ? 15 : isMediumHeight ? 17 : 20);
+            const bCautionDividerY = bCautionY - (isShort ? 10 : isMediumHeight ? 11 : 13);
 
-            const availableWorkHeight = bCautionDividerY - (isShort ? 12 : 18);
+            // Maximum allowed Y coordinate for the bottom edge of posBox (zero overlap guarantee)
+            const maxPosBoxBottom = bCautionDividerY - (isShort ? 10 : isMediumHeight ? 12 : 14);
 
             // Typographical baseline offsets with safe font cap-height clearance (Zero overlap)
-            const ingHeaderTitleY = isShort ? 14 : 16;
-            const firstIngLineY = ingHeaderTitleY + (isShort ? 12 : 16) + Math.round((isMultiColumn ? multiColFontSize : ingFontSize) * 0.82);
-            const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * (isMultiColumn ? multiColLineGap : ingLineGap)) + (isUltraSparse ? 24 : isSparse ? 18 : 14) + Math.round(baseFontSize * 0.82);
-            const ingBlockH = firstBaseLineY + ((baseLines.length - 1) * baseLineGap) + 10;
+            const ingHeaderTitleY = isShort ? 12 : isMediumHeight ? 14 : 16;
+            const firstIngLineY = ingHeaderTitleY + (isShort ? 10 : isMediumHeight ? 12 : 16) + Math.round((isMultiColumn ? multiColFontSize : ingFontSize) * 0.82);
+            const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * (isMultiColumn ? multiColLineGap : ingLineGap)) + (isUltraSparse ? 18 : isSparse ? 14 : 10) + Math.round(baseFontSize * 0.82);
+            const ingBlockH = firstBaseLineY + ((baseLines.length - 1) * baseLineGap) + 8;
 
-            const posHeaderTitleY = isShort ? 20 : 24;
-            const firstPosLineY = posHeaderTitleY + (isShort ? 12 : 16) + Math.round(posFontSize * 0.82);
-            const posBoxHeight = firstPosLineY + ((posologyLines.length - 1) * posLineGap) + (isShort ? 18 : 24);
+            const posHeaderTitleY = isShort ? 16 : isMediumHeight ? 18 : 22;
+            const firstPosLineY = posHeaderTitleY + (isShort ? 10 : isMediumHeight ? 12 : 16) + Math.round(posFontSize * 0.82);
+            const posBoxHeight = firstPosLineY + ((posologyLines.length - 1) * posLineGap) + (isShort ? 14 : isMediumHeight ? 16 : 22);
 
-            // Harmonious vertical surplus distribution (eliminates desert-like empty white gaps)
-            const surplus = Math.max(0, availableWorkHeight - (ingBlockH + posBoxHeight));
-            const topIngredientsY = Math.max(isShort ? 14 : 18, Math.min(32, Math.round(surplus * 0.20)));
-            const midPad = Math.max(isShort ? 16 : 22, Math.min(70, Math.round(surplus * 0.45)));
-            const posBoxY = topIngredientsY + ingBlockH + midPad;
+            // Available vertical space above Block 4
+            const totalContentNeeded = ingBlockH + posBoxHeight;
+            const totalAvailableSpace = maxPosBoxBottom - (isShort ? 10 : isMediumHeight ? 12 : 16);
+            const verticalSurplus = Math.max(0, totalAvailableSpace - totalContentNeeded);
+
+            const topIngredientsY = isShort ? 8 : isMediumHeight ? 10 : Math.max(14, Math.min(28, Math.round(verticalSurplus * 0.20)));
+            const midPad = isShort ? 10 : isMediumHeight ? 12 : Math.max(14, Math.min(50, Math.round(verticalSurplus * 0.45)));
+
+            // Absolute hard clamp: posBoxY + posBoxHeight CAN NEVER EXCEED maxPosBoxBottom
+            let posBoxY = topIngredientsY + ingBlockH + midPad;
+            if (posBoxY + posBoxHeight > maxPosBoxBottom) {
+              posBoxY = maxPosBoxBottom - posBoxHeight;
+            }
 
             const rxParts = [];
             if (doctorName) rxParts.push(`Rx: ${doctorName}`);
             if (clinicName) rxParts.push(clinicName);
             if (doctorLicense) rxParts.push(`(${doctorLicense})`);
             const rxFullText = rxParts.length > 0 ? rxParts.join(' • ') : (doctorName ? `Rx: ${doctorName}` : 'Rx: Licensed Clinical Practice');
-            const rxFontSize = isShort ? (rxFullText.length > 65 ? 13 : 15) : (rxFullText.length > 70 ? 15 : 17);
+            const rxFontSize = isShort ? (rxFullText.length > 65 ? 12 : 14) : isMediumHeight ? (rxFullText.length > 65 ? 13 : 15) : (rxFullText.length > 70 ? 15 : 17);
 
             return (
               <>
@@ -996,12 +1012,12 @@ export default function PharmapolisLabelSvg({
   const formulaLines = formula ? wrapLines(formula, maxFormulaChars) : [];
   const directionLines = wrapDirections(directions, isShort ? 46 : 56, isShort ? 58 : 72);
 
-  // Dynamic typography scale: calibrated to 9.5pt - 11.5pt physical print equivalents
-  const titleFontSize = isShort ? 38 : (productTitle.length > 48 ? 44 : 50); // ~11.5 pt
-  const formulaFontSize = isShort ? 32 : 38; // ~10.5 pt
-  const formulaLineGap = isShort ? 46 : 54;
-  const dirFontSize = isShort ? 29 : 35;     // ~9.5 pt
-  const dirLineGap = isShort ? 44 : 52;
+  // Dynamic typography scale: calibrated to 9.5pt - 11.5pt physical print equivalents across tiers
+  const titleFontSize = isShort ? 34 : isMediumHeight ? 40 : (productTitle.length > 48 ? 44 : 50); // ~11.5 pt
+  const formulaFontSize = isShort ? 28 : isMediumHeight ? 32 : 38; // ~10.5 pt
+  const formulaLineGap = isShort ? 38 : isMediumHeight ? 44 : 54;
+  const dirFontSize = isShort ? 26 : isMediumHeight ? 29 : 35;     // ~9.5 pt
+  const dirLineGap = isShort ? 36 : isMediumHeight ? 42 : 52;
 
   // Generous margin below patient box bottom line
   const titleMarginTop = isShort ? 26 : 36;
