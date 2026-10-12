@@ -171,7 +171,7 @@ export async function generateA4BatchPdf({
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(6);
       pdf.setTextColor(100, 116, 139);
-      const caption = `[#${item.rxCode || 'RX'} - ${item.patientName || 'Patient'}] ${wMm}×${hMm}mm (${item.variantLabel || item.variant || 'Standard'})`;
+      const caption = `[#${item.rxCode || 'RX'} - ${item.patientName || 'Patient'}${item.partLabel ? ` • ${item.partLabel}` : ''}] ${wMm}×${hMm}mm (${item.variantLabel || item.variant || 'Standard'})`;
       pdf.text(caption, currentX + 1, currentY + hMm + 3.2);
     }
 

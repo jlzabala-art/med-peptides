@@ -12,7 +12,7 @@ export async function generateMetadata({ searchParams }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const code = (resolvedSearchParams?.rx || resolvedSearchParams?.code || '51812').trim();
   const isEditing = resolvedSearchParams?.edit === 'true' || resolvedSearchParams?.edit === '1';
-  const lang = resolvedSearchParams?.lang || 'en';
+  const lang = resolvedSearchParams?.lang === 'es' ? 'es' : 'en';
   const isEs = lang === 'es';
 
   let patientName = '';
@@ -95,7 +95,7 @@ export default async function PublicLabelsPage({ searchParams }) {
   const primaryCode = codes[0] || '51812';
   const initialEditMode = resolvedSearchParams?.edit === 'true' || resolvedSearchParams?.edit === '1';
   const initialPhaseIdx = Number(resolvedSearchParams?.phase) ? Math.max(0, Number(resolvedSearchParams.phase) - 1) : 0;
-  const initialLang = resolvedSearchParams?.lang || 'en';
+  const initialLang = resolvedSearchParams?.lang === 'es' ? 'es' : 'en';
 
   const initialQueue = [];
 

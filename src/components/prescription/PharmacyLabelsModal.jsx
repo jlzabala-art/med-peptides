@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye, Pill, ChevronLeft, ChevronRight, Share2 } from '@/lib/icons';
+import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye, Pill, ChevronLeft, ChevronRight, Share2, AlertTriangle } from '@/lib/icons';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { labelsRepository } from '@/repositories/labelsRepository';
 import PharmapolisLabelSvg from './PharmapolisLabelSvg';
@@ -9,6 +9,45 @@ import { getCustomsFriendlySuggestions, findCustomsRisks } from '@/utils/labels/
 import { formatApisForEditor, labelToMarkdown, parseMarkdownToLabel } from '@/utils/labels/labelMarkdown';
 import ClinicPicker from '@/components/admin/patients/ClinicPicker';
 import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
+
+/**
+ * Optical Print Legibility Pill Badge
+ * Alarms with warning red when font size drops below 6.0 pt legal pharmaceutical threshold.
+ */
+function FontLegibilityPill({ pt = 0, isEs = false, compact = false }) {
+  const isAlarm = pt < 6.0;
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: compact ? '1px 6px' : '2px 8px',
+        borderRadius: '4px',
+        fontSize: compact ? '0.65rem' : '0.68rem',
+        fontWeight: 700,
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        background: isAlarm ? '#fef2f2' : '#f0fdf4',
+        border: `1px solid ${isAlarm ? '#f87171' : '#86efac'}`,
+        color: isAlarm ? '#dc2626' : '#15803d',
+        boxShadow: isAlarm ? '0 1px 3px rgba(220,38,38,0.18)' : 'none',
+        whiteSpace: 'nowrap',
+        transition: 'all 0.2s ease'
+      }}
+      title={
+        isAlarm
+          ? (isEs ? `⚠️ Alarma de Legibilidad: ${pt} pt es menor que el mínimo legal recomendado de 6.0 pt. Ilegible sin lupa.` : `⚠️ Legibility Alarm: ${pt} pt is below the 6.0 pt regulatory threshold. Hard to read without magnification.`)
+          : (isEs ? `✓ ${pt} pt cumple el estándar farmacéutico (≥ 6.0 pt legible)` : `✓ ${pt} pt meets pharmaceutical standard (≥ 6.0 pt readable)`)
+      }
+    >
+      <span>{isAlarm ? '⚠️' : '✓'}</span>
+      <span>{pt} pt</span>
+      <span style={{ opacity: 0.85, fontWeight: 600 }}>
+        {isAlarm ? (isEs ? '· ¡Alarma < 6 pt!' : '· Alarm < 6 pt!') : (isEs ? '· Legible' : '· Legible')}
+      </span>
+    </span>
+  );
+}
 
 export default function PharmacyLabelsModal({
   isOpen,
@@ -322,6 +361,47 @@ export default function PharmacyLabelsModal({
   // Calculated pixel dimensions at current DPI: (mm / 25.4) * DPI
   const exportWidthPx = Math.round((dimensions.widthMm / 25.4) * dpi);
   const exportHeightPx = Math.round((dimensions.heightMm / 25.4) * dpi);
+
+  // ── Optical Print Typography Monitor & Regulatory Alarm (< 6.0 pt) ──
+  const calculatePhysicalPt = (svgUnits) => {
+    return Number(((svgUnits * (dimensions.widthMm || 75)) / 529.17).toFixed(1));
+  };
+
+  const parsedApisCount = (apisEditorText || '').split('\n').filter(l => l.trim()).length || 1;
+  const rawDirText = currentItem.directions || currentItem.instructions || '';
+  const dirLinesCount = Math.max(1, Math.ceil(rawDirText.length / 54));
+  const patNameLength = (currentItem.patientName || '').length;
+
+  let dirSvgUnits = 26;
+  let ingSvgUnits = 26;
+  let patSvgUnits = 34;
+  let titleSvgUnits = 38;
+
+  if (activeVariant === 'backQr') {
+    ingSvgUnits = parsedApisCount <= 2 ? 28 : (parsedApisCount <= 4 ? 26 : 22);
+    dirSvgUnits = dirLinesCount <= 2 ? 26 : 23;
+    patSvgUnits = patNameLength > 36 ? 30 : (patNameLength > 28 ? 34 : 38);
+    titleSvgUnits = 32;
+  } else if (activeVariant === 'front' || activeVariant === 'frontWithQr') {
+    ingSvgUnits = 38;
+    dirSvgUnits = 35;
+    patSvgUnits = patNameLength > 36 ? 30 : (patNameLength > 28 ? 34 : 38);
+    titleSvgUnits = (currentItem.productTitle || '').length > 48 ? 44 : 50;
+  } else if (activeVariant === 'shipping') {
+    const calcHeight = Math.round(((dimensions.heightMm || 45) / (dimensions.widthMm || 75)) * 1500);
+    const shipBase = Math.min(35, Math.max(24, Math.round(calcHeight * 0.040)));
+    dirSvgUnits = shipBase;
+    ingSvgUnits = shipBase;
+    patSvgUnits = shipBase;
+    titleSvgUnits = Math.min(48, Math.max(32, Math.round(calcHeight * 0.054)));
+  }
+
+  const dirPt = calculatePhysicalPt(dirSvgUnits);
+  const ingPt = calculatePhysicalPt(ingSvgUnits);
+  const patientPt = calculatePhysicalPt(patSvgUnits);
+  const titlePt = calculatePhysicalPt(titleSvgUnits);
+  const minPatientPt = Math.min(dirPt, ingPt, patientPt);
+  const hasFontAlarm = minPatientPt < 6.0;
 
   const PRESETS = [
     { id: '100x55', label: '100 × 55 mm', sub: isEs ? 'Bote Cilíndrico 100ml' : 'Compounding Bottle 100ml', w: 100, h: 55 },
@@ -2085,13 +2165,32 @@ export default function PharmacyLabelsModal({
 
               {/* Tab Body */}
               <div className="gcp-editor-container">
+                {hasFontAlarm && (
+                  <div style={{ margin: '8px 12px 0', padding: '10px 14px', borderRadius: '8px', background: '#fef2f2', border: '1px solid #f87171', color: '#991b1b', display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.78rem' }}>
+                    <AlertTriangle size={18} style={{ color: '#dc2626', flexShrink: 0, marginTop: '1px' }} />
+                    <div>
+                      <div style={{ fontWeight: 800 }}>
+                        {isEs ? '⚠️ Alarma de Legibilidad Física (< 6.0 pt)' : '⚠️ Optical Legibility Alarm (< 6.0 pt)'}
+                      </div>
+                      <div style={{ marginTop: '2px', lineHeight: 1.4, color: '#7f1d1d' }}>
+                        {isEs
+                          ? `Al imprimir a ${dimensions.widthMm}×${dimensions.heightMm} mm, algunos textos clínicos quedan en ${minPatientPt} pt (< 6.0 pt recomendado por normativas farmacéuticas). Te recomendamos usar un formato más grande (ej. 100×55 mm) o acortar el texto para asegurar una lectura perfecta sin lupa.`
+                          : `When printed at ${dimensions.widthMm}×${dimensions.heightMm} mm, clinical typography drops to ${minPatientPt} pt (< 6.0 pt regulatory threshold). Consider selecting a wider label (e.g. 100×55 mm) or condensing text for clear readability.`}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {editorTab === 'fields' ? (
                   <div className="gcp-editor-fields-grid">
                     {/* Row 1: Patient Name (6 cols) | Dispensing Batch (3 cols) | Net Quantity (3 cols) */}
                     <div className="gcp-col-6 gcp-field-wrap">
-                      <label className="gcp-form-label">
-                        <span>{isEs ? 'Nombre Paciente' : 'Patient Name'}</span>
-                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span>{isEs ? 'Nombre Paciente' : 'Patient Name'}</span>
+                          <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                        </div>
+                        <FontLegibilityPill pt={patientPt} isEs={isEs} compact={true} />
                       </label>
                       <input
                         type="text"
@@ -2132,9 +2231,12 @@ export default function PharmacyLabelsModal({
 
                     {/* Row 2: Product Title / Formula (12 cols - full width so complete formula title is 100% visible) */}
                     <div className="gcp-col-12 gcp-field-wrap">
-                      <label className="gcp-form-label">
-                        <span>{isEs ? 'Título Producto / Fórmula' : 'Product Title / Formula'}</span>
-                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span>{isEs ? 'Título Producto / Fórmula' : 'Product Title / Formula'}</span>
+                          <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                        </div>
+                        <FontLegibilityPill pt={titlePt} isEs={isEs} compact={true} />
                       </label>
                       <input
                         type="text"
@@ -2285,12 +2387,15 @@ export default function PharmacyLabelsModal({
                     </div>
 
                     <div className="gcp-col-12 gcp-field-wrap">
-                      <label className="gcp-form-label">
-                        <span>{isEs ? 'Principios Activos y Concentración' : 'Active Ingredients & Strength'}</span>
-                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
-                        <span style={{ fontSize: '0.66rem', color: '#5f6368', textTransform: 'none', fontWeight: 500, marginLeft: '6px' }}>
-                          {isEs ? '(un ingrediente por línea · formato: Fármaco: Dosis)' : '(one per line · Drug: Dose)'}
-                        </span>
+                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span>{isEs ? 'Principios Activos y Concentración' : 'Active Ingredients & Strength'}</span>
+                          <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                          <span style={{ fontSize: '0.66rem', color: '#5f6368', textTransform: 'none', fontWeight: 500, marginLeft: '6px' }}>
+                            {isEs ? '(un ingrediente por línea · formato: Fármaco: Dosis)' : '(one per line · Drug: Dose)'}
+                          </span>
+                        </div>
+                        <FontLegibilityPill pt={ingPt} isEs={isEs} compact={true} />
                       </label>
                       <textarea
                         rows={4}
@@ -2319,9 +2424,12 @@ export default function PharmacyLabelsModal({
                     </div>
 
                     <div className="gcp-col-12 gcp-field-wrap">
-                      <label className="gcp-form-label">
-                        <span>{isEs ? 'Posología / Modo de Empleo (Directions for Use)' : 'Directions for Use'}</span>
-                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span>{isEs ? 'Posología / Modo de Empleo (Directions for Use)' : 'Directions for Use'}</span>
+                          <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                        </div>
+                        <FontLegibilityPill pt={dirPt} isEs={isEs} compact={true} />
                       </label>
                       <input
                         type="text"
@@ -2430,9 +2538,7 @@ export default function PharmacyLabelsModal({
                 <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   {isEs ? 'Vista Previa en Vivo' : 'Live Preview'}
                 </span>
-                <span style={{ fontSize: '0.66rem', color: '#137333', background: '#e6f4ea', border: '1px solid #ceead6', padding: '1px 6px', borderRadius: '3px', fontWeight: 600 }}>
-                  Vector SVG · Min 6.5pt Print Legible
-                </span>
+                <FontLegibilityPill pt={minPatientPt} isEs={isEs} compact={false} />
               </div>
 
               <button

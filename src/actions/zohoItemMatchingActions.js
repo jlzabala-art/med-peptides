@@ -8,15 +8,53 @@ const ZOHO_BOOKS_BASE = 'https://www.zohoapis.com/books/v3';
 const ZOHO_BOOKS_BASE_ME = 'https://www.zohoapis.me/books/v3';
 
 /**
- * Retrieves valid Zoho OAuth access token from Firestore cache
+ * Retrieves valid Zoho OAuth access token from Firestore cache,
+ * auto-refreshing via refresh_token when expired.
  */
 async function getZohoAccessToken() {
   if (!adminDb) return null;
   try {
     const snapV2 = await adminDb.collection('zoho_token_cache').doc('access_token_v2').get();
-    if (snapV2.exists && snapV2.data()?.access_token) {
-      return snapV2.data().access_token;
+    const dataV2 = snapV2.exists ? snapV2.data() : null;
+    const now = Date.now();
+
+    // If cached token exists and has more than 5 mins of life, use it
+    if (dataV2?.access_token && (dataV2.expires_at || 0) > now + 300000) {
+      return dataV2.access_token;
     }
+
+    // Auto-refresh via refresh_token
+    const refreshToken = dataV2?.refresh_token || process.env.ZOHO_REFRESH_TOKEN;
+    const clientId = process.env.ZOHO_CLIENT_ID || "1000.NAHBCCYF5C9B3Z3YS2URAQ4TG7O76V";
+    const clientSecret = process.env.ZOHO_CLIENT_SECRET || "088b65381f7f30dfb801ff3f901e1af2c7adef11e5";
+
+    if (refreshToken) {
+      const params = new URLSearchParams({
+        grant_type: "refresh_token",
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: refreshToken
+      });
+
+      const resp = await fetch("https://accounts.zoho.com/oauth/v2/token", { method: "POST", body: params });
+      const refreshed = await resp.json();
+      if (refreshed.access_token) {
+        const expiresAt = now + ((refreshed.expires_in || 3600) * 1000);
+        const updatePayload = {
+          access_token: refreshed.access_token,
+          expires_at: expiresAt,
+          updated_at: now
+        };
+        await adminDb.collection('zoho_token_cache').doc('access_token_v2').set(updatePayload, { merge: true });
+        await adminDb.collection('zoho_token_cache').doc('access_token').set(updatePayload, { merge: true });
+        return refreshed.access_token;
+      }
+    }
+
+    if (dataV2?.access_token) {
+      return dataV2.access_token;
+    }
+
     const snapV1 = await adminDb.collection('zoho_token_cache').doc('access_token').get();
     if (snapV1.exists && snapV1.data()?.access_token) {
       return snapV1.data().access_token;

@@ -403,38 +403,56 @@ export default function PublicLabelsAppClient({
   // Generate and download A4 Multi-Patient Batch PDF
   const handleDownloadA4BatchPdf = async () => {
     if (!patientQueue.length) return;
+
+    // Calculate total label parts across queue
+    let totalLabelPartsCount = 0;
+    patientQueue.forEach((pItem) => {
+      const labels = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels : [{}];
+      const count = (pItem.selectedPartIndex != null && pItem.selectedPartIndex !== 'all') ? 1 : labels.length;
+      totalLabelPartsCount += count;
+    });
+
     setIsGeneratingBatchPdf(true);
-    setBatchPdfProgress({ current: 0, total: patientQueue.length, patient: '' });
+    setBatchPdfProgress({ current: 0, total: totalLabelPartsCount, patient: '' });
 
     try {
       const batchItems = [];
 
       for (let i = 0; i < patientQueue.length; i++) {
         const pItem = patientQueue[i];
-        const partIdx = pItem.selectedPartIndex || 0;
-        const pLabel = pItem.labels[partIdx] || pItem.labels[0] || {};
-        const pName = pItem.rx?.patient?.name || pItem.rx?.patientName || 'Patient';
-        const rxC = pItem.code;
-        const partLbl = pLabel.partLabel || (pItem.labels.length > 1 ? `Part ${partIdx + 1}` : '');
+        const labels = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels : [{}];
+        // If user specifically picked a single part, honor it; otherwise print ALL parts
+        const partsToInclude = (pItem.selectedPartIndex != null && pItem.selectedPartIndex !== 'all')
+          ? [pItem.selectedPartIndex]
+          : labels.map((_, idx) => idx);
 
-        // Grab SVG element from offscreen renderer
-        const svgElId = `batch-svg-${rxC}-${partIdx}`;
-        const svgEl = document.getElementById(svgElId);
+        for (const partIdx of partsToInclude) {
+          const pLabel = labels[partIdx] || labels[0] || {};
+          const pName = pItem.rx?.patient?.name || pItem.rx?.patientName || pLabel.patientName || 'Patient';
+          const rxC = pItem.code;
+          const partLbl = pLabel.partLabel || (labels.length > 1 ? `Part ${partIdx + 1}/${labels.length}` : '');
 
-        if (!svgEl) {
-          console.warn(`SVG element #${svgElId} not found in DOM`);
-          continue;
+          // Grab SVG element from offscreen renderer
+          const svgElId = `batch-svg-${rxC}-${partIdx}`;
+          const svgEl = document.getElementById(svgElId);
+
+          if (!svgEl) {
+            console.warn(`SVG element #${svgElId} not found in DOM`);
+            continue;
+          }
+
+          batchItems.push({
+            patientName: pName,
+            rxCode: rxC,
+            partLabel: partLbl,
+            variant: pItem.variant || 'backQr',
+            variantLabel: pItem.variant === 'shipping' ? 'Shipping' : (pItem.variant === 'front' ? 'Front' : (pItem.variant === 'frontWithQr' ? 'Front+MicroQR' : 'Delivery')),
+            widthMm: Number(pItem.widthMm) || 75,
+            heightMm: Number(pItem.heightMm) || 45,
+            svgEl: svgEl,
+            svgElement: svgEl
+          });
         }
-
-        batchItems.push({
-          patientName: pName,
-          rxCode: rxC,
-          partLabel: partLbl,
-          widthMm: Number(pItem.widthMm) || 75,
-          heightMm: Number(pItem.heightMm) || 45,
-          svgEl: svgEl,
-          svgElement: svgEl
-        });
       }
 
       if (batchItems.length === 0) {
@@ -1482,7 +1500,12 @@ export default function PublicLabelsAppClient({
                 : (isEs ? 'Imprimir Lote A4' : 'Print Batch A4')}
             </span>
             <span className="pls-btn-batch-count">
-              {patientQueue.length}
+              {patientQueue.reduce((acc, pItem) => {
+                const count = (pItem.selectedPartIndex != null && pItem.selectedPartIndex !== 'all')
+                  ? 1
+                  : (Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels.length : 1);
+                return acc + count;
+              }, 0)}
             </span>
           </button>
 
@@ -1645,20 +1668,30 @@ export default function PublicLabelsAppClient({
                     {pItem.labels.length > 1 && (
                       <>
                         <div style={{ fontWeight: 700, fontSize: '0.74rem', marginBottom: '4px', color: '#0f172a' }}>
-                          {isEs ? 'Parte a Imprimir:' : 'Part to Print:'}
+                          {isEs ? 'Partes a Imprimir en Lote:' : 'Parts to Print in Batch:'}
                         </div>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          {pItem.labels.map((lbl, pIdx) => (
-                            <button
-                              key={pIdx}
-                              type="button"
-                              className={`pls-popover-opt ${pItem.selectedPartIndex === pIdx ? 'selected' : ''}`}
-                              style={{ flex: 1, justifyContent: 'center' }}
-                              onClick={() => handleUpdatePatientConfig(qIdx, { selectedPartIndex: pIdx })}
-                            >
-                              {lbl.partLabel || `Part ${pIdx + 1}`}
-                            </button>
-                          ))}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
+                          <button
+                            type="button"
+                            className={`pls-popover-opt ${(pItem.selectedPartIndex == null || pItem.selectedPartIndex === 'all') ? 'selected' : ''}`}
+                            onClick={() => handleUpdatePatientConfig(qIdx, { selectedPartIndex: 'all' })}
+                          >
+                            <span>{isEs ? `✓ Todas las partes (${pItem.labels.length})` : `✓ All parts (${pItem.labels.length})`}</span>
+                            {(pItem.selectedPartIndex == null || pItem.selectedPartIndex === 'all') && <Check size={12} color="#1a73e8" />}
+                          </button>
+                          <div style={{ display: 'flex', gap: '4px' }}>
+                            {pItem.labels.map((lbl, pIdx) => (
+                              <button
+                                key={pIdx}
+                                type="button"
+                                className={`pls-popover-opt ${pItem.selectedPartIndex === pIdx ? 'selected' : ''}`}
+                                style={{ flex: 1, justifyContent: 'center' }}
+                                onClick={() => handleUpdatePatientConfig(qIdx, { selectedPartIndex: pIdx })}
+                              >
+                                {lbl.partLabel || `Part ${pIdx + 1}`}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </>
                     )}
@@ -1828,25 +1861,31 @@ export default function PublicLabelsAppClient({
           }}
           aria-hidden="true"
         >
-          {patientQueue.map((pItem) => {
-            const partIdx = pItem.selectedPartIndex || 0;
-            const pLabel = pItem.labels[partIdx] || pItem.labels[0] || {};
-            return (
-              <div key={`offscreen-${pItem.code}-${partIdx}`}>
-                <PharmapolisLabelSvg
-                  labelData={pLabel}
-                  variant={pItem.variant || 'backQr'}
-                  widthMm={pItem.widthMm || 75}
-                  heightMm={pItem.heightMm || 45}
-                  showCutGuides={true}
-                  svgRef={(node) => {
-                    if (node) {
-                      node.id = `batch-svg-${pItem.code}-${partIdx}`;
-                    }
-                  }}
-                />
-              </div>
-            );
+          {patientQueue.flatMap((pItem) => {
+            const labels = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels : [{}];
+            const partsToRender = (pItem.selectedPartIndex != null && pItem.selectedPartIndex !== 'all')
+              ? [pItem.selectedPartIndex]
+              : labels.map((_, idx) => idx);
+
+            return partsToRender.map((partIdx) => {
+              const pLabel = labels[partIdx] || labels[0] || {};
+              return (
+                <div key={`offscreen-${pItem.code}-${partIdx}`}>
+                  <PharmapolisLabelSvg
+                    labelData={pLabel}
+                    variant={pItem.variant || 'backQr'}
+                    widthMm={pItem.widthMm || 75}
+                    heightMm={pItem.heightMm || 45}
+                    showCutGuides={true}
+                    svgRef={(node) => {
+                      if (node) {
+                        node.id = `batch-svg-${pItem.code}-${partIdx}`;
+                      }
+                    }}
+                  />
+                </div>
+              );
+            });
           })}
         </div>
       </main>
