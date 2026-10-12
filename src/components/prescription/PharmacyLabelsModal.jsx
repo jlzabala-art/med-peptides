@@ -7,6 +7,7 @@ import { labelsRepository } from '@/repositories/labelsRepository';
 import PharmapolisLabelSvg from './PharmapolisLabelSvg';
 import { getCustomsFriendlySuggestions, findCustomsRisks } from '@/utils/labels/customsNaming';
 import { formatApisForEditor, labelToMarkdown, parseMarkdownToLabel } from '@/utils/labels/labelMarkdown';
+import ClinicPicker from '@/components/admin/patients/ClinicPicker';
 import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
 
 export default function PharmacyLabelsModal({
@@ -51,6 +52,7 @@ export default function PharmacyLabelsModal({
   const [editorTab, setEditorTab] = useState('fields'); // 'fields' | 'markdown'
   const [editedOverrides, setEditedOverrides] = useState({});
   const [markdownText, setMarkdownText] = useState('');
+  const [apisEditorText, setApisEditorText] = useState('');
   const [copiedMd, setCopiedMd] = useState(false);
   const [isSavingToFirebase, setIsSavingToFirebase] = useState(false);
   const [firebaseSaveSuccess, setFirebaseSaveSuccess] = useState(false);
@@ -72,13 +74,15 @@ export default function PharmacyLabelsModal({
 
   const svgContainerRef = useRef(null);
 
-  // Keep markdown text synced when selected product changes (must run unconditionally before any early returns)
+  // Keep markdown text & apis text synced when selected product changes (must run unconditionally before any early returns)
   React.useEffect(() => {
     if (!isOpen || !labels || labels.length === 0) return;
     const active = editedOverrides[selectedProductIdx] || labels[selectedProductIdx] || labels[0];
     if (active) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setMarkdownText(active.labelMarkdown || labelToMarkdown(active));
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setApisEditorText(formatApisForEditor(active));
     }
   }, [isOpen, selectedProductIdx, labels]);
 
@@ -99,16 +103,32 @@ export default function PharmacyLabelsModal({
   };
 
   const handleApisFieldChange = (rawText) => {
+    setApisEditorText(rawText);
     const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
     const apisArray = lines.map(line => {
       const colonIdx = line.indexOf(':');
       if (colonIdx > 0) {
+        const drug = line.slice(0, colonIdx).trim();
+        const dose = line.slice(colonIdx + 1).trim();
         return {
-          drugName: line.slice(0, colonIdx).trim(),
-          dosage: line.slice(colonIdx + 1).trim()
+          drugName: drug,
+          name: drug,
+          activeIngredient: drug,
+          dosage: dose,
+          dose: dose,
+          strength: dose,
+          concentration: dose
         };
       }
-      return { drugName: line };
+      return {
+        drugName: line,
+        name: line,
+        activeIngredient: line,
+        dosage: '',
+        dose: '',
+        strength: '',
+        concentration: ''
+      };
     });
     const updated = {
       ...currentItem,
@@ -132,6 +152,7 @@ export default function PharmacyLabelsModal({
       ...prev,
       [selectedProductIdx]: parsed
     }));
+    setApisEditorText(formatApisForEditor(parsed));
   };
 
   const handleResetOriginal = () => {
@@ -140,7 +161,11 @@ export default function PharmacyLabelsModal({
       delete copy[selectedProductIdx];
       return copy;
     });
-    setMarkdownText(baseItem?.labelMarkdown || labelToMarkdown(baseItem));
+    const original = labels[selectedProductIdx] || labels[0];
+    if (original) {
+      setMarkdownText(original.labelMarkdown || labelToMarkdown(original));
+      setApisEditorText(formatApisForEditor(original));
+    }
   };
 
   const handleCopyMarkdown = () => {
@@ -2022,7 +2047,8 @@ export default function PharmacyLabelsModal({
                     {/* Row 1: Patient Name (6 cols) | Dispensing Batch (3 cols) | Net Quantity (3 cols) */}
                     <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        {isEs ? 'Nombre Paciente' : 'Patient Name'}
+                        <span>{isEs ? 'Nombre Paciente' : 'Patient Name'}</span>
+                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                       </label>
                       <input
                         type="text"
@@ -2035,7 +2061,8 @@ export default function PharmacyLabelsModal({
 
                     <div className="gcp-col-3 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        {isEs ? 'Lote (Batch)' : 'Dispensing Batch'}
+                        <span>{isEs ? 'Lote (Batch)' : 'Dispensing Batch'}</span>
+                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                       </label>
                       <input
                         type="text"
@@ -2048,7 +2075,8 @@ export default function PharmacyLabelsModal({
 
                     <div className="gcp-col-3 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        {isEs ? 'Cantidad Neta' : 'Net Quantity'}
+                        <span>{isEs ? 'Cantidad Neta' : 'Net Quantity'}</span>
+                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                       </label>
                       <input
                         type="text"
@@ -2062,7 +2090,8 @@ export default function PharmacyLabelsModal({
                     {/* Row 2: Product Title / Formula (12 cols - full width so complete formula title is 100% visible) */}
                     <div className="gcp-col-12 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        {isEs ? 'Título Producto / Fórmula' : 'Product Title / Formula'}
+                        <span>{isEs ? 'Título Producto / Fórmula' : 'Product Title / Formula'}</span>
+                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                       </label>
                       <input
                         type="text"
@@ -2077,7 +2106,10 @@ export default function PharmacyLabelsModal({
                     {activeVariant === 'shipping' && (
                       <div className="gcp-col-12 gcp-field-wrap">
                         <label className="gcp-form-label">
-                          {isEs ? 'Nombre para Aduanas / Shipping' : 'Customs / Shipping Name'}
+                          <span>{isEs ? 'Nombre para Aduanas / Shipping' : 'Customs / Shipping Name'}</span>
+                          <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, textTransform: 'none', marginLeft: '4px' }}>
+                            {isEs ? '(Opcional)' : '(Optional)'}
+                          </span>
                         </label>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <input
@@ -2168,40 +2200,58 @@ export default function PharmacyLabelsModal({
                     {/* Row 3: Prescribing Doctor (6 cols) & Clinic (6 cols) -> generous width, zero truncation */}
                     <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        {isEs ? 'Médico Prescriptor' : 'Prescribing Doctor'}
+                        <span>{isEs ? 'Médico Prescriptor' : 'Prescribing Doctor'}</span>
+                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                       </label>
                       <input
                         type="text"
                         value={currentItem.doctorName || currentItem.physician || ''}
                         onChange={(e) => handleFieldChange('doctorName', e.target.value)}
                         className="gcp-form-input"
-                        placeholder="Dr. Marina Cordeiro Fernandes"
+                        placeholder={isEs ? "Dr. Nombre y Apellidos" : "Dr. Prescribing Physician"}
                       />
                     </div>
 
                     <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        {isEs ? 'Clínica' : 'Clinic'}
+                        <span>{isEs ? 'Clínica' : 'Clinic'}</span>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, textTransform: 'none', marginLeft: '4px' }}>
+                          {isEs ? '(Opcional · Elegir de Atlas)' : '(Optional · Select from Atlas)'}
+                        </span>
                       </label>
-                      <input
-                        type="text"
-                        value={currentItem.clinicName || ''}
-                        onChange={(e) => handleFieldChange('clinicName', e.target.value)}
-                        className="gcp-form-input"
-                        placeholder="NOVA Clinic, Dubai"
+                      <ClinicPicker
+                        value={currentItem.clinicId || ''}
+                        clinicName={currentItem.clinicName || ''}
+                        allowCustom={true}
+                        onChange={({ clinicId, clinicName }) => {
+                          const updated = {
+                            ...currentItem,
+                            clinicName: clinicName || '',
+                            clinicId: clinicId || ''
+                          };
+                          const newMd = labelToMarkdown(updated);
+                          updated.labelMarkdown = newMd;
+                          setEditedOverrides(prev => ({
+                            ...prev,
+                            [selectedProductIdx]: updated
+                          }));
+                          setMarkdownText(newMd);
+                        }}
+                        placeholder={isEs ? "Seleccionar clínica de Atlas..." : "Select clinic from Atlas..."}
                       />
                     </div>
 
                     <div className="gcp-col-12 gcp-field-wrap">
                       <label className="gcp-form-label">
                         <span>{isEs ? 'Principios Activos y Concentración' : 'Active Ingredients & Strength'}</span>
-                        <span style={{ fontSize: '0.66rem', color: '#5f6368', textTransform: 'none', fontWeight: 500 }}>
+                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                        <span style={{ fontSize: '0.66rem', color: '#5f6368', textTransform: 'none', fontWeight: 500, marginLeft: '6px' }}>
                           {isEs ? '(un ingrediente por línea · formato: Fármaco: Dosis)' : '(one per line · Drug: Dose)'}
                         </span>
                       </label>
                       <textarea
                         rows={4}
-                        value={formatApisForEditor(currentItem)}
+                        value={apisEditorText}
                         onChange={(e) => handleApisFieldChange(e.target.value)}
                         className="gcp-form-textarea"
                         style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }}
@@ -2211,7 +2261,10 @@ export default function PharmacyLabelsModal({
 
                     <div className="gcp-col-12 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        {isEs ? 'Vehículo de Formulación (Compounding Vehicle)' : 'Compounding Vehicle'}
+                        <span>{isEs ? 'Vehículo de Formulación' : 'Compounding Vehicle'}</span>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, textTransform: 'none', marginLeft: '4px' }}>
+                          {isEs ? '(Opcional)' : '(Optional)'}
+                        </span>
                       </label>
                       <input
                         type="text"
@@ -2224,7 +2277,8 @@ export default function PharmacyLabelsModal({
 
                     <div className="gcp-col-12 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        {isEs ? 'Posología / Modo de Empleo (Directions for Use)' : 'Directions for Use'}
+                        <span>{isEs ? 'Posología / Modo de Empleo (Directions for Use)' : 'Directions for Use'}</span>
+                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                       </label>
                       <input
                         type="text"
@@ -2237,7 +2291,8 @@ export default function PharmacyLabelsModal({
 
                     <div className="gcp-col-3 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        {isEs ? 'Fecha Fabricación (Mfg)' : 'Mfg Date'}
+                        <span>{isEs ? 'Fecha Fabricación (Mfg)' : 'Mfg Date'}</span>
+                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                       </label>
                       <input
                         type="text"
@@ -2250,7 +2305,8 @@ export default function PharmacyLabelsModal({
 
                     <div className="gcp-col-3 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        {isEs ? 'Fecha Caducidad (Exp)' : 'Expiry Date'}
+                        <span>{isEs ? 'Fecha Caducidad (Exp)' : 'Expiry Date'}</span>
+                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
                       </label>
                       <input
                         type="text"
@@ -2263,7 +2319,10 @@ export default function PharmacyLabelsModal({
 
                     <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        {isEs ? 'Conservación / Almacenamiento' : 'Storage Conditions'}
+                        <span>{isEs ? 'Conservación / Almacenamiento' : 'Storage Conditions'}</span>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, textTransform: 'none', marginLeft: '4px' }}>
+                          {isEs ? '(Opcional)' : '(Optional)'}
+                        </span>
                       </label>
                       <input
                         type="text"

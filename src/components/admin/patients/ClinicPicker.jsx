@@ -11,7 +11,8 @@ export default function ClinicPicker({
   clinicName: initialClinicName,
   onChange, // ({ clinicId, clinicName }) => void
   disabled = false,
-  placeholder = "Search clinic by name or location..."
+  placeholder = "Search clinic by name or location...",
+  allowCustom = false
 }) {
   const [queryText, setQueryText] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -145,6 +146,12 @@ export default function ClinicPicker({
                 setQueryText(e.target.value);
                 if (!isOpen) setIsOpen(true);
               }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && allowCustom && queryText.trim()) {
+                  e.preventDefault();
+                  handleSelect({ id: 'custom', name: queryText.trim() });
+                }
+              }}
               placeholder={placeholder}
               style={{
                 width: '100%',
@@ -213,6 +220,29 @@ export default function ClinicPicker({
                     {selectedClinic?.id === clinic.id && <Check size={15} color="var(--color-primary, #003666)" />}
                   </div>
                 ))
+              )}
+              {allowCustom && queryText.trim() && !clinics.some(c => (c.name || '').toLowerCase() === queryText.trim().toLowerCase()) && (
+                <div
+                  onClick={() => handleSelect({ id: 'custom', name: queryText.trim() })}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.65rem 0.85rem',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    borderTop: clinics.length > 0 ? '1px dashed var(--border, #e2e8f0)' : 'none',
+                    color: 'var(--color-primary, #003666)',
+                    fontWeight: 600,
+                    background: 'var(--surface-50, #f8fafc)',
+                    transition: 'background 0.15s'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--surface-100, #f1f5f9)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--surface-50, #f8fafc)'; }}
+                >
+                  <Building2 size={14} color="var(--color-primary, #003666)" />
+                  <span>+ Usar / Use &ldquo;{queryText.trim()}&rdquo;</span>
+                </div>
               )}
             </div>
           )}

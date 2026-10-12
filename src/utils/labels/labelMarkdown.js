@@ -12,8 +12,8 @@ export function formatApisForEditor(item) {
     if (list.length > 0) {
       return list.map(a => {
         if (typeof a === 'string') return a.trim();
-        const drug = a.drugName || a.drug || a.name || a.productName || '';
-        const dose = a.dosage || a.dose || a.strength || '';
+        const drug = a.drugName || a.drug || a.name || a.productName || a.activeIngredient || '';
+        const dose = a.dosage || a.dose || a.strength || a.concentration || '';
         return dose ? `${drug}: ${dose}` : drug;
       }).filter(Boolean).join('\n');
     }
@@ -39,9 +39,9 @@ export function labelToMarkdown(item) {
   const exp = item.expDate || item.expiryDate || item.caducidad || item.expirationDate || '04-10-2027';
   const pharmacy = item.pharmacyName || item.dispensingPharmacy || item.pharmacy || 'PHARMAPOLIS';
   const pharmacyAddress = item.pharmacyAddress || item.dispensingPharmacyAddress || item.dispensaryAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria';
-  const doctor = item.doctorName || item.physician || 'Dr. Marina Cordeiro Fernandes';
-  const clinic = item.clinicName || 'NOVA Clinic Day Surgery Center, Dubai';
-  const license = item.doctorLicense || 'DHA-91105367';
+  const doctor = item.doctorName !== undefined ? item.doctorName : (item.physician || '');
+  const clinic = item.clinicName !== undefined ? item.clinicName : (item.clinic || '');
+  const license = item.doctorLicense !== undefined ? item.doctorLicense : (item.license || '');
   const storage = item.storage || 'Store at room temperature';
   const title = item.productTitle || item.productName || 'Compounded Pharmaceutical Protocol';
 

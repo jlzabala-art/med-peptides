@@ -142,9 +142,9 @@ export default function PharmapolisLabelSvg({
   const prodDate = formatLabelDate(labelData.prodDate || labelData.mfgDate, '05-10-2026');
   const expDate = formatLabelDate(labelData.expDate, '04-10-2027');
   const storage = labelData.storage || 'Store at room temperature';
-  const doctorName = labelData.doctorName || labelData.physician || 'Dr. Marina Cordeiro Fernandes';
-  const clinicName = labelData.clinicName || 'NOVA Clinic Day Surgery Center, Dubai';
-  const doctorLicense = labelData.doctorLicense || 'DHA-91105367';
+  const doctorName = labelData.doctorName !== undefined && labelData.doctorName !== null ? String(labelData.doctorName).trim() : (labelData.physician || '');
+  const clinicName = labelData.clinicName !== undefined && labelData.clinicName !== null ? String(labelData.clinicName).trim() : (labelData.clinic || '');
+  const doctorLicense = labelData.doctorLicense !== undefined && labelData.doctorLicense !== null ? String(labelData.doctorLicense).trim() : (labelData.license || '');
   const batchCode = labelData.batchCode || 'PHARM-2026-B948';
   const lote = labelData.lote || '2609-PLV';
   const volume = labelData.volume || labelData.netVolume || labelData.size || labelData.netContent || labelData.totalVolume || labelData.quantity || '100 mL';
@@ -747,7 +747,11 @@ export default function PharmapolisLabelSvg({
               {cautionText}
             </text>
             {(() => {
-              const rxFullText = `Rx: ${doctorName} • ${clinicName} (${doctorLicense})`;
+              const rxParts = [];
+              if (doctorName) rxParts.push(`Rx: ${doctorName}`);
+              if (clinicName) rxParts.push(clinicName);
+              if (doctorLicense) rxParts.push(`(${doctorLicense})`);
+              const rxFullText = rxParts.length > 0 ? rxParts.join(' • ') : (doctorName ? `Rx: ${doctorName}` : 'Rx: Licensed Clinical Practice');
               const rxFontSize = isShort ? (rxFullText.length > 65 ? 11 : 12) : (rxFullText.length > 70 ? 13 : 15);
               return (
                 <text
