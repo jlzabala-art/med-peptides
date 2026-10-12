@@ -123,6 +123,40 @@ export default function PharmapolisLabelSvg({
     }
   }
 
+  // Detect clinical Time of Day (Morning, Evening, Night / Bedtime)
+  const timeOfDay = React.useMemo(() => {
+    const corpus = `${labelData.timeOfDay || ''} ${labelData.productTitle || ''} ${labelData.productName || ''} ${labelData.subTitle || ''} ${labelData.directions || ''} ${labelData.instructions || ''} ${labelData.partLabel || ''} ${labelData.formula || ''}`.toLowerCase();
+    
+    const isMorning = /\b(morning|breakfast|mañana|desayuno|matutina|am\b)/i.test(corpus);
+    const isBedtime = /\b(bedtime|before bed|night|sleep|sueño|dormir|nocturna)\b/i.test(corpus);
+    const isEvening = /\b(evening|dinner|afternoon|lunch.*dinner|vespertina|tarde|cena|pm\b)/i.test(corpus);
+
+    if (isMorning && !isBedtime && !isEvening) return 'MORNING';
+    if (isBedtime) return 'NIGHT / BEDTIME';
+    if (isEvening) return 'EVENING';
+    if (/\b(daily|once daily|diaria)\b/i.test(corpus)) return 'ONCE DAILY';
+    return '';
+  }, [labelData]);
+
+  // Unified Header Badge: Replaces technical FILE # with clinical Time of Day / Part indicator
+  const headerBadgeText = React.useMemo(() => {
+    const timeIcon = timeOfDay === 'MORNING' ? '☀️ ' : (timeOfDay.includes('NIGHT') || timeOfDay.includes('BEDTIME') ? '🌙 ' : (timeOfDay === 'EVENING' ? '🌅 ' : ''));
+    if (partBadge && timeOfDay) {
+      return `${partBadge} · ${timeIcon}${timeOfDay}`;
+    }
+    if (partBadge) return partBadge;
+    if (timeOfDay) return `${timeIcon}${timeOfDay}`;
+    return '';
+  }, [partBadge, timeOfDay]);
+
+  // Header badge sizing and right-aligned position (guaranteed zero overlap with patientName)
+  const badgeCharCount = headerBadgeText.length;
+  const badgeFontSize = isShort ? (badgeCharCount > 24 ? 13 : 15) : (badgeCharCount > 24 ? 15 : 17);
+  const badgeWidth = Math.max(120, Math.round(badgeCharCount * (badgeFontSize * 0.64) + 36));
+  const badgeX = 1380 - badgeWidth - 16;
+  const badgeHeight = isShort ? 38 : 44;
+  const badgeY = isShort ? 13 : 15;
+
   const productTitle = labelData.productTitle || labelData.productName || 'Compounded Pharmaceutical Protocol';
   const formula = labelData.formula || '';
   const rawDirections = labelData.directions || labelData.instructions || 'Take / apply as directed by prescribing physician.';
@@ -529,21 +563,23 @@ export default function PharmapolisLabelSvg({
           <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
             PATIENT: <tspan fontWeight="800" fontSize={patientNameFontSize}>{patientName}</tspan>
           </text>
-          {partBadge ? (
-            <g transform="translate(1080, 0)">
-              <rect x="0" y={isShort ? 12 : 14} width="140" height={isShort ? 40 : 46} fill="#003666" rx="4" />
-              <text x="70" y={isShort ? 37 : 43} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill="#ffffff" letterSpacing="0.6">
-                {partBadge}
-              </text>
-              <text x="276" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
-                FILE #{fileNumber}
+          {headerBadgeText ? (
+            <g transform={`translate(${badgeX}, ${badgeY})`}>
+              <rect x="0" y="0" width={badgeWidth} height={badgeHeight} fill="#003666" rx="6" />
+              <text
+                x={Math.round(badgeWidth / 2)}
+                y={isShort ? 25 : 29}
+                textAnchor="middle"
+                fontFamily="Arial, Helvetica, sans-serif"
+                fontSize={badgeFontSize}
+                fontWeight="900"
+                fill="#ffffff"
+                letterSpacing="0.5"
+              >
+                {headerBadgeText}
               </text>
             </g>
-          ) : (
-            <text x="1356" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
-              FILE #{fileNumber}
-            </text>
-          )}
+          ) : null}
         </g>
 
         {/* ── TWO-COLUMN WORKSPACE ── */}
@@ -681,18 +717,15 @@ export default function PharmapolisLabelSvg({
                   ))}
                 </g>
 
-                {/* 4. CLINICAL STORAGE & HANDLING MONOGRAPH BADGE (Harmonious European Pharmacopeia Balance) */}
+                {/* 4. CLINICAL STORAGE & HANDLING MONOGRAPH BADGE */}
                 <g transform={`translate(0, ${storageBlockBottom + (isShort ? 8 : 12)})`}>
                   <line x1="0" y1="0" x2={leftColWidth - 28} y2="0" stroke="#e2e8f0" strokeWidth="1.2" />
-                  <rect x="-4" y={isShort ? 6 : 10} width={leftColWidth - 20} height={isShort ? 56 : 64} fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1.2" rx="4" />
+                  <rect x="-4" y={isShort ? 6 : 8} width={leftColWidth - 20} height={isShort ? 42 : 48} fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1.2" rx="4" />
                   
-                  <text x="4" y={isShort ? 22 : 28} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 9 : 10.5} fontWeight="800" fill="#003666" letterSpacing="0.3">
-                    🔒 KEEP TIGHTLY CLOSED
-                  </text>
-                  <text x="4" y={isShort ? 37 : 46} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 8 : 9.5} fontWeight="700" fill="#64748b" letterSpacing="0.2">
+                  <text x="4" y={isShort ? 22 : 26} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 8.5 : 10} fontWeight="700" fill="#64748b" letterSpacing="0.2">
                     PROTECT FROM LIGHT
                   </text>
-                  <text x="4" y={isShort ? 51 : 62} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 7.5 : 9} fontWeight="700" fill="#0284c7" letterSpacing="0.3">
+                  <text x="4" y={isShort ? 36 : 42} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 8 : 9.5} fontWeight="700" fill="#0284c7" letterSpacing="0.3">
                     15°C–25°C • ROOM TEMP.
                   </text>
                 </g>
@@ -748,6 +781,11 @@ export default function PharmapolisLabelSvg({
                 .replace(/\bnatural\s+lipidic\s+carrier\b/gi, '100% Natural Scalp Compounding Vehicle');
             }
 
+            // Formula / Protocol title callout (gives formula immediate clinical identity)
+            const rawTitle = (labelData.productTitle || labelData.productName || '').trim();
+            const hasFormulaTitle = rawTitle.length > 0 && rawTitle.toLowerCase() !== 'compounded pharmaceutical protocol';
+            const formulaTitleText = hasFormulaTitle ? rawTitle : '';
+
             // Multi-API layout strategy:
             // If ingCount >= 3 and innerUsableWidth >= 700: Structured Dual-Column Clinical Bulleted Grid
             // Else: Single-Column Prominent Bulleted Flow
@@ -757,10 +795,6 @@ export default function PharmapolisLabelSvg({
             const col2Items = isMultiColumn ? activeIngredientsList.slice(halfColCount) : [];
             const colWidth = Math.floor((innerUsableWidth - 36) / 2);
 
-            // Dynamic Auto-Fill Font Sizing calibrated across all aspect ratios:
-            // - Standard (HEIGHT >= 850, e.g. 75x45 mm = 900 px canvas, colHeight ~600)
-            // - Medium (HEIGHT 720-850, e.g. 100x50 mm = 750 px canvas, colHeight ~490)
-            // - Short (HEIGHT < 720, e.g. 90x38 mm = 633 px canvas, colHeight ~390)
             const multiColFontSize = isShort ? 16 : isMediumHeight ? 18 : 22;
             const multiColLineGap = Math.round(multiColFontSize * 1.32);
             const multiColMaxChars = Math.max(20, Math.floor((colWidth - 20) / (multiColFontSize * 0.68)));
@@ -769,39 +803,37 @@ export default function PharmapolisLabelSvg({
             const col2Lines = isMultiColumn ? col2Items.flatMap(it => wrapLines(`• ${it}`, multiColMaxChars)) : [];
             const multiColMaxLines = Math.max(col1Lines.length, col2Lines.length);
 
-            // Raw continuous flowing text for active ingredients (1-2 APIs)
-            const rawIngText = ingCount === 1
-              ? `• ${activeIngredientsList[0]}`
-              : `• ${activeIngredientsList.join('  —  ')}`;
+            // Sparsity detection: allows short formulas to boost typography and use space
+            const isUltraSparse = ingCount <= 2 && (directions.length < 90);
+            const isSparse = ingCount <= 3 && (directions.length < 130);
 
-            // Sparsity detection: allows short formulas to boost typography
-            const isUltraSparse = ingCount <= 2 && (rawIngText.length < 100) && (directions.length < 90);
-            const isSparse = ingCount <= 3 && (rawIngText.length < 150) && (directions.length < 130);
-
+            // Single column ingredients: if ingCount <= 2, give each its own bullet line
             const ingFontSize = isShort
-              ? (isUltraSparse ? 25 : isSparse ? 22 : 19)
+              ? (isUltraSparse ? 24 : isSparse ? 22 : 19)
               : isMediumHeight
-                ? (isUltraSparse ? 28 : isSparse ? 24 : 21)
-                : (isUltraSparse ? 34 : isSparse ? 30 : 25);
+                ? (isUltraSparse ? 26 : isSparse ? 24 : 21)
+                : (isUltraSparse ? 32 : isSparse ? 28 : 24);
             const ingLineGap = Math.round(ingFontSize * 1.34);
             const ingMaxChars = Math.max(20, Math.floor((innerUsableWidth - 48) / (ingFontSize * 0.70)));
-            const ingLines = wrapLines(rawIngText, ingMaxChars);
+            const singleIngLines = activeIngredientsList.flatMap(it => wrapLines(`• ${it}`, ingMaxChars));
+            const ingLines = singleIngLines.length > 0 ? singleIngLines : wrapLines(`• ${activeIngredientsList.join(' — ')}`, ingMaxChars);
             const ingLineCount = isMultiColumn ? multiColMaxLines : ingLines.length;
 
             const baseFontSize = isShort
-              ? (isUltraSparse ? 18 : isSparse ? 16 : 14)
+              ? (isUltraSparse ? 17 : isSparse ? 15 : 14)
               : isMediumHeight
-                ? (isUltraSparse ? 19 : isSparse ? 17 : 15)
-                : (isUltraSparse ? 23 : isSparse ? 20 : 18);
+                ? (isUltraSparse ? 18 : isSparse ? 16 : 15)
+                : (isUltraSparse ? 22 : isSparse ? 19 : 17);
             const baseLineGap = Math.round(baseFontSize * 1.32);
             const baseMaxChars = Math.max(24, Math.floor((innerUsableWidth - 48) / (baseFontSize * 0.68)));
             const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, baseMaxChars);
 
+            // Directions font scaling & wrapping
             const posFontSize = isShort
-              ? (isUltraSparse ? 21 : isSparse ? 19 : 17)
+              ? (isUltraSparse ? 22 : isSparse ? 20 : 17)
               : isMediumHeight
-                ? (isUltraSparse ? 23 : isSparse ? 20 : 18)
-                : (isUltraSparse ? 28 : isSparse ? 24 : 21);
+                ? (isUltraSparse ? 24 : isSparse ? 21 : 18)
+                : (isUltraSparse ? 29 : isSparse ? 25 : 21);
             const posLineGap = Math.round(posFontSize * 1.32);
             const posMaxChars = Math.max(22, Math.floor((innerUsableWidth - 64) / (posFontSize * 0.70)));
             const posologyLines = wrapLines(directions, posMaxChars);
@@ -816,23 +848,31 @@ export default function PharmapolisLabelSvg({
             // Maximum allowed Y coordinate for the bottom edge of posBox (zero overlap guarantee)
             const maxPosBoxBottom = bCautionDividerY - (isShort ? 10 : isMediumHeight ? 12 : 14);
 
+            // Formula title height if present
+            const formulaTitleFontSize = isShort ? 15 : isMediumHeight ? 17 : 20;
+            const formulaTitleH = formulaTitleText ? (formulaTitleFontSize + 12) : 0;
+
             // Typographical baseline offsets with safe font cap-height clearance (Zero overlap)
-            const ingHeaderTitleY = isShort ? 12 : isMediumHeight ? 14 : 16;
+            const ingHeaderTitleY = (formulaTitleText ? formulaTitleH + 6 : 0) + (isShort ? 12 : isMediumHeight ? 14 : 16);
             const firstIngLineY = ingHeaderTitleY + (isShort ? 10 : isMediumHeight ? 12 : 16) + Math.round((isMultiColumn ? multiColFontSize : ingFontSize) * 0.82);
-            const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * (isMultiColumn ? multiColLineGap : ingLineGap)) + (isUltraSparse ? 18 : isSparse ? 14 : 10) + Math.round(baseFontSize * 0.82);
+            const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * (isMultiColumn ? multiColLineGap : ingLineGap)) + (isUltraSparse ? 16 : isSparse ? 12 : 10) + Math.round(baseFontSize * 0.82);
             const ingBlockH = firstBaseLineY + ((baseLines.length - 1) * baseLineGap) + 8;
 
             const posHeaderTitleY = isShort ? 16 : isMediumHeight ? 18 : 22;
             const firstPosLineY = posHeaderTitleY + (isShort ? 10 : isMediumHeight ? 12 : 16) + Math.round(posFontSize * 0.82);
-            const posBoxHeight = firstPosLineY + ((posologyLines.length - 1) * posLineGap) + (isShort ? 14 : isMediumHeight ? 16 : 22);
+            const basePosBoxHeight = firstPosLineY + ((posologyLines.length - 1) * posLineGap) + (isShort ? 14 : isMediumHeight ? 16 : 22);
 
             // Available vertical space above Block 4
-            const totalContentNeeded = ingBlockH + posBoxHeight;
+            const totalContentNeeded = ingBlockH + basePosBoxHeight;
             const totalAvailableSpace = maxPosBoxBottom - (isShort ? 10 : isMediumHeight ? 12 : 16);
             const verticalSurplus = Math.max(0, totalAvailableSpace - totalContentNeeded);
 
-            const topIngredientsY = isShort ? 8 : isMediumHeight ? 10 : Math.max(14, Math.min(28, Math.round(verticalSurplus * 0.20)));
-            const midPad = isShort ? 10 : isMediumHeight ? 12 : Math.max(14, Math.min(50, Math.round(verticalSurplus * 0.45)));
+            // Expand posBoxHeight to absorb surplus space naturally
+            const extraBoxPad = Math.min(80, Math.round(verticalSurplus * 0.40));
+            const posBoxHeight = basePosBoxHeight + extraBoxPad;
+
+            const topIngredientsY = isShort ? 8 : isMediumHeight ? 10 : Math.max(12, Math.min(24, Math.round(verticalSurplus * 0.20)));
+            const midPad = isShort ? 10 : isMediumHeight ? 12 : Math.max(14, Math.min(42, Math.round(verticalSurplus * 0.40)));
 
             // Absolute hard clamp: posBoxY + posBoxHeight CAN NEVER EXCEED maxPosBoxBottom
             let posBoxY = topIngredientsY + ingBlockH + midPad;
@@ -851,6 +891,15 @@ export default function PharmapolisLabelSvg({
               <>
                 {/* Block 2: ACTIVE COMPOUNDED INGREDIENTS & BASE (Dynamic Auto-Fill Layout) */}
                 <g transform={`translate(24, ${topIngredientsY})`}>
+                  {formulaTitleText ? (
+                    <g>
+                      <text x="0" y={formulaTitleFontSize} fontFamily="Arial, Helvetica, sans-serif" fontSize={formulaTitleFontSize} fontWeight="900" fill="#003666" letterSpacing="0.4">
+                        {formulaTitleText}
+                      </text>
+                      <line x1="0" y1={formulaTitleFontSize + 6} x2={innerUsableWidth} y2={formulaTitleFontSize + 6} stroke="#e2e8f0" strokeWidth="1.2" />
+                    </g>
+                  ) : null}
+
                   <text x="0" y={ingHeaderTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
                     ACTIVE COMPOUNDED INGREDIENTS
                   </text>
@@ -1082,21 +1131,23 @@ export default function PharmapolisLabelSvg({
         <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
           PATIENT: <tspan fontWeight="800" fontSize={patientNameFontSize}>{patientName}</tspan>
         </text>
-        {partBadge ? (
-          <g transform="translate(1080, 0)">
-            <rect x="0" y={isShort ? 12 : 14} width="140" height={isShort ? 40 : 46} fill="#003666" rx="4" />
-            <text x="70" y={isShort ? 37 : 43} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill="#ffffff" letterSpacing="0.6">
-              {partBadge}
-            </text>
-            <text x="276" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
-              RX #{fileNumber}
+        {headerBadgeText ? (
+          <g transform={`translate(${badgeX}, ${badgeY})`}>
+            <rect x="0" y="0" width={badgeWidth} height={badgeHeight} fill="#003666" rx="6" />
+            <text
+              x={Math.round(badgeWidth / 2)}
+              y={isShort ? 25 : 29}
+              textAnchor="middle"
+              fontFamily="Arial, Helvetica, sans-serif"
+              fontSize={badgeFontSize}
+              fontWeight="900"
+              fill="#ffffff"
+              letterSpacing="0.5"
+            >
+              {headerBadgeText}
             </text>
           </g>
-        ) : (
-          <text x="1356" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
-            RX #{fileNumber}
-          </text>
-        )}
+        ) : null}
       </g>
 
       {/* ── PRODUCT TITLE ── */}
