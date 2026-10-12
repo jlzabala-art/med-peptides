@@ -8,6 +8,9 @@ export async function rasterizeSvgToImageData(svgEl, widthMm, heightMm, targetDp
   const heightPx = Math.round((heightMm / 25.4) * targetDpi);
 
   const clonedSvg = svgEl.cloneNode(true);
+  if (!clonedSvg.getAttribute('xmlns')) {
+    clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  }
   clonedSvg.setAttribute('width', `${widthPx}px`);
   clonedSvg.setAttribute('height', `${heightPx}px`);
 
@@ -133,8 +136,9 @@ export async function generateA4BatchPdf({
 
     // Rasterize SVG element to image
     let imgData = null;
-    if (item.svgEl) {
-      imgData = await rasterizeSvgToImageData(item.svgEl, wMm, hMm, dpi);
+    const targetSvg = item.svgEl || item.svgElement;
+    if (targetSvg) {
+      imgData = await rasterizeSvgToImageData(targetSvg, wMm, hMm, dpi);
     }
 
     if (imgData) {

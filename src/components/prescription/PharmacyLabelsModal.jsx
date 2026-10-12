@@ -1047,7 +1047,8 @@ export default function PharmacyLabelsModal({
           border-radius: 8px;
           border: 1px solid #dadce0;
           width: 100%;
-          max-width: 860px;
+          max-width: 960px;
+          margin: 0 auto;
           box-sizing: border-box;
           box-shadow: 0 1px 3px rgba(60, 64, 67, 0.06);
         }
@@ -1470,12 +1471,38 @@ export default function PharmacyLabelsModal({
             align-items: stretch !important;
             gap: 6px !important;
           }
+          .gcp-controls-toolbar {
+            padding: 8px 10px !important;
+            gap: 8px !important;
+          }
+          .gcp-toolbar-row-top {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+          }
+          .gcp-toolbar-group {
+            width: 100% !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+          }
+          .gcp-toolbar-control {
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 4px !important;
+          }
           .gcp-toolbar-select {
-            height: 36px !important;
-            font-size: 13px !important;
+            width: 100% !important;
+            height: 40px !important;
+            font-size: 14px !important;
+          }
+          .gcp-toolbar-badge {
+            align-self: flex-start !important;
           }
           .gcp-toolbar-btn {
-            height: 36px !important;
+            height: 38px !important;
             font-size: 13px !important;
             padding: 0 10px !important;
           }
@@ -1937,7 +1964,8 @@ export default function PharmacyLabelsModal({
           {isEditing && (
             <div style={{
               width: '100%',
-              maxWidth: '860px',
+              maxWidth: '960px',
+              margin: '0 auto',
               background: '#ffffff',
               border: '1px solid #1a73e8',
               borderRadius: '8px',
@@ -2388,12 +2416,13 @@ export default function PharmacyLabelsModal({
           <div
             style={{
               width: '100%',
-              maxWidth: '760px',
+              maxWidth: '960px',
+              margin: '0 auto',
               display: 'flex',
               flexDirection: 'column',
               gap: '6px',
-              alignSelf: 'stretch',
-              flexShrink: 0
+              flexShrink: 0,
+              boxSizing: 'border-box'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px', flexWrap: 'wrap', gap: '6px' }}>

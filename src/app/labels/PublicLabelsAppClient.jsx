@@ -432,6 +432,7 @@ export default function PublicLabelsAppClient({
           partLabel: partLbl,
           widthMm: Number(pItem.widthMm) || 75,
           heightMm: Number(pItem.heightMm) || 45,
+          svgEl: svgEl,
           svgElement: svgEl
         });
       }
@@ -1280,6 +1281,31 @@ export default function PublicLabelsAppClient({
           .pls-meta-parts {
             margin-top: 4px;
           }
+          /* Mobile Batch Queue - Vertical Stacking (Golden Rule #23) */
+          .pls-batch-bar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+            padding: 8px 12px !important;
+          }
+          .pls-batch-label-wrap {
+            width: 100% !important;
+            justify-content: space-between !important;
+          }
+          .pls-batch-scroll {
+            flex-direction: column !important;
+            width: 100% !important;
+            gap: 6px !important;
+            overflow-x: visible !important;
+          }
+          .pls-batch-pill {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            justify-content: space-between !important;
+            min-height: 42px !important;
+            padding: 8px 12px !important;
+            white-space: normal !important;
+          }
         }
       `}</style>
 
@@ -1791,14 +1817,14 @@ export default function PublicLabelsAppClient({
         <div
           id="pls-offscreen-batch-render"
           style={{
-            position: 'absolute',
+            position: 'fixed',
             left: '-9999px',
             top: '-9999px',
-            width: '1px',
-            height: '1px',
+            width: '800px',
+            height: '800px',
             overflow: 'hidden',
             pointerEvents: 'none',
-            visibility: 'hidden'
+            opacity: 0
           }}
           aria-hidden="true"
         >
