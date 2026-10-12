@@ -747,19 +747,28 @@ export default function PharmacyLabelsModal({
           z-index: 1;
           background: transparent;
           backdrop-filter: none;
-          padding: 16px 20px 48px 20px;
+          padding: 0 !important;
           min-height: auto;
           display: flex;
-          align-items: flex-start;
+          align-items: stretch;
           justify-content: center;
+          width: 100%;
         }
         .gcp-labels-backdrop.is-standalone-page .gcp-labels-dialog {
-          max-width: 960px;
+          max-width: 100% !important;
+          width: 100% !important;
           max-height: none;
           height: auto;
-          box-shadow: 0 1px 3px rgba(60, 64, 67, 0.12), 0 2px 8px rgba(60, 64, 67, 0.08);
-          border: 1px solid #dadce0;
-          border-radius: 8px;
+          box-shadow: none !important;
+          border: none !important;
+          border-radius: 0 !important;
+          background: transparent !important;
+        }
+        .gcp-labels-backdrop.is-standalone-page .gcp-labels-body {
+          max-width: 1100px;
+          margin: 0 auto;
+          width: 100%;
+          padding: 8px 16px 40px 16px;
         }
         .gcp-labels-dialog {
           background: #ffffff;
@@ -1508,48 +1517,48 @@ export default function PharmacyLabelsModal({
       `}</style>
 
       <div className="gcp-labels-dialog">
-        {/* Header */}
-        <div className="gcp-labels-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: 38,
-              height: 38,
-              borderRadius: '6px',
-              background: '#e8f0fe',
-              color: '#1a73e8',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid #d2e3fc'
-            }}>
-              <QrCode size={22} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#202124' }}>
-                  {isEs ? 'Etiquetas Farmacéuticas Vectoriales' : 'Vector Pharmacy Compounding Labels'}
-                </h3>
-                <span style={{
-                  background: '#e6f4ea',
-                  color: '#137333',
-                  border: '1px solid #ceead6',
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
-                  padding: '2px 8px',
-                  borderRadius: '4px'
-                }}>
-                  EU GMP Certified
-                </span>
+        {/* Header (Only in popup modal mode; hidden in standalone GCP studio) */}
+        {!isStandalone && (
+          <div className="gcp-labels-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: 38,
+                height: 38,
+                borderRadius: '6px',
+                background: '#e8f0fe',
+                color: '#1a73e8',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid #d2e3fc'
+              }}>
+                <QrCode size={22} />
               </div>
-              <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#5f6368' }}>
-                {isEs 
-                  ? 'Pharmapolis Compounding Pharmacy · Renderizado vectorial SVG & Exportador Multi-DPI a medida' 
-                  : 'Pharmapolis Compounding Pharmacy · Vector SVG Engine & Multi-DPI PNG Exporter'}
-              </p>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#202124' }}>
+                    {isEs ? 'Etiquetas Farmacéuticas Vectoriales' : 'Vector Pharmacy Compounding Labels'}
+                  </h3>
+                  <span style={{
+                    background: '#e6f4ea',
+                    color: '#137333',
+                    border: '1px solid #ceead6',
+                    fontSize: '0.68rem',
+                    fontWeight: 600,
+                    padding: '2px 8px',
+                    borderRadius: '4px'
+                  }}>
+                    EU GMP Certified
+                  </span>
+                </div>
+                <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#5f6368' }}>
+                  {isEs 
+                    ? 'Pharmapolis Compounding Pharmacy · Renderizado vectorial SVG & Exportador Multi-DPI a medida' 
+                    : 'Pharmapolis Compounding Pharmacy · Vector SVG Engine & Multi-DPI PNG Exporter'}
+                </p>
+              </div>
             </div>
-          </div>
 
-          {!isStandalone && (
             <button
               type="button"
               onClick={onClose}
@@ -1571,126 +1580,128 @@ export default function PharmacyLabelsModal({
             >
               <X size={20} />
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Content Body */}
         <div className="gcp-labels-body">
-          {/* Google Cloud Dedicated Primary Resource / Formula Selector Card */}
-          <div className="gcp-resource-selector-card">
-            <div className="gcp-resource-header-row">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                <div className="gcp-resource-icon-box">
-                  <Pill size={16} color="#1a73e8" />
+          {/* Google Cloud Dedicated Primary Resource / Formula Selector Card (Only in popup modal mode) */}
+          {!isStandalone && (
+            <div className="gcp-resource-selector-card">
+              <div className="gcp-resource-header-row">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                  <div className="gcp-resource-icon-box">
+                    <Pill size={16} color="#1a73e8" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                    <span className="gcp-resource-title-label">
+                      {isEs ? 'Prescripción y Fórmula Seleccionada' : 'Selected Prescription & Formula'}
+                    </span>
+                    <a
+                      href={`/rx/${encodeURIComponent(String(currentItem.fileNumber || currentItem.rxCode || '').replace(/^#/, '').trim())}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="gcp-resource-subtitle-code"
+                      style={{
+                        textDecoration: 'none',
+                        color: '#1a73e8',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        cursor: 'pointer'
+                      }}
+                      title={isEs ? 'Abrir expediente de prescripción pública (nueva pestaña)' : 'Open public prescription dossier (new tab)'}
+                    >
+                      <span>{currentItem.fileNumber || currentItem.rxCode || 'RX-COMPOUND'}</span>
+                      <ExternalLink size={11} style={{ opacity: 0.6 }} />
+                    </a>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                  <span className="gcp-resource-title-label">
-                    {isEs ? 'Prescripción y Fórmula Seleccionada' : 'Selected Prescription & Formula'}
-                  </span>
-                  <a
-                    href={`/rx/${encodeURIComponent(String(currentItem.fileNumber || currentItem.rxCode || '').replace(/^#/, '').trim())}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="gcp-resource-subtitle-code"
-                    style={{
-                      textDecoration: 'none',
-                      color: '#1a73e8',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      cursor: 'pointer'
-                    }}
-                    title={isEs ? 'Abrir expediente de prescripción pública (nueva pestaña)' : 'Open public prescription dossier (new tab)'}
-                  >
-                    <span>{currentItem.fileNumber || currentItem.rxCode || 'RX-COMPOUND'}</span>
-                    <ExternalLink size={11} style={{ opacity: 0.6 }} />
-                  </a>
-                </div>
+
+                {labels.length > 1 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                    <span className="gcp-resource-count-badge">
+                      {selectedProductIdx + 1} / {labels.length}
+                    </span>
+                    <button
+                      type="button"
+                      className="gcp-resource-nav-btn"
+                      disabled={selectedProductIdx === 0}
+                      onClick={() => setSelectedProductIdx(prev => Math.max(0, prev - 1))}
+                      title={isEs ? 'Fórmula Anterior' : 'Previous Formula'}
+                      aria-label="Previous Formula"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      className="gcp-resource-nav-btn"
+                      disabled={selectedProductIdx >= labels.length - 1}
+                      onClick={() => setSelectedProductIdx(prev => Math.min(labels.length - 1, prev + 1))}
+                      title={isEs ? 'Siguiente Fórmula' : 'Next Formula'}
+                      aria-label="Next Formula"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
 
+              {/* If multi-product / multi-phase, large full-width responsive dropdown */}
               {labels.length > 1 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                  <span className="gcp-resource-count-badge">
-                    {selectedProductIdx + 1} / {labels.length}
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <label htmlFor="gcp-label-phase-primary" style={{ display: 'none' }}>
+                    {isEs ? 'Seleccionar Fórmula:' : 'Select Formula:'}
+                  </label>
+                  <select
+                    id="gcp-label-phase-primary"
+                    value={selectedProductIdx}
+                    onChange={(e) => setSelectedProductIdx(Number(e.target.value))}
+                    className="gcp-resource-select"
+                  >
+                    {labels.map((lbl, idx) => {
+                      const phase = lbl.phaseNumber ? `Phase ${lbl.phaseNumber}: ` : `${idx + 1}. `;
+                      const title = lbl.productName || lbl.productTitle || 'Compounded Formula';
+                      const vol = lbl.volume ? ` (${lbl.volume})` : '';
+                      return (
+                        <option key={lbl.id || idx} value={idx}>
+                          {phase}{title}{vol}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              )}
+
+              {/* Unwrapped Full Name and Formula Details Banner */}
+              <div className="gcp-resource-details-strip">
+                <div className="gcp-resource-detail-item">
+                  <span className="gcp-detail-tag">{isEs ? 'Paciente:' : 'Patient:'}</span>
+                  <span className="gcp-detail-text gcp-detail-patient">
+                    {currentItem.patientName || currentItem.patient?.name || 'N/A'}
                   </span>
-                  <button
-                    type="button"
-                    className="gcp-resource-nav-btn"
-                    disabled={selectedProductIdx === 0}
-                    onClick={() => setSelectedProductIdx(prev => Math.max(0, prev - 1))}
-                    title={isEs ? 'Fórmula Anterior' : 'Previous Formula'}
-                    aria-label="Previous Formula"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className="gcp-resource-nav-btn"
-                    disabled={selectedProductIdx >= labels.length - 1}
-                    onClick={() => setSelectedProductIdx(prev => Math.min(labels.length - 1, prev + 1))}
-                    title={isEs ? 'Siguiente Fórmula' : 'Next Formula'}
-                    aria-label="Next Formula"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
                 </div>
-              )}
-            </div>
-
-            {/* If multi-product / multi-phase, large full-width responsive dropdown */}
-            {labels.length > 1 && (
-              <div style={{ position: 'relative', width: '100%' }}>
-                <label htmlFor="gcp-label-phase-primary" style={{ display: 'none' }}>
-                  {isEs ? 'Seleccionar Fórmula:' : 'Select Formula:'}
-                </label>
-                <select
-                  id="gcp-label-phase-primary"
-                  value={selectedProductIdx}
-                  onChange={(e) => setSelectedProductIdx(Number(e.target.value))}
-                  className="gcp-resource-select"
-                >
-                  {labels.map((lbl, idx) => {
-                    const phase = lbl.phaseNumber ? `Phase ${lbl.phaseNumber}: ` : `${idx + 1}. `;
-                    const title = lbl.productName || lbl.productTitle || 'Compounded Formula';
-                    const vol = lbl.volume ? ` (${lbl.volume})` : '';
-                    return (
-                      <option key={lbl.id || idx} value={idx}>
-                        {phase}{title}{vol}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-            )}
-
-            {/* Unwrapped Full Name and Formula Details Banner (Zero ellipsis · 100% visible on both mobile and laptop) */}
-            <div className="gcp-resource-details-strip">
-              <div className="gcp-resource-detail-item">
-                <span className="gcp-detail-tag">{isEs ? 'Paciente:' : 'Patient:'}</span>
-                <span className="gcp-detail-text gcp-detail-patient">
-                  {currentItem.patientName || currentItem.patient?.name || 'N/A'}
-                </span>
-              </div>
-              <div className="gcp-resource-detail-item">
-                <span className="gcp-detail-tag">{isEs ? 'Fórmula:' : 'Formula:'}</span>
-                <span className="gcp-detail-text gcp-detail-formula">
-                  {currentItem.phaseNumber ? `Phase ${currentItem.phaseNumber}: ` : ''}{currentItem.productTitle || currentItem.productName || 'Compounded Protocol'}
-                </span>
-              </div>
-              {currentItem.volume && (
                 <div className="gcp-resource-detail-item">
-                  <span className="gcp-detail-tag">{isEs ? 'Cantidad:' : 'Net:'}</span>
-                  <span className="gcp-detail-text">🧴 {currentItem.volume}</span>
+                  <span className="gcp-detail-tag">{isEs ? 'Fórmula:' : 'Formula:'}</span>
+                  <span className="gcp-detail-text gcp-detail-formula">
+                    {currentItem.phaseNumber ? `Phase ${currentItem.phaseNumber}: ` : ''}{currentItem.productTitle || currentItem.productName || 'Compounded Protocol'}
+                  </span>
                 </div>
-              )}
-              {currentItem.batchCode && (
-                <div className="gcp-resource-detail-item">
-                  <span className="gcp-detail-tag">{isEs ? 'Lote:' : 'Batch:'}</span>
-                  <span className="gcp-detail-text">🏷️ {currentItem.batchCode}</span>
-                </div>
-              )}
+                {currentItem.volume && (
+                  <div className="gcp-resource-detail-item">
+                    <span className="gcp-detail-tag">{isEs ? 'Cantidad:' : 'Net:'}</span>
+                    <span className="gcp-detail-text">🧴 {currentItem.volume}</span>
+                  </div>
+                )}
+                {currentItem.batchCode && (
+                  <div className="gcp-resource-detail-item">
+                    <span className="gcp-detail-tag">{isEs ? 'Lote:' : 'Batch:'}</span>
+                    <span className="gcp-detail-text">🏷️ {currentItem.batchCode}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Google Cloud Compact Controls Toolbar (Structured 2-Row Layout) */}
           <div className="gcp-controls-toolbar">

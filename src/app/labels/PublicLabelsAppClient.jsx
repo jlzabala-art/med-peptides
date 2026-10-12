@@ -716,24 +716,45 @@ export default function PublicLabelsAppClient({
           align-items: center;
           gap: 3px;
         }
+        .pls-search-item-action-wrap {
+          flex-shrink: 0;
+          margin-left: auto;
+          padding-left: 10px;
+          display: flex;
+          align-items: center;
+        }
         .pls-search-btn-add-batch {
           display: inline-flex;
           align-items: center;
-          gap: 4px;
+          justify-content: center;
+          gap: 5px;
           background: #eff6ff;
           border: 1px solid #bfdbfe;
-          color: #1d4ed8;
-          font-size: 0.68rem;
+          color: #1a73e8;
+          font-size: 0.74rem;
           font-weight: 600;
-          padding: 3px 8px;
+          height: 32px;
+          min-width: 76px;
+          padding: 0 10px;
           border-radius: 4px;
           cursor: pointer;
-          transition: all 0.15s ease;
+          white-space: nowrap;
           flex-shrink: 0;
+          transition: all 0.15s ease;
+          box-sizing: border-box;
         }
         .pls-search-btn-add-batch:hover {
           background: #dbeafe;
           border-color: #93c5fd;
+          color: #1e40af;
+        }
+        .pls-search-btn-add-batch.in-batch {
+          background: #e6f4ea;
+          border-color: #ceead6;
+          color: #137333;
+        }
+        .pls-search-btn-add-batch.in-batch:hover {
+          background: #d4edda;
         }
 
         /* Batch Patient Queue Strip */
@@ -743,7 +764,6 @@ export default function PublicLabelsAppClient({
           padding: 8px 16px;
           display: flex;
           align-items: center;
-          justify-content: space-between;
           gap: 12px;
           position: sticky;
           top: 49px;
@@ -772,6 +792,11 @@ export default function PublicLabelsAppClient({
           min-width: 0;
           overflow-x: auto;
           padding: 2px 0;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+        .pls-batch-scroll::-webkit-scrollbar {
+          display: none;
         }
         .pls-batch-pill {
           display: inline-flex;
@@ -784,6 +809,8 @@ export default function PublicLabelsAppClient({
           font-size: 0.76rem;
           cursor: pointer;
           white-space: nowrap;
+          flex-shrink: 0;
+          min-width: max-content;
           transition: all 0.15s ease;
           position: relative;
         }
@@ -875,7 +902,7 @@ export default function PublicLabelsAppClient({
           transition: background 0.1s;
         }
         .pls-popover-opt:hover {
-          background: #f1f5f9;
+          background: #f1f3f4;
         }
         .pls-popover-opt.selected {
           background: #eff6ff;
@@ -883,36 +910,45 @@ export default function PublicLabelsAppClient({
           color: #1e40af;
           font-weight: 700;
         }
-        .pls-batch-btn-print {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          background: #0f172a;
-          color: #ffffff;
-          border: 1px solid #0f172a;
-          border-radius: 6px;
-          padding: 6px 14px;
-          font-size: 0.78rem;
-          font-weight: 700;
-          cursor: pointer;
-          white-space: nowrap;
-          box-shadow: 0 1px 3px rgba(15,23,42,0.2);
-          transition: background 0.15s ease;
-        }
-        .pls-batch-btn-print:hover:not(:disabled) {
-          background: #1e293b;
-        }
-        .pls-batch-btn-print:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
 
-        /* Header Actions */
+        /* Top Header Action Buttons */
         .pls-actions-wrap {
           display: flex;
           align-items: center;
           gap: 8px;
           flex-shrink: 0;
+        }
+        .pls-btn-print-batch {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #1a73e8;
+          color: #ffffff;
+          border: 1px solid #1a73e8;
+          border-radius: 6px;
+          padding: 6px 12px;
+          font-size: 0.78rem;
+          font-weight: 600;
+          cursor: pointer;
+          white-space: nowrap;
+          box-shadow: 0 1px 2px rgba(26,115,232,0.3);
+          transition: all 0.15s ease;
+        }
+        .pls-btn-print-batch:hover:not(:disabled) {
+          background: #1557b0;
+          border-color: #1557b0;
+        }
+        .pls-btn-print-batch:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+        .pls-btn-batch-count {
+          background: rgba(255, 255, 255, 0.25);
+          color: #ffffff;
+          font-size: 0.68rem;
+          font-weight: 700;
+          padding: 1px 6px;
+          border-radius: 10px;
         }
         .pls-btn-share {
           display: inline-flex;
@@ -1100,66 +1136,83 @@ export default function PublicLabelsAppClient({
           box-shadow: 0 1px 3px rgba(60,64,67,0.3);
         }
 
-        /* Identity strip: Patient · Prescription · Doctor (single source) */
-        .pls-identity {
+        /* Unified Google Cloud Resource Metadata Strip (Zero nested cards) */
+        .pls-meta-row {
           display: flex;
-          align-items: stretch;
-          gap: 8px;
+          align-items: center;
+          gap: 12px;
           flex-wrap: wrap;
-          min-width: 0;
+          width: 100%;
         }
-        .pls-id-chip {
+        .pls-meta-item {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          min-height: 40px;
-          padding: 4px 10px;
-          background: #ffffff;
-          border: 1px solid #dadce0;
-          border-radius: 8px;
-          text-decoration: none;
-          color: #202124;
-          cursor: pointer;
-          transition: border-color 0.15s, background 0.15s;
+          gap: 7px;
           min-width: 0;
-          font: inherit;
-          text-align: left;
         }
-        .pls-id-chip:hover {
-          border-color: #1a73e8;
-          background: #f8fbff;
-        }
-        .pls-id-icon {
-          width: 26px;
-          height: 26px;
+        .pls-meta-icon {
+          width: 24px;
+          height: 24px;
           border-radius: 50%;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
         }
-        .pls-id-text {
-          display: flex;
-          flex-direction: column;
+        .pls-meta-text {
+          display: inline-flex;
+          align-items: baseline;
+          gap: 6px;
           min-width: 0;
-          line-height: 1.15;
         }
-        .pls-id-label {
-          font-size: 0.62rem;
+        .pls-meta-k {
+          font-size: 0.70rem;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.04em;
           color: #5f6368;
+          white-space: nowrap;
         }
-        .pls-id-value {
-          font-size: 0.84rem;
+        .pls-meta-v {
+          font-size: 0.86rem;
           font-weight: 700;
           color: #202124;
-          overflow-wrap: anywhere;
+          white-space: nowrap;
         }
-        .pls-id-value.mono {
+        .pls-meta-v.mono {
           font-family: monospace;
           color: #1a73e8;
+        }
+        .pls-meta-link {
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .pls-meta-link:hover {
+          text-decoration: underline;
+        }
+        .pls-meta-action-btn {
+          background: transparent;
+          border: none;
+          color: #5f6368;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2px 4px;
+          border-radius: 4px;
+          transition: background 0.15s, color 0.15s;
+        }
+        .pls-meta-action-btn:hover {
+          background: #e8eaed;
+          color: #202124;
+        }
+        .pls-meta-divider {
+          width: 1px;
+          height: 16px;
+          background: #dadce0;
+          flex-shrink: 0;
         }
 
         /* Mobile Adjustments (Golden Rule #23) */
@@ -1174,6 +1227,14 @@ export default function PublicLabelsAppClient({
           }
           .pls-actions-wrap {
             margin-left: auto;
+            gap: 6px !important;
+          }
+          .pls-btn-print-batch .pls-btn-print-label {
+            display: none;
+          }
+          .pls-btn-print-batch {
+            padding: 6px 10px !important;
+            height: 34px !important;
           }
           /* Search drops to its own full-width line */
           .pls-search-container {
@@ -1187,21 +1248,10 @@ export default function PublicLabelsAppClient({
             display: none;
           }
           .pls-btn-import {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             padding: 0;
             justify-content: center;
-          }
-          .pls-identity {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            width: 100%;
-          }
-          .pls-id-chip.patient {
-            grid-column: 1 / -1;
-          }
-          .pls-id-chip {
-            min-height: 44px;
           }
           .pls-search-input {
             font-size: 16px !important; /* Prevents iOS Safari auto-zoom */
@@ -1209,19 +1259,26 @@ export default function PublicLabelsAppClient({
           .pls-search-badge {
             display: none !important;
           }
-          .pls-actions-wrap {
-            gap: 6px !important;
-          }
           .pls-btn-share {
-            padding: 6px 10px !important;
+            padding: 6px 8px !important;
             font-size: 0.74rem !important;
           }
           .pls-context-strip {
             padding: 8px 12px !important;
+            gap: 6px !important;
+          }
+          .pls-meta-row {
             gap: 8px !important;
           }
-          .pls-context-patient {
-            gap: 8px !important;
+          .pls-meta-divider {
+            display: none;
+          }
+          .pls-meta-item {
+            width: 100%;
+            justify-content: flex-start;
+          }
+          .pls-meta-parts {
+            margin-top: 4px;
           }
         }
       `}</style>
@@ -1348,21 +1405,27 @@ export default function PublicLabelsAppClient({
                           #{item.code} • {item.title || item.treatmentTitle || 'Compounded Pharmaceutical Protocol'}
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span className="pls-search-item-badge">
-                          #{item.code}
-                        </span>
+                      <div className="pls-search-item-action-wrap">
                         <button
                           type="button"
-                          className="pls-search-btn-add-batch"
-                          title={isEs ? "Añadir a la cola de lote sin cerrar" : "Add to batch queue without closing"}
+                          className={`pls-search-btn-add-batch ${isInBatch ? 'in-batch' : ''}`}
+                          title={isInBatch ? (isEs ? "Ya está en el lote" : "Already in batch") : (isEs ? "Añadir a la cola de lote" : "Add to batch queue")}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSelectOrAddPatient(item.code, false);
                           }}
                         >
-                          <Plus size={11} />
-                          <span>{isInBatch ? (isEs ? 'Añadido' : 'Added') : (isEs ? 'Añadir' : 'Add')}</span>
+                          {isInBatch ? (
+                            <>
+                              <Check size={12} color="#137333" />
+                              <span>{isEs ? 'En Lote' : 'In Batch'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Plus size={12} />
+                              <span>{isEs ? 'Añadir' : 'Add'}</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -1373,8 +1436,30 @@ export default function PublicLabelsAppClient({
           )}
         </div>
 
-        {/* Action Buttons: Import, Share, Language */}
+        {/* Action Buttons: Print Batch A4, Import, Share, Language */}
         <div className="pls-actions-wrap">
+          {/* Global Action: Print All Patients in A4 PDF Sheet */}
+          <button
+            type="button"
+            className="pls-btn-print-batch"
+            onClick={handleDownloadA4BatchPdf}
+            disabled={isGeneratingBatchPdf || patientQueue.length === 0}
+            title={isEs ? 'Imprimir todas las etiquetas del lote en un folio A4 en formato PDF' : 'Print all queued labels onto an A4 PDF sheet'}
+            aria-label={isEs ? 'Imprimir Lote en A4 (PDF)' : 'Print Batch in A4 (PDF)'}
+          >
+            <Printer size={14} />
+            <span className="pls-btn-print-label">
+              {isGeneratingBatchPdf
+                ? (batchPdfProgress
+                    ? `${isEs ? 'Rasterizando' : 'Rendering'} ${batchPdfProgress.current}/${batchPdfProgress.total}...`
+                    : (isEs ? 'Generando...' : 'Generating...'))
+                : (isEs ? 'Imprimir Lote A4' : 'Print Batch A4')}
+            </span>
+            <span className="pls-btn-batch-count">
+              {patientQueue.length}
+            </span>
+          </button>
+
           {/* Import Prescription (Account Managers · no Atlas validation) */}
           <button
             type="button"
@@ -1567,125 +1652,118 @@ export default function PublicLabelsAppClient({
             );
           })}
         </div>
-
-        {/* Global Action: Print All Patients in A4 PDF Sheet */}
-        <div className="pls-batch-btn-print-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <button
-            type="button"
-            className="pls-batch-btn-print"
-            onClick={handleDownloadA4BatchPdf}
-            disabled={isGeneratingBatchPdf || patientQueue.length === 0}
-            title={isEs ? 'Imprimir todas las etiquetas del lote en un folio A4 en formato PDF' : 'Print all queued labels onto an A4 PDF sheet'}
-          >
-            <Printer size={15} />
-            <span>
-              {isGeneratingBatchPdf
-                ? (batchPdfProgress
-                    ? `${isEs ? 'Rasterizando' : 'Rendering'} ${batchPdfProgress.current}/${batchPdfProgress.total}...`
-                    : (isEs ? 'Generando A4 PDF...' : 'Generating A4 PDF...'))
-                : (isEs ? 'Imprimir Lote en A4 (PDF)' : 'Print Batch in A4 (PDF)')}
-            </span>
-          </button>
-        </div>
       </section>
 
-      {/* ── 3. Active Patient & Formula Context Strip ── */}
+      {/* ── 3. Unified Google Cloud Resource Metadata Strip (Zero nested cards) ── */}
       <div className="pls-context-strip">
-        <div className="pls-identity">
-          {/* Patient → shows all prescriptions of this patient */}
-          <button
-            type="button"
-            id="pls-id-patient"
-            className="pls-id-chip patient"
-            onClick={() => {
-              setSearchQuery(patientName);
-              setSearchOpen(true);
-              searchInputRef.current?.focus();
-            }}
-            title={isEs ? `Ver todas las prescripciones de ${patientName}` : `View all prescriptions for ${patientName}`}
-          >
-            <span className="pls-id-icon" style={{ background: '#f3e8fd', color: '#8430ce' }}><User size={14} /></span>
-            <span className="pls-id-text">
-              <span className="pls-id-label">{isEs ? 'Paciente' : 'Patient'}</span>
-              <span className="pls-id-value">{patientName}</span>
+        <div className="pls-meta-row">
+          {/* Patient Item */}
+          <div className="pls-meta-item">
+            <span className="pls-meta-icon" style={{ background: '#f3e8fd', color: '#8430ce' }}>
+              <User size={13} />
             </span>
-            <Search size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
-          </button>
-
-          <div className="pls-id-sub-row">
-            {/* Prescription → public RX page (+ copy) */}
-            <div className="pls-id-chip" style={{ padding: 0, cursor: 'default' }}>
-              <Link
-                href={`/rx/${encodeURIComponent(cleanRxCode)}`}
-                id="pls-id-rx"
-                className="pls-id-chip"
-                style={{ border: 'none', background: 'transparent' }}
-                title={isEs ? `Ir a la prescripción #${cleanRxCode}` : `Go to prescription #${cleanRxCode}`}
-              >
-                <span className="pls-id-icon" style={{ background: '#e8f0fe', color: '#1a73e8' }}><FileText size={14} /></span>
-                <span className="pls-id-text">
-                  <span className="pls-id-label">{isEs ? 'Prescripción' : 'Prescription'}</span>
-                  <span className="pls-id-value mono">#{cleanRxCode}</span>
-                </span>
-                <ExternalLink size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
-              </Link>
-              <button
-                type="button"
-                className="pls-code-pill-copy"
-                style={{ alignSelf: 'stretch', minWidth: 32 }}
-                onClick={handleCopyCode}
-                title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
-                aria-label={isEs ? 'Copiar código' : 'Copy code'}
-              >
-                {copyCodeSuccess ? <Check size={12} color="#137333" /> : <Copy size={12} />}
-              </button>
+            <div className="pls-meta-text">
+              <span className="pls-meta-k">{isEs ? 'Paciente' : 'Patient'}:</span>
+              <span className="pls-meta-v">{patientName}</span>
             </div>
-
-            {/* Doctor → public doctor page */}
-            <Link
-              href={`/dr/${encodeURIComponent(doctorSlug)}`}
-              id="pls-id-doctor"
-              className="pls-id-chip"
-              title={isEs ? `Ir al portal clínico de ${docName}` : `Go to doctor portal of ${docName}`}
+            <button
+              type="button"
+              className="pls-meta-action-btn"
+              onClick={() => {
+                setSearchQuery(patientName);
+                setSearchOpen(true);
+                searchInputRef.current?.focus();
+              }}
+              title={isEs ? `Buscar prescripciones de ${patientName}` : `Search prescriptions for ${patientName}`}
+              aria-label={isEs ? 'Buscar paciente' : 'Search patient'}
             >
-              <span className="pls-id-icon" style={{ background: '#e6f4ea', color: '#137333' }}><Stethoscope size={14} /></span>
-              <span className="pls-id-text">
-                <span className="pls-id-label">{isEs ? 'Médico' : 'Doctor'}</span>
-                <span className="pls-id-value">{docName}</span>
-              </span>
-              <ExternalLink size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
-            </Link>
+              <Search size={12} />
+            </button>
           </div>
-        </div>
 
-        {/* Formula Parts Switcher (Part 1 / Part 2) */}
-        {labels.length > 1 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 600, textTransform: 'uppercase' }}>
-              {isEs ? 'Fórmula:' : 'Formula:'}
+          <span className="pls-meta-divider" aria-hidden="true" />
+
+          {/* Prescription Item */}
+          <div className="pls-meta-item">
+            <span className="pls-meta-icon" style={{ background: '#e8f0fe', color: '#1a73e8' }}>
+              <FileText size={13} />
             </span>
-            <div className="pls-parts-tabs">
-              {labels.map((lbl, idx) => {
-                const isActive = labelIndex === idx;
-                const labelText = lbl.partLabel || `Part ${idx + 1}`;
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    className={`pls-part-btn ${isActive ? 'active' : ''}`}
-                    onClick={() => {
-                      setLabelIndex(idx);
-                      const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${idx + 1}&edit=true&lang=${lang}`;
-                      window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
-                    }}
-                  >
-                    {labelText}
-                  </button>
-                );
-              })}
+            <div className="pls-meta-text">
+              <span className="pls-meta-k">{isEs ? 'Prescripción' : 'Prescription'}:</span>
+              <a
+                href={`/rx/${encodeURIComponent(cleanRxCode)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pls-meta-v mono pls-meta-link"
+                title={isEs ? `Abrir prescripción #${cleanRxCode}` : `Open prescription #${cleanRxCode}`}
+              >
+                #{cleanRxCode}
+                <ExternalLink size={11} style={{ opacity: 0.6 }} />
+              </a>
+            </div>
+            <button
+              type="button"
+              className="pls-meta-action-btn"
+              onClick={handleCopyCode}
+              title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
+              aria-label={isEs ? 'Copiar código' : 'Copy code'}
+            >
+              {copyCodeSuccess ? <Check size={12} color="#137333" /> : <Copy size={12} />}
+            </button>
+          </div>
+
+          <span className="pls-meta-divider" aria-hidden="true" />
+
+          {/* Doctor Item */}
+          <div className="pls-meta-item">
+            <span className="pls-meta-icon" style={{ background: '#e6f4ea', color: '#137333' }}>
+              <Stethoscope size={13} />
+            </span>
+            <div className="pls-meta-text">
+              <span className="pls-meta-k">{isEs ? 'Médico' : 'Doctor'}:</span>
+              <a
+                href={`/dr/${encodeURIComponent(doctorSlug)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pls-meta-v pls-meta-link"
+                title={isEs ? `Ir al portal clínico de ${docName}` : `Go to doctor portal of ${docName}`}
+              >
+                {docName}
+                <ExternalLink size={11} style={{ opacity: 0.6 }} />
+              </a>
             </div>
           </div>
-        )}
+
+          {/* Formula Parts Switcher (Part 1 / Part 2) */}
+          {labels.length > 1 && (
+            <>
+              <span className="pls-meta-divider" aria-hidden="true" />
+              <div className="pls-meta-item pls-meta-parts">
+                <span className="pls-meta-k">{isEs ? 'Fórmula' : 'Formula'}:</span>
+                <div className="pls-parts-tabs">
+                  {labels.map((lbl, idx) => {
+                    const isActive = labelIndex === idx;
+                    const labelText = lbl.partLabel || `Part ${idx + 1}`;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        className={`pls-part-btn ${isActive ? 'active' : ''}`}
+                        onClick={() => {
+                          setLabelIndex(idx);
+                          const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${idx + 1}&edit=true&lang=${lang}`;
+                          window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+                        }}
+                      >
+                        {labelText}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* ── 4. Main Independent Label Studio Workspace ── */}
