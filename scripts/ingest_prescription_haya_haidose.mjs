@@ -395,13 +395,6 @@ async function ingest() {
   await db.collection('prescriptions').doc(RX_ID).set(rxPayload, { merge: true });
   console.log(`✅ Prescription written: prescriptions/${RX_ID}`);
 
-  // Also write alias doc: prescriptions/BOX01399AATRI for 100% URL parity
-  await db.collection('prescriptions').doc(CODE).set({
-    ...rxPayload,
-    id: CODE
-  }, { merge: true });
-  console.log(`✅ Prescription alias written: prescriptions/${CODE}`);
-
   console.log('🎉 Successfully completed ingestion for Haya Hassen Al-Haidose (BOX01399AATRI)!');
   process.exit(0);
 }
