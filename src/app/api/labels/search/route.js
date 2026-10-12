@@ -93,9 +93,11 @@ export async function GET(request) {
       }
     }
 
-    // ── 3. Algolia Federated Search ──
+    // ── 3. Algolia Prescriptions Search (Exclusively Prescriptions, Never Patient Records) ──
     try {
-      const algoliaRes = await searchAlgoliaFederated(query, ['prescriptions', 'atlas_patients'], 6);
+      // In Label Studio, only real compounding prescriptions can be printed.
+      // Searching atlas_patients causes confusion by showing patient records with '+ Add' buttons.
+      const algoliaRes = await searchAlgoliaFederated(query, ['prescriptions'], 10);
       
       const rxHits = algoliaRes.prescriptions || [];
       for (const hit of rxHits) {
@@ -112,26 +114,6 @@ export async function GET(request) {
             title: hit.treatmentTitle || hit.title || hit.formulaName || 'Compounded Prescription',
             date: extractDate(hit.prescriptionDate || hit.date || hit.dispensedDate || hit.createdAt || hit.created_at),
             source: 'algolia'
-          });
-        }
-      }
-
-      const patHits = algoliaRes.patients || [];
-      for (const hit of patHits) {
-        const pName = hit.name || hit.patientName || hit.fullName;
-        const pCode = hit.fileNumber || hit.rxCode || hit.id || hit.objectID;
-        if (pName && !seenCodes.has(String(pCode).toLowerCase())) {
-          seenCodes.add(String(pCode).toLowerCase());
-          results.push({
-            id: hit.objectID || pCode,
-            code: String(pCode),
-            fileNumber: hit.fileNumber || String(pCode),
-            patientName: pName,
-            doctorName: hit.treatingDoctor || hit.doctorName || '',
-            clinicName: hit.clinic || '',
-            title: `Patient Record (${pName})`,
-            date: extractDate(hit.lastPrescriptionDate || hit.date || hit.createdAt || hit.created_at),
-            source: 'algolia_patient'
           });
         }
       }
