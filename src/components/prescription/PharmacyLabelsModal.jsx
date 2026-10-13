@@ -61,14 +61,15 @@ export default function PharmacyLabelsModal({
   initialEditMode = false,
   isStandalone = false,
   hideInternalPartsSwitcher = false,
+  hideShippingLabel = false,
   onPrescriptionUpdated = null,
   onLabelIndexChange = null,
   onConfigChange = null
 }) {
   const [selectedProductIdx, setSelectedProductIdx] = useState(typeof initialLabelIndex === 'number' ? initialLabelIndex : 0);
   const [activeVariant, setActiveVariantState] = useState(() => {
-    if (initialVariant) return initialVariant;
-    const valid = ['front', 'backQr', 'frontWithQr', 'shipping'];
+    if (initialVariant && (!hideShippingLabel || initialVariant !== 'shipping')) return initialVariant;
+    const valid = hideShippingLabel ? ['front', 'backQr', 'frontWithQr'] : ['front', 'backQr', 'frontWithQr', 'shipping'];
     const saved = labels?.[initialLabelIndex]?.lastVariant || labels?.[0]?.lastVariant;
     if (valid.includes(saved)) return saved;
     try {
@@ -88,7 +89,7 @@ export default function PharmacyLabelsModal({
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isGeneratingZip, setIsGeneratingZip] = useState(false);
-  const [compareMode, setCompareMode] = useState(true); // show Delivery + Shipping side by side by default
+  const [compareMode, setCompareMode] = useState(!hideShippingLabel); // show Delivery + Shipping side by side only if shipping label is enabled
   const [shippingDraft, setShippingDraft] = useState(null); // null = not editing
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [showCutGuides, setShowCutGuides] = useState(false); // Scissor cut lines & crop marks toggle (default false for clean label)
@@ -2688,24 +2689,26 @@ export default function PharmacyLabelsModal({
                 <FontLegibilityPill pt={minPatientPt} isEs={isEs} compact={false} threshold={legalThreshold} />
               </div>
 
-              <button
-                type="button"
-                onClick={() => setCompareMode((v) => !v)}
-                aria-pressed={compareMode}
-                style={{
-                  padding: '6px 10px',
-                  minHeight: '32px',
-                  borderRadius: '4px',
-                  border: compareMode ? '1px solid #1a73e8' : '1px solid #dadce0',
-                  background: compareMode ? '#e8f0fe' : '#fff',
-                  color: compareMode ? '#1a73e8' : '#3c4043',
-                  fontSize: '0.70rem',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                {isEs ? 'Comparar Delivery / Shipping' : 'Compare Delivery / Shipping'}
-              </button>
+              {!hideShippingLabel && (
+                <button
+                  type="button"
+                  onClick={() => setCompareMode((v) => !v)}
+                  aria-pressed={compareMode}
+                  style={{
+                    padding: '6px 10px',
+                    minHeight: '32px',
+                    borderRadius: '4px',
+                    border: compareMode ? '1px solid #1a73e8' : '1px solid #dadce0',
+                    background: compareMode ? '#e8f0fe' : '#fff',
+                    color: compareMode ? '#1a73e8' : '#3c4043',
+                    fontSize: '0.70rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isEs ? 'Comparar Delivery / Shipping' : 'Compare Delivery / Shipping'}
+                </button>
+              )}
 
               {/* Multi-step Zoom Bar */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -2837,7 +2840,7 @@ export default function PharmacyLabelsModal({
               </div>
             </div>
 
-            {compareMode && (() => {
+            {!hideShippingLabel && compareMode && (() => {
               const otherVariant = activeVariant === 'shipping' ? 'backQr' : 'shipping';
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

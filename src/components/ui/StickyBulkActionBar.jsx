@@ -308,7 +308,7 @@ export default function StickyBulkActionBar({
                 className={`sticky-bulk-action-btn ${isPrimary ? 'primary' : ''}`}
                 title={action.label}
               >
-                {IconComp && <IconComp size={14} />}
+                {React.isValidElement(IconComp) ? IconComp : (IconComp && typeof IconComp === 'function' ? <IconComp size={14} /> : null)}
                 <span>{String(action.label || '').replace(/^[\p{Emoji}\p{Extended_Pictographic}\uFE0F\u200D\s]+/u, '').replace(/\s*\(\d+\)\s*$/, '').trim()}</span>
               </button>
             );

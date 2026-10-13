@@ -89,7 +89,6 @@ import ProductDetailSidebar from './ProductDetailSidebar';
 import EternaPublicOverviewShowcase from './EternaPublicOverviewShowcase';
 import SupplementPublicOverviewShowcase from './SupplementPublicOverviewShowcase';
 import ProductOverviewQuickNav from './ProductOverviewQuickNav';
-import ProductSectionHeaderBanner from './ProductSectionHeaderBanner';
 import ProductSectionFooterNav from './ProductSectionFooterNav';
 import PresentationsMatrixSection from './datasheet/sections/PresentationsMatrixSection';
 import ReconstitutionRouterSection from './datasheet/sections/ReconstitutionRouterSection';
@@ -2060,14 +2059,6 @@ export default function PublicDatasheetView({
         </div>
       ) : (
         <div className="pds-single-section-view">
-          <ProductSectionHeaderBanner
-            productName={name}
-            category={category}
-            activeSection={effectiveActiveSection}
-            sections={tocSections}
-            onSelectSection={handleSelectSection}
-            lang={lang}
-          />
 
           {effectiveActiveSection === 'presentations-matrix' && (
             <PresentationsMatrixSection

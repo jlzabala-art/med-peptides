@@ -30,6 +30,8 @@ export function invalidateDoctorCache(slugOrId = null) {
 
 export function slugify(text) {
   return String(text || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/^dr[a]?\.\s*/i, '')
     .replace(/^dr[a]?\s*/i, '')
@@ -289,12 +291,17 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
   }
 
   const doctors = await getCachedDoctorDirectory();
+  const normalizedSlug = cleanSlug.replace(/^dr[-.]?/, '');
   
-  // Find doctor matching: opaqueCode, docId, or nameSlug
+  // Find doctor matching: opaqueCode, docId, nameSlug, or alias
   let matchedDoc = doctors.find(doc => {
-    return doc.opaqueCode.toLowerCase() === cleanSlug ||
+    const docSlugNoDr = (doc.nameSlug || '').replace(/^dr[-.]?/, '');
+    const isSezginMatch = (cleanSlug.includes('sezgin') || cleanSlug.includes('cagatay')) && (doc.id === 'z3aUIMaYsPViG1JgM95r' || (doc.nameSlug || '').includes('sezgin'));
+    return isSezginMatch ||
+           doc.opaqueCode.toLowerCase() === cleanSlug ||
            doc.id.toLowerCase() === cleanSlug ||
            doc.nameSlug === cleanSlug ||
+           docSlugNoDr === normalizedSlug ||
            doc.nameSlug.replace(/-/g, '') === cleanSlug.replace(/-/g, '') ||
            (doc.license && doc.license.toLowerCase() === cleanSlug);
   });
@@ -309,7 +316,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     rxProbe.forEach((doc) => {
       const d = doc.data();
       const dName = d.doctorName || d.treatingDoctor?.name || d.prescribingDoctor || '';
-      if (dName && slugify(dName) === cleanSlug) {
+      if (dName && (slugify(dName) === cleanSlug || slugify(dName).replace(/^dr[-.]?/, '') === normalizedSlug)) {
         doctorDoc = {
           displayName: dName,
           clinic: d.clinic || d.treatingDoctor?.clinic || 'Clinical Dispensary',
@@ -326,6 +333,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
 
   const cleanDoctorName = (doctorDoc.displayName || doctorDoc.name || `${doctorDoc.firstName || ''} ${doctorDoc.lastName || ''}`).trim();
   const cleanDoctorQuery = cleanDoctorName.toLowerCase().replace('dr.', '').replace('dr ', '').trim();
+  const isDoctorSezgin = (doctorId === 'z3aUIMaYsPViG1JgM95r') || cleanSlug.includes('sezgin') || cleanDoctorQuery.includes('sezgin');
   if (!opaqueCode) opaqueCode = getDoctorOpaqueCode(doctorId, doctorDoc);
 
   // 2. Fetch prescriptions for this doctor
@@ -340,8 +348,12 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     const dDocName = String(treatingDocName || d.doctorName || d.doctor?.name || d.prescribingDoctor || '').toLowerCase();
     const dDocId = String(treatingDocId || d.treatingDoctorId || d.doctorId || d.doctor?.id || '').toLowerCase();
 
+    const dDocNormalized = dDocName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const cleanDocQueryNormalized = cleanDoctorQuery.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
     const isMatch = (doctorId && dDocId === doctorId.toLowerCase()) ||
-                    (cleanDoctorQuery && dDocName && (dDocName.includes(cleanDoctorQuery) || cleanDoctorQuery.includes(dDocName)));
+                    (isDoctorSezgin && (dDocId === 'z3auimayspvig1jgm95r' || dDocId === 'dr-cagatay-sezgin' || dDocNormalized.includes('sezgin'))) ||
+                    (cleanDoctorQuery && dDocNormalized && (dDocNormalized.includes(cleanDocQueryNormalized) || cleanDocQueryNormalized.includes(dDocNormalized)));
 
     if (isMatch) {
       const patName = d.patientName || d.patient?.name || 'Patient';
@@ -846,6 +858,28 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       console.warn('Could not load protocols in doctorCache:', pErr);
     }
 
+    // 7.5 Fetch Laboratory Diagnostic Results (Bloodo / LifeLab1 tests)
+    let labResults = [];
+    try {
+      const labSnap = await adminDb.collection('lab_results').limit(100).get();
+      labSnap.forEach(doc => {
+        const ld = doc.data();
+        const lDocId = (ld.doctorId || '').toLowerCase();
+        const lDocName = (ld.doctorName || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const isMatch = (doctorId && lDocId === doctorId.toLowerCase()) ||
+                        (isDoctorSezgin && (lDocId === 'z3auimayspvig1jgm95r' || lDocName.includes('sezgin'))) ||
+                        (cleanDoctorQueryNormalized && lDocName.includes(cleanDoctorQueryNormalized));
+        if (isMatch) {
+          labResults.push({
+            id: doc.id,
+            ...ld
+          });
+        }
+      });
+    } catch (labErr) {
+      console.warn('Could not load lab_results in doctorCache:', labErr);
+    }
+
     // 8. Enrich each prescription with tailored Atlas Recommendations (Peptides & Colway)
     const enrichedPrescriptions = prescriptions.map(rx => {
       const recs = getPrescriptionAtlasRecommendations(rx);
@@ -869,6 +903,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       },
       tasks: clinicalTasks,
       prescriptions: enrichedPrescriptions,
+      labResults,
       patients: Array.from(patientMap.values()),
       formulary,
       bloodoPanels,

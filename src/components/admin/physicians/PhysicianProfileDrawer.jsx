@@ -182,6 +182,10 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
   const [previewPdfUrl,  setPreviewPdfUrl]  = useState(null);
   const [currentDoctor,  setCurrentDoctor]  = useState(doctor);
 
+  const doctorName = currentDoctor
+    ? (currentDoctor.displayName || [currentDoctor.firstName, currentDoctor.lastName].filter(Boolean).join(' ') || 'Unnamed Physician')
+    : 'Unnamed Physician';
+
   // Expose PDF preview to PdfButton via window (avoids prop drilling into column defs)
   useEffect(() => {
     window._previewPdf = (url) => setPreviewPdfUrl(url);

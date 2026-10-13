@@ -310,30 +310,62 @@ export default function DoctorClinicalAnalytics({
     }
 
     const counts = {
+      dermal: { id: 'dermal', label: 'Follicular & Hair Restoration', count: 0, color: '#0d9488' },
       cellular: { id: 'cellular', label: 'Cellular Longevity & Mitochondria', count: 0, color: '#ea580c' },
       neuro: { id: 'neuro', label: 'Neuro-Circadian & Sleep Balance', count: 0, color: '#6366f1' },
-      dermal: { id: 'dermal', label: 'Follicular & Dermal Regeneration', count: 0, color: '#0d9488' },
       metabolic: { id: 'metabolic', label: 'Metabolic & Peptide Optimization', count: 0, color: '#1a73e8' },
-      repair: { id: 'repair', label: 'Tissue Repair & Musculoskeletal', count: 0, color: '#7c3aed' }
+      repair: { id: 'repair', label: 'Tissue Repair & Musculoskeletal', count: 0, color: '#7c3aed' },
+      hormonal: { id: 'hormonal', label: 'Hormonal Health & BHRT', count: 0, color: '#ec4899' }
     };
 
     let classified = 0;
     prescriptions.forEach((rx) => {
-      const text = `${rx.treatmentTitle || ''} ${rx.title || ''} ${rx.category || ''} ${rx.indication || ''} ${Array.isArray(rx.apis) ? rx.apis.join(' ') : ''} ${Array.isArray(rx.items) ? rx.items.map(i => i.name || '').join(' ') : ''}`.toLowerCase();
+      const itemsText = Array.isArray(rx.items) ? rx.items.map(i => `${i.name || ''} ${i.activeIngredient || ''}`).join(' ') : '';
+      const apisText = Array.isArray(rx.apis) ? rx.apis.join(' ') : '';
+      const formulasText = Array.isArray(rx.formulas) ? rx.formulas.map(f => `${f.name || ''} ${f.formulaName || ''} ${(f.components || []).map(c => c.name || c.apiName || '').join(' ')}`).join(' ') : '';
+      const docSpecialty = `${rx.doctor?.specialty || ''} ${rx.treatingDoctor?.specialty || ''}`.toLowerCase();
 
-      if (text.includes('coenzyme') || text.includes('ubiquinol') || text.includes('resveratrol') || text.includes('nad') || text.includes('epithalon') || text.includes('longevity') || text.includes('mitochondr')) {
-        counts.cellular.count += 1;
-        classified += 1;
-      } else if (text.includes('theanine') || text.includes('magnesium') || text.includes('glycine') || text.includes('melatonin') || text.includes('sleep') || text.includes('neuro') || text.includes('circadian')) {
-        counts.neuro.count += 1;
-        classified += 1;
-      } else if (text.includes('minoxidil') || text.includes('dutasteride') || text.includes('finasteride') || text.includes('ghk') || text.includes('hair') || text.includes('follic') || text.includes('dermal') || text.includes('latanoprost')) {
+      const text = `${rx.treatmentTitle || ''} ${rx.title || ''} ${rx.category || ''} ${rx.indication || ''} ${rx.treatmentProgram || ''} ${rx.fagron?.testName || ''} ${rx.diagnosis || ''} ${rx.clinicalNotes || ''} ${apisText} ${itemsText} ${formulasText}`.toLowerCase();
+
+      // 1. Follicular & Hair Restoration / Trichology (High Priority)
+      if (
+        text.includes('tricho') || text.includes('hair') || text.includes('follic') || text.includes('scalp') ||
+        text.includes('alopecia') || text.includes('effluvium') || text.includes('androgenetic') ||
+        text.includes('minoxidil') || text.includes('dutasteride') || text.includes('finasteride') ||
+        text.includes('capixyl') || text.includes('latanoprost') || text.includes('bimatoprost') ||
+        text.includes('ginseng') || text.includes('biotin') || text.includes('saw palmetto') ||
+        text.includes('caffeine') || text.includes('clobetasol') || docSpecialty.includes('hair') || docSpecialty.includes('trichol')
+      ) {
         counts.dermal.count += 1;
         classified += 1;
-      } else if (text.includes('tirzepatide') || text.includes('semaglutide') || text.includes('retatrutide') || text.includes('metformin') || text.includes('metabolic') || text.includes('weight')) {
+      } else if (
+        text.includes('estradiol') || text.includes('progesterone') || text.includes('testosterone') ||
+        text.includes('bhrt') || text.includes('hormon') || text.includes('menopaus') || text.includes('dhea')
+      ) {
+        counts.hormonal.count += 1;
+        classified += 1;
+      } else if (
+        text.includes('coenzyme') || text.includes('ubiquinol') || text.includes('resveratrol') ||
+        text.includes('nad') || text.includes('epithalon') || text.includes('longevity') || text.includes('mitochondr')
+      ) {
+        counts.cellular.count += 1;
+        classified += 1;
+      } else if (
+        text.includes('theanine') || text.includes('magnesium') || text.includes('glycine') ||
+        text.includes('melatonin') || text.includes('sleep') || text.includes('neuro') || text.includes('circadian')
+      ) {
+        counts.neuro.count += 1;
+        classified += 1;
+      } else if (
+        text.includes('tirzepatide') || text.includes('semaglutide') || text.includes('retatrutide') ||
+        text.includes('metformin') || text.includes('metabolic') || text.includes('weight')
+      ) {
         counts.metabolic.count += 1;
         classified += 1;
-      } else if (text.includes('bpc') || text.includes('tb-500') || text.includes('repair') || text.includes('musculo') || text.includes('joint')) {
+      } else if (
+        text.includes('bpc') || text.includes('tb-500') || text.includes('repair') ||
+        text.includes('musculo') || text.includes('joint')
+      ) {
         counts.repair.count += 1;
         classified += 1;
       } else {

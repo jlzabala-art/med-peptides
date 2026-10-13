@@ -909,12 +909,12 @@ export default function AdminPhysiciansTab() {
         onSearchChange={setSearchTerm}
         resultCount={loading && !algoliaLoading ? undefined : sortedDoctors.length}
         bulkActions={[
-          { label: 'Export CSV', icon: <Archive size={14} />, onClick: handleBulkExportCSV },
-          { label: 'Assign Protocol', icon: <ClipboardList size={14} />, onClick: () => { notifier.info('Assign Protocol modal coming soon'); setSelectedIds([]); } },
-          { label: 'Request Audit', icon: <Activity size={14} />, onClick: () => handleBulkAction('request_audit') },
-          { label: 'Safety Update', icon: <Mail size={14} />, onClick: () => { notifier.info('Safety Update mailer coming soon'); setSelectedIds([]); } },
-          { label: 'Approve', icon: <CheckCircle2 size={14} />, onClick: () => handleBulkAction('approve') },
-          { label: 'Archive', icon: <Archive size={14} />, onClick: () => handleBulkAction('archive'), variant: 'danger' },
+          { label: 'Export CSV', icon: Archive, onClick: handleBulkExportCSV },
+          { label: 'Assign Protocol', icon: ClipboardList, onClick: () => { notifier.info('Assign Protocol modal coming soon'); setSelectedIds([]); } },
+          { label: 'Request Audit', icon: Activity, onClick: () => handleBulkAction('request_audit') },
+          { label: 'Safety Update', icon: Mail, onClick: () => { notifier.info('Safety Update mailer coming soon'); setSelectedIds([]); } },
+          { label: 'Approve', icon: CheckCircle2, onClick: () => handleBulkAction('approve') },
+          { label: 'Archive', icon: Archive, onClick: () => handleBulkAction('archive'), variant: 'danger' },
         ]}
         selectedIds={selectedIds}
         onSelectionChange={setSelectedIds}

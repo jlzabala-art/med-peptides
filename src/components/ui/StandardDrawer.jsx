@@ -25,6 +25,7 @@ export default function StandardDrawer({
   onClose,
   title,
   subtitle,
+  headerContent,
   children,
   footer,
   actions,
@@ -139,36 +140,42 @@ export default function StandardDrawer({
             }}
           >
             <div style={{ flex: 1, minWidth: 0, paddingRight: '0.75rem' }}>
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: '1.15rem',
-                  fontWeight: 700,
-                  color: 'var(--color-text, #0f172a)',
-                  lineHeight: '1.3',
-                  letterSpacing: '-0.01em',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-                title={typeof title === 'string' ? title : undefined}
-              >
-                {title}
-              </h2>
-              {subtitle && (
-                <div
-                  style={{
-                    margin: '0.2rem 0 0 0',
-                    fontSize: '0.8rem',
-                    color: 'var(--color-text-tertiary, #64748b)',
-                    lineHeight: '1.3',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {subtitle}
-                </div>
+              {headerContent ? (
+                headerContent
+              ) : (
+                <>
+                  <h2
+                    style={{
+                      margin: 0,
+                      fontSize: '1.15rem',
+                      fontWeight: 700,
+                      color: 'var(--color-text, #0f172a)',
+                      lineHeight: '1.3',
+                      letterSpacing: '-0.01em',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                    title={typeof title === 'string' ? title : undefined}
+                  >
+                    {title}
+                  </h2>
+                  {subtitle && (
+                    <div
+                      style={{
+                        margin: '0.2rem 0 0 0',
+                        fontSize: '0.8rem',
+                        color: 'var(--color-text-tertiary, #64748b)',
+                        lineHeight: '1.3',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {subtitle}
+                    </div>
+                  )}
+                </>
               )}
             </div>
 

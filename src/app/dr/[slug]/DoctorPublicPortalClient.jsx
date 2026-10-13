@@ -699,6 +699,7 @@ export default function DoctorPublicPortalClient({
   const allTasks = data?.tasks || [];
   const allPrescriptions = data?.prescriptions || [];
   const allProtocols = data?.protocols || [];
+  const allLabResults = data?.labResults || [];
 
   const [activeSection, setActiveSection] = useState('overview');
 
@@ -1550,55 +1551,26 @@ export default function DoctorPublicPortalClient({
       width: '34%',
       sortable: true,
       render: (rx) => {
-        const itemCount = (rx.items || []).length || (rx.prescriptionLines || []).length || 1;
-        const protoUrl = rx.protocolUrl || (rx.protocolSlug ? `/proto/${rx.protocolSlug}` : null);
+        const parts = resolvePrescriptionParts(rx);
+        const totalParts = rx.totalParts || parts.length || 1;
 
         return (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              {protoUrl ? (
-                <a
-                  href={protoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  title="Open evidence-based clinical protocol dossier in new tab"
-                  style={{
-                    fontWeight: 650,
-                    color: '#1a73e8',
-                    fontSize: '0.84rem',
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-                  onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-                >
-                  <span>{rx.treatmentTitle || 'Personalized Compounded Regimen'}</span>
-                  <ExternalLink size={11} style={{ color: '#1a73e8', flexShrink: 0 }} />
-                </a>
-              ) : (
-                <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.84rem' }}>
-                  {rx.treatmentTitle || 'Personalized Compounded Regimen'}
-                </span>
-              )}
+            <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.86rem', lineHeight: '1.3' }}>
+              {rx.treatmentTitle || 'Personalized Compounded Regimen'}
             </div>
-            <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <span style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, color: '#334155' }}>
-                {itemCount} prescription item{itemCount > 1 ? 's' : ''}
+            <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{
+                background: totalParts > 1 ? '#eff6ff' : '#f1f5f9',
+                color: totalParts > 1 ? '#1d4ed8' : '#475569',
+                border: totalParts > 1 ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+                padding: '1px 8px',
+                borderRadius: '4px',
+                fontSize: '0.72rem',
+                fontWeight: 700
+              }}>
+                {totalParts === 1 ? '1 Part' : `${totalParts} Parts`}
               </span>
-              {protoUrl && (
-                <span style={{ fontSize: '0.68rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                  <BookOpen size={10} />
-                  <span>Protocol Dossier</span>
-                </span>
-              )}
-              {rx.volume && (
-                <span style={{ fontSize: '0.68rem', background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                  {rx.volume}
-                </span>
-              )}
             </div>
           </div>
         );
@@ -1758,6 +1730,156 @@ export default function DoctorPublicPortalClient({
       }
     }
   ], [signingTaskId, handleSignOffPrescription]);
+
+  // ── Bloodo Diagnostic Lab Results Columns (DataTable Universal) ─────────
+  const labResultsColumns = useMemo(() => [
+    {
+      key: 'code',
+      header: 'Protocol / Sample Code',
+      width: '18%',
+      sortable: true,
+      render: (row) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          <CopyableId value={row.code || row.protocolNumber || row.id} iconOnly={false} />
+          <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+            {row.sampleType || 'Dried Blood Spot (DBS)'}
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'testName',
+      header: 'Biomarker & Diagnostic Assay',
+      width: '28%',
+      sortable: true,
+      render: (row) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
+            {row.testName || row.biomarker || 'NAD+ Quantitative Test'}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#64748b' }}>
+            <span style={{ fontWeight: 600, color: '#0369a1' }}>{row.laboratory?.name || 'LifeLab1'}</span>
+            <span>•</span>
+            <span>{row.method || 'Enzymatic cyclic assay'}</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'result',
+      header: 'Quantification',
+      width: '18%',
+      sortable: true,
+      render: (row) => {
+        const zone = row.zone || 'yellow';
+        const isYellow = zone === 'yellow';
+        const isGreen = zone === 'green';
+        const badgeColor = isGreen ? '#16a34a' : isYellow ? '#d97706' : '#dc2626';
+        const badgeBg = isGreen ? '#f0fdf4' : isYellow ? '#fffbeb' : '#fef2f2';
+        const badgeBorder = isGreen ? '#bbf7d0' : isYellow ? '#fde68a' : '#fecaca';
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+              <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
+                {row.value}
+              </span>
+              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#64748b' }}>
+                {row.unit || 'µmol/L'}
+              </span>
+            </div>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '2px 8px',
+                borderRadius: '9999px',
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                color: badgeColor,
+                background: badgeBg,
+                border: `1px solid ${badgeBorder}`,
+                width: 'fit-content'
+              }}
+            >
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: badgeColor }} />
+              {row.zoneLabel || (isYellow ? 'Insufficient' : isGreen ? 'Optimal' : 'Deficient')}
+            </span>
+          </div>
+        );
+      }
+    },
+    {
+      key: 'patient',
+      header: 'Patient Profile',
+      width: '18%',
+      sortable: true,
+      render: (row) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span style={{ fontSize: '0.84rem', fontWeight: 650, color: '#1e293b' }}>
+            {row.patientName || row.patient?.name || 'Patient'}
+          </span>
+          <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+            {row.patient?.age ? `${row.patient.age} yrs` : ''} {row.patient?.gender ? `· ${row.patient.gender}` : ''}
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      width: '18%',
+      render: (row) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          <Link
+            href={`/lab/${row.code || row.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '5px 10px',
+              borderRadius: '6px',
+              background: '#003666',
+              color: '#ffffff',
+              fontSize: '0.74rem',
+              fontWeight: 650,
+              textDecoration: 'none',
+              boxShadow: '0 1px 2px rgba(0,54,102,0.12)'
+            }}
+          >
+            <span>Public Dossier</span>
+            <ArrowUpRight size={12} />
+          </Link>
+          {row.pdfReportUrl && (
+            <a
+              href={row.pdfReportUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              title="Download Original Laboratory Report PDF"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '28px',
+                height: '28px',
+                borderRadius: '6px',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#475569',
+                cursor: 'pointer'
+              }}
+            >
+              <Download size={13} />
+            </a>
+          )}
+        </div>
+      )
+    }
+  ], []);
 
   // ── Practice Pharmacopeia Columns (DataTable Universal) ───────────────────
   const pharmacopeiaColumns = useMemo(() => [
@@ -1989,6 +2111,13 @@ export default function DoctorPublicPortalClient({
           icon: Layers,
           badge: filteredPrescriptions.length > 0 ? `${filteredPrescriptions.length}` : null,
           badgeColor: '#1a73e8'
+        },
+        {
+          id: 'lab_results',
+          label: 'Lab Results',
+          icon: FlaskConical,
+          badge: allLabResults.length > 0 ? `${allLabResults.length}` : null,
+          badgeColor: '#059669'
         },
         {
           id: 'tasks',
@@ -4152,152 +4281,162 @@ export default function DoctorPublicPortalClient({
                           </div>
                         ))}
                       </div>
+                    </div>
+                  );
+                }}
+              />
+            </section>
+          )}
 
-                      {/* Tailored Atlas Clinical Recommendations (Bioactive Peptides & Colway Scalp Care) */}
-                      {(() => {
-                        const atlasRec = rx.atlasRecommendations || getPrescriptionAtlasRecommendations(rx);
-                        if (!atlasRec?.peptide && !atlasRec?.colway) return null;
+          {/* ── View 3.5: Bloodo™ Diagnostic Lab Results (LifeLab1 Tests) ── */}
+          {activeAnchor === 'lab_results' && (
+            <section
+              id="lab_results"
+              style={{
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                borderRadius: '8px',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                overflow: 'hidden'
+              }}
+            >
+              <div
+                style={{
+                  padding: '16px 20px',
+                  borderBottom: '1px solid #dadce0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '12px',
+                  background: '#ffffff'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <FlaskConical size={18} style={{ color: '#059669' }} />
+                      <span>Diagnostic Laboratory Results (LifeLab1 Accredited)</span>
+                    </h2>
+                    <span style={{ fontSize: '0.70rem', color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 8px', borderRadius: '12px', fontWeight: 700 }}>
+                      ISO 15189 / EU IVDR
+                    </span>
+                  </div>
+                  <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+                    Quantitative capillary dried blood spot (DBS) biomarker assays and cellular metabolism diagnostics.
+                  </p>
+                </div>
 
-                        return (
-                          <div
-                            style={{
-                              marginTop: '16px',
-                              padding: '16px 18px',
-                              background: '#f8fafc',
-                              border: '1px solid #e2e8f0',
-                              borderRadius: '8px',
-                              boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
-                            }}
-                          >
-                            {/* Header with Detected APIs */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: '0.72rem', background: '#e0e7ff', color: '#4338ca', border: '1px solid #c7d2fe', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                  <Sparkles size={11} />
-                                  <span>Atlas Clinical Recommendations</span>
-                                </span>
-                                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                                  Adjuvant care based on molecular analysis of this formulation:
-                                </span>
-                              </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={handleRefresh}
+                    title="Refresh lab results"
+                    style={{
+                      height: '32px',
+                      padding: '0 12px',
+                      borderRadius: '4px',
+                      border: '1px solid #dadce0',
+                      background: '#ffffff',
+                      color: '#3c4043',
+                      fontSize: '0.78rem',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <RotateCw size={13} className={isSwitchingDoctor ? 'animate-spin' : ''} />
+                    <span>Sync</span>
+                  </button>
+                </div>
+              </div>
 
-                              {/* Detected APIs Badges */}
-                              {atlasRec.detectedApis && atlasRec.detectedApis.length > 0 && (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                                  <span style={{ fontSize: '0.70rem', color: '#475569', fontWeight: 600 }}>Detected APIs:</span>
-                                  {atlasRec.detectedApis.slice(0, 4).map((api, aIdx) => (
-                                    <span key={aIdx} style={{ fontSize: '0.68rem', background: '#ffffff', color: '#0f172a', border: '1px solid #cbd5e1', padding: '1px 6px', borderRadius: '4px', fontWeight: 650, fontFamily: 'monospace' }}>
-                                      {api}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Dual Recommendations Grid (Peptide & Colway) */}
-                            <div style={{ display: 'grid', gridTemplateColumns: atlasRec.colway ? 'repeat(auto-fit, minmax(280px, 1fr))' : '1fr', gap: '12px' }}>
-                              {/* 1. Bioactive Biomimetic Peptide (Strictly no Lotusland brand on screen) */}
-                              {atlasRec.peptide && (
-                                <div style={{ background: '#ffffff', border: '1px solid #c7d2fe', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                                  <div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                      <span style={{ fontSize: '0.68rem', fontWeight: 750, color: '#4338ca', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                                        Bioactive Peptide Signaler
-                                      </span>
-                                      <span style={{ fontSize: '0.68rem', color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 6px', borderRadius: '4px', fontWeight: 650 }}>
-                                        {atlasRec.peptide.matchScore || 'High Synergy'}
-                                      </span>
-                                    </div>
-                                    <h4 style={{ margin: '0 0 6px 0', fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
-                                      {atlasRec.peptide.peptideName}
-                                    </h4>
-                                    <div style={{ fontSize: '0.74rem', color: '#334155', lineHeight: 1.45, background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', border: '1px solid #edf2f7', marginBottom: '8px' }}>
-                                      <strong style={{ color: '#0f172a' }}>Synergy Rationale: </strong>
-                                      {atlasRec.peptide.pharmaRationale}
-                                    </div>
-                                  </div>
-
-                                  {atlasRec.peptide.associatedProtocol && (
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
-                                      <a
-                                        href={atlasRec.peptide.associatedProtocol.url || `/proto/${atlasRec.peptide.associatedProtocol.slug}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        style={{
-                                          fontSize: '0.72rem',
-                                          fontWeight: 650,
-                                          color: '#1d4ed8',
-                                          background: '#eff6ff',
-                                          border: '1px solid #bfdbfe',
-                                          padding: '4px 10px',
-                                          borderRadius: '4px',
-                                          textDecoration: 'none',
-                                          display: 'inline-flex',
-                                          alignItems: 'center',
-                                          gap: '4px'
-                                        }}
-                                      >
-                                        <span>Protocol: {atlasRec.peptide.associatedProtocol.title}</span>
-                                        <ArrowUpRight size={11} />
-                                      </a>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* 2. Scalp Barrier & Extracellular Matrix Support (Colway Clinical Care) */}
-                              {atlasRec.colway && (
-                                <div style={{ background: '#ffffff', border: '1px solid #a7f3d0', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                                  <div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                      <span style={{ fontSize: '0.68rem', fontWeight: 750, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                                        Colway Scalp Care &amp; ECM
-                                      </span>
-                                      <span style={{ fontSize: '0.68rem', color: '#047857', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 6px', borderRadius: '4px', fontWeight: 650 }}>
-                                        {atlasRec.colway.matchScore || 'Barrier Support'}
-                                      </span>
-                                    </div>
-                                    <h4 style={{ margin: '0 0 6px 0', fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
-                                      {atlasRec.colway.productName}
-                                    </h4>
-                                    <div style={{ fontSize: '0.74rem', color: '#334155', lineHeight: 1.45, background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', border: '1px solid #edf2f7', marginBottom: '8px' }}>
-                                      <strong style={{ color: '#0f172a' }}>Clinical Rationale: </strong>
-                                      {atlasRec.colway.clinicalRationale}
-                                    </div>
-                                    <div style={{ fontSize: '0.70rem', color: '#64748b', fontStyle: 'italic', marginBottom: '8px' }}>
-                                      💡 {atlasRec.colway.routineAdvice}
-                                    </div>
-                                  </div>
-
-                                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
-                                    <a
-                                      href={atlasRec.colway.catalogUrl || `/p/${atlasRec.colway.catalogSlug}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      style={{
-                                        fontSize: '0.72rem',
-                                        fontWeight: 650,
-                                        color: '#047857',
-                                        background: '#ecfdf5',
-                                        border: '1px solid #a7f3d0',
-                                        padding: '4px 10px',
-                                        borderRadius: '4px',
-                                        textDecoration: 'none',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '4px'
-                                      }}
-                                    >
-                                      <span>View Colway Clinical Datasheet</span>
-                                      <ArrowUpRight size={11} />
-                                    </a>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+              <DataTable
+                columns={labResultsColumns}
+                data={allLabResults}
+                keyField="id"
+                tableId={`doctor-lab-results-${slug}`}
+                pagination={true}
+                initialRowsPerPage={10}
+                alwaysShowPagination={false}
+                emptyTitle="No Diagnostic Lab Results Found"
+                emptyDescription="No laboratory blood or metabolic biomarker reports registered for this physician yet."
+                expandableRender={(row) => {
+                  const val = Number(row.value) || 14.1;
+                  const unit = row.unit || 'µmol/L';
+                  const percentagePos = Math.min(Math.max(((val - 0) / 40) * 100, 2), 98);
+                  return (
+                    <div style={{ background: '#f8fafc', padding: '18px 22px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                        <div>
+                          <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase' }}>
+                            Quantitative Biomarker Range Assessment
+                          </span>
+                          <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
+                            {row.testName} · {val} {unit}
                           </div>
-                        );
-                      })()}
+                        </div>
+                        <Link
+                          href={`/lab/${row.code || row.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: '0.76rem',
+                            fontWeight: 700,
+                            color: '#003666',
+                            background: '#e0f2fe',
+                            border: '1px solid #bae6fd',
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <span>Open Dedicated Patient Dossier</span>
+                          <ArrowUpRight size={12} />
+                        </Link>
+                      </div>
+
+                      {/* Spectrum Bar in Expandable */}
+                      <div style={{ position: 'relative', width: '100%', height: '22px', borderRadius: '6px', overflow: 'hidden', display: 'flex' }}>
+                        <div style={{ width: '22%', background: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.62rem', fontWeight: 700 }}>&lt; 8.8 (Deficient)</div>
+                        <div style={{ width: '21.5%', background: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#78350f', fontSize: '0.62rem', fontWeight: 700 }}>8.8–17.4 (Suboptimal)</div>
+                        <div style={{ width: '10.75%', background: '#a3e635', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#365314', fontSize: '0.60rem', fontWeight: 700 }}>17.4–21.7</div>
+                        <div style={{ width: '30%', background: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#064e3b', fontSize: '0.62rem', fontWeight: 700 }}>21.7–33.7 (Optimal Longevity)</div>
+                        <div style={{ width: '15.75%', background: '#93c5fd', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1e3a8a', fontSize: '0.62rem', fontWeight: 700 }}>&gt; 33.7</div>
+                        <div style={{ position: 'absolute', left: `${percentagePos}%`, top: 0, bottom: 0, width: '3px', background: '#0f172a', transform: 'translateX(-50%)' }} />
+                      </div>
+
+                      {row.interpretation && (
+                        <div style={{ fontSize: '0.78rem', color: '#334155', lineHeight: 1.5, background: '#ffffff', padding: '10px 14px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          <strong style={{ color: '#0f172a' }}>Clinical Interpretation: </strong>
+                          {row.interpretation}
+                        </div>
+                      )}
+
+                      {Array.isArray(row.synergies) && row.synergies.length > 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                            Recommended Protocol Synergies
+                          </span>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {row.synergies.map((syn, sIdx) => (
+                              <div key={sIdx} style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '6px 12px', fontSize: '0.75rem' }}>
+                                <span style={{ fontWeight: 700, color: '#003666' }}>{syn.name}</span>
+                                {syn.slug && (
+                                  <Link href={`/proto/${syn.slug}`} style={{ marginLeft: '6px', color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>
+                                    View Protocol →
+                                  </Link>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 }}
@@ -5430,6 +5569,7 @@ export default function DoctorPublicPortalClient({
           labels={labelsForActiveRx}
           initialLabelIndex={0}
           isEs={false}
+          hideShippingLabel={true}
         />
       )}
 
