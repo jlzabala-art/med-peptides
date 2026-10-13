@@ -7,6 +7,14 @@ import './labels-studio.css';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 import ImportPrescriptionModal from '@/features/prescriptions/components/ImportPrescriptionModal';
+import EmptyState from '@/components/ui/EmptyState';
+import LabelsHeader from './components/LabelsHeader';
+import LabelsSearchDropdown from './components/LabelsSearchDropdown';
+import LabelsBatchBar from './components/LabelsBatchBar';
+import LabelsMetaStrip from './components/LabelsMetaStrip';
+import LabelsOffscreenRenderer from './components/LabelsOffscreenRenderer';
+import LabelsWorkspaceSkeleton from './components/LabelsWorkspaceSkeleton';
+import LabelsErrorBoundary from './components/LabelsErrorBoundary';
 import {
   Search,
   Check,
@@ -200,6 +208,7 @@ export default function PublicLabelsAppClient({
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [recentPrescriptions, setRecentPrescriptions] = useState([]);
   const [isLoadingRx, setIsLoadingRx] = useState(false);
   const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
@@ -208,6 +217,32 @@ export default function PublicLabelsAppClient({
 
   const searchBoxRef = useRef(null);
   const searchInputRef = useRef(null);
+
+  const handleKeyDownSearch = (e) => {
+    const items = searchQuery.trim()
+      ? searchResults
+      : (recentPrescriptions.length > 0 ? recentPrescriptions : FEATURED_PATIENTS);
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSearchOpen(true);
+      setHighlightedIndex(prev => (prev < items.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSearchOpen(true);
+      setHighlightedIndex(prev => (prev > 0 ? prev - 1 : items.length - 1));
+    } else if (e.key === 'Enter') {
+      if (highlightedIndex >= 0 && items[highlightedIndex]) {
+        e.preventDefault();
+        handleSelectOrAddPatient(items[highlightedIndex].code, true);
+        setSearchOpen(false);
+        setHighlightedIndex(-1);
+      }
+    } else if (e.key === 'Escape') {
+      setSearchOpen(false);
+      setHighlightedIndex(-1);
+    }
+  };
 
   // Sync title dynamically
   const patientName = currentRx?.patient?.name || currentRx?.patientName || 'Patient';
@@ -696,511 +731,134 @@ export default function PublicLabelsAppClient({
     <div className="public-label-studio-root">
 
 
-      {/* ── 1. Google Cloud Console Header ── */}
-      <header className="pls-header">
-        {/* Brand */}
-        <Link href="/labels" className="pls-brand-link">
-          <div className="pls-brand-icon">
-            <span>℞</span>
-          </div>
-          <div className="pls-brand-text">
-            <span className="pls-brand-title">Compounding Label Studio</span>
-            <span className="pls-brand-subtitle">Pharmapolis • Atlas Health</span>
-          </div>
-        </Link>
+      {/* ── 1. Google Cloud Console Header with Search & Actions ── */}
+      <LabelsHeader
+        searchBoxRef={searchBoxRef}
+        searchInputRef={searchInputRef}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        searchOpen={searchOpen}
+        setSearchOpen={setSearchOpen}
+        isEs={isEs}
+        lang={lang}
+        setLang={setLang}
+        isGeneratingBatchPdf={isGeneratingBatchPdf}
+        batchPdfProgress={batchPdfProgress}
+        patientQueue={patientQueue}
+        onDownloadA4BatchPdf={handleDownloadA4BatchPdf}
+        onOpenImport={() => setShowImport(true)}
+        onShare={handleShare}
+        copiedShareLink={copiedShareLink}
+        onKeyDownSearch={handleKeyDownSearch}
+      >
+        <LabelsSearchDropdown
+          searchQuery={searchQuery}
+          isSearching={isSearching}
+          searchResults={searchResults}
+          recentPrescriptions={recentPrescriptions}
+          featuredPatients={FEATURED_PATIENTS}
+          patientQueue={patientQueue}
+          onSelectPatient={handleSelectOrAddPatient}
+          onClearRecent={handleClearRecent}
+          formatResultDate={formatResultDate}
+          isEs={isEs}
+          highlightedIndex={highlightedIndex}
+        />
+      </LabelsHeader>
 
-        {/* Algolia Instant Search Container */}
-        <div className="pls-search-container" ref={searchBoxRef}>
-          <div className="pls-search-input-wrap">
-            <Search size={15} color="#5f6368" />
-            <input
-              ref={searchInputRef}
-              type="text"
-              className="pls-search-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchOpen(true)}
-              placeholder={isEs
-                ? "Buscar paciente o nº historia (Selección múltiple: puedes añadir varios)... (⌘K)"
-                : "Search patient or file # (Multi-selection: add multiple to batch)... (⌘K)"}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#80868b' }}
-              >
-                <X size={14} />
-              </button>
-            )}
-            <span className="pls-search-badge" title={isEs ? "Selección múltiple disponible" : "Multi-selection enabled"}>
-              ⌘K • {isEs ? 'Múltiple' : 'Multi'}
-            </span>
-          </div>
+      {/* ── 2. Patient Batch Queue Strip ── */}
+      {patientQueue.length > 0 && (
+        <LabelsBatchBar
+          patientQueue={patientQueue}
+          activeQueueIndex={activeQueueIndex}
+          totalBatchLabelsCount={totalBatchLabelsCount}
+          onSwitchActivePatient={handleSwitchActivePatient}
+          onRemoveFromQueue={handleRemoveFromQueue}
+          isEs={isEs}
+        />
+      )}
 
-          {/* Search Dropdown Results */}
-          {searchOpen && (
-            <div className="pls-search-dropdown">
-              <div style={{ padding: '8px 12px', background: '#f8fafc', borderBottom: '1px solid #e8eaed', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  {searchQuery 
-                    ? (isEs ? 'Resultados de Algolia y Portal (Selecciona o añade al lote)' : 'Algolia & Portal Matches (Select or Add to Batch)')
-                    : (recentPrescriptions.length > 0 
-                        ? (isEs ? '🕒 Últimos 5 consultados' : '🕒 Recently Consulted (Last 5)')
-                        : (isEs ? 'Prescripciones Destacadas' : 'Featured Prescriptions'))}
-                </span>
-                {searchQuery ? (
-                  isSearching ? (
-                    <span style={{ fontSize: '0.68rem', color: '#1a73e8' }}>Searching...</span>
-                  ) : (
-                    <span style={{ fontSize: '0.68rem', color: '#5f6368' }}>{searchResults.length} {searchResults.length === 1 ? 'match' : 'matches'}</span>
-                  )
-                ) : (
-                  recentPrescriptions.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={handleClearRecent}
-                      style={{ border: 'none', background: 'transparent', color: '#1a73e8', fontSize: '0.68rem', fontWeight: 600, cursor: 'pointer' }}
-                    >
-                      {isEs ? 'Borrar Historial' : 'Clear History'}
-                    </button>
-                  )
-                )}
-              </div>
-
-              {/* Items List */}
-              {(() => {
-                const itemsToRender = searchQuery.trim() 
-                  ? searchResults 
-                  : (recentPrescriptions.length > 0 ? recentPrescriptions : FEATURED_PATIENTS);
-
-                if (itemsToRender.length === 0 && !isSearching) {
-                  return (
-                    <div style={{ padding: '16px', textAlign: 'center', fontSize: '0.80rem', color: '#80868b' }}>
-                      {isEs ? 'No se encontraron registros.' : 'No matching records found.'}
-                    </div>
-                  );
-                }
-
-                return itemsToRender.map((item) => {
-                  const dateStr = formatResultDate(item.date);
-                  const isRecent = !searchQuery.trim() && recentPrescriptions.length > 0;
-                  const isInBatch = patientQueue.some(p => String(p.code) === String(item.code));
-
-                  return (
-                    <div
-                      key={`${item.code}-${item.id || item.timestamp || item.name}`}
-                      className="pls-search-item"
-                      onClick={() => handleSelectOrAddPatient(item.code, true)}
-                    >
-                      <div className="pls-search-item-info">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                          <span className="pls-search-item-name">
-                            {item.patientName || item.name || 'Patient'}
-                          </span>
-                          {isInBatch && (
-                            <span style={{ fontSize: '0.65rem', color: '#1d4ed8', background: '#dbeafe', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>
-                              {isEs ? '✓ En Lote' : '✓ In Batch'}
-                            </span>
-                          )}
-                          {dateStr && (
-                            <span className="pls-search-item-date" title={isEs ? 'Fecha de Prescripción' : 'Prescription Date'}>
-                              📅 {dateStr}
-                            </span>
-                          )}
-                          {isRecent && (
-                            <span style={{ fontSize: '0.65rem', color: '#137333', background: '#e6f4ea', padding: '1px 5px', borderRadius: '4px', fontWeight: 600 }}>
-                              {isEs ? 'Reciente' : 'Recent'}
-                            </span>
-                          )}
-                        </div>
-                        <div className="pls-search-item-desc">
-                          #{item.code} • {item.title || item.treatmentTitle || 'Compounded Pharmaceutical Protocol'}
-                        </div>
-                      </div>
-                      <div className="pls-search-item-action-wrap">
-                        <button
-                          type="button"
-                          className={`pls-search-btn-add-batch ${isInBatch ? 'in-batch' : ''}`}
-                          title={isInBatch ? (isEs ? "Ya está en el lote" : "Already in batch") : (isEs ? "Añadir a la cola de lote" : "Add to batch queue")}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelectOrAddPatient(item.code, false);
-                          }}
-                        >
-                          {isInBatch ? (
-                            <>
-                              <Check size={12} color="#137333" />
-                              <span>{isEs ? 'En Lote' : 'In Batch'}</span>
-                            </>
-                          ) : (
-                            <>
-                              <Plus size={12} />
-                              <span>{isEs ? 'Añadir' : 'Add'}</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                });
-              })()}
-            </div>
-          )}
-        </div>
-
-        {/* Action Buttons: Print Batch A4, Import, Share, Language */}
-        <div className="pls-actions-wrap">
-          {/* Global Action: Print All Patients in A4 PDF Sheet */}
-          <button
-            type="button"
-            className="pls-btn-print-batch"
-            onClick={handleDownloadA4BatchPdf}
-            disabled={isGeneratingBatchPdf || patientQueue.length === 0}
-            title={isEs ? 'Imprimir todas las etiquetas del lote en un folio A4 en formato PDF' : 'Print all queued labels onto an A4 PDF sheet'}
-            aria-label={isEs ? 'Imprimir Lote en A4 (PDF)' : 'Print Batch in A4 (PDF)'}
-          >
-            <Printer size={14} />
-            <span className="pls-btn-print-label">
-              {isGeneratingBatchPdf
-                ? (batchPdfProgress
-                    ? `${isEs ? 'Rasterizando' : 'Rendering'} ${batchPdfProgress.current}/${batchPdfProgress.total}...`
-                    : (isEs ? 'Generando...' : 'Generating...'))
-                : (isEs ? 'Imprimir Lote A4' : 'Print Batch A4')}
-            </span>
-            <span className="pls-btn-batch-count">
-              {patientQueue.reduce((acc, pItem) => {
-                const count = (pItem.selectedPartIndex != null && pItem.selectedPartIndex !== 'all')
-                  ? 1
-                  : (Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels.length : 1);
-                return acc + count;
-              }, 0)}
-            </span>
-          </button>
-
-          {/* Import Prescription (Account Managers · no Atlas validation) */}
-          <button
-            type="button"
-            id="pls-import-rx-btn"
-            className="pls-btn-import"
-            onClick={() => setShowImport(true)}
-            title={isEs ? 'Importar prescripción (Account Managers · sin validación Atlas)' : 'Import prescription (Account Managers · no Atlas validation)'}
-            aria-label={isEs ? 'Importar prescripción' : 'Import prescription'}
-          >
-            <Upload size={14} />
-            <span className="pls-btn-label">{isEs ? 'Importar Rx' : 'Import Rx'}</span>
-          </button>
-
-          {/* Share Button (Web Share API on mobile, Copy link fallback) */}
-          <button
-            type="button"
-            className="pls-btn-share"
-            onClick={handleShare}
-            style={{
-              borderColor: copiedShareLink ? '#ceead6' : '#dadce0',
-              background: copiedShareLink ? '#e6f4ea' : '#ffffff',
-              color: copiedShareLink ? '#137333' : '#3c4043'
-            }}
-            title={isEs ? 'Compartir enlace público del estudio' : 'Share public studio link'}
-          >
-            {copiedShareLink ? <Check size={14} color="#137333" /> : <Share2 size={14} />}
-            <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
-          </button>
-
-          {/* Language Switcher */}
-          <div className="pls-lang-toggle">
-            <button
-              type="button"
-              onClick={() => setLang('en')}
-              className={`pls-lang-btn ${!isEs ? 'active' : 'inactive'}`}
-            >
-              EN
-            </button>
-            <button
-              type="button"
-              onClick={() => setLang('es')}
-              className={`pls-lang-btn ${isEs ? 'active' : 'inactive'}`}
-            >
-              ES
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* ── 2. Patient Batch Queue Strip (Multi-Patient & A4 Format) ── */}
-      <section className="pls-batch-bar" aria-label="Patient Batch Queue">
-        <div className="pls-batch-info-label">
-          <Layers size={16} color="#1a73e8" />
-          <span style={{ fontWeight: 700, fontSize: '0.82rem', color: '#1e293b' }}>
-            {isEs ? 'Lote de Pacientes:' : 'Patient Batch:'}
-          </span>
-          <span className="pls-batch-count-badge">
-            {patientQueue.length} {patientQueue.length === 1 ? (isEs ? 'paciente' : 'patient') : (isEs ? 'pacientes' : 'patients')} · {totalBatchLabelsCount} {totalBatchLabelsCount === 1 ? (isEs ? 'etiqueta' : 'label') : (isEs ? 'etiquetas' : 'labels')}
-          </span>
-        </div>
-
-        {/* Fluid multiline list of patient cards (stacks vertically without horizontal scroll) */}
-        <div className="pls-batch-scroll">
-          {patientQueue.map((pItem, qIdx) => {
-            const isActive = activeQueueIndex === qIdx;
-            const pName = pItem.rx?.patient?.name || pItem.rx?.patientName || 'Patient';
-            const labelsCount = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels.length : 1;
-            const partInfo = (pItem.selectedPartIndex === 'all' || pItem.selectedPartIndex == null)
-              ? (isEs ? `${labelsCount} ${labelsCount === 1 ? 'parte' : 'partes'}` : `${labelsCount} ${labelsCount === 1 ? 'part' : 'parts'}`)
-              : (isEs ? `Parte ${Number(pItem.selectedPartIndex) + 1}/${labelsCount}` : `Part ${Number(pItem.selectedPartIndex) + 1}/${labelsCount}`);
-
-            return (
-              <div
-                key={`queue-${pItem.code}-${qIdx}`}
-                className={`pls-batch-pill ${isActive ? 'active' : ''}`}
-                onClick={() => handleSwitchActivePatient(qIdx)}
-                title={isEs ? `Activar prescripción #${pItem.code} (${pName})` : `Activate prescription #${pItem.code} (${pName})`}
-              >
-                <span className="pls-batch-pill-name">{pName}</span>
-                <span style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  background: labelsCount > 1 ? '#fef3c7' : '#f1f5f9',
-                  color: labelsCount > 1 ? '#92400e' : '#475569',
-                  padding: '2px 7px',
-                  borderRadius: '4px',
-                  border: labelsCount > 1 ? '1px solid #fde68a' : '1px solid #cbd5e1',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {partInfo}
-                </span>
-
-                {/* Remove button if more than 1 patient */}
-                {patientQueue.length > 1 && (
-                  <button
-                    type="button"
-                    className="pls-batch-pill-remove"
-                    title={isEs ? `Quitar a ${pName} del lote` : `Remove ${pName} from batch`}
-                    onClick={(e) => handleRemoveFromQueue(qIdx, e)}
-                    aria-label="Remove patient"
-                  >
-                    <X size={12} />
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ── 3. Unified Google Cloud Resource Metadata Strip (Zero nested cards) ── */}
-      <div className="pls-context-strip">
-        <div className="pls-meta-row">
-          {/* Patient Item */}
-          <div className="pls-meta-item">
-            <span className="pls-meta-icon" style={{ background: '#f3e8fd', color: '#8430ce' }}>
-              <User size={13} />
-            </span>
-            <div className="pls-meta-text">
-              <span className="pls-meta-k">{isEs ? 'Paciente' : 'Patient'}:</span>
-              <span className="pls-meta-v">{patientName}</span>
-            </div>
-            <button
-              type="button"
-              className="pls-meta-action-btn"
-              onClick={() => {
-                setSearchQuery(patientName);
-                setSearchOpen(true);
-                searchInputRef.current?.focus();
-              }}
-              title={isEs ? `Buscar prescripciones de ${patientName}` : `Search prescriptions for ${patientName}`}
-              aria-label={isEs ? 'Buscar paciente' : 'Search patient'}
-            >
-              <Search size={12} />
-            </button>
-          </div>
-
-          <span className="pls-meta-divider" aria-hidden="true" />
-
-          {/* Prescription Item */}
-          <div className="pls-meta-item">
-            <span className="pls-meta-icon" style={{ background: '#e8f0fe', color: '#1a73e8' }}>
-              <FileText size={13} />
-            </span>
-            <div className="pls-meta-text">
-              <span className="pls-meta-k">{isEs ? 'Prescripción' : 'Prescription'}:</span>
-              <a
-                href={`/rx/${encodeURIComponent(cleanRxCode)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pls-meta-v mono pls-meta-link"
-                title={isEs ? `Abrir prescripción #${cleanRxCode}` : `Open prescription #${cleanRxCode}`}
-              >
-                #{cleanRxCode}
-                <ExternalLink size={11} style={{ opacity: 0.6 }} />
-              </a>
-            </div>
-            <button
-              type="button"
-              className="pls-meta-action-btn"
-              onClick={handleCopyCode}
-              title={isEs ? 'Copiar código de prescripción' : 'Copy prescription code'}
-              aria-label={isEs ? 'Copiar código' : 'Copy code'}
-            >
-              {copyCodeSuccess ? <Check size={12} color="#137333" /> : <Copy size={12} />}
-            </button>
-          </div>
-
-          <span className="pls-meta-divider" aria-hidden="true" />
-
-          {/* Doctor Item */}
-          <div className="pls-meta-item">
-            <span className="pls-meta-icon" style={{ background: '#e6f4ea', color: '#137333' }}>
-              <Stethoscope size={13} />
-            </span>
-            <div className="pls-meta-text">
-              <span className="pls-meta-k">{isEs ? 'Médico' : 'Doctor'}:</span>
-              <a
-                href={`/dr/${encodeURIComponent(doctorSlug)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pls-meta-v pls-meta-link"
-                title={isEs ? `Ir al portal clínico de ${docName}` : `Go to doctor portal of ${docName}`}
-              >
-                {docName}
-                <ExternalLink size={11} style={{ opacity: 0.6 }} />
-              </a>
-            </div>
-          </div>
-
-          {/* Formula Parts Switcher (Part 1 / Part 2) with Full Explicit Titles */}
-          {labels.length > 1 && (
-            <>
-              <span className="pls-meta-divider" aria-hidden="true" />
-              <div className="pls-meta-item pls-meta-parts">
-                <span className="pls-meta-k">{isEs ? 'Fórmula' : 'Formula'}:</span>
-                <div className="pls-parts-tabs" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {labels.map((lbl, idx) => {
-                    const isActive = labelIndex === idx;
-                    const rawTitle = lbl.productTitle || lbl.productName || (lbl.formula ? lbl.formula.slice(0, 24) : `Part ${idx + 1}`);
-                    const cleanTitle = rawTitle.replace(/^Part\s*\d+\s*:\s*/i, '').trim();
-                    const volTag = lbl.volume ? ` (${lbl.volume})` : '';
-                    const labelText = `Parte ${idx + 1}: ${cleanTitle}${volTag}`;
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        className={`pls-part-btn ${isActive ? 'active' : ''}`}
-                        style={{
-                          fontWeight: isActive ? 800 : 600,
-                          fontSize: '0.78rem',
-                          padding: '4px 10px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px'
-                        }}
-                        onClick={() => {
-                          setLabelIndex(idx);
-                          const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${idx + 1}&edit=true&lang=${lang}`;
-                          window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
-                        }}
-                      >
-                        {isActive && <span style={{ color: '#16a34a', fontWeight: 900 }}>✔</span>}
-                        <span>{labelText}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      {/* ── 3. Unified Resource Metadata Strip ── */}
+      {patientQueue.length > 0 && (
+        <LabelsMetaStrip
+          isEs={isEs}
+          patientName={patientName}
+          cleanRxCode={cleanRxCode}
+          rxCode={rxCode}
+          copyCodeSuccess={copyCodeSuccess}
+          onCopyCode={handleCopyCode}
+          doctorSlug={doctorSlug}
+          docName={docName}
+          labels={labels}
+          labelIndex={labelIndex}
+          onSelectLabelPart={(idx) => {
+            setLabelIndex(idx);
+            const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${idx + 1}&edit=true&lang=${lang}`;
+            window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+          }}
+          onQuickSearchPatient={() => {
+            setSearchQuery(patientName);
+            setSearchOpen(true);
+            searchInputRef.current?.focus();
+          }}
+        />
+      )}
 
       {/* ── 4. Main Independent Label Studio Workspace ── */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {isLoadingRx ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#5f6368', fontSize: '0.90rem' }}>
-            <p>{isEs ? 'Cargando datos de prescripción y formulación magistral...' : 'Loading prescription & compounding formulations...'}</p>
+        {patientQueue.length === 0 ? (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px' }}>
+            <EmptyState
+              icon={Layers}
+              title={isEs ? 'No hay pacientes en el lote' : 'No patients in batch'}
+              subtitle={isEs ? 'Busca una prescripción o importa una para comenzar a diseñar y previsualizar etiquetas.' : 'Search for a prescription or import one to get started designing labels.'}
+              action={{
+                label: isEs ? 'Buscar Prescripciones (⌘K)' : 'Search Prescriptions (⌘K)',
+                onClick: () => {
+                  setSearchOpen(true);
+                  searchInputRef.current?.focus();
+                }
+              }}
+            />
           </div>
+        ) : isLoadingRx ? (
+          <LabelsWorkspaceSkeleton isEs={isEs} />
         ) : (
-          <PharmacyLabelsModal
-            key={`${activeCode}-${labelIndex}`}
-            isOpen={true}
-            onClose={() => {
-              // Standalone mode maintains workspace
-            }}
-            labels={labels}
-            initialLabelIndex={labelIndex}
-            hideInternalPartsSwitcher={true}
-            onLabelIndexChange={(newIdx) => {
-              setLabelIndex(newIdx);
-              const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${newIdx + 1}&edit=true&lang=${lang}`;
-              window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
-            }}
-            initialWidthMm={patientQueue[activeQueueIndex]?.labels?.[labelIndex]?.widthMm || patientQueue[activeQueueIndex]?.widthMm || 75}
-            initialHeightMm={patientQueue[activeQueueIndex]?.labels?.[labelIndex]?.heightMm || patientQueue[activeQueueIndex]?.heightMm || 45}
-            initialVariant={patientQueue[activeQueueIndex]?.labels?.[labelIndex]?.variant || patientQueue[activeQueueIndex]?.variant || 'backQr'}
-            onConfigChange={(cfg) => {
-              handleUpdatePatientConfig(activeQueueIndex, {
-                widthMm: cfg.widthMm,
-                heightMm: cfg.heightMm,
-                variant: cfg.variant,
-                selectedPreset: cfg.preset
-              });
-            }}
-            initialEditMode={isEditing}
-            isStandalone={true}
-            isEs={isEs}
-          />
+          <LabelsErrorBoundary isEs={isEs}>
+            <PharmacyLabelsModal
+              key={`${activeCode}-${labelIndex}`}
+              isOpen={true}
+              onClose={() => {
+                // Standalone mode maintains workspace
+              }}
+              labels={labels}
+              initialLabelIndex={labelIndex}
+              hideInternalPartsSwitcher={true}
+              onLabelIndexChange={(newIdx) => {
+                setLabelIndex(newIdx);
+                const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${newIdx + 1}&edit=true&lang=${lang}`;
+                window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+              }}
+              initialWidthMm={patientQueue[activeQueueIndex]?.labels?.[labelIndex]?.widthMm || patientQueue[activeQueueIndex]?.widthMm || 75}
+              initialHeightMm={patientQueue[activeQueueIndex]?.labels?.[labelIndex]?.heightMm || patientQueue[activeQueueIndex]?.heightMm || 45}
+              initialVariant={patientQueue[activeQueueIndex]?.labels?.[labelIndex]?.variant || patientQueue[activeQueueIndex]?.variant || 'backQr'}
+              onConfigChange={(cfg) => {
+                handleUpdatePatientConfig(activeQueueIndex, {
+                  widthMm: cfg.widthMm,
+                  heightMm: cfg.heightMm,
+                  variant: cfg.variant,
+                  selectedPreset: cfg.preset
+                });
+              }}
+              initialEditMode={isEditing}
+              isStandalone={true}
+              isEs={isEs}
+            />
+          </LabelsErrorBoundary>
         )}
 
         {/* ── Hidden Offscreen Container for Batch High-Res SVG Rasterization ── */}
-        <div
-          id="pls-offscreen-batch-render"
-          style={{
-            position: 'fixed',
-            left: '-9999px',
-            top: '-9999px',
-            width: '800px',
-            height: '800px',
-            overflow: 'hidden',
-            pointerEvents: 'none',
-            opacity: 0
-          }}
-          aria-hidden="true"
-        >
-          {patientQueue.flatMap((pItem) => {
-            const labels = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels : [{}];
-            const partsToRender = (pItem.selectedPartIndex != null && pItem.selectedPartIndex !== 'all')
-              ? [pItem.selectedPartIndex]
-              : labels.map((_, idx) => idx);
-
-            return partsToRender.map((partIdx) => {
-              const pLabel = labels[partIdx] || labels[0] || {};
-              const optDims = detectOptimalLabelDimensions(pLabel);
-              const effectiveWidthMm = Number(pLabel.widthMm || (pItem.widthMm !== 75 ? pItem.widthMm : optDims.widthMm)) || 75;
-              const effectiveHeightMm = Number(pLabel.heightMm || (pItem.heightMm !== 45 ? pItem.heightMm : optDims.heightMm)) || 45;
-
-              return (
-                <div key={`offscreen-${pItem.code}-${partIdx}`}>
-                  <PharmapolisLabelSvg
-                    labelData={{
-                      ...pLabel,
-                      partLabel: pLabel.partLabel || (labels.length > 1 ? `Part ${partIdx + 1} of ${labels.length}` : ''),
-                      partIndex: partIdx,
-                      totalParts: labels.length
-                    }}
-                    variant={pLabel.variant || pLabel.lastVariant || pItem.variant || 'backQr'}
-                    widthMm={effectiveWidthMm}
-                    heightMm={effectiveHeightMm}
-                    showCutGuides={false}
-                    svgRef={(node) => {
-                      if (node) {
-                        node.id = `batch-svg-${pItem.code}-${partIdx}`;
-                      }
-                    }}
-                  />
-                </div>
-              );
-            });
-          })}
-        </div>
+        <LabelsOffscreenRenderer patientQueue={patientQueue} />
       </main>
 
       {/* Import Prescription — shared engine, server-side persistence without Atlas validation */}
