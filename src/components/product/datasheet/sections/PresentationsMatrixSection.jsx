@@ -663,18 +663,200 @@ export default function PresentationsMatrixSection({
               </span>
             </div>
 
+            <style>{`
+              .pds-table-subpanel {
+                margin-top: 1.5rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+              }
+              .pds-table-subpanel-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 10px;
+              }
+              .pds-table-subpanel-titles {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+              }
+              .pds-subpanel-label {
+                font-size: 0.68rem;
+                font-weight: 800;
+                color: #003666;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+              }
+              .pds-subpanel-title {
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: #0f172a;
+                margin: 0;
+              }
+              .pds-subpanel-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                background: #f1f3f4;
+                color: #3c4043;
+                border: 1px solid #dadce0;
+                border-radius: 4px;
+                padding: 3px 10px;
+                font-size: 0.72rem;
+                font-weight: 600;
+              }
+              .pds-table-container {
+                width: 100%;
+                overflow-x: auto;
+                background: #ffffff;
+                border: 1px solid #dadce0;
+                border-radius: 8px;
+                box-shadow: 0 1px 3px rgba(60,64,67,0.06);
+              }
+              .pds-matrix-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+                font-size: 0.82rem;
+              }
+              .pds-matrix-table thead tr {
+                background: #f8fafc;
+                border-bottom: 1px solid #dadce0;
+              }
+              .pds-matrix-table th {
+                padding: 10px 14px;
+                font-size: 0.70rem;
+                font-weight: 700;
+                color: #475569;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                border: none;
+                white-space: nowrap;
+              }
+              .pds-matrix-table tbody tr {
+                border-bottom: 1px solid #f1f3f4;
+                transition: background 0.15s ease;
+                cursor: pointer;
+              }
+              .pds-matrix-table tbody tr:hover {
+                background: #f8fafc;
+              }
+              .pds-matrix-table tbody tr:last-child {
+                border-bottom: none;
+              }
+              .pds-matrix-table tbody tr.pds-matrix-row-selected {
+                background: #f0fdf4 !important;
+                box-shadow: inset 3px 0 0 #16a34a;
+              }
+              .pds-matrix-table td {
+                padding: 11px 14px;
+                color: #1e293b;
+                vertical-align: middle;
+                border: none;
+              }
+              .pds-strength-cell {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+              }
+              .pds-active-dot {
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                border: 4px solid #16a34a;
+                background: #ffffff;
+                box-shadow: 0 0 0 1px #16a34a;
+                flex-shrink: 0;
+              }
+              .pds-inactive-dot {
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                border: 1.5px solid #94a3b8;
+                background: #ffffff;
+                flex-shrink: 0;
+              }
+              .pds-strength-name {
+                font-weight: 700;
+                color: #0f172a;
+              }
+              .pds-selected-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 3px;
+                margin-left: 8px;
+                font-size: 0.68rem;
+                font-weight: 700;
+                color: #166534;
+                background: #dcfce7;
+                border: 1px solid #bbf7d0;
+                border-radius: 4px;
+                padding: 1px 6px;
+              }
+              .pds-format-pill {
+                display: inline-block;
+                padding: 3px 8px;
+                background: #f1f5f9;
+                border: 1px solid #e2e8f0;
+                border-radius: 4px;
+                font-size: 0.74rem;
+                font-weight: 600;
+                color: #334155;
+              }
+              .pds-gcp-compliance-badge {
+                display: inline-flex;
+                align-items: center;
+                padding: 2px 8px;
+                background: #e6f4ea;
+                color: #137333;
+                border: 1px solid #ceead6;
+                border-radius: 4px;
+                font-size: 0.72rem;
+                font-weight: 600;
+              }
+              .pds-source-name {
+                font-weight: 600;
+                color: #334155;
+              }
+              .pds-conc-badge {
+                background: #f0fdf4;
+                color: #15803d;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 0.74rem;
+                font-weight: 700;
+              }
+              @media (max-width: 768px) {
+                .pds-matrix-table {
+                  min-width: 580px;
+                }
+              }
+            `}</style>
+
             <div className="pds-table-container">
               <table className="pds-matrix-table" aria-label="Available Presentations and Analytical Specs">
                 <thead>
-                  <tr>
-                    <th scope="col">{isDiagnosticKit ? (lang === 'es' ? 'Formato de Kit' : 'Kit Format') : (t?.activePresentationDose || 'Strength / Dose')}</th>
-                    <th scope="col">{t?.deliveryDevice || 'Format'}</th>
-                    <th scope="col">{isDiagnosticKit ? (lang === 'es' ? 'Toma de Muestra' : 'Sample Collection') : (t?.reconstitutionSolvent || 'Reconstitution')}</th>
-                    <th scope="col" className="pds-conc-col">{isDiagnosticKit ? (lang === 'es' ? 'Rango Analítico' : 'Linear Range') : (t?.reconConcentration || 'Concentration')}</th>
-                    <th scope="col">{isDiagnosticKit ? (lang === 'es' ? 'Metodología' : 'Methodology') : (t?.primaryAdministrationRoute || 'Administration')}</th>
-                    <th scope="col" className="pds-purity-col">{isDiagnosticKit ? (lang === 'es' ? 'Acreditación' : 'Accreditation') : (t?.analyticalGrade || 'Analytical Grade')}</th>
-                    <th scope="col">{t?.manufacturingSource || 'Verified Source'}</th>
-                  </tr>
+                  {isSupplementProduct ? (
+                    <tr>
+                      <th scope="col">{lang === 'es' ? 'Presentación y Pauta' : 'Presentation & Supply'}</th>
+                      <th scope="col">{lang === 'es' ? 'Formato y Envase' : 'Delivery Format'}</th>
+                      <th scope="col">{lang === 'es' ? 'Pauta y Vía' : 'Administration'}</th>
+                      <th scope="col">{lang === 'es' ? 'Calidad y Certificación' : 'Quality Standard'}</th>
+                      <th scope="col">{lang === 'es' ? 'Laboratorio' : 'Verified Source'}</th>
+                    </tr>
+                  ) : (
+                    <tr>
+                      <th scope="col">{isDiagnosticKit ? (lang === 'es' ? 'Formato de Kit' : 'Kit Format') : (t?.activePresentationDose || 'Strength / Dose')}</th>
+                      <th scope="col">{t?.deliveryDevice || 'Format'}</th>
+                      <th scope="col">{isDiagnosticKit ? (lang === 'es' ? 'Toma de Muestra' : 'Sample Collection') : (t?.reconstitutionSolvent || 'Reconstitution')}</th>
+                      <th scope="col" className="pds-conc-col">{isDiagnosticKit ? (lang === 'es' ? 'Rango Analítico' : 'Linear Range') : (t?.reconConcentration || 'Concentration')}</th>
+                      <th scope="col">{isDiagnosticKit ? (lang === 'es' ? 'Metodología' : 'Methodology') : (t?.primaryAdministrationRoute || 'Administration')}</th>
+                      <th scope="col" className="pds-purity-col">{isDiagnosticKit ? (lang === 'es' ? 'Acreditación' : 'Accreditation') : (t?.analyticalGrade || 'Analytical Grade')}</th>
+                      <th scope="col">{t?.manufacturingSource || 'Verified Source'}</th>
+                    </tr>
+                  )}
                 </thead>
                 <tbody>
                   {matrixRows.map(row => {
@@ -706,40 +888,77 @@ export default function PresentationsMatrixSection({
                           }
                         }}
                       >
-                        <td data-label="Strength / Dose">
-                          <div className="pds-strength-cell">
-                            <span
-                              className={row.isCurrentlyActive ? "pds-active-dot" : "pds-inactive-dot"}
-                              aria-label={row.isCurrentlyActive ? "Active Presentation" : "Select Presentation"}
-                            />
-                            <span className="pds-strength-name">{row.strengthName}</span>
-                          </div>
-                          {row.isCurrentlyActive && (
-                            <span className="pds-mobile-active-tag">
-                              {lang === 'es' ? 'Seleccionada' : 'Selected'}
-                            </span>
-                          )}
-                        </td>
-                        <td data-label="Presentation Format">
-                          <span className={`pds-format-pill pds-format-${row.formatId}`}>
-                            {row.formatName}
-                          </span>
-                        </td>
-                        <td data-label="Reconstitution Diluent">{row.diluentText}</td>
-                        <td data-label="Solution Concentration (mg/mL)" className="pds-conc-cell">
-                          {row.recon.volume > 0 && !row.isPenOrCart && !row.isOral && !row.isSpray && !isSolventProduct ? (
-                            <span className="pds-conc-badge font-mono">
-                              {row.concText}
-                            </span>
-                          ) : (
-                            row.concText
-                          )}
-                        </td>
-                        <td data-label="Administration">{row.adminText}</td>
-                        <td data-label="Analytical Grade" className="pds-purity-cell">
-                          {row.purity}
-                        </td>
-                        <td data-label="Laboratory Verification">{row.supplierName}</td>
+                        {isSupplementProduct ? (
+                          <>
+                            <td data-label="Presentation & Supply">
+                              <div className="pds-strength-cell">
+                                <span
+                                  className={row.isCurrentlyActive ? "pds-active-dot" : "pds-inactive-dot"}
+                                  aria-label={row.isCurrentlyActive ? "Active Presentation" : "Select Presentation"}
+                                />
+                                <span className="pds-strength-name">{row.strengthName}</span>
+                                {row.isCurrentlyActive && (
+                                  <span className="pds-selected-badge">
+                                    {lang === 'es' ? 'Activa ✓' : 'Selected ✓'}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td data-label="Delivery Format">
+                              <span className="pds-format-pill">
+                                {row.formatName}
+                              </span>
+                            </td>
+                            <td data-label="Administration">{row.adminText}</td>
+                            <td data-label="Quality Standard">
+                              <span className="pds-gcp-compliance-badge">
+                                {row.purity}
+                              </span>
+                            </td>
+                            <td data-label="Verified Source">
+                              <span className="pds-source-name">{row.supplierName}</span>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td data-label="Strength / Dose">
+                              <div className="pds-strength-cell">
+                                <span
+                                  className={row.isCurrentlyActive ? "pds-active-dot" : "pds-inactive-dot"}
+                                  aria-label={row.isCurrentlyActive ? "Active Presentation" : "Select Presentation"}
+                                />
+                                <span className="pds-strength-name">{row.strengthName}</span>
+                                {row.isCurrentlyActive && (
+                                  <span className="pds-selected-badge">
+                                    {lang === 'es' ? 'Activa ✓' : 'Selected ✓'}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td data-label="Presentation Format">
+                              <span className={`pds-format-pill pds-format-${row.formatId}`}>
+                                {row.formatName}
+                              </span>
+                            </td>
+                            <td data-label="Reconstitution Diluent">{row.diluentText}</td>
+                            <td data-label="Solution Concentration (mg/mL)" className="pds-conc-cell">
+                              {row.recon.volume > 0 && !row.isPenOrCart && !row.isOral && !row.isSpray && !isSolventProduct ? (
+                                <span className="pds-conc-badge font-mono">
+                                  {row.concText}
+                                </span>
+                              ) : (
+                                row.concText
+                              )}
+                            </td>
+                            <td data-label="Administration">{row.adminText}</td>
+                            <td data-label="Analytical Grade" className="pds-purity-cell">
+                              <span className="pds-gcp-compliance-badge">{row.purity}</span>
+                            </td>
+                            <td data-label="Laboratory Verification">
+                              <span className="pds-source-name">{row.supplierName}</span>
+                            </td>
+                          </>
+                        )}
                       </tr>
                     );
                   })}

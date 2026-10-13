@@ -14,7 +14,8 @@ import {
   FlaskConical, 
   Hash, 
   Clock, 
-  Sparkles 
+  Sparkles,
+  Layers 
 } from '@/lib/icons';
 import toast from 'react-hot-toast';
 import { triggerHaptic } from '@/utils/haptics';
@@ -72,6 +73,19 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
     product.supplierId === 'supplier-bloodo' ||
     (slug && slug.includes('bloodo')) ||
     (slug && slug.endsWith('-test'))
+  );
+
+  const isSupplementProduct = Boolean(
+    product.is_supplement ||
+    product.isSupplement ||
+    product.category === 'supplements' ||
+    product.category === 'oral_supplements' ||
+    product.category === 'clinical_supplements' ||
+    String(slug || '').toLowerCase().includes('ultraperson') ||
+    String(product.name || '').toLowerCase().includes('ultraperson') ||
+    String(product.canonicalName || '').toLowerCase().includes('ultraperson') ||
+    String(product.brand || '').toLowerCase().includes('ultraperson') ||
+    String(product.presentation || '').toLowerCase().includes('caps')
   );
 
   const fdaInfo = useMemo(() => getFdaPeptideStatus(product), [product]);
@@ -281,63 +295,63 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
           </div>
         </div>
 
-        {/* Diagnostic Precision / Purity */}
+        {/* Diagnostic Precision / Purity / Quality Standard */}
         <div className="ptc-kpi-card">
           <div className="ptc-kpi-top">
-            <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Precisión Analítica (CV / RSD)' : 'Analytical Precision (CV / RSD)') : 'Reversed-Phase High-Performance Liquid Chromatography (RP-HPLC) Purity'}>
-              <Sparkles size={12} className="ptc-kpi-icon" color="#16a34a" /> {isDiagnosticKit ? (lang === 'es' ? 'Precisión' : 'Precision') : 'Purity'}
+            <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Precisión Analítica (CV / RSD)' : 'Analytical Precision (CV / RSD)') : isSupplementProduct ? (lang === 'es' ? 'Estándar y Calidad Farmacéutica' : 'Standard & Pharmacopeial Quality') : 'Reversed-Phase High-Performance Liquid Chromatography (RP-HPLC) Purity'}>
+              <Sparkles size={12} className="ptc-kpi-icon" color="#16a34a" /> {isDiagnosticKit ? (lang === 'es' ? 'Precisión' : 'Precision') : isSupplementProduct ? (lang === 'es' ? 'Estándar' : 'Quality Standard') : 'Purity'}
             </span>
-            <span className="ptc-kpi-pill purity-pill" title="Reversed-Phase HPLC">{isDiagnosticKit ? diagnosticMetric.cv : 'RP-HPLC'}</span>
+            <span className="ptc-kpi-pill purity-pill" title={isSupplementProduct ? 'EU Good Manufacturing Practice' : 'Reversed-Phase HPLC'}>{isDiagnosticKit ? diagnosticMetric.cv : isSupplementProduct ? 'EU GMP' : 'RP-HPLC'}</span>
           </div>
           <div className="ptc-kpi-value-wrap">
             <span className="ptc-kpi-value value-purity">
-              {isDiagnosticKit ? diagnosticMetric.lod : purity}
+              {isDiagnosticKit ? diagnosticMetric.lod : isSupplementProduct ? 'Ph. Eur. Grade' : purity}
             </span>
           </div>
           <div className="ptc-kpi-sub">
-            <span>{isDiagnosticKit ? (lang === 'es' ? 'Linealidad Cuantitativa Validada' : 'Validated Quantitative Linearity') : 'Specification: ≥ 98.0% (Ph. Eur.)'}</span>
+            <span>{isDiagnosticKit ? (lang === 'es' ? 'Linealidad Cuantitativa Validada' : 'Validated Quantitative Linearity') : isSupplementProduct ? (lang === 'es' ? 'Directiva UE 2002/46/CE' : 'EU Directive 2002/46/EC') : 'Specification: ≥ 98.0% (Ph. Eur.)'}</span>
           </div>
         </div>
 
-        {/* Laboratory / Identity */}
+        {/* Laboratory / Identity / Delivery Vehicle */}
         <div className="ptc-kpi-card">
           <div className="ptc-kpi-top">
-            <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Laboratorio Central Analítico Acreditado' : 'Accredited Central Testing Laboratory') : 'Mass Spectrometry Molecular Identity Confirmation (LC-MS / ESI-MS)'}>
-              <Beaker size={12} className="ptc-kpi-icon" color="#0284c7" /> {isDiagnosticKit ? (lang === 'es' ? 'Laboratorio' : 'Testing Lab') : 'Mass Spec'}
+            <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Laboratorio Central Analítico Acreditado' : 'Accredited Central Testing Laboratory') : isSupplementProduct ? (lang === 'es' ? 'Vehículo de Administración Gastrorresistente' : 'Targeted Delivery Vehicle') : 'Mass Spectrometry Molecular Identity Confirmation (LC-MS / ESI-MS)'}>
+              {isSupplementProduct ? <Layers size={12} className="ptc-kpi-icon" color="#0284c7" /> : <Beaker size={12} className="ptc-kpi-icon" color="#0284c7" />} {isDiagnosticKit ? (lang === 'es' ? 'Laboratorio' : 'Testing Lab') : isSupplementProduct ? (lang === 'es' ? 'Vehículo' : 'Delivery Form') : 'Mass Spec'}
             </span>
-            <span className="ptc-kpi-pill ms-pill" title="Electrospray Ionization Liquid Chromatography-Mass Spectrometry">{isDiagnosticKit ? 'ISO 15189' : 'ESI-MS'}</span>
+            <span className="ptc-kpi-pill ms-pill" title={isSupplementProduct ? 'Acid-Resistant Vegan HPMC Delayed Release' : 'Electrospray Ionization Liquid Chromatography-Mass Spectrometry'}>{isDiagnosticKit ? 'ISO 15189' : isSupplementProduct ? 'HPMC Shell' : 'ESI-MS'}</span>
           </div>
           <div className="ptc-kpi-value-wrap">
-            <span className="ptc-kpi-value font-mono" title={isDiagnosticKit ? 'LifeLab1 (Vilnius, Lithuania)' : (mw || 'MW Confirmed')}>
-              {isDiagnosticKit ? 'LifeLab1 Lab' : (mw || 'MW Confirmed')}
+            <span className="ptc-kpi-value font-mono" title={isDiagnosticKit ? 'LifeLab1 (Vilnius, Lithuania)' : isSupplementProduct ? (lang === 'es' ? 'Cápsula Gastrorresistente' : 'Acid-Resistant Caps') : (mw || 'MW Confirmed')}>
+              {isDiagnosticKit ? 'LifeLab1 Lab' : isSupplementProduct ? (lang === 'es' ? 'Cápsulas Gastrorresistentes' : 'Acid-Resistant Caps') : (mw || 'MW Confirmed')}
             </span>
           </div>
           <div className="ptc-kpi-sub">
-            <span>{isDiagnosticKit ? (lang === 'es' ? 'Vilna, Lituania (Unión Europea)' : 'Vilnius, Lithuania (EU Member State)') : 'Monoisotopic Peak Concordant'}</span>
+            <span>{isDiagnosticKit ? (lang === 'es' ? 'Vilna, Lituania (Unión Europea)' : 'Vilnius, Lithuania (EU Member State)') : isSupplementProduct ? (lang === 'es' ? 'Liberación Duodenal (<pH 2.0 Protegido)' : 'Targeted Duodenal Absorption (<pH 2.0)') : 'Monoisotopic Peak Concordant'}</span>
           </div>
         </div>
 
-        {/* Specimen / CAS */}
+        {/* Specimen / CAS / Formulation Matrix */}
         <div className="ptc-kpi-card">
           <div className="ptc-kpi-top">
-            <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Matriz de Muestra y Regulación' : 'Specimen Matrix & Directive') : 'Chemical Abstracts Service (CAS) Registry Identification'}>
-              <FlaskConical size={12} className="ptc-kpi-icon" color="#8b5cf6" /> {isDiagnosticKit ? (lang === 'es' ? 'Muestra' : 'Specimen') : 'CAS Number'}
+            <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Matriz de Muestra y Regulación' : 'Specimen Matrix & Directive') : isSupplementProduct ? (lang === 'es' ? 'Fórmula Magistral Nutracéutica' : 'Compounded Nutraceutical Matrix') : 'Chemical Abstracts Service (CAS) Registry Identification'}>
+              <FlaskConical size={12} className="ptc-kpi-icon" color="#8b5cf6" /> {isDiagnosticKit ? (lang === 'es' ? 'Muestra' : 'Specimen') : isSupplementProduct ? (lang === 'es' ? 'Formulación' : 'Formulation') : 'CAS Number'}
             </span>
-            <span className="ptc-kpi-pill cas-pill">{isDiagnosticKit ? 'CE-IVD' : 'CAS'}</span>
+            <span className="ptc-kpi-pill cas-pill">{isDiagnosticKit ? 'CE-IVD' : isSupplementProduct ? 'Compounded' : 'CAS'}</span>
           </div>
           <div className="ptc-kpi-value-wrap">
-            <span className="ptc-kpi-value font-mono" title={isDiagnosticKit ? (lang === 'es' ? 'DBS (Gotas de Sangre Seca)' : 'DBS (Dried Blood Spot)') : casNumber}>
-              {isDiagnosticKit ? (lang === 'es' ? 'Sangre Capilar (DBS)' : 'Capillary Blood (DBS)') : casNumber}
+            <span className="ptc-kpi-value font-mono" title={isDiagnosticKit ? (lang === 'es' ? 'DBS (Gotas de Sangre Seca)' : 'DBS (Dried Blood Spot)') : isSupplementProduct ? (lang === 'es' ? 'Matriz Multi-Activa' : 'Multi-Active Matrix') : casNumber}>
+              {isDiagnosticKit ? (lang === 'es' ? 'Sangre Capilar (DBS)' : 'Capillary Blood (DBS)') : isSupplementProduct ? (lang === 'es' ? 'Matriz Multi-Activa' : 'Multi-Active Matrix') : casNumber}
             </span>
           </div>
           <div className="ptc-kpi-sub">
-            <span title={isDiagnosticKit ? (lang === 'es' ? 'Directiva de Diagnóstico In Vitro UE 2017/746' : 'EU 2017/746 In Vitro Diagnostic Directive') : (formula || 'Synthetic Polypeptide Structure')}>
-              {isDiagnosticKit ? (lang === 'es' ? 'Directiva IVD (UE 2017/746)' : 'EU 2017/746 IVD Directive') : (formula || 'Synthetic Polypeptide')}
+            <span title={isDiagnosticKit ? (lang === 'es' ? 'Directiva de Diagnóstico In Vitro UE 2017/746' : 'EU 2017/746 In Vitro Diagnostic Directive') : isSupplementProduct ? (lang === 'es' ? 'Fórmula Magistral · Multi-Ingrediente' : 'Magistral Formula · Multi-Active') : (formula || 'Synthetic Polypeptide Structure')}>
+              {isDiagnosticKit ? (lang === 'es' ? 'Directiva IVD (UE 2017/746)' : 'EU 2017/746 IVD Directive') : isSupplementProduct ? (lang === 'es' ? 'Fórmula Magistral · Multi-Ingrediente' : 'Magistral Formula · Multi-Active') : (formula || 'Synthetic Polypeptide')}
             </span>
           </div>
         </div>
 
-        {!isDiagnosticKit && product?.sequence && (
+        {!isDiagnosticKit && !isSupplementProduct && product?.sequence && (
           <div className="ptc-sequence-wrap">
             <div className="ptc-kpi-label" style={{ marginBottom: '0.35rem' }}>
               Primary Peptide Sequence (Mono-letter Notation)
@@ -407,6 +421,57 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
                     <td data-label={t.resultCol}>{lang === 'es' ? 'Entrega en 3 a 5 días hábiles desde recepción en laboratorio' : '3 to 5 business days from receipt at testing facility'}</td>
                     <td data-label={t.statusCol}>
                       <span className="ptc-status-badge">{lang === 'es' ? 'GARANTIZADO' : 'GUARANTEED'}</span>
+                    </td>
+                  </tr>
+                </>
+              ) : isSupplementProduct ? (
+                <>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Forma Farmacéutica & Aspecto' : 'Dosage Form & Visual Appearance'}</td>
+                    <td data-label={t.methodCol}>Ph. Eur. 2.9.1 / Organoleptic Inspection</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? 'Cápsula vegetal HPMC gastrorresistente transparente con polvo bioactivo uniforme' : 'Clear acid-resistant vegan HPMC capsules with uniform bioactive powder fill'}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFORME' : 'CONFORMS'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Identificación de Matriz Bioactiva' : 'Active Matrix Compound Identification'}</td>
+                    <td data-label={t.methodCol}>HPLC / UV-Vis Spectrophotometry</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? 'Coenzima Q10, PQQ, Ginseng, ALA y Piperina conformes con especificación' : 'Coenzyme Q10, PQQ, Ginseng, ALA, and Piperine concordant with release criteria'}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFIRMADO' : 'CONFIRMED'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Gastrorresistencia & Desintegración' : 'Enteric Resistance & Disintegration'}</td>
+                    <td data-label={t.methodCol}>USP &lt;701&gt; / Ph. Eur. 2.9.1 (Simulated Gastric / Intestinal Fluid)</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? '&gt; 120 min intacto a pH 1.2; Disolución duodenal completa &lt; 30 min a pH 6.8' : '&gt; 120 min intact at pH 1.2; complete duodenal release &lt; 30 min at pH 6.8'}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : 'PASSED'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Metales Pesados & Pureza Elemental' : 'Heavy Metals & Elemental Impurities'}</td>
+                    <td data-label={t.methodCol}>ICP-MS (Ph. Eur. 2.4.20)</td>
+                    <td data-label={t.resultCol}>Pb &lt; 0.1 ppm, As &lt; 0.1 ppm, Cd &lt; 0.05 ppm, Hg &lt; 0.01 ppm</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : 'PASSED'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Límites de Seguridad Microbiológica' : 'Microbiological Safety Limits'}</td>
+                    <td data-label={t.methodCol}>Ph. Eur. 5.1.4 / USP &lt;61&gt;</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? 'Recuento total aerobios &lt; 10³ UFC/g; Ausencia de Salmonella / E. coli' : 'TAMC &lt; 10³ CFU/g; Absence of Salmonella & E. coli in 10g'}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : 'PASSED'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Estándar Regulatorio & Almacenamiento' : 'Regulatory Standard & Storage'}</td>
+                    <td data-label={t.methodCol}>EU Directive 2002/46/EC &amp; cGMP</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? '15°C–25°C · Lugar fresco y seco lejos de luz solar directa' : '15°C–25°C · Store in cool, dry place away from direct sunlight'}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'CERTIFICADO' : 'CERTIFIED'}</span>
                     </td>
                   </tr>
                 </>

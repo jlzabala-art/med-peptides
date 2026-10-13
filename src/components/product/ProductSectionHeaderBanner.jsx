@@ -61,7 +61,7 @@ export default function ProductSectionHeaderBanner({
           title={isEs ? 'Volver al resumen general del producto' : 'Return to product overview'}
         >
           <ArrowLeft size={14} />
-          <span>{isEs ? '← Volver a Overview' : '← Back to Overview'}</span>
+          <span>{isEs ? 'Volver a Overview' : 'Back to Overview'}</span>
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#64748b' }}>
