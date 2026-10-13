@@ -131,7 +131,7 @@ export async function getCategoryById(categoryId) {
  * @param {'es'|'en'} lang
  * @returns {string}
  */
-export function getCategoryLabel(categoryId, lang = 'es') {
+export function getCategoryLabel(categoryId, lang = 'en') {
   if (!categoryId) return '—';
 
   const cached = cache.read();
@@ -149,7 +149,7 @@ export function getCategoryLabel(categoryId, lang = 'es') {
  * @param {'es'|'en'} lang
  * @returns {Promise<Record<string, string>>}
  */
-export async function getCategoryLabelMap(lang = 'es') {
+export async function getCategoryLabelMap(lang = 'en') {
   const categories = await getAllCategories();
   const map = {};
   for (const cat of categories) {
@@ -237,7 +237,7 @@ export async function deleteCategory(categoryId) {
  * Returns an array of { value, label } pairs for use in <select> / filter dropdowns.
  * @param {{ activeOnly?: boolean, lang?: 'es'|'en' }} opts
  */
-export async function getCategoryOptions({ activeOnly = true, lang = 'es' } = {}) {
+export async function getCategoryOptions({ activeOnly = true, lang = 'en' } = {}) {
   const categories = await getAllCategories({ activeOnly });
   return categories.map(c => ({
     value: c.id,

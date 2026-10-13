@@ -80,7 +80,7 @@ export default function AtlasSynergyRecommendationsSection({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#202124' }}>
-                  4. Recomendaciones Clínicas Atlas (Ecosistema Coadyuvante)
+                  4. Atlas Clinical Recommendations (Adjuvant Ecosystem)
                 </span>
                 <span
                   style={{
@@ -93,11 +93,11 @@ export default function AtlasSynergyRecommendationsSection({
                     fontWeight: 600
                   }}
                 >
-                  Basado en Evidencia · Tríada Sinérgica
+                  Evidence-Based · Synergistic Triad
                 </span>
               </div>
               <div style={{ fontSize: '0.74rem', color: '#5f6368', marginTop: '2px' }}>
-                Protocolo coadyuvante calibrado a partir del perfil farmacodinámico y los principios activos de esta formulación magistral.
+                Adjuvant protocol calibrated from the pharmacodynamic profile and active compounded ingredients of this prescription.
               </div>
             </div>
           </div>
@@ -138,7 +138,7 @@ export default function AtlasSynergyRecommendationsSection({
             }}
           >
             <div style={{ fontSize: '0.76rem', color: '#3c4043' }}>
-              <strong>Principios Activos Analizados en esta Fórmula:</strong>
+              <strong>Active Compounded Ingredients Analyzed in this Formulation:</strong>
             </div>
             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
               {detectedApis.map((api, aIdx) => (
@@ -197,7 +197,7 @@ export default function AtlasSynergyRecommendationsSection({
                       borderRadius: '4px'
                     }}
                   >
-                    Péptido Biorregulador
+                    Bioregulator Peptide
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
@@ -219,7 +219,7 @@ export default function AtlasSynergyRecommendationsSection({
                     }}
                   >
                     <Activity size={10} />
-                    {peptide.matchScore || 'Alta Sinergia'}
+                    {peptide.matchScore || 'High Synergy'}
                   </span>
                 </div>
               </div>
@@ -244,7 +244,7 @@ export default function AtlasSynergyRecommendationsSection({
                     border: '1px solid #edf2f7'
                   }}
                 >
-                  <strong style={{ color: '#0f172a' }}>Mecanismo Farmacológico y Sinergia: </strong>
+                  <strong style={{ color: '#0f172a' }}>Pharmacological Mechanism & Synergy: </strong>
                   {peptide.pharmaRationale}
                 </div>
               </div>
@@ -271,7 +271,7 @@ export default function AtlasSynergyRecommendationsSection({
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    <span>Ver Protocolo Clínico</span>
+                    <span>View Clinical Protocol</span>
                     <ArrowUpRight size={13} />
                   </a>
                 )}
@@ -311,7 +311,7 @@ export default function AtlasSynergyRecommendationsSection({
                       borderRadius: '4px'
                     }}
                   >
-                    Nutracéutico Oral
+                    Oral Nutraceutical
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
@@ -333,7 +333,7 @@ export default function AtlasSynergyRecommendationsSection({
                     }}
                   >
                     <Pill size={10} />
-                    {supplement.matchScore || 'Sinergia Metabólica'}
+                    {supplement.matchScore || 'Metabolic Synergy'}
                   </span>
                 </div>
               </div>
@@ -381,7 +381,7 @@ export default function AtlasSynergyRecommendationsSection({
                     marginBottom: supplement.routineAdvice ? '6px' : '0'
                   }}
                 >
-                  <strong style={{ color: '#0f172a' }}>Justificación Clínica y Sinergia: </strong>
+                  <strong style={{ color: '#0f172a' }}>Clinical Rationale & Synergy: </strong>
                   {supplement.clinicalRationale}
                 </div>
 
@@ -396,7 +396,7 @@ export default function AtlasSynergyRecommendationsSection({
                       borderRadius: '6px'
                     }}
                   >
-                    <strong style={{ color: '#9a3412' }}>Pauta Coadyuvante Sugerida: </strong>
+                    <strong style={{ color: '#9a3412' }}>Suggested Adjuvant Regimen: </strong>
                     {supplement.routineAdvice}
                   </div>
                 )}
@@ -423,7 +423,7 @@ export default function AtlasSynergyRecommendationsSection({
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  <span>Ver Ficha UltraPerson</span>
+                  <span>View UltraPerson Monograph</span>
                   <ArrowUpRight size={13} />
                 </a>
               </div>
@@ -462,7 +462,7 @@ export default function AtlasSynergyRecommendationsSection({
                       borderRadius: '4px'
                     }}
                   >
-                    Monitorización Analítica
+                    Biomarker Monitoring
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
@@ -484,7 +484,7 @@ export default function AtlasSynergyRecommendationsSection({
                     }}
                   >
                     <FlaskConical size={10} />
-                    {diagnostic.matchScore || 'Sinergia Diagnóstica'}
+                    {diagnostic.matchScore || 'Diagnostic Synergy'}
                   </span>
                 </div>
               </div>
@@ -532,7 +532,7 @@ export default function AtlasSynergyRecommendationsSection({
                     marginBottom: diagnostic.timingRecommendation ? '6px' : '0'
                   }}
                 >
-                  <strong style={{ color: '#0f172a' }}>Objetivo Clínico de Monitorización: </strong>
+                  <strong style={{ color: '#0f172a' }}>Clinical Monitoring Objective: </strong>
                   {diagnostic.clinicalRationale}
                 </div>
 
@@ -547,7 +547,7 @@ export default function AtlasSynergyRecommendationsSection({
                       borderRadius: '6px'
                     }}
                   >
-                    <strong style={{ color: '#0369a1' }}>Ventana Temporal Recomendada: </strong>
+                    <strong style={{ color: '#0369a1' }}>Recommended Time Window: </strong>
                     {diagnostic.timingRecommendation}
                   </div>
                 )}
@@ -574,7 +574,7 @@ export default function AtlasSynergyRecommendationsSection({
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  <span>Ver Panel Bloodo</span>
+                  <span>View Bloodo Panel</span>
                   <ArrowUpRight size={13} />
                 </a>
               </div>
@@ -613,7 +613,7 @@ export default function AtlasSynergyRecommendationsSection({
                       borderRadius: '4px'
                     }}
                   >
-                    Barrera & Colágeno
+                    Barrier & Native ECM
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
@@ -635,7 +635,7 @@ export default function AtlasSynergyRecommendationsSection({
                     }}
                   >
                     <Droplets size={10} />
-                    {colway.matchScore || 'Soporte Barrera'}
+                    {colway.matchScore || 'Barrier Support'}
                   </span>
                 </div>
               </div>
@@ -661,7 +661,7 @@ export default function AtlasSynergyRecommendationsSection({
                     marginBottom: colway.routineAdvice ? '6px' : '0'
                   }}
                 >
-                  <strong style={{ color: '#0f172a' }}>Justificación Clínica: </strong>
+                  <strong style={{ color: '#0f172a' }}>Clinical Rationale: </strong>
                   {colway.clinicalRationale}
                 </div>
 
@@ -676,7 +676,7 @@ export default function AtlasSynergyRecommendationsSection({
                       borderRadius: '6px'
                     }}
                   >
-                    <strong style={{ color: '#166534' }}>Pauta Coadyuvante: </strong>
+                    <strong style={{ color: '#166534' }}>Adjuvant Regimen: </strong>
                     {colway.routineAdvice}
                   </div>
                 )}
@@ -703,7 +703,7 @@ export default function AtlasSynergyRecommendationsSection({
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  <span>Ver Ficha Colway</span>
+                  <span>View Colway Monograph</span>
                   <ArrowUpRight size={13} />
                 </a>
               </div>

@@ -201,7 +201,7 @@ export default function SupplementPublicOverviewShowcase({
             </span>
             <span className="up-badge-compliance">
               <ShieldCheck size={12} />
-              <span>EU GMP · Ph. Eur. Directiva 2002/46/CE</span>
+              <span>{isEs ? 'EU GMP · Ph. Eur. Directiva 2002/46/CE' : 'EU GMP · Ph. Eur. Directive 2002/46/EC'}</span>
             </span>
           </div>
         </div>

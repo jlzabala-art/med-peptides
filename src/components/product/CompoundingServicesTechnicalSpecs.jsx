@@ -44,7 +44,7 @@ import './CompoundingServicesTechnicalSpecs.css';
 
 export default function CompoundingServicesTechnicalSpecs({
   product,
-  lang = 'es',
+  lang = 'en',
   onOpenInquiry
 }) {
   // Interactive Controls

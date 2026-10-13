@@ -31,7 +31,7 @@ import {
 export default function SupplementTechnicalSpecs({
   product,
   _selectedStrength,
-  lang = 'es'
+  lang = 'en'
 }) {
   const isEs = lang === 'es';
 

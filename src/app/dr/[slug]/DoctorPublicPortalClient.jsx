@@ -1035,7 +1035,7 @@ export default function DoctorPublicPortalClient({
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('atlas_represcribe_prefill', JSON.stringify(formulaSummary));
     }
-    toast.success(`Fórmula de #${rx.code} lista para asignar a nuevo paciente ✓`);
+    toast.success(`Formula #${rx.code} ready to prescribe for new patient ✓`);
     setIsIntakeOpen(true);
   };
 
@@ -2598,7 +2598,7 @@ export default function DoctorPublicPortalClient({
                 triggerHaptic('light');
                 setIsCredentialsModalOpen(true);
               }}
-              title={`Ver y gestionar perfil médico: ${doctor.name || 'Médico Titular'}`}
+              title={`View and manage physician profile: ${doctor.name || 'Treating Physician'}`}
               style={{
                 width: '100%',
                 display: 'flex',
@@ -2694,7 +2694,7 @@ export default function DoctorPublicPortalClient({
                     justifyContent: 'center',
                     flexShrink: 0
                   }}
-                  title="Ver y editar perfil médico"
+                  title="View and edit physician profile"
                 >
                   <Edit3 size={12} />
                 </div>
@@ -3968,8 +3968,8 @@ export default function DoctorPublicPortalClient({
                                 <button
                                   type="button"
                                   onClick={() => handleContactAtlasWhatsApp(
-                                    `Prescripción #${rx.code} - Part ${part.partNumber} (${rx.patientName || 'Paciente'})`,
-                                    `Consulta clínica sobre formulación: ${part.title} (${(part.apis || []).map(a => a.name + (a.dose ? ' ' + a.dose : '')).join(', ')}) en vehículo: ${part.vehicle || 'Vehículo magistral'}`
+                                    `Prescription #${rx.code} - Part ${part.partNumber} (${rx.patientName || 'Patient'})`,
+                                    `Clinical inquiry regarding formulation: ${part.title} (${(part.apis || []).map(a => a.name + (a.dose ? ' ' + a.dose : '')).join(', ')}) in vehicle: ${part.vehicle || 'Compounded vehicle'}`
                                   )}
                                   style={{
                                     display: 'inline-flex',
@@ -4743,65 +4743,65 @@ export default function DoctorPublicPortalClient({
               {
                 id: 'ultraperson-energy-metabolic-vitality',
                 category: 'supplement',
-                badge: 'NUTRACÉUTICO METABÓLICO & MITOCONDRIAL',
+                badge: 'METABOLIC & MITOCHONDRIAL NUTRACEUTICAL',
                 title: 'UltraPerson Energy & Metabolic Vitality (CoQ10 / PQQ / Ginseng)',
                 badgeColor: '#d97706',
                 badgeBg: '#fef3c7',
                 borderColor: '#fde68a',
                 matchScore: '99% Metabolic Synergy',
-                target: 'Síntesis de ATP Mitocondrial & Neutralización de Radicales Libres',
-                summary: 'Cofactores mitocondriales de tasa limitante (PQQ, Ubiquinol/CoQ10 125mg, Ácido Alfa-Lipoico y Ginseng). Multiplica la eficiencia bioenergética celular y amortigua el estrés oxidativo tisular derivado de terapias activas.',
-                synergisticApis: ['Minoxidil Oral & Tópico', 'Metformina', 'CoQ10', 'Antioxidantes', 'Ácido Alfa-Lipoico'],
+                target: 'Mitochondrial ATP Synthesis & Free Radical Neutralization',
+                summary: 'Rate-limiting mitochondrial cofactors (PQQ, Ubiquinol/CoQ10 125mg, Alpha-Lipoic Acid, and Ginseng). Multiplies cellular bioenergetic efficiency and buffers tissue oxidative stress from active therapies.',
+                synergisticApis: ['Oral & Topical Minoxidil', 'Metformin', 'CoQ10', 'Antioxidants', 'Alpha-Lipoic Acid'],
                 matchingItems: ultrapersonEnergyMatches,
-                protocolTitle: 'Ver Ficha UltraPerson Energy',
+                protocolTitle: 'View UltraPerson Energy Monograph',
                 protocolUrl: '/p/ultraperson-energy-metabolic-vitality'
               },
               {
                 id: 'ultraperson-longevity-cellular-renewal',
                 category: 'supplement',
-                badge: 'ACTIVADOR DE SIRTUINAS & SENOLÍTICO',
+                badge: 'SIRTUIN ACTIVATOR & SENOLYTIC',
                 title: 'UltraPerson Longevity & Cellular Renewal (Sirtuin & Senolytic)',
                 badgeColor: '#b45309',
                 badgeBg: '#fef3c7',
                 borderColor: '#fde68a',
                 matchScore: '98% Sirtuin Synergy',
-                target: 'Activación SIRT1 & Depuración Selectiva de Células Senescentes (SASP)',
-                summary: 'Trans-Resveratrol micronizado bioidéntico, Fisetina liposomal 100mg y Curcumina fitosomada. Induce autofagia selectiva y elimina células senescentes que secretan citoquinas proinflamatorias en el microambiente peribulbar y vascular.',
-                synergisticApis: ['Finasteride', 'Dutasteride', 'Epithalon', 'Metformina', 'Resveratrol'],
+                target: 'SIRT1 Activation & Selective Senescent Cell Clearance (SASP)',
+                summary: 'Micronized bioidentical Trans-Resveratrol, Liposomal Fisetin 100mg, and Phytosomal Curcumin. Induces selective autophagy and eliminates senescent cells secreting pro-inflammatory cytokines in the peribulbar and vascular microenvironment.',
+                synergisticApis: ['Finasteride', 'Dutasteride', 'Epithalon', 'Metformin', 'Resveratrol'],
                 matchingItems: ultrapersonLongevityMatches,
-                protocolTitle: 'Ver Ficha UltraPerson Longevity',
+                protocolTitle: 'View UltraPerson Longevity Monograph',
                 protocolUrl: '/p/ultraperson-longevity-cellular-renewal'
               },
               {
                 id: 'ultraperson-stress-resilience-emotional-balance',
                 category: 'supplement',
-                badge: 'MODULADOR DEL EJE HPA & CORTISOL',
+                badge: 'HPA AXIS & CORTISOL MODULATOR',
                 title: 'UltraPerson Stress Resilience & Emotional Balance',
                 badgeColor: '#d97706',
                 badgeBg: '#fef3c7',
                 borderColor: '#fde68a',
                 matchScore: '97% Endocrine Balance',
-                target: 'Homeostasis del Eje Suprarrenal HPA & Bloqueo de Cortisol Periférico',
-                summary: 'Ashwagandha KSM-66 estandarizada en withanólidos y L-Teanina pura. Normaliza picos de ACTH y cortisol sérico, previniendo el efluvio telógeno inducido por estrés y la inhibición periférica de receptores hormonales.',
-                synergisticApis: ['DHEA', 'BHRT Hormonoterapia', 'L-Teanina', 'Ashwagandha', 'Magnesio'],
+                target: 'HPA Adrenal Axis Homeostasis & Peripheral Cortisol Blockade',
+                summary: 'KSM-66 Ashwagandha standardized in withanolides and pure L-Theanine. Normalizes ACTH and serum cortisol spikes, preventing stress-induced telogen effluvium and peripheral hormone receptor inhibition.',
+                synergisticApis: ['DHEA', 'BHRT Hormone Therapy', 'L-Theanine', 'Ashwagandha', 'Magnesium'],
                 matchingItems: ultrapersonStressMatches,
-                protocolTitle: 'Ver Ficha UltraPerson Stress',
+                protocolTitle: 'View UltraPerson Stress Monograph',
                 protocolUrl: '/p/ultraperson-stress-resilience-emotional-balance'
               },
               {
                 id: 'ultraperson-sleep-quality-restoration',
                 category: 'supplement',
-                badge: 'RESTAURADOR DE SUEÑO PROFUNDO DELTA',
+                badge: 'DELTA DEEP SLEEP RESTORER',
                 title: 'UltraPerson Sleep Quality & Restoration (Melatonin-Free)',
                 badgeColor: '#4f46e5',
                 badgeBg: '#e0e7ff',
                 borderColor: '#c7d2fe',
                 matchScore: '98% Restorative Sleep',
-                target: 'Modulación Alostérica GABAérgica sin Desensibilización Melatonínica',
-                summary: 'Honokiol/Magnolol de corteza de magnolia, Apigenina y Melisa. Extiende la fase 3/4 del sueño no-REM para maximizar la liberación nocturna de hormona de crecimiento fisiológica y reparación tisular.',
-                synergisticApis: ['Melatonina', 'GABA', 'DSIP', 'L-Teanina', 'Magnesio'],
+                target: 'GABAergic Allosteric Modulation Without Melatonin Desensitization',
+                summary: 'Magnolia bark Honokiol/Magnolol, Apigenin, and Lemon Balm. Extends non-REM stage 3/4 sleep to maximize nocturnal physiological growth hormone release and tissue repair.',
+                synergisticApis: ['Melatonin', 'GABA', 'DSIP', 'L-Theanine', 'Magnesium'],
                 matchingItems: ultrapersonSleepMatches,
-                protocolTitle: 'Ver Ficha UltraPerson Sleep',
+                protocolTitle: 'View UltraPerson Sleep Monograph',
                 protocolUrl: '/p/ultraperson-sleep-quality-restoration'
               },
 
@@ -4809,17 +4809,17 @@ export default function DoctorPublicPortalClient({
               {
                 id: 'eterna-longevity-pharmacogenomics-test',
                 category: 'eterna',
-                badge: 'GENÓMICA DE PRECISIÓN & FARMACOGENÉTICA',
+                badge: 'PRECISION GENOMICS & PHARMACOGENETICS',
                 title: 'ETERNA® Longevity & Pharmacogenomics Saliva/DNA Test Kit',
                 badgeColor: '#7c3aed',
                 badgeBg: '#ede9fe',
                 borderColor: '#ddd6fe',
                 matchScore: '99% Pharmacogenetic Match',
-                target: 'Mapeo de Polimorfismos CYP, Enzima SULT1A1, Genes AR/SRD5A2 & Desgaste Telomérico',
-                summary: 'Test genético no invasivo de saliva (72 biomarcadores clave). Evalúa la tasa de sulfotransferasa (SULT1A1) que activa el Minoxidil, la sensibilidad del receptor androgénico (AR) y polimorfismos CYP hepáticos para calibrar dosis magistrales exactas y predecir la respuesta terapéutica con cero ensayo-error.',
-                synergisticApis: ['Minoxidil Tópico/Oral', 'Finasteride', 'Dutasteride', 'Epithalon', 'Metformina', 'TeloTest™'],
+                target: 'CYP Polymorphism Mapping, SULT1A1 Enzyme, AR/SRD5A2 Genes & Telomere Wear',
+                summary: 'Non-invasive saliva genetic test (72 key biomarkers). Assesses sulfotransferase (SULT1A1) Minoxidil activation rate, androgen receptor (AR) sensitivity, and hepatic CYP polymorphisms to calibrate exact compounded doses and predict therapeutic response with zero trial-and-error.',
+                synergisticApis: ['Topical/Oral Minoxidil', 'Finasteride', 'Dutasteride', 'Epithalon', 'Metformin', 'TeloTest™'],
                 matchingItems: eternaMatches,
-                protocolTitle: 'Solicitar Kit Diagnóstico ETERNA® DX',
+                protocolTitle: 'Request ETERNA® DX Diagnostic Kit',
                 protocolUrl: '/p/eternadx-genetic-test'
               },
 

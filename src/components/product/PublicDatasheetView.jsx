@@ -1913,7 +1913,9 @@ export default function PublicDatasheetView({
                         ? (lang === 'es' ? 'Resumen Ejecutivo y Estructura Legal' : 'Executive Legal & Operational Overview')
                         : isDiagnosticKit 
                           ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility') 
-                          : (t.pharmacologicalOverview || 'Pharmacological Overview')}
+                          : isSupplementProduct
+                            ? (lang === 'es' ? 'Descripción y Perfil Nutracéutico' : 'Nutraceutical Profile & Bioactive Matrix')
+                            : (t.pharmacologicalOverview || 'Pharmacological Overview')}
                     </h2>
                     {isTranslating ? (
                       <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
@@ -2037,12 +2039,14 @@ export default function PublicDatasheetView({
             onSelectSection={handleSelectSection}
           />
         )}
-        <ProductOverviewQuickNav
-          sections={tocSections}
-          activeSection={effectiveActiveSection}
-          onSelectSection={handleSelectSection}
-          lang={lang}
-        />
+        {!isSupplementProduct && (
+          <ProductOverviewQuickNav
+            sections={tocSections}
+            activeSection={effectiveActiveSection}
+            onSelectSection={handleSelectSection}
+            lang={lang}
+          />
+        )}
         </div>
       ) : (
         <div className="pds-single-section-view">

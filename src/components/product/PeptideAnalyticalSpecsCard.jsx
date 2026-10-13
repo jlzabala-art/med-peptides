@@ -30,7 +30,7 @@ import './PeptideAnalyticalSpecsCard.css';
 export default function PeptideAnalyticalSpecsCard({
   product,
   selectedStrength,
-  lang = 'es',
+  lang = 'en',
   onOpenCoa
 }) {
   const [copiedSeq, setCopiedSeq] = useState(false);

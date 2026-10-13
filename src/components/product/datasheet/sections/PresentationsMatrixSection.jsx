@@ -512,7 +512,7 @@ export default function PresentationsMatrixSection({
               <div className="pds-detail-col">
                 <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Contenido del Kit' : 'Kit Contents') : isCosmeticProduct ? (lang === 'es' ? 'Volumen y Envase' : 'Volume & Packaging') : isSupplementProduct ? (lang === 'es' ? 'Contenido Neto / Envase' : 'Net Content / Packaging') : (t?.activeContent || 'Active Content')}</span>
                 <span className="pds-dval font-bold text-sky-950">
-                  {selectedStrength?.name || (isCosmeticProduct ? '250 mL' : isSolventProduct ? '30 mL' : isDiagnosticKit ? '1 Test / Kit' : isSupplementProduct ? '60 Cápsulas HPMC' : '10 mg')}
+                  {selectedStrength?.name || (isCosmeticProduct ? '250 mL' : isSolventProduct ? '30 mL' : isDiagnosticKit ? '1 Test / Kit' : isSupplementProduct ? (lang === 'es' ? '60 Cápsulas HPMC' : '60 HPMC Capsules') : '10 mg')}
                 </span>
               </div>
               <div className="pds-detail-col">
