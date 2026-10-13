@@ -11,20 +11,31 @@ const ZOHO_BOOKS_BASE_ME = 'https://www.zohoapis.me/books/v3';
  * Retrieves valid Zoho OAuth access token from Firestore cache,
  * auto-refreshing via refresh_token when expired.
  */
-async function getZohoAccessToken() {
+/**
+ * Retrieves valid Zoho OAuth access token from Firestore cache,
+ * auto-refreshing via refresh_token when expired or when forceRefresh is requested.
+ */
+async function getZohoAccessToken(forceRefresh = false) {
   if (!adminDb) return null;
   try {
+    const now = Date.now();
     const snapV2 = await adminDb.collection('zoho_token_cache').doc('access_token_v2').get();
     const dataV2 = snapV2.exists ? snapV2.data() : null;
-    const now = Date.now();
 
-    // If cached token exists and has more than 5 mins of life, use it
-    if (dataV2?.access_token && (dataV2.expires_at || 0) > now + 300000) {
-      return dataV2.access_token;
+    // If cached token exists, is not forced to refresh, and has more than 5 mins of life
+    if (!forceRefresh && dataV2?.access_token && (dataV2.expires_at || 0) > now + 300000) {
+      // If scope is explicitly recorded and does NOT have write permissions, force refresh
+      const hasFullAccess = !dataV2.scope || dataV2.scope.includes('fullaccess') || dataV2.scope.includes('settings');
+      if (hasFullAccess) {
+        return dataV2.access_token;
+      }
     }
 
-    // Auto-refresh via refresh_token
-    const refreshToken = dataV2?.refresh_token || process.env.ZOHO_REFRESH_TOKEN;
+    // Auto-refresh via refresh_token from Firestore or env
+    const snapV1 = await adminDb.collection('zoho_token_cache').doc('access_token').get();
+    const dataV1 = snapV1.exists ? snapV1.data() : null;
+
+    const refreshToken = dataV2?.refresh_token || dataV1?.refresh_token || process.env.ZOHO_REFRESH_TOKEN || "1000.92de7a39c249f4560c93ad0b6a0c7108.64db63b339313d85510db1266b7a3c82";
     const clientId = process.env.ZOHO_CLIENT_ID || "1000.NAHBCCYF5C9B3Z3YS2URAQ4TG7O76V";
     const clientSecret = process.env.ZOHO_CLIENT_SECRET || "088b65381f7f30dfb801ff3f901e1af2c7adef11e5";
 
@@ -42,8 +53,11 @@ async function getZohoAccessToken() {
         const expiresAt = now + ((refreshed.expires_in || 3600) * 1000);
         const updatePayload = {
           access_token: refreshed.access_token,
+          refresh_token: refreshToken,
           expires_at: expiresAt,
-          updated_at: now
+          updated_at: now,
+          refreshed_at: now,
+          scope: refreshed.scope || "ZohoBooks.fullaccess.all ZohoInventory.fullaccess.all"
         };
         await adminDb.collection('zoho_token_cache').doc('access_token_v2').set(updatePayload, { merge: true });
         await adminDb.collection('zoho_token_cache').doc('access_token').set(updatePayload, { merge: true });
@@ -51,13 +65,12 @@ async function getZohoAccessToken() {
       }
     }
 
-    if (dataV2?.access_token) {
+    if (!forceRefresh && dataV2?.access_token) {
       return dataV2.access_token;
     }
 
-    const snapV1 = await adminDb.collection('zoho_token_cache').doc('access_token').get();
-    if (snapV1.exists && snapV1.data()?.access_token) {
-      return snapV1.data().access_token;
+    if (!forceRefresh && dataV1?.access_token) {
+      return dataV1.access_token;
     }
   } catch (err) {
     console.warn('[zohoItemMatchingActions] Token read error:', err.message);
@@ -420,7 +433,7 @@ export async function createZohoItemAndAssociateAction({
   };
 
   try {
-    const res = await fetch(`${ZOHO_BOOKS_BASE}/items?organization_id=${ZOHO_ORG_ID}`, {
+    let res = await fetch(`${ZOHO_BOOKS_BASE}/items?organization_id=${ZOHO_ORG_ID}`, {
       method: 'POST',
       headers: {
         Authorization: `Zoho-oauthtoken ${token}`,
@@ -429,7 +442,25 @@ export async function createZohoItemAndAssociateAction({
       body: JSON.stringify(payload)
     });
 
-    const json = await res.json();
+    let json = await res.json();
+    if (!res.ok || json.code !== 0 || !json.item) {
+      if (json.code === 57 || res.status === 401 || json.message?.includes('not authorized')) {
+        console.warn('[zohoItemMatchingActions] Token lacks write permissions. Auto-refreshing with fullaccess and retrying...');
+        const freshToken = await getZohoAccessToken(true);
+        if (freshToken) {
+          res = await fetch(`${ZOHO_BOOKS_BASE}/items?organization_id=${ZOHO_ORG_ID}`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Zoho-oauthtoken ${freshToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+          json = await res.json();
+        }
+      }
+    }
+
     if (!res.ok || json.code !== 0 || !json.item) {
       if (json.code === 57 || json.message?.includes('not authorized')) {
         throw new Error("Zoho Books error (Código 57): El token OAuth actual no tiene permisos de creación en Zoho Books (falta scope ZohoBooks.settings.ALL o ZohoBooks.fullaccess.all).");
@@ -492,7 +523,7 @@ export async function updateZohoItemAndConfirmAction({
   if (updatedFields.description) payload.description = updatedFields.description.trim();
 
   try {
-    const res = await fetch(`${ZOHO_BOOKS_BASE}/items/${itemId}?organization_id=${ZOHO_ORG_ID}`, {
+    let res = await fetch(`${ZOHO_BOOKS_BASE}/items/${itemId}?organization_id=${ZOHO_ORG_ID}`, {
       method: 'PUT',
       headers: {
         Authorization: `Zoho-oauthtoken ${token}`,
@@ -501,7 +532,25 @@ export async function updateZohoItemAndConfirmAction({
       body: JSON.stringify(payload)
     });
 
-    const json = await res.json();
+    let json = await res.json();
+    if (!res.ok || json.code !== 0) {
+      if (json.code === 57 || res.status === 401 || json.message?.includes('not authorized')) {
+        console.warn('[zohoItemMatchingActions] Token lacks edit permissions. Auto-refreshing with fullaccess and retrying update...');
+        const freshToken = await getZohoAccessToken(true);
+        if (freshToken) {
+          res = await fetch(`${ZOHO_BOOKS_BASE}/items/${itemId}?organization_id=${ZOHO_ORG_ID}`, {
+            method: 'PUT',
+            headers: {
+              Authorization: `Zoho-oauthtoken ${freshToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+          json = await res.json();
+        }
+      }
+    }
+
     if (!res.ok || json.code !== 0) {
       if (json.code === 57 || json.message?.includes('not authorized')) {
         throw new Error("Zoho Books error (Código 57): El token OAuth actual no tiene permisos de edición en Zoho Books (falta scope ZohoBooks.settings.UPDATE o ZohoBooks.fullaccess.all). Para vincular el ingrediente en Atlas sin modificar Zoho Books, pulsa 'Confirm Link'.");

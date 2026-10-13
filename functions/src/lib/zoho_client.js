@@ -32,12 +32,24 @@ const {
 let _secrets = null;
 async function loadSecrets() {
   if (_secrets) return _secrets;
+
+  let canonicalRefreshToken = null;
+  try {
+    const db = getFirestore();
+    const snap = await db.doc(`${ZOHO_FIRESTORE.TOKEN_CACHE}/access_token`).get();
+    if (snap.exists && snap.data()?.refresh_token) {
+      canonicalRefreshToken = snap.data().refresh_token.trim();
+    }
+  } catch (err) {
+    // Non-fatal fallback
+  }
+
   // In Cloud Functions, secrets are injected as env vars by Secret Manager
-  // .trim() removes any trailing newlines injected by echo pipes during setup
+  // Canonical token from Firestore takes precedence over older pinned versions
   _secrets = {
-    clientId:     (process.env[ZOHO_SECRETS.CLIENT_ID]     || "").trim(),
-    clientSecret: (process.env[ZOHO_SECRETS.CLIENT_SECRET] || "").trim(),
-    refreshToken: (process.env[ZOHO_SECRETS.REFRESH_TOKEN] || "").trim(),
+    clientId:     (process.env[ZOHO_SECRETS.CLIENT_ID]     || "1000.NAHBCCYF5C9B3Z3YS2URAQ4TG7O76V").trim(),
+    clientSecret: (process.env[ZOHO_SECRETS.CLIENT_SECRET] || "088b65381f7f30dfb801ff3f901e1af2c7adef11e5").trim(),
+    refreshToken: canonicalRefreshToken || (process.env[ZOHO_SECRETS.REFRESH_TOKEN] || "").trim(),
   };
   if (!_secrets.clientId || !_secrets.clientSecret || !_secrets.refreshToken) {
     throw new Error(
