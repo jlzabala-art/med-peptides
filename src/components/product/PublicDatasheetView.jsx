@@ -536,11 +536,13 @@ export default function PublicDatasheetView({
     return !isCorporateService && !isDiagnosticKit && !isCosmeticProduct && !isSolventProduct && !isSupplementProduct;
   }, [isCorporateService, isDiagnosticKit, isCosmeticProduct, isSolventProduct, isSupplementProduct]);
 
-  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA™ Saliva DNA & Epigenetics') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : (isSupplementProduct ? (product?.name || 'UltraPerson Clinical Supplement') : 'Clinical Peptide'))))));
+  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA® Precision Health & Multiomics Platform') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : (isSupplementProduct ? (product?.name || 'UltraPerson Clinical Supplement') : 'Clinical Peptide'))))));
   const category = isCosmeticProduct
     ? (lang === 'es' ? 'Cosmecéutica y Cuidado Capilar' : 'Hair & Scalp Cosmeceuticals')
     : isSolventProduct 
     ? (lang === 'es' ? 'Solvente y Diluyente Estéril' : 'Sterile Reconstitution Solvent')
+    : isEternaDiagnostic
+    ? (lang === 'es' ? 'Plataforma Multiómica y Portal Clínico' : 'Multiomic Platform & Clinical Portal')
     : isDiagnosticKit
     ? (lang === 'es' ? 'Diagnóstico Clínico y Biomarcadores' : 'Clinical Diagnostics & Biomarkers')
     : isIvDrip
@@ -597,6 +599,8 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Folículo Piloso, Matriz Dérmica y Fase Anágena' : 'Hair Follicle, Scalp Dermal Matrix & Anagen Phase')
     : isSolventProduct
     ? (lang === 'es' ? 'Vehículo Estéril de Reconstitución de Péptidos (USP)' : 'Universal Sterile Peptide Reconstitution Vehicle (USP)')
+    : isEternaDiagnostic
+    ? (lang === 'es' ? 'Ecosistema de Salud de Precisión, Telemetría 24/7 y Portal Clínico' : 'Precision Multiomics Ecosystem, 24/7 Telemetry & Clinical OS')
     : isDiagnosticKit
     ? (lang === 'es' ? 'Monitoreo Cuantitativo de Biomarcadores y Longevidad Celular' : 'Cellular Longevity & Quantitative Biomarker Monitoring')
     : isIvDrip
@@ -604,15 +608,19 @@ export default function PublicDatasheetView({
     : isSupplementProduct
     ? (lang === 'es' ? (product?.targetSystem || 'Optimización Metabólica, Mitocondrial y Celular') : (product?.targetSystem || 'Mitochondrial, Metabolic & Cellular Optimization'))
     : getLocalizedTargetSystem(product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis', lang);
-  const description = dynamicTranslations[lang]?.description
-    || getLocalizedField(product, 'description', lang) 
-    || getLocalizedField(product, 'clinicalOverview', lang)
-    || product?.clinicalOverview
-    || product?.clinical_overview
-    || product?.description 
-    || product?.desc 
-    || product?.objective 
-    || '';
+  const description = isEternaDiagnostic
+    ? (lang === 'es'
+        ? 'ETERNA® es un ecosistema integral de salud de precisión que conecta el diagnóstico multiómico avanzado del paciente (Genetics 360, telemetría continua 24/7 con wearables y la serie bioquímica AgeScan) con un portal clínico profesional impulsado por Agentes de IA clínicos para briefings médicos, gestión de hasta 250 pacientes y personalización white-label para clínicas modernas de medicina preventiva y longevidad.'
+        : 'ETERNA® is a comprehensive precision health ecosystem bridging advanced patient multiomics (Genetics 360, 24/7 continuous wearable biometrics, and the AgeScan biochemical series) with a professional clinical management platform powered by autonomous AI clinical briefing agents, multi-practitioner orchestration, and full white-label capabilities for modern longevity and preventive medicine clinics.')
+    : (dynamicTranslations[lang]?.description
+        || getLocalizedField(product, 'description', lang) 
+        || getLocalizedField(product, 'clinicalOverview', lang)
+        || product?.clinicalOverview
+        || product?.clinical_overview
+        || product?.description 
+        || product?.desc 
+        || product?.objective 
+        || '');
 
   // ─── Version & Update Date System ──────────────────────────────────────────
   const versionInfo = useMemo(() => {
@@ -2006,11 +2014,13 @@ export default function PublicDatasheetView({
               <h2 className="pds-section-heading" style={{ margin: 0 }}>
                 {isCorporateService
                   ? (lang === 'es' ? 'Resumen Ejecutivo y Estructura Legal' : 'Executive Legal & Operational Overview')
-                  : isDiagnosticKit 
-                    ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility') 
-                    : isSupplementProduct
-                      ? (lang === 'es' ? 'Descripción y Perfil Nutracéutico' : 'Nutraceutical Profile & Bioactive Matrix')
-                      : (t.pharmacologicalOverview || 'Pharmacological Overview')}
+                  : isEternaDiagnostic
+                    ? (lang === 'es' ? 'Ecosistema de Salud de Precisión y Portal Clínico ETERNA®' : 'ETERNA® Precision Health Ecosystem & Clinical Platform')
+                    : isDiagnosticKit 
+                      ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility') 
+                      : isSupplementProduct
+                        ? (lang === 'es' ? 'Descripción y Perfil Nutracéutico' : 'Nutraceutical Profile & Bioactive Matrix')
+                        : (t.pharmacologicalOverview || 'Pharmacological Overview')}
               </h2>
               {isTranslating ? (
                 <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
