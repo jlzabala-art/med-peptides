@@ -45,64 +45,62 @@ export async function rasterizeSvgToImageData(svgEl, widthMm, heightMm, targetDp
 }
 
 /**
- * Packs labels into horizontal shelves/rows maximizing paper usage on A4
- * while strictly preserving each label's exact physical millimeter dimensions (1:1 scale)
- * and keeping multi-part prescriptions for the same patient paired together when possible.
+ * Packs labels into strict guillotine-friendly horizontal shelves (rows).
+ * 
+ * GUILLOTINE GENERAL RULES:
+ * 1. Strict Height Uniformity: Never mix different heights in the same row.
+ *    A full straight horizontal cut across the sheet separates each row cleanly without steps.
+ * 2. Format-Block Batching: Labels are clustered by dimensions (hMm, wMm) descending.
+ *    Within the same dimension group, multi-part prescriptions for the same patient stay adjacent.
+ * 3. Consistent Column Anchor: All rows of the same width tier share identical column X coordinates.
+ *    Single labels in a row sit in column 0 (left-aligned to that tier's grid), never floating in the center.
+ * 4. Inter-tier Separation: When switching from one label format to another, a distinct horizontal
+ *    cutting plane is preserved.
  */
-function buildOptimizedRows(items, maxRowWidth, minGapX) {
-  // Sort items primarily by height (descending) so each row shares uniform height
-  // for straight 100% continuous horizontal guillotine cuts across the entire A4 sheet.
-  // Within the same height tier, preserve rxCode grouping.
-  const sorted = [...items].sort((a, b) => {
+function buildGuillotineOptimizedRows(items, maxRowWidth, minGapX) {
+  // Group items by format tier (rounded to nearest 0.5mm to avoid floating point jitter)
+  const tiersMap = new Map();
+  for (const item of items) {
+    const key = `${item.hMm.toFixed(1)}x${item.wMm.toFixed(1)}`;
+    if (!tiersMap.has(key)) {
+      tiersMap.set(key, { hMm: item.hMm, wMm: item.wMm, items: [] });
+    }
+    tiersMap.get(key).items.push(item);
+  }
+
+  // Sort tiers by height descending, then width descending
+  const sortedTiers = Array.from(tiersMap.values()).sort((a, b) => {
     if (Math.abs(b.hMm - a.hMm) > 0.5) return b.hMm - a.hMm;
-    return (a.rxCode || '').localeCompare(b.rxCode || '') || (a.originalIdx - b.originalIdx);
+    return b.wMm - a.wMm;
   });
-  const remaining = [...sorted];
+
   const rows = [];
 
-  while (remaining.length > 0) {
-    const currentRow = [];
-    let currentWidth = 0;
+  for (const tier of sortedTiers) {
+    // Within the same tier, sort to keep multi-part rxCode prescriptions together
+    tier.items.sort((a, b) => {
+      const codeA = a.rxCode || '';
+      const codeB = b.rxCode || '';
+      if (codeA !== codeB) return codeA.localeCompare(codeB);
+      return (a.originalIdx || 0) - (b.originalIdx || 0);
+    });
 
-    let i = 0;
-    while (i < remaining.length) {
-      const candidate = remaining[i];
-      const neededWidth = currentRow.length === 0
-        ? candidate.wMm
-        : candidate.wMm + minGapX;
+    const tierItems = [...tier.items];
+    const itemW = tier.wMm;
+    const itemH = tier.hMm;
 
-      if (currentWidth + neededWidth <= maxRowWidth) {
-        // If candidate is part of a multi-part prescription, check if remaining parts would be separated
-        const rxCode = candidate.rxCode;
-        const siblingCandidates = remaining.filter((it, idx) => idx !== i && it.rxCode === rxCode && Math.abs(it.hMm - candidate.hMm) <= 0.5);
+    // Calculate max columns that fit on the row width
+    const maxCols = Math.max(1, Math.floor((maxRowWidth + minGapX) / (itemW + minGapX)));
 
-        if (siblingCandidates.length > 0 && currentRow.length > 0) {
-          const allSiblingsWidth = candidate.wMm + siblingCandidates.reduce((acc, s) => acc + s.wMm + minGapX, 0);
-          if (currentWidth + allSiblingsWidth > maxRowWidth) {
-            const altIdx = remaining.findIndex((it, idx) => idx > i && it.rxCode !== rxCode && (currentWidth + it.wMm + minGapX <= maxRowWidth));
-            if (altIdx !== -1) {
-              const altItem = remaining.splice(altIdx, 1)[0];
-              currentRow.push(altItem);
-              currentWidth += altItem.wMm + minGapX;
-              continue;
-            }
-          }
-        }
-
-        currentRow.push(candidate);
-        currentWidth += neededWidth;
-        remaining.splice(i, 1);
-      } else {
-        i++;
+    while (tierItems.length > 0) {
+      const currentRow = [];
+      while (currentRow.length < maxCols && tierItems.length > 0) {
+        currentRow.push(tierItems.shift());
       }
+      // Attach tier format metadata to row for consistent column grid calculation
+      currentRow.tierFormat = { wMm: itemW, hMm: itemH, maxCols };
+      rows.push(currentRow);
     }
-
-    if (currentRow.length === 0) {
-      const single = remaining.shift();
-      currentRow.push(single);
-    }
-
-    rows.push(currentRow);
   }
 
   return rows;
@@ -110,7 +108,7 @@ function buildOptimizedRows(items, maxRowWidth, minGapX) {
 
 /**
  * Generates an A4 Multi-Patient Batch PDF sheet laying out each label maintaining
- * its exact physical mm dimensions, with crop marks, patient captions, and optimized space.
+ * its exact physical mm dimensions, with crop marks, patient captions, and guillotine-optimized spacing.
  */
 export async function generateA4BatchPdf({
   items = [],
@@ -131,15 +129,14 @@ export async function generateA4BatchPdf({
 
   const PAGE_WIDTH = 210;
   const PAGE_HEIGHT = 297;
-  const MIN_MARGIN_X = 3.8; // mm (compatible with virtually all desktop and office laser/inkjet printers)
-  const MAX_ROW_WIDTH = PAGE_WIDTH - (2 * MIN_MARGIN_X); // 202.4 mm (comfortably fits two 100mm labels side-by-side)
+  const MIN_MARGIN_X = 3.8; // mm
+  const MAX_ROW_WIDTH = PAGE_WIDTH - (2 * MIN_MARGIN_X); // 202.4 mm
   const MARGIN_TOP = 19.5; // mm (leaves room for EU GMP header)
   const MARGIN_BOTTOM = 8; // mm
-  const MIN_LABEL_GAP_X = 2.0; // mm
-  const MAX_LABEL_GAP_X = 6.0; // mm
-  const ROW_GAP_Y = 4.2; // mm
+  const STANDARD_GAP_X = 2.4; // mm (uniform horizontal gap for vertical guillotine cutting)
+  const ROW_GAP_Y = 4.5; // mm
   const CAPTION_TOTAL_H = 4.2; // mm (for crop ticks + caption text)
-  const CROP_LEN = 1.8; // mm
+  const CROP_LEN = 2.0; // mm
 
   // Normalize item dimensions
   const normalizedItems = items.map((item, idx) => ({
@@ -149,14 +146,14 @@ export async function generateA4BatchPdf({
     hMm: Number(item.heightMm) || 45
   }));
 
-  // Build space-optimized rows (shelf bin-packing)
-  const rows = buildOptimizedRows(normalizedItems, MAX_ROW_WIDTH, MIN_LABEL_GAP_X);
+  // Build guillotine-optimized shelves (strict height homogeneity + format tiering)
+  const rows = buildGuillotineOptimizedRows(normalizedItems, MAX_ROW_WIDTH, STANDARD_GAP_X);
 
   // Pre-calculate total pages
   let simPages = 1;
   let simY = MARGIN_TOP;
   for (const row of rows) {
-    const rowH = Math.max(...row.map(it => it.hMm)) + CAPTION_TOTAL_H;
+    const rowH = (row.tierFormat?.hMm || Math.max(...row.map(it => it.hMm))) + CAPTION_TOTAL_H;
     if (simY + rowH > PAGE_HEIGHT - MARGIN_BOTTOM) {
       simPages++;
       simY = MARGIN_TOP;
@@ -183,7 +180,7 @@ export async function generateA4BatchPdf({
     pdf.setTextColor(100, 116, 139); // slate-500
     const today = new Date().toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     pdf.text(
-      `Physical 1:1 Scale Print (Unscaled) • Container-Adaptive Packaging • Space-Optimized • ${items.length} ${items.length === 1 ? 'Label' : 'Labels'} • Generated ${today}`,
+      `Physical 1:1 Scale Print (Unscaled) • Container-Adaptive Packaging • Guillotine-Optimized • ${items.length} ${items.length === 1 ? 'Label' : 'Labels'} • Generated ${today}`,
       MIN_MARGIN_X,
       14.2
     );
@@ -199,10 +196,16 @@ export async function generateA4BatchPdf({
 
   for (let rIdx = 0; rIdx < rows.length; rIdx++) {
     const row = rows[rIdx];
-    const rowMaxH = Math.max(...row.map(it => it.hMm));
-    const rowTotalH = rowMaxH + CAPTION_TOTAL_H;
+    const tier = row.tierFormat || {
+      wMm: row[0]?.wMm || 75,
+      hMm: row[0]?.hMm || 45,
+      maxCols: Math.max(1, Math.floor((MAX_ROW_WIDTH + STANDARD_GAP_X) / ((row[0]?.wMm || 75) + STANDARD_GAP_X)))
+    };
 
-    // Check if row fits vertically on the current page
+    const rowH = tier.hMm;
+    const rowTotalH = rowH + CAPTION_TOTAL_H;
+
+    // Check if row fits vertically on current page
     if (currentY + rowTotalH > PAGE_HEIGHT - MARGIN_BOTTOM) {
       pdf.addPage('a4', 'portrait');
       currentPage++;
@@ -210,23 +213,36 @@ export async function generateA4BatchPdf({
       currentY = MARGIN_TOP;
     }
 
-    // Horizontally center the row on the A4 page
-    const count = row.length;
-    const sumLabelsW = row.reduce((sum, it) => sum + it.wMm, 0);
+    // Fixed column grid coordinates for this tier across all rows of this size
+    const maxCols = tier.maxCols;
+    const itemW = tier.wMm;
+    const gapX = STANDARD_GAP_X;
+    const totalTierW = (maxCols * itemW) + ((maxCols - 1) * gapX);
+    const tierStartX = Math.max(MIN_MARGIN_X, (PAGE_WIDTH - totalTierW) / 2);
 
-    let gapX = MIN_LABEL_GAP_X;
-    let rowTotalW = sumLabelsW;
+    const itemY = currentY;
 
-    if (count > 1) {
-      const availableGapsSpace = PAGE_WIDTH - (2 * MIN_MARGIN_X) - sumLabelsW;
-      gapX = Math.max(MIN_LABEL_GAP_X, Math.min(MAX_LABEL_GAP_X, availableGapsSpace / (count - 1)));
-      rowTotalW = sumLabelsW + ((count - 1) * gapX);
+    // 1. Draw horizontal guillotine alignment ticks on the page margins (left and right edges)
+    pdf.setDrawColor(71, 85, 105); // slate-600
+    pdf.setLineWidth(0.22);
+
+    // Top horizontal cut of the row
+    pdf.line(0.5, itemY, 3.5, itemY);
+    pdf.line(PAGE_WIDTH - 3.5, itemY, PAGE_WIDTH - 0.5, itemY);
+
+    // Bottom horizontal cut of the labels
+    pdf.line(0.5, itemY + rowH, 3.5, itemY + rowH);
+    pdf.line(PAGE_WIDTH - 3.5, itemY + rowH, PAGE_WIDTH - 0.5, itemY + rowH);
+
+    // Inter-row separation cut guide line in margin
+    const interRowCutY = itemY + rowTotalH + (ROW_GAP_Y / 2);
+    if (rIdx < rows.length - 1) {
+      pdf.setDrawColor(148, 163, 184); // slate-400
+      pdf.line(0.5, interRowCutY, 2.5, interRowCutY);
+      pdf.line(PAGE_WIDTH - 2.5, interRowCutY, PAGE_WIDTH - 0.5, interRowCutY);
     }
 
-    const rowStartX = Math.max(MIN_MARGIN_X, (PAGE_WIDTH - rowTotalW) / 2);
-
-    let itemX = rowStartX;
-
+    // 2. Iterate items in the row
     for (let cIdx = 0; cIdx < row.length; cIdx++) {
       const item = row[cIdx];
       processedCount++;
@@ -235,7 +251,8 @@ export async function generateA4BatchPdf({
         onProgress({ current: processedCount, total: items.length, patient: item.patientName });
       }
 
-      const itemY = currentY;
+      // Column position strictly anchored to the tier's column grid
+      const itemX = tierStartX + (cIdx * (itemW + gapX));
       const wMm = item.wMm;
       const hMm = item.hMm;
 
@@ -250,17 +267,17 @@ export async function generateA4BatchPdf({
         // Draw physical 1:1 image
         pdf.addImage(imgData, 'PNG', itemX, itemY, wMm, hMm, undefined, 'SLOW');
 
-        // Draw outer rounded border
+        // Draw outer label border
         pdf.setDrawColor(203, 213, 225); // slate-300
         pdf.setLineWidth(0.18);
         pdf.roundedRect(itemX, itemY, wMm, hMm, 1.0, 1.0, 'S');
 
-        // Draw crop marks at corners with crisp professional line weight
-        pdf.setDrawColor(71, 85, 105); // slate-600 (sharp on B&W laser printers)
-        pdf.setLineWidth(0.18);
+        // Draw crop marks at corners with crisp line weight
+        pdf.setDrawColor(71, 85, 105); // slate-600
+        pdf.setLineWidth(0.20);
 
         const cropLeft = cIdx === 0 ? CROP_LEN : Math.min(CROP_LEN, (gapX / 2) - 0.2);
-        const cropRight = cIdx === count - 1 ? CROP_LEN : Math.min(CROP_LEN, (gapX / 2) - 0.2);
+        const cropRight = cIdx === maxCols - 1 ? CROP_LEN : Math.min(CROP_LEN, (gapX / 2) - 0.2);
 
         // Top-left
         pdf.line(itemX - cropLeft, itemY, itemX, itemY);
@@ -276,40 +293,30 @@ export async function generateA4BatchPdf({
 
         // Bottom-right
         pdf.line(itemX + wMm, itemY + hMm, itemX + wMm + cropRight, itemY + hMm);
-        pdf.line(itemX + wMm, itemY + hMm, itemX + wMm + CROP_LEN, itemY + hMm + CROP_LEN);
+        pdf.line(itemX + wMm, itemY + hMm, itemX + wMm, itemY + hMm + CROP_LEN);
 
-        // Vertical cutting tick mark in the middle of gap between items
-        if (cIdx < count - 1) {
+        // Vertical cutting tick mark between columns
+        if (cIdx < maxCols - 1) {
           const cutTickX = itemX + wMm + (gapX / 2);
           pdf.line(cutTickX, itemY - CROP_LEN, cutTickX, itemY - 0.3);
           pdf.line(cutTickX, itemY + hMm + 0.3, cutTickX, itemY + hMm + CROP_LEN);
 
-          // Top/bottom page-edge vertical guillotine ticks for the inter-column cut
-          pdf.line(cutTickX, 16.5, cutTickX, 18.5);
-          pdf.line(cutTickX, PAGE_HEIGHT - 3.5, cutTickX, PAGE_HEIGHT - 1.2);
+          // Top/bottom page-edge vertical guillotine ticks for the column cut
+          pdf.line(cutTickX, 16.5, cutTickX, 19.0);
+          pdf.line(cutTickX, PAGE_HEIGHT - 3.5, cutTickX, PAGE_HEIGHT - 1.0);
         }
 
-        // Horizontal guillotine alignment ticks on the page margins (left and right edges)
-        if (cIdx === 0) {
-          pdf.line(0.8, itemY, 3.2, itemY);
-          pdf.line(0.8, itemY + hMm, 3.2, itemY + hMm);
-        }
-        if (cIdx === count - 1) {
-          pdf.line(PAGE_WIDTH - 3.2, itemY, PAGE_WIDTH - 0.8, itemY);
-          pdf.line(PAGE_WIDTH - 3.2, itemY + hMm, PAGE_WIDTH - 0.8, itemY + hMm);
-        }
-
-        // Top/bottom page-edge vertical guillotine ticks for outer label borders
+        // Top/bottom page-edge ticks for outer boundaries
         if (cIdx === 0) {
           pdf.line(itemX, 16.5, itemX, 18.5);
           pdf.line(itemX, PAGE_HEIGHT - 3.5, itemX, PAGE_HEIGHT - 1.2);
         }
-        if (cIdx === count - 1) {
+        if (cIdx === row.length - 1) {
           pdf.line(itemX + wMm, 16.5, itemX + wMm, 18.5);
           pdf.line(itemX + wMm, PAGE_HEIGHT - 3.5, itemX + wMm, PAGE_HEIGHT - 1.2);
         }
 
-        // Micro caption safely tucked in the discard gutter below label
+        // Micro caption safely tucked in discard gutter below label
         pdf.setFont('helvetica', 'normal');
         pdf.setFontSize(5.2);
         pdf.setTextColor(100, 116, 139);
@@ -317,8 +324,6 @@ export async function generateA4BatchPdf({
         const caption = `[#${item.rxCode || 'RX'} - ${item.patientName || 'Patient'}${item.partLabel ? ` • ${item.partLabel}` : ''}] ${wMm}×${hMm}mm (${item.variantLabel || item.variant || 'Standard'}${containerInfo})`;
         pdf.text(caption, itemX + 0.5, itemY + hMm + 2.4, { maxWidth: wMm - 1 });
       }
-
-      itemX += wMm + gapX;
     }
 
     currentY += rowTotalH + ROW_GAP_Y;
