@@ -425,10 +425,6 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
     }
   };
 
-  const doctorName = currentDoctor.displayName
-    || [currentDoctor.firstName, currentDoctor.lastName].filter(Boolean).join(' ')
-    || 'Unnamed Physician';
-
   const tabs = [
     { id: 'overview',      label: 'Overview' },
     { id: 'patients',      label: 'Patients',      count: patients.length      || null },
