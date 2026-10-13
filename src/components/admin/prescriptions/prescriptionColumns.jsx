@@ -6,31 +6,129 @@ import {
 } from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
 
-// Helper to determine if all compounded APIs in a prescription are matched/synced with Zoho
-export function checkAllApisZohoMatched(rx) {
-  if (!rx) return false;
+// Helper to calculate Zoho matching statistics (matched, total, percentage) for all APIs in a prescription
+export function getRxZohoMatchingStats(rx) {
+  if (!rx) return { total: 0, matched: 0, percent: 0, isAllMatched: false, hasNoApis: true };
   const members = rx._sessionMembers || [rx];
   const items = [];
 
   for (const m of members) {
-    if (Array.isArray(m.parts) && m.parts.length > 0) {
-      for (const p of m.parts) {
-        if (Array.isArray(p.apis)) items.push(...p.apis);
-        else if (Array.isArray(p.items)) items.push(...p.items);
-        else if (Array.isArray(p.prescriptionLines)) items.push(...p.prescriptionLines);
-      }
-    }
-    if (Array.isArray(m.prescriptionLines) && m.prescriptionLines.length > 0) {
-      items.push(...m.prescriptionLines);
-    } else if (Array.isArray(m.items) && m.items.length > 0) {
+    if (Array.isArray(m.items) && m.items.length > 0) {
       items.push(...m.items);
+    } else if (Array.isArray(m.parts) && m.parts.length > 0) {
+      for (const p of m.parts) {
+        if (Array.isArray(p.apis) && p.apis.length > 0) items.push(...p.apis);
+        else if (Array.isArray(p.items) && p.items.length > 0) items.push(...p.items);
+        else if (Array.isArray(p.prescriptionLines) && p.prescriptionLines.length > 0) items.push(...p.prescriptionLines);
+      }
+    } else if (Array.isArray(m.compounds) && m.compounds.length > 0) {
+      items.push(...m.compounds);
+    } else if (Array.isArray(m.prescriptionLines) && m.prescriptionLines.length > 0) {
+      items.push(...m.prescriptionLines);
     } else if (Array.isArray(m.apis) && m.apis.length > 0) {
       items.push(...m.apis);
     }
   }
 
-  if (items.length === 0) return false;
-  return items.every(it => Boolean(it && (it.zoho_item_id || it.zoho_sku)));
+  // Filter valid items representing compound formulations or medicines
+  const validItems = items.filter(it => Boolean(it && (it.name || it.drugName || it.productName || it.activeIngredient || it.title || it.zoho_item_id)));
+
+  if (validItems.length === 0) {
+    return { total: 0, matched: 0, percent: 0, isAllMatched: false, hasNoApis: true };
+  }
+
+  const isMatched = (it) => Boolean(
+    it && (it.zoho_item_id || it.zoho_sku || it.zohoItemId || it.zohoSku || it.linkedItem?.item_id || it.linkedItem?.zoho_item_id)
+  );
+
+  const matchedCount = validItems.filter(isMatched).length;
+  const total = validItems.length;
+  const percent = total > 0 ? Math.round((matchedCount / total) * 100) : 0;
+
+  return {
+    total,
+    matched: matchedCount,
+    percent,
+    isAllMatched: total > 0 && matchedCount === total,
+    hasNoApis: false
+  };
+}
+
+// Helper to determine if all compounded APIs in a prescription are matched/synced with Zoho
+export function checkAllApisZohoMatched(rx) {
+  const stats = getRxZohoMatchingStats(rx);
+  return stats.isAllMatched;
+}
+
+// Compact percentage matching badge placed directly under the Status badge in the table
+export function ZohoMatchingBadge({ rx, onOpenMatcher }) {
+  const stats = getRxZohoMatchingStats(rx);
+
+  if (stats.hasNoApis || stats.total === 0) {
+    return null;
+  }
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (onOpenMatcher) {
+      onOpenMatcher(rx);
+    } else if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('OPEN_ZOHO_API_MATCHER', { detail: { rx } }));
+    }
+  };
+
+  const isFull = stats.isAllMatched || stats.percent === 100;
+  const isPartial = stats.percent > 0 && !isFull;
+
+  // Semantic GCP-inspired color palette
+  const bg = isFull ? '#f0fdf4' : (isPartial ? '#fffbeb' : '#fef2f2');
+  const border = isFull ? '#bbf7d0' : (isPartial ? '#fde68a' : '#fecaca');
+  const color = isFull ? '#15803d' : (isPartial ? '#b45309' : '#dc2626');
+  const dotColor = isFull ? '#16a34a' : (isPartial ? '#d97706' : '#ef4444');
+
+  const tooltip = isFull
+    ? `Zoho Books: 100% sincronizado (${stats.matched}/${stats.total} APIs vinculados). Clic para abrir el gestor.`
+    : isPartial
+      ? `Zoho Books: ${stats.percent}% sincronizado (${stats.matched}/${stats.total} APIs vinculados). Clic para vincular los pendientes.`
+      : `Zoho Books: 0% sincronizado (0/${stats.total} APIs vinculados). Clic para vincular con Zoho.`;
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      title={tooltip}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        fontSize: '0.66rem',
+        fontWeight: 700,
+        color,
+        background: bg,
+        border: `1px solid ${border}`,
+        padding: '1px 6px',
+        borderRadius: '4px',
+        lineHeight: 1.25,
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+        marginTop: '3px',
+        transition: 'all 0.15s ease',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+      }}
+    >
+      <span
+        style={{
+          width: '5px',
+          height: '5px',
+          borderRadius: '50%',
+          backgroundColor: dotColor,
+          flexShrink: 0
+        }}
+      />
+      <span style={{ fontWeight: 800 }}>Zoho {stats.percent}%</span>
+      <span style={{ fontSize: '0.62rem', fontWeight: 600, opacity: 0.85 }}>({stats.matched}/{stats.total})</span>
+    </button>
+  );
 }
 
 // Determines whether a prescription contains injectable peptides / biologics.
@@ -250,7 +348,6 @@ export const getPrescriptionColumns = (options = {}) => {
         const formattedDoc = formatDoctorName(doctor);
         const treatingDocClinic = typeof rx.treatingDoctor === 'object' ? rx.treatingDoctor?.clinic : null;
         const clinicName = treatingDocClinic || rx.doctor?.clinic || rx.clinic || rx.clinicName || (String(doctor).toLowerCase().includes('haytham') || String(doctor).toLowerCase().includes('heytham') ? 'Arthregen Clinic' : null);
-        const isZohoAllMatched = checkAllApisZohoMatched(rx);
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0, padding: '2px 0' }}>
@@ -273,29 +370,6 @@ export const getPrescriptionColumns = (options = {}) => {
                 <div style={{ flexShrink: 0, marginTop: '2px' }}>
                   <CopyableId value={patientId} iconOnly={true} />
                 </div>
-              )}
-              {isZohoAllMatched && (
-                <span
-                  title="Todos los APIs están sincronizados con Zoho Books"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '2px',
-                    padding: '1px 5px',
-                    borderRadius: '3px',
-                    background: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    color: '#15803d',
-                    fontSize: '0.64rem',
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    marginTop: '2px',
-                    flexShrink: 0,
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  <Check size={9} color="#16a34a" /> Zoho
-                </span>
               )}
             </div>
 
@@ -476,32 +550,10 @@ export const getPrescriptionColumns = (options = {}) => {
           return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
               <StatusBadge status={aggregateStatus} label={RX_STATUS_LABELS[aggregateStatus]} />
-              {isZohoAllMatched && (
-                <span
-                  title="Todos los APIs están sincronizados con Zoho Books"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '3px',
-                    fontSize: '0.64rem',
-                    fontWeight: 700,
-                    color: '#15803d',
-                    background: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    padding: '1px 5px',
-                    borderRadius: '4px',
-                    lineHeight: 1.2,
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  <Check size={9} color="#16a34a" /> Zoho Matched
-                </span>
-              )}
+              <ZohoMatchingBadge rx={rx} onOpenMatcher={options?.onOpenZohoMatcher} />
             </div>
           );
         }
-
-        const isZohoAllMatched = checkAllApisZohoMatched(rx);
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
@@ -530,27 +582,7 @@ export const getPrescriptionColumns = (options = {}) => {
                 }
               }}
             />
-            {isZohoAllMatched && (
-              <span
-                title="Todos los APIs están sincronizados con Zoho Books"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  fontSize: '0.64rem',
-                  fontWeight: 700,
-                  color: '#15803d',
-                  background: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  padding: '1px 5px',
-                  borderRadius: '4px',
-                  lineHeight: 1.2,
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                <Check size={9} color="#16a34a" /> Zoho Matched
-              </span>
-            )}
+            <ZohoMatchingBadge rx={rx} onOpenMatcher={options?.onOpenZohoMatcher} />
           </div>
         );
       },

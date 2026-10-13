@@ -821,6 +821,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     onRefill: handleRefill,
     onEnrich: handleEnrichPrescription,
     onOpenPatientGuide: (rx) => setPatientGuideRx(rx),
+    onOpenZohoMatcher: (rx) => setZohoMatcherRx(rx),
     isDoctor,
     role: effectiveRole
   }), [handleEdit, refresh, handleRefill, handleEnrichPrescription, isDoctor, effectiveRole]);
