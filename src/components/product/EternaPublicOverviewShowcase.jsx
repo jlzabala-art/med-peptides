@@ -87,6 +87,17 @@ export default function EternaPublicOverviewShowcase({
         ? 'Cronotipo circadiano molecular (CLOCK), profundidad de ondas delta y resiliencia del eje HPA.'
         : 'Circadian CLOCK chronotype, slow-wave delta sleep restoration, and HPA axis resilience.',
       targets: 'CLOCK · PER2 · ARNTL · CRY1'
+    },
+    {
+      id: 'immunity',
+      name: isEs ? 'Inmunidad & Inflamaging' : 'Immunity & Inflammaging',
+      icon: ShieldCheck,
+      color: '#059669',
+      bg: '#ecfdf5',
+      summary: isEs
+        ? 'Regulación de la cascada de citoquinas, homeostasis mucosal y trayectoria de senescencia inmunitaria.'
+        : 'Systemic cytokine cascade regulation, mucosal barrier defense, and immunosenescence trajectory.',
+      targets: 'IL1B · TNF · CRP · IFNG'
     }
   ];
 
@@ -200,7 +211,7 @@ export default function EternaPublicOverviewShowcase({
             </div>
             <div>
               <h4 className="eterna-section-title">
-                {isEs ? 'Los 5 Pilares Epigenéticos de Intervención' : 'The 5 Epigenetic Intervention Pillars'}
+                {isEs ? 'Los 6 Pilares Epigenéticos de Intervención' : 'The 6 Epigenetic Intervention Pillars'}
               </h4>
               <p className="eterna-section-subtitle">
                 {isEs 

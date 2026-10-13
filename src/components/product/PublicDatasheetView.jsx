@@ -1905,31 +1905,6 @@ export default function PublicDatasheetView({
                 </div>
               )}
 
-              {description && (
-                <div className="pds-description-card" style={{ marginTop: '0.85rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <h2 className="pds-section-heading" style={{ margin: 0 }}>
-                      {isCorporateService
-                        ? (lang === 'es' ? 'Resumen Ejecutivo y Estructura Legal' : 'Executive Legal & Operational Overview')
-                        : isDiagnosticKit 
-                          ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility') 
-                          : isSupplementProduct
-                            ? (lang === 'es' ? 'Descripción y Perfil Nutracéutico' : 'Nutraceutical Profile & Bioactive Matrix')
-                            : (t.pharmacologicalOverview || 'Pharmacological Overview')}
-                    </h2>
-                    {isTranslating ? (
-                      <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
-                        <Sparkles size={13} className="spin" /> {lang === 'es' ? 'Traduciendo...' : (t.translating || 'Translating…')}
-                      </span>
-                    ) : lang !== 'en' && (
-                      <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 500, backgroundColor: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                        <Sparkles size={11} color="#0284c7" /> {lang === 'es' ? 'Traducción Asistida' : 'Verified Translation'}
-                      </span>
-                    )}
-                  </div>
-                  <p className="pds-description-body">{description}</p>
-                </div>
-              )}
             </>
           }
           desktopSecondary={
@@ -2025,6 +2000,31 @@ export default function PublicDatasheetView({
             ) : null
           }
         />
+        {description && (
+          <div className="pds-description-card" style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <h2 className="pds-section-heading" style={{ margin: 0 }}>
+                {isCorporateService
+                  ? (lang === 'es' ? 'Resumen Ejecutivo y Estructura Legal' : 'Executive Legal & Operational Overview')
+                  : isDiagnosticKit 
+                    ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility') 
+                    : isSupplementProduct
+                      ? (lang === 'es' ? 'Descripción y Perfil Nutracéutico' : 'Nutraceutical Profile & Bioactive Matrix')
+                      : (t.pharmacologicalOverview || 'Pharmacological Overview')}
+              </h2>
+              {isTranslating ? (
+                <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                  <Sparkles size={13} className="spin" /> {lang === 'es' ? 'Traduciendo...' : (t.translating || 'Translating…')}
+                </span>
+              ) : lang !== 'en' && (
+                <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 500, backgroundColor: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <Sparkles size={11} color="#0284c7" /> {lang === 'es' ? 'Traducción Asistida' : 'Verified Translation'}
+                </span>
+              )}
+            </div>
+            <p className="pds-description-body">{description}</p>
+          </div>
+        )}
         {isEternaDiagnostic && (
           <EternaPublicOverviewShowcase
             product={product}

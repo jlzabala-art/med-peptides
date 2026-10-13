@@ -101,19 +101,17 @@
 .pds-hero-layout {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 1.5rem;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.75rem;
 }
 
 .pds-hero-main {
-  flex: 1 1 640px;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
 .pds-hero-side {
   flex-shrink: 0;
-  min-width: 160px;
 }
 
 .pds-hero-badge-group {
@@ -691,26 +689,26 @@
   }
 }
 
-/* ── Bloodo™ Ultra-Premium Square Kit Showcase ── */
+/* ── Bloodo™ & ETERNA Ultra-Premium Square Kit Showcase ── */
 .pds-hero-square-showcase {
-  width: 290px;
+  width: 250px;
   background: #ffffff;
   border: 1px solid rgba(226, 232, 240, 0.95);
-  border-radius: 16px;
-  padding: 14px;
-  box-shadow: 0 10px 30px -5px rgba(0, 54, 102, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 4px 18px -3px rgba(0, 54, 102, 0.07), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   cursor: pointer;
   position: relative;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
   user-select: none;
 }
 
 .pds-hero-square-showcase:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -8px rgba(0, 54, 102, 0.14), 0 8px 16px -4px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -4px rgba(0, 54, 102, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
   border-color: #cbd5e1;
 }
 
