@@ -55,6 +55,30 @@ function wrapDirections(text, firstLineMaxChars = 44, otherLinesMaxChars = 56) {
 }
 
 /**
+ * Renders an active ingredient line with tabular/high-contrast dosage formatting.
+ * The molecule name is rendered in slate-800 (#1e293b), while the strength/dosage
+ * (e.g., 500 mcg, 25 mg, 4%, etc.) is rendered in bold dark blue (#0284c7) for instant recognition.
+ */
+function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a') {
+  const match = String(line).match(/^(.*?\s+)([\d.,]+\s*(?:mcg|mg|g|%|iu|fu|spu|ml|capsules?|drops?)(?:\s*\([^)]+\))?)\s*$/i);
+  if (match) {
+    const namePart = match[1];
+    const dosePart = match[2];
+    return (
+      <text key={key} x={x} y={y} fontFamily="Arial, Helvetica, sans-serif" fontSize={fontSize}>
+        <tspan fontWeight="700" fill="#1e293b">{namePart}</tspan>
+        <tspan fontWeight="900" fill="#0284c7">{dosePart}</tspan>
+      </text>
+    );
+  }
+  return (
+    <text key={key} x={x} y={y} fontFamily="Arial, Helvetica, sans-serif" fontSize={fontSize} fontWeight="800" fill={defaultFill}>
+      {line}
+    </text>
+  );
+}
+
+/**
  * PharmapolisLabelSvg
  * ─────────────────────────────────────────────────────────────────────────────
  * High-precision vector SVG pharmaceutical & dispensary label generator.
@@ -149,6 +173,20 @@ export default function PharmapolisLabelSvg({
     return '';
   }, [partBadge, timeOfDay]);
 
+  // Clinical Color Theme for Time of Day & Part indicator
+  const badgeTheme = React.useMemo(() => {
+    if (timeOfDay === 'MORNING') {
+      return { fill: '#b45309', text: '#ffffff', border: '#d97706', accent: '#f59e0b', icon: '☀️' }; // Warm amber gold
+    }
+    if (timeOfDay.includes('NIGHT') || timeOfDay.includes('BEDTIME')) {
+      return { fill: '#1e1b4b', text: '#ffffff', border: '#312e81', accent: '#6366f1', icon: '🌙' }; // Midnight indigo
+    }
+    if (timeOfDay === 'EVENING') {
+      return { fill: '#0f766e', text: '#ffffff', border: '#14b8a6', accent: '#2dd4bf', icon: '🌅' }; // Evening teal
+    }
+    return { fill: '#003666', text: '#ffffff', border: '#0284c7', accent: '#38bdf8', icon: '' }; // Clinical dispensary navy
+  }, [timeOfDay]);
+
   // Header badge sizing and right-aligned position (guaranteed zero overlap with patientName)
   const badgeCharCount = headerBadgeText.length;
   const badgeFontSize = isShort ? (badgeCharCount > 24 ? 13 : 15) : (badgeCharCount > 24 ? 15 : 17);
@@ -208,8 +246,17 @@ export default function PharmapolisLabelSvg({
       ? Math.round(headerTitleSize * 0.84) 
       : headerTitleSize;
 
-  // Unique QR URL strictly bound to this prescription (pointing to patient view)
-  const targetRxUrl = labelData.targetRxUrl || labelData.url || `https://med-peptides.com/rx/${fileNumber}?view=patient`;
+  // Unique QR URL strictly bound to this prescription (pointing to public patient refill view)
+  const targetRxUrl = React.useMemo(() => {
+    if (labelData.targetRxUrl) return labelData.targetRxUrl;
+    if (labelData.url) return labelData.url;
+    const base = `https://med-peptides.com/rx/${fileNumber}?view=patient`;
+    const pIdx = labelData.partIndex ?? labelData.phaseIndex;
+    if (pIdx !== undefined && pIdx !== null && labelData.totalParts > 1) {
+      return `${base}&part=${Number(pIdx) + 1}&action=refill`;
+    }
+    return `${base}&action=refill`;
+  }, [labelData.targetRxUrl, labelData.url, fileNumber, labelData.partIndex, labelData.phaseIndex, labelData.totalParts]);
   const cleanDisplayUrl = targetRxUrl.replace(/^https?:\/\//, '');
 
   // Extract active ingredients list for Block 2 (Back Label)
@@ -565,7 +612,7 @@ export default function PharmapolisLabelSvg({
           </text>
           {headerBadgeText ? (
             <g transform={`translate(${badgeX}, ${badgeY})`}>
-              <rect x="0" y="0" width={badgeWidth} height={badgeHeight} fill="#003666" rx="6" />
+              <rect x="0" y="0" width={badgeWidth} height={badgeHeight} fill={badgeTheme.fill} stroke={badgeTheme.border} strokeWidth="1.2" rx="6" />
               <text
                 x={Math.round(badgeWidth / 2)}
                 y={isShort ? 25 : 29}
@@ -573,7 +620,7 @@ export default function PharmapolisLabelSvg({
                 fontFamily="Arial, Helvetica, sans-serif"
                 fontSize={badgeFontSize}
                 fontWeight="900"
-                fill="#ffffff"
+                fill={badgeTheme.text || "#ffffff"}
                 letterSpacing="0.5"
               >
                 {headerBadgeText}
@@ -907,48 +954,18 @@ export default function PharmapolisLabelSvg({
                   {isMultiColumn ? (
                     <g>
                       {/* Column 1 */}
-                      {col1Lines.map((line, lIdx) => (
-                        <text
-                          key={`ing1-${lIdx}`}
-                          x="0"
-                          y={firstIngLineY + (lIdx * multiColLineGap)}
-                          fontFamily="Arial, Helvetica, sans-serif"
-                          fontSize={multiColFontSize}
-                          fontWeight="800"
-                          fill="#0f172a"
-                        >
-                          {line}
-                        </text>
-                      ))}
+                      {col1Lines.map((line, lIdx) => 
+                        renderIngredientLine(line, 0, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing1-${lIdx}`)
+                      )}
                       {/* Column 2 */}
-                      {col2Lines.map((line, lIdx) => (
-                        <text
-                          key={`ing2-${lIdx}`}
-                          x={colWidth + 36}
-                          y={firstIngLineY + (lIdx * multiColLineGap)}
-                          fontFamily="Arial, Helvetica, sans-serif"
-                          fontSize={multiColFontSize}
-                          fontWeight="800"
-                          fill="#0f172a"
-                        >
-                          {line}
-                        </text>
-                      ))}
+                      {col2Lines.map((line, lIdx) => 
+                        renderIngredientLine(line, colWidth + 36, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing2-${lIdx}`)
+                      )}
                     </g>
                   ) : (
-                    ingLines.map((line, lIdx) => (
-                      <text
-                        key={`ing-${lIdx}`}
-                        x="0"
-                        y={firstIngLineY + (lIdx * ingLineGap)}
-                        fontFamily="Arial, Helvetica, sans-serif"
-                        fontSize={ingFontSize}
-                        fontWeight="800"
-                        fill="#0f172a"
-                      >
-                        {line}
-                      </text>
-                    ))
+                    ingLines.map((line, lIdx) => 
+                      renderIngredientLine(line, 0, firstIngLineY + (lIdx * ingLineGap), ingFontSize, `ing-${lIdx}`)
+                    )
                   )}
 
                   {baseLines.map((bLine, bIdx) => (
@@ -966,23 +983,23 @@ export default function PharmapolisLabelSvg({
                   ))}
                 </g>
 
-                {/* Block 3: DEDICATED CLINICAL POSOLOGY & DIRECTIONS (Harmoniously Weighted) */}
+                {/* Block 3: DEDICATED CLINICAL POSOLOGY & DIRECTIONS (Harmoniously Weighted & High-Contrast) */}
                 <g transform={`translate(24, ${posBoxY})`}>
-                  <rect x="0" y="0" width={innerUsableWidth} height={posBoxHeight} fill="#f8fafc" stroke="#bae6fd" strokeWidth="1.8" rx="6" />
-                  <rect x="0" y="0" width="6" height={posBoxHeight} fill="#0284c7" rx="3" />
+                  <rect x="0" y="0" width={innerUsableWidth} height={posBoxHeight} fill="#f0f9ff" stroke="#0284c7" strokeWidth="2" rx="6" />
+                  <rect x="0" y="0" width="8" height={posBoxHeight} fill={badgeTheme.fill || '#0284c7'} rx="4" />
                   
-                  <text x="18" y={posHeaderTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
-                    DIRECTIONS FOR USE / PRESCRIBED POSOLOGY
+                  <text x="22" y={posHeaderTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill="#0369a1" letterSpacing="0.8">
+                    {badgeTheme.icon ? `${badgeTheme.icon} ` : ''}DIRECTIONS FOR USE / PRESCRIBED POSOLOGY
                   </text>
 
                   {posologyLines.map((pLine, pIdx) => (
                     <text
                       key={`pos-${pIdx}`}
-                      x="18"
+                      x="22"
                       y={firstPosLineY + (pIdx * posLineGap)}
                       fontFamily="Arial, Helvetica, sans-serif"
-                      fontSize={posFontSize}
-                      fontWeight="700"
+                      fontSize={posFontSize + 1}
+                      fontWeight="800"
                       fill="#0f172a"
                     >
                       {pLine}
@@ -1133,7 +1150,7 @@ export default function PharmapolisLabelSvg({
         </text>
         {headerBadgeText ? (
           <g transform={`translate(${badgeX}, ${badgeY})`}>
-            <rect x="0" y="0" width={badgeWidth} height={badgeHeight} fill="#003666" rx="6" />
+            <rect x="0" y="0" width={badgeWidth} height={badgeHeight} fill={badgeTheme.fill} stroke={badgeTheme.border} strokeWidth="1.2" rx="6" />
             <text
               x={Math.round(badgeWidth / 2)}
               y={isShort ? 25 : 29}
@@ -1141,7 +1158,7 @@ export default function PharmapolisLabelSvg({
               fontFamily="Arial, Helvetica, sans-serif"
               fontSize={badgeFontSize}
               fontWeight="900"
-              fill="#ffffff"
+              fill={badgeTheme.text || "#ffffff"}
               letterSpacing="0.5"
             >
               {headerBadgeText}
