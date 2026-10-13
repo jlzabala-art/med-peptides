@@ -8,6 +8,7 @@ import { prescriptionSchema } from '../../../schemas/prescriptionSchema';
 import { resolveIngredients } from '../../../services/apiIngredientMatcher';
 import { syncPrescriptionToAlgolia, syncPatientToAlgolia } from '../../../services/algoliaSyncService';
 import AIContextBadge from '../../../components/ui/AIContextBadge';
+import { processPrescriptionZohoOnImport } from '../../../actions/zohoAutoIngestMatcher';
 
 /**
  * @param {string}   [persistEndpoint] - When set (e.g. '/api/labels/import'), the built
@@ -208,6 +209,21 @@ export default function ImportPrescriptionModal({
               console.warn('[ImportPrescriptionModal] Algolia patient sync error:', err);
             });
           }
+
+          // Auto-evaluate Zoho Books matching (creates if zero match, leaves if partial)
+          processPrescriptionZohoOnImport({
+            prescriptionId: docRef.id,
+            rxData: newRx,
+            userEmail: 'import_modal'
+          }).then(zohoRes => {
+            if (zohoRes?.status === 'auto_created_and_linked') {
+              toast.success(`✨ Zoho Books: ${zohoRes.createdCount} APIs auto-creados (100% sincronizado)`);
+            } else if (zohoRes?.status === 'partial_match') {
+              toast(`ℹ️ Zoho Books: Matching parcial (${zohoRes.percent}%). Pendiente de revisión manual.`);
+            }
+          }).catch(err => {
+            console.warn('[ImportPrescriptionModal] Zoho auto-ingest error:', err);
+          });
         }
 
         if (persistEndpoint && pendingDocs.length > 0) {
