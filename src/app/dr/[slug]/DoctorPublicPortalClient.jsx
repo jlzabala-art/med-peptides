@@ -5510,10 +5510,10 @@ export default function DoctorPublicPortalClient({
             type="button"
             className="doctor-dock-btn doctor-dock-btn-primary"
             onClick={() => setIsIntakeOpen(true)}
-            title="Import or create a new compounded prescription"
+            title="Import lab data or create a new compounded prescription"
           >
             <Plus size={15} />
-            <span>Import / New Rx</span>
+            <span>Import Data / New Rx</span>
           </button>
 
           <button

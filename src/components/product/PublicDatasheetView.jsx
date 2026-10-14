@@ -92,6 +92,7 @@ import ProductSectionFooterNav from './ProductSectionFooterNav';
 import PresentationsMatrixSection from './datasheet/sections/PresentationsMatrixSection';
 import ReconstitutionRouterSection from './datasheet/sections/ReconstitutionRouterSection';
 import PeptideMonographWorkspace from './monograph/PeptideMonographWorkspace';
+import { CollectionBadgePill, CollectionCompanionBanner, resolveBrandCollectionInfo } from './CollectionBannerWidget';
 import { Mail, Lock } from 'lucide-react';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
@@ -533,6 +534,8 @@ export default function PublicDatasheetView({
   const isPeptideCompound = useMemo(() => {
     return !isCorporateService && !isDiagnosticKit && !isCosmeticProduct && !isSolventProduct && !isSupplementProduct;
   }, [isCorporateService, isDiagnosticKit, isCosmeticProduct, isSolventProduct, isSupplementProduct]);
+
+  const brandCollection = useMemo(() => resolveBrandCollectionInfo(product), [product]);
 
   const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA® Precision Health & Multiomics Platform') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : (isSupplementProduct ? (product?.name || 'UltraPerson Clinical Supplement') : 'Clinical Peptide'))))));
   const category = isCosmeticProduct
@@ -1617,6 +1620,7 @@ export default function PublicDatasheetView({
         hideTier2={true}
         breadcrumb={[
           { label: lang === 'es' ? 'Catálogo de Productos' : 'Product Catalog', href: '/c/CAT-MU9L9GBN' },
+          ...(brandCollection ? [{ label: brandCollection.title, href: brandCollection.href }] : []),
           { label: product?.canonicalName || product?.name || name || 'Peptide Monograph' }
         ]}
       />
@@ -1652,6 +1656,7 @@ export default function PublicDatasheetView({
                 <PublicPageHero
             badges={
             <>
+              <CollectionBadgePill product={product} />
               <span className="pds-cat-tag">
                 {lang === 'es' && (category === 'PEPTIDE' || category === 'Peptide' || !category) ? 'PÉPTIDO' : category}
               </span>
@@ -2006,6 +2011,7 @@ export default function PublicDatasheetView({
             ) : null
           }
         />
+        <CollectionCompanionBanner product={product} />
         {description && (
           <div className="pds-description-card" style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>

@@ -316,8 +316,13 @@ CRITICAL CLINICAL EXTRACTION RULES LEARNED FROM REAL-WORLD CLINICAL AUDITS:
      * Step 3 (Absorption/Diffusion): Massage gently until absorbed, leave on overnight, or wait 10 minutes.
      * Step 4 (Maintenance & Hygiene): Wash hands thoroughly with soap and water immediately; storage instructions.
 
-5. CLINICIAN & CLINIC ATTRIBUTION:
-   - Extract the prescribing physician name (e.g. "Dr. Marina Cordeiro Fernandes"), medical license (e.g. "DHA-P-03..."), clinic name (e.g. "Nova Plastic Surgery Clinic", "NOVA Clinic"), and address/city (e.g. "Dubai, UAE").
+5. CLINICIAN & CLINIC ATTRIBUTION (CRITICAL FOR ALL DOCUMENTS):
+   - ALWAYS search for and extract the prescribing physician name and clinic/center name across all pages, headers, footers, stamps, and signatures.
+   - On Fagron Genomics reports (TrichoTest, NutriGen, TeloTest, AcneTest), the clinician and clinic are often labeled as:
+     'Healthcare Professional:', 'Professional:', 'Prescriber:', 'Solicitado por:', 'Doctor:', 'Dr.', 'Physician:', 'Customer:', 'Client:', 'Center:', 'Centro:', 'Clinic:', 'Practice:'.
+   - On laboratory reports (Bloodo, LifeLab1, etc.), look for 'Requesting Doctor', 'Ordering Physician', 'Referring Clinic', 'Center', 'Healthcare Professional'.
+   - NEVER leave 'doctor.name' or 'doctor.clinicName' empty if a doctor or clinic is mentioned anywhere in the document.
+   - Extract the full name (e.g. "Dr. Marina Cordeiro Fernandes", "Dr. Çağatay Sezgin, MD, FISHRS") into 'doctor.name' and clinic (e.g. "Nova Plastic Surgery Clinic", "Shamma Clinic by Novomed LLC") into 'doctor.clinicName'.
 
 6. FAGRON TELOTEST & TELOMERE REPORTS:
    - If the document contains "THE TELOTEST FORMULA™", "TeloTest", "Telomeres", or BOX ID with "...AATEL" (e.g. "BOX03049AATEL"):
@@ -357,7 +362,12 @@ CRITICAL CLINICAL EXTRACTION RULES LEARNED FROM REAL-WORLD CLINICAL AUDITS:
       * Set 'documentType' to "LabResult".
       * Set 'clinicalCategory' to "standard" (or "peptide").
       * Extract all laboratory fields into 'labResult': testName (e.g. 'Nicotinamide adenine dinucleotide (NAD)'), biomarker ('NAD+ (Total Intracellular)'), numeric value (e.g. 11.6, 16.7, 24.5), unit ('µmol/L'), zone ('green', 'light_green', 'yellow', 'red', 'dark_red'), zoneLabel ('Optimal', 'Near-Optimal', 'Insufficient', 'Deficient'), protocolNumber (e.g. '260513001'), sampleType ('dried blood spot (DBS)'), collectionDate, receiptDate, analysisDate, protocolDate, and laboratory ('LifeLab1 / Bloodo').
-      * In 'formulationBlocks', return an empty array [].`;
+      * In 'formulationBlocks', return an empty array [].
+
+13. REAL UNENCODED PATIENT NAME EXTRACTION (MANDATORY):
+    - ALWAYS extract the patient's full, real human name (e.g. "Sandhya Patel", "Basma Haitham", "Eldose Babu") into 'patient.name'.
+    - NEVER put an anonymized barcode or sample code (like "DBUQEWDT2449" or "Patient #DBUQEWDT2449") into 'patient.name' if a real human name is visible anywhere on the document.
+    - Store barcodes, sample codes, accession IDs, and protocol numbers into 'labResult.patientCode', 'fileNumber', or 'fagronDetails.boxId'.`;
 
     // Verified Google GenAI models for multimodal extraction
     const CANDIDATE_MODELS = [

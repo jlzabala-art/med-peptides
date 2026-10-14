@@ -21,9 +21,9 @@ import PublicPageHero from '@/components/shared/public/PublicPageHero';
 import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
 import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
 import HairProtocolsSidebarWidget from '@/components/product/HairProtocolsSidebarWidget';
-import CosmeticsSidebarWidget from '@/components/product/CosmeticsSidebarWidget';
 import ColwayProtocolInfogram from '@/components/product/ColwayProtocolInfogram';
 import ImageModal from '@/snippets/ImageModal';
+import { CollectionBadgePill, CollectionCompanionBanner } from '@/components/product/CollectionBannerWidget';
 import toast from 'react-hot-toast';
 
 const INCI_GROUP_META = {
@@ -722,13 +722,14 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: '5rem' }}>
       <PublicUnifiedHeader track="products" lang={lang} copyUrl={productUrl} inquiryContextType="product" inquiryEntity={{ name, slug, category }} hideTier2={true}
-        breadcrumb={[{ label: 'Catalog', href: '/catalog' }, { label: 'Hair & Scalp', href: '/catalog?category=cosmetics' }, { label: name }]} />
+        breadcrumb={[{ label: 'Catalog', href: '/catalog' }, { label: 'Colway® Trichology', href: '/collection/colway' }, { label: name }]} />
 
       <PublicPageShell>
         <div id="overview" style={{ scrollMarginTop: '80px' }}>
           <PublicPageHero
             badges={<>
               <span className="pds-cat-tag">{category}</span>
+              <CollectionBadgePill product={product} />
               <span className="pds-cgmp-tag">{brand}</span>
               <span className="pds-purity-tag"><ShieldCheck size={12} /><span>EU Reg. 1223/2009</span></span>
               <span className="pds-purity-tag" style={{ background: '#fdf2f8', color: '#db2777', borderColor: '#fbcfe8' }}><Leaf size={12} /><span>Dermatologically Tested</span></span>
@@ -963,6 +964,8 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             }
           />
         </div>
+
+        <CollectionCompanionBanner product={product} />
 
         <PublicKpiGrid items={kpis} />
 

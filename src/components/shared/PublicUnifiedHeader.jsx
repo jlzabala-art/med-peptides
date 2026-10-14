@@ -363,7 +363,7 @@ export default function PublicUnifiedHeader({
                     if (onImportRx) onImportRx();
                     else window.location.href = '/rx/intake';
                   }}
-                  title={isSpanish ? 'Importar nueva prescripción desde el portal' : 'Import prescription from intake portal'}
+                  title={isSpanish ? 'Importar datos (Rx y Analíticas Lab)' : 'Import Data (Rx & Lab Results)'}
                   style={{
                     background: 'rgba(255,255,255,0.08)',
                     border: '1px solid rgba(255,255,255,0.22)',
@@ -372,7 +372,7 @@ export default function PublicUnifiedHeader({
                   }}
                 >
                   <FileInput size={14} />
-                  <span className="puh-btn-label">{isSpanish ? 'Importar Rx' : 'Import Rx'}</span>
+                  <span className="puh-btn-label">{isSpanish ? 'Importar Datos' : 'Import Data'}</span>
                 </button>
               )}
 

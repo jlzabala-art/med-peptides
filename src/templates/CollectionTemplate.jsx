@@ -10,6 +10,7 @@ import ProtocolCollectionPage from './ProtocolCollectionPage';
 import SupplementCollectionPage from './SupplementCollectionPage';
 import SuppliesView from './SuppliesView';
 import RestrictedCatalogRoute from '../components/auth/RestrictedCatalogRoute';
+import BrandCollectionPage from './BrandCollectionPage';
 
 
 // Slug → exact category name mapping
@@ -67,9 +68,10 @@ export default function CollectionTemplate({
   const router = useRouter();
 
   const handleProductSelect = (name) => {
-    const target = (products || []).find(p => p.name === name);
-    if (target?.slug) router.push(`/product/${target.slug}`);
-    else if (target?.name) router.push(`/product/${target.name.toLowerCase().replace(/\s+/g, '-')}`);
+    const target = (products || []).find(p => p.name === name || p.title === name || p.id === name || p.slug === name);
+    if (target?.slug) router.push(`/p/${target.slug}`);
+    else if (target?.id) router.push(`/p/${target.id}`);
+    else if (target?.name) router.push(`/p/${target.name.toLowerCase().replace(/\s+/g, '-')}`);
   };
 
   const s = (slug || '').toLowerCase();
@@ -127,6 +129,21 @@ export default function CollectionTemplate({
           isProfessional={isProfessional}
           EXCHANGE_RATES={EXCHANGE_RATES || {}}
           products={products || []}
+        />
+      </RestrictedCatalogRoute>
+    );
+  }
+
+  // Dedicated brand collections: /collection/colway, /collection/bloodo, /collection/ultraperson, /collection/eterna
+  if (s === 'colway' || s === 'bloodo' || s === 'ultraperson' || s === 'eterna') {
+    return (
+      <RestrictedCatalogRoute catalogName="products">
+        <BrandCollectionPage
+          brandSlug={s}
+          products={products || []}
+          onSelectProduct={handleProductSelect}
+          updateCart={updateCart}
+          toggleCompare={toggleCompare}
         />
       </RestrictedCatalogRoute>
     );

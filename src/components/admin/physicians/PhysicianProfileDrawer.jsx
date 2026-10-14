@@ -612,9 +612,10 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
                   <button
                     onClick={() => setIsImportOpen(true)}
+                    title="Import Data (Rx & Lab Results)"
                     style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '8px', background: '#e0f2fe', color: '#0369a1', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700 }}
                   >
-                    <FileUp size={14} /> Import Rx
+                    <FileUp size={14} /> Import Data
                   </button>
                 </div>
                 <DataTable

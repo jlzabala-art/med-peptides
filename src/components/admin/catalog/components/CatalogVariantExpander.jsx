@@ -36,36 +36,64 @@ function detectProductFamily(row) {
   const subcat = String(row.subcategory || '').toLowerCase();
   const supp = String(row.supplierId || row.supplierName || row.supplier || '').toLowerCase();
 
-  // 1a. Capillary & Venous Blood Diagnostics (Bloodo DBS, finger-prick biomarker kits)
+  // 1. Bulk Active Pharmaceutical Ingredients (APIs) & Raw Materials
+  // MUST precede test classification so APIs used in TrichoTest/NutriGen formulations are NEVER misclassified as kits
+  const isRawOrApi =
+    types.includes('raw_material') ||
+    cat === 'raw_material' ||
+    cat === 'api_peptide' ||
+    cat === 'compounding_material' ||
+    cat.includes('raw_material') ||
+    cat.includes('bulk') ||
+    pres.includes('bulk_api') ||
+    pres.includes('bulk_powder') ||
+    pres.includes('crystalline powder') ||
+    row.format === 'bulk_api' ||
+    row.format === 'Bulk Crystalline Powder' ||
+    row.materialType === 'Bulk API' ||
+    row.material_type === 'Bulk API' ||
+    row.isBulkMaterial === true;
+
+  if (isRawOrApi) {
+    return 'peptide_api';
+  }
+
+  // 2a. Capillary & Venous Blood Diagnostics (Bloodo DBS, finger-prick biomarker kits)
   const isBloodTest = 
-    sample.includes('blood') ||
-    sample.includes('dbs') ||
-    sample.includes('capillary') ||
-    pres.includes('blood_test') ||
-    subcat.includes('blood') ||
-    tags.some(t => t.includes('blood')) ||
-    supp.includes('bloodo') ||
-    name.includes('bloodo') ||
-    (name.includes('test') && (name.includes('testosterone') || name.includes('hba1c') || name.includes('cortisol') || name.includes('omega') || name.includes('vitamin d') || name.includes('nad')));
+    (types.includes('diagnostic') || cat.includes('diagnostic')) &&
+    (sample.includes('blood') ||
+     sample.includes('dbs') ||
+     sample.includes('capillary') ||
+     pres.includes('blood_test') ||
+     subcat.includes('blood') ||
+     name.includes('bloodo') ||
+     supp.includes('bloodo') ||
+     name.includes('dbs test') ||
+     name.includes('blood test'));
 
   if (isBloodTest) {
     return 'blood_diagnostic';
   }
 
-  // 1b. Saliva, Buccal & Genomics/Epigenetic DNA Tests (Eterna, TrichoTest, TeloTest, NutriGen...)
-  if (
-    types.includes('diagnostic') ||
-    cat.includes('diagnostic') ||
-    cat.includes('genomic') ||
-    name.includes('test') ||
-    name.includes('telotest') ||
-    name.includes('trichotest') ||
-    name.includes('nutrigen') ||
-    name.includes('dna') ||
-    name.includes('eterna') ||
-    supp.includes('eterna') ||
-    tags.some(t => t.includes('genomics') || t.includes('test'))
-  ) {
+  // 2b. Saliva, Buccal & Genomics/Epigenetic DNA Tests (Eterna, TrichoTest Kit, TeloTest Kit, NutriGen Kit...)
+  // Strictly restricted to actual diagnostic test kits, never raw chemicals or compounding actives
+  const isGenomicsKit =
+    (types.includes('diagnostic') || cat.includes('diagnostic') || cat.includes('genomic')) &&
+    (name.includes('trichotest kit') ||
+     name.includes('telotest kit') ||
+     name.includes('nutrigen kit') ||
+     name.includes('dna test kit') ||
+     name.includes('saliva') ||
+     name.includes('buccal') ||
+     name.includes('epigenetic test') ||
+     name.includes('eterna test') ||
+     pres.includes('test_kit') ||
+     pres.includes('kit') ||
+     sample.includes('saliva') ||
+     sample.includes('buccal') ||
+     sample.includes('swab'));
+
+  if (isGenomicsKit) {
     return 'genomics_diagnostic';
   }
 
@@ -738,7 +766,7 @@ export default function CatalogVariantExpander({
                 <span className="meta-card-tag">Molecular Identity</span>
               </div>
               <div className="meta-card-title">
-                CAS: <span style={{ fontFamily: 'monospace', color: '#0f172a', fontWeight: 800 }}>{getCleanCas(row) || 'N/A'}</span>
+                CAS: <span style={{ fontFamily: 'monospace', color: '#0f172a', fontWeight: 800 }}>{molecular.casNumber || getCleanCas() || 'N/A'}</span>
               </div>
               <div className="meta-card-sub">
                 {molecular.molecularFormula ? `Formula: ${molecular.molecularFormula}` : 'Standard Reference API'}

@@ -462,6 +462,7 @@ export default function PatientPrescriptionPanel({ patientUid, onAddToCart }) {
         </div>
         <button 
           onClick={() => setIsImportOpen(true)}
+          title="Import Data (Rx & Lab Results)"
           style={{
             display: 'flex', alignItems: 'center', gap: '6px',
             padding: '6px 12px', borderRadius: '8px',
@@ -469,7 +470,7 @@ export default function PatientPrescriptionPanel({ patientUid, onAddToCart }) {
             border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700
           }}
         >
-          <FileUp size={14} /> Import Rx
+          <FileUp size={14} /> Import Data
         </button>
       </div>
 

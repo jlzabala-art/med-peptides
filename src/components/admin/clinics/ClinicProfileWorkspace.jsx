@@ -542,9 +542,10 @@ export default function ClinicProfileWorkspace({ clinic, onClose }) {
           <button
             onClick={() => setIsImportOpen(true)}
             className="gcp-btn-secondary"
+            title="Import Data (Rx & Lab Results)"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd', fontSize: '0.78rem', padding: '7px 12px' }}
           >
-            <FileUp size={14} /> Import Rx
+            <FileUp size={14} /> Import Data
           </button>
           <button
             type="button"

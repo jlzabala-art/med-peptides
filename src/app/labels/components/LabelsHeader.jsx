@@ -123,17 +123,17 @@ export default function LabelsHeader({
             </span>
           </button>
 
-          {/* Import Prescription */}
+          {/* Import Data (Rx & Lab Results) */}
           <button
             type="button"
             id="pls-import-rx-btn"
             className="pls-btn-import"
             onClick={onOpenImport}
-            title={isEs ? 'Importar prescripción (Account Managers · sin validación Atlas)' : 'Import prescription (Account Managers · no Atlas validation)'}
-            aria-label={isEs ? 'Importar prescripción' : 'Import prescription'}
+            title={isEs ? 'Importar datos (Rx y Analíticas Lab)' : 'Import Data (Rx & Lab Results)'}
+            aria-label={isEs ? 'Importar datos' : 'Import Data'}
           >
             <Upload size={14} />
-            <span className="pls-btn-label">{isEs ? 'Importar Rx' : 'Import Rx'}</span>
+            <span className="pls-btn-label">{isEs ? 'Importar Datos' : 'Import Data'}</span>
           </button>
 
           {/* Share Button */}

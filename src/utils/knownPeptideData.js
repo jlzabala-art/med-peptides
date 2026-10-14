@@ -329,6 +329,33 @@ export const KNOWN_PEPTIDE_DATA = {
     pubchemCid: 5311221,
     targetSystem: 'Prostaglandin F2-alpha Analogue (FP Receptor Agonist)',
     mechanismOfAction: 'Induces anagen phase prolongment in hair follicles and enhances eyelash/hair density'
+  },
+  '17-alpha-estradiol': {
+    casNumber: '57-91-0',
+    molecularFormula: 'C18H24O2',
+    molecularWeight: '272.38',
+    pubchemCid: 5979,
+    targetSystem: 'Local Aromatase Activator & 5-α Reductase Inhibitor',
+    mechanismOfAction: 'Stereoisomer of 17-beta estradiol with negligible systemic estrogenic activity that locally accelerates aromatase conversion of androgens to estrogens while inhibiting 5-alpha reductase in hair follicles',
+    halfLife: 'Topical follicular residence: ~12-24 hours'
+  },
+  '17-α estradiol': {
+    casNumber: '57-91-0',
+    molecularFormula: 'C18H24O2',
+    molecularWeight: '272.38',
+    pubchemCid: 5979,
+    targetSystem: 'Local Aromatase Activator & 5-α Reductase Inhibitor',
+    mechanismOfAction: 'Stereoisomer of 17-beta estradiol with negligible systemic estrogenic activity that locally accelerates aromatase conversion of androgens to estrogens while inhibiting 5-alpha reductase in hair follicles',
+    halfLife: 'Topical follicular residence: ~12-24 hours'
+  },
+  'alfatradiol': {
+    casNumber: '57-91-0',
+    molecularFormula: 'C18H24O2',
+    molecularWeight: '272.38',
+    pubchemCid: 5979,
+    targetSystem: 'Local Aromatase Activator & 5-α Reductase Inhibitor',
+    mechanismOfAction: 'Stereoisomer of 17-beta estradiol with negligible systemic estrogenic activity that locally accelerates aromatase conversion of androgens to estrogens while inhibiting 5-alpha reductase in hair follicles',
+    halfLife: 'Topical follicular residence: ~12-24 hours'
   }
 };
 

@@ -32,6 +32,40 @@ import { logger } from '../utils/logger';
 const memoryCache = new Map();
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
+/**
+ * Recursively removes all `undefined` values from objects and arrays
+ * while strictly preserving Firestore FieldValues (serverTimestamp, etc.) and Date instances.
+ */
+function deepSanitizeFirestore(obj, depth = 0) {
+  if (depth > 12) return obj;
+  if (obj === undefined) return null;
+  if (obj === null) return null;
+  if (typeof obj !== 'object') return obj;
+
+  // Preserve Firestore FieldValues (serverTimestamp(), deleteField(), etc.)
+  if (obj.constructor && (obj.constructor.name === 'FieldValue' || obj._methodName || typeof obj.isEqual === 'function')) {
+    return obj;
+  }
+  // Preserve Date instances
+  if (obj instanceof Date) return obj;
+
+  // Array: filter undefined and recursively sanitize items
+  if (Array.isArray(obj)) {
+    return obj
+      .filter(item => item !== undefined)
+      .map(item => deepSanitizeFirestore(item, depth + 1));
+  }
+
+  // Plain object: omit keys whose value is undefined
+  const clean = {};
+  for (const [key, val] of Object.entries(obj)) {
+    if (val !== undefined) {
+      clean[key] = deepSanitizeFirestore(val, depth + 1);
+    }
+  }
+  return clean;
+}
+
 export const labelsRepository = {
   /**
    * Clears the in-memory cache for a given prescription ID (or all).
@@ -329,23 +363,20 @@ export const labelsRepository = {
       }
     }
 
-    // Execute atomic parent update with strict sanitization
-    // Remove any undefined or non-plain keys (except FieldValues like serverTimestamp)
-    const sanitizedPayload = Object.entries(updatePayload).reduce((acc, [key, value]) => {
-      if (value !== undefined) acc[key] = value;
-      return acc;
-    }, {});
+    // Execute atomic parent update with strict deep sanitization
+    // Completely strips any nested undefined values from objects and arrays to prevent Firestore errors
+    const sanitizedPayload = deepSanitizeFirestore(updatePayload);
 
     await updateDoc(targetDocRef, sanitizedPayload);
 
     // Save into granular subcollection prescriptions/{rxId}/labels/{partKey}
     try {
       const subcollectionDocRef = doc(db, 'prescriptions', targetDocRef.id, 'labels', partKey);
-      await setDoc(subcollectionDocRef, {
+      await setDoc(subcollectionDocRef, deepSanitizeFirestore({
         ...updatedLabelRecord,
         rxId: targetDocRef.id,
         updatedAt: serverTimestamp()
-      }, { merge: true });
+      }), { merge: true });
     } catch (subcolErr) {
       logger.warn('[labelsRepository] Subcollection write warning (non-fatal):', subcolErr);
     }
