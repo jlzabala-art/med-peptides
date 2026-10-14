@@ -7,10 +7,13 @@ import { searchPhysicians } from '../../../repositories/userRepository';
 import { logger } from '../../../utils/logger';
 
 export default function PhysicianPicker({
-  value, // doctorId
+  value, // doctorId or doctor name
   physicianName: initialDoctorName,
   clinicId, // optional selected clinic to prioritize
-  onChange, // ({ doctorId, doctorName }) => void
+  clinicName, // optional selected clinic name to filter by
+  strictClinic = false, // if true, only show doctors for this clinic
+  allowCustom = true, // allow typing custom physician name
+  onChange, // ({ doctorId, doctorName, license }) => void
   disabled = false,
   placeholder = "Search doctor by name, email or specialty..."
 }) {
@@ -49,8 +52,8 @@ export default function PhysicianPicker({
 
     const timer = setTimeout(async () => {
       try {
-        const serverResults = await searchDoctorsAction(queryText, clinicId, 50);
-        if (active && Array.isArray(serverResults) && serverResults.length > 0) {
+        const serverResults = await searchDoctorsAction(queryText, clinicId, 50, clinicName, strictClinic);
+        if (active && Array.isArray(serverResults)) {
           setDoctors(serverResults);
           setLoading(false);
           return;
@@ -64,11 +67,20 @@ export default function PhysicianPicker({
             name: data.displayName || data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.email,
             email: data.email || '',
             specialty: data.specialty || 'General Practitioner',
+            license: data.license || null,
             clinicId: data.clinicId || null,
+            clinicName: data.clinicName || null,
           }));
 
-          if (clinicId) {
-            list.sort((a, b) => (b.clinicId === clinicId ? 1 : 0) - (a.clinicId === clinicId ? 1 : 0));
+          if (clinicId || clinicName) {
+            const cLower = (clinicName || '').toLowerCase().trim();
+            list = list.filter(d => {
+              if (!strictClinic) return true;
+              if (clinicId && d.clinicId === clinicId) return true;
+              if (cLower && (d.clinicName || '').toLowerCase().includes(cLower)) return true;
+              return false;
+            });
+            list.sort((a, b) => ((b.clinicId === clinicId || (cLower && (b.clinicName || '').toLowerCase().includes(cLower))) ? 1 : 0) - ((a.clinicId === clinicId || (cLower && (a.clinicName || '').toLowerCase().includes(cLower))) ? 1 : 0));
           }
 
           setDoctors(list);
@@ -80,19 +92,34 @@ export default function PhysicianPicker({
       }
     }, 150);
 
-
     return () => {
       active = false;
       clearTimeout(timer);
     };
-  }, [queryText, clinicId, isOpen]);
+  }, [queryText, clinicId, clinicName, strictClinic, isOpen]);
 
   const handleSelect = (doctor) => {
     setSelectedDoctor(doctor);
     setIsOpen(false);
     setQueryText('');
     if (onChange) {
-      onChange({ doctorId: doctor.id, doctorName: doctor.name || doctor.id });
+      onChange({ 
+        doctorId: doctor.id, 
+        doctorName: doctor.name || doctor.id,
+        license: doctor.license || null
+      });
+    }
+  };
+
+  const handleSelectCustom = (customName) => {
+    const trimmed = (customName || '').trim();
+    if (!trimmed) return;
+    const docObj = { id: `custom_${Date.now()}`, name: trimmed };
+    setSelectedDoctor(docObj);
+    setIsOpen(false);
+    setQueryText('');
+    if (onChange) {
+      onChange({ doctorId: docObj.id, doctorName: trimmed });
     }
   };
 
@@ -100,7 +127,7 @@ export default function PhysicianPicker({
     e.stopPropagation();
     setSelectedDoctor(null);
     if (onChange) {
-      onChange({ doctorId: '', doctorName: '' });
+      onChange({ doctorId: '', doctorName: '', license: null });
     }
   };
 
@@ -188,52 +215,100 @@ export default function PhysicianPicker({
               padding: '0.35rem 0'
             }}>
               {loading && doctors.length === 0 ? (
-                <div style={{ padding: '0.75rem 1rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  Searching physicians...
+                <div style={{ padding: '0.75rem 1rem', fontSize: '0.82rem', color: 'var(--text-muted, #64748b)' }}>
+                  {strictClinic ? 'Searching doctors for this clinic...' : 'Searching physicians...'}
                 </div>
               ) : doctors.length === 0 ? (
-                <div style={{ padding: '0.75rem 1rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  No physicians found.
+                <div style={{ padding: '0.75rem 1rem', fontSize: '0.82rem' }}>
+                  <div style={{ color: 'var(--text-muted, #64748b)', marginBottom: allowCustom && queryText ? '0.5rem' : '0' }}>
+                    {strictClinic && (clinicName || clinicId)
+                      ? `No registered doctors found specifically for "${clinicName || 'this clinic'}".`
+                      : 'No physicians found.'}
+                  </div>
+                  {allowCustom && queryText.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => handleSelectCustom(queryText)}
+                      style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        padding: '0.5rem 0.65rem',
+                        borderRadius: '6px',
+                        background: '#eff6ff',
+                        border: '1px solid #bfdbfe',
+                        color: '#1d4ed8',
+                        fontSize: '0.82rem',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      + Use &quot;{queryText.trim()}&quot; as Prescribing Doctor
+                    </button>
+                  )}
                 </div>
               ) : (
-                doctors.map((doctor) => {
-                  const isClinicMatch = clinicId && doctor.clinicId === clinicId;
-                  return (
-                    <div
-                      key={doctor.id}
-                      onClick={() => handleSelect(doctor)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '0.55rem 0.85rem',
-                        cursor: 'pointer',
-                        fontSize: '0.85rem',
-                        transition: 'background 0.15s'
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--surface-100, #f1f5f9)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Stethoscope size={14} color="var(--text-muted, #64748b)" />
-                        <div>
-                          <div style={{ fontWeight: 600, color: 'var(--text-primary, #0f172a)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                            <span>{doctor.name}</span>
-                            {isClinicMatch && (
-                              <span style={{ fontSize: '0.68rem', padding: '1px 5px', borderRadius: '4px', background: 'var(--color-info-bg, #eff6ff)', color: 'var(--color-info, #2563eb)', fontWeight: 700 }}>
-                                Clinic Affiliated
-                              </span>
-                            )}
-                          </div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            {doctor.specialty || 'Practitioner'}{doctor.email ? ` · ${doctor.email}` : ''}
+                <>
+                  {doctors.map((doctor) => {
+                    const isClinicMatch = doctor.isAffiliated || (clinicId && doctor.clinicId === clinicId);
+                    return (
+                      <div
+                        key={doctor.id}
+                        onClick={() => handleSelect(doctor)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.55rem 0.85rem',
+                          cursor: 'pointer',
+                          fontSize: '0.85rem',
+                          transition: 'background 0.15s'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--surface-100, #f1f5f9)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Stethoscope size={14} color="var(--text-muted, #64748b)" />
+                          <div>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary, #0f172a)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <span>{doctor.name}</span>
+                              {isClinicMatch && (
+                                <span style={{ fontSize: '0.68rem', padding: '1px 5px', borderRadius: '4px', background: 'var(--color-info-bg, #eff6ff)', color: 'var(--color-info, #2563eb)', fontWeight: 700 }}>
+                                  Clinic Doctor
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #64748b)' }}>
+                              {doctor.specialty || 'Practitioner'}{doctor.email ? ` · ${doctor.email}` : ''}
+                            </div>
                           </div>
                         </div>
+                        {selectedDoctor?.id === doctor.id && <Check size={15} color="var(--color-primary, #003666)" />}
                       </div>
-                      {selectedDoctor?.id === doctor.id && <Check size={15} color="var(--color-primary, #003666)" />}
+                    );
+                  })}
+                  {allowCustom && queryText.trim() && !doctors.some(d => d.name.toLowerCase() === queryText.trim().toLowerCase()) && (
+                    <div style={{ borderTop: '1px solid #e2e8f0', padding: '0.4rem 0.5rem', marginTop: '0.25rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectCustom(queryText)}
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '0.45rem 0.65rem',
+                          borderRadius: '6px',
+                          background: '#f8fafc',
+                          border: '1px dashed #cbd5e1',
+                          color: '#1e40af',
+                          fontSize: '0.80rem',
+                          fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        + Use &quot;{queryText.trim()}&quot; as custom doctor
+                      </button>
                     </div>
-                  );
-                })
+                  )}
+                </>
               )}
             </div>
           )}

@@ -68,7 +68,7 @@ export async function POST(request) {
       properties: {
         documentType: {
           type: Type.STRING,
-          enum: ['StandardPrescription', 'FagronGenomics', 'CompoundingFormula', 'ClinicalReport', 'Unknown'],
+          enum: ['StandardPrescription', 'FagronGenomics', 'CompoundingFormula', 'ClinicalReport', 'LabResult', 'Unknown'],
           description: 'Classification of the uploaded document'
         },
         prescriptionNumber: {
@@ -249,6 +249,29 @@ export async function POST(request) {
             required: ['treatmentType', 'items']
           }
         },
+        labResult: {
+          type: Type.OBJECT,
+          description: 'Extraction fields when documentType is LabResult (e.g. Bloodo, LifeLab1, DBS capillary blood tests)',
+          properties: {
+            testName: { type: Type.STRING, description: 'Test name (e.g. Nicotinamide adenine dinucleotide (NAD))' },
+            biomarker: { type: Type.STRING, description: 'Biomarker name (e.g. NAD+ (Total Intracellular))' },
+            value: { type: Type.NUMBER, description: 'Numeric result value (e.g. 11.6, 16.7, 24.5)' },
+            unit: { type: Type.STRING, description: 'Measurement units (e.g. µmol/L)' },
+            zone: { type: Type.STRING, description: 'Zone code: green, light_green, yellow, red, dark_red' },
+            zoneLabel: { type: Type.STRING, description: 'Zone label (e.g. Optimal, Near-Optimal, Insufficient, Deficient)' },
+            protocolNumber: { type: Type.STRING, description: 'Protocol / report order number (e.g. 260513001, 260325002)' },
+            sampleType: { type: Type.STRING, description: 'Sample type (e.g. dried blood spot (DBS))' },
+            collectionDate: { type: Type.STRING, description: 'Sample collected date (YYYY-MM-DD)' },
+            receiptDate: { type: Type.STRING, description: 'Sample received date (YYYY-MM-DD)' },
+            analysisDate: { type: Type.STRING, description: 'Analysis date (YYYY-MM-DD)' },
+            protocolDate: { type: Type.STRING, description: 'Protocol generation date (YYYY-MM-DD)' },
+            patientCode: { type: Type.STRING, description: 'Patient code from protocol (e.g. DBUQEQ842449)' },
+            patientAge: { type: Type.INTEGER, description: 'Patient age' },
+            patientGender: { type: Type.STRING, description: 'Patient gender: Male or Female' },
+            laboratory: { type: Type.STRING, description: 'Laboratory name (e.g. LifeLab1 / Bloodo)' },
+            interpretation: { type: Type.STRING, description: 'Clinical interpretation text from report' }
+          }
+        },
         missing: {
           type: Type.ARRAY,
           items: { type: Type.STRING },
@@ -327,12 +350,20 @@ CRITICAL CLINICAL EXTRACTION RULES LEARNED FROM REAL-WORLD CLINICAL AUDITS:
 
 11. TEMPORAL DATE VALIDITY (EU GMP COMPLIANCE):
     - Extract 'prescriptionDate' accurately from the doctor's signature or document date.
-    - In an EU GMP licensed compounding dispensary, manufacturing/compounding cannot precede the prescription date. All compounding dates must be on or after 'prescriptionDate'.`;
+    - In an EU GMP licensed compounding dispensary, manufacturing/compounding cannot precede the prescription date. All compounding dates must be on or after 'prescriptionDate'.
+
+12. LABORATORY TEST PROTOCOLS & BIOMARKER BLOOD REPORTS (BLOODO, LIFELAB1, ETC.):
+    - If the document is a laboratory test protocol (such as Bloodo / LifeLab1 DBS capillary blood test for NAD, HbA1c, Testosterone, Omega Ratio, Vitamin D, Cortisol):
+      * Set 'documentType' to "LabResult".
+      * Set 'clinicalCategory' to "standard" (or "peptide").
+      * Extract all laboratory fields into 'labResult': testName (e.g. 'Nicotinamide adenine dinucleotide (NAD)'), biomarker ('NAD+ (Total Intracellular)'), numeric value (e.g. 11.6, 16.7, 24.5), unit ('µmol/L'), zone ('green', 'light_green', 'yellow', 'red', 'dark_red'), zoneLabel ('Optimal', 'Near-Optimal', 'Insufficient', 'Deficient'), protocolNumber (e.g. '260513001'), sampleType ('dried blood spot (DBS)'), collectionDate, receiptDate, analysisDate, protocolDate, and laboratory ('LifeLab1 / Bloodo').
+      * In 'formulationBlocks', return an empty array [].`;
 
     // Verified Google GenAI models for multimodal extraction
     const CANDIDATE_MODELS = [
-      'gemini-flash-lite-latest',
-      'gemini-3-flash-preview',
+      'gemini-3.5-flash',
+      'gemini-3.1-flash-lite',
+      'gemini-3.6-flash',
       'gemini-flash-latest'
     ];
     let response = null;

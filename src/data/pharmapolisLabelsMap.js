@@ -1298,8 +1298,21 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         volume: lbl.volume || lbl.netContent || lbl.size || rx.volume || '100 mL',
         productTitle: lbl.productTitle || lbl.productName || lbl.title || 'Compounded Pharmaceutical Protocol',
         vehicle: lbl.vehicle || lbl.compoundingVehicle || rx.vehicle || 'Vegetable capsules. Gluten-free, lactose-free, colorant-free.',
-        directions: lbl.directions || lbl.instructions || rx.directions || rx.dosageInstructions || 'Take / apply as directed by physician.',
-        prodDate: formatIsoDate(lbl.prodDate || lbl.mfgDate || rx.mfgDate || rx.prodDate || rx.createdAt, '05-10-2026'),
+        prodDate: formatIsoDate(
+          lbl.prodDate || 
+          lbl.mfgDate || 
+          rx.fagron?.reportDate || 
+          rx.fagronDetails?.reportDate || 
+          rx.geneticResultDate || 
+          rx.reportDate || 
+          rx.prescriptionDate || 
+          rx.mfgDate || 
+          rx.prodDate || 
+          rx.dateIssued || 
+          rx.issuedDate || 
+          rx.date, 
+          '05-10-2026'
+        ),
         expDate: formatIsoDate(lbl.expDate || rx.expDate || rx.expiryDate, '04-10-2027'),
         storage: lbl.storage || rx.storage || 'Store at room temperature (15°C - 25°C)',
         warnings: lbl.warnings || rx.warnings || 'For external / patient use only. Keep out of reach of children.',
@@ -1382,8 +1395,32 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
     return fallback;
   };
 
-  const rxProdDate = formatIsoDate(rx.mfgDate || rx.prodDate || rx.dateIssued || rx.issuedDate || rx.date || rx.createdAt, '05-10-2026');
-  const rxExpDate = formatIsoDate(rx.expDate || rx.expiryDate, '04-10-2027');
+  const rxGeneticOrPrescriptionDate = rx.fagron?.reportDate || 
+                                     rx.fagronDetails?.reportDate || 
+                                     rx.geneticResultDate || 
+                                     rx.reportDate || 
+                                     rx.prescriptionDate || 
+                                     rx.mfgDate || 
+                                     rx.prodDate || 
+                                     rx.dateIssued || 
+                                     rx.issuedDate || 
+                                     rx.date;
+  const rxProdDate = formatIsoDate(rxGeneticOrPrescriptionDate, '05-10-2026');
+
+  // Compute 1-year default expiry if not explicitly set
+  const computeDefaultExpiry = (prodDateStr) => {
+    if (!prodDateStr) return '04-10-2027';
+    const m = prodDateStr.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    if (m) {
+      const day = m[1];
+      const month = m[2];
+      const year = parseInt(m[3], 10) + 1;
+      return `${day}-${month}-${year}`;
+    }
+    return '04-10-2027';
+  };
+
+  const rxExpDate = formatIsoDate(rx.expDate || rx.expiryDate, computeDefaultExpiry(rxProdDate));
 
   // If explicit formulations are passed (from PublicPrescriptionClient compoundedFormulations),
   // map every formulation directly so apis, vehicle, route, and posology match 100%!

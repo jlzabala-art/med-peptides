@@ -52,6 +52,43 @@ export function usePrescriptionAI() {
     // 1. First Attempt: Fast direct multimodal extraction via Next.js API
     try {
       const rawAiData = await extractPrescriptionFromDocument(file);
+
+      // Dedicated Lab Result Handling (Bloodo / LifeLab1 / Biomarkers)
+      if (rawAiData.documentType === 'LabResult' || rawAiData.labResult) {
+        setIsProcessing(false);
+        const lr = rawAiData.labResult || {};
+        const pCode = lr.patientCode || rawAiData.patient?.code || rawAiData.fileNumber || '';
+        return {
+          isLabResult: true,
+          documentType: 'LabResult',
+          rawDocId: `direct_${Date.now()}`,
+          fileUrl: URL.createObjectURL(file),
+          fileName: file.name,
+          patientName: pCode ? `Patient #${pCode}` : (rawAiData.patient?.name || 'Verified Patient'),
+          patientCode: pCode,
+          patientAge: lr.patientAge || rawAiData.patient?.age || null,
+          patientGender: lr.patientGender || rawAiData.patient?.gender || null,
+          doctorName: rawAiData.doctor?.name || 'Dr. Çağatay Sezgin, MD, FISHRS',
+          doctorId: rawAiData.matchedDoctor?.id || 'z3aUIMaYsPViG1JgM95r',
+          clinicName: rawAiData.doctor?.clinicName || rawAiData.clinic || 'Shamma Clinic by Novomed LLC',
+          testName: lr.testName || 'Nicotinamide Adenine Dinucleotide (NAD+) Quantitative Test',
+          biomarker: lr.biomarker || 'NAD+ (Total Intracellular)',
+          value: lr.value != null ? lr.value : null,
+          unit: lr.unit || 'µmol/L',
+          zone: lr.zone || 'yellow',
+          zoneLabel: lr.zoneLabel || 'Insufficient / Suboptimal',
+          protocolNumber: lr.protocolNumber || rawAiData.prescriptionNumber || '',
+          sampleType: lr.sampleType || 'Dried Blood Spot (DBS)',
+          collectionDate: lr.collectionDate || '',
+          receiptDate: lr.receiptDate || '',
+          analysisDate: lr.analysisDate || '',
+          protocolDate: lr.protocolDate || '',
+          laboratory: lr.laboratory || 'LifeLab1 / Bloodo',
+          interpretation: lr.interpretation || '',
+          rawAiData
+        };
+      }
+
       const normalizedList = await normalizeExtractedPrescriptions(rawAiData);
       const firstRx = normalizedList[0] || {};
       const lines = firstRx.prescriptionLines || [];
@@ -204,9 +241,86 @@ export function usePrescriptionAI() {
     });
   }, []);
 
+  const saveLabResult = useCallback(async (labData) => {
+    try {
+      const cleanCode = String(labData.protocolNumber || labData.code || Date.now()).trim();
+      const docId = `LAB-${cleanCode}-NAD`;
+      const docRef = doc(collection(db, 'lab_results'), docId);
+
+      const zone = String(labData.zone || 'yellow').toLowerCase();
+      const zoneColor = (zone === 'green' || zone === 'optimal') ? '#15803d' :
+                        (zone === 'light_green' || zone === 'near_optimal') ? '#16a34a' :
+                        (zone === 'dark_red') ? '#991b1b' :
+                        (zone === 'red' || zone === 'deficient') ? '#dc2626' : '#d97706';
+      const zoneBg = (zone === 'green' || zone === 'light_green') ? '#f0fdf4' :
+                     (zone === 'red' || zone === 'dark_red') ? '#fef2f2' : '#fffbeb';
+
+      const payload = {
+        id: docId,
+        code: cleanCode,
+        protocolNumber: cleanCode,
+        patient: {
+          code: labData.patientCode || 'Anonymous',
+          id: labData.patientCode || 'Anonymous',
+          name: labData.patientName || `Patient #${labData.patientCode || 'Anonymous'}`,
+          gender: labData.patientGender || 'Male',
+          age: Number(labData.patientAge) || 50
+        },
+        patientCode: labData.patientCode || 'Anonymous',
+        patientName: labData.patientName || `Patient #${labData.patientCode || 'Anonymous'}`,
+        doctorId: labData.doctorId || 'z3aUIMaYsPViG1JgM95r',
+        doctorName: labData.doctorName || 'Dr. Çağatay Sezgin, MD, FISHRS',
+        doctorSpecialty: labData.doctorSpecialty || 'Hair Restoration Surgery / Regenerative Medicine',
+        clinicName: labData.clinicName || 'Shamma Clinic by Novomed LLC',
+        testType: 'nad_dbs',
+        testName: labData.testName || 'Nicotinamide Adenine Dinucleotide (NAD+) Quantitative Test',
+        shortName: 'NAD+ Dried Blood Spot (DBS)',
+        biomarker: labData.biomarker || 'NAD+ (Total Intracellular)',
+        sampleType: labData.sampleType || 'Dried Blood Spot (DBS)',
+        value: labData.value != null ? Number(labData.value) : 0,
+        unit: labData.unit || 'µmol/L',
+        zone: labData.zone || 'yellow',
+        zoneLabel: labData.zoneLabel || 'Insufficient / Suboptimal',
+        zoneColor,
+        zoneBg,
+        resultCategory: labData.zone || 'insufficient',
+        collectionDate: labData.collectionDate || '',
+        receiptDate: labData.receiptDate || '',
+        analysisDate: labData.analysisDate || '',
+        protocolDate: labData.protocolDate || labData.analysisDate || '',
+        method: 'Enzymatic cyclic assay (XLT01690-0)',
+        laboratory: {
+          name: 'LifeLab1',
+          city: 'Vilnius',
+          country: 'Lithuania',
+          license: 'License 4864',
+          standards: 'ISO 15189 / EU IVDR Accredited'
+        },
+        referenceRanges: {
+          deficient: { min: 0, max: 8.8, label: 'Deficient / Depleted', color: '#dc2626' },
+          insufficient: { min: 8.8, max: 17.4, label: 'Insufficient / Suboptimal', color: '#d97706' },
+          near_optimal: { min: 17.4, max: 21.7, label: 'Near-Optimal', color: '#16a34a' },
+          optimal: { min: 21.7, max: 33.7, label: 'Optimal / Longevity Range', color: '#15803d' }
+        },
+        interpretation: labData.interpretation || '',
+        pdfReportUrl: labData.pdfReportUrl || `/reports/bloodo-nad-${cleanCode}.pdf`,
+        status: 'completed',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      await setDoc(docRef, payload, { merge: true });
+      return { success: true, id: docId, code: cleanCode, publicUrl: `/lab/${cleanCode}` };
+    } catch (err) {
+      console.error('[usePrescriptionAI] Error saving lab result:', err);
+      throw err;
+    }
+  }, []);
+
   return {
     queuePrescription,
     processPrescription,
+    saveLabResult,
     isProcessing,
     error
   };

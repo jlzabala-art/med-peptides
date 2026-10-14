@@ -253,28 +253,47 @@ export async function searchClinicsAction(searchQuery = '', limitCount = 50) {
  * Search physicians/doctors from database (Golden Rule #1: Bounded query)
  * Queries users collection scoped by role or doctor flag with strict limit
  */
-export async function searchDoctorsAction(searchQuery = '', clinicId = null, limitCount = 50) {
+export async function searchDoctorsAction(searchQuery = '', clinicId = null, limitCount = 50, clinicName = null, strictClinic = false) {
   if (!adminDb) return [];
   try {
     const fetchLimit = Math.min(Math.max(Number(limitCount) || 50, 1), 200);
     
-    // First query users where role == 'doctor' or 'physician' with limit
-    let queryRef = adminDb.collection('users');
+    // Retrieve clinic document if clinicId is passed to check for doctorIds and clinic name
+    let clinicDocData = null;
+    let clinicDoctorIds = [];
+    let clinicCanonicalName = (clinicName || '').toLowerCase().trim();
+
     if (clinicId) {
-      queryRef = queryRef.where('clinicId', '==', clinicId);
+      try {
+        const cSnap = await adminDb.collection('clinics').doc(clinicId).get();
+        if (cSnap.exists) {
+          clinicDocData = cSnap.data();
+          if (Array.isArray(clinicDocData.doctorIds)) {
+            clinicDoctorIds = clinicDocData.doctorIds;
+          }
+          if (!clinicCanonicalName && clinicDocData.name) {
+            clinicCanonicalName = clinicDocData.name.toLowerCase().trim();
+          }
+        }
+      } catch (err) {
+        // Non-fatal
+      }
     }
 
+    // Query doctors from users collection
     let snap;
     try {
-      snap = await queryRef.where('role', 'in', ['doctor', 'physician']).limit(fetchLimit).get();
+      snap = await adminDb.collection('users')
+        .where('role', 'in', ['doctor', 'physician'])
+        .limit(fetchLimit * 2)
+        .get();
     } catch {
-      // If composite index is missing or field doesn't match 'in', fallback to bounded query
-      snap = await queryRef.limit(fetchLimit * 2).get();
+      snap = await adminDb.collection('users').limit(fetchLimit * 3).get();
     }
 
     const q = (searchQuery || '').toLowerCase().trim();
-
     const doctors = [];
+
     snap.forEach(d => {
       const data = d.data();
       const isDoctor = data.role === 'doctor' || 
@@ -283,17 +302,36 @@ export async function searchDoctorsAction(searchQuery = '', clinicId = null, lim
         Boolean(data.specialty) || 
         Boolean(data.isDoctor);
 
-      if (isDoctor) {
-        const fullName = data.displayName || data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.email;
-        doctors.push({
-          id: d.id,
-          name: fullName,
-          email: data.email || '',
-          specialty: data.specialty || 'General Practitioner',
-          clinicId: data.clinicId || data.assignedClinicId || null,
-          clinicName: data.clinicName || null,
-        });
+      if (!isDoctor) return;
+
+      const docClinicId = data.clinicId || data.assignedClinicId || null;
+      const docClinicIds = Array.isArray(data.clinicIds) ? data.clinicIds : [];
+      const docClinicName = (data.clinicName || '').toLowerCase().trim();
+
+      const isAffiliatedWithClinic = Boolean(
+        (clinicId && (docClinicId === clinicId || docClinicIds.includes(clinicId) || clinicDoctorIds.includes(d.id))) ||
+        (clinicCanonicalName && docClinicName && (
+          docClinicName.includes(clinicCanonicalName) || 
+          clinicCanonicalName.includes(docClinicName)
+        ))
+      );
+
+      // If strict clinic filtering is requested and a clinic is active, omit non-affiliated doctors
+      if (strictClinic && (clinicId || clinicCanonicalName) && !isAffiliatedWithClinic) {
+        return;
       }
+
+      const fullName = data.displayName || data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.email;
+      doctors.push({
+        id: d.id,
+        name: fullName,
+        email: data.email || '',
+        specialty: data.specialty || 'General Practitioner',
+        license: data.license || data.medicalLicense || data.doctorLicense || null,
+        clinicId: docClinicId,
+        clinicName: data.clinicName || null,
+        isAffiliated: isAffiliatedWithClinic,
+      });
     });
 
     let filtered = doctors;
@@ -305,11 +343,11 @@ export async function searchDoctorsAction(searchQuery = '', clinicId = null, lim
       );
     }
 
-    // If clinicId is provided, sort matching clinic first
-    if (clinicId) {
+    // Sort affiliated doctors first
+    if (clinicId || clinicCanonicalName) {
       filtered.sort((a, b) => {
-        const aMatch = a.clinicId === clinicId ? 1 : 0;
-        const bMatch = b.clinicId === clinicId ? 1 : 0;
+        const aMatch = a.isAffiliated ? 1 : 0;
+        const bMatch = b.isAffiliated ? 1 : 0;
         return bMatch - aMatch;
       });
     }

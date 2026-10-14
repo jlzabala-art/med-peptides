@@ -88,7 +88,6 @@ import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedCo
 import ProductDetailSidebar from './ProductDetailSidebar';
 import EternaPublicOverviewShowcase from './EternaPublicOverviewShowcase';
 import SupplementPublicOverviewShowcase from './SupplementPublicOverviewShowcase';
-import ProductOverviewQuickNav from './ProductOverviewQuickNav';
 import ProductSectionFooterNav from './ProductSectionFooterNav';
 import PresentationsMatrixSection from './datasheet/sections/PresentationsMatrixSection';
 import ReconstitutionRouterSection from './datasheet/sections/ReconstitutionRouterSection';
@@ -2046,14 +2045,6 @@ export default function PublicDatasheetView({
             product={product}
             lang={lang}
             onSelectSection={handleSelectSection}
-          />
-        )}
-        {!isSupplementProduct && (
-          <ProductOverviewQuickNav
-            sections={tocSections}
-            activeSection={effectiveActiveSection}
-            onSelectSection={handleSelectSection}
-            lang={lang}
           />
         )}
         </div>

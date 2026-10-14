@@ -8,6 +8,7 @@ import PharmapolisLabelSvg from './PharmapolisLabelSvg';
 import { getCustomsFriendlySuggestions, findCustomsRisks } from '@/utils/labels/customsNaming';
 import { formatApisForEditor, labelToMarkdown, parseMarkdownToLabel } from '@/utils/labels/labelMarkdown';
 import ClinicPicker from '@/components/admin/patients/ClinicPicker';
+import PhysicianPicker from '@/components/admin/patients/PhysicianPicker';
 import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
 
 /**
@@ -2490,18 +2491,42 @@ export default function PharmacyLabelsModal({
                       </div>
                     )}
 
-                    {/* Row 3: Prescribing Doctor (6 cols) & Clinic (6 cols) -> generous width, zero truncation */}
+                    {/* Row 3: Prescribing Doctor (6 cols) & Clinic (6 cols) -> linked clinic & physician selection */}
                     <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label">
-                        <span>{isEs ? 'Médico Prescriptor' : 'Prescribing Doctor'}</span>
-                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span>{isEs ? 'Médico Prescriptor' : 'Prescribing Doctor'}</span>
+                          <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                          {(currentItem.clinicName || currentItem.clinicId) && (
+                            <span style={{ fontSize: '0.66rem', color: '#1a73e8', fontWeight: 600, marginLeft: '4px' }} title={isEs ? 'Doctores asociados a esta clínica' : 'Doctors associated with this clinic'}>
+                              {isEs ? '(Asociados a clínica)' : '(Clinic-associated)'}
+                            </span>
+                          )}
+                        </div>
                       </label>
-                      <input
-                        type="text"
-                        value={currentItem.doctorName || currentItem.physician || ''}
-                        onChange={(e) => handleFieldChange('doctorName', e.target.value)}
-                        className="gcp-form-input"
-                        placeholder={isEs ? "Dr. Nombre y Apellidos" : "Dr. Prescribing Physician"}
+                      <PhysicianPicker
+                        value={currentItem.doctorId || ''}
+                        physicianName={currentItem.doctorName || currentItem.physician || ''}
+                        clinicId={currentItem.clinicId || ''}
+                        clinicName={currentItem.clinicName || ''}
+                        strictClinic={Boolean(currentItem.clinicId || currentItem.clinicName)}
+                        allowCustom={true}
+                        placeholder={isEs ? "Seleccionar o escribir doctor..." : "Select or type doctor..."}
+                        onChange={({ doctorId, doctorName, license }) => {
+                          const updated = {
+                            ...currentItem,
+                            doctorName: doctorName || '',
+                            doctorId: doctorId || '',
+                            doctorLicense: license || currentItem.doctorLicense || ''
+                          };
+                          const newMd = labelToMarkdown(updated);
+                          updated.labelMarkdown = newMd;
+                          setEditedOverrides(prev => ({
+                            ...prev,
+                            [selectedProductIdx]: updated
+                          }));
+                          setMarkdownText(newMd);
+                        }}
                       />
                     </div>
 

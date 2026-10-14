@@ -3,6 +3,7 @@
 import React from 'react';
 import { FileText, ShieldCheck, Download, Sparkles, CheckCircle2 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
+import UltraPersonFormularyNetworkWidget from './UltraPersonFormularyNetworkWidget';
 
 /**
  * SupplementSidebarWidget
@@ -10,16 +11,17 @@ import { triggerHaptic } from '@/utils/haptics';
  * Displays:
  *  - Clinical Actions: PDF Monograph / Certificate of Analysis
  *  - Quality Badges: EU GMP, 100% Vegan, Acid-resistant HPMC capsules
+ *  - UltraPerson Precision Clinical Formulary Matrix (5 formulations)
  *  - Posology & Active Batch Traceability
  */
 export default function SupplementSidebarWidget({
-  _product,
-  _slug,
+  product,
+  slug,
   effectiveBatchCode,
   lang = 'en',
   onOpenPreviewModal,
   onOpenCoaModal,
-  _onOpenInquiry
+  onOpenInquiry: _onOpenInquiry
 }) {
   const isEs = lang === 'es';
 
@@ -131,6 +133,13 @@ export default function SupplementSidebarWidget({
           </span>
         </div>
       </div>
+
+      {/* ── ULTRAPERSON CLINICAL FORMULARY MATRIX ── */}
+      <UltraPersonFormularyNetworkWidget
+        currentSlug={slug}
+        currentProduct={product}
+        lang={lang}
+      />
     </div>
   );
 }

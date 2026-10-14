@@ -41,16 +41,7 @@ export default function LabelsBatchBar({
               title={isEs ? `Activar prescripción #${pItem.code} (${pName})` : `Activate prescription #${pItem.code} (${pName})`}
             >
               <span className="pls-batch-pill-name">{pName}</span>
-              <span style={{
-                fontSize: '0.68rem',
-                fontWeight: 700,
-                background: labelsCount > 1 ? '#fef3c7' : '#f1f5f9',
-                color: labelsCount > 1 ? '#92400e' : '#475569',
-                padding: '2px 7px',
-                borderRadius: '4px',
-                border: labelsCount > 1 ? '1px solid #fde68a' : '1px solid #cbd5e1',
-                whiteSpace: 'nowrap'
-              }}>
+              <span className={`pls-batch-pill-badge ${labelsCount > 1 ? 'multi' : 'single'}`}>
                 {partInfo}
               </span>
 
