@@ -1,5 +1,6 @@
 import { adminDb } from '@/lib/firebaseAdmin';
 import { KNOWN_DOCTORS_DIRECTORY } from '@/services/doctorDirectoryService';
+import { classifyPrescriptionRegimen } from '@/utils/prescriptionRegimenTaxonomy';
 
 // ── In-Memory RAM Cache (Golden Rule #2) ─────────────────────────────────────
 // Layer 1: 0ms RAM cache with 10-minute TTL
@@ -365,10 +366,12 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         phone: d.patient?.phone || null,
         email: d.patient?.email || null
       });
-
-      // Priority to phaseName for multi-phase protocols
-      const treatmentTitle = d.phaseName || d.treatmentTitle || d.description || d.treatmentProgram || d.program || 'Personalized Formulation';
-      const protoSlug = d.protocolSlug || d.protocolId || resolveProtocolSlug({ treatmentTitle, phaseName: d.phaseName, items: d.items });
+      // Priority to concise clinical titles, avoiding generic 'Personalized Compounded Protocol'
+      let baseTitle = d.treatmentTitle;
+      if (!baseTitle || baseTitle === 'Personalized Compounded Protocol' || baseTitle === 'Personalized Formulation') {
+        baseTitle = d.regimenShortTitle || d.phaseName || d.treatmentProgram || 'Personalized Formulation';
+      }
+      const protoSlug = d.protocolSlug || d.protocolId || resolveProtocolSlug({ treatmentTitle: baseTitle, phaseName: d.phaseName, items: d.items });
 
       // 1. Resolve structured parts/formulations (Schema B: nested apis, Schema C: formulas, Schema D: phases/formulationBlocks)
       let resolvedParts = [];
@@ -472,6 +475,23 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         }));
       }
 
+      // Resolve standardized clinical category & concise title
+      let catData = {
+        category: d.regimenCategory,
+        categoryId: d.regimenCategoryId,
+        categoryShort: d.regimenCategoryShort,
+        categoryCode: d.regimenCategoryCode,
+        regimenShortTitle: d.regimenShortTitle,
+        activeSummary: d.activeIngredientsSummary
+      };
+      if (!catData.category || !catData.regimenShortTitle) {
+        catData = classifyPrescriptionRegimen({ ...d, items: resolvedItems, parts: resolvedParts, treatmentTitle: baseTitle });
+      }
+
+      const finalTreatmentTitle = d.treatmentTitle && !['Personalized Compounded Protocol', 'Personalized Formulation'].includes(d.treatmentTitle)
+        ? d.treatmentTitle
+        : (d.regimenShortTitle || catData.regimenShortTitle || baseTitle);
+
       prescriptions.push({
         id: doc.id,
         prescriptionNumber: d.prescriptionNumber || d.code || doc.id,
@@ -481,7 +501,13 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         patient: d.patient || null,
         status: d.status || d.state || 'active',
         state: d.state || d.status || 'active',
-        treatmentTitle: treatmentTitle,
+        treatmentTitle: finalTreatmentTitle,
+        regimenCategory: d.regimenCategory || catData.category || 'Follicular & Hair Restoration',
+        regimenCategoryId: d.regimenCategoryId || catData.categoryId || 'follicular_hair',
+        regimenCategoryShort: d.regimenCategoryShort || catData.categoryShort || 'Follicular',
+        regimenCategoryCode: d.regimenCategoryCode || catData.categoryCode || 'HAIR-RX',
+        regimenShortTitle: d.regimenShortTitle || catData.regimenShortTitle || finalTreatmentTitle,
+        activeIngredientsSummary: d.activeIngredientsSummary || catData.activeSummary || null,
         protocolSlug: protoSlug,
         protocolUrl: protoSlug ? `/proto/${protoSlug}` : null,
         phaseName: d.phaseName || null,

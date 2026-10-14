@@ -848,9 +848,11 @@ export default function DoctorPublicPortalClient({
       const q = searchQuery.toLowerCase();
       const matchPat = (rx.patientName || '').toLowerCase().includes(q);
       const matchCode = (rx.code || rx.prescriptionNumber || '').toLowerCase().includes(q);
-      const matchTitle = (rx.treatmentTitle || '').toLowerCase().includes(q);
+      const matchTitle = (rx.treatmentTitle || '').toLowerCase().includes(q) || (rx.regimenShortTitle || '').toLowerCase().includes(q);
+      const matchCategory = (rx.regimenCategory || '').toLowerCase().includes(q) || (rx.regimenCategoryShort || '').toLowerCase().includes(q);
+      const matchActives = (rx.activeIngredientsSummary || '').toLowerCase().includes(q);
       const matchItems = (rx.items || []).some(i => (i.name || '').toLowerCase().includes(q));
-      if (!matchPat && !matchCode && !matchTitle && !matchItems) return false;
+      if (!matchPat && !matchCode && !matchTitle && !matchCategory && !matchActives && !matchItems) return false;
 
       // Also apply quickRxFilter if search query is present
       if (quickRxFilter === 'pending') {
@@ -1531,9 +1533,10 @@ export default function DoctorPublicPortalClient({
       key: 'patientName',
       header: 'Patient Dossier',
       width: '24%',
+      align: 'left',
       sortable: true,
       render: (rx) => (
-        <div>
+        <div style={{ textAlign: 'left' }}>
           <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.86rem' }}>
             {rx.patientName}
           </div>
@@ -1549,28 +1552,63 @@ export default function DoctorPublicPortalClient({
       key: 'treatmentTitle',
       header: 'Prescription Regimen',
       width: '34%',
+      align: 'left',
       sortable: true,
       render: (rx) => {
         const parts = resolvePrescriptionParts(rx);
         const totalParts = rx.totalParts || parts.length || 1;
+        const categoryLabel = rx.regimenCategoryShort || rx.regimenCategory || 'Follicular';
+        const displayTitle = rx.regimenShortTitle || rx.treatmentTitle || 'Compounded Precision Regimen';
 
         return (
-          <div>
-            <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.86rem', lineHeight: '1.3' }}>
-              {rx.treatmentTitle || 'Personalized Compounded Regimen'}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', width: '100%' }}>
+            <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.86rem', lineHeight: '1.3', textAlign: 'left' }}>
+              {displayTitle}
             </div>
-            <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ marginTop: '5px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+              {/* Category Pill */}
+              <span style={{
+                background: '#f8fafc',
+                color: '#334155',
+                border: '1px solid #cbd5e1',
+                padding: '1px 7px',
+                borderRadius: '4px',
+                fontSize: '0.68rem',
+                fontWeight: 650,
+                letterSpacing: '0.02em',
+                textTransform: 'uppercase'
+              }}>
+                {categoryLabel}
+              </span>
+
+              {/* Parts Badge (Flush left aligned) */}
               <span style={{
                 background: totalParts > 1 ? '#eff6ff' : '#f1f5f9',
                 color: totalParts > 1 ? '#1d4ed8' : '#475569',
                 border: totalParts > 1 ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
                 padding: '1px 8px',
                 borderRadius: '4px',
-                fontSize: '0.72rem',
+                fontSize: '0.68rem',
                 fontWeight: 700
               }}>
                 {totalParts === 1 ? '1 Part' : `${totalParts} Parts`}
               </span>
+
+              {rx.activeIngredientsSummary && (
+                <span
+                  style={{
+                    fontSize: '0.70rem',
+                    color: '#64748b',
+                    maxWidth: '180px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                  title={rx.activeIngredientsSummary}
+                >
+                  {rx.activeIngredientsSummary}
+                </span>
+              )}
             </div>
           </div>
         );
@@ -1580,6 +1618,7 @@ export default function DoctorPublicPortalClient({
       key: 'status',
       header: 'Status',
       width: '12%',
+      align: 'left',
       sortable: true,
       render: (rx) => {
         const isDraftOrReview = ['draft', 'pending', 'awaiting_validation'].includes(String(rx.status || '').toLowerCase()) || rx.ingestionStage === 'awaiting_atlas_review';
@@ -1597,6 +1636,7 @@ export default function DoctorPublicPortalClient({
       key: 'createdAt',
       header: 'Date',
       width: '12%',
+      align: 'left',
       sortable: true,
       render: (rx) => (
         <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
