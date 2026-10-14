@@ -5,6 +5,7 @@ import { serializeFirestoreData, serializeDoc, serializeDocs } from '../lib/seri
 import { withRetry } from '../repositories/_resilience';
 import { PatientSchema } from '../schemas/patientSchema.zod';
 import logger from '../utils/logger';
+import { KNOWN_DOCTORS_DIRECTORY } from '../services/doctorDirectoryService';
 
 export async function fetchPatientsAction({ limitCount = 50 } = {}) {
   try {
@@ -237,6 +238,23 @@ export async function searchClinicsAction(searchQuery = '', limitCount = 50) {
       };
     });
 
+    // Merge known verified clinics from directory if not present
+    if (Array.isArray(KNOWN_DOCTORS_DIRECTORY)) {
+      KNOWN_DOCTORS_DIRECTORY.forEach(kDoc => {
+        const cId = kDoc.clinicId;
+        const cName = kDoc.clinicName || kDoc.clinic;
+        if (!cName) return;
+        if (list.some(c => (cId && c.id === cId) || c.name.toLowerCase() === cName.toLowerCase())) return;
+        list.push({
+          id: cId || cName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          name: cName,
+          city: kDoc.city || 'Dubai',
+          phone: kDoc.clinicPhone || kDoc.phone || '',
+          status: 'active'
+        });
+      });
+    }
+
     if (!q) {
       return list.slice(0, limitCount);
     }
@@ -333,6 +351,39 @@ export async function searchDoctorsAction(searchQuery = '', clinicId = null, lim
         isAffiliated: isAffiliatedWithClinic,
       });
     });
+
+    // Merge known verified doctors from directory
+    if (Array.isArray(KNOWN_DOCTORS_DIRECTORY)) {
+      KNOWN_DOCTORS_DIRECTORY.forEach(kDoc => {
+        if (doctors.some(d => d.id === kDoc.id || (kDoc.email && d.email === kDoc.email))) return;
+
+        const docClinicId = kDoc.clinicId || null;
+        const docClinicName = (kDoc.clinicName || kDoc.clinic || '').toLowerCase().trim();
+
+        const isAffiliatedWithClinic = Boolean(
+          (clinicId && (docClinicId === clinicId || clinicDoctorIds.includes(kDoc.id))) ||
+          (clinicCanonicalName && docClinicName && (
+            docClinicName.includes(clinicCanonicalName) || 
+            clinicCanonicalName.includes(docClinicName)
+          ))
+        );
+
+        if (strictClinic && (clinicId || clinicCanonicalName) && !isAffiliatedWithClinic) {
+          return;
+        }
+
+        doctors.push({
+          id: kDoc.id,
+          name: kDoc.name,
+          email: kDoc.email || '',
+          specialty: kDoc.specialty || 'General Practitioner',
+          license: kDoc.license || kDoc.licenseNumber || null,
+          clinicId: docClinicId,
+          clinicName: kDoc.clinicName || kDoc.clinic || null,
+          isAffiliated: isAffiliatedWithClinic,
+        });
+      });
+    }
 
     let filtered = doctors;
     if (q) {
