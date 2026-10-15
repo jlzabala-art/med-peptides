@@ -92,7 +92,7 @@ export default function PrescriptionDetailSidebar({
 
   const canonicalUrl = publicUrl || (typeof window !== 'undefined' 
     ? `${window.location.origin}/rx/${rxId}` 
-    : `https://med-peptides.com/rx/${rxId}`);
+    : `https://www.atlashealth-services.com/rx/${rxId}`);
 
   const availableSections = useMemo(() => {
     return sections.filter(sec => sec && sec.id);

@@ -43,7 +43,7 @@ export default function B2BShowcaseClientView({ showcase }) {
     currency = 'EUR'
   } = showcase;
 
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : `https://med-peptides.com/b2b/${id}`;
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : `https://www.atlashealth-services.com/b2b/${id}`;
 
   const handleCopyLink = () => {
     triggerHaptic('light');

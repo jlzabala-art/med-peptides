@@ -116,7 +116,7 @@ export async function POST(request) {
               intakeState: existingData.intakeState || (existingData.isAtlasRegistered ? 'registered' : 'scanned'),
               createdAt: existingData.createdAt,
               rxUrl: `/rx/${existingCode}`,
-              fullUrl: `https://med-peptides.com/rx/${existingCode}`,
+              fullUrl: `https://www.atlashealth-services.com/rx/${existingCode}`,
               rxData: { id: existingDoc.id, ...existingData }
             },
             message: `Esta prescripción ya está oficialmente registrada en Atlas (${matchReason}). Código oficial: ${existingCode}`
@@ -196,7 +196,7 @@ export async function POST(request) {
         // Generate canonical prescriptionNumber if missing
         const randomHex = Math.random().toString(36).substring(2, 6).toUpperCase();
         const officialNumber = rx.prescriptionNumber || `RX-${dateStr}-${randomHex}`;
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
         const canonicalUrl = `${baseUrl}/rx/${officialNumber}`;
         const rxPath = `/rx/${officialNumber}`;
 
@@ -272,7 +272,7 @@ export async function POST(request) {
           facilityCode: 'BG-SOF-MAG-01',
           country: 'Bulgaria (EU)',
           city: 'Sofia',
-          contactEmail: 'lab@med-peptides.com',
+          contactEmail: 'lab@atlashealth-services.com',
           certification: 'EU-GMP / ISO 22716 & ISO 9001:2015',
           isCertified: true,
           status: 'ready_for_production',

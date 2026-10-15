@@ -167,7 +167,7 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
                   const dateStr = item.issuedAt
                     ? new Date(item.issuedAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
                     : 'Unknown date';
-                  const shortUrl = item.shortUrl || `https://med-peptides.com/c/${item.catalogId}`;
+                  const shortUrl = item.shortUrl || `https://www.atlashealth-services.com/c/${item.catalogId}`;
                   const isCopied = copiedId === item.id;
 
                   return (

@@ -27,7 +27,7 @@ exports.linkedinAutoPost = onDocumentWritten("blogPosts/{docId}", async (event) 
       return null;
     }
 
-    const blogUrl = `https://med-peptides.com/blog/${afterData.slug}`;
+    const blogUrl = `https://www.atlashealth-services.com/blog/${afterData.slug}`;
     const summaryText = afterData.excerpt || afterData.summary || '';
 
     try {

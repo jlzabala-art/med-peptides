@@ -121,6 +121,10 @@ const getTabComponent = async (tabId) => {
     case 'relationships':      return (await import('../../../components/admin/AdminRelationshipsTab')).default;
     case 'semantic':           return (await import('../../../components/admin/AdminSemanticTab')).default;
 
+    case 'tools':
+    case 'admin-tools':
+    case 'clinical-tools':     return (await import('../../../components/admin/AdminToolsTab')).default;
+
     default:
       return null;
   }

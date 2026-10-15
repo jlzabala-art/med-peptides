@@ -51,19 +51,19 @@ export default function CategoryDetailView({
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://med-peptides.com/"
+        "item": "https://www.atlashealth-services.com/"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Research Catalog",
-        "item": "https://med-peptides.com/collection/peptides"
+        "item": "https://www.atlashealth-services.com/collection/peptides"
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": category,
-        "item": `https://med-peptides.com/collection/${categorySlug}`
+        "item": `https://www.atlashealth-services.com/collection/${categorySlug}`
       }
     ]
   }), [category, categorySlug]);

@@ -678,7 +678,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
 
   // WhatsApp share message
   const shareTextWhatsApp = useMemo(() => {
-    const baseUrl = 'https://med-peptides.com';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
     const patientPublicUrl = `${baseUrl}/rx/${rxId}?view=patient`;
     return encodeURIComponent(
       isEs

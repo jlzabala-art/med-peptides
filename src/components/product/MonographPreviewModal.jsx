@@ -104,7 +104,7 @@ export default function MonographPreviewModal({
   const lot = rawLot;
 
   // Dynamic public verification URL (guaranteed non-empty for QR SVG)
-  const effectivePublicUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : `https://med-peptides.com/p/${slug}`);
+  const effectivePublicUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : `https://www.atlashealth-services.com/p/${slug}`);
 
   // Clinical Summary & Indications
   const clinicalIndications = product.clinical_indications || (slug.includes('pt-141') || slug.includes('bremelanotide') 
@@ -208,7 +208,7 @@ export default function MonographPreviewModal({
   // QR URL for the client label reflecting presentation and dose
   const dynamicClientQrUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/p/${slug}?presentation=${encodeURIComponent(selectedLabelFormatId)}&dose=${encodeURIComponent(targetLabelDoseName)}`
-    : `https://med-peptides.com/p/${slug}?presentation=${encodeURIComponent(selectedLabelFormatId)}&dose=${encodeURIComponent(targetLabelDoseName)}`;
+    : `https://www.atlashealth-services.com/p/${slug}?presentation=${encodeURIComponent(selectedLabelFormatId)}&dose=${encodeURIComponent(targetLabelDoseName)}`;
 
   const currentDownloadUrl = activeTab === 'shipping'
     ? shippingLabelPdfUrl

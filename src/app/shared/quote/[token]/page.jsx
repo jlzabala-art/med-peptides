@@ -17,7 +17,7 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const token = resolvedParams?.token;
   const verification = verifySignedQuoteToken(token);
-  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
   let title = 'Official Medical Quotation • Institutional Reference';
   let description = 'Official verified quotation with locked channel pricing, cold-chain logistics, and certificate of analysis verification.';

@@ -108,7 +108,7 @@ export default function PeptideMonographHeader({
 
   const handleCopySpec = () => {
     triggerHaptic('light');
-    const resolvedMonographUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : `https://med-peptides.com/p/${slug}`);
+    const resolvedMonographUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : `https://www.atlashealth-services.com/p/${slug}`);
     const text = [
       `Product: ${primaryName}${cleanScientific ? ` (${cleanScientific})` : ''}`,
       `Classification: Peptide • Clinical monograph`,
@@ -365,8 +365,8 @@ export default function PeptideMonographHeader({
               </div>
             </div>
 
-            {/* Field 3: Verified Purity */}
-            <div className="pds-summary-cell">
+            {/* Field 3: Verified Purity (Moved to Right Inspector on Desktop to prevent duplication) */}
+            <div className="pds-summary-cell pds-summary-cell-redundant-desktop">
               <span className="pds-summary-label">Verified Purity</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
@@ -374,8 +374,8 @@ export default function PeptideMonographHeader({
               </div>
             </div>
 
-            {/* Field 4: Batch Record (GCP Copy-on-Click Standard) */}
-            <div className="pds-summary-cell">
+            {/* Field 4: Batch Record (Moved to Right Inspector on Desktop to prevent duplication) */}
+            <div className="pds-summary-cell pds-summary-cell-redundant-desktop">
               <span className="pds-summary-label">Verified Batch (CoA)</span>
               <div
                 style={{
@@ -417,8 +417,8 @@ export default function PeptideMonographHeader({
               </div>
             </div>
 
-            {/* Field 5: Supplier */}
-            <div className="pds-summary-cell">
+            {/* Field 5: Supplier (Moved to Right Inspector on Desktop to prevent duplication) */}
+            <div className="pds-summary-cell pds-summary-cell-redundant-desktop">
               <span className="pds-summary-label">Source Supplier</span>
               <strong className="pds-summary-value" title={supplier} style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflow: 'visible' }}>{supplier}</strong>
             </div>
@@ -512,7 +512,7 @@ export default function PeptideMonographHeader({
               marginBottom: '14px'
             }}>
               <QRCodeSVG 
-                value={typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : `https://med-peptides.com/p/${slug}`} 
+                value={typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : `https://www.atlashealth-services.com/p/${slug}`} 
                 size={160} 
                 level="M" 
                 includeMargin={false}

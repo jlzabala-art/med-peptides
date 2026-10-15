@@ -467,7 +467,7 @@ export default function ProtocolTemplate({
       descParts.join(' — ');
 
     // ── JSON-LD: MedicalGuideline & WebPage structured data graph ────────────
-    const pageUrl = `https://Atlas Health.com/protocol/${slug}`;
+    const pageUrl = `https://www.atlashealth-services.com/protocol/${slug}`;
     const conditionSchema = {
       "@type": "MedicalCondition",
       "name": humanize(protocol.metadata?.primary_goal || protocol.primary_goal || slug)
@@ -489,9 +489,9 @@ export default function ProtocolTemplate({
           'description': desc.slice(0, 160),
           'isPartOf': {
             '@type': 'WebSite',
-            '@id': 'https://Atlas Health.com#website',
+            '@id': 'https://www.atlashealth-services.com#website',
             'name': 'Atlas Health',
-            'url': 'https://Atlas Health.com'
+            'url': 'https://www.atlashealth-services.com'
           },
           'about': [conditionSchema, ...drugSchemas]
         },
@@ -515,7 +515,7 @@ export default function ProtocolTemplate({
           'publisher': {
             '@type': 'Organization',
             'name': 'Atlas Health',
-            'url': 'https://Atlas Health.com',
+            'url': 'https://www.atlashealth-services.com',
           }
         }
       ]

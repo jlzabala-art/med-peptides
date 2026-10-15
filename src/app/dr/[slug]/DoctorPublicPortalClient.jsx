@@ -1593,22 +1593,6 @@ export default function DoctorPublicPortalClient({
               }}>
                 {totalParts === 1 ? '1 Part' : `${totalParts} Parts`}
               </span>
-
-              {rx.activeIngredientsSummary && (
-                <span
-                  style={{
-                    fontSize: '0.70rem',
-                    color: '#64748b',
-                    maxWidth: '180px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}
-                  title={rx.activeIngredientsSummary}
-                >
-                  {rx.activeIngredientsSummary}
-                </span>
-              )}
             </div>
           </div>
         );
@@ -2230,7 +2214,7 @@ export default function DoctorPublicPortalClient({
       return;
     }
     if (id === 'protocols_catalog') {
-      window.open('https://med-peptides.com/c/CAT-MUWWS6JL', '_blank');
+      window.open('https://www.atlashealth-services.com/c/CAT-MUWWS6JL', '_blank');
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
       return;
     }

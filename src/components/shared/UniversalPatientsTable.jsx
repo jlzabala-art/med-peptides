@@ -52,6 +52,31 @@ function cleanStr(s) {
   return (s || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
+function resolvePatientDoctorAndClinic(row, doctors = []) {
+  const doctorObj = (doctors || []).find(d => d.id === (row.physicianId || row.doctorId));
+  
+  const docName = row.physician 
+    || row.doctorName 
+    || doctorObj?.name 
+    || doctorObj?.displayName 
+    || row.doctor?.name 
+    || (row.prescribingDoctorNames && row.prescribingDoctorNames[0])
+    || null;
+
+  const clinicName = row.clinic 
+    || row.clinicName 
+    || row.doctorClinic 
+    || doctorObj?.clinic 
+    || doctorObj?.clinicName 
+    || row.doctor?.clinicName 
+    || null;
+
+  return { 
+    docName: docName || 'Unassigned Doctor', 
+    clinicName: clinicName || 'Atlas Network' 
+  };
+}
+
 export default function UniversalPatientsTable({ doctorId, accountManagerId, readOnly = false, viewMode = 'admin', hideHeader = false, title = 'Patient Registry', subtitle = 'Centralized database for managing all patients across the platform.', initialData = null, serverKPIs = null }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -283,8 +308,8 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
 
 
   const doctorBreadcrumbs = useMemo(() => [
-    { label: '🏠 Doctor Overview', href: '/doctor' },
-    { label: '👥 Patients' }
+    { label: 'Doctor Overview', href: '/doctor' },
+    { label: 'Patients' }
   ], []);
 
   return (
@@ -341,7 +366,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       kpis={
         <PatientsKPIs 
           filteredCount={finalFiltered.length} 
-          isFiltered={Boolean(searchTerm || filters.status || filters.clinic || filters.physician)} 
+          isFiltered={Boolean(searchTerm || filters.status || filters.clinic || filters.physicianId || (filters.timeRange && filters.timeRange !== 'all'))} 
           scopedPatients={effectiveDoctorId ? finalFiltered : null}
           isDoctorMode={Boolean(effectiveDoctorId || viewMode === 'doctor')}
         />
@@ -365,40 +390,9 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
           value: filters.physicianId || '',
           options: [
             { label: 'All Physicians', value: '' },
-            ...(doctors || []).map(d => ({ label: d.name || d.email, value: d.id }))
+            ...(doctors || []).map(d => ({ label: d.name || d.displayName || d.email, value: d.id }))
           ],
           onChange: (val) => setFilters(prev => ({ ...prev, physicianId: val || undefined }))
-        },
-        {
-          key: 'prescriptionStatus',
-          label: 'Prescription Status (Depuración)',
-          value: filters.prescriptionStatus || '',
-          options: [
-            { label: 'All Patients', value: '' },
-            { label: '⚠️ Sin Prescripción Asignada (Depuración)', value: 'no_rx' },
-            { label: '✓ Con Prescripciones Asignadas', value: 'has_rx' }
-          ],
-          onChange: (val) => setFilters(prev => ({ ...prev, prescriptionStatus: val || undefined }))
-        },
-        {
-          key: 'productCategory',
-          label: 'Product Category (Algolia)',
-          value: filters.productCategory || '',
-          options: [
-            { label: 'All Categories', value: '' },
-            ...(algoliaFacets?.prescribedProductCategories || []).map(f => ({ label: `${f.name} (${f.count})`, value: f.name }))
-          ],
-          onChange: (val) => setFilters(prev => ({ ...prev, productCategory: val || undefined }))
-        },
-        {
-          key: 'algoliaDoctor',
-          label: 'Prescribed By (Algolia)',
-          value: filters.algoliaDoctor || '',
-          options: [
-            { label: 'All Doctors', value: '' },
-            ...(algoliaFacets?.prescribingDoctorNames || []).map(f => ({ label: `${f.name} (${f.count})`, value: f.name }))
-          ],
-          onChange: (val) => setFilters(prev => ({ ...prev, algoliaDoctor: val || undefined }))
         },
         {
           key: 'timeRange',
@@ -428,20 +422,8 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
         filters.physicianId && { 
           key: 'physician', 
           label: 'Assigned Physician', 
-          value: (doctors || []).find(d => d.id === filters.physicianId)?.name || 'Unknown', 
+          value: (doctors || []).find(d => d.id === filters.physicianId)?.name || (doctors || []).find(d => d.id === filters.physicianId)?.displayName || 'Physician', 
           onRemove: () => setFilters(prev => ({ ...prev, physicianId: undefined })) 
-        },
-        filters.productCategory && {
-          key: 'productCategory',
-          label: 'Category',
-          value: filters.productCategory,
-          onRemove: () => setFilters(prev => ({ ...prev, productCategory: undefined })) 
-        },
-        filters.algoliaDoctor && {
-          key: 'algoliaDoctor',
-          label: 'Prescribed By',
-          value: filters.algoliaDoctor,
-          onRemove: () => setFilters(prev => ({ ...prev, algoliaDoctor: undefined })) 
         }
       ].filter(Boolean)}
       data={finalFiltered}
@@ -463,7 +445,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       expandableRender={(row) => {
         const allergies = Array.isArray(row.allergies) && row.allergies.length > 0 ? row.allergies.join(', ') : 'None registered';
         const activeGoals = Array.isArray(row.healthGoals) && row.healthGoals.length > 0 ? row.healthGoals.join(' • ') : (row.primaryGoal || 'Longevity & Metabolic Wellness');
-        const physicianName = (doctors || []).find(d => d.id === row.physicianId)?.name || row.physician || 'Direct Medical Desk';
+        const { docName: physicianName, clinicName: patientClinicName } = resolvePatientDoctorAndClinic(row, doctors);
 
         return (
           <div style={{ padding: '1.25rem 1.5rem', background: '#f8fafc', borderTop: '1px solid var(--border)', borderRadius: '0 0 8px 8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -471,11 +453,11 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
               {/* Perfil Clínico & Objetivos */}
               <div style={{ backgroundColor: 'white', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  🩺 Clinical Focus & Goal
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Clinical Focus & Goal
                 </span>
-                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                  🎯 {activeGoals}
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                  {activeGoals}
                 </span>
                 <span style={{ fontSize: '0.72rem', color: '#dc2626', fontWeight: 600 }}>
                   Allergies: {allergies}
@@ -484,40 +466,40 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
 
               {/* Contacto Directo */}
               <div style={{ backgroundColor: 'white', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  📞 Verified Contact
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Verified Contact
                 </span>
-                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
-                  📧 {row.email || 'No email registered'}
+                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>
+                  {row.email || 'No email registered'}
                 </span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                  📱 {row.phone || '+971 (Direct)'} • {row.country || 'United Arab Emirates'}
+                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  {row.phone || '+971 (Direct)'} • {row.country || 'United Arab Emirates'}
                 </span>
               </div>
 
               {/* Logística de Entrega a Domicilio */}
               <div style={{ backgroundColor: 'white', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  🚚 Home Delivery & Cold Chain
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Home Delivery & Cold Chain
                 </span>
                 <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0284c7' }}>
-                  ❄️ 2-8°C Insulated Pack
+                  2-8°C Insulated Pack
                 </span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  📍 {row.address?.street || row.street || 'Standard Residence Delivery'}
+                <span style={{ fontSize: '0.72rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {row.address?.street || row.street || 'Standard Residence Delivery'}
                 </span>
               </div>
 
               {/* Médico & Afiliación */}
               <div style={{ backgroundColor: 'white', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  👨‍⚕️ Supervisory Doctor & Clinic
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Supervisory Doctor & Clinic
                 </span>
-                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {physicianName}
                 </span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                  🏥 {row.clinic || 'Affiliated Clinical Center'}
+                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  {patientClinicName}
                 </span>
               </div>
             </div>
@@ -538,7 +520,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
                   className="gcp-btn-secondary"
                   style={{ fontSize: '0.75rem', padding: '3px 10px' }}
                 >
-                  ➕ New Rx
+                  New Rx
                 </button>
                 <button
                   onClick={() => openDrawer('patient', row.id, { initialTab: 'overview', patient: row })}
@@ -631,14 +613,15 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
           header: 'Doctor & Clinic',
           width: '26%',
           render: (row) => {
-            const docName = (doctors || []).find(d => d.id === row.physicianId)?.name || row.physician || 'Direct Medical Desk';
+            const { docName, clinicName } = resolvePatientDoctorAndClinic(row, doctors);
+            const isUnassigned = docName === 'Unassigned Doctor';
             return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--text-main)' }}>
-                  👨‍⚕️ {docName}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ fontSize: '0.86rem', fontWeight: 600, color: isUnassigned ? '#94a3b8' : '#0f172a' }}>
+                  {docName}
                 </span>
-                <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                  🏥 {row.clinic || 'Affiliated Clinical Center'}
+                <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                  {clinicName}
                 </span>
               </div>
             );
@@ -649,9 +632,9 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
           header: 'Active Program', 
           width: '16%', 
           render: (row) => (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', backgroundColor: '#eff6ff', color: '#1d4ed8', fontWeight: 700, border: '1px solid #bfdbfe' }}>
-                📋 {row.prescriptionCount || 1} Rx Active
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', backgroundColor: '#eff6ff', color: '#1d4ed8', fontWeight: 600, border: '1px solid #bfdbfe' }}>
+                {row.prescriptionCount || 1} Rx Active
               </span>
             </div>
           )

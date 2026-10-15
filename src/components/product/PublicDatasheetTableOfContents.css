@@ -628,6 +628,24 @@
 #labels-section,
 #analytical-specs,
 #nad-clinical-faq,
-#related-peptides-section {
+#related-peptides-section,
+#results,
+#organ-breakdown,
+#interpretation,
+#synergies,
+#accreditation {
   scroll-margin-top: 86px;
+}
+
+/* ── 5. MOBILE LAB RESULT TOC TRIGGER ── */
+@media (max-width: 1023px) {
+  .mobile-lab-toc-btn {
+    display: block !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobile-lab-toc-btn {
+    display: none !important;
+  }
 }

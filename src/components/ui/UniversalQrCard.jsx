@@ -126,7 +126,7 @@ export default function UniversalQrCard({
         }}>
           <QRCodeSVG 
             id={qrId}
-            value={value || 'https://med-peptides.com'}
+            value={value || 'https://www.atlashealth-services.com'}
             size={size}
             level="M"
             includeMargin={false}
@@ -265,7 +265,7 @@ export default function UniversalQrCard({
               marginBottom: '16px'
             }}>
               <QRCodeSVG 
-                value={value || 'https://med-peptides.com'}
+                value={value || 'https://www.atlashealth-services.com'}
                 size={220}
                 level="Q"
                 includeMargin={false}

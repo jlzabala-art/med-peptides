@@ -34,13 +34,13 @@ const ContactTemplate = memo(({
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://med-peptides.com/"
+            "item": "https://www.atlashealth-services.com/"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Contact Us",
-            "item": "https://med-peptides.com/contact"
+            "item": "https://www.atlashealth-services.com/contact"
           }
         ]
       },
@@ -48,7 +48,7 @@ const ContactTemplate = memo(({
         "@type": "ContactPage",
         "name": "Contact Atlas Health",
         "description": "Contact our team for research support, institutional inquiries, and order assistance.",
-        "url": "https://med-peptides.com/contact"
+        "url": "https://www.atlashealth-services.com/contact"
       }
     ]
   }), []);
@@ -56,7 +56,7 @@ const ContactTemplate = memo(({
   usePageMeta({
     title: 'Contact Us | Research Support & Inquiries | Atlas Health',
     description: 'Get in touch with Atlas Health for technical support, institutional inquiries, or order assistance regarding our research-grade peptides.',
-    canonicalUrl: 'https://med-peptides.com/contact',
+    canonicalUrl: 'https://www.atlashealth-services.com/contact',
     structuredData
   });
 

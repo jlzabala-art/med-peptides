@@ -56,7 +56,7 @@ export default function ProtocolDetailSidebar({
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [pdfStatus, setPdfStatus] = useState('idle'); // 'idle' | 'generating' | 'downloading' | 'success'
 
-  const resolvedUrl = publicUrl || (typeof window !== 'undefined' ? window.location.href : `https://med-peptides.com/proto/${slug}`);
+  const resolvedUrl = publicUrl || (typeof window !== 'undefined' ? window.location.href : `https://www.atlashealth-services.com/proto/${slug}`);
 
   const availableSections = useMemo(() => {
     return sections.filter(sec => sec && sec.id);

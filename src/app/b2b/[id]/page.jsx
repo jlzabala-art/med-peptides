@@ -27,7 +27,7 @@ export async function generateMetadata({ params }) {
     // Fallback to defaults
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
   const ogImageUrl = `${appUrl}/og-catalog.png`;
 
   return {

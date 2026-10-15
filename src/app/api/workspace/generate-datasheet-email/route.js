@@ -59,8 +59,8 @@ export async function POST(req) {
 
       const format = it.format || (isCosmetic ? 'Topical Care' : isDiagnostic ? 'DBS Test Kit' : 'Lyophilized Vial');
       const category = it.category || (isCosmetic ? 'Hair & Scalp Cosmeceuticals' : isDiagnostic ? 'Diagnostics & Biomarkers' : 'Therapeutic Peptides');
-      const monographUrl = `https://med-peptides.com/p/${slug}`;
-      const pdfUrl = `https://med-peptides.com/api/product-sheet/${it.productId || slug}`;
+      const monographUrl = `https://www.atlashealth-services.com/p/${slug}`;
+      const pdfUrl = `https://www.atlashealth-services.com/api/product-sheet/${it.productId || slug}`;
 
       return {
         name,
@@ -122,7 +122,7 @@ Respectfully,
 
 Medical Affairs & Institutional Supply Division
 Med-Peptides Laboratory & Research Network
-business@med-peptides.com | https://med-peptides.com`;
+info@atlashealth-services.com | https://www.atlashealth-services.com`;
 
       return NextResponse.json({
         subject: fallbackSubject,
@@ -160,7 +160,7 @@ business@med-peptides.com | https://med-peptides.com`;
           };
         }),
         fullEmailBody: fallbackBody,
-        senderEmail: 'business@med-peptides.com',
+        senderEmail: 'info@atlashealth-services.com',
         recipientEmail,
         recipientName,
       });
@@ -202,13 +202,13 @@ business@med-peptides.com | https://med-peptides.com`;
         },
         fullEmailBody: {
           type: Type.STRING,
-          description: 'The complete, formal, beautifully formatted plain-text/markdown email written in Pharma English, ready to send from business@med-peptides.com to the recipient.',
+          description: 'The complete, formal, beautifully formatted plain-text/markdown email written in Pharma English, ready to send from info@atlashealth-services.com to the recipient.',
         },
       },
       required: ['subject', 'executiveSummary', 'compounds', 'fullEmailBody'],
     };
 
-    const prompt = `You are the Chief Medical Affairs Officer & Institutional Supply Director at Med-Peptides Analytical Laboratory & Research Network (business@med-peptides.com).
+    const prompt = `You are the Chief Medical Affairs Officer & Institutional Supply Director at Med-Peptides Analytical Laboratory & Research Network (info@atlashealth-services.com).
 
 Draft a formal, highly authoritative professional email in professional "Pharma English" to provide the requested clinical datasheets and analytical documentation.
 
@@ -231,7 +231,7 @@ Staged Items in this Requisition:
 ${JSON.stringify(compoundManifest, null, 2)}
 
 Mandatory Email Content & Category Tone Requirements:
-1. Sender Identity: Med-Peptides Medical Affairs & Supply Division (business@med-peptides.com).
+1. Sender Identity: Med-Peptides Medical Affairs & Supply Division (info@atlashealth-services.com).
 2. Salutation: Formal ("Dear ${recipientName},").
 3. Acknowledgment: Express that following their request, the official clinical monographs and analytical dossiers for the requested products are detailed below.
 4. Executive Summary:
@@ -250,7 +250,7 @@ Mandatory Email Content & Category Tone Requirements:
    Respectfully,
    Medical Affairs & Institutional Supply Division
    Med-Peptides Laboratory & Research Network
-   business@med-peptides.com | https://med-peptides.com
+   info@atlashealth-services.com | https://www.atlashealth-services.com
 
 Ensure all medical and cosmetic language is sophisticated, clinically accurate, reassuring, and strictly in English.`;
 
@@ -282,7 +282,7 @@ Ensure all medical and cosmetic language is sophisticated, clinically accurate, 
 
     const res = NextResponse.json({
       ...data,
-      senderEmail: 'business@med-peptides.com',
+      senderEmail: 'info@atlashealth-services.com',
       recipientEmail,
       recipientName,
     });

@@ -67,7 +67,7 @@ export default function AIUserIntelligenceModal({
         ];
         if (outreachType === 'welcome') {
           subject = `Welcome Dr. ${rawName} to the Atlas Health Clinical Portal`;
-          message = `Hello Dr. ${rawName},\n\nWelcome to Atlas Health Medical Peptides. Your clinical portal access is now active, providing you with our verified research peptide catalog, AI Clinical Scribe, and custom dosing calculator.\n\nYou can access your portal here: https://med-peptides.com/doctor\n\nIf you have any questions or require custom formulations for your practice, feel free to reply directly to this chat.\n\nBest regards,\nAtlas Health Clinical Logistics Team`;
+          message = `Hello Dr. ${rawName},\n\nWelcome to Atlas Health Medical Peptides. Your clinical portal access is now active, providing you with our verified research peptide catalog, AI Clinical Scribe, and custom dosing calculator.\n\nYou can access your portal here: https://www.atlashealth-services.com/doctor\n\nIf you have any questions or require custom formulations for your practice, feel free to reply directly to this chat.\n\nBest regards,\nAtlas Health Clinical Logistics Team`;
         } else {
           subject = `Clinical Protocol Update & Bulk Compounding for Dr. ${rawName}`;
           message = `Dear Dr. ${rawName},\n\nWe wanted to share our latest clinical protocol monographs for BPC-157, TB-500, and GLP-1 analogues now available in your portal with batch analytical COAs.\n\nLet us know if you need priority allocation for your clinic.\n\nWarm regards,\nAtlas Health Team`;
@@ -81,7 +81,7 @@ export default function AIUserIntelligenceModal({
           'Assigned logistics hub: Europe & Middle East Priority Air Freight.'
         ];
         subject = `Atlas Health B2B Wholesale Partnership — ${rawName}`;
-        message = `Hello ${rawName},\n\nThank you for partnering with Atlas Health. We have enabled Wholesale Tier pricing for your account, giving you direct access to batch bulk procurement and private labelling.\n\nAccess your B2B dashboard here: https://med-peptides.com/wholesaler\n\nWe look forward to supporting your supply chain.\n\nAtlas Health Global Logistics`;
+        message = `Hello ${rawName},\n\nThank you for partnering with Atlas Health. We have enabled Wholesale Tier pricing for your account, giving you direct access to batch bulk procurement and private labelling.\n\nAccess your B2B dashboard here: https://www.atlashealth-services.com/wholesaler\n\nWe look forward to supporting your supply chain.\n\nAtlas Health Global Logistics`;
       } else {
         recommendedTier = 'retail';
         insights = [
@@ -90,7 +90,7 @@ export default function AIUserIntelligenceModal({
           'Recommended action: connect with certified physician for personalized protocol supervision.'
         ];
         subject = `Welcome to Atlas Health, ${rawName}`;
-        message = `Hi ${rawName},\n\nThank you for creating your account with Atlas Health. You can now explore our scientific catalog and track your wellness protocols safely.\n\nPortal: https://med-peptides.com/patient\n\nLet us know if you have any questions!\n\nBest regards,\nAtlas Health Support`;
+        message = `Hi ${rawName},\n\nThank you for creating your account with Atlas Health. You can now explore our scientific catalog and track your wellness protocols safely.\n\nPortal: https://www.atlashealth-services.com/patient\n\nLet us know if you have any questions!\n\nBest regards,\nAtlas Health Support`;
       }
 
       setAiAnalysis({

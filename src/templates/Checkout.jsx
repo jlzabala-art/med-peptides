@@ -774,7 +774,7 @@ export default function Checkout({
     const footY = doc.internal.pageSize.getHeight()-15;
     doc.setDrawColor(226,232,240); doc.line(15, footY-4, W-15, footY-4);
     doc.setFontSize(8); doc.setTextColor(148,163,184);
-    doc.text('Atlas Health — Advanced Research Solutions | info@Atlas Health.com', W/2, footY, { align: 'center' });
+    doc.text('Atlas Health — Advanced Research Solutions | info@atlashealth-services.com', W/2, footY, { align: 'center' });
     doc.save(`Atlas Health-Order-${targetOrderId}.pdf`);
   }, [orderId, formData, enrichedCartItems, protocolGroups, checkoutTotals, selectedShipping, finalOrderData]);
 

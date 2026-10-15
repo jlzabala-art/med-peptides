@@ -119,7 +119,7 @@ function exportPDF({ mg, ml, dose, units }) {
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.text('Atlas Health — Research Report  |  Atlas Health.com', 14, FOOTER_Y + 5.5);
+  doc.text('Atlas Health — Research Report  |  atlashealth-services.com', 14, FOOTER_Y + 5.5);
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(7);
   doc.setTextColor(180, 205, 230);

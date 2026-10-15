@@ -26,17 +26,17 @@ export default function TrustRow() {
       >
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
           <ShieldCheck size={14} color="#0ea5e9" />
-          {t('hero.trust.tested', 'Third-Party Tested')}
+          {t('hero.trust.tested', 'ISO 15189 & CE-IVDR Diagnostics')}
         </span>
         <span style={{ opacity: 0.3 }}>•</span>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
           <BookOpen size={14} color="#0ea5e9" />
-          {t('hero.trust.coa', 'COA Included')}
+          {t('hero.trust.coa', 'Physician Supervised Protocols')}
         </span>
         <span style={{ opacity: 0.3 }}>•</span>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
           <Bot size={14} color="#0ea5e9" />
-          {t('hero.trust.clinicalAi', 'Atlas AI Guided')}
+          {t('hero.trust.clinicalAi', 'Atlas AI Clinical Decision')}
         </span>
       </div>
     </div>

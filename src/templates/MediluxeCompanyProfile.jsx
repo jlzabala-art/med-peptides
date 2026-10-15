@@ -92,7 +92,7 @@ export default function MediluxeCompanyProfile() {
 
   const handleShareWhatsApp = () => {
     const text = encodeURIComponent(
-      "MediLuxe Medical Supplies L.L.C. — Company Profile & Personalized Medicine Portfolio (Est. 2011, Abu Dhabi & Dubai):\nhttps://med-peptides.com/mediluxe"
+      "MediLuxe Medical Supplies L.L.C. — Company Profile & Personalized Medicine Portfolio (Est. 2011, Abu Dhabi & Dubai):\nhttps://www.atlashealth-services.com/mediluxe"
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };
@@ -106,7 +106,7 @@ ORG:Mediluxe Medical Supplies L.L.C.
 TITLE:Executive Director
 TEL;TYPE=WORK,VOICE:+971564179256
 EMAIL;TYPE=PREF,INTERNET:jose@mediluxegulf.com
-URL:https://med-peptides.com/mediluxe
+URL:https://www.atlashealth-services.com/mediluxe
 ADR;TYPE=WORK:;;Abu Dhabi & Dubai;UAE;;;
 NOTE:Personalized Medicine & Advanced Compounding Pharmacy Solutions across GCC
 END:VCARD`;
@@ -186,7 +186,7 @@ END:VCARD`;
                 <span>Download Official vCard</span>
               </button>
               <button 
-                onClick={() => handleCopy('https://med-peptides.com/mediluxe', 'url')} 
+                onClick={() => handleCopy('https://www.atlashealth-services.com/mediluxe', 'url')} 
                 className="mediluxe-btn mediluxe-btn-outline"
               >
                 {copiedKey === 'url' ? <Check size={15} style={{ color: '#10b981' }} /> : <Copy size={15} />}
@@ -730,7 +730,7 @@ END:VCARD`;
                 {/* QR Code Card */}
                 <div className="mediluxe-qr-card">
                   <div className="mediluxe-qr-frame">
-                    {/* Clean SVG QR code representation pointing to https://med-peptides.com/mediluxe */}
+                    {/* Clean SVG QR code representation pointing to https://www.atlashealth-services.com/mediluxe */}
                     <svg viewBox="0 0 120 120" width="120" height="120">
                       <rect width="120" height="120" fill="#ffffff" />
                       {/* Corner 1 */}
@@ -821,7 +821,7 @@ END:VCARD`;
                 <span>Save vCard to Mobile</span>
               </button>
               <button
-                onClick={() => handleCopy('https://med-peptides.com/mediluxe', 'sidebar-link')}
+                onClick={() => handleCopy('https://www.atlashealth-services.com/mediluxe', 'sidebar-link')}
                 className="mediluxe-btn mediluxe-btn-outline"
                 style={{ width: '100%', fontSize: '0.8rem' }}
               >

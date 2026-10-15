@@ -42,6 +42,7 @@ import PublicInstitutionalInquiryDrawer from '../shared/PublicInstitutionalInqui
 import PublicStickyActionBar from '../shared/PublicStickyActionBar';
 import ProtocolQrModal from './ProtocolQrModal';
 import PublicUnifiedHeader from '../shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '../shared/PublicUnifiedFooter';
 import ProtocolsCatalogSidebar from './ProtocolsCatalogSidebar';
 import { Mail, Lock } from 'lucide-react';
 import { getProtocolTranslations, GOAL_TRANSLATIONS, SUPPORTED_LANGUAGES } from '../../utils/protocolTranslations';
@@ -258,7 +259,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
 
   const handleCopyQrUrl = () => {
     if (!qrModalProtocol) return;
-    const url = `https://med-peptides.com/proto/${qrModalProtocol.cleanSlug}`;
+    const url = `https://www.atlashealth-services.com/proto/${qrModalProtocol.cleanSlug}`;
     navigator.clipboard?.writeText(url);
     setCopiedQrUrl(true);
     triggerHaptic('copy');
@@ -560,7 +561,8 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         lang={lang}
         hideTier2={true}
         onLangChange={handleLangChange}
-        copyUrl={typeof window !== 'undefined' ? `${window.location.origin}/proto` : 'https://med-peptides.com/proto'}
+        copyUrl="https://www.atlashealth-services.com/proto"
+        shortUrl="https://www.atlashealth-services.com/proto"
         inquiryContextType="protocols_directory"
         onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
         loginRedirect="/proto"
@@ -968,10 +970,10 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                               <button
                                 type="button"
                                 className="proto-card-btn-icon"
-                                onClick={(e) => handleCopyCode(`https://med-peptides.com/proto/${proto.cleanSlug}`, e)}
+                                onClick={(e) => handleCopyCode(`https://www.atlashealth-services.com/proto/${proto.cleanSlug}`, e)}
                                 title={t.copyProtocolLink}
                               >
-                                {copiedId === `https://med-peptides.com/proto/${proto.cleanSlug}` ? (
+                                {copiedId === `https://www.atlashealth-services.com/proto/${proto.cleanSlug}` ? (
                                   <Check size={15} style={{ color: '#16a34a' }} />
                                 ) : (
                                   <Copy size={15} />
@@ -1230,10 +1232,10 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             <button
                               type="button"
                               className="proto-card-btn-icon"
-                              onClick={(e) => handleCopyCode(`https://med-peptides.com/proto/${proto.cleanSlug}`, e)}
+                              onClick={(e) => handleCopyCode(`https://www.atlashealth-services.com/proto/${proto.cleanSlug}`, e)}
                               title={t.copyProtocolLink}
                             >
-                              {copiedId === `https://med-peptides.com/proto/${proto.cleanSlug}` ? (
+                              {copiedId === `https://www.atlashealth-services.com/proto/${proto.cleanSlug}` ? (
                                 <Check size={16} style={{ color: '#16a34a' }} />
                               ) : (
                                 <Copy size={16} />
@@ -1316,7 +1318,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           hasActiveFilters={hasActiveFilters}
           lang={lang}
           t={t}
-          publicUrl={typeof window !== 'undefined' ? `${window.location.origin}/proto` : 'https://med-peptides.com/proto'}
+          publicUrl={typeof window !== 'undefined' ? `${window.location.origin}/proto` : 'https://www.atlashealth-services.com/proto'}
           onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
           isMobileDrawerOpen={isMobileDrawerOpen}
           onCloseMobileDrawer={() => setIsMobileDrawerOpen(false)}
@@ -1328,7 +1330,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         <ProtocolQrModal
           isOpen={Boolean(qrModalProtocol)}
           onClose={() => setQrModalProtocol(null)}
-          publicUrl={`https://med-peptides.com/proto/${qrModalProtocol.cleanSlug}`}
+          publicUrl={`https://www.atlashealth-services.com/proto/${qrModalProtocol.cleanSlug}`}
           displayName={qrModalProtocol.cleanName}
           protocolCode={qrModalProtocol.code || qrModalProtocol.cleanSlug}
           t={t}
@@ -1383,6 +1385,9 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         contextType="protocols_directory"
         lang={lang}
       />
+
+      {/* Institutional Unified Public Footer */}
+      <PublicUnifiedFooter lang={lang} />
     </div>
   );
 }

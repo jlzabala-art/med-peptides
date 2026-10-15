@@ -44,13 +44,21 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // ── Delivery Triad Detection (vial, single_cartridge_pen, double_cartridge_pen) ──
+  // ── Delivery Triad / API Detection (vial, single_cartridge_pen, double_cartridge_pen, bulk_api) ──
   const defaultFormat = React.useMemo(() => {
     if (!product) return 'vial';
     const pName = (product?.canonicalName || product?.name || '').toLowerCase();
     const pPres = (product?.presentation || product?.format || '').toLowerCase();
     const variants = product?.variants || [];
     
+    // 1. Check if product is exclusively or primarily bulk API / raw material
+    const isExclusivelyRaw = variants.length > 0 && variants.every(v => 
+      v.type === 'raw_material' || v.productType === 'raw_material' || v.format === 'bulk_api' || v.unitOfMeasure === 'g'
+    );
+    if (isExclusivelyRaw || product?.primaryType === 'raw_material' || product?.format === 'bulk_api' || /bulk.?api|raw.?material/i.test(pPres)) {
+      return 'bulk_api';
+    }
+
     const hasDouble = variants.some(v => /double|dual|two.?chamber/i.test(v.presentation || v.format || ''));
     if (hasDouble || /double|dual|two.?chamber/i.test(pName) || /double|dual|two.?chamber/i.test(pPres)) {
       return 'double_cartridge_pen';
@@ -134,7 +142,7 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
 
   const handleDownloadPdf = async () => {
     setDownloading(true);
-    notifier.info(`Generating official clinical PDF for ${name} (${selectedFormat === 'double_cartridge_pen' ? 'Double Cartridge' : selectedFormat === 'single_cartridge_pen' ? 'Single Cartridge' : 'Vial'})...`);
+    notifier.info(`Generating official clinical PDF for ${name} (${selectedFormat === 'double_cartridge_pen' ? 'Double Cartridge' : selectedFormat === 'single_cartridge_pen' ? 'Single Cartridge' : selectedFormat === 'bulk_api' ? 'Bulk API' : 'Vial'})...`);
     try {
       const url = `/api/product-sheet/${product.id}?format=${selectedFormat}`;
       const res = await fetch(url);
@@ -143,7 +151,7 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
       const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
-      const formatSuffix = selectedFormat === 'double_cartridge_pen' ? '_double_cartridge' : selectedFormat === 'single_cartridge_pen' ? '_single_cartridge' : '_vial';
+      const formatSuffix = selectedFormat === 'double_cartridge_pen' ? '_double_cartridge' : selectedFormat === 'single_cartridge_pen' ? '_single_cartridge' : selectedFormat === 'bulk_api' ? '_bulk_api' : '_vial';
       a.download = `${(name || product.id).replace(/\s+/g, '_').toLowerCase()}${formatSuffix}_datasheet.pdf`;
       document.body.appendChild(a);
       a.click();
@@ -630,13 +638,14 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
                       {selectedFormat === 'double_cartridge_pen' && '🔄 Dual-Chamber In-Pen System'}
                       {selectedFormat === 'single_cartridge_pen' && '🖊️ Ready-to-Use Liquid Pen'}
                       {selectedFormat === 'vial' && '🧪 Manual Reconstitution Vial'}
+                      {selectedFormat === 'bulk_api' && '⚗️ Bulk API Raw Material (Compounding)'}
                     </span>
                   </div>
 
-                  {/* 3-Option Segmented Control */}
+                  {/* 4-Option Segmented Control (Google Cloud UX Style) */}
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gridTemplateColumns: 'repeat(4, 1fr)',
                     gap: '6px',
                     background: '#f8fafc',
                     padding: '4px',
@@ -721,6 +730,33 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
                       <span>Double Cartridge</span>
                       <span style={{ fontSize: '0.62rem', color: selectedFormat === 'double_cartridge_pen' ? '#7c3aed' : '#94a3b8', fontWeight: 700 }}>
                         Dual-Chamber
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFormat('bulk_api')}
+                      style={{
+                        padding: '8px 4px',
+                        borderRadius: '8px',
+                        border: selectedFormat === 'bulk_api' ? '1px solid #cbd5e1' : '1px solid transparent',
+                        background: selectedFormat === 'bulk_api' ? '#ffffff' : 'transparent',
+                        boxShadow: selectedFormat === 'bulk_api' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
+                        color: selectedFormat === 'bulk_api' ? '#003666' : '#64748b',
+                        fontWeight: selectedFormat === 'bulk_api' ? 800 : 600,
+                        fontSize: '0.75rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '2px',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <span style={{ fontSize: '1.1rem' }}>⚗️</span>
+                      <span>Bulk API</span>
+                      <span style={{ fontSize: '0.62rem', color: selectedFormat === 'bulk_api' ? '#0d9488' : '#94a3b8', fontWeight: 700 }}>
+                        Raw Material
                       </span>
                     </button>
                   </div>
@@ -894,6 +930,65 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
                       }}>
                         <Thermometer size={16} style={{ flexShrink: 0 }} />
                         <span><strong>Storage:</strong> Unmixed dual cartridge: refrigerate at 2°C–8°C. Once mixed in-pen: refrigerate at 2°C–8°C (stable for 28–30 days). Protect from freezing and direct light.</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── FORMAT 4: BULK API POWDER (RAW MATERIAL / COMPOUNDING & FORMULATION) ── */}
+                  {selectedFormat === 'bulk_api' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        background: '#f0fdfa',
+                        border: '1px solid #ccfbf1',
+                        color: '#0f766e',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        width: 'fit-content'
+                      }}>
+                        <span>⚗️ Raw Active Pharmaceutical Ingredient (API) · Master Compounding Protocol</span>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.82rem', color: '#334155', lineHeight: 1.5 }}>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <strong style={{ minWidth: '18px', color: '#0d9488' }}>1.</strong>
+                          <span><strong>Aseptic & Moisture Equilibration:</strong> Dispense strictly inside an ISO Class 5 laminar airflow hood / cleanroom. Allow the sealed frozen vial (-20°C) to reach room temperature in a desiccator cabinet before opening to avoid atmospheric moisture condensation.</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <strong style={{ minWidth: '18px', color: '#0d9488' }}>2.</strong>
+                          <span><strong>Analytical Gravimetric Dosing:</strong> Weigh on a calibrated 5-decimal analytical microbalance (0.01 mg precision). Calculate real active peptide mass factoring the HPLC Purity % and Net Peptide Content (NPC %) from the batch Certificate of Analysis (CoA).</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <strong style={{ minWidth: '18px', color: '#0d9488' }}>3.</strong>
+                          <span><strong>Vehicle Solubilization:</strong> Dissolve in sterile, pyrogen-free vehicle (e.g. Bacteriostatic 0.9% NaCl with 0.9% benzyl alcohol or tailored pH buffer). Swirl gently until optical clarity is achieved. <em>Never vortex or subject peptides to high-shear mechanical agitation.</em></span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <strong style={{ minWidth: '18px', color: '#0d9488' }}>4.</strong>
+                          <span><strong>Sterile 0.22 μm Membrane Filtration:</strong> Filter finished solution through a certified low-protein-binding 0.22 μm PVDF or PES hydrophilic membrane into sterile, depyrogenated type I borosilicate glass receiving vials.</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <strong style={{ minWidth: '18px', color: '#0d9488' }}>5.</strong>
+                          <span><strong>Batch Quality & Bubble Point QA:</strong> Perform bubble-point membrane integrity testing, record batch reconciliation (yield %, lot #, target dose/vial), and seal vials with sterile chlorobutyl stoppers and flip-off aluminum crimps.</span>
+                        </div>
+                      </div>
+
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        background: '#f0fdfa',
+                        border: '1px solid #ccfbf1',
+                        fontSize: '0.78rem',
+                        color: '#0f766e'
+                      }}>
+                        <Thermometer size={16} style={{ flexShrink: 0 }} />
+                        <span><strong>Bulk Storage:</strong> Store lyophilized API powder sealed with desiccants at -20°C (stable 24–36 months; -80°C for long-term biobanking). Keep protected from ambient humidity and direct light.</span>
                       </div>
                     </div>
                   )}

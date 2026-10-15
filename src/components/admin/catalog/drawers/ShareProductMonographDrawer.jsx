@@ -232,7 +232,7 @@ export default function ShareProductMonographDrawer({
 
   const productName = product?.canonicalName || product?.name || 'Clinical Product';
   const slug = product?.slug || product?.id || '';
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
 
   const catLowerSMD = (product?.category || product?.therapeutic_category || '').toLowerCase();
   const isProductCosmeticSMD = (

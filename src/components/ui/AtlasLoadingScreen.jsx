@@ -23,15 +23,20 @@ export default function AtlasLoadingScreen() {
       </motion.div>
 
       {/* Brand name */}
-      <p style={{
-        fontWeight: 800,
-        fontSize: '1.1rem',
-        color: '#003666',
-        letterSpacing: '-0.01em',
+      <div style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         marginBottom: '0.4rem',
       }}>
-        Atlas Health
-      </p>
+        <span style={{ fontWeight: 800, fontSize: '1.25rem', color: '#003666', letterSpacing: '-0.02em' }}>
+          Atlas Health
+        </span>
+        <span style={{ fontWeight: 600, fontSize: '1.25rem', color: '#0284c7', letterSpacing: '-0.02em' }}>
+          Services
+        </span>
+      </div>
       <p style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500 }}>
         {t('common.loading', { defaultValue: 'Iniciando Atlas App...' })}
       </p>

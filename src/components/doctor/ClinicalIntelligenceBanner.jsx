@@ -1019,7 +1019,7 @@ export default function ClinicalIntelligenceBanner({
                             </button>
 
                             <a
-                              href={`https://med-peptides.com/c/CAT-MUWWS6JL`}
+                              href={`https://www.atlashealth-services.com/c/CAT-MUWWS6JL`}
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{

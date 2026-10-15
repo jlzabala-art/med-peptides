@@ -29,7 +29,7 @@ export default function SolventReconWidget({
   const isEs = lang === 'es';
   const [copied, setCopied] = useState(false);
 
-  const resolvedUrl = publicUrl || (typeof window !== 'undefined' ? window.location.href : `https://med-peptides.com/p/${slug}`);
+  const resolvedUrl = publicUrl || (typeof window !== 'undefined' ? window.location.href : `https://www.atlashealth-services.com/p/${slug}`);
 
   const handleCopyLink = async () => {
     try {

@@ -100,7 +100,7 @@ export default function MobileQuotationCard({
               const itemsCount = (quote.items || []).length;
               const client = quote.clientName || 'Valued Client';
               const quoteNum = quote.quotationNumber || quote.id;
-              const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+              const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
               const secureLink = `${origin}/quotation/${quote.id}`;
               const msg = isEs
                 ? `Estimado/a ${client},\n\nLe adjuntamos su Cotización oficial de Atlas Health (${quoteNum}):\n• Productos: ${itemsCount} formulación(es) compuesta(s)\n• Total: $${total}\n• Ver y Aceptar Online: ${secureLink}`

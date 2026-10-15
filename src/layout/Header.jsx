@@ -326,14 +326,14 @@ function Header(props) {
             {logoUrl ? (
               <Image src={logoUrl} alt={tenantName || "Partner Logo"} width={160} height={40} style={{ height: '40px', width: 'auto', objectFit: 'contain' }} />
             ) : (
-              <BrandLogo variant="dark" size="default" />
+              <BrandLogo variant={isOpaque ? "dark" : "light"} size="default" />
             )}
           </span>
           <span className="site-header__logo-mobile">
             {logoUrl ? (
               <Image src={logoUrl} alt={tenantName || "Partner Logo"} width={160} height={32} style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
             ) : (
-              <BrandLogo variant="dark" size="compact" />
+              <BrandLogo variant={isOpaque ? "dark" : "light"} size="compact" />
             )}
           </span>
         </div>

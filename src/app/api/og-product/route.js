@@ -76,7 +76,7 @@ export async function GET(request) {
 
   <!-- Brand -->
   <text x="100" y="510" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="800" fill="white" opacity="0.9">Atlas Services</text>
-  <text x="100" y="532" font-family="system-ui, sans-serif" font-size="14" fill="#64748b">med-peptides.com · Clinical Product Database</text>
+  <text x="100" y="532" font-family="system-ui, sans-serif" font-size="14" fill="#64748b">atlashealth-services.com · Clinical Product Database</text>
 
   <!-- QR icon hint -->
   <rect x="990" y="450" width="80" height="80" rx="12" fill="#0f172a"/>

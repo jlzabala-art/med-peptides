@@ -482,26 +482,127 @@ export default function AdminPhysiciansTab() {
     });
   };
 
+  const physicianExpandableRender = (d) => {
+    const name = getDoctorName(d);
+    const drSlug = getDoctorSlug(d);
+    return (
+      <div
+        style={{
+          padding: '1.25rem 1.5rem',
+          backgroundColor: '#f8fafc',
+          borderTop: '1px solid #e2e8f0',
+          borderBottom: '1px solid #e2e8f0',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '1.25rem',
+          fontSize: '0.85rem'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Contact Info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+            Contacto & Identificación
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ color: '#0f172a', fontWeight: 600 }}>{d.email || 'No email registered'}</span>
+            {d.email && <CopyableId value={d.email} iconOnly={true} />}
+          </div>
+          {d.phone && (
+            <div style={{ color: '#475569', fontSize: '0.8rem' }}>
+              Tel: <span style={{ fontWeight: 500 }}>{d.phone}</span>
+            </div>
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Doctor ID:</span>
+            <CopyableId value={d.id} />
+          </div>
+        </div>
+
+        {/* Practice & Clinic Info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+            Centro Médico / Dónde Trabaja
+          </span>
+          <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem' }}>
+            {d.clinicName || d.clinic || 'Clínica no asignada'}
+          </div>
+          <div style={{ color: '#0284c7', fontWeight: 600, fontSize: '0.8rem' }}>
+            {d.specialty || d.title || 'General Practitioner'}
+          </div>
+          {(d.dhaLicense || d.licenseNumber || d.licenseId) && (
+            <div style={{ fontSize: '0.75rem', color: '#475569' }}>
+              Licencia DHA: <span style={{ fontWeight: 600, color: '#0f172a' }}>{d.dhaLicense || d.licenseNumber || d.licenseId}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Clinical Statistics */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+            Métricas Clínicas
+          </span>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 14px', textAlign: 'center' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#d97706' }}>{getPatientsCount(d)}</div>
+              <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>Pacientes</div>
+            </div>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 14px', textAlign: 'center' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#16a34a' }}>{d.prescriptionCount || 0}</div>
+              <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>Prescripciones</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', justifyContent: 'center' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+            Acciones Rápidas
+          </span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <a
+              href={`/dr/${encodeURIComponent(drSlug)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline btn-sm"
+              style={{ fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            >
+              <ExternalLink size={13} /> Ver Página Pública
+            </a>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => useWorkspaceStore.getState().loadUserIntoWorkspace(d, { role: 'doctor' })}
+              style={{ fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            >
+              <Layers size={13} /> Cargar en Workspace
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => setSelectedDoctor({ ...d, activeTab: 'patients' })}
+              style={{ fontSize: '0.78rem' }}
+            >
+              Ver Pacientes ({getPatientsCount(d)})
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const columns = [
     {
       key: 'physician',
       header: 'Physician',
-      width: '28%',
+      width: '30%',
       render: (d) => {
         const name = getDoctorName(d);
-        const clinicInfo = [d.specialty || 'General', d.clinicName].filter(Boolean).join(' • ');
         return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ minWidth: 0, overflow: 'hidden' }}>
-              <div style={{ fontWeight: 600, color: 'var(--color-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{name}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{d.email}</span>
-                <CopyableId value={d.id} iconOnly={true} />
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.15rem', fontWeight: 500 }}>
-                {clinicInfo}
-              </div>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontWeight: 600, color: 'var(--color-primary)', fontSize: '0.92rem' }}>
+              {name}
+            </span>
           </div>
         );
       }
@@ -518,12 +619,12 @@ export default function AdminPhysiciansTab() {
     {
       key: 'subscriptionTier',
       header: 'Plan / Tier',
-      width: '18%',
+      width: '12%',
       align: 'center',
       render: (d) => {
         const isPro = d.subscriptionTier === 'advanced' || d.subscriptionTier === 'pro';
         return (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <button
               type="button"
               onClick={async (e) => {
@@ -534,7 +635,7 @@ export default function AdminPhysiciansTab() {
                     subscriptionTier: nextTier,
                     planUpdatedAt: new Date()
                   });
-                  notifier.success(`Dr. ${d.firstName || d.displayName || 'Physician'} updated to ${nextTier === 'advanced' ? 'Advanced Pro 💎' : 'Basic (Free) 🟢'}`);
+                  notifier.success(`Dr. ${d.firstName || d.displayName || 'Physician'} updated to ${nextTier === 'advanced' ? 'Pro' : 'Basic'}`);
                   refresh();
                 } catch (err) {
                   notifier.error('Error updating plan: ' + err.message);
@@ -543,20 +644,19 @@ export default function AdminPhysiciansTab() {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
-                padding: '0.25rem 0.65rem',
-                borderRadius: '16px',
-                fontSize: '0.78rem',
-                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '0.72rem',
+                fontWeight: isPro ? 600 : 500,
                 cursor: 'pointer',
-                border: isPro ? '1px solid #99f6e4' : '1px solid #cbd5e1',
-                backgroundColor: isPro ? '#f0fdfa' : '#f8fafc',
-                color: isPro ? '#0f766e' : '#475569',
+                border: isPro ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+                backgroundColor: isPro ? '#eff6ff' : '#f8fafc',
+                color: isPro ? '#1d4ed8' : '#64748b',
                 transition: 'all 0.15s ease',
               }}
-              title="Click to toggle between Basic and Advanced Pro Plan"
+              title="Click to toggle between Basic and Pro"
             >
-              {isPro ? '💎 Advanced Pro' : '🟢 Basic (Free)'}
+              {isPro ? 'Pro' : 'Basic'}
             </button>
           </div>
         );
@@ -653,7 +753,7 @@ export default function AdminPhysiciansTab() {
         const actions = [
           {
             type: 'toggle_plan',
-            label: isPro ? 'Cambiar a Básico 🟢' : 'Promocionar a Avanzado Pro 💎',
+            label: isPro ? 'Cambiar a Básico' : 'Promocionar a Avanzado Pro',
             onClick: async () => {
               const nextTier = isPro ? 'basic' : 'advanced';
               try {
@@ -922,6 +1022,7 @@ export default function AdminPhysiciansTab() {
         filterOptions={filterOptionsConfig}
         data={sortedDoctors}
         columns={columns}
+        expandableRender={physicianExpandableRender}
         onRowClick={(d) => setSelectedDoctor(d)}
         mobileCardComponent={MobileDoctorCard}
         mobileCardProps={mobileCardPropsForTable}

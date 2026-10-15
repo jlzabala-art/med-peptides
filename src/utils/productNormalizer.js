@@ -291,6 +291,9 @@ export function normalizeProductMeta(product) {
   };
 }
 
+/** Alias for normalizeProductMeta */
+export const normalizeProduct = normalizeProductMeta;
+
 /**
  * Accurately determines if a product is a genuine clinical Peptide (vs raw API, medical supply, supplement, etc.)
  * Used to restrict peptide-specific features (such as the Universal Datasheet / Barcode share function).

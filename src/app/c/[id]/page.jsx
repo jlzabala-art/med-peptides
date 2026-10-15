@@ -29,7 +29,7 @@ export async function generateMetadata({ params, searchParams }) {
             ? `Clinical Protocol Directory • ${recipientName}`
             : 'Clinical Protocol Directory • Evidence-Based Pathways';
           const description = 'Standardized clinical protocol guidelines, dosing schedules, and titration timelines for certified medical practitioners.';
-          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
           const ogImageUrl = `${appUrl}/og-catalog.png`;
 
           return {
@@ -74,7 +74,7 @@ export async function generateMetadata({ params, searchParams }) {
 }
 
 /**
- * Short URL Entry Point: https://med-peptides.com/c/[id]
+ * Short URL Entry Point: https://www.atlashealth-services.com/c/[id]
  * Renders the verified shared catalog or redirects to protocols directory with visit tracking.
  */
 export default async function ShortCatalogRoute({ params }) {

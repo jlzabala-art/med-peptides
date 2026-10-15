@@ -250,7 +250,7 @@ export default function PharmapolisLabelSvg({
   const targetRxUrl = React.useMemo(() => {
     if (labelData.targetRxUrl) return labelData.targetRxUrl;
     if (labelData.url) return labelData.url;
-    const base = `https://med-peptides.com/rx/${fileNumber}?view=patient`;
+    const base = `https://www.atlashealth-services.com/rx/${fileNumber}?view=patient`;
     const pIdx = labelData.partIndex ?? labelData.phaseIndex;
     if (pIdx !== undefined && pIdx !== null && labelData.totalParts > 1) {
       return `${base}&part=${Number(pIdx) + 1}&action=refill`;

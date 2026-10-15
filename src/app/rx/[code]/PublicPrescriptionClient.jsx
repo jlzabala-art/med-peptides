@@ -55,6 +55,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PrescriptionDetailSidebar from '@/components/prescription/PrescriptionDetailSidebar';
@@ -177,7 +178,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     timeline
   } = usePrescriptionData(currentRx, { lang, isEs, isPatientView, atlasRecs });
 
-  const baseUrl = 'https://med-peptides.com';
+  const baseUrl = 'https://www.atlashealth-services.com';
   const publicUrl = `${baseUrl}/rx/${rxId}`;
   const patientPublicUrl = `${baseUrl}/rx/${rxId}?view=patient`;
 
@@ -1741,6 +1742,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           />
         </div>
       </div>
+
+      {/* Institutional Unified Public Footer */}
+      {!embedded && <PublicUnifiedFooter lang={lang} />}
 
       {/* Floating Bottom Action Dock (Doctor & Patient View - GCP Standard) */}
       {!embedded && (

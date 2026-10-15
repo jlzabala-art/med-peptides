@@ -47,7 +47,7 @@ export default function EternaGenomicsDetail({
   slug = 'eterna-epigenetic-age-test',
   initialBatch = 'AS-ETR-EUR01-2610',
   initialStrength = '1 test / kit',
-  baseUrl = 'https://med-peptides.com'
+  baseUrl = 'https://www.atlashealth-services.com'
 }) {
   // Default strictly to English as requested
   const [lang, setLang] = useState('en');

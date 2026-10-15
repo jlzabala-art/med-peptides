@@ -385,8 +385,8 @@ async function ingest() {
     batchCode: 'PHARM-2024-TRI-BOX01399',
     batchNumber: 'PHARM-2024-TRI-BOX01399',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
-    canonicalUrl: `https://med-peptides.com/rx/${CODE}`,
-    publicUrl: `https://med-peptides.com/rx/${CODE}`,
+    canonicalUrl: `https://www.atlashealth-services.com/rx/${CODE}`,
+    publicUrl: `https://www.atlashealth-services.com/rx/${CODE}`,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp()
   };

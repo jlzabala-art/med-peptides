@@ -7,7 +7,7 @@ import RxLabelsStandaloneClient from './RxLabelsStandaloneClient';
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
 export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;

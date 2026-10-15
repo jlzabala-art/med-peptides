@@ -364,7 +364,7 @@ export default function AdminQuotationsTab() {
     const itemsCount = (quote.items || []).length;
     const client = quote.clientName || 'Valued Client';
     const quoteNum = quote.quotationNumber || quote.id;
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
     const secureLink = `${origin}/quotation/${quote.id}`;
 
     const isEs = activeLang === 'es';
@@ -378,14 +378,14 @@ export default function AdminQuotationsTab() {
   };
 
   const handleCopyClientLink = (quote) => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
     const link = `${origin}/quotation/${quote.id}`;
     navigator.clipboard?.writeText(link);
     notifier.success(`🔗 Client link copied for ${quote.quotationNumber || quote.id}`);
   };
 
   const handleOpenShareModal = (quote) => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
     setShareModalData({
       isOpen: true,
       quote,

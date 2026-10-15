@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import PeptideMonographHeader from './PeptideMonographHeader';
 import PeptideMonographTabs from './PeptideMonographTabs';
 import PeptideMonographTopStrip from './PeptideMonographTopStrip';
+import PeptideMonographSidebar from './PeptideMonographSidebar';
 import MonographTabsNavigatorDrawer from './MonographTabsNavigatorDrawer';
 import OverviewTab from './OverviewTab';
 import ProtocolWorkspaceTab from './ProtocolWorkspaceTab';
@@ -165,26 +166,9 @@ export default function PeptideMonographWorkspace({
         }}
       />
 
-      {/* ── DESKTOP LAYOUT (≥1024px): Standard GCP Top Tabs + Full Main Grid ── */}
+      {/* ── DESKTOP LAYOUT (≥1024px): Google Cloud Console Right-Inspector Grid ── */}
       <div className="pds-desktop-tabs-wrapper">
-        <PeptideMonographTabs
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          protocolCount={associatedProtocols?.length || 3}
-        />
-
-        <PeptideMonographTopStrip
-          activeTab={activeTab}
-          product={product}
-          slug={slug}
-          effectiveBatch={effectiveBatch}
-          protocolContext={protocolContext}
-          dynamicPublicUrl={dynamicPublicUrl}
-          shortUrl={shortUrl}
-          onOpenCoaModal={() => setIsCoaModalOpen(true)}
-        />
-
-        <div className="pds-monograph-main-grid">
+        <div className="pds-monograph-desktop-grid">
           <div className="pds-monograph-task-area">
             {activeTab === 'overview' && (
               <OverviewTab
@@ -238,6 +222,25 @@ export default function PeptideMonographWorkspace({
             {activeTab === 'references' && (
               <ReferencesTab product={product} slug={slug} />
             )}
+          </div>
+
+          <div className="pds-monograph-sidebar-sticky">
+            <PeptideMonographSidebar
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              protocolCount={associatedProtocols?.length || 3}
+              product={product}
+              slug={slug}
+              effectiveBatch={effectiveBatch}
+              selectedStrength={selectedStrength}
+              activeFormat={activeFormat}
+              supplierName={supplierName}
+              dynamicPublicUrl={dynamicPublicUrl}
+              onOpenCoaModal={() => setIsCoaModalOpen(true)}
+              onOpenPreviewModal={(tab) => {
+                setIsPreviewModalOpen(true);
+              }}
+            />
           </div>
         </div>
       </div>
@@ -595,7 +598,7 @@ export default function PeptideMonographWorkspace({
         selectedStrength={selectedStrength}
         availableFormats={availableFormats}
         sortedStrengths={sortedStrengths}
-        dynamicPublicUrl={dynamicPublicUrl || (typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : `https://med-peptides.com/p/${slug}`)}
+        dynamicPublicUrl={dynamicPublicUrl || (typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : `https://www.atlashealth-services.com/p/${slug}`)}
         initialBatch={effectiveBatch}
         version={versionInfo?.version}
         updatedAtDate={versionInfo?.updatedAtDate}

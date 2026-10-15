@@ -68,7 +68,7 @@ export const serializeProtocolToICS = (protocolData) => {
         
         events.push([
           'BEGIN:VEVENT',
-          `UID:${id}-W${week.week}-M${mIdx}-${dtStr}@Atlas Health.com`,
+          `UID:${id}-W${week.week}-M${mIdx}-${dtStr}@atlashealth-services.com`,
           `DTSTAMP:${stamp}`,
           `DTSTART;VALUE=DATE:${dtStr}`,
           `DTEND;VALUE=DATE:${dtStr}`,
@@ -134,7 +134,7 @@ export const generateProtocolICS = (protocolData) => {
  * Note: Requires backend support for persistent storage of protocol IDs
  */
 export const getWebcalUrl = (protocolId) => {
-  return `webcal://api.Atlas Health.com/calendar/v1/feed/${protocolId}.ics`;
+  return `webcal://api.atlashealth-services.com/calendar/v1/feed/${protocolId}.ics`;
 };
 
 /**

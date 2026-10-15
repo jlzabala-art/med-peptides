@@ -62,7 +62,7 @@ describe('CatalogExportStatusDock', () => {
       markupPercent: 20,
       state: 'success',
       stepMessage: 'Interactive Web Share link is active.',
-      resultUrl: 'https://med-peptides.com/shared/catalog/test-token',
+      resultUrl: 'https://www.atlashealth-services.com/shared/catalog/test-token',
       errorMessage: null,
     };
 

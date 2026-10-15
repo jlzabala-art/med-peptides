@@ -63,13 +63,13 @@ export default function Quality() {
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://med-peptides.com/"
+            "item": "https://www.atlashealth-services.com/"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Quality Standards",
-            "item": "https://med-peptides.com/quality"
+            "item": "https://www.atlashealth-services.com/quality"
           }
         ]
       },
@@ -89,7 +89,7 @@ export default function Quality() {
   usePageMeta({
     title: 'Quality & Analytical Standards | HPLC & MS Verified Peptides',
     description: 'Every Atlas Health batch is verified by HPLC and Mass Spectrometry. Discover our rigorous quality control process and compliance certifications.',
-    canonicalUrl: 'https://med-peptides.com/quality',
+    canonicalUrl: 'https://www.atlashealth-services.com/quality',
     structuredData
   });
 

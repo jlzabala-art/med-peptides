@@ -173,7 +173,7 @@ async function generateFrontLabelSvg(data, options = { withMicroQr: false, qrSvg
 
 async function generateBackLabelSvg(data, qrSvg) {
   const patientDisplay = data.patientName;
-  const qrUrl = data.url || `https://med-peptides.com/rx/${data.rxCode || '50957'}`;
+  const qrUrl = data.url || `https://www.atlashealth-services.com/rx/${data.rxCode || '50957'}`;
 
   return `
   <svg width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
@@ -361,7 +361,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-CET100',
     lote: '2608-CET',
-    url: 'https://med-peptides.com/rx/50957'
+    url: 'https://www.atlashealth-services.com/rx/50957'
   },
   // 2. Alan Maclean Rutledge - Proteolytic Enzymes 270 caps (RX-50957-A)
   {
@@ -381,7 +381,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Clínica Dra Camacho, Barcelona',
     batchCode: 'PHARM-2026-NATSER',
     lote: '2609-NAT',
-    url: 'https://med-peptides.com/rx/RX-50957-A'
+    url: 'https://www.atlashealth-services.com/rx/RX-50957-A'
   },
   // 3. Alan Maclean Rutledge - Liver & Mitochondrial Support 90 caps (RX-50957-B)
   {
@@ -401,7 +401,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Clínica Dra Camacho, Barcelona',
     batchCode: 'PHARM-2026-ALAUPI',
     lote: '2609-MITO',
-    url: 'https://med-peptides.com/rx/RX-50957-B'
+    url: 'https://www.atlashealth-services.com/rx/RX-50957-B'
   },
 
   // 4. Saeed Musallam Mefleh Khamis Almazrouei - Night Formula (from uploaded sample)
@@ -422,7 +422,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-NF270',
     lote: '2608-NF',
-    url: 'https://med-peptides.com/rx/saeed-almazrouei'
+    url: 'https://www.atlashealth-services.com/rx/saeed-almazrouei'
   },
 
   // 5. Amna Sultan Mohamed Ahmed Alotaiba - Morning Formula (RX-51857-A)
@@ -444,7 +444,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'NOVA Plastic Surgery Clinic, Dubai',
     batchCode: 'PHARM-2026-UBISWP',
     lote: '2609-AMN1',
-    url: 'https://med-peptides.com/rx/51857'
+    url: 'https://www.atlashealth-services.com/rx/51857'
   },
   // 6. Amna Sultan Mohamed Ahmed Alotaiba - Metabolic & Lipid Formula (RX-51857-B)
   {
@@ -465,7 +465,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'NOVA Plastic Surgery Clinic, Dubai',
     batchCode: 'PHARM-2026-RYR',
     lote: '2609-AMN2',
-    url: 'https://med-peptides.com/rx/51857'
+    url: 'https://www.atlashealth-services.com/rx/51857'
   },
 
   // 7. Abdulla Sultan Mohamed Ahmed Alotaiba - Morning Methylation (RX-51812-A)
@@ -487,7 +487,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'NOVA Clinic Day Surgery Center, Dubai',
     batchCode: 'PHARM-2026-METH90',
     lote: '2609-ABD1',
-    url: 'https://med-peptides.com/rx/51812'
+    url: 'https://www.atlashealth-services.com/rx/51812'
   },
   // 8. Abdulla Sultan Mohamed Ahmed Alotaiba - Night Formula (RX-51812-B)
   {
@@ -508,7 +508,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'NOVA Clinic Day Surgery Center, Dubai',
     batchCode: 'PHARM-2026-REST90',
     lote: '2609-ABD2',
-    url: 'https://med-peptides.com/rx/51812'
+    url: 'https://www.atlashealth-services.com/rx/51812'
   },
 
   // 9. Basma Haitham K Bouzo - Morning Testosterone Cream (RX-51861-A)
@@ -529,7 +529,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'NOVA Plastic Surgery Clinic, Dubai',
     batchCode: 'PHARM-2026-TEST90',
     lote: '2609-BAS1',
-    url: 'https://med-peptides.com/rx/51861'
+    url: 'https://www.atlashealth-services.com/rx/51861'
   },
   // 10. Basma Haitham K Bouzo - Evening Estradiol Cream (RX-51861-B)
   {
@@ -549,7 +549,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'NOVA Plastic Surgery Clinic, Dubai',
     batchCode: 'PHARM-2026-ESTR90',
     lote: '2609-BAS2',
-    url: 'https://med-peptides.com/rx/51861'
+    url: 'https://www.atlashealth-services.com/rx/51861'
   },
 
   // 11. Mohammed Ahmad Aishehhi - TrichoSol 100ml (RX-BOX03483AATRI)
@@ -576,7 +576,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-TRI100',
     lote: '2609-MHD1',
-    url: 'https://med-peptides.com/rx/BOX03483AATRI'
+    url: 'https://www.atlashealth-services.com/rx/BOX03483AATRI'
   },
 
   // 12. Julien Boiteux - TrichoSol 100ml (BOX03529AATRI - Part 1)
@@ -603,7 +603,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-TRI-BOX03529',
     lote: '2609-JB1',
-    url: 'https://med-peptides.com/rx/BOX03529AATRI'
+    url: 'https://www.atlashealth-services.com/rx/BOX03529AATRI'
   },
   // 13. Julien Boiteux - TrichoOil 30ml (BOX03529AATRI - Part 2)
   {
@@ -629,7 +629,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-OIL-BOX03529',
     lote: '2609-JB2',
-    url: 'https://med-peptides.com/rx/BOX03529AATRI'
+    url: 'https://www.atlashealth-services.com/rx/BOX03529AATRI'
   },
 
   // 14. Mangesh Sakharkar - TrichoSol (RX-MS-0903)
@@ -652,7 +652,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-MS-TR1',
     lote: '2609-MS1',
-    url: 'https://med-peptides.com/rx/RX-MS-0903'
+    url: 'https://www.atlashealth-services.com/rx/RX-MS-0903'
   },
   // 15. Mangesh Sakharkar - Oral Minoxidil (RX-MS-0903)
   {
@@ -674,7 +674,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-MS-OR1',
     lote: '2609-MS2',
-    url: 'https://med-peptides.com/rx/RX-MS-0903'
+    url: 'https://www.atlashealth-services.com/rx/RX-MS-0903'
   },
 
   // 16. Matthew Taylor - TrichoSol (RX-MT-0903)
@@ -697,7 +697,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-MT-TR1',
     lote: '2609-MT1',
-    url: 'https://med-peptides.com/rx/RX-MT-0903'
+    url: 'https://www.atlashealth-services.com/rx/RX-MT-0903'
   },
   // 17. Matthew Taylor - TrichoOil (RX-MT-0903)
   {
@@ -719,7 +719,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-MT-OIL',
     lote: '2609-MT2',
-    url: 'https://med-peptides.com/rx/RX-MT-0903'
+    url: 'https://www.atlashealth-services.com/rx/RX-MT-0903'
   },
 
   // 18. Aamer Reza Habib - Diltiazem 2% + Lidocaine 2% Pomade - 30 g (RX-51245)
@@ -745,7 +745,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'NOVA Clinic Day Surgery Center, Dubai',
     batchCode: 'PHARM-2026-DL30G',
     lote: '2609-HAB1',
-    url: 'https://med-peptides.com/rx/RX-51245'
+    url: 'https://www.atlashealth-services.com/rx/RX-51245'
   },
 
   // ── SPREADSHEET AUDIT PRESCRIPTIONS (NEW EN ALTAS) ──
@@ -780,7 +780,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'NOVA Clinic, Dubai',
     batchCode: 'PHARM-2026-NMMA-EVE',
     lote: '2609-NOU1',
-    url: 'https://med-peptides.com/rx/rx_nmma_2'
+    url: 'https://www.atlashealth-services.com/rx/rx_nmma_2'
   },
 
   // 20. Daria Grek - TrichoSol 100ml (RX-20261001-SW8B - Part 1)
@@ -807,7 +807,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-DG-TR1',
     lote: '2609-DG1',
-    url: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+    url: 'https://www.atlashealth-services.com/rx/CfOwJCEFcnwmww0TjtZ5'
   },
   // 21. Daria Grek - Capsules (RX-20261001-SW8B - Part 2)
   {
@@ -836,7 +836,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-DG-CAP',
     lote: '2609-DG2',
-    url: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+    url: 'https://www.atlashealth-services.com/rx/CfOwJCEFcnwmww0TjtZ5'
   },
   // 22. Daria Grek - TrichoOil 30ml (RX-20261001-SW8B - Part 3)
   {
@@ -862,7 +862,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-DG-OIL',
     lote: '2609-DG3',
-    url: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+    url: 'https://www.atlashealth-services.com/rx/CfOwJCEFcnwmww0TjtZ5'
   },
   // 23. Daria Grek - TrichoWash 250ml (RX-20261001-SW8B - Part 4)
   {
@@ -888,7 +888,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-DG-WASH',
     lote: '2609-DG4',
-    url: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+    url: 'https://www.atlashealth-services.com/rx/CfOwJCEFcnwmww0TjtZ5'
   },
 
   // 24. Ghada Abdulaziz Ishaq - Formula Estradiol Transdermal (RX-51253)
@@ -913,7 +913,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'NOVA Clinic · Dubai Healthcare City',
     batchCode: 'PHARM-2026-GHA-EST',
     lote: '2609-GHA1',
-    url: 'https://med-peptides.com/rx/RX-51253'
+    url: 'https://www.atlashealth-services.com/rx/RX-51253'
   },
   // 25. Ghada Abdulaziz Ishaq - Dehydroepiandrosterone (DHEA) 5 mg (RX-51253-B)
   {
@@ -937,7 +937,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'NOVA Clinic · Dubai Healthcare City',
     batchCode: 'PHARM-2026-GHA-DHEA',
     lote: '2609-GHA2',
-    url: 'https://med-peptides.com/rx/RX-51253-B'
+    url: 'https://www.atlashealth-services.com/rx/RX-51253-B'
   },
 
   // 26. Reem F M Alghanim - Bioidentical Hormone Cream (RX-RFMA-2)
@@ -963,7 +963,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'NOVA Clinic, Dubai',
     batchCode: 'PHARM-2026-RFMA-CRM',
     lote: '2609-RFM1',
-    url: 'https://med-peptides.com/rx/rx_rfma_2'
+    url: 'https://www.atlashealth-services.com/rx/rx_rfma_2'
   },
 
   // 27. George Mills - TrichoSol 100ml (RX-518134)
@@ -989,7 +989,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-GM-TRI',
     lote: '2609-GM1',
-    url: 'https://med-peptides.com/rx/RX-518134'
+    url: 'https://www.atlashealth-services.com/rx/RX-518134'
   },
 
   // 28. Sara Khalid Al-Meadadi - Pentravan (BOX03049AATEL - Part 1)
@@ -1016,7 +1016,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-SKA-PEN',
     lote: '2609-SKA1',
-    url: 'https://med-peptides.com/rx/BOX03049AATEL'
+    url: 'https://www.atlashealth-services.com/rx/BOX03049AATEL'
   },
   // 29. Sara Khalid Al-Meadadi - Capsules (BOX03049AATEL - Part 2)
   {
@@ -1042,7 +1042,7 @@ const PRESCRIPTIONS_CATALOG = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-SKA-CAP',
     lote: '2609-SKA2',
-    url: 'https://med-peptides.com/rx/BOX03049AATEL'
+    url: 'https://www.atlashealth-services.com/rx/BOX03049AATEL'
   }
 ];
 
@@ -1055,7 +1055,7 @@ async function run() {
     console.log(`Generating labels for: ${item.patientName} -> ${item.productTitle}`);
 
     // Generate Raw QR SVG for the prescription URL
-    const qrUrl = item.url || `https://med-peptides.com/rx/${item.rxCode}`;
+    const qrUrl = item.url || `https://www.atlashealth-services.com/rx/${item.rxCode}`;
     const rawQrSvg = await QRCode.toString(qrUrl, {
       type: 'svg',
       margin: 1,

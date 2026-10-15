@@ -5,7 +5,7 @@ import PublicProtocolsCatalogView from '../../components/protocol/PublicProtocol
 
 export const revalidate = 3600; // ⚡ Multi-Tier ISR (1 hour Edge Cache)
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
 export const metadata = {
   title: 'Clinical Protocol Directory & Peptide Treatment Pathways | Med-Peptides',

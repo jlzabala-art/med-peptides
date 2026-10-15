@@ -1,14 +1,27 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import { usePageMeta } from '../hooks/usePageMeta';
+import PublicUnifiedHeader from '../components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '../components/shared/PublicUnifiedFooter';
+import DiagnosticReportVisualPreview from '../components/diagnostic/DiagnosticReportVisualPreview';
+import BloodoCollectionSidebar from '../components/diagnostic/BloodoCollectionSidebar';
+import EternaCollectionSidebar from '../components/diagnostic/EternaCollectionSidebar';
+import UltraPersonCollectionSidebar from '../components/diagnostic/UltraPersonCollectionSidebar';
+import ColwayCollectionSidebar from '../components/diagnostic/ColwayCollectionSidebar';
+import PublicInstitutionalInquiryDrawer from '../components/shared/PublicInstitutionalInquiryDrawer';
+import ColwayTrichologyStemCellShowcase from '../components/product/ColwayTrichologyStemCellShowcase';
+import CopyableId from '../components/ui/CopyableId';
+import StatusBadge from '../components/ui/StatusBadge';
+import { useAuth } from '../context/AuthContext';
 import {
   Search, SlidersHorizontal, LayoutGrid, List, Sparkles, Shield, Activity,
   Zap, HeartPulse, Check, ArrowRight, ExternalLink, Dna,
-  Droplets, Microscope, FileText, FlaskConical, Award, ShieldCheck, CheckCircle2, ChevronRight
+  Droplets, Microscope, FileText, FlaskConical, Award, ShieldCheck, CheckCircle2, ChevronRight,
+  ChevronDown, Layers, Eye, Lock, LogIn, User
 } from '@/lib/icons';
 import '../styles/collection_shared.css';
 
@@ -50,11 +63,13 @@ const BRAND_CONFIGS = {
       { label: 'Result Turnaround', value: '48 – 72 Hours', sub: 'Direct Quantitative Portal Delivery', icon: HeartPulse, color: '#16a34a' }
     ],
     categories: [
-      { id: 'all', label: 'All Tests' },
-      { id: 'bioenergetics', label: 'Cellular Bioenergetics' },
-      { id: 'hormones', label: 'Endocrine & Cortisol' },
-      { id: 'metabolic', label: 'Metabolic & Glycation' },
-      { id: 'micronutrients', label: 'Lipids & Vitamins' }
+      { id: 'all', label: 'All Tests (6)' },
+      { id: 'nad', label: 'Bioenergetics (NAD+)' },
+      { id: 'cortisol', label: 'Endocrine & Cortisol CAR' },
+      { id: 'testosterone', label: 'Androgens & Testosterone+' },
+      { id: 'hba1c', label: 'Glycation & HbA1c' },
+      { id: 'omega', label: 'Lipidomics & Omega-3' },
+      { id: 'vitamin-d', label: 'Micronutrients & Vit D3' }
     ]
   },
   ultraperson: {
@@ -134,20 +149,36 @@ function resolveBrandProductImage(product, brandSlug) {
 }
 
 export default function BrandCollectionPage({
-  brandSlug = 'colway',
+  brandSlug = 'bloodo',
   products = [],
   onSelectProduct,
   updateCart,
   toggleCompare
 }) {
   const router = useRouter();
-  const config = BRAND_CONFIGS[brandSlug] || BRAND_CONFIGS.colway;
+  const config = BRAND_CONFIGS[brandSlug] || BRAND_CONFIGS.bloodo;
+  const { user, isProfessional } = useAuth();
 
+  const [lang, setLang] = useState('en');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
   const [sortOption, setSortOption] = useState('featured');
   const [addedItem, setAddedItem] = useState(null);
+  const [expandedDetails, setExpandedDetails] = useState({});
+  const [scopeMode, setScopeMode] = useState('filtered'); // 'filtered' | 'global'
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('atlas_portal_lang') || 'en';
+      setLang(savedLang);
+    }
+  }, []);
+
+  const isEs = lang === 'es';
+  const canonicalUrl = `https://www.atlashealth-services.com/collection/${brandSlug}`;
 
   // SEO & structured data
   usePageMeta({
@@ -170,16 +201,17 @@ export default function BrandCollectionPage({
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       list = list.filter(p => {
-        const text = `${p.id} ${p.name || ''} ${p.title || ''} ${p.description || ''} ${p.desc || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
+        const text = `${p.id} ${p.name || ''} ${p.title || ''} ${p.description || ''} ${p.desc || ''} ${p.sampleType || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
         return text.includes(q);
       });
     }
 
-    // Category / tag filter
+    // Category filter
     if (selectedCategory !== 'all') {
+      const cat = selectedCategory.toLowerCase();
       list = list.filter(p => {
-        const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${JSON.stringify(p.goalIds || [])}`.toLowerCase();
-        return str.includes(selectedCategory);
+        const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''}`.toLowerCase();
+        return str.includes(cat);
       });
     }
 
@@ -188,10 +220,22 @@ export default function BrandCollectionPage({
       list.sort((a, b) => (a.name || a.title || '').localeCompare(b.name || b.title || ''));
     } else if (sortOption === 'name-desc') {
       list.sort((a, b) => (b.name || b.title || '').localeCompare(a.name || a.title || ''));
+    } else if (sortOption === 'price-asc') {
+      list.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sortOption === 'price-desc') {
+      list.sort((a, b) => (b.price || 0) - (a.price || 0));
     }
 
     return list;
   }, [products, searchQuery, selectedCategory, sortOption]);
+
+  const toggleExpand = (productId, e) => {
+    e?.stopPropagation();
+    setExpandedDetails(prev => ({
+      ...prev,
+      [productId]: !prev[productId]
+    }));
+  };
 
   const handleProductClick = (product) => {
     if (onSelectProduct) {
@@ -205,7 +249,7 @@ export default function BrandCollectionPage({
   const handleQuickAdd = (product, e) => {
     e?.stopPropagation();
     if (updateCart) {
-      const variant = product.variants?.[0] || { id: `${product.id}-default`, presentation: product.presentation || 'Standard' };
+      const variant = product.variants?.[0] || { id: `${product.id}-default`, presentation: product.presentation || 'Standard Kit' };
       updateCart({
         id: product.id,
         name: product.name || product.title,
@@ -220,32 +264,125 @@ export default function BrandCollectionPage({
   };
 
   return (
-    <div className="brand-collection-root" style={{ minHeight: '100vh', background: 'var(--col-surface, #F4F8FB)', paddingBottom: '5rem' }}>
-      {/* ── Breadcrumb Bar ── */}
+    <div className="brand-collection-root" style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a' }}>
+      {/* ── 1. Unified Public Header (Sticky top) ── */}
+      <PublicUnifiedHeader
+        track="products"
+        lang={lang}
+        onLangChange={setLang}
+        copyUrl={canonicalUrl}
+        shortUrl={canonicalUrl}
+        brandHref="/c/CAT-MU9L9GBN"
+        brandTitle="Atlas Health Services Clinical & Healthcare Intelligence"
+        hideTier2={true}
+      />
+
+      {/* ── 2. Breadcrumbs Bar ── */}
       <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '1rem 2rem 0' }}>
         <Breadcrumbs items={breadcrumbs} />
       </div>
 
-      {/* ── Collection Hero Header ── */}
-      <header className="col-header" style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', marginTop: '0.75rem', padding: '2.5rem 0' }}>
+      {/* ── 3. Google Cloud Hero Header ── */}
+      <header style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', marginTop: '0.75rem', padding: '2.5rem 0 2rem' }}>
         <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: '850px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', alignSelf: 'flex-start', background: `${config.badgeColor}15`, border: `1px solid ${config.badgeColor}35`, color: config.badgeColor, padding: '4px 12px', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: '900px' }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              alignSelf: 'flex-start',
+              background: `${config.badgeColor}15`,
+              border: `1px solid ${config.badgeColor}35`,
+              color: config.badgeColor,
+              padding: '4px 12px',
+              borderRadius: '16px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase'
+            }}>
               <Sparkles size={13} />
               <span>{config.badge}</span>
             </div>
-            <h1 style={{ fontSize: 'clamp(2rem, 3.8vw, 3rem)', fontWeight: 850, color: '#0f172a', letterSpacing: '-0.03em', margin: 0, lineHeight: 1.15 }}>
+            <h1 style={{ fontSize: 'clamp(2rem, 3.6vw, 2.85rem)', fontWeight: 850, color: '#0f172a', letterSpacing: '-0.03em', margin: 0, lineHeight: 1.15 }}>
               {config.title}
             </h1>
-            <p style={{ fontSize: '1.05rem', color: '#475569', lineHeight: 1.6, margin: 0, fontWeight: 450 }}>
+            <p style={{ fontSize: '1.02rem', color: '#475569', lineHeight: 1.6, margin: 0, fontWeight: 450 }}>
               {config.subtitle}
             </p>
           </div>
         </div>
       </header>
 
-      {/* ── 4 KPIs Grid (Golden Rule #22) ── */}
-      <section style={{ maxWidth: '1440px', margin: '-1.25rem auto 2rem', padding: '0 2rem' }}>
+      {/* ── 4. 4 KPIs Grid + Scope Switcher (Regla Golden #22) ── */}
+      <section style={{ maxWidth: '1440px', margin: '-1.25rem auto 2.5rem', padding: '0 2rem' }}>
+        {/* Scope Indicator Bar */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          marginBottom: '0.75rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '3px 10px',
+              borderRadius: '6px',
+              background: scopeMode === 'filtered' ? '#e0f2fe' : '#f1f5f9',
+              border: '1px solid',
+              borderColor: scopeMode === 'filtered' ? '#bae6fd' : '#e2e8f0',
+              color: scopeMode === 'filtered' ? '#0369a1' : '#64748b',
+              fontSize: '0.74rem',
+              fontWeight: 700
+            }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: scopeMode === 'filtered' ? '#0284c7' : '#94a3b8' }} />
+              {scopeMode === 'filtered' 
+                ? (isEs ? `Resultados Filtrados (${filteredProducts.length} pruebas)` : `Matching Active Filters (${filteredProducts.length} items)`)
+                : (isEs ? `Colección Completa (${products.length} pruebas)` : `Entire Collection (${products.length} items)`)}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              onClick={() => setScopeMode('filtered')}
+              style={{
+                background: scopeMode === 'filtered' ? '#0284c7' : '#ffffff',
+                color: scopeMode === 'filtered' ? '#ffffff' : '#64748b',
+                border: '1px solid',
+                borderColor: scopeMode === 'filtered' ? '#0284c7' : '#cbd5e1',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              {isEs ? 'Filtros Activos' : 'Filtered View'}
+            </button>
+            <button
+              onClick={() => { setScopeMode('global'); setSearchQuery(''); setSelectedCategory('all'); }}
+              style={{
+                background: scopeMode === 'global' ? '#0284c7' : '#ffffff',
+                color: scopeMode === 'global' ? '#ffffff' : '#64748b',
+                border: '1px solid',
+                borderColor: scopeMode === 'global' ? '#0284c7' : '#cbd5e1',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              {isEs ? 'Ver Colección Global' : 'Entire Database'}
+            </button>
+          </div>
+        </div>
+
+        {/* 4 Cards Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
           {config.kpis.map((kpi, idx) => {
             const Icon = kpi.icon;
@@ -263,7 +400,17 @@ export default function BrandCollectionPage({
                   boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
                 }}
               >
-                <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: `${kpi.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: kpi.color, flexShrink: 0 }}>
+                <div style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '10px',
+                  background: `${kpi.color}15`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: kpi.color,
+                  flexShrink: 0
+                }}>
                   <Icon size={22} />
                 </div>
                 <div>
@@ -283,316 +430,681 @@ export default function BrandCollectionPage({
         </div>
       </section>
 
-      {/* ── Main Controls & Filtering (Search, Categories, View Toggle) ── */}
-      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem' }}>
-        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', marginBottom: '2rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          {/* Search bar */}
-          <div style={{ position: 'relative', flex: '1 1 320px', maxWidth: '480px' }}>
-            <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-            <input
-              type="text"
-              placeholder={`Search in ${config.name}...`}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.65rem 1rem 0.65rem 2.5rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '8px',
-                fontSize: '0.88rem',
-                color: '#0f172a',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem' }}
-              >
-                ✕
-              </button>
-            )}
-          </div>
+      {/* ── 5. GRAPHIC OVERVIEW: HOW RESULTS ARE OBTAINED & LAB REPORT MOCKUP ── */}
+      {brandSlug === 'bloodo' && (
+        <section style={{ maxWidth: '1440px', margin: '0 auto 2.5rem', padding: '0 2rem' }}>
+          <DiagnosticReportVisualPreview lang={lang} activeTest="nad" />
+        </section>
+      )}
 
-          {/* Category Filter Chips */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-            {config.categories.map(cat => (
+      {brandSlug === 'colway' && (
+        <section style={{ maxWidth: '1440px', margin: '0 auto 2.5rem', padding: '0 2rem' }}>
+          <ColwayTrichologyStemCellShowcase lang={lang} />
+        </section>
+      )}
+
+      {/* ── 6. MAIN WORKSPACE (70% Main Products Grid + 30% Sticky Sidebar) ── */}
+      <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem 5rem' }}>
+        <div className="gcp-collection-workspace">
+          {/* ── LEFT COLUMN: MAIN PRODUCTS & FILTERS ── */}
+          <main style={{ minWidth: 0 }}>
+            {/* Google Cloud Filter Bar */}
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '1rem 1.25rem',
+              marginBottom: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+            }}>
+              {/* Row 1: Search + View Toggle */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+                <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '480px' }}>
+                  <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="text"
+                    placeholder={isEs ? `Buscar en ${config.name} (ej. NAD+, cortisol, DBS)... ⌘K` : `Search in ${config.name} (e.g. NAD+, cortisol)... ⌘K`}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.65rem 2.2rem 0.65rem 2.5rem',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '8px',
+                      fontSize: '0.88rem',
+                      color: '#0f172a',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem' }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
+                    {filteredProducts.length} {filteredProducts.length === 1 ? 'test' : 'tests'}
+                  </span>
+
+                  <select
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value)}
+                    style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', color: '#334155', background: '#fff' }}
+                  >
+                    <option value="featured">{isEs ? 'Destacados' : 'Featured'}</option>
+                    <option value="name-asc">{isEs ? 'Nombre A-Z' : 'Name A-Z'}</option>
+                    <option value="name-desc">{isEs ? 'Nombre Z-A' : 'Name Z-A'}</option>
+                    <option value="price-asc">{isEs ? 'Precio: Menor a Mayor' : 'Price: Low to High'}</option>
+                    <option value="price-desc">{isEs ? 'Precio: Mayor a Menor' : 'Price: High to Low'}</option>
+                  </select>
+
+                  <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      title="Grid View"
+                      style={{ padding: '6px 10px', background: viewMode === 'grid' ? '#f1f5f9' : '#ffffff', border: 'none', cursor: 'pointer', color: viewMode === 'grid' ? '#0f172a' : '#94a3b8' }}
+                    >
+                      <LayoutGrid size={16} />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('table')}
+                      title="Master-Detail List"
+                      style={{ padding: '6px 10px', background: viewMode === 'table' ? '#f1f5f9' : '#ffffff', border: 'none', cursor: 'pointer', color: viewMode === 'table' ? '#0f172a' : '#94a3b8' }}
+                    >
+                      <List size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 2: Category Chips */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', alignItems: 'center' }}>
+                {config.categories.map(cat => {
+                  const isActive = selectedCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      style={{
+                        padding: '5px 12px',
+                        borderRadius: '16px',
+                        border: '1px solid',
+                        borderColor: isActive ? config.accentColor : '#e2e8f0',
+                        background: isActive ? `${config.accentColor}15` : '#ffffff',
+                        color: isActive ? config.accentColor : '#475569',
+                        fontSize: '0.78rem',
+                        fontWeight: isActive ? 700 : 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Empty State */}
+            {filteredProducts.length === 0 ? (
+              <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '4rem 2rem', textAlign: 'center' }}>
+                <FlaskConical size={48} color="#94a3b8" style={{ margin: '0 auto 1rem' }} />
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem' }}>
+                  {isEs ? 'No se encontraron pruebas diagnósticas' : 'No diagnostic panels found'}
+                </h3>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0 0 1.5rem' }}>
+                  {isEs ? 'Prueba limpiando los filtros o utilizando otros términos de búsqueda.' : 'Try adjusting your search criteria or resetting filters.'}
+                </p>
+                <button
+                  onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+                  style={{ padding: '8px 18px', borderRadius: '8px', background: config.accentColor, color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  {isEs ? 'Limpiar Filtros' : 'Clear Filters'}
+                </button>
+              </div>
+            ) : (
+              /* Diagnostic Products Grid / Master-Detail */
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(310px, 1fr))' : '1fr',
+                gap: '1.25rem'
+              }}>
+                {filteredProducts.map(product => {
+                  const imageSrc = resolveBrandProductImage(product, brandSlug);
+                  const displayName = product.canonicalName || product.name || product.title || product.id;
+                  const desc = product.overview_summary || product.description || product.desc || '';
+                  const sampleType = product.sampleType || 'Capillary Dried Blood Spot (DBS)';
+                  const isExpanded = !!expandedDetails[product.id];
+                  const isAdded = addedItem === product.id;
+
+                  return (
+                    <div
+                      key={product.id}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '14px',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#cbd5e1';
+                        e.currentTarget.style.boxShadow = '0 8px 20px -6px rgba(0,0,0,0.08)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#e2e8f0';
+                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+                      }}
+                    >
+                      {/* Card Visual Header */}
+                      <div
+                        onClick={() => handleProductClick(product)}
+                        style={{
+                          height: '180px',
+                          background: 'radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%)',
+                          borderBottom: '1px solid #f1f5f9',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          position: 'relative',
+                          cursor: 'pointer',
+                          padding: '1rem'
+                        }}
+                      >
+                        <img
+                          src={imageSrc}
+                          alt={displayName}
+                          style={{
+                            maxHeight: '140px',
+                            maxWidth: '85%',
+                            objectFit: 'contain',
+                            filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.08))'
+                          }}
+                        />
+
+                        {/* Top Badges */}
+                        <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', gap: '6px' }}>
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 800,
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            background: 'rgba(22, 163, 74, 0.12)',
+                            color: '#15803d',
+                            border: '1px solid rgba(22, 163, 74, 0.25)'
+                          }}>
+                            {brandSlug === 'eterna' ? 'CAP / CLIA' : brandSlug === 'ultraperson' ? 'EU GMP' : brandSlug === 'colway' ? 'EU 1223/2009' : 'CE-IVDR'}
+                          </span>
+                        </div>
+
+                        {/* Price Badge */}
+                        {product.price > 0 && (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: '10px',
+                            right: '10px',
+                            background: '#0f172a',
+                            color: '#ffffff',
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            fontSize: '0.85rem',
+                            fontWeight: 800
+                          }}>
+                            ${product.price} USD
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Card Content Area */}
+                      <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            ID: <CopyableId value={product.id} maxLength={18} />
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <CheckCircle2 size={12} /> {brandSlug === 'eterna' ? 'Eurofins Genomics' : brandSlug === 'ultraperson' ? 'PharmaPolis Labs' : brandSlug === 'colway' ? 'Colway Dermocosmetics' : 'LifeLab1'}
+                          </span>
+                        </div>
+
+                        <h3
+                          onClick={() => handleProductClick(product)}
+                          style={{
+                            fontSize: '1.05rem',
+                            fontWeight: 800,
+                            color: '#0f172a',
+                            margin: '0 0 6px 0',
+                            lineHeight: 1.3,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {displayName}
+                        </h3>
+
+                        <div style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <Droplets size={13} />
+                          <span>{sampleType}</span>
+                        </div>
+
+                        <p style={{
+                          fontSize: '0.82rem',
+                          color: '#475569',
+                          lineHeight: 1.5,
+                          margin: '0 0 1rem 0',
+                          display: '-webkit-box',
+                          WebkitLineClamp: isExpanded ? 'unset' : 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {desc}
+                        </p>
+
+                        {/* Master-Detail Expandable Drawer (Regla #4) */}
+                        {isExpanded && (
+                          <div style={{
+                            background: '#f8fafc',
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                            padding: '10px 12px',
+                            fontSize: '0.76rem',
+                            color: '#334155',
+                            marginBottom: '1rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '6px'
+                          }}>
+                            <div>
+                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Laboratorio de Referencia:' : 'Reference Lab:'}</strong> {
+                                brandSlug === 'eterna' ? 'Eurofins Genomics (Munich/Ebersberg) · CAP / CLIA / ISO 17025' :
+                                brandSlug === 'ultraperson' ? 'PharmaPolis Compounding Labs · EU GMP / cGMP' :
+                                brandSlug === 'colway' ? 'Colway International Dermocosmetics · EU Reg. 1223/2009' :
+                                'LifeLab1 Central Lab (Vilnius) · ISO 15189'
+                              }
+                            </div>
+                            <div>
+                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Tecnología / Metodología:' : 'Analytical Method:'}</strong> {
+                                brandSlug === 'eterna' ? 'Illumina Infinium +700k SNPs & High-Density Proteomics' :
+                                brandSlug === 'ultraperson' ? 'Vegan HPMC Delayed-Release Capsule Standardization' :
+                                brandSlug === 'colway' ? 'Native Tropocollagen Triple Helix & Baicapil™ 2%' :
+                                'LC-MS/MS & UHPLC Tandem MS'
+                              }
+                            </div>
+                            <div>
+                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:'}</strong> {
+                                brandSlug === 'eterna' ? '15 – 20 Business Days' :
+                                brandSlug === 'ultraperson' ? '48 – 72h Compounding Dispatch' :
+                                brandSlug === 'colway' ? '24 – 48h Direct Clinic Dispatch' :
+                                '48 – 72h post-receipt'
+                              }
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Card Action Strip */}
+                        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
+                          <button
+                            type="button"
+                            onClick={(e) => toggleExpand(product.id, e)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#64748b',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '4px 0'
+                            }}
+                          >
+                            <span>{isExpanded ? (isEs ? 'Ocultar' : 'Hide Specs') : (isEs ? 'Master-Detail' : 'Specs & Lab')}</span>
+                            <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                          </button>
+
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleProductClick(product)}
+                              style={{
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                border: '1px solid #cbd5e1',
+                                background: '#ffffff',
+                                color: '#0f172a',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <Eye size={13} />
+                              <span>{isEs ? 'Ficha' : 'View'}</span>
+                            </button>
+
+                            {!user ? (
+                              /* Non-registered visitors cannot place clinical orders directly (Regla de Oro Usuario) */
+                              <button
+                                type="button"
+                                onClick={() => setIsAuthModalOpen(true)}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  border: `1px solid ${config.accentColor}`,
+                                  background: 'rgba(255, 255, 255, 0.95)',
+                                  color: config.accentColor,
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  transition: 'all 0.15s ease'
+                                }}
+                                title={isEs ? 'Registro obligatorio para tramitar pedidos clínicos' : 'Registered professional account required to order'}
+                              >
+                                <Lock size={12} />
+                                <span>{isEs ? 'Acceso Requerido' : 'Sign In to Order'}</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => handleQuickAdd(product, e)}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  background: isAdded ? '#16a34a' : config.accentColor,
+                                  color: '#ffffff',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  transition: 'background 0.15s ease'
+                                }}
+                              >
+                                {isAdded ? (
+                                  <>
+                                    <Check size={13} /> {isEs ? 'Añadido' : 'Added'}
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>{isEs ? 'Pedir Kit' : 'Order Kit'}</span>
+                                    <ArrowRight size={13} />
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </main>
+
+          {/* ── RIGHT COLUMN: STICKY DEDICATED SIDEBAR PER BRAND ── */}
+          {brandSlug === 'bloodo' ? (
+            <BloodoCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
+          ) : brandSlug === 'eterna' ? (
+            <EternaCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
+          ) : brandSlug === 'ultraperson' ? (
+            <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
+          ) : brandSlug === 'colway' ? (
+            <ColwayCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
+          ) : (
+            <aside className="gcp-collection-sidebar" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.5rem', position: 'sticky', top: '90px' }}>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>{config.name}</h4>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 1rem 0' }}>{config.subtitle}</p>
+              <div style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>{filteredProducts.length} items in catalog</div>
+            </aside>
+          )}
+        </div>
+      </section>
+
+      {/* ── FLOATING ACTION DOCK / STICKED FOOT (Regla Golden: Centrado en pantalla principal sin tapar sidebar) ── */}
+      <div className="collection-bottom-dock">
+        {/* Brand Chip Indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: config.accentColor
+          }} />
+          <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a' }}>
+            {config.name}
+          </span>
+          <span className="collection-dock-hide-mobile" style={{ fontSize: '0.74rem', color: '#64748b' }}>
+            · {filteredProducts.length} {isEs ? 'ítems en catálogo' : 'items'}
+          </span>
+        </div>
+
+        {/* Dock Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {!user ? (
+            <button
+              type="button"
+              onClick={() => setIsAuthModalOpen(true)}
+              style={{
+                height: '36px',
+                padding: '0 14px',
+                borderRadius: '9999px',
+                background: config.accentColor,
+                color: '#ffffff',
+                border: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}
+            >
+              <Lock size={13} />
+              <span>{isEs ? 'Iniciar Sesión para Pedir' : 'Sign In to Order'}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => router.push('/checkout')}
+              style={{
+                height: '36px',
+                padding: '0 14px',
+                borderRadius: '9999px',
+                background: '#16a34a',
+                color: '#ffffff',
+                border: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <Sparkles size={13} />
+              <span>{isEs ? 'Ver Carrito' : 'View Cart'}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setIsInquiryDrawerOpen(true)}
+            style={{
+              height: '36px',
+              padding: '0 12px',
+              borderRadius: '9999px',
+              background: '#ffffff',
+              border: '1px solid #cbd5e1',
+              color: '#334155',
+              fontSize: '0.78rem',
+              fontWeight: 650,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <FileText size={13} color="#0284c7" />
+            <span className="collection-dock-hide-mobile">{isEs ? 'Consultar' : 'Inquire'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── Auth Notice Modal for Unregistered Visitors (Regla Golden Usuario) ── */}
+      {isAuthModalOpen && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(6px)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            maxWidth: '460px',
+            width: '100%',
+            padding: '2rem',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.25rem',
+            position: 'relative'
+          }}>
+            <button
+              type="button"
+              onClick={() => setIsAuthModalOpen(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                fontSize: '1.2rem',
+                lineHeight: 1
+              }}
+            >
+              ✕
+            </button>
+
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              background: `${config.accentColor}18`,
+              color: config.accentColor,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Lock size={24} />
+            </div>
+
+            <div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
+                {isEs ? 'Acceso Profesional Requerido' : 'Professional Account Required'}
+              </h3>
+              <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
+                {isEs
+                  ? `Para solicitar formulaciones o kits clínicos de ${config.name}, es obligatorio disponer de una cuenta registrada como profesional sanitario, clínica o paciente autorizado.`
+                  : `Ordering clinical test kits and formulations from ${config.name} requires an authorized registered professional, clinic, or verified patient account.`}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '0.5rem' }}>
               <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
+                type="button"
+                onClick={() => router.push(`/auth/login?redirect=/collection/${brandSlug}`)}
                 style={{
-                  padding: '6px 14px',
-                  borderRadius: '20px',
-                  border: '1px solid',
-                  borderColor: selectedCategory === cat.id ? config.accentColor : '#e2e8f0',
-                  background: selectedCategory === cat.id ? `${config.accentColor}15` : '#ffffff',
-                  color: selectedCategory === cat.id ? config.accentColor : '#475569',
-                  fontSize: '0.8rem',
-                  fontWeight: selectedCategory === cat.id ? 700 : 500,
+                  width: '100%',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  background: config.accentColor,
+                  color: '#ffffff',
+                  border: 'none',
+                  fontSize: '0.84rem',
+                  fontWeight: 700,
                   cursor: 'pointer',
-                  transition: 'all 0.15s ease'
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
                 }}
               >
-                {cat.label}
+                <LogIn size={15} />
+                <span>{isEs ? 'Iniciar Sesión / Acceso' : 'Sign In to My Account'}</span>
               </button>
-            ))}
-          </div>
 
-          {/* Right Toolbar: View mode & Count */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}
-            </span>
-
-            <select
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
-              style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', color: '#334155', background: '#fff' }}
-            >
-              <option value="featured">Featured</option>
-              <option value="name-asc">Name A-Z</option>
-              <option value="name-desc">Name Z-A</option>
-            </select>
-
-            <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
               <button
-                onClick={() => setViewMode('grid')}
-                title="Grid View"
-                style={{ padding: '6px 10px', background: viewMode === 'grid' ? '#f1f5f9' : '#ffffff', border: 'none', cursor: 'pointer', color: viewMode === 'grid' ? '#0f172a' : '#94a3b8' }}
+                type="button"
+                onClick={() => {
+                  setIsAuthModalOpen(false);
+                  setIsInquiryDrawerOpen(true);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  color: '#334155',
+                  fontSize: '0.84rem',
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
               >
-                <LayoutGrid size={16} />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                title="List View"
-                style={{ padding: '6px 10px', background: viewMode === 'list' ? '#f1f5f9' : '#ffffff', border: 'none', cursor: 'pointer', color: viewMode === 'list' ? '#0f172a' : '#94a3b8' }}
-              >
-                <List size={16} />
+                <FileText size={15} color="#0284c7" />
+                <span>{isEs ? 'Solicitar Información / Consulta' : 'Request Clinical Consultation'}</span>
               </button>
             </div>
           </div>
         </div>
+      )}
 
-        {/* ── Product Cards Grid / List ── */}
-        {filteredProducts.length === 0 ? (
-          <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '4rem 2rem', textAlign: 'center' }}>
-            <FlaskConical size={48} color="#94a3b8" style={{ margin: '0 auto 1rem' }} />
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem' }}>No products found</h3>
-            <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0 0 1.5rem' }}>Try clearing your search query or selecting a different category.</p>
-            <button
-              onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-              style={{ padding: '8px 18px', borderRadius: '8px', background: config.accentColor, color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}
-            >
-              Clear Filters
-            </button>
-          </div>
-        ) : (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(320px, 1fr))' : '1fr',
-              gap: '1.5rem'
-            }}
-          >
-            {filteredProducts.map(product => {
-              const imageSrc = resolveBrandProductImage(product, brandSlug);
-              const displayName = product.canonicalName || product.name || product.title || product.id;
-              const sub = product.subtitle || product.role || product.therapeuticArea || product.categoryLabel || product.category || '';
-              const desc = product.overview_summary || product.description || product.desc || '';
-              const isAdded = addedItem === product.id;
+      {/* ── Context-Aware Clinical Inquiry Drawer ── */}
+      <PublicInstitutionalInquiryDrawer
+        isOpen={isInquiryDrawerOpen}
+        onClose={() => setIsInquiryDrawerOpen(false)}
+        contextType="brand_collection"
+        initialEntity={{
+          brandSlug,
+          brandName: config.name,
+          catalogCount: filteredProducts.length
+        }}
+      />
 
-              // Key highlight ingredients or badges
-              const keyIngredients = Array.isArray(product.ingredients)
-                ? product.ingredients.slice(0, 4).map(i => i.name)
-                : Array.isArray(product.activeIngredients)
-                ? product.activeIngredients.slice(0, 4).map(i => i.name)
-                : [];
-
-              const variantInfo = product.variants?.[0]?.presentation || product.presentation || product.dailyServing || product.sampleType || null;
-
-              return (
-                <div
-                  key={product.id}
-                  onClick={() => handleProductClick(product)}
-                  style={{
-                    background: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: viewMode === 'grid' ? 'column' : 'row',
-                    transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                    cursor: 'pointer',
-                    position: 'relative',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                    e.currentTarget.style.boxShadow = '0 12px 24px -8px rgba(0,0,0,0.09)';
-                    e.currentTarget.style.borderColor = '#cbd5e1';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'none';
-                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
-                    e.currentTarget.style.borderColor = '#e2e8f0';
-                  }}
-                >
-                  {/* Product Visual Area */}
-                  <div
-                    style={{
-                      width: viewMode === 'grid' ? '100%' : '260px',
-                      height: viewMode === 'grid' ? '220px' : 'auto',
-                      minHeight: viewMode === 'list' ? '200px' : 'auto',
-                      background: 'radial-gradient(circle at center, #f8fafc 0%, #f1f5f9 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '1.5rem',
-                      position: 'relative',
-                      flexShrink: 0
-                    }}
-                  >
-                    <img
-                      src={imageSrc}
-                      alt={displayName}
-                      style={{
-                        maxHeight: '100%',
-                        maxWidth: '100%',
-                        objectFit: 'contain',
-                        filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.12))'
-                      }}
-                      loading="lazy"
-                    />
-                    {variantInfo && (
-                      <span
-                        style={{
-                          position: 'absolute',
-                          bottom: '12px',
-                          left: '12px',
-                          background: 'rgba(15, 23, 42, 0.85)',
-                          backdropFilter: 'blur(4px)',
-                          color: '#ffffff',
-                          fontSize: '0.68rem',
-                          fontWeight: 700,
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          letterSpacing: '0.02em'
-                        }}
-                      >
-                        {variantInfo}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Product Details Area */}
-                  <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: config.accentColor, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                          {config.name}
-                        </span>
-                        {product.sampleType && (
-                          <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>
-                            {product.sampleType}
-                          </span>
-                        )}
-                      </div>
-
-                      <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0', lineHeight: 1.3 }}>
-                        {displayName}
-                      </h3>
-
-                      {sub && (
-                        <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0284c7', marginBottom: '8px' }}>
-                          {sub}
-                        </div>
-                      )}
-
-                      <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 1rem 0', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                        {desc}
-                      </p>
-
-                      {/* Active Ingredients / Bioactive Tags */}
-                      {keyIngredients.length > 0 && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '1.25rem' }}>
-                          {keyIngredients.map((ing, i) => (
-                            <span
-                              key={i}
-                              style={{
-                                background: '#f8fafc',
-                                border: '1px solid #e2e8f0',
-                                color: '#334155',
-                                fontSize: '0.7rem',
-                                fontWeight: 600,
-                                padding: '2px 8px',
-                                borderRadius: '6px'
-                              }}
-                            >
-                              {ing}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Card Footer Actions */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1rem', borderTop: '1px solid #f1f5f9', marginTop: 'auto' }}>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleProductClick(product); }}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#0f172a',
-                          fontSize: '0.85rem',
-                          fontWeight: 700,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          cursor: 'pointer',
-                          padding: 0
-                        }}
-                      >
-                        <span>Clinical Monograph</span>
-                        <ChevronRight size={15} color={config.accentColor} />
-                      </button>
-
-                      <button
-                        onClick={(e) => handleQuickAdd(product, e)}
-                        style={{
-                          background: isAdded ? '#16a34a' : config.accentColor,
-                          color: '#ffffff',
-                          border: 'none',
-                          borderRadius: '8px',
-                          padding: '7px 14px',
-                          fontSize: '0.8rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          transition: 'background 0.2s ease'
-                        }}
-                      >
-                        {isAdded ? (
-                          <>
-                            <Check size={14} /> Added
-                          </>
-                        ) : (
-                          <>
-                            <span>Add / Order</span>
-                            <ArrowRight size={13} />
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      {/* ── 7. Unified Public Institutional Footer (Bottom) ── */}
+      <PublicUnifiedFooter lang={lang} />
     </div>
   );
 }

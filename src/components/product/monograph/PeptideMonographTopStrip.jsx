@@ -45,7 +45,7 @@ export default function PeptideMonographTopStrip({
   const [copiedLink, setCopiedLink] = useState(false);
 
   const cleanSlug = slug || product.slug || 'product';
-  const pageUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : `https://med-peptides.com/p/${cleanSlug}`);
+  const pageUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : `https://www.atlashealth-services.com/p/${cleanSlug}`);
   const isPt141 = cleanSlug.toLowerCase().includes('pt-141') || (product.canonicalName || product.name || '').toLowerCase().includes('pt-141');
   const refDossier = getPeptideReferenceDossier(product?.slug || product?.canonicalName || product?.name || cleanSlug);
 
@@ -532,7 +532,7 @@ export default function PeptideMonographTopStrip({
                 gap: '8px'
               }}>
                 <span style={{ fontSize: '0.72rem', color: '#475569', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  med-peptides.com/p/{slug}
+                  atlashealth-services.com/p/{slug}
                 </span>
                 <button
                   type="button"

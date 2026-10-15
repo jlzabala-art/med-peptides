@@ -139,7 +139,7 @@ export const generateInvoicePDF = async (options) => {
   const footY = doc.internal.pageSize.getHeight()-15;
   doc.setDrawColor(226,232,240); doc.line(15, footY-4, W-15, footY-4);
   doc.setFontSize(8); doc.setTextColor(148,163,184);
-  doc.text('Atlas Health — Advanced Research Solutions | info@Atlas Health.com', W/2, footY, { align: 'center' });
+  doc.text('Atlas Health — Advanced Research Solutions | info@atlashealth-services.com', W/2, footY, { align: 'center' });
   doc.save(`Atlas Health-Order-${targetOrderId}.pdf`);
 };
 
@@ -266,7 +266,7 @@ export const getReceiptHTML = (options) => {
         <tr><td style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;padding:20px 36px;text-align:center;">
           <p style="margin:0;font-size:12px;color:#94a3b8;">
             Atlas Health — Advanced Research Solutions<br/>
-            Questions? <a href="mailto:info@Atlas Health.com" style="color:#003666;">info@Atlas Health.com</a>
+            Questions? <a href="mailto:info@atlashealth-services.com" style="color:#003666;">info@atlashealth-services.com</a>
           </p>
         </td></tr>
       </table>

@@ -50,7 +50,7 @@ export default function ProtocolsCatalogSidebar({
   hasActiveFilters,
   lang = 'en',
   t = {},
-  publicUrl = 'https://med-peptides.com/proto',
+  publicUrl = 'https://www.atlashealth-services.com/proto',
   onOpenInquiry,
   isMobileDrawerOpen = false,
   onCloseMobileDrawer

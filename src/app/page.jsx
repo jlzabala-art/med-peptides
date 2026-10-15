@@ -4,8 +4,19 @@ import HomeClientWrapper from './HomeClientWrapper';
 import { getFeaturedProductsServer } from '../repositories/productRepository';
 
 export const metadata = {
-  title: 'Atlas Health | Premium Research Peptides & Research Protocols',
-  description: 'Atlas Health provides high-purity research peptides and advanced research protocols for scientific professionals. Global logistics and verified analytical standards.',
+  metadataBase: new URL('https://www.atlashealth-services.com'),
+  title: 'Atlas Health Services | Accredited Diagnostics, Clinical Protocols & Precision Formulations',
+  description: 'Atlas Health Services provides certified CE-IVDR capillary blood diagnostics (Bloodo DBS, LifeLab1 ISO 15189), physician clinical intake workflows, high-purity peptides, and advanced health protocols.',
+  alternates: {
+    canonical: 'https://www.atlashealth-services.com/',
+  },
+  openGraph: {
+    title: 'Atlas Health Services | Accredited Diagnostics & Clinical Protocols',
+    description: 'Precision Dried Blood Spot (DBS) tests, physician prescription workflows, and medical-grade protocols backed by ISO 15189 reference laboratory standards.',
+    url: 'https://www.atlashealth-services.com/',
+    siteName: 'Atlas Health Services',
+    type: 'website',
+  },
 };
 
 import { sanitizeForClient } from '../utils/sanitizeForClient';

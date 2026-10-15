@@ -88,6 +88,8 @@ import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedCo
 import ProductDetailSidebar from './ProductDetailSidebar';
 import EternaPublicOverviewShowcase from './EternaPublicOverviewShowcase';
 import SupplementPublicOverviewShowcase from './SupplementPublicOverviewShowcase';
+import DiagnosticReportVisualPreview from '../diagnostic/DiagnosticReportVisualPreview';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import ProductSectionFooterNav from './ProductSectionFooterNav';
 import PresentationsMatrixSection from './datasheet/sections/PresentationsMatrixSection';
 import ReconstitutionRouterSection from './datasheet/sections/ReconstitutionRouterSection';
@@ -974,7 +976,7 @@ export default function PublicDatasheetView({
       `• In-Use Concentration: ${reconVol.concentration} mg/mL\n` +
       `• Storage: 2°C – 8°C Refrigerated (Do Not Freeze) · 28-Day Stability\n\n` +
       (protocolsList ? `*ASSOCIATED CLINICAL BLUEPRINTS:*\n${protocolsList}\n\n` : '') +
-      `Official Verification: https://med-peptides.com/p/${slug}\n` +
+      `Official Verification: https://www.atlashealth-services.com/p/${slug}\n` +
       `_Atlas Services · SSOT Clinical Intelligence Standard_`;
 
     let success = false;
@@ -1198,7 +1200,7 @@ export default function PublicDatasheetView({
     return exists ? activeSection : 'overview';
   }, [activeSection, tocSections]);
 
-  // Reactive Dynamic Share URL respecting active state — Guaranteed https://med-peptides.com
+  // Reactive Dynamic Share URL respecting active state — Guaranteed https://www.atlashealth-services.com
   const dynamicPublicUrl = useMemo(() => {
     const params = new URLSearchParams();
     
@@ -1224,7 +1226,7 @@ export default function PublicDatasheetView({
     }
 
     const q = params.toString();
-    const canonicalDomain = 'https://med-peptides.com';
+    const canonicalDomain = 'https://www.atlashealth-services.com';
     return `${canonicalDomain}/p/${slug}${q ? `?${q}` : ''}`;
   }, [slug, selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, supplierName, effectiveBatchCode, lang]);
 
@@ -1856,10 +1858,6 @@ export default function PublicDatasheetView({
                   <span>{lang === 'es' ? 'Ficha Imprimible (PDF)' : 'Print / PDF Monograph'}</span>
                 </button>
               </div>
-
-              {isBloodoDiagnostic && (
-                <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="chips" />
-              )}
             </>
           }
           meta={
@@ -2011,7 +2009,24 @@ export default function PublicDatasheetView({
             ) : null
           }
         />
-        <CollectionCompanionBanner product={product} />
+        {/* ── Block 4.1: Google Cloud UX Clinical Specimen Dossier Banner (Bloodo / Diagnostic Kits) ── */}
+        {(isBloodoDiagnostic || isDiagnosticKit) && (
+          <div style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
+            <DiagnosticReportVisualPreview
+              activeTest={
+                slug?.includes('cortisol') ? 'cortisol' :
+                slug?.includes('testosterone') || slug?.includes('testosterona') ? 'testosterone' :
+                slug?.includes('hba1c') || slug?.includes('hemoglobin') || slug?.includes('glucose') || slug?.includes('glucosa') ? 'hba1c' :
+                slug?.includes('omega') || slug?.includes('lipid') ? 'omega' :
+                slug?.includes('vitamin') || slug?.includes('vitd') || slug?.includes('vit-d') ? 'vitd' : 'nad'
+              }
+              lang={lang}
+              hideSelector={true}
+              hideWorkflow={true}
+              variant="gcp"
+            />
+          </div>
+        )}
         {description && (
           <div className="pds-description-card" style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -2366,6 +2381,7 @@ export default function PublicDatasheetView({
               selectedDose={selectedStrength?.name || 'Standard'}
               supplierName={displaySupplierName}
               lang={lang}
+              activeSection={effectiveActiveSection}
             />
           </section>
         )}
@@ -2398,9 +2414,12 @@ export default function PublicDatasheetView({
           isDiagnosticKit={isDiagnosticKit || isBloodoDiagnostic}
           isSolventProduct={isSolventProduct}
           isCorporateService={isCorporateService}
-          isSupplementProduct={isSupplementProduct}
-          supplierName={supplierName}
         />
+
+        {/* Brand Collection Discovery Banner (Moved to End as requested) */}
+        <div style={{ marginTop: '2rem', marginBottom: '1.5rem' }}>
+          <CollectionCompanionBanner product={product} />
+        </div>
 
         {/* Institutional Regulatory Footnote */}
         <footer className="pds-page-footer">
@@ -2713,6 +2732,9 @@ export default function PublicDatasheetView({
           altText={name}
         />
       )}
+
+      {/* Institutional Unified Public Footer */}
+      <PublicUnifiedFooter lang={lang} />
     </div>
   );
 }

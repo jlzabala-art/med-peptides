@@ -8,7 +8,7 @@ import PublicProtocolPage from './PublicProtocolPage';
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
 // ⚡ Layer 1 In-Memory Server RAM Cache (Golden Rule #2)
 const PUBLIC_PROTOCOL_RAM_CACHE = new Map();

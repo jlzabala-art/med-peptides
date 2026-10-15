@@ -229,6 +229,44 @@ export function useMasterCatalogColumns({
                 );
               })()}
 
+              {/* Dual / Hybrid Badge if product offers both Finished & Raw API */}
+              {(() => {
+                const variants = row.variants || [];
+                let apiCount = 0;
+                let finCount = 0;
+                variants.forEach(v => {
+                  const pStr = String(v.presentation || v.presentationName || v.format || '').toLowerCase();
+                  const isVarApi = v.type === 'raw_material' || 
+                                   v.productType === 'raw_material' || 
+                                   v.format === 'bulk_api' || 
+                                   pStr.includes('bulk') || 
+                                   pStr.includes('api') || 
+                                   pStr.includes('powder') || 
+                                   v.unit === 'g' || 
+                                   v.unitOfMeasure === 'g';
+                  if (isVarApi) apiCount++;
+                  else finCount++;
+                });
+                const isDual = (apiCount > 0 && finCount > 0) || row.primaryType === 'dual' || row.isHybrid;
+                if (!isDual) return null;
+                return (
+                  <span style={{ 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    gap: '3px',
+                    backgroundColor: '#faf5ff', 
+                    border: '1px solid #e9d5ff', 
+                    borderRadius: '4px', 
+                    padding: '1px 6px',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: '#6b21a8'
+                  }}>
+                    <span>⚡ Dual (API + Finished)</span>
+                  </span>
+                );
+              })()}
+
               <span style={{ color: '#dadce0', fontSize: '0.8rem', userSelect: 'none' }}>•</span>
 
               {/* 2. Format & Variant Footprint (Clean Secondary Text) */}
@@ -242,6 +280,39 @@ export function useMasterCatalogColumns({
                   return (
                     <span style={{ fontSize: '0.73rem', color: '#5f6368', fontWeight: 500 }}>
                       💼 {n} {n === 1 ? 'Service Tier' : 'Service Tiers'}
+                    </span>
+                  );
+                }
+
+                let apiCount = 0;
+                let finCount = 0;
+                variants.forEach(v => {
+                  const pStr = String(v.presentation || v.presentationName || v.format || '').toLowerCase();
+                  const isVarApi = v.type === 'raw_material' || 
+                                   v.productType === 'raw_material' || 
+                                   v.format === 'bulk_api' || 
+                                   pStr.includes('bulk') || 
+                                   pStr.includes('api') || 
+                                   pStr.includes('powder') || 
+                                   v.unit === 'g' || 
+                                   v.unitOfMeasure === 'g';
+                  if (isVarApi) apiCount++;
+                  else finCount++;
+                });
+
+                const isDual = (apiCount > 0 && finCount > 0) || row.primaryType === 'dual' || row.isHybrid;
+
+                if (isDual && apiCount > 0 && finCount > 0) {
+                  return (
+                    <span style={{ fontSize: '0.73rem', color: '#5f6368', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontWeight: 600, color: '#003666', background: '#f0f9ff', padding: '1px 5px', borderRadius: '3px', border: '1px solid #bae6fd' }}>
+                        💊 {finCount} Finished
+                      </span>
+                      <span style={{ color: '#dadce0' }}>•</span>
+                      <span style={{ fontWeight: 600, color: '#0f766e', background: '#f0fdfa', padding: '1px 5px', borderRadius: '3px', border: '1px solid #ccfbf1' }}>
+                        🧪 {apiCount} Bulk API
+                      </span>
+                      <span style={{ color: '#5f6368' }}>({n} {n === 1 ? 'var' : 'vars'})</span>
                     </span>
                   );
                 }

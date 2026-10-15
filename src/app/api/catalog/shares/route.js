@@ -90,7 +90,7 @@ export async function GET(request) {
               recipientType: rdata.recipient?.type,
               channel: rdata.deliveryChannel || 'whatsapp',
               visitsCount: rdata.viewCount || 0,
-              shareableUrl: rdata.shareUrl || `https://med-peptides.com/c/${code}`,
+              shareableUrl: rdata.shareUrl || `https://www.atlashealth-services.com/c/${code}`,
               status: rdata.status || 'sent',
               interactions: {
                 webOpened: (rdata.viewCount || 0) > 0,
@@ -145,8 +145,8 @@ export async function GET(request) {
         orderPlaced:        d.interactions?.orderPlaced        ?? false,
         lastInteractionAt:  d.interactions?.lastInteractionAt  ?? null,
         // Share URL
-        shareableUrl:   d.shareableUrl   || (catCode ? `https://med-peptides.com/c/${catCode}` : null),
-        shortUrl:       catCode ? `https://med-peptides.com/c/${catCode}` : (d.shareableUrl || null),
+        shareableUrl:   d.shareableUrl   || (catCode ? `https://www.atlashealth-services.com/c/${catCode}` : null),
+        shortUrl:       catCode ? `https://www.atlashealth-services.com/c/${catCode}` : (d.shareableUrl || null),
         pdfDownloadUrl: d.pdfDownloadUrl || null,
       };
     });

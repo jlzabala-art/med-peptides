@@ -88,8 +88,8 @@ async function run() {
     pdfUrl: '/prescriptions/RX-51857-Amna-Alotaiba.png',
     imageUrl: '/prescriptions/RX-51857-Amna-Alotaiba.png',
     gdriveSource: 'https://drive.google.com/file/d/1ZDOYu7kXUcy65AJE-X9pVnFHKYSH5PJs/view?usp=drive_link',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-51857-A',
-    publicUrl: 'https://med-peptides.com/rx/RX-51857-A',
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-51857-A',
+    publicUrl: 'https://www.atlashealth-services.com/rx/RX-51857-A',
     patientId: 'amna-alotaiba',
     patientName: 'Amna Sultan Mohamed Ahmed Alotaiba',
     patientDob: '2001-06-14',
@@ -195,8 +195,8 @@ async function run() {
     pdfUrl: '/prescriptions/RX-51857-Amna-Alotaiba.png',
     imageUrl: '/prescriptions/RX-51857-Amna-Alotaiba.png',
     gdriveSource: 'https://drive.google.com/file/d/1ZDOYu7kXUcy65AJE-X9pVnFHKYSH5PJs/view?usp=drive_link',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-51857-B',
-    publicUrl: 'https://med-peptides.com/rx/RX-51857-B',
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-51857-B',
+    publicUrl: 'https://www.atlashealth-services.com/rx/RX-51857-B',
     patientId: 'amna-alotaiba',
     patientName: 'Amna Sultan Mohamed Ahmed Alotaiba',
     patientDob: '2001-06-14',
@@ -310,7 +310,7 @@ async function run() {
     prescriptionCode: 'RX-51857',
     code: '51857',
     fileNumber: '51857',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-51857'
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-51857'
   }, { merge: true });
   console.log('✓ Amna Alotaiba (51857) RX-51857-A & B ingested');
 
@@ -365,8 +365,8 @@ async function run() {
     pdfUrl: '/prescriptions/RX-51812-Abdulla-Alotaiba.png',
     imageUrl: '/prescriptions/RX-51812-Abdulla-Alotaiba.png',
     gdriveSource: 'https://drive.google.com/file/d/1ksvM8J_scw3CalKhe9n64Dmr4ZlFpIbK/view?usp=drive_link',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-51812-A',
-    publicUrl: 'https://med-peptides.com/rx/RX-51812-A',
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-51812-A',
+    publicUrl: 'https://www.atlashealth-services.com/rx/RX-51812-A',
     patientId: 'abdulla-alotaiba',
     patientName: 'Abdulla Sultan Mohamed Ahmed Alotaiba',
     patientDob: '1990-11-21',
@@ -532,8 +532,8 @@ async function run() {
     pdfUrl: '/prescriptions/RX-51812-Abdulla-Alotaiba.png',
     imageUrl: '/prescriptions/RX-51812-Abdulla-Alotaiba.png',
     gdriveSource: 'https://drive.google.com/file/d/1ksvM8J_scw3CalKhe9n64Dmr4ZlFpIbK/view?usp=drive_link',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-51812-B',
-    publicUrl: 'https://med-peptides.com/rx/RX-51812-B',
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-51812-B',
+    publicUrl: 'https://www.atlashealth-services.com/rx/RX-51812-B',
     patientId: 'abdulla-alotaiba',
     patientName: 'Abdulla Sultan Mohamed Ahmed Alotaiba',
     patientDob: '1990-11-21',
@@ -632,7 +632,7 @@ async function run() {
     prescriptionCode: 'RX-51812',
     code: '51812',
     fileNumber: '51812',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-51812'
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-51812'
   }, { merge: true });
   console.log('✓ Abdulla Alotaiba (51812) RX-51812-A & B ingested');
 
@@ -689,8 +689,8 @@ async function run() {
     pdfUrl: '/prescriptions/RX-51861-Basma-Bouzo.png',
     imageUrl: '/prescriptions/RX-51861-Basma-Bouzo.png',
     gdriveSource: 'https://drive.google.com/file/d/11OZyjDzE65266e-UBcS9lx5XrAgPho3h/view?usp=drive_link',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-51861-A',
-    publicUrl: 'https://med-peptides.com/rx/RX-51861-A',
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-51861-A',
+    publicUrl: 'https://www.atlashealth-services.com/rx/RX-51861-A',
     patientId: 'basma-bouzo',
     patientName: 'Basma Haitham K Bouzo',
     patientDob: '1984-06-05',
@@ -798,8 +798,8 @@ async function run() {
     pdfUrl: '/prescriptions/RX-51861-Basma-Bouzo.png',
     imageUrl: '/prescriptions/RX-51861-Basma-Bouzo.png',
     gdriveSource: 'https://drive.google.com/file/d/11OZyjDzE65266e-UBcS9lx5XrAgPho3h/view?usp=drive_link',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-51861-B',
-    publicUrl: 'https://med-peptides.com/rx/RX-51861-B',
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-51861-B',
+    publicUrl: 'https://www.atlashealth-services.com/rx/RX-51861-B',
     patientId: 'basma-bouzo',
     patientName: 'Basma Haitham K Bouzo',
     patientDob: '1984-06-05',
@@ -887,7 +887,7 @@ async function run() {
     prescriptionCode: 'RX-51861',
     code: '51861',
     fileNumber: '51861',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-51861'
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-51861'
   }, { merge: true });
   console.log('✓ Basma Bouzo (51861) RX-51861-A & B ingested');
 
@@ -946,8 +946,8 @@ async function run() {
     genomicsTest: 'Fagron Genomics TrichoTest™',
     pdfUrl: '/prescriptions/RX-BOX03483AATRI-Mohammed-Aishehhi.pdf',
     gdriveSource: 'https://drive.google.com/file/d/1JCLJCMYTciurnzNljkxv4HBU6usVTbsV/view?usp=drive_link',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-BOX03483AATRI',
-    publicUrl: 'https://med-peptides.com/rx/RX-BOX03483AATRI',
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-BOX03483AATRI',
+    publicUrl: 'https://www.atlashealth-services.com/rx/RX-BOX03483AATRI',
     patientId: 'mohammed-ahmad-aishehhi',
     patientName: 'Mohammed Ahmad Aishehhi',
     patientDob: '1966-07-15',
@@ -1059,12 +1059,12 @@ async function run() {
   await db.collection('prescriptions').doc('RX-BOX03483').set({
     ...rxMohammed,
     prescriptionCode: 'RX-BOX03483',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-BOX03483'
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-BOX03483'
   }, { merge: true });
   await db.collection('prescriptions').doc('BOX03483AATRI').set({
     ...rxMohammed,
     prescriptionCode: 'BOX03483AATRI',
-    canonicalUrl: 'https://med-peptides.com/rx/BOX03483AATRI'
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/BOX03483AATRI'
   }, { merge: true });
   console.log('✓ Mohammed Aishehhi (BOX03483AATRI) ingested');
 

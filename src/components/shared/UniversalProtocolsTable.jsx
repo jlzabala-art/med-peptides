@@ -1111,7 +1111,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
       <UniversalShareDrawer
         isOpen={showShareProtocolsDrawer}
         onClose={() => setShowShareProtocolsDrawer(false)}
-        shareUrl="https://med-peptides.com/proto"
+        shareUrl="https://www.atlashealth-services.com/proto"
         docType="protocols_catalog"
         title="Share Protocols Directory"
         subtitle="Generate a tracked short link for WhatsApp or Email with recipient assignment."

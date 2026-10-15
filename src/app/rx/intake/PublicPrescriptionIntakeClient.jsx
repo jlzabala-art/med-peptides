@@ -604,7 +604,7 @@ export default function PublicPrescriptionIntakeClient() {
   const officialCode = activeRx?.prescriptionNumber || activeRx?.id || 'RX-PRESCRIPTION';
   const fullPublicUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}/rx/${officialCode}` 
-    : `https://med-peptides.com/rx/${officialCode}`;
+    : `https://www.atlashealth-services.com/rx/${officialCode}`;
 
   // Pre-fill physician & patient forms whenever active draft changes in Phase 2
   useEffect(() => {
@@ -1254,7 +1254,7 @@ export default function PublicPrescriptionIntakeClient() {
         ]}
         isDoctorView={isDoctor}
         onSwitchRx={() => setShowRxSwitcherModal(true)}
-        copyUrl={typeof window !== 'undefined' ? `${window.location.origin}/rx/intake` : 'https://med-peptides.com/rx/intake'}
+        copyUrl={typeof window !== 'undefined' ? `${window.location.origin}/rx/intake` : 'https://www.atlashealth-services.com/rx/intake'}
       />
 
       {/* ── GOOGLE CLOUD UX: 3-PHASE STEPPER BAR ── */}

@@ -183,7 +183,7 @@ export async function POST(request) {
     const year = new Date().getFullYear();
     const randPart = Math.random().toString(36).substring(2, 6).toUpperCase();
     const shareCode = `SH-${year}-${randPart}`;
-    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
     const shortUrl = `${origin}/c/${shareCode}`;
 
     const docData = {

@@ -33,7 +33,7 @@ export default function DiagnosticTestWidget({
   const isEs = lang === 'es';
   const [copied, setCopied] = useState(false);
 
-  const resolvedUrl = publicUrl || (typeof window !== 'undefined' ? window.location.href : `https://med-peptides.com/p/${slug}`);
+  const resolvedUrl = publicUrl || (typeof window !== 'undefined' ? window.location.href : `https://www.atlashealth-services.com/p/${slug}`);
 
   const handleCopyLink = async () => {
     try {
@@ -94,8 +94,8 @@ export default function DiagnosticTestWidget({
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
             <Clock size={14} color="#0284c7" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
-              <strong style={{ color: '#0f172a', display: 'block' }}>{isEs ? 'Tiempo de Informe: 48–72h' : 'Reporting Window: 48–72h'}</strong>
-              <span style={{ color: '#64748b', fontSize: '0.70rem' }}>{isEs ? 'Desde recepción en laboratorio central' : 'From central laboratory receipt'}</span>
+              <strong style={{ color: '#0f172a', display: 'block' }}>{isEs ? 'Plazo de Resultados: ~2 semanas' : 'Reporting Window: ~2 weeks'}</strong>
+              <span style={{ color: '#64748b', fontSize: '0.70rem' }}>{isEs ? 'Validación analítica dual y tránsito LifeLab1' : 'Dual laboratory validation & courier transit to LifeLab1'}</span>
             </div>
           </div>
 

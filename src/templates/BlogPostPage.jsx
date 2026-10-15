@@ -361,12 +361,12 @@ useEffect(() => {
               "name": "Atlas Health",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://Atlas Health.com/atlas-health-logo.png"
+                "url": "https://www.atlashealth-services.com/atlas-health-logo.png"
               }
             },
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": `https://Atlas Health.com/blog/${post.slug}`
+              "@id": `https://www.atlashealth-services.com/blog/${post.slug}`
             }
           }
         }

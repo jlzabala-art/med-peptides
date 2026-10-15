@@ -870,6 +870,17 @@ nav.site-nav,
   gap: 10px;
   transition: all 0.2s ease;
 }
+
+@media (min-width: 1024px) {
+  .rx-bottom-dock {
+    /* Offset by half the right sidebar width (290px + 24px gap = 314px / 2 = 157px)
+       to ensure the dock is strictly centered in the main column and never covers sidebar content */
+    left: calc(50% - 157px);
+    transform: translateX(-50%);
+    width: auto;
+    max-width: min(720px, calc(100vw - 360px));
+  }
+}
 .rx-dock-patient-pill {
   display: inline-flex;
   align-items: center;

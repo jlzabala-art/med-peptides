@@ -56,7 +56,7 @@ export async function POST(req) {
       return NextResponse.json({ error: 'targetUrl or slug is required' }, { status: 400 });
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
     // Build canonical target URL with clean query parameters
     let cleanTargetUrl = targetUrl;

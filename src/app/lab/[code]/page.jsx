@@ -6,7 +6,7 @@ import PublicLabResultClient from './PublicLabResultClient';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
 async function getLabResultData(code) {
   if (!code || !adminDb) return null;
@@ -49,12 +49,12 @@ export async function generateMetadata({ params }) {
   }
 
   const testName = labData.testName || 'NAD+ Quantitative Test';
-  const val = `${labData.value} ${labData.unit || 'µmol/L'}`;
-  const patient = labData.patientName || 'Verified Patient';
+  const val = labData.value != null ? `${labData.value} ${labData.unit || 'µM'}` : (labData.result || 'Quantified');
+  const maskedSubject = `Subject #${labData.patientCode || labData.code || code}`;
   const doctor = labData.doctorName || 'Attending Physician';
 
-  const shareTitle = `${testName} (${val}) · ${patient} | Bloodo & LifeLab1`;
-  const shareDesc = `Official LifeLab1 quantitative diagnostic report. Result: ${val} (${labData.zoneLabel || 'Insufficient range'}). Prescribed under ${doctor}. Accredited ISO 15189 / EU IVDR.`;
+  const shareTitle = `${testName} (${val}) · ${maskedSubject} | Atlas Health Services`;
+  const shareDesc = `Official diagnostic biomarker report. Result: ${val} (${labData.zoneLabel || 'Quantified'}). Prescribed under ${doctor}. Accredited ISO 15189 / EU IVDR.`;
   const pageUrl = `${BASE_URL}/lab/${code}`;
 
   return {

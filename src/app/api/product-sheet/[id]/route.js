@@ -4,7 +4,7 @@ import { adminDb } from '../../../../lib/firebaseAdmin';
 import { getPeptideScientificData } from '../../../../utils/knownPeptideData';
 import { processProductVariants } from '../../../../utils/productVariantProcessing';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 const BRAND_NAME = 'Atlas Solutions';
 const BRAND_COLOR = rgb(0, 0.21, 0.4);       // #003666 (Deep Corporate Navy)
 const TEAL_COLOR  = rgb(0.05, 0.58, 0.53);   // #0d9488 (Medical Teal)

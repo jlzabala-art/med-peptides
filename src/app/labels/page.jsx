@@ -6,7 +6,7 @@ import PublicLabelsAppClient from './PublicLabelsAppClient';
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
 export async function generateMetadata({ searchParams }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};

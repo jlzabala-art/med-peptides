@@ -476,9 +476,9 @@ export default function PrescriptionBrochureModal({
   const expiryDate = rx.expiryDate || rx.expDate || '15-09-2027';
 
   // Target URLs for QR codes
-  const doctorQrUrl = publicUrl || `https://med-peptides.com/rx/${rxId}`;
-  const patientQrUrl = patientPublicUrl || `https://med-peptides.com/rx/${rxId}?view=patient`;
-  const cleanDisplayUrl = `med-peptides.com/rx/${rx.prescriptionCode || rx.prescriptionNumber || rxId}`;
+  const doctorQrUrl = publicUrl || `https://www.atlashealth-services.com/rx/${rxId}`;
+  const patientQrUrl = patientPublicUrl || `https://www.atlashealth-services.com/rx/${rxId}?view=patient`;
+  const cleanDisplayUrl = `atlashealth-services.com/rx/${rx.prescriptionCode || rx.prescriptionNumber || rxId}`;
 
   // Formulations fallback
   const formulations = compoundedFormulations && compoundedFormulations.length > 0 

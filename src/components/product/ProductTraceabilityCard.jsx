@@ -145,7 +145,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
   const mfgDate = product.mfgDate || freshDates.mfgDate;
   const expDate = product.expirationDate || product.expiryDate || `${freshDates.expDate} (${freshDates.stabilityText})`;
 
-  const origin = 'https://med-peptides.com';
+  const origin = 'https://www.atlashealth-services.com';
   const defaultSupplier = product.supplierId || (Array.isArray(product.suppliers) && product.suppliers[0]) || (Array.isArray(product.supplierIds) && product.supplierIds[0]) || 'supplier-lotusland';
   const defaultDose = (product.dosage || (Array.isArray(product.variants) && product.variants[0]?.dosage) || '10 mg').replace(/_/g, ' ');
   const defaultFormat = product.format || product.presentation || (Array.isArray(product.variants) && product.variants[0]?.format) || 'vial';

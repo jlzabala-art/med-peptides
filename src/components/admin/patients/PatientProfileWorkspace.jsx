@@ -651,7 +651,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                 <span>Attending:</span>
               </div>
               <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0e7490', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                {patient.physician || 'Direct Medical Desk'}
+                {patient.physician || patient.doctorName || 'Direct Medical Desk'}
               </span>
             </div>
 
@@ -889,7 +889,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: '5px', backgroundColor: '#ecfeff', color: '#0e7490' }}>
-                  {patient.clinic || 'Affiliated Clinic'}
+                  {patient.clinic || patient.clinicName || 'Affiliated Clinic'}
                 </span>
                 {openSections.careTeam ? <ChevronUp size={16} color="#64748b" /> : <ChevronDown size={16} color="#64748b" />}
               </div>
@@ -927,8 +927,8 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                     <div>
                       <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px', display: 'block' }}>Primary Clinic</label>
                       <ClinicPicker
-                        value={patient.clinicId || patient.clinic}
-                        clinicName={patient.clinic}
+                        value={patient.clinicId || patient.clinic || patient.clinicName}
+                        clinicName={patient.clinic || patient.clinicName}
                         onChange={async (selected) => {
                           if (selected) {
                             await handleUpdatePatient({
@@ -943,14 +943,16 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                     <div>
                       <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px', display: 'block' }}>Attending Physician</label>
                       <PhysicianPicker
-                        value={patient.physicianId || patient.physician}
-                        physicianName={patient.physician}
-                        clinicFilter={patient.clinicId || patient.clinic}
+                        value={patient.physicianId || patient.doctorId || patient.physician || patient.doctorName}
+                        physicianName={patient.physician || patient.doctorName}
+                        clinicFilter={patient.clinicId || patient.clinic || patient.clinicName}
                         onChange={async (selected) => {
                           if (selected) {
                             await handleUpdatePatient({
                               physicianId: selected.physicianId || '',
+                              doctorId: selected.physicianId || '',
                               physician: selected.physicianName || '',
+                              doctorName: selected.physicianName || '',
                               physicianName: selected.physicianName || ''
                             });
                           }
@@ -960,16 +962,16 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
-                    {patient.clinic && (
+                    {(patient.clinic || patient.clinicName) && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', backgroundColor: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600 }}>
-                        🏥 {patient.clinic}
+                        🏥 {patient.clinic || patient.clinicName}
                       </span>
                     )}
-                    {patient.physicianId ? (
-                      <EntityLink type="physician" id={patient.physicianId} label={patient.physician || 'View Primary Doctor'} size="md" />
-                    ) : patient.physician ? (
+                    {patient.physicianId || patient.doctorId ? (
+                      <EntityLink type="physician" id={patient.physicianId || patient.doctorId} label={patient.physician || patient.doctorName || 'View Primary Doctor'} size="md" />
+                    ) : (patient.physician || patient.doctorName) ? (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600 }}>
-                        🩺 {patient.physician}
+                        🩺 {patient.physician || patient.doctorName}
                       </span>
                     ) : null}
                     {prescriptions && prescriptions.length > 0 && (

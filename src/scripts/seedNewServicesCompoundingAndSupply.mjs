@@ -52,7 +52,7 @@ export const COMPOUNDING_SERVICE_PRODUCT = {
     },
     {
       name: 'Clinical Prescription Desk',
-      description: 'Submit formal doctor prescriptions directly to our clinical compounding desk at kasia@mediluxeme.com or business@med-peptides.com.'
+      description: 'Submit formal doctor prescriptions directly to our clinical compounding desk at kasia@mediluxeme.com or info@atlashealth-services.com.'
     }
   ],
   pricingRules: {
@@ -147,7 +147,7 @@ export const COMPOUNDING_SERVICE_PRODUCT = {
   faqs: [
     {
       q: 'How do we submit a compounding request?',
-      a: 'You can submit requests through our dedicated mobile application or by emailing physician prescriptions and required quantities to kasia@mediluxeme.com or business@med-peptides.com.'
+      a: 'You can submit requests through our dedicated mobile application or by emailing physician prescriptions and required quantities to kasia@mediluxeme.com or info@atlashealth-services.com.'
     },
     {
       q: 'How does flexible invoicing work between the clinic and the patient?',

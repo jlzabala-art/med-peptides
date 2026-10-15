@@ -50,10 +50,10 @@ export default function HomeView({
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Atlas Health",
-    "url": "https://Atlas Health.com/",
+    "url": "https://www.atlashealth-services.com/",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://Atlas Health.com/search?q={search_term_string}",
+      "target": "https://www.atlashealth-services.com/search?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   }), []);
@@ -61,7 +61,7 @@ export default function HomeView({
   usePageMeta({
     title: 'Atlas Health | Premium Research Peptides & Research Protocols',
     description: 'Atlas Health provides high-purity research peptides and advanced research protocols for scientific professionals. Global logistics and verified analytical standards.',
-    canonicalUrl: 'https://Atlas Health.com/',
+    canonicalUrl: 'https://www.atlashealth-services.com/',
     structuredData
   });
 

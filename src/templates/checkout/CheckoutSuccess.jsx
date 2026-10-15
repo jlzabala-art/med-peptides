@@ -447,7 +447,7 @@ export default function CheckoutSuccess({
               fontSize: '0.68rem', color: 'var(--color-border)',
               letterSpacing: '0.08em', paddingTop: '0.5rem',
             }}>
-              FOR RESEARCH USE ONLY — Not for human therapeutic use &nbsp;·&nbsp; Atlas Health.com
+              FOR RESEARCH USE ONLY — Not for human therapeutic use &nbsp;·&nbsp; atlashealth-services.com
             </div>
 
             </div>{/* end pa-col-left */}

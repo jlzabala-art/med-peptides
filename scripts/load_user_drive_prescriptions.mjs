@@ -602,7 +602,7 @@ async function executeImport() {
     code: '51812',
     partNumber: 1,
     parentPrescriptionId: 'RX-51812',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-51812'
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-51812'
   }, { merge: true });
 
   await adminDb.collection('prescriptions').doc('RX-51812-B').set({
@@ -611,7 +611,7 @@ async function executeImport() {
     code: '51812',
     partNumber: 2,
     parentPrescriptionId: 'RX-51812',
-    canonicalUrl: 'https://med-peptides.com/rx/RX-51812'
+    canonicalUrl: 'https://www.atlashealth-services.com/rx/RX-51812'
   }, { merge: true });
 
   console.log('✅ Synchronized RX-51812-A and RX-51812-B');

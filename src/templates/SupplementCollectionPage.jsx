@@ -191,13 +191,13 @@ export default function SupplementCollectionPage({ onNavigate, onBack, toggleCom
   usePageMeta({
     title: 'Research-Grade Supplement Catalog | Atlas Health',
     description: 'Browse our catalog of scientifically-sourced, research-grade supplements. Filter by biological goal, category, and compound tags.',
-    canonicalUrl: 'https://med-peptides.com/collection/supplements',
+    canonicalUrl: 'https://www.atlashealth-services.com/collection/supplements',
     structuredData: {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://med-peptides.com/' },
-        { '@type': 'ListItem', position: 2, name: 'Supplement Catalog', item: 'https://med-peptides.com/collection/supplements' },
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.atlashealth-services.com/' },
+        { '@type': 'ListItem', position: 2, name: 'Supplement Catalog', item: 'https://www.atlashealth-services.com/collection/supplements' },
       ],
     },
   });

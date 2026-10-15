@@ -85,7 +85,50 @@
   line-height: 1.2;
 }
 
-/* ── 3. Main Workspace Full-Width Layout (100% Workspace Width) ── */
+/* ── 3. Google Cloud Console 2-Column Monograph Desktop Grid ── */
+.pds-monograph-desktop-grid {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .pds-monograph-desktop-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 290px !important;
+    gap: 1.5rem !important;
+    align-items: flex-start !important;
+    max-width: 1360px !important;
+    margin: 0.5rem auto 3rem auto !important;
+    padding: 0 1.5rem !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+  }
+
+  .pds-monograph-sidebar-sticky {
+    position: sticky !important;
+    top: 76px !important;
+    max-height: calc(100vh - 86px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e1 transparent !important;
+    padding-right: 2px;
+    padding-bottom: 2rem;
+    box-sizing: border-box;
+  }
+
+  .pds-monograph-sidebar-sticky::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .pds-monograph-sidebar-sticky::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+}
+
 .pds-monograph-main-grid {
   max-width: 1240px;
   margin: 0.5rem auto 3rem auto;
@@ -1366,6 +1409,18 @@
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .pds-summary-cell-redundant-desktop {
+    display: none !important;
+  }
+  .pds-summary-panel-grid {
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) !important;
+  }
+  .pds-summary-panel-grid .pds-summary-cell:nth-child(2) {
+    border-right: none !important;
+  }
 }
 
 .pds-summary-cell {

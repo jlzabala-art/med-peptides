@@ -195,7 +195,7 @@ async function patchProtocol() {
   console.log('  → Dual-compartment collagen strategy table');
   console.log('  → 8 peer-reviewed citations (4 per product)');
   console.log('  → Application timing sequence');
-  console.log('\nProtocol URL: https://med-peptides.com/proto/ghk-cu-scalp-follicular-support');
+  console.log('\nProtocol URL: https://www.atlashealth-services.com/proto/ghk-cu-scalp-follicular-support');
 
   process.exit(0);
 }

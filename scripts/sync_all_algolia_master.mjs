@@ -58,7 +58,7 @@ async function syncUsers() {
   });
 
   if (records.length > 0) {
-    await client.saveObjects({ indexName: 'atlas_users', objects: records });
+    await client.replaceAllObjects({ indexName: 'atlas_users', objects: records });
     console.log(`✅ Synced ${records.length} users to atlas_users.`);
 
     await client.setSettings({
@@ -75,12 +75,23 @@ async function syncUsers() {
 async function syncPatients() {
   console.log('🔄 Syncing atlas_patients...');
   
-  // Fetch from both users(role=patient) and patients collection
-  const [patientUsersSnap, patientsCollSnap, prescriptionsSnap] = await Promise.all([
+  // Fetch doctors, patient users, patients collection, and prescriptions
+  const [doctorsUsersSnap, patientUsersSnap, patientsCollSnap, prescriptionsSnap] = await Promise.all([
+    db.collection('users').where('role', '==', 'doctor').get(),
     db.collection('users').where('role', '==', 'patient').get(),
     db.collection('patients').get(),
     db.collection('prescriptions').get()
   ]);
+
+  const doctorMap = new Map();
+  doctorsUsersSnap.forEach(doc => {
+    const d = doc.data();
+    doctorMap.set(doc.id, {
+      name: d.name || d.displayName || 'Doctor',
+      clinic: d.clinic || d.clinicName || 'Affiliated Clinical Center',
+      clinicId: d.clinicId || ''
+    });
+  });
 
   const patientMap = new Map();
 
@@ -97,20 +108,27 @@ async function syncPatients() {
     patientMap.set(doc.id, { ...existing, ...data, id: doc.id });
   });
 
-  // Build prescription metadata by patient
+  // Build prescription metadata by patient id and patient name
   const rxByPatient = {};
+  const rxByPatientName = {};
   prescriptionsSnap.forEach(doc => {
     const d = doc.data();
     if (d.patientId) {
       if (!rxByPatient[d.patientId]) rxByPatient[d.patientId] = [];
       rxByPatient[d.patientId].push(d);
     }
+    const cleanPName = (d.patientName || d.patient?.name || '').trim().toLowerCase();
+    if (cleanPName) {
+      if (!rxByPatientName[cleanPName]) rxByPatientName[cleanPName] = [];
+      rxByPatientName[cleanPName].push(d);
+    }
   });
 
   const records = [];
   for (const [id, patient] of patientMap.entries()) {
     const name = (patient.name || `${patient.firstName || ''} ${patient.lastName || ''}`).trim() || 'Patient';
-    const rxList = rxByPatient[id] || [];
+    const cleanPName = name.toLowerCase();
+    const rxList = rxByPatient[id] || rxByPatientName[cleanPName] || [];
 
     const doctorIds = new Set(patient.doctorIds || []);
     if (patient.physicianId) doctorIds.add(patient.physicianId);
@@ -131,36 +149,74 @@ async function syncPatients() {
 
     const docIdsArray = Array.from(doctorIds);
     const primDocId = patient.physicianId || patient.doctorId || (docIdsArray[0] || '');
+    const doctorObj = primDocId ? doctorMap.get(primDocId) : null;
+
+    const resolvedDoctorName = patient.physician
+      || patient.doctorName
+      || (rxList[0]?.doctorName)
+      || doctorObj?.name
+      || '';
+
+    const resolvedClinicName = patient.clinic
+      || patient.clinicName
+      || (rxList[0]?.clinicName || rxList[0]?.clinic || rxList[0]?.doctor?.clinicName)
+      || doctorObj?.clinic
+      || '';
+
+    const resolvedClinicId = patient.clinicId
+      || (rxList[0]?.clinicId || rxList[0]?.doctor?.clinicId)
+      || doctorObj?.clinicId
+      || '';
 
     records.push({
       objectID: id,
       id,
       name,
+      fullName: name,
       email: patient.email || '',
       phone: patient.phone || patient.phoneNumber || '',
       status: (patient.status || 'active').toLowerCase(),
       country: patient.country || 'AE',
+      physician: resolvedDoctorName,
+      doctorName: resolvedDoctorName,
       physicianId: primDocId,
+      doctorId: primDocId,
+      clinic: resolvedClinicName,
+      clinicName: resolvedClinicName,
+      clinicId: resolvedClinicId,
       doctorIds: docIdsArray,
-      clinicIds: patient.clinicIds || (patient.clinicId ? [patient.clinicId] : []),
+      clinicIds: patient.clinicIds || (resolvedClinicId ? [resolvedClinicId] : []),
+      prescriptionCount: rxList.length || patient.prescriptionCount || 1,
       prescribedProductCategories: Array.from(categories),
-      prescribingDoctorNames: Array.from(doctorNames),
+      prescribingDoctorNames: Array.from(new Set([...doctorNames, resolvedDoctorName].filter(Boolean))),
       createdAt_ts: getTimestamp(patient.createdAt),
       lastActivityDate: getTimestamp(patient.lastActivityDate || patient.updatedAt || patient.createdAt)
     });
   }
 
   if (records.length > 0) {
-    await client.saveObjects({ indexName: 'atlas_patients', objects: records });
-    console.log(`✅ Synced ${records.length} patients to atlas_patients.`);
+    await client.replaceAllObjects({ indexName: 'atlas_patients', objects: records });
+    console.log(`✅ Synced ${records.length} patients to atlas_patients with resolved doctor & clinic.`);
 
     await client.setSettings({
       indexName: 'atlas_patients',
       indexSettings: {
-        searchableAttributes: ['name', 'email', 'phone', 'prescribingDoctorNames', 'prescribedProductCategories'],
+        searchableAttributes: [
+          'name',
+          'fullName',
+          'email',
+          'phone',
+          'physician',
+          'doctorName',
+          'clinic',
+          'clinicName',
+          'prescribingDoctorNames',
+          'prescribedProductCategories'
+        ],
         attributesForFaceting: [
           'filterOnly(status)',
           'filterOnly(physicianId)',
+          'filterOnly(doctorId)',
           'filterOnly(doctorIds)',
           'filterOnly(clinicIds)',
           'filterOnly(country)',
@@ -201,7 +257,7 @@ async function syncPrescriptions() {
   });
 
   if (records.length > 0) {
-    await client.saveObjects({ indexName: 'prescriptions', objects: records });
+    await client.replaceAllObjects({ indexName: 'prescriptions', objects: records });
     console.log(`✅ Synced ${records.length} prescriptions to prescriptions index.`);
 
     await client.setSettings({

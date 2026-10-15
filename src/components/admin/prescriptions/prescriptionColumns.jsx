@@ -794,7 +794,7 @@ export const getPrescriptionColumns = (options = {}) => {
               const patientPhone = (rx.patientPhone || rx.patient?.phone || '').replace(/[^0-9]/g, '');
               const rawItems = rx.items || rx.compounds || rx.products || [];
               const itemNames = rawItems.map(i => i.name || i.productName || 'Compound').join(', ');
-              const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+              const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
               const message = `Dear ${patientName}, ${doctorName} has issued your personalised prescription for ${itemNames || 'your treatment'}. Access details at: ${origin}/patient/prescriptions`;
               if (patientPhone) {
                 window.open(`https://wa.me/${patientPhone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');

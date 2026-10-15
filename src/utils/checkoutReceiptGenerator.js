@@ -143,7 +143,7 @@ export function generateReceiptHtml({
           <!-- Notice -->
           <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;line-height:1.5;">
             For research use only. Not for human therapeutic or diagnostic applications.<br/>
-            Questions? Contact support at <a href="mailto:info@Atlas Health.com" style="color:#003666;">info@Atlas Health.com</a>
+            Questions? Contact support at <a href="mailto:info@atlashealth-services.com" style="color:#003666;">info@atlashealth-services.com</a>
           </p>
         </td></tr>
 

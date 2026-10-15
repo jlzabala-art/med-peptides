@@ -461,7 +461,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                     </button>
 
                     <a
-                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Hello ${saved.patientName}, here is your official digitized medical prescription with validated clinical access:\n\n🔗 ${typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com'}${saved.rxUrl}\n\nVerification Code: ${saved.prescriptionNumber}`)}`}
+                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Hello ${saved.patientName}, here is your official digitized medical prescription with validated clinical access:\n\n🔗 ${typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com'}${saved.rxUrl}\n\nVerification Code: ${saved.prescriptionNumber}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="gcp-btn-secondary"

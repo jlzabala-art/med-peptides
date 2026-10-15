@@ -206,10 +206,10 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
   }, [user, userProfile, userType]);
 
   // We rely on Formspree for actual email delivery securely without a backend
-  // The user specifies they want the email to go to business@Atlas Health.com
+  // The user specifies they want the email to go to business@atlashealth-services.com
   // Normally you'd create a specific hash. In this demo setting, we'll use a mailto action or direct form action
   // if they have a formspree/other endpoint. Given no API keys, we'll use a direct mailto as fallback, 
-  // OR simulated submission that says "Emails to business@Atlas Health.com" since we can't register an endpoint for them automatically.
+  // OR simulated submission that says "Emails to business@atlashealth-services.com" since we can't register an endpoint for them automatically.
   // Actually, standard HTML form to formsubmit.co is free and requires no registration.
 
   const handleSubmit = (e) => {
@@ -233,7 +233,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
       user_type: userType || 'none'
     });
 
-    fetch('https://formsubmit.co/ajax/business@Atlas Health.com', {
+    fetch('https://formsubmit.co/ajax/business@atlashealth-services.com', {
         method: 'POST',
         headers: {
             'Accept': 'application/json'
@@ -256,7 +256,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
             window.open(`https://wa.me/971553561058?text=${text}`, '_blank');
           } else if (pendingQuote.type === 'Email') {
             const body = encodeURIComponent(`Sample Order Summary:\n${pendingQuote.summary}\n\nI have just submitted the contact form with my official details.`);
-            window.location.href = `mailto:business@Atlas Health.com?subject=Official Quote Request&body=${body}`;
+            window.location.href = `mailto:business@atlashealth-services.com?subject=Official Quote Request&body=${body}`;
           }
           setPendingQuote(null);
         }
@@ -362,7 +362,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
                 </div>
                 <div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Email Inquiry</div>
-                  <div style={{ fontWeight: 600 }}>business@Atlas Health.com</div>
+                  <div style={{ fontWeight: 600 }}>business@atlashealth-services.com</div>
                 </div>
               </div>
               <div

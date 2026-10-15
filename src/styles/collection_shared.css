@@ -1399,3 +1399,85 @@
   color: var(--text-muted, #475569);
   line-height: 1.4;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   GOOGLE CLOUD WORKSPACE & SIDEBAR RESPONSIVE LAYOUT (Regla #23)
+   ───────────────────────────────────────────────────────────── */
+.gcp-collection-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 2rem;
+  align-items: start;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .gcp-collection-workspace {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .gcp-collection-workspace > main {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .gcp-collection-sidebar {
+    position: static !important;
+    top: auto !important;
+    width: 100% !important;
+    margin-top: 1rem !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   FLOATING ACTION DOCK / STICKED FOOT (Regla Golden User Idea)
+   Centrado en la parte principal de la pantalla, sin tapar el sidebar
+   ───────────────────────────────────────────────────────────── */
+.collection-bottom-dock {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 860px;
+  z-index: 48;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  border-radius: 9999px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.05);
+  padding: 7px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+@media (min-width: 1025px) {
+  .collection-bottom-dock {
+    /* Offset by half the sidebar width (340px / 2 = 170px) so the dock is centered
+       directly over the main catalog column and NEVER overlaps the right sidebar */
+    left: calc(50% - 170px);
+    transform: translateX(-50%);
+    width: auto;
+    max-width: min(760px, calc(100vw - 420px));
+  }
+}
+
+@media (max-width: 768px) {
+  .collection-bottom-dock {
+    bottom: 12px;
+    width: calc(100% - 20px);
+    padding: 6px 12px;
+    gap: 8px;
+  }
+  .collection-dock-hide-mobile {
+    display: none !important;
+  }
+}
+

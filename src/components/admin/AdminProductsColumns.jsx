@@ -9,7 +9,7 @@ import CopyableId from '../ui/CopyableId';
 import notifier from '../../services/NotificationService';
 import { getProductAvailableTypes, isPeptideProduct } from '../../utils/productNormalizer';
 
-const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
 
 /**
  * QrShareButton — inline share button for admin table rows.

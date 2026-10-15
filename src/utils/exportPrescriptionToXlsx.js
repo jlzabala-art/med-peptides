@@ -74,7 +74,7 @@ export function exportPrescriptionToXlsx(rx, options = {}) {
     [isEs ? '── PAUTA GENERAL DE POSOLOGÍA & NOTAS ──' : '── POSOLOGY REGIMEN & CLINICAL INSTRUCTIONS ──', ''],
     [isEs ? 'Instrucciones de Uso' : 'Posology Regimen', rx.posology || rx.clinicalNotes || (isEs ? 'Según prescripción médica facultativa.' : 'As directed by prescribing physician.')],
     ['', ''],
-    [isEs ? 'Verificación Oficial Digital' : 'Digital Verification URL', `https://med-peptides.com/rx/${rxId}`],
+    [isEs ? 'Verificación Oficial Digital' : 'Digital Verification URL', `https://www.atlashealth-services.com/rx/${rxId}`],
   ];
 
   const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
@@ -231,7 +231,7 @@ export function exportBatchPrescriptionsToXlsx(rxList = [], options = {}) {
     const treatmentType = rx.treatmentType || rx.formulaName || (isEs ? 'Fórmula Magistral' : 'Compounded Formula');
     const lines = rx.prescriptionLines || rx.items || rx.compounds || [];
     const dateStr = rx.prescriptionDate || rx.createdAt?.slice(0, 10) || exportDate;
-    const url = `https://med-peptides.com/rx/${rxId}`;
+    const url = `https://www.atlashealth-services.com/rx/${rxId}`;
 
     return [
       idx + 1,

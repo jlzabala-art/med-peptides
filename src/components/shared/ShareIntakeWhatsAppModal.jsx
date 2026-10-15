@@ -40,7 +40,7 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose, rx = null })
   const isEs = lang === 'es';
   const origin = typeof window !== 'undefined' 
     ? window.location.origin 
-    : 'https://med-peptides.com';
+    : 'https://www.atlashealth-services.com';
 
   const userEmail = user?.email || userProfile?.email || '';
   

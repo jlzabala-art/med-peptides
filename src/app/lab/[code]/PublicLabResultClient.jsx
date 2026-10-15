@@ -28,14 +28,27 @@ import {
   Brain,
   Shield,
   Flame,
-  Gauge
+  Gauge,
+  Lock,
+  Sparkles
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import LabResultDetailSidebar from '@/components/lab/LabResultDetailSidebar';
 
 export default function PublicLabResultClient({ initialData, code }) {
+  const { user, activeRole } = useAuth();
+  const isAuthorizedDoctor = Boolean(user && ['doctor', 'admin', 'clinic', 'medical_director', 'fagron_doctor'].includes(activeRole));
+
   const [copied, setCopied] = useState(false);
   const [activeSection, setActiveSection] = useState('overview');
   const data = initialData || {};
+
+  const rawPatientName = data.patientName || data.patient?.name;
+  const maskedSubjectCode = `Subject #${data.patientCode || data.patient?.code || data.protocolNumber || code}`;
+  const displayPatientName = isAuthorizedDoctor ? (rawPatientName || maskedSubjectCode) : maskedSubjectCode;
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
@@ -87,270 +100,23 @@ export default function PublicLabResultClient({ initialData, code }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif', paddingBottom: '90px' }}>
-      {/* Top Banner Navigation */}
-      <header style={{
-        background: '#ffffff',
-        borderBottom: '1px solid #e2e8f0',
-        padding: '12px 24px',
-        position: 'sticky',
-        top: 0,
-        zIndex: 30,
-        boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-      }}>
-        <div style={{ maxWidth: '1360px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
-              background: isEternaProteomics ? '#4f46e5' : '#003666',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff'
-            }}>
-              {isEternaProteomics ? <Activity size={20} /> : (isTellmeGen ? <Dna size={20} /> : <FlaskConical size={20} />)}
-            </div>
-            <div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: isEternaProteomics ? '#4f46e5' : '#003666', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>{isEternaProteomics ? 'ETERNA BIOAGE PROTEOMICS' : (isTellmeGen ? 'TELLMEGEN DNA GENOMICS' : 'BLOODO™ DIAGNOSTICS')}</span>
-                <span style={{ fontSize: '0.68rem', padding: '1px 6px', borderRadius: '4px', background: isEternaProteomics ? '#eef2ff' : '#e0f2fe', color: isEternaProteomics ? '#4338ca' : '#0284c7', fontWeight: 700 }}>
-                  {data.laboratory?.accreditation || 'CLIA / ISO 15189'}
-                </span>
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                {isEternaProteomics ? 'Blood Proteomics & Organ Biological Age Quantification' : (isTellmeGen ? 'Pharmacogenetics & Monogenic DNA Sequencing Panel' : 'Quantitative Intracellular Biomarker Assay · LifeLab1')}
-              </div>
-            </div>
-          </div>
+      {/* Atlas Health Unified Public Header */}
+      <PublicUnifiedHeader
+        track="diagnostics"
+        brandTitle="Atlas Health Services · Precision Biomarkers & Diagnostics"
+        copyUrl={`https://www.atlashealth-services.com/lab/${code}`}
+        shortUrl={`https://www.atlashealth-services.com/lab/${code}`}
+        doctorName={data.doctorName || 'Dr. Sobia Mirza'}
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Diagnostic Registry', href: '/collection/bloodo' },
+          { label: `${data.testName || 'Biomarker Report'} #${data.protocolNumber || code}` }
+        ]}
+      />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={handleCopyLink}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                color: '#334155',
-                cursor: 'pointer'
-              }}
-            >
-              {copied ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
-              <span>{copied ? 'Copied' : 'Share Link'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handlePrint}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                color: '#334155',
-                cursor: 'pointer'
-              }}
-            >
-              <Printer size={14} />
-              <span>Print</span>
-            </button>
-
-            {data.pdfReportUrl && (
-              <a
-                href={data.pdfReportUrl}
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  background: isEternaProteomics ? '#4f46e5' : '#003666',
-                  color: '#ffffff',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  textDecoration: 'none',
-                  boxShadow: '0 2px 4px rgba(0,54,102,0.15)'
-                }}
-              >
-                <Download size={14} />
-                <span>Original PDF</span>
-              </a>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Main Container with GCP-style Left Sidebar and Content Area */}
-      <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '20px 16px', display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+      {/* Main Container with 2-Column Responsive Layout (Main Dossier + Sticky Right Sidebar) */}
+      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '24px 16px', display: 'flex', gap: '28px', alignItems: 'flex-start' }}>
         
-        {/* GCP Console Left Navigation Sidebar (Desktop) */}
-        <aside style={{
-          width: '240px',
-          flexShrink: 0,
-          background: '#ffffff',
-          borderRadius: '10px',
-          border: '1px solid #e2e8f0',
-          padding: '16px 12px',
-          position: 'sticky',
-          top: '76px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '6px'
-        }} className="hidden md:flex">
-          <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '4px 8px' }}>
-            DOSSIER SECTIONS
-          </div>
-
-          <button
-            type="button"
-            onClick={() => scrollToSection('overview')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 10px',
-              borderRadius: '6px',
-              fontSize: '0.80rem',
-              fontWeight: activeSection === 'overview' ? 700 : 500,
-              color: activeSection === 'overview' ? '#1d4ed8' : '#334155',
-              background: activeSection === 'overview' ? '#eff6ff' : 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              textAlign: 'left'
-            }}
-          >
-            <Info size={15} />
-            <span>Overview & Patient</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => scrollToSection('results')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 10px',
-              borderRadius: '6px',
-              fontSize: '0.80rem',
-              fontWeight: activeSection === 'results' ? 700 : 500,
-              color: activeSection === 'results' ? '#1d4ed8' : '#334155',
-              background: activeSection === 'results' ? '#eff6ff' : 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              textAlign: 'left'
-            }}
-          >
-            <Activity size={15} />
-            <span>{isEternaProteomics ? 'Biological Age Metrics' : (isTellmeGen ? 'Genomic Variant Results' : 'Biomarker Quantification')}</span>
-          </button>
-
-          {isEternaProteomics && (
-            <button
-              type="button"
-              onClick={() => scrollToSection('organ-breakdown')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 10px',
-                borderRadius: '6px',
-                fontSize: '0.80rem',
-                fontWeight: activeSection === 'organ-breakdown' ? 700 : 500,
-                color: activeSection === 'organ-breakdown' ? '#1d4ed8' : '#334155',
-                background: activeSection === 'organ-breakdown' ? '#eff6ff' : 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                textAlign: 'left'
-              }}
-            >
-              <Heart size={15} />
-              <span>5-Organ Biological Ages</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => scrollToSection('interpretation')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 10px',
-              borderRadius: '6px',
-              fontSize: '0.80rem',
-              fontWeight: activeSection === 'interpretation' ? 700 : 500,
-              color: activeSection === 'interpretation' ? '#1d4ed8' : '#334155',
-              background: activeSection === 'interpretation' ? '#eff6ff' : 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              textAlign: 'left'
-            }}
-          >
-            <Gauge size={15} />
-            <span>Clinical Interpretation</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => scrollToSection('synergies')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 10px',
-              borderRadius: '6px',
-              fontSize: '0.80rem',
-              fontWeight: activeSection === 'synergies' ? 700 : 500,
-              color: activeSection === 'synergies' ? '#1d4ed8' : '#334155',
-              background: activeSection === 'synergies' ? '#eff6ff' : 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              textAlign: 'left'
-            }}
-          >
-            <Zap size={15} />
-            <span>Therapeutic Synergies</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => scrollToSection('accreditation')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 10px',
-              borderRadius: '6px',
-              fontSize: '0.80rem',
-              fontWeight: activeSection === 'accreditation' ? 700 : 500,
-              color: activeSection === 'accreditation' ? '#1d4ed8' : '#334155',
-              background: activeSection === 'accreditation' ? '#eff6ff' : 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              textAlign: 'left'
-            }}
-          >
-            <ShieldCheck size={15} />
-            <span>Accreditation & Standards</span>
-          </button>
-        </aside>
-
         {/* Main Content Column */}
         <main style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
@@ -405,32 +171,6 @@ export default function PublicLabResultClient({ initialData, code }) {
                         : 'Quantitative assessment of total intracellular NAD+ in capillary dried blood spots via validated enzymatic cyclic assay (XLT01690-0).')}
                 </p>
               </div>
-
-              {/* Accreditation Badge */}
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #cbd5e1',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '4px',
-                minWidth: '220px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#16a34a', fontSize: '0.80rem', fontWeight: 700 }}>
-                  <ShieldCheck size={16} />
-                  <span>{data.laboratory?.name || 'LifeLab1 / Eterna Precision'}</span>
-                </div>
-                <div style={{ fontSize: '0.72rem', color: '#475569' }}>
-                  License: <strong>{data.laboratory?.license || 'ISO 15189 / CLIA Certified'}</strong>
-                </div>
-                <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
-                  Standards: {data.laboratory?.standards || 'EU IVDR / CAP Accredited'}
-                </div>
-                <div style={{ fontSize: '0.70rem', color: '#94a3b8' }}>
-                  Location: {data.laboratory?.city || 'Vilnius / London'}, {data.laboratory?.country || 'Lithuania'}
-                </div>
-              </div>
             </div>
 
             {/* Demographic & Clinical Vigilance Bar */}
@@ -444,15 +184,35 @@ export default function PublicLabResultClient({ initialData, code }) {
               padding: '14px 18px'
             }}>
               <div>
-                <div style={{ fontSize: '0.70rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Patient</div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>{data.patientName || data.patient?.name || `Patient #${code}`}</div>
-                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Age: {data.patient?.age || chronoAgeYears || 38} · Gender: {data.patient?.gender || 'Verified'}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.70rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
+                  <span>Diagnostic Subject</span>
+                  {!isAuthorizedDoctor && <Lock size={11} color="#94a3b8" />}
+                </div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>{displayPatientName}</span>
+                </div>
+                {!isAuthorizedDoctor ? (
+                  <Link
+                    href={`/auth?tab=login&redirect=/lab/${code}`}
+                    style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 650, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}
+                  >
+                    <span>Doctor Sign In to Unlock Identity</span>
+                    <ExternalLink size={10} />
+                  </Link>
+                ) : (
+                  <div style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 650, marginTop: '2px' }}>
+                    ✓ Verified Clinician Access
+                  </div>
+                )}
+                <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                  Age: {data.patient?.age || chronoAgeYears || 38} · Gender: {data.patient?.gender || 'Verified'}
+                </div>
               </div>
 
               <div>
                 <div style={{ fontSize: '0.70rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Physician / Center</div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>{data.doctorName || 'Youth Dubai Longevity (YDL)'}</div>
-                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>{data.clinicName || 'Longevity Medicine Center'}</div>
+                <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>{data.doctorName || 'Dr. Sobia Mirza'}</div>
+                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>{data.clinicName || 'My London Skin Clinic'}</div>
               </div>
 
               <div>
@@ -754,8 +514,8 @@ export default function PublicLabResultClient({ initialData, code }) {
             </p>
           </div>
 
-          {/* THERAPEUTIC SYNERGIES */}
-          <div id="synergies" style={{
+          {/* CLINICAL RECOMMENDATIONS (SUPPLEMENTS + PROTOCOLS & PEPTIDES) */}
+          <div id="recommendations" style={{
             background: '#ffffff',
             borderRadius: '12px',
             border: '1px solid #e2e8f0',
@@ -763,79 +523,165 @@ export default function PublicLabResultClient({ initialData, code }) {
             boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '16px'
+            gap: '20px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Zap size={18} color="#d97706" />
-              <h2 style={{ fontSize: '1.05rem', fontWeight: 750, color: '#0f172a', margin: 0 }}>
-                Correlated Clinical Protocols & Therapeutic Synergies
-              </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={20} color="#0284c7" />
+                <div>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                    Clinical Recommendations
+                  </h2>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                    Personalized therapeutic interventions based on quantified intracellular NAD+ ({val} {unit} · {zoneLabel}).
+                  </p>
+                </div>
+              </div>
+              <span style={{
+                fontSize: '0.72rem',
+                fontWeight: 750,
+                color: '#0369a1',
+                background: '#e0f2fe',
+                border: '1px solid #bae6fd',
+                padding: '3px 9px',
+                borderRadius: '6px'
+              }}>
+                Target: Longevity Range (21.7 – 33.7 µmol/L)
+              </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '14px' }}>
-              <div style={{
-                border: '1px solid #bae6fd',
-                borderRadius: '8px',
-                padding: '16px',
-                background: '#f0f9ff',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                gap: '12px'
-              }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase' }}>
-                    EVIDENCE-BASED PROTOCOL
-                  </span>
-                  <h3 style={{ fontSize: '0.94rem', fontWeight: 750, color: '#0c4a6e', margin: 0 }}>
-                    NAD+ Cellular Optimization & Mitochondrial Resilience
-                  </h3>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.45 }}>
-                    Subcutaneous bioidentical NAD+ administration coupled with oral salvage precursors (NMN/NR) and CD38 enzymatic inhibitors (Apigenin / Quercetin).
-                  </p>
-                </div>
-
-                <Link
-                  href="/proto/Ks2ThxuWoPmWzc3UW06R"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    color: '#0284c7',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    textDecoration: 'none'
-                  }}
-                >
-                  <span>View Full Clinical Protocol Dossier</span>
-                  <ArrowRight size={13} />
-                </Link>
+            {/* Sub-block 1: Targeted Cellular Supplements */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.80rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <FlaskConical size={15} color="#0284c7" />
+                <span>1. Cellular & Metabolic Supplements</span>
               </div>
 
-              <div style={{
-                border: '1px solid #99f6e4',
-                borderRadius: '8px',
-                padding: '16px',
-                background: '#f0fdfa',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                gap: '12px'
-              }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase' }}>
-                    PEPTIDE REGULATION & REPAIR
-                  </span>
-                  <h3 style={{ fontSize: '0.94rem', fontWeight: 750, color: '#134e4a', margin: 0 }}>
-                    Epithalon & Cellular Senescence Bioregulator
-                  </h3>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.45 }}>
-                    Pineal peptide bioregulator stimulating telomerase expression and normalizing neuroendocrine circadian rhythms in biological age deceleration.
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+                {/* Supplement 1: NMN / NR */}
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '0.84rem', fontWeight: 750, color: '#0f172a' }}>NAD+ Salvage Precursor (NMN / NR)</span>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#0369a1', background: '#eff6ff', padding: '2px 6px', borderRadius: '4px' }}>300–500 mg/day</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
+                    Oral β-Nicotinamide Mononucleotide or Nicotinamide Riboside enters the salvage pathway via Nrk1/2, replenishing cellular NAD+ stores in peripheral tissues.
                   </p>
                 </div>
 
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0d9488' }}>
-                  Prescription formulation available via clinical dispensary.
+                {/* Supplement 2: Apigenin / CD38 Blocker */}
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '0.84rem', fontWeight: 750, color: '#0f172a' }}>CD38 Enzymatic Inhibitor (Apigenin + Quercetin)</span>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#0369a1', background: '#eff6ff', padding: '2px 6px', borderRadius: '4px' }}>50 mg / 250 mg</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
+                    Inhibits age-hyperactivated CD38 glycohydrolases which consume up to 80% of intracellular NAD+, preserving synthesized and recycled NAD+ pools.
+                  </p>
+                </div>
+
+                {/* Supplement 3: Methylation Buffer (TMG) */}
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '0.84rem', fontWeight: 750, color: '#0f172a' }}>Methyl Pool Protection (TMG / Betaine)</span>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#0369a1', background: '#eff6ff', padding: '2px 6px', borderRadius: '4px' }}>500 mg daily</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
+                    Supplies labile methyl groups consumed during hepatic nicotinamide methylation (NNMT) preventing hyperhomocysteinemia during active NAD+ repletion.
+                  </p>
+                </div>
+
+                {/* Supplement 4: CoQ10 & PQQ */}
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '0.84rem', fontWeight: 750, color: '#0f172a' }}>Mitochondrial Biogenesis (Ubiquinol + PQQ)</span>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#0369a1', background: '#eff6ff', padding: '2px 6px', borderRadius: '4px' }}>100 mg / 10 mg</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
+                    Optimizes electron transfer at Complex I and Complex II, protecting inner mitochondrial membranes from oxidative flux during NAD+ metabolic acceleration.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Sub-block 2: Therapeutic Protocols & Bioregulator Peptides */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.80rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <Dna size={15} color="#0d9488" />
+                <span>2. Therapeutic Protocols & Bioregulator Peptides</span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '12px' }}>
+                {/* Protocol 1: NAD+ Direct SubQ */}
+                <div style={{ border: '1px solid #bae6fd', borderRadius: '8px', padding: '16px', background: '#f0f9ff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase' }}>
+                      CLINICAL PROTOCOL · INJECTABLE
+                    </span>
+                    <h3 style={{ fontSize: '0.94rem', fontWeight: 750, color: '#0c4a6e', margin: 0 }}>
+                      Direct Subcutaneous NAD+ Replenishment Protocol
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.45 }}>
+                      50–100 mg subcutaneous injection 2–3 times weekly for 4–8 weeks. Bypasses intestinal and hepatic first-pass breakdown, directly elevating circulating and tissue NAD+ to longevity threshold.
+                    </p>
+                  </div>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0284c7' }}>
+                    Prescription formulation available via clinical dispensary
+                  </div>
+                </div>
+
+                {/* Protocol 2: Epithalon Bioregulator */}
+                <div style={{ border: '1px solid #99f6e4', borderRadius: '8px', padding: '16px', background: '#f0fdfa', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase' }}>
+                      PEPTIDE BIOREGULATOR · LONGEVITY
+                    </span>
+                    <h3 style={{ fontSize: '0.94rem', fontWeight: 750, color: '#134e4a', margin: 0 }}>
+                      Epithalon Pineal Bioregulator Protocol
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.45 }}>
+                      10 mg cycle (Ala-Glu-Asp-Gly tetrapeptide). Normalizes pineal neuroendocrine secretion, induces telomerase reverse transcriptase (TERT) expression, and works in synergy with NAD+-activated SIRT1.
+                    </p>
+                  </div>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0d9488' }}>
+                    Prescription formulation available via clinical dispensary
+                  </div>
+                </div>
+
+                {/* Protocol 3: MOTS-c Mitochondrial Peptide */}
+                <div style={{ border: '1px solid #c7d2fe', borderRadius: '8px', padding: '16px', background: '#eef2ff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#4338ca', textTransform: 'uppercase' }}>
+                      MITOCHONDRIAL PEPTIDE · METABOLIC
+                    </span>
+                    <h3 style={{ fontSize: '0.94rem', fontWeight: 750, color: '#312e81', margin: 0 }}>
+                      MOTS-c Mitochondrial-Derived Peptide Protocol
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.45 }}>
+                      5–10 mg SubQ weekly. Regulates the folate-methionine cycle and activates AMPK, stimulating cellular glucose uptake and mitochondrial respiration alongside NAD+ coenzyme availability.
+                    </p>
+                  </div>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#4f46e5' }}>
+                    Prescription formulation available via clinical dispensary
+                  </div>
+                </div>
+
+                {/* Protocol 4: SS-31 Cardiolipin Shield */}
+                <div style={{ border: '1px solid #fed7aa', borderRadius: '8px', padding: '16px', background: '#fffaf5', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#c2410c', textTransform: 'uppercase' }}>
+                      MEMBRANE SHIELD · MITOCHONDRIAL
+                    </span>
+                    <h3 style={{ fontSize: '0.94rem', fontWeight: 750, color: '#7c2d12', margin: 0 }}>
+                      SS-31 (Elamipretide) Mitochondrial Restorative Protocol
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.45 }}>
+                      Selectively concentrates in the inner mitochondrial membrane, binding cardiolipin to stabilize cristae structure, boost ATP yield, and reduce electron leak during respiratory chain stimulation.
+                    </p>
+                  </div>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#ea580c' }}>
+                    Prescription formulation available via clinical dispensary
+                  </div>
                 </div>
               </div>
             </div>
@@ -863,7 +709,24 @@ export default function PublicLabResultClient({ initialData, code }) {
             </p>
           </div>
         </main>
+
+        {/* Dedicated Laboratory & Diagnostic Sticky Sidebar (Desktop & Mobile Drawer) */}
+        <LabResultDetailSidebar
+          data={data}
+          code={code}
+          activeSection={activeSection}
+          onSelectSection={scrollToSection}
+          onPrint={handlePrint}
+          onCopyLink={handleCopyLink}
+          isEternaProteomics={isEternaProteomics}
+          isTellmeGen={isTellmeGen}
+          isDoctorUnlocked={isDoctorUnlocked}
+          patientDisplayName={maskedPatientName}
+        />
       </div>
+
+      {/* Institutional Unified Public Footer */}
+      <PublicUnifiedFooter />
 
       {/* FIXED BOTTOM ACTION DOCK (Google Cloud Console UX) */}
       <footer style={{

@@ -515,7 +515,7 @@ export default function PeptideDetail({
   const structuredData = useMemo(() => {
     if (!product) return null;
     const slug = product.slug || product.name.toLowerCase().replace(/\s+/g, '-');
-    const canonicalBase = 'https://med-peptides.com';
+    const canonicalBase = 'https://www.atlashealth-services.com';
     const productUrl = `${canonicalBase}/product/${slug}`;
 
     const graph = [
@@ -571,7 +571,7 @@ export default function PeptideDetail({
       ? `${product.shortDesc} — Research-grade ${product.name} with verified purity, available in multiple formats from Atlas Health.`
       : `Detailed technical profile for ${product?.name || 'this peptide'} — purity data, dosage formats, and research references.`,
     path: product?.name ? `/product/${product.slug || product.name.toLowerCase().replace(/\s+/g, '-')}` : '/products',
-    image: product?.image ? `https://med-peptides.com${product.image}` : undefined,
+    image: product?.image ? `https://www.atlashealth-services.com${product.image}` : undefined,
     structuredData
   });
 

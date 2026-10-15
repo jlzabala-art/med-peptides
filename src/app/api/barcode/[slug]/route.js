@@ -223,7 +223,7 @@ export async function GET(request, { params }) {
       ? (rawSupp.startsWith('supplier-') ? rawSupp : `supplier-${rawSupp.toLowerCase().replace(/[\s_]+/g, '-')}`)
       : 'supplier-lotusland';
 
-    const baseUrl = 'https://med-peptides.com';
+    const baseUrl = 'https://www.atlashealth-services.com';
     const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
     let targetUrl = explicitUrl;
 

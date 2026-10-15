@@ -390,7 +390,7 @@ export default function UserMobileCard({
               onOpenShareDrawer={(targetUser) => {
                 setShareDrawerConfig?.({
                   user: targetUser,
-                  shareUrl: 'https://med-peptides.com/catalog',
+                  shareUrl: 'https://www.atlashealth-services.com/catalog',
                   docType: 'catalog'
                 });
               }}

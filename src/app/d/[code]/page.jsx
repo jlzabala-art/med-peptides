@@ -19,7 +19,7 @@ import { adminDb } from '@/lib/firebaseAdmin';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
 import { resolveSocialImage, resolveSocialContent } from '@/utils/socialImageResolver';
 

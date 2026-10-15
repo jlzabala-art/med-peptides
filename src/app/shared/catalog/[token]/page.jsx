@@ -88,7 +88,7 @@ export async function generateMetadata({ params, searchParams }) {
     ? `Curated clinical peptide selection matching ${filterSummary} in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch purity assays, and cold-chain logistics.`
     : `Clinical peptide portfolio and analytical-grade lyophilized formulations in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch traceability & verified analytical assays.`;
 
-  const appUrl = 'https://med-peptides.com';
+  const appUrl = 'https://www.atlashealth-services.com';
   const catalogCode = catalogData.catalogId || token || '';
   const ogImageUrl = `${appUrl}/og-catalog.png`;
 

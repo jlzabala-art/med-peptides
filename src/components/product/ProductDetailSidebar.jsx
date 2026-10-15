@@ -309,7 +309,7 @@ export default function ProductDetailSidebar({
 
       {/* ── QR Code — Direct monograph link for print / clinical handout ── */}
       {slug && (() => {
-        const pageUrl = `https://med-peptides.com/p/${slug}`;
+        const pageUrl = `https://www.atlashealth-services.com/p/${slug}`;
         return (
           <div style={{
             margin: '12px 0 4px',
@@ -344,7 +344,7 @@ export default function ProductDetailSidebar({
               />
             </a>
             <p style={{ fontSize: '0.6rem', color: '#94a3b8', textAlign: 'center', margin: 0, lineHeight: 1.3 }}>
-              med-peptides.com/p/{slug}
+              atlashealth-services.com/p/{slug}
             </p>
           </div>
         );
@@ -522,13 +522,13 @@ export default function ProductDetailSidebar({
                     {isEs ? '📲 Monografía Digital' : '📲 Digital Monograph'}
                   </span>
                   <a
-                    href={`https://med-peptides.com/p/${slug}`}
+                    href={`https://www.atlashealth-services.com/p/${slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ display: 'block', lineHeight: 0, borderRadius: '6px', overflow: 'hidden' }}
                   >
                     <QRCodeSVG
-                      value={`https://med-peptides.com/p/${slug}`}
+                      value={`https://www.atlashealth-services.com/p/${slug}`}
                       size={110}
                       bgColor="#ffffff"
                       fgColor="#003666"
@@ -536,7 +536,7 @@ export default function ProductDetailSidebar({
                     />
                   </a>
                   <p style={{ fontSize: '0.62rem', color: '#94a3b8', textAlign: 'center', margin: 0 }}>
-                    med-peptides.com/p/{slug}
+                    atlashealth-services.com/p/{slug}
                   </p>
                 </div>
               )}

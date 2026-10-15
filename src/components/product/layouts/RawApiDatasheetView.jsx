@@ -29,7 +29,7 @@ import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import toast from 'react-hot-toast';
 
-export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://med-peptides.com' }) {
+export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://www.atlashealth-services.com' }) {
   const [copiedCas, setCopiedCas] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [selectedPack, setSelectedPack] = useState(product?.packSize || '10g');

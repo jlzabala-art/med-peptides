@@ -13,7 +13,7 @@
 export const getApprovalEmailHtml = ({
   fullName = 'User',
   clinicName = '',
-  loginUrl = 'https://med-peptides.com/login',
+  loginUrl = 'https://www.atlashealth-services.com/login',
   role = 'guest',
 } = {}) => {
   // Configuración del Saludo
@@ -250,7 +250,7 @@ export const getApprovalEmailHtml = ({
               <p class="footer-text"
                 style="margin:0 0 8px;font-size:11px;color:#94a3b8;">
                 Questions? Contact
-                <a href="mailto:support@Atlas Health.com"
+                <a href="mailto:support@atlashealth-services.com"
                   style="color:#00a3e0;text-decoration:none;font-weight:600;">
                   Technical Support
                 </a>
@@ -562,7 +562,7 @@ return `
               <p class="footer-text"
                 style="margin:0 0 8px;font-size:11px;color:#94a3b8;">
                 Questions? Contact
-                <a href="mailto:support@Atlas Health.com"
+                <a href="mailto:support@atlashealth-services.com"
                   style="color:#00a3e0;text-decoration:none;font-weight:600;">
                   Technical Support
                 </a>

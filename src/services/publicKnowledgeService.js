@@ -157,7 +157,7 @@ ${productEntries}
 - [European Pharmaceutical Compounding & Custom Formulation Service](/p/pharmaceutical-compounding-service)
   * Manufacturing: European Compounding Pharmacy operating under EU GMP & Ph. Eur. standards.
   * Turnaround: 5 to 7 working days total from prescription validation to international delivery.
-  * Dual Order Channels: Via dedicated Mobile Application or by emailing prescriptions directly to kasia@mediluxeme.com or business@med-peptides.com.
+  * Dual Order Channels: Via dedicated Mobile Application or by emailing prescriptions directly to kasia@mediluxeme.com or info@atlashealth-services.com.
   * Flexible Invoicing: If clinic pays, clinical wholesale discount is applied. If patient pays directly, recommended patient price (RRP) is applied via secure email payment link.
   * Flexible Delivery: Shipped directly to Clinic or dropshipped door-to-door to Patient residence in validated cold-chain.
   * Shipping Costs: 200–400 AED (approx 50–100 EUR); 100% Free Complimentary Shipping on orders of 10 or more products.

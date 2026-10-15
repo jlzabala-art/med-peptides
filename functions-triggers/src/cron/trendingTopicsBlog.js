@@ -18,7 +18,7 @@ exports.trendingTopicsBlog = onSchedule("0 9 * * 1", async (event) => { // Runs 
     console.log("Starting trending topics search...");
 
     // 1. Search for trending topics and write the article
-    const prompt = `You are a world-class medical writer for Atlas Health (med-peptides.com).
+    const prompt = `You are a world-class medical writer for Atlas Health (atlashealth-services.com).
 Your task is to write a highly engaging, scientific but accessible blog post about the most trending topic in the last 7 days regarding Peptides, longevity, or regenerative medicine.
     
 Rules:

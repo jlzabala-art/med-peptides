@@ -5,7 +5,7 @@ import { getDoctorPortalData } from '@/lib/doctorCache';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;

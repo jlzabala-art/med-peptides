@@ -188,7 +188,7 @@ export default function WorkspaceShareDatasheetModal({
         Clinical Product Documentation & Analytical Specifications
       </h1>
       <div style="font-size: 12px; color: #bfdbfe;">
-        Ref: <strong>${workspaceName}</strong> · Dispatched by Medical Affairs Desk (business@med-peptides.com)
+        Ref: <strong>${workspaceName}</strong> · Dispatched by Medical Affairs Desk (info@atlashealth-services.com)
       </div>
     </div>
 
@@ -235,7 +235,7 @@ export default function WorkspaceShareDatasheetModal({
       <div style="margin-top: 22px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 12px; line-height: 1.5; color: #475569;">
         <div style="font-weight: 700; color: #0f172a;">Medical Affairs & Institutional Supply Division</div>
         <div>Atlas Services · Clinical Intelligence & Research Network</div>
-        <div><a href="mailto:business@atlas-services.com" style="color: #0284c7; text-decoration: none;">business@atlas-services.com</a> | <a href="https://med-peptides.com" style="color: #0284c7; text-decoration: none;">https://med-peptides.com</a></div>
+        <div><a href="mailto:business@atlas-services.com" style="color: #0284c7; text-decoration: none;">business@atlas-services.com</a> | <a href="https://www.atlashealth-services.com" style="color: #0284c7; text-decoration: none;">https://www.atlashealth-services.com</a></div>
       </div>
 
     </div>
@@ -381,7 +381,7 @@ export default function WorkspaceShareDatasheetModal({
             <div>
               <h3 className="ws-datasheet-title">Share Clinical Datasheets</h3>
               <div className="ws-datasheet-subtitle">
-                <span>From: <strong>business@med-peptides.com</strong></span>
+                <span>From: <strong>info@atlashealth-services.com</strong></span>
                 <span className="ws-datasheet-ai-chip">Gemini 2.5 Flash · Pharma English</span>
               </div>
             </div>

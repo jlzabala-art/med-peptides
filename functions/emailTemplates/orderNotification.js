@@ -396,7 +396,7 @@ function buildOrderNotificationHtml(order) {
                   ${(order.catalogToken || order.catalogId) ? `
                   <tr>
                     <td style="font-weight:600;padding-top:4px;width:140px;">Shared Link:</td>
-                    <td style="padding-top:4px;"><a href="https://med-peptides.com/shared/catalog/${order.catalogToken || order.catalogId}" target="_blank" style="color:#2563eb;font-weight:700;text-decoration:underline;">View Shared Catalog & Pricing Sheet &rarr;</a></td>
+                    <td style="padding-top:4px;"><a href="https://www.atlashealth-services.com/shared/catalog/${order.catalogToken || order.catalogId}" target="_blank" style="color:#2563eb;font-weight:700;text-decoration:underline;">View Shared Catalog & Pricing Sheet &rarr;</a></td>
                   </tr>` : ''}
                 </table>
               </div>

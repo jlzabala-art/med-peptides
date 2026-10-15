@@ -53,7 +53,7 @@ function wrapLines(text, maxChars = 65) {
 }
 
 async function renderLabelSvg(item) {
-  const targetRxUrl = item.targetRxUrl || 'https://med-peptides.com/rx/51857';
+  const targetRxUrl = item.targetRxUrl || 'https://www.atlashealth-services.com/rx/51857';
   const qrSvgString = await QRCode.toString(targetRxUrl, {
     type: 'svg',
     margin: 1,
@@ -288,7 +288,7 @@ async function main() {
     mfg: '05/10/26',
     exp: '04/10/27',
     storage: 'Store in a cool dry place',
-    targetRxUrl: 'https://med-peptides.com/rx/51857'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/51857'
   };
 
   const svgPart1 = await renderLabelSvg(part1);
@@ -313,7 +313,7 @@ async function main() {
     mfg: '05/10/26',
     exp: '04/10/27',
     storage: 'Store in a cool dry place',
-    targetRxUrl: 'https://med-peptides.com/rx/51857'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/51857'
   };
 
   const svgPart2 = await renderLabelSvg(part2);
@@ -340,7 +340,7 @@ async function main() {
     mfg: '05/10/26',
     exp: '04/10/27',
     storage: 'Store at room temperature',
-    targetRxUrl: 'https://med-peptides.com/rx/BOX03483AATRI'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03483AATRI'
   };
   const svgAishehhi = await renderLabelSvg(aishehhi);
   await exportBoth(svgAishehhi, 'PHARMAPOLIS_MOHAMMED_AHMAD_AISHEHHI_BOX03483AATRI_TRICHOSOL_100ML_75x45mm_BACK-QR_300DPI');
@@ -364,7 +364,7 @@ async function main() {
     mfg: '05/10/26',
     exp: '04/10/27',
     storage: 'Store at room temperature',
-    targetRxUrl: 'https://med-peptides.com/rx/BOX03529AATRI'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03529AATRI'
   };
   const svgJulien1 = await renderLabelSvg(julienPart1);
   await exportBoth(svgJulien1, 'PHARMAPOLIS_JULIEN_BOITEUX_BOX03529AATRI_PART-1_TRICHOSOL_100ML_75x45mm_BACK-QR_300DPI');
@@ -388,7 +388,7 @@ async function main() {
     mfg: '05/10/26',
     exp: '04/10/27',
     storage: 'Store at room temperature',
-    targetRxUrl: 'https://med-peptides.com/rx/BOX03529AATRI'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03529AATRI'
   };
   const svgJulien2 = await renderLabelSvg(julienPart2);
   await exportBoth(svgJulien2, 'PHARMAPOLIS_JULIEN_BOITEUX_BOX03529AATRI_PART-2_TRICHOOIL_30ML_75x45mm_BACK-QR_300DPI');

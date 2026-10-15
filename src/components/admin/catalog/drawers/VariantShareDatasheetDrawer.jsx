@@ -95,7 +95,7 @@ export default function VariantShareDatasheetDrawer({
   const formatName = variant?.format || variant?.presentation || 'vial';
   const vialCode = currentVialCode || variant?.vialCode || variant?.id || 'BATCH-STD';
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
 
   // Auto-bind recipient on open if not already customized
   useEffect(() => {

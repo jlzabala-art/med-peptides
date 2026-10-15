@@ -628,7 +628,7 @@ export default function CheckoutConfirmationView({
                 paddingTop: '0.5rem',
               }}
             >
-              FOR RESEARCH USE ONLY — Not for human therapeutic use &nbsp;·&nbsp; Atlas Health.com
+              FOR RESEARCH USE ONLY — Not for human therapeutic use &nbsp;·&nbsp; atlashealth-services.com
             </div>
           </div>
 

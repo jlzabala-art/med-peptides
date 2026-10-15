@@ -45,7 +45,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
 
   const rxId = rx.id || rx.prescriptionNumber || 'RX-PRESCRIPTION';
   const posology = rx.structuredPosology || {};
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
   const publicUrl = rx.publicDossierUrl || `${baseUrl}/rx/${rxId}`;
 
   const steps = posology.applicationSteps || [

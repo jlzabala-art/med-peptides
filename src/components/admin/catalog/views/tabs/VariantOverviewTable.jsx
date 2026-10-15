@@ -49,12 +49,18 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
       const typeStr = v.formatLabel || v.format || v.productType || '';
       const dosageStr = v.dosage || v.size || '';
       const unitStr = v.kit?.unit || v.dosage_unit || '';
-      let formatSize = '-';
-      if (typeStr.toLowerCase().includes('api')) {
-        formatSize = `API (Bulk)`;
+      const isApi = typeStr.toLowerCase().includes('api') || 
+                    v.format === 'bulk_api' || 
+                    v.type === 'raw_material' || 
+                    v.productType === 'raw_material' || 
+                    v.unitOfMeasure === 'g';
+      let formatSize;
+      if (isApi) {
+        const moqText = v.moq ? ` · MOQ: ${v.moq}g` : '';
+        formatSize = `🧪 Bulk API (${v.dosage || v.size || '1g'}${moqText})`;
       } else if (dosageStr) {
         const presentation = unitStr ? unitStr : (typeStr.toLowerCase().includes('lyophilized') ? 'Vial' : typeStr);
-        formatSize = `${dosageStr} / ${presentation.charAt(0).toUpperCase() + presentation.slice(1)}`;
+        formatSize = `💊 ${dosageStr} / ${presentation.charAt(0).toUpperCase() + presentation.slice(1)}`;
       } else {
         formatSize = typeStr || '-';
       }
@@ -65,19 +71,19 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
   }, [variants, parentProduct]);
 
   const sortedVariants = useMemo(() => {
-    let sortableItems = [...processedVariants];
+    const sortableItems = [...processedVariants];
     if (sortConfig.key !== null) {
       sortableItems.sort((a, b) => {
-        let valA = sortConfig.key === 'health' ? a.health.score : a[sortConfig.key];
-        let valB = sortConfig.key === 'health' ? b.health.score : b[sortConfig.key];
+        const valA = sortConfig.key === 'health' ? a.health.score : a[sortConfig.key];
+        const valB = sortConfig.key === 'health' ? b.health.score : b[sortConfig.key];
         if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
         if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
       });
     } else {
       sortableItems.sort((a, b) => {
-        const isApiA = (a.productType || a.formatLabel || '').toLowerCase().includes('api');
-        const isApiB = (b.productType || b.formatLabel || '').toLowerCase().includes('api');
+        const isApiA = (a.productType || a.formatLabel || a.format || a.type || '').toLowerCase().includes('api') || a.format === 'bulk_api' || a.type === 'raw_material' || a.unitOfMeasure === 'g';
+        const isApiB = (b.productType || b.formatLabel || b.format || b.type || '').toLowerCase().includes('api') || b.format === 'bulk_api' || b.type === 'raw_material' || b.unitOfMeasure === 'g';
         if (isApiA && !isApiB) return -1;
         if (!isApiA && isApiB) return 1;
         const getDosageNum = (v) => parseFloat((v.dosage || v.size || '0').toString().replace(/[^0-9.]/g, '')) || 0;

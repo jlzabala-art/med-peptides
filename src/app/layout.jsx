@@ -9,9 +9,18 @@ import { Suspense } from 'react';
 
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com'),
   title: 'Atlas Health — Precision Peptide & Protocol Intelligence',
   description: 'Atlas Health — Precision Peptide & Protocol Intelligence Platform',
   manifest: '/manifest.json',
+  openGraph: {
+    title: 'Atlas Health — Precision Peptide & Protocol Intelligence',
+    description: 'Atlas Health — Precision Peptide & Protocol Intelligence Platform',
+    url: 'https://www.atlashealth-services.com',
+    siteName: 'Atlas Health',
+    locale: 'en_US',
+    type: 'website',
+  },
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },

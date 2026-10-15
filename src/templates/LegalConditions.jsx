@@ -27,7 +27,7 @@ const LegalConditions = ({ onBack }) => {
       icon: <Scale size={24} />,
       content: (
         <>
-          <p>By accessing and using Atlas Health.com, you agree to comply with and be bound by the following terms and conditions. These terms constitute a legally binding agreement between you and Atlas Health.</p>
+          <p>By accessing and using atlashealth-services.com, you agree to comply with and be bound by the following terms and conditions. These terms constitute a legally binding agreement between you and Atlas Health.</p>
           <p><strong>RESEARCH USE ONLY:</strong> All products listed on this website are intended for laboratory research purposes only. They are not for human or animal consumption, nor are they intended for diagnostic or therapeutic use.</p>
           <p><strong>AGE RESTRICTION:</strong> You must be at least 21 years of age to purchase products from this site. We reserve the right to verify credentials and refuse or cancel any order at our discretion.</p>
         </>

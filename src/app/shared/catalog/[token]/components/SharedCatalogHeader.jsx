@@ -63,7 +63,7 @@ export default function SharedCatalogHeader({
     : (isWholesaler && rawRecipientName.includes(' • ') ? rawRecipientName.split(' • ')[0].trim() : rawRecipientName);
 
   const verifiedCode = batchCode || catalogCode || 'RP-CATALOG';
-  const cleanBaseUrl = shareUrl || (typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : 'https://med-peptides.com');
+  const cleanBaseUrl = shareUrl || (typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : 'https://www.atlashealth-services.com');
   const activeFilteredUrl = typeof window !== 'undefined' ? window.location.href : cleanBaseUrl;
   const hasActiveFilters = Boolean(typeof window !== 'undefined' && window.location.search && window.location.search.length > 1);
   const activeQrUrl = (includeFiltersInQr && hasActiveFilters) ? activeFilteredUrl : cleanBaseUrl;
@@ -459,7 +459,7 @@ export default function SharedCatalogHeader({
           onClick={() => setIsQrModalOpen(true)}
           title="Click to enlarge QR code"
           >
-            <QRCodeSVG value={activeQrUrl || cleanBaseUrl || 'https://med-peptides.com'} size={64} level="M" />
+            <QRCodeSVG value={activeQrUrl || cleanBaseUrl || 'https://www.atlashealth-services.com'} size={64} level="M" />
             <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#003666', display: 'flex', alignItems: 'center', gap: '2px', marginTop: '1px' }}>
               <ShieldCheck size={9} color="#16a34a" />
               <span>Verified QR</span>
@@ -533,7 +533,7 @@ export default function SharedCatalogHeader({
             </div>
 
             <div style={{ padding: '12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-              <QRCodeSVG value={activeQrUrl || cleanBaseUrl || 'https://med-peptides.com'} size={200} level="H" />
+              <QRCodeSVG value={activeQrUrl || cleanBaseUrl || 'https://www.atlashealth-services.com'} size={200} level="H" />
             </div>
 
             {hasActiveFilters && (

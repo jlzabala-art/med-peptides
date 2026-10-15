@@ -12,7 +12,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-const BASE_URL = 'https://med-peptides.com';
+const BASE_URL = 'https://www.atlashealth-services.com';
 const BRAND_COLOR = rgb(0, 0.21, 0.4);       // #003666
 const TEAL_COLOR  = rgb(0.05, 0.58, 0.53);   // #0d9488
 const DARK_GRAY   = rgb(0.12, 0.15, 0.18);
@@ -635,7 +635,7 @@ export async function GET(request, { params }) {
       if (targetShareUrl.startsWith('/')) {
         targetShareUrl = `${BASE_URL}${targetShareUrl}`;
       }
-      // Force canonical production domain https://med-peptides.com in ALL cases
+      // Force canonical production domain https://www.atlashealth-services.com in ALL cases
       targetShareUrl = targetShareUrl.replace(/https?:\/\/[a-z0-9-]+\.web\.app/gi, BASE_URL);
       targetShareUrl = targetShareUrl.replace(/https?:\/\/[a-z0-9-]+\.firebaseapp\.com/gi, BASE_URL);
 

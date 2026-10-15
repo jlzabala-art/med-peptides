@@ -6,7 +6,7 @@ import PublicPrescriptionClient from './PublicPrescriptionClient';
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
 import { getPrescriptionData, invalidateRxCache } from '@/lib/prescriptionFetcher';
 import { getAuthoritativeClinicalData } from '@/data/pharmapolisLabelsMap';

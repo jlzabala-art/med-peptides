@@ -715,7 +715,7 @@ export default function User360Drawer({
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {sharedLinks.map(link => {
-                    const shortUrl = link.shortUrl || `https://med-peptides.com/c/${link.catalogId}`;
+                    const shortUrl = link.shortUrl || `https://www.atlashealth-services.com/c/${link.catalogId}`;
                     const createdDate = link.createdAt ? new Date(link.createdAt).toLocaleDateString() : 'N/A';
                     const lastVisited = link.lastVisitedAt ? new Date(link.lastVisitedAt).toLocaleString() : null;
 

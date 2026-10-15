@@ -21,7 +21,10 @@ import PublicPageHero from '@/components/shared/public/PublicPageHero';
 import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
 import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
 import HairProtocolsSidebarWidget from '@/components/product/HairProtocolsSidebarWidget';
+import CosmeticsSidebarWidget from '@/components/product/CosmeticsSidebarWidget';
 import ColwayProtocolInfogram from '@/components/product/ColwayProtocolInfogram';
+import ColwayTrichologyStemCellShowcase from '@/components/product/ColwayTrichologyStemCellShowcase';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import ImageModal from '@/snippets/ImageModal';
 import { CollectionBadgePill, CollectionCompanionBanner } from '@/components/product/CollectionBannerWidget';
 import toast from 'react-hot-toast';
@@ -659,6 +662,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
   const tocSections = useMemo(() => [
     { id: 'overview', label: 'Formulation Overview', icon: Layers },
+    { id: 'stem-cell-monograph', label: 'Baicapil™ 2% Monograph', icon: Sparkles },
     { id: 'clinical-evidence', label: 'Clinical Evidence & Targets', icon: Activity },
     { id: 'inci-dossier', label: 'Full INCI Composition', icon: Microscope },
     { id: 'application-protocol', label: 'Professional Application Protocol & Infogram', icon: ClipboardList },
@@ -971,6 +975,11 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
         <div className="pds-content-with-sidebar">
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+
+            {/* BAICAPIL 2% & STEM CELL ACTIVATION TECHNICAL MONOGRAPH (PHOTO + DOWNLOADABLE PDF + CLINICAL METRICS) */}
+            <div id="stem-cell-monograph" style={{ scrollMarginTop: '80px' }}>
+              <ColwayTrichologyStemCellShowcase lang={lang} />
+            </div>
 
             {/* CLINICAL EVIDENCE & MOLECULAR MECHANISMS */}
             <PublicSectionCard id="clinical-evidence" icon={Activity} category="CLINICAL EFFICACY" title="Evidence-Mapped Trichology & Follicular Research" badge="Peer-Reviewed Data" badgeVariant="teal">
@@ -1558,9 +1567,12 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
       <QrModal
         isOpen={isQrModalOpen}
         onClose={() => setIsQrModalOpen(false)}
-        url={productUrl || `https://med-peptides.com/p/${slug}`}
+        url={productUrl || `https://www.atlashealth-services.com/p/${slug}`}
         productName={name}
       />
+
+      {/* Institutional Unified Google Cloud Footer */}
+      <PublicUnifiedFooter lang={lang} />
     </div>
   );
 }

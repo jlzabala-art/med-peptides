@@ -358,13 +358,13 @@ export default function PeptideCollectionPage({ initialProducts = [], onNavigate
   usePageMeta({
     title: 'Research Peptide Catalog | Browse All Peptides | Atlas Health',
     description: 'Browse our complete catalog of high-purity research peptides. Filter by biological goal, form, and tags. Free worldwide shipping on qualified orders.',
-    canonicalUrl: 'https://med-peptides.com/collection/peptides',
+    canonicalUrl: 'https://www.atlashealth-services.com/collection/peptides',
     structuredData: {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://med-peptides.com/' },
-        { '@type': 'ListItem', position: 2, name: 'Peptide Catalog', item: 'https://med-peptides.com/collection/peptides' },
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.atlashealth-services.com/' },
+        { '@type': 'ListItem', position: 2, name: 'Peptide Catalog', item: 'https://www.atlashealth-services.com/collection/peptides' },
       ],
     },
   });

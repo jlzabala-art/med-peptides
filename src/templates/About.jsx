@@ -80,7 +80,7 @@ const About = () => {
   usePageMeta({
     title: 'About Atlas Health | Sourcing Quality & Trust | Atlas Health',
     description: 'Learn about Atlas Health, the global standard for high-purity research peptides. Batch verified, documented quality, globally coordinated operations in US, EU, HK, and UAE.',
-    canonicalUrl: 'https://med-peptides.com/about',
+    canonicalUrl: 'https://www.atlashealth-services.com/about',
     structuredData: {
       '@context': 'https://schema.org',
       '@type': 'AboutPage',
@@ -91,7 +91,7 @@ const About = () => {
         name: 'Atlas Health',
         logo: {
           '@type': 'ImageObject',
-          url: 'https://med-peptides.com/images/logo.png'
+          url: 'https://www.atlashealth-services.com/images/logo.png'
         }
       }
     }

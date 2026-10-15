@@ -56,6 +56,12 @@ const SupportIcon = () => (
 const TRUST_ITEMS = [
   {
     Icon: CheckBadgeIcon,
+    title: 'Accredited Diagnostics & ISO 15189',
+    desc: 'CE-IVDR certified DBS capillary blood panels and multi-omics longevity tests processed by accredited European reference laboratories.',
+    color: '#0ea5e9',
+  },
+  {
+    Icon: CheckBadgeIcon,
     title: 'Verified Specialized Suppliers',
     desc: 'Every compound is sourced from vetted manufacturers with documented quality control processes.',
     color: '#34d399',

@@ -72,7 +72,7 @@ export default function CatalogRightSidebar({
   const isFdaActive = fdaFilter && fdaFilter !== 'all';
   const [copiedType, setCopiedType] = useState(null);
 
-  const cleanBaseUrl = typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : 'https://med-peptides.com/catalog';
+  const cleanBaseUrl = typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : 'https://www.atlashealth-services.com/catalog';
   const activeFilteredUrl = typeof window !== 'undefined' ? window.location.href : cleanBaseUrl;
   const hasActiveFilters = Boolean(typeof window !== 'undefined' && window.location.search && window.location.search.length > 1);
 

@@ -154,7 +154,7 @@ export default function CorporateResidencyInquiryDrawer({
       // Fallback mailto
       const mailtoSubject = encodeURIComponent(`Confidential Visa & Corporate Review: ${fullName}`);
       const mailtoBody = encodeURIComponent(`Applicant: ${fullName}\nEmail: ${email}\nPhone: ${phone}\nStructure: ${applicantStructure}\nCapital: ${capitalHorizon}\nTimeline: ${timeline}`);
-      window.location.href = `mailto:business@med-peptides.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+      window.location.href = `mailto:info@atlashealth-services.com?subject=${mailtoSubject}&body=${mailtoBody}`;
     } finally {
       setIsSubmitting(false);
     }

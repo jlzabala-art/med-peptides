@@ -299,8 +299,7 @@ export async function buildCatalogSummary(searchParams) {
             algoliaMatchedIds.has(docId) || 
             algoliaMatchedIds.has(pSlug) || 
             algoliaMatchedIds.has(cName) || 
-            algoliaMatchedIds.has(pName) ||
-            searchTerms.some(st => algoliaMatchedIds.has(st))
+            algoliaMatchedIds.has(pName)
           )) ||
           searchTerms.some(st => (
             docId.includes(st) ||
@@ -555,21 +554,47 @@ export async function buildCatalogSummary(searchParams) {
       kpiTotalCanonical++;
       kpiTotalVariants += productVariants.length;
 
-      const isApi = (
-        data.primaryType === 'raw_material' || 
-        data.primaryType === 'api_raw_material' || 
-        data.productType === 'raw_material' || 
-        data.productType === 'api_raw_material' || 
-        (data.category && String(data.category).toLowerCase().includes('raw')) || 
-        (data.categoryId && String(data.categoryId).toLowerCase().includes('raw'))
-      );
+      let hasApiVar = false;
+      let hasFinVar = false;
 
-      if (isApi) {
-        kpiApiProducts++;
-        kpiApiVariants += productVariants.length;
+      productVariants.forEach(v => {
+        const pStr = String(v.presentation || v.presentationName || v.format || '').toLowerCase();
+        const isVarApi = v.type === 'raw_material' || 
+                         v.productType === 'raw_material' || 
+                         v.format === 'bulk_api' || 
+                         pStr.includes('bulk') || 
+                         pStr.includes('api') || 
+                         pStr.includes('powder') || 
+                         v.unit === 'g' || 
+                         v.unitOfMeasure === 'g';
+
+        if (isVarApi) {
+          hasApiVar = true;
+          kpiApiVariants++;
+        } else {
+          hasFinVar = true;
+          kpiFinishedVariants++;
+        }
+      });
+
+      if (productVariants.length === 0) {
+        const isApiDoc = data.primaryType === 'raw_material' || 
+                         data.primaryType === 'api_raw_material' || 
+                         data.productType === 'raw_material' || 
+                         data.productType === 'api_raw_material' || 
+                         (data.category && String(data.category).toLowerCase().includes('raw'));
+        if (isApiDoc) {
+          kpiApiProducts++;
+        } else {
+          kpiFinishedProducts++;
+        }
       } else {
-        kpiFinishedProducts++;
-        kpiFinishedVariants += productVariants.length;
+        if (hasApiVar || data.availableTypes?.includes('raw_material')) {
+          kpiApiProducts++;
+        }
+        if (hasFinVar || data.availableTypes?.includes('finished_product') || (!hasApiVar && !hasFinVar)) {
+          kpiFinishedProducts++;
+        }
       }
 
       if (data.category) kpiCategorySet.add(data.category);
@@ -736,13 +761,38 @@ export async function buildCatalogSummary(searchParams) {
       });
     }
 
-    // ── Sort results: most recently updated / quoted first ─────────────────
-    results.sort((a, b) => {
-      const timeA = new Date(a.updatedAt || a.supplierPricing?.lastQuotationDate || a.createdAt || 0).getTime();
-      const timeB = new Date(b.updatedAt || b.supplierPricing?.lastQuotationDate || b.createdAt || 0).getTime();
-      if (timeA !== timeB) return timeB - timeA;
-      return (a.canonicalName || '').localeCompare(b.canonicalName || '');
-    });
+    // ── Sort results: if search query present, relevance first; else most recently updated / quoted first ──
+    if (qParam && qParam.trim()) {
+      const qLower = qParam.trim().toLowerCase();
+      const getRelevance = (item) => {
+        const cName = (item.canonicalName || '').toLowerCase();
+        const pName = (item.name || '').toLowerCase();
+        const slug = (item.canonicalSlug || item.slug || '').toLowerCase();
+        const docId = (item.id || '').toLowerCase();
+
+        if (cName === qLower || slug === qLower || pName === qLower || docId === qLower) return 100;
+        if (cName.startsWith(qLower) || slug.startsWith(qLower) || pName.startsWith(qLower)) return 80;
+        if (cName.includes(qLower) || slug.includes(qLower) || pName.includes(qLower)) return 50;
+        return 10;
+      };
+
+      results.sort((a, b) => {
+        const scoreA = getRelevance(a);
+        const scoreB = getRelevance(b);
+        if (scoreA !== scoreB) return scoreB - scoreA;
+        const timeA = new Date(a.updatedAt || a.supplierPricing?.lastQuotationDate || a.createdAt || 0).getTime();
+        const timeB = new Date(b.updatedAt || b.supplierPricing?.lastQuotationDate || b.createdAt || 0).getTime();
+        if (timeA !== timeB) return timeB - timeA;
+        return (a.canonicalName || '').localeCompare(b.canonicalName || '');
+      });
+    } else {
+      results.sort((a, b) => {
+        const timeA = new Date(a.updatedAt || a.supplierPricing?.lastQuotationDate || a.createdAt || 0).getTime();
+        const timeB = new Date(b.updatedAt || b.supplierPricing?.lastQuotationDate || b.createdAt || 0).getTime();
+        if (timeA !== timeB) return timeB - timeA;
+        return (a.canonicalName || '').localeCompare(b.canonicalName || '');
+      });
+    }
 
     const ttl = hasActiveFilters ? 15 : 60;
     const payloadItems = results.slice(offsetParam, offsetParam + limitParam);

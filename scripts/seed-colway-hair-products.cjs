@@ -288,7 +288,7 @@ async function seedColwayProducts() {
   await batch.commit();
   console.log('\n✅ Colway products seeded successfully!');
   console.log('\nPublic URLs:');
-  PRODUCTS.forEach(p => console.log(`  → https://med-peptides.com/product/${p.slug}`));
+  PRODUCTS.forEach(p => console.log(`  → https://www.atlashealth-services.com/product/${p.slug}`));
   process.exit(0);
 }
 

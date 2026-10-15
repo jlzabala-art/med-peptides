@@ -5,7 +5,7 @@ import CollectionClientWrapper from './CollectionClientWrapper';
 import { sanitizeForClient } from '../../../utils/sanitizeForClient';
 import { adminDb } from '../../../lib/firebaseAdmin';
 
-const BASE_URL = 'https://med-peptides.com';
+const BASE_URL = 'https://www.atlashealth-services.com';
 
 const BRAND_METADATA = {
   colway: {

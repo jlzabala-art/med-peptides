@@ -52,7 +52,7 @@ export async function POST(request) {
       } : null,
       sourceUrl: String(sourceUrl || '').trim(),
       subscribeNewsletter: Boolean(body.subscribeNewsletter),
-      recipientDesk: 'business@med-peptides.com',
+      recipientDesk: 'info@atlashealth-services.com',
       status: 'new',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -125,7 +125,7 @@ export async function POST(request) {
         return NextResponse.json({
           success: true,
           inquiryId,
-          recipient: 'business@med-peptides.com'
+          recipient: 'info@atlashealth-services.com'
         });
       } catch (dbErr) {
         console.warn('Firestore write failed, falling back to success acknowledgement:', dbErr);
@@ -136,13 +136,13 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       inquiryId: `INQ-${Date.now()}`,
-      recipient: 'business@med-peptides.com',
+      recipient: 'info@atlashealth-services.com',
       note: 'Acknowledged via relay'
     });
   } catch (error) {
     console.error('Error in /api/portal/inquiry:', error);
     return NextResponse.json(
-      { error: 'Failed to process inquiry. Please contact business@med-peptides.com directly.' },
+      { error: 'Failed to process inquiry. Please contact info@atlashealth-services.com directly.' },
       { status: 500 }
     );
   }

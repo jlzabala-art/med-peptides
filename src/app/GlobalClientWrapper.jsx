@@ -15,6 +15,8 @@ import AppErrorBoundary from '../components/AppErrorBoundary';
 import PWAInstallPrompt from '../components/mobile/PWAInstallPrompt';
 import AtlasAIDrawer from '../components/shared/AtlasAIDrawer';
 import { useFirestoreData } from '../hooks/useFirestoreData';
+import GCPImpersonationDock from '../components/navigation/GCPImpersonationDock';
+import GCPCommandPalette from '../components/navigation/GCPCommandPalette';
 
 const PORTAL_PREFIXES = ['/admin', '/doctor', '/patient', '/clinic', '/supplier', '/wholesaler', '/pharmacy', '/login', '/auth', '/session-ended', '/shared', '/quotation', '/p', '/proto', '/catalog', '/verify', '/c', '/mediluxe', '/company', '/rx', '/d', '/intake', '/labels', '/lab', '/dr'];
 
@@ -134,11 +136,19 @@ export default function GlobalClientWrapper({ children }) {
       <AppErrorBoundary>
         <Toaster containerStyle={{ zIndex: 99999 }} />
         {children}
+        <GCPImpersonationDock />
+        <GCPCommandPalette />
         <PWAInstallPrompt />
       </AppErrorBoundary>
     );
   }
 
-  return <StorefrontShell>{children}</StorefrontShell>;
+  return (
+    <>
+      <StorefrontShell>{children}</StorefrontShell>
+      <GCPImpersonationDock />
+      <GCPCommandPalette />
+    </>
+  );
 }
 

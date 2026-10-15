@@ -20,10 +20,10 @@ export default function GuestHeroSearch({
             Optimize by <span style={{ color: '#0ea5e9' }}>Goal</span>
           </h1>
           <h2 style={{ color: '#0f172a', fontWeight: 700, fontSize: 'clamp(1.15rem, 3vw, 1.5rem)', margin: '0 0 0.6rem 0', letterSpacing: '-0.01em' }}>
-            Peptides, supplements & guided protocols
+            Diagnostics, clinical protocols & precision formulations
           </h2>
-          <p style={{ color: '#64748b', fontSize: 'clamp(0.92rem, 2vw, 1.05rem)', maxWidth: '580px', margin: '0 auto', lineHeight: 1.5, fontWeight: 450 }}>
-            Explore evidence-based pathways for energy, recovery, sleep, cognition, metabolism and healthy aging.
+          <p style={{ color: '#64748b', fontSize: 'clamp(0.92rem, 2vw, 1.05rem)', maxWidth: '620px', margin: '0 auto', lineHeight: 1.5, fontWeight: 450 }}>
+            Certified CE-IVDR blood diagnostics (Bloodo DBS), physician prescription pathways, and evidence-based peptide therapies guided by Atlas AI.
           </p>
         </div>
 

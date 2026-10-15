@@ -35,7 +35,7 @@ export default function ContextualRightSidebar({
   protocolContext = null,
   onOpenCoaModal
 }) {
-  const pageUrl = `https://med-peptides.com/p/${slug}`;
+  const pageUrl = `https://www.atlashealth-services.com/p/${slug}`;
   const refDossier = getPeptideReferenceDossier(slug);
 
   return (
@@ -328,7 +328,7 @@ export default function ContextualRightSidebar({
         </a>
 
         <div style={{ fontSize: '0.64rem', color: '#94a3b8', textAlign: 'center', fontFamily: 'monospace' }}>
-          med-peptides.com/p/{slug}
+          atlashealth-services.com/p/{slug}
         </div>
       </div>
     </aside>

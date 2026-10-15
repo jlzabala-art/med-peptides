@@ -14,7 +14,7 @@ import {
   FileText,
   Search
 } from '@/lib/icons';
-import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, User, LogOut, FileInput, LayoutList, Home } from 'lucide-react';
+import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, User, LogOut, FileInput, LayoutList, Home, Sliders } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
@@ -171,11 +171,30 @@ export default function PublicUnifiedHeader({
     }
   };
 
-  // Copy link (prefers clean shortUrl for discreet WhatsApp & social sharing)
+const CANONICAL_BASE_DOMAIN = 'https://www.atlashealth-services.com';
+
+function forceCanonicalDomain(urlOrPath) {
+  if (!urlOrPath) return CANONICAL_BASE_DOMAIN;
+  const str = String(urlOrPath).trim();
+  if (str.startsWith('/')) {
+    return `${CANONICAL_BASE_DOMAIN}${str}`;
+  }
+  try {
+    const parsed = new URL(str);
+    return `${CANONICAL_BASE_DOMAIN}${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return `${CANONICAL_BASE_DOMAIN}/${str.replace(/^https?:\/\/[^/]+/, '').replace(/^\//, '')}`;
+  }
+}
+
+  // Copy link (prefers clean shortUrl for discreet WhatsApp & social sharing, always canonical atlashealth-services.com)
   const handleCopyLink = async () => {
     triggerHaptic('selection');
-    let effectiveShortUrl = shortUrl;
-    const baseTarget = copyUrl || (typeof window !== 'undefined' ? window.location.href : '');
+    let effectiveShortUrl = shortUrl ? forceCanonicalDomain(shortUrl) : null;
+    let baseTarget = copyUrl ? forceCanonicalDomain(copyUrl) : '';
+    if (!baseTarget && typeof window !== 'undefined') {
+      baseTarget = forceCanonicalDomain(`${window.location.pathname}${window.location.search}${window.location.hash}`);
+    }
 
     // If shortUrl is not yet available, resolve it on-the-fly via API
     if (!effectiveShortUrl && baseTarget) {
@@ -191,14 +210,14 @@ export default function PublicUnifiedHeader({
         });
         const data = await res.json();
         if (data?.shortUrl) {
-          effectiveShortUrl = data.shortUrl;
+          effectiveShortUrl = forceCanonicalDomain(data.shortUrl);
         }
       } catch (e) {
         console.warn('Failed to resolve short URL on the fly:', e);
       }
     }
 
-    const targetUrl = effectiveShortUrl || baseTarget;
+    const targetUrl = forceCanonicalDomain(effectiveShortUrl || baseTarget);
     if (!targetUrl) return;
 
     try {
@@ -323,6 +342,17 @@ export default function PublicUnifiedHeader({
                   <kbd className="puh-kbd-hint">⌘K</kbd>
                 </button>
               )}
+
+              {/* Account Manager Multi-Portal Hub */}
+              <Link
+                href="/account-manager"
+                className="puh-btn puh-btn-ghost hide-on-extra-narrow"
+                title={isSpanish ? 'Consola de Account Manager (/account-manager)' : 'Account Manager Hub (/account-manager)'}
+                style={{ textDecoration: 'none' }}
+              >
+                <Sliders size={14} />
+                <span className="puh-btn-label">{isSpanish ? 'Account Manager' : 'Account Mgr'}</span>
+              </Link>
 
               {/* Language Selector */}
               <select
@@ -478,6 +508,10 @@ export default function PublicUnifiedHeader({
                       <Link href="/account" className="puh-auth-dropdown-item" onClick={() => setAuthDropdownOpen(false)} role="menuitem">
                         <User size={13} />
                         <span>{isSpanish ? 'Mi Cuenta' : 'Account'}</span>
+                      </Link>
+                      <Link href="/account-manager" className="puh-auth-dropdown-item" onClick={() => setAuthDropdownOpen(false)} role="menuitem">
+                        <Sliders size={13} />
+                        <span>{isSpanish ? 'Consola Account Manager' : 'Account Manager Hub'}</span>
                       </Link>
                       <div className="puh-auth-dropdown-divider" />
                       <button

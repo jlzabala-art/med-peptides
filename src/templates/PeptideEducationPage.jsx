@@ -11,7 +11,7 @@ import { usePageMeta } from '../hooks/usePageMeta';
  */
 export default function PeptideEducationPage() {
   const structuredData = useMemo(() => {
-    const pageUrl = 'https://Atlas Health.com/what-are-peptides';
+    const pageUrl = 'https://www.atlashealth-services.com/what-are-peptides';
     return {
       "@context": "https://schema.org",
       "@graph": [
@@ -23,9 +23,9 @@ export default function PeptideEducationPage() {
           "description": "A comprehensive guide to research peptides, cellular signaling, and amino acid sequences for scientific professionals.",
           "isPartOf": {
             "@type": "WebSite",
-            "@id": "https://Atlas Health.com#website",
+            "@id": "https://www.atlashealth-services.com#website",
             "name": "Atlas Health",
-            "url": "https://Atlas Health.com"
+            "url": "https://www.atlashealth-services.com"
           },
           "about": [
             {
@@ -54,7 +54,7 @@ export default function PeptideEducationPage() {
             "name": "Atlas Health",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://Atlas Health.com/atlas-health-logo.png"
+              "url": "https://www.atlashealth-services.com/atlas-health-logo.png"
             }
           },
           "author": {

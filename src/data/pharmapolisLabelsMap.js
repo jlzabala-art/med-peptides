@@ -39,7 +39,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51857_morning_90caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51857_morning_90caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51857_morning_90caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/51857'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/51857'
   },
   {
     id: '51857-phase-2',
@@ -76,7 +76,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51857_metabolic_90caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51857_metabolic_90caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51857_metabolic_90caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/51857'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/51857'
   },
 
   // ── 50957: Alan Maclean Rutledge ──
@@ -113,7 +113,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_proteolytic_270caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_proteolytic_270caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_proteolytic_270caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-50957-A'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-50957-A'
   },
   {
     id: '50957-phase-2',
@@ -149,7 +149,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-50957-B'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-50957-B'
   },
 
   // ── 51812: Abdulla Sultan Mohamed Ahmed Alotaiba ──
@@ -191,7 +191,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51812_morning_90caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51812_morning_90caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51812_morning_90caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/51812'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/51812'
   },
   {
     id: '51812-phase-2',
@@ -227,7 +227,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51812_night_90caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51812_night_90caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51812_night_90caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/51812'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/51812'
   },
 
   // ── 51861: Basma Haitham K Bouzo ──
@@ -263,7 +263,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_testosterone_90ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_testosterone_90ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_testosterone_90ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-51861-A'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-51861-A'
   },
   {
     id: '51861-prep-2',
@@ -297,7 +297,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_estradiol_90ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_estradiol_90ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_estradiol_90ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-51861-B'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-51861-B'
   },
 
   // ── 51245: Aamer Reza Habib ──
@@ -334,7 +334,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51245_diltiazem_30g_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51245_diltiazem_30g_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51245_diltiazem_30g_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-51245'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-51245'
   },
 
   // ── 6F8QZC: Eldose Babu (Fagron TrichoTest™ - Official Signed Medical Prescription) ──
@@ -369,7 +369,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     clinicName: 'Hortman Clinics · Jumeirah 1, Dubai',
     batchCode: 'PHARM-2026-TF100',
     lote: '2609-ELD1',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-6F8QZC'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-6F8QZC'
   },
 
   // ── Mohammed Ahmad Aishehhi: BOX03483AATRI ──
@@ -407,7 +407,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_box03483_trichotest_100ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_box03483_trichotest_100ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_box03483_trichotest_100ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/BOX03483AATRI'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03483AATRI'
   },
 
   // ── Haya Hassen Al-Haidose: BOX01399AATRI ──
@@ -442,7 +442,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2024-TRI-BOX01399',
     lote: '2405-HAY1',
-    targetRxUrl: 'https://med-peptides.com/rx/BOX01399AATRI'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX01399AATRI'
   },
   {
     id: 'box01399-trichowash-part2',
@@ -475,7 +475,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2024-WASH-BOX01399',
     lote: '2405-HAY2',
-    targetRxUrl: 'https://med-peptides.com/rx/BOX01399AATRI'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX01399AATRI'
   },
 
   // ── Julien Boiteux: BOX03529AATRI ──
@@ -513,7 +513,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichosol_100ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichosol_100ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichosol_100ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/BOX03529AATRI'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03529AATRI'
   },
   {
     id: 'box03529-trichotest-part2',
@@ -549,7 +549,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichooil_30ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichooil_30ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichooil_30ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/BOX03529AATRI'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03529AATRI'
   },
 
   // ── Mangesh Sakharkar: RX-MS-0903 ──
@@ -581,7 +581,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_mangesh_oral_90caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_mangesh_oral_90caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_mangesh_oral_90caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-MS-0903'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-MS-0903'
   },
   {
     id: 'mangesh-trichosol',
@@ -611,7 +611,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_mangesh_trichosol_100ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_mangesh_trichosol_100ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_mangesh_trichosol_100ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-MS-0903'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-MS-0903'
   },
 
   // ── Matthew Taylor: RX-MT-0903 ──
@@ -647,7 +647,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_matthew_trichooil_30ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_matthew_trichooil_30ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_matthew_trichooil_30ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-MT-0903'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-MT-0903'
   },
   {
     id: 'matthew-trichosol',
@@ -682,7 +682,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_matthew_trichosol_100ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_matthew_trichosol_100ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_matthew_trichosol_100ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-MT-0903'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-MT-0903'
   },
 
   // ── Saeed Musallam ──
@@ -714,7 +714,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_saeed_night_formula_270caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_saeed_night_formula_270caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_saeed_night_formula_270caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/BOX03492AANUT?view=patient'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03492AANUT?view=patient'
   },
 
   // ── Noura Majed Mohamed Alfuttaim ──
@@ -758,7 +758,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_NOURA_MAJED_MOHAMED_ALFUTTAIM_nmma_evening_formula_90caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_NOURA_MAJED_MOHAMED_ALFUTTAIM_nmma_evening_formula_90caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_NOURA_MAJED_MOHAMED_ALFUTTAIM_nmma_evening_formula_90caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/rx_nmma_2'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/rx_nmma_2'
   },
 
   // ── Daria Grek ──
@@ -796,7 +796,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_trichosol_100ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_trichosol_100ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_trichosol_100ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/CfOwJCEFcnwmww0TjtZ5'
   },
   {
     id: 'daria-capsules',
@@ -835,7 +835,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_capsules_90caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_capsules_90caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_capsules_90caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/CfOwJCEFcnwmww0TjtZ5'
   },
   {
     id: 'daria-trichooil',
@@ -871,7 +871,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_trichooil_30ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_trichooil_30ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_trichooil_30ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/CfOwJCEFcnwmww0TjtZ5'
   },
   {
     id: 'daria-trichowash',
@@ -906,7 +906,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_trichowash_250ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_trichowash_250ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_DARIA_GREK_daria_trichowash_250ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/CfOwJCEFcnwmww0TjtZ5'
   },
 
   // ── Ghada Abdulaziz Ishaq ──
@@ -942,7 +942,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_GHADA_ABDULAZIZ_ISHAQ_51253_estradiol_60ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_GHADA_ABDULAZIZ_ISHAQ_51253_estradiol_60ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_GHADA_ABDULAZIZ_ISHAQ_51253_estradiol_60ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-51253'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-51253'
   },
   {
     id: 'ghada-dhea',
@@ -976,7 +976,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_GHADA_ABDULAZIZ_ISHAQ_51253_dhea_60caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_GHADA_ABDULAZIZ_ISHAQ_51253_dhea_60caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_GHADA_ABDULAZIZ_ISHAQ_51253_dhea_60caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-51253-B'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-51253-B'
   },
 
   // ── Reem F M Alghanim ──
@@ -1013,7 +1013,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_REEM_F_M_ALGHANIM_rfma_hormone_cream_60ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_REEM_F_M_ALGHANIM_rfma_hormone_cream_60ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_REEM_F_M_ALGHANIM_rfma_hormone_cream_60ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/rx_rfma_2'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/rx_rfma_2'
   },
 
   // ── George Mills ──
@@ -1050,7 +1050,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_GEORGE_MILLS_518134_trichosol_100ml_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_GEORGE_MILLS_518134_trichosol_100ml_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_GEORGE_MILLS_518134_trichosol_100ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-518134'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/RX-518134'
   },
 
   // ── Sara Khalid Al-Meadadi ──
@@ -1088,7 +1088,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_SARA_KHALID_AL_MEADADI_box03049_pentravan_30g_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_SARA_KHALID_AL_MEADADI_box03049_pentravan_30g_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_SARA_KHALID_AL_MEADADI_box03049_pentravan_30g_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/BOX03049AATEL'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03049AATEL'
   },
   {
     id: 'sara-capsules',
@@ -1124,7 +1124,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_SARA_KHALID_AL_MEADADI_box03049_capsules_90caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_SARA_KHALID_AL_MEADADI_box03049_capsules_90caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_SARA_KHALID_AL_MEADADI_box03049_capsules_90caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/BOX03049AATEL'
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03049AATEL'
   }
 ];
 
@@ -1235,7 +1235,7 @@ export function getAuthoritativeClinicalData(rx) {
   }
 
   // QR encoded URL on bottles points directly to patient portal
-  const targetRxUrl = `https://med-peptides.com/rx/${fileNumber}?view=patient`;
+  const targetRxUrl = `https://www.atlashealth-services.com/rx/${fileNumber}?view=patient`;
 
   return {
     patientName: patientName ? patientName.trim() : null,
@@ -1274,7 +1274,7 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       return fallback;
     };
 
-    const fallbackUrl = `https://med-peptides.com/rx/${encodeURIComponent(rx.prescriptionNumber || rx.code || rx.id || 'RX')}`;
+    const fallbackUrl = `https://www.atlashealth-services.com/rx/${encodeURIComponent(rx.prescriptionNumber || rx.code || rx.id || 'RX')}`;
 
     return rx.pharmacyLabels.map((lbl, idx) => {
       const phaseNum = lbl.phaseNumber || (idx + 1);

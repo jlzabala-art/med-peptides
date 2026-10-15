@@ -16,7 +16,7 @@ export const revalidate = 3600; // ISR: regenerate at most every 60 min
 export const dynamicParams = true; // Allow slugs not in generateStaticParams
 
 
-const BASE_URL = 'https://med-peptides.com';
+const BASE_URL = 'https://www.atlashealth-services.com';
 
 // ⚡ Layer 1 In-Memory Server RAM Cache (Golden Rule #2)
 const PUBLIC_PRODUCT_RAM_CACHE = new Map();

@@ -16,4 +16,4 @@ Disallow: /saved
 Disallow: /orders
 
 # Sitemap
-Sitemap: https://regenpept.com/sitemap.xml
+Sitemap: https://www.atlashealth-services.com/sitemap.xml

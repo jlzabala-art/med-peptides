@@ -545,7 +545,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
                     onOpenShareDrawer={(targetUser) => {
                       setShareDrawerConfig({
                         user: targetUser,
-                        shareUrl: 'https://med-peptides.com/catalog',
+                        shareUrl: 'https://www.atlashealth-services.com/catalog',
                         docType: 'catalog'
                       });
                     }} 
@@ -1290,7 +1290,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
         <UniversalShareDrawer
           isOpen={Boolean(shareDrawerConfig)}
           onClose={() => setShareDrawerConfig(null)}
-          shareUrl={shareDrawerConfig.shareUrl || 'https://med-peptides.com/catalog'}
+          shareUrl={shareDrawerConfig.shareUrl || 'https://www.atlashealth-services.com/catalog'}
           docType={shareDrawerConfig.docType || 'catalog'}
           title={`Share with ${getUserFullName(shareDrawerConfig.user)}`}
           subtitle="Generate a tracked short link for WhatsApp or Email with individual tracking."

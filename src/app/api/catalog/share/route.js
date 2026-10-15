@@ -62,7 +62,7 @@ export async function POST(request) {
     };
 
     const token = generateSignedQuoteToken(catalogPayload, validityDays * 24);
-    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
     const shortUrl = `${origin}/c/${catalogPayload.catalogId}`;
     const longUrl = `${origin}/shared/catalog/${token}`;
     const shareableUrl = shortUrl; // Short link by default for clean WhatsApp sharing

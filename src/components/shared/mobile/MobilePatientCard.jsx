@@ -47,7 +47,8 @@ export default function MobilePatientCard({
   const email    = row.email || null;
   const phone    = row.phone || null;
   const program  = row.program || null;
-  const physician = row.physician || null;
+  const physician = row.physician || row.doctorName || null;
+  const clinic   = row.clinic || row.clinicName || null;
 
   /* Long-press */
   const timer = useRef(null);
@@ -147,7 +148,8 @@ export default function MobilePatientCard({
 
         <div className="mpc-meta-row">
           {program && <span className="mpc-tag">{program}</span>}
-          {physician && <span className="mpc-physician">{physician}</span>}
+          {physician && <span className="mpc-physician">👨‍⚕️ {physician}</span>}
+          {clinic && <span className="mpc-physician" style={{ color: 'var(--text-muted)' }}>🏥 {clinic}</span>}
         </div>
       </div>
 
