@@ -25,6 +25,7 @@ import {
 import { getPeptideScientificData } from '../../../../utils/knownPeptideData';
 import { getProductAvailableTypes } from '../../../../utils/productNormalizer';
 import notifier from '../../../../services/NotificationService';
+import CopyableId from '../../../ui/CopyableId';
 import ShareProductMonographDrawer from '../drawers/ShareProductMonographDrawer';
 
 export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
@@ -951,6 +952,38 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
                         width: 'fit-content'
                       }}>
                         <span>⚗️ Raw Active Pharmaceutical Ingredient (API) · Master Compounding Protocol</span>
+                      </div>
+
+                      {/* GCP Key Specifications Property Matrix */}
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                        gap: '8px',
+                        background: '#f8fafc',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0',
+                        marginTop: '2px',
+                        marginBottom: '4px'
+                      }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.04em' }}>CAS Number</span>
+                          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            {casNumber && casNumber !== 'N/A' ? <CopyableId value={casNumber} /> : 'Available on CoA'}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.04em' }}>HPLC Purity</span>
+                          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f766e' }}>≥ 98.0% (Ph. Eur.)</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.04em' }}>Physical State</span>
+                          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155' }}>Lyophilized Bulk</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.04em' }}>Storage Temp</span>
+                          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0369a1' }}>-20°C Desiccated</span>
+                        </div>
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.82rem', color: '#334155', lineHeight: 1.5 }}>

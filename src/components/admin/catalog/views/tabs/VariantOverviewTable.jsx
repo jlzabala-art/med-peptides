@@ -34,6 +34,22 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
     return sortConfig.direction === 'asc' ? ' ↑' : ' ↓';
   };
 
+  const [variantTypeFilter, setVariantTypeFilter] = useState('all');
+
+  const { finCount, apiCount } = useMemo(() => {
+    let fin = 0;
+    let api = 0;
+    (variants || []).forEach(v => {
+      const typeStr = (v.formatLabel || v.format || v.productType || v.type || '').toLowerCase();
+      const isApi = typeStr.includes('api') || v.format === 'bulk_api' || v.type === 'raw_material' || v.unitOfMeasure === 'g';
+      if (isApi) api++;
+      else fin++;
+    });
+    return { finCount: fin, apiCount: api };
+  }, [variants]);
+
+  const isDual = finCount > 0 && apiCount > 0;
+
   const processedVariants = useMemo(() => {
     return variants.map((v) => {
       const health = calculateVariantHealthScore(v);
@@ -66,14 +82,20 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
       }
       const inventory = typeof v.stock === 'object' ? v.stock?.available || 0 : v.stock || 0;
       const regStatus = v.registrationStatus || v.registration || 'Unregistered';
-      return { ...v, displaySku, supplierName, formatSize, health, inventory, regStatus };
+      return { ...v, displaySku, supplierName, formatSize, health, inventory, regStatus, isApi };
     });
   }, [variants, parentProduct]);
 
   const sortedVariants = useMemo(() => {
-    const sortableItems = [...processedVariants];
+    let items = [...processedVariants];
+    if (variantTypeFilter === 'finished') {
+      items = items.filter(v => !v.isApi);
+    } else if (variantTypeFilter === 'api') {
+      items = items.filter(v => v.isApi);
+    }
+
     if (sortConfig.key !== null) {
-      sortableItems.sort((a, b) => {
+      items.sort((a, b) => {
         const valA = sortConfig.key === 'health' ? a.health.score : a[sortConfig.key];
         const valB = sortConfig.key === 'health' ? b.health.score : b[sortConfig.key];
         if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -81,7 +103,7 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
         return 0;
       });
     } else {
-      sortableItems.sort((a, b) => {
+      items.sort((a, b) => {
         const isApiA = (a.productType || a.formatLabel || a.format || a.type || '').toLowerCase().includes('api') || a.format === 'bulk_api' || a.type === 'raw_material' || a.unitOfMeasure === 'g';
         const isApiB = (b.productType || b.formatLabel || b.format || b.type || '').toLowerCase().includes('api') || b.format === 'bulk_api' || b.type === 'raw_material' || b.unitOfMeasure === 'g';
         if (isApiA && !isApiB) return -1;
@@ -90,8 +112,8 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
         return getDosageNum(a) - getDosageNum(b);
       });
     }
-    return sortableItems;
-  }, [processedVariants, sortConfig]);
+    return items;
+  }, [processedVariants, sortConfig, variantTypeFilter]);
 
   const allSelected = variants.length > 0 && variants.every(v => selectedIds.includes(v.id));
 
@@ -179,6 +201,89 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
 
   return (
     <div className="gcp-table-container">
+      {isDual && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          marginBottom: '14px',
+          padding: '3px',
+          background: '#f1f5f9',
+          border: '1px solid #e2e8f0',
+          borderRadius: '8px',
+          width: 'fit-content'
+        }}>
+          <button
+            type="button"
+            onClick={() => setVariantTypeFilter('all')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '6px',
+              border: variantTypeFilter === 'all' ? '1px solid #cbd5e1' : '1px solid transparent',
+              background: variantTypeFilter === 'all' ? '#ffffff' : 'transparent',
+              boxShadow: variantTypeFilter === 'all' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+              color: variantTypeFilter === 'all' ? '#0f172a' : '#64748b',
+              fontWeight: variantTypeFilter === 'all' ? 700 : 500,
+              fontSize: '0.74rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <span>All Formats</span>
+            <span style={{ fontSize: '0.68rem', opacity: 0.8 }}>({variants.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setVariantTypeFilter('finished')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '6px',
+              border: variantTypeFilter === 'finished' ? '1px solid #bae6fd' : '1px solid transparent',
+              background: variantTypeFilter === 'finished' ? '#ffffff' : 'transparent',
+              boxShadow: variantTypeFilter === 'finished' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+              color: variantTypeFilter === 'finished' ? '#003666' : '#64748b',
+              fontWeight: variantTypeFilter === 'finished' ? 700 : 500,
+              fontSize: '0.74rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <span>💊 Finished Vials</span>
+            <span style={{ fontSize: '0.68rem', color: '#0284c7', fontWeight: 700 }}>({finCount})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setVariantTypeFilter('api')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '6px',
+              border: variantTypeFilter === 'api' ? '1px solid #ccfbf1' : '1px solid transparent',
+              background: variantTypeFilter === 'api' ? '#ffffff' : 'transparent',
+              boxShadow: variantTypeFilter === 'api' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+              color: variantTypeFilter === 'api' ? '#0f766e' : '#64748b',
+              fontWeight: variantTypeFilter === 'api' ? 700 : 500,
+              fontSize: '0.74rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <span>⚗️ Bulk APIs</span>
+            <span style={{ fontSize: '0.68rem', color: '#0d9488', fontWeight: 700 }}>({apiCount})</span>
+          </button>
+        </div>
+      )}
+
       <DataTable
         columns={columns}
         data={sortedVariants}
