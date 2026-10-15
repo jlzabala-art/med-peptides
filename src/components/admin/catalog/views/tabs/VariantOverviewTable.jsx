@@ -255,7 +255,7 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
               transition: 'all 0.15s ease'
             }}
           >
-            <span>💊 Finished Vials</span>
+            <span>📦 Finished Vials</span>
             <span style={{ fontSize: '0.68rem', color: '#0284c7', fontWeight: 700 }}>({finCount})</span>
           </button>
 

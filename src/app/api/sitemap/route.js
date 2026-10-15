@@ -5,7 +5,7 @@ import { protocolRepository } from '../../../repositories/protocolRepository';
 export const revalidate = 3600; // Cache 1 hour
 
 export async function GET(request) {
-  const host = request.headers.get('host') || 'regenpept.com';
+  const host = request.headers.get('host') || 'www.atlashealth-services.com';
   const protocol = host.includes('localhost') ? 'http' : 'https';
   const baseUrl = `${protocol}://${host}`;
 

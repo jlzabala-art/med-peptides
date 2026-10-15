@@ -8,16 +8,16 @@ export const revalidate = 3600; // ⚡ Multi-Tier ISR (1 hour Edge Cache)
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
 export const metadata = {
-  title: 'Clinical Protocol Directory & Peptide Treatment Pathways | Med-Peptides',
-  description: 'Public clinical registry of 77 evidence-based therapeutic protocols: GLP-1/GIP metabolism, cellular longevity, musculoskeletal recovery, neuroplasticity, and precision endocrinology.',
+  title: 'Clinical Protocol Directory & Peptide Treatment Pathways',
+  description: 'Atlas public clinical registry of evidence-based therapeutic protocols: GLP-1/GIP metabolism, cellular longevity, musculoskeletal recovery, neuroplasticity, and precision endocrinology.',
   alternates: {
     canonical: `${BASE_URL}/proto`,
   },
   openGraph: {
-    title: 'Clinical Protocol Directory • Evidence-Based Pathways | Med-Peptides',
+    title: 'Clinical Protocol Directory • Evidence-Based Pathways | Atlas Health',
     description: 'Evidence-based clinical protocol guidelines, dosing titration schedules, and synergistic biomarker pathways for certified medical practitioners.',
     url: `${BASE_URL}/proto`,
-    siteName: 'Med-Peptides Clinical Directory',
+    siteName: 'Atlas Clinical Directory',
     locale: 'en_US',
     type: 'website',
     images: [
@@ -25,15 +25,15 @@ export const metadata = {
         url: `${BASE_URL}/og-catalog.png`,
         width: 1200,
         height: 630,
-        alt: 'Med-Peptides Clinical Protocol Directory',
+        alt: 'Atlas Clinical Protocol Directory',
         type: 'image/png'
       }
     ]
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Clinical Protocol Directory • Evidence-Based Pathways | Med-Peptides',
-    description: '77 evidence-based clinical protocols with dosing titration schedules and active formulation metrics.',
+    title: 'Clinical Protocol Directory • Evidence-Based Pathways | Atlas Health',
+    description: 'Evidence-based clinical protocols with dosing titration schedules and active formulation metrics.',
     images: [`${BASE_URL}/og-catalog.png`]
   },
 };

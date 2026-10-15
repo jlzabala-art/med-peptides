@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 
 const CATEGORY_STYLES = {
-  peptide:               { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', icon: '💊', defaultLabel: 'Peptides' },
+  peptide:               { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', icon: '🧬', defaultLabel: 'Peptides' },
   raw_material:          { bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0', icon: '⚗️', defaultLabel: 'Bulk APIs & Raw Materials' },
   aesthetic_injectables: { bg: '#faf5ff', color: '#7c3aed', border: '#c4b5fd', icon: '💉', defaultLabel: 'Aesthetic Injectables' },
   diagnostic_test:       { bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4', icon: '🩸', defaultLabel: 'Diagnostic Tests' },
@@ -306,7 +306,7 @@ export function useMasterCatalogColumns({
                   return (
                     <span style={{ fontSize: '0.73rem', color: '#5f6368', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                       <span style={{ fontWeight: 600, color: '#003666', background: '#f0f9ff', padding: '1px 5px', borderRadius: '3px', border: '1px solid #bae6fd' }}>
-                        💊 {finCount} Finished
+                        📦 {finCount} Finished
                       </span>
                       <span style={{ color: '#dadce0' }}>•</span>
                       <span style={{ fontWeight: 600, color: '#0f766e', background: '#f0fdfa', padding: '1px 5px', borderRadius: '3px', border: '1px solid #ccfbf1' }}>

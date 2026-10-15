@@ -167,8 +167,8 @@ async function seedCatalogFacets() {
   const presCounts = {};
   const supplierMap = {};
   varSnap.forEach(doc => {
-    const parentId = doc.ref.parent.parent.id;
-    if (!activeProductIds.has(parentId)) return;
+    const parentId = doc.ref.parent?.parent?.id;
+    if (!parentId || !activeProductIds.has(parentId)) return;
     const { formatId, format, presentation, supplierId, supplierName, supplier, isActive: vA, status: vS } = doc.data();
     if (vA === false || INACTIVE_STATUSES.has(vS)) return;
 

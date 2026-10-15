@@ -117,6 +117,96 @@ export function resolveProtocolSlug(rx) {
 }
 
 /**
+ * Consolidates multi-part prescription documents sharing the same sessionId
+ * or patient into a single master prescription with all parts and items.
+ */
+export function consolidateMultiPartPrescriptions(rawPrescriptions = []) {
+  if (!Array.isArray(rawPrescriptions) || rawPrescriptions.length === 0) return [];
+
+  const consolidatedMap = new Map();
+  const result = [];
+
+  rawPrescriptions.forEach((rx) => {
+    const rawSessionId = rx.sessionId || rx.groupSessionId;
+    const isExplicitGroup = rawSessionId && (String(rawSessionId).startsWith('group_') || String(rawSessionId).length > 5);
+    const multiPartKey = isExplicitGroup
+      ? `session_${rawSessionId}`
+      : (rx.patientName && rx.totalParts && rx.totalParts > 1 && rx.partNumber
+          ? `pat_${String(rx.patientName).toLowerCase().trim()}_${rx.totalParts}_${rx.treatmentTitle || ''}`
+          : null);
+
+    if (!multiPartKey) {
+      result.push(rx);
+      return;
+    }
+
+    if (!consolidatedMap.has(multiPartKey)) {
+      const masterRx = {
+        ...rx,
+        isMultiPart: true,
+        totalParts: rx.totalParts || 1,
+        parts: Array.isArray(rx.parts) && rx.parts.length > 0 ? [...rx.parts] : [],
+        items: Array.isArray(rx.items) ? [...rx.items] : [],
+        allDocIds: [rx.id],
+        allCodes: [rx.code || rx.prescriptionNumber || rx.id]
+      };
+      if (masterRx.parts.length === 0) {
+        masterRx.parts.push({
+          partNumber: rx.partNumber || 1,
+          totalParts: rx.totalParts || 1,
+          title: rx.treatmentTitle || rx.regimenShortTitle || `Part ${rx.partNumber || 1}`,
+          vehicle: rx.volume || rx.vehicle || '',
+          posology: rx.posology || '',
+          apis: (rx.items || []).map(i => ({
+            name: i.name || i.drugName || '',
+            dose: i.dose || i.dosage || ''
+          }))
+        });
+      }
+      consolidatedMap.set(multiPartKey, masterRx);
+      result.push(masterRx);
+    } else {
+      const master = consolidatedMap.get(multiPartKey);
+      master.allDocIds.push(rx.id);
+      const code = rx.code || rx.prescriptionNumber || rx.id;
+      if (!master.allCodes.includes(code)) master.allCodes.push(code);
+      if (rx.totalParts && rx.totalParts > (master.totalParts || 1)) {
+        master.totalParts = rx.totalParts;
+      }
+      (rx.items || []).forEach(newItem => {
+        const alreadyHas = master.items.some(existing =>
+          existing.name === newItem.name && existing.dose === newItem.dose
+        );
+        if (!alreadyHas) {
+          master.items.push(newItem);
+        }
+      });
+      const newPartNum = rx.partNumber || (master.parts.length + 1);
+      const existingPartIdx = master.parts.findIndex(p => p.partNumber === newPartNum);
+      const partObj = {
+        partNumber: newPartNum,
+        totalParts: master.totalParts,
+        title: rx.treatmentTitle || rx.regimenShortTitle || `Part ${newPartNum}`,
+        vehicle: rx.volume || rx.vehicle || '',
+        posology: rx.posology || '',
+        apis: (rx.items || []).map(i => ({
+          name: i.name || i.drugName || '',
+          dose: i.dose || i.dosage || ''
+        }))
+      };
+      if (existingPartIdx >= 0) {
+        master.parts[existingPartIdx] = { ...master.parts[existingPartIdx], ...partObj };
+      } else {
+        master.parts.push(partObj);
+      }
+      master.parts.sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0));
+    }
+  });
+
+  return result;
+}
+
+/**
  * Fetches the directory of doctors from Firestore (cached in RAM for 15 mins).
  */
 async function getCachedDoctorDirectory() {
@@ -339,7 +429,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
 
   // 2. Fetch prescriptions for this doctor
   const rxSnap = await adminDb.collection('prescriptions').limit(300).get();
-  const prescriptions = [];
+  const rawPrescriptionsList = [];
   const patientMap = new Map();
 
   rxSnap.forEach((doc) => {
@@ -492,7 +582,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         ? d.treatmentTitle
         : (d.regimenShortTitle || catData.regimenShortTitle || baseTitle);
 
-      prescriptions.push({
+      rawPrescriptionsList.push({
         id: doc.id,
         prescriptionNumber: d.prescriptionNumber || d.code || doc.id,
         code: d.code || d.prescriptionNumber || doc.id,
@@ -511,6 +601,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         protocolSlug: protoSlug,
         protocolUrl: protoSlug ? `/proto/${protoSlug}` : null,
         phaseName: d.phaseName || null,
+        sessionId: d.sessionId || null,
+        groupSessionId: d.groupSessionId || null,
         partNumber: d.partNumber != null ? Number(d.partNumber) : null,
         isMultiPart: !!d.isMultiPart || resolvedParts.length > 1,
         totalParts: d.totalParts || (resolvedParts.length > 1 ? resolvedParts.length : null),
@@ -533,6 +625,9 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       });
     }
   });
+
+  // Consolidate multi-part prescriptions sharing a session or patient group
+  const prescriptions = consolidateMultiPartPrescriptions(rawPrescriptionsList);
 
   // Sort: prescriptions grouped by patient, then date descending
   prescriptions.sort((a, b) => {

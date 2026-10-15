@@ -39,7 +39,7 @@ export async function generateMetadata({ params, searchParams }) {
               title,
               description,
               type: 'website',
-              siteName: 'Med-Peptides Clinical Directory',
+              siteName: 'Atlas Clinical Directory',
               url: `${appUrl}/c/${id}`,
               locale: 'en_US',
               images: [
@@ -47,7 +47,7 @@ export async function generateMetadata({ params, searchParams }) {
                   url: ogImageUrl,
                   width: 1200,
                   height: 630,
-                  alt: 'Med-Peptides Clinical Protocol Directory',
+                  alt: 'Atlas Clinical Protocol Directory',
                   type: 'image/png'
                 }
               ]

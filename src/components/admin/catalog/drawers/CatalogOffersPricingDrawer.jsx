@@ -353,6 +353,93 @@ export default function CatalogOffersPricingDrawer({
     return `${channelLabel} ${tierLabel}`;
   }, [priceView, commercialChannel]);
 
+  // Group pricing benchmarks: separate Finished vs Bulk API, find best price in each group and calculate diff
+  const variantBenchmarks = useMemo(() => {
+    const variants = selectedProduct?.variants || [];
+    const euroRate = Number(settings?.exchangeRates?.euro || 0.92);
+    const aedRate = Number(settings?.exchangeRates?.uae || 3.67);
+
+    // 1. Analyze each variant
+    const analyzed = variants.map(v => {
+      const pStr = (v.formatLabel || v.format || v.presentation || v.presentationName || v.productType || v.type || '').toLowerCase();
+      const isApi = v.type === 'raw_material' || 
+                    v.productType === 'raw_material' || 
+                    v.format === 'bulk_api' || 
+                    pStr.includes('bulk') || 
+                    pStr.includes('api') || 
+                    pStr.includes('powder') || 
+                    v.unit === 'g' || 
+                    v.unitOfMeasure === 'g';
+
+      const res = resolveChannelPrice(v, commercialChannel, priceView);
+      const rawUsd = Number(res.price) || 0;
+      let converted = rawUsd;
+      if (displayCurrency === 'EUR') converted = rawUsd * euroRate;
+      if (displayCurrency === 'AED') converted = rawUsd * aedRate;
+
+      const totalMg = calculateTotalMg(v) || calculateTotalMg(selectedProduct);
+      let rateDisplay = null;
+      let normRate = null;
+
+      if (converted > 0 && totalMg && totalMg > 0) {
+        if (isApi) {
+          // Bulk API: normalize per gram (1g = 1000mg)
+          const pricePerGram = (converted / totalMg) * 1000;
+          normRate = pricePerGram;
+          rateDisplay = `${currencySymbol}${pricePerGram.toFixed(2)}/g`;
+        } else {
+          // Finished: normalize per mg
+          const pricePerMg = converted / totalMg;
+          normRate = pricePerMg;
+          if (pricePerMg < 0.01) {
+            rateDisplay = `${currencySymbol}${pricePerMg.toFixed(4)}/mg`;
+          } else {
+            rateDisplay = `${currencySymbol}${pricePerMg.toFixed(2)}/mg`;
+          }
+        }
+      }
+
+      return {
+        id: v.id,
+        isApi,
+        converted,
+        totalMg,
+        normRate,
+        rateDisplay
+      };
+    });
+
+    // 2. Find min normRate in finished pool and in bulk API pool
+    const finishedPool = analyzed.filter(a => !a.isApi && a.normRate && a.normRate > 0);
+    const apiPool = analyzed.filter(a => a.isApi && a.normRate && a.normRate > 0);
+
+    const minFinished = finishedPool.length > 0 ? Math.min(...finishedPool.map(a => a.normRate)) : null;
+    const minApi = apiPool.length > 0 ? Math.min(...apiPool.map(a => a.normRate)) : null;
+
+    // 3. Map benchmarks by variant id
+    const benchmarkMap = new Map();
+    analyzed.forEach(a => {
+      if (!a.normRate) {
+        benchmarkMap.set(a.id, { rateDisplay: a.rateDisplay, isBest: false, diffPct: null });
+        return;
+      }
+      const baseline = a.isApi ? minApi : minFinished;
+      const isBest = baseline && Math.abs(a.normRate - baseline) < 0.0001;
+      let diffPct = null;
+      if (!isBest && baseline && baseline > 0) {
+        diffPct = Math.round(((a.normRate - baseline) / baseline) * 100);
+      }
+      benchmarkMap.set(a.id, {
+        rateDisplay: a.rateDisplay,
+        isBest,
+        diffPct,
+        isApi: a.isApi
+      });
+    });
+
+    return benchmarkMap;
+  }, [selectedProduct?.variants, commercialChannel, priceView, displayCurrency, settings, currencySymbol, selectedProduct]);
+
   const activePriceCol = useMemo(() => ({
     key: 'active_price',
     header: priceHeader,
@@ -371,10 +458,26 @@ export default function CatalogOffersPricingDrawer({
         if (displayCurrency === 'AED') converted = rawUsd * (settings?.exchangeRates?.uae || 3.67);
       }
 
-      const totalMg = calculateTotalMg(v) || calculateTotalMg(selectedProduct);
-      const perMgText = (converted != null && !isNaN(converted) && totalMg && totalMg > 0)
-        ? `• ${currencySymbol}${(converted / totalMg).toFixed(2)}/mg`
-        : null;
+      const bm = variantBenchmarks.get(v.id);
+
+      const renderRateBadge = () => {
+        if (!bm?.rateDisplay) return null;
+        return (
+          <span style={{ fontSize: '0.67rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px', marginTop: '1px', lineHeight: 1 }}>
+            <span style={{ color: '#0284c7' }}>• {bm.rateDisplay}</span>
+            {bm.isBest && (
+              <span style={{ color: '#15803d', background: '#dcfce7', padding: '0 4px', borderRadius: '3px', fontWeight: 700, fontSize: '0.60rem' }}>
+                Best
+              </span>
+            )}
+            {!bm.isBest && bm.diffPct != null && bm.diffPct > 0 && (
+              <span style={{ color: '#b45309', background: '#fef3c7', padding: '0 4px', borderRadius: '3px', fontWeight: 600, fontSize: '0.60rem' }}>
+                +{bm.diffPct}%
+              </span>
+            )}
+          </span>
+        );
+      };
 
       if (commercialChannel === 'cost') {
         return (
@@ -385,11 +488,7 @@ export default function CatalogOffersPricingDrawer({
               format={(val) => (val != null && !isNaN(val)) ? `${currencySymbol}${Number(val).toFixed(2)}` : '—'}
               onSave={(newVal) => updateVariantField(v.id, priceField, Number(newVal))}
             />
-            {perMgText && (
-              <span style={{ fontSize: '0.67rem', fontWeight: 600, color: '#0284c7', marginTop: '1px' }}>
-                {perMgText}
-              </span>
-            )}
+            {renderRateBadge()}
           </div>
         );
       }
@@ -406,15 +505,11 @@ export default function CatalogOffersPricingDrawer({
               </span>
             )}
           </div>
-          {perMgText && (
-            <span style={{ fontSize: '0.67rem', fontWeight: 600, color: '#0284c7', marginTop: '1px' }}>
-              {perMgText}
-            </span>
-          )}
+          {renderRateBadge()}
         </div>
       );
     }
-  }), [priceHeader, priceField, commercialChannel, priceView, displayCurrency, settings, currencySymbol, selectedProduct]);
+  }), [priceHeader, priceField, commercialChannel, priceView, displayCurrency, settings, currencySymbol, variantBenchmarks]);
 
   const activeMgCol = useMemo(() => ({
     key: 'price_per_mg',
@@ -422,24 +517,27 @@ export default function CatalogOffersPricingDrawer({
     width: '105px',
     nowrap: true,
     render: (v) => {
-      const res = resolveChannelPrice(v, commercialChannel, priceView);
-      const rawUsd = res.price;
-      const totalMg = calculateTotalMg(v) || calculateTotalMg(selectedProduct) || (v.format === 'nasal_spray' ? 500 : null);
-      if (!rawUsd || !totalMg || totalMg <= 0) return <span style={{ color: '#94a3b8' }}>—</span>;
-      let convertedPerMg = rawUsd / totalMg;
-      if (displayCurrency === 'EUR') {
-        convertedPerMg *= (settings?.exchangeRates?.euro || 0.92);
-      }
-      if (displayCurrency === 'AED') {
-        convertedPerMg *= (settings?.exchangeRates?.uae || 3.67);
-      }
+      const bm = variantBenchmarks.get(v.id);
+      if (!bm?.rateDisplay) return <span style={{ color: '#94a3b8' }}>—</span>;
       return (
-        <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#003666' }}>
-          {currencySymbol}{convertedPerMg.toFixed(2)}/mg
-        </span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#003666' }}>
+            {bm.rateDisplay}
+          </span>
+          {bm.isBest && (
+            <span style={{ color: '#15803d', background: '#dcfce7', padding: '0 4px', borderRadius: '3px', fontWeight: 700, fontSize: '0.60rem' }}>
+              Best
+            </span>
+          )}
+          {!bm.isBest && bm.diffPct != null && bm.diffPct > 0 && (
+            <span style={{ color: '#b45309', background: '#fef3c7', padding: '0 4px', borderRadius: '3px', fontWeight: 600, fontSize: '0.60rem' }}>
+              +{bm.diffPct}%
+            </span>
+          )}
+        </div>
       );
     }
-  }), [commercialChannel, priceView, displayCurrency, settings, currencySymbol, selectedProduct]);
+  }), [commercialChannel, variantBenchmarks]);
 
   const activeMonthlyCol = useMemo(() => ({
     key: 'price_per_month',

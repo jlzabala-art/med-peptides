@@ -210,7 +210,7 @@ export default function CatalogKpiHeader({
       }}>
         {[
           { id: 'all', label: 'All Catalog', count: `${displayedMetrics.totalProducts} (${displayedMetrics.totalVariants} vars)` },
-          { id: 'finished_product', label: '💊 Finished Products', count: `${displayedMetrics.finishedProducts} (${displayedMetrics.finishedVariants} vars)` },
+          { id: 'finished_product', label: '📦 Finished Products', count: `${displayedMetrics.finishedProducts} (${displayedMetrics.finishedVariants} vars)` },
           { id: 'api_raw_material', label: '🧪 Raw Materials & APIs', count: `${displayedMetrics.apisProducts} (${displayedMetrics.apisVariants} vars)` },
           { id: 'dual', label: '⚡ Dual (Finished + API)', count: `48 Prods` },
         ].map(tab => {

@@ -74,6 +74,7 @@ import { getFagronClinicalMonograph, resolveApiClinicalData } from '@/data/fagro
 import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
 import { triggerHaptic } from '@/utils/haptics';
 import { COUNTRIES } from '@/data/countries';
+import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolidator';
 
 function safeRenderText(val, fallback = '') {
   if (!val) return fallback;
@@ -697,7 +698,7 @@ export default function DoctorPublicPortalClient({
   };
   const globalKpis = data?.kpis || { activePrescriptions: 0, monitoredPatients: 0, pendingTasksCount: 0, refillsDueCount: 0 };
   const allTasks = data?.tasks || [];
-  const allPrescriptions = data?.prescriptions || [];
+  const allPrescriptions = useMemo(() => consolidateMultiPartPrescriptions(data?.prescriptions || []), [data?.prescriptions]);
   const allProtocols = data?.protocols || [];
   const allLabResults = data?.labResults || [];
 
