@@ -148,6 +148,8 @@ function PresentationStrengthCard({ row, onRowClick }) {
 
 export default function OverviewTab({
   product = {},
+  slug = '',
+  lang = 'en',
   presentationMatrixRows = [],
   activeFormat = null,
   availableFormats = [],
@@ -155,6 +157,8 @@ export default function OverviewTab({
   onSelectVariant,
   onNavigateToProtocols
 }) {
+  const currentLang = lang || (typeof window !== 'undefined' ? (new URLSearchParams(window?.location?.search || '').get('lang') || localStorage.getItem('atlas_portal_lang')) : 'en') || 'en';
+  const resolvedSlug = slug || product.slug || product.canonicalName || product.id || 'pt-141';
   const isPt141 = (product.slug || product.canonicalName || product.name || '').toLowerCase().includes('pt-141') || (product.slug || '').toLowerCase().includes('pt141');
   const genericName = product.scientificName || product.chemical_name || product.genericName || (isPt141 ? 'Bremelanotide' : (product.canonicalName || product.name || ''));
   const targetReceptor = product.targetSystem || product.mechanism_of_action || (isPt141 ? 'Central Melanocortin MC3R / MC4R Receptors' : 'Target Receptor / Biomolecular Pathway');
@@ -719,10 +723,10 @@ export default function OverviewTab({
               </div>
               <div>
                 <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a' }}>
-                  {lang === 'es' ? 'Materia Prima Grado Farmacéutico (Bulk API)' : 'Pharmaceutical-Grade Bulk API & Raw Material'}
+                  {currentLang === 'es' ? 'Materia Prima Grado Farmacéutico (Bulk API)' : 'Pharmaceutical-Grade Bulk API & Raw Material'}
                 </div>
                 <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-                  {lang === 'es'
+                  {currentLang === 'es'
                     ? 'Disponible en lotes de 10g a 1kg con CoA analítico completo para Farmacias Formuladoras y CDMOs.'
                     : 'Available in 10g to 1kg batches with complete analytical CoA and DMF dossier for Compounding Pharmacies & CDMOs.'}
                 </div>
@@ -730,7 +734,7 @@ export default function OverviewTab({
             </div>
 
             <a
-              href={`/raw/${slug}`}
+              href={`/raw/${resolvedSlug}`}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -745,7 +749,7 @@ export default function OverviewTab({
                 transition: 'background 0.15s ease'
               }}
             >
-              <span>{lang === 'es' ? 'Ver Monografía API' : 'View API Monograph'}</span>
+              <span>{currentLang === 'es' ? 'Ver Monografía API' : 'View API Monograph'}</span>
               <ArrowUpRight size={13} />
             </a>
           </div>

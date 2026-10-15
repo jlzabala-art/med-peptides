@@ -127,6 +127,8 @@ function resolveBrandProductImage(product, brandSlug) {
   const name = (product.name || product.title || '').toLowerCase();
 
   if (brandSlug === 'colway') {
+    if (id.includes('lip') || name.includes('lip') || id.includes('balm') || name.includes('balm') || name.includes('pomadka')) return '/images/products/colway/lip-care.png';
+    if (id.includes('wash') || name.includes('wash') || id.includes('gel') || name.includes('gel') || name.includes('zel')) return '/images/products/colway/washing-gel.png';
     if (id.includes('conditioner') || name.includes('conditioner')) return '/images/products/colway/conditioner.png';
     return '/images/products/colway/shampoo.png';
   }
@@ -220,10 +222,6 @@ export default function BrandCollectionPage({
       list.sort((a, b) => (a.name || a.title || '').localeCompare(b.name || b.title || ''));
     } else if (sortOption === 'name-desc') {
       list.sort((a, b) => (b.name || b.title || '').localeCompare(a.name || a.title || ''));
-    } else if (sortOption === 'price-asc') {
-      list.sort((a, b) => (a.price || 0) - (b.price || 0));
-    } else if (sortOption === 'price-desc') {
-      list.sort((a, b) => (b.price || 0) - (a.price || 0));
     }
 
     return list;
@@ -503,8 +501,6 @@ export default function BrandCollectionPage({
                     <option value="featured">{isEs ? 'Destacados' : 'Featured'}</option>
                     <option value="name-asc">{isEs ? 'Nombre A-Z' : 'Name A-Z'}</option>
                     <option value="name-desc">{isEs ? 'Nombre Z-A' : 'Name Z-A'}</option>
-                    <option value="price-asc">{isEs ? 'Precio: Menor a Mayor' : 'Price: Low to High'}</option>
-                    <option value="price-desc">{isEs ? 'Precio: Mayor a Menor' : 'Price: High to Low'}</option>
                   </select>
 
                   <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
@@ -649,22 +645,23 @@ export default function BrandCollectionPage({
                           </span>
                         </div>
 
-                        {/* Price Badge */}
-                        {product.price > 0 && (
-                          <div style={{
-                            position: 'absolute',
-                            bottom: '10px',
-                            right: '10px',
-                            background: '#0f172a',
-                            color: '#ffffff',
-                            padding: '4px 10px',
-                            borderRadius: '6px',
-                            fontSize: '0.85rem',
-                            fontWeight: 800
-                          }}>
-                            ${product.price} USD
-                          </div>
-                        )}
+                        {/* Professional Clinical Badge (No Prices on Public Pages) */}
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '10px',
+                          right: '10px',
+                          background: 'rgba(15, 23, 42, 0.85)',
+                          backdropFilter: 'blur(4px)',
+                          color: '#ffffff',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          letterSpacing: '0.03em',
+                          textTransform: 'uppercase'
+                        }}>
+                          Clinical Formulary
+                        </div>
                       </div>
 
                       {/* Card Content Area */}

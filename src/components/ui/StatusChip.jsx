@@ -27,7 +27,7 @@ export default function StatusChip({ status, customLabel, style = {}, variant = 
     bg = '#e6f4ea';
     border = '#ceead6';
     color = '#137333';
-  } else if (['pending', 'draft', 'awaiting', 'processing', 'pendiente', 'unverified', 'awaiting payment', 'paused', 'on_demand', 'on demand', 'low_stock', 'pending_atlas_review', 'pending review', 'quote_pending', 'awaiting_confirmation'].includes(s)) {
+  } else if (['pending', 'draft', 'awaiting', 'processing', 'pendiente', 'unverified', 'awaiting payment', 'paused', 'on_demand', 'on demand', 'low_stock', 'pending_atlas_review', 'pending review', 'quote_pending', 'awaiting_confirmation', 'proposal_pending', 'offer_not_accepted', 'unaccepted_offer', 'proposal pending'].includes(s)) {
     bg = '#fef7e0';
     border = '#feefc3';
     color = '#b06000';
@@ -47,6 +47,10 @@ export default function StatusChip({ status, customLabel, style = {}, variant = 
   
   // Canonical English label dictionary for any legacy status string
   const SPANISH_TO_ENGLISH_MAP = {
+    'proposal_pending': 'Offer Unaccepted',
+    'offer_not_accepted': 'Offer Unaccepted',
+    'unaccepted_offer': 'Offer Unaccepted',
+    'proposal': 'Clinical Proposal',
     'pending_atlas_review': 'Pending Review',
     'en tránsito': 'In Transit',
     'en transito': 'In Transit',

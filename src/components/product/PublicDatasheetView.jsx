@@ -1632,6 +1632,7 @@ export default function PublicDatasheetView({
         <PeptideMonographWorkspace
           product={product}
           slug={slug}
+          lang={lang}
           effectiveBatch={effectiveBatchCode}
           associatedProtocols={associatedProtocols}
           baseUrl={baseUrl}

@@ -834,9 +834,18 @@ export default function DoctorPublicPortalClient({
 
       if (!searchQuery.trim()) {
         // Quick Status / Category Filter (Proposal #3)
-        if (quickRxFilter === 'pending') {
+        if (quickRxFilter === 'proposals') {
           const s = (rx.status || rx.state || '').toLowerCase();
-          if (!['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review') return false;
+          const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+          if (!isProp) return false;
+        } else if (quickRxFilter === 'drafts') {
+          const s = (rx.status || rx.state || '').toLowerCase();
+          const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+          if (isProp || (!['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review')) return false;
+        } else if (quickRxFilter === 'pending') {
+          const s = (rx.status || rx.state || '').toLowerCase();
+          const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+          if (!isProp && !['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review') return false;
         } else if (quickRxFilter === 'active') {
           const s = (rx.status || rx.state || '').toLowerCase();
           if (!['active', 'approved', 'dispensed'].includes(s)) return false;
@@ -856,9 +865,18 @@ export default function DoctorPublicPortalClient({
       if (!matchPat && !matchCode && !matchTitle && !matchCategory && !matchActives && !matchItems) return false;
 
       // Also apply quickRxFilter if search query is present
-      if (quickRxFilter === 'pending') {
+      if (quickRxFilter === 'proposals') {
         const s = (rx.status || rx.state || '').toLowerCase();
-        if (!['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review') return false;
+        const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+        if (!isProp) return false;
+      } else if (quickRxFilter === 'drafts') {
+        const s = (rx.status || rx.state || '').toLowerCase();
+        const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+        if (isProp || (!['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review')) return false;
+      } else if (quickRxFilter === 'pending') {
+        const s = (rx.status || rx.state || '').toLowerCase();
+        const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+        if (!isProp && !['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review') return false;
       } else if (quickRxFilter === 'active') {
         const s = (rx.status || rx.state || '').toLowerCase();
         if (!['active', 'approved', 'dispensed'].includes(s)) return false;
@@ -873,19 +891,27 @@ export default function DoctorPublicPortalClient({
 
   // Quick Prescription Counts for 1-Click Status Chips (Proposal #3)
   const quickCounts = useMemo(() => {
-    let pendingCount = 0;
+    let proposalsCount = 0;
+    let draftsCount = 0;
     let activeCount = 0;
     let multipartCount = 0;
     allPrescriptions.forEach(p => {
       const s = (p.status || p.state || '').toLowerCase();
-      if (['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) || p.ingestionStage === 'awaiting_atlas_review') pendingCount++;
+      const isProp = s === 'proposal_pending' || p.isTreatmentProposal || p.orderStatus === 'Offer Not Accepted';
+      if (isProp) {
+        proposalsCount++;
+      } else if (['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) || p.ingestionStage === 'awaiting_atlas_review') {
+        draftsCount++;
+      }
       if (['active', 'approved', 'dispensed'].includes(s)) activeCount++;
       const parts = resolvePrescriptionParts(p);
       if (parts.length > 1) multipartCount++;
     });
     return {
       all: allPrescriptions.length,
-      pending: pendingCount,
+      proposals: proposalsCount,
+      drafts: draftsCount,
+      pending: proposalsCount + draftsCount,
       active: activeCount,
       multipart: multipartCount
     };
@@ -1025,6 +1051,43 @@ export default function DoctorPublicPortalClient({
     text += `• Store below 25°C, protected from direct sunlight.\n\n`;
     text += `For medical inquiries, consult Dr. ${doctor.name} or Atlas Clinical Support on WhatsApp.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleShareProposalWhatsApp = (rx, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (!rx) return;
+    triggerHaptic('light');
+    const patientName = rx.patientName || 'Patient';
+    const rxCode = rx.code || rx.prescriptionNumber || rx.id;
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+    const proposalUrl = `${origin}/rx/${rxCode}`;
+    const cleanTitle = String(rx.treatmentTitle || 'Clinical Treatment Proposal')
+      .replace(/\s*\(Propuesta de Tratamiento\)/gi, '')
+      .replace(/\s*\(Sin Pedido\)/gi, '')
+      .replace(/\s*\(Propuesta\)/gi, '')
+      .trim();
+
+    let text = `Dear ${patientName},\n\nDr. ${doctor.name} has prepared your personalized Clinical Treatment Proposal:\n\n`;
+    text += `📋 *Regimen:* ${cleanTitle}\n`;
+    text += `🆔 *Proposal Reference:* #${rxCode}\n\n`;
+    text += `You can review your complete clinical dossier, formulation details, and confirm your treatment order here:\n`;
+    text += `🔗 ${proposalUrl}\n\n`;
+    text += `For any clinical questions regarding this protocol, please contact our medical team directly.`;
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleCopyProposalLink = (rx, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (!rx) return;
+    triggerHaptic('selection');
+    const rxCode = rx.code || rx.prescriptionNumber || rx.id;
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+    const proposalUrl = `${origin}/rx/${rxCode}`;
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(proposalUrl);
+      toast.success('Proposal link copied to clipboard ✓');
+    }
   };
 
   const handleReprescribeFormula = (rx) => {
@@ -1559,7 +1622,9 @@ export default function DoctorPublicPortalClient({
         const parts = resolvePrescriptionParts(rx);
         const totalParts = rx.totalParts || parts.length || 1;
         const categoryLabel = rx.regimenCategoryShort || rx.regimenCategory || 'Follicular';
-        const displayTitle = rx.regimenShortTitle || rx.treatmentTitle || 'Compounded Precision Regimen';
+        const rawTitle = rx.regimenShortTitle || rx.treatmentTitle || 'Compounded Precision Regimen';
+        const displayTitle = String(rawTitle).replace(/\s*\(Propuesta de Tratamiento\)/gi, '').replace(/\s*\(Sin Pedido\)/gi, '').replace(/\s*\(Propuesta\)/gi, '').trim();
+        const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', width: '100%' }}>
@@ -1581,6 +1646,23 @@ export default function DoctorPublicPortalClient({
               }}>
                 {categoryLabel}
               </span>
+
+              {/* Proposal Badge if Unaccepted */}
+              {isProposal && (
+                <span style={{
+                  background: '#fef7e0',
+                  color: '#b06000',
+                  border: '1px solid #feefc3',
+                  padding: '1px 7px',
+                  borderRadius: '4px',
+                  fontSize: '0.68rem',
+                  fontWeight: 650,
+                  letterSpacing: '0.02em',
+                  textTransform: 'uppercase'
+                }}>
+                  Clinical Proposal
+                </span>
+              )}
 
               {/* Parts Badge (Flush left aligned) */}
               <span style={{
@@ -1606,13 +1688,20 @@ export default function DoctorPublicPortalClient({
       align: 'left',
       sortable: true,
       render: (rx) => {
-        const isDraftOrReview = ['draft', 'pending', 'awaiting_validation'].includes(String(rx.status || '').toLowerCase()) || rx.ingestionStage === 'awaiting_atlas_review';
+        const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+        const effectiveStatus = isProposal ? 'proposal_pending' : (rx.status || 'active');
+        const isDraftOrReview = !isProposal && (['draft', 'pending', 'awaiting_validation'].includes(String(rx.status || '').toLowerCase()) || rx.ingestionStage === 'awaiting_atlas_review');
         return (
           <div
-            title={isDraftOrReview ? "Atlas AI clinical pharmacist review in progress (~24h SLA). Expand row for full timeline." : undefined}
-            style={{ display: 'inline-flex', alignItems: 'center' }}
+            title={isProposal ? "Clinical proposal recommended by physician; patient has not yet confirmed or purchased the order." : (isDraftOrReview ? "Atlas AI clinical pharmacist review in progress (~24h SLA)." : undefined)}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
           >
-            <StatusBadge status={rx.status || 'active'} />
+            <StatusBadge status={effectiveStatus} />
+            {isProposal && (
+              <span style={{ fontSize: '0.66rem', color: '#b06000', marginTop: '2px', fontWeight: 500, lineHeight: 1.2 }}>
+                Offer not accepted
+              </span>
+            )}
           </div>
         );
       }
@@ -1640,12 +1729,38 @@ export default function DoctorPublicPortalClient({
       width: '18%',
       align: 'right',
       render: (rx) => {
-        const isPending = ['pending', 'draft'].includes((rx.status || rx.state || '').toLowerCase());
+        const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+        const isPending = !isProposal && ['pending', 'draft'].includes((rx.status || rx.state || '').toLowerCase());
         const isSigning = signingTaskId === (rx.code || rx.id);
 
         return (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'flex-end', width: '100%' }} onClick={e => e.stopPropagation()}>
-            {isPending ? (
+            {isProposal ? (
+              <button
+                type="button"
+                onClick={(e) => handleShareProposalWhatsApp(rx, e)}
+                style={{
+                  height: '28px',
+                  padding: '0 8px',
+                  borderRadius: '4px',
+                  background: '#25d366',
+                  border: '1px solid #1ebc59',
+                  color: '#ffffff',
+                  fontSize: '0.73rem',
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 1px 2px rgba(37,211,102,0.25)',
+                  whiteSpace: 'nowrap'
+                }}
+                title="Share treatment proposal with patient via WhatsApp"
+              >
+                <MessageCircle size={12} style={{ color: '#ffffff' }} />
+                <span>Share Offer</span>
+              </button>
+            ) : isPending ? (
               <button
                 type="button"
                 disabled={isSigning}
@@ -1754,7 +1869,7 @@ export default function DoctorPublicPortalClient({
         );
       }
     }
-  ], [signingTaskId, handleSignOffPrescription]);
+  ], [signingTaskId, handleSignOffPrescription, handleShareProposalWhatsApp]);
 
   // ── Bloodo Diagnostic Lab Results Columns (DataTable Universal) ─────────
   const labResultsColumns = useMemo(() => [
@@ -3695,7 +3810,7 @@ export default function DoctorPublicPortalClient({
                     quickRxFilter !== 'all' && {
                       key: 'quick',
                       label: 'Filter',
-                      value: quickRxFilter === 'pending' ? 'Awaiting Review' : quickRxFilter === 'active' ? 'Active Dispensary' : 'Multi-Part',
+                      value: quickRxFilter === 'proposals' ? 'Unaccepted Offers' : quickRxFilter === 'drafts' ? 'Doctor Drafts' : quickRxFilter === 'active' ? 'Active Prescriptions' : 'Multi-Part',
                       onRemove: () => setQuickRxFilter('all')
                     },
                     apiFilter && {
@@ -3745,8 +3860,9 @@ export default function DoctorPublicPortalClient({
                   </span>
                   {[
                     { id: 'all', label: `All (${quickCounts.all})`, color: '#003666', bg: '#f1f5f9' },
-                    { id: 'pending', label: `🟡 Awaiting Sign-off / Review (${quickCounts.pending})`, color: '#b45309', bg: '#fffbeb' },
-                    { id: 'active', label: `🟢 Active in Dispensary (${quickCounts.active})`, color: '#137333', bg: '#f0fdf4' },
+                    { id: 'active', label: `🟢 Active Prescriptions (${quickCounts.active})`, color: '#137333', bg: '#f0fdf4' },
+                    { id: 'proposals', label: `⏳ Unaccepted Offers (${quickCounts.proposals})`, color: '#b06000', bg: '#fef7e0' },
+                    ...(quickCounts.drafts > 0 ? [{ id: 'drafts', label: `🟡 Doctor Drafts (${quickCounts.drafts})`, color: '#b45309', bg: '#fffbeb' }] : []),
                     { id: 'multipart', label: `🔵 Multi-Part Formulations (${quickCounts.multipart})`, color: '#1a73e8', bg: '#eff6ff' }
                   ].map(chip => (
                     <button
@@ -3826,11 +3942,89 @@ export default function DoctorPublicPortalClient({
                   const parts = resolvePrescriptionParts(rx);
                   const totalApisCount = parts.reduce((acc, p) => acc + (p.apis?.length || 0), 0);
 
-                  const isAwaitingAtlasReview = rx.status === 'draft' || rx.ingestionStage === 'awaiting_atlas_review' || rx.state === 'draft';
+                  const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+                  const isAwaitingAtlasReview = !isProposal && (rx.status === 'draft' || rx.ingestionStage === 'awaiting_atlas_review' || rx.state === 'draft');
 
                   return (
                     <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                      {/* Two-Phase Clinical Intake Tracker Banner (Draft SLA SLA) */}
+                      {/* Clinical Treatment Proposal Banner (Unaccepted Offer) */}
+                      {isProposal && (
+                        <div style={{
+                          background: '#fffbeb',
+                          border: '1px solid #fde68a',
+                          borderRadius: '8px',
+                          padding: '12px 16px',
+                          marginBottom: '14px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                              <Clock size={16} color="#d97706" />
+                              <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#92400e' }}>
+                                Clinical Treatment Proposal · Offer Not Accepted
+                              </span>
+                              <span style={{
+                                fontSize: '0.70rem',
+                                background: '#fef3c7',
+                                color: '#b45309',
+                                padding: '2px 8px',
+                                borderRadius: '999px',
+                                fontWeight: 700,
+                                border: '1px solid #fcd34d'
+                              }}>
+                                Patient Pending Purchase
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleShareProposalWhatsApp(rx)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '5px 12px',
+                                  background: '#25D366',
+                                  color: '#ffffff',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Share on WhatsApp
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyProposalLink(rx)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '5px 12px',
+                                  background: '#ffffff',
+                                  color: '#003666',
+                                  borderRadius: '6px',
+                                  border: '1px solid #cbd5e1',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Copy Link
+                              </button>
+                            </div>
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#78350f', lineHeight: 1.5 }}>
+                            Dr. Khalid Shukri formulated this personalized regimen. The patient has not yet confirmed the dispensing order.
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Two-Phase Clinical Intake Tracker Banner (Draft SLA) */}
                       {isAwaitingAtlasReview && (
                         <div style={{
                           background: '#fffbeb',
@@ -7183,10 +7377,12 @@ export default function DoctorPublicPortalClient({
         const rx = isTask ? selectedInspectorItem.prescription : item;
         const rxCode = rx?.code || rx?.prescriptionNumber || item?.code || 'N/A';
         const patientName = rx?.patientName || item?.patientName || 'Anonymous Patient';
-        const treatmentTitle = rx?.treatmentTitle || item?.title || 'Personalized Clinical Protocol';
+        const rawTitle = rx?.treatmentTitle || item?.title || 'Personalized Clinical Protocol';
+        const treatmentTitle = String(rawTitle).replace(/\s*\(Propuesta de Tratamiento\)/gi, '').replace(/\s*\(Sin Pedido\)/gi, '').replace(/\s*\(Propuesta\)/gi, '').trim();
         const itemsList = rx?.items && rx.items.length > 0 ? rx.items : (rx?.prescriptionLines || []);
         const posology = rx?.posology || item?.description || 'Administer as directed by treating physician according to physiological circadian cycle.';
-        const status = rx?.status || (isTask ? item?.priority : 'active');
+        const isProposal = rx?.status === 'proposal_pending' || rx?.isTreatmentProposal || rx?.orderStatus === 'Offer Not Accepted';
+        const status = isProposal ? 'proposal_pending' : (rx?.status || (isTask ? item?.priority : 'active'));
         const createdDate = rx?.createdAt || rx?.createdDate ? new Date(rx.createdAt || rx.createdDate).toLocaleDateString() : 'Active Regimen';
 
         return (
@@ -7430,8 +7626,115 @@ export default function DoctorPublicPortalClient({
                       </div>
                     </div>
 
+                    {/* Unaccepted Proposal / Patient Follow-up Block */}
+                    {isProposal && (
+                      <div style={{
+                        background: '#fef7e0',
+                        border: '1px solid #feefc3',
+                        borderRadius: '6px',
+                        padding: '16px'
+                      }}>
+                        <div style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          color: '#b06000',
+                          textTransform: 'uppercase',
+                          marginBottom: '4px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}>
+                          <Clock size={13} color="#b06000" />
+                          <span>Clinical Treatment Proposal · Offer Not Accepted</span>
+                        </div>
+                        <div style={{
+                          fontSize: '0.82rem',
+                          color: '#78350f',
+                          lineHeight: 1.45,
+                          marginBottom: '12px'
+                        }}>
+                          This personalized formulation was recommended by Dr. Khalid Shukri, but the patient has not yet confirmed or purchased the treatment order.
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleShareProposalWhatsApp(rx)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '8px',
+                              width: '100%',
+                              padding: '10px 16px',
+                              borderRadius: '4px',
+                              background: '#25d366',
+                              border: '1px solid #1ebc59',
+                              color: '#ffffff',
+                              fontSize: '0.82rem',
+                              fontWeight: 650,
+                              cursor: 'pointer',
+                              boxShadow: '0 1px 3px rgba(37,211,102,0.25)',
+                              transition: 'all 0.12s'
+                            }}
+                          >
+                            <MessageCircle size={15} style={{ color: '#ffffff' }} />
+                            <span>Share Offer via WhatsApp</span>
+                          </button>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyProposalLink(rx)}
+                              style={{
+                                flex: 1,
+                                padding: '8px 12px',
+                                borderRadius: '4px',
+                                background: '#ffffff',
+                                border: '1px solid #dadce0',
+                                color: '#1a73e8',
+                                fontSize: '0.78rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px'
+                              }}
+                            >
+                              <Copy size={13} />
+                              <span>Copy Link</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => handleSignOffPrescription(rx, e)}
+                              style={{
+                                flex: 1,
+                                padding: '8px 12px',
+                                borderRadius: '4px',
+                                background: '#003666',
+                                border: '1px solid #002244',
+                                color: '#ffffff',
+                                fontSize: '0.78rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px'
+                              }}
+                            >
+                              <CheckCircle2 size={13} />
+                              <span>Convert to Active Rx</span>
+                            </button>
+                          </div>
+                          <div style={{ fontSize: '0.70rem', color: '#64748b', textAlign: 'center', lineHeight: 1.35 }}>
+                            Patient can review posology, ingredients, and confirm payment directly from the shared link.
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Clinical Sign-off & Task Action Block */}
-                    {(isTask || (rx && ['pending', 'draft'].includes((rx.status || '').toLowerCase()))) && (() => {
+                    {!isProposal && (isTask || (rx && ['pending', 'draft'].includes((rx.status || '').toLowerCase()))) && (() => {
                       const targetEntity = isTask ? item : rx;
                       const isSigned = targetEntity?.isSigned || targetEntity?.status === 'approved' || rx?.status === 'approved';
                       const isSigning = signingTaskId === (targetEntity?.id || targetEntity?.code || rx?.code);

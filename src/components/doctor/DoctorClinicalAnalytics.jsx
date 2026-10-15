@@ -61,6 +61,21 @@ function normalizeApiName(rawName) {
  */
 function getApiCategoryMeta(apiName) {
   const name = String(apiName).toLowerCase();
+  if (name.includes('selank') || name.includes('semax')) {
+    return { category: 'Neuro-Cognitive & Anxiolytic Bioregulator', color: '#1a73e8', bg: '#eff6ff' };
+  }
+  if (name.includes('bpc') || name.includes('tb-500') || name.includes('tb500')) {
+    return { category: 'Angiogenic & Mucosal Tissue Repair', color: '#0d9488', bg: '#f0fdfa' };
+  }
+  if (name.includes('kpv')) {
+    return { category: 'Mucosal Anti-Inflammatory & Gut Barrier', color: '#7c3aed', bg: '#f5f3ff' };
+  }
+  if (name.includes('dihexa')) {
+    return { category: 'Synaptogenesis & HGF Activator', color: '#b45309', bg: '#fffbeb' };
+  }
+  if (name.includes('ghk')) {
+    return { category: 'Extracellular Matrix & Follicular Remodeling', color: '#4338ca', bg: '#e0e7ff' };
+  }
   if (name.includes('minoxidil')) {
     return { category: 'Vasodilator & Microvascular Growth Factor', color: '#0d9488', bg: '#f0fdfa' };
   }
@@ -82,7 +97,7 @@ function getApiCategoryMeta(apiName) {
   if (name.includes('arginine') || name.includes('ginkgo') || name.includes('ginseng')) {
     return { category: 'Microcirculation & Bioregulator', color: '#0284c7', bg: '#f0f9ff' };
   }
-  return { category: 'Targeted API Compound', color: '#5f6368', bg: '#f8f9fa' };
+  return { category: 'Targeted Clinical Formulation', color: '#475569', bg: '#f1f5f9' };
 }
 
 /**
@@ -129,19 +144,21 @@ export default function DoctorClinicalAnalytics({
   // we bypass 100% of client-side loops for instant 0ms latency.
   const isServerOptimized = !!serverAnalytics && !selectedApiFilter && !isFiltered;
 
-  // ── 1. Monthly Distribution ────────────────────────────────────────────────
+  // ── 1. Monthly Distribution (Continuous 6-Month Rolling Timeline - GCP Standard) ──
   const monthlyData = useMemo(() => {
-    if (isServerOptimized && Array.isArray(serverAnalytics?.monthlyData) && serverAnalytics.monthlyData.length > 0) {
+    if (isServerOptimized && Array.isArray(serverAnalytics?.monthlyData) && serverAnalytics.monthlyData.length >= 6) {
       return serverAnalytics.monthlyData;
     }
     if (!prescriptions || prescriptions.length === 0) return [];
 
     const monthMap = {};
+    let latestTimestamp = 0;
+
     prescriptions.forEach((rx) => {
-      let rawDate = rx.dateIssued || rx.createdAt || rx.date;
+      let rawDate = rx.startDate || rx.dateIssued || rx.createdAt || rx.date;
       if (!rawDate) return;
 
-      let d = new Date(rawDate);
+      let d = rawDate.toDate ? rawDate.toDate() : new Date(rawDate);
       if (isNaN(d.getTime())) {
         if (typeof rawDate === 'string' && rawDate.includes('/')) {
           const [day, m, y] = rawDate.split('/');
@@ -149,6 +166,8 @@ export default function DoctorClinicalAnalytics({
         }
       }
       if (isNaN(d.getTime())) return;
+
+      if (d.getTime() > latestTimestamp) latestTimestamp = d.getTime();
 
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       const label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
@@ -159,8 +178,22 @@ export default function DoctorClinicalAnalytics({
       monthMap[key].count += 1;
     });
 
-    const sorted = Object.values(monthMap).sort((a, b) => a.key.localeCompare(b.key));
-    return sorted.slice(-8);
+    const anchorDate = latestTimestamp > 0 ? new Date(latestTimestamp) : new Date();
+    // Build 6 consecutive months leading up to anchorDate
+    const timeline = [];
+    for (let i = 5; i >= 0; i--) {
+      const targetDate = new Date(anchorDate.getFullYear(), anchorDate.getMonth() - i, 1);
+      const key = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}`;
+      const label = targetDate.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      timeline.push({
+        key,
+        label,
+        count: monthMap[key]?.count || 0,
+        dateObj: targetDate
+      });
+    }
+
+    return timeline;
   }, [isServerOptimized, serverAnalytics, prescriptions]);
 
   const maxMonthlyCount = useMemo(() => {
@@ -180,7 +213,7 @@ export default function DoctorClinicalAnalytics({
     return (sum / monthlyData.length).toFixed(1);
   }, [isServerOptimized, serverAnalytics, monthlyData]);
 
-  // ── 2. Top 5 Prescribed APIs ───────────────────────────────────────────────
+  // ── 2. Top Prescribed Active Ingredients & Formulations ──────────────────────
   const topApis = useMemo(() => {
     if (isServerOptimized && Array.isArray(serverAnalytics?.topApis) && serverAnalytics.topApis.length > 0) {
       return serverAnalytics.topApis;
@@ -194,6 +227,7 @@ export default function DoctorClinicalAnalytics({
       const seenInThisRx = new Set();
       const candidateItems = [];
       if (Array.isArray(rx.items)) candidateItems.push(...rx.items);
+      if (Array.isArray(rx.prescriptionLines)) candidateItems.push(...rx.prescriptionLines);
       if (Array.isArray(rx.recommendedItems)) candidateItems.push(...rx.recommendedItems);
       if (Array.isArray(rx.phases)) {
         rx.phases.forEach(ph => {
@@ -211,7 +245,7 @@ export default function DoctorClinicalAnalytics({
         if (!item) return;
         if (item.isVehicleOrBase || item.itemType === 'vehicle_base') return;
 
-        const rawName = item.activeIngredient || item.drugName || item.name;
+        const rawName = item.name || item.drugName || item.productName || item.activeIngredient;
         const norm = normalizeApiName(rawName);
         if (!norm || norm === 'Unknown' || norm.length < 2) return;
 
@@ -233,7 +267,7 @@ export default function DoctorClinicalAnalytics({
       }))
       .sort((a, b) => b.count - a.count);
 
-    return list.slice(0, 5);
+    return list.slice(0, 10);
   }, [isServerOptimized, serverAnalytics, prescriptions]);
 
   // ── 3. Patient Cohort Loyalty ─────────────────────────────────────────────
@@ -821,7 +855,7 @@ export default function DoctorClinicalAnalytics({
                                 whiteSpace: 'nowrap', 
                                 overflow: 'hidden', 
                                 textOverflow: 'ellipsis',
-                                maxWidth: '170px'
+                                flex: 1
                               }} 
                               title={api.name}
                             >
@@ -837,8 +871,7 @@ export default function DoctorClinicalAnalytics({
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
-                                maxWidth: '140px',
-                                flexShrink: 1
+                                flexShrink: 0
                               }}
                               title={api.meta.category}
                             >

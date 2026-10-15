@@ -74,6 +74,17 @@ function getPosologyString(raw) {
   return String(raw);
 }
 
+export function sanitizeEnglishText(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/\s*\(Propuesta de Tratamiento\)/gi, '')
+    .replace(/\s*\(Sin Pedido\)/gi, '')
+    .replace(/\s*\(Propuesta\)/gi, '')
+    .replace(/Propuesta de Tratamiento/gi, 'Treatment Proposal')
+    .replace(/Sin Pedido/gi, 'Unaccepted Offer')
+    .trim();
+}
+
 /**
  * Resolves corresponding evidence-based public protocol slug (/proto/[slug])
  */
@@ -579,9 +590,12 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         catData = classifyPrescriptionRegimen({ ...d, items: resolvedItems, parts: resolvedParts, treatmentTitle: baseTitle });
       }
 
-      const finalTreatmentTitle = d.treatmentTitle && !['Personalized Compounded Protocol', 'Personalized Formulation'].includes(d.treatmentTitle)
+      const rawTitle = d.treatmentTitle && !['Personalized Compounded Protocol', 'Personalized Formulation'].includes(d.treatmentTitle)
         ? d.treatmentTitle
         : (d.regimenShortTitle || catData.regimenShortTitle || baseTitle);
+      const finalTreatmentTitle = sanitizeEnglishText(rawTitle);
+      const isProposal = !!d.isTreatmentProposal || d.status === 'proposal_pending' || d.orderStatus === 'Offer Not Accepted' || String(d.treatmentProgram || '').toLowerCase().includes('proposal') || String(d.invoiceRef || '').toLowerCase().includes('proposal');
+      const normalizedStatus = isProposal ? 'proposal_pending' : (d.status || d.state || 'active');
 
       rawPrescriptionsList.push({
         id: doc.id,
@@ -590,18 +604,21 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         patientName: patName,
         patientId: patId,
         patient: d.patient || null,
-        status: d.status || d.state || 'active',
-        state: d.state || d.status || 'active',
+        status: normalizedStatus,
+        state: normalizedStatus,
+        isTreatmentProposal: isProposal,
+        orderStatus: d.orderStatus || (isProposal ? 'Offer Not Accepted' : 'Ordered'),
+        treatmentProgram: sanitizeEnglishText(d.treatmentProgram) || (isProposal ? 'Clinical Treatment Proposal (Unaccepted Offer)' : 'Personalized Compounded Protocol'),
         treatmentTitle: finalTreatmentTitle,
         regimenCategory: d.regimenCategory || catData.category || 'Follicular & Hair Restoration',
         regimenCategoryId: d.regimenCategoryId || catData.categoryId || 'follicular_hair',
         regimenCategoryShort: d.regimenCategoryShort || catData.categoryShort || 'Follicular',
         regimenCategoryCode: d.regimenCategoryCode || catData.categoryCode || 'HAIR-RX',
-        regimenShortTitle: d.regimenShortTitle || catData.regimenShortTitle || finalTreatmentTitle,
+        regimenShortTitle: sanitizeEnglishText(d.regimenShortTitle || catData.regimenShortTitle || finalTreatmentTitle),
         activeIngredientsSummary: d.activeIngredientsSummary || catData.activeSummary || null,
         protocolSlug: protoSlug,
         protocolUrl: protoSlug ? `/proto/${protoSlug}` : null,
-        phaseName: d.phaseName || null,
+        phaseName: sanitizeEnglishText(d.phaseName) || null,
         sessionId: d.sessionId || null,
         groupSessionId: d.groupSessionId || null,
         partNumber: d.partNumber != null ? Number(d.partNumber) : null,

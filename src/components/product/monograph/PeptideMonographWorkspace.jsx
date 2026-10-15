@@ -34,6 +34,7 @@ import './monographWorkspace.css';
 export default function PeptideMonographWorkspace({
   product = {},
   slug = 'pt-141',
+  lang = 'en',
   effectiveBatch = 'AS-LOT-PT05-2609',
   associatedProtocols = [],
   onAddToCart,
@@ -174,6 +175,8 @@ export default function PeptideMonographWorkspace({
             {activeTab === 'overview' && (
               <OverviewTab
                 product={product}
+                slug={slug}
+                lang={lang}
                 presentationMatrixRows={presentationMatrixRows}
                 activeFormat={activeFormat}
                 availableFormats={availableFormats}
@@ -303,6 +306,8 @@ export default function PeptideMonographWorkspace({
               <div className="pds-mobile-accordion-body">
                 <OverviewTab
                   product={product}
+                  slug={slug}
+                  lang={lang}
                   presentationMatrixRows={presentationMatrixRows}
                   activeFormat={activeFormat}
                   availableFormats={availableFormats}
