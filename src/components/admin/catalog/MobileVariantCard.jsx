@@ -68,13 +68,30 @@ export default function MobileVariantCard({
   // Normalized $/g and $/mg
   let normalizedPrice = null;
   let normalizedPriceGram = null;
-  const totalMg = calculateTotalMg(row) || calculateTotalMg(selectedProduct) || (row.doseMg ?? row.totalMg ?? parseFloat(rawStrength || 0));
-  if (convertedPrice !== null && totalMg > 0 && typeof totalMg === 'number') {
-     const qty = priceView === 'kit' || priceView === 'tier_10' ? (row.quantityPerKit || 10) : (priceView === 'tier_50' ? 50 : (priceView === 'tier_100' ? 100 : 1));
-     const pMg = convertedPrice / (totalMg * qty);
-     const pGram = pMg * 1000;
-     normalizedPrice = `${sym}${formatNumberAdaptive(pMg)}${suf}/mg`;
-     normalizedPriceGram = `${sym}${formatNumberAdaptive(pGram)}${suf}/g`;
+  const pStr = (row.formatLabel || row.format || row.presentation || row.presentationName || row.productType || row.type || '').toLowerCase();
+  const isApi = row.type === 'raw_material' || 
+                row.productType === 'raw_material' || 
+                row.format === 'bulk_api' || 
+                pStr.includes('bulk') || 
+                pStr.includes('api') || 
+                pStr.includes('powder') || 
+                row.unit === 'g' || 
+                row.unitOfMeasure === 'g';
+
+  if (isApi) {
+    if (convertedPrice !== null && !isNaN(convertedPrice) && convertedPrice > 0) {
+      normalizedPriceGram = `${sym}${formatNumberAdaptive(convertedPrice)}${suf}/g`;
+      normalizedPrice = `${sym}${formatNumberAdaptive(convertedPrice / 1000)}${suf}/mg`;
+    }
+  } else {
+    const totalMg = calculateTotalMg(row) || calculateTotalMg(selectedProduct) || (row.doseMg ?? row.totalMg ?? parseFloat(rawStrength || 0));
+    if (convertedPrice !== null && totalMg > 0 && typeof totalMg === 'number') {
+       const qty = priceView === 'kit' || priceView === 'tier_10' ? (row.quantityPerKit || 10) : (priceView === 'tier_50' ? 50 : (priceView === 'tier_100' ? 100 : 1));
+       const pMg = convertedPrice / (totalMg * qty);
+       const pGram = pMg * 1000;
+       normalizedPrice = `${sym}${formatNumberAdaptive(pMg)}${suf}/mg`;
+       normalizedPriceGram = `${sym}${formatNumberAdaptive(pGram)}${suf}/g`;
+    }
   }
 
   // Active channel descriptor

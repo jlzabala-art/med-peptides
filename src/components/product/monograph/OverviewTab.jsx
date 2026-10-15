@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { ArrowRight, Target, ShieldCheck, Activity, Clock, Syringe, Info, Sparkles } from '@/lib/icons';
+import { ArrowRight, ArrowUpRight, Target, ShieldCheck, Activity, Clock, Syringe, Info, Sparkles, FlaskConical } from '@/lib/icons';
 import DataTable from '@/components/ui/DataTable';
 import { STANDARD_PRESENTATIONS } from './monographCalculationEngine';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';

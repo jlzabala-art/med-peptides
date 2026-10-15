@@ -579,10 +579,11 @@ export const buildApiColumns = ({
   actionCol,
   updateVariantField
 }) => {
+  const channelLabel = commercialChannel === 'cost' ? 'Cost' : commercialChannel === 'wholesale' ? 'Wholesale' : commercialChannel === 'clinic' ? 'Clinic' : 'Retail';
   const customBatchCostCol = activePriceCol ? {
     ...activePriceCol,
-    header: (activePriceCol.header || '').replace(/COST \(X1\)/i, 'COST ($/g)').replace(/PRICE \(X1\)/i, 'PRICE ($/g)').replace(/Cost \(x1\)/i, 'Cost ($/g)'),
-    width: '135px'
+    header: `${channelLabel} / g`,
+    width: '145px'
   } : null;
 
   const refinedGramCol = activeGramCol ? {

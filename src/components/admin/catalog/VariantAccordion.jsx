@@ -219,6 +219,26 @@ export default function VariantAccordion({
   const getVariantCostPerMg = (v) => {
     const res = resolveChannelPrice(v, commercialChannel, priceView);
     const cost = res.price;
+    const pStr = (v.formatLabel || v.format || v.presentation || v.presentationName || v.productType || v.type || '').toLowerCase();
+    const isApi = v.type === 'raw_material' || 
+                  v.productType === 'raw_material' || 
+                  v.format === 'bulk_api' || 
+                  pStr.includes('bulk') || 
+                  pStr.includes('api') || 
+                  pStr.includes('powder') || 
+                  v.unit === 'g' || 
+                  v.unitOfMeasure === 'g';
+
+    if (isApi) {
+      if (cost != null && !isNaN(cost) && cost > 0) {
+        // For Bulk API, cost is already $/g.
+        // Therefore normalized cost per mg is (cost / 1000).
+        // (Do NOT divide by MOQ grams!)
+        return cost / 1000;
+      }
+      return Infinity;
+    }
+
     const totalMg = calculateTotalMg(v) || calculateTotalMg(selectedProduct) || (v.doseMg ?? v.totalMg);
     if (cost != null && !isNaN(cost) && cost > 0 && totalMg != null && !isNaN(totalMg) && totalMg > 0) {
       return cost / totalMg;

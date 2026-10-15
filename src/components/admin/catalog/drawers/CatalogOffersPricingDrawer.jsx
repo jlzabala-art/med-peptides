@@ -381,13 +381,15 @@ export default function CatalogOffersPricingDrawer({
       let rateDisplay = null;
       let normRate = null;
 
-      if (converted > 0 && totalMg && totalMg > 0) {
+      if (converted > 0) {
         if (isApi) {
-          // Bulk API: normalize per gram (1g = 1000mg)
-          const pricePerGram = (converted / totalMg) * 1000;
+          // Bulk API: the supplier price is ALREADY per gram ($/g).
+          // One thing is the MOQ (minimum order quantity), and another is the price per gram.
+          // Do NOT divide by MOQ grams!
+          const pricePerGram = converted;
           normRate = pricePerGram;
           rateDisplay = `${currencySymbol}${pricePerGram.toFixed(2)}/g`;
-        } else {
+        } else if (totalMg && totalMg > 0) {
           // Finished: normalize per mg
           const pricePerMg = converted / totalMg;
           normRate = pricePerMg;
@@ -420,7 +422,7 @@ export default function CatalogOffersPricingDrawer({
     const benchmarkMap = new Map();
     analyzed.forEach(a => {
       if (!a.normRate) {
-        benchmarkMap.set(a.id, { rateDisplay: a.rateDisplay, isBest: false, diffPct: null });
+        benchmarkMap.set(a.id, { rateDisplay: a.rateDisplay, isBest: false, diffPct: null, isApi: a.isApi });
         return;
       }
       const baseline = a.isApi ? minApi : minFinished;
@@ -461,7 +463,37 @@ export default function CatalogOffersPricingDrawer({
       const bm = variantBenchmarks.get(v.id);
 
       const renderRateBadge = () => {
-        if (!bm?.rateDisplay) return null;
+        if (!bm) return null;
+
+        // For Bulk API: show MOQ batch total (if MOQ > 1) and Best / +X% diff badge
+        if (bm.isApi) {
+          const rawMoq = v.moq || v.minimum_order_quantity_g || v.weightGrams;
+          const moqVal = Number(rawMoq) || parseFloat(String(v.weight || v.size || '').replace(/[^0-9.]/g, '')) || 0;
+          const batchTotal = (moqVal > 1 && converted > 0) ? (converted * moqVal) : null;
+
+          return (
+            <span style={{ fontSize: '0.67rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px', marginTop: '1px', lineHeight: 1 }}>
+              {batchTotal != null && (
+                <span style={{ color: '#64748b', fontSize: '0.65rem' }}>
+                  • Batch ({moqVal}g): {currencySymbol}{batchTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              )}
+              {bm.isBest && (
+                <span style={{ color: '#15803d', background: '#dcfce7', padding: '0 4px', borderRadius: '3px', fontWeight: 700, fontSize: '0.60rem' }}>
+                  Best
+                </span>
+              )}
+              {!bm.isBest && bm.diffPct != null && bm.diffPct > 0 && (
+                <span style={{ color: '#b45309', background: '#fef3c7', padding: '0 4px', borderRadius: '3px', fontWeight: 600, fontSize: '0.60rem' }}>
+                  +{bm.diffPct}%
+                </span>
+              )}
+            </span>
+          );
+        }
+
+        // For Finished products: show • $X.XX/mg and Best / +X% badge
+        if (!bm.rateDisplay) return null;
         return (
           <span style={{ fontSize: '0.67rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px', marginTop: '1px', lineHeight: 1 }}>
             <span style={{ color: '#0284c7' }}>• {bm.rateDisplay}</span>
@@ -479,13 +511,18 @@ export default function CatalogOffersPricingDrawer({
         );
       };
 
+      const formatPrice = (val) => {
+        if (val == null || isNaN(val)) return '—';
+        return `${currencySymbol}${Number(val).toFixed(2)}${bm?.isApi ? '/g' : ''}`;
+      };
+
       if (commercialChannel === 'cost') {
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: '1.2' }}>
             <InlineEditableCell
               value={converted}
               type="number"
-              format={(val) => (val != null && !isNaN(val)) ? `${currencySymbol}${Number(val).toFixed(2)}` : '—'}
+              format={formatPrice}
               onSave={(newVal) => updateVariantField(v.id, priceField, Number(newVal))}
             />
             {renderRateBadge()}
@@ -497,7 +534,7 @@ export default function CatalogOffersPricingDrawer({
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: '1.2' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#003666' }}>
-              {converted != null && !isNaN(converted) ? `${currencySymbol}${Number(converted).toFixed(2)}` : '—'}
+              {formatPrice(converted)}
             </span>
             {res.isAuto && (
               <span style={{ fontSize: '0.65rem', color: '#64748b', background: '#f1f5f9', padding: '1px 4px', borderRadius: '3px' }}>

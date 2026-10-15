@@ -51,7 +51,30 @@ export function resolveChannelPrice(variant, channel = 'cost', priceView = 'unit
     variant.perVialPriceUSD ?? 
     null;
 
-  if (priceView === 'kit' || priceView === 'tier_10') {
+  const pStr = (variant.formatLabel || variant.format || variant.presentation || variant.presentationName || variant.productType || variant.type || '').toLowerCase();
+  const isApi = variant.type === 'raw_material' || 
+                variant.productType === 'raw_material' || 
+                variant.format === 'bulk_api' || 
+                pStr.includes('bulk') || 
+                pStr.includes('api') || 
+                pStr.includes('powder') || 
+                variant.unit === 'g' || 
+                variant.unitOfMeasure === 'g';
+
+  if (isApi) {
+    if (priceView === 'kit' || priceView === 'tier_10') {
+      const rawCost10 = variant.cost_10 ?? variant.cost_tiers?.cost_10 ?? pricingObj.cost_tiers?.cost_10 ?? null;
+      rawCost = rawCost10 != null && !isNaN(rawCost10) ? Number(rawCost10) : unitPrice;
+    } else if (priceView === 'tier_50') {
+      const rawCost50 = variant.cost_50 ?? variant.cost_tiers?.cost_50 ?? pricingObj.cost_tiers?.cost_50 ?? null;
+      rawCost = rawCost50 != null && !isNaN(rawCost50) ? Number(rawCost50) : (unitPrice != null ? Number((Number(unitPrice) * 0.95).toFixed(2)) : null);
+    } else if (priceView === 'tier_100') {
+      const rawCost100 = variant.cost_100 ?? variant.cost_tiers?.cost_100 ?? pricingObj.cost_tiers?.cost_100 ?? null;
+      rawCost = rawCost100 != null && !isNaN(rawCost100) ? Number(rawCost100) : (unitPrice != null ? Number((Number(unitPrice) * 0.90).toFixed(2)) : null);
+    } else {
+      rawCost = unitPrice;
+    }
+  } else if (priceView === 'kit' || priceView === 'tier_10') {
     const rawCost10 = variant.cost_10 ?? 
       variant.cost_tiers?.cost_10 ?? 
       pricingObj.master?.kit ?? 

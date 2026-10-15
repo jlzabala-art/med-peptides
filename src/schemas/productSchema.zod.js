@@ -367,8 +367,8 @@ export function normalizeAndValidateVariant(rawVariant, productType = 'finished_
 
   // 2. Coerce pricing metrics
   const costPrice = Number(rawVariant.costPrice || rawVariant.pricePerGram || rawVariant.unit_price || rawVariant.cost || 0);
-  const pricePerGram = Number(rawVariant.pricePerGram || (weightGrams > 0 ? costPrice / weightGrams : costPrice));
-  const totalBatchCost = Number(rawVariant.totalBatchCost || (costPrice * quantity) || 0);
+  const pricePerGram = Number(rawVariant.pricePerGram || costPrice);
+  const totalBatchCost = Number(rawVariant.totalBatchCost || (pricePerGram * weightGrams) || (costPrice * quantity) || 0);
 
   const normalizedRaw = {
     ...rawVariant,
