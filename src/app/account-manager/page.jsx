@@ -5,7 +5,7 @@ import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 
 export const metadata = {
   title: 'Account Manager Multi-Portal Hub | Atlas Services',
-  description: 'Consola de Account Manager para navegación e impersonación directa sin contraseñas: Pantalla Pública, Doctores, Pacientes y Catálogo de Productos.'
+  description: 'Account Manager console for direct single-click navigation without passwords: Public Views, Doctor Portals, Patient Dossiers, and Product Catalog.'
 };
 
 export default function AccountManagerPage() {

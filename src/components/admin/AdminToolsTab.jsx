@@ -32,25 +32,26 @@ import {
   Pill,
   Zap,
   ChevronRight,
-  Download
+  Download,
+  LayoutDashboard
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import CopyableId from '../ui/CopyableId';
 import StatusBadge from '../ui/StatusBadge';
 import GCPSplitDrawer from './GCPSplitDrawer';
+import DataTable from '../ui/DataTable';
 import { getCachedAMData, setCachedAMData, purgeAMCache } from '../../services/accountManagerCache';
 
 export default function AdminToolsTab() {
   const router = useRouter();
 
-  // 4 Primary Views for Account Manager (Sin Password):
-  // 'public' | 'doctors' | 'patients' | 'products' | 'ops'
-  const [activeView, setActiveView] = useState('public');
+  // Navigation Views for Account Manager Hub:
+  // 'overview' | 'doctors' | 'patients' | 'products' | 'public' | 'ops'
+  const [activeView, setActiveView] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [countryFilter, setCountryFilter] = useState('all');
   const [copiedId, setCopiedId] = useState(null);
-  const [isClearingCache, setIsClearingCache] = useState(false);
 
   // Side Drawer Split-View state (GCP Master-Detail)
   const [drawerItem, setDrawerItem] = useState(null);
@@ -60,15 +61,14 @@ export default function AdminToolsTab() {
   const [dynamicDoctors, setDynamicDoctors] = useState([]);
   const [dynamicPrescriptions, setDynamicPrescriptions] = useState([]);
 
-  // Fetch real doctors from Cache / Firestore API
+  // Auto-purge stale cache on refresh/load & fetch fresh doctors from Firestore API
   useEffect(() => {
     let isMounted = true;
-    const cached = getCachedAMData();
-    if (cached.data?.doctors && Array.isArray(cached.data.doctors)) {
-      setDynamicDoctors(cached.data.doctors);
-    }
+    
+    // Automatically purge stale local/memory cache on page refresh / load
+    purgeAMCache();
 
-    fetch('/api/prescriptions/doctors-list')
+    fetch('/api/prescriptions/doctors-list', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (!isMounted) return;
@@ -80,6 +80,166 @@ export default function AdminToolsTab() {
       .catch(() => {});
     return () => { isMounted = false; };
   }, []);
+
+  // ── Unified DataTable Columns for Doctors (Golden Rule #3 & #30) ─────────
+  const doctorColumns = useMemo(() => [
+    {
+      key: 'name',
+      title: 'Doctor & Specialty',
+      width: '32%',
+      sortable: true,
+      render: (doc) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
+            background: '#ecfdf5',
+            color: '#059669',
+            border: '1px solid #a7f3d0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 700,
+            fontSize: '0.82rem',
+            flexShrink: 0
+          }}>
+            {doc.name?.replace(/^(Dr\.|Dra\.)\s*/, '').charAt(0) || 'D'}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '1rem' }}>{doc.countryFlag}</span>
+              <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem' }}>{doc.name}</span>
+              {doc.verified && (
+                <span style={{
+                  fontSize: '0.62rem',
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  background: '#f0fdf4',
+                  color: '#16a34a',
+                  fontWeight: 700,
+                  border: '1px solid #bbf7d0'
+                }}>
+                  VERIFIED
+                </span>
+              )}
+            </div>
+            <div style={{ fontSize: '0.74rem', color: '#059669', fontWeight: 600, marginTop: '2px' }}>
+              {doc.specialty}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'clinicName',
+      title: 'Clinic & Territory',
+      width: '24%',
+      sortable: true,
+      render: (doc) => (
+        <div>
+          <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.84rem' }}>{doc.clinicName}</div>
+          <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
+            {doc.city}, {doc.country} · Lic: <span style={{ fontFamily: 'monospace', color: '#475569' }}>{doc.license}</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'slug',
+      title: 'Public Portal Endpoint',
+      width: '20%',
+      render: (doc) => (
+        <div>
+          <div style={{ fontSize: '0.76rem', fontFamily: 'monospace', color: '#0284c7', background: '#f8fafc', padding: '3px 8px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
+            <span>/dr/{doc.slug}</span>
+          </div>
+          <div>
+            <CopyableId value={`${typeof window !== 'undefined' ? window.location.origin : ''}/dr/${doc.slug}`} label="Copy link" />
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'activity',
+      title: 'Activity',
+      width: '12%',
+      sortable: true,
+      render: (doc) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
+            {doc.activePrescriptionsCount} Prescriptions
+          </span>
+          <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+            {doc.patientsCount} Active Patients
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      title: 'Status',
+      width: '8%',
+      render: () => <StatusBadge status="active" />
+    },
+    {
+      key: 'actions',
+      title: 'Actions',
+      width: '140px',
+      render: (doc) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              openDrawer(doc, 'doctor');
+            }}
+            style={{
+              padding: '6px 8px',
+              borderRadius: '6px',
+              background: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              color: '#334155',
+              fontSize: '0.74rem',
+              fontWeight: 650,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+            title="Inspect traceability drawer"
+          >
+            <Eye size={13} />
+            <span>Detail</span>
+          </button>
+
+          <Link
+            href={`/dr/${doc.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              padding: '6px 10px',
+              borderRadius: '6px',
+              background: '#059669',
+              color: '#ffffff',
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              boxShadow: '0 1px 2px rgba(5, 150, 105, 0.2)'
+            }}
+            title="Open doctor portal in new tab"
+          >
+            <span>Open</span>
+            <ExternalLink size={12} />
+          </Link>
+        </div>
+      )
+    }
+  ], []);
 
   // ── 1. PANTALLA PÚBLICA (Public Views Catalog) ─────────────────────────────
   const publicScreens = useMemo(() => [
@@ -742,20 +902,6 @@ export default function AdminToolsTab() {
     }
   };
 
-  const handlePurgeAllCaches = async () => {
-    triggerHaptic('impact');
-    setIsClearingCache(true);
-    try {
-      purgeAMCache();
-      await new Promise(r => setTimeout(r, 400));
-      toast.success('Todas las cachés de memoria y localStorage purgadas ✓');
-    } catch {
-      toast.error('Error al purgar cachés');
-    } finally {
-      setIsClearingCache(false);
-    }
-  };
-
   const openDrawer = (item, type) => {
     triggerHaptic('selection');
     setDrawerItem(item);
@@ -763,9 +909,9 @@ export default function AdminToolsTab() {
   };
 
   return (
-    <div style={{ padding: '1.5rem 2rem 5rem', maxWidth: '1440px', margin: '0 auto', color: '#0f172a' }}>
+    <div style={{ padding: '1.25rem 1.5rem 5rem', maxWidth: '1440px', margin: '0 auto', color: '#0f172a' }}>
       
-      {/* ── Page Header (Regla Golden #9) ── */}
+      {/* ── Page Header (Golden Rule #9) ── */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.25rem' }}>
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#eff6ff', color: '#0284c7', padding: '4px 10px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
@@ -776,33 +922,8 @@ export default function AdminToolsTab() {
             Account Manager Multi-Portal Hub
           </h1>
           <p style={{ fontSize: '0.86rem', color: '#64748b', margin: '4px 0 0 0' }}>
-            Consola para Account Managers: selecciona y abre con 1 clic la <strong>Pantalla Pública</strong>, portales de <strong>Doctores</strong>, dossiers de <strong>Pacientes</strong> y catálogo de <strong>Productos</strong> sin necesidad de contraseñas.
+            Single-click console for Account Managers: inspect and open <strong>Public Screens</strong>, verified <strong>Doctor Portals</strong>, <strong>Patient Dossiers</strong>, and <strong>Product Monographs</strong> with zero credential barriers.
           </p>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
-            type="button"
-            onClick={handlePurgeAllCaches}
-            disabled={isClearingCache}
-            style={{
-              padding: '8px 14px',
-              borderRadius: '8px',
-              background: '#ffffff',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              fontSize: '0.78rem',
-              fontWeight: 650,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-            }}
-          >
-            <RefreshCw size={14} className={isClearingCache ? 'animate-spin' : ''} />
-            <span>{isClearingCache ? 'Purgando...' : 'Purgar Caché'}</span>
-          </button>
         </div>
       </div>
 
@@ -826,509 +947,585 @@ export default function AdminToolsTab() {
           </div>
           <div>
             <div style={{ fontSize: '0.88rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>Modo Account Manager Activo · Acceso Directo Sin Contraseña</span>
-              <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '999px', background: '#10b981', color: '#ffffff', fontWeight: 800 }}>SIN LOGIN</span>
+              <span>Account Manager Mode Active · Instant Credential-Free Access</span>
+              <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '999px', background: '#10b981', color: '#ffffff', fontWeight: 800 }}>NO LOGIN REQUIRED</span>
             </div>
             <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
-              Como Account Manager puedes auditar y abrir en tiempo real la experiencia del paciente, médico tratante, laboratorio o catálogo público con 1 solo clic.
+              Audit and launch real-time clinical experiences for patients, attending physicians, compounding labs, and public monographs with 1 single click.
             </div>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '6px' }}>
-          <span style={{ fontSize: '0.74rem', background: 'rgba(255,255,255,0.08)', padding: '4px 10px', borderRadius: '6px', color: '#cbd5e1' }}>GCC: Qatar 🇶🇦 · EAU 🇦🇪</span>
-          <span style={{ fontSize: '0.74rem', background: 'rgba(255,255,255,0.08)', padding: '4px 10px', borderRadius: '6px', color: '#cbd5e1' }}>EU: España 🇪🇸 · UK 🇬🇧</span>
+          <span style={{ fontSize: '0.74rem', background: 'rgba(255,255,255,0.08)', padding: '4px 10px', borderRadius: '6px', color: '#cbd5e1' }}>GCC: Qatar 🇶🇦 · UAE 🇦🇪</span>
+          <span style={{ fontSize: '0.74rem', background: 'rgba(255,255,255,0.08)', padding: '4px 10px', borderRadius: '6px', color: '#cbd5e1' }}>EU: Spain 🇪🇸 · UK 🇬🇧</span>
         </div>
       </div>
 
-      {/* ── 4 Google Cloud KPIs (Regla Golden #22) ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '1rem',
-        marginBottom: '1.5rem'
-      }}>
-        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Pantalla Pública</span>
-            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Globe size={14} />
-            </div>
+      {/* ── Responsive Google Cloud Layout: Sidebar + Main Content ── */}
+      <style jsx>{`
+        .am-hub-layout {
+          display: flex;
+          gap: 1.5rem;
+          align-items: flex-start;
+        }
+        .am-hub-sidebar {
+          width: 250px;
+          flex-shrink: 0;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 0.85rem 0.65rem;
+          position: sticky;
+          top: 1rem;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .am-sidebar-header {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          padding: 0.25rem 0.5rem 0.65rem;
+          border-bottom: 1px solid #f1f5f9;
+          margin-bottom: 0.5rem;
+        }
+        .am-sidebar-nav {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .am-nav-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
+          padding: 9px 12px;
+          border-radius: 8px;
+          border: 1px solid transparent;
+          background: transparent;
+          color: #475569;
+          font-size: 0.82rem;
+          font-weight: 650;
+          cursor: pointer;
+          text-align: left;
+          transition: all 0.15s ease;
+        }
+        .am-nav-item:hover {
+          background: #f8fafc;
+          color: #0f172a;
+        }
+        .am-nav-item.active {
+          background: #eff6ff;
+          border-color: #bfdbfe;
+          color: #0284c7;
+          font-weight: 700;
+        }
+        .am-nav-label {
+          flex: 1;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .am-nav-badge {
+          font-size: 0.7rem;
+          padding: 2px 7px;
+          border-radius: 999px;
+          background: #f1f5f9;
+          color: #64748b;
+          font-weight: 700;
+        }
+        .am-nav-item.active .am-nav-badge {
+          background: #0284c7;
+          color: #ffffff;
+        }
+        .am-hub-content {
+          flex: 1;
+          min-width: 0;
+        }
+        @media (max-width: 899px) {
+          .am-hub-layout {
+            flex-direction: column;
+            gap: 1rem;
+          }
+          .am-hub-sidebar {
+            width: 100%;
+            position: static;
+            padding: 0.5rem;
+            border-radius: 8px;
+          }
+          .am-sidebar-nav {
+            flex-direction: row;
+            overflow-x: auto;
+            gap: 6px;
+            padding-bottom: 4px;
+          }
+          .am-nav-item {
+            width: auto;
+            flex-shrink: 0;
+            padding: 7px 12px;
+          }
+        }
+      `}</style>
+
+      <div className="am-hub-layout">
+        {/* ── Left Sidebar (Google Cloud Style) ── */}
+        <aside className="am-hub-sidebar">
+          <div className="am-sidebar-header">
+            <Sliders size={13} />
+            <span>Navigation Hub</span>
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{publicScreens.length}</div>
-          <div style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600, marginTop: '4px' }}>Portales y Vistas Públicas</div>
-        </div>
-
-        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Médicos Verificados</span>
-            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Stethoscope size={14} />
-            </div>
-          </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{doctorsList.length}</div>
-          <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600, marginTop: '4px' }}>Portales /dr/[slug] Activos</div>
-        </div>
-
-        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Dossiers de Pacientes</span>
-            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <User size={14} />
-            </div>
-          </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{patientsList.length}</div>
-          <div style={{ fontSize: '0.72rem', color: '#7c3aed', fontWeight: 600, marginTop: '4px' }}>Recetas /rx/[code] & Lab</div>
-        </div>
-
-        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Péptidos & Fórmulas</span>
-            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fffbeb', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <FlaskConical size={14} />
-            </div>
-          </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{productsList.length}+</div>
-          <div style={{ fontSize: '0.72rem', color: '#d97706', fontWeight: 600, marginTop: '4px' }}>Monografías /p/[slug] con HPLC</div>
-        </div>
-      </div>
-
-      {/* ── 4-Mode Selector (Golden UX Requirement) ── */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        gap: '8px',
-        borderBottom: '2px solid #e2e8f0',
-        paddingBottom: '0.75rem',
-        marginBottom: '1.5rem'
-      }}>
-        <button
-          type="button"
-          onClick={() => { triggerHaptic('selection'); setActiveView('public'); }}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            fontSize: '0.86rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            border: activeView === 'public' ? '1px solid #0284c7' : '1px solid transparent',
-            background: activeView === 'public' ? '#eff6ff' : '#ffffff',
-            color: activeView === 'public' ? '#0284c7' : '#475569',
-            boxShadow: activeView === 'public' ? '0 1px 3px rgba(2,132,199,0.1)' : 'none'
-          }}
-        >
-          <Globe size={16} />
-          <span>1. Pantalla Pública</span>
-          <span style={{ fontSize: '0.72rem', background: activeView === 'public' ? '#0284c7' : '#e2e8f0', color: activeView === 'public' ? '#fff' : '#64748b', padding: '2px 6px', borderRadius: '999px' }}>{publicScreens.length}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => { triggerHaptic('selection'); setActiveView('doctors'); }}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            fontSize: '0.86rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            border: activeView === 'doctors' ? '1px solid #059669' : '1px solid transparent',
-            background: activeView === 'doctors' ? '#ecfdf5' : '#ffffff',
-            color: activeView === 'doctors' ? '#059669' : '#475569',
-            boxShadow: activeView === 'doctors' ? '0 1px 3px rgba(5,150,105,0.1)' : 'none'
-          }}
-        >
-          <Stethoscope size={16} />
-          <span>2. Pantalla de Doctores</span>
-          <span style={{ fontSize: '0.72rem', background: activeView === 'doctors' ? '#059669' : '#e2e8f0', color: activeView === 'doctors' ? '#fff' : '#64748b', padding: '2px 6px', borderRadius: '999px' }}>{doctorsList.length}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => { triggerHaptic('selection'); setActiveView('patients'); }}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            fontSize: '0.86rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            border: activeView === 'patients' ? '1px solid #7c3aed' : '1px solid transparent',
-            background: activeView === 'patients' ? '#f5f3ff' : '#ffffff',
-            color: activeView === 'patients' ? '#7c3aed' : '#475569',
-            boxShadow: activeView === 'patients' ? '0 1px 3px rgba(124,58,237,0.1)' : 'none'
-          }}
-        >
-          <User size={16} />
-          <span>3. Pantalla de Pacientes</span>
-          <span style={{ fontSize: '0.72rem', background: activeView === 'patients' ? '#7c3aed' : '#e2e8f0', color: activeView === 'patients' ? '#fff' : '#64748b', padding: '2px 6px', borderRadius: '999px' }}>{patientsList.length}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => { triggerHaptic('selection'); setActiveView('products'); }}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            fontSize: '0.86rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            border: activeView === 'products' ? '1px solid #d97706' : '1px solid transparent',
-            background: activeView === 'products' ? '#fffbeb' : '#ffffff',
-            color: activeView === 'products' ? '#d97706' : '#475569',
-            boxShadow: activeView === 'products' ? '0 1px 3px rgba(217,119,6,0.1)' : 'none'
-          }}
-        >
-          <FlaskConical size={16} />
-          <span>4. Pantalla de Productos</span>
-          <span style={{ fontSize: '0.72rem', background: activeView === 'products' ? '#d97706' : '#e2e8f0', color: activeView === 'products' ? '#fff' : '#64748b', padding: '2px 6px', borderRadius: '999px' }}>{productsList.length}</span>
-        </button>
-
-        <div style={{ marginLeft: 'auto' }}>
-          <button
-            type="button"
-            onClick={() => { triggerHaptic('selection'); setActiveView('ops'); }}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '6px',
-              fontSize: '0.76rem',
-              fontWeight: 650,
-              cursor: 'pointer',
-              border: '1px solid #cbd5e1',
-              background: activeView === 'ops' ? '#0f172a' : '#ffffff',
-              color: activeView === 'ops' ? '#ffffff' : '#64748b'
-            }}
-          >
-            Aduanas & Etiquetas
-          </button>
-        </div>
-      </div>
-
-      {/* ── Search Bar (Regla Golden #7) ── */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div style={{ flex: 1, minWidth: '280px', position: 'relative' }}>
-          <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={
-              activeView === 'public' ? 'Filtrar pantallas públicas...' :
-              activeView === 'doctors' ? 'Buscar doctor por nombre, clínica, especialidad, licencia...' :
-              activeView === 'patients' ? 'Buscar paciente por nombre, BOX code, RX code o doctor...' :
-              'Buscar producto por nombre, concentración, lote, categoría...'
-            }
-            style={{
-              width: '100%',
-              padding: '9px 12px 9px 36px',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              background: '#ffffff',
-              fontSize: '0.85rem',
-              color: '#0f172a',
-              outline: 'none',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-            }}
-          />
-          {searchQuery && (
+          <nav className="am-sidebar-nav">
             <button
-              onClick={() => setSearchQuery('')}
-              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
+              type="button"
+              className={`am-nav-item ${activeView === 'overview' ? 'active' : ''}`}
+              onClick={() => { triggerHaptic('selection'); setActiveView('overview'); }}
             >
-              ×
+              <LayoutDashboard size={15} />
+              <span className="am-nav-label">1. Overview & KPIs</span>
+              <span className="am-nav-badge">GCP</span>
             </button>
-          )}
-        </div>
 
-        {(activeView === 'doctors' || activeView === 'patients') && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>Territorio:</span>
-            {[
-              { code: 'all', label: 'Todos' },
-              { code: 'QA', label: 'Qatar 🇶🇦' },
-              { code: 'AE', label: 'EAU 🇦🇪' },
-              { code: 'ES', label: 'España 🇪🇸' },
-              { code: 'GB', label: 'UK 🇬🇧' }
-            ].map(c => (
-              <button
-                key={c.code}
-                onClick={() => setCountryFilter(c.code)}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  fontSize: '0.74rem',
-                  fontWeight: 650,
-                  cursor: 'pointer',
-                  border: countryFilter === c.code ? '1px solid #0284c7' : '1px solid #e2e8f0',
-                  background: countryFilter === c.code ? '#eff6ff' : '#ffffff',
-                  color: countryFilter === c.code ? '#0284c7' : '#64748b'
-                }}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+            <button
+              type="button"
+              className={`am-nav-item ${activeView === 'doctors' ? 'active' : ''}`}
+              onClick={() => { triggerHaptic('selection'); setActiveView('doctors'); }}
+            >
+              <Stethoscope size={15} />
+              <span className="am-nav-label">2. Doctors Directory</span>
+              <span className="am-nav-badge">{doctorsList.length}</span>
+            </button>
 
-      {/* ───────────────────────────────────────────────────────────────────────────
-          VIEW 1: PANTALLA PÚBLICA (Public Views)
-      ─────────────────────────────────────────────────────────────────────────── */}
-      {activeView === 'public' && (
-        <div>
-          <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 650, marginBottom: '0.85rem' }}>
-            VISTAS PÚBLICAS Y PORTALES DISPONIBLES ({filteredPublic.length} pantallas)
-          </div>
+            <button
+              type="button"
+              className={`am-nav-item ${activeView === 'patients' ? 'active' : ''}`}
+              onClick={() => { triggerHaptic('selection'); setActiveView('patients'); }}
+            >
+              <User size={15} />
+              <span className="am-nav-label">3. Patient Dossiers</span>
+              <span className="am-nav-badge">{patientsList.length}</span>
+            </button>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
-            {filteredPublic.map(screen => {
-              const IconComp = screen.icon;
-              return (
+            <button
+              type="button"
+              className={`am-nav-item ${activeView === 'products' ? 'active' : ''}`}
+              onClick={() => { triggerHaptic('selection'); setActiveView('products'); }}
+            >
+              <FlaskConical size={15} />
+              <span className="am-nav-label">4. Product Catalog</span>
+              <span className="am-nav-badge">{productsList.length}+</span>
+            </button>
+
+            <button
+              type="button"
+              className={`am-nav-item ${activeView === 'public' ? 'active' : ''}`}
+              onClick={() => { triggerHaptic('selection'); setActiveView('public'); }}
+            >
+              <Globe size={15} />
+              <span className="am-nav-label">5. Public Portals</span>
+              <span className="am-nav-badge">{publicScreens.length}</span>
+            </button>
+
+            <a
+              href="/labels"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="am-nav-item"
+              onClick={() => triggerHaptic('selection')}
+              style={{ textDecoration: 'none' }}
+              title="Open Compounding Label Studio in a new tab"
+            >
+              <Tag size={15} />
+              <span className="am-nav-label">6. Labels Studio</span>
+              <ExternalLink size={12} style={{ color: '#94a3b8', marginLeft: 'auto' }} />
+            </a>
+          </nav>
+        </aside>
+
+        {/* ── Main Work Area ── */}
+        <main className="am-hub-content">
+          
+          {/* ───────────────────────────────────────────────────────────────────────────
+              VIEW 0: OVERVIEW & KPIS (Google Cloud Rule #22)
+          ─────────────────────────────────────────────────────────────────────────── */}
+          {activeView === 'overview' && (
+            <div>
+              {/* 4 Google Cloud KPIs */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                gap: '1rem',
+                marginBottom: '1.5rem'
+              }}>
                 <div
-                  key={screen.id}
-                  style={{
-                    background: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '12px',
-                    padding: '1.25rem',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between'
-                  }}
+                  onClick={() => setActiveView('public')}
+                  style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'all 0.15s ease' }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#0284c7'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
                 >
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                      <div style={{ width: 34, height: 34, borderRadius: '8px', background: screen.bg, color: screen.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <IconComp size={18} />
-                      </div>
-                      <span style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 700 }}>
-                        {screen.badge}
-                      </span>
-                    </div>
-
-                    <h3 style={{ fontSize: '0.98rem', fontWeight: 700, margin: '0 0 6px', color: '#0f172a' }}>
-                      {screen.title}
-                    </h3>
-                    <p style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 12px' }}>
-                      {screen.desc}
-                    </p>
-                    <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#0284c7', background: '#f8fafc', padding: '4px 8px', borderRadius: '6px', marginBottom: '12px' }}>
-                      {screen.path}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Public Portals</span>
+                    <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Globe size={14} />
                     </div>
                   </div>
-
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                    <Link
-                      href={screen.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        borderRadius: '8px',
-                        background: '#0284c7',
-                        color: '#ffffff',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        textAlign: 'center',
-                        textDecoration: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      <span>Abrir Pantalla</span>
-                      <ExternalLink size={13} />
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(`${window.location.origin}${screen.path}`, screen.id)}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '8px',
-                        background: '#f8fafc',
-                        border: '1px solid #cbd5e1',
-                        color: '#475569',
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        cursor: 'pointer'
-                      }}
-                      title="Copiar URL completa"
-                    >
-                      {copiedId === screen.id ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
-                    </button>
-                  </div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{publicScreens.length}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600, marginTop: '4px' }}>Portals & Public Views</div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
-      {/* ───────────────────────────────────────────────────────────────────────────
-          VIEW 2: PANTALLA DE DOCTORES (Doctor Portals & Impersonation)
-      ─────────────────────────────────────────────────────────────────────────── */}
-      {activeView === 'doctors' && (
-        <div>
-          <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 650, marginBottom: '0.85rem' }}>
-            MÉDICOS DE LA RED ATLAS ({filteredDoctors.length} profesionales registrados)
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1rem' }}>
-            {filteredDoctors.map(doc => (
-              <div
-                key={doc.id}
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '12px',
-                  padding: '1.25rem',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '1.1rem' }}>{doc.countryFlag}</span>
-                        <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
-                          {doc.name}
-                        </h3>
-                      </div>
-                      <div style={{ fontSize: '0.76rem', color: '#059669', fontWeight: 650, marginTop: '2px' }}>
-                        {doc.specialty}
-                      </div>
+                <div
+                  onClick={() => setActiveView('doctors')}
+                  style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'all 0.15s ease' }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#059669'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Verified Doctors</span>
+                    <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Stethoscope size={14} />
                     </div>
+                  </div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{doctorsList.length}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600, marginTop: '4px' }}>Active /dr/[slug] Portals</div>
+                </div>
 
-                    <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#f0fdf4', color: '#16a34a', fontWeight: 700, border: '1px solid #bbf7d0' }}>
-                      VERIFICADO
+                <div
+                  onClick={() => setActiveView('patients')}
+                  style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'all 0.15s ease' }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#7c3aed'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Patient Dossiers</span>
+                    <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <User size={14} />
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{patientsList.length}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#7c3aed', fontWeight: 600, marginTop: '4px' }}>Prescriptions /rx & Lab</div>
+                </div>
+
+                <div
+                  onClick={() => setActiveView('products')}
+                  style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'all 0.15s ease' }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#d97706'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Peptides & Formulas</span>
+                    <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fffbeb', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FlaskConical size={14} />
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{productsList.length}+</div>
+                  <div style={{ fontSize: '0.72rem', color: '#d97706', fontWeight: 600, marginTop: '4px' }}>Monographs with HPLC</div>
+                </div>
+              </div>
+
+              {/* Executive Launchpad: Quick Direct Jump */}
+              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+                  Quick Directory Launchpad
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '1rem' }}>
+                  Select an operational workspace to explore records, audit clinical workflows, or generate prescription orders:
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.85rem' }}>
+                  <div
+                    onClick={() => setActiveView('doctors')}
+                    style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', background: '#f8fafc', cursor: 'pointer', transition: 'all 0.15s ease' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#059669'; e.currentTarget.style.background = '#ecfdf5'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <Stethoscope size={16} color="#059669" />
+                      <strong style={{ fontSize: '0.88rem', color: '#0f172a' }}>Doctors Table</strong>
+                    </div>
+                    <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>
+                      Verified physician directory formatted as an editable Google Cloud table with 1-click portal open.
+                    </p>
+                    <span style={{ fontSize: '0.74rem', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      Open Table →
                     </span>
                   </div>
 
-                  <div style={{ fontSize: '0.8rem', color: '#475569', marginBottom: '4px' }}>
-                    <strong>Clínica:</strong> {doc.clinicName}
-                  </div>
-                  <div style={{ fontSize: '0.76rem', color: '#64748b', marginBottom: '8px' }}>
-                    {doc.city}, {doc.country} · Licencia: <code>{doc.license}</code>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '10px', fontSize: '0.74rem', color: '#64748b', background: '#f8fafc', padding: '6px 10px', borderRadius: '6px', marginBottom: '12px' }}>
-                    <div><strong>{doc.activePrescriptionsCount}</strong> Recetas emitidas</div>
-                    <div>•</div>
-                    <div><strong>{doc.patientsCount}</strong> Pacientes activos</div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <button
-                      type="button"
-                      onClick={() => openDrawer(doc, 'doctor')}
-                      style={{
-                        padding: '7px 10px',
-                        borderRadius: '6px',
-                        background: '#f8fafc',
-                        border: '1px solid #cbd5e1',
-                        color: '#334155',
-                        fontSize: '0.76rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}
-                      title="Abrir Split Drawer de Trazabilidad"
-                    >
-                      <Eye size={13} />
-                      <span>Detalle</span>
-                    </button>
-
-                    <Link
-                      href={`/dr/${doc.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        flex: 1,
-                        padding: '7px 12px',
-                        borderRadius: '6px',
-                        background: '#059669',
-                        color: '#ffffff',
-                        fontSize: '0.78rem',
-                        fontWeight: 700,
-                        textAlign: 'center',
-                        textDecoration: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      <span>Abrir Portal (/dr)</span>
-                      <ExternalLink size={13} />
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(`${window.location.origin}/dr/${doc.slug}`, doc.id)}
-                      style={{
-                        padding: '7px 10px',
-                        borderRadius: '6px',
-                        background: '#f8fafc',
-                        border: '1px solid #cbd5e1',
-                        color: '#475569',
-                        cursor: 'pointer'
-                      }}
-                      title="Copiar URL del Portal Doctor"
-                    >
-                      {copiedId === doc.id ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
-                    </button>
+                  <div
+                    onClick={() => setActiveView('patients')}
+                    style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', background: '#f8fafc', cursor: 'pointer', transition: 'all 0.15s ease' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#7c3aed'; e.currentTarget.style.background = '#f5f3ff'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <User size={16} color="#7c3aed" />
+                      <strong style={{ fontSize: '0.88rem', color: '#0f172a' }}>Patient Dossiers</strong>
+                    </div>
+                    <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>
+                      Active patients with Fagron TrichoTest DNA kits, prescription numbers, and lab certificates.
+                    </p>
+                    <span style={{ fontSize: '0.74rem', color: '#7c3aed', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      Explore Patients →
+                    </span>
                   </div>
 
-                  <Link
-                    href={`/doctor/prescriptions?impersonate=doctor&doc=${doc.slug}`}
+                  <div
+                    onClick={() => setActiveView('products')}
+                    style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', background: '#f8fafc', cursor: 'pointer', transition: 'all 0.15s ease' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#d97706'; e.currentTarget.style.background = '#fffbeb'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <FlaskConical size={16} color="#d97706" />
+                      <strong style={{ fontSize: '0.88rem', color: '#0f172a' }}>Product Catalog</strong>
+                    </div>
+                    <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>
+                      HPLC-tested peptides, bulk APIs, compounding bases, and vial label specifications.
+                    </p>
+                    <span style={{ fontSize: '0.74rem', color: '#d97706', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      Browse Catalog →
+                    </span>
+                  </div>
+
+                  <div
+                    onClick={() => setActiveView('public')}
+                    style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', background: '#f8fafc', cursor: 'pointer', transition: 'all 0.15s ease' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#0284c7'; e.currentTarget.style.background = '#eff6ff'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <Globe size={16} color="#0284c7" />
+                      <strong style={{ fontSize: '0.88rem', color: '#0f172a' }}>Public Portals</strong>
+                    </div>
+                    <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>
+                      Direct public entry points to the storefront, clinical protocols, and batch verifiers.
+                    </p>
+                    <span style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      View Links →
+                    </span>
+                  </div>
+
+                  <a
+                    href="/labels"
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: '6px',
-                      background: '#f1f5f9',
-                      color: '#334155',
-                      fontSize: '0.74rem',
-                      fontWeight: 650,
-                      textAlign: 'center',
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '4px'
-                    }}
+                    style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', background: '#f8fafc', textDecoration: 'none', display: 'block', transition: 'all 0.15s ease' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#0284c7'; e.currentTarget.style.background = '#f0f9ff'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
                   >
-                    <span>Entrar al Workspace Clínico (/doctor)</span>
-                    <ArrowRight size={12} />
-                  </Link>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Tag size={16} color="#0284c7" />
+                        <strong style={{ fontSize: '0.88rem', color: '#0f172a' }}>Labels Studio</strong>
+                      </div>
+                      <ExternalLink size={14} color="#0284c7" />
+                    </div>
+                    <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>
+                      EU GMP vector label designer, 300 DPI thermal Zebra & A4 sheet printing studio.
+                    </p>
+                    <span style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      Open Labels App ↗
+                    </span>
+                  </a>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            </div>
+          )}
+
+          {/* ── Search & Filter Bar for List Views (Regla Golden #7) ── */}
+          {activeView !== 'overview' && activeView !== 'ops' && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div style={{ flex: 1, minWidth: '280px', position: 'relative' }}>
+                <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={
+                    activeView === 'public' ? 'Filter public portal views...' :
+                    activeView === 'doctors' ? 'Filter doctors by name, clinic, specialty, license...' :
+                    activeView === 'patients' ? 'Filter patients by name, sample code, RX code or doctor...' :
+                    'Filter products by name, concentration, batch, category...'
+                  }
+                  style={{
+                    width: '100%',
+                    padding: '9px 12px 9px 36px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    fontSize: '0.85rem',
+                    color: '#0f172a',
+                    outline: 'none',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+                  }}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              {(activeView === 'doctors' || activeView === 'patients') && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>Territory:</span>
+                  {[
+                    { code: 'all', label: 'All' },
+                    { code: 'QA', label: 'Qatar 🇶🇦' },
+                    { code: 'AE', label: 'UAE 🇦🇪' },
+                    { code: 'ES', label: 'Spain 🇪🇸' },
+                    { code: 'GB', label: 'UK 🇬🇧' }
+                  ].map(c => (
+                    <button
+                      key={c.code}
+                      onClick={() => setCountryFilter(c.code)}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '0.74rem',
+                        fontWeight: 650,
+                        cursor: 'pointer',
+                        border: countryFilter === c.code ? '1px solid #0284c7' : '1px solid #e2e8f0',
+                        background: countryFilter === c.code ? '#eff6ff' : '#ffffff',
+                        color: countryFilter === c.code ? '#0284c7' : '#64748b'
+                      }}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ───────────────────────────────────────────────────────────────────────────
+              VIEW 1: PANTALLA PÚBLICA (Public Views)
+          ─────────────────────────────────────────────────────────────────────────── */}
+          {activeView === 'public' && (
+            <div>
+              <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 650, marginBottom: '0.85rem' }}>
+                AVAILABLE PUBLIC SCREENS & PORTALS ({filteredPublic.length} views)
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
+                {filteredPublic.map(screen => {
+                  const IconComp = screen.icon;
+                  return (
+                    <div
+                      key={screen.id}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        padding: '1.25rem',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                          <div style={{ width: 34, height: 34, borderRadius: '8px', background: screen.bg, color: screen.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <IconComp size={18} />
+                          </div>
+                          <span style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 700 }}>
+                            {screen.badge}
+                          </span>
+                        </div>
+
+                        <h3 style={{ fontSize: '0.98rem', fontWeight: 700, margin: '0 0 6px', color: '#0f172a' }}>
+                          {screen.title}
+                        </h3>
+                        <p style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 12px' }}>
+                          {screen.desc}
+                        </p>
+                        <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#0284c7', background: '#f8fafc', padding: '4px 8px', borderRadius: '6px', marginBottom: '12px' }}>
+                          {screen.path}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                        <Link
+                          href={screen.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            background: '#0284c7',
+                            color: '#ffffff',
+                            fontSize: '0.8rem',
+                            fontWeight: 700,
+                            textAlign: 'center',
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <span>Open View</span>
+                          <ExternalLink size={13} />
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(`${typeof window !== 'undefined' ? window.location.origin : ''}${screen.path}`, screen.id)}
+                          style={{
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            background: '#f8fafc',
+                            border: '1px solid #cbd5e1',
+                            color: '#475569',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                          }}
+                          title="Copy Full URL"
+                        >
+                          {copiedId === screen.id ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ───────────────────────────────────────────────────────────────────────────
+              VIEW 2: DOCTORS DIRECTORY (DataTable Exclusive - Golden Rule #3)
+          ─────────────────────────────────────────────────────────────────────────── */}
+          {activeView === 'doctors' && (
+            <div style={{ width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 650 }}>
+                  ATLAS MEDICAL NETWORK DIRECTORY ({filteredDoctors.length} registered practitioners)
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#059669', background: '#ecfdf5', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, border: '1px solid #a7f3d0' }}>
+                  ● 100% Direct Impersonation Available (No Credentials Required)
+                </div>
+              </div>
+
+              <DataTable
+                columns={doctorColumns}
+                data={filteredDoctors}
+                keyField="id"
+                pagination={true}
+                initialRowsPerPage={15}
+                mobileView="cards"
+                emptyTitle="No doctors found"
+                emptyDescription="No physicians match the selected search query or territory filter."
+              />
+            </div>
+          )}
 
       {/* ───────────────────────────────────────────────────────────────────────────
           VIEW 3: PANTALLA DE PACIENTES (Patient Dossiers & Lab Results)
@@ -1687,6 +1884,9 @@ export default function AdminToolsTab() {
           </div>
         </div>
       )}
+
+        </main>
+      </div>
 
       {/* ── GCP Contextual Split Drawer (Phases 3, 5 & 6) ── */}
       {drawerItem && (

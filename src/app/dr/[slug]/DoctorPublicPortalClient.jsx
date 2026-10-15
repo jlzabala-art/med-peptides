@@ -121,6 +121,108 @@ export function enrichApiClinicalDetails(api) {
   };
 }
 
+/**
+ * Accurately resolve pharmaceutical vehicle, excipient carrier, or diluent by clinical modality
+ * Prevents displaying misleading "Compounding Vehicle Base" for peptides, sprays, or oral capsules.
+ */
+export function resolveClinicalVehicle(rxObj = {}, items = [], explicitVehicle = null) {
+  const explicitName = typeof explicitVehicle === 'string' ? explicitVehicle : explicitVehicle?.name;
+  if (explicitName && !explicitName.toLowerCase().includes('standard compounding vehicle') && !explicitName.toLowerCase().includes('compounding galenic carrier')) {
+    const isOil = explicitName.toLowerCase().includes('trichooil') || explicitName.toLowerCase().includes('oil');
+    const isSol = explicitName.toLowerCase().includes('trichosol');
+    return {
+      label: isOil || isSol ? 'Compounding Vehicle Base:' : 'Pharmaceutical Base / Carrier:',
+      value: explicitName,
+      badge: 'EU GMP Validated Pharmacopeia Base'
+    };
+  }
+
+  const itemsArr = Array.isArray(items) ? items : [];
+  const combined = [
+    rxObj.treatmentTitle,
+    rxObj.title,
+    rxObj.name,
+    rxObj.dispensingForm,
+    rxObj.format,
+    rxObj.dosageForm,
+    rxObj.route,
+    ...itemsArr.map(i => i.name || i.drugName || i.activeIngredient || '')
+  ].filter(Boolean).join(' ').toLowerCase();
+
+  // 1. Intranasal peptide solutions (Selank, Semax, Oxytocin, Desmopressin)
+  if (combined.includes('nasal') || combined.includes('spray') || combined.includes('intranasal') || combined.includes('selank') || combined.includes('semax')) {
+    return {
+      label: 'Intranasal Delivery Matrix:',
+      value: 'Sterile Buffered Isotonic Saline Solution (0.9% NaCl USP)',
+      badge: 'Sterile Osmotically Balanced Nasal Matrix'
+    };
+  }
+
+  // 2. Oral peptide / nutraceutical capsules (BPC-157 Oral, KPV, Spermidine, Mito detox)
+  if (combined.includes('capsule') || combined.includes('cápsula') || combined.includes('oral') || combined.includes('cap') || combined.includes('enteric')) {
+    return {
+      label: 'Delivery Shell & Excipient Matrix:',
+      value: 'Acid-Resistant Enteric Capsule Shell (Hypoallergenic Plant Cellulose Matrix)',
+      badge: 'Gastric Acid-Resistant (DRcaps®)'
+    };
+  }
+
+  // 3. Injectable peptide vials (SubQ / IM, e.g. Retatrutide, Tirzepatide, BPC-157, TB-500, Epithalon)
+  if (combined.includes('vial') || combined.includes('subq') || combined.includes('subcutaneous') || combined.includes('inject') || combined.includes('lyophilized') || combined.includes('retatrutide') || combined.includes('tirzepatide') || combined.includes('semaglutide') || combined.includes('bpc-157') || combined.includes('tb-500')) {
+    return {
+      label: 'Reconstitution Diluent & Solvent:',
+      value: 'Bacteriostatic Water for Injection USP (0.9% Benzyl Alcohol)',
+      badge: 'Sterile Multidose Diluent'
+    };
+  }
+
+  // 4. Sublingual drops / troches
+  if (combined.includes('sublingual') || combined.includes('troche') || combined.includes('dropper') || combined.includes('drops')) {
+    return {
+      label: 'Sublingual Mucosal Matrix:',
+      value: 'Pharmaceutical-Grade Polyethylene Glycol (PEG) Troche / Glycerol Base',
+      badge: 'Rapid Transmucosal Absorption'
+    };
+  }
+
+  // 5. Transdermal BHRT (Bioidentical Hormones: Estradiol, Progesterone, Testosterone in Pentravan)
+  if (combined.includes('pentravan') || combined.includes('transdermal') || combined.includes('estradiol') || combined.includes('progesterone') || combined.includes('testosterone') || combined.includes('bhrt')) {
+    return {
+      label: 'Transdermal Compounding Vehicle:',
+      value: 'Pentravan® Patented Transdermal Liposomal Cream Base (Fagron)',
+      badge: 'Clinically Validated Liposomal Matrix'
+    };
+  }
+
+  // 6. Topical Scalp / Trichology (TrichoSol, TrichoOil, Minoxidil, Finasteride, Scalp)
+  if (combined.includes('tricho') || combined.includes('scalp') || combined.includes('topical') || combined.includes('alopecia') || combined.includes('minoxidil') || combined.includes('finasteride') || combined.includes('dutasteride') || combined.includes('latanoprost')) {
+    const isOil = combined.includes('oil') || combined.includes('aceite') || combined.includes('trichooil');
+    return {
+      label: 'Compounding Vehicle Base:',
+      value: isOil 
+        ? 'TrichoOil™ Natural Lipidic Scalp Carrier (q.s.)' 
+        : 'TrichoSol™ Alcohol-Free Liposomal Hydrophilic Vehicle (q.s.)',
+      badge: 'EU GMP Validated Pharmacopeia Base'
+    };
+  }
+
+  // 7. General Peptide / Bioregulator fallback
+  if (combined.includes('peptide') || combined.includes('bioregulator')) {
+    return {
+      label: 'Pharmaceutical Formulation Base:',
+      value: 'Sterile Isotonic Pharmacopeial Diluent Matrix',
+      badge: 'EU GMP Grade Sterile Solution'
+    };
+  }
+
+  // 8. General Compounding fallback
+  return {
+    label: 'Compounding Vehicle / Base:',
+    value: 'Pharmacopeial Compounding Vehicle Base (GMP Validated)',
+    badge: 'EU GMP Validated Pharmacopeia Base'
+  };
+}
+
 export function resolvePrescriptionParts(rx) {
   if (!rx) return [];
 
@@ -129,24 +231,28 @@ export function resolvePrescriptionParts(rx) {
     return rx.parts.map((p, pIdx) => {
       const partNum = p.partNumber || (pIdx + 1);
       const vName = p.vehicle || p.title || '';
+      const resolvedVeh = resolveClinicalVehicle(p, p.apis || [], vName);
       const isOil = String(vName + ' ' + (p.title || '')).toLowerCase().includes('oil') || String(vName).toLowerCase().includes('aceite');
       const isOral = String(vName + ' ' + (p.format || '') + ' ' + (p.title || '')).toLowerCase().includes('oral') || String(vName + ' ' + (p.format || '')).toLowerCase().includes('capsule');
       const isFoam = String(vName + ' ' + (p.title || '')).toLowerCase().includes('foam') || String(vName).toLowerCase().includes('espuma');
+      const isNasal = String(vName + ' ' + (p.format || '') + ' ' + (p.title || '')).toLowerCase().includes('nasal') || String(vName).toLowerCase().includes('spray');
 
-      const badgeText = isOil ? 'SCALP CARE & LIPIDIC OIL' : (isOral ? 'ORAL CAPSULES' : (isFoam ? 'TOPICAL FOAM' : 'TOPICAL SOLUTION'));
-      const accentColor = isOil ? '#0d9488' : (isOral ? '#ea580c' : (isFoam ? '#7c3aed' : '#0284c7'));
-      const accentBg = isOil ? '#f0fdfa' : (isOral ? '#fff7ed' : (isFoam ? '#faf5ff' : '#f0f9ff'));
-      const borderAccent = isOil ? '#99f6e4' : (isOral ? '#fed7aa' : (isFoam ? '#e9d5ff' : '#bae6fd'));
+      const badgeText = isNasal ? 'INTRANASAL SOLUTION' : (isOil ? 'SCALP CARE & LIPIDIC OIL' : (isOral ? 'ORAL CAPSULES' : (isFoam ? 'TOPICAL FOAM' : 'TOPICAL SOLUTION')));
+      const accentColor = isNasal ? '#0284c7' : (isOil ? '#0d9488' : (isOral ? '#ea580c' : (isFoam ? '#7c3aed' : '#003666')));
+      const accentBg = isNasal ? '#f0f9ff' : (isOil ? '#f0fdfa' : (isOral ? '#fff7ed' : (isFoam ? '#faf5ff' : '#f8fafc')));
+      const borderAccent = isNasal ? '#bae6fd' : (isOil ? '#99f6e4' : (isOral ? '#fed7aa' : (isFoam ? '#e9d5ff' : '#cbd5e1')));
 
       return {
         partNumber: partNum,
         totalParts: rx.parts.length,
-        title: p.title || (isOil ? 'Scalp Care & Lipid Protection' : (isOral ? 'Systemic Nutraceutical Support' : 'Topical Compounded Solution')),
+        title: p.title || (isNasal ? 'Intranasal Peptide Therapy' : (isOil ? 'Scalp Care & Lipid Protection' : (isOral ? 'Systemic Support' : 'Compounded Solution'))),
         badge: `PART ${partNum} OF ${rx.parts.length} · ${badgeText}`,
-        volume: p.volume || (isOil ? '30 mL' : (isOral ? '90 Capsules' : '100 mL')),
+        volume: p.volume || (isNasal ? '15 mL' : (isOil ? '30 mL' : (isOral ? '90 Capsules' : '100 mL'))),
         format: p.format || badgeText,
-        vehicle: vName || (isOil ? 'TrichoOil™ Natural Lipidic Carrier (q.s. 30 mL)' : (isOral ? 'Vegetarian HPMC Capsules (90 Caps)' : 'TrichoSol™ Liposomal Hydrophilic Base (q.s. 100 mL)')),
-        schedule: p.posology || p.directions || (isOil ? '1-2 times weekly, massage 3-5 min, leave 10 min before wash.' : 'Apply nightly before bedtime to target scalp area.'),
+        vehicleLabel: resolvedVeh.label,
+        vehicle: resolvedVeh.value,
+        vehicleBadge: resolvedVeh.badge,
+        schedule: p.posology || p.directions || (isOil ? '1-2 times weekly, massage 3-5 min, leave 10 min before wash.' : 'Apply as directed by treating physician.'),
         accentColor,
         accentBg,
         borderAccent,
@@ -275,19 +381,33 @@ export function resolvePrescriptionParts(rx) {
     return i.isVehicleOrBase || i._isVehicleOrBase || n.includes('vehicle') || n.includes('base');
   });
 
+  const activeItems = apisOnly.length > 0 ? apisOnly : rawItems;
+  const resolvedVehicle = resolveClinicalVehicle(rx, activeItems, vehicleOnly);
+
+  // Determine modal accent styling based on clinical presentation
+  const isNasal = (resolvedVehicle.label || '').includes('Nasal') || String(rx.dispensingForm || '').toLowerCase().includes('nasal');
+  const isInjectable = (resolvedVehicle.label || '').includes('Diluent') || String(rx.dispensingForm || '').toLowerCase().includes('vial') || String(rx.route || '').toLowerCase().includes('subq');
+  const isOral = (resolvedVehicle.label || '').includes('Shell') || String(rx.dispensingForm || '').toLowerCase().includes('capsule');
+
+  const accentColor = isNasal ? '#0284c7' : (isInjectable ? '#0f766e' : (isOral ? '#ea580c' : '#003666'));
+  const accentBg = isNasal ? '#f0f9ff' : (isInjectable ? '#f0fdf4' : (isOral ? '#fff7ed' : '#f8fafc'));
+  const borderAccent = isNasal ? '#bae6fd' : (isInjectable ? '#a7f3d0' : (isOral ? '#fed7aa' : '#cbd5e1'));
+
   return [{
     partNumber: 1,
     totalParts: 1,
     title: rx.treatmentTitle || 'Personalized Compounded Formulation',
-    badge: 'SINGLE COMPOUNDED FORMULATION',
-    volume: rx.volume || vehicleOnly?.dose || 'Standard Dispensary Volume',
-    format: rx.dispensingForm || 'Compounded Pharmaceutical Solution',
-    vehicle: vehicleOnly?.name || 'Standard Compounding Vehicle Base',
+    badge: isNasal ? 'INTRANASAL PEPTIDE FORMULATION' : (isInjectable ? 'INJECTABLE PEPTIDE REGIMEN' : (isOral ? 'ORAL PEPTIDE CAPSULES' : 'SINGLE COMPOUNDED FORMULATION')),
+    volume: rx.volume || vehicleOnly?.dose || (isNasal ? '15 mL' : (isOral ? '60 Capsules' : 'Standard Dispensary Volume')),
+    format: rx.dispensingForm || (isNasal ? 'Calibrated Nasal Spray (15 mL)' : (isInjectable ? 'Sterile Lyophilized Vial' : 'Compounded Pharmaceutical Solution')),
+    vehicleLabel: resolvedVehicle.label,
+    vehicle: resolvedVehicle.value,
+    vehicleBadge: resolvedVehicle.badge,
     schedule: posologyText || 'Administer as directed by treating physician.',
-    accentColor: '#003666',
-    accentBg: '#f8fafc',
-    borderAccent: '#cbd5e1',
-    apis: (apisOnly.length > 0 ? apisOnly : rawItems).map(a => enrichApiClinicalDetails(a))
+    accentColor,
+    accentBg,
+    borderAccent,
+    apis: activeItems.map(a => enrichApiClinicalDetails(a))
   }];
 }
 
@@ -4490,7 +4610,7 @@ export default function DoctorPublicPortalClient({
                               }}
                             >
                               <span>
-                                <strong style={{ color: '#334155' }}>Compounding Vehicle / Excipient Carrier:</strong> {part.vehicle}
+                                <strong style={{ color: '#334155' }}>{part.vehicleLabel || 'Pharmaceutical Carrier Base:'}</strong> {part.vehicle}
                               </span>
                               <span style={{ color: '#16a34a', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                 <ShieldCheck size={12} />
@@ -5583,6 +5703,13 @@ export default function DoctorPublicPortalClient({
                                 className="doctor-recommendation-action-btn"
                                 onClick={() => {
                                   triggerHaptic('selection');
+                                  // Clear all prior filters so recommendation cohort is isolated without conflicting filter states
+                                  setQuickRxFilter('all');
+                                  setSearchQuery('');
+                                  setStatusFilter('all');
+                                  setPatientFilter('all');
+                                  setTemporalFilter('all');
+                                  setApiFilter(null);
                                   const matchedRxIds = sol.matchingItems.map(item => item.rx.id || item.rx.code || item.rx.prescriptionNumber);
                                   setRecFilter({ id: sol.id, title: sol.title, rxIds: matchedRxIds });
                                   setActiveAnchor('prescriptions');

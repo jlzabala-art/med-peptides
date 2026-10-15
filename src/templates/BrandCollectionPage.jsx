@@ -42,10 +42,11 @@ const BRAND_CONFIGS = {
       { label: 'Regulatory Compliance', value: 'EU Cosmetics Reg.', sub: 'Dermatologically & Clinically Tested', icon: Award, color: '#16a34a' }
     ],
     categories: [
-      { id: 'all', label: 'All Products' },
+      { id: 'all', label: 'All Formulations (7)' },
+      { id: 'collagen', label: 'Vegan & Native Collagen' },
+      { id: 'diamond', label: 'Blue Diamond Series' },
       { id: 'hair', label: 'Hair Strengthening System' },
-      { id: 'collagen', label: 'Native Collagen' },
-      { id: 'cosmeceutical', label: 'Clinical Cosmeceuticals' }
+      { id: 'hygiene', label: 'Dermal Cleanser & Lip Care' }
     ]
   },
   bloodo: {
@@ -127,6 +128,9 @@ function resolveBrandProductImage(product, brandSlug) {
   const name = (product.name || product.title || '').toLowerCase();
 
   if (brandSlug === 'colway') {
+    if (id.includes('vege') || name.includes('vege') || name.includes('vegan')) return '/images/products/colway/vege-collagen.png';
+    if (id.includes('peeling') || name.includes('peeling')) return '/images/products/colway/blue-diamond-peeling.png';
+    if (id.includes('blue-diamond') || id.includes('diamond') || name.includes('diamond') || name.includes('diament')) return '/images/products/colway/blue-diamond-cream.png';
     if (id.includes('lip') || name.includes('lip') || id.includes('balm') || name.includes('balm') || name.includes('pomadka')) return '/images/products/colway/lip-care.png';
     if (id.includes('wash') || name.includes('wash') || id.includes('gel') || name.includes('gel') || name.includes('zel')) return '/images/products/colway/washing-gel.png';
     if (id.includes('conditioner') || name.includes('conditioner')) return '/images/products/colway/conditioner.png';
@@ -213,6 +217,12 @@ export default function BrandCollectionPage({
       const cat = selectedCategory.toLowerCase();
       list = list.filter(p => {
         const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''}`.toLowerCase();
+        if (brandSlug === 'colway') {
+          if (cat === 'collagen') return str.includes('vege') || str.includes('vegan') || str.includes('collagen') || str.includes('kolagen');
+          if (cat === 'diamond') return str.includes('diamond') || str.includes('diament') || str.includes('peeling');
+          if (cat === 'hair') return str.includes('hair') || str.includes('shampoo') || str.includes('conditioner');
+          if (cat === 'hygiene') return str.includes('wash') || str.includes('lip') || str.includes('cleanser');
+        }
         return str.includes(cat);
       });
     }

@@ -27,7 +27,6 @@ export default function GCPImpersonationDock() {
 
   const [isActive, setIsActive] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [activeMenu, setActiveMenu] = useState(null); // 'doctors' | 'patients' | 'products' | null
 
   // Activate AM session if visiting /account-manager or /tools, or if stored in sessionStorage
   useEffect(() => {
@@ -44,76 +43,38 @@ export default function GCPImpersonationDock() {
     }
   }, [pathname]);
 
-  // Close menus on outside click or navigation
-  useEffect(() => {
-    setActiveMenu(null);
-  }, [pathname]);
-
   if (!isActive) return null;
 
   // Detect current context
-  let currentContext = 'Pantalla Pública';
-  let contextColor = '#38bdf8';
+  let currentContext = 'Public View';
+  let contextColor = '#1a73e8';
   if (pathname?.startsWith('/dr/')) {
     const slug = pathname.replace('/dr/', '').split('/')[0];
-    currentContext = `Portal Médico: Dr. ${slug.replace(/-/g, ' ')}`;
-    contextColor = '#34d399';
+    currentContext = `Doctor Portal: Dr. ${slug.replace(/-/g, ' ')}`;
+    contextColor = '#137333';
   } else if (pathname?.startsWith('/doctor')) {
-    currentContext = 'Workspace Médico';
-    contextColor = '#34d399';
+    currentContext = 'Clinical Workspace';
+    contextColor = '#137333';
   } else if (pathname?.startsWith('/rx/')) {
     const code = pathname.replace('/rx/', '').split('/')[0];
-    currentContext = `Receta Paciente: ${code}`;
-    contextColor = '#a78bfa';
+    currentContext = `Patient Rx: ${code}`;
+    contextColor = '#7c3aed';
   } else if (pathname?.startsWith('/lab/')) {
     const code = pathname.replace('/lab/', '').split('/')[0];
-    currentContext = `Lab Paciente: ${code}`;
-    contextColor = '#a78bfa';
+    currentContext = `Patient Lab: ${code}`;
+    contextColor = '#7c3aed';
   } else if (pathname?.startsWith('/p/')) {
     const slug = pathname.replace('/p/', '').split('/')[0];
-    currentContext = `Monografía: ${slug.toUpperCase()}`;
-    contextColor = '#fbbf24';
+    currentContext = `Monograph: ${slug.toUpperCase()}`;
+    contextColor = '#b06000';
   } else if (pathname?.startsWith('/account-manager') || pathname?.startsWith('/tools')) {
-    currentContext = 'Consola Principal de Account Manager';
-    contextColor = '#38bdf8';
+    currentContext = 'Account Manager Operations Hub';
+    contextColor = '#1a73e8';
   }
 
-  const quickDoctors = [
-    { name: 'Dr. Raffanie Lucenio (Qatar 🇶🇦)', url: '/dr/raffanie-lucenio' },
-    { name: 'Dr. Çağatay Sezgin (Dubai 🇦🇪)', url: '/dr/dr-cagatay-sezgin' },
-    { name: 'Dr. M Jay Alkhatib (YDL Dubai 🇦🇪)', url: '/dr/dr-jay-alkhatib' },
-    { name: 'Dr. Sobia Mirza (MLSC Dubai 🇦🇪)', url: '/dr/dr-sobia-mirza' },
-    { name: 'Dra. Haydee Camacho (Madrid 🇪🇸)', url: '/dr/haydee-camacho' },
-    { name: 'Dr. Carlos Méndez (Barcelona 🇪🇸)', url: '/dr/carlos-mendez' },
-    { name: 'Dr. Frank Silva (London 🇬🇧)', url: '/dr/frank-silva' }
-  ];
-
-  const quickPatients = [
-    { name: 'Turky Al-Shahwani (Qatar 🇶🇦)', url: '/rx/RX-BOX02574AATRI' },
-    { name: 'Aisha Alsulaiti (Qatar 🇶🇦)', url: '/rx/RX-BOX02550AATRI' },
-    { name: 'Maryam Al-Sulaiti (Qatar 🇶🇦)', url: '/rx/RX-BOX02571AATRI' },
-    { name: 'Rashid Malalla (Dubai 🇦🇪)', url: '/rx/RX-BOX03484AATRI' },
-    { name: 'Abdulrahman Fakhro (Qatar 🇶🇦)', url: '/rx/RX-BOX03054AATRI' },
-    { name: 'Mohammed Al-Khulaifi (Qatar 🇶🇦)', url: '/rx/RX-BOX03044AATRI' },
-    { name: 'Moza Almatwi (Qatar 🇶🇦)', url: '/rx/RX-BOX03041AATRI' },
-    { name: 'Salwa Alkubaisi (Qatar 🇶🇦)', url: '/rx/RX-BOX03055AATRI' },
-    { name: 'Saadat Valiyeva (YDL 🇦🇪)', url: '/rx/RX-FAG-YDL-001' }
-  ];
-
-  const quickProducts = [
-    { name: 'Retatrutide 10mg (Triple Agonist)', url: '/p/retatrutide' },
-    { name: 'Tirzepatide 15mg (Dual Agonist)', url: '/p/tirzepatide' },
-    { name: 'Semaglutide 5mg (GLP-1 RA)', url: '/p/semaglutide' },
-    { name: 'BPC-157 & TB-500 Blend (10mg)', url: '/p/bpc-157-tb-500' },
-    { name: 'NAD+ Pure API (1000mg)', url: '/p/nad-plus' },
-    { name: 'GHK-Cu Copper Tripeptide', url: '/p/ghk-cu' },
-    { name: 'Epithalon Tetrapeptide (10mg)', url: '/p/epithalon' },
-    { name: 'Colway Stem Cell Trichology', url: '/p/colway-trichology' }
-  ];
-
-  const handleOpenCommandPalette = () => {
+  const handleOpenSearch = (initialFilter = '') => {
     triggerHaptic('selection');
-    window.dispatchEvent(new CustomEvent('open-gcp-command-palette'));
+    window.dispatchEvent(new CustomEvent('open-gcp-command-palette', { detail: { filter: initialFilter } }));
   };
 
   const handleExitAMMode = () => {
@@ -124,21 +85,23 @@ export default function GCPImpersonationDock() {
     setIsActive(false);
   };
 
-  // Minimized Floating Pill
+  const hasSidebar = pathname?.startsWith('/account-manager') || pathname?.startsWith('/tools') || pathname?.startsWith('/admin');
+
+  // Minimized Floating Pill (Google Cloud UX)
   if (isMinimized) {
     return (
       <div
         style={{
           position: 'fixed',
-          bottom: '20px',
+          bottom: '16px',
           right: '20px',
           zIndex: 99990,
-          background: '#0f172a',
-          color: '#ffffff',
-          borderRadius: '999px',
-          padding: '8px 16px',
-          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.4)',
-          border: '1px solid #334155',
+          background: '#ffffff',
+          color: '#202124',
+          borderRadius: '24px',
+          padding: '7px 14px',
+          boxShadow: '0 4px 14px rgba(60,64,67,0.2)',
+          border: '1px solid #dadce0',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
@@ -148,374 +111,181 @@ export default function GCPImpersonationDock() {
         }}
         onClick={() => { triggerHaptic('selection'); setIsMinimized(false); }}
       >
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }} />
-        <span>👤 Account Manager Dock</span>
-        <Maximize2 size={13} style={{ color: '#94a3b8' }} />
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#137333', boxShadow: '0 0 6px #137333' }} />
+        <span>Account Manager Bar</span>
+        <Maximize2 size={13} style={{ color: '#5f6368' }} />
       </div>
     );
   }
 
   return (
-    <aside
-      aria-label="Account Manager Impersonation Dock"
-      style={{
-        position: 'fixed',
-        bottom: '16px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 99990,
-        width: 'calc(100% - 32px)',
-        maxWidth: '1180px',
-        background: 'rgba(15, 23, 42, 0.94)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255, 255, 255, 0.15)',
-        borderRadius: '14px',
-        padding: '8px 14px',
-        color: '#ffffff',
-        boxShadow: '0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)',
-        fontFamily: 'system-ui, -apple-system, sans-serif'
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-        
-        {/* Left: Status & Context */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }} />
-            <span style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#94a3b8' }}>
-              Account Manager
-            </span>
-          </div>
+    <>
+      <style jsx>{`
+        .gcp-dock-wrapper {
+          position: fixed;
+          bottom: 16px;
+          z-index: 99990;
+          background: #ffffff;
+          border: 1px solid #dadce0;
+          border-radius: 10px;
+          padding: 8px 14px;
+          color: #202124;
+          box-shadow: 0 4px 20px rgba(60, 64, 67, 0.18), 0 1px 3px rgba(60, 64, 67, 0.12);
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          transition: all 0.2s ease;
+        }
 
-          <div style={{ width: 1, height: 16, background: '#334155' }} />
+        /* When on desktop with a sidebar: MUST ONLY SIT IN THE MAIN AREA WITHOUT OVERLAPPING THE SIDEBAR */
+        @media (min-width: 900px) {
+          .gcp-dock-wrapper.has-sidebar {
+            left: calc(260px + 2rem);
+            right: 2rem;
+            max-width: 1100px;
+            transform: none;
+            width: auto;
+          }
+          .gcp-dock-wrapper:not(.has-sidebar) {
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 1060px;
+          }
+        }
 
-          <div style={{ fontSize: '0.8rem', fontWeight: 650, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ color: contextColor }}>●</span>
-            <span style={{ maxWidth: '280px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {currentContext}
-            </span>
-          </div>
-        </div>
+        /* Mobile View */
+        @media (max-width: 899px) {
+          .gcp-dock-wrapper {
+            left: 12px;
+            right: 12px;
+            transform: none;
+            width: auto;
+            padding: 6px 10px;
+          }
+          .gcp-dock-context {
+            display: none !important;
+          }
+        }
+      `}</style>
 
-        {/* Center: 1-Click Fast Jump Menus (Sin Password) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
+      <aside
+        aria-label="Google Cloud Account Manager Bar"
+        className={`gcp-dock-wrapper ${hasSidebar ? 'has-sidebar' : ''}`}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
           
-          {/* Public Views */}
-          <Link
-            href="/catalog"
-            style={{
-              padding: '5px 10px',
-              borderRadius: '6px',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#e2e8f0',
-              fontSize: '0.74rem',
-              fontWeight: 650,
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <Globe size={12} color="#38bdf8" />
-            <span>Pública</span>
-          </Link>
+          {/* Left: GCP Status Badge & Live Context */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#137333', boxShadow: '0 0 6px #137333' }} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#137333' }}>
+                Account Manager
+              </span>
+            </div>
 
-          {/* Doctors Menu */}
-          <div style={{ position: 'relative' }}>
-            <button
-              type="button"
-              onClick={() => { triggerHaptic('selection'); setActiveMenu(activeMenu === 'doctors' ? null : 'doctors'); }}
-              style={{
-                padding: '5px 10px',
-                borderRadius: '6px',
-                background: activeMenu === 'doctors' ? '#059669' : 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#e2e8f0',
-                fontSize: '0.74rem',
-                fontWeight: 650,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              <Stethoscope size={12} color="#34d399" />
-              <span>Doctores</span>
-              <ChevronDown size={11} />
-            </button>
+            <div style={{ width: 1, height: 16, background: '#e0e0e0' }} />
 
-            {activeMenu === 'doctors' && (
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 'calc(100% + 8px)',
-                  left: 0,
-                  width: '260px',
-                  background: '#0f172a',
-                  border: '1px solid #334155',
-                  borderRadius: '10px',
-                  padding: '6px',
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2px',
-                  zIndex: 99999
-                }}
-              >
-                <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', padding: '4px 8px', textTransform: 'uppercase' }}>
-                  Portales Médicos Directos (Sin Password)
-                </div>
-                {quickDoctors.map((doc, idx) => (
-                  <Link
-                    key={idx}
-                    href={doc.url}
-                    style={{
-                      padding: '6px 8px',
-                      borderRadius: '6px',
-                      color: '#e2e8f0',
-                      fontSize: '0.74rem',
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <span>{doc.name}</span>
-                    <ExternalLink size={11} color="#94a3b8" />
-                  </Link>
-                ))}
-              </div>
-            )}
+            <div className="gcp-dock-context" style={{ fontSize: '0.78rem', fontWeight: 650, color: '#3c4043', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ color: contextColor, fontSize: '0.7rem' }}>●</span>
+              <span style={{ maxWidth: '240px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {currentContext}
+              </span>
+            </div>
           </div>
 
-          {/* Patients Menu */}
-          <div style={{ position: 'relative' }}>
-            <button
-              type="button"
-              onClick={() => { triggerHaptic('selection'); setActiveMenu(activeMenu === 'patients' ? null : 'patients'); }}
-              style={{
-                padding: '5px 10px',
-                borderRadius: '6px',
-                background: activeMenu === 'patients' ? '#7c3aed' : 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#e2e8f0',
-                fontSize: '0.74rem',
-                fontWeight: 650,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              <User size={12} color="#a78bfa" />
-              <span>Pacientes</span>
-              <ChevronDown size={11} />
-            </button>
-
-            {activeMenu === 'patients' && (
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 'calc(100% + 8px)',
-                  left: 0,
-                  width: '260px',
-                  background: '#0f172a',
-                  border: '1px solid #334155',
-                  borderRadius: '10px',
-                  padding: '6px',
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2px',
-                  zIndex: 99999
-                }}
-              >
-                <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', padding: '4px 8px', textTransform: 'uppercase' }}>
-                  Recetas & Dossiers Directos (Sin Password)
-                </div>
-                {quickPatients.map((pt, idx) => (
-                  <Link
-                    key={idx}
-                    href={pt.url}
-                    style={{
-                      padding: '6px 8px',
-                      borderRadius: '6px',
-                      color: '#e2e8f0',
-                      fontSize: '0.74rem',
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <span>{pt.name}</span>
-                    <ExternalLink size={11} color="#94a3b8" />
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Products Menu */}
-          <div style={{ position: 'relative' }}>
-            <button
-              type="button"
-              onClick={() => { triggerHaptic('selection'); setActiveMenu(activeMenu === 'products' ? null : 'products'); }}
-              style={{
-                padding: '5px 10px',
-                borderRadius: '6px',
-                background: activeMenu === 'products' ? '#d97706' : 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#e2e8f0',
-                fontSize: '0.74rem',
-                fontWeight: 650,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              <FlaskConical size={12} color="#fbbf24" />
-              <span>Productos</span>
-              <ChevronDown size={11} />
-            </button>
-
-            {activeMenu === 'products' && (
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 'calc(100% + 8px)',
-                  left: 0,
-                  width: '270px',
-                  background: '#0f172a',
-                  border: '1px solid #334155',
-                  borderRadius: '10px',
-                  padding: '6px',
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2px',
-                  zIndex: 99999
-                }}
-              >
-                <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', padding: '4px 8px', textTransform: 'uppercase' }}>
-                  Monografías & Viales (HPLC & CoA)
-                </div>
-                {quickProducts.map((pr, idx) => (
-                  <Link
-                    key={idx}
-                    href={pr.url}
-                    style={{
-                      padding: '6px 8px',
-                      borderRadius: '6px',
-                      color: '#e2e8f0',
-                      fontSize: '0.74rem',
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <span>{pr.name}</span>
-                    <ExternalLink size={11} color="#94a3b8" />
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Command Palette Trigger */}
-          <button
-            type="button"
-            onClick={handleOpenCommandPalette}
+          {/* Center: Simplified Search Launcher (Algolia Integrated for Patients, Doctors, Products) */}
+          <div
+            onClick={() => handleOpenSearch()}
             style={{
-              padding: '5px 10px',
-              borderRadius: '6px',
-              background: '#0284c7',
-              border: 'none',
-              color: '#ffffff',
-              fontSize: '0.74rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px'
-            }}
-            title="Abrir GCP Command Palette (⌘K)"
-          >
-            <Search size={12} />
-            <span>⌘K</span>
-          </button>
-        </div>
-
-        {/* Right: Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Link
-            href="/account-manager"
-            style={{
-              padding: '5px 10px',
-              borderRadius: '6px',
-              background: 'rgba(255,255,255,0.12)',
-              color: '#ffffff',
-              fontSize: '0.74rem',
-              fontWeight: 700,
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <Sliders size={12} />
-            <span>Consola AM ⎋</span>
-          </Link>
-
-          <button
-            type="button"
-            onClick={() => { triggerHaptic('selection'); setIsMinimized(true); }}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              padding: '4px',
+              flex: 1,
+              minWidth: '220px',
+              maxWidth: '440px',
               display: 'flex',
-              alignItems: 'center'
-            }}
-            title="Minimizar dock"
-          >
-            <Minimize2 size={14} />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleExitAMMode}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#ef4444',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              background: '#f1f3f4',
+              border: '1px solid #dadce0',
+              color: '#5f6368',
+              fontSize: '0.78rem',
               cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center'
+              transition: 'all 0.15s ease'
             }}
-            title="Salir del modo Account Manager"
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#e8eaed'; e.currentTarget.style.borderColor = '#1a73e8'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#f1f3f4'; e.currentTarget.style.borderColor = '#dadce0'; }}
+            title="Search patients, doctors, and products across Algolia"
           >
-            <X size={14} />
-          </button>
-        </div>
+            <Search size={14} style={{ color: '#1a73e8', flexShrink: 0 }} />
+            <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              Search patients, doctors, or products...
+            </span>
+            <kbd style={{ fontSize: '0.66rem', padding: '1px 6px', borderRadius: '4px', background: '#ffffff', border: '1px solid #dadce0', color: '#3c4043', fontFamily: 'monospace', fontWeight: 700 }}>
+              ⌘K
+            </kbd>
+          </div>
 
-      </div>
-    </aside>
+          {/* Right: Quick Direct Navigation Chips & Controls */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <Link
+              href="/account-manager"
+              style={{
+                padding: '5px 10px',
+                borderRadius: '6px',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                color: '#1a73e8',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+              title="Open Account Manager Hub"
+            >
+              <Sliders size={12} />
+              <span>Hub Console</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => { triggerHaptic('selection'); setIsMinimized(true); }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#5f6368',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                borderRadius: '4px'
+              }}
+              title="Minimize bar"
+            >
+              <Minimize2 size={13} />
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExitAMMode}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#d93025',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                borderRadius: '4px'
+              }}
+              title="Exit Account Manager Mode"
+            >
+              <X size={14} />
+            </button>
+          </div>
+
+        </div>
+      </aside>
+    </>
   );
 }
