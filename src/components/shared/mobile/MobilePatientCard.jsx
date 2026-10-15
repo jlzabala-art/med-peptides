@@ -150,13 +150,27 @@ export default function MobilePatientCard({
           {program && <span className="mpc-tag">{program}</span>}
           {physician && <span className="mpc-physician">👨‍⚕️ {physician}</span>}
           {clinic && <span className="mpc-physician" style={{ color: 'var(--text-muted)' }}>🏥 {clinic}</span>}
+          {row.commercialStage === 'paid' && (
+            <span className="mpc-tag" style={{ backgroundColor: '#f0fdf4', color: '#15803d', borderColor: '#bbf7d0' }}>
+              ✓ Paid {row.totalSpent ? `$${Number(row.totalSpent).toLocaleString()}` : ''}
+            </span>
+          )}
         </div>
       </div>
 
       {/* Right side */}
       {!selectionMode ? (
         <div className="mpc-right">
-          <StatusBadge status={status} compact />
+          <StatusBadge 
+            status={row.commercialStage || status} 
+            customLabel={
+              row.commercialStage === 'paid' ? 'Paid ✓' :
+              row.commercialStage === 'quote_unconfirmed' ? 'Unconfirmed' :
+              row.commercialStage === 'quote_pending' ? 'Quoted' :
+              status
+            }
+            compact 
+          />
           {onQuickAction && (
             <button
               className="mpc-quick-btn"

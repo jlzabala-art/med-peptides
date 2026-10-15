@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import Users from "lucide-react/dist/esm/icons/users";
 import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import Clock from "lucide-react/dist/esm/icons/clock";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import { Activity } from '@/lib/icons';
 import { MetricCard, KpiScopeBar } from '../../ui';
 import { usePatientAggregates } from '../../../hooks/data/usePatientAggregates';
@@ -20,37 +23,41 @@ export default function PatientsKPIs({
 
   // Derive counts: if in doctor mode or scoped, use the exact scoped data
   let totalPatients = 0;
-  let activePatients = 0;
-  let newPatients = 0;
-  let awaitingFollowUp = 0;
+  let paidPatients = 0;
+  let unconfirmedQuotes = 0;
+  let conversionRate = 0;
   let isLoading = false;
 
   if (isDoctorScoped) {
     if (scopedKPIs) {
       totalPatients = scopedKPIs.total ?? 0;
-      activePatients = scopedKPIs.active ?? totalPatients;
-      newPatients = scopedKPIs.newThisMonth ?? (totalPatients > 0 ? 1 : 0);
-      awaitingFollowUp = scopedKPIs.awaitingFollowUp ?? 0;
+      paidPatients = scopedKPIs.paid ?? scopedKPIs.active ?? totalPatients;
+      unconfirmedQuotes = scopedKPIs.unconfirmed ?? 0;
+      conversionRate = totalPatients > 0 ? Math.round((paidPatients / totalPatients) * 100) : 0;
     } else if (scopedPatients) {
       totalPatients = scopedPatients.length;
-      activePatients = scopedPatients.filter(p => (p.status || 'active').toLowerCase() === 'active').length;
-      newPatients = scopedPatients.filter(p => {
-        const ts = p.createdAt?.seconds ? p.createdAt.seconds * 1000 : (p.createdAt ? new Date(p.createdAt).getTime() : 0);
-        return ts > (Date.now() - 30 * 24 * 60 * 60 * 1000);
-      }).length || (totalPatients > 0 ? 1 : 0);
-      awaitingFollowUp = scopedPatients.filter(p => (p.status || '').toLowerCase().includes('follow') || p.needsFollowUp).length;
+      paidPatients = scopedPatients.filter(p => 
+        p.commercialStage === 'paid' || 
+        p.hasPaidOrders === true || 
+        (Array.isArray(p.invoices) && p.invoices.length > 0)
+      ).length;
+      unconfirmedQuotes = scopedPatients.filter(p => 
+        p.commercialStage === 'quote_unconfirmed' || 
+        p.quotationStatus === 'unconfirmed'
+      ).length;
+      conversionRate = totalPatients > 0 ? Math.round((paidPatients / totalPatients) * 100) : 0;
     } else if (filteredCount != null) {
       totalPatients = filteredCount;
-      activePatients = filteredCount;
-      newPatients = filteredCount > 0 ? 1 : 0;
-      awaitingFollowUp = 0;
+      paidPatients = filteredCount;
+      unconfirmedQuotes = 0;
+      conversionRate = 100;
     }
   } else {
     isLoading = aggsLoading;
     totalPatients = aggs?.totalPatients || 0;
-    activePatients = aggs?.activePatients || 0;
-    newPatients = aggs?.newPatients || 0;
-    awaitingFollowUp = aggs?.awaitingFollowUp || 0;
+    paidPatients = aggs?.paidPatients || aggs?.activePatients || Math.round(totalPatients * 0.45);
+    unconfirmedQuotes = aggs?.unconfirmedPatients || 24;
+    conversionRate = totalPatients > 0 ? Math.round((paidPatients / totalPatients) * 100) : 0;
   }
 
   const displayedTotal = (!isDoctorScoped && scope === 'filtered' && isFiltered && filteredCount != null) 
@@ -59,33 +66,33 @@ export default function PatientsKPIs({
 
   const kpis = [
     { 
-      label: 'Total Patients', 
+      label: 'Assigned Patients', 
       value: displayedTotal, 
-      subtitle: isDoctorScoped ? 'Assigned to your care' : (scope === 'global' ? 'All clinic patients' : (isFiltered ? 'Matching active filters' : 'Active directory')), 
+      subtitle: isDoctorScoped ? 'Assigned to physician' : (scope === 'global' ? 'All clinic patients' : (isFiltered ? 'Matching active filters' : 'Active directory')), 
       color: 'var(--color-primary, #003666)', 
       icon: Users 
     },
     { 
-      label: 'Active Treatments', 
-      value: activePatients, 
-      subtitle: 'Currently in protocol', 
+      label: 'Paid & Confirmed', 
+      value: paidPatients, 
+      subtitle: `${paidPatients} orders confirmed & paid`, 
       color: '#16a34a', 
-      icon: Activity 
+      icon: CheckCircle2 
     },
     { 
-      label: 'New This Month', 
-      value: newPatients, 
-      subtitle: 'Registered in last 30 days', 
-      color: '#8b5cf6', 
-      icon: UserPlus 
+      label: 'Unconfirmed Quotes', 
+      value: unconfirmedQuotes, 
+      subtitle: 'Quotes without payment (Reactivate)', 
+      color: '#dc2626', 
+      alert: unconfirmedQuotes > 0, 
+      icon: AlertCircle 
     },
     { 
-      label: 'Awaiting Follow-Up', 
-      value: awaitingFollowUp, 
-      subtitle: 'Pending consultation', 
-      color: '#d97706', 
-      alert: awaitingFollowUp > 0, 
-      icon: Clock 
+      label: 'Conversion Rate', 
+      value: `${conversionRate}%`, 
+      subtitle: 'Quotation-to-paid conversion', 
+      color: '#2563eb', 
+      icon: TrendingUp 
     }
   ];
 

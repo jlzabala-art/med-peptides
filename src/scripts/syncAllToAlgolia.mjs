@@ -1,17 +1,5 @@
-import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { adminDb as db } from '../lib/firebaseAdmin.js';
 import { algoliasearch } from 'algoliasearch';
-
-let rawPk = process.env.FIREBASE_PRIVATE_KEY || '';
-if (rawPk.startsWith('"') && rawPk.endsWith('"')) rawPk = rawPk.slice(1, -1);
-const privateKey = rawPk.replace(/\\n/g, '\n');
-const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-
-const app = initializeApp({
-  credential: cert({ projectId, clientEmail, privateKey })
-});
-const db = getFirestore(app);
 
 const client = algoliasearch(
   process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'G722EVODUJ',
@@ -125,6 +113,11 @@ async function syncAll() {
       phone: d.phone || d.phoneNumber || '',
       fileNumber: d.fileNumber || '',
       status: (d.status || 'active').toLowerCase(),
+      commercialStage: d.commercialStage || (d.hasPaidOrders || (Array.isArray(d.invoices) && d.invoices.length > 0) ? 'paid' : 'registered_only'),
+      quotationStatus: d.quotationStatus || 'none',
+      totalSpent: Number(d.totalSpent || 0),
+      lastInvoiceRef: d.lastInvoiceRef || '',
+      invoices: Array.isArray(d.invoices) ? d.invoices : [],
       country: d.country || 'AE',
       physicianId: d.physicianId || d.doctorId || '',
       prescribingDoctorNames: d.prescribingDoctorNames || (d.doctorName ? [d.doctorName] : []),

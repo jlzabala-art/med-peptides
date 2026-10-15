@@ -23,15 +23,15 @@ export default function StatusChip({ status, customLabel, style = {}, variant = 
   let border = '#dadce0';
   let color = '#5f6368';
   
-  if (['active', 'approved', 'reconciled', 'published', 'success', 'completed', 'delivered', 'accepted', 'aceptada', 'linked', 'in_stock', 'in stock'].includes(s)) {
+  if (['active', 'approved', 'reconciled', 'published', 'success', 'completed', 'delivered', 'accepted', 'aceptada', 'linked', 'in_stock', 'in stock', 'paid', 'pagado', 'confirmed'].includes(s)) {
     bg = '#e6f4ea';
     border = '#ceead6';
     color = '#137333';
-  } else if (['pending', 'draft', 'awaiting', 'processing', 'pendiente', 'unverified', 'awaiting payment', 'paused', 'on_demand', 'on demand', 'low_stock', 'pending_atlas_review', 'pending review'].includes(s)) {
+  } else if (['pending', 'draft', 'awaiting', 'processing', 'pendiente', 'unverified', 'awaiting payment', 'paused', 'on_demand', 'on demand', 'low_stock', 'pending_atlas_review', 'pending review', 'quote_pending', 'awaiting_confirmation'].includes(s)) {
     bg = '#fef7e0';
     border = '#feefc3';
     color = '#b06000';
-  } else if (['error', 'rejected', 'disputed', 'failed', 'cancelled', 'suspended', 'inactive', 'expired', 'caducada', 'revoked', 'out of stock', 'out_of_stock'].includes(s)) {
+  } else if (['error', 'rejected', 'disputed', 'failed', 'cancelled', 'suspended', 'inactive', 'expired', 'caducada', 'revoked', 'out of stock', 'out_of_stock', 'quote_unconfirmed', 'unconfirmed', 'declined', 'lost'].includes(s)) {
     bg = '#fce8e6';
     border = '#fad2cf';
     color = '#c5221f';
@@ -39,7 +39,7 @@ export default function StatusChip({ status, customLabel, style = {}, variant = 
     bg = '#e8f0fe';
     border = '#d2e3fc';
     color = '#1a73e8';
-  } else if (['archived', 'hidden', 'disabled', 'unknown'].includes(s)) {
+  } else if (['archived', 'hidden', 'disabled', 'unknown', 'registered_only', 'registered', 'lead'].includes(s)) {
     bg = '#f1f3f4';
     border = '#dadce0';
     color = '#5f6368';
@@ -57,6 +57,10 @@ export default function StatusChip({ status, customLabel, style = {}, variant = 
     'anulada': 'Cancelled',
     'rechazada': 'Rejected',
     'borrador': 'Draft',
+    'paid': 'Paid & Confirmed',
+    'quote_pending': 'Quote Pending',
+    'quote_unconfirmed': 'Unconfirmed Quote',
+    'registered_only': 'Registered Lead',
   };
 
   const formattedDefault = status 
