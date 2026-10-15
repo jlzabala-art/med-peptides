@@ -60,44 +60,301 @@ function normalizeApiName(rawName) {
  * Returns therapeutic category and color token for GCP-styled bars
  */
 function getApiCategoryMeta(apiName) {
-  const name = String(apiName).toLowerCase();
-  if (name.includes('selank') || name.includes('semax')) {
-    return { category: 'Neuro-Cognitive & Anxiolytic Bioregulator', color: '#1a73e8', bg: '#eff6ff' };
+  const name = String(apiName || '').toLowerCase();
+
+  // 1. Finished Product Delivery Format Detection (Golden Rule - Specificity)
+  let format = 'Finished Formulation';
+  let formatBadge = 'Finished Product';
+  let formatColor = '#334155';
+  let formatBg = '#f1f5f9';
+  let formatBorder = '#cbd5e1';
+
+  if (name.includes('nasal spray') || name.includes('spray') || name.includes('intranasal')) {
+    format = 'Intranasal Spray';
+    formatBadge = 'Nasal Spray';
+    formatColor = '#0369a1';
+    formatBg = '#e0f2fe';
+    formatBorder = '#bae6fd';
+  } else if (name.includes('oral capsule') || name.includes('capsule') || name.includes('caps') || name.includes('drcaps')) {
+    format = 'Oral DRcaps®';
+    formatBadge = 'Oral Capsules';
+    formatColor = '#b45309';
+    formatBg = '#fef3c7';
+    formatBorder = '#fde68a';
+  } else if (name.includes('troche') || name.includes('sublingual') || name.includes('drops')) {
+    format = 'Sublingual Troche';
+    formatBadge = 'Sublingual Troche';
+    formatColor = '#4f46e5';
+    formatBg = '#e0e7ff';
+    formatBorder = '#c7d2fe';
+  } else if (name.includes('vial') || name.includes('injection') || name.includes('subcutaneous') || name.includes('subq') || name.includes('lyophilized')) {
+    format = 'Subcutaneous Vial';
+    formatBadge = 'SubQ Vial';
+    formatColor = '#047857';
+    formatBg = '#d1fae5';
+    formatBorder = '#a7f3d0';
+  } else if (name.includes('shampoo') || name.includes('conditioner') || name.includes('trichology')) {
+    format = 'Trichological Hygiene';
+    formatBadge = 'Scalp Care';
+    formatColor = '#0f766e';
+    formatBg = '#ccfbf1';
+    formatBorder = '#99f6e4';
+  } else if (name.includes('collagen') || name.includes('peeling') || name.includes('bio-gel') || name.includes('colway')) {
+    format = 'Native Tropocollagen Bio-Matrix';
+    formatBadge = 'Collagen Bio-Matrix';
+    formatColor = '#be185d';
+    formatBg = '#fce7f3';
+    formatBorder = '#fbcfe8';
+  } else if (name.includes('pentravan') || name.includes('cream') || name.includes('transdermal')) {
+    format = 'Transdermal Liposomal Cream';
+    formatBadge = 'Liposomal Cream';
+    formatColor = '#6d28d9';
+    formatBg = '#ede9fe';
+    formatBorder = '#ddd6fe';
+  } else if (name.includes('topical') || name.includes('foam') || name.includes('solution') || name.includes('trichosol') || name.includes('serum')) {
+    format = 'Topical Scalp Solution';
+    formatBadge = 'Topical Solution';
+    formatColor = '#1d4ed8';
+    formatBg = '#dbeafe';
+    formatBorder = '#bfdbfe';
   }
-  if (name.includes('bpc') || name.includes('tb-500') || name.includes('tb500')) {
-    return { category: 'Angiogenic & Mucosal Tissue Repair', color: '#0d9488', bg: '#f0fdfa' };
+
+  // 2. Specific Finished Peptides with Formats & Roles
+  if (name.includes('selank')) {
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Peptide · ${formatBadge}`,
+      role: 'Neuro-Peptide · Anxiolytic & BDNF',
+      color: '#1a73e8',
+      bg: '#eff6ff'
+    };
+  }
+  if (name.includes('semax')) {
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Peptide · ${formatBadge}`,
+      role: 'Neuro-Peptide · Cognitive Focus & BDNF',
+      color: '#1a73e8',
+      bg: '#eff6ff'
+    };
+  }
+  if (name.includes('bpc') || name.includes('bpc-157') || name.includes('tb-500') || name.includes('tb500')) {
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Peptide · ${formatBadge}`,
+      role: 'Regenerative Peptide · Tissue Repair',
+      color: '#0d9488',
+      bg: '#f0fdfa'
+    };
   }
   if (name.includes('kpv')) {
-    return { category: 'Mucosal Anti-Inflammatory & Gut Barrier', color: '#7c3aed', bg: '#f5f3ff' };
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Peptide · ${formatBadge}`,
+      role: 'Anti-Inflammatory Tripeptide',
+      color: '#7c3aed',
+      bg: '#f5f3ff'
+    };
   }
   if (name.includes('dihexa')) {
-    return { category: 'Synaptogenesis & HGF Activator', color: '#b45309', bg: '#fffbeb' };
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Peptide · ${formatBadge}`,
+      role: 'Synaptogenesis & HGF Activator',
+      color: '#b45309',
+      bg: '#fffbeb'
+    };
   }
-  if (name.includes('ghk')) {
-    return { category: 'Extracellular Matrix & Follicular Remodeling', color: '#4338ca', bg: '#e0e7ff' };
+  if (name.includes('epithalon')) {
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Peptide · ${formatBadge}`,
+      role: 'Pineal Epigenetic Peptide',
+      color: '#7c3aed',
+      bg: '#f5f3ff'
+    };
   }
+  if (name.includes('ghk') || name.includes('copper tripeptide')) {
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Peptide · ${formatBadge}`,
+      role: 'Follicular & Matrix Remodeling Tripeptide',
+      color: '#4338ca',
+      bg: '#e0e7ff'
+    };
+  }
+  if (name.includes('cjc') || name.includes('ipamorelin')) {
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Peptide · ${formatBadge}`,
+      role: 'Endocrine GH Secretagogue',
+      color: '#0284c7',
+      bg: '#f0f9ff'
+    };
+  }
+  if (name.includes('dsip')) {
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Peptide · ${formatBadge}`,
+      role: 'Circadian Sleep Delta-Wave Peptide',
+      color: '#6366f1',
+      bg: '#eef2ff'
+    };
+  }
+  if (name.includes('tirzepatide') || name.includes('semaglutide') || name.includes('retatrutide')) {
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Incretin · ${formatBadge}`,
+      role: 'Multi-Incretin Metabolic Agonist',
+      color: '#059669',
+      bg: '#ecfdf5'
+    };
+  }
+
+  // 3. Classical Pharmacological Active Classes
   if (name.includes('minoxidil')) {
-    return { category: 'Vasodilator & Microvascular Growth Factor', color: '#0d9488', bg: '#f0fdfa' };
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Compounded · ${formatBadge}`,
+      role: 'Vasodilator & Microvascular Growth Factor',
+      color: '#0d9488',
+      bg: '#f0fdfa'
+    };
   }
   if (name.includes('dutasteride') || name.includes('finasteride') || name.includes('spironolactone') || name.includes('saw palmetto')) {
-    return { category: '5α-Reductase & Androgen Blockade', color: '#1a73e8', bg: '#eff6ff' };
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Compounded · ${formatBadge}`,
+      role: '5α-Reductase & Androgen Blockade',
+      color: '#1a73e8',
+      bg: '#eff6ff'
+    };
   }
-  if (name.includes('metformin') || name.includes('resveratrol') || name.includes('epithalon')) {
-    return { category: 'Telomere & Genomic Activator', color: '#7c3aed', bg: '#f5f3ff' };
+  if (name.includes('metformin') || name.includes('resveratrol')) {
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Compounded · ${formatBadge}`,
+      role: 'Telomere & Genomic Activator',
+      color: '#7c3aed',
+      bg: '#f5f3ff'
+    };
   }
   if (name.includes('astaxanthin') || name.includes('coenzyme') || name.includes('cysteine') || name.includes('nac') || name.includes('ubiquinol')) {
-    return { category: 'Mitochondrial & Antioxidant Shield', color: '#ea580c', bg: '#fff7ed' };
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Formula · ${formatBadge}`,
+      role: 'Mitochondrial & Antioxidant Shield',
+      color: '#ea580c',
+      bg: '#fff7ed'
+    };
   }
   if (name.includes('latanoprost')) {
-    return { category: 'Prostaglandin F2α Agonist', color: '#059669', bg: '#ecfdf5' };
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Compounded · ${formatBadge}`,
+      role: 'Prostaglandin F2α Agonist',
+      color: '#059669',
+      bg: '#ecfdf5'
+    };
   }
   if (name.includes('melatonin') || name.includes('theanine') || name.includes('glycine') || name.includes('magnesium')) {
-    return { category: 'Neuro-Circadian Modulator', color: '#6366f1', bg: '#eef2ff' };
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Formula · ${formatBadge}`,
+      role: 'Neuro-Circadian Modulator',
+      color: '#6366f1',
+      bg: '#eef2ff'
+    };
   }
   if (name.includes('arginine') || name.includes('ginkgo') || name.includes('ginseng')) {
-    return { category: 'Microcirculation & Bioregulator', color: '#0284c7', bg: '#f0f9ff' };
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Formula · ${formatBadge}`,
+      role: 'Microcirculation & Bioregulator',
+      color: '#0284c7',
+      bg: '#f0f9ff'
+    };
   }
-  return { category: 'Targeted Clinical Formulation', color: '#475569', bg: '#f1f5f9' };
+
+  return {
+    format,
+    formatBadge,
+    formatColor,
+    formatBg,
+    formatBorder,
+    category: `Finished Product · ${formatBadge}`,
+    role: 'Targeted Clinical Formulation',
+    color: '#475569',
+    bg: '#f1f5f9'
+  };
 }
 
 /**
@@ -214,60 +471,69 @@ export default function DoctorClinicalAnalytics({
   }, [isServerOptimized, serverAnalytics, monthlyData]);
 
   // ── 2. Top Prescribed Active Ingredients & Formulations ──────────────────────
+  // ── 2. Top Prescribed Active Ingredients & Formulations ──────────────────────
   const topApis = useMemo(() => {
+    let rawList = [];
     if (isServerOptimized && Array.isArray(serverAnalytics?.topApis) && serverAnalytics.topApis.length > 0) {
-      return serverAnalytics.topApis;
-    }
-    if (!prescriptions || prescriptions.length === 0) return [];
+      rawList = serverAnalytics.topApis;
+    } else if (prescriptions && prescriptions.length > 0) {
+      const apiMap = {};
+      const totalRxCount = prescriptions.length;
 
-    const apiMap = {};
-    const totalRxCount = prescriptions.length;
-
-    prescriptions.forEach((rx) => {
-      const seenInThisRx = new Set();
-      const candidateItems = [];
-      if (Array.isArray(rx.items)) candidateItems.push(...rx.items);
-      if (Array.isArray(rx.prescriptionLines)) candidateItems.push(...rx.prescriptionLines);
-      if (Array.isArray(rx.recommendedItems)) candidateItems.push(...rx.recommendedItems);
-      if (Array.isArray(rx.phases)) {
-        rx.phases.forEach(ph => {
-          if (Array.isArray(ph.apis)) candidateItems.push(...ph.apis);
-          if (Array.isArray(ph.items)) candidateItems.push(...ph.items);
-        });
-      }
-      if (Array.isArray(rx.parts)) {
-        rx.parts.forEach(pt => {
-          if (Array.isArray(pt.apis)) candidateItems.push(...pt.apis);
-        });
-      }
-
-      candidateItems.forEach(item => {
-        if (!item) return;
-        if (item.isVehicleOrBase || item.itemType === 'vehicle_base') return;
-
-        const rawName = item.name || item.drugName || item.productName || item.activeIngredient;
-        const norm = normalizeApiName(rawName);
-        if (!norm || norm === 'Unknown' || norm.length < 2) return;
-
-        if (!seenInThisRx.has(norm)) {
-          seenInThisRx.add(norm);
-          if (!apiMap[norm]) {
-            apiMap[norm] = { name: norm, count: 0 };
-          }
-          apiMap[norm].count += 1;
+      prescriptions.forEach((rx) => {
+        const seenInThisRx = new Set();
+        const candidateItems = [];
+        if (Array.isArray(rx.items)) candidateItems.push(...rx.items);
+        if (Array.isArray(rx.prescriptionLines)) candidateItems.push(...rx.prescriptionLines);
+        if (Array.isArray(rx.recommendedItems)) candidateItems.push(...rx.recommendedItems);
+        if (Array.isArray(rx.phases)) {
+          rx.phases.forEach(ph => {
+            if (Array.isArray(ph.apis)) candidateItems.push(...ph.apis);
+            if (Array.isArray(ph.items)) candidateItems.push(...ph.items);
+          });
         }
+        if (Array.isArray(rx.parts)) {
+          rx.parts.forEach(pt => {
+            if (Array.isArray(pt.apis)) candidateItems.push(...pt.apis);
+          });
+        }
+
+        candidateItems.forEach(item => {
+          if (!item) return;
+          if (item.isVehicleOrBase || item.itemType === 'vehicle_base') return;
+
+          const rawName = item.name || item.drugName || item.productName || item.activeIngredient;
+          const norm = normalizeApiName(rawName);
+          if (!norm || norm === 'Unknown' || norm.length < 2) return;
+
+          if (!seenInThisRx.has(norm)) {
+            seenInThisRx.add(norm);
+            if (!apiMap[norm]) {
+              apiMap[norm] = { name: norm, count: 0 };
+            }
+            apiMap[norm].count += 1;
+          }
+        });
       });
-    });
 
-    const list = Object.values(apiMap)
-      .map(item => ({
+      rawList = Object.values(apiMap)
+        .map(item => ({
+          ...item,
+          percentage: Math.round((item.count / totalRxCount) * 100)
+        }))
+        .sort((a, b) => b.count - a.count);
+    }
+
+    return rawList.map(item => {
+      const freshMeta = getApiCategoryMeta(item.name);
+      return {
         ...item,
-        percentage: Math.round((item.count / totalRxCount) * 100),
-        meta: getApiCategoryMeta(item.name)
-      }))
-      .sort((a, b) => b.count - a.count);
-
-    return list.slice(0, 10);
+        meta: freshMeta,
+        format: freshMeta.format,
+        formatBadge: freshMeta.formatBadge,
+        category: freshMeta.category
+      };
+    }).slice(0, 10);
   }, [isServerOptimized, serverAnalytics, prescriptions]);
 
   // ── 3. Patient Cohort Loyalty ─────────────────────────────────────────────
@@ -777,10 +1043,10 @@ export default function DoctorClinicalAnalytics({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                   <div>
                     <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: '#5f6368', letterSpacing: '0.4px' }}>
-                      Pharmacological Distribution
+                      Clinical Formulations
                     </span>
                     <h3 style={{ margin: '2px 0 0 0', fontSize: '14px', fontWeight: 600, color: '#202124' }}>
-                      Top 5 Active Ingredients (APIs)
+                      Top 5 Finished Products & Formulations
                     </h3>
                   </div>
                   <span 
@@ -798,7 +1064,7 @@ export default function DoctorClinicalAnalytics({
                 </div>
 
                 <p style={{ margin: '0 0 14px 0', fontSize: '12px', color: '#5f6368' }}>
-                  Highest frequency molecules in personalized compounding formulas.
+                  Highest frequency finished peptide therapies, delivery formats and clinical regimens in practice.
                 </p>
               </div>
 
@@ -863,9 +1129,11 @@ export default function DoctorClinicalAnalytics({
                             </span>
                             <span 
                               style={{
-                                fontSize: '9.5px',
-                                color: '#5f6368',
-                                backgroundColor: '#f1f3f4',
+                                fontSize: '10px',
+                                fontWeight: 600,
+                                color: api.meta.formatColor || '#0369a1',
+                                backgroundColor: api.meta.formatBg || '#e0f2fe',
+                                border: `1px solid ${api.meta.formatBorder || '#bae6fd'}`,
                                 padding: '1px 6px',
                                 borderRadius: '4px',
                                 whiteSpace: 'nowrap',
@@ -873,9 +1141,9 @@ export default function DoctorClinicalAnalytics({
                                 textOverflow: 'ellipsis',
                                 flexShrink: 0
                               }}
-                              title={api.meta.category}
+                              title={`${api.meta.category} · Format: ${api.meta.format}`}
                             >
-                              {api.meta.category}
+                              {api.meta.formatBadge || api.meta.format}
                             </span>
                           </div>
                           <div style={{ textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, paddingLeft: '4px' }}>

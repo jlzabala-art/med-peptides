@@ -49,6 +49,10 @@ async function configureProductIndex() {
     searchableAttributes: [
       'unordered(canonicalName)',
       'unordered(name)',
+      'unordered(title)',
+      'unordered(brand)',
+      'unordered(vendor)',
+      'unordered(slug)',
       'unordered(canonicalKey)',
       'unordered(searchableGoals)',
       'unordered(tags)',

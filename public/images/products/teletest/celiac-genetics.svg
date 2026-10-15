@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" fill="none">
+  <defs>
+    <linearGradient id="bgCel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5f3ff"/>
+      <stop offset="50%" stop-color="#ede9fe"/>
+      <stop offset="100%" stop-color="#ddd6fe"/>
+    </linearGradient>
+    <linearGradient id="cardGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="600" height="600" rx="24" fill="url(#bgCel)"/>
+
+  <rect x="100" y="80" width="400" height="440" rx="20" fill="url(#cardGrad3)" stroke="#cbd5e1" stroke-width="2" filter="drop-shadow(0 20px 30px rgba(124, 58, 237, 0.15))"/>
+  
+  <path d="M100 100 Q100 80 120 80 L480 80 Q500 80 500 100 L500 150 L100 150 Z" fill="url(#purpleGrad)"/>
+  <text x="130" y="118" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="800" fill="#ffffff" letter-spacing="0.1em">TELETEST ANALYTIKA · CELIAC GENETICS</text>
+  <text x="130" y="138" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" fill="#ede9fe">HLA-DQ2 / HLA-DQ8 · qPCR VALIDATED</text>
+
+  <g transform="translate(300, 260)">
+    <circle cx="0" cy="0" r="50" fill="#7c3aed" fill-opacity="0.1" stroke="#7c3aed" stroke-width="2"/>
+    <path d="M-25 0 Q0 -30 25 0 Q0 30 -25 0" stroke="#7c3aed" stroke-width="3" fill="none"/>
+    <circle cx="0" cy="0" r="12" fill="#7c3aed"/>
+  </g>
+
+  <text x="300" y="375" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="900" fill="#0f172a" letter-spacing="-0.02em">GENÉTICA CELIAQUÍA &amp; GLUTEN</text>
+  <text x="300" y="400" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#7c3aed">Haplotipos HLA-DQ2.5, DQ2.2 y DQ8</text>
+  <text x="300" y="425" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" fill="#64748b">Report 18267615-CEL · Sangre o Frotis Bucal</text>
+
+  <g transform="translate(130, 455)">
+    <rect x="0" y="0" width="105" height="26" rx="6" fill="#f1f5f9" stroke="#cbd5e1"/>
+    <text x="52" y="17" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#334155">DQ2 / DQ8</text>
+    
+    <rect x="115" y="0" width="115" height="26" rx="6" fill="#f1f5f9" stroke="#cbd5e1"/>
+    <text x="172" y="17" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#334155">VPN &gt; 99%</text>
+
+    <rect x="240" y="0" width="95" height="26" rx="6" fill="#ecfdf5" stroke="#a7f3d0"/>
+    <text x="287" y="17" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" fill="#047857">Validez 100%</text>
+  </g>
+</svg>

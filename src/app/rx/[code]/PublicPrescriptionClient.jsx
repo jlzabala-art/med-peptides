@@ -1826,18 +1826,21 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     />
                   </button>
 
-                  {/* Upward Dropdown Menu */}
+                  {/* Upward Dropdown Menu (Apple Glassmorphism) */}
                   {showDocDropdown && (
                     <div style={{
                       position: 'absolute',
-                      bottom: 'calc(100% + 10px)',
+                      bottom: 'calc(100% + 12px)',
                       left: '50%',
                       transform: 'translateX(-50%)',
                       zIndex: 999,
-                      background: '#ffffff',
-                      borderRadius: '12px',
-                      boxShadow: '0 12px 32px rgba(15,23,42,0.18), 0 2px 8px rgba(15,23,42,0.08)',
-                      border: '1px solid #e2e8f0',
+                      background: 'rgba(255, 255, 255, 0.88)',
+                      backdropFilter: 'blur(24px) saturate(190%)',
+                      WebkitBackdropFilter: 'blur(24px) saturate(190%)',
+                      borderRadius: '16px',
+                      boxShadow: '0 20px 48px -8px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(15, 23, 42, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.95)',
+                      border: '1px solid rgba(255, 255, 255, 0.85)',
+                      outline: '1px solid rgba(203, 213, 225, 0.35)',
                       padding: '8px',
                       minWidth: '270px',
                       display: 'flex',

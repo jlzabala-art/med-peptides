@@ -36,6 +36,13 @@ const BRAND_METADATA = {
     section: 'Multi-Omics Genomics & Organ Proteomics',
     keywords: ['ETERNA DX', 'Organ Proteomics', 'Epigenetic Age Test', 'Eurofins Longevity', 'Multi-Omics']
   },
+  teletest: {
+    title: 'TeleTest Analytika® Clinical Genomics & Laboratory Diagnostics | Atlas Collection',
+    description: 'Explore TeleTest Analytika® accredited clinical diagnostics: High-resolution HLA Immunogenetics & Celiac Predisposition, plus ICP-MS/MS Hair Tissue Mineral & Heavy Metal Toxicology (HTMA). Generalitat de Catalunya E08750211 & ISO 17025 accredited.',
+    image: `${BASE_URL}/images/products/teletest/hla-autoinmunidad.svg`,
+    section: 'Clinical Laboratory Diagnostics & Pharmacogenomics',
+    keywords: ['TeleTest Analytika', 'HLA Autoinmunidad', 'Mineralograma Cabello', 'HTMA', 'Toxicología Metales Pesados', 'Estudio Genético Celiaquía', 'ISO 17025 Laboratorio']
+  },
   peptides: {
     title: 'Precision Research Peptides Catalog | Atlas Health Platform',
     description: 'Browse our comprehensive catalog of verified analytical peptides (≥99.0% purity). BPC-157, TB-500, GHK-Cu, Epithalon, MOTS-c, and metabolic secretagogues.',
@@ -137,6 +144,8 @@ async function fetchTargetedBrandProducts(brandSlug) {
         matches = str.includes('ultraperson');
       } else if (s === 'eterna') {
         matches = str.includes('eterna') || str.includes('proteom') || d.id.startsWith('eternadx-') || d.id.startsWith('eterna-');
+      } else if (s === 'teletest') {
+        matches = str.includes('teletest') || d.id.startsWith('teletest-') || data.supplierId === 'supplier-teletest';
       }
 
       if (matches) {

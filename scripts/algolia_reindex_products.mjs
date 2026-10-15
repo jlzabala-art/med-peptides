@@ -51,8 +51,8 @@ const client = algoliasearch(APP_ID, ADMIN_KEY);
 
 // ── Field mask — only what Algolia needs ──────────────────────────────────────
 const FIELDS = [
-  'name', 'slug', 'tier', 'tags', 'description',
-  'goalIds', 'categoryId', 'category',
+  'name', 'slug', 'title', 'brand', 'vendor', 'supplierName', 'supplierId', 'tier', 'tags', 'description',
+  'goalIds', 'categoryId', 'category', 'format',
   'supplierIds', 'suppliersCount', 'supplier',
   'status', 'isActive', 'active',
   'sku', 'dosage', 'warehouse', 'stock',
@@ -62,19 +62,27 @@ const FIELDS = [
 ];
 
 function toAlgoliaRecord(id, data) {
+  const brand = data.brand || data.vendor || '';
+  const supplierName = data.supplierName || data.supplier || brand || '';
   return {
     objectID: id,
     name: data.name || '',
+    title: data.title || data.name || '',
+    brand,
+    vendor: data.vendor || brand,
+    supplierName,
+    supplier: supplierName,
+    format: data.format || '',
     // ── Faceting ──────────────────────────────────────────────────────────
     goalIds:        data.goalIds || [],
     categoryId:     data.categoryId || data.category || '',
     category:       data.category || '',
-    supplierIds:    data.supplierIds || (data.supplier ? [data.supplier] : []),
-    suppliersCount: data.suppliersCount ?? (data.supplierIds?.length ?? 0),
+    supplierIds:    data.supplierIds || (data.supplierId ? [data.supplierId] : (supplierName ? [supplierName] : [])),
+    suppliersCount: data.suppliersCount ?? (data.supplierIds?.length ?? 1),
     status:         data.status || 'published',
     isActive:       data.isActive !== undefined ? data.isActive : (data.active !== undefined ? data.active : true),
     // ── Search ────────────────────────────────────────────────────────────
-    slug:              data.slug || '',
+    slug:              data.slug || id,
     tier:              data.tier || '',
     tags:              data.tags || [],
     description_short: data.description ? data.description.substring(0, 200) : '',
@@ -87,7 +95,6 @@ function toAlgoliaRecord(id, data) {
     clinicalDescription:  data.clinicalDescription || '',
     // ── Admin ─────────────────────────────────────────────────────────────
     sku:                data.sku || '',
-    supplier:           data.supplier || '',
     dosage:             data.dosage || '',
     warehouse:          data.warehouse || '',
     stock:              data.stock || 0,

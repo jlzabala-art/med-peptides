@@ -495,6 +495,18 @@ export function getPrescriptionAtlasRecommendations(rx) {
       catalogSlug: 'colway-strengthening-shampoo',
       catalogUrl: '/p/colway-strengthening-shampoo'
     };
+  } else if (allText.includes('collagen') || allText.includes('skin') || allText.includes('joint') || allText.includes('tissue') || isTrichoTest || isMitochondrialLongevity || isTissueRepairWound) {
+    colwayRec = {
+      brand: 'Colway Laboratories',
+      productName: 'Colvita Bioactive Native Collagen & Marine Algae',
+      category: 'Systemic Tropocollagen & Fibroblast ECM Regeneration',
+      regulatoryNotice: 'EU Food Supplement · Sublimation Freeze-Dried Active Tropocollagen',
+      matchScore: '98% Connective Tissue Synergy',
+      clinicalRationale: 'Endogenous collagen synthesis declines with chronological age and metabolic strain. Colvita delivers intact freeze-dried fish tropocollagen triple helices combined with Fucus vesiculosus marine algae and natural vitamin E, providing rate-limiting signaling oligopeptides that stimulate fibroblast neo-collagenesis across skin, hair follicles, and vascular endothelia.',
+      routineAdvice: 'Take 2 capsules daily with meals and a glass of water for 60–90 days alongside your precision protocol.',
+      catalogSlug: 'colway-colvita',
+      catalogUrl: '/p/colway-colvita'
+    };
   }
 
   return {

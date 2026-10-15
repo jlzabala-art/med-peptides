@@ -514,7 +514,50 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
     - CAS Number, Fórmula Molecular, Peso Molecular y Estructura Química.
     - Especificaciones analíticas de CoA: Pureza HPLC (≥98.5% / ≥99%), Espectrometría de Masas (MS), Rotación Óptica $[\alpha]_D^{20}$, Disolventes Residuales (TFA/Acetonitrilo), Contenido de Agua Karl Fischer (<5%) y Endotoxinas bacterianas (<5 EU/mg).
     - Guía de Solubilización y Compatibilidad galénica (tampones de pH, compatibilidad con filtros PES 0.22 µm).
-    - Dossier regulatorio: Drug Master File (DMF), declaración cGMP / ISO 9001, certificado TSE/BSE y Ficha de Seguridad (SDS).
-    - Términos B2B: Cantidades Mínimas de Pedido (MOQ: 10g, 50g, 100g, 1kg), descuentos por volumen y solicitud formal de cotización/muestra para farmacias.
-  - **Prohibición de Mezcla**: NUNCA debe incluirse un formato de API a granel (ej. 40g Bulk API) dentro de la tabla de viales clínicos asignándole diluyente BAC Water o inyección SubQ. En su lugar, la página clínica debe enlazar a la monografía especializada de API mediante un banner B2B limpio para farmacias elaboradoras.
+
+## 43. Formato Universal de Fechas en Tablas (GCP Two-Line Standard — Golden Rule)
+- **Prohibición de Truncamiento**: Bajo ninguna circunstancia una fecha en una tabla puede aparecer cortada como `Oct 12, 20...` o `08/10/2...`.
+- **Estructura Estándar de 2 Líneas (Google Cloud Style)**:
+  - Línea 1 (Fecha): Día Mes Año en texto destacado (ej. `12 Oct 2026`), peso semi-bold (`fontWeight: 600`), color `#1e293b`.
+  - Línea 2 (Hora / Estado Relativo): Hora en formato 24h o UTC en texto secundario (ej. `14:32`), color `#94a3b8` y tamaño `0.68rem`.
+- **Cero Ruido de Iconos en Celdas de Fecha**: Está terminantemente prohibido incluir `<Calendar size={12} />` en cada fila de una tabla. El encabezado de la columna ya indica "Date". El icono solo consume 18–20px de ancho horizontal útil que provoca que el texto se trunque.
+- **Ancho Mínimo de Columna**: Toda columna de fecha en definiciones de `columns` de `DataTable` DEBE tener un ancho mínimo asignado de entre `14%` y `16%` (o mínimo `110px` fijos) con `white-space: nowrap`.
+
+## 44. Botón e Ícono Universal para Navegación a Páginas Públicas de Detalle (Universal ExternalLink — Golden Rule)
+- **Consistencia Visual Absoluta**: Para navegar a la página pública o dossier de detalle de cualquier entidad (paciente `/lab/[code]`, prescripción `/rx/[code]`, protocolo `/proto/[slug]`, producto `/p/[slug]`), se DEBE utilizar siempre el **mismo componente e icono estándar**:
+  - **Ícono**: `ExternalLink` (`size={12}` o `size={13}`).
+  - **Etiqueta**: `Dossier` (para expedientes médicos/prescripciones) o `View ↗` / `Detail` (para protocolos/productos).
+  - **Estilo visual**: Botón tipo pill Google Cloud con fondo `#ffffff`, borde sutil `#dadce0`, texto y flecha azul `#1a73e8`, con apertura en pestaña nueva (`target="_blank" rel="noopener noreferrer"`).
+- **Presencia Incondicional en Todas las Filas**: Este botón de enlace de detalle DEBE existir en **todas las filas de la tabla**, independientemente de si el registro está en estado `Draft`, `Pending`, `Approved` o `Completed`.
+- **Cero Sustitución de Botones**: Si una fila requiere una acción contextual transitoria (como firmar `Sign` o compartir `Share WhatsApp`), dicha acción se sitúa *al lado* del botón de detalle, pero NUNCA debe reemplazarlo ni ocultarlo. El operador siempre debe tener acceso en 1 clic a la vista pública.
+
+## 45. Iconografía Monocromática Estándar en Quick Actions y Toolbars (GCP Enterprise UX — Golden Rule)
+- **Reposo Monocromático (Idle / Default State)**:
+  - En barras de herramientas fijas, docks inferiores y menús de acciones rápidas, **TODOS los iconos secundarios deben renderizarse en gris corporativo neutro (`#5f6368` / `#475569`)** sobre botones de fondo blanco `#ffffff` y borde `#dadce0`.
+  - **Prohibido el efecto arcoíris**: Queda prohibido hardcodear iconos verdes, morados o amarillos en reposo en la barra de acciones rápidas (ej. no poner `ShieldCheck color="#16a34a"` o fondos de color permanente en botones secundarios).
+- **Botón Primario Único (Single Primary CTA)**:
+  - Solo UN botón primario puede tener fondo sólido de acento corporativo (`#1a73e8` o `var(--color-primary)`) con texto e icono blancos (ej. `+ Import Data / New Rx`).
+- **Color Semántico Exclusivo para Interacción (:hover) y Badges**:
+  - Los acentos semánticos (verde para WhatsApp, violeta para IA, rojo para peligro) solo deben manifestarse:
+    1. Al pasar el cursor (`:hover`), donde el borde y el icono se iluminan sutilmente con el color de la acción.
+    2. En badges de estado (`<StatusBadge />`), los cuales representan estado del sistema, no acciones.
+
+## 46. Estándar Apple Glassmorphism para Docks y Stickers Flotantes Inferiores (Golden Rule)
+- **Efecto Cristal Translúcido Apple (macOS / iOS Liquid Glass Standard)**:
+  - Todas las barras y docks de acción flotantes inferiores (ej. pie fijo de `/rx/[code]`, dock de `/dr/[slug]`, barra flotante de Account Manager) DEBEN renderizarse con la firma visual de cristal esmerilado de Apple:
+    - **Fondo translúcido**: `background: rgba(255, 255, 255, 0.78);` en modo claro (o `rgba(15, 23, 42, 0.82)` en modo oscuro).
+    - **Desenfoque y saturación obligatoria**: `backdrop-filter: blur(24px) saturate(190%);` y `-webkit-backdrop-filter: blur(24px) saturate(190%);`. La saturación al `190%` es obligatoria: evita que el vidrio se torne lechoso o grisáceo y potencia la vivacidad de los colores que circulan por debajo.
+    - **Bisel especular de luz reflejada (Specular Edge Highlight)**: `border: 1px solid rgba(255, 255, 255, 0.85);` acompañado de `outline: 1px solid rgba(203, 213, 225, 0.4);` y el reflejo superior interno `inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);`.
+    - **Sombra volumétrica suave**: `box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.05);`.
+    - **Geometría en cápsula**: `border-radius: 9999px;` con `padding: 7px 14px;` o `8px 16px;`.
+- **Garantía Innegociable de Contraste y Nitidez Tipográfica ("Legibilidad Cristalográfica")**:
+  - Está prohibido usar textos grises desvaídos o con opacidad reducida sobre el vidrio.
+  - Títulos y nombres de paciente/médico: `#0f172a` sólido, peso `700`, `letter-spacing: -0.01em`.
+  - Códigos de referencia (#RX-..., PO-...): `#0284c7` azul zafiro, peso `700`, monoespaciado.
+  - Botones secundarios interiores: `background: rgba(255, 255, 255, 0.85);`, `backdrop-filter: blur(10px);`, borde `rgba(203, 213, 225, 0.85)`, texto `#1e293b` y sombra interna `inset 0 1px 0 rgba(255, 255, 255, 0.9)`.
+  - Botones primarios (CTA): Gradiente refinado (`linear-gradient(180deg, #1a73e8 0%, #1557b0 100%)`) con brillo interior superior `inset 0 1px 0 rgba(255, 255, 255, 0.25)` y sombra `0 2px 6px rgba(26, 115, 232, 0.35)`.
+  - Menús desplegables ascendentes: `background: rgba(255, 255, 255, 0.88);`, `backdrop-filter: blur(24px) saturate(190%);`, `border-radius: 16px;`, borde `1px solid rgba(255, 255, 255, 0.85);`.
+- **Adaptabilidad Móvil (< 768px)**:
+  - En smartphones el dock no flota con márgenes laterales: se ancla a la base con `border-radius: 20px 20px 0 0;`, `border-top: 1px solid rgba(255, 255, 255, 0.9);`, fondo `rgba(255, 255, 255, 0.86);` y padding que respeta `env(safe-area-inset-bottom, 0px)`.
+
 

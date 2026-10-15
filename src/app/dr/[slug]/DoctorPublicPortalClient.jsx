@@ -54,7 +54,8 @@ import {
   Sun,
   Moon,
   RefreshCw,
-  Dna
+  Dna,
+  MoreHorizontal
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -75,6 +76,9 @@ import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendat
 import { triggerHaptic } from '@/utils/haptics';
 import { COUNTRIES } from '@/data/countries';
 import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolidator';
+import { calculateTreatmentDates, calculateTreatmentDuration } from '@/utils/clinical/clinicalFormulations';
+import DoctorFloatingGlassDock from '@/components/doctor/docks/DoctorFloatingGlassDock';
+import DoctorPracticeSearchModal from '@/components/doctor/modals/DoctorPracticeSearchModal';
 
 function safeRenderText(val, fallback = '') {
   if (!val) return fallback;
@@ -420,7 +424,7 @@ export default function DoctorPublicPortalClient({
 }) {
   const [slug, setSlug] = useState(propSlug);
   const [data, setData] = useState(initialData || null);
-  const [loading, setLoading] = useState(!initialData);
+  const [loading, setLoading] = useState(!initialData?.doctor && !initialData?.success && !initialData?.serverComputed);
   const [error, setError] = useState(null);
   const [agentDoctors, setAgentDoctors] = useState(availableDoctors || []);
   const [isSwitchingDoctor, setIsSwitchingDoctor] = useState(false);
@@ -521,7 +525,20 @@ export default function DoctorPublicPortalClient({
   const [activeLabelRx, setActiveLabelRx] = useState(null);
   const [isLabelsModalOpen, setIsLabelsModalOpen] = useState(false);
   const [isCredentialsModalOpen, setIsCredentialsModalOpen] = useState(false);
+  const [isPracticeSearchOpen, setIsPracticeSearchOpen] = useState(false);
   const [isServicesModalOpen, setIsServicesModalOpen] = useState(false);
+
+  // Keyboard shortcut (⌘K or /) for Practice Search
+  useEffect(() => {
+    const handleGlobalSearchKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsPracticeSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalSearchKey);
+    return () => window.removeEventListener('keydown', handleGlobalSearchKey);
+  }, []);
 
   // GCP Resource Inspector Drawer State (Golden Rule #4: Master-Detail sin abandonar contexto)
   const [selectedInspectorItem, setSelectedInspectorItem] = useState(null);
@@ -585,6 +602,98 @@ export default function DoctorPublicPortalClient({
   const [recSearchQuery, setRecSearchQuery] = useState('');
   const [expandedRecId, setExpandedRecId] = useState(null);
   const [recFilter, setRecFilter] = useState(null); // { id: string, title: string, rxIds: string[] }
+
+  // ── Treatment Timeline & Duration Inline Editing State (Golden Rule #5) ──
+  const [editingTimelineRxId, setEditingTimelineRxId] = useState(null);
+  const [timelineStartDate, setTimelineStartDate] = useState('');
+  const [timelineDurationDays, setTimelineDurationDays] = useState(30);
+  const [isSavingTimeline, setIsSavingTimeline] = useState(false);
+
+  // ── Quick Action Dots Popover Menu State ──
+  const [activeActionsMenuRxId, setActiveActionsMenuRxId] = useState(null);
+
+  // Close floating action menu when clicking outside
+  useEffect(() => {
+    const handleOutsideActionClick = (e) => {
+      if (!e.target.closest('.gcp-row-actions-menu')) {
+        setActiveActionsMenuRxId(null);
+      }
+    };
+    window.addEventListener('click', handleOutsideActionClick);
+    return () => window.removeEventListener('click', handleOutsideActionClick);
+  }, []);
+
+  const startEditingTimeline = (rx, e) => {
+    if (e) e.stopPropagation();
+    triggerHaptic('selection');
+    const dates = calculateTreatmentDates(rx);
+    setTimelineStartDate(dates.startDate);
+    setTimelineDurationDays(dates.durationDays || 30);
+    setEditingTimelineRxId(rx.code || rx.id);
+  };
+
+  const handleCancelEditingTimeline = (e) => {
+    if (e) e.stopPropagation();
+    setEditingTimelineRxId(null);
+  };
+
+  const handleSaveTimeline = async (rx, e) => {
+    if (e) e.stopPropagation();
+    try {
+      setIsSavingTimeline(true);
+      triggerHaptic('medium');
+
+      const parsedDays = Number(timelineDurationDays) || 30;
+      const res = await fetch('/api/prescriptions/update-timeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prescriptionId: rx.id || rx.code,
+          prescriptionNumber: rx.code || rx.prescriptionNumber,
+          startDate: timelineStartDate,
+          durationDays: parsedDays
+        })
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Failed to update treatment timeline');
+      }
+
+      // Optimistically update prescription in reactive client state (Golden Rule #25)
+      setData(prev => {
+        if (!prev?.prescriptions) return prev;
+        const updatedRxList = prev.prescriptions.map(p => {
+          if ((p.id && p.id === rx.id) || (p.code && p.code === rx.code)) {
+            const weeks = Math.round(parsedDays / 7);
+            return {
+              ...p,
+              startDate: timelineStartDate,
+              treatmentStartDate: timelineStartDate,
+              durationDays: parsedDays,
+              durationWeeks: weeks,
+              duration: `${parsedDays} Days (${weeks} Weeks)`,
+              treatmentDuration: `${parsedDays} Days`,
+              endDate: json.updated?.endDate
+            };
+          }
+          return p;
+        });
+        return {
+          ...prev,
+          prescriptions: updatedRxList
+        };
+      });
+
+      setEditingTimelineRxId(null);
+      toast.success(`Timeline updated: ${parsedDays} days starting ${timelineStartDate} ✓`);
+    } catch (err) {
+      console.error('Error saving timeline:', err);
+      toast.error(err.message || 'Could not save timeline');
+    } finally {
+      setIsSavingTimeline(false);
+    }
+  };
 
   // Inline Doctor Profile Field Editing State (Rule #5: Inline editing with explicit Save & Cancel)
   const [editingDoctorField, setEditingDoctorField] = useState(null); // 'name' | 'specialty' | 'clinic' | 'license' | 'mobile' | 'email' | null
@@ -730,8 +839,8 @@ export default function DoctorPublicPortalClient({
   }, [searchQuery, statusFilter, taskFilter, temporalFilter]);
 
   useEffect(() => {
-    // If initialData is already hydrated, only fetch in background if stale
-    if (initialData && data?.success) return;
+    // If initialData is already hydrated from server, do NOT flash loading screen or re-fetch on mount
+    if (initialData?.doctor || initialData?.success || initialData?.serverComputed || data?.doctor || data?.success) return;
 
     async function fetchDoctorPortal() {
       try {
@@ -1735,7 +1844,7 @@ export default function DoctorPublicPortalClient({
     {
       key: 'treatmentTitle',
       header: 'Prescription Regimen',
-      width: '34%',
+      width: '30%',
       align: 'left',
       sortable: true,
       render: (rx) => {
@@ -1828,20 +1937,200 @@ export default function DoctorPublicPortalClient({
     },
     {
       key: 'createdAt',
-      header: 'Date',
-      width: '12%',
+      header: 'Start Date & Duration',
+      width: '18%',
       align: 'left',
       sortable: true,
-      render: (rx) => (
-        <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
-          <Calendar size={12} style={{ color: '#64748b', flexShrink: 0 }} />
-          <span>
-            {rx.createdAt
-              ? new Date(rx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-              : 'Active'}
-          </span>
-        </div>
-      )
+      render: (rx) => {
+        const isEditing = editingTimelineRxId === (rx.code || rx.id);
+        const dates = calculateTreatmentDates(rx, isEditing ? timelineStartDate : null, isEditing ? timelineDurationDays : null);
+
+        if (isEditing) {
+          return (
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: '#ffffff',
+                border: '1.5px solid #1a73e8',
+                borderRadius: '6px',
+                padding: '6px 8px',
+                boxShadow: '0 2px 8px rgba(26,115,232,0.15)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '5px',
+                minWidth: '185px'
+              }}
+            >
+              {/* Start Date Input */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#475569' }}>Start:</span>
+                <input
+                  type="date"
+                  value={timelineStartDate}
+                  onChange={(e) => setTimelineStartDate(e.target.value)}
+                  style={{
+                    fontSize: '0.74rem',
+                    padding: '2px 4px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '4px',
+                    color: '#0f172a',
+                    fontWeight: 600,
+                    outline: 'none',
+                    width: '110px'
+                  }}
+                />
+              </div>
+
+              {/* Duration Presets & Input */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#475569' }}>Days:</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={timelineDurationDays}
+                  onChange={(e) => setTimelineDurationDays(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                  style={{
+                    fontSize: '0.74rem',
+                    padding: '2px 4px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '4px',
+                    color: '#0f172a',
+                    fontWeight: 600,
+                    width: '46px',
+                    textAlign: 'center'
+                  }}
+                />
+                <div style={{ display: 'flex', gap: '2px' }}>
+                  {[30, 60, 90].map(d => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setTimelineDurationDays(d)}
+                      style={{
+                        fontSize: '0.64rem',
+                        padding: '1px 4px',
+                        borderRadius: '3px',
+                        border: timelineDurationDays === d ? '1px solid #1a73e8' : '1px solid #e2e8f0',
+                        background: timelineDurationDays === d ? '#eff6ff' : '#f8fafc',
+                        color: timelineDurationDays === d ? '#1a73e8' : '#64748b',
+                        fontWeight: 650,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {d}d
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Projected End Date Preview */}
+              <div style={{ fontSize: '0.66rem', color: '#64748b', lineHeight: 1.1 }}>
+                End: <strong style={{ color: '#0f172a' }}>{dates.endFormatted}</strong>
+              </div>
+
+              {/* Explicit Save & Cancel Buttons (Golden Rule #5) */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px', marginTop: '2px' }}>
+                <button
+                  type="button"
+                  onClick={handleCancelEditingTimeline}
+                  style={{
+                    height: '22px',
+                    padding: '0 6px',
+                    fontSize: '0.68rem',
+                    borderRadius: '3px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#64748b',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '2px'
+                  }}
+                  title="Cancel edit"
+                >
+                  <X size={10} />
+                  <span>Cancel</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={isSavingTimeline}
+                  onClick={(e) => handleSaveTimeline(rx, e)}
+                  style={{
+                    height: '22px',
+                    padding: '0 8px',
+                    fontSize: '0.68rem',
+                    borderRadius: '3px',
+                    border: '1px solid #1a73e8',
+                    background: '#1a73e8',
+                    color: '#ffffff',
+                    fontWeight: 650,
+                    cursor: isSavingTimeline ? 'wait' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px'
+                  }}
+                  title="Save changes to Firestore"
+                >
+                  {isSavingTimeline ? <Loader2 size={10} className="animate-spin" /> : <Check size={10} />}
+                  <span>Save</span>
+                </button>
+              </div>
+            </div>
+          );
+        }
+
+        // Non-editing Display
+        return (
+          <div
+            onClick={(e) => startEditingTimeline(rx, e)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              cursor: 'pointer',
+              padding: '2px 4px',
+              borderRadius: '4px',
+              transition: 'background 0.12s'
+            }}
+            title="Click to edit treatment start date and duration"
+            onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            {/* Start Date */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Calendar size={12} style={{ color: '#1a73e8', flexShrink: 0 }} />
+              <span style={{ fontSize: '0.78rem', fontWeight: 650, color: '#1e293b' }}>
+                {dates.startFormatted}
+              </span>
+              <Edit3 size={10} style={{ color: '#94a3b8', opacity: 0.6, flexShrink: 0 }} />
+            </div>
+
+            {/* Duration Badge */}
+            <div style={{ marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 650,
+                  color: dates.isEstimated ? '#0369a1' : '#047857',
+                  background: dates.isEstimated ? '#f0f9ff' : '#f0fdf4',
+                  border: dates.isEstimated ? '1px solid #bae6fd' : '1px solid #bbf7d0',
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px'
+                }}
+                title={dates.reason}
+              >
+                <Clock size={10} />
+                <span>{dates.durationLabel}</span>
+                {dates.isEstimated && <span style={{ opacity: 0.7, fontSize: '0.62rem' }}>~auto</span>}
+              </span>
+            </div>
+          </div>
+        );
+      }
     },
     {
       key: 'actions',
@@ -1852,35 +2141,16 @@ export default function DoctorPublicPortalClient({
         const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
         const isPending = !isProposal && ['pending', 'draft'].includes((rx.status || rx.state || '').toLowerCase());
         const isSigning = signingTaskId === (rx.code || rx.id);
+        const isMenuOpen = activeActionsMenuRxId === (rx.code || rx.id);
 
         return (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'flex-end', width: '100%' }} onClick={e => e.stopPropagation()}>
-            {isProposal ? (
-              <button
-                type="button"
-                onClick={(e) => handleShareProposalWhatsApp(rx, e)}
-                style={{
-                  height: '28px',
-                  padding: '0 8px',
-                  borderRadius: '4px',
-                  background: '#25d366',
-                  border: '1px solid #1ebc59',
-                  color: '#ffffff',
-                  fontSize: '0.73rem',
-                  fontWeight: 650,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  boxShadow: '0 1px 2px rgba(37,211,102,0.25)',
-                  whiteSpace: 'nowrap'
-                }}
-                title="Share treatment proposal with patient via WhatsApp"
-              >
-                <MessageCircle size={12} style={{ color: '#ffffff' }} />
-                <span>Share Offer</span>
-              </button>
-            ) : isPending ? (
+          <div
+            className="gcp-row-actions-menu"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'flex-end', width: '100%', position: 'relative' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Contextual Action: Sign (if pending) */}
+            {isPending && (
               <button
                 type="button"
                 disabled={isSigning}
@@ -1915,81 +2185,339 @@ export default function DoctorPublicPortalClient({
                   </>
                 )}
               </button>
-            ) : (
-              <Link
-                href={`/rx/${rx.code}`}
+            )}
+
+            {/* Contextual Action: Share Offer (if proposal) */}
+            {isProposal && (
+              <button
+                type="button"
+                onClick={(e) => handleShareProposalWhatsApp(rx, e)}
                 style={{
                   height: '28px',
                   padding: '0 8px',
                   borderRadius: '4px',
-                  background: '#ffffff',
-                  border: '1px solid #dadce0',
-                  color: '#1a73e8',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
+                  background: '#25d366',
+                  border: '1px solid #1ebc59',
+                  color: '#ffffff',
+                  fontSize: '0.73rem',
+                  fontWeight: 650,
+                  cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
-                  textDecoration: 'none',
+                  boxShadow: '0 1px 2px rgba(37,211,102,0.25)',
                   whiteSpace: 'nowrap'
                 }}
-                title="Open complete clinical monograph and posology dossier"
+                title="Share treatment proposal with patient via WhatsApp"
               >
-                <span>Dossier</span>
-                <ExternalLink size={11} />
-              </Link>
+                <MessageCircle size={12} style={{ color: '#ffffff' }} />
+                <span>Offer</span>
+              </button>
             )}
 
+            {/* UNIVERSAL DETAIL LINK BUTTON (Always visible on all rows) */}
+            <Link
+              href={`/rx/${rx.code}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                height: '28px',
+                padding: '0 8px',
+                borderRadius: '4px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#1a73e8',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.12s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafd'; e.currentTarget.style.borderColor = '#1a73e8'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#dadce0'; }}
+              title="Open public clinical prescription dossier in a new tab"
+            >
+              <span>Dossier</span>
+              <ExternalLink size={12} style={{ color: '#1a73e8' }} />
+            </Link>
+
+            {/* QUICK ACTIONS ELLIPSIS BUTTON ("... / linea de suspensivos") */}
             <button
               type="button"
-              onClick={() => handleOpenLabelsModal(rx)}
-              title="View vector pharmacy compounding bottle label"
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerHaptic('selection');
+                setActiveActionsMenuRxId(prev => prev === (rx.code || rx.id) ? null : (rx.code || rx.id));
+              }}
               style={{
                 height: '28px',
                 width: '28px',
                 borderRadius: '4px',
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                color: '#0284c7',
+                background: isMenuOpen ? '#eff6ff' : '#ffffff',
+                border: isMenuOpen ? '1px solid #1a73e8' : '1px solid #dadce0',
+                color: isMenuOpen ? '#1a73e8' : '#5f6368',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                flexShrink: 0
+                flexShrink: 0,
+                transition: 'all 0.12s'
               }}
+              title="More quick clinical actions..."
             >
-              <Tag size={13} />
+              <MoreHorizontal size={15} />
             </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                const url = `${window.location.origin}/rx/${rx.code}?view=patient`;
-                navigator.clipboard?.writeText(url);
-                toast.success('Patient direct link copied ✓');
-              }}
-              title="Copy direct patient-facing prescription link"
-              style={{
-                height: '28px',
-                width: '28px',
-                borderRadius: '4px',
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                color: '#5f6368',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}
-            >
-              <Share2 size={13} />
-            </button>
+            {/* FLOATING ACTION POINTS MENU (Pop-over) */}
+            {isMenuOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '32px',
+                  right: '0',
+                  zIndex: 90,
+                  width: '240px',
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                  padding: '6px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px',
+                  textAlign: 'left'
+                }}
+              >
+                {/* 1. Patient Posology Handout */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveActionsMenuRxId(null);
+                    handleOpenHandout(rx);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#334155',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    width: '100%',
+                    textAlign: 'left',
+                    transition: 'background 0.1s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <FileText size={14} style={{ color: '#4338ca' }} />
+                  <span>Patient Posology Handout</span>
+                </button>
+
+                {/* 2. Re-prescribe Formula */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveActionsMenuRxId(null);
+                    handleReprescribeFormula(rx);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#334155',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    width: '100%',
+                    textAlign: 'left',
+                    transition: 'background 0.1s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <RefreshCw size={14} style={{ color: '#0284c7' }} />
+                  <span>Re-prescribe Formula</span>
+                </button>
+
+                {/* 3. Contact Atlas on WhatsApp */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveActionsMenuRxId(null);
+                    handleContactAtlasWhatsApp(
+                      `Prescription #${rx.code} (${rx.patientName || 'Patient'})`,
+                      `Clinical formulation inquiry: ${rx.treatmentTitle || 'Compounded Formula'}`
+                    );
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#334155',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    width: '100%',
+                    textAlign: 'left',
+                    transition: 'background 0.1s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <MessageCircle size={14} style={{ color: '#059669' }} />
+                  <span>Contact Atlas on WhatsApp</span>
+                </button>
+
+                {/* 4. Official Bottle Labels */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveActionsMenuRxId(null);
+                    handleOpenLabelsModal(rx);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#334155',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    width: '100%',
+                    textAlign: 'left',
+                    transition: 'background 0.1s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <Tag size={14} style={{ color: '#d97706' }} />
+                  <span>Official Bottle Labels</span>
+                </button>
+
+                {/* 5. Protocol Reference (if present) */}
+                {(rx.protocolUrl || rx.protocolSlug) && (
+                  <a
+                    href={rx.protocolUrl || `/proto/${rx.protocolSlug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setActiveActionsMenuRxId(null)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 10px',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#1d4ed8',
+                      textDecoration: 'none',
+                      borderRadius: '5px',
+                      transition: 'background 0.1s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <BookOpen size={14} style={{ color: '#1d4ed8' }} />
+                    <span>Protocol Reference</span>
+                    <ExternalLink size={10} style={{ marginLeft: 'auto', opacity: 0.6 }} />
+                  </a>
+                )}
+
+                <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
+
+                {/* 6. Edit Start Date & Duration */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveActionsMenuRxId(null);
+                    startEditingTimeline(rx, e);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#475569',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    width: '100%',
+                    textAlign: 'left',
+                    transition: 'background 0.1s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <Calendar size={14} style={{ color: '#1a73e8' }} />
+                  <span>Edit Start Date & Duration</span>
+                </button>
+
+                {/* 7. Copy Patient Link */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveActionsMenuRxId(null);
+                    const url = `${window.location.origin}/rx/${rx.code}?view=patient`;
+                    navigator.clipboard?.writeText(url);
+                    toast.success('Patient direct link copied ✓');
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#475569',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    width: '100%',
+                    textAlign: 'left',
+                    transition: 'background 0.1s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <Share2 size={14} style={{ color: '#64748b' }} />
+                  <span>Copy Patient Link</span>
+                </button>
+              </div>
+            )}
           </div>
         );
       }
     }
-  ], [signingTaskId, handleSignOffPrescription, handleShareProposalWhatsApp]);
+  ], [signingTaskId, handleSignOffPrescription, handleShareProposalWhatsApp, editingTimelineRxId, timelineStartDate, timelineDurationDays, isSavingTimeline, activeActionsMenuRxId]);
 
   // ── Bloodo Diagnostic Lab Results Columns (DataTable Universal) ─────────
   const labResultsColumns = useMemo(() => [
@@ -2354,34 +2882,43 @@ export default function DoctorPublicPortalClient({
     ];
   }, [data?.bloodoPanels]);
 
+  const uniquePatientsCount = useMemo(() => {
+    const set = new Set();
+    allPrescriptions.forEach(rx => {
+      const p = (rx.patientName || rx.patient?.name || rx.patientId || '').trim().toLowerCase();
+      if (p) set.add(p);
+    });
+    return set.size;
+  }, [allPrescriptions]);
+
   const sidebarNavGroups = useMemo(() => [
     {
-      group: 'CLINICAL OPERATIONS',
-      groupTitle: 'CLINICAL OPERATIONS',
+      group: 'PRACTICE WORKSPACE',
+      groupTitle: 'PRACTICE WORKSPACE',
       items: [
         {
           id: 'overview',
-          label: 'Clinical Overview & KPIs',
+          label: 'Practice Dashboard',
           icon: BarChart3,
           badge: null
         },
         {
           id: 'prescriptions',
-          label: 'My Prescriptions',
+          label: 'Patient Prescriptions',
           icon: Layers,
-          badge: filteredPrescriptions.length > 0 ? `${filteredPrescriptions.length}` : null,
+          badge: allPrescriptions.length > 0 ? `${allPrescriptions.length}` : null,
           badgeColor: '#1a73e8'
         },
         {
-          id: 'lab_results',
-          label: 'Lab Results',
-          icon: FlaskConical,
-          badge: allLabResults.length > 0 ? `${allLabResults.length}` : null,
-          badgeColor: '#059669'
+          id: 'patients',
+          label: 'Monitored Patients',
+          icon: Users,
+          badge: uniquePatientsCount > 0 ? `${uniquePatientsCount}` : null,
+          badgeColor: '#0284c7'
         },
         {
           id: 'tasks',
-          label: 'Pending Tasks',
+          label: 'Action Queue & Reviews',
           icon: Clock,
           badge: filteredTasks.length > 0 ? `${filteredTasks.length}` : null,
           badgeColor: filteredTasks.length > 0 ? '#b06000' : '#5f6368'
@@ -2393,47 +2930,71 @@ export default function DoctorPublicPortalClient({
       groupTitle: 'CLINICAL INTELLIGENCE',
       items: [
         {
+          id: 'lab_results',
+          label: 'Lab Diagnostics & DBS',
+          icon: FlaskConical,
+          badge: allLabResults.length > 0 ? `${allLabResults.length}` : null,
+          badgeColor: '#059669'
+        },
+        {
           id: 'recommendations',
-          label: 'Atlas Recommendations',
+          label: 'Clinical Synergies & Protocols',
           icon: Sparkles,
           badge: 'Synergy',
           badgeColor: '#7c3aed'
+        },
+        {
+          id: 'search',
+          label: 'Practice Spotlight Search',
+          icon: Search,
+          badge: '⌘K',
+          badgeColor: '#1a73e8'
         }
       ]
     },
     {
-      group: 'PRACTICE & TOOLS',
-      groupTitle: 'PRACTICE & TOOLS',
+      group: 'ACTIONS & CREDENTIALS',
+      groupTitle: 'ACTIONS & CREDENTIALS',
       items: [
         {
           id: 'intake',
-          label: 'Share Patient Intake',
-          icon: Share2,
-          action: handleCopyIntakeLink,
-          badge: '1-Click'
+          label: 'New Rx / Patient Intake',
+          icon: Plus,
+          badge: '1-Click',
+          badgeColor: '#1a73e8'
         },
         {
           id: 'credentials',
-          label: 'DHA License & Profile',
+          label: 'Physician Profile & DHA License',
           icon: ShieldCheck,
-          action: () => setIsCredentialsModalOpen(true),
-          badge: 'Verified'
+          badge: 'Verified',
+          badgeColor: '#16a34a'
         },
         {
           id: 'services_tiers',
           label: 'Atlas Platform & Services',
           icon: Award,
-          action: () => setIsServicesModalOpen(true),
           badge: 'Free vs Pro',
           badgeColor: '#137333'
         }
       ]
     }
-  ], [filteredTasks.length, filteredPrescriptions.length, filteredFormulary.length, filteredProtocols.length]);
+  ], [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, allLabResults.length]);
 
   const handleSidebarNavigate = (itemOrId) => {
     triggerHaptic('light');
     const id = typeof itemOrId === 'string' ? itemOrId : itemOrId?.id;
+
+    if (id === 'intake') {
+      setIsIntakeOpen(true);
+      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      return;
+    }
+    if (id === 'search' || id === 'patients') {
+      setIsPracticeSearchOpen(true);
+      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      return;
+    }
     if (id === 'credentials') {
       setIsCredentialsModalOpen(true);
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
@@ -2444,18 +3005,8 @@ export default function DoctorPublicPortalClient({
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
       return;
     }
-    if (id === 'intake') {
-      handleCopyIntakeLink();
-      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
-      return;
-    }
-    if (id === 'protocols_catalog') {
-      window.open('https://www.atlashealth-services.com/c/CAT-MUWWS6JL', '_blank');
-      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
-      return;
-    }
 
-    if (id === 'search' || id === 'prescriptions') {
+    if (id === 'prescriptions') {
       setQuickRxFilter('all');
       setStatusFilter('all');
       setPatientFilter('all');
@@ -2548,18 +3099,19 @@ export default function DoctorPublicPortalClient({
           width: calc(100% - 280px);
           max-width: 820px;
           z-index: 40;
-          background: rgba(255, 255, 255, 0.96);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          border: 1px solid rgba(203, 213, 225, 0.9);
+          background: rgba(255, 255, 255, 0.78);
+          backdrop-filter: blur(24px) saturate(190%);
+          -webkit-backdrop-filter: blur(24px) saturate(190%);
+          border: 1px solid rgba(255, 255, 255, 0.85);
+          outline: 1px solid rgba(203, 213, 225, 0.4);
           border-radius: 9999px;
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.05);
+          box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.05), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
           padding: 8px 14px;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 10px;
-          transition: all 0.2s ease;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .gcp-portal-layout:has(.gcp-clinical-sidebar.collapsed) .doctor-bottom-dock {
           left: calc(64px + (100% - 64px) / 2);
@@ -2588,48 +3140,63 @@ export default function DoctorPublicPortalClient({
           border: 1px solid transparent;
         }
         .doctor-dock-btn-primary {
-          background: #1a73e8;
+          background: linear-gradient(180deg, #1a73e8 0%, #1557b0 100%);
           color: #ffffff;
-          border-color: #1a73e8;
-          box-shadow: 0 1px 3px rgba(26, 115, 232, 0.35);
+          border-color: rgba(21, 87, 176, 0.85);
+          box-shadow: 0 2px 6px rgba(26, 115, 232, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }
         .doctor-dock-btn-primary:hover {
           background: #1557b0;
           border-color: #1557b0;
-          box-shadow: 0 2px 6px rgba(26, 115, 232, 0.45);
+          box-shadow: 0 3px 8px rgba(26, 115, 232, 0.45);
         }
         .doctor-dock-btn-secondary {
-          background: #ffffff;
-          color: #374151;
-          border-color: #d1d5db;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          color: #1e293b;
+          border-color: rgba(203, 213, 225, 0.85);
+          box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
         }
         .doctor-dock-btn-secondary:hover {
-          background: #f8fafc;
+          background: #ffffff;
           border-color: #1a73e8;
           color: #1a73e8;
+          box-shadow: 0 2px 6px rgba(26, 115, 232, 0.12);
         }
         .doctor-dock-btn-whatsapp {
-          background: #f0fdf4;
-          color: #15803d;
-          border-color: #bbf7d0;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          color: #1e293b;
+          border-color: rgba(203, 213, 225, 0.85);
+          box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
         }
         .doctor-dock-btn-whatsapp:hover {
-          background: #dcfce7;
+          background: #f0fdf4;
           border-color: #86efac;
           color: #166534;
+          box-shadow: 0 2px 6px rgba(22, 163, 74, 0.12);
+        }
+        .doctor-dock-btn-whatsapp:hover svg {
+          color: #16a34a !important;
         }
         .doctor-dock-btn-ai {
-          background: #f5f3ff;
-          color: #4f46e5;
-          border-color: #ddd6fe;
-          box-shadow: 0 1px 2px rgba(79, 70, 229, 0.08);
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          color: #1e293b;
+          border-color: rgba(203, 213, 225, 0.85);
+          box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
         }
         .doctor-dock-btn-ai:hover {
-          background: #ede9fe;
+          background: #f5f3ff;
           border-color: #c4b5fd;
           color: #4338ca;
+          box-shadow: 0 2px 6px rgba(124, 58, 237, 0.12);
+        }
+        .doctor-dock-btn-ai:hover svg {
+          color: #7c3aed !important;
         }
         @media (max-width: 768px) {
           .doctor-bottom-dock {
@@ -2638,12 +3205,16 @@ export default function DoctorPublicPortalClient({
             transform: none;
             width: 100%;
             max-width: 100%;
-            border-radius: 16px 16px 0 0;
+            border-radius: 20px 20px 0 0;
             border-left: none;
             border-right: none;
             border-bottom: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.86);
+            backdrop-filter: blur(24px) saturate(190%);
+            -webkit-backdrop-filter: blur(24px) saturate(190%);
             padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)) 10px;
-            box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.12);
+            box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
           }
           .doctor-bottom-dock-actions {
             flex-wrap: nowrap;
@@ -4235,149 +4806,6 @@ export default function DoctorPublicPortalClient({
                           </span>
                         </div>
 
-                        {/* Integrated Clinical Action Buttons */}
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                          {/* Proposal #2: Patient Posology Handout */}
-                          <button
-                            type="button"
-                            onClick={() => handleOpenHandout(rx)}
-                            style={{
-                              fontSize: '0.76rem',
-                              fontWeight: 650,
-                              color: '#4338ca',
-                              background: '#eef2ff',
-                              border: '1px solid #c7d2fe',
-                              padding: '4px 10px',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px',
-                              boxShadow: '0 1px 2px rgba(67, 56, 202, 0.08)'
-                            }}
-                            title="View and download patient posology instructions handout (PDF / Print)"
-                          >
-                            <FileText size={12} />
-                            <span>Patient Handout</span>
-                          </button>
-
-                          {/* Proposal #4: Re-prescribe Formula for Another Patient */}
-                          <button
-                            type="button"
-                            onClick={() => handleReprescribeFormula(rx)}
-                            style={{
-                              fontSize: '0.76rem',
-                              fontWeight: 650,
-                              color: '#0369a1',
-                              background: '#f0f9ff',
-                              border: '1px solid #bae6fd',
-                              padding: '4px 10px',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px'
-                            }}
-                            title="Replicate this formula in Clinical Intake for a new patient"
-                          >
-                            <RefreshCw size={12} />
-                            <span>Re-prescribe Formula</span>
-                          </button>
-
-                          {/* Proposal #1: Direct WhatsApp Consultation for this Prescription */}
-                          <button
-                            type="button"
-                            onClick={() => handleContactAtlasWhatsApp(
-                              `Prescription #${rx.code} (${rx.patientName || 'Patient'})`,
-                              `Clinical formulation inquiry: ${rx.treatmentTitle || 'Compounded Formula'} (${parts.length} parts, ${totalApisCount} active ingredients)`
-                            )}
-                            style={{
-                              fontSize: '0.76rem',
-                              fontWeight: 650,
-                              color: '#047857',
-                              background: '#f0fdf4',
-                              border: '1px solid #a7f3d0',
-                              padding: '4px 10px',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px'
-                            }}
-                            title="Contact Atlas Clinical Support on WhatsApp"
-                          >
-                            <MessageCircle size={12} />
-                            <span>Contact Atlas on WhatsApp</span>
-                          </button>
-
-                          <Link
-                            href={`/rx/${rx.code}`}
-                            style={{
-                              fontSize: '0.76rem',
-                              fontWeight: 650,
-                              color: '#003666',
-                              background: '#ffffff',
-                              border: '1px solid #cbd5e1',
-                              padding: '4px 10px',
-                              borderRadius: '4px',
-                              textDecoration: 'none',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-                            }}
-                          >
-                            <span>Full Dossier</span>
-                            <ArrowUpRight size={12} />
-                          </Link>
-
-                          {(rx.protocolUrl || rx.protocolSlug) && (
-                            <a
-                              href={rx.protocolUrl || `/proto/${rx.protocolSlug}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                fontSize: '0.76rem',
-                                fontWeight: 650,
-                                color: '#1d4ed8',
-                                background: '#eff6ff',
-                                border: '1px solid #bfdbfe',
-                                padding: '4px 10px',
-                                borderRadius: '4px',
-                                textDecoration: 'none',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px'
-                              }}
-                            >
-                              <BookOpen size={12} />
-                              <span>Protocol Reference</span>
-                              <ExternalLink size={10} />
-                            </a>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => handleOpenLabelsModal(rx)}
-                            style={{
-                              fontSize: '0.76rem',
-                              fontWeight: 650,
-                              color: '#0284c7',
-                              background: '#ffffff',
-                              border: '1px solid #bae6fd',
-                              padding: '4px 10px',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              boxShadow: '0 1px 2px rgba(2,132,199,0.06)'
-                            }}
-                          >
-                            <Tag size={12} />
-                            <span>Official Bottle Labels</span>
-                          </button>
-                        </div>
                       </div>
 
                       {/* Multi-Part Formulations Container (Full Horizontal Width) */}
@@ -5850,59 +6278,42 @@ export default function DoctorPublicPortalClient({
       </div>
 
       {/* ── Fixed Bottom Actions Dock ("Sticker" Footer for Laptop & Mobile) ── */}
-      <footer className="doctor-bottom-dock" role="toolbar" aria-label="Physician Quick Actions">
-        <div className="doctor-bottom-dock-actions">
-          <button
-            type="button"
-            className="doctor-dock-btn doctor-dock-btn-primary"
-            onClick={() => setIsIntakeOpen(true)}
-            title="Import lab data or create a new compounded prescription"
-          >
-            <Plus size={15} />
-            <span>Import Data / New Rx</span>
-          </button>
+      <DoctorFloatingGlassDock
+        onOpenIntake={() => setIsIntakeOpen(true)}
+        onOpenSearch={() => {
+          triggerHaptic('selection');
+          setIsPracticeSearchOpen(true);
+        }}
+        onOpenAtlasAi={() => setIsAtlasAiOpen(true)}
+        aiUsesRemaining={aiUsesRemaining}
+        onOpenWhatsApp={() => setIsRequestInfoOpen(true)}
+      />
 
-          <button
-            type="button"
-            className="doctor-dock-btn doctor-dock-btn-secondary"
-            onClick={handleCopyIntakeLink}
-            title="Copy patient intake link to clipboard"
-          >
-            <Share2 size={14} />
-            <span>Share Intake</span>
-          </button>
-
-          <button
-            type="button"
-            className="doctor-dock-btn doctor-dock-btn-secondary"
-            onClick={() => setIsCredentialsModalOpen(true)}
-            title="View physician profile and credentials"
-          >
-            <ShieldCheck size={14} color="#16a34a" />
-            <span>Doctor Profile</span>
-          </button>
-
-          <button
-            type="button"
-            className="doctor-dock-btn doctor-dock-btn-ai"
-            onClick={() => setIsAtlasAiOpen(true)}
-            title="Atlas AI clinical query credits"
-          >
-            <Bot size={14} />
-            <span>Atlas AI ({aiUsesRemaining}/5)</span>
-          </button>
-
-          <button
-            type="button"
-            className="doctor-dock-btn doctor-dock-btn-whatsapp"
-            onClick={() => setIsRequestInfoOpen(true)}
-            title="Request clinical assistance via WhatsApp"
-          >
-            <MessageCircle size={14} />
-            <span>WhatsApp</span>
-          </button>
-        </div>
-      </footer>
+      {/* ── Practice Spotlight Search Palette (Rule #7 & Spotlight standard) ── */}
+      <DoctorPracticeSearchModal
+        isOpen={isPracticeSearchOpen}
+        onClose={() => setIsPracticeSearchOpen(false)}
+        doctor={doctor}
+        prescriptions={allPrescriptions}
+        topFormulations={data?.serverAnalytics?.topApis || []}
+        onSelectPatient={(pName) => {
+          setPatientFilter(pName);
+          setActiveAnchor('prescriptions');
+          toast.success(`Showing prescriptions for ${pName}`);
+        }}
+        onSelectPrescription={(rx) => {
+          handleRowClickPrescription(rx);
+        }}
+        onSelectProduct={(prodName) => {
+          setApiFilter(prodName);
+          setActiveAnchor('prescriptions');
+          toast.success(`Filtered practice for ${prodName}`);
+        }}
+        onSelectRecommendation={(rec) => {
+          handleContactAtlasWhatsApp('clinical_recommendation', `Inquiry regarding ${rec.title} (${rec.formatBadge || rec.format})`);
+        }}
+        triggerHaptic={triggerHaptic}
+      />
 
       {/* ── Official Compounding Bottle Labels Modal (Direct from Doctor Portal) ── */}
       {isLabelsModalOpen && activeLabelRx && (

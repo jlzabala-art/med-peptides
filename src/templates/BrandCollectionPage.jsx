@@ -116,6 +116,27 @@ const BRAND_CONFIGS = {
       { id: 'proteomics', label: 'Organ Proteomics & Blood' },
       { id: 'platform', label: 'Digital Platform & Pro' }
     ]
+  },
+  teletest: {
+    name: 'TeleTest Analytika®',
+    title: 'TeleTest Analytika® Clinical Genomics & Laboratory Diagnostics',
+    badge: 'ISO 17025 European Reference Laboratory',
+    badgeColor: '#0284c7',
+    subtitle: 'European reference clinical laboratory authorized by Generalitat de Catalunya (E08750211) & ISO 17025 accredited. High-precision HLA immunogenetics, autoimmune celiac predisposition, and ICP-MS/MS hair tissue mineral & heavy metals toxicology.',
+    heroImage: '/images/products/teletest/hla-autoinmunidad.svg',
+    accentColor: '#0284c7',
+    kpis: [
+      { label: 'Laboratory Quality', value: 'ISO 17025', sub: 'Generalitat de Catalunya E08750211', icon: Award, color: '#16a34a' },
+      { label: 'Analytical Method', value: 'ICP-MS/MS & qPCR', sub: 'High-Resolution Mass Spectrometry', icon: Microscope, color: '#0284c7' },
+      { label: 'Diagnostic Scope', value: '33 Elements & HLA', sub: 'Hair Toxicology & Immunogenetics', icon: Dna, color: '#d97706' },
+      { label: 'Digital Reports', value: 'FNMT Signed', sub: 'Digital Validation 5-7 Workdays', icon: ShieldCheck, color: '#7c3aed' }
+    ],
+    categories: [
+      { id: 'all', label: 'All Diagnostic Panels (5)' },
+      { id: 'genomics', label: 'Genomics & Autoimmunity (HLA)' },
+      { id: 'toxicology', label: 'Hair Mineral & Heavy Metals (HTMA)' },
+      { id: 'celiac', label: 'Celiac & Gluten Predisposition' }
+    ]
   }
 };
 
@@ -126,6 +147,13 @@ function resolveBrandProductImage(product, brandSlug) {
 
   const id = (product.id || '').toLowerCase();
   const name = (product.name || product.title || '').toLowerCase();
+
+  if (brandSlug === 'teletest') {
+    if (id.includes('hla') || id.includes('gnt')) return '/images/products/teletest/hla-autoinmunidad.svg';
+    if (id.includes('celiac') || id.includes('gluten')) return '/images/products/teletest/celiac-genetics.svg';
+    if (id.includes('tox') || id.includes('pesados')) return '/images/products/teletest/heavy-metals.svg';
+    return '/images/products/teletest/mineralograma-cabello.svg';
+  }
 
   if (brandSlug === 'colway') {
     if (id.includes('vege') || name.includes('vege') || name.includes('vegan')) return '/images/products/colway/vege-collagen.png';

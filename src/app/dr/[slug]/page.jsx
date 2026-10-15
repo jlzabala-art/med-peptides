@@ -7,15 +7,35 @@ export const revalidate = 0;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
+import { KNOWN_DOCTORS_DIRECTORY } from '@/services/doctorDirectoryService';
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const cleanSlug = decodeURIComponent(slug || '').trim();
+  const cleanSlug = decodeURIComponent(slug || '').trim().toLowerCase();
 
-  let doctorName = 'Physician Clinical Portal';
-  let clinic = cleanSlug.includes('marina') ? 'NOVA Clinic' : 'Medical Practice';
+  let doctorName = 'Treating Physician Clinical Portal';
+  let clinic = 'Clinical Practice & Dispensary';
   let specialty = 'Regenerative Medicine & Nutrigenomics';
   let canonicalSlug = cleanSlug;
 
+  // 1. Instant Synchronous Resolution from Known Directory (0ms - Golden Rule #2)
+  const known = KNOWN_DOCTORS_DIRECTORY.find(d => {
+    const s = cleanSlug.replace(/^dr[-.]?/, '');
+    const idMatch = d.id.toLowerCase() === cleanSlug || d.id.toLowerCase().replace(/^dr[-.]?/, '') === s;
+    const nameSlug = (d.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanNoHyphens = cleanSlug.replace(/[^a-z0-9]/g, '');
+    const nameMatch = nameSlug.includes(cleanNoHyphens) || cleanNoHyphens.includes(nameSlug.replace('dr', ''));
+    const aliasMatch = (d.aliases || []).some(a => a.toLowerCase() === cleanSlug || a.toLowerCase().replace(/^dr[-.]?/, '') === s);
+    return idMatch || nameMatch || aliasMatch;
+  });
+
+  if (known) {
+    doctorName = known.name || doctorName;
+    clinic = known.clinic || known.clinicName || clinic;
+    specialty = known.specialty || specialty;
+  }
+
+  // 2. Layer 2 Firestore / Cache Enrichment
   try {
     const portalData = await getDoctorPortalData(cleanSlug);
     if (portalData?.doctor) {
@@ -29,8 +49,8 @@ export async function generateMetadata({ params }) {
     console.warn('Doctor metadata fetch error', e);
   }
 
-  const shareTitle = `${doctorName} | Clinical Prescriptions & Patient Portal`;
-  const shareDesc = `Official digital prescription & clinical dossier for ${doctorName} (${specialty} at ${clinic}). View posology regimens, active compounded treatments, and patient care management.`;
+  const shareTitle = `${doctorName} | Clinical Prescriptions & Patient Dossier`;
+  const shareDesc = `Official digital clinical prescription & medical portal for ${doctorName} (${specialty} at ${clinic}). View prescribed therapies, patient posology regimens, and personalized medical care dossiers.`;
   const pageUrl = `${BASE_URL}/dr/${canonicalSlug}`;
 
   return {
@@ -43,7 +63,7 @@ export async function generateMetadata({ params }) {
       title: shareTitle,
       description: shareDesc,
       url: pageUrl,
-      siteName: 'Atlas Clinical Services',
+      siteName: `${doctorName} · Clinical Practice`,
       locale: 'en_US',
       type: 'profile',
       images: [

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" fill="none">
+  <rect width="400" height="100" rx="12" fill="#ffffff"/>
+  <g transform="translate(24, 20)">
+    <!-- Scientific Diamond & Helix Monogram -->
+    <rect x="0" y="0" width="60" height="60" rx="14" fill="#0284c7" fill-opacity="0.1"/>
+    <path d="M30 8 L52 30 L30 52 L8 30 Z" stroke="#0284c7" stroke-width="3" fill="none"/>
+    <circle cx="30" cy="30" r="10" fill="#0284c7" fill-opacity="0.2"/>
+    <circle cx="30" cy="30" r="5" fill="#0284c7"/>
+    <path d="M18 30 Q30 18 42 30 Q30 42 18 30" stroke="#0ea5e9" stroke-width="2" fill="none"/>
+  </g>
+  <text x="100" y="46" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="800" fill="#0f172a" letter-spacing="-0.02em">TeleTest</text>
+  <text x="202" y="46" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="400" fill="#0284c7" letter-spacing="-0.02em">Analytika</text>
+  <text x="100" y="68" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#64748b" letter-spacing="0.08em" text-transform="uppercase">Laboratorio Clínico · ISO 17025 · E08750211</text>
+</svg>

@@ -771,7 +771,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     specialty: doctorDoc.specialty || doctorDoc.speciality || 'Regenerative Medicine & Nutrigenomics',
     clinic: resolvedClinic,
     clinicName: resolvedClinicName,
-    license: doctorDoc.licenseNumber || doctorDoc.dhaLicense || doctorDoc.germanMedicalId || 'DHA-P-0319842',
+    license: doctorDoc.licenseNumber || doctorDoc.license || doctorDoc.dhaLicense || doctorDoc.germanMedicalId || 'DHA Registered',
     email: resolvedEmail,
     phone: doctorDoc.phone || doctorDoc.mobile || '',
     mobile: doctorDoc.mobile || doctorDoc.phone || '',
@@ -1210,25 +1210,288 @@ export function computeServerAnalytics(prescriptions = []) {
   };
 
   const getApiMeta = (apiName) => {
-    const name = String(apiName).toLowerCase();
-    if (name.includes('minoxidil')) return { category: 'Vasodilator & Microvascular Growth Factor', color: '#0d9488', bg: '#f0fdfa' };
-    if (name.includes('dutasteride') || name.includes('finasteride') || name.includes('spironolactone') || name.includes('saw palmetto')) {
-      return { category: '5α-Reductase & Androgen Blockade', color: '#1a73e8', bg: '#eff6ff' };
+    const name = String(apiName || '').toLowerCase();
+    
+    // 1. Finished Product Delivery Format Detection (Golden Rule - Specificity)
+    let format = 'Finished Formulation';
+    let formatBadge = 'Finished Product';
+    let formatColor = '#334155';
+    let formatBg = '#f1f5f9';
+    let formatBorder = '#cbd5e1';
+
+    if (name.includes('nasal spray') || name.includes('spray') || name.includes('intranasal')) {
+      format = 'Intranasal Spray';
+      formatBadge = 'Nasal Spray';
+      formatColor = '#0369a1';
+      formatBg = '#e0f2fe';
+      formatBorder = '#bae6fd';
+    } else if (name.includes('oral capsule') || name.includes('capsule') || name.includes('caps') || name.includes('drcaps')) {
+      format = 'Oral DRcaps®';
+      formatBadge = 'Oral Capsules';
+      formatColor = '#b45309';
+      formatBg = '#fef3c7';
+      formatBorder = '#fde68a';
+    } else if (name.includes('troche') || name.includes('sublingual') || name.includes('drops')) {
+      format = 'Sublingual Troche';
+      formatBadge = 'Sublingual Troche';
+      formatColor = '#4f46e5';
+      formatBg = '#e0e7ff';
+      formatBorder = '#c7d2fe';
+    } else if (name.includes('vial') || name.includes('injection') || name.includes('subcutaneous') || name.includes('subq') || name.includes('lyophilized')) {
+      format = 'Subcutaneous Vial';
+      formatBadge = 'SubQ Vial';
+      formatColor = '#047857';
+      formatBg = '#d1fae5';
+      formatBorder = '#a7f3d0';
+    } else if (name.includes('shampoo') || name.includes('conditioner') || name.includes('trichology')) {
+      format = 'Trichological Hygiene';
+      formatBadge = 'Scalp Care';
+      formatColor = '#0f766e';
+      formatBg = '#ccfbf1';
+      formatBorder = '#99f6e4';
+    } else if (name.includes('collagen') || name.includes('peeling') || name.includes('bio-gel') || name.includes('colway')) {
+      format = 'Native Tropocollagen Bio-Matrix';
+      formatBadge = 'Collagen Bio-Matrix';
+      formatColor = '#be185d';
+      formatBg = '#fce7f3';
+      formatBorder = '#fbcfe8';
+    } else if (name.includes('pentravan') || name.includes('cream') || name.includes('transdermal')) {
+      format = 'Transdermal Liposomal Cream';
+      formatBadge = 'Liposomal Cream';
+      formatColor = '#6d28d9';
+      formatBg = '#ede9fe';
+      formatBorder = '#ddd6fe';
+    } else if (name.includes('topical') || name.includes('foam') || name.includes('solution') || name.includes('trichosol') || name.includes('serum')) {
+      format = 'Topical Scalp Solution';
+      formatBadge = 'Topical Solution';
+      formatColor = '#1d4ed8';
+      formatBg = '#dbeafe';
+      formatBorder = '#bfdbfe';
     }
-    if (name.includes('metformin') || name.includes('resveratrol') || name.includes('epithalon')) {
-      return { category: 'Telomere & Genomic Activator', color: '#7c3aed', bg: '#f5f3ff' };
+
+    // 2. Specific Finished Peptides with Formats & Roles
+    if (name.includes('selank')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Peptide · ${formatBadge}`,
+        role: 'Neuro-Peptide · Anxiolytic & BDNF',
+        color: '#1a73e8',
+        bg: '#eff6ff'
+      };
+    }
+    if (name.includes('semax')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Peptide · ${formatBadge}`,
+        role: 'Neuro-Peptide · Cognitive Focus & BDNF',
+        color: '#1a73e8',
+        bg: '#eff6ff'
+      };
+    }
+    if (name.includes('bpc') || name.includes('bpc-157') || name.includes('tb-500') || name.includes('tb500')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Peptide · ${formatBadge}`,
+        role: 'Regenerative Peptide · Tissue Repair',
+        color: '#0d9488',
+        bg: '#f0fdfa'
+      };
+    }
+    if (name.includes('kpv')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Peptide · ${formatBadge}`,
+        role: 'Anti-Inflammatory Tripeptide',
+        color: '#7c3aed',
+        bg: '#f5f3ff'
+      };
+    }
+    if (name.includes('epithalon')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Peptide · ${formatBadge}`,
+        role: 'Pineal Epigenetic Peptide',
+        color: '#7c3aed',
+        bg: '#f5f3ff'
+      };
+    }
+    if (name.includes('ghk') || name.includes('copper tripeptide')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Peptide · ${formatBadge}`,
+        role: 'Follicular & Matrix Remodeling Tripeptide',
+        color: '#4338ca',
+        bg: '#e0e7ff'
+      };
+    }
+    if (name.includes('cjc') || name.includes('ipamorelin')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Peptide · ${formatBadge}`,
+        role: 'Endocrine GH Secretagogue',
+        color: '#0284c7',
+        bg: '#f0f9ff'
+      };
+    }
+    if (name.includes('dsip')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Peptide · ${formatBadge}`,
+        role: 'Circadian Sleep Delta-Wave Peptide',
+        color: '#6366f1',
+        bg: '#eef2ff'
+      };
+    }
+    if (name.includes('tirzepatide') || name.includes('semaglutide') || name.includes('retatrutide')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Incretin · ${formatBadge}`,
+        role: 'Multi-Incretin Metabolic Agonist',
+        color: '#059669',
+        bg: '#ecfdf5'
+      };
+    }
+
+    // 3. Classical Pharmacological Active Classes
+    if (name.includes('minoxidil')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Compounded · ${formatBadge}`,
+        role: 'Vasodilator & Microvascular Growth Factor',
+        color: '#0d9488',
+        bg: '#f0fdfa'
+      };
+    }
+    if (name.includes('dutasteride') || name.includes('finasteride') || name.includes('spironolactone') || name.includes('saw palmetto')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Compounded · ${formatBadge}`,
+        role: '5α-Reductase & Androgen Blockade',
+        color: '#1a73e8',
+        bg: '#eff6ff'
+      };
+    }
+    if (name.includes('metformin') || name.includes('resveratrol')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Compounded · ${formatBadge}`,
+        role: 'Telomere & Genomic Activator',
+        color: '#7c3aed',
+        bg: '#f5f3ff'
+      };
     }
     if (name.includes('astaxanthin') || name.includes('coenzyme') || name.includes('cysteine') || name.includes('nac') || name.includes('ubiquinol')) {
-      return { category: 'Mitochondrial & Antioxidant Shield', color: '#ea580c', bg: '#fff7ed' };
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Formula · ${formatBadge}`,
+        role: 'Mitochondrial & Antioxidant Shield',
+        color: '#ea580c',
+        bg: '#fff7ed'
+      };
     }
-    if (name.includes('latanoprost')) return { category: 'Prostaglandin F2α Agonist', color: '#059669', bg: '#ecfdf5' };
+    if (name.includes('latanoprost')) {
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Compounded · ${formatBadge}`,
+        role: 'Prostaglandin F2α Agonist',
+        color: '#059669',
+        bg: '#ecfdf5'
+      };
+    }
     if (name.includes('melatonin') || name.includes('theanine') || name.includes('glycine') || name.includes('magnesium')) {
-      return { category: 'Neuro-Circadian Modulator', color: '#6366f1', bg: '#eef2ff' };
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Formula · ${formatBadge}`,
+        role: 'Neuro-Circadian Modulator',
+        color: '#6366f1',
+        bg: '#eef2ff'
+      };
     }
     if (name.includes('arginine') || name.includes('ginkgo') || name.includes('ginseng')) {
-      return { category: 'Microcirculation & Bioregulator', color: '#0284c7', bg: '#f0f9ff' };
+      return {
+        format,
+        formatBadge,
+        formatColor,
+        formatBg,
+        formatBorder,
+        category: `Finished Formula · ${formatBadge}`,
+        role: 'Microcirculation & Bioregulator',
+        color: '#0284c7',
+        bg: '#f0f9ff'
+      };
     }
-    return { category: 'Targeted API Compound', color: '#5f6368', bg: '#f8f9fa' };
+
+    return {
+      format,
+      formatBadge,
+      formatColor,
+      formatBg,
+      formatBorder,
+      category: `Finished Product · ${formatBadge}`,
+      role: 'Targeted Clinical Formulation',
+      color: '#475569',
+      bg: '#f1f5f9'
+    };
   };
 
   prescriptions.forEach(rx => {
@@ -1259,11 +1522,23 @@ export function computeServerAnalytics(prescriptions = []) {
         name,
         count,
         percentage: totalRxCount > 0 ? Math.round((count / totalRxCount) * 100) : 0,
+        format: meta.format,
+        formatBadge: meta.formatBadge,
+        formatColor: meta.formatColor,
+        formatBg: meta.formatBg,
+        formatBorder: meta.formatBorder,
         category: meta.category,
+        role: meta.role,
         color: meta.color,
         bg: meta.bg,
         meta: {
+          format: meta.format,
+          formatBadge: meta.formatBadge,
+          formatColor: meta.formatColor,
+          formatBg: meta.formatBg,
+          formatBorder: meta.formatBorder,
           category: meta.category,
+          role: meta.role,
           color: meta.color,
           bg: meta.bg
         }

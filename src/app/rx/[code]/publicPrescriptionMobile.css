@@ -848,7 +848,7 @@ nav.site-nav,
   }
 }
 
-/* ── Floating Bottom Action Dock (Doctor & Patient View) ── */
+/* ── Floating Bottom Action Dock (Doctor & Patient View - Apple Glassmorphism Standard) ── */
 .rx-bottom-dock {
   position: fixed;
   bottom: 18px;
@@ -857,18 +857,19 @@ nav.site-nav,
   width: calc(100% - 32px);
   max-width: 860px;
   z-index: 48;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(203, 213, 225, 0.9);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  outline: 1px solid rgba(203, 213, 225, 0.4);
   border-radius: 9999px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.05), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
   padding: 7px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (min-width: 1024px) {
@@ -885,18 +886,22 @@ nav.site-nav,
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
   border-radius: 9999px;
   padding: 4px 10px 4px 5px;
   cursor: pointer;
   text-align: left;
   transition: all 0.15s ease;
   flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 .rx-dock-patient-pill:hover {
-  background: #eff6ff;
-  border-color: #bfdbfe;
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #93c5fd;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
 }
 .rx-dock-patient-avatar {
   width: 26px;
@@ -909,6 +914,7 @@ nav.site-nav,
   justify-content: center;
   font-size: 0.72rem;
   font-weight: 700;
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.35);
 }
 .rx-dock-patient-meta {
   display: flex;
@@ -923,12 +929,14 @@ nav.site-nav,
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  letter-spacing: -0.01em;
 }
 .rx-dock-patient-ref {
   font-size: 0.65rem;
   color: #0284c7;
   font-family: monospace;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 .rx-bottom-dock-actions {
   display: flex;
@@ -952,41 +960,48 @@ nav.site-nav,
   border: 1px solid transparent;
 }
 .rx-dock-btn-sign {
-  background: #003666;
+  background: linear-gradient(180deg, #003666 0%, #002244 100%);
   color: #ffffff;
-  border-color: #002244;
-  box-shadow: 0 1px 3px rgba(0, 54, 102, 0.35);
+  border-color: rgba(0, 34, 68, 0.85);
+  box-shadow: 0 2px 6px rgba(0, 54, 102, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 .rx-dock-btn-sign:hover {
   background: #002244;
+  box-shadow: 0 3px 8px rgba(0, 54, 102, 0.45);
 }
 .rx-dock-btn-primary {
-  background: #1a73e8;
+  background: linear-gradient(180deg, #1a73e8 0%, #1557b0 100%);
   color: #ffffff;
-  border-color: #1a73e8;
-  box-shadow: 0 1px 3px rgba(26, 115, 232, 0.35);
+  border-color: rgba(21, 87, 176, 0.85);
+  box-shadow: 0 2px 6px rgba(26, 115, 232, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 .rx-dock-btn-primary:hover {
   background: #1557b0;
+  box-shadow: 0 3px 8px rgba(26, 115, 232, 0.45);
 }
 .rx-dock-btn-quote {
-  background: #0284c7;
+  background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
   color: #ffffff;
-  border-color: #0284c7;
-  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.35);
+  border-color: rgba(3, 105, 161, 0.85);
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 .rx-dock-btn-quote:hover {
   background: #0369a1;
+  box-shadow: 0 3px 8px rgba(2, 132, 199, 0.45);
 }
 .rx-dock-btn-secondary {
-  background: #ffffff;
-  color: #374151;
-  border-color: #d1d5db;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #1e293b;
+  border-color: rgba(203, 213, 225, 0.85);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 .rx-dock-btn-secondary:hover {
-  background: #f8fafc;
-  border-color: #1a73e8;
-  color: #1a73e8;
+  background: #ffffff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
 }
 .rx-dock-drop-item {
   display: flex;
