@@ -21,12 +21,17 @@ import {
   Send,
   ExternalLink,
   ChevronRight,
-  Package
+  Package,
+  ArrowRight,
+  Sparkles
 } from 'lucide-react';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
+import { CURATED_CAS_REGISTRY } from '@/utils/casResolver';
+import { deriveCanonicalIdentity } from '@/utils/canonicalProductRegistry';
 import toast from 'react-hot-toast';
 
 export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://www.atlashealth-services.com' }) {
@@ -38,18 +43,36 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
 
   if (!product) return null;
 
-  const productName = product.canonicalName || product.name || 'Chemical API';
-  const displayName = product.displayName || `${productName} (${product.packSize || 'Bulk API'})`;
-  const casNumber = product.casNumber || product.cas_number || '10102-18-8';
-  const molecularFormula = product.molecularFormula || product.molecular_formula || 'Na2SeO3';
-  const molecularWeight = product.molecularWeight || product.molecular_weight || '172.94 g/mol';
-  const purity = product.purity || '≥98.0%';
-  const grade = product.grade || 'USP / Ph. Eur. Pharmacopeia Grade';
-  const format = product.format || 'Fine White Powder';
-  const hsnCode = product.hsnCode || '28429090';
-  const storageCondition = product.storageCondition || 'Store in airtight containers at 15–25°C, protected from light and moisture.';
-  const supplierName = product.supplier || 'Licensed Pharmaceutical Synthesis Laboratory';
-  const targetUrl = `${baseUrl}/p/${slug || product.slug || product.id}`;
+  const rawSlug = (slug || product.slug || product.id || '').toLowerCase().trim();
+  const canonicalIdent = deriveCanonicalIdentity({ id: product.id || rawSlug, name: product.name || rawSlug });
+  const cleanKey = canonicalIdent.canonicalKey || rawSlug.replace(/^api-/, '').replace(/-bulk$/, '');
+  const peptideData = KNOWN_PEPTIDE_DATA[cleanKey] || null;
+
+  const prodType = (product.type || product.productType || '').toLowerCase();
+  const prodCat = (product.category || product.therapeutic_category || '').toLowerCase();
+  const isPeptide = Boolean(
+    peptideData ||
+    product.is_peptide === true ||
+    prodType === 'peptide' ||
+    prodCat.includes('peptide') ||
+    product.sequence
+  );
+
+  const productName = product.canonicalName || peptideData?.targetSystem || product.name || 'Chemical API';
+  const displayName = product.displayName || `${productName} (${selectedPack} Bulk API)`;
+  
+  const casNumber = product.casNumber || product.cas_number || product.cas || CURATED_CAS_REGISTRY[cleanKey] || peptideData?.casNumber || (isPeptide ? '2381089-83-2' : '10102-18-8');
+  const molecularFormula = product.molecularFormula || product.molecular_formula || peptideData?.molecularFormula || (isPeptide ? 'C221H342N46O68' : 'Na2SeO3');
+  const molecularWeight = product.molecularWeight || product.molecular_weight || (peptideData?.molecularWeight ? `${peptideData.molecularWeight} g/mol` : null) || (isPeptide ? '4731.33 g/mol' : '172.94 g/mol');
+  const purity = product.purity || (isPeptide ? '≥98.5% (RP-HPLC)' : '≥98.0% (Assay)');
+  const grade = product.grade || (isPeptide ? 'cGMP / Compounding Reference Grade' : 'USP / Ph. Eur. Pharmacopeia Grade');
+  const format = product.format || (isPeptide ? 'Lyophilized Solid Powder' : 'Fine White Crystalline Powder');
+  const hsnCode = product.hsnCode || (isPeptide ? '29371900' : '28429090');
+  const storageCondition = product.storageCondition || (isPeptide ? 'Store desiccated at -20°C in an airtight container protected from light. Stable 24 months.' : 'Store in airtight containers at 15–25°C, protected from light and moisture.');
+  const supplierName = product.supplier || (isPeptide ? 'Licensed Peptide Synthesis Laboratory (cGMP)' : 'Licensed Pharmaceutical Synthesis Laboratory');
+  
+  const targetUrl = `${baseUrl}/raw/${cleanKey}`;
+  const finishedProductUrl = `/p/${cleanKey}`;
 
   const handleCopyCas = () => {
     if (!casNumber) return;
@@ -62,7 +85,7 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
   const handleCopyLink = () => {
     navigator.clipboard.writeText(targetUrl);
     setCopiedLink(true);
-    toast.success('Product link copied to clipboard');
+    toast.success('API product link copied to clipboard');
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
@@ -88,10 +111,55 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
           <ChevronRight size={12} color="#94a3b8" />
           <span style={{ color: '#0d9488', fontWeight: 600 }}>Active Pharmaceutical Ingredients (API)</span>
           <ChevronRight size={12} color="#94a3b8" />
-          <span style={{ color: '#0f172a', fontWeight: 600 }}>{productName}</span>
+          <span style={{ color: '#0f172a', fontWeight: 600 }}>{productName} (Bulk)</span>
         </div>
 
-        {/* ── Google Cloud Console Callout: Non-Peptide Notice ── */}
+        {/* ── Cross-Navigation Banner: Link to Finished Clinical Product ── */}
+        {isPeptide && (
+          <div style={{
+            background: 'linear-gradient(90deg, #eff6ff 0%, #f0fdfa 100%)',
+            border: '1px solid #bfdbfe',
+            borderRadius: '8px',
+            padding: '12px 18px',
+            marginBottom: '1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Package size={18} color="#2563eb" style={{ flexShrink: 0 }} />
+              <div style={{ fontSize: '0.84rem', color: '#1e3a8a' }}>
+                <strong>Looking for patient-ready clinical reconstitution vials?</strong>{' '}
+                Finished vials (e.g. 5 mg, 10 mg) with reconstitution protocols and BAC water guides are available on the finished product page.
+              </div>
+            </div>
+
+            <a
+              href={finishedProductUrl}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                background: '#003666',
+                color: '#ffffff',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.06)'
+              }}
+            >
+              <span>View Finished Product Vials</span>
+              <ArrowRight size={14} />
+            </a>
+          </div>
+        )}
+
+        {/* ── Callout Notice: Bulk API Distinction ── */}
         <div style={{
           background: '#f0fdfa',
           border: '1px solid #ccfbf1',
@@ -105,10 +173,21 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
         }}>
           <Info size={18} color="#0d9488" style={{ flexShrink: 0, marginTop: '2px' }} />
           <div style={{ fontSize: '0.82rem', lineHeight: 1.5, color: '#134e4a' }}>
-            <strong style={{ color: '#115e59' }}>Pharma Grade Raw Material &amp; Active Ingredient (API):</strong>{' '}
-            This product is a pharmaceutical active substance / essential mineral trace element for licensed compounding and laboratory use. 
-            It is <strong style={{ textDecoration: 'underline' }}>not a peptide</strong> and must not be reconstituted with bacteriostatic water. 
-            Prepared strictly under USP / Ph. Eur. Compounding Pharmacopeia monographs.
+            <strong style={{ color: '#115e59' }}>
+              {isPeptide ? 'Pharma-Grade Bulk Peptide Active Ingredient (API):' : 'Pharma Grade Raw Material & Active Ingredient (API):'}
+            </strong>{' '}
+            {isPeptide ? (
+              <>
+                This product is high-purity Active Pharmaceutical Ingredient (API) bulk powder supplied strictly for licensed compounding pharmacies, contract manufacturing (CDMO), and laboratory formulation. 
+                Supplied by weight in 10g, 50g, 100g, and 1kg units with full analytical batch Certificate of Analysis (HPLC &amp; LC-MS).
+              </>
+            ) : (
+              <>
+                This product is a pharmaceutical active substance / essential mineral trace element for licensed compounding and laboratory use. 
+                It is <strong style={{ textDecoration: 'underline' }}>not a peptide</strong> and must not be reconstituted with bacteriostatic water. 
+                Prepared strictly under USP / Ph. Eur. Compounding Pharmacopeia monographs.
+              </>
+            )}
           </div>
         </div>
 
@@ -146,7 +225,7 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
                   padding: '2px 8px',
                   borderRadius: '4px'
                 }}>
-                  Essential Trace Element
+                  {isPeptide ? 'Synthetic Peptide' : 'Essential Trace Element'}
                 </span>
                 <span style={{
                   background: '#e0f2fe',
@@ -157,7 +236,7 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
                   padding: '2px 8px',
                   borderRadius: '4px'
                 }}>
-                  USP / Ph. Eur.
+                  {grade.split('/')[0].trim()}
                 </span>
               </div>
 
@@ -166,7 +245,7 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
               </h1>
 
               <div style={{ fontSize: '0.90rem', color: '#475569', maxWidth: '720px', lineHeight: 1.5 }}>
-                {product.description || 'Pharmaceutical grade active substance for specialized compounding, antioxidant defense protocols, and tailored clinical formulations.'}
+                {product.description || peptideData?.mechanismOfAction || 'Pharmaceutical grade active substance for specialized compounding, clinical formulations, and analytical research.'}
               </div>
             </div>
 
@@ -318,29 +397,48 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '0.84rem' }}>
                   <div style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '6px' }}>
                     <div style={{ color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase' }}>Substance Class</div>
-                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>Inorganic Selenium Salt / Essential Trace Element</div>
+                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>
+                      {isPeptide ? 'Synthetic Peptide Active Pharmaceutical Ingredient (API)' : 'Inorganic Salt / Essential Trace Element'}
+                    </div>
                   </div>
                   <div style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '6px' }}>
-                    <div style={{ color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase' }}>Assay (Titration / HPLC)</div>
-                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>98.0% – 100.5% (Anhydrous Basis)</div>
+                    <div style={{ color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase' }}>Assay (RP-HPLC / Titration)</div>
+                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>
+                      {isPeptide ? '≥ 98.5% (Single Major Peak)' : '98.0% – 100.5% (Anhydrous Basis)'}
+                    </div>
                   </div>
                   <div style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '6px' }}>
-                    <div style={{ color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase' }}>Water Solubility</div>
-                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>Freely soluble in water (~85 g/100 mL at 20°C)</div>
+                    <div style={{ color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase' }}>Water Content (Karl Fischer)</div>
+                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>
+                      {isPeptide ? '≤ 5.0% (Lyophilized state)' : 'Freely soluble in water (~85 g/100 mL)'}
+                    </div>
                   </div>
                   <div style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '6px' }}>
-                    <div style={{ color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase' }}>Alcohol Solubility</div>
-                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>Practically insoluble in ethanol</div>
+                    <div style={{ color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase' }}>Bacterial Endotoxins</div>
+                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>
+                      &lt; 5.0 EU/mg (EP / USP Pharmacopeia Grade)
+                    </div>
                   </div>
                   <div style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '6px' }}>
-                    <div style={{ color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase' }}>pH (1% Aqueous Solution)</div>
-                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>9.0 – 10.0</div>
+                    <div style={{ color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase' }}>Residual Solvents (TFA / ACN)</div>
+                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>&le; 0.1% (USP &lt;467&gt;)</div>
                   </div>
                   <div style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '6px' }}>
                     <div style={{ color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase' }}>Heavy Metals (as Pb)</div>
-                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>≤ 10 ppm</div>
+                    <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>&le; 10 ppm</div>
                   </div>
                 </div>
+
+                {isPeptide && peptideData?.sequence && (
+                  <div style={{ marginTop: '16px', padding: '12px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
+                      Primary Amino Acid Sequence
+                    </div>
+                    <div style={{ fontFamily: 'monospace', fontSize: '0.80rem', color: '#0f172a', wordBreak: 'break-all' }}>
+                      {peptideData.sequence}
+                    </div>
+                  </div>
+                )}
 
                 <div style={{ marginTop: '16px', padding: '12px', background: '#f8fafc', borderRadius: '6px', fontSize: '0.80rem', color: '#475569', lineHeight: 1.5 }}>
                   <strong>Pharmacopeia Monograph Reference:</strong> Complies with United States Pharmacopeia (USP) and European Pharmacopoeia (Ph. Eur.) monographs for active pharmaceutical ingredients. Complete analytical batch documentation and Certificate of Analysis available upon supplier RFQ.
@@ -356,23 +454,28 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
                 </h3>
                 <div style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6 }}>
                   <p>
-                    <strong>Biological Role:</strong> Sodium Selenite is an essential trace element delivering bioavailable selenium, which incorporates as selenocysteine into critical antioxidant selenoenzymes, notably <em>glutathione peroxidase (GPx)</em> and <em>thioredoxin reductase (TrxR)</em>.
+                    <strong>Biological Role &amp; Mechanism:</strong>{' '}
+                    {peptideData?.mechanismOfAction || product.description || 'Targeted active pharmaceutical substance optimizing specific physiological signaling axes.'}
                   </p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
                     <div style={{ border: '1px solid #e2e8f0', borderRadius: '6px', padding: '12px' }}>
                       <h4 style={{ margin: '0 0 6px', fontSize: '0.84rem', fontWeight: 700, color: '#0d9488' }}>
-                        Oral Compounding (Nutrigenomics)
+                        {isPeptide ? 'Aseptic Compounding (Cleanroom ISO 5)' : 'Oral Compounding (Nutrigenomics)'}
                       </h4>
                       <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                        Incorporated into customized oral capsules or multi-mineral formulas. Standard clinical doses range between <strong>50 mcg to 200 mcg</strong> of elemental selenium daily.
+                        {isPeptide
+                          ? 'Sterile reconstitution and membrane filtration (0.22 µm PES) inside laminar flow biosafety cabinets for customized multi-dose patient vials.'
+                          : 'Incorporated into customized oral capsules or multi-mineral formulas. Formulated according to validated master formulation records.'}
                       </div>
                     </div>
                     <div style={{ border: '1px solid #e2e8f0', borderRadius: '6px', padding: '12px' }}>
                       <h4 style={{ margin: '0 0 6px', fontSize: '0.84rem', fontWeight: 700, color: '#0284c7' }}>
-                        Parenteral Cleanroom Solutions
+                        {isPeptide ? 'CDMO Lyophilization & Batch Fill' : 'Parenteral Cleanroom Solutions'}
                       </h4>
                       <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                        Aseptic formulation in certified ISO Class 5 compounding suites for targeted intravenous infusion under physician supervision.
+                        {isPeptide
+                          ? 'Suitable for automated lyophilization cycles, pre-filled syringe (PFS) filling, and stable peptide matrix formulations under cGMP supervision.'
+                          : 'Aseptic formulation in certified ISO Class 5 compounding suites for targeted intravenous infusion under physician supervision.'}
                       </div>
                     </div>
                   </div>
@@ -384,20 +487,34 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
             {activeTab === 'safety' && (
               <div style={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '20px' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', margin: '0 0 12px' }}>
-                  Laboratory Handling &amp; GHS Guidelines
+                  Laboratory Handling &amp; Storage Guidelines
                 </h3>
                 <div style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.5 }}>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: '#fef2f2', border: '1px solid #fecaca', padding: '10px 14px', borderRadius: '6px', marginBottom: '12px' }}>
-                    <AlertTriangle size={18} color="#dc2626" style={{ flexShrink: 0 }} />
-                    <div style={{ color: '#991b1b', fontSize: '0.80rem' }}>
-                      <strong>Laboratory Safety Warning (GHS06):</strong> Pure Sodium Selenite is an inorganic active compound with high physiological potency. Weighing and galenic preparation must be performed inside a certified fume hood with PPE (gloves, safety goggles, and respiratory mask).
+                  <div style={{
+                    display: 'flex',
+                    gap: '10px',
+                    alignItems: 'center',
+                    background: isPeptide ? '#f0fdf4' : '#fef2f2',
+                    border: `1px solid ${isPeptide ? '#bbf7d0' : '#fecaca'}`,
+                    padding: '10px 14px',
+                    borderRadius: '6px',
+                    marginBottom: '12px'
+                  }}>
+                    <AlertTriangle size={18} color={isPeptide ? '#16a34a' : '#dc2626'} style={{ flexShrink: 0 }} />
+                    <div style={{ color: isPeptide ? '#166534' : '#991b1b', fontSize: '0.80rem' }}>
+                      <strong>{isPeptide ? 'Laboratory Handling Protocol:' : 'Laboratory Safety Warning (GHS06):'}</strong>{' '}
+                      {isPeptide
+                        ? 'High-potency peptide active ingredient. Handle in cleanroom or biosafety hood with standard PPE (nitrile gloves, lab coat, face protection). Avoid repeated freeze-thaw cycles after reconstitution.'
+                        : 'Pure inorganic active compound with high physiological potency. Weighing and galenic preparation must be performed inside a certified fume hood with PPE.'}
                     </div>
                   </div>
                   <p>
                     <strong>Storage Requirements:</strong> {storageCondition}
                   </p>
                   <p>
-                    <strong>Incompatibilities:</strong> Avoid contact with strong reducing agents, acids, and heavy metal oxidizers to prevent chemical reduction or precipitation.
+                    <strong>Incompatibilities:</strong> {isPeptide
+                      ? 'Avoid exposure to strong oxidizing agents, extreme pH (< 3 or > 9), and prolonged heat above 25°C to preserve peptide tertiary structure.'
+                      : 'Avoid contact with strong reducing agents, acids, and heavy metal oxidizers to prevent chemical reduction or precipitation.'}
                   </p>
                 </div>
               </div>
@@ -448,7 +565,7 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
 
               <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '12px', fontSize: '0.78rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <div><strong>Primary Supplier:</strong> {supplierName}</div>
-                <div><strong>Packaging:</strong> Sealed HDPE Amber Laboratory Bottle</div>
+                <div><strong>Packaging:</strong> Sealed HDPE Amber Laboratory Bottle / Vacuum Lyophilized Vial</div>
                 <div><strong>Tariff HSN:</strong> {hsnCode}</div>
                 <div><strong>Lead Time:</strong> 2–4 Business Days (Express B2B)</div>
               </div>

@@ -8,7 +8,6 @@ import { deriveCanonicalIdentity } from '../../../utils/canonicalProductRegistry
 import PublicDatasheetView from '../../../components/product/PublicDatasheetView';
 import AestheticInjectableDetail from '../../../components/product/layouts/AestheticInjectableDetail';
 import CosmeticsDetail from '../../../components/product/layouts/CosmeticsDetail';
-import RawApiDatasheetView from '../../../components/product/layouts/RawApiDatasheetView';
 import EternaGenomicsDetail from '../../../components/product/layouts/EternaGenomicsDetail';
 import { getClinicalSupplementBySlug } from '../../../data/clinicalSupplementsRegistry';
 
@@ -572,23 +571,8 @@ export default async function PublicProductRoute({ params, searchParams }) {
     );
   }
   if (isRawApi) {
-    return (
-      <>
-        {jsonLd && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-          />
-        )}
-        {breadcrumbJsonLd && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-          />
-        )}
-        <RawApiDatasheetView product={safeProduct} slug={slug} baseUrl={BASE_URL} />
-      </>
-    );
+    const cleanRawSlug = safeProduct.canonicalKey || slug.replace(/^api-/, '').replace(/-bulk$/, '');
+    redirect(`/raw/${cleanRawSlug}`);
   }
 
 
