@@ -99,7 +99,7 @@ const CANONICAL_MAP = {
   'KLOW (BPC-157 / TB-500 / GHKCu / KPV)':       'lotusland-klowbpc157tb500ghkcukpv-10mg10mg75mg10mgvial',
   'PT-141':                                       'pt-141',
   'MT2':                                          'o6jpvVugV0gVhpVNk5WX',
-  'Oxytocin Acetate':                             'oxytocin-acetate',
+  'Oxytocin Acetate':                             'oxytocin',
   'Kisspeptin-10':                                'kisspeptin-10',
   'hCG':                                          'magenta-hcg-5-000-iu-2ml-refill-cartridge-60',
   'LL-37':                                        'lotusland-ll37-12mgvial',
