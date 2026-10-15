@@ -154,11 +154,15 @@ export function useFirestorePaginatedCollection(collectionPath, options = {}) {
     if (queryData?.pages?.[0] && !queryData.pages[0].fromCache && typeof window !== 'undefined') {
       try {
         const firstPage = queryData.pages[0];
-        localStorage.setItem(cacheKey, JSON.stringify({
+        const payloadStr = JSON.stringify({
           data: firstPage.docs,
           hasMore: firstPage.hasMore,
           ts: Date.now()
-        }));
+        });
+        // Avoid caching oversized page data (> 300 KB) in localStorage to prevent storage quota churn
+        if (payloadStr.length < 300 * 1024) {
+          localStorage.setItem(cacheKey, payloadStr);
+        }
       } catch (e) {}
     }
   }, [queryData, cacheKey]);

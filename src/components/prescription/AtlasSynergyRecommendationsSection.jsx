@@ -162,27 +162,25 @@ export default function AtlasSynergyRecommendationsSection({
           </div>
         )}
 
-        {/* Responsive Google Cloud UX Recommendations Grid (2 Columns on Laptop/Desktop) */}
+        {/* Responsive Google Cloud UX Recommendations Rows (Full-Width Horizontal Stack) */}
         <style dangerouslySetInnerHTML={{ __html: `
           .atlas-gcp-recs-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-          }
-          @media (min-width: 860px) {
-            .atlas-gcp-recs-grid {
-              grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
           }
           .atlas-gcp-rec-card {
             background: #ffffff;
             border: 1px solid #dadce0;
             border-radius: 8px;
-            padding: 14px 16px;
+            padding: 16px 18px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             transition: box-shadow 0.15s ease, border-color 0.15s ease;
+            width: 100%;
+            box-sizing: border-box;
           }
           .atlas-gcp-rec-card:hover {
             border-color: #bdc1c6;
@@ -194,7 +192,7 @@ export default function AtlasSynergyRecommendationsSection({
             color: #1a73e8;
             background: #ffffff;
             border: 1px solid #dadce0;
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 4px;
             text-decoration: none;
             display: inline-flex;
@@ -221,6 +219,21 @@ export default function AtlasSynergyRecommendationsSection({
                 {/* Header: Badge + Provider + Synergy Match */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <span
+                      style={{
+                        fontSize: '0.64rem',
+                        fontWeight: 800,
+                        color: '#1e40af',
+                        background: '#dbeafe',
+                        border: '1px solid #bfdbfe',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em'
+                      }}
+                    >
+                      Priority 1 · Primary Pharmacodynamic Adjuvant
+                    </span>
                     <span
                       style={{
                         fontSize: '0.66rem',
@@ -313,6 +326,21 @@ export default function AtlasSynergyRecommendationsSection({
                 {/* Header: Badge + Provider + Synergy Match */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <span
+                      style={{
+                        fontSize: '0.64rem',
+                        fontWeight: 800,
+                        color: '#9a3412',
+                        background: '#ffedd5',
+                        border: '1px solid #fed7aa',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em'
+                      }}
+                    >
+                      Priority 2 · Essential Micronutrition Synergy
+                    </span>
                     <span
                       style={{
                         fontSize: '0.66rem',
@@ -445,6 +473,21 @@ export default function AtlasSynergyRecommendationsSection({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                     <span
                       style={{
+                        fontSize: '0.64rem',
+                        fontWeight: 800,
+                        color: '#0369a1',
+                        background: '#e0f2fe',
+                        border: '1px solid #bae6fd',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em'
+                      }}
+                    >
+                      Priority 3 · Objective Biomarker Monitoring
+                    </span>
+                    <span
+                      style={{
                         fontSize: '0.66rem',
                         fontWeight: 700,
                         color: '#0369a1',
@@ -575,6 +618,21 @@ export default function AtlasSynergyRecommendationsSection({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                     <span
                       style={{
+                        fontSize: '0.64rem',
+                        fontWeight: 800,
+                        color: '#065f46',
+                        background: '#d1fae5',
+                        border: '1px solid #a7f3d0',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em'
+                      }}
+                    >
+                      Priority 4 · Scalp Barrier & Native ECM
+                    </span>
+                    <span
+                      style={{
                         fontSize: '0.66rem',
                         fontWeight: 700,
                         color: '#047857',
@@ -675,14 +733,28 @@ export default function AtlasSynergyRecommendationsSection({
           <div
             className="atlas-gcp-rec-card"
             style={{
-              borderLeft: '4px solid #0d9488',
-              gridColumn: !colway ? 'span 2' : 'auto'
+              borderLeft: '4px solid #0d9488'
             }}
           >
             <div>
               {/* Header: Badge + Provider + SNPs Tag */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span
+                    style={{
+                      fontSize: '0.64rem',
+                      fontWeight: 800,
+                      color: '#115e59',
+                      background: '#ccfbf1',
+                      border: '1px solid #99f6e4',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em'
+                    }}
+                  >
+                    Priority 5 · Longitudinal Genomic & Epigenetic Tracking
+                  </span>
                   <span
                     style={{
                       fontSize: '0.66rem',

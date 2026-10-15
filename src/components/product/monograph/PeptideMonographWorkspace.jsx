@@ -97,7 +97,8 @@ export default function PeptideMonographWorkspace({
       window.history.replaceState(null, '', url.toString());
     }
 
-    if (tabId) {
+    // Only scroll accordion on mobile viewports (<1024px); desktop behaves as an independent navigation track
+    if (tabId && typeof window !== 'undefined' && window.innerWidth < 1024) {
       setTimeout(() => {
         const el = moduleRefs[tabId]?.current;
         if (el) {

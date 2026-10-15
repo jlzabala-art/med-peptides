@@ -75,21 +75,25 @@ export default function PreparationTab({
   // ── 2. Derive Dynamic Available Strengths ──
   const dynamicStrengths = useMemo(() => {
     if (sortedStrengths && sortedStrengths.length > 0) {
-      return sortedStrengths.map(s => ({
-        id: s.id,
-        name: s.name,
-        mg: parseNumber(s.name, 10)
-      }));
+      return sortedStrengths
+        .filter(s => !String(s.name || s.id || '').toLowerCase().includes('bulk'))
+        .map(s => ({
+          id: s.id,
+          name: s.name,
+          mg: parseNumber(s.name, 10)
+        }));
     }
     if (product.variants && product.variants.length > 0) {
-      return product.variants.map((v, i) => {
-        const name = v.dosage || v.dose || v.strength || (isSpray ? '30 mg' : isPen ? '6 mg' : '10 mg');
-        return {
-          id: v.id || `st-${i}`,
-          name: typeof name === 'string' ? name : `${name} mg`,
-          mg: parseNumber(name, 10)
-        };
-      });
+      return product.variants
+        .filter(v => !String(v.name || v.id || v.format || v.dosage || '').toLowerCase().includes('bulk'))
+        .map((v, i) => {
+          const name = v.dosage || v.dose || v.strength || (isSpray ? '30 mg' : isPen ? '6 mg' : '10 mg');
+          return {
+            id: v.id || `st-${i}`,
+            name: typeof name === 'string' ? name : `${name} mg`,
+            mg: parseNumber(name, 10)
+          };
+        });
     }
     if (isSpray) return [{ id: '30mg', name: '30 mg (4 mL)', mg: 30 }, { id: '75mg', name: '75 mg (10 mL)', mg: 75 }];
     if (isPen) return [{ id: '6mg', name: '6 mg (3 mL)', mg: 6 }, { id: '10mg', name: '10 mg (3 mL)', mg: 10 }];

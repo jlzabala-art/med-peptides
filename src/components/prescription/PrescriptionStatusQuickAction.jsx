@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Check, ChevronDown, Clock, ShieldCheck, Tag, RotateCcw, AlertCircle } from '@/lib/icons';
+import Link from 'next/link';
+import { Check, ChevronDown, Clock, ShieldCheck, Tag, RotateCcw, AlertCircle, Stethoscope, LogIn, UserPlus, X } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 
 export const STATUS_TAXONOMY_GROUPS = [
   {
@@ -134,8 +136,11 @@ export default function PrescriptionStatusQuickAction({
   isEs = false,
   readOnly = false
 }) {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [targetStatusToChange, setTargetStatusToChange] = useState(null);
   const containerRef = useRef(null);
 
   const normalizedStatus = String(status || 'approved').toLowerCase().trim();
@@ -176,6 +181,15 @@ export default function PrescriptionStatusQuickAction({
   const handleSelectStatus = async (newStatusId) => {
     if (newStatusId === normalizedStatus) {
       setIsOpen(false);
+      return;
+    }
+
+    // Golden Rule: Unauthenticated public visitors can inspect the status taxonomy,
+    // but cannot modify clinical database records without authorized physician login.
+    if (!user) {
+      setIsOpen(false);
+      setTargetStatusToChange(newStatusId);
+      setShowAuthModal(true);
       return;
     }
 
@@ -406,6 +420,186 @@ export default function PrescriptionStatusQuickAction({
             {isEs 
               ? 'Los estados dispensados activan el flujo de renovación y precio anterior en el portal del paciente.' 
               : 'Dispensed states automatically activate the refill prompt & previous price on patient view.'}
+          </div>
+        </div>
+      )}
+      {/* ── POLITE PHYSICIAN AUTHENTICATION MODAL ── */}
+      {showAuthModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="auth-barrier-title"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            backgroundColor: 'rgba(15, 23, 42, 0.45)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            animation: 'fadeIn 0.2s ease-out'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAuthModal(false);
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              border: '1px solid #cbd5e1',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              width: '100%',
+              maxWidth: '480px',
+              overflow: 'hidden',
+              animation: 'scaleIn 0.2s ease-out'
+            }}
+          >
+            {/* Header Accent */}
+            <div style={{ height: '4px', background: 'linear-gradient(90deg, #003666 0%, #1a73e8 100%)' }} />
+
+            <div style={{ padding: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '8px',
+                    background: '#e8f0fe',
+                    color: '#1a73e8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Stethoscope size={22} />
+                  </div>
+                  <div>
+                    <h3 id="auth-barrier-title" style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>
+                      {isEs ? 'Acceso Médico Facultativo Requerido' : 'Physician Authorization Required'}
+                    </h3>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
+                      {isEs ? 'Documento Clínico Oficial · Trazabilidad GMP' : 'Official Clinical Record · GMP Traceability'}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAuthModal(false)}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#94a3b8',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title={isEs ? 'Cerrar' : 'Close'}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <p style={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.5, margin: '0 0 1rem 0' }}>
+                {isEs
+                  ? `Ha seleccionado modificar el estado de esta prescripción a "${targetStatusToChange || ''}". Para salvaguardar la seguridad del paciente y cumplir con la normativa sanitaria, la actualización del ciclo de dispensación requiere autenticación como médico facultativo o farmacia acreditada.`
+                  : `You selected to update this prescription status to "${targetStatusToChange || ''}". To safeguard patient safety and comply with healthcare standards, updating dispensing and treatment records requires authentication as an authorized physician or certified pharmacy.`}
+              </p>
+
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '0.75rem 1rem',
+                marginBottom: '1.25rem',
+                fontSize: '0.76rem',
+                color: '#475569',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <ShieldCheck size={16} color="#16a34a" style={{ flexShrink: 0 }} />
+                <span>
+                  {isEs 
+                    ? 'Si usted es el médico prescriptor o la farmacia dispensadora, inicie sesión para registrar este cambio.' 
+                    : 'If you are the prescribing physician or dispensing pharmacy, sign in to commit this change.'}
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <Link
+                  href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    width: '100%',
+                    padding: '0.65rem 1rem',
+                    background: '#003666',
+                    color: '#ffffff',
+                    borderRadius: '6px',
+                    fontSize: '0.84rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                    transition: 'background 0.15s ease'
+                  }}
+                >
+                  <LogIn size={15} />
+                  <span>{isEs ? 'Iniciar Sesión Facultativa' : 'Physician Sign In'}</span>
+                </Link>
+
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <Link
+                    href="/auth?tab=register&role=doctor"
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '0.55rem 0.75rem',
+                      background: '#ffffff',
+                      color: '#003666',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <UserPlus size={14} />
+                    <span>{isEs ? 'Registrarse como Médico' : 'Register as Doctor'}</span>
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowAuthModal(false)}
+                    style={{
+                      flex: 1,
+                      padding: '0.55rem 0.75rem',
+                      background: '#f1f5f9',
+                      color: '#475569',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {isEs ? 'Permanecer en Modo Lectura' : 'Keep Viewing'}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

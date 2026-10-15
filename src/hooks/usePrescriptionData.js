@@ -601,7 +601,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     if (genomicsData) {
       list.push({ 
         id: 'genomics-card', 
-        label: isEs ? 'Guía Genómica' : 'Genomics Guidance',
+        label: isEs ? 'Formulación Guiada por Fagron Genomics' : 'Formulation Guided by Fagron Genomics',
         category: 'genomics',
         icon: 'dna'
       });

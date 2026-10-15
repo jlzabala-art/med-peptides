@@ -149,18 +149,28 @@ export default function GlobalSearchBar({
           const seenProdKeys = new Set();
           const prods = [];
           for (const p of (res.products || [])) {
-            const key = (p.canonicalKey || p.canonicalName || p.name || '').trim().toLowerCase();
+            let key = (p.canonicalKey || p.canonicalName || '').trim().toLowerCase();
+            if (!key) {
+              const rawName = (p.name || p.productName || '').toLowerCase().trim();
+              key = rawName
+                .replace(/^api[-_\s]+/i, '')
+                .replace(/\b(bulk\s+api\s+powder|bulk\s+api|api\s+powder|api|bulk|powder|raw\s+material)\b/gi, '')
+                .trim();
+            }
             if (!key || seenProdKeys.has(key)) continue;
             seenProdKeys.add(key);
 
-            const displayName = (p.canonicalName || p.name || p.productName || '').trim();
+            let displayName = (p.canonicalName || p.name || p.productName || '').trim();
+            if (displayName.toLowerCase().includes('bulk api powder')) {
+              displayName = displayName.replace(/\s*bulk\s*api\s*powder/i, '').trim();
+            }
             const varCount = Number(p.variantsCount || p.variantCount || 1);
 
             prods.push({
               key,
               id: p.productId || p.objectID || p.id,
               name: displayName,
-              category: p.category || 'Peptide',
+              category: p.category === 'api_peptide' ? 'Peptide' : (p.category || 'Peptide'),
               variantCount: varCount,
               indexName: 'products'
             });

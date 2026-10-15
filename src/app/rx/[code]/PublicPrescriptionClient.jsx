@@ -126,6 +126,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       if (targetId.startsWith('formulation') || targetId.includes('phase') || targetId === 'formula-card') {
         setActiveGcpTab('treatment');
         setExpandedSections(prev => ({ ...prev, formulations: true }));
+      } else if (targetId === 'genomics-card' || targetId.includes('genomic')) {
+        setActiveGcpTab('genomics');
+        setExpandedSections(prev => ({ ...prev, genomics: true }));
       } else if (targetId.includes('milestone') || targetId.includes('roadmap')) {
         setActiveGcpTab('roadmap');
         setExpandedSections(prev => ({ ...prev, posology: true }));
@@ -630,7 +633,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
 
         {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
-        {(activeGcpTab === 'treatment' || activeGcpTab === 'genomics') && genomicsData && (
+        {activeGcpTab === 'genomics' && genomicsData && (
           <div id="genomics-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
             <GenomicsPrescriptionGuidanceCard
               genomicsData={genomicsData}

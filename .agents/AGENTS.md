@@ -499,3 +499,22 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   - Todas las etiquetas, textos de posología, encabezados, advertencias, especificaciones técnicas y hojas de lote A4 DEBEN generarse **exclusivamente en inglés**.
 - **Márgenes de Seguridad para Guillotina (Bleed Safety)**:
   - El pie de página con fechas (`Mfg`, `Exp`, `Batch`) DEBE mantener siempre un margen de guarda mínimo de 4–5 mm respecto a la línea de corte inferior para evitar amputaciones por tolerancia de cuchilla.
+
+## 42. Regla Canónica de Ingesta de Catálogo y Separación de Páginas para APIs (Golden Rule)
+- **Unicidad Canónica de Producto (Single Entity Golden Rule)**:
+  - Jamás fragmentar un producto en la base de datos por dosis, volumen o presentación (ej. NO crear `retatrutide-5mg`, `retatrutide-10mg`, `pt-141-standard`, etc.).
+  - Cada péptido o molécula activa DEBE ser un único documento canónico en Firestore (`products/{slug}`), diferenciado exclusivamente a través de su matriz de variantes (`variants[]`).
+  - El nombre (`name`) y título del producto NUNCA deben incluir dosis o volumen (ej. usar siempre "Oxytocin", no "Oxytocin 10 UI / 2 mL").
+- **Deduplicación Estricta en Búsqueda y Algolia (Single Search Entry Rule)**:
+  - Todo producto debe tener `canonicalKey` y `canonicalName` normalizados en Firestore y sincronizados en el índice `products` de Algolia.
+  - En la barra de búsqueda global y sugerencias de autocompletado, cada principio activo debe aparecer **EXACTAMENTE UNA SOLA VEZ** (ej. "Retatrutide"), evitando fragmentaciones entre viales y polvo API.
+- **Páginas Públicas Distintas para Producto Terminado vs API a Granel (Product vs API Page Separation)**:
+  - Los **productos terminados** (viales clínicos, plumas precargadas, sprays intranasales, cápsulas orales) están orientados a médicos y pacientes: posología semanal, titulación clínica, guías de reconstitución (mL BAC water), hitos biológicos a 90 días y emisión de prescripciones.
+  - Las **materias primas API a granel** (Bulk Lyophilized API Powder en gramos o kilogramos) están dirigidas a farmacias de formulación magistral, laboratorios analíticos y CDMOs. Su contenido es estrictamente químico y regulatorio:
+    - CAS Number, Fórmula Molecular, Peso Molecular y Estructura Química.
+    - Especificaciones analíticas de CoA: Pureza HPLC (≥98.5% / ≥99%), Espectrometría de Masas (MS), Rotación Óptica $[\alpha]_D^{20}$, Disolventes Residuales (TFA/Acetonitrilo), Contenido de Agua Karl Fischer (<5%) y Endotoxinas bacterianas (<5 EU/mg).
+    - Guía de Solubilización y Compatibilidad galénica (tampones de pH, compatibilidad con filtros PES 0.22 µm).
+    - Dossier regulatorio: Drug Master File (DMF), declaración cGMP / ISO 9001, certificado TSE/BSE y Ficha de Seguridad (SDS).
+    - Términos B2B: Cantidades Mínimas de Pedido (MOQ: 10g, 50g, 100g, 1kg), descuentos por volumen y solicitud formal de cotización/muestra para farmacias.
+  - **Prohibición de Mezcla**: NUNCA debe incluirse un formato de API a granel (ej. 40g Bulk API) dentro de la tabla de viales clínicos asignándole diluyente BAC Water o inyección SubQ. En su lugar, la página clínica debe enlazar a la monografía especializada de API mediante un banner B2B limpio para farmacias elaboradoras.
+

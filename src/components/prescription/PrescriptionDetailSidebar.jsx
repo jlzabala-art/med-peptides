@@ -71,7 +71,7 @@ export default function PrescriptionDetailSidebar({
 
   const SECTION_TO_TAB = useMemo(() => ({
     'formula-card': 'treatment',
-    'genomics-card': 'treatment',
+    'genomics-card': 'genomics',
     'milestones-card': 'roadmap',
     'quality-card': 'traceability',
     'atlas-recommendations-card': 'recommendations',
@@ -82,6 +82,7 @@ export default function PrescriptionDetailSidebar({
 
   const TAB_TO_DEFAULT_SECTION = useMemo(() => ({
     treatment: 'formula-card',
+    genomics: 'genomics-card',
     roadmap: 'milestones-card',
     traceability: 'quality-card',
     recommendations: 'atlas-recommendations-card',

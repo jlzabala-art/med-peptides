@@ -424,6 +424,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
 
   const cleanDoctorName = (doctorDoc.displayName || doctorDoc.name || `${doctorDoc.firstName || ''} ${doctorDoc.lastName || ''}`).trim();
   const cleanDoctorQuery = cleanDoctorName.toLowerCase().replace('dr.', '').replace('dr ', '').trim();
+  const cleanDoctorQueryNormalized = cleanDoctorQuery.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const isDoctorSezgin = (doctorId === 'z3aUIMaYsPViG1JgM95r') || cleanSlug.includes('sezgin') || cleanDoctorQuery.includes('sezgin');
   if (!opaqueCode) opaqueCode = getDoctorOpaqueCode(doctorId, doctorDoc);
 
@@ -1032,14 +1033,37 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       serverAnalytics
     };
 
+    function sanitizeForRsc(obj) {
+      if (obj === null || obj === undefined) return obj;
+      if (typeof obj?.toDate === 'function') {
+        return obj.toDate().toISOString();
+      }
+      if (typeof obj === 'object') {
+        if (obj._seconds !== undefined && obj._nanoseconds !== undefined) {
+          return new Date(obj._seconds * 1000).toISOString();
+        }
+        if (Array.isArray(obj)) {
+          return obj.map(sanitizeForRsc);
+        }
+        const res = {};
+        for (const key of Object.keys(obj)) {
+          res[key] = sanitizeForRsc(obj[key]);
+        }
+        return res;
+      }
+      return obj;
+    }
+
+    const sanitizedPayload = sanitizeForRsc(payload);
+
   // Cache in RAM for 10 minutes under all lookup aliases
   const expiresAt = now + CACHE_TTL_MS;
-  DOCTOR_RAM_CACHE.set(cleanSlug, { data: payload, expiresAt });
-  DOCTOR_RAM_CACHE.set(opaqueCode.toLowerCase(), { data: payload, expiresAt });
-  if (nameSlug) DOCTOR_RAM_CACHE.set(nameSlug, { data: payload, expiresAt });
-  if (doctorId) DOCTOR_RAM_CACHE.set(String(doctorId).toLowerCase(), { data: payload, expiresAt });
+  DOCTOR_RAM_CACHE.set(cleanSlug, { data: sanitizedPayload, expiresAt });
+  DOCTOR_RAM_CACHE.set(opaqueCode.toLowerCase(), { data: sanitizedPayload, expiresAt });
+  if (nameSlug) DOCTOR_RAM_CACHE.set(nameSlug, { data: sanitizedPayload, expiresAt });
+  if (doctorId) DOCTOR_RAM_CACHE.set(String(doctorId).toLowerCase(), { data: sanitizedPayload, expiresAt });
 
-  return payload;
+  return sanitizedPayload;
 }
 
 import {

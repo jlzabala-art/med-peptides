@@ -392,22 +392,42 @@ export default function OverviewTab({
           isCurrentlyActive: false
         }));
 
+  const hasBulkApi = useMemo(() => {
+    return (availableFormats || []).some(f => String(f.id || f.name || '').toLowerCase().includes('bulk')) ||
+           (presentationData || []).some(r => String(r.formatId || r.strengthMg || '').toLowerCase().includes('bulk'));
+  }, [availableFormats, presentationData]);
+
+  const clinicalAvailableFormats = useMemo(() => {
+    return (availableFormats || []).filter(f => {
+      const fid = String(f.id || f.name || '').toLowerCase();
+      return !fid.includes('bulk') && !fid.includes('api');
+    });
+  }, [availableFormats]);
+
+  const clinicalPresentationData = useMemo(() => {
+    return presentationData.filter(r => {
+      const fid = String(r.formatId || r.format || '').toLowerCase();
+      const st = String(r.strengthMg || '').toLowerCase();
+      return !fid.includes('bulk') && !fid.includes('api') && !st.includes('bulk');
+    });
+  }, [presentationData]);
+
   const hasVials = useMemo(() => {
-    return presentationData.some(r => {
+    return clinicalPresentationData.some(r => {
       const f = String(r.formatId || r.format || '').toLowerCase();
       return f.includes('vial') || (!f.includes('pen') && !f.includes('spray') && !f.includes('sublingual') && !f.includes('oral'));
     });
-  }, [presentationData]);
-  const allAreReadyToUse = presentationData.length > 0 && !hasVials;
+  }, [clinicalPresentationData]);
+  const allAreReadyToUse = clinicalPresentationData.length > 0 && !hasVials;
 
   const filteredPresentationData = useMemo(() => {
-    if (formatFilter === 'all') return presentationData;
-    return presentationData.filter(row => {
+    if (formatFilter === 'all') return clinicalPresentationData;
+    return clinicalPresentationData.filter(row => {
       const fId = String(row.formatId || row.format || '').toLowerCase();
       const target = formatFilter.toLowerCase();
       return fId.includes(target) || target.includes(fId);
     });
-  }, [presentationData, formatFilter]);
+  }, [clinicalPresentationData, formatFilter]);
 
   return (
     <div className="pds-tab-content pds-overview-tab" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -558,7 +578,7 @@ export default function OverviewTab({
         </div>
 
         {/* Route / Presentation Fluid Segmented Filter Bar (GCP Standard) */}
-        {availableFormats && availableFormats.length > 1 && (
+        {clinicalAvailableFormats && clinicalAvailableFormats.length > 1 && (
           <div style={{
             marginBottom: '1rem',
             padding: '4px 6px',
@@ -596,15 +616,15 @@ export default function OverviewTab({
                   boxShadow: formatFilter === 'all' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
                 }}
               >
-                All Formats ({presentationData.length})
+                All Formats ({clinicalPresentationData.length})
               </button>
-              {availableFormats.map(fmt => {
+              {clinicalAvailableFormats.map(fmt => {
                 const fId = fmt.id;
                 const isSelected = formatFilter === fId;
                 const isSpray = fId.includes('spray') || fId.includes('nasal');
                 const isPen = fId.includes('pen') || fId.includes('cartridge');
                 const isVial = fId.includes('vial');
-                const count = presentationData.filter(r => {
+                const count = clinicalPresentationData.filter(r => {
                   const rf = String(r.formatId || r.format || '').toLowerCase();
                   return rf.includes(fId.toLowerCase()) || fId.toLowerCase().includes(rf);
                 }).length;
@@ -667,6 +687,69 @@ export default function OverviewTab({
           onRowClick={handleRowClick}
           mobileCardComponent={PresentationStrengthCard}
         />
+
+        {/* B2B Pharmaceutical API / Raw Material Monograph Link */}
+        {hasBulkApi && (
+          <div style={{
+            marginTop: '1rem',
+            background: '#f8fafc',
+            border: '1px solid #cbd5e1',
+            borderLeft: '4px solid #003666',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 260 }}>
+              <div style={{
+                width: 34,
+                height: 34,
+                borderRadius: '6px',
+                background: '#e0e7ff',
+                color: '#3730a3',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <FlaskConical size={18} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a' }}>
+                  {lang === 'es' ? 'Materia Prima Grado Farmacéutico (Bulk API)' : 'Pharmaceutical-Grade Bulk API & Raw Material'}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                  {lang === 'es'
+                    ? 'Disponible en lotes de 10g a 1kg con CoA analítico completo para Farmacias Formuladoras y CDMOs.'
+                    : 'Available in 10g to 1kg batches with complete analytical CoA and DMF dossier for Compounding Pharmacies & CDMOs.'}
+                </div>
+              </div>
+            </div>
+
+            <a
+              href={`/raw/${slug}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                background: '#003666',
+                color: '#ffffff',
+                borderRadius: '6px',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                transition: 'background 0.15s ease'
+              }}
+            >
+              <span>{lang === 'es' ? 'Ver Monografía API' : 'View API Monograph'}</span>
+              <ArrowUpRight size={13} />
+            </a>
+          </div>
+        )}
       </section>
 
       {/* ── C. Key Clinical Considerations & CTA ── */}
