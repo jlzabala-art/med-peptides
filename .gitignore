@@ -48,6 +48,8 @@ test-screenshots/
 *.png
 !public/labels/**
 !public/labels/**/*.png
+!public/images/**
+!public/images/**/*.png
 functions-ai/
 functions-cron/
 functions-finance/
