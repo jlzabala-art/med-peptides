@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { get as idbGet, set as idbSet } from 'idb-keyval';
 import {
   collection,
   query,
@@ -128,20 +129,6 @@ export function useFirestorePaginatedCollection(collectionPath, options = {}) {
           pageParams: [null],
         };
       }
-      if (typeof window !== 'undefined') {
-        try {
-          const cached = localStorage.getItem(cacheKey);
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (Date.now() - parsed.ts < 30 * 60 * 1000) { // 30 min TTL
-              return {
-                pages: [{ docs: parsed.data, lastDoc: null, hasMore: parsed.hasMore, fromCache: true }],
-                pageParams: [null]
-              };
-            }
-          }
-        } catch (e) {}
-      }
       return undefined;
     },
     enabled: enabled && !!collectionPath,
@@ -149,21 +136,47 @@ export function useFirestorePaginatedCollection(collectionPath, options = {}) {
     retry: false, // Prevent hanging loops on missing index errors
   });
 
-  // Sync first page to LocalStorage for zero-latency load on refresh
+  // ⚡ Layer 2: IndexedDB Cache Hydration (Async, non-blocking, zero localStorage quota exhaustion)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !enabled || !collectionPath) return;
+
+    let isCancelled = false;
+    async function hydrateFromIdb() {
+      try {
+        const cached = await idbGet(cacheKey);
+        if (!isCancelled && cached && cached.data && Array.isArray(cached.data)) {
+          // 30-minute validity
+          if (Date.now() - (cached.ts || 0) < 30 * 60 * 1000) {
+            queryClient.setQueryData(queryKey, (current) => {
+              if (current?.pages?.[0]?.docs?.length) return current; // Keep network data if already fetched
+              return {
+                pages: [{ docs: cached.data, lastDoc: null, hasMore: cached.hasMore, fromCache: true }],
+                pageParams: [null]
+              };
+            });
+          }
+        }
+      } catch (e) {
+        // IDB fallback silence
+      }
+    }
+
+    if (!queryClient.getQueryData(queryKey)) {
+      hydrateFromIdb();
+    }
+
+    return () => { isCancelled = true; };
+  }, [cacheKey, queryKey, enabled, collectionPath, queryClient]);
+
+  // Sync first page to IndexedDB asynchronously (Zero main-thread blocking, no 5MB quota limit)
   useEffect(() => {
     if (queryData?.pages?.[0] && !queryData.pages[0].fromCache && typeof window !== 'undefined') {
-      try {
-        const firstPage = queryData.pages[0];
-        const payloadStr = JSON.stringify({
-          data: firstPage.docs,
-          hasMore: firstPage.hasMore,
-          ts: Date.now()
-        });
-        // Avoid caching oversized page data (> 300 KB) in localStorage to prevent storage quota churn
-        if (payloadStr.length < 300 * 1024) {
-          localStorage.setItem(cacheKey, payloadStr);
-        }
-      } catch (e) {}
+      const firstPage = queryData.pages[0];
+      idbSet(cacheKey, {
+        data: firstPage.docs,
+        hasMore: firstPage.hasMore,
+        ts: Date.now()
+      }).catch(() => {});
     }
   }, [queryData, cacheKey]);
 
