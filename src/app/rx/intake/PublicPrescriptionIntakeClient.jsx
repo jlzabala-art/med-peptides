@@ -29,6 +29,7 @@ import {
 import { uploadPrescriptionDocument } from '@/services/prescriptionStorageService';
 import { exportPrescriptionToXlsx, exportBatchPrescriptionsToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { getFagronClinicalMonograph as getClinicalPharmacopeiaMonograph } from '@/data/fagronClinicalMonographs';
+import { getActiveContext } from '@/services/activeContextService';
 import '@/styles/publicDesignSystem.css';
 
 const PUBLIC_INTAKE_STYLES = `
@@ -658,6 +659,38 @@ export default function PublicPrescriptionIntakeClient() {
       }
     }
     loadRefDoctor();
+  }, [refDoctor]);
+
+  // Auto-populate physician & patient from Active Operations Context (Atlas Hub) if no URL ref provided
+  useEffect(() => {
+    if (refDoctor) return;
+    try {
+      const activeCtx = getActiveContext();
+      if (activeCtx?.doctor) {
+        const activeDoc = activeCtx.doctor;
+        setPhysicianForm(prev => {
+          if (prev.name && prev.name !== 'Licensed Clinical Practice') return prev;
+          return {
+            ...prev,
+            name: activeDoc.name || prev.name,
+            clinic: activeDoc.clinic || prev.clinic,
+            specialty: activeDoc.specialty || prev.specialty || 'Physician Specialist'
+          };
+        });
+      }
+      if (activeCtx?.patient) {
+        const activePt = activeCtx.patient;
+        setPatientForm(prev => {
+          if (prev.name) return prev;
+          return {
+            ...prev,
+            name: activePt.name || prev.name
+          };
+        });
+      }
+    } catch (e) {
+      console.warn('[PublicPrescriptionIntakeClient] Failed to auto-populate active context:', e);
+    }
   }, [refDoctor]);
 
   // Pre-fill physician form when published in Phase 3

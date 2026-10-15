@@ -48,6 +48,15 @@ export function getActiveContext() {
   }
 }
 
+let broadcastChannel = null;
+if (typeof window !== 'undefined' && typeof window.BroadcastChannel !== 'undefined') {
+  try {
+    broadcastChannel = new BroadcastChannel('atlas_active_operations_context');
+  } catch (e) {
+    console.warn('[ActiveContextService] BroadcastChannel initialization failed:', e);
+  }
+}
+
 function persistAndBroadcast(context) {
   const storage = getStorage();
   if (storage) {
@@ -56,6 +65,12 @@ function persistAndBroadcast(context) {
     } catch (e) {
       console.warn('[ActiveContextService] Failed to persist context:', e);
     }
+  }
+
+  if (broadcastChannel) {
+    try {
+      broadcastChannel.postMessage(context);
+    } catch (_) {}
   }
 
   if (typeof window !== 'undefined') {
@@ -158,7 +173,19 @@ export function subscribeToActiveContext(callback) {
     callback(event.detail || getActiveContext());
   };
 
+  const bcHandler = (event) => {
+    if (event?.data) {
+      callback(event.data);
+    }
+  };
+
   window.addEventListener(EVENT_NAME, handler);
+  if (broadcastChannel) {
+    try {
+      broadcastChannel.addEventListener('message', bcHandler);
+    } catch (_) {}
+  }
+
   // Also listen for storage events from other tabs
   const storageHandler = (event) => {
     if (event.key === STORAGE_KEY) {
@@ -169,6 +196,11 @@ export function subscribeToActiveContext(callback) {
 
   return () => {
     window.removeEventListener(EVENT_NAME, handler);
+    if (broadcastChannel) {
+      try {
+        broadcastChannel.removeEventListener('message', bcHandler);
+      } catch (_) {}
+    }
     window.removeEventListener('storage', storageHandler);
   };
 }

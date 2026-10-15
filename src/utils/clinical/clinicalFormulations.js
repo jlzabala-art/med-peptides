@@ -527,3 +527,42 @@ export function calculateTreatmentDates(rx, explicitStartDate = null, explicitDu
   };
 }
 
+/**
+ * Bidirectional Posology & Volume Duration Recalibrator
+ * Recalculates projected treatment duration and completion date when bottle volume, capsule count, or dosing frequency is altered.
+ *
+ * @param {Object} currentRx
+ * @param {string|number} [newVolume] e.g. "100 mL" or 100
+ * @param {string} [newPosology] e.g. "2 mL daily" or "2 capsules twice daily"
+ * @returns {Object}
+ */
+export function recalculateDurationFromPosologyOrVolumeChange(currentRx, newVolume = null, newPosology = null) {
+  const simulatedRx = {
+    ...currentRx,
+    volume: newVolume || currentRx?.volume,
+    posology: newPosology || currentRx?.posology
+  };
+
+  const oldDates = calculateTreatmentDates(currentRx);
+  const newDates = calculateTreatmentDates(simulatedRx);
+
+  const diffDays = newDates.durationDays - oldDates.durationDays;
+  let summaryMessage = '';
+
+  if (diffDays > 0) {
+    summaryMessage = `Regimen extended by +${diffDays} days (+${Math.round(diffDays / 7)}w). New projected end: ${newDates.endFormatted}`;
+  } else if (diffDays < 0) {
+    summaryMessage = `Regimen shortened by ${Math.abs(diffDays)} days. New projected end: ${newDates.endFormatted}`;
+  } else {
+    summaryMessage = `Regimen duration unchanged (${newDates.durationLabel}). Projected end: ${newDates.endFormatted}`;
+  }
+
+  return {
+    ...newDates,
+    diffDays,
+    summaryMessage,
+    hasChanged: diffDays !== 0
+  };
+}
+
+
