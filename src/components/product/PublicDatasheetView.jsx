@@ -567,11 +567,35 @@ export default function PublicDatasheetView({
     return !isCorporateService && !isCosmeticProduct && !isSolventProduct && !isSupplementProduct;
   }, [isCorporateService, isCosmeticProduct, isSolventProduct, isSupplementProduct]);
 
+  const isLipProduct = useMemo(() => {
+    const pSlug = (slug || product?.slug || product?.id || '').toLowerCase();
+    const pName = (product?.name || product?.title || product?.canonicalName || '').toLowerCase();
+    return pSlug.includes('lip-care') || pSlug.includes('pomadka') || pName.includes('lip care') || pName.includes('pomadka');
+  }, [slug, product]);
+
+  const isHairProduct = useMemo(() => {
+    const pSlug = (slug || product?.slug || product?.id || '').toLowerCase();
+    const pName = (product?.name || product?.title || product?.canonicalName || '').toLowerCase();
+    return pSlug.includes('shampoo') || pSlug.includes('conditioner') || pSlug.includes('trichology') || pName.includes('shampoo') || pName.includes('conditioner');
+  }, [slug, product]);
+
+  const isFacialProduct = useMemo(() => {
+    const pSlug = (slug || product?.slug || product?.id || '').toLowerCase();
+    const pName = (product?.name || product?.title || product?.canonicalName || '').toLowerCase();
+    return pSlug.includes('blue-diamond') || pSlug.includes('collagen-vege') || pSlug.includes('wash-gel') || pName.includes('blue diamond') || pName.includes('vege') || pName.includes('wash');
+  }, [slug, product]);
+
   const brandCollection = useMemo(() => resolveBrandCollectionInfo(product), [product]);
 
   const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA® Precision Health & Multiomics Platform') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : (isSupplementProduct ? (product?.name || 'UltraPerson Clinical Supplement') : 'Clinical Peptide'))))));
-  const category = isCosmeticProduct
-    ? (lang === 'es' ? 'Cosmecéutica y Cuidado Capilar' : 'Hair & Scalp Cosmeceuticals')
+  const category = isLipProduct
+    ? (lang === 'es' ? 'Cuidado Labial Bioactivo & Barrera' : 'Bioactive Lip Barrier Care')
+    : isHairProduct
+    ? (lang === 'es' ? 'Cosmecéutica y Tricología Capilar' : 'Hair & Scalp Cosmeceuticals')
+    : isFacialProduct
+    ? (lang === 'es' ? 'Dermocosmética Celular Avanzada' : 'Advanced Cellular Cosmeceuticals')
+    : isCosmeticProduct
+    ? (lang === 'es' ? 'Cosmecéutica y Cuidado Dérmico' : 'Cosmeceuticals & Dermal Care')
     : isSolventProduct 
     ? (lang === 'es' ? 'Solvente y Diluyente Estéril' : 'Sterile Reconstitution Solvent')
     : isEternaDiagnostic
@@ -605,7 +629,13 @@ export default function PublicDatasheetView({
     : isSupplementProduct
     ? (lang === 'es' ? `Fórmula Multi-Activa (${product?.ingredients?.length || '6+'} Activos Clave)` : `Multi-Active Matrix (${product?.ingredients?.length || '6+'} Key Actives)`)
     : (product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null);
-  const mw = isCosmeticProduct
+  const mw = isLipProduct
+    ? (lang === 'es' ? 'Barra Anhidra Lipídica (0% Agua)' : 'Anhydrous Lipid Stick (0% Water)')
+    : isHairProduct
+    ? (lang === 'es' ? 'Formulación Tópica: pH 4.5–5.5' : 'Topical Cosmeceutical: pH 4.5–5.5')
+    : isFacialProduct
+    ? (lang === 'es' ? 'Formulación Fisiológica: pH 5.5' : 'Physiologic Cosmeceutical: pH 5.5')
+    : isCosmeticProduct
     ? (lang === 'es' ? 'Formulación Tópica: pH 4.5–5.5' : 'Topical Cosmeceutical: pH 4.5–5.5')
     : isSolventProduct 
     ? '18.02 g/mol (H₂O)' 
@@ -616,7 +646,13 @@ export default function PublicDatasheetView({
     : isSupplementProduct
     ? (lang === 'es' ? 'Cápsulas HPMC Gastrorresistentes' : 'Acid-Resistant HPMC Delayed-Release')
     : (product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null);
-  const purity = isCosmeticProduct
+  const purity = isLipProduct
+    ? (lang === 'es' ? 'Testado Dermatológicamente · Ceras Naturales' : 'Dermatologically Tested · Natural Waxes')
+    : isHairProduct
+    ? (lang === 'es' ? 'Dermatológicamente Testado · Sin Sulfatos' : 'Dermatologically Tested · Sulphate-Free')
+    : isFacialProduct
+    ? (lang === 'es' ? 'Dermatológicamente Testado · Hipoalergénico' : 'Dermatologically Tested · Hypoallergenic')
+    : isCosmeticProduct
     ? (lang === 'es' ? 'Dermatológicamente Testado · Sin Sulfatos' : 'Dermatologically Tested · Sulphate-Free')
     : isSolventProduct 
     ? 'USP Pharmacopeial Grade (Sterile)' 
@@ -628,8 +664,14 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Grado Farmacéutico EU GMP · 100% Vegano' : 'EU GMP Certified · 100% Vegan')
     : (product?.purity || '≥ 99.4% (RP-HPLC)');
   const sequence = (isSolventProduct || isDiagnosticKit || isIvDrip || isCosmeticProduct || isSupplementProduct) ? null : (product?.sequence || product?.molecular?.sequence || null);
-  const targetSystem = isCosmeticProduct
+  const targetSystem = isLipProduct
+    ? (lang === 'es' ? 'Borde Bermellón, Mucosa Labial y Barrera Cutánea' : 'Vermilion Border, Labial Mucosa & Cutaneous Barrier')
+    : isHairProduct
     ? (lang === 'es' ? 'Folículo Piloso, Matriz Dérmica y Fase Anágena' : 'Hair Follicle, Scalp Dermal Matrix & Anagen Phase')
+    : isFacialProduct
+    ? (lang === 'es' ? 'Matriz Extracelular Dérmica, Fibroblastos y Renovación Celular' : 'Dermal Extracellular Matrix, Fibroblasts & Cellular Renewal')
+    : isCosmeticProduct
+    ? (lang === 'es' ? 'Matriz Cutánea y Barrera Dérmica' : 'Cutaneous Matrix & Dermal Barrier')
     : isSolventProduct
     ? (lang === 'es' ? 'Vehículo Estéril de Reconstitución de Péptidos (USP)' : 'Universal Sterile Peptide Reconstitution Vehicle (USP)')
     : isEternaDiagnostic

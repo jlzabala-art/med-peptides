@@ -403,10 +403,12 @@ export default function PublicInstitutionalInquiryDrawer({
   onClose,
   contextType = 'general', // 'product' | 'protocol' | 'catalog' | 'protocols_directory' | 'prescription' | 'general'
   initialEntity = null,    // { name, slug, code, strength, category, supplier, rxId }
+  brandType: propBrandType = null,
   lang = 'en'
 }) {
   const brandType = useMemo(() => {
     // 0. Explicit brandType or prescriptionType passed from caller
+    if (propBrandType) return propBrandType;
     if (initialEntity?.brandType) return initialEntity.brandType;
     if (initialEntity?.prescriptionType === 'trichotest') return 'trichotest';
     if (initialEntity?.prescriptionType === 'nutrigen') return 'nutrigen';
@@ -414,12 +416,38 @@ export default function PublicInstitutionalInquiryDrawer({
     if (initialEntity?.prescriptionType === 'peptide' || initialEntity?.prescriptionType === 'peptides') return 'peptides';
 
     const rawCat = String(initialEntity?.category || contextType || '').toLowerCase();
+    const rawBrand = String(initialEntity?.brandType || initialEntity?.brandSlug || initialEntity?.brand || initialEntity?.supplier || initialEntity?.supplierName || '').toLowerCase();
     const rawSupplier = String(initialEntity?.supplier || '').toLowerCase();
-    const rawName = String(initialEntity?.name || '').toLowerCase();
-    const rawSlug = String(initialEntity?.slug || '').toLowerCase();
+    const rawName = String(initialEntity?.name || initialEntity?.title || initialEntity?.canonicalName || '').toLowerCase();
+    const rawSlug = String(initialEntity?.slug || initialEntity?.id || initialEntity?.brandSlug || '').toLowerCase();
     const rawFormula = String(initialEntity?.formula || '').toLowerCase();
     const rawGenomics = String(initialEntity?.genomicsTest || '').toLowerCase();
     const rxId = String(initialEntity?.rxId || initialEntity?.prescriptionNumber || '').toLowerCase();
+
+    // Priority check for explicit brand collection or brand name
+    if (
+      rawBrand.includes('colway') ||
+      rawSupplier.includes('colway') ||
+      rawSlug.includes('colway') ||
+      rawName.includes('colway') ||
+      rawName.includes('colvita') ||
+      rawCat.includes('colway')
+    ) {
+      return 'colway';
+    }
+
+    if (
+      rawBrand.includes('bloodo') ||
+      rawSupplier.includes('bloodo') ||
+      rawSlug.includes('bloodo') ||
+      rawName.includes('blood test') ||
+      rawName.includes('bloodo') ||
+      rawName.includes('dbs') ||
+      rawName.includes('nad level') ||
+      rawCat.includes('bloodo')
+    ) {
+      return 'bloodo';
+    }
 
     if (
       contextType === 'prescription' ||

@@ -45,6 +45,53 @@ export default function PeptideContraindicationsSection({ product, lang = 'en' }
       if (unhyphenKey) return safetyRegistry[unhyphenKey];
     }
 
+    // ── Colway Colvita specific nutraceutical safety profile (Fish collagen, Fucus iodine, Vitamin E) ──
+    const isColvita = cleanCandidates.some(c => String(c).toLowerCase().includes('colvita'));
+    if (isColvita) {
+      return {
+        safetyNote: isEs
+          ? "Complemento alimenticio a base de colágeno nativo liofilizado de pescado de agua dulce (triple hélice intacta), algas marinas Fucus vesiculosus y vitamina E natural. No superar la dosis diaria expresamente recomendada (2 cápsulas al día). Los complementos alimenticios no deben utilizarse como sustitutos de una dieta variada y equilibrada. El alga Fucus es una fuente natural de yodo orgánico biodisponible; los pacientes con trastornos tiroideos diagnosticados (hipertiroidismo, tiroiditis) deben consultar a su médico especialista antes de su administración. La cubierta de la cápsula es 100% gelatina de pescado."
+          : "Dietary food supplement formulated with pure freeze-dried native freshwater fish tropocollagen (intact triple-helix conformation), marine Bladderwrack (Fucus vesiculosus) algae, and natural Vitamin E. Do not exceed the recommended daily intake (2 capsules daily). Food supplements should not be used as a substitute for a varied and balanced diet. Fucus algae is a rich natural source of bioavailable organic iodine; individuals with diagnosed thyroid conditions (hyperthyroidism, autoimmune thyroiditis) should consult their physician prior to supplementation. Capsule shell is manufactured from 100% fish gelatin.",
+        contraindications: isEs
+          ? [
+              "Hipersensibilidad o alergia conocida al pescado o proteínas marinas",
+              "Hipersensibilidad al yodo o a las algas marinas (Fucus vesiculosus)",
+              "Hipertiroidismo diagnosticado o afecciones tiroideas no controladas (debido al aporte natural de yodo orgánico)",
+              "Embarazo y período de lactancia (se recomienda consultar con el médico facultativo antes de su administración)",
+              "Dietas vegetarianas o veganas estrictas (cubierta de cápsula 100% gelatina de pescado)",
+              "Uso pediátrico no indicado (mantener fuera del alcance de los niños pequeños)"
+            ]
+          : [
+              "Known hypersensitivity or allergy to fish proteins or marine ingredients",
+              "Hypersensitivity to iodine or Bladderwrack (Fucus vesiculosus) sea algae",
+              "Diagnosed hyperthyroidism or unmonitored thyroid disorders (due to natural organic iodine content)",
+              "Pregnancy and lactation (consult with a qualified healthcare professional prior to use)",
+              "Strict vegan or vegetarian diets (capsule shell is made of 100% fish gelatin)",
+              "Not formulated for pediatric use (keep out of reach of young children)"
+            ]
+      };
+    }
+
+    const isSupplement = product?.is_supplement || product?.isSupplement || product?.productType === 'supplement' || product?.type === 'supplement';
+    if (isSupplement) {
+      return {
+        safetyNote: isEs
+          ? "Complemento alimenticio de grado clínico. No superar la dosis recomendada. Los complementos alimenticios no deben utilizarse como sustitutos de una dieta equilibrada. Mantener fuera del alcance de los niños. Si está embarazada, en período de lactancia o bajo tratamiento farmacológico, consulte a su médico."
+          : "Clinical-grade nutritional dietary supplement. Do not exceed recommended daily serving. Food supplements should not be used as a replacement for a balanced lifestyle. Keep out of reach of children. Consult your physician if pregnant, lactating, or taking prescription medication.",
+        contraindications: isEs
+          ? [
+              "Hipersensibilidad conocida a cualquiera de los principios activos o excipientes",
+              "Embarazo y lactancia (salvo indicación médica expresa)",
+              "Insuficiencia renal o hepática avanzada sin monitorización médica"
+            ]
+          : [
+              "Known hypersensitivity to active ingredients or excipients",
+              "Pregnancy and lactation (unless specifically directed by physician)",
+              "Severe unmonitored renal or hepatic impairment"
+            ]
+      };
+    }
+
     // Standard clinical fallback when peptide is active but lacks an explicit entry
     return {
       safetyNote: isEs

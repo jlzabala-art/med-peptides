@@ -77,6 +77,11 @@ export default function DoctorCredentialsModal({
       if (fieldKey === 'name') updates.displayName = finalValue;
       if (fieldKey === 'license') updates.licenseNumber = finalValue;
       if (fieldKey === 'clinic') updates.clinicName = finalValue;
+      if (fieldKey === 'clinicLogo') {
+        updates.clinicLogo = finalValue;
+        updates.logoUrl = finalValue;
+        updates.whiteLabelEnabled = Boolean(finalValue);
+      }
 
       const res = await fetch(`/api/doctor/${encodeURIComponent(slug)}`, {
         method: 'PUT',
@@ -127,6 +132,14 @@ export default function DoctorCredentialsModal({
       placeholder: 'e.g. Lotusland Bio-Regenerative Center',
       icon: MapPin,
       type: 'text'
+    },
+    {
+      key: 'clinicLogo',
+      label: 'Clinic Logo (White-Label)',
+      value: doctor.clinicLogo || doctor.logoUrl || '',
+      placeholder: 'Paste direct image URL or upload file (e.g. https://clinic.com/logo.png)',
+      icon: Building2,
+      type: 'logo'
     },
     {
       key: 'license',
@@ -314,7 +327,175 @@ export default function DoctorCredentialsModal({
                 <div style={{ flex: 1, minWidth: '240px', display: 'flex', alignItems: 'center' }}>
                   {isEditing ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', flexWrap: 'wrap' }}>
-                      {field.type === 'mobile' ? (
+                      {field.type === 'logo' ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', flexWrap: 'wrap' }}>
+                            <input
+                              type="url"
+                              value={tempFieldValue}
+                              onChange={(e) => setTempFieldValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleSaveField('clinicLogo');
+                                if (e.key === 'Escape') setEditingDoctorField(null);
+                              }}
+                              placeholder={field.placeholder}
+                              disabled={isSavingDoctorField}
+                              autoFocus
+                              style={{
+                                flex: 1,
+                                minWidth: '220px',
+                                height: '34px',
+                                padding: '0 10px',
+                                borderRadius: '4px',
+                                border: '1px solid #1a73e8',
+                                fontSize: '0.84rem',
+                                color: '#202124',
+                                outline: 'none'
+                              }}
+                            />
+                            <label
+                              style={{
+                                height: '34px',
+                                padding: '0 10px',
+                                borderRadius: '4px',
+                                border: '1px solid #dadce0',
+                                background: '#f8fafd',
+                                color: '#1a73e8',
+                                fontSize: '0.78rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                flexShrink: 0
+                              }}
+                              title="Upload local logo image"
+                            >
+                              <Upload size={13} />
+                              <span>Upload Image</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    if (file.size > 2 * 1024 * 1024) {
+                                      toast.error('Image file must be under 2 MB');
+                                      return;
+                                    }
+                                    const reader = new FileReader();
+                                    reader.onload = (ev) => {
+                                      setTempFieldValue(ev.target.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                              />
+                            </label>
+
+                            {/* Save and Cancel buttons for logo */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveField(field.key)}
+                                disabled={isSavingDoctorField}
+                                title="Save changes (Enter)"
+                                style={{
+                                  height: '32px',
+                                  padding: '0 10px',
+                                  borderRadius: '4px',
+                                  border: '1px solid #1a73e8',
+                                  background: '#1a73e8',
+                                  color: '#ffffff',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  cursor: isSavingDoctorField ? 'wait' : 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                {isSavingDoctorField ? (
+                                  <Loader2 size={13} className="animate-spin" />
+                                ) : (
+                                  <Check size={14} />
+                                )}
+                                <span>Save</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingDoctorField(null)}
+                                disabled={isSavingDoctorField}
+                                title="Cancel (Esc)"
+                                style={{
+                                  height: '32px',
+                                  padding: '0 8px',
+                                  borderRadius: '4px',
+                                  border: '1px solid #dadce0',
+                                  background: '#ffffff',
+                                  color: '#5f6368',
+                                  fontSize: '0.78rem',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                <X size={14} />
+                                <span>Cancel</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Live Patient Portal Header Preview */}
+                          <div style={{
+                            padding: '10px 12px',
+                            borderRadius: '6px',
+                            background: '#f8fafd',
+                            border: '1px solid #d2e3fc',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            flexWrap: 'wrap'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              {tempFieldValue ? (
+                                <img
+                                  src={tempFieldValue}
+                                  alt="Clinic Logo Preview"
+                                  style={{ maxHeight: '30px', maxWidth: '110px', objectFit: 'contain', borderRadius: '4px', background: '#ffffff', border: '1px solid #e2e8f0', padding: '2px' }}
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                              ) : (
+                                <div style={{ width: '32px', height: '32px', borderRadius: '4px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#64748b', fontWeight: 600 }}>
+                                  LOGO
+                                </div>
+                              )}
+                              <div style={{ fontSize: '0.74rem', color: '#174ea6', lineHeight: 1.35 }}>
+                                <strong>Patient Portal Header Preview:</strong> Replaces Atlas brand with your clinic identity across all patient therapy portals, with discreet <em>"Powered by Atlas Health Platform"</em> attribution.
+                              </div>
+                            </div>
+                            {tempFieldValue && (
+                              <button
+                                type="button"
+                                onClick={() => setTempFieldValue('')}
+                                style={{
+                                  fontSize: '0.72rem',
+                                  color: '#dc2626',
+                                  background: 'transparent',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  textDecoration: 'underline'
+                                }}
+                              >
+                                Clear Logo
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ) : field.type === 'mobile' ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: '200px' }}>
                           <select
                             value={tempDialCode}
@@ -387,58 +568,60 @@ export default function DoctorCredentialsModal({
                         />
                       )}
 
-                      {/* Explicit Save and Cancel buttons */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <button
-                          type="button"
-                          onClick={() => handleSaveField(field.key)}
-                          disabled={isSavingDoctorField}
-                          title="Save changes (Enter)"
-                          style={{
-                            height: '32px',
-                            padding: '0 10px',
-                            borderRadius: '4px',
-                            border: '1px solid #1a73e8',
-                            background: '#1a73e8',
-                            color: '#ffffff',
-                            fontSize: '0.78rem',
-                            fontWeight: 600,
-                            cursor: isSavingDoctorField ? 'wait' : 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                          {isSavingDoctorField ? (
-                            <Loader2 size={13} className="animate-spin" />
-                          ) : (
-                            <Check size={14} />
-                          )}
-                          <span>Save</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditingDoctorField(null)}
-                          disabled={isSavingDoctorField}
-                          title="Cancel (Esc)"
-                          style={{
-                            height: '32px',
-                            padding: '0 8px',
-                            borderRadius: '4px',
-                            border: '1px solid #dadce0',
-                            background: '#ffffff',
-                            color: '#5f6368',
-                            fontSize: '0.78rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                          <X size={14} />
-                          <span>Cancel</span>
-                        </button>
-                      </div>
+                      {/* Explicit Save and Cancel buttons for non-logo */}
+                      {field.type !== 'logo' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleSaveField(field.key)}
+                            disabled={isSavingDoctorField}
+                            title="Save changes (Enter)"
+                            style={{
+                              height: '32px',
+                              padding: '0 10px',
+                              borderRadius: '4px',
+                              border: '1px solid #1a73e8',
+                              background: '#1a73e8',
+                              color: '#ffffff',
+                              fontSize: '0.78rem',
+                              fontWeight: 600,
+                              cursor: isSavingDoctorField ? 'wait' : 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            {isSavingDoctorField ? (
+                              <Loader2 size={13} className="animate-spin" />
+                            ) : (
+                              <Check size={14} />
+                            )}
+                            <span>Save</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingDoctorField(null)}
+                            disabled={isSavingDoctorField}
+                            title="Cancel (Esc)"
+                            style={{
+                              height: '32px',
+                              padding: '0 8px',
+                              borderRadius: '4px',
+                              border: '1px solid #dadce0',
+                              background: '#ffffff',
+                              color: '#5f6368',
+                              fontSize: '0.78rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <X size={14} />
+                            <span>Cancel</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div
@@ -455,18 +638,53 @@ export default function DoctorCredentialsModal({
                       }}
                       title="Click to edit"
                     >
-                      <div
-                        style={{
-                          fontSize: '0.85rem',
-                          color: field.value ? '#202124' : '#9aa0a6',
-                          fontWeight: field.value ? 500 : 400,
-                          fontFamily: field.isMonospace ? 'monospace' : 'inherit',
-                          fontStyle: field.value ? 'normal' : 'italic',
-                          wordBreak: 'break-all'
-                        }}
-                      >
-                        {field.value || 'Not configured'}
-                      </div>
+                      {field.type === 'logo' ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexWrap: 'wrap' }}>
+                          {field.value ? (
+                            <>
+                              <img
+                                src={field.value}
+                                alt="Clinic Logo"
+                                style={{ maxHeight: '28px', maxWidth: '110px', objectFit: 'contain', borderRadius: '3px', border: '1px solid #dadce0', padding: '2px', background: '#ffffff' }}
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                              />
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#137333', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <span>White-Label Active</span>
+                                  <span style={{ fontSize: '0.66rem', background: '#e6f4ea', border: '1px solid #ceead6', padding: '1px 6px', borderRadius: '4px', color: '#137333', fontWeight: 700 }}>
+                                    Patient Portals
+                                  </span>
+                                </span>
+                                <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>
+                                  Clinic logo replaces Atlas · Discreet "Powered by Atlas Platform" attribution
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '0.84rem', color: '#9aa0a6', fontStyle: 'italic' }}>
+                                Not configured (Atlas default branding active)
+                              </span>
+                              <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#1a73e8', background: '#e8f0fe', border: '1px solid #d2e3fc', padding: '1px 6px', borderRadius: '4px' }}>
+                                White-Label Mode
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            fontSize: '0.85rem',
+                            color: field.value ? '#202124' : '#9aa0a6',
+                            fontWeight: field.value ? 500 : 400,
+                            fontFamily: field.isMonospace ? 'monospace' : 'inherit',
+                            fontStyle: field.value ? 'normal' : 'italic',
+                            wordBreak: 'break-all'
+                          }}
+                        >
+                          {field.value || 'Not configured'}
+                        </div>
+                      )}
                       <div
                         style={{
                           display: 'flex',

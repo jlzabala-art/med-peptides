@@ -73,6 +73,7 @@ export default function PublicUnifiedHeader({
   // Doctor-only: enables Import Rx and Prescriptions Switcher buttons
   isDoctorView = false,
   hideImportRx = false,
+  hideSwitchRx = false,
   onImportRx = null,
   onSwitchRx = null,
   rxSwitcherCount = 0,
@@ -446,7 +447,7 @@ function forceCanonicalDomain(urlOrPath) {
               )}
 
               {/* Doctor-only: My Prescriptions Switcher / Back button */}
-              {isDoctorView && (
+              {isDoctorView && !hideSwitchRx && (
                 <button
                   type="button"
                   className="puh-btn puh-btn-rx-switcher"

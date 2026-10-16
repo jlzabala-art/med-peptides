@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import {
@@ -101,6 +101,46 @@ const DoctorPracticeSearchModal = dynamic(
 );
 const EditTreatmentDurationModal = dynamic(
   () => import('@/components/doctor/modals/EditTreatmentDurationModal'),
+  { ssr: false }
+);
+const DoctorRecommendationsTab = dynamic(
+  () => import('@/components/doctor/tabs/DoctorRecommendationsTab'),
+  { ssr: false }
+);
+const DoctorMonographDrawer = dynamic(
+  () => import('@/components/doctor/modals/DoctorMonographDrawer'),
+  { ssr: false }
+);
+const DoctorInquiryModal = dynamic(
+  () => import('@/components/doctor/modals/DoctorInquiryModal'),
+  { ssr: false }
+);
+const DoctorAtlasAiModal = dynamic(
+  () => import('@/components/doctor/modals/DoctorAtlasAiModal'),
+  { ssr: false }
+);
+const DoctorWhatsAppModal = dynamic(
+  () => import('@/components/doctor/modals/DoctorWhatsAppModal'),
+  { ssr: false }
+);
+const DoctorHandoutModal = dynamic(
+  () => import('@/components/doctor/modals/DoctorHandoutModal'),
+  { ssr: false }
+);
+const DoctorMobileSidebarDrawer = dynamic(
+  () => import('@/components/doctor/navigation/DoctorMobileSidebarDrawer'),
+  { ssr: false }
+);
+const DoctorResourceInspectorDrawer = dynamic(
+  () => import('@/components/doctor/modals/DoctorResourceInspectorDrawer'),
+  { ssr: false }
+);
+const DoctorDiscoveryDrawer = dynamic(
+  () => import('@/components/doctor/modals/DoctorDiscoveryDrawer'),
+  { ssr: false }
+);
+const DoctorCredentialsModal = dynamic(
+  () => import('@/components/doctor/modals/DoctorCredentialsModal'),
   { ssr: false }
 );
 
@@ -699,113 +739,7 @@ export default function DoctorPublicPortalClient({
     return () => window.removeEventListener('click', handleOutsideActionClick);
   }, []);
 
-  // Inline Doctor Profile Field Editing State (Rule #5: Inline editing with explicit Save & Cancel)
-  const [editingDoctorField, setEditingDoctorField] = useState(null); // 'name' | 'specialty' | 'clinic' | 'license' | 'mobile' | 'email' | null
-  const [tempFieldValue, setTempFieldValue] = useState('');
-  const [tempDialCode, setTempDialCode] = useState('+971');
-  const [isSavingDoctorField, setIsSavingDoctorField] = useState(false);
 
-  // Dial code resolver using COUNTRIES data
-  const parsePhoneNumber = (rawPhone) => {
-    if (!rawPhone) return { dialCode: '+971', number: '' };
-    const clean = String(rawPhone).trim();
-    const sorted = [...COUNTRIES].sort((a, b) => (b.dial_code?.length || 0) - (a.dial_code?.length || 0));
-    const matched = sorted.find(c => c.dial_code && clean.startsWith(c.dial_code));
-    if (matched) {
-      return {
-        dialCode: matched.dial_code,
-        number: clean.slice(matched.dial_code.length).trim()
-      };
-    }
-    return { dialCode: '+971', number: clean };
-  };
-
-  const startEditingField = (fieldKey, currentValue) => {
-    triggerHaptic('selection');
-    setEditingDoctorField(fieldKey);
-    if (fieldKey === 'mobile') {
-      const parsed = parsePhoneNumber(currentValue || doctor.mobile || doctor.phone);
-      setTempDialCode(parsed.dialCode);
-      setTempFieldValue(parsed.number);
-    } else {
-      setTempFieldValue(currentValue || '');
-    }
-  };
-
-  const handleSaveDoctorField = async (fieldKey) => {
-    try {
-      setIsSavingDoctorField(true);
-      triggerHaptic('medium');
-
-      let finalValue = tempFieldValue.trim();
-
-      if (fieldKey === 'email') {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(finalValue)) {
-          toast.error('Please enter a valid RFC-compliant email address (e.g. doctor@clinic.com)');
-          setIsSavingDoctorField(false);
-          return;
-        }
-      }
-
-      if (fieldKey === 'mobile') {
-        finalValue = `${tempDialCode} ${tempFieldValue.replace(/[^\d\s-]/g, '').trim()}`.trim();
-      }
-
-      const updates = { [fieldKey]: finalValue };
-      if (fieldKey === 'mobile') {
-        updates.phone = finalValue;
-      }
-      if (fieldKey === 'name') {
-        updates.displayName = finalValue;
-      }
-      if (fieldKey === 'license') {
-        updates.licenseNumber = finalValue;
-      }
-      if (fieldKey === 'clinic') {
-        updates.clinicName = finalValue;
-      }
-      if (fieldKey === 'clinicLogo') {
-        updates.clinicLogo = finalValue;
-        updates.logoUrl = finalValue;
-        updates.whiteLabelEnabled = Boolean(finalValue);
-      }
-
-      const res = await fetch(`/api/doctor/${encodeURIComponent(slug)}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      });
-
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || 'Failed to update field');
-      }
-
-      // Immediately merge returned doctor profile and updates into reactive state
-      // Guarantees zero page-refresh needed for user updates (Golden Rule #25)
-      setData(prev => {
-        const serverDoctor = json?.doctor || {};
-        return {
-          ...prev,
-          ...(json || {}),
-          doctor: {
-            ...prev?.doctor,
-            ...updates,
-            ...serverDoctor
-          }
-        };
-      });
-
-      setEditingDoctorField(null);
-      toast.success(`Doctor ${fieldKey} updated successfully ✓`);
-    } catch (err) {
-      console.error(`Error updating doctor ${fieldKey}:`, err);
-      toast.error(err.message || 'Could not update field');
-    } finally {
-      setIsSavingDoctorField(false);
-    }
-  };
 
   // Persist session quota (max 5 uses per session, isolated to this doctor)
   useEffect(() => {
@@ -1420,11 +1354,59 @@ export default function DoctorPublicPortalClient({
     setIsLabelsModalOpen(true);
   };
 
-  const handleRefresh = () => {
-    triggerHaptic('light');
-    setLastRefreshed(new Date());
-    toast.success('Clinical registry data synchronized ✓');
-  };
+  // ── Autonomous Background Registry Synchronization (SWR + Focus Revalidation) ──
+  const isSyncingRegistryRef = useRef(false);
+  const lastSyncTimestampRef = useRef(Date.now());
+  const [isBackgroundSyncing, setIsBackgroundSyncing] = useState(false);
+
+  const syncDoctorRegistry = useCallback(async (force = false) => {
+    if (!slug || isSyncingRegistryRef.current) return;
+    const now = Date.now();
+    // Throttle automatic focus revalidations to 45s unless forced by a mutation
+    if (!force && now - lastSyncTimestampRef.current < 45000) return;
+
+    try {
+      isSyncingRegistryRef.current = true;
+      setIsBackgroundSyncing(true);
+      const res = await fetch(`/api/doctor/${encodeURIComponent(slug)}?fresh=1`, {
+        cache: 'no-store'
+      });
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json?.success) {
+        setData(prev => ({
+          ...prev,
+          ...json,
+          doctor: {
+            ...(prev?.doctor || {}),
+            ...(json.doctor || {})
+          }
+        }));
+        lastSyncTimestampRef.current = Date.now();
+        setLastRefreshed(new Date());
+      }
+    } catch (err) {
+      console.warn('[DoctorRegistrySync] Silent background revalidation skipped:', err?.message);
+    } finally {
+      isSyncingRegistryRef.current = false;
+      setIsBackgroundSyncing(false);
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        syncDoctorRegistry(false);
+      }
+    };
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    return () => {
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+    };
+  }, [syncDoctorRegistry]);
 
   const handleExportCsv = () => {
     triggerHaptic('selection');
@@ -1834,7 +1816,7 @@ export default function DoctorPublicPortalClient({
     {
       key: 'patientName',
       header: 'Patient Dossier',
-      width: '24%',
+      width: '22%',
       align: 'left',
       sortable: true,
       render: (rx) => (
@@ -1873,7 +1855,7 @@ export default function DoctorPublicPortalClient({
     {
       key: 'treatmentTitle',
       header: 'Prescription Regimen',
-      width: '30%',
+      width: '32%',
       align: 'left',
       sortable: true,
       render: (rx) => {
@@ -1975,11 +1957,12 @@ export default function DoctorPublicPortalClient({
     {
       key: 'createdAt',
       header: 'Start Date & Duration',
-      width: '18%',
+      width: '19%',
       align: 'left',
       sortable: true,
       render: (rx) => {
         const dates = calculateTreatmentDates(rx);
+        const endShort = String(dates.endFormatted || '').replace(/,\s*\d{4}$/, '');
 
         return (
           <div
@@ -1988,14 +1971,16 @@ export default function DoctorPublicPortalClient({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-start',
+              gap: '3px',
               cursor: 'pointer',
               padding: '4px 6px',
+              margin: '-4px -6px',
               borderRadius: '6px',
               border: '1px solid transparent',
               transition: 'all 0.15s ease',
               maxWidth: '100%'
             }}
-            title="Click to edit treatment start date and duration"
+            title={`${dates.startFormatted} → ${dates.endFormatted} (${dates.durationLabel}). Click to edit start date and duration.`}
             onMouseEnter={e => {
               e.currentTarget.style.background = '#f8fafc';
               e.currentTarget.style.borderColor = '#e2e8f0';
@@ -2005,34 +1990,23 @@ export default function DoctorPublicPortalClient({
               e.currentTarget.style.borderColor = 'transparent';
             }}
           >
-            {/* Start Date */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Calendar size={12} style={{ color: '#1a73e8', flexShrink: 0 }} />
-              <span style={{ fontSize: '0.78rem', fontWeight: 650, color: '#1e293b', whiteSpace: 'nowrap' }}>
+            {/* Line 1: Clean Start Date + Always-Visible Subtle Edit Pencil (Rule #5 & Rule #43: Zero Calendar Icon Clutter) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', maxWidth: '100%' }}>
+              <span style={{ fontSize: '0.80rem', fontWeight: 650, color: '#0f172a', whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>
                 {dates.startFormatted}
               </span>
-              <span
+              <Edit3
+                size={11}
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '16px',
-                  height: '16px',
-                  borderRadius: '3px',
-                  background: '#eff6ff',
-                  color: '#1a73e8',
-                  opacity: 0.85,
-                  flexShrink: 0,
-                  marginLeft: '2px'
+                  color: '#475569',
+                  opacity: 0.45,
+                  flexShrink: 0
                 }}
-                title="Edit timeline"
-              >
-                <Edit3 size={10} />
-              </span>
+              />
             </div>
 
-            {/* Duration Badge */}
-            <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            {/* Line 2: Compact Duration Pill + End Date (Zero Truncation) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
               <span
                 style={{
                   fontSize: '0.68rem',
@@ -2040,21 +2014,22 @@ export default function DoctorPublicPortalClient({
                   color: dates.isEstimated ? '#0369a1' : '#047857',
                   background: dates.isEstimated ? '#f0f9ff' : '#f0fdf4',
                   border: dates.isEstimated ? '1px solid #bae6fd' : '1px solid #bbf7d0',
-                  padding: '2px 7px',
+                  padding: '1px 6px',
                   borderRadius: '4px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1.35
                 }}
                 title={dates.reason}
               >
-                <Clock size={10} style={{ flexShrink: 0 }} />
-                <span>{dates.durationLabel}</span>
-                {dates.isEstimated && (
-                  <span style={{ opacity: 0.75, fontSize: '0.62rem', fontWeight: 500 }}>· Auto</span>
-                )}
+                {dates.durationDays}d ({dates.durationWeeks}w)
               </span>
+              {endShort && (
+                <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                  → {endShort}
+                </span>
+              )}
             </div>
           </div>
         );
@@ -2063,7 +2038,7 @@ export default function DoctorPublicPortalClient({
     {
       key: 'actions',
       header: 'Actions',
-      width: '18%',
+      width: '15%',
       align: 'right',
       render: (rx) => {
         const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
@@ -2077,102 +2052,185 @@ export default function DoctorPublicPortalClient({
             style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'flex-end', width: '100%', position: 'relative' }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Contextual Action: Sign (if pending) */}
-            {isPending && (
-              <button
-                type="button"
-                disabled={isSigning}
-                onClick={(e) => handleSignOffPrescription(rx, e)}
-                style={{
-                  height: '28px',
-                  padding: '0 8px',
-                  borderRadius: '4px',
-                  background: '#1a73e8',
-                  border: '1px solid #1557b0',
-                  color: '#ffffff',
-                  fontSize: '0.73rem',
-                  fontWeight: 650,
-                  cursor: isSigning ? 'wait' : 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  boxShadow: '0 1px 2px rgba(60,64,67,0.3)',
-                  whiteSpace: 'nowrap'
-                }}
-                title="Sign & Authorize Prescribing Order"
-              >
-                {isSigning ? (
-                  <>
-                    <Loader2 size={12} className="animate-spin" />
-                    <span>Signing...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 size={12} style={{ color: '#ffffff' }} />
-                    <span>Sign</span>
-                  </>
-                )}
-              </button>
-            )}
-
-            {/* Contextual Action: Share Offer (if proposal) */}
-            {isProposal && (
-              <button
-                type="button"
-                onClick={(e) => handleShareProposalWhatsApp(rx, e)}
-                style={{
-                  height: '28px',
-                  padding: '0 8px',
-                  borderRadius: '4px',
-                  background: '#25d366',
-                  border: '1px solid #1ebc59',
-                  color: '#ffffff',
-                  fontSize: '0.73rem',
-                  fontWeight: 650,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  boxShadow: '0 1px 2px rgba(37,211,102,0.25)',
-                  whiteSpace: 'nowrap'
-                }}
-                title="Share treatment proposal with patient via WhatsApp"
-              >
-                <MessageCircle size={12} style={{ color: '#ffffff' }} />
-                <span>Offer</span>
-              </button>
-            )}
-
-            {/* UNIVERSAL DETAIL LINK BUTTON (Always visible on all rows) */}
+            {/* QUICK ACTION 1: View Public Prescription Page (Simple Icon Button per User Request & Rule #45) */}
             <Link
               href={`/rx/${rx.code}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{
                 height: '28px',
-                padding: '0 8px',
+                width: '28px',
                 borderRadius: '4px',
                 background: '#ffffff',
                 border: '1px solid #dadce0',
-                color: '#1a73e8',
-                fontSize: '0.74rem',
-                fontWeight: 600,
+                color: '#5f6368',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                justifyContent: 'center',
                 textDecoration: 'none',
-                whiteSpace: 'nowrap',
+                flexShrink: 0,
                 transition: 'all 0.12s ease'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafd'; e.currentTarget.style.borderColor = '#1a73e8'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#dadce0'; }}
-              title="Open public clinical prescription dossier in a new tab"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#eff6ff';
+                e.currentTarget.style.borderColor = '#1a73e8';
+                e.currentTarget.style.color = '#1a73e8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.borderColor = '#dadce0';
+                e.currentTarget.style.color = '#5f6368';
+              }}
+              title="View public prescription page (/rx)"
+              aria-label="View public prescription page"
             >
-              <span>Dossier</span>
-              <ExternalLink size={12} style={{ color: '#1a73e8' }} />
+              <ExternalLink size={14} />
             </Link>
 
-            {/* QUICK ACTIONS ELLIPSIS BUTTON ("... / linea de suspensivos") */}
+            {/* QUICK ACTION 2: Contextual Primary Clinical Action (Sign if pending, Share Offer if proposal, or Patient Posology Handout if active/approved) */}
+            {isPending ? (
+              <button
+                type="button"
+                disabled={isSigning}
+                onClick={(e) => handleSignOffPrescription(rx, e)}
+                style={{
+                  height: '28px',
+                  width: '28px',
+                  borderRadius: '4px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#5f6368',
+                  cursor: isSigning ? 'wait' : 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  transition: 'all 0.12s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f0fdf4';
+                  e.currentTarget.style.borderColor = '#16a34a';
+                  e.currentTarget.style.color = '#16a34a';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#dadce0';
+                  e.currentTarget.style.color = '#5f6368';
+                }}
+                title="Sign & Authorize Prescribing Order"
+                aria-label="Sign and Authorize Prescribing Order"
+              >
+                {isSigning ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+              </button>
+            ) : isProposal ? (
+              <button
+                type="button"
+                onClick={(e) => handleShareProposalWhatsApp(rx, e)}
+                style={{
+                  height: '28px',
+                  width: '28px',
+                  borderRadius: '4px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#5f6368',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  transition: 'all 0.12s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f0fdf4';
+                  e.currentTarget.style.borderColor = '#16a34a';
+                  e.currentTarget.style.color = '#16a34a';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#dadce0';
+                  e.currentTarget.style.color = '#5f6368';
+                }}
+                title="Share treatment proposal with patient via WhatsApp"
+                aria-label="Share treatment proposal via WhatsApp"
+              >
+                <MessageCircle size={14} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenHandout(rx);
+                }}
+                style={{
+                  height: '28px',
+                  width: '28px',
+                  borderRadius: '4px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#5f6368',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  transition: 'all 0.12s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#eff6ff';
+                  e.currentTarget.style.borderColor = '#1a73e8';
+                  e.currentTarget.style.color = '#1a73e8';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#dadce0';
+                  e.currentTarget.style.color = '#5f6368';
+                }}
+                title="Patient Posology Handout (Printable / Shareable Sheet)"
+                aria-label="Patient Posology Handout"
+              >
+                <FileText size={14} />
+              </button>
+            )}
+
+            {/* QUICK ACTION 3: Official Bottle Labels (Direct 1-Click Access) */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenLabelsModal(rx);
+              }}
+              style={{
+                height: '28px',
+                width: '28px',
+                borderRadius: '4px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#5f6368',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                transition: 'all 0.12s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#fffbeb';
+                e.currentTarget.style.borderColor = '#d97706';
+                e.currentTarget.style.color = '#d97706';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.borderColor = '#dadce0';
+                e.currentTarget.style.color = '#5f6368';
+              }}
+              title="Official Bottle Labels"
+              aria-label="Official Bottle Labels"
+            >
+              <Tag size={14} />
+            </button>
+
+            {/* OVERFLOW MENU BUTTON ("⋯" — Secondary Actions per Golden Rule #33) */}
             <button
               type="button"
               onClick={(e) => {
@@ -2195,6 +2253,7 @@ export default function DoctorPublicPortalClient({
                 transition: 'all 0.12s'
               }}
               title="More quick clinical actions..."
+              aria-label="More clinical actions"
             >
               <MoreHorizontal size={15} />
             </button>
@@ -2382,7 +2441,7 @@ export default function DoctorPublicPortalClient({
                   onClick={(e) => {
                     e.stopPropagation();
                     setActiveActionsMenuRxId(null);
-                    startEditingTimeline(rx, e);
+                    openTimelineModal(rx, e);
                   }}
                   style={{
                     display: 'flex',
@@ -2834,22 +2893,26 @@ export default function DoctorPublicPortalClient({
           id: 'prescriptions',
           label: 'Patient Prescriptions',
           icon: Layers,
-          badge: allPrescriptions.length > 0 ? `${allPrescriptions.length}` : null,
-          badgeColor: '#1a73e8'
+          badge: allPrescriptions.length > 0 ? allPrescriptions.length : null,
+          actionBadge: quickCounts.pending > 0 ? quickCounts.pending : null,
+          actionBadgeTooltip: quickCounts.pending > 0
+            ? `${quickCounts.pending} prescription(s) awaiting action (${quickCounts.drafts} draft/sign-off, ${quickCounts.proposals} unaccepted offer)`
+            : undefined
         },
         {
           id: 'patients',
           label: 'Monitored Patients',
           icon: Users,
-          badge: uniquePatientsCount > 0 ? `${uniquePatientsCount}` : null,
-          badgeColor: '#0284c7'
+          badge: uniquePatientsCount > 0 ? uniquePatientsCount : null
         },
         {
           id: 'tasks',
-          label: 'Action Queue & Reviews',
+          label: 'Action Queue',
           icon: Clock,
-          badge: filteredTasks.length > 0 ? `${filteredTasks.length}` : null,
-          badgeColor: filteredTasks.length > 0 ? '#b06000' : '#5f6368'
+          actionBadge: filteredTasks.length > 0 ? filteredTasks.length : null,
+          actionBadgeTooltip: filteredTasks.length > 0
+            ? `${filteredTasks.length} pending clinical task(s) requiring physician review`
+            : undefined
         }
       ]
     },
@@ -2859,24 +2922,21 @@ export default function DoctorPublicPortalClient({
       items: [
         {
           id: 'lab_results',
-          label: 'Lab Diagnostics & DBS',
+          label: 'Lab Diagnostics',
           icon: FlaskConical,
-          badge: allLabResults.length > 0 ? `${allLabResults.length}` : null,
-          badgeColor: '#059669'
+          badge: allLabResults.length > 0 ? allLabResults.length : null
         },
         {
           id: 'recommendations',
-          label: 'Clinical Synergies & Protocols',
+          label: 'Clinical Synergies',
           icon: Sparkles,
-          badge: 'Synergy',
-          badgeColor: '#7c3aed'
+          badge: null
         },
         {
           id: 'search',
-          label: 'Practice Spotlight Search',
+          label: 'Spotlight Search',
           icon: Search,
-          badge: '⌘K',
-          badgeColor: '#1a73e8'
+          badge: '⌘K'
         }
       ]
     },
@@ -2886,28 +2946,25 @@ export default function DoctorPublicPortalClient({
       items: [
         {
           id: 'intake',
-          label: 'New Rx / Patient Intake',
+          label: 'New Prescription',
           icon: Plus,
-          badge: '1-Click',
-          badgeColor: '#1a73e8'
+          badge: null
         },
         {
           id: 'credentials',
-          label: 'Physician Profile & DHA License',
+          label: 'Physician Credentials',
           icon: ShieldCheck,
-          badge: 'Verified',
-          badgeColor: '#16a34a'
+          badge: null
         },
         {
           id: 'services_tiers',
-          label: 'Atlas Platform & Services',
+          label: 'Platform & Services',
           icon: Award,
-          badge: 'Free vs Pro',
-          badgeColor: '#137333'
+          badge: null
         }
       ]
     }
-  ], [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, allLabResults.length]);
+  ], [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, allLabResults.length, quickCounts.pending, quickCounts.drafts, quickCounts.proposals]);
 
   const handleSidebarNavigate = (itemOrId) => {
     triggerHaptic('light');
@@ -3388,11 +3445,12 @@ export default function DoctorPublicPortalClient({
         doctorName={doctor.name}
         hideTier2={true}
         hideImportRx={false}
+        hideSwitchRx={true}
         hideSearchButton={true}
         isDoctorView={true}
         onImportRx={() => setIsIntakeOpen(true)}
         onSwitchRx={() => handleSidebarNavigate('prescriptions')}
-        rxSwitcherCount={allPrescriptions.length}
+        rxSwitcherCount={quickCounts.pending}
       />
 
       {/* ── Portal Layout with Left Collapsible Clinical Rail (GCP Standard) ── */}
@@ -3427,24 +3485,25 @@ export default function DoctorPublicPortalClient({
                       key={item.id}
                       type="button"
                       onClick={() => handleSidebarNavigate(item.id)}
-                      title={item.label}
+                      title={item.actionBadgeTooltip ? `${item.label} — ${item.actionBadgeTooltip}` : item.label}
                       style={{
                         width: '100%',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: isSidebarCollapsed ? 'center' : 'space-between',
-                        gap: '10px',
-                        padding: isSidebarCollapsed ? '10px 0' : '9px 16px',
+                        gap: '8px',
+                        padding: isSidebarCollapsed ? '10px 0' : '9px 14px',
                         border: 'none',
                         borderLeft: isActive ? '3px solid #1a73e8' : '3px solid transparent',
                         background: isActive ? '#e8f0fe' : 'transparent',
                         color: isActive ? '#1a73e8' : '#3c4043',
-                        fontSize: '0.82rem',
+                        fontSize: '0.81rem',
                         fontWeight: isActive ? 600 : 500,
                         cursor: 'pointer',
                         textAlign: 'left',
                         transition: 'background 0.12s, color 0.12s',
-                        borderRadius: isSidebarCollapsed ? '6px' : '0'
+                        borderRadius: isSidebarCollapsed ? '6px' : '0',
+                        position: 'relative'
                       }}
                       onMouseEnter={(e) => {
                         if (!isActive) e.currentTarget.style.background = '#f1f3f4';
@@ -3453,27 +3512,65 @@ export default function DoctorPublicPortalClient({
                         if (!isActive) e.currentTarget.style.background = 'transparent';
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0 }}>
                         <Icon size={17} style={{ color: isActive ? '#1a73e8' : '#5f6368', flexShrink: 0 }} />
                         {!isSidebarCollapsed && (
-                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span style={{ whiteSpace: 'nowrap' }}>
                             {item.label}
                           </span>
                         )}
                       </div>
-                      {!isSidebarCollapsed && typeof item.badge === 'number' && (
+                      {!isSidebarCollapsed && (item.actionBadge !== null && item.actionBadge !== undefined || item.badge !== null && item.badge !== undefined) && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                          {item.actionBadge !== null && item.actionBadge !== undefined && (
+                            <span
+                              title={item.actionBadgeTooltip}
+                              style={{
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                padding: '1px 6px',
+                                minWidth: '18px',
+                                textAlign: 'center',
+                                borderRadius: '999px',
+                                background: '#dc2626',
+                                color: '#ffffff',
+                                lineHeight: 1.35,
+                                boxShadow: '0 1px 2px rgba(220, 38, 38, 0.25)'
+                              }}
+                            >
+                              {item.actionBadge}
+                            </span>
+                          )}
+                          {item.badge !== null && item.badge !== undefined && !item.actionBadge && (
+                            <span
+                              style={{
+                                fontSize: '0.68rem',
+                                fontWeight: 600,
+                                padding: '1px 6px',
+                                borderRadius: '10px',
+                                background: isActive ? '#d2e3fc' : '#f1f5f9',
+                                color: isActive ? '#174ea6' : '#475569',
+                                lineHeight: 1.35
+                              }}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {isSidebarCollapsed && item.actionBadge > 0 && (
                         <span
                           style={{
-                            fontSize: '0.70rem',
-                            fontWeight: 600,
-                            padding: '1px 6px',
-                            borderRadius: '10px',
-                            background: isActive ? '#1a73e8' : '#e8eaed',
-                            color: isActive ? '#ffffff' : '#3c4043'
+                            position: 'absolute',
+                            top: '6px',
+                            right: '12px',
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            background: '#dc2626',
+                            border: '1.5px solid #ffffff'
                           }}
-                        >
-                          {item.badge}
-                        </span>
+                        />
                       )}
                     </button>
                   );
@@ -4373,39 +4470,40 @@ export default function DoctorPublicPortalClient({
                       <Layers size={18} style={{ color: '#1a73e8' }} />
                       <span>Associated Clinical Prescriptions Dossier</span>
                     </h2>
-                    <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>•</span>
-                      <span>Synced {lastRefreshed ? lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'recently'}</span>
+                    <span
+                      style={{
+                        fontSize: '0.70rem',
+                        fontWeight: 600,
+                        color: isBackgroundSyncing ? '#1a73e8' : '#15803d',
+                        background: isBackgroundSyncing ? '#eff6ff' : '#f0fdf4',
+                        border: `1px solid ${isBackgroundSyncing ? '#bfdbfe' : '#bbf7d0'}`,
+                        padding: '1px 8px',
+                        borderRadius: '999px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                      title="Automatic background synchronization active (updates automatically on focus and after clinical actions)"
+                    >
+                      <span
+                        style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          background: isBackgroundSyncing ? '#1a73e8' : '#16a34a'
+                        }}
+                      />
+                      <span>
+                        {isBackgroundSyncing
+                          ? 'Updating registry...'
+                          : `Live registry · ${lastRefreshed ? lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Auto-synced'}`}
+                      </span>
                     </span>
                   </div>
                   <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
                     Complete verified repository of compounded prescriptions and clinical regimens.
                   </p>
                 </div>
-
-                {/* Header Action: Refresh Button */}
-                <button
-                  type="button"
-                  onClick={handleRefresh}
-                  title="Refresh clinical registry"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '4px',
-                    border: '1px solid #dadce0',
-                    background: '#ffffff',
-                    color: '#5f6368',
-                    cursor: 'pointer',
-                    transition: 'all 0.12s ease'
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafd'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; }}
-                >
-                  <RotateCw size={14} />
-                </button>
               </div>
 
               {/* ── Search Bar with Integrated Filters (Golden Rule #7) ──────── */}
@@ -5025,31 +5123,6 @@ export default function DoctorPublicPortalClient({
                     Quantitative capillary dried blood spot (DBS) biomarker assays and cellular metabolism diagnostics.
                   </p>
                 </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button
-                    type="button"
-                    onClick={handleRefresh}
-                    title="Refresh lab results"
-                    style={{
-                      height: '32px',
-                      padding: '0 12px',
-                      borderRadius: '4px',
-                      border: '1px solid #dadce0',
-                      background: '#ffffff',
-                      color: '#3c4043',
-                      fontSize: '0.78rem',
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <RotateCw size={13} className={isSwitchingDoctor ? 'animate-spin' : ''} />
-                    <span>Sync</span>
-                  </button>
-                </div>
               </div>
 
               <DataTable
@@ -5422,790 +5495,24 @@ export default function DoctorPublicPortalClient({
             </section>
           )}
 
-          {/* ── View 7: Consolidated Master Atlas Recommendations (Clean & Non-Repetitive) ── */}
-          {activeAnchor === 'recommendations' && (() => {
-            // 1. Process all prescriptions with their analyzed recs once
-            const analyzedItems = allPrescriptions.map(rx => ({
-              rx,
-              recs: rx.atlasRecommendations || getPrescriptionAtlasRecommendations(rx)
-            }));
-
-            // Category 1: Bioactive Peptides Matches
-            const ghkMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-ghk-cu-50mg');
-            const glowMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-glow-blend');
-            const epithalonMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-epithalon-10mg');
-            const cjcMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-cjc-ipam-blend');
-            const dsipMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-dsip-5mg');
-            const bpcMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-bpc-157-10mg');
-
-            // Category 2: Scalp Barrier & ECM Matches
-            const colwayMatches = analyzedItems.filter(item => Boolean(item.recs?.colway));
-
-            // Category 3: Precision Nutraceuticals (UltraPerson by PharmaPolis) Matches
-            const ultrapersonEnergyMatches = analyzedItems.filter(item => {
-              const slug = item.recs?.supplement?.catalogSlug;
-              const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
-              return slug === 'ultraperson-energy-metabolic-vitality' || raw.includes('minoxidil') || raw.includes('coq10') || raw.includes('ubiquinol');
-            });
-            const ultrapersonLongevityMatches = analyzedItems.filter(item => {
-              const slug = item.recs?.supplement?.catalogSlug;
-              const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
-              return slug === 'ultraperson-longevity-cellular-renewal' || raw.includes('finasteride') || raw.includes('dutasteride') || raw.includes('resveratrol') || raw.includes('metformin');
-            });
-            const ultrapersonStressMatches = analyzedItems.filter(item => {
-              const slug = item.recs?.supplement?.catalogSlug;
-              const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
-              return slug === 'ultraperson-stress-resilience-emotional-balance' || raw.includes('stress') || raw.includes('cortisol') || raw.includes('ashwagandha') || raw.includes('bhrt') || raw.includes('dhea');
-            });
-            const ultrapersonSleepMatches = analyzedItems.filter(item => {
-              const slug = item.recs?.supplement?.catalogSlug;
-              const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
-              return slug === 'ultraperson-sleep-quality-restoration' || raw.includes('sleep') || raw.includes('melatonin') || raw.includes('theanine') || raw.includes('gaba');
-            });
-
-            // Category 4: ETERNA® Longevity & Pharmacogenomics Saliva/DNA Test Matches
-            const eternaMatches = analyzedItems.filter(item => {
-              const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
-              return raw.includes('finasteride') ||
-                     raw.includes('dutasteride') ||
-                     raw.includes('minoxidil') ||
-                     raw.includes('epithalon') ||
-                     raw.includes('metformin') ||
-                     raw.includes('spironolactone') ||
-                     raw.includes('latanoprost') ||
-                     raw.includes('tricho') ||
-                     raw.includes('alopecia') ||
-                     raw.includes('longevity');
-            });
-
-            const candidateSolutions = [
-              // ─── Bioactive Peptides (Lotusland Research) ───
-              {
-                id: 'atlas-ghk-cu-50mg',
-                category: 'peptide',
-                badge: 'BIOACTIVE PEPTIDE SIGNALER',
-                title: 'GHK-Cu (Copper Tripeptide-1) 50 mg / vial',
-                badgeColor: '#4338ca',
-                badgeBg: '#e0e7ff',
-                borderColor: '#c7d2fe',
-                matchScore: '98% Synergy',
-                target: 'Dermal Papilla Proliferation & TGF-β1 Catagen Blockade',
-                summary: 'High-affinity follicular bioregulator stimulating dermal papilla fibroblasts, downregulating TGF-β1 miniaturization, and accelerating anagen re-entry in synergy with Minoxidil and antiandrogens.',
-                synergisticApis: ['Minoxidil', 'Finasteride', 'Dutasteride', 'Spironolactone', 'Latanoprost', 'TrichoSol'],
-                matchingItems: ghkMatches,
-                protocolTitle: 'Melanogenesis & Density Protocol (ZT + GHK-Cu)',
-                protocolUrl: '/proto/melanogenesis-density-protocol-zt-ghk-cu'
-              },
-              {
-                id: 'atlas-glow-blend',
-                category: 'peptide',
-                badge: 'TRIPLE REGENERATIVE COMPLEX',
-                title: 'GLOW (BPC-157 / TB-500 / GHK) 10 mg | 10 mg | 75 mg',
-                badgeColor: '#0369a1',
-                badgeBg: '#e0f2fe',
-                borderColor: '#bae6fd',
-                matchScore: '99% Graft Synergy',
-                target: 'Post-FUE Revascularization & Microvascular Graft Take',
-                summary: 'Biocompatible tri-peptide complex engineered for accelerated follicular graft revascularization, nitric oxide microvascular stability, and early keratinocyte migration into recipient beds.',
-                synergisticApis: ['PRP (Platelet-Rich Plasma)', 'FUE Micro-Grafts', 'TrichoOil Lipids', 'L-Arginine', 'Vitamin E'],
-                matchingItems: glowMatches,
-                protocolTitle: 'BPC-157 & TB-500 Tissue Repair Protocol',
-                protocolUrl: '/proto/bpc-157-tb-500-protocol'
-              },
-              {
-                id: 'atlas-epithalon-10mg',
-                category: 'peptide',
-                badge: 'EPIGENETIC TELOMERE REGULATOR',
-                title: 'Epithalon (Ala-Glu-Asp-Gly) 10 mg / vial',
-                badgeColor: '#7c3aed',
-                badgeBg: '#ede9fe',
-                borderColor: '#ddd6fe',
-                matchScore: '99% Longevity Synergy',
-                target: 'Telomerase Activation & Bulge Stem Cell Longevity',
-                summary: 'Pineal biomimetic peptide inducing heterochromatin de-condensation and TERT upregulation, protecting follicular bulge stem cells against premature replicative senescence.',
-                synergisticApis: ['Metformin', 'TeloTest™ Genomic Panels', 'CoQ10 / Ubiquinol', 'Trans-Resveratrol', 'NAC'],
-                matchingItems: epithalonMatches,
-                protocolTitle: 'Epithalon Telomere Extension Cycle',
-                protocolUrl: '/proto/epithalon-telomere-extension'
-              },
-              {
-                id: 'atlas-cjc-ipam-blend',
-                category: 'peptide',
-                badge: 'ENDOCRINE GH AXIS REGULATOR',
-                title: 'CJC-1295 (No DAC) & Ipamorelin 5 mg / 5 mg',
-                badgeColor: '#0284c7',
-                badgeBg: '#e0f2fe',
-                borderColor: '#bae6fd',
-                matchScore: '97% Endocrine Synergy',
-                target: 'Pulsatile Pituitary GH Axis & Body Composition Bioregulator',
-                summary: 'Dual-action secretagogue stimulating physiological, pulsatile growth hormone and IGF-1 secretion without pituitary desensitization, synergizing with BHRT/TRT regimens.',
-                synergisticApis: ['Testosterone', 'Estradiol', 'Progesterone', 'DHEA', 'Pentravan'],
-                matchingItems: cjcMatches,
-                protocolTitle: 'CJC-1295 & Ipamorelin Synergistic HGH Protocol',
-                protocolUrl: '/proto/gh-rejuvenation-cjc-ipam'
-              },
-              {
-                id: 'atlas-dsip-5mg',
-                category: 'peptide',
-                badge: 'NEURO-CIRCADIAN REGULATOR',
-                title: 'DSIP (Delta Sleep-Inducing Peptide) 5 mg / vial',
-                badgeColor: '#6366f1',
-                badgeBg: '#e0e7ff',
-                borderColor: '#c7d2fe',
-                matchScore: '98% Neuro-Circadian Synergy',
-                target: 'Central GABAergic & Pineal Circadian Neuro-Reset',
-                summary: 'Nonapeptide crossing the blood-brain barrier to restore physiological slow-wave sleep (SWS) architecture, blunting hypercortisolemia and stabilizing autonomic tone.',
-                synergisticApis: ['Melatonin', 'L-Theanine', 'GABA', 'Magnesium Glycinate'],
-                matchingItems: dsipMatches,
-                protocolTitle: 'DSIP Circadian Sleep Restoration Protocol',
-                protocolUrl: '/proto/dsip-circadian-deep-sleep'
-              },
-              {
-                id: 'atlas-bpc-157-10mg',
-                category: 'peptide',
-                badge: 'CYTOPROTECTIVE TISSUE REGULATOR',
-                title: 'BPC-157 (Body Protection Compound) 10 mg / vial',
-                badgeColor: '#0369a1',
-                badgeBg: '#e0f2fe',
-                borderColor: '#bae6fd',
-                matchScore: '95% Biological Synergy',
-                target: 'Endothelial Nitric Oxide Signaling & Cytoprotection',
-                summary: 'Penta-decapeptide accelerating local tissue repair through endothelial nitric oxide synthase (eNOS) upregulation and VEGFR2 phosphorylation, stabilizing cellular extracellular matrices.',
-                synergisticApis: ['Arginine', 'Glutamine', 'Zinc Carnosine', 'Hyaluronic Acid'],
-                matchingItems: bpcMatches,
-                protocolTitle: 'BPC-157 & TB-500 Cellular Repair Protocol',
-                protocolUrl: '/proto/bpc-157-tb-500-protocol'
-              },
-
-              // ─── Precision Nutraceuticals (UltraPerson by PharmaPolis) ───
-              {
-                id: 'ultraperson-energy-metabolic-vitality',
-                category: 'supplement',
-                badge: 'METABOLIC & MITOCHONDRIAL NUTRACEUTICAL',
-                title: 'UltraPerson Energy & Metabolic Vitality (CoQ10 / PQQ / Ginseng)',
-                badgeColor: '#d97706',
-                badgeBg: '#fef3c7',
-                borderColor: '#fde68a',
-                matchScore: '99% Metabolic Synergy',
-                target: 'Mitochondrial ATP Synthesis & Free Radical Neutralization',
-                summary: 'Rate-limiting mitochondrial cofactors (PQQ, Ubiquinol/CoQ10 125mg, Alpha-Lipoic Acid, and Ginseng). Multiplies cellular bioenergetic efficiency and buffers tissue oxidative stress from active therapies.',
-                synergisticApis: ['Oral & Topical Minoxidil', 'Metformin', 'CoQ10', 'Antioxidants', 'Alpha-Lipoic Acid'],
-                matchingItems: ultrapersonEnergyMatches,
-                protocolTitle: 'View UltraPerson Energy Monograph',
-                protocolUrl: '/p/ultraperson-energy-metabolic-vitality'
-              },
-              {
-                id: 'ultraperson-longevity-cellular-renewal',
-                category: 'supplement',
-                badge: 'SIRTUIN ACTIVATOR & SENOLYTIC',
-                title: 'UltraPerson Longevity & Cellular Renewal (Sirtuin & Senolytic)',
-                badgeColor: '#b45309',
-                badgeBg: '#fef3c7',
-                borderColor: '#fde68a',
-                matchScore: '98% Sirtuin Synergy',
-                target: 'SIRT1 Activation & Selective Senescent Cell Clearance (SASP)',
-                summary: 'Micronized bioidentical Trans-Resveratrol, Liposomal Fisetin 100mg, and Phytosomal Curcumin. Induces selective autophagy and eliminates senescent cells secreting pro-inflammatory cytokines in the peribulbar and vascular microenvironment.',
-                synergisticApis: ['Finasteride', 'Dutasteride', 'Epithalon', 'Metformin', 'Resveratrol'],
-                matchingItems: ultrapersonLongevityMatches,
-                protocolTitle: 'View UltraPerson Longevity Monograph',
-                protocolUrl: '/p/ultraperson-longevity-cellular-renewal'
-              },
-              {
-                id: 'ultraperson-stress-resilience-emotional-balance',
-                category: 'supplement',
-                badge: 'HPA AXIS & CORTISOL MODULATOR',
-                title: 'UltraPerson Stress Resilience & Emotional Balance',
-                badgeColor: '#d97706',
-                badgeBg: '#fef3c7',
-                borderColor: '#fde68a',
-                matchScore: '97% Endocrine Balance',
-                target: 'HPA Adrenal Axis Homeostasis & Peripheral Cortisol Blockade',
-                summary: 'KSM-66 Ashwagandha standardized in withanolides and pure L-Theanine. Normalizes ACTH and serum cortisol spikes, preventing stress-induced telogen effluvium and peripheral hormone receptor inhibition.',
-                synergisticApis: ['DHEA', 'BHRT Hormone Therapy', 'L-Theanine', 'Ashwagandha', 'Magnesium'],
-                matchingItems: ultrapersonStressMatches,
-                protocolTitle: 'View UltraPerson Stress Monograph',
-                protocolUrl: '/p/ultraperson-stress-resilience-emotional-balance'
-              },
-              {
-                id: 'ultraperson-sleep-quality-restoration',
-                category: 'supplement',
-                badge: 'DELTA DEEP SLEEP RESTORER',
-                title: 'UltraPerson Sleep Quality & Restoration (Melatonin-Free)',
-                badgeColor: '#4f46e5',
-                badgeBg: '#e0e7ff',
-                borderColor: '#c7d2fe',
-                matchScore: '98% Restorative Sleep',
-                target: 'GABAergic Allosteric Modulation Without Melatonin Desensitization',
-                summary: 'Magnolia bark Honokiol/Magnolol, Apigenin, and Lemon Balm. Extends non-REM stage 3/4 sleep to maximize nocturnal physiological growth hormone release and tissue repair.',
-                synergisticApis: ['Melatonin', 'GABA', 'DSIP', 'L-Theanine', 'Magnesium'],
-                matchingItems: ultrapersonSleepMatches,
-                protocolTitle: 'View UltraPerson Sleep Monograph',
-                protocolUrl: '/p/ultraperson-sleep-quality-restoration'
-              },
-
-              // ─── Precision Genomics & Pharmacogenetics (ETERNA® Diagnostics) ───
-              {
-                id: 'eterna-longevity-pharmacogenomics-test',
-                category: 'eterna',
-                badge: 'PRECISION GENOMICS & PHARMACOGENETICS',
-                title: 'ETERNA® Longevity & Pharmacogenomics Saliva/DNA Test Kit',
-                badgeColor: '#7c3aed',
-                badgeBg: '#ede9fe',
-                borderColor: '#ddd6fe',
-                matchScore: '99% Pharmacogenetic Match',
-                target: 'CYP Polymorphism Mapping, SULT1A1 Enzyme, AR/SRD5A2 Genes & Telomere Wear',
-                summary: 'Non-invasive saliva genetic test (72 key biomarkers). Assesses sulfotransferase (SULT1A1) Minoxidil activation rate, androgen receptor (AR) sensitivity, and hepatic CYP polymorphisms to calibrate exact compounded doses and predict therapeutic response with zero trial-and-error.',
-                synergisticApis: ['Topical/Oral Minoxidil', 'Finasteride', 'Dutasteride', 'Epithalon', 'Metformin', 'TeloTest™'],
-                matchingItems: eternaMatches,
-                protocolTitle: 'Request ETERNA® DX Diagnostic Kit',
-                protocolUrl: '/p/eternadx-genetic-test'
-              },
-
-              // ─── Barrier & Cuticular ECM (Colway Clinical Care) ───
-              {
-                id: 'colway-hair-system',
-                category: 'colway',
-                badge: 'SCALP BARRIER INTEGRITY & NATIVE ECM',
-                title: 'Colway Hair Strengthening System (2-Step Routine)',
-                badgeColor: '#047857',
-                badgeBg: '#d1fae5',
-                borderColor: '#a7f3d0',
-                matchScore: '99% Barrier Support',
-                target: 'Cuticular ECM Preservation & Vehicle Irritation Prevention',
-                summary: 'Biologically active native tropocollagen and microcirculatory flavonoids (diosmin) engineered to calm the stratum corneum, seal cuticular scales, and counteract hydroalcoholic vehicle lipid depletion.',
-                synergisticApis: ['TrichoSol Vehicle Base', 'Topical Minoxidil', 'Topical 5αR Inhibitors', 'TrichoOil'],
-                matchingItems: colwayMatches,
-                protocolTitle: 'View Colway Clinical Datasheet (Shampoo & Conditioner)',
-                protocolUrl: '/p/colway-strengthening-shampoo'
-              }
-            ];
-
-            // Strict Clinical Rule: Only display recommendations with at least 1 actual applicable prescription in practice
-            // Priority Order (Descending): Sorted by number of matching patients/prescriptions in practice
-            const masterSolutions = candidateSolutions
-              .filter(sol => Array.isArray(sol.matchingItems) && sol.matchingItems.length > 0)
-              .sort((a, b) => b.matchingItems.length - a.matchingItems.length);
-
-            const peptideSolutions = masterSolutions.filter(sol => sol.category === 'peptide');
-            const supplementSolutions = masterSolutions.filter(sol => sol.category === 'supplement');
-            const eternaSolutions = masterSolutions.filter(sol => sol.category === 'eterna');
-            const colwaySolutions = masterSolutions.filter(sol => sol.category === 'colway');
-
-            // If active category filter has no solutions, gracefully fallback to 'all'
-            const effectiveCategoryFilter = 
-              (recCategoryFilter === 'peptides' && peptideSolutions.length === 0) ||
-              (recCategoryFilter === 'supplements' && supplementSolutions.length === 0) ||
-              (recCategoryFilter === 'eterna' && eternaSolutions.length === 0) ||
-              (recCategoryFilter === 'colway' && colwaySolutions.length === 0)
-                ? 'all'
-                : recCategoryFilter;
-
-            // Filter by Category and Search Query
-            const filteredSolutions = masterSolutions.filter(sol => {
-              if (effectiveCategoryFilter === 'peptides' && sol.category !== 'peptide') return false;
-              if (effectiveCategoryFilter === 'supplements' && sol.category !== 'supplement') return false;
-              if (effectiveCategoryFilter === 'eterna' && sol.category !== 'eterna') return false;
-              if (effectiveCategoryFilter === 'colway' && sol.category !== 'colway') return false;
-              if (recSearchQuery.trim()) {
-                const q = recSearchQuery.toLowerCase().trim();
-                const matchTitle = sol.title.toLowerCase().includes(q);
-                const matchTarget = sol.target.toLowerCase().includes(q);
-                const matchApis = sol.synergisticApis.some(api => api.toLowerCase().includes(q));
-                const matchPatients = sol.matchingItems.some(item =>
-                  (item.rx.patientName || '').toLowerCase().includes(q) ||
-                  (item.rx.code || item.rx.id || '').toLowerCase().includes(q)
-                );
-                return matchTitle || matchTarget || matchApis || matchPatients;
-              }
-              return true;
-            });
-
-            const totalCoveredRxs = new Set(
-              masterSolutions.flatMap(s => s.matchingItems.map(item => item.rx.id || item.rx.code))
-            ).size;
-
-            return (
-              <section
-                id="recommendations"
-                className="doctor-recommendations-section"
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #dadce0',
-                  borderRadius: '8px',
-                  padding: '24px',
-                  marginBottom: '110px',
-                  boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-                }}
-              >
-                {/* Top GCP Header & Practice Metrics */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#e0e7ff', color: '#4338ca', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Sparkles size={18} />
-                      </div>
-                      <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#202124' }}>
-                        Atlas Recommendations &amp; Clinical Synergies
-                      </h2>
-                    </div>
-                    <p style={{ margin: 0, fontSize: '0.84rem', color: '#5f6368', maxWidth: '780px', lineHeight: 1.5 }}>
-                      Master formulary of bioactive adjuvants, UltraPerson nutraceuticals, ETERNA® genomics, and cuticular ECM barrier care. Consolidated across {masterSolutions.length} core {masterSolutions.length === 1 ? 'synergy' : 'synergies'} prioritized by patient prevalence in your practice.
-                    </p>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <div style={{
-                      fontSize: '0.74rem',
-                      background: '#f8fafc',
-                      color: '#0f172a',
-                      border: '1px solid #e2e8f0',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      fontWeight: 650,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}>
-                      <Users size={14} style={{ color: '#2563eb' }} />
-                      <span><strong>{totalCoveredRxs}</strong> of {allPrescriptions.length} prescriptions with synergy</span>
-                    </div>
-                    <span style={{ fontSize: '0.74rem', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '6px 12px', borderRadius: '6px', fontWeight: 650 }}>
-                      ✓ {masterSolutions.length} Prioritized Master Formulation{masterSolutions.length === 1 ? '' : 's'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Filter Tabs & Patient Search Controls */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '12px',
-                  padding: '12px 16px',
-                  background: '#f8fafd',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  marginBottom: '20px'
-                }}>
-                  {/* Category Pills (Horizontal Scroll on Mobile per Google Cloud UX) */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '6px',
-                      flexWrap: 'nowrap',
-                      overflowX: 'auto',
-                      WebkitOverflowScrolling: 'touch',
-                      paddingBottom: '4px',
-                      maxWidth: '100%',
-                      scrollbarWidth: 'none'
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setRecCategoryFilter('all')}
-                      style={{
-                        padding: '6px 12px',
-                        fontSize: '0.76rem',
-                        fontWeight: 650,
-                        borderRadius: '6px',
-                        border: '1px solid',
-                        borderColor: effectiveCategoryFilter === 'all' ? '#2563eb' : '#d1d5db',
-                        background: effectiveCategoryFilter === 'all' ? '#eff6ff' : '#ffffff',
-                        color: effectiveCategoryFilter === 'all' ? '#1d4ed8' : '#4b5563',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                        flexShrink: 0,
-                        whiteSpace: 'nowrap',
-                        minHeight: '34px'
-                      }}
-                    >
-                      All ({masterSolutions.length})
-                    </button>
-                    {peptideSolutions.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setRecCategoryFilter('peptides')}
-                        style={{
-                          padding: '6px 12px',
-                          fontSize: '0.76rem',
-                          fontWeight: 650,
-                          borderRadius: '6px',
-                          border: '1px solid',
-                          borderColor: effectiveCategoryFilter === 'peptides' ? '#4338ca' : '#d1d5db',
-                          background: effectiveCategoryFilter === 'peptides' ? '#e0e7ff' : '#ffffff',
-                          color: effectiveCategoryFilter === 'peptides' ? '#3730a3' : '#4b5563',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease',
-                          flexShrink: 0,
-                          whiteSpace: 'nowrap',
-                          minHeight: '34px'
-                        }}
-                      >
-                        🧬 Bioactive Peptides ({peptideSolutions.length})
-                      </button>
-                    )}
-                    {supplementSolutions.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setRecCategoryFilter('supplements')}
-                        style={{
-                          padding: '6px 12px',
-                          fontSize: '0.76rem',
-                          fontWeight: 650,
-                          borderRadius: '6px',
-                          border: '1px solid',
-                          borderColor: effectiveCategoryFilter === 'supplements' ? '#d97706' : '#d1d5db',
-                          background: effectiveCategoryFilter === 'supplements' ? '#fef3c7' : '#ffffff',
-                          color: effectiveCategoryFilter === 'supplements' ? '#b45309' : '#4b5563',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease',
-                          flexShrink: 0,
-                          whiteSpace: 'nowrap',
-                          minHeight: '34px'
-                        }}
-                      >
-                        ⚡ UltraPerson Supplements ({supplementSolutions.length})
-                      </button>
-                    )}
-                    {eternaSolutions.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setRecCategoryFilter('eterna')}
-                        style={{
-                          padding: '6px 12px',
-                          fontSize: '0.76rem',
-                          fontWeight: 650,
-                          borderRadius: '6px',
-                          border: '1px solid',
-                          borderColor: effectiveCategoryFilter === 'eterna' ? '#7c3aed' : '#d1d5db',
-                          background: effectiveCategoryFilter === 'eterna' ? '#ede9fe' : '#ffffff',
-                          color: effectiveCategoryFilter === 'eterna' ? '#6d28d9' : '#4b5563',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease',
-                          flexShrink: 0,
-                          whiteSpace: 'nowrap',
-                          minHeight: '34px'
-                        }}
-                      >
-                        ⏳ ETERNA® Longevity &amp; DNA ({eternaSolutions.length})
-                      </button>
-                    )}
-                    {colwaySolutions.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setRecCategoryFilter('colway')}
-                        style={{
-                          padding: '6px 12px',
-                          fontSize: '0.76rem',
-                          fontWeight: 650,
-                          borderRadius: '6px',
-                          border: '1px solid',
-                          borderColor: effectiveCategoryFilter === 'colway' ? '#047857' : '#d1d5db',
-                          background: effectiveCategoryFilter === 'colway' ? '#ecfdf5' : '#ffffff',
-                          color: effectiveCategoryFilter === 'colway' ? '#065f46' : '#4b5563',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease',
-                          flexShrink: 0,
-                          whiteSpace: 'nowrap',
-                          minHeight: '34px'
-                        }}
-                      >
-                        🛡️ Barrier &amp; Cuticular ECM ({colwaySolutions.length})
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Instant Search Bar */}
-                  <div style={{ position: 'relative', minWidth: '260px', flex: '1', maxWidth: '420px' }}>
-                    <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                    <input
-                      type="text"
-                      value={recSearchQuery}
-                      onChange={(e) => setRecSearchQuery(e.target.value)}
-                      placeholder="Search by patient name, code, or active API (e.g., Minoxidil)..."
-                      style={{
-                        width: '100%',
-                        padding: '6px 30px 6px 30px',
-                        fontSize: '0.78rem',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '6px',
-                        outline: 'none',
-                        background: '#ffffff',
-                        color: '#1e293b'
-                      }}
-                    />
-                    {recSearchQuery && (
-                      <button
-                        type="button"
-                        onClick={() => setRecSearchQuery('')}
-                        style={{
-                          position: 'absolute',
-                          right: '8px',
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          color: '#94a3b8',
-                          padding: 0
-                        }}
-                      >
-                        <X size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Master Solutions High-Density Horizontal Rows (Google Cloud Console UX - Full Width 100%, No Orphan Cards) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {filteredSolutions.map((sol, index) => {
-                    const count = sol.matchingItems.length;
-                    const totalCount = allPrescriptions.length;
-                    const coveragePct = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0;
-
-                    return (
-                      <div
-                        key={sol.id}
-                        className="doctor-recommendation-row"
-                        style={{
-                          background: '#ffffff',
-                          border: `1px solid ${sol.borderColor || '#e2e8f0'}`,
-                          borderLeft: `5px solid ${sol.badgeColor}`,
-                          borderRadius: '8px',
-                          padding: '16px 20px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '12px',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        {/* Top Sub-Row: Priority Rank + Pillar Badge + Title + Match Score + Coverage + Primary Actions */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          flexWrap: 'wrap',
-                          gap: '12px',
-                          borderBottom: '1px solid #f1f5f9',
-                          paddingBottom: '10px'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                            {/* Priority Rank Badge */}
-                            <span style={{
-                              fontSize: '0.72rem',
-                              fontWeight: 800,
-                              background: '#f1f5f9',
-                              color: '#334155',
-                              padding: '3px 8px',
-                              borderRadius: '4px',
-                              border: '1px solid #e2e8f0'
-                            }}>
-                              #{index + 1}
-                            </span>
-
-                            {/* Pillar Badge */}
-                            <span style={{
-                              fontSize: '0.68rem',
-                              fontWeight: 750,
-                              color: sol.badgeColor,
-                              background: sol.badgeBg,
-                              padding: '3px 8px',
-                              borderRadius: '4px',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.03em'
-                            }}>
-                              {sol.badge}
-                            </span>
-
-                            {/* Formulation / Test Title */}
-                            <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
-                              {sol.title}
-                            </h3>
-                          </div>
-
-                          {/* Right Badges & Action Buttons */}
-                          <div className="doctor-recommendation-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <span style={{
-                              fontSize: '0.70rem',
-                              color: '#047857',
-                              background: '#ecfdf5',
-                              border: '1px solid #a7f3d0',
-                              padding: '3px 8px',
-                              borderRadius: '4px',
-                              fontWeight: 700
-                            }}>
-                              {sol.matchScore}
-                            </span>
-
-                            {/* Patient Coverage Tag */}
-                            <div style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px',
-                              fontSize: '0.74rem',
-                              fontWeight: 650,
-                              color: '#1e293b',
-                              background: '#f8fafc',
-                              border: '1px solid #e2e8f0',
-                              padding: '3px 8px',
-                              borderRadius: '4px'
-                            }}>
-                              <Users size={13} style={{ color: count > 0 ? '#2563eb' : '#94a3b8' }} />
-                              <span><strong>{count}</strong> {count === 1 ? 'patient' : 'patients'} ({coveragePct}%)</span>
-                            </div>
-
-                            {/* View Patients Filter Button */}
-                            {count > 0 && (
-                              <button
-                                type="button"
-                                className="doctor-recommendation-action-btn"
-                                onClick={() => {
-                                  triggerHaptic('selection');
-                                  // Clear all prior filters so recommendation cohort is isolated without conflicting filter states
-                                  setQuickRxFilter('all');
-                                  setSearchQuery('');
-                                  setStatusFilter('all');
-                                  setPatientFilter('all');
-                                  setTemporalFilter('all');
-                                  setApiFilter(null);
-                                  const matchedRxIds = sol.matchingItems.map(item => item.rx.id || item.rx.code || item.rx.prescriptionNumber);
-                                  setRecFilter({ id: sol.id, title: sol.title, rxIds: matchedRxIds });
-                                  setActiveAnchor('prescriptions');
-                                  if (typeof window !== 'undefined') {
-                                    setTimeout(() => {
-                                      const tableEl = document.getElementById('prescriptions');
-                                      if (tableEl) {
-                                        tableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                      } else {
-                                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                                      }
-                                    }, 50);
-                                  }
-                                }}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  fontSize: '0.72rem',
-                                  fontWeight: 650,
-                                  color: '#1d4ed8',
-                                  background: '#eff6ff',
-                                  border: '1px solid #bfdbfe',
-                                  padding: '5px 12px',
-                                  borderRadius: '5px',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.15s ease'
-                                }}
-                                title="Filter prescriptions table by these matched patients"
-                              >
-                                <span>View patients ({count})</span>
-                                <ArrowUpRight size={12} />
-                              </button>
-                            )}
-
-                            {/* Link to Protocol / Catalog */}
-                            <a
-                              href={sol.protocolUrl}
-                              className="doctor-recommendation-action-btn"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                fontSize: '0.72rem',
-                                fontWeight: 650,
-                                color: sol.badgeColor,
-                                background: sol.badgeBg,
-                                border: `1px solid ${sol.borderColor}`,
-                                padding: '5px 12px',
-                                borderRadius: '5px',
-                                textDecoration: 'none',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                transition: 'all 0.15s ease'
-                              }}
-                            >
-                              <span>{sol.protocolTitle}</span>
-                              <ArrowUpRight size={12} />
-                            </a>
-                          </div>
-                        </div>
-
-                        {/* Middle Sub-Row: Cellular Target & Rationale */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <div style={{ fontSize: '0.78rem', color: sol.badgeColor, fontWeight: 700 }}>
-                            🎯 {sol.target}
-                          </div>
-                          <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.48 }}>
-                            {sol.summary}
-                          </p>
-                        </div>
-
-                        {/* Bottom Sub-Row: Synergistic APIs Chips */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '2px' }}>
-                          <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 650 }}>
-                            Proven synergy with:
-                          </span>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                            {sol.synergisticApis.map((api, aIdx) => (
-                              <span
-                                key={aIdx}
-                                style={{
-                                  fontSize: '0.70rem',
-                                  background: '#f8fafc',
-                                  color: '#334155',
-                                  border: '1px solid #e2e8f0',
-                                  padding: '2px 7px',
-                                  borderRadius: '4px',
-                                  fontWeight: 600
-                                }}
-                              >
-                                {api}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {filteredSolutions.length === 0 && (
-                  <div style={{
-                    padding: '36px 20px',
-                    textAlign: 'center',
-                    background: '#f8fafc',
-                    borderRadius: '8px',
-                    border: '1px dashed #cbd5e1',
-                    color: '#64748b'
-                  }}>
-                    <p style={{ margin: 0, fontSize: '0.85rem' }}>
-                      No clinical solutions found matching &ldquo;{recSearchQuery}&rdquo;.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRecSearchQuery('');
-                        setRecCategoryFilter('all');
-                      }}
-                      style={{
-                        marginTop: '8px',
-                        fontSize: '0.76rem',
-                        color: '#2563eb',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontWeight: 650
-                      }}
-                    >
-                      Reset filters
-                    </button>
-                  </div>
-                )}
-              </section>
-            );
-          })()}
+          {/* ── View 7: Consolidated Master Atlas Recommendations (Modularized) ── */}
+          {activeAnchor === 'recommendations' && (
+            <DoctorRecommendationsTab
+              allPrescriptions={allPrescriptions}
+              recCategoryFilter={recCategoryFilter}
+              setRecCategoryFilter={setRecCategoryFilter}
+              recSearchQuery={recSearchQuery}
+              setRecSearchQuery={setRecSearchQuery}
+              setQuickRxFilter={setQuickRxFilter}
+              setStatusFilter={setStatusFilter}
+              setPatientFilter={setPatientFilter}
+              setTemporalFilter={setTemporalFilter}
+              setApiFilter={setApiFilter}
+              setRecFilter={setRecFilter}
+              setActiveAnchor={setActiveAnchor}
+              triggerHaptic={triggerHaptic}
+            />
+          )}
         </main>
       </div>
 
@@ -8629,669 +7936,23 @@ export default function DoctorPublicPortalClient({
         </div>
       )}
 
-      {/* ── Official Physician Credentials & Profile Popup Modal ─────────────── */}
-      {isCredentialsModalOpen && (() => {
-        const doctorFields = [
-          {
-            key: 'name',
-            label: 'Physician Name',
-            value: doctor.name || '',
-            placeholder: 'e.g. Dr. Jane Doe, MD',
-            icon: User,
-            type: 'text'
-          },
-          {
-            key: 'specialty',
-            label: 'Medical Specialty',
-            value: doctor.specialty || '',
-            placeholder: 'e.g. Anti-Aging & Regenerative Medicine',
-            icon: Stethoscope,
-            type: 'text'
-          },
-          {
-            key: 'clinic',
-            label: 'Practice / Clinic',
-            value: doctor.clinic || '',
-            placeholder: 'e.g. Lotusland Bio-Regenerative Center',
-            icon: MapPin,
-            type: 'text'
-          },
-          {
-            key: 'clinicLogo',
-            label: 'Clinic Logo (White-Label)',
-            value: doctor.clinicLogo || doctor.logoUrl || '',
-            placeholder: 'Paste direct image URL or upload file (e.g. https://clinic.com/logo.png)',
-            icon: Building2,
-            type: 'logo'
-          },
-          {
-            key: 'license',
-            label: 'Medical License (DHA)',
-            value: doctor.license || '',
-            placeholder: 'e.g. DHA-P-0089241',
-            icon: ShieldCheck,
-            type: 'text',
-            isMonospace: true
-          },
-          {
-            key: 'mobile',
-            label: 'Direct Mobile / WhatsApp',
-            value: doctor.mobile || doctor.phone || '',
-            placeholder: '50 123 4567',
-            icon: Phone,
-            type: 'mobile'
-          },
-          {
-            key: 'email',
-            label: 'Physician Email',
-            value: doctor.email || '',
-            placeholder: 'doctor@clinic.com',
-            icon: Mail,
-            type: 'email'
-          }
-        ];
-
-        return (
-          <div
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 1100,
-              background: 'rgba(15, 23, 42, 0.65)',
-              backdropFilter: 'blur(6px)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '16px'
-            }}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setIsCredentialsModalOpen(false);
-              }
-            }}
-          >
-            <div
-              style={{
-                width: '100%',
-                maxWidth: '680px',
-                background: '#ffffff',
-                borderRadius: '8px',
-                boxShadow: '0 4px 24px rgba(60,64,67,0.22), 0 0 0 1px #dadce0',
-                padding: '24px',
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '18px',
-                maxHeight: '90vh',
-                overflowY: 'auto'
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close Button Top Right (Google Cloud Icon Button) */}
-              <button
-                type="button"
-                onClick={() => setIsCredentialsModalOpen(false)}
-                aria-label="Close credentials dialog"
-                style={{
-                  position: 'absolute',
-                  top: '16px',
-                  right: '16px',
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  border: 'none',
-                  background: 'transparent',
-                  color: '#5f6368',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'background 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#f1f3f4';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                }}
-                title="Close"
-              >
-                <X size={18} />
-              </button>
-
-              {/* Doctor Identity Header (Google Cloud Platform UX) */}
-              <div style={{ display: 'flex', gap: '16px', alignItems: 'center', paddingRight: '36px' }}>
-                <div
-                  style={{
-                    width: '52px',
-                    height: '52px',
-                    borderRadius: '50%',
-                    background: '#1a73e8',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.30rem',
-                    fontWeight: 600,
-                    flexShrink: 0,
-                    boxShadow: '0 1px 3px rgba(60,64,67,0.20)',
-                    position: 'relative'
-                  }}
-                >
-                  {doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D'}
-                  <span
-                    style={{
-                      position: 'absolute',
-                      bottom: '1px',
-                      right: '1px',
-                      width: '12px',
-                      height: '12px',
-                      borderRadius: '50%',
-                      background: '#1e8e3e',
-                      border: '2px solid #ffffff'
-                    }}
-                    title="DHA Verified Active Practice"
-                  />
-                </div>
-
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <h2 style={{ fontSize: '1.15rem', fontWeight: 600, color: '#202124', margin: 0, letterSpacing: '-0.01em' }}>
-                      Physician Profile & Credentials
-                    </h2>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#137333', background: '#e6f4ea', border: '1px solid #ceead6', padding: '1px 7px', borderRadius: '4px' }}>
-                      DHA Verified
-                    </span>
-                  </div>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#5f6368', lineHeight: 1.4 }}>
-                    DHA-licensed practitioner profile settings and clinical contact parameters.
-                  </p>
-                </div>
-              </div>
-
-              {/* GCP Properties Grid with Inline Editing (Rule #5) */}
-              <div
-                style={{
-                  border: '1px solid #dadce0',
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  background: '#ffffff'
-                }}
-              >
-                {doctorFields.map((field, idx) => {
-                  const FieldIcon = field.icon;
-                  const isEditing = editingDoctorField === field.key;
-
-                  return (
-                    <div
-                      key={field.key}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '12px 16px',
-                        borderBottom: idx < doctorFields.length - 1 ? '1px solid #f1f3f4' : 'none',
-                        background: isEditing ? '#f8fafd' : '#ffffff',
-                        gap: '12px',
-                        flexWrap: 'wrap'
-                      }}
-                    >
-                      {/* Left: Field Label */}
-                      <div
-                        style={{
-                          width: '160px',
-                          flexShrink: 0,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          color: '#5f6368',
-                          fontSize: '0.80rem',
-                          fontWeight: 600
-                        }}
-                      >
-                        <FieldIcon size={14} style={{ color: '#5f6368', flexShrink: 0 }} />
-                        <span>{field.label}</span>
-                      </div>
-
-                      {/* Right: Field Value / Inline Editor */}
-                      <div style={{ flex: 1, minWidth: '240px', display: 'flex', alignItems: 'center' }}>
-                        {isEditing ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', flexWrap: 'wrap' }}>
-                            {field.type === 'logo' ? (
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', flexWrap: 'wrap' }}>
-                                  <input
-                                    type="url"
-                                    value={tempFieldValue}
-                                    onChange={(e) => setTempFieldValue(e.target.value)}
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') handleSaveDoctorField('clinicLogo');
-                                      if (e.key === 'Escape') setEditingDoctorField(null);
-                                    }}
-                                    placeholder={field.placeholder}
-                                    disabled={isSavingDoctorField}
-                                    autoFocus
-                                    style={{
-                                      flex: 1,
-                                      minWidth: '220px',
-                                      height: '34px',
-                                      padding: '0 10px',
-                                      borderRadius: '4px',
-                                      border: '1px solid #1a73e8',
-                                      fontSize: '0.84rem',
-                                      color: '#202124',
-                                      outline: 'none'
-                                    }}
-                                  />
-                                  <label
-                                    style={{
-                                      height: '34px',
-                                      padding: '0 10px',
-                                      borderRadius: '4px',
-                                      border: '1px solid #dadce0',
-                                      background: '#f8fafd',
-                                      color: '#1a73e8',
-                                      fontSize: '0.78rem',
-                                      fontWeight: 600,
-                                      cursor: 'pointer',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      gap: '6px',
-                                      flexShrink: 0
-                                    }}
-                                    title="Upload local logo image"
-                                  >
-                                    <Upload size={13} />
-                                    <span>Upload Image</span>
-                                    <input
-                                      type="file"
-                                      accept="image/*"
-                                      style={{ display: 'none' }}
-                                      onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                          if (file.size > 2 * 1024 * 1024) {
-                                            toast.error('Image file must be under 2 MB');
-                                            return;
-                                          }
-                                          const reader = new FileReader();
-                                          reader.onload = (ev) => {
-                                            setTempFieldValue(ev.target.result);
-                                          };
-                                          reader.readAsDataURL(file);
-                                        }
-                                      }}
-                                    />
-                                  </label>
-
-                                  {/* Explicit Save (✔️) and Cancel (❌) buttons (Golden Rule #5) */}
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleSaveDoctorField(field.key)}
-                                      disabled={isSavingDoctorField}
-                                      title="Save changes (Enter)"
-                                      style={{
-                                        height: '32px',
-                                        padding: '0 10px',
-                                        borderRadius: '4px',
-                                        border: '1px solid #1a73e8',
-                                        background: '#1a73e8',
-                                        color: '#ffffff',
-                                        fontSize: '0.78rem',
-                                        fontWeight: 600,
-                                        cursor: isSavingDoctorField ? 'wait' : 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '4px'
-                                      }}
-                                    >
-                                      {isSavingDoctorField ? (
-                                        <Loader2 size={13} className="animate-spin" />
-                                      ) : (
-                                        <Check size={14} />
-                                      )}
-                                      <span>Save</span>
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => setEditingDoctorField(null)}
-                                      disabled={isSavingDoctorField}
-                                      title="Cancel (Esc)"
-                                      style={{
-                                        height: '32px',
-                                        padding: '0 8px',
-                                        borderRadius: '4px',
-                                        border: '1px solid #dadce0',
-                                        background: '#ffffff',
-                                        color: '#5f6368',
-                                        fontSize: '0.78rem',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '4px'
-                                      }}
-                                    >
-                                      <X size={14} />
-                                      <span>Cancel</span>
-                                    </button>
-                                  </div>
-                                </div>
-
-                                {/* Live Patient Portal Header Preview & White-Label Attribution Explanation */}
-                                <div style={{
-                                  padding: '10px 12px',
-                                  borderRadius: '6px',
-                                  background: '#f8fafd',
-                                  border: '1px solid #d2e3fc',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'space-between',
-                                  gap: '12px',
-                                  flexWrap: 'wrap'
-                                }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    {tempFieldValue ? (
-                                      <img
-                                        src={tempFieldValue}
-                                        alt="Clinic Logo Preview"
-                                        style={{ maxHeight: '30px', maxWidth: '110px', objectFit: 'contain', borderRadius: '4px', background: '#ffffff', border: '1px solid #e2e8f0', padding: '2px' }}
-                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                      />
-                                    ) : (
-                                      <div style={{ width: '32px', height: '32px', borderRadius: '4px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#64748b', fontWeight: 600 }}>
-                                        LOGO
-                                      </div>
-                                    )}
-                                    <div style={{ fontSize: '0.74rem', color: '#174ea6', lineHeight: 1.35 }}>
-                                      <strong>Patient Portal Header Preview:</strong> Replaces Atlas brand with your clinic identity across all patient therapy portals, with discreet <em>"Powered by Atlas Health Platform"</em> attribution.
-                                    </div>
-                                  </div>
-                                  {tempFieldValue && (
-                                    <button
-                                      type="button"
-                                      onClick={() => setTempFieldValue('')}
-                                      style={{
-                                        fontSize: '0.72rem',
-                                        color: '#dc2626',
-                                        background: 'transparent',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        textDecoration: 'underline'
-                                      }}
-                                    >
-                                      Clear Logo
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            ) : field.type === 'mobile' ? (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: '200px' }}>
-                                <select
-                                  value={tempDialCode}
-                                  onChange={(e) => setTempDialCode(e.target.value)}
-                                  disabled={isSavingDoctorField}
-                                  style={{
-                                    height: '34px',
-                                    padding: '0 6px',
-                                    borderRadius: '4px',
-                                    border: '1px solid #dadce0',
-                                    background: '#ffffff',
-                                    fontSize: '0.80rem',
-                                    color: '#202124',
-                                    cursor: 'pointer',
-                                    maxWidth: '125px'
-                                  }}
-                                >
-                                  {COUNTRIES.map((c) => (
-                                    <option key={`${c.code}-${c.dial_code}`} value={c.dial_code}>
-                                      {c.dial_code} ({c.name})
-                                    </option>
-                                  ))}
-                                </select>
-                                <input
-                                  type="tel"
-                                  value={tempFieldValue}
-                                  onChange={(e) => setTempFieldValue(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') handleSaveDoctorField('mobile');
-                                    if (e.key === 'Escape') setEditingDoctorField(null);
-                                  }}
-                                  placeholder={field.placeholder}
-                                  disabled={isSavingDoctorField}
-                                  autoFocus
-                                  style={{
-                                    flex: 1,
-                                    height: '34px',
-                                    padding: '0 10px',
-                                    borderRadius: '4px',
-                                    border: '1px solid #1a73e8',
-                                    fontSize: '0.84rem',
-                                    color: '#202124',
-                                    outline: 'none'
-                                  }}
-                                />
-                              </div>
-                            ) : (
-                              <input
-                                type={field.type === 'email' ? 'email' : 'text'}
-                                value={tempFieldValue}
-                                onChange={(e) => setTempFieldValue(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') handleSaveDoctorField(field.key);
-                                  if (e.key === 'Escape') setEditingDoctorField(null);
-                                }}
-                                placeholder={field.placeholder}
-                                disabled={isSavingDoctorField}
-                                autoFocus
-                                style={{
-                                  flex: 1,
-                                  height: '34px',
-                                  padding: '0 10px',
-                                  borderRadius: '4px',
-                                  border: '1px solid #1a73e8',
-                                  fontSize: '0.84rem',
-                                  color: '#202124',
-                                  fontFamily: field.isMonospace ? 'monospace' : 'inherit',
-                                  outline: 'none'
-                                }}
-                              />
-                            )}
-
-                            {/* Explicit Save (✔️) and Cancel (❌) buttons for non-logo fields */}
-                            {field.type !== 'logo' && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <button
-                                  type="button"
-                                  onClick={() => handleSaveDoctorField(field.key)}
-                                  disabled={isSavingDoctorField}
-                                  title="Save changes (Enter)"
-                                  style={{
-                                    height: '32px',
-                                    padding: '0 10px',
-                                    borderRadius: '4px',
-                                    border: '1px solid #1a73e8',
-                                    background: '#1a73e8',
-                                    color: '#ffffff',
-                                    fontSize: '0.78rem',
-                                    fontWeight: 600,
-                                    cursor: isSavingDoctorField ? 'wait' : 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px'
-                                  }}
-                                >
-                                  {isSavingDoctorField ? (
-                                    <Loader2 size={13} className="animate-spin" />
-                                  ) : (
-                                    <Check size={14} />
-                                  )}
-                                  <span>Save</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setEditingDoctorField(null)}
-                                  disabled={isSavingDoctorField}
-                                  title="Cancel (Esc)"
-                                  style={{
-                                    height: '32px',
-                                    padding: '0 8px',
-                                    borderRadius: '4px',
-                                    border: '1px solid #dadce0',
-                                    background: '#ffffff',
-                                    color: '#5f6368',
-                                    fontSize: '0.78rem',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px'
-                                  }}
-                                >
-                                  <X size={14} />
-                                  <span>Cancel</span>
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div
-                            onClick={() => startEditingField(field.key, field.value)}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              width: '100%',
-                              cursor: 'pointer',
-                              padding: '4px 6px',
-                              borderRadius: '4px',
-                              transition: 'background 0.1s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = '#f1f3f4';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = 'transparent';
-                            }}
-                            title="Click to edit"
-                          >
-                            {field.type === 'logo' ? (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexWrap: 'wrap' }}>
-                                {field.value ? (
-                                  <>
-                                    <img
-                                      src={field.value}
-                                      alt="Clinic Logo"
-                                      style={{ maxHeight: '28px', maxWidth: '110px', objectFit: 'contain', borderRadius: '3px', border: '1px solid #dadce0', padding: '2px', background: '#ffffff' }}
-                                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                    />
-                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                      <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#137333', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <span>White-Label Active</span>
-                                        <span style={{ fontSize: '0.66rem', background: '#e6f4ea', border: '1px solid #ceead6', padding: '1px 6px', borderRadius: '4px', color: '#137333', fontWeight: 700 }}>
-                                          Patient Portals
-                                        </span>
-                                      </span>
-                                      <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>
-                                        Clinic logo replaces Atlas · Discreet "Powered by Atlas Platform" attribution
-                                      </span>
-                                    </div>
-                                  </>
-                                ) : (
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span style={{ fontSize: '0.84rem', color: '#9aa0a6', fontStyle: 'italic' }}>
-                                      Not configured (Atlas default branding active)
-                                    </span>
-                                    <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#1a73e8', background: '#e8f0fe', border: '1px solid #d2e3fc', padding: '1px 6px', borderRadius: '4px' }}>
-                                      White-Label Mode
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            ) : (
-                              <div
-                                style={{
-                                  fontSize: '0.85rem',
-                                  color: field.value ? '#202124' : '#9aa0a6',
-                                  fontWeight: field.value ? 500 : 400,
-                                  fontFamily: field.isMonospace ? 'monospace' : 'inherit',
-                                  fontStyle: field.value ? 'normal' : 'italic',
-                                  wordBreak: 'break-all'
-                                }}
-                              >
-                                {field.value || 'Not configured'}
-                              </div>
-                            )}
-
-                            <div
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                color: '#1a73e8',
-                                opacity: 0.6,
-                                fontSize: '0.74rem',
-                                fontWeight: 500,
-                                flexShrink: 0,
-                                marginLeft: '8px'
-                              }}
-                            >
-                              <Edit3 size={13} />
-                              <span>{field.type === 'logo' ? (field.value ? 'Change' : 'Configure') : 'Edit'}</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Modal Footer (GCP Style) */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  paddingTop: '16px',
-                  borderTop: '1px solid #e8eaed',
-                  flexWrap: 'wrap',
-                  gap: '12px'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#5f6368' }}>
-                  <CheckCircle2 size={14} style={{ color: '#137333' }} />
-                  <span>Changes synchronize automatically across prescriptions and doctor portal.</span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsCredentialsModalOpen(false)}
-                  style={{
-                    height: '36px',
-                    padding: '0 20px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    background: '#1a73e8',
-                    color: '#ffffff',
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    boxShadow: '0 1px 2px rgba(60,64,67,0.3)',
-                    transition: 'background 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#1557b0';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#1a73e8';
-                  }}
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      {/* ── Official Physician Credentials & Profile Popup Modal (Modularized) ── */}
+      <DoctorCredentialsModal
+        isOpen={isCredentialsModalOpen}
+        onClose={() => setIsCredentialsModalOpen(false)}
+        doctor={doctor}
+        slug={slug}
+        onDoctorUpdated={(updates, serverDoctor) => {
+          setData(prev => ({
+            ...prev,
+            doctor: {
+              ...prev?.doctor,
+              ...updates,
+              ...serverDoctor
+            }
+          }));
+        }}
+      />
 
       {/* ── Atlas Platform Services & Membership Tiers Modal (GCP UX Style) ── */}
       <DoctorServicesMembershipModal

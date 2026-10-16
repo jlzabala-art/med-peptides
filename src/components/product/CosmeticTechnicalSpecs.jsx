@@ -317,12 +317,16 @@ export default function CosmeticTechnicalSpecs({ product, lang = 'en', onOpenInq
   const [inciFilter, setInciFilter] = useState('key_active');
 
   const slug = (product?.slug || product?.id || '').toLowerCase();
-  const isShampoo = slug.includes('shampoo') || (product?.name || '').toLowerCase().includes('shampoo');
+  const name = (product?.name || product?.title || '').toLowerCase();
+  const isLipProduct = slug.includes('lip-care') || slug.includes('pomadka') || name.includes('lip care') || name.includes('pomadka');
+  const isShampoo = slug.includes('shampoo') || name.includes('shampoo');
+  const isConditioner = slug.includes('conditioner') || name.includes('conditioner');
+  const isHairProduct = isShampoo || isConditioner || slug.includes('trichology');
   const ingredients = useMemo(() => product?.ingredients || [], [product]);
   const technicalSpecs = product?.technical_specs || null;
   const applicationProtocol = product?.application_protocol || (Array.isArray(product?.usage_steps) ? {
-    frequency: '3–4× / Week',
-    duration_of_use: 'Minimum 12 Weeks',
+    frequency: isLipProduct ? (isEs ? 'A demanda (2–4× / día)' : 'As needed (2–4× / Day)') : '3–4× / Week',
+    duration_of_use: isLipProduct ? (isEs ? 'Uso Continuo Preventivo' : 'Continuous Protective Use') : 'Minimum 12 Weeks',
     steps: product.usage_steps.map((st, i) => ({ step: i + 1, instruction: st }))
   } : null);
   const hairProtocols = product?.associated_protocols || [];
@@ -352,15 +356,87 @@ export default function CosmeticTechnicalSpecs({ product, lang = 'en', onOpenInq
   }, [ingredients, inciFilter]);
 
   const techRows = [
-    { label: isEs ? 'TIPO DE FORMULACIÓN' : 'FORMULATION TYPE', value: technicalSpecs?.formulation_type || (isShampoo ? 'Aqueous Gel (Sulphate-Free)' : 'Leave-In / Rinse-Off Cosmeceutical Emulsion'), icon: Beaker },
-    { label: isEs ? 'RANGO DE PH' : 'PH RANGE', value: technicalSpecs?.ph_range || (isShampoo ? '4.5 – 5.5 (Acid-Buffered)' : '4.0 – 5.0 (Cuticle Sealing)'), icon: TestTube },
-    { label: isEs ? 'VISCOSIDAD' : 'VISCOSITY', value: technicalSpecs?.viscosity || '2,500 – 4,500 mPa·s', icon: BarChart2 },
-    { label: isEs ? 'ASPECTO' : 'APPEARANCE', value: technicalSpecs?.appearance || (isShampoo ? 'Translucent amber viscous gel' : 'Creamy white structured emulsion'), icon: Sparkles },
-    { label: isEs ? 'FAMILIA DE FRAGANCIA' : 'FRAGRANCE FAMILY', value: technicalSpecs?.fragrance_family || 'Hypoallergenic Green Tea & Citrus (IFRA Compliant)', icon: Leaf },
-    { label: isEs ? 'VIDA ÚTIL / CADUCIDAD' : 'SHELF LIFE', value: technicalSpecs?.shelf_life || '24 Months Sealed / 6M PAO', icon: Clock },
-    { label: isEs ? 'CONDICIONES DE CONSERVACIÓN' : 'STORAGE CONDITIONS', value: technicalSpecs?.storage || '15°C – 25°C. Protect from direct sunlight.', icon: Thermometer },
-    { label: isEs ? 'ESTATUS REGULATORIO' : 'REGULATORY STATUS', value: technicalSpecs?.regulatory_status || 'EU Regulation 1223/2009 · CPNP Registered', icon: ShieldCheck },
-    { label: isEs ? 'TEST DERMATOLÓGICO' : 'DERM. TESTING', value: technicalSpecs?.dermatological_testing || 'Clinically Patch Tested (ICDRG Protocol)', icon: ShieldCheck },
+    {
+      label: isEs ? 'TIPO DE FORMULACIÓN' : 'FORMULATION TYPE',
+      value: technicalSpecs?.formulation_type || (
+        isLipProduct
+          ? (isEs ? 'Barra Anhidra Lipídica (Ceras y Aceites Naturales)' : 'Anhydrous Lipid Barrier Stick (Natural Waxes & Oils)')
+          : isShampoo
+          ? 'Aqueous Gel (Sulphate-Free)'
+          : isConditioner
+          ? 'Leave-In / Rinse-Off Cosmeceutical Emulsion'
+          : (isEs ? 'Dermocosmética Tópica Fisiológica' : 'Physiologic Topical Cosmeceutical')
+      ),
+      icon: Beaker
+    },
+    {
+      label: isEs ? 'RANGO DE PH' : 'PH RANGE',
+      value: technicalSpecs?.ph_range || (
+        isLipProduct
+          ? (isEs ? 'Anhidro (Sin Fase Acuosa, No Aplica)' : 'Anhydrous Matrix (Water-Free, Non-Aqueous)')
+          : isShampoo
+          ? '4.5 – 5.5 (Acid-Buffered)'
+          : '4.0 – 5.0 (Cuticle Sealing)'
+      ),
+      icon: TestTube
+    },
+    {
+      label: isEs ? 'VISCOSIDAD' : 'VISCOSITY',
+      value: technicalSpecs?.viscosity || (
+        isLipProduct
+          ? (isEs ? 'Bálsamo Sólido Fundente al Contacto' : 'Solid Melting Lipid Balm (Wax-Ester Matrix)')
+          : '2,500 – 4,500 mPa·s'
+      ),
+      icon: BarChart2
+    },
+    {
+      label: isEs ? 'ASPECTO' : 'APPEARANCE',
+      value: technicalSpecs?.appearance || (
+        isLipProduct
+          ? (isEs ? 'Barra sólida marfil translúcida de aplicación suave' : 'Translucent ivory solid balm stick, ultra-smooth glide')
+          : isShampoo
+          ? 'Translucent amber viscous gel'
+          : 'Creamy white structured emulsion'
+      ),
+      icon: Sparkles
+    },
+    {
+      label: isEs ? 'FAMILIA DE FRAGANCIA' : 'FRAGRANCE FAMILY',
+      value: technicalSpecs?.fragrance_family || (
+        isLipProduct
+          ? (isEs ? 'Hipoalergénico · Sutil Aroma Vainilla Natural' : 'Hypoallergenic · Subtle Natural Vanilla')
+          : 'Hypoallergenic Green Tea & Citrus (IFRA Compliant)'
+      ),
+      icon: Leaf
+    },
+    {
+      label: isEs ? 'VIDA ÚTIL / CADUCIDAD' : 'SHELF LIFE',
+      value: technicalSpecs?.shelf_life || (isLipProduct ? '24 Months Sealed / 12M PAO' : '24 Months Sealed / 6M PAO'),
+      icon: Clock
+    },
+    {
+      label: isEs ? 'CONDICIONES DE CONSERVACIÓN' : 'STORAGE CONDITIONS',
+      value: technicalSpecs?.storage || (
+        isLipProduct
+          ? (isEs ? '15°C – 25°C. Proteger del calor intenso o fusión.' : '15°C – 25°C. Protect from intense heat or direct sunlight.')
+          : '15°C – 25°C. Protect from direct sunlight.'
+      ),
+      icon: Thermometer
+    },
+    {
+      label: isEs ? 'ESTATUS REGULATORIO' : 'REGULATORY STATUS',
+      value: technicalSpecs?.regulatory_status || 'EU Regulation 1223/2009 · CPNP Registered',
+      icon: ShieldCheck
+    },
+    {
+      label: isEs ? 'TEST DERMATOLÓGICO' : 'DERM. TESTING',
+      value: technicalSpecs?.dermatological_testing || (
+        isLipProduct
+          ? (isEs ? 'Testado Epicutáneo en Mucosa Labial' : 'Clinically Tested for Lip & Mucosal Safety')
+          : 'Clinically Patch Tested (ICDRG Protocol)'
+      ),
+      icon: ShieldCheck
+    },
   ].filter(r => r.value);
 
   return (
@@ -510,13 +586,15 @@ export default function CosmeticTechnicalSpecs({ product, lang = 'en', onOpenInq
         </div>
       </div>
 
-      {/* ── SECTION: Clinical Evidence & Trichology Targets (#clinical-evidence) ── */}
+      {/* ── SECTION: Clinical Evidence & Molecular Targets (#clinical-evidence) ── */}
       <div id="clinical-evidence" style={{ scrollMarginTop: '90px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.85rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Activity size={18} style={{ color: '#0d9488' }} />
             <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-              {isEs ? 'Evidencia Clínica y Dianas Moleculares Mapeadas' : 'Evidence-Mapped Trichology & Follicular Research'}
+              {isLipProduct
+                ? (isEs ? 'Evidencia Clínica y Dianas Labiales Mapeadas' : 'Evidence-Mapped Lip Barrier & Mucosal Research')
+                : (isEs ? 'Evidencia Clínica y Dianas Moleculares Mapeadas' : 'Evidence-Mapped Trichology & Follicular Research')}
             </h3>
           </div>
           <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0d9488', background: '#ccfbf1', padding: '3px 9px', borderRadius: '99px' }}>
@@ -524,18 +602,55 @@ export default function CosmeticTechnicalSpecs({ product, lang = 'en', onOpenInq
           </span>
         </div>
         <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, marginBottom: '1rem' }}>
-          {isEs
-            ? 'Cada compuesto activo en este cosmecéutico cuenta con respaldo en dermatología y tricología molecular con dianas documentadas en el folículo piloso y la matriz dérmica del cuero cabelludo.'
-            : 'Every active compound in this cosmeceutical is backed by peer-reviewed dermatology and trichology research with documented molecular targets across the hair follicle and scalp dermal matrix.'}
+          {isLipProduct
+            ? (isEs
+                ? 'Cada principio activo en Colway Collagen Lip Care está respaldado por investigación dermatológica molecular para la regeneración del epitelio labial, borde bermellón y reducción de TEWL.'
+                : 'Every active compound in Colway Bioactive Collagen Lip Care is backed by molecular dermatology research targeting vermilion border integrity, mucosal hydration, and TEWL prevention.')
+            : (isEs
+                ? 'Cada compuesto activo en este cosmecéutico cuenta con respaldo en dermatología y tricología molecular con dianas documentadas en el folículo piloso y la matriz dérmica del cuero cabelludo.'
+                : 'Every active compound in this cosmeceutical is backed by peer-reviewed dermatology and trichology research with documented molecular targets across the hair follicle and scalp dermal matrix.')}
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {[
+          {(isLipProduct ? [
+            {
+              target: isEs ? 'Regeneración Mucosa Labial' : 'Labial Mucosa Regeneration',
+              compound: isEs ? 'Tropocolágeno Nativo Bioactivo' : 'Native Marine Tropocollagen',
+              mechanism: 'Fibroblast & Extracellular Matrix Scaffolding',
+              outcome: isEs ? 'Restaura microfisuras del borde bermellón e incrementa turgencia labial.' : 'Repairs vermilion border micro-fissures and enhances mucosal turgor.',
+              stat: '+38% Labial Smoothness',
+              pmid: '31574672'
+            },
+            {
+              target: isEs ? 'Barrera Lipídica Oclusiva' : 'Lipid Barrier Occlusion',
+              compound: isEs ? 'Aceite de Argán & Manteca de Karité' : 'Argan Oil & Shea Butter',
+              mechanism: 'TEWL Reduction (Trans-Epidermal Water Loss)',
+              outcome: isEs ? 'Detiene la deshidratación y descamación labial protegiendo de viento, frío y aire acondicionado.' : 'Halts dry desquamation and protects delicate lip epithelium from environmental drying.',
+              stat: '−52% Moisture Loss',
+              pmid: '25640693'
+            },
+            {
+              target: isEs ? 'Escudo Antioxidante' : 'Antioxidant & Perioral Defense',
+              compound: isEs ? 'Vitamina E (Tocoferol Natural)' : 'Natural Vitamin E (Tocopherol)',
+              mechanism: 'Lipoperoxidation Prevention',
+              outcome: isEs ? 'Neutraliza radicales libres inducidos por UV y polución sobre la fina epidermis labial.' : 'Neutralizes UV-induced lipid peroxidation on the thin stratum corneum of lips.',
+              stat: '98% Radical Scavenging',
+              pmid: '16029679'
+            },
+            {
+              target: isEs ? 'Elasticidad y Flexibilidad' : 'Flexibility & Anti-Cheilitis',
+              compound: isEs ? 'Aceite de Jojoba y Cera de Carnauba' : 'Jojoba Esters & Carnauba Wax',
+              mechanism: 'Elastic Cuticular Cohesion',
+              outcome: isEs ? 'Previene grietas dolorosas en comisuras y aporta deslizamiento satinado sin sensación pegajosa.' : 'Prevents angular cheilitis fissures and provides non-sticky protective cushion.',
+              stat: '+44% Elasticity',
+              pmid: '29744921'
+            }
+          ] : [
             { target: isEs ? 'Inhibición DHT' : 'DHT Inhibition', compound: 'Zinc PCA', mechanism: '5α-Reductase Blockade', outcome: isEs ? 'Suprime la miniaturización folicular en la papila dérmica reduciendo la DHT lipofílica sebácea.' : 'Suppresses follicular miniaturisation at dermal papilla by lowering lipophilic sebum dihydrotestosterone.', stat: '−65% Sebum DHT', pmid: '21514542' },
             { target: isEs ? 'Extensión Fase Anágena' : 'Anagen Extension', compound: isShampoo ? 'Caffeine' : 'Diosmin Complex', mechanism: 'Adenosine Antagonism / IGF-1', outcome: isEs ? 'Contrarresta el arresto del crecimiento inducido por andrógenos; estimula señalización IGF-1 en queratinocitos.' : 'Counters testosterone-induced growth arrest; upregulates IGF-1 signaling in matrix keratinocytes.', stat: '+32% Anagen Lifespan', pmid: '17214716' },
             { target: isEs ? 'Resistencia a Tracción' : 'Tensile Strength', compound: isEs ? 'Tropocolágeno Nativo de Pescado' : 'Native Freshwater Fish Tropocollagen', mechanism: 'Perifollicular ECM Support', outcome: isEs ? 'Aporta andamiaje fisiológico a la vaina folicular, reforzando la elasticidad y anclaje de la raíz (0% bovino).' : 'Provides physiological scaffolding to follicular sheath, reinforcing dermal papilla elasticity (0% bovine).', stat: '+24% Fiber Strength', pmid: '31574672' },
             { target: isEs ? 'Flujo Microvascular' : 'Microvascular Flow', compound: 'Niacinamide / Diosmin', mechanism: 'VEGF Upregulation', outcome: isEs ? 'Mejora la perfusión capilar del cuero cabelludo y el aporte de oxígeno y nutrientes al folículo anágeno.' : 'Enhances scalp microcirculation and oxygen-nutrient delivery to active anagen follicles.', stat: '+21% Follicular Density', pmid: '16029679' },
             { target: isEs ? 'Sellado de Cutícula' : 'Cuticle Integrity', compound: 'Keratin Hydrolysate', mechanism: 'Cortical Micro-Fissure Repair', outcome: isEs ? 'Rellena microfisuras en el córtex expuesto, protegiendo contra la rotura mecánica durante el cepillado.' : 'Fills structural cortex gaps in newly emerged anagen hair, protecting against mechanical breakage.', stat: '−47% Combing Force', pmid: '29744921' },
-          ].map(item => (
+          ]).map(item => (
             <div
               key={item.target}
               style={{
@@ -768,12 +883,17 @@ export default function CosmeticTechnicalSpecs({ product, lang = 'en', onOpenInq
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {(applicationProtocol?.steps || [
+          {(applicationProtocol?.steps || (isLipProduct ? [
+            { step: 1, instruction: isEs ? 'Girar suavemente la base del stick retráctil para exponer 2–3 mm de la barra de colágeno.' : 'Twist base of precision stick to expose 2–3 mm of bioactive collagen balm.', phase: isEs ? 'DISPENSACIÓN' : 'DISPENSING' },
+            { step: 2, instruction: isEs ? 'Deslizar uniformemente sobre el labio superior e inferior, cubriendo el borde bermellón y las comisuras.' : 'Glide evenly across upper and lower lips, thoroughly covering vermilion border and corners.', phase: isEs ? 'APLICACIÓN' : 'APPLICATION' },
+            { step: 3, instruction: isEs ? 'Permitir que la temperatura corporal funda suavemente la matriz lipídica creando un escudo oclusivo transdérmico.' : 'Allow body warmth to gently melt the lipid matrix, establishing an occlusive transdermal moisture shield.', phase: isEs ? 'PROTECCIÓN' : 'SHIELD ABSORPTION' },
+            { step: 4, instruction: isEs ? 'Reaplicar según necesidad a lo largo del día, tras comidas o en caso de exposición a clima adverso o aire acondicionado.' : 'Reapply as needed throughout the day, after meals, or upon exposure to drying weather and indoor AC.', phase: isEs ? 'MANTENIMIENTO' : 'MAINTENANCE' }
+          ] : [
             { step: 1, instruction: isEs ? 'Aplicar sobre el cuero cabelludo húmedo tras lavado inicial.' : 'Apply generously to wet scalp following initial wash.', phase: isEs ? 'APLICACIÓN' : 'APPLICATION' },
             { step: 2, instruction: isEs ? 'Masajear suavemente con las yemas de los dedos durante 2–3 minutos para estimular la microcirculación.' : 'Massage gently into scalp for 2–3 minutes to promote microvascular flow.', phase: isEs ? 'MASAJE' : 'MASSAGE', duration: '2–3 min' },
             { step: 3, instruction: isEs ? 'Dejar actuar entre 3 y 5 minutos antes de aclarar para permitir la penetración de los activos biológicos.' : 'Leave in contact for 3–5 minutes for trans-epidermal bio-active delivery.', phase: isEs ? 'TIEMPO DE ACCIÓN' : 'DWELL TIME', duration: '3–5 min' },
             { step: 4, instruction: isEs ? 'Aclarar abundantemente con agua tibia o fresca (≤38°C) para favorecer el sellado de la cutícula capilar.' : 'Rinse thoroughly with lukewarm or cool water (≤38°C) to seal hair cuticles.', phase: isEs ? 'ACLARADO' : 'RINSE', temp: '≤38°C' }
-          ]).map((step, i, arr) => (
+          ])).map((step, i, arr) => (
             <ApplicationStepItem
               key={step.step || i}
               step={step}
@@ -784,13 +904,19 @@ export default function CosmeticTechnicalSpecs({ product, lang = 'en', onOpenInq
           ))}
         </div>
 
-        {applicationProtocol?.professional_notes?.length > 0 && (
+        {(applicationProtocol?.professional_notes?.length > 0 || isLipProduct) && (
           <div style={{ marginTop: '1.25rem', padding: '0.9rem 1.1rem', background: 'linear-gradient(135deg, #0f172a, #1e3a5f)', borderRadius: '10px' }}>
             <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
-              {isEs ? 'NOTAS CLÍNICAS PARA EL TRICÓLOGO / DERMATÓLOGO' : 'PROFESSIONAL / TRICHOLOGIST CLINICAL NOTES'}
+              {isLipProduct
+                ? (isEs ? 'PAUTAS DERMATOLÓGICAS Y RECOMENDACIONES CLÍNICAS' : 'DERMATOLOGICAL GUIDELINES & CLINICAL RECOMMENDATIONS')
+                : (isEs ? 'NOTAS CLÍNICAS PARA EL TRICÓLOGO / DERMATÓLOGO' : 'PROFESSIONAL / TRICHOLOGIST CLINICAL NOTES')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {applicationProtocol.professional_notes.map((note, i) => (
+              {(applicationProtocol?.professional_notes || (isLipProduct ? [
+                isEs ? 'Recomendado como cuidado peribucal post-inyección de ácido hialurónico tras epitelización inicial (48h+).' : 'Recommended as post-aesthetic filler care following initial 48h re-epithelialization window.',
+                isEs ? 'Apto para queilitis descamativa, labios expuestos a radiación UV, frío extremo o ambientes secos con climatización.' : 'Indicated for dry desquamative cheilitis, severe winter wind, and low-humidity air-conditioned environments.',
+                isEs ? 'Compatible como base nutritiva previa a barras de labios con color o maquillaje peribucal.' : 'Compatible as a smoothing hydrating primer prior to cosmetic lipsticks or pigments.'
+              ] : [])).map((note, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                   <CheckCircle2 size={13} style={{ color: '#0d9488', flexShrink: 0, marginTop: '2px' }} />
                   <span style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: 1.5 }}>{note}</span>
@@ -802,52 +928,54 @@ export default function CosmeticTechnicalSpecs({ product, lang = 'en', onOpenInq
       </div>
 
       {/* ── SECTION: Complete Colway Hair System (#colway-system) ── */}
-      <div id="colway-system" style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1a2e4a 100%)',
-        borderRadius: '12px',
-        padding: '1.25rem 1.5rem',
-        color: '#ffffff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        boxShadow: '0 4px 16px rgba(15, 23, 42, 0.15)'
-      }}>
-        <div style={{ flex: 1, minWidth: '240px' }}>
-          <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#5eead4', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            {isEs ? 'COMPLETA EL SISTEMA INTEGRAL COLWAY' : 'COMPLETE THE COLWAY 2-STEP SYSTEM'}
+      {isHairProduct && (
+        <div id="colway-system" style={{
+          background: 'linear-gradient(135deg, #0f172a 0%, #1a2e4a 100%)',
+          borderRadius: '12px',
+          padding: '1.25rem 1.5rem',
+          color: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          boxShadow: '0 4px 16px rgba(15, 23, 42, 0.15)'
+        }}>
+          <div style={{ flex: 1, minWidth: '240px' }}>
+            <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#5eead4', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              {isEs ? 'COMPLETA EL SISTEMA INTEGRAL COLWAY' : 'COMPLETE THE COLWAY 2-STEP SYSTEM'}
+            </div>
+            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', margin: '3px 0' }}>
+              {isShampoo
+                ? (isEs ? 'Paso 2: Acondicionador Fortalecedor con Colágeno Nativo' : 'Step 2: Strengthening Conditioner with Native Collagen')
+                : (isEs ? 'Paso 1: Champú Densificante con Diosmina y Cafeína' : 'Step 1: Densifying Shampoo with Diosmin & Caffeine')}
+            </div>
+            <div style={{ fontSize: '0.76rem', color: '#94a3b8', lineHeight: 1.5 }}>
+              {isEs
+                ? 'Aplicados de forma coordinada 3–4×/semana potencian el anclaje folicular en cuero cabelludo y el sellado de cutícula en el tallo expuesto.'
+                : 'Used synergistically 3–4×/week to synchronize dermal follicular stimulation with shaft cortex repair.'}
+            </div>
           </div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', margin: '3px 0' }}>
-            {isShampoo
-              ? (isEs ? 'Paso 2: Acondicionador Fortalecedor con Colágeno Nativo' : 'Step 2: Strengthening Conditioner with Native Collagen')
-              : (isEs ? 'Paso 1: Champú Densificante con Diosmina y Cafeína' : 'Step 1: Densifying Shampoo with Diosmin & Caffeine')}
-          </div>
-          <div style={{ fontSize: '0.76rem', color: '#94a3b8', lineHeight: 1.5 }}>
-            {isEs
-              ? 'Aplicados de forma coordinada 3–4×/semana potencian el anclaje folicular en cuero cabelludo y el sellado de cutícula en el tallo expuesto.'
-              : 'Used synergistically 3–4×/week to synchronize dermal follicular stimulation with shaft cortex repair.'}
-          </div>
+          <Link
+            href={`/p/${isShampoo ? 'colway-strengthening-conditioner' : 'colway-strengthening-shampoo'}`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '9px 18px',
+              borderRadius: '8px',
+              background: '#0d9488',
+              color: '#ffffff',
+              fontSize: '0.80rem',
+              fontWeight: 700,
+              textDecoration: 'none',
+              boxShadow: '0 2px 8px rgba(13, 148, 136, 0.3)'
+            }}
+          >
+            {isEs ? 'Ver Monografía Complementaria' : 'View Companion Monograph'} <ChevronRight size={14} />
+          </Link>
         </div>
-        <Link
-          href={`/p/${isShampoo ? 'colway-strengthening-conditioner' : 'colway-strengthening-shampoo'}`}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '9px 18px',
-            borderRadius: '8px',
-            background: '#0d9488',
-            color: '#ffffff',
-            fontSize: '0.80rem',
-            fontWeight: 700,
-            textDecoration: 'none',
-            boxShadow: '0 2px 8px rgba(13, 148, 136, 0.3)'
-          }}
-        >
-          {isEs ? 'Ver Monografía Complementaria' : 'View Companion Monograph'} <ChevronRight size={14} />
-        </Link>
-      </div>
+      )}
 
       {/* ── SECTION: Clinical Safety & Patch Testing (#contraindications-section) ── */}
       <div id="contraindications-section" style={{ scrollMarginTop: '90px' }}>
@@ -858,13 +986,18 @@ export default function CosmeticTechnicalSpecs({ product, lang = 'en', onOpenInq
           </h3>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-          {(warnings.length > 0 ? warnings : [
+          {(warnings.length > 0 ? warnings : (isLipProduct ? [
+            isEs ? 'Uso exclusivo labial y peribucal. No ingerir en grandes cantidades.' : 'For external labial and perioral use only. Do not ingest.',
+            isEs ? 'Conservar en lugar fresco y seco (15°C – 25°C). Proteger de la luz solar directa, calefactores o vehículos cerrados para evitar la fusión de la barra.' : 'Store in a cool dry place (15°C – 25°C). Protect from direct heat or car interiors to prevent stick melting.',
+            isEs ? 'En caso de queilitis angular con infección bacteriana o brote de herpes simple activo, consulte con su médico antes de aplicar el producto.' : 'In case of infectious angular cheilitis or active herpes simplex flare, consult a physician prior to application.',
+            isEs ? 'Suspender su uso si observa eritema peribucal persistente o signos de hipersensibilidad alérgica de contacto.' : 'Discontinue use if persistent perioral redness or contact sensitivity develops.'
+          ] : [
             isEs ? 'Uso exclusivo externo/tópico. Evitar contacto directo con los ojos; en caso de contacto accidental, aclarar inmediatamente con abundante agua.' : 'For external topical use only. Avoid contact with eyes; rinse immediately with copious water if contact occurs.',
             isEs ? 'Se aconseja realizar un test epicutáneo de parche (patch test) 48 horas antes de la primera aplicación en pacientes con terreno atópico o cuero cabelludo sensible.' : 'Perform an occlusive 48-hour patch test prior to first application in patients with sensitive scalp or history of contact allergy.',
             isEs ? 'No aplicar sobre cuero cabelludo con heridas abiertas, dermatitis seborreica en fase exudativa aguda o placas psoriásicas no controladas.' : 'Do not apply to scalps with open lesions, active acute eczema, or severe uncontrolled psoriatic plaques without dermatologist clearance.',
             isEs ? 'Mantener fuera del alcance de niños menores de 3 años. Conservar en lugar fresco protegido de la luz solar directa.' : 'Keep out of reach of children under 3 years. Store in a cool dry place protected from direct heat.',
             isEs ? 'Suspender la aplicación si se manifiesta eritema persistente, prurito severo o signos de dermatitis de contacto.' : 'Discontinue use if persistent erythema, severe pruritus, or signs of allergic contact dermatitis develop.'
-          ]).map((w, i) => (
+          ])).map((w, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
               <AlertTriangle size={14} style={{ color: '#d97706', flexShrink: 0, marginTop: '2px' }} />
               <span style={{ fontSize: '0.80rem', color: '#374151', lineHeight: 1.55 }}>

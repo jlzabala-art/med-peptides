@@ -39,12 +39,14 @@ export default function DoctorServicesMembershipModal({
   const resolved = resolveDoctorTier(doctor);
   const isPro = resolved.isPro || currentTier === 'advanced' || currentTier === 'pro';
 
-  const effectiveDoctorName = doctor.name || doctorName || 'Dr. Hanieh Erdmann';
+  const rawDoctorName = doctor.name || doctorName || 'Hanieh Erdmann';
+  const cleanDoctorName = String(rawDoctorName).replace(/^(Dr\.|Dr\s+|Doctor\s+)/i, '').trim();
+  const displayDoctorTitle = `Dr. ${cleanDoctorName}`;
   const effectiveClinicName = doctor.clinic || clinicName || 'Bedaya Polyclinic L.L.C.';
 
   const handleContactWhatsApp = (subject = 'Atlas Health Services & Pro Tier Inquiry') => {
     const text = encodeURIComponent(
-      `Hello Atlas Health Team, I am Dr. ${effectiveDoctorName} (${effectiveClinicName}). I am reviewing the Atlas Platform Services & Capabilities Matrix and would like more information regarding ${subject}.`
+      `Hello Atlas Health Team, I am ${displayDoctorTitle} (${effectiveClinicName}). I am reviewing the Atlas Platform Services & Capabilities Matrix and would like more information regarding ${subject}.`
     );
     const waUrl = `https://wa.me/971553561058?text=${text}`; // Atlas Conciergerie line
     window.open(waUrl, '_blank');
@@ -274,7 +276,7 @@ export default function DoctorServicesMembershipModal({
                 }}
               >
                 <CheckCircle2 size={13} color="#188038" />
-                <span>Verified medical registration for Dr. {effectiveDoctorName}</span>
+                <span>Verified medical registration for {displayDoctorTitle}</span>
               </div>
             </div>
 
@@ -430,7 +432,7 @@ export default function DoctorServicesMembershipModal({
                       {effectiveClinicName}
                     </div>
                     <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                      {effectiveDoctorName} · Specialist in Longevity & Dermatology
+                      {displayDoctorTitle} · Specialist in Longevity & Dermatology
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -440,7 +442,7 @@ export default function DoctorServicesMembershipModal({
                   </div>
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.4 }}>
-                  "Your personalized peptide protocol has been configured by {effectiveDoctorName} at {effectiveClinicName}. Follow the interactive reconstitution steps below."
+                  "Your personalized peptide protocol has been configured by {displayDoctorTitle} at {effectiveClinicName}. Follow the interactive reconstitution steps below."
                 </div>
               </div>
             </div>

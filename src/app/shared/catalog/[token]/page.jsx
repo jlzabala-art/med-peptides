@@ -2,6 +2,7 @@ import React from 'react';
 import { unstable_cache } from 'next/cache';
 import { verifySignedQuoteToken } from '@/services/dynamicPricingEngine';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { FieldPath } from 'firebase-admin/firestore';
 import { sanitizeForClient } from '@/utils/sanitizeForClient';
 import { filterProductVariantsStrictly } from '@/utils/strictFilterEngine';
 import { resolveVariantPrice } from '@/utils/resolvePrice';
@@ -210,52 +211,96 @@ export function invalidateSharedCatalogCache(key = null) {
   }
 }
 
-async function fetchCatalogData(supplierId, category, catalogueFilter) {
-  const cacheKey = `${Array.isArray(supplierId) ? supplierId.join(',') : supplierId || 'all'}_${category || 'all'}_${catalogueFilter || 'all'}`;
+async function fetchCatalogData(supplierId, category, catalogueFilter, productIds = []) {
+  const hasSpecificIds = Array.isArray(productIds) && productIds.length > 0;
+  const cacheKey = hasSpecificIds
+    ? `pids_${[...productIds].sort().join(',')}`
+    : `${Array.isArray(supplierId) ? supplierId.join(',') : supplierId || 'all'}_${category || 'all'}_${catalogueFilter || 'all'}`;
   const cached = CATALOG_RAM_CACHE.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.data;
   }
 
-  let productsQuery = adminDb.collection('products')
-    .where('status', 'in', ['active', 'published', 'out of stock'])
-    .limit(200); // Safety ceiling: prevents full-collection scans that hang the catalog
+  let productDocs = [];
+  let protosSnapshot = null;
 
-  const rawList = Array.isArray(supplierId)
-    ? supplierId
-    : String(supplierId || '').split(',').map(s => s.trim()).filter(Boolean);
-
-  const cleanSuppliers = rawList.filter(s => s !== 'all' && s !== 'All');
-
-  if (cleanSuppliers.length === 1) {
-    const s = cleanSuppliers[0];
-    const sFormatted = s.startsWith('supplier-') ? s : `supplier-${s}`;
-    productsQuery = productsQuery.where('supplierIds', 'array-contains', sFormatted);
-  } else if (cleanSuppliers.length > 1) {
-    const sFormattedList = cleanSuppliers.map(s => s.startsWith('supplier-') ? s : `supplier-${s}`);
-    productsQuery = productsQuery.where('supplierIds', 'array-contains-any', sFormattedList);
-  }
-
-  let productsSnapshot, protosSnapshot;
-  try {
-    [productsSnapshot, protosSnapshot] = await Promise.all([
-      productsQuery.get(),
+  if (hasSpecificIds) {
+    const CHUNK = 30;
+    const fetchDocPromises = [];
+    for (let i = 0; i < productIds.length; i += CHUNK) {
+      const chunk = productIds.slice(i, i + CHUNK);
+      fetchDocPromises.push(
+        adminDb.collection('products').where(FieldPath.documentId(), 'in', chunk).get()
+      );
+    }
+    const [snaps, protos] = await Promise.all([
+      Promise.all(fetchDocPromises),
       adminDb.collection('protocols').limit(60).get()
     ]);
-  } catch (queryErr) {
-    // Fallback to unindexed query if composite index is pending
-    const fallbackQuery = adminDb.collection('products').where('status', 'in', ['active', 'published', 'out of stock']);
-    [productsSnapshot, protosSnapshot] = await Promise.all([
-      fallbackQuery.get(),
-      adminDb.collection('protocols').limit(60).get()
-    ]);
+    protosSnapshot = protos;
+    snaps.forEach(snap => {
+      snap.docs.forEach(d => productDocs.push(d));
+    });
+
+    // If any IDs were not found by documentId in chunk (e.g. custom IDs or slugs), attempt direct doc gets
+    if (productDocs.length < productIds.length) {
+      const foundIds = new Set(productDocs.map(d => d.id));
+      const missingIds = productIds.filter(id => !foundIds.has(id));
+      if (missingIds.length > 0) {
+        const directSnaps = await Promise.all(
+          missingIds.map(id => adminDb.collection('products').doc(id).get())
+        );
+        directSnaps.forEach(d => {
+          if (d.exists && !foundIds.has(d.id)) {
+            productDocs.push(d);
+            foundIds.add(d.id);
+          }
+        });
+      }
+    }
+  } else {
+    let productsQuery = adminDb.collection('products')
+      .where('status', 'in', ['active', 'published', 'out of stock'])
+      .limit(200); // Safety ceiling: prevents full-collection scans that hang the catalog
+
+    const rawList = Array.isArray(supplierId)
+      ? supplierId
+      : String(supplierId || '').split(',').map(s => s.trim()).filter(Boolean);
+
+    const cleanSuppliers = rawList.filter(s => s !== 'all' && s !== 'All');
+
+    if (cleanSuppliers.length === 1) {
+      const s = cleanSuppliers[0];
+      const sFormatted = s.startsWith('supplier-') ? s : `supplier-${s}`;
+      productsQuery = productsQuery.where('supplierIds', 'array-contains', sFormatted);
+    } else if (cleanSuppliers.length > 1) {
+      const sFormattedList = cleanSuppliers.map(s => s.startsWith('supplier-') ? s : `supplier-${s}`);
+      productsQuery = productsQuery.where('supplierIds', 'array-contains-any', sFormattedList);
+    }
+
+    try {
+      const [productsSnap, protos] = await Promise.all([
+        productsQuery.get(),
+        adminDb.collection('protocols').limit(60).get()
+      ]);
+      productDocs = productsSnap.docs;
+      protosSnapshot = protos;
+    } catch (queryErr) {
+      // Fallback to unindexed query if composite index is pending
+      const fallbackQuery = adminDb.collection('products').where('status', 'in', ['active', 'published', 'out of stock']);
+      const [fallbackSnap, protos] = await Promise.all([
+        fallbackQuery.get(),
+        adminDb.collection('protocols').limit(60).get()
+      ]);
+      productDocs = fallbackSnap.docs;
+      protosSnapshot = protos;
+    }
   }
 
   // Build variants map with controlled concurrency (batch of 25) to avoid
   // N+1 Firestore fan-out that exhausts connection limits and freezes the page.
   const CONCURRENT_BATCH_SIZE = 25;
   const variantsByProduct = {};
-  const productDocs = productsSnapshot.docs;
   for (let i = 0; i < productDocs.length; i += CONCURRENT_BATCH_SIZE) {
     const batch = productDocs.slice(i, i + CONCURRENT_BATCH_SIZE);
     await Promise.all(
@@ -274,9 +319,9 @@ async function fetchCatalogData(supplierId, category, catalogueFilter) {
   }
 
   const result = {
-    productDocs: productsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })),
+    productDocs: productDocs.map(d => ({ id: d.id, ...d.data() })),
     variantsByProduct,
-    protoDocs: protosSnapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+    protoDocs: (protosSnapshot?.docs || []).map(d => ({ id: d.id, ...d.data() }))
   };
 
   CATALOG_RAM_CACHE.set(cacheKey, {
@@ -437,12 +482,15 @@ export default async function SharedCatalogPage({ params }) {
 
   // F-D: Use cached Firestore fetch + pre-aggregated _meta/catalog_facets for Golden Rule #22 Server-side KPIs
   let productDocs, variantsByProduct, protoDocs, metaFacets = null;
+  const hasSpecificProductIds = Array.isArray(catalogMeta.productIds) && catalogMeta.productIds.length > 0;
+
   try {
     const [catalogDataResult, facetsDoc] = await Promise.all([
       fetchCatalogData(
         supplierId || 'all',
         category || 'all',
-        catalogueFilter || 'all'
+        catalogueFilter || 'all',
+        hasSpecificProductIds ? catalogMeta.productIds : []
       ),
       adminDb.collection('_meta').doc('catalog_facets').get().catch(() => null)
     ]);
@@ -459,15 +507,19 @@ export default async function SharedCatalogPage({ params }) {
   const products = [];
 
   for (const data of productDocs) {
+    if (hasSpecificProductIds && !catalogMeta.productIds.includes(data.id)) {
+      continue;
+    }
+
     // Clinical Vials Catalog Guard: Exclude bulk chemical raw materials (API powders by the gram)
-    // from clinical finished vial catalogs unless explicitly configured as a raw material catalog.
+    // from clinical finished vial catalogs unless explicitly configured as a raw material catalog or specific products.
     const isRawMaterial = data.productType === 'raw_material' ||
       data.category === 'raw_material' ||
       data.type === 'raw_material' ||
       (data.name || '').toLowerCase().includes('(bulk api)') ||
       (data.canonicalName || '').toLowerCase().includes('(bulk api)');
 
-    if (isRawMaterial && catalogueFilter !== 'raw_material' && catalogueFilter !== 'api' && category !== 'raw_material') {
+    if (!hasSpecificProductIds && isRawMaterial && catalogueFilter !== 'raw_material' && catalogueFilter !== 'api' && category !== 'raw_material') {
       continue;
     }
 
@@ -477,7 +529,7 @@ export default async function SharedCatalogPage({ params }) {
     const productVariants = deduplicateVariants(combinedVariants);
 
     // Supplier filter — supports single or multiple suppliers (e.g. ['supplier-lotusland', 'supplier-magenta'] or 'supplier-lotusland,supplier-magenta')
-    if (supplierId && supplierId !== 'all') {
+    if (!hasSpecificProductIds && supplierId && supplierId !== 'all') {
       const allowedSuppliers = (Array.isArray(supplierId) ? supplierId : String(supplierId).split(','))
         .map(s => s.trim().toLowerCase().replace(/^supplier-/, ''))
         .filter(Boolean);
@@ -498,15 +550,17 @@ export default async function SharedCatalogPage({ params }) {
       }
     }
 
-    const variants = filterProductVariantsStrictly(
-      { ...data, variants: productVariants },
-      { 
-        supplierId, 
-        supplierFilter: supplierId,
-        catalogueFilter,
-        categoryFilter: category !== 'all' ? category : null 
-      }
-    );
+    const variants = (hasSpecificProductIds && (!supplierId || supplierId === 'all'))
+      ? (productVariants.length > 0 ? productVariants : [data])
+      : filterProductVariantsStrictly(
+          { ...data, variants: productVariants },
+          { 
+            supplierId, 
+            supplierFilter: supplierId,
+            catalogueFilter,
+            categoryFilter: category !== 'all' ? category : null 
+          }
+        );
 
     if (variants.length === 0) continue;
 

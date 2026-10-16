@@ -97,7 +97,7 @@ function DesktopCatalogActions(props) {
         <span className="btn-label">Import</span>
       </button>
 
-      <CatalogExportDropdown {...props} isMobile={false} />
+      <CatalogExportDropdown {...props} filteredProductIds={props.filteredProductIds} isMobile={false} />
 
       <button
         onClick={props.onNewProduct}
@@ -161,7 +161,7 @@ function MobileCatalogActions(props) {
         <span>Import</span>
       </button>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <CatalogExportDropdown {...props} isMobile={true} />
+        <CatalogExportDropdown {...props} filteredProductIds={props.filteredProductIds} isMobile={true} />
       </div>
     </div>
   );
@@ -176,6 +176,7 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
   const [exportStatus, setExportStatus] = useState(null);
   const [markupPercent, setMarkupPercent] = useState(20);
   const [isExportHubOpen, setIsExportHubOpen] = useState(false);
+  const [currentFilteredProductIds, setCurrentFilteredProductIds] = useState([]);
 
   // Action handlers
   const handleExportJSON  = () => window.dispatchEvent(new CustomEvent('catalog-export', { detail: { format: 'json' } }));
@@ -192,11 +193,19 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
     if (actionLoading) return;
     setActionLoading(loadingKey);
 
+    const isFilteredView = loadingKey?.includes('filtered');
+    const effectiveProductIds = (extraParams.productIds !== undefined && extraParams.productIds.length > 0)
+      ? extraParams.productIds
+      : (isFilteredView && currentFilteredProductIds.length > 0)
+      ? currentFilteredProductIds
+      : (initialProducts || []).map(p => p.id).filter(Boolean);
+
     const variantCount = extraParams.variantCount || (
+      isFilteredView ? effectiveProductIds.length :
       loadingKey.includes('lotusland') ? 104 :
       loadingKey.includes('magenta') ? 101 :
       loadingKey.includes('larimedical') ? 8 :
-      loadingKey.includes('europeptides') ? 54 : null
+      loadingKey.includes('europeptides') ? 54 : effectiveProductIds.length
     );
 
     setExportStatus({
@@ -217,9 +226,7 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
     const timeoutId = setTimeout(() => controller.abort(), 45_000);
 
     try {
-      const productIds = extraParams.productIds !== undefined
-        ? extraParams.productIds
-        : (initialProducts || []).map(p => p.id).filter(Boolean);
+      const productIds = effectiveProductIds;
 
       const res = await fetch('/api/generate-pdf', {
         method: 'POST',
@@ -383,11 +390,19 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
     if (actionLoading) return;
     setActionLoading(loadingKey);
 
+    const isFilteredView = loadingKey?.includes('filtered') || !supplierId || supplierId === 'filtered';
+    const effectiveProductIds = (extraParams.productIds !== undefined && extraParams.productIds.length > 0)
+      ? extraParams.productIds
+      : (isFilteredView && currentFilteredProductIds.length > 0)
+      ? currentFilteredProductIds
+      : [];
+
     const variantCount = extraParams.variantCount || (
+      isFilteredView ? effectiveProductIds.length :
       loadingKey.includes('lotusland') ? 104 :
       loadingKey.includes('magenta') ? 101 :
       loadingKey.includes('larimedical') ? 8 :
-      loadingKey.includes('europeptides') ? 54 : null
+      loadingKey.includes('europeptides') ? 54 : effectiveProductIds.length
     );
 
     setExportStatus({
@@ -410,6 +425,7 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           supplierId,
+          productIds: effectiveProductIds,
           priceSource: 'cost',
           priceMarkupPercent: markupPercent,
           currency: extraParams.currency || 'USD',
@@ -467,7 +483,7 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
     } finally {
       setActionLoading(null);
     }
-  }, [actionLoading, markupPercent]);
+  }, [actionLoading, markupPercent, currentFilteredProductIds]);
 
   const sharedActions = {
     onExportJSON:        handleExportJSON,
@@ -476,6 +492,7 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
     onNewProduct:        handleNewProduct,
     onGeneratePDF:       handleSupplierPDF,
     onGenerateWebShare:  handleSupplierWebShare,
+    filteredProductIds:  currentFilteredProductIds,
     onLotuslandPDF:      () => handleSupplierPDF('lotusland', 'Lotusland / RegenPept', 'lotusland-pdf', {
       catalogueFilter: 'RegenPept',
       productIds: []
@@ -517,6 +534,7 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
           readOnly={readOnly}
           lockedSupplier={lockedSupplier}
           defaultSupplier={defaultSupplier}
+          onFilteredProductIdsChange={setCurrentFilteredProductIds}
           headerActions={<DesktopCatalogActions {...sharedActions} />}
           mobileHeaderActions={<MobileCatalogActions {...sharedActions} />}
         />

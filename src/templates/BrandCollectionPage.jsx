@@ -33,7 +33,7 @@ const BRAND_CONFIGS = {
     badge: 'Clinical Nutriceuticals, Dermocosmetics & Trichology Desk',
     badgeColor: '#0d9488',
     subtitle: 'Polish pioneer in biologically active native freshwater fish tropocollagen (triple-helix preserved), cellular oral nutriceuticals, advanced diamond cosmeceuticals, and medical follicular trichology.',
-    heroImage: '/images/products/colway/colvita.png',
+    heroImage: '/images/products/colway/colway-collection-hero-banner.jpg',
     accentColor: '#0d9488',
     kpis: [
       { label: 'Active Tropocollagen', value: 'Triple Helix', sub: 'Sublimation Freeze-Dried Active Form', icon: Sparkles, color: '#0d9488' },
@@ -42,7 +42,7 @@ const BRAND_CONFIGS = {
       { label: 'Regulatory Compliance', value: 'EU Reg. & GMP', sub: 'CPNP Registered & Dermatologically Tested', icon: ShieldCheck, color: '#16a34a' }
     ],
     categories: [
-      { id: 'all', label: 'All Formulations (8)' },
+      { id: 'all', label: 'All Formulations (7)' },
       { id: 'nutraceutical', label: 'Nutraceuticals & Systemic Collagen (Colvita)' },
       { id: 'facial', label: 'Facial Cosmeceuticals & Blue Diamond' },
       { id: 'trichology', label: 'Trichology & Hair Strengthening System' }
@@ -235,6 +235,11 @@ export default function BrandCollectionPage({
   const filteredProducts = useMemo(() => {
     let list = [...products];
 
+    // Colway collection: bundle 'colway-trichology' is represented by individual shampoo and conditioner formulations
+    if (brandSlug === 'colway') {
+      list = list.filter(p => p.id !== 'colway-trichology' && p.slug !== 'colway-trichology');
+    }
+
     // Search query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
@@ -350,6 +355,15 @@ export default function BrandCollectionPage({
               {config.subtitle}
             </p>
           </div>
+          {brandSlug === 'colway' && (
+            <div style={{ marginTop: '1.5rem', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 6px 24px rgba(15, 23, 42, 0.08)', border: '1px solid #e2e8f0' }}>
+              <img
+                src="/images/products/colway/colway-collection-hero-banner.jpg"
+                alt="Colway Complete Cellular Dermocosmetics & Nutricosmetics Collection"
+                style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '440px', objectFit: 'cover' }}
+              />
+            </div>
+          )}
         </div>
       </header>
 
@@ -619,7 +633,11 @@ export default function BrandCollectionPage({
                   const imageSrc = resolveBrandProductImage(product, brandSlug);
                   const displayName = product.canonicalName || product.name || product.title || product.id;
                   const desc = product.overview_summary || product.description || product.desc || '';
-                  const sampleType = product.sampleType || 'Capillary Dried Blood Spot (DBS)';
+                  const sampleType = brandSlug === 'bloodo'
+                    ? (product.sampleType || 'Capillary Dried Blood Spot (DBS)')
+                    : brandSlug === 'colway'
+                    ? (product.volume || product.presentation || (product.is_supplement || product.id?.includes('colvita') ? '60 / 120 Capsules (Box)' : 'Dermocosmetic Formulation'))
+                    : (product.sampleType || product.presentation || product.volume || 'Clinical Formulation');
                   const isExpanded = !!expandedDetails[product.id];
                   const isAdded = addedItem === product.id;
 
@@ -730,8 +748,16 @@ export default function BrandCollectionPage({
                           {displayName}
                         </h3>
 
-                        <div style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <Droplets size={13} />
+                        <div style={{
+                          fontSize: '0.75rem',
+                          color: brandSlug === 'colway' ? '#0d9488' : '#0284c7',
+                          fontWeight: 600,
+                          marginBottom: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}>
+                          {brandSlug === 'bloodo' ? <Droplets size={13} /> : <Sparkles size={13} />}
                           <span>{sampleType}</span>
                         </div>
 
@@ -882,7 +908,11 @@ export default function BrandCollectionPage({
                                   </>
                                 ) : (
                                   <>
-                                    <span>{isEs ? 'Pedir Kit' : 'Order Kit'}</span>
+                                    <span>
+                                      {isEs
+                                        ? (brandSlug === 'bloodo' ? 'Pedir Kit' : 'Ver Formulación')
+                                        : (brandSlug === 'bloodo' ? 'Order Kit' : 'View Formulation')}
+                                    </span>
                                     <ArrowRight size={13} />
                                   </>
                                 )}
@@ -1134,6 +1164,7 @@ export default function BrandCollectionPage({
         isOpen={isInquiryDrawerOpen}
         onClose={() => setIsInquiryDrawerOpen(false)}
         contextType="brand_collection"
+        brandType={brandSlug}
         initialEntity={{
           brandSlug,
           brandName: config.name,

@@ -28,7 +28,8 @@ import {
   ArrowRight,
   Sliders,
   DollarSign,
-  Coins
+  Coins,
+  X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DataTable from '@/components/ui/DataTable';
@@ -43,6 +44,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22 Scope Switcher)
   const [copied, setCopied] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportTier, setExportTier] = useState('master'); // 'master' | 'clinic'
 
   // Automatically default to card view on mobile screens (Golden Rule #23)
   React.useEffect(() => {
@@ -232,9 +235,105 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
   ], [formatPrice, markupPct]);
 
   const handlePrint = () => {
+    setIsExportModalOpen(false);
     if (typeof window !== 'undefined') {
       window.print();
     }
+  };
+
+  const handleExportCSV = (tier = exportTier) => {
+    setIsExportModalOpen(false);
+    const isMaster = tier === 'master';
+
+    const headers = isMaster
+      ? [
+          '#',
+          'SKU Code',
+          'Product Name',
+          'Subtitle',
+          'Category',
+          'Presentation',
+          `Landed Cost CIF Dubai (${currency})`,
+          `Wholesale B2B (+${markupPct}%) (${currency})`,
+          `Wholesaler Margin (${currency})`,
+          'Wholesaler Margin (%)',
+          `Recommended Clinic Price (${currency})`,
+          `Recommended Retail MSRP (${currency})`,
+          'Key Bioactive Compounds',
+          'Clinical Indication & Protocol',
+          'Stock Status'
+        ]
+      : [
+          '#',
+          'SKU Code',
+          'Product Name',
+          'Subtitle',
+          'Category',
+          'Presentation',
+          `Wholesale B2B Price (${currency})`,
+          `Recommended Clinic Price (${currency})`,
+          `Recommended Retail MSRP (${currency})`,
+          'Key Bioactive Compounds',
+          'Clinical Indication & Protocol',
+          'Stock Status'
+        ];
+
+    const rows = filteredProducts.map((p) => {
+      const landed = (p.calculatedLanded * fxRate).toFixed(2);
+      const wholesale = (p.calculatedWholesale * fxRate).toFixed(2);
+      const margin = (p.calculatedMarginAed * fxRate).toFixed(2);
+      const clinic = ((p.clinicPriceAed || 0) * fxRate).toFixed(2);
+      const retail = ((p.retailPriceAed || 0) * fxRate).toFixed(2);
+
+      if (isMaster) {
+        return [
+          p.itemNumber,
+          p.sku,
+          `"${(p.name || '').replace(/"/g, '""')}"`,
+          `"${(p.subtitle || '').replace(/"/g, '""')}"`,
+          `"${(p.category || '').replace(/"/g, '""')}"`,
+          `"${(p.volume || '').replace(/"/g, '""')}"`,
+          landed,
+          wholesale,
+          margin,
+          `${p.calculatedMarginPct}%`,
+          clinic,
+          retail,
+          `"${(p.keyActives || '').replace(/"/g, '""')}"`,
+          `"${(p.clinicalFocus || '').replace(/"/g, '""')}"`,
+          `"${(p.stockStatus || 'In Stock (Dubai)').replace(/"/g, '""')}"`
+        ];
+      }
+
+      return [
+        p.itemNumber,
+        p.sku,
+        `"${(p.name || '').replace(/"/g, '""')}"`,
+        `"${(p.subtitle || '').replace(/"/g, '""')}"`,
+        `"${(p.category || '').replace(/"/g, '""')}"`,
+        `"${(p.volume || '').replace(/"/g, '""')}"`,
+        wholesale,
+        clinic,
+        retail,
+        `"${(p.keyActives || '').replace(/"/g, '""')}"`,
+        `"${(p.clinicalFocus || '').replace(/"/g, '""')}"`,
+        `"${(p.stockStatus || 'In Stock (Dubai)').replace(/"/g, '""')}"`
+      ];
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const filename = `Colway_UAE_Price_Schedule_${isMaster ? 'Master_B2B' : 'Clinic_Catalog'}_${currency}_${markupPct}pct_${dateStr}.csv`;
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${filename} successfully! ✓`);
   };
 
   const handleCopyLink = () => {
@@ -298,9 +397,18 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
               <span>Share</span>
             </button>
 
+            <button
+              onClick={() => setIsExportModalOpen(true)}
+              className="action-btn action-export"
+              title="Export in PDF or Excel / CSV format"
+            >
+              <Download size={16} />
+              <span>Export</span>
+            </button>
+
             <button onClick={handlePrint} className="action-btn action-primary" title="Print this Price Sheet">
               <Printer size={16} />
-              <span>Print Price Sheet</span>
+              <span>Print</span>
             </button>
           </div>
         </div>
@@ -782,6 +890,160 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
         </section>
       </main>
 
+      {/* ── Export Schedule Modal (2 Distinct Formats: PDF vs CSV/Excel) ── */}
+      {isExportModalOpen && (
+        <div className="export-modal-backdrop no-print" onClick={() => setIsExportModalOpen(false)}>
+          <div className="export-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="export-modal-header">
+              <div className="export-modal-title-wrap">
+                <span className="export-badge">Official Schedule Export</span>
+                <h3 className="export-modal-title">Export Colway UAE Price Schedule</h3>
+                <p className="export-modal-subtitle">
+                  Select your preferred format for institutional presentation or procurement processing.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsExportModalOpen(false)}
+                className="export-close-btn"
+                aria-label="Close export dialog"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="export-options-grid">
+              {/* Option 1: Executive PDF / Print Dossier */}
+              <div className="export-card">
+                <div className="export-card-icon-wrap pdf-icon-wrap">
+                  <FileText size={24} className="text-rose-600" />
+                </div>
+                <div className="export-card-content">
+                  <div className="export-card-tag text-rose-700 bg-rose-50 border border-rose-200">
+                    Documental / Institutional
+                  </div>
+                  <h4 className="export-card-title">Executive PDF & Print Dossier</h4>
+                  <p className="export-card-desc">
+                    Official A4 landscape schedule with dual branding (Atlas × Colway), UAE cold-chain compliance stamps (&lt;26°C), full product breakdown, commercial terms, and physical sign-off lines.
+                  </p>
+                  <ul className="export-features-list">
+                    <li>✓ High-resolution print-ready typography</li>
+                    <li>✓ Cold-chain (&lt;26°C) & ISO 22716 certification stamp</li>
+                    <li>✓ Formatted for A4 landscape / PDF download</li>
+                  </ul>
+                  <button onClick={handlePrint} className="export-primary-btn pdf-btn">
+                    <Printer size={16} />
+                    <span>Print / Save as PDF (A4)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Option 2: Structured CSV / Excel Spreadsheet */}
+              <div className="export-card">
+                <div className="export-card-icon-wrap excel-icon-wrap">
+                  <Download size={24} className="text-emerald-600" />
+                </div>
+                <div className="export-card-content">
+                  <div className="export-card-tag text-emerald-700 bg-emerald-50 border border-emerald-200">
+                    Operative / ERP & Spreadsheet
+                  </div>
+                  <h4 className="export-card-title">Procurement CSV & Excel Data Sheet</h4>
+                  <p className="export-card-desc">
+                    Clean, computational spreadsheet formatted with UTF-8 BOM for instant import into Microsoft Excel, Google Sheets, Zoho Books, or hospital ERP systems.
+                  </p>
+
+                  <div className="export-tier-selector">
+                    <label className="tier-radio-option">
+                      <input
+                        type="radio"
+                        name="exportTier"
+                        value="master"
+                        checked={exportTier === 'master'}
+                        onChange={() => setExportTier('master')}
+                      />
+                      <span>
+                        <strong>Wholesaler Master:</strong> Includes Landed CIF, Markup % and Net Margins
+                      </span>
+                    </label>
+                    <label className="tier-radio-option">
+                      <input
+                        type="radio"
+                        name="exportTier"
+                        value="clinic"
+                        checked={exportTier === 'clinic'}
+                        onChange={() => setExportTier('clinic')}
+                      />
+                      <span>
+                        <strong>Clinic Catalog:</strong> Wholesale, Clinic & MSRP (Confidential landed costs hidden)
+                      </span>
+                    </label>
+                  </div>
+
+                  <button onClick={() => handleExportCSV(exportTier)} className="export-primary-btn excel-btn">
+                    <Download size={16} />
+                    <span>Download Spreadsheet (.csv)</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="export-modal-footer">
+              <span className="export-footer-note">
+                Values calculated dynamically based on current configuration: <strong>{currency}</strong> at <strong>+{markupPct}% markup</strong> ({filteredProducts.length} items).
+              </span>
+              <button onClick={() => setIsExportModalOpen(false)} className="export-dismiss-btn">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Mobile Floating Action Bar (<768px) ── */}
+      <div className="mobile-floating-bar no-print">
+        <div className="mobile-floating-inner">
+          <div className="mobile-currency-pills">
+            {['AED', 'USD', 'EUR'].map((cur) => (
+              <button
+                key={cur}
+                onClick={() => setCurrency(cur)}
+                className={`mobile-pill ${currency === cur ? 'active' : ''}`}
+              >
+                {cur}
+              </button>
+            ))}
+          </div>
+
+          <div className="mobile-action-buttons">
+            <button
+              onClick={() => setViewMode(prev => prev === 'table' ? 'cards' : 'table')}
+              className="mobile-btn mobile-btn-ghost"
+              title="Toggle View Mode"
+            >
+              {viewMode === 'table' ? <Layers size={14} /> : <FileText size={14} />}
+              <span>{viewMode === 'table' ? 'Visual' : 'Table'}</span>
+            </button>
+
+            <button
+              onClick={() => setIsExportModalOpen(true)}
+              className="mobile-btn mobile-btn-accent"
+              title="Export Price Schedule"
+            >
+              <Download size={14} />
+              <span>Export</span>
+            </button>
+
+            <button
+              onClick={handlePrint}
+              className="mobile-btn mobile-btn-primary"
+              title="Print Price Schedule"
+            >
+              <Printer size={14} />
+              <span>Print</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* ── Scoped Styling with High-End Screen Aesthetics & Print Isolation ── */}
       <style jsx>{`
         .colway-price-root {
@@ -897,6 +1159,14 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
         }
         .action-whatsapp:hover {
           background: #047857;
+        }
+        .action-export {
+          background: #0d9488;
+          color: #ffffff;
+          box-shadow: 0 2px 4px rgba(13, 148, 136, 0.25);
+        }
+        .action-export:hover {
+          background: #0f766e;
         }
         .action-primary {
           background: #0284c7;
@@ -1453,11 +1723,244 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
         }
 
         /* ═══════════════════════════════════════════════════════════════
+           EXPORT MODAL STYLING (2 Distinct Formats: PDF vs CSV/Excel)
+           ═══════════════════════════════════════════════════════════════ */
+        .export-modal-backdrop {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(15, 23, 42, 0.7);
+          backdrop-filter: blur(6px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+          z-index: 1000;
+          animation: modalFadeIn 0.2s ease-out;
+        }
+        @keyframes modalFadeIn {
+          from { opacity: 0; transform: scale(0.98); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .export-modal-box {
+          background: #ffffff;
+          border-radius: 16px;
+          border: 1px solid #cbd5e1;
+          box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.3);
+          max-width: 820px;
+          width: 100%;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        }
+        .export-modal-header {
+          padding: 1.5rem 1.75rem 1.25rem 1.75rem;
+          border-bottom: 1px solid #e2e8f0;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 1rem;
+          background: #f8fafc;
+        }
+        .export-badge {
+          display: inline-block;
+          font-size: 0.68rem;
+          font-weight: 750;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          padding: 3px 8px;
+          border-radius: 4px;
+          background: #0284c7;
+          color: #ffffff;
+          margin-bottom: 6px;
+        }
+        .export-modal-title {
+          font-size: 1.3rem;
+          font-weight: 850;
+          color: #0f172a;
+          margin: 0 0 4px 0;
+        }
+        .export-modal-subtitle {
+          font-size: 0.82rem;
+          color: #64748b;
+          margin: 0;
+        }
+        .export-close-btn {
+          border: none;
+          background: #e2e8f0;
+          color: #475569;
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .export-close-btn:hover {
+          background: #cbd5e1;
+          color: #0f172a;
+        }
+
+        .export-options-grid {
+          padding: 1.5rem 1.75rem;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.25rem;
+        }
+        .export-card {
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 1.25rem;
+          background: #ffffff;
+          display: flex;
+          flex-direction: column;
+          transition: all 0.2s ease;
+        }
+        .export-card:hover {
+          border-color: #0284c7;
+          box-shadow: 0 6px 16px -4px rgba(2, 132, 199, 0.12);
+        }
+        .export-card-icon-wrap {
+          width: 44px;
+          height: 44px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 0.85rem;
+        }
+        .pdf-icon-wrap {
+          background: #ffe4e6;
+        }
+        .excel-icon-wrap {
+          background: #d1fae5;
+        }
+        .export-card-tag {
+          display: inline-block;
+          font-size: 0.68rem;
+          font-weight: 700;
+          padding: 2px 6px;
+          border-radius: 4px;
+          margin-bottom: 6px;
+        }
+        .export-card-title {
+          font-size: 1.05rem;
+          font-weight: 800;
+          color: #0f172a;
+          margin: 0 0 6px 0;
+        }
+        .export-card-desc {
+          font-size: 0.76rem;
+          color: #64748b;
+          line-height: 1.45;
+          margin: 0 0 1rem 0;
+          flex: 1;
+        }
+        .export-features-list {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 1.25rem 0;
+          font-size: 0.72rem;
+          color: #334155;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .export-primary-btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 10px 14px;
+          border-radius: 8px;
+          font-size: 0.82rem;
+          font-weight: 750;
+          cursor: pointer;
+          border: none;
+          transition: all 0.15s ease;
+        }
+        .pdf-btn {
+          background: #e11d48;
+          color: #ffffff;
+        }
+        .pdf-btn:hover {
+          background: #be123c;
+        }
+        .excel-btn {
+          background: #059669;
+          color: #ffffff;
+        }
+        .excel-btn:hover {
+          background: #047857;
+        }
+
+        .export-tier-selector {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 8px 10px;
+          margin-bottom: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .tier-radio-option {
+          display: flex;
+          align-items: flex-start;
+          gap: 6px;
+          font-size: 0.72rem;
+          color: #334155;
+          cursor: pointer;
+        }
+        .tier-radio-option input {
+          margin-top: 2px;
+        }
+
+        .export-modal-footer {
+          padding: 1rem 1.75rem;
+          background: #f8fafc;
+          border-top: 1px solid #e2e8f0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+          flex-wrap: wrap;
+        }
+        .export-footer-note {
+          font-size: 0.72rem;
+          color: #64748b;
+          flex: 1;
+        }
+        .export-dismiss-btn {
+          padding: 6px 14px;
+          border-radius: 6px;
+          font-size: 0.78rem;
+          font-weight: 600;
+          border: 1px solid #cbd5e1;
+          background: #ffffff;
+          color: #475569;
+          cursor: pointer;
+        }
+        .export-dismiss-btn:hover {
+          background: #f1f5f9;
+        }
+
+        /* ── Mobile Floating Bar ── */
+        .mobile-floating-bar {
+          display: none;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
            RESPONSIVE ADAPTATIONS (Laptop & Mobile UX - Golden Rule #23)
            ═══════════════════════════════════════════════════════════════ */
         @media (max-width: 1024px) {
           .price-sheet-container {
-            padding: 1rem 0.75rem 6rem;
+            padding: 1rem 1rem 6rem;
           }
           .kpi-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -1465,87 +1968,35 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           .document-header {
             padding: 1.25rem;
           }
-          .colway-price-table th,
-          .colway-price-table td {
-            padding: 0.65rem 0.6rem;
-            font-size: 0.76rem;
-          }
         }
 
         @media (max-width: 768px) {
-          .colway-topbar-inner {
-            padding: 0.6rem 0.75rem;
+          .screen-nav-bar {
+            position: relative;
           }
-          .topbar-actions {
+          .nav-container {
+            padding: 0.75rem 1rem;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.75rem;
+          }
+          .nav-left {
+            justify-content: space-between;
+            font-size: 0.8rem;
+          }
+          .nav-actions {
             width: 100%;
-            justify-content: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
           }
           .header-meta-row {
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.25rem;
           }
           .document-stamp-box {
             width: 100%;
             min-width: unset;
-          }
-          .kpi-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-          }
-          .kpi-card {
-            padding: 0.85rem 1rem;
-          }
-          .kpi-value {
-            font-size: 1.25rem;
-          }
-          .controls-row {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 0.85rem;
-          }
-          .controls-row-right {
-            width: 100%;
-            justify-content: space-between;
-          }
-          .search-input-wrapper {
-            width: 100%;
-            min-width: unset;
-          }
-          .category-pills-bar {
-            overflow-x: auto;
-            flex-wrap: nowrap;
-            padding-bottom: 4px;
-            -webkit-overflow-scrolling: touch;
-          }
-          .category-pill {
-            white-space: nowrap;
-          }
-          .table-responsive-wrapper {
-            border-radius: 8px;
-            -webkit-overflow-scrolling: touch;
-          }
-          .floating-action-bar {
-            padding: 0.6rem 0.75rem;
-            flex-wrap: wrap;
-            justify-content: center;
-          }
-          .floating-action-bar-inner {
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.5rem;
-            width: 100%;
-          }
-          .cards-grid {
-            grid-template-columns: 1fr;
-          }
-          .terms-columns {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .kpi-grid {
-            grid-template-columns: 1fr;
           }
           .document-title {
             font-size: 1.2rem;
@@ -1553,6 +2004,177 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           .regulatory-banner {
             flex-direction: column;
             gap: 0.5rem;
+          }
+          .kpi-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.65rem;
+          }
+          .kpi-card {
+            padding: 0.75rem 0.85rem;
+            gap: 0.65rem;
+          }
+          .kpi-value {
+            font-size: 1.15rem;
+          }
+          .controls-strip {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.75rem;
+            padding: 0.75rem;
+          }
+          .controls-left {
+            width: 100%;
+          }
+          .category-chips {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+          }
+          .category-chip {
+            white-space: nowrap;
+            flex-shrink: 0;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+          }
+          .controls-right {
+            width: 100%;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.75rem;
+          }
+          .markup-simulator {
+            width: 100%;
+            justify-content: space-between;
+          }
+          .markup-presets {
+            flex: 1;
+            justify-content: flex-end;
+          }
+          .preset-btn {
+            padding: 6px 10px;
+            font-size: 0.75rem;
+          }
+          .view-switcher {
+            width: 100%;
+          }
+          .view-btn {
+            flex: 1;
+            justify-content: center;
+            padding: 8px 12px;
+          }
+          .product-cards-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+          .terms-columns {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+          .price-sheet-container {
+            padding: 0.75rem 0.85rem 6.5rem 0.85rem;
+          }
+          .export-options-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            padding: 1.25rem;
+          }
+          .export-modal-box {
+            max-height: 90vh;
+            overflow-y: auto;
+          }
+
+          /* Mobile Floating Bottom Bar */
+          .mobile-floating-bar {
+            display: block;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.96);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 0.6rem 0.85rem;
+            z-index: 100;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+          }
+          .mobile-floating-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            max-width: 600px;
+            margin: 0 auto;
+          }
+          .mobile-currency-pills {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 2px;
+          }
+          .mobile-pill {
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 5px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+          .mobile-pill.active {
+            background: #38bdf8;
+            color: #0f172a;
+          }
+          .mobile-action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          }
+          .mobile-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 7px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            min-height: 38px;
+          }
+          .mobile-btn-ghost {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+          }
+          .mobile-btn-accent {
+            background: #0d9488;
+            color: #ffffff;
+          }
+          .mobile-btn-primary {
+            background: #0284c7;
+            color: #ffffff;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .kpi-grid {
+            grid-template-columns: 1fr;
+          }
+          .nav-actions {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          .action-btn {
+            justify-content: center;
+            padding: 8px 12px;
+          }
+          .header-meta-row {
+            gap: 1rem;
+          }
+          .document-title {
+            font-size: 1.15rem;
           }
         }
 

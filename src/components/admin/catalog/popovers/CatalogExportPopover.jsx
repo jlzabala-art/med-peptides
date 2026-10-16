@@ -172,6 +172,7 @@ export default function CatalogExportPopover({
     };
     if (scopeObj.id === 'filtered') {
       extras.productIds = filteredProductIds;
+      extras.variantCount = filteredProductIds.length;
     } else if (scopeObj.catalogueFilter) {
       extras.catalogueFilter = scopeObj.catalogueFilter;
       extras.productIds = [];
@@ -181,9 +182,10 @@ export default function CatalogExportPopover({
 
   const handleTriggerPDF = () => {
     const scopeObj = SUPPLIER_SCOPES.find(s => s.id === selectedScope) || SUPPLIER_SCOPES[0];
+    const isFiltered = scopeObj.id === 'filtered';
     onGeneratePDF?.(
       scopeObj.filter === 'filtered' ? null : scopeObj.filter,
-      scopeObj.label,
+      isFiltered ? `Curated View (${filteredProductIds.length} items)` : scopeObj.label,
       `${scopeObj.id}-pdf`,
       buildScopeExtras(scopeObj)
     );
@@ -192,12 +194,18 @@ export default function CatalogExportPopover({
 
   const handleTriggerWebShare = () => {
     const scopeObj = SUPPLIER_SCOPES.find(s => s.id === selectedScope) || SUPPLIER_SCOPES[0];
+    const isFiltered = scopeObj.id === 'filtered';
     const supplierId = scopeObj.id === 'lotusland'     ? 'supplier-lotusland'
                      : scopeObj.id === 'magenta'       ? 'supplier-magenta'
                      : scopeObj.id === 'larimedical'   ? 'supplier-larimedical'
                      : scopeObj.id === 'europeptides'  ? 'supplier-europeptides'
                      : scopeObj.id === 'filtered'      ? null : 'all';
-    onGenerateWebShare?.(supplierId, scopeObj.label, `${scopeObj.id}-web`, buildScopeExtras(scopeObj));
+    onGenerateWebShare?.(
+      supplierId,
+      isFiltered ? `Curated View (${filteredProductIds.length} items)` : scopeObj.label,
+      `${scopeObj.id}-web`,
+      buildScopeExtras(scopeObj)
+    );
     onClose();
   };
 
@@ -299,11 +307,16 @@ export default function CatalogExportPopover({
                 boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
               }}
             >
-              {SUPPLIER_SCOPES.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.label}  ({s.badge})
-                </option>
-              ))}
+              {SUPPLIER_SCOPES.map(s => {
+                const badgeText = s.id === 'filtered'
+                  ? `${filteredProductIds?.length || 0} items in view`
+                  : s.badge;
+                return (
+                  <option key={s.id} value={s.id}>
+                    {s.label} ({badgeText})
+                  </option>
+                );
+              })}
             </select>
             <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#64748b' }}>
               <ChevronDown size={14} />

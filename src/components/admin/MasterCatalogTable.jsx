@@ -63,7 +63,8 @@ export default function MasterCatalogTable({
   mobileHeaderActions,
   readOnly = false,
   lockedSupplier = null,
-  defaultSupplier = null
+  defaultSupplier = null,
+  onFilteredProductIdsChange = null
 }) {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -744,6 +745,16 @@ export default function MasterCatalogTable({
   const activeData = isGenomicsMatrix ? genomicsMatrixData : dataWithMeta;
   const activeTotal = isGenomicsMatrix ? genomicsMetrics.total : (displayedMetrics.totalProducts || displayedMetrics.total);
 
+  const currentFilteredProductIds = useMemo(() => {
+    return (activeData || []).map(p => p.id).filter(Boolean);
+  }, [activeData]);
+
+  useEffect(() => {
+    if (typeof onFilteredProductIdsChange === 'function') {
+      onFilteredProductIdsChange(currentFilteredProductIds);
+    }
+  }, [currentFilteredProductIds, onFilteredProductIdsChange]);
+
   return (
     <div style={{ position: 'relative' }}>
       <DataModule
@@ -850,14 +861,20 @@ export default function MasterCatalogTable({
             {mobileHeaderActions ? (
               <>
                 <div className="catalog-header-actions-desktop">
-                  {headerActions || headerProps.actions}
+                  {React.isValidElement(headerActions)
+                    ? React.cloneElement(headerActions, { filteredProductIds: currentFilteredProductIds })
+                    : (headerActions || headerProps.actions)}
                 </div>
                 <div className="catalog-header-actions-mobile" style={{ width: '100%' }}>
-                  {mobileHeaderActions}
+                  {React.isValidElement(mobileHeaderActions)
+                    ? React.cloneElement(mobileHeaderActions, { filteredProductIds: currentFilteredProductIds })
+                    : mobileHeaderActions}
                 </div>
               </>
             ) : (
-              headerActions || headerProps.actions
+              React.isValidElement(headerActions || headerProps.actions)
+                ? React.cloneElement(headerActions || headerProps.actions, { filteredProductIds: currentFilteredProductIds })
+                : (headerActions || headerProps.actions)
             )}
           </div>
         }

@@ -368,7 +368,7 @@ export const CLINICAL_SUPPLEMENTS = {
         sku: 'SKU-COLWAY-COLVITA-60',
         format: 'Capsules',
         dosage: '60 Capsules',
-        size: '60 Capsules Bottle',
+        size: '60 Capsules Box (Blister Packs)',
         pricing: {
           master: { perUnit: 28, currency: 'USD' },
           wholesale: { perUnit: 42, currency: 'USD' },
@@ -393,7 +393,7 @@ export const CLINICAL_SUPPLEMENTS = {
         sku: 'SKU-COLWAY-COLVITA-120',
         format: 'Capsules',
         dosage: '120 Capsules',
-        size: '120 Capsules Bottle',
+        size: '120 Capsules Box (Blister Packs)',
         pricing: {
           master: { perUnit: 50, currency: 'USD' },
           wholesale: { perUnit: 74, currency: 'USD' },
