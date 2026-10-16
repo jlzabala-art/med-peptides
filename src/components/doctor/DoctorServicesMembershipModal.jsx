@@ -31,7 +31,6 @@ export default function DoctorServicesMembershipModal({
   clinicName = 'Medical Practice',
   currentTier = 'basic'
 }) {
-  const [activeTabFilter, setActiveTabFilter] = useState('all'); // 'all' | 'highlight'
   const [showWhiteLabelPreview, setShowWhiteLabelPreview] = useState(false);
 
   if (!isOpen) return null;
@@ -52,9 +51,7 @@ export default function DoctorServicesMembershipModal({
     window.open(waUrl, '_blank');
   };
 
-  const filteredRows = activeTabFilter === 'highlight' 
-    ? DOCTOR_CAPABILITIES_MATRIX.filter(r => r.highlight) 
-    : DOCTOR_CAPABILITIES_MATRIX;
+  const filteredRows = DOCTOR_CAPABILITIES_MATRIX;
 
   return (
     <div
@@ -448,53 +445,15 @@ export default function DoctorServicesMembershipModal({
             </div>
           )}
 
-          {/* ── Table Filter Selector (All vs Pro Highlights) ── */}
+          {/* ── Table Header: Detailed Capabilities Matrix ── */}
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
               paddingTop: '10px',
               borderTop: '1px solid #e0e0e0'
             }}
           >
             <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#202124' }}>
               Detailed Capabilities Matrix
-            </div>
-
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <button
-                type="button"
-                onClick={() => setActiveTabFilter('all')}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '4px',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  border: activeTabFilter === 'all' ? '1px solid #1a73e8' : '1px solid #dadce0',
-                  backgroundColor: activeTabFilter === 'all' ? '#e8f0fe' : '#ffffff',
-                  color: activeTabFilter === 'all' ? '#1a73e8' : '#5f6368',
-                  cursor: 'pointer'
-                }}
-              >
-                All Capabilities ({DOCTOR_CAPABILITIES_MATRIX.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTabFilter('highlight')}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '4px',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  border: activeTabFilter === 'highlight' ? '1px solid #1a73e8' : '1px solid #dadce0',
-                  backgroundColor: activeTabFilter === 'highlight' ? '#e8f0fe' : '#ffffff',
-                  color: activeTabFilter === 'highlight' ? '#1a73e8' : '#5f6368',
-                  cursor: 'pointer'
-                }}
-              >
-                Pro Highlights ({DOCTOR_CAPABILITIES_MATRIX.filter(r => r.highlight).length})
-              </button>
             </div>
           </div>
 
