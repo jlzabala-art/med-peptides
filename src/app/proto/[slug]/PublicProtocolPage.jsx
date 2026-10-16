@@ -9,7 +9,8 @@ import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import { 
   generateDynamicReconData, 
   generateDynamicSupplySummary, 
-  generateDynamicWeeklySchedule 
+  generateDynamicWeeklySchedule,
+  matchClinicalBenchmark
 } from '../../../utils/clinicalDosingEngine';
 import { 
   SUPPORTED_LANGUAGES, 
@@ -57,6 +58,7 @@ import {
 import BiomarkerCalibrationBanner from '@/components/protocol/BiomarkerCalibrationBanner';
 import ProtocolCompoundsSection from '@/components/protocol/ProtocolCompoundsSection';
 import ProtocolReconstitutionConsole from '@/components/protocol/ProtocolReconstitutionConsole';
+import ProtocolPosologyConsole from '@/components/protocol/ProtocolPosologyConsole';
 import ProtocolSupplyLogisticsCard from '@/components/protocol/ProtocolSupplyLogisticsCard';
 import ProtocolWeeklyRoadmapCard from '@/components/protocol/ProtocolWeeklyRoadmapCard';
 import ProtocolBiomarkersSafetyCard from '@/components/protocol/ProtocolBiomarkersSafetyCard';
@@ -416,6 +418,35 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
     return `${supplySummary.totalVials} Vials`;
   }, [supplySummary]);
 
+  // Check if protocol includes injectable/lyophilized vials or is purely non-injectable (oral/topical/cosmetic)
+  const hasVials = useMemo(() => {
+    // If protocol explicitly flags delivery route or formulation type
+    const protoDelivery = String(protocol?.delivery_mode || protocol?.route || protocol?.format || '').toLowerCase();
+    if (protoDelivery.includes('topical') || protoDelivery.includes('oral') || protoDelivery.includes('cosmetic') || protoDelivery.includes('supplement')) {
+      // Check if any item is actually an injection
+      const hasInjectable = items.some(it => {
+        const r = String(it.route || '').toLowerCase();
+        const f = String(it.format || it.presentation || it.dosageForm || '').toLowerCase();
+        return r.includes('subcutaneous') || r.includes('subq') || r.includes('injection') || r.includes('intramuscular') || f.includes('vial') || f.includes('lyophilized');
+      });
+      if (!hasInjectable) return false;
+    }
+
+    // Inspect all items in protocol
+    if (!items || items.length === 0) return true; // Default fallback to standard peptide protocol
+    const allNonVial = items.every(it => {
+      const r = String(it.route || '').toLowerCase();
+      const f = String(it.format || it.presentation || it.dosageForm || '').toLowerCase();
+      const name = String(it.name || it.product_name || it.id || '').toLowerCase();
+      const isOralOrTopicalRoute = r.includes('topical') || r.includes('oral') || r.includes('cutánea') || r.includes('enteral') || r.includes('dermal');
+      const isNonVialFormat = f.includes('tube') || f.includes('bottle') || f.includes('capsule') || f.includes('caps') || f.includes('cream') || f.includes('serum') || f.includes('shampoo') || f.includes('peeling') || f.includes('gel');
+      const isColwayOrNutri = it.is_supplement || it.is_topical || it.isCosmetic || name.includes('colvita') || name.includes('colway') || name.includes('vege') || name.includes('diamond');
+      return (isOralOrTopicalRoute || isNonVialFormat || isColwayOrNutri) && !r.includes('subcutaneous') && !r.includes('subq') && !r.includes('injection') && !f.includes('vial') && !f.includes('lyophilized');
+    });
+
+    return !allNonVial;
+  }, [protocol, items]);
+
   // Check if protocol is specifically Tirzepatide (single-agent metabolic titration)
   const isTirzepatideProtocol = useMemo(() => {
     const s = String(slug || protocol?.slug || protocol?.id || '').toLowerCase();
@@ -571,12 +602,21 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         href: '#pathway-timeline',
         icon: (isTirzepatideProtocol || isLongevityProtocol || isImmuneProtocol || isRecoveryProtocol) ? Calculator : CalendarDays 
       },
-      { 
-        id: 'reconstitution-console', 
-        label: isEs ? 'Consola de Reconstitución' : 'Reconstitution Console', 
-        href: '#reconstitution-console',
-        icon: Droplets 
-      },
+      ...(hasVials ? [
+        { 
+          id: 'reconstitution-console', 
+          label: isEs ? 'Consola de Reconstitución' : 'Reconstitution Console', 
+          href: '#reconstitution-console',
+          icon: Droplets 
+        }
+      ] : [
+        { 
+          id: 'posology-console', 
+          label: isEs ? 'Posología & Vía de Uso' : 'Posology & Ritual', 
+          href: '#posology-console',
+          icon: Sparkles 
+        }
+      ]),
       { 
         id: 'cycle-supplies', 
         label: isEs ? 'Suministros del Ciclo' : 'Cycle Supplies & Kit', 
@@ -602,7 +642,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         icon: ShieldCheck 
       }
     ];
-  }, [lang, protocol, isTirzepatideProtocol, isLongevityProtocol, isImmuneProtocol, isRecoveryProtocol]);
+  }, [lang, protocol, hasVials, isTirzepatideProtocol, isLongevityProtocol, isImmuneProtocol, isRecoveryProtocol]);
 
   return (
     <div className="public-datasheet-root">
@@ -898,9 +938,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               icon: Package,
               iconBg: '#faf5ff',
               iconColor: '#7c3aed',
-              title: t.kpiVialsTitle,
-              value: `${supplySummary.totalVials} ${t.kpiVialsUnit}`,
-              subtitle: supplySummary.compounds.length > 1 ? (
+              title: hasVials ? t.kpiVialsTitle : (lang === 'es' ? 'FORMULACIONES TOTALES' : 'TOTAL FORMULATIONS'),
+              value: hasVials ? `${supplySummary.totalVials} ${t.kpiVialsUnit}` : `${items.length} ${lang === 'es' ? 'Productos' : 'Items'}`,
+              subtitle: hasVials ? (supplySummary.compounds.length > 1 ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginTop: '0.2rem' }}>
                   {supplySummary.compounds.map((c, i) => (
                     <span 
@@ -920,19 +960,19 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
                     </span>
                   ))}
                 </div>
-              ) : vialBreakdownText,
+              ) : vialBreakdownText) : (lang === 'es' ? 'Régimen Nutracéutico & Tópico' : 'Nutricosmetic & Topical Regimen'),
               subColor: '#7c3aed'
             },
             {
-              icon: Syringe,
-              iconBg: '#fff7ed',
-              iconColor: '#c2410c',
-              title: t.kpiInjectionsTitle,
-              value: `${supplySummary.totalInjections} ${t.kpiInjectionsUnit}`,
-              subtitle: isHairProtocol
-                ? (lang === 'es' ? 'Vía SubQ / Mesoterapia Capilar' : 'SubQ & Scalp Mesotherapy')
-                : t.kpiInjectionsSubtitle,
-              subColor: '#c2410c'
+              icon: hasVials ? Syringe : Sparkles,
+              iconBg: hasVials ? '#fff7ed' : '#f0fdf4',
+              iconColor: hasVials ? '#c2410c' : '#16a34a',
+              title: hasVials ? t.kpiInjectionsTitle : (lang === 'es' ? 'VÍA DE ADMINISTRACIÓN' : 'DELIVERY ROUTE'),
+              value: hasVials ? `${supplySummary.totalInjections} ${t.kpiInjectionsUnit}` : (lang === 'es' ? 'Oral & Tópica' : 'Oral & Topical'),
+              subtitle: hasVials
+                ? (isHairProtocol ? (lang === 'es' ? 'Vía SubQ / Mesoterapia Capilar' : 'SubQ & Scalp Mesotherapy') : t.kpiInjectionsSubtitle)
+                : (lang === 'es' ? 'No invasivo • Sin viales ni agujas' : 'Non-invasive • No needles or vials'),
+              subColor: hasVials ? '#c2410c' : '#16a34a'
             }
           ]}
         />
@@ -1052,20 +1092,31 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               </PublicSectionCard>
             </div>
 
-            {/* ── STEP 11: Reconstitution Console ── */}
-            <ProtocolReconstitutionConsole
-              reconData={reconData}
-              activeReconTab={activeReconTab}
-              setActiveReconTab={setActiveReconTab}
-              currentRecon={currentRecon}
-              lang={lang}
-            />
+            {/* ── STEP 11: Reconstitution Console OR Posology Console (Non-Injectables) ── */}
+            {hasVials ? (
+              <ProtocolReconstitutionConsole
+                reconData={reconData}
+                activeReconTab={activeReconTab}
+                setActiveReconTab={setActiveReconTab}
+                currentRecon={currentRecon}
+                lang={lang}
+              />
+            ) : (
+              <ProtocolPosologyConsole
+                items={items}
+                phases={phases}
+                protocol={protocol}
+                lang={lang}
+              />
+            )}
 
             {/* ── STEP 12: Cycle Supply & Logistics Blueprint ── */}
             <ProtocolSupplyLogisticsCard
               supplySummary={supplySummary}
               displayDuration={displayDuration}
               t={t}
+              hasVials={hasVials}
+              items={items}
               lang={lang}
             />
 

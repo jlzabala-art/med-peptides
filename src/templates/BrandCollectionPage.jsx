@@ -42,7 +42,7 @@ const BRAND_CONFIGS = {
       { label: 'Regulatory Compliance', value: 'EU Reg. & GMP', sub: 'CPNP Registered & Dermatologically Tested', icon: ShieldCheck, color: '#16a34a' }
     ],
     categories: [
-      { id: 'all', label: 'All Formulations (7)' },
+      { id: 'all', label: 'All Formulations (8)' },
       { id: 'nutraceutical', label: 'Nutraceuticals & Systemic Collagen (Colvita)' },
       { id: 'facial', label: 'Facial Cosmeceuticals & Blue Diamond' },
       { id: 'trichology', label: 'Trichology & Hair Strengthening System' }
@@ -197,7 +197,12 @@ export default function BrandCollectionPage({
   const config = BRAND_CONFIGS[brandSlug] || BRAND_CONFIGS.bloodo;
   const { user, isProfessional } = useAuth();
 
-  const [lang, setLang] = useState('en');
+  const [lang, setLang] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('atlas_portal_lang') || 'en';
+    }
+    return 'en';
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
@@ -207,13 +212,6 @@ export default function BrandCollectionPage({
   const [scopeMode, setScopeMode] = useState('filtered'); // 'filtered' | 'global'
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedLang = localStorage.getItem('atlas_portal_lang') || 'en';
-      setLang(savedLang);
-    }
-  }, []);
 
   const isEs = lang === 'es';
   const canonicalUrl = `https://www.atlashealth-services.com/collection/${brandSlug}`;
@@ -490,11 +488,6 @@ export default function BrandCollectionPage({
         </section>
       )}
 
-      {brandSlug === 'colway' && (
-        <section style={{ maxWidth: '1440px', margin: '0 auto 2.5rem', padding: '0 2rem' }}>
-          <ColwayTrichologyStemCellShowcase lang={lang} />
-        </section>
-      )}
 
       {/* ── 6. MAIN WORKSPACE (70% Main Products Grid + 30% Sticky Sidebar) ── */}
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem 5rem' }}>
@@ -518,6 +511,7 @@ export default function BrandCollectionPage({
                 <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '480px' }}>
                   <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
+                    id="catalog-search-input"
                     type="text"
                     placeholder={isEs ? `Buscar en ${config.name} (ej. NAD+, cortisol, DBS)... ⌘K` : `Search in ${config.name} (e.g. NAD+, cortisol)... ⌘K`}
                     value={searchQuery}
@@ -936,7 +930,21 @@ export default function BrandCollectionPage({
           ) : brandSlug === 'ultraperson' ? (
             <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
           ) : brandSlug === 'colway' ? (
-            <ColwayCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
+            <ColwayCollectionSidebar
+              lang={lang}
+              onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+              selectedCategory={selectedCategory}
+              onSelectCategory={(catId) => {
+                setSelectedCategory(catId);
+                const el = document.getElementById('catalog-search-input');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+              onSearchKeyword={(kw) => {
+                setSearchQuery(kw);
+                const el = document.getElementById('catalog-search-input');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+            />
           ) : (
             <aside className="gcp-collection-sidebar" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.5rem', position: 'sticky', top: '90px' }}>
               <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>{config.name}</h4>
