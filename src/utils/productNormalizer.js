@@ -87,6 +87,8 @@ export function extractProductPresentation(product) {
   if (pres && typeof pres === 'string' && pres.trim()) {
     const p = pres.trim().toLowerCase();
     if (isRaw || /bulk|granel|api|powder/i.test(p)) return 'Bulk API Powder';
+    if (/stick|labial|lip|balm|pomadka/i.test(p)) return 'Lip Care Stick';
+    if (/shampoo|champú|conditioner|acondicionador|peeling|scrub|cleanser|wash|gel|jabón|soap|shower/i.test(p)) return 'Dermal Cleanser / Gel';
     if (/pen/i.test(p)) return 'Pre-filled Pen';
     if (/lyophilized|liofilizado/i.test(p)) return 'Lyophilized Vial';
     if (/nasal/i.test(p)) return 'Nasal Spray';
@@ -99,14 +101,16 @@ export function extractProductPresentation(product) {
     if (/oil|aceite/i.test(p)) return 'Topical Oil';
     if (/tablet|comprimido/i.test(p)) return 'Oral Tablet';
     if (/bottle|frasco/i.test(p)) return 'Bottle';
-    if (/swab|saliva|blood/i.test(p)) return 'Diagnostic Kit';
-    return isRaw ? 'Bulk API Powder' : 'Vial';
+    if (/swab|saliva|blood|hair|cabello|htma|mineralograma|omega|metabolizer|test/i.test(p)) return 'Diagnostic Kit';
+    return isRaw ? 'Bulk API Powder' : (catLower.includes('cosmetic') || catLower.includes('skincare') ? 'Dermocosmetic' : 'Vial');
   }
 
   // Inspect variants if parent doesn't have an explicit presentation
   if (Array.isArray(product.variants) && product.variants.length > 0) {
     for (const v of product.variants) {
       const vStr = String(v.presentation || v.presentationName || v.format || v.dosageForm || v.dispensingForm || v.size || v.name || '').toLowerCase();
+      if (/stick|labial|lip|balm|pomadka/i.test(vStr)) return 'Lip Care Stick';
+      if (/shampoo|champú|conditioner|acondicionador|peeling|scrub|cleanser|wash|gel|jabón|soap|shower/i.test(vStr)) return 'Dermal Cleanser / Gel';
       if (/capsule|cápsula/i.test(vStr)) return 'Oral Capsule';
       if (/tablet|comprimido/i.test(vStr)) return 'Oral Tablet';
       if (/pen/i.test(vStr)) return 'Pre-filled Pen';
@@ -118,25 +122,27 @@ export function extractProductPresentation(product) {
       if (/oil|aceite/i.test(vStr)) return 'Topical Oil';
       if (/foam|espuma/i.test(vStr)) return 'Topical Foam';
       if (/bottle|frasco/i.test(vStr)) return 'Bottle';
-      if (/swab|saliva|blood|test/i.test(vStr)) return 'Diagnostic Kit';
+      if (/swab|saliva|blood|hair|cabello|htma|mineralograma|omega|metabolizer|test/i.test(vStr)) return 'Diagnostic Kit';
       if (/bulk|api|powder/i.test(vStr)) return 'Bulk API Powder';
     }
   }
 
+  const str = `${product.objectID || ''} ${product.id || ''} ${product.name || ''} ${product.sku || ''}`.toLowerCase();
+  if (/stick|labial|lip|balm|pomadka/i.test(str)) return 'Lip Care Stick';
+  if (/shampoo|champú|conditioner|acondicionador|peeling|scrub|cleanser|wash|gel|jabón|soap|shower/i.test(str)) return 'Dermal Cleanser / Gel';
+  if (/swab|saliva|blood|hair|cabello|htma|mineralograma|omega|metabolizer|test/i.test(str)) return 'Diagnostic Kit';
+
   // Category and Type fallback inference
-  const catLower = String(product.category || product.therapeutic_category || '').toLowerCase();
-  const typeLower = String(product.type || product.productType || '').toLowerCase();
   if (catLower.includes('supplement') || typeLower.includes('supplement') || product.is_supplement || product.isSupplement) {
     return 'Oral Capsule';
   }
   if (catLower.includes('diagnostic') || typeLower.includes('diagnostic')) {
     return 'Diagnostic Kit';
   }
-  if (catLower.includes('cosmetic') || typeLower.includes('cosmetic') || product.is_cosmetic) {
-    return 'Dermal Serum';
+  if (catLower.includes('cosmetic') || typeLower.includes('cosmetic') || product.is_cosmetic || catLower.includes('skincare')) {
+    return 'Dermocosmetic';
   }
 
-  const str = `${product.objectID || ''} ${product.id || ''} ${product.name || ''} ${product.sku || ''}`.toLowerCase();
   if (isRaw || /bulk|granel|api/i.test(str)) return 'Bulk API Powder';
   if (/pre-?filled-?pen|pen/i.test(str)) return 'Pre-filled Pen';
   if (/lyophilized|liofilizado/i.test(str)) return 'Lyophilized Vial';
@@ -151,7 +157,7 @@ export function extractProductPresentation(product) {
   if (/oil/i.test(str)) return 'Topical Oil';
   if (/tablet/i.test(str)) return 'Oral Tablet';
   if (/bottle/i.test(str)) return 'Bottle';
-  return isRaw ? 'Bulk API Powder' : 'Vial';
+  return isRaw ? 'Bulk API Powder' : (catLower.includes('cosmetic') || catLower.includes('skincare') ? 'Dermocosmetic' : 'Vial');
 }
 
 /**

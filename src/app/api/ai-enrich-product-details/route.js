@@ -90,18 +90,21 @@ Rules:
       cat === 'genetic_test' ||
       cat === 'biomarker_test' ||
       cat === 'genomics_biomarkers' ||
-      cat === 'genomics'
+      cat === 'genomics' ||
+      cat === 'diagnostic' ||
+      cat.includes('diagnostic') ||
+      cat.includes('test')
     ) {
       systemPrompt = `You are the Medical Laboratory Director and Clinical Geneticist for Atlas Solutions Master Catalog.
 Generate comprehensive diagnostic assay and laboratory specifications for:
 - Test: ${productName}
 - Category: Clinical Diagnostic / Biomarker / Genetic Test
-- Specimen/Sample: ${presentation || 'Blood DBS or Saliva'}
+- Specimen/Sample: ${presentation || 'Blood DBS, Saliva, or Hair matrix'}
 
 Rules:
 1. Provide accurate clinical utility and diagnostic overview.
-2. Specify biological sample type (e.g. Capillary Blood DBS, Venous Serum, Saliva DNA Buffer).
-3. Detail turnaround time (TAT) and laboratory methodology (e.g., High-Density Microarray +700K SNPs, Enzymatic assay, LC-MS/MS).
+2. Specify biological sample type (e.g. Capillary Blood DBS, Venous Serum, Saliva DNA Buffer, Hair Matrix).
+3. Detail turnaround time (TAT) and laboratory methodology (e.g., Triple Quadrupole ICP-MS/MS, High-Density Microarray +700K SNPs, Enzymatic assay, LC-MS/MS).
 4. List key biomarkers or genetic loci evaluated.
 5. Detail laboratory accreditation standards (e.g., CLIA, CAP, ISO 15189, CE-IVD) and report delivery format.`;
 
@@ -109,8 +112,8 @@ Rules:
         type: Type.OBJECT,
         properties: {
           scientificName: { type: Type.STRING, description: 'Clinical test title and methodology classification' },
-          sampleType: { type: Type.STRING, description: 'Biological specimen required (e.g. Capillary Blood DBS, Saliva DNA Buffer)' },
-          turnaroundTime: { type: Type.STRING, description: 'Estimated turnaround time (e.g. 3-5 business days, 2-3 weeks)' },
+          sampleType: { type: Type.STRING, description: 'Biological specimen required (e.g. Capillary Blood DBS, Saliva DNA Buffer, Hair Matrix)' },
+          turnaroundTime: { type: Type.STRING, description: 'Estimated turnaround time (e.g. 3-5 business days, 7-10 days)' },
           methodology: { type: Type.STRING, description: 'Analytical technology/platform' },
           mechanismOfAction: { type: Type.STRING, description: 'Clinical diagnostic utility and biological significance' },
           therapeuticIndications: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Actionable clinical health areas' },
@@ -120,6 +123,44 @@ Rules:
           categoryTags: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Diagnostic category tags' }
         },
         required: ['scientificName', 'sampleType', 'turnaroundTime', 'methodology', 'mechanismOfAction', 'therapeuticIndications', 'labAccreditation', 'reportFormat']
+      };
+    } else if (
+      cat === 'cosmetics' ||
+      cat === 'skincare' ||
+      cat === 'aesthetic_injectables' ||
+      cat.includes('cosmetic') ||
+      cat.includes('skincare')
+    ) {
+      systemPrompt = `You are the Chief Dermal Pharmacologist and Cosmeceutical Formulation Director for Atlas Solutions Master Catalog.
+Generate comprehensive, verified dermocosmetic and INCI formulation data for:
+- Product: ${productName}
+- Category: Cosmeceuticals & Advanced Skincare
+- Format / Presentation: ${presentation || 'Topical Cosmeceutical formulation'}
+- Target Strength / Grade: ${strength || 'Clinical Grade Cosmeceutical'}
+
+Rules:
+1. Detail the standardized active matrix and key INCI ingredients (e.g. Bioactive Tropocollagen Triple Helix, Signal Oligopeptides, Botanical Lipids, Hyaluronic Acid).
+2. List primary dermatological/mucosal indications (e.g. Vermilion Lip Border Barrier Defense, Anti-photoaging, Deep cellular hydration, Epidermal regeneration).
+3. Detail exact application protocol, frequency, skin tolerance, and target skin types.
+4. Detail safety compliance: EU Cosmetics Regulation (EC) No 1223/2009, ISO 22716 GMP, CPNP notification, and Period After Opening (PAO).
+5. DO NOT treat this cosmetic as an injectable synthetic peptide or assign lyophilized vial reconstitution protocols.`;
+
+      schema = {
+        type: Type.OBJECT,
+        properties: {
+          scientificName: { type: Type.STRING, description: 'Standardized INCI product name or clinical formulation classification' },
+          activeComplex: { type: Type.STRING, description: 'Primary active biological complex (e.g. Bioactive Tropocollagen & Botanical Lipids)' },
+          ingredients: { type: Type.STRING, description: 'Key INCI components (e.g. Jojoba Seed Oil, Shea Butter, Native Fish Collagen Oligopeptides)' },
+          mechanismOfAction: { type: Type.STRING, description: 'Dermatological and cellular mechanism of epidermal action' },
+          therapeuticIndications: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Dermatological and aesthetic indications' },
+          applicationGuide: { type: Type.STRING, description: 'Recommended application protocol and frequency' },
+          skinType: { type: Type.STRING, description: 'Target skin / mucosal profile (e.g. Dry/Chapped Lips, Sensitive, All Skin Types)' },
+          regulatoryLabel: { type: Type.STRING, description: 'Regulatory safety standard (e.g. EU Cosmetics Regulation 1223/2009 / ISO 22716 GMP / CPNP)' },
+          paoMonths: { type: Type.STRING, description: 'Period After Opening stability (e.g. 12M)' },
+          storageConditions: { type: Type.STRING, description: 'Storage conditions (e.g. Controlled Room Temperature 15°C to 25°C)' },
+          categoryTags: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'Cosmeceutical category tags' }
+        },
+        required: ['scientificName', 'activeComplex', 'ingredients', 'mechanismOfAction', 'therapeuticIndications', 'applicationGuide', 'regulatoryLabel']
       };
     } else if (cat === 'raw_material' || cat === 'api_raw_material' || cat === 'api') {
       systemPrompt = `You are the Chief Compounding Chemist and Pharmaceutical API Specialist for Atlas Solutions Master Catalog.

@@ -164,7 +164,59 @@ function detectProductFamily(row) {
     return 'galenic_vehicle';
   }
 
-  // 5. Default: Synthetic Peptides & Active Pharmaceutical APIs
+  // 5. Hair Mineral, Heavy Metal & Metabolic Diagnostic Tests (TeleTest HTMA, Saliva Detox, Omega...)
+  const isHairOrMetabolicTest =
+    (types.includes('diagnostic') || cat.includes('diagnostic')) &&
+    (sample.includes('hair') ||
+     sample.includes('cabello') ||
+     name.includes('htma') ||
+     name.includes('mineralograma') ||
+     name.includes('heavy metals') ||
+     name.includes('metales pesados') ||
+     name.includes('metabolizer') ||
+     name.includes('omega') ||
+     name.includes('teletest') ||
+     supp.includes('teletest'));
+
+  if (isHairOrMetabolicTest) {
+    return 'hair_diagnostic';
+  }
+
+  // 6. Cosmeceuticals, Dermal Formulations, Lip Balms & Topical Peptides (Colway, Bioactive Collagen...)
+  const isCosmeceutical =
+    types.includes('cosmetics') ||
+    types.includes('skincare') ||
+    cat === 'cosmetics' ||
+    cat === 'skincare' ||
+    cat === 'nutricosmetics' ||
+    cat.includes('cosmetic') ||
+    cat.includes('skincare') ||
+    name.includes('colway') ||
+    name.includes('lip care') ||
+    name.includes('lip balm') ||
+    name.includes('pomadka') ||
+    name.includes('atelocollagen') ||
+    (name.includes('collagen') && (name.includes('cream') || name.includes('serum') || name.includes('lip') || name.includes('shampoo') || name.includes('conditioner') || name.includes('peeling') || name.includes('gel'))) ||
+    supp.includes('colway');
+
+  if (isCosmeceutical) {
+    return 'cosmeceutical';
+  }
+
+  // 7. Oral Dietary Supplements & Nutraceuticals (Colvita, Dietary Capsules...)
+  const isNutraceutical =
+    cat === 'supplement' ||
+    cat === 'nutraceutical' ||
+    cat.includes('supplement') ||
+    types.includes('supplement') ||
+    name.includes('colvita') ||
+    (name.includes('capsule') && !cat.includes('raw') && !types.includes('raw_material'));
+
+  if (isNutraceutical) {
+    return 'nutraceutical';
+  }
+
+  // 8. Default: Synthetic Peptides & Active Pharmaceutical APIs
   return 'peptide_api';
 }
 
@@ -745,6 +797,240 @@ export default function CatalogVariantExpander({
               </div>
               <div className="meta-card-sub">
                 Direct physician messaging & progress monitoring
+              </div>
+            </div>
+          </>
+        );
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         4a. COSMECEUTICALS, DERMOCOSMETICS & LIP CARE (Colway, Tropocollagen...)
+         ───────────────────────────────────────────────────────────── */
+      case 'cosmeceutical': {
+        const isLipCare = String(row.canonicalName || row.name || '').toLowerCase().includes('lip') ||
+                          String(row.canonicalName || row.name || '').toLowerCase().includes('pomadka') ||
+                          String(row.canonicalName || row.name || '').toLowerCase().includes('balm');
+        const activeMatrixTitle = isLipCare 
+          ? 'Bioactive Tropocollagen & Botanical Lipids' 
+          : (row.activeComplex || 'Bioactive Tropocollagen Triple Helix & Peptides');
+        const activeMatrixSub = isLipCare
+          ? 'Simmondsia Chinensis (Jojoba) Oil • Butyrospermum Parkii (Shea) Butter • Tocopherol (Vit E)'
+          : (row.ingredients || 'Native Fish Collagen Oligopeptides • Matrixyl Synthe’6 • Hyaluronic Acid');
+        const indicationsTitle = goalsList || (isLipCare ? 'Mucosal Lip Repair & Barrier Defense' : 'Cellular Dermal Matrix & Anti-Photoaging');
+        const indicationsSub = isLipCare
+          ? 'Shields delicate vermilion border against environmental fissures, UV oxidative stress & trans-epidermal dehydration'
+          : (targetMechanism || 'Stimulates pro-collagen synthesis, fibroblast proliferation & dermal firmness');
+
+        return (
+          <>
+            {/* Card 1: Active Dermal Matrix */}
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#f0fdfa', color: '#0d9488' }}>
+                  <Sparkles size={13} />
+                </div>
+                <span className="meta-card-tag">Active Dermal Matrix & INCI</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#0d9488' }}>
+                {activeMatrixTitle}
+              </div>
+              <div className="meta-card-sub">
+                {activeMatrixSub}
+              </div>
+            </div>
+
+            {/* Card 2: Dermatological Indications */}
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#ecfdf5', color: '#059669' }}>
+                  <Activity size={13} />
+                </div>
+                <span className="meta-card-tag">Dermatological Indications</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#059669' }}>
+                {indicationsTitle}
+              </div>
+              <div className="meta-card-sub">
+                {indicationsSub}
+              </div>
+            </div>
+
+            {/* Card 3: Cosmetic Regulatory & Safety */}
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+                  <ShieldCheck size={13} />
+                </div>
+                <span className="meta-card-tag">Regulatory & Cosmetic Safety</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#0284c7' }}>
+                EU Regulation (EC) No 1223/2009
+              </div>
+              <div className="meta-card-sub">
+                ISO 22716 GMP Cosmetics Certified • CPNP Registered • Dermatologically Tested
+              </div>
+            </div>
+
+            {/* Card 4: Shelf Life & Storage */}
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#fffbeb', color: '#d97706' }}>
+                  <Clock size={13} />
+                </div>
+                <span className="meta-card-tag">Stability & Period After Opening</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#0f172a' }}>
+                PAO: 12M • Room Temp (15°C to 25°C)
+              </div>
+              <div className="meta-card-sub">
+                {isLipCare ? 'Anhydrous protective stick formulation • Keep protected from temperatures >35°C' : 'Store tightly capped • Protect native collagen triple helix from thermal degradation'}
+              </div>
+            </div>
+          </>
+        );
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         4b. HAIR MINERAL & TOXIC METAL DIAGNOSTICS (TeleTest HTMA, Saliva Detox)
+         ───────────────────────────────────────────────────────────── */
+      case 'hair_diagnostic': {
+        const sampleText = row.sampleType || 'Hair Matrix Specimen (100–150 mg proximal scalp cut)';
+        const methodTitle = row.methodology || 'Triple Quadrupole ICP-MS/MS Technology';
+        const methodSub = 'Quantifies 38 Essential Minerals, Electrolytes & Toxic Heavy Metals (ppb precision)';
+        const tatTitle = row.turnaroundTime || '7 – 10 Business Days Processing';
+
+        return (
+          <>
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}>
+                  <Droplets size={13} />
+                </div>
+                <span className="meta-card-tag">Diagnostic Sample Matrix</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#dc2626' }}>
+                {sampleText}
+              </div>
+              <div className="meta-card-sub">
+                Non-Invasive At-Home Collection • Reflects 3–4 month cellular metabolic accumulation
+              </div>
+            </div>
+
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#f3e8ff', color: '#7c3aed' }}>
+                  <FlaskConical size={13} />
+                </div>
+                <span className="meta-card-tag">Analytical Assay & Elements</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#7c3aed' }}>
+                {methodTitle}
+              </div>
+              <div className="meta-card-sub">
+                {methodSub}
+              </div>
+            </div>
+
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+                  <ShieldCheck size={13} />
+                </div>
+                <span className="meta-card-tag">Clinical Lab Accreditation</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#0284c7' }}>
+                {row.labAccreditation || 'ISO 15189 / CE-IVD Certified Facility'}
+              </div>
+              <div className="meta-card-sub">
+                TeleTest Partner Laboratories (Barcelona, Spain) • Evidence-based medical ratio analysis
+              </div>
+            </div>
+
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#fffbeb', color: '#d97706' }}>
+                  <Clock size={13} />
+                </div>
+                <span className="meta-card-tag">Turnaround Time & Logistics</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#0f172a' }}>
+                {tatTitle}
+              </div>
+              <div className="meta-card-sub">
+                Prepaid return logistics envelope • Encrypted medical portal PDF with clinical guidance
+              </div>
+            </div>
+          </>
+        );
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         4c. ORAL DIETARY SUPPLEMENTS & NUTRACEUTICALS (Colvita, Longevity Caps...)
+         ───────────────────────────────────────────────────────────── */
+      case 'nutraceutical': {
+        const activesTitle = row.activeIngredients || 'Freeze-Dried Native Collagen Matrix & Nutrients';
+        const activesSub = 'Synergistic Vitamin E (D-alpha-tocopherol) & Fucus Vesiculosus Micronized Algae';
+        const dosageTitle = row.dosage || '2 Capsules Daily with Meals';
+
+        return (
+          <>
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#f0fdf4', color: '#15803d' }}>
+                  <Layers size={13} />
+                </div>
+                <span className="meta-card-tag">Nutraceutical Formulation</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#15803d' }}>
+                {activesTitle}
+              </div>
+              <div className="meta-card-sub">
+                {activesSub}
+              </div>
+            </div>
+
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#ecfdf5', color: '#059669' }}>
+                  <Activity size={13} />
+                </div>
+                <span className="meta-card-tag">Physiological & Cellular Scope</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#059669' }}>
+                {goalsList || 'Connective Tissue Homeostasis & Longevity'}
+              </div>
+              <div className="meta-card-sub">
+                Stimulates endogenous collagen biosynthesis, osteo-articular protection & skin elasticity
+              </div>
+            </div>
+
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+                  <ShieldCheck size={13} />
+                </div>
+                <span className="meta-card-tag">Dietary Quality & Standards</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#0284c7' }}>
+                HACCP & ISO 22000 Certified
+              </div>
+              <div className="meta-card-sub">
+                EFSA Compliant • Heavy Metals Tested (ICP-MS) • Non-GMO
+              </div>
+            </div>
+
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#fffbeb', color: '#d97706' }}>
+                  <Clock size={13} />
+                </div>
+                <span className="meta-card-tag">Dosage & Storage Protocol</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#0f172a' }}>
+                {dosageTitle}
+              </div>
+              <div className="meta-card-sub">
+                Controlled Room Temp (15°C to 25°C) • Protect from direct moisture and light
               </div>
             </div>
           </>

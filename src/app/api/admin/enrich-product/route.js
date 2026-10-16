@@ -79,8 +79,11 @@ export async function POST(request) {
       .replace(/\s+/g, ' ')
       .trim();
     
-    // 1. Fetch PubChem CID and chemical properties dynamically if missing
-    if (!enriched.scientificData?.pubchemCid && !enriched.pubchemCid) {
+    // 1. Fetch PubChem CID and chemical properties dynamically if missing (Chemical APIs & Peptides only)
+    const isChemicalTarget = ['peptide', 'raw_material', 'api_raw_material', 'api'].includes(enriched.category || '') ||
+      ['peptide', 'api'].includes(enriched._enrichmentType || '');
+
+    if (isChemicalTarget && !enriched.scientificData?.pubchemCid && !enriched.pubchemCid) {
       try {
         const pubchemRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(cleanChemName)}/cids/JSON`);
         if (pubchemRes.ok) {
@@ -148,7 +151,11 @@ export async function POST(request) {
         const aiRes = await fetch(`${baseUrl}/api/ai-enrich-product-details`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productName: rawNameToFetch, category: enriched.category })
+          body: JSON.stringify({ 
+            productName: rawNameToFetch, 
+            category: enriched.category,
+            presentation: enriched.presentation || enriched.format || ''
+          })
         });
         
         if (aiRes.ok) {
@@ -159,11 +166,20 @@ export async function POST(request) {
               enriched.aiDescription = overview;
               enriched.description = overview;
             }
-            if (!enriched.scientificData?.sequence && aiData.data.sequence) {
+            if (aiData.data.activeComplex) enriched.activeComplex = aiData.data.activeComplex;
+            if (aiData.data.ingredients && !enriched.ingredients) enriched.ingredients = aiData.data.ingredients;
+            if (aiData.data.applicationGuide && !enriched.applicationGuide) enriched.applicationGuide = aiData.data.applicationGuide;
+            if (aiData.data.regulatoryLabel && !enriched.regulatoryLabel) enriched.regulatoryLabel = aiData.data.regulatoryLabel;
+            if (aiData.data.skinType && !enriched.skinType) enriched.skinType = aiData.data.skinType;
+            if (aiData.data.sampleType && !enriched.sampleType) enriched.sampleType = aiData.data.sampleType;
+            if (aiData.data.methodology && !enriched.methodology) enriched.methodology = aiData.data.methodology;
+            if (aiData.data.turnaroundTime && !enriched.turnaroundTime) enriched.turnaroundTime = aiData.data.turnaroundTime;
+
+            if (isChemicalTarget && !enriched.scientificData?.sequence && aiData.data.sequence) {
               enriched.sequence = aiData.data.sequence;
               if (enriched.scientificData) enriched.scientificData.sequence = aiData.data.sequence;
             }
-            if (aiData.data.casNumber && (!enriched.casNumber || enriched.casNumber === 'Available on Request')) {
+            if (isChemicalTarget && aiData.data.casNumber && aiData.data.casNumber !== 'N/A' && (!enriched.casNumber || enriched.casNumber === 'Available on Request')) {
               const aiCas = aiData.data.casNumber.trim();
               enriched.casNumber = aiCas;
               if (!enriched.molecular) enriched.molecular = {};

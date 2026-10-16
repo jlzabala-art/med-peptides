@@ -7,10 +7,11 @@ import {
   CheckCircle, XCircle, MoreHorizontal, EyeOff, Download, Package, 
   ClipboardList, Bot, Copy, UserCheck, FilePlus, UserPlus, ShoppingCart, 
   Sparkles, Play, Pause, BarChart3, Layers, Activity, FileText, Send, Share2,
-  Clock, QrCode
+  Clock, QrCode, ExternalLink
 } from '@/lib/icons';
 
 const ACTION_CONFIG = {
+  public_page: { icon: ExternalLink, label: 'View Public Monograph / Page', color: '#0284c7', hoverColor: '#0369a1' },
   offers: { icon: Layers, label: 'Price Comparison & Offers', color: '#0284c7', hoverColor: '#0369a1' },
   list: { icon: Layers, label: 'Price Comparison & Offers', color: '#0284c7', hoverColor: '#0369a1' },
   view: { icon: Eye, label: 'View Details', color: '#475569', hoverColor: '#0f172a' },
@@ -63,6 +64,7 @@ const ACTION_CONFIG = {
 
 // GCP Console UX: Clean, monochromatic neutral buttons with subtle semantic hover states
 const ACTION_THEMES = {
+  public_page: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#eff6ff', hoverBorder: '#bfdbfe', hoverColor: '#1d4ed8' },
   offers: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
   list: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
   sparkles: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f8f9fa', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },

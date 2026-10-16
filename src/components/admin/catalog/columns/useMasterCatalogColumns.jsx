@@ -31,7 +31,8 @@ import {
   FileText,
   Droplets,
   Building2,
-  Syringe
+  Syringe,
+  ExternalLink
 } from 'lucide-react';
 
 const CATEGORY_STYLES = {
@@ -113,38 +114,41 @@ function WorkspaceProductToggleButton({ product }) {
     <button
       onClick={handleClick}
       type="button"
-      title={isInWorkspace ? 'Remove from active workspace' : 'Add to active workspace'}
+      title={isInWorkspace ? 'Quitar del Workspace activo' : 'Añadir al Workspace activo'}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '4px',
-        padding: '3px 8px',
-        borderRadius: '6px',
-        fontSize: '0.72rem',
-        fontWeight: isInWorkspace ? 700 : 500,
+        justifyContent: 'center',
+        width: '30px',
+        height: '30px',
+        minWidth: '30px',
+        minHeight: '30px',
+        padding: 0,
+        margin: 0,
+        borderRadius: '4px',
         backgroundColor: isInWorkspace ? '#e0f2fe' : '#ffffff',
-        color: isInWorkspace ? '#0369a1' : '#475569',
-        border: isInWorkspace ? '1px solid #7dd3fc' : '1px solid #cbd5e1',
+        color: isInWorkspace ? '#0284c7' : '#5f6368',
+        border: isInWorkspace ? '1px solid #7dd3fc' : '1px solid #dadce0',
         cursor: 'pointer',
-        transition: 'all 0.15s ease',
-        flexShrink: 0,
-        whiteSpace: 'nowrap'
+        transition: 'background-color 0.15s, border-color 0.15s, color 0.15s',
+        flexShrink: 0
       }}
       onMouseEnter={(e) => {
         if (!isInWorkspace) {
-          e.currentTarget.style.backgroundColor = '#f1f5f9';
-          e.currentTarget.style.borderColor = '#94a3b8';
+          e.currentTarget.style.backgroundColor = '#f1f3f4';
+          e.currentTarget.style.borderColor = '#dadce0';
+          e.currentTarget.style.color = '#1a73e8';
         }
       }}
       onMouseLeave={(e) => {
         if (!isInWorkspace) {
           e.currentTarget.style.backgroundColor = '#ffffff';
-          e.currentTarget.style.borderColor = '#cbd5e1';
+          e.currentTarget.style.borderColor = '#dadce0';
+          e.currentTarget.style.color = '#5f6368';
         }
       }}
     >
-      <Briefcase size={12} color={isInWorkspace ? '#0284c7' : '#64748b'} />
-      <span>{isInWorkspace ? 'In Workspace' : '+ Workspace'}</span>
+      <Briefcase size={14} color={isInWorkspace ? '#0284c7' : 'currentColor'} />
     </button>
   );
 }
@@ -622,6 +626,15 @@ export function useMasterCatalogColumns({
 
         const actions = [
           {
+            type: 'public_page',
+            icon: ExternalLink,
+            label: `Open Public Page (${row.slug || row.id})`,
+            onClick: (e) => {
+              e?.stopPropagation?.();
+              window.open(`/p/${row.slug || row.id}`, '_blank', 'noopener,noreferrer');
+            }
+          },
+          {
             type: 'enrich',
             icon: Wand2,
             label: isEnriching ? `Enriqueciendo ${row.canonicalName}...` : `✨ Enrich ${row.canonicalName} with AI`,
@@ -752,7 +765,7 @@ export function useMasterCatalogColumns({
         return (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', width: '100%', paddingRight: '8px' }}>
             <WorkspaceProductToggleButton product={row} />
-            <AppActionGroup maxVisible={2} actions={actions} />
+            <AppActionGroup maxVisible={3} actions={actions} />
           </div>
         );
       }
