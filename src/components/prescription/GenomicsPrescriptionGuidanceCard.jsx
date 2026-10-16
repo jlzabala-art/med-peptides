@@ -14,6 +14,8 @@ import {
   Layers
 } from '@/lib/icons';
 
+import ComplementaryHairMineralCard from './ComplementaryHairMineralCard';
+
 /**
  * GenomicsPrescriptionGuidanceCard
  * ─────────────────────────────────────────────────────────────────────────────
@@ -23,7 +25,9 @@ import {
  */
 export default function GenomicsPrescriptionGuidanceCard({
   genomicsData,
-  lang = 'en'
+  lang = 'en',
+  rx = null,
+  onOpenInquiry = null
 }) {
   const [expanded, setExpanded] = useState(false);
   const isEs = lang === 'es';
@@ -261,6 +265,16 @@ export default function GenomicsPrescriptionGuidanceCard({
               {isEs ? test.recommendedVehicle.descriptionEs : test.recommendedVehicle.descriptionEn}
             </div>
           </div>
+        )}
+
+        {/* ── Complementary Hair Health Assessment (TeleTest HTMA) for TrichoTest ── */}
+        {(test.id === 'trichotest' || genomicsData.testKey === 'trichotest') && (
+          <ComplementaryHairMineralCard
+            rx={rx}
+            lang={lang}
+            onOpenInquiry={onOpenInquiry}
+            compact={false}
+          />
         )}
 
         {/* ── Footer Link to Fagron Genomics Official Website ── */}

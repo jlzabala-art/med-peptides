@@ -521,6 +521,21 @@ export function getPrescriptionAtlasRecommendations(rx) {
     };
   }
 
+  const teletestHairMineralRec = isTrichoTest ? {
+    id: 'teletest-mineralograma-cabello-htma',
+    slug: 'teletest-mineralograma-cabello-htma',
+    testCode: '18267691',
+    brand: 'TeleTest Analytika',
+    title: 'Complementary Hair Health Assessment',
+    productName: 'TeleTest Hair Mineral & Heavy Metals Analysis (HTMA)',
+    recommendationText: 'Consider Hair Mineral & Heavy Metals Analysis to assess mineral and trace element concentrations and potential environmental metal exposure. This test may provide additional clinical information alongside genetic hair assessments, when indicated.',
+    clinicalGuardrail: 'Important: This is an optional recommendation, not an automatic prescription. Hair mineral analysis cannot independently diagnose nutritional deficiencies, heavy metal toxicity, or causes of hair loss.',
+    commercialNotice: 'Mediluxe does not sell TrichoTest. It only manages prescriptions derived from independently performed TrichoTest assessments.',
+    category: 'Diagnostic & Heavy Metals Toxicology',
+    methodology: 'ICP-MS/MS (33 Elements & Metabolic Ratios)',
+    catalogUrl: '/p/teletest-mineralograma-cabello-htma'
+  } : null;
+
   return {
     isTrichoTest,
     isOralRoute,
@@ -529,7 +544,8 @@ export function getPrescriptionAtlasRecommendations(rx) {
     peptide: peptideRec,
     supplement: supplementRec,
     diagnostic: diagnosticRec,
-    colway: colwayRec
+    colway: colwayRec,
+    teletestHairMineral: teletestHairMineralRec
   };
 }
 

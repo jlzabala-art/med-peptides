@@ -5,6 +5,8 @@ import { resolveDoctorProfile } from '../../../services/doctorDirectoryService';
 import notifier from '../../../services/NotificationService';
 import { toast } from 'react-hot-toast';
 import PrescriptionPosologyQrCard from '../PrescriptionPosologyQrCard';
+import ComplementaryHairMineralCard from '../../prescription/ComplementaryHairMineralCard';
+import { isTrichoTestPrescription } from '../../../data/fagronGenomicsTests';
 
 const TOP_DOCTORS = [
   { name: 'Dr. Anitathurasini Rajoo', title: 'Trichology & Peptide Therapy' },
@@ -675,6 +677,13 @@ export default function OverviewTab({ rx = {}, onProtocolClick, refreshPrescript
           </div>
         )}
       </div>
+
+      {/* ── Complementary Hair Health Assessment (TeleTest HTMA) for TrichoTest ── */}
+      {isTrichoTestPrescription(rx) && (
+        <div style={{ gridColumn: '1 / -1' }}>
+          <ComplementaryHairMineralCard rx={rx} compact={false} />
+        </div>
+      )}
 
       {/* ── Advanced Posology & QR Sharing Suite ── */}
       <div style={{ gridColumn: '1 / -1' }}>

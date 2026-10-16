@@ -20,6 +20,8 @@ import GlobalSearchBar from '../../ui/GlobalSearchBar';
 import DataTable from '../../ui/DataTable';
 import CopyableId from '../../ui/CopyableId';
 import { resolvePrescriptionParts } from '../../../utils/clinical/clinicalFormulations';
+import ComplementaryHairMineralCard from '../../prescription/ComplementaryHairMineralCard';
+import { isTrichoTestPrescription } from '../../../data/fagronGenomicsTests';
 
 /**
  * DoctorPrescriptionsTab
@@ -699,6 +701,24 @@ export default function DoctorPrescriptionsTab({
                   </div>
                 ))}
               </div>
+
+              {/* Complementary Hair Health Assessment (TeleTest HTMA) for TrichoTest Prescriptions */}
+              {isTrichoTestPrescription(rx) && (
+                <div style={{ marginTop: '16px' }}>
+                  <ComplementaryHairMineralCard
+                    rx={rx}
+                    compact={true}
+                    onOpenInquiry={() => {
+                      if (handleContactAtlasWhatsApp) {
+                        handleContactAtlasWhatsApp(
+                          `Prescription #${rx.code} — TeleTest Hair Mineral & Heavy Metals Analysis`,
+                          `Physician inquiry & quotation request for TeleTest HTMA (Code: 18267691) complementary to TrichoTest prescription #${rx.code} for patient ${rx.patientName || 'Patient'}.`
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              )}
             </div>
           );
         }}

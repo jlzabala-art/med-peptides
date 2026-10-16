@@ -60,6 +60,7 @@ import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PrescriptionDetailSidebar from '@/components/prescription/PrescriptionDetailSidebar';
 import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
+import ComplementaryHairMineralCard from '@/components/prescription/ComplementaryHairMineralCard';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import '@/styles/publicDesignSystem.css';
 import './publicPrescriptionMobile.css';
@@ -91,7 +92,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [previewDoc, setPreviewDoc] = useState(null);
   const [showQrModal, setShowQrModal] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+  const [inquiryCustomEntity, setInquiryCustomEntity] = useState(null);
   const [activeGcpTab, setActiveGcpTab] = useState('treatment'); // 'treatment' | 'roadmap' | 'traceability' | 'credentials' | 'patientSharing'
+
+  const handleOpenInquiry = useCallback((customEntity = null) => {
+    setInquiryCustomEntity(customEntity || null);
+    setIsInquiryDrawerOpen(true);
+  }, []);
   const [, setExpandedSections] = useState({
     overview: true,
     formulations: true,
@@ -625,11 +632,21 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
 
         {/* ── Atlas Clinical Recommendations (Lotusland, UltraPerson, Bloodo & Colway) ── */}
-        {(activeGcpTab === 'recommendations') && (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway) && (
-          <AtlasSynergyRecommendationsSection
-            atlasRecs={atlasRecs}
-            isEs={isEs}
-          />
+        {(activeGcpTab === 'recommendations') && (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway || atlasRecs?.teletestHairMineral) && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
+            <AtlasSynergyRecommendationsSection
+              atlasRecs={atlasRecs}
+              isEs={isEs}
+            />
+            {atlasRecs?.teletestHairMineral && (
+              <ComplementaryHairMineralCard
+                rx={currentRx}
+                lang={lang}
+                onOpenInquiry={handleOpenInquiry}
+                compact={false}
+              />
+            )}
+          </div>
         )}
 
         {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
@@ -638,6 +655,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             <GenomicsPrescriptionGuidanceCard
               genomicsData={genomicsData}
               lang={lang}
+              rx={currentRx}
+              onOpenInquiry={handleOpenInquiry}
             />
           </div>
         )}
@@ -1981,9 +2000,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       {/* Context-Aware Prescription Clinical Inquiry Drawer */}
       <PublicInstitutionalInquiryDrawer
         isOpen={isInquiryDrawerOpen}
-        onClose={() => setIsInquiryDrawerOpen(false)}
-        contextType="prescription"
-        initialEntity={{
+        onClose={() => {
+          setIsInquiryDrawerOpen(false);
+          setInquiryCustomEntity(null);
+        }}
+        contextType={inquiryCustomEntity ? 'product' : 'prescription'}
+        initialEntity={inquiryCustomEntity || {
           name: `Prescription ${rxId} — ${patientName}`,
           rxId,
           code: rxId,

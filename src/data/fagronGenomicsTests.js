@@ -357,3 +357,47 @@ export function detectFagronGenomicsTest(rx) {
 
   return null;
 }
+
+/**
+ * Checks if a prescription is derived from or associated with Fagron Genomics TrichoTest™
+ * or specialized trichology compounding regimens.
+ * @param {Object} rx - The prescription object
+ * @returns {boolean}
+ */
+export function isTrichoTestPrescription(rx) {
+  if (!rx) return false;
+  const detected = detectFagronGenomicsTest(rx);
+  if (detected?.testKey === 'trichotest') return true;
+
+  const rawDocType = String(rx.documentType || '').toLowerCase();
+  const rawProgram = String(rx.treatmentProgram || rx.program || rx.treatmentType || '').toLowerCase();
+  const rawTestName = String(rx.fagronDetails?.testName || rx.fagron?.testName || rx.fagronTest || rx.testName || '').toLowerCase();
+  const rawDiagnosis = String(rx.diagnosis || '').toLowerCase();
+  const rawNotes = String(rx.clinicalNotes || '').toLowerCase();
+  const rawFormula = String(rx.formula || '').toLowerCase();
+  const rxId = String(rx.id || rx.code || rx.prescriptionNumber || '').toLowerCase();
+
+  const allText = [
+    rawDocType,
+    rawProgram,
+    rawTestName,
+    rawDiagnosis,
+    rawNotes,
+    rawFormula,
+    rxId,
+    ...(rx.items || []).map(i => `${i.name || ''} ${i.productName || ''}`),
+    ...(rx.compounds || []).map(c => `${c.name || ''}`),
+    ...(rx.prescriptionLines || []).map(l => `${l.name || ''}`)
+  ].join(' ').toLowerCase();
+
+  return (
+    allText.includes('tricho') ||
+    allText.includes('trichotest') ||
+    allText.includes('trichosol') ||
+    allText.includes('trichofoam') ||
+    allText.includes('trichooil') ||
+    allText.includes('alopecia') ||
+    allText.includes('follic') ||
+    (allText.includes('minoxidil') && (allText.includes('finasteride') || allText.includes('dutasteride') || allText.includes('latanoprost') || allText.includes('scalp')))
+  );
+}

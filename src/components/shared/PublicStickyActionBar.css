@@ -369,3 +369,25 @@
   }
 }
 
+/* ── Global Sticky Bottom Clearance & Coordination Tokens ── */
+:root {
+  --atlas-sticky-bar-height: 62px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --atlas-sticky-bar-height: 110px;
+  }
+}
+
+/* Ensure footer text and copyright are never obscured when sticky bar is active */
+body.has-sticky-bottom-bar footer.public-unified-footer {
+  padding-bottom: calc(2.5rem + var(--atlas-sticky-bar-height, 62px)) !important;
+}
+
+@media (max-width: 768px) {
+  body.has-sticky-bottom-bar footer.public-unified-footer {
+    padding-bottom: calc(2rem + var(--atlas-sticky-bar-height, 110px)) !important;
+  }
+}
+

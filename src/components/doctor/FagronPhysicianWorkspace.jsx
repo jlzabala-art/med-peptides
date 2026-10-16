@@ -43,6 +43,7 @@ import { RX_STATUS, rxEvent } from '../../config/prescriptionConfig';
 const STEP = { UPLOAD: 0, REVIEW: 1, DONE: 2 };
 
 import { extractPrescriptionFromDocument } from '../../services/prescriptionAiService';
+import ComplementaryHairMineralCard from '../prescription/ComplementaryHairMineralCard';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmt(d) {
@@ -954,6 +955,20 @@ export default function FagronPhysicianWorkspace({ doctorId, doctorMeta }) {
                 </strong>
               </div>
             </div>
+
+            {/* Complementary Diagnostic Recommendation for TrichoTest */}
+            {(String(testName || '').toLowerCase().includes('tricho') || String(diagnosis || '').toLowerCase().includes('tricho') || String(clinicalNotes || '').toLowerCase().includes('tricho') || items.some(i => (i.name || '').toLowerCase().includes('tricho'))) && (
+              <ComplementaryHairMineralCard
+                rx={{
+                  patientName: patient.name,
+                  diagnosis,
+                  clinicalNotes,
+                  items,
+                  code: boxId || 'NEW'
+                }}
+                compact={false}
+              />
+            )}
 
             {/* Action Buttons */}
             <div

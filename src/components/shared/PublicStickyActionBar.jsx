@@ -87,6 +87,15 @@ export default function PublicStickyActionBar({
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.body.classList.add('has-sticky-bottom-bar');
+      return () => {
+        document.body.classList.remove('has-sticky-bottom-bar');
+      };
+    }
+  }, []);
+
   const handleOpenAI = () => {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));

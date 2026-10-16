@@ -38,6 +38,31 @@ export default function GCPImpersonationDock() {
   const [context, setContext] = useState(getActiveContext());
   const [mounted, setMounted] = useState(false);
 
+  // The floating dock is not appropriate for B2B portals (Admin, Doctor, Wholesaler,
+  // Account Manager, Tools) where the Workspace handles this natively, nor on
+  // product/protocol datasheets which feature their own persistent action bar.
+  const isExcludedRoute = useMemo(() => {
+    if (!pathname) return false;
+    const excludedPrefixes = [
+      '/admin',
+      '/doctor',
+      '/dr',
+      '/clinic',
+      '/supplier',
+      '/wholesaler',
+      '/account-manager',
+      '/tools',
+      '/catalog',
+      '/p/',
+      '/product/',
+      '/proto/',
+      '/shared',
+      '/b2b',
+      '/rx/'
+    ];
+    return excludedPrefixes.some(prefix => pathname.startsWith(prefix));
+  }, [pathname]);
+
   useEffect(() => {
     setMounted(true);
     setContext(getActiveContext());
@@ -115,7 +140,7 @@ export default function GCPImpersonationDock() {
   const hasRightSidebar = pathname?.startsWith('/p/') || pathname?.startsWith('/product/');
   const activeCount = [resolvedDoctor, resolvedPatient, !isDoctorView ? resolvedSupplier : null].filter(Boolean).length;
 
-  if (!mounted) return null;
+  if (!mounted || isExcludedRoute) return null;
 
   // ── 1. CLOSED STATE: Discrete, Sleek Floating Glass Activator Pill ──────────
   if (context.isDockClosed) {

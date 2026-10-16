@@ -136,7 +136,6 @@ export default function GlobalClientWrapper({ children }) {
       <AppErrorBoundary>
         <Toaster containerStyle={{ zIndex: 99999 }} />
         {children}
-        <GCPImpersonationDock />
         <GCPCommandPalette />
         <PWAInstallPrompt />
       </AppErrorBoundary>
