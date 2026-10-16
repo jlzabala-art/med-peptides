@@ -18,7 +18,38 @@ import { useFirestoreData } from '../hooks/useFirestoreData';
 import GCPImpersonationDock from '../components/navigation/GCPImpersonationDock';
 import GCPCommandPalette from '../components/navigation/GCPCommandPalette';
 
-const PORTAL_PREFIXES = ['/admin', '/doctor', '/patient', '/clinic', '/supplier', '/wholesaler', '/pharmacy', '/login', '/auth', '/session-ended', '/shared', '/quotation', '/p', '/proto', '/catalog', '/verify', '/c', '/mediluxe', '/company', '/rx', '/d', '/intake', '/labels', '/lab', '/dr', '/account-manager', '/tools'];
+const PORTAL_PREFIXES = [
+  '/admin',
+  '/doctor',
+  '/patient',
+  '/clinic',
+  '/supplier',
+  '/wholesaler',
+  '/pharmacy',
+  '/login',
+  '/auth',
+  '/session-ended',
+  '/shared',
+  '/quotation',
+  '/p',
+  '/proto',
+  '/catalog',
+  '/verify',
+  '/c',
+  '/mediluxe',
+  '/company',
+  '/rx',
+  '/d',
+  '/intake',
+  '/labels',
+  '/lab',
+  '/dr',
+  '/account-manager',
+  '/tools',
+  '/b2b',
+  '/rfq',
+  '/medical'
+];
 
 function StorefrontShell({ children }) {
   const { isProfessional, activeRole } = useAuth();
