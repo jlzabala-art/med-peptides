@@ -1,9 +1,11 @@
 /**
  * scripts/seed_teletest_supplier_and_products.mjs
  * 
- * Uploads original TeleTest PDF reports to Google Cloud Storage
+ * Uploads all 8 original TeleTest demonstration PDF reports to Google Cloud Storage
  * and registers TeleTest Analytika S.A. as an official diagnostic laboratory supplier,
- * seeding all 5 diagnostic products into Firestore with clinical metadata.
+ * seeding all 5 canonical diagnostic products into Firestore with clinical metadata.
+ * 
+ * Consolidates the 3 fragmented HTMA tests into 1 canonical product and archives the split entries.
  */
 
 import admin from 'firebase-admin';
@@ -36,14 +38,44 @@ const bucket = admin.storage().bucket();
 
 const PDFS_TO_UPLOAD = [
   {
+    localPath: path.resolve(__dirname, '../public/docs/labs/teletest/TELETEST_Celiaco_HLA_Demo_18267609.pdf'),
+    storagePath: 'labs/teletest/original/TELETEST_Celiaco_HLA_Demo_18267609.pdf',
+    fileName: 'TELETEST_Celiaco_HLA_Demo_18267609.pdf'
+  },
+  {
     localPath: path.resolve(__dirname, '../public/docs/labs/teletest/TELETEST_HLA_Autoinmunidad_Demo_18267615.pdf'),
     storagePath: 'labs/teletest/original/TELETEST_HLA_Autoinmunidad_Demo_18267615.pdf',
     fileName: 'TELETEST_HLA_Autoinmunidad_Demo_18267615.pdf'
   },
   {
+    localPath: path.resolve(__dirname, '../public/docs/labs/teletest/TELETEST_HLA_Autoinmunidad_Assessment_Demo_18267615.pdf'),
+    storagePath: 'labs/teletest/original/TELETEST_HLA_Autoinmunidad_Assessment_Demo_18267615.pdf',
+    fileName: 'TELETEST_HLA_Autoinmunidad_Assessment_Demo_18267615.pdf'
+  },
+  {
     localPath: path.resolve(__dirname, '../public/docs/labs/teletest/TELETEST_Mineralograma_Cabello_HTMA_Demo_18267691.pdf'),
     storagePath: 'labs/teletest/original/TELETEST_Mineralograma_Cabello_HTMA_Demo_18267691.pdf',
     fileName: 'TELETEST_Mineralograma_Cabello_HTMA_Demo_18267691.pdf'
+  },
+  {
+    localPath: path.resolve(__dirname, '../public/docs/labs/teletest/TELETEST_Mineralograma_Cabello_HTMA_Assessment_Demo_18267691.pdf'),
+    storagePath: 'labs/teletest/original/TELETEST_Mineralograma_Cabello_HTMA_Assessment_Demo_18267691.pdf',
+    fileName: 'TELETEST_Mineralograma_Cabello_HTMA_Assessment_Demo_18267691.pdf'
+  },
+  {
+    localPath: path.resolve(__dirname, '../public/docs/labs/teletest/TELETEST_Omega_Test_Demo_18267598.pdf'),
+    storagePath: 'labs/teletest/original/TELETEST_Omega_Test_Demo_18267598.pdf',
+    fileName: 'TELETEST_Omega_Test_Demo_18267598.pdf'
+  },
+  {
+    localPath: path.resolve(__dirname, '../public/docs/labs/teletest/TELETEST_Omega_Test_Assessment_Demo_18267598.pdf'),
+    storagePath: 'labs/teletest/original/TELETEST_Omega_Test_Assessment_Demo_18267598.pdf',
+    fileName: 'TELETEST_Omega_Test_Assessment_Demo_18267598.pdf'
+  },
+  {
+    localPath: path.resolve(__dirname, '../public/docs/labs/teletest/TELETEST_Saliva_Metabolizer_Detox_Demo_18264926.pdf'),
+    storagePath: 'labs/teletest/original/TELETEST_Saliva_Metabolizer_Detox_Demo_18264926.pdf',
+    fileName: 'TELETEST_Saliva_Metabolizer_Detox_Demo_18264926.pdf'
   }
 ];
 
@@ -98,92 +130,46 @@ const TELETEST_SUPPLIER = {
   phone: '+34 932 123 345',
   portalUrl: 'https://teletest.es',
   currency: 'EUR',
-  status: 'active',
-  leadTimeDays: 7,
+  defaultPaymentTerms: 'Net 30 Days B2B Clinical',
+  shippingOrigin: 'Barcelona, España (UE Logistics)',
   logoUrl: '/images/suppliers/teletest-logo.svg',
-  descriptionEn: 'European reference clinical laboratory authorized by the Health Department of Catalonia (E08750211) and ISO 17025 accredited. Specializing in high-resolution HLA immunogenetics, autoimmune disease predisposition, and ICP-MS/MS hair tissue mineral and heavy metal toxicology.',
-  descriptionEs: 'Laboratorio de análisis clínicos de referencia europeo autorizado por el Departament de Salut de la Generalitat de Catalunya (E08750211) y acreditado bajo norma ISO 17025. Especializado en inmunogenética HLA de alta resolución, celiaquía y toxicología tisular por ICP-MS/MS.',
-  productCount: 5,
+  status: 'active',
   updatedAt: new Date().toISOString()
 };
 
 const TELETEST_PRODUCTS = [
-  {
-    id: 'teletest-gnt-hla-autoinmunidad',
-    slug: 'teletest-gnt-hla-autoinmunidad',
-    name: 'GNT. HLA y Autoinmunidad (Panel Completo Inmunogenético)',
-    displayName: 'GNT. HLA & Autoimmunity Complete Panel',
-    canonicalName: 'GNT. HLA y Autoinmunidad',
-    canonicalKey: 'gnt-hla-autoinmunidad',
-    brand: 'TeleTest Analytika',
-    supplierId: 'supplier-teletest',
-    supplierName: 'TeleTest Analytika S.A.',
-    supplier: 'TeleTest Analytika',
-    category: 'Diagnostic & Laboratory Tests',
-    subCategory: 'Genomics & Autoimmunity',
-    sampleType: 'Sangre Periférica (Blood Sample)',
-    methodology: 'qPCR & Genotipado de Alta Resolución',
-    testCode: '18267615',
-    turnaroundDays: 7,
-    status: 'published',
-    currency: 'EUR',
-    basePrice: 295,
-    cloudStoragePath: 'labs/teletest/original/TELETEST_HLA_Autoinmunidad_Demo_18267615.pdf',
-    pdfUrl: '/docs/labs/teletest/TELETEST_HLA_Autoinmunidad_Demo_18267615.pdf',
-    shortDescription: 'Tipificación genética completa de HLA Clase I, Clase II y susceptibilidad genética a celiaquía y patologías autoinmunes.',
-    description: 'Estudio genómico avanzado de antígenos leucocitarios humanos (HLA). Analiza alelos completos de HLA Clase I (A, B, C) y HLA Clase II (DPA1, DPB1, DQA1, DQB1, DRB1, DRB3, DRB4, DRB5) junto con un panel de celiaquía (DQ8, DQ2.2, DQ2.5, DQ7.5). Esencial para guiar terapias inmunomoduladoras y pautas de nutrición de precisión.',
-    biomarkers: [
-      'HLA-A', 'HLA-B', 'HLA-C',
-      'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQB1', 'HLA-DRB1', 'HLA-DRB3', 'HLA-DRB4', 'HLA-DRB5',
-      'HLA-DQ8', 'HLA-DQ2.2', 'HLA-DQ2.5', 'HLA-DQ7.5', 'HLA-DQX.2', 'HLA-DQX.5'
-    ],
-    variants: [
-      {
-        id: 'teletest-gnt-hla-single',
-        sku: 'TT-GNT-HLA-01',
-        name: 'Kit de Extracción Sanguínea + Análisis Completo HLA',
-        dosage: '1 Informe Completo',
-        price: 295,
-        currency: 'EUR',
-        supplierId: 'supplier-teletest',
-        supplierName: 'TeleTest Analytika S.A.',
-        stock: 99,
-        available: true
-      }
-    ],
-    updatedAt: new Date().toISOString()
-  },
+  // ── TEST 1: GNT. CELIAQUIA (18267609) ──────────────────────────────────────
   {
     id: 'teletest-celiac-gluten-hla',
     slug: 'teletest-celiac-gluten-hla',
     name: 'Estudio Genético de Intolerancia al Gluten & Enfermedad Celíaca (HLA-DQ2 / DQ8)',
-    displayName: 'Genetic Celiac & Gluten Intolerance Test (HLA-DQ2 / DQ8)',
-    canonicalName: 'Estudio Genético Celiaquía HLA-DQ2/DQ8',
-    canonicalKey: 'estudio-genetico-celiaquia-hla-dq2-dq8',
+    displayName: 'Genetic Celiac Disease & Gluten Predisposition Panel (HLA-DQ2 / DQ8)',
+    canonicalName: 'Estudio Genético Celíaco HLA',
+    canonicalKey: 'estudio-genetico-celiaco-hla',
     brand: 'TeleTest Analytika',
     supplierId: 'supplier-teletest',
     supplierName: 'TeleTest Analytika S.A.',
     supplier: 'TeleTest Analytika',
-    category: 'Diagnostic & Laboratory Tests',
-    subCategory: 'Genomics & Autoimmunity',
-    sampleType: 'Sangre Periférica o Frotis Bucal',
-    methodology: 'qPCR Multiplex Específica',
-    testCode: '18267615-CEL',
-    turnaroundDays: 5,
+    category: 'diagnostic',
+    subCategory: 'genomics',
+    sampleType: 'Saliva (Frotis Bucal)',
+    methodology: 'PCR a Tiempo Real / Hibridación Inversa y Tipificación Alelos HLA',
+    testCode: '18267609',
+    turnaroundDays: 7,
     status: 'published',
     currency: 'EUR',
     basePrice: 165,
-    cloudStoragePath: 'labs/teletest/original/TELETEST_HLA_Autoinmunidad_Demo_18267615.pdf',
-    pdfUrl: '/docs/labs/teletest/TELETEST_HLA_Autoinmunidad_Demo_18267615.pdf',
-    shortDescription: 'Detección de haplotipos HLA-DQ2 y HLA-DQ8 con valor predictivo negativo superior al 99%.',
-    description: 'Prueba genética para descartar o confirmar predisposición a enfermedad celíaca y sensibilidad al gluten mediada por inmunidad innata. La ausencia de estos marcadores prácticamente excluye la celiaquía a lo largo de la vida.',
-    biomarkers: ['HLA-DQ2.5', 'HLA-DQ2.2', 'HLA-DQ8', 'DQA1*05', 'DQB1*02', 'DQA1*03', 'DQB1*03:02'],
+    cloudStoragePath: 'labs/teletest/original/TELETEST_Celiaco_HLA_Demo_18267609.pdf',
+    pdfUrl: '/docs/labs/teletest/TELETEST_Celiaco_HLA_Demo_18267609.pdf',
+    shortDescription: 'Genotipado de susceptibilidad genética a celiaquía: haplotipos HLA-DQ2.5, HLA-DQ2.2, HLA-DQ8 y alelos DQA1/DQB1.',
+    description: 'Prueba molecular definitiva de exclusión genética. Un resultado negativo confiere un valor predictivo negativo >99% para el desarrollo de enfermedad celíaca. No requiere consumo previo de gluten.',
+    biomarkers: ['HLA-DQ2.5', 'HLA-DQ2.2', 'HLA-DQ8', 'HLA-DQ7.5', 'DQA1*05', 'DQB1*02', 'DQA1*03', 'DQB1*03:02'],
     variants: [
       {
         id: 'teletest-celiac-single',
         sku: 'TT-CEL-HLA-01',
-        name: 'Kit Frotis Bucal / Sanguíneo + Genotipado Celíaco',
-        dosage: '1 Determinación',
+        name: 'Kit Frotis Bucal + Genotipado Celíaco HLA',
+        dosage: '1 Determinación Molecular',
         price: 165,
         currency: 'EUR',
         supplierId: 'supplier-teletest',
@@ -194,19 +180,72 @@ const TELETEST_PRODUCTS = [
     ],
     updatedAt: new Date().toISOString()
   },
+
+  // ── TEST 2: GNT. HLA Y AUTOINMUNIDAD (18267615) ─────────────────────────────
+  {
+    id: 'teletest-gnt-hla-autoinmunidad',
+    slug: 'teletest-gnt-hla-autoinmunidad',
+    name: 'GNT. HLA y Autoinmunidad (Panel Completo Inmunogenético)',
+    displayName: 'HLA & Autoimmunity Genetic Screen (High-Resolution Immunogenetics)',
+    canonicalName: 'Panel HLA Autoinmunidad',
+    canonicalKey: 'panel-hla-autoinmunidad',
+    brand: 'TeleTest Analytika',
+    supplierId: 'supplier-teletest',
+    supplierName: 'TeleTest Analytika S.A.',
+    supplier: 'TeleTest Analytika',
+    category: 'diagnostic',
+    subCategory: 'genomics',
+    sampleType: 'Sangre Periférica (EDTA)',
+    methodology: 'Tipificación HLA Clase I y Clase II de Alta Resolución (SSO/NGS)',
+    testCode: '18267615',
+    turnaroundDays: 14,
+    status: 'published',
+    currency: 'EUR',
+    basePrice: 245,
+    cloudStoragePath: 'labs/teletest/original/TELETEST_HLA_Autoinmunidad_Demo_18267615.pdf',
+    assessmentCloudStoragePath: 'labs/teletest/original/TELETEST_HLA_Autoinmunidad_Assessment_Demo_18267615.pdf',
+    pdfUrl: '/docs/labs/teletest/TELETEST_HLA_Autoinmunidad_Demo_18267615.pdf',
+    assessmentPdfUrl: '/docs/labs/teletest/TELETEST_HLA_Autoinmunidad_Assessment_Demo_18267615.pdf',
+    shortDescription: 'Tipificación genética completa del Complejo Mayor de Histocompatibilidad (HLA-A, B, C, DRB1, DQB1).',
+    description: 'Evaluación de susceptibilidad inmunogenética a más de 16 patologías autoinmunes: Tiroiditis de Hashimoto, Enfermedad de Graves, Artritis Reumatoide, Lupus, Alopecia Areata, Crohn, Colitis Ulcerosa, Diabetes Tipo 1, Psoriasis, Vitíligo, Espondilitis Anquilosante y Celiaquía.',
+    biomarkers: [
+      'HLA-A', 'HLA-B', 'HLA-C',
+      'HLA-DRB1', 'HLA-DRB3', 'HLA-DRB4', 'HLA-DRB5',
+      'HLA-DQA1', 'HLA-DQB1', 'HLA-DPA1', 'HLA-DPB1',
+      'HLA-B*27 (Espondilitis)', 'HLA-DRB1*03:01 (Lupus / Hashimoto)', 'HLA-DRB1*04:01 (Artritis Reumatoide)',
+      'HLA-DQB1*02:01 (Celiaquía / T1D)', 'HLA-B*57:01 (Farmacogenética Abacavir)'
+    ],
+    variants: [
+      {
+        id: 'teletest-gnt-hla-single',
+        sku: 'TT-HLA-AUTO-01',
+        name: 'Kit Sangre Periférica + Tipificación Inmunogenética Completa',
+        dosage: '1 Perfil Completo HLA I & II',
+        price: 245,
+        currency: 'EUR',
+        supplierId: 'supplier-teletest',
+        supplierName: 'TeleTest Analytika S.A.',
+        stock: 99,
+        available: true
+      }
+    ],
+    updatedAt: new Date().toISOString()
+  },
+
+  // ── TEST 3: MINERALOGRAMA EN CABELLO (HTMA - 18267691) ──────────────────────
   {
     id: 'teletest-mineralograma-cabello-htma',
     slug: 'teletest-mineralograma-cabello-htma',
-    name: 'Mineralograma en Cabello (HTMA) - 33 Metales & Ratios Metabólicos',
-    displayName: 'Hair Tissue Mineral Analysis (HTMA) - 33 Elements & Ratios',
+    name: 'Mineralograma en Cabello (HTMA) - 33 Metales, Minerales & Ratios Tisulares',
+    displayName: 'Hair Tissue Mineral Analysis (HTMA) - 33 Elements & Metabolic Ratios',
     canonicalName: 'Mineralograma en Cabello HTMA',
     canonicalKey: 'mineralograma-cabello-htma',
     brand: 'TeleTest Analytika',
     supplierId: 'supplier-teletest',
     supplierName: 'TeleTest Analytika S.A.',
     supplier: 'TeleTest Analytika',
-    category: 'Diagnostic & Laboratory Tests',
-    subCategory: 'Toxicology & Trace Elements',
+    category: 'diagnostic',
+    subCategory: 'toxicology',
     sampleType: 'Cabello (Hair Mineral Composition)',
     methodology: 'ICP-MS/MS (Espectrometría de Masas Triple Cuadrupolo)',
     testCode: '18267691',
@@ -215,9 +254,11 @@ const TELETEST_PRODUCTS = [
     currency: 'EUR',
     basePrice: 195,
     cloudStoragePath: 'labs/teletest/original/TELETEST_Mineralograma_Cabello_HTMA_Demo_18267691.pdf',
+    assessmentCloudStoragePath: 'labs/teletest/original/TELETEST_Mineralograma_Cabello_HTMA_Assessment_Demo_18267691.pdf',
     pdfUrl: '/docs/labs/teletest/TELETEST_Mineralograma_Cabello_HTMA_Demo_18267691.pdf',
-    shortDescription: 'Cuantificación de 33 elementos tisulares (17 minerales, 11 indicadores, 5 metales tóxicos) y 10 ratios metabólicos.',
-    description: 'El análisis de metales y minerales en cabello refleja la acumulación tisular intracelular de los últimos 2-3 meses. Incluye espectro completo de minerales esenciales, detección de tóxicos (Pb, Hg, Cd, As) y evaluación endocrina/adrenal mediante ratios matemáticos.',
+    assessmentPdfUrl: '/docs/labs/teletest/TELETEST_Mineralograma_Cabello_HTMA_Assessment_Demo_18267691.pdf',
+    shortDescription: 'Cuantificación de 33 elementos tisulares (17 minerales esenciales, 11 indicadores, 5 metales tóxicos) y 10 ratios metabólicos.',
+    description: 'El análisis de metales y minerales en cabello refleja la acumulación tisular intracelular de los últimos 2-3 meses. Incluye espectro completo de minerales esenciales, detección de neurotóxicos (Pb, Hg, Cd, As, Tl, U) y evaluación endocrina/adrenal mediante ratios matemáticos.',
     biomarkers: [
       'Na', 'K', 'Ca', 'Sr', 'P', 'B', 'Mg', 'Fe', 'Cu', 'Zn', 'Co', 'Mn', 'Mo', 'I', 'S', 'Se', 'Si', 'V', 'Cr', 'Ge', 'Li',
       'Be', 'Al', 'Ti', 'Ni', 'Ag', 'Sn', 'Sb', 'Ba', 'Gd', 'W', 'Pt', 'Au', 'Bi',
@@ -228,7 +269,7 @@ const TELETEST_PRODUCTS = [
       {
         id: 'teletest-htma-single',
         sku: 'TT-HTMA-33-01',
-        name: 'Kit de Recogida de Cabello + Análisis ICP-MS/MS Completo',
+        name: 'Kit Muestra de Cabello + Panel ICP-MS/MS Completo 33 Elementos & Ratios',
         dosage: '1 Perfil Completo 33 Elementos',
         price: 195,
         currency: 'EUR',
@@ -240,37 +281,46 @@ const TELETEST_PRODUCTS = [
     ],
     updatedAt: new Date().toISOString()
   },
+
+  // ── TEST 4: TEST OMEGA (18267598) ──────────────────────────────────────────
   {
-    id: 'teletest-metales-pesados-toxicologia',
-    slug: 'teletest-metales-pesados-toxicologia',
-    name: 'Screening Toxicológico de Metales Pesados Tisulares',
-    displayName: 'Heavy Metals Toxicology Tissue Screening (ICP-MS/MS)',
-    canonicalName: 'Screening Metales Pesados Tisulares',
-    canonicalKey: 'screening-metales-pesados-tisulares',
+    id: 'teletest-omega-profile',
+    slug: 'teletest-omega-profile',
+    name: 'Perfil Completo Ácidos Grasos Omega & Balance Inflamatorio (Test Omega)',
+    displayName: 'Omega Fatty Acid Profile & Cellular Inflammation Index (Test Omega)',
+    canonicalName: 'Perfil Ácidos Grasos Test Omega',
+    canonicalKey: 'perfil-acidos-grasos-test-omega',
     brand: 'TeleTest Analytika',
     supplierId: 'supplier-teletest',
     supplierName: 'TeleTest Analytika S.A.',
     supplier: 'TeleTest Analytika',
-    category: 'Diagnostic & Laboratory Tests',
-    subCategory: 'Toxicology & Heavy Metals',
-    sampleType: 'Cabello (Hair Sample)',
-    methodology: 'ICP-MS/MS de Alta Sensibilidad',
-    testCode: '18267691-TOX',
-    turnaroundDays: 8,
+    category: 'diagnostic',
+    subCategory: 'metabolic',
+    sampleType: 'Sangre Total (EDTA / Dry Blood Spot)',
+    methodology: 'Cromatografía de Gases con Detector de Ionización de Llama (GC-FID)',
+    testCode: '18267598',
+    turnaroundDays: 10,
     status: 'published',
     currency: 'EUR',
     basePrice: 145,
-    cloudStoragePath: 'labs/teletest/original/TELETEST_Mineralograma_Cabello_HTMA_Demo_18267691.pdf',
-    pdfUrl: '/docs/labs/teletest/TELETEST_Mineralograma_Cabello_HTMA_Demo_18267691.pdf',
-    shortDescription: 'Perfil centrado en neurotóxicos y bioacumulación: Plomo, Mercurio, Arsénico, Cadmio, Talio, Uranio y Aluminio.',
-    description: 'Permite identificar intoxicaciones subclínicas crónicas que no se detectan en analíticas de sangre convencionales debido a la rápida depuración plasmática hacia los tejidos blandos y hueso.',
-    biomarkers: ['Plomo (Pb)', 'Mercurio (Hg)', 'Arsénico (As)', 'Cadmio (Cd)', 'Talio (Tl)', 'Uranio (U)', 'Aluminio (Al)', 'Níquel (Ni)'],
+    cloudStoragePath: 'labs/teletest/original/TELETEST_Omega_Test_Demo_18267598.pdf',
+    assessmentCloudStoragePath: 'labs/teletest/original/TELETEST_Omega_Test_Assessment_Demo_18267598.pdf',
+    pdfUrl: '/docs/labs/teletest/TELETEST_Omega_Test_Demo_18267598.pdf',
+    assessmentPdfUrl: '/docs/labs/teletest/TELETEST_Omega_Test_Assessment_Demo_18267598.pdf',
+    shortDescription: 'Espectrometría completa de ácidos grasos en membrana eritrocitaria: Omega-3 (EPA, DHA), Omega-6 (AA, LA), HS Omega-3 Index y ratio AA/EPA.',
+    description: 'Determinación cuantitativa de 24 ácidos grasos plasmáticos y de membrana eritrocitaria. Calcula con precisión el índice HS Omega-3 (protección cardiovascular y neurocognitiva), el índice de ácidos trans (riesgo vascular) y el cociente de inflamación celular Ácido Araquidónico / EPA.',
+    biomarkers: [
+      'EPA (Ácido Eicosapentaenoico)', 'DHA (Ácido Docosahexaenoico)', 'DPA w3 (Ácido Docosapentaenoico)', 'ALA (Ácido Alfa-Linolénico)',
+      'AA (Ácido Araquidónico)', 'LA (Ácido Linoleico)', 'GLA (Ácido Gamma-Linolénico)', 'DGLA (Ácido Dihomo-gamma-linolénico)',
+      'Índice HS Omega-3 (%)', 'Ratio AA/EPA (Inflamación Celular)', 'Ratio Omega-6/Omega-3', 'Índice Ácidos Trans (%)',
+      'Ácidos Grasos Saturados (SFA)', 'Ácidos Grasos Monoinsaturados (MUFA)', 'Ácidos Grasos Poliinsaturados (PUFA)'
+    ],
     variants: [
       {
-        id: 'teletest-tox-single',
-        sku: 'TT-TOX-HEAVY-01',
-        name: 'Kit Muestra Cabello + Panel Toxicológico ICP-MS/MS',
-        dosage: '1 Panel Toxicológico',
+        id: 'teletest-omega-single',
+        sku: 'TT-OMEGA-24-01',
+        name: 'Kit Sangre / DBS + Cromatografía GC-FID Ácidos Grasos',
+        dosage: '1 Perfil Completo 24 Ácidos Grasos',
         price: 145,
         currency: 'EUR',
         supplierId: 'supplier-teletest',
@@ -281,38 +331,45 @@ const TELETEST_PRODUCTS = [
     ],
     updatedAt: new Date().toISOString()
   },
+
+  // ── TEST 5: GNT. SALIVA METABOLIZER DETOX (18264926) ───────────────────────
   {
-    id: 'teletest-ratios-metabolicos-minerales',
-    slug: 'teletest-ratios-metabolicos-minerales',
-    name: 'Perfil de Minerales Nutricionales & Ratios Metabólicos Tisulares',
-    displayName: 'Nutritional Trace Minerals & Metabolic Ratios Profile',
-    canonicalName: 'Minerales Nutricionales y Ratios Metabólicos',
-    canonicalKey: 'minerales-nutricionales-ratios-metabolicos',
+    id: 'teletest-metabolizer-detox',
+    slug: 'teletest-metabolizer-detox',
+    name: 'GNT. Saliva Metabolizer Detox (Farmacogenética & Detoxificación Hepática)',
+    displayName: 'Saliva Metabolizer Detox - Comprehensive Pharmacogenetics & Biotransformation',
+    canonicalName: 'Saliva Metabolizer Detox Farmacogenética',
+    canonicalKey: 'saliva-metabolizer-detox-farmacogenetica',
     brand: 'TeleTest Analytika',
     supplierId: 'supplier-teletest',
     supplierName: 'TeleTest Analytika S.A.',
     supplier: 'TeleTest Analytika',
-    category: 'Diagnostic & Laboratory Tests',
-    subCategory: 'Metabolic Health & Trace Minerals',
-    sampleType: 'Cabello (Hair Sample)',
-    methodology: 'ICP-MS/MS',
-    testCode: '18267691-NUT',
-    turnaroundDays: 8,
+    category: 'diagnostic',
+    subCategory: 'genomics',
+    sampleType: 'Saliva (Frotis Bucal)',
+    methodology: 'Genotipado Farmacogenético NGS / MALDI-TOF Array Multiplex',
+    testCode: '18264926',
+    turnaroundDays: 15,
     status: 'published',
     currency: 'EUR',
-    basePrice: 155,
-    cloudStoragePath: 'labs/teletest/original/TELETEST_Mineralograma_Cabello_HTMA_Demo_18267691.pdf',
-    pdfUrl: '/docs/labs/teletest/TELETEST_Mineralograma_Cabello_HTMA_Demo_18267691.pdf',
-    shortDescription: 'Evaluación del ratio electrolítico intracelular, función tiroidea y respuesta de las glándulas suprarrenales.',
-    description: 'Análisis de los 17 minerales esenciales y los 10 ratios fisiológicos que determinan la tasa metabólica del paciente (metabolizador rápido vs lento), el balance oxidativo y la utilización celular de glucosa y ATP.',
-    biomarkers: ['Ca', 'Mg', 'Na', 'K', 'P', 'Zn', 'Cu', 'Fe', 'Mn', 'Cr', 'Se', 'Ratio Ca/Mg', 'Ratio Ca/K', 'Ratio Na/K', 'Ratio Na/Mg'],
+    basePrice: 380,
+    cloudStoragePath: 'labs/teletest/original/TELETEST_Saliva_Metabolizer_Detox_Demo_18264926.pdf',
+    pdfUrl: '/docs/labs/teletest/TELETEST_Saliva_Metabolizer_Detox_Demo_18264926.pdf',
+    shortDescription: 'Panel integral de 48 polimorfismos en rutas de Fase I (Citocromos CYP450), Fase II (Conjugación, Metilación MTHFR, COMT, GSTs) y Transportadores.',
+    description: 'Estudio de biotransformación hepática y aclaramiento xenobiótico. Identifica fenotipos metabolizadores lentos, intermedios, rápidos y ultrarrápidos para optimizar dosificaciones terapéuticas, toxicidad farmacológica y susceptibilidad a estrés oxidativo.',
+    biomarkers: [
+      'CYP1A1', 'CYP1A2', 'CYP1B1', 'CYP2A6', 'CYP2B6', 'CYP2C8', 'CYP2C9', 'CYP2C19', 'CYP2D6', 'CYP3A4', 'CYP3A5',
+      'NAT1', 'NAT2', 'UGT1A1', 'UGT1A6', 'UGT2B7', 'GSTM1', 'GSTP1', 'GSTT1',
+      'COMT (rs4680)', 'MTHFR (C677T / A1298C)', 'MTR', 'MTRR', 'CBS', 'SOD1', 'SOD2', 'GPX1', 'CAT', 'NQO1',
+      'ABCB1 (P-glicoproteína)', 'SLCO1B1 (Transporte de Estatinas)', 'ABCG2'
+    ],
     variants: [
       {
-        id: 'teletest-nut-single',
-        sku: 'TT-NUT-RATIOS-01',
-        name: 'Kit Muestra Cabello + Evaluación de Ratios Metabólicos',
-        dosage: '1 Perfil Nutricional & Metabólico',
-        price: 155,
+        id: 'teletest-detox-single',
+        sku: 'TT-DETOX-PHARMA-01',
+        name: 'Kit Saliva + Genotipado Completo Fase I/II & Farmacogenética',
+        dosage: '1 Perfil Completo 48 Polimorfismos',
+        price: 380,
         currency: 'EUR',
         supplierId: 'supplier-teletest',
         supplierName: 'TeleTest Analytika S.A.',
@@ -324,8 +381,14 @@ const TELETEST_PRODUCTS = [
   }
 ];
 
+// Deprecated split documents that should be archived
+const DEPRECATED_PRODUCT_IDS = [
+  'teletest-metales-pesados-toxicologia',
+  'teletest-ratios-metabolicos-minerales'
+];
+
 async function seedTeleTest() {
-  console.log('\n🚀 [TeleTest Seeder] Iniciando proceso de importación y seed...');
+  console.log('\n🚀 [TeleTest Seeder] Iniciando proceso de importación y seed canonical...');
 
   // 1. Upload PDFs to Cloud Storage
   for (const item of PDFS_TO_UPLOAD) {
@@ -335,6 +398,9 @@ async function seedTeleTest() {
       TELETEST_PRODUCTS.forEach(p => {
         if (p.cloudStoragePath === item.storagePath) {
           p.cloudStorageDownloadUrl = res.publicUrl;
+        }
+        if (p.assessmentCloudStoragePath === item.storagePath) {
+          p.assessmentCloudStorageDownloadUrl = res.publicUrl;
         }
       });
     } catch (err) {
@@ -347,18 +413,34 @@ async function seedTeleTest() {
   await db.collection('suppliers').doc(TELETEST_SUPPLIER.id).set(TELETEST_SUPPLIER, { merge: true });
   console.log(`✅ Proveedor '${TELETEST_SUPPLIER.displayName}' guardado con éxito.`);
 
-  // 3. Upsert Products in Firestore
-  console.log(`\n🧪 Registrando ${TELETEST_PRODUCTS.length} productos diagnósticos en 'products/'...`);
+  // 3. Upsert Canonical Products in Firestore
+  console.log(`\n🧪 Registrando ${TELETEST_PRODUCTS.length} productos diagnósticos canónicos en 'products/'...`);
   const batch = db.batch();
 
   for (const prod of TELETEST_PRODUCTS) {
     const ref = db.collection('products').doc(prod.id);
     batch.set(ref, prod, { merge: true });
-    console.log(`   + Preparado: [${prod.id}] ${prod.name}`);
+    console.log(`   + Preparado canónico: [${prod.id}] ${prod.name}`);
+  }
+
+  // 4. Archive deprecated split entries (only if they exist)
+  for (const depId of DEPRECATED_PRODUCT_IDS) {
+    const depRef = db.collection('products').doc(depId);
+    const depSnap = await depRef.get();
+    if (depSnap.exists) {
+      batch.update(depRef, {
+        status: 'archived',
+        archivedReason: 'Consolidated into canonical teletest-mineralograma-cabello-htma',
+        updatedAt: new Date().toISOString()
+      });
+      console.log(`   - Archivado fragmento redundante existente: [${depId}]`);
+    } else {
+      console.log(`   ℹ️ Fragmento no encontrado en Firestore (no requiere archivo): [${depId}]`);
+    }
   }
 
   await batch.commit();
-  console.log(`✅ ${TELETEST_PRODUCTS.length} productos guardados en Firestore correctamente.`);
+  console.log(`✅ Transacción completada en Firestore: 5 productos canónicos activos y 2 archivados.`);
 
   console.log('\n🎉 [TeleTest Seeder] Proceso finalizado con éxito.');
 }
