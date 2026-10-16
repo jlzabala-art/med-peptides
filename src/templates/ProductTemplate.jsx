@@ -149,6 +149,39 @@ export default function ProductTemplate({
 
   if (!product) return <div className="container">Product Not Found</div>;
 
+  const isEterna = (product?.slug || product?.id || '').toLowerCase().includes('eterna') || 
+                   (product?.name || '').toLowerCase().includes('eterna') || 
+                   product?.supplierId === 'supplier-eternadx';
+
+  if (isEterna) {
+    return (
+      <ProductDetail 
+        product={product} 
+        products={products}
+        region={region}
+        isProfessional={isProfessional}
+        cart={cart}
+        onAddToCart={onAddToCart}
+        toggleCompare={toggleCompare}
+        compareList={compareList}
+        allFaqs={allFaqs}
+        processedHierarchy={processedHierarchy}
+        onBack={() => router.back()}
+        onSelectCategory={(cat) => router.push(`/collection/${cat.toLowerCase().replace(/ /g, '-')}`)}
+        onSelectProduct={(name) => {
+          const target = products?.find(p => p.name === name);
+          if (target) {
+            const targetSlug = target.name
+              ? target.name.toLowerCase().replace(/\s+/g, '-')
+              : (target.slug || target.id || target.name);
+            router.push(`/product/${targetSlug}`);
+          }
+        }}
+        onSelectObjective={(obj) => router.push(`/protocol/${obj.toLowerCase().replace(/ /g, '-')}`)}
+      />
+    );
+  }
+
   const breadcrumbItems = [
     { label: 'Peptides', path: '/catalog' },
     { label: product.category || 'Research', path: product.category ? `/collection/${product.category.toLowerCase().replace(/ /g, '-')}` : '/catalog' },
