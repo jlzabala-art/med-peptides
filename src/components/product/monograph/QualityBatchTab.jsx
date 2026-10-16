@@ -18,6 +18,7 @@ import DataTable from '@/components/ui/DataTable';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
+import { classifyProductDomain } from '@/utils/productNormalizer';
 
 export default function QualityBatchTab({
   product = {},
@@ -27,24 +28,7 @@ export default function QualityBatchTab({
 }) {
   const [copiedBatch, setCopiedBatch] = useState(false);
 
-  const isDiagnostic = Boolean(
-    product?.category === 'diagnostic' ||
-    product?.category === 'diagnostic_test' ||
-    product?.category === 'diagnostic_tests' ||
-    product?.category?.toLowerCase().includes('diagnostic') ||
-    product?.type?.toLowerCase().includes('diagnostic') ||
-    product?.format === 'diagnostic_kit' ||
-    product?.presentation === 'diagnostic_kit' ||
-    product?.sampleType ||
-    product?.supplierId?.toLowerCase().includes('teletest') ||
-    product?.supplierName?.toLowerCase().includes('teletest') ||
-    product?.supplierId?.toLowerCase().includes('bloodo') ||
-    slug?.toLowerCase().includes('omega') ||
-    slug?.toLowerCase().includes('htma') ||
-    slug?.toLowerCase().includes('metabolizer') ||
-    slug?.toLowerCase().includes('teletest') ||
-    (product?.name || '').toLowerCase().includes('omega')
-  );
+  const { isDiagnostic } = classifyProductDomain(product, { slug });
 
   const batchId = effectiveBatch || product.batchNumber || (isDiagnostic ? 'AS-TEL-TL01-2610' : 'AS-LOT-PT05-2609');
   const purity = isDiagnostic ? 'CV < 4.5% (CE-IVD)' : (product.purityPercentage || '99.4%');

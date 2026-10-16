@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
   Stethoscope,
   Share2,
@@ -68,11 +69,7 @@ import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
-import PrescriptionIntakeWorkspace from '@/features/prescriptions/components/PrescriptionIntakeWorkspace';
-import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 import ClinicalIntelligenceBanner from '@/components/doctor/ClinicalIntelligenceBanner';
-import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
-import DoctorServicesMembershipModal from '@/components/doctor/DoctorServicesMembershipModal';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
 import { getFagronClinicalMonograph, resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
 import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
@@ -81,8 +78,31 @@ import { COUNTRIES } from '@/data/countries';
 import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolidator';
 import { calculateTreatmentDates, calculateTreatmentDuration } from '@/utils/clinical/clinicalFormulations';
 import DoctorFloatingGlassDock from '@/components/doctor/docks/DoctorFloatingGlassDock';
-import DoctorPracticeSearchModal from '@/components/doctor/modals/DoctorPracticeSearchModal';
-import EditTreatmentDurationModal from '@/components/doctor/modals/EditTreatmentDurationModal';
+
+const PrescriptionIntakeWorkspace = dynamic(
+  () => import('@/features/prescriptions/components/PrescriptionIntakeWorkspace'),
+  { ssr: false }
+);
+const PharmacyLabelsModal = dynamic(
+  () => import('@/components/prescription/PharmacyLabelsModal'),
+  { ssr: false }
+);
+const DoctorClinicalAnalytics = dynamic(
+  () => import('@/components/doctor/DoctorClinicalAnalytics'),
+  { ssr: false }
+);
+const DoctorServicesMembershipModal = dynamic(
+  () => import('@/components/doctor/DoctorServicesMembershipModal'),
+  { ssr: false }
+);
+const DoctorPracticeSearchModal = dynamic(
+  () => import('@/components/doctor/modals/DoctorPracticeSearchModal'),
+  { ssr: false }
+);
+const EditTreatmentDurationModal = dynamic(
+  () => import('@/components/doctor/modals/EditTreatmentDurationModal'),
+  { ssr: false }
+);
 
 function safeRenderText(val, fallback = '') {
   if (!val) return fallback;
@@ -518,6 +538,7 @@ export default function DoctorPublicPortalClient({
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedIntake, setCopiedIntake] = useState(false);
   const [isIntakeOpen, setIsIntakeOpen] = useState(false);
+  const intakeSavedRef = useRef(false);
 
   // Language & Clinical Sidebar Navigation State (GCP Standard)
   const [lang, setLang] = useState('en');
@@ -6253,11 +6274,22 @@ export default function DoctorPublicPortalClient({
       {isIntakeOpen && (
         <PrescriptionIntakeWorkspace
           isOpen={true}
-          onClose={() => setIsIntakeOpen(false)}
-          onSaveSuccess={() => {
+          doctorContext={{
+            doctorId: doctor.id,
+            doctorName: doctor.name,
+            doctorSlug: doctor.slug,
+            clinicName: doctor.clinic
+          }}
+          onClose={() => {
             setIsIntakeOpen(false);
-            toast.success(`Prescription saved and attributed to ${doctor.name}!`);
-            window.location.reload();
+            if (intakeSavedRef.current) {
+              intakeSavedRef.current = false;
+              window.location.reload();
+            }
+          }}
+          onSaveSuccess={() => {
+            intakeSavedRef.current = true;
+            toast.success(`Prescription attributed to ${doctor.name}`);
           }}
         />
       )}

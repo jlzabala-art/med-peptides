@@ -317,6 +317,9 @@ export function extractProductSupplier(product) {
     if (sIdLower.includes('fagron')) return 'Fagron';
     if (sIdLower.includes('24genetics')) return '24Genetics';
     if (sIdLower.includes('eterna')) return 'Eterna Diagnostics';
+    if (sIdLower.includes('teletest')) return 'TeleTest Analytika';
+    if (sIdLower.includes('bloodo')) return 'Bloodo Diagnostics';
+    if (sIdLower.includes('colway')) return 'Colway International';
   }
 
   return '';
@@ -343,6 +346,117 @@ export function normalizeProductMeta(product) {
 
 /** Alias for normalizeProductMeta */
 export const normalizeProduct = normalizeProductMeta;
+
+/**
+ * Canonical Single Source of Truth for Product Domain & Presentation Classification.
+ * Centralizes detection of Diagnostic Kits (TeleTest, Bloodo, EternaDX), Cosmeceuticals (Colway),
+ * Bulk APIs, Nasal Sprays, Pre-filled Pens, Sublingual Drops, Oral Solids, and Lyophilized Vials.
+ *
+ * @param {Object|null} product - Product entity from Firestore
+ * @param {Object} [options] - Optional overrides { slug, activeFormat }
+ */
+export function classifyProductDomain(product = {}, options = {}) {
+  const p = product || {};
+  const slugStr = String(options.slug || p.slug || p.canonicalName || p.id || '').toLowerCase();
+  const nameStr = String(p.canonicalName || p.name || p.title || '').toLowerCase();
+  const catStr = String(p.category || p.classification || '').toLowerCase();
+  const typeStr = String(p.productType || p.type || '').toLowerCase();
+  const suppIdStr = String(p.supplierId || p.supplier_id || '').toLowerCase();
+  const suppNameStr = String(p.supplierName || p.supplier || p.brand || '').toLowerCase();
+
+  const rawFmt = String(
+    (typeof options.activeFormat === 'object' ? (options.activeFormat?.id || options.activeFormat?.name) : options.activeFormat) ||
+    p.format ||
+    p.presentation ||
+    p.variants?.[0]?.format ||
+    p.variants?.[0]?.presentation ||
+    ''
+  ).toLowerCase();
+
+  const isTeletest = suppIdStr.includes('teletest') || suppNameStr.includes('teletest') || slugStr.includes('teletest');
+  const isBloodo = suppIdStr.includes('bloodo') || suppNameStr.includes('bloodo') || slugStr.includes('bloodo');
+  const isEterna = suppIdStr.includes('eterna') || suppNameStr.includes('eterna') || slugStr.includes('eterna');
+
+  const isDiagnostic = Boolean(
+    catStr === 'diagnostic' ||
+    catStr === 'diagnostic_test' ||
+    catStr === 'diagnostic_tests' ||
+    catStr === 'genomics_biomarkers' ||
+    catStr === 'tests' ||
+    catStr.includes('diagnostic') ||
+    typeStr.includes('diagnostic') ||
+    rawFmt === 'diagnostic_kit' ||
+    rawFmt === 'blood_test' ||
+    rawFmt === 'home_test_kit' ||
+    rawFmt === 'saliva_kit' ||
+    rawFmt.includes('kit') ||
+    rawFmt.includes('test') ||
+    Boolean(p.sampleType) ||
+    isTeletest ||
+    isBloodo ||
+    isEterna ||
+    slugStr.includes('omega') ||
+    slugStr.includes('htma') ||
+    slugStr.includes('metabolizer') ||
+    slugStr.endsWith('-test') ||
+    slugStr.includes('test-') ||
+    nameStr.includes('test kit') ||
+    nameStr.includes('level test')
+  );
+
+  const isColway = suppIdStr.includes('colway') || suppNameStr.includes('colway') || slugStr.includes('colway') || nameStr.includes('colway') || nameStr.includes('colvita');
+  const isCosmetic = !isDiagnostic && Boolean(
+    isColway ||
+    catStr.includes('cosme') ||
+    catStr.includes('skin') ||
+    catStr.includes('derma') ||
+    catStr.includes('hair') ||
+    catStr.includes('trichology') ||
+    typeStr === 'cosmetic' ||
+    typeStr === 'cosmeceutical'
+  );
+
+  const isBulkApi = !isDiagnostic && !isCosmetic && Boolean(
+    typeStr === 'raw_material' ||
+    typeStr === 'bulk_api' ||
+    catStr === 'api' ||
+    catStr === 'raw_material' ||
+    rawFmt.includes('bulk') ||
+    rawFmt.includes('powder')
+  );
+
+  const isSpray = !isDiagnostic && (rawFmt.includes('spray') || rawFmt.includes('nasal'));
+  const isPen = !isDiagnostic && (rawFmt.includes('pen') || rawFmt.includes('cartridge'));
+  const isSublingual = !isDiagnostic && (rawFmt.includes('sublingual') || rawFmt.includes('drop'));
+  const isOral = !isDiagnostic && !isSublingual && (
+    rawFmt.includes('oral') ||
+    rawFmt.includes('capsule') ||
+    rawFmt.includes('tablet') ||
+    rawFmt.includes('troche') ||
+    rawFmt.includes('softgel') ||
+    slugStr.includes('colvita') ||
+    slugStr.includes('axanta')
+  );
+  const isVial = !isDiagnostic && !isCosmetic && !isSpray && !isPen && !isSublingual && !isOral;
+
+  return {
+    isDiagnostic,
+    isTeletest,
+    isBloodo,
+    isEterna,
+    isCosmetic,
+    isColway,
+    isBulkApi,
+    isSpray,
+    isPen,
+    isSublingual,
+    isOral,
+    isVial,
+    defaultPresentation: isDiagnostic ? 'diagnostic_kit' : 'vial',
+    defaultDose: isDiagnostic ? '1 Analytical Profile' : '10 mg',
+    batchParamKey: isDiagnostic ? 'kitCode' : 'vialCode'
+  };
+}
 
 /**
  * Accurately determines if a product is a genuine clinical Peptide (vs raw API, medical supply, supplement, etc.)
@@ -381,4 +495,5 @@ export function isPeptideProduct(product) {
 
   return true;
 }
+
 

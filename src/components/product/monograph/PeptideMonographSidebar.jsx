@@ -19,6 +19,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
 import { formatCommercialSupplierName } from '@/utils/supplierCommercialNames';
+import { classifyProductDomain } from '@/utils/productNormalizer';
 import ClinicalRecommendationsSidebarWidget from '../widgets/ClinicalRecommendationsSidebarWidget';
 
 /**
@@ -50,23 +51,7 @@ export default function PeptideMonographSidebar({
   const batchCode = effectiveBatch || product.batchNumber || 'RP-LOT-RT10-2609';
   const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || 'Lotusland';
   const supplier = formatCommercialSupplierName(rawSupplier);
-  // Detect if product is a diagnostic test
-  const isDiagnostic = Boolean(
-    product?.category === 'diagnostic' ||
-    product?.category === 'diagnostic_test' ||
-    product?.category === 'diagnostic_tests' ||
-    product?.category?.toLowerCase().includes('diagnostic') ||
-    product?.type?.toLowerCase().includes('diagnostic') ||
-    product?.supplierId?.toLowerCase().includes('teletest') ||
-    product?.supplierName?.toLowerCase().includes('teletest') ||
-    product?.supplierId?.toLowerCase().includes('bloodo') ||
-    product?.sampleType ||
-    cleanSlug.includes('omega') ||
-    cleanSlug.includes('htma') ||
-    cleanSlug.includes('metabolizer') ||
-    (product?.name || '').toLowerCase().includes('test omega') ||
-    (product?.canonicalName || '').toLowerCase().includes('test omega')
-  );
+  const { isDiagnostic } = classifyProductDomain(product, { slug: cleanSlug, activeFormat });
 
   // Active strength & presentation label in English
   const rawStrength = selectedStrength?.name || selectedStrength?.id || (typeof selectedStrength === 'string' ? selectedStrength : '');

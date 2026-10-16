@@ -5,6 +5,7 @@ import {
   getDiscreetProductPrefix, 
   getSupplierCode 
 } from '../../../../utils/discreetBatchHelper.js';
+import { classifyProductDomain } from '../../../../utils/productNormalizer.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -227,15 +228,10 @@ export async function GET(request, { params }) {
     const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
     let targetUrl = explicitUrl;
 
-    const isDiagnosticSlug = slug.includes('teletest') || 
-      slug.includes('bloodo') || 
-      slug.includes('eterna') || 
-      slug.includes('test') || 
-      slug.includes('htma') || 
-      slug.includes('omega');
-
-    const defaultPresentation = isDiagnosticSlug ? 'diagnostic_kit' : 'vial';
-    const defaultDose = isDiagnosticSlug ? '1 Analytical Profile' : '10 mg';
+    const { isDiagnostic: isDiagnosticSlug, defaultPresentation, defaultDose } = classifyProductDomain(
+      { supplierId: suppParam },
+      { slug, activeFormat: searchParams.get('presentation') || searchParams.get('format') }
+    );
 
     if (targetUrl) {
       if (targetUrl.startsWith('/')) {

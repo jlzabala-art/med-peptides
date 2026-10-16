@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Printer,
@@ -31,6 +31,9 @@ import {
   Coins
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import DataTable from '@/components/ui/DataTable';
+import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
+import CopyableId from '@/components/ui/CopyableId';
 
 export default function ColwayPriceListClient({ initialProducts = [] }) {
   const [markupPct, setMarkupPct] = useState(15); // Default 15% requested by user
@@ -38,12 +41,13 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'cards'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22 Scope Switcher)
   const [copied, setCopied] = useState(false);
-  const [copiedSku, setCopiedSku] = useState(null);
 
   // Automatically default to card view on mobile screens (Golden Rule #23)
   React.useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setViewMode('cards');
     }
   }, []);
@@ -61,14 +65,14 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
     return 'AED ';
   }, [currency]);
 
-  const formatPrice = (aedAmount) => {
+  const formatPrice = useCallback((aedAmount) => {
     if (aedAmount == null || isNaN(aedAmount)) return '—';
     const converted = aedAmount * fxRate;
     return `${currencySymbol}${converted.toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })}`;
-  };
+  }, [currencySymbol, fxRate]);
 
   // Filtered and calculated products based on dynamic markup
   const processedProducts = useMemo(() => {
@@ -106,19 +110,126 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
     });
   }, [processedProducts, searchQuery, selectedCategory]);
 
-  // Aggregate Totals
+  const hasActiveFilters = Boolean(searchQuery || selectedCategory !== 'all');
+  const kpiSourceProducts = (scopeMode === 'filtered' && hasActiveFilters) ? filteredProducts : processedProducts;
+
+  // Aggregate Totals (respecting Scope Switcher per Rule #22)
   const totals = useMemo(() => {
-    const totalLanded = processedProducts.reduce((sum, p) => sum + p.calculatedLanded, 0);
-    const totalWholesale = processedProducts.reduce((sum, p) => sum + p.calculatedWholesale, 0);
+    const totalLanded = kpiSourceProducts.reduce((sum, p) => sum + p.calculatedLanded, 0);
+    const totalWholesale = kpiSourceProducts.reduce((sum, p) => sum + p.calculatedWholesale, 0);
     const totalMargin = Number((totalWholesale - totalLanded).toFixed(2));
     const avgMarginPct = totalWholesale > 0 ? Number(((totalMargin / totalWholesale) * 100).toFixed(1)) : 0;
-    return { totalLanded, totalWholesale, totalMargin, avgMarginPct };
-  }, [processedProducts]);
+    return { totalLanded, totalWholesale, totalMargin, avgMarginPct, count: kpiSourceProducts.length };
+  }, [kpiSourceProducts]);
 
   const categories = useMemo(() => {
     const cats = new Set(initialProducts.map((p) => p.category).filter(Boolean));
     return ['all', ...Array.from(cats)];
   }, [initialProducts]);
+
+  // DataTable column definitions (Rules #3, #11, #30: explicit percentage widths, zero horizontal scroll)
+  const colwayColumns = useMemo(() => [
+    {
+      key: 'itemNumber',
+      label: '#',
+      width: '5%',
+      sortable: true,
+      render: (val) => <span className="font-mono text-xs text-slate-500">{val}</span>
+    },
+    {
+      key: 'sku',
+      label: 'SKU Code',
+      width: '14%',
+      sortable: true,
+      render: (val, row) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          <CopyableId value={val} />
+          <span className="product-category-tag">{row.category}</span>
+        </div>
+      )
+    },
+    {
+      key: 'name',
+      label: 'Product & Clinical Indication',
+      width: '31%',
+      sortable: true,
+      render: (_, row) => (
+        <div className="product-identity-cell">
+          {row.image && (
+            <img
+              src={row.image}
+              alt={row.name}
+              className="product-thumb"
+              loading="lazy"
+            />
+          )}
+          <div>
+            <div className="product-name font-bold">{row.name}</div>
+            <div className="product-subtitle text-xs text-slate-500">{row.subtitle}</div>
+            {row.keyActives && (
+              <div className="product-actives text-xs text-sky-700 mt-0.5">
+                <span className="font-semibold">Actives:</span> {row.keyActives}
+              </div>
+            )}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'volume',
+      label: 'Presentation',
+      width: '11%',
+      sortable: true,
+      render: (val, row) => (
+        <div>
+          <span className="volume-badge">{val}</span>
+          <div className="text-xs text-slate-400 mt-0.5">{row.presentation}</div>
+        </div>
+      )
+    },
+    {
+      key: 'calculatedLanded',
+      label: 'Landed Cost',
+      width: '10%',
+      sortable: true,
+      render: (val) => (
+        <span className="font-mono font-semibold text-slate-700">{formatPrice(val)}</span>
+      )
+    },
+    {
+      key: 'calculatedWholesale',
+      label: `Wholesale (+${markupPct}%)`,
+      width: '11%',
+      sortable: true,
+      render: (val) => (
+        <span className="font-mono font-bold text-sky-700">{formatPrice(val)}</span>
+      )
+    },
+    {
+      key: 'calculatedMarginAed',
+      label: 'Margin',
+      width: '9%',
+      sortable: true,
+      render: (val, row) => (
+        <div className="font-mono text-emerald-600">
+          <div>+{formatPrice(val)}</div>
+          <div className="text-xs text-emerald-500 font-sans">({row.calculatedMarginPct}%)</div>
+        </div>
+      )
+    },
+    {
+      key: 'retailPriceAed',
+      label: 'MSRP / Clinic',
+      width: '9%',
+      sortable: true,
+      render: (val, row) => (
+        <div className="font-mono text-xs">
+          <div className="font-bold text-slate-800" title="Recommended Retail Price">{formatPrice(val)}</div>
+          <div className="text-slate-500" title="Recommended Clinic Price">Clinic: {formatPrice(row.clinicPriceAed)}</div>
+        </div>
+      )
+    }
+  ], [formatPrice, markupPct]);
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {
@@ -132,15 +243,6 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       setCopied(true);
       toast.success('Colway Price Sheet link copied to clipboard ✓');
       setTimeout(() => setCopied(false), 2200);
-    }
-  };
-
-  const handleCopySku = (sku) => {
-    if (typeof window !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(sku);
-      setCopiedSku(sku);
-      toast.success(`SKU ${sku} copied ✓`);
-      setTimeout(() => setCopiedSku(null), 1800);
     }
   };
 
@@ -262,7 +364,52 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           </div>
         </header>
 
-        {/* ── KPI Summary Cards (GCP Style) ── */}
+        {/* ── Scope Indicator & Switcher (Golden Rule #22) ── */}
+        <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.76rem', fontWeight: 600, color: '#475569', background: '#f1f5f9', padding: '3px 10px', borderRadius: '999px', border: '1px solid #e2e8f0' }}>
+            {scopeMode === 'filtered' && hasActiveFilters
+              ? `Matching Active Filters (${filteredProducts.length} items)`
+              : `Entire Database (Unfiltered · ${processedProducts.length} items)`}
+          </span>
+          {hasActiveFilters && (
+            <div style={{ display: 'inline-flex', gap: '4px', background: '#f1f5f9', padding: '2px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+              <button
+                type="button"
+                onClick={() => setScopeMode('filtered')}
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: scopeMode === 'filtered' ? '#0284c7' : 'transparent',
+                  color: scopeMode === 'filtered' ? '#fff' : '#475569'
+                }}
+              >
+                Applied Filters View
+              </button>
+              <button
+                type="button"
+                onClick={() => setScopeMode('global')}
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: scopeMode === 'global' ? '#0284c7' : 'transparent',
+                  color: scopeMode === 'global' ? '#fff' : '#475569'
+                }}
+              >
+                Global Database View
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ── KPI Summary Cards (GCP Style — Rule #22) ── */}
         <section className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-icon-wrap bg-blue-500/10 text-blue-500">
@@ -270,7 +417,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
             </div>
             <div className="kpi-info">
               <div className="kpi-label">Active Formulations</div>
-              <div className="kpi-value">{processedProducts.length} Clinical SKUs</div>
+              <div className="kpi-value">{totals.count} Clinical SKUs</div>
               <div className="kpi-sub">Trichology, Anti-Aging & Barrier Care</div>
             </div>
           </div>
@@ -309,25 +456,27 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           </div>
         </section>
 
-        {/* ── Interactive Controls Strip (Screen Only) ── */}
+        {/* ── Unified GlobalSearchBar + Category Chips & Controls (Rules #7 & #24) ── */}
+        <div className="no-print" style={{ marginBottom: '1rem' }}>
+          <GlobalSearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search Colway formulations by product name, SKU, or active ingredient..."
+            resultCount={filteredProducts.length}
+            totalCount={processedProducts.length}
+            size="lg"
+            storageNamespace="colway_uae_pricing"
+            filters={categories.filter(c => c !== 'all').map(cat => ({
+              key: cat,
+              label: cat,
+              active: selectedCategory === cat,
+              onToggle: () => setSelectedCategory(prev => prev === cat ? 'all' : cat)
+            }))}
+          />
+        </div>
+
         <div className="controls-strip no-print">
           <div className="controls-left">
-            <div className="search-box">
-              <Search size={15} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Filter by product, SKU, active ingredient..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="clear-btn">
-                  ×
-                </button>
-              )}
-            </div>
-
             <div className="category-chips">
               {categories.map((cat) => (
                 <button
@@ -380,11 +529,39 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           </div>
         </div>
 
-        {/* ── 1. The Master Price Schedule Table ── */}
-        {(viewMode === 'table' || typeof window === 'undefined') && (
-          <div className="table-responsive-wrapper">
-            {/* eslint-disable-next-line no-restricted-syntax */}
-            <table className="colway-price-table">
+        {/* ── 1A. Screen-Only Unified DataTable (Rules #3, #4, #11, #30) ── */}
+        {viewMode === 'table' && (
+          <div className="no-print" style={{ marginBottom: '1.5rem' }}>
+            <DataTable
+              columns={colwayColumns}
+              data={filteredProducts}
+              emptyMessage="No Colway formulations match the current filter criteria."
+              expandableRender={(row) => (
+                <div style={{ padding: '0.85rem 1.25rem', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', fontSize: '0.8rem' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>Key Bioactive Compounds</div>
+                    <div style={{ color: '#475569' }}>{row.keyActives || 'Native Tropocollagen & Clinical Actives'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>Clinical Role & Protocol</div>
+                    <div style={{ color: '#475569' }}>{row.clinicalFocus || row.subtitle}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>Commercial Tier Breakdown</div>
+                    <div style={{ color: '#475569' }}>
+                      Landed CIF: <strong>{formatPrice(row.calculatedLanded)}</strong> · Wholesale (+{markupPct}%): <strong>{formatPrice(row.calculatedWholesale)}</strong> · Clinic: <strong>{formatPrice(row.clinicPriceAed)}</strong> · MSRP: <strong>{formatPrice(row.retailPriceAed)}</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+            />
+          </div>
+        )}
+
+        {/* ── 1B. Print-Only Official Schedule Table (Preserved for A4 @media print) ── */}
+        <div className="table-responsive-wrapper print-only-schedule">
+          {/* eslint-disable-next-line no-restricted-syntax */}
+          <table className="colway-price-table">
               <thead>
                 <tr>
                   <th style={{ width: '4%' }} className="text-center">#</th>
@@ -414,17 +591,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                     <td className="text-center text-muted font-mono">{p.itemNumber}</td>
                     
                     <td>
-                      <div
-                        className="sku-badge cursor-pointer"
-                        onClick={() => handleCopySku(p.sku)}
-                        title="Click to copy SKU"
-                      >
+                      <div className="sku-badge">
                         <span className="font-mono text-xs">{p.sku}</span>
-                        {copiedSku === p.sku ? (
-                          <Check size={11} className="text-emerald-500 ml-1 inline" />
-                        ) : (
-                          <Copy size={11} className="text-slate-400 ml-1 opacity-40 inline" />
-                        )}
                       </div>
                       <div className="product-category-tag">{p.category}</div>
                     </td>
@@ -505,8 +673,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                 </tr>
               </tfoot>
             </table>
-          </div>
-        )}
+        </div>
 
         {/* ── 2. Visual Product Cards Grid (Optional Screen View) ── */}
         {viewMode === 'cards' && (
@@ -1389,6 +1556,10 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           }
         }
 
+        .print-only-schedule {
+          display: none;
+        }
+
         /* ═══════════════════════════════════════════════════════════════
            PRINT OPTIMIZATION ENGINE (@media print)
            ═══════════════════════════════════════════════════════════════ */
@@ -1404,6 +1575,9 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           }
           .no-print {
             display: none !important;
+          }
+          .print-only-schedule {
+            display: block !important;
           }
           .colway-price-root {
             background: #ffffff !important;

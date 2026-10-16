@@ -38,40 +38,72 @@ export default function StandardDrawer({
   zIndex = 9999,
 }) {
   const bodyRef = React.useRef(null);
+  const panelRef = React.useRef(null);
+  const previousFocusRef = React.useRef(null);
   const [mounted, setMounted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
   // Reset expansion when drawer closes or changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!isOpen) setIsExpanded(false);
   }, [isOpen]);
 
-  // Prevent body scroll when open and reset drawer scroll to top
+  // Prevent body scroll when open, reset scroll to top, and manage focus restoration
   useEffect(() => {
     if (isOpen) {
+      previousFocusRef.current = document.activeElement;
       document.body.style.overflow = 'hidden';
       if (bodyRef.current) {
         bodyRef.current.scrollTop = 0;
       }
     } else {
       document.body.style.overflow = '';
+      if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
+        try {
+          previousFocusRef.current.focus();
+        } catch {
+          // ignore focus restoration errors if element unmounted
+        }
+        previousFocusRef.current = null;
+      }
     }
     return () => {
       document.body.style.overflow = '';
     };
   }, [isOpen, title]);
 
-  // Handle Escape key
+  // Handle Escape key and Tab focus trap within drawer
   useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === 'Escape' && isOpen) onClose();
+    const handleKeyDown = (e) => {
+      if (!isOpen) return;
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key === 'Tab' && panelRef.current) {
+        const focusable = panelRef.current.querySelectorAll(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
   if (!isOpen || !mounted) return null;
@@ -109,6 +141,10 @@ export default function StandardDrawer({
 
       {/* Drawer Panel */}
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={typeof title === 'string' ? title : 'Panel'}
         className={`standard-drawer-panel ${fullWorkspace ? 'drawer-full-workspace' : ''}`}
         style={{
           position: 'relative',
@@ -189,6 +225,7 @@ export default function StandardDrawer({
                   type="button"
                   className="drawer-expand-btn"
                   onClick={() => setIsExpanded(prev => !prev)}
+                  aria-label={isExpanded ? "Collapse panel width" : "Expand panel width"}
                   title={isExpanded ? "Collapse to side drawer" : "Expand width (Wide view)"}
                   style={{
                     background: 'none',

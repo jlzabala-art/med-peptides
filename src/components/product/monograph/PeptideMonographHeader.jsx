@@ -6,6 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
 import { formatCommercialSupplierName } from '@/utils/supplierCommercialNames';
+import { classifyProductDomain } from '@/utils/productNormalizer';
 
 /**
  * PeptideMonographHeader
@@ -51,23 +52,8 @@ export default function PeptideMonographHeader({
     cleanScientific = '';
   }
 
-  // Detect if product is a Diagnostic Test Kit
-  const isDiagnostic = Boolean(
-    product?.category === 'diagnostic' ||
-    product?.category === 'diagnostic_test' ||
-    product?.category === 'diagnostic_tests' ||
-    product?.category?.toLowerCase().includes('diagnostic') ||
-    product?.type?.toLowerCase().includes('diagnostic') ||
-    product?.supplierId?.toLowerCase().includes('teletest') ||
-    product?.supplierName?.toLowerCase().includes('teletest') ||
-    product?.supplierId?.toLowerCase().includes('bloodo') ||
-    product?.sampleType ||
-    slug?.toLowerCase().includes('omega') ||
-    slug?.toLowerCase().includes('htma') ||
-    slug?.toLowerCase().includes('metabolizer') ||
-    slug?.toLowerCase().includes('teletest') ||
-    primaryName.toLowerCase().includes('test omega')
-  );
+  // Canonical domain classification
+  const { isDiagnostic } = classifyProductDomain(product, { slug, activeFormat });
 
   // FDA reference formulation details (Vyleesi)
   const hasFdaRef = isPt141 || product.hasFdaReference;

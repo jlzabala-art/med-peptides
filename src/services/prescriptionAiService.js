@@ -216,6 +216,27 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
   // Generate shared sessionId if multiple formulations exist in a single document
   const sessionId = blocks.length > 1 ? `sess_${Date.now()}_${Math.random().toString(36).substring(2, 7)}` : null;
 
+  // Dynamic EU GMP Regulatory Batch Dates (Rule #40: mfgDate >= prescriptionDate, expDate = mfgDate + 1 year)
+  const computeEuGmpBatchDates = (rxDateStr) => {
+    const now = new Date();
+    let baseDate = now;
+    if (rxDateStr) {
+      const parsed = new Date(rxDateStr);
+      if (!Number.isNaN(parsed.getTime()) && parsed > now) {
+        baseDate = parsed;
+      }
+    }
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const mfgDate = `${pad2(baseDate.getDate())}-${pad2(baseDate.getMonth() + 1)}-${baseDate.getFullYear()}`;
+    const expObj = new Date(baseDate.getTime());
+    expObj.setFullYear(expObj.getFullYear() + 1);
+    expObj.setDate(expObj.getDate() - 1);
+    const expDate = `${pad2(expObj.getDate())}-${pad2(expObj.getMonth() + 1)}-${expObj.getFullYear()}`;
+    return { mfgDate, expDate };
+  };
+  const resolvedRxDateStr = rawData.prescriptionDate || new Date().toISOString().slice(0, 10);
+  const { mfgDate: dynamicMfgDate, expDate: dynamicExpDate } = computeEuGmpBatchDates(resolvedRxDateStr);
+
   // Split multipart formulation blocks into individual prescriptions by default
   const shouldSplitBlocks = options.splitBlocksIntoSeparatePrescriptions !== false && blocks.length > 1;
 
@@ -375,10 +396,10 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
         volume: block.volume || null,
         duration: block.duration || '30 days',
         posology: block.posology || '',
-        date: rawData.prescriptionDate || new Date().toISOString().slice(0, 10),
-        prescriptionDate: rawData.prescriptionDate || new Date().toISOString().slice(0, 10),
-        mfgDate: '05-10-2026',
-        expDate: '04-10-2027',
+        date: resolvedRxDateStr,
+        prescriptionDate: resolvedRxDateStr,
+        mfgDate: dynamicMfgDate,
+        expDate: dynamicExpDate,
         prescriptionLines,
         items: prescriptionLines,
         fagron: isFagron ? {
@@ -722,10 +743,10 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
     posology: combinedPosology,
     phases,
     formulationBlocks: blocks,
-    date: rawData.prescriptionDate || new Date().toISOString().slice(0, 10),
-    prescriptionDate: rawData.prescriptionDate || new Date().toISOString().slice(0, 10),
-    mfgDate: '05-10-2026',
-    expDate: '04-10-2027',
+    date: resolvedRxDateStr,
+    prescriptionDate: resolvedRxDateStr,
+    mfgDate: dynamicMfgDate,
+    expDate: dynamicExpDate,
 
     // ALL PRODUCTS / LINES CONSOLIDATED IN THIS SINGLE PRESCRIPTION
     prescriptionLines: allPrescriptionLines,
@@ -865,11 +886,11 @@ export async function checkDuplicatesInFirestore(prescriptions = []) {
  * Optionally creates/links patient profile in `patients/`.
  * 
  * @param {Array<Object>} prescriptionsToSave 
- * @param {Object} options - { alsoCreatePatient: boolean, currentUser: Object }
+ * @param {Object} options - { alsoCreatePatient: boolean, currentUser: Object, targetStatus: string }
  * @returns {Promise<{ savedCount: number, savedIds: Array<string>, errors: Array<string> }>}
  */
 export async function savePrescriptionsToFirestore(prescriptionsToSave = [], options = {}) {
-  const { alsoCreatePatient = true, currentUser } = options;
+  const { alsoCreatePatient = false, currentUser, targetStatus } = options;
   let savedCount = 0;
   const savedIds = [];
   const savedPrescriptions = [];
@@ -879,7 +900,7 @@ export async function savePrescriptionsToFirestore(prescriptionsToSave = [], opt
     try {
       let patientId = rx.patientId || null;
 
-      // Automatically register or link patient in CRM if requested
+      // Automatically register or link patient in CRM only if explicitly requested
       if (alsoCreatePatient && rx.patient?.name && !patientId) {
         try {
           const patientResult = await createPatient({
@@ -898,14 +919,17 @@ export async function savePrescriptionsToFirestore(prescriptionsToSave = [], opt
         }
       }
 
+      const finalStatus = targetStatus || rx.status || 'draft';
+      const isSubmittedForReview = finalStatus === 'pending';
+
       // Prepare payload with Firestore serverTimestamps (Two-Phase Ingestion Workflow)
       const payload = {
         ...rx,
-        status: rx.status || 'draft',
-        state: rx.state || 'draft',
-        ingestionStage: 'awaiting_atlas_review',
+        status: finalStatus,
+        state: finalStatus,
+        ingestionStage: isSubmittedForReview ? 'awaiting_atlas_review' : 'draft_saved',
         reviewEtaHours: 24,
-        validationStatus: rx.validationStatus || 'Under Clinical Review',
+        validationStatus: isSubmittedForReview ? 'Under Clinical Review' : (rx.validationStatus || 'Draft'),
         patientId: patientId || rx.patientId || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -933,7 +957,7 @@ export async function savePrescriptionsToFirestore(prescriptionsToSave = [], opt
         treatmentType: payload.treatmentType || 'Formulation',
         lineCount: payload.prescriptionLines?.length || 0,
         status: payload.status,
-        ingestionStage: 'awaiting_atlas_review',
+        ingestionStage: payload.ingestionStage,
         reviewEtaHours: 24,
         rxUrl: `/rx/${officialCode}`,
       });

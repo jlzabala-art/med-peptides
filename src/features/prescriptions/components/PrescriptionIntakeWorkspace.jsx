@@ -4,10 +4,10 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
 import {
   Upload, X, CheckCircle2, Activity, AlertCircle, Save, FileText,
-  Beaker, Sparkles, ExternalLink, RefreshCw, UserCheck, ShieldAlert,
-  Calendar, Stethoscope, Dna, Info, Copy, Check, ArrowRight, Phone,
-  FileSpreadsheet, Eye, Clock, ChevronDown, ChevronUp, ChevronRight,
-  MessageCircle, RotateCcw, ShieldCheck
+  Beaker, Sparkles, ExternalLink, RefreshCw, ShieldAlert,
+  Stethoscope, Dna, Info, Copy, Check, ArrowRight, ArrowLeft, Phone,
+  FileSpreadsheet, Eye, Clock, ChevronDown, ChevronUp,
+  MessageCircle, RotateCcw, ShieldCheck, Send
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import StandardDrawer from '../../../components/ui/StandardDrawer';
@@ -24,7 +24,12 @@ import {
 } from '../../../services/prescriptionAiService';
 import { exportPrescriptionToXlsx } from '../../../utils/exportPrescriptionToXlsx';
 
-export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuccess }) {
+export default function PrescriptionIntakeWorkspace({
+  isOpen,
+  onClose,
+  onSaveSuccess,
+  doctorContext = null
+}) {
   const { openDrawer } = useDrawer();
   const { user } = useAuth();
 
@@ -32,15 +37,18 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
   const [filePreview, setFilePreview] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [savingActionType, setSavingActionType] = useState('draft'); // 'draft' | 'pending'
   const [error, setError] = useState(null);
 
   const [rawAiData, setRawAiData] = useState(null);
   const [normalizedRxList, setNormalizedRxList] = useState([]);
-  const [alsoCreatePatient, setAlsoCreatePatient] = useState(true);
+  // Default to false so we never silently select or merge similarly named patients without physician opt-in
+  const [alsoCreatePatient, setAlsoCreatePatient] = useState(false);
   const [savedPrescriptionsResult, setSavedPrescriptionsResult] = useState(null);
   const [copiedUrl, setCopiedUrl] = useState(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [pendingTargetStatus, setPendingTargetStatus] = useState('draft');
   const [showHowReviewWorks, setShowHowReviewWorks] = useState(false);
 
   // Workflow progress determination: 1 = Upload, 2 = Review, 3 = Save draft
@@ -86,16 +94,17 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     setFilePreview(URL.createObjectURL(droppedFile));
 
     try {
-      toast.loading('Extracting prescription data with Atlas Clinical AI...', { id: 'ai-intake' });
+      toast.loading('Extracting document details...', { id: 'ai-intake' });
       
       // 1. Multimodal extraction
       const aiData = await extractPrescriptionFromDocument(droppedFile);
       setRawAiData(aiData);
 
       // 2. Normalize to canonical schema & resolve catalog ingredients
-      toast.loading('Matching ingredients against clinical pharmacopeia...', { id: 'ai-intake' });
+      toast.loading('Matching ingredients against clinical catalogue...', { id: 'ai-intake' });
       const normalized = await normalizeExtractedPrescriptions(aiData, {
         currentUser: user,
+        context: doctorContext || {},
         splitBlocksIntoSeparatePrescriptions: true,
       });
 
@@ -110,10 +119,10 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     } catch (err) {
       console.error('[PrescriptionIntakeWorkspace] Error:', err);
       const rawMsg = String(err?.message || '');
-      let cleanMsg = 'Error analyzing prescription with Atlas AI';
+      let cleanMsg = 'Unable to extract details from this document. Please check the file and retry.';
 
       if (/503|UNAVAILABLE|high demand|saturad|peak demand|capacity|spikes in demand|temporarily|busy/i.test(rawMsg)) {
-        cleanMsg = 'Atlas AI service is temporarily experiencing high demand. Please retry in a few moments.';
+        cleanMsg = 'Extraction service is temporarily experiencing high demand. Please retry in a few moments.';
       } else if (rawMsg && !rawMsg.startsWith('{')) {
         cleanMsg = rawMsg;
       }
@@ -123,7 +132,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     } finally {
       setIsProcessing(false);
     }
-  }, [user]);
+  }, [user, doctorContext]);
 
   const { getRootProps, getInputProps, isDragActive, open: openFileDialog } = useDropzone({
     onDrop: (accepted, rejected) => {
@@ -145,12 +154,66 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     accept: {
       'application/pdf': ['.pdf'],
       'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
-      'image/webp': ['.webp']
+      'image/png': ['.png']
     },
     maxSize: 15 * 1024 * 1024,
     disabled: isProcessing
   });
+
+  // Editable review field handlers
+  const handleUpdateSharedHeaderField = useCallback((field, value) => {
+    setNormalizedRxList(prev => prev.map(rx => {
+      const updated = { ...rx };
+      if (field === 'patientName') {
+        updated.patientName = value;
+        updated.patient = { ...(updated.patient || {}), name: value };
+      } else if (field === 'patientDob') {
+        updated.patient = { ...(updated.patient || {}), dob: value };
+      } else if (field === 'doctorName') {
+        updated.doctorName = value;
+        updated.doctor = { ...(updated.doctor || {}), name: value };
+      } else if (field === 'doctorLicense') {
+        updated.doctorLicense = value;
+        updated.doctor = { ...(updated.doctor || {}), license: value };
+      }
+      return updated;
+    }));
+  }, []);
+
+  const handleUpdateFormulationField = useCallback((rxIndex, field, value) => {
+    setNormalizedRxList(prev => {
+      const copy = [...prev];
+      copy[rxIndex] = {
+        ...copy[rxIndex],
+        [field]: value
+      };
+      return copy;
+    });
+  }, []);
+
+  const handleUpdateIngredientField = useCallback((rxIndex, lineIndex, field, value) => {
+    setNormalizedRxList(prev => {
+      const copy = [...prev];
+      const rx = { ...copy[rxIndex] };
+      const lines = [...(rx.prescriptionLines || [])];
+      const updatedLine = {
+        ...lines[lineIndex],
+        [field]: value
+      };
+      if (field === 'dose') {
+        updatedLine.dosage = value;
+        updatedLine.strength = value;
+      }
+      if (field === 'productName') {
+        updatedLine.activeIngredient = value;
+      }
+      lines[lineIndex] = updatedLine;
+      rx.prescriptionLines = lines;
+      rx.items = lines;
+      copy[rxIndex] = rx;
+      return copy;
+    });
+  }, []);
 
   // Re-map an individual line item to a selected catalog product
   const handleProductMapped = (rxIndex, lineIndex, selectedProduct) => {
@@ -188,7 +251,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     const fullUrl = `${window.location.origin}${url}`;
     navigator?.clipboard?.writeText(fullUrl);
     setCopiedUrl(rxNumber);
-    toast.success('Online prescription dossier link copied to clipboard ✓');
+    toast.success('Online prescription dossier link copied to clipboard');
     setTimeout(() => setCopiedUrl(null), 2500);
   };
 
@@ -202,37 +265,67 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     setShowDuplicateModal(false);
   };
 
+  const isDraftValid = useMemo(() => {
+    if (!normalizedRxList.length) return false;
+    const first = normalizedRxList[0];
+    const hasPatientName = Boolean(first?.patientName && first.patientName.trim().length > 0);
+    const hasLines = normalizedRxList.some(r => Array.isArray(r.prescriptionLines) && r.prescriptionLines.length > 0);
+    return hasPatientName && hasLines;
+  }, [normalizedRxList]);
+
+  const disabledReason = useMemo(() => {
+    if (isProcessing) return 'Waiting for document extraction to finish...';
+    if (!normalizedRxList.length) return 'No extracted prescription details available yet.';
+    if (!normalizedRxList[0]?.patientName?.trim()) return 'Enter a patient name before saving.';
+    if (!normalizedRxList.some(r => r.prescriptionLines?.length > 0)) return 'At least one active ingredient is required.';
+    return null;
+  }, [isProcessing, normalizedRxList]);
+
   // Save directly to Firestore using canonical schema
-  const handleConfirmSave = async (overrideDuplicate = false) => {
-    if (!normalizedRxList.length) {
-      toast.error('No prescriptions available to save.');
+  const handleConfirmSave = async (overrideDuplicate = false, targetStatus = 'draft') => {
+    if (!isDraftValid) {
+      toast.error(disabledReason || 'Please complete required prescription fields before saving.');
       return;
     }
 
     const hasDups = normalizedRxList.some(r => r._dupStatus === 'duplicate');
     if (hasDups && !overrideDuplicate) {
+      setPendingTargetStatus(targetStatus);
       setShowDuplicateModal(true);
       return;
     }
 
     setIsSaving(true);
+    setSavingActionType(targetStatus);
     setShowDuplicateModal(false);
     try {
-      toast.loading('Saving prescription draft to clinical repository...', { id: 'save-intake' });
+      const isSubmitting = targetStatus === 'pending';
+      toast.loading(
+        isSubmitting
+          ? 'Submitting prescription for pharmacist review...'
+          : 'Saving prescription draft...',
+        { id: 'save-intake' }
+      );
       
       const result = await savePrescriptionsToFirestore(normalizedRxList, {
         alsoCreatePatient,
         currentUser: user,
         overrideDuplicate,
+        targetStatus,
       });
 
       if (result.errors?.length > 0) {
         toast.error(`Saved with advisories: ${result.errors[0]}`, { id: 'save-intake' });
       } else {
-        toast.success(`Successfully saved ${result.savedCount} prescription draft(s)!`, { id: 'save-intake' });
+        toast.success(
+          isSubmitting
+            ? `Submitted ${result.savedCount} prescription(s) for pharmacist review`
+            : `Saved ${result.savedCount} prescription draft(s)`,
+          { id: 'save-intake' }
+        );
       }
 
-      onSaveSuccess && onSaveSuccess(result.savedIds);
+      onSaveSuccess && onSaveSuccess(result.savedIds, result.savedPrescriptions);
 
       if (result.savedPrescriptions && result.savedPrescriptions.length > 0) {
         setSavedPrescriptionsResult(result.savedPrescriptions);
@@ -297,7 +390,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
             <Upload size={14} />
-            <span>Upload Another Prescription</span>
+            <span>Upload another prescription</span>
           </button>
           <button
             type="button"
@@ -305,35 +398,47 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
             onClick={onClose}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: '160px', justifyContent: 'center' }}
           >
-            <span>View in Prescriptions Table</span>
+            <span>Done</span>
             <ArrowRight size={15} />
           </button>
         </div>
       );
     }
 
+    // Initial state: only Cancel (no unexplained, permanently disabled Save button)
     if (!file) {
       return (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-          <button className="gcp-btn-secondary" onClick={handleSafeClose}>
+        <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
+          <button type="button" className="gcp-btn-secondary" onClick={handleSafeClose}>
             Cancel
           </button>
-          <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-            Choose a prescription file to begin review.
-          </div>
         </div>
       );
     }
 
+    // Review state: Back, Cancel, optional tools, Submit for review (secondary), Save draft (primary)
     return (
       <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button className="gcp-btn-secondary" onClick={handleSafeClose}>
+          <button
+            type="button"
+            className="gcp-btn-secondary"
+            onClick={handleSafeChangeFile}
+            disabled={isSaving}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <ArrowLeft size={14} />
+            <span>Back</span>
+          </button>
+
+          <button type="button" className="gcp-btn-secondary" onClick={handleSafeClose} disabled={isSaving}>
             Cancel
           </button>
+
           {normalizedRxList.length > 0 && (
             <>
               <button
+                type="button"
                 className="gcp-btn-secondary"
                 onClick={handleOpenInBuilder}
                 disabled={isSaving}
@@ -368,22 +473,45 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+          {disabledReason && (
+            <span style={{ fontSize: '0.76rem', color: '#64748b' }}>
+              {disabledReason}
+            </span>
+          )}
+
           <button
-            className="gcp-btn-primary"
-            onClick={() => handleConfirmSave(false)}
-            disabled={!normalizedRxList.length || isSaving || isProcessing}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '150px', justifyContent: 'center' }}
+            type="button"
+            className="gcp-btn-secondary"
+            onClick={() => handleConfirmSave(false, 'pending')}
+            disabled={!isDraftValid || isSaving || isProcessing}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}
+            title="Save and submit to compounding pharmacist for review (reviewed within 24 hours)"
           >
-            {isSaving ? (
+            {isSaving && savingActionType === 'pending' ? (
+              <>
+                <RefreshCw size={14} className="spin-slow" />
+                <span>Submitting...</span>
+              </>
+            ) : (
+              <>
+                <Send size={14} />
+                <span>Submit for review</span>
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            className="gcp-btn-primary"
+            onClick={() => handleConfirmSave(false, 'draft')}
+            disabled={!isDraftValid || isSaving || isProcessing}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '140px', justifyContent: 'center' }}
+          >
+            {isSaving && savingActionType === 'draft' ? (
               <>
                 <RefreshCw size={15} className="spin-slow" />
                 <span>Saving draft...</span>
-              </>
-            ) : isProcessing ? (
-              <>
-                <Activity size={15} className="spin-slow" />
-                <span>Extracting details...</span>
               </>
             ) : (
               <>
@@ -397,6 +525,8 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     );
   };
 
+  const isSubmittedResult = savedPrescriptionsResult?.some(r => r.status === 'pending');
+
   return (
     <>
       <StandardDrawer
@@ -409,19 +539,19 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
       >
         <div className="prescription-intake-body">
           {/* ── Compact Progress Indicator ── */}
-          <div className="workflow-stepper-strip">
+          <div className="workflow-stepper-strip" aria-label="Prescription intake steps">
             <div className={`step-node ${currentStep >= 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
-              <div className="step-circle">{currentStep > 1 ? '✓' : '1'}</div>
+              <div className="step-circle">{currentStep > 1 ? <Check size={12} /> : '1'}</div>
               <span className="step-title">Upload</span>
             </div>
             <div className={`step-line ${currentStep >= 2 ? 'active' : ''}`} />
             <div className={`step-node ${currentStep >= 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
-              <div className="step-circle">{currentStep > 2 ? '✓' : '2'}</div>
+              <div className="step-circle">{currentStep > 2 ? <Check size={12} /> : '2'}</div>
               <span className="step-title">Review</span>
             </div>
             <div className={`step-line ${currentStep >= 3 ? 'active' : ''}`} />
             <div className={`step-node ${currentStep >= 3 ? 'active' : ''}`}>
-              <div className="step-circle">3</div>
+              <div className="step-circle">{currentStep >= 3 ? <Check size={12} /> : '3'}</div>
               <span className="step-title">Save draft</span>
             </div>
           </div>
@@ -435,12 +565,25 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                 </div>
                 <div className="saved-text-block">
                   <div className="saved-heading-row">
-                    <h3 className="saved-title">Prescription draft saved</h3>
-                    <span className="saved-badge">Draft Status · Pending Verification</span>
+                    <h3 className="saved-title">
+                      {isSubmittedResult ? 'Submitted for pharmacist review' : 'Prescription draft saved'}
+                    </h3>
+                    <span className="saved-badge">
+                      {isSubmittedResult ? 'Pending Pharmacist Review · Not Yet Approved' : 'Draft Status · Not Yet Approved'}
+                    </span>
                   </div>
                   <p className="saved-description">
-                    The prescription has been structured and stored in your practice repository as a <strong>Draft</strong>. 
-                    Atlas compounding pharmacists will verify excipients, molecular vehicles, and posology prior to dispensary fulfillment.
+                    {isSubmittedResult ? (
+                      <>
+                        Your prescription has been submitted for pharmacist review (status: <strong>Pending</strong>).
+                        Compounding pharmacists verify excipients, molecular vehicles, and posology within 24 hours before final approval.
+                      </>
+                    ) : (
+                      <>
+                        The prescription has been saved in your practice repository as a <strong>Draft</strong>.
+                        Drafts are not yet approved or dispensed until submitted and verified by a compounding pharmacist.
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
@@ -463,7 +606,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                       </div>
 
                       <span className="draft-pill">
-                        <Clock size={12} /> Draft Mode
+                        <Clock size={12} /> {saved.status === 'pending' ? 'Submitted for Review' : 'Draft'}
                       </span>
                     </div>
 
@@ -486,11 +629,11 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                         style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', padding: '6px 14px' }}
                       >
                         {copiedUrl === saved.prescriptionNumber ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
-                        <span>{copiedUrl === saved.prescriptionNumber ? 'Link Copied ✓' : 'Copy Patient Direct Link'}</span>
+                        <span>{copiedUrl === saved.prescriptionNumber ? 'Link Copied' : 'Copy Patient Direct Link'}</span>
                       </button>
 
                       <a
-                        href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Hello ${saved.patientName}, here is your digitized medical prescription with validated clinical access:\n\n🔗 ${typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com'}${saved.rxUrl}\n\nVerification Code: ${saved.prescriptionNumber}`)}`}
+                        href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Hello ${saved.patientName}, here is your digitized medical prescription with validated clinical access:\n\n${typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com'}${saved.rxUrl}\n\nVerification Code: ${saved.prescriptionNumber}`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="gcp-btn-secondary"
@@ -534,7 +677,6 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                 </div>
                 
                 <h3 className="upload-main-heading">Upload a document</h3>
-                <p className="upload-drag-text">Or drag and drop your file here</p>
 
                 <button
                   type="button"
@@ -546,6 +688,8 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                 >
                   Choose file
                 </button>
+
+                <p className="upload-drag-text">Or drag and drop your file here</p>
 
                 <div className="upload-specs-block">
                   <div className="upload-examples">Prescriptions, clinical reports and compounding formulas</div>
@@ -575,6 +719,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                   type="button"
                   className="how-review-trigger"
                   onClick={() => setShowHowReviewWorks(!showHowReviewWorks)}
+                  aria-expanded={showHowReviewWorks}
                 >
                   <Info size={14} className="text-slate-500" />
                   <span>How review works</span>
@@ -598,13 +743,19 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                     <div className="how-review-item">
                       <div className="how-num">3</div>
                       <div className="how-text">
-                        <strong>Saving a draft:</strong> The prescription is stored as a draft in your dispensary repository. Drafts are never finalized or dispensed automatically.
+                        <strong>Saving a draft:</strong> You can save the prescription as a draft in your practice repository at any time. Saved drafts are never approved or dispensed automatically.
                       </div>
                     </div>
                     <div className="how-review-item">
                       <div className="how-num">4</div>
                       <div className="how-text">
-                        <strong>Pharmacist verification:</strong> Compounding pharmacists verify excipients, chemical compatibility, and posology prior to fulfillment.
+                        <strong>Submission for pharmacist review:</strong> When ready, submit the prescription so compounding pharmacists can verify excipients, chemical compatibility, and posology (within 24 hours).
+                      </div>
+                    </div>
+                    <div className="how-review-item">
+                      <div className="how-num">5</div>
+                      <div className="how-text">
+                        <strong>Final approval:</strong> Once pharmacist verification and physician sign-off are complete, the prescription transitions to final approved status for dispensing.
                       </div>
                     </div>
                   </div>
@@ -669,8 +820,12 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                   </div>
 
                   {rawAiData && (
-                    <span className={`classification-badge ${isFagron ? 'fagron-badge' : 'standard-badge'}`}>
-                      {isFagron ? `✦ Fagron ${rawAiData.fagronDetails?.testName || 'Genomics'}` : '✦ Standard Formulation'}
+                    <span
+                      className={`classification-badge ${isFagron ? 'fagron-badge' : 'standard-badge'}`}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Sparkles size={12} />
+                      <span>{isFagron ? `Fagron ${rawAiData.fagronDetails?.testName || 'Genomics'}` : 'Standard Formulation'}</span>
                     </span>
                   )}
                 </div>
@@ -714,6 +869,25 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                     </div>
                   ) : normalizedRxList.length > 0 ? (
                     <div className="review-sections-list">
+                      {/* Missing or Uncertain Extraction Output Notice (only when reported by actual extraction) */}
+                      {Array.isArray(rawAiData?.missing) && rawAiData.missing.length > 0 && (
+                        <div className="clinical-safety-card">
+                          <div className="clinical-safety-header">
+                            <AlertCircle size={15} className="text-amber-600" />
+                            <span className="clinical-safety-title">
+                              Missing or uncertain information in document ({rawAiData.missing.length})
+                            </span>
+                          </div>
+                          <div className="clinical-safety-list">
+                            {rawAiData.missing.map((item, idx) => (
+                              <div key={idx} className="clinical-warning-item">
+                                • {item}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Potential Duplication Warning */}
                       {hasDuplicates && (
                         <div className="duplicate-alert-banner">
@@ -762,36 +936,64 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                         </div>
                       )}
 
-                      {/* Patient & Prescribing Physician Card */}
+                      {/* Patient & Prescribing Physician Card (Editable Fields) */}
                       <div className="patient-physician-card">
                         <div className="patient-physician-grid">
                           <div>
-                            <span className="card-section-label">Patient Profile</span>
-                            <h4 className="patient-name-display">
-                              {normalizedRxList[0]?.patientName || 'Unknown Patient'}
-                            </h4>
-                            {rawAiData?.patient?.dob && (
-                              <span className="patient-dob-text">
-                                DOB: {rawAiData.patient.dob} {rawAiData.patient.gender ? `(${rawAiData.patient.gender})` : ''}
-                              </span>
-                            )}
+                            <label className="card-section-label" htmlFor="intake-patient-name">
+                              Patient Profile
+                            </label>
+                            <input
+                              id="intake-patient-name"
+                              type="text"
+                              className="review-inline-input font-semibold"
+                              value={normalizedRxList[0]?.patientName || ''}
+                              onChange={(e) => handleUpdateSharedHeaderField('patientName', e.target.value)}
+                              placeholder="Enter patient full name"
+                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                              <span className="patient-dob-text">DOB:</span>
+                              <input
+                                type="text"
+                                className="review-inline-input-sm"
+                                value={normalizedRxList[0]?.patient?.dob || rawAiData?.patient?.dob || ''}
+                                onChange={(e) => handleUpdateSharedHeaderField('patientDob', e.target.value)}
+                                placeholder="YYYY-MM-DD (optional)"
+                                aria-label="Patient date of birth"
+                              />
+                            </div>
                           </div>
 
                           <div>
-                            <span className="card-section-label">Prescribing Physician</span>
+                            <label className="card-section-label" htmlFor="intake-doctor-name">
+                              Prescribing Physician
+                            </label>
                             <div className="doctor-name-display">
-                              <Stethoscope size={14} className="text-slate-500" />
-                              <span>{normalizedRxList[0]?.doctorName || 'Prescribing Physician'}</span>
+                              <Stethoscope size={14} className="text-slate-500 flex-shrink-0" />
+                              <input
+                                id="intake-doctor-name"
+                                type="text"
+                                className="review-inline-input"
+                                value={normalizedRxList[0]?.doctorName || ''}
+                                onChange={(e) => handleUpdateSharedHeaderField('doctorName', e.target.value)}
+                                placeholder="Prescribing physician name"
+                              />
                             </div>
-                            {normalizedRxList[0]?.doctorLicense && (
-                              <span className="doctor-license-text">
-                                License / Reg: {normalizedRxList[0].doctorLicense}
-                              </span>
-                            )}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                              <span className="doctor-license-text">License:</span>
+                              <input
+                                type="text"
+                                className="review-inline-input-sm"
+                                value={normalizedRxList[0]?.doctorLicense || ''}
+                                onChange={(e) => handleUpdateSharedHeaderField('doctorLicense', e.target.value)}
+                                placeholder="Medical license (optional)"
+                                aria-label="Physician medical license"
+                              />
+                            </div>
                           </div>
                         </div>
 
-                        {/* Patient linking checkbox */}
+                        {/* Explicit opt-in patient linking checkbox (never silently merges similarly named patients) */}
                         <div className="patient-linking-strip">
                           <input
                             type="checkbox"
@@ -801,7 +1003,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                             className="cursor-pointer"
                           />
                           <label htmlFor="autoCreatePatient" className="patient-linking-label">
-                            Link or register patient profile in clinical repository
+                            Create a new patient record in the clinical repository from these details (leave unchecked to link manually later)
                           </label>
                         </div>
                       </div>
@@ -846,10 +1048,14 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                         {normalizedRxList.map((rxItem, rxIdx) => (
                           <div key={rxIdx} className="formulation-card">
                             <div className="formulation-card-top">
-                              <div>
-                                <h4 className="formulation-title">
-                                  {rxItem.treatmentType || `Formulation ${rxIdx + 1}`}
-                                </h4>
+                              <div style={{ flex: 1 }}>
+                                <input
+                                  type="text"
+                                  className="review-inline-input font-bold"
+                                  value={rxItem.treatmentType || `Formulation ${rxIdx + 1}`}
+                                  onChange={(e) => handleUpdateFormulationField(rxIdx, 'treatmentType', e.target.value)}
+                                  aria-label={`Formulation ${rxIdx + 1} title`}
+                                />
                                 {rxItem.volume && (
                                   <span className="formulation-volume">
                                     Volume / Delivery: {rxItem.volume} {rxItem.dispensingForm ? `(${rxItem.dispensingForm})` : ''}
@@ -857,17 +1063,41 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                                 )}
                               </div>
 
-                              <span className={`validation-status-pill ${rxItem.validationStatus === 'Ready' ? 'status-ready' : 'status-review'}`}>
-                                {rxItem.validationStatus === 'Ready' ? '✓ Ready to Prescribe' : '⚠ Review Required'}
+                              <span
+                                className={`validation-status-pill ${rxItem.validationStatus === 'Ready' ? 'status-ready' : 'status-review'}`}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}
+                              >
+                                {rxItem.validationStatus === 'Ready' ? (
+                                  <>
+                                    <CheckCircle2 size={12} />
+                                    <span>Ready for draft</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <AlertCircle size={12} />
+                                    <span>Review required</span>
+                                  </>
+                                )}
                               </span>
                             </div>
 
-                            {/* Posology sentence */}
-                            {rxItem.posology && (
-                              <div className="posology-quote-box">
-                                "{rxItem.posology}"
-                              </div>
-                            )}
+                            {/* Editable Posology instructions */}
+                            <div className="posology-quote-box">
+                              <label
+                                htmlFor={`rx-posology-${rxIdx}`}
+                                style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', marginBottom: '3px', fontStyle: 'normal' }}
+                              >
+                                Posology & Administration Instructions
+                              </label>
+                              <textarea
+                                id={`rx-posology-${rxIdx}`}
+                                rows={2}
+                                className="review-inline-textarea"
+                                value={rxItem.posology || ''}
+                                onChange={(e) => handleUpdateFormulationField(rxIdx, 'posology', e.target.value)}
+                                placeholder="Enter dosing and administration instructions..."
+                              />
+                            </div>
 
                             {/* Ingredients Lines List */}
                             <div className="ingredients-lines-list">
@@ -876,20 +1106,28 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                                   key={line.id || lineIdx}
                                   className={`ingredient-line-item ${line._isPlaceholder ? 'placeholder-item' : 'verified-item'}`}
                                 >
-                                  <div className="ingredient-line-header">
-                                    <div className="ingredient-identity">
+                                  <div className="ingredient-line-header" style={{ flexWrap: 'wrap' }}>
+                                    <div className="ingredient-identity" style={{ flex: '1 1 200px' }}>
                                       <Beaker size={14} className={line._isPlaceholder ? 'text-amber-600' : 'text-blue-600'} />
-                                      <span className="ingredient-name">
-                                        {line.productName || line.activeIngredient}
-                                      </span>
+                                      <input
+                                        type="text"
+                                        className="review-inline-input-sm font-semibold"
+                                        style={{ flex: 1 }}
+                                        value={line.productName || line.activeIngredient || ''}
+                                        onChange={(e) => handleUpdateIngredientField(rxIdx, lineIdx, 'productName', e.target.value)}
+                                        aria-label={`Ingredient ${lineIdx + 1} name`}
+                                      />
                                     </div>
 
                                     <div className="ingredient-meta-badges">
-                                      {line.dose && (
-                                        <span className="dose-badge">
-                                          {line.dose}
-                                        </span>
-                                      )}
+                                      <input
+                                        type="text"
+                                        className="review-inline-dose-input"
+                                        value={line.dose || ''}
+                                        onChange={(e) => handleUpdateIngredientField(rxIdx, lineIdx, 'dose', e.target.value)}
+                                        placeholder="Strength / Dose"
+                                        aria-label={`Ingredient ${lineIdx + 1} dose`}
+                                      />
                                       <span className={`catalog-badge ${line._isPlaceholder ? 'catalog-placeholder' : 'catalog-verified'}`}>
                                         {line._isPlaceholder ? 'Needs Mapping' : 'Verified in Catalogue'}
                                       </span>
@@ -914,11 +1152,11 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                         ))}
                       </div>
 
-                      {/* Clinical Review Notice */}
+                      {/* Pharmacist Review Notice (at submission stage) */}
                       <div className="review-assurance-footer-note">
                         <ShieldCheck size={15} className="text-blue-600 flex-shrink-0" />
                         <span>
-                          Review all active ingredients, concentrations, and instructions before saving. Drafts require pharmacist verification prior to dispensing.
+                          Save as a draft to continue editing later, or submit for pharmacist review. Submitted prescriptions are verified by a compounding pharmacist within 24 hours before final approval.
                         </span>
                       </div>
                     </div>
@@ -975,12 +1213,12 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
 
               <button
                 type="button"
-                onClick={() => handleConfirmSave(true)}
+                onClick={() => handleConfirmSave(true, pendingTargetStatus)}
                 className="gcp-btn-primary w-full justify-center"
                 style={{ backgroundColor: '#ea580c', borderColor: '#c2410c' }}
               >
                 <Save size={14} />
-                <span>Save Draft Anyway (Create Revision)</span>
+                <span>{pendingTargetStatus === 'pending' ? 'Submit Anyway (Create Revision)' : 'Save Draft Anyway (Create Revision)'}</span>
               </button>
 
               <button
@@ -1111,20 +1349,20 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
           font-size: 1.2rem;
           font-weight: 750;
           color: #0f172a;
-          margin: 0 0 0.35rem 0;
+          margin: 0 0 0.85rem 0;
+        }
+        .choose-file-btn {
+          font-size: 0.88rem;
+          padding: 9px 24px;
+          border-radius: 6px;
+          font-weight: 600;
+          margin-bottom: 0.65rem;
+          pointer-events: auto;
         }
         .upload-drag-text {
           font-size: 0.85rem;
           color: #64748b;
           margin: 0 0 1.25rem 0;
-        }
-        .choose-file-btn {
-          font-size: 0.88rem;
-          padding: 8px 22px;
-          border-radius: 6px;
-          font-weight: 600;
-          margin-bottom: 1.5rem;
-          pointer-events: auto;
         }
         .upload-specs-block {
           border-top: 1px solid #f1f5f9;
@@ -1142,6 +1380,56 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
           font-size: 0.72rem;
           color: #94a3b8;
           font-weight: 500;
+        }
+
+        /* ── Inline Editable Review Inputs ── */
+        .review-inline-input {
+          width: 100%;
+          padding: 5px 8px;
+          font-size: 0.88rem;
+          color: #0f172a;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          margin-top: 3px;
+          transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .review-inline-input:focus,
+        .review-inline-input-sm:focus,
+        .review-inline-textarea:focus,
+        .review-inline-dose-input:focus {
+          outline: none;
+          border-color: #0284c7;
+          box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+        }
+        .review-inline-input-sm {
+          padding: 3px 7px;
+          font-size: 0.78rem;
+          color: #0f172a;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          border-radius: 5px;
+        }
+        .review-inline-textarea {
+          width: 100%;
+          padding: 5px 8px;
+          font-size: 0.78rem;
+          color: #1e293b;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          border-radius: 5px;
+          font-family: inherit;
+          resize: vertical;
+        }
+        .review-inline-dose-input {
+          width: 110px;
+          padding: 3px 7px;
+          font-size: 0.74rem;
+          font-weight: 600;
+          color: #1d4ed8;
+          background: #eff6ff;
+          border: 1px solid #bfdbfe;
+          border-radius: 4px;
         }
 
         /* ── Mobile Upload Secondary ── */

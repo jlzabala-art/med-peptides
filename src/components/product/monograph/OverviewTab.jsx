@@ -6,6 +6,7 @@ import DataTable from '@/components/ui/DataTable';
 import { STANDARD_PRESENTATIONS } from './monographCalculationEngine';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 import { triggerHaptic } from '@/utils/haptics';
+import { classifyProductDomain } from '@/utils/productNormalizer';
 
 /**
  * OverviewTab
@@ -168,28 +169,11 @@ export default function OverviewTab({
   const resolvedSlug = slug || product.slug || product.canonicalName || product.id || 'pt-141';
   const isPt141 = (product.slug || product.canonicalName || product.name || '').toLowerCase().includes('pt-141') || (product.slug || '').toLowerCase().includes('pt141');
 
-  // Determine dominant format & diagnostic classification
-  const rawFmt = String(activeFormat?.id || activeFormat?.name || product.format || product.presentation || product.variants?.[0]?.format || product.variants?.[0]?.presentation || '').toLowerCase();
-  const slugStr = (product?.canonicalName || product?.name || slug || '').toLowerCase();
-  const isDiagnostic = Boolean(
-    product?.category === 'diagnostic' ||
-    product?.category === 'diagnostic_test' ||
-    product?.category === 'diagnostic_tests' ||
-    product?.category?.toLowerCase().includes('diagnostic') ||
-    product?.type?.toLowerCase().includes('diagnostic') ||
-    product?.format === 'diagnostic_kit' ||
-    product?.presentation === 'diagnostic_kit' ||
-    rawFmt.includes('kit') ||
-    rawFmt.includes('test') ||
-    Boolean(product?.sampleType) ||
-    product?.supplierId?.toLowerCase().includes('teletest') ||
-    product?.supplierName?.toLowerCase().includes('teletest') ||
-    product?.supplierId?.toLowerCase().includes('bloodo') ||
-    slugStr.includes('omega') ||
-    slugStr.includes('htma') ||
-    slugStr.includes('metabolizer') ||
-    slugStr.includes('teletest')
-  );
+  // Determine dominant format & diagnostic classification via centralized normalizer
+  const { isDiagnostic, isSpray, isSublingual, isPen } = classifyProductDomain(product, {
+    slug: resolvedSlug,
+    activeFormat
+  });
 
   const genericName = product.scientificName || product.chemical_name || product.genericName || 
     (isDiagnostic ? (product.name || product.canonicalName || 'Diagnostic Laboratory Test Panel') : (isPt141 ? 'Bremelanotide' : (product.canonicalName || product.name || '')));
@@ -209,10 +193,6 @@ export default function OverviewTab({
     ? `${product.referenceBrand}${product.referenceApprovalYear ? ` (Approved ${product.referenceApprovalYear})` : ''}` 
     : (isDiagnostic ? 'CE-IVD In Vitro Diagnostic Medical Device (EU IVDR 2017/746 Compliant) • ISO 15189:2022 Accredited' : (fdaStatusObj?.referenceBrand || (isPt141 ? 'Vyleesi® (bremelanotide injection 1.75 mg/0.3 mL, NDA 210583, FDA Approved June 2019)' : null)));
   const fdaRefProduct = rawRef && String(rawRef).trim().length > 0 ? String(rawRef).trim() : null;
-
-  const isSpray = !isDiagnostic && (rawFmt.includes('spray') || rawFmt.includes('nasal'));
-  const isSublingual = !isDiagnostic && (rawFmt.includes('sublingual') || rawFmt.includes('drop'));
-  const isPen = !isDiagnostic && (rawFmt.includes('pen') || rawFmt.includes('cartridge'));
 
   // Note: product.category is intentionally excluded — it stores type ('peptide'), not a clinical indication.
   const defaultIndication = isDiagnostic
