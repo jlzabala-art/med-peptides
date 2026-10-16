@@ -56,7 +56,7 @@ export default function ProtocolCosmeticsAdjunctsCard({
       ? (isEs ? '3–4× por semana, aplicado antes de la aplicación tópica de GHK-Cu' : '3–4× per week, applied immediately before GHK-Cu topical')
       : (isEs ? 'Tras cada lavado, dejar actuar 5–10 min antes de aclarar' : 'After every shampoo session, leave 5–10 min before cool rinse')),
     synergy_score: p.synergy_score || (idx === 0 ? 94 : 88),
-    supplier: p.supplier || 'Colway International',
+    supplier: p.supplier || 'Colway',
     evidence_citations: p.evidence_citations || []
   })) : [
     {
@@ -64,28 +64,28 @@ export default function ProtocolCosmeticsAdjunctsCard({
       name: 'Colway Strengthening Hair Shampoo',
       step: isEs ? 'Paso 1 — Preparación del Cuero Cabelludo' : 'Step 1 — Scalp Prep',
       tagline: 'DHT inhibition, anagen extension, scalp microbiome support',
-      image_url: 'https://colway.pl/wp-content/uploads/2024/09/szampon-wzmacniajacy-wlosy-colway.png',
+      image_url: '/images/products/colway/shampoo.png',
       key_compounds: ['Caffeine (IGF-1)', 'Zinc PCA (DHT↓)', 'Niacinamide (VEGF↑)', 'Native Collagen'],
       synergy_role: isEs
         ? 'Prepara el cuero cabelludo eliminando sebo con DHT, activando microcirculación y fijando un pH 4.5–5.5 ideal para absorción de péptidos.'
         : 'Prepares the scalp by removing DHT-laden sebum, activating microcirculation, and creating an optimal pH environment for peptide absorption.',
       frequency: isEs ? '3–4× por semana, aplicado antes de GHK-Cu' : '3–4× per week, applied before GHK-Cu topical if used',
       synergy_score: 94,
-      supplier: 'Colway International'
+      supplier: 'Colway'
     },
     {
       slug: 'colway-strengthening-conditioner',
       name: 'Colway Strengthening Conditioner',
       step: isEs ? 'Paso 2 — Reparación del Córtex' : 'Step 2 — Cortex Repair',
       tagline: 'Keratin cortex reinforcement, cuticle sealing, moisture retention',
-      image_url: 'https://colway.pl/wp-content/uploads/2024/09/odzywka-wzmacniajaca-wlosy.png',
+      image_url: '/images/products/colway/conditioner.png',
       key_compounds: ['Argan Oil (barrier)', 'Keratin Hydrolysate', 'Panthenol (B5)', 'Silk Amino Acids'],
       synergy_role: isEs
         ? 'Sella la cutícula y refuerza el córtex. Evita la rotura mecánica durante la fase de rebrote del protocolo.'
         : 'Seals the cuticle and fills cortical micro-fractures after the shampoo phase. Reduces mechanical breakage during the regrowth phase.',
       frequency: isEs ? 'Tras cada champú, dejar 5–10 min' : 'After every shampoo session, leave 5–10 min before rinsing',
       synergy_score: 88,
-      supplier: 'Colway International'
+      supplier: 'Colway'
     }
   ];
 

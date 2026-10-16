@@ -484,8 +484,39 @@ export default function PublicDatasheetView({
     );
   }, [product, slug]);
 
+  const isSupplementProduct = useMemo(() => {
+    const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
+    const cat = (product?.category || product?.therapeutic_category || '').toLowerCase();
+    const pt = (product?.productType || product?.product_type || product?.type || '').toLowerCase();
+    const pName = (product?.name || product?.title || product?.canonicalName || '').toLowerCase();
+    const pres = (product?.presentation || '').toLowerCase();
+    const fmt = (product?.format || '').toLowerCase();
+    const brand = (product?.brand || product?.supplier || '').toLowerCase();
+    return Boolean(
+      product?.is_supplement ||
+      product?.isSupplement ||
+      pSlug.includes('colvita') ||
+      pName.includes('colvita') ||
+      cat === 'supplements' ||
+      cat === 'oral_supplements' ||
+      cat === 'clinical_supplements' ||
+      cat.includes('supplement') ||
+      pt === 'supplement' ||
+      pt === 'oral_supplement' ||
+      pSlug.includes('ultraperson') ||
+      pName.includes('ultraperson') ||
+      brand.includes('ultraperson') ||
+      pres.includes('caps') ||
+      pres.includes('bottle_(') ||
+      fmt === 'capsules'
+    );
+  }, [product, slug]);
+
   const isCosmeticProduct = useMemo(() => {
     const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
+    if (pSlug.includes('colvita') || (product?.name || '').toLowerCase().includes('colvita') || product?.is_supplement || product?.isSupplement) {
+      return false;
+    }
     const cat = (product?.category || product?.therapeutic_category || '').toLowerCase();
     const pt = (product?.productType || product?.product_type || product?.type || '').toLowerCase();
     const pName = (product?.name || product?.title || product?.canonicalName || '').toLowerCase();
@@ -499,37 +530,13 @@ export default function PublicDatasheetView({
       cat.includes('cosmetic') ||
       pt === 'cosmetic' ||
       pt === 'cosmetics' ||
-      brand.includes('colway') ||
-      pSlug.includes('colway') ||
-      pName.includes('colway') ||
       pSlug.includes('strengthening-shampoo') ||
-      pSlug.includes('strengthening-conditioner')
-    );
-  }, [product, slug]);
-
-  const isSupplementProduct = useMemo(() => {
-    const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
-    const cat = (product?.category || product?.therapeutic_category || '').toLowerCase();
-    const pt = (product?.productType || product?.product_type || product?.type || '').toLowerCase();
-    const pName = (product?.name || product?.title || product?.canonicalName || '').toLowerCase();
-    const pres = (product?.presentation || '').toLowerCase();
-    const fmt = (product?.format || '').toLowerCase();
-    const brand = (product?.brand || product?.supplier || '').toLowerCase();
-    return Boolean(
-      product?.is_supplement ||
-      product?.isSupplement ||
-      cat === 'supplements' ||
-      cat === 'oral_supplements' ||
-      cat === 'clinical_supplements' ||
-      cat.includes('supplement') ||
-      pt === 'supplement' ||
-      pt === 'oral_supplement' ||
-      pSlug.includes('ultraperson') ||
-      pName.includes('ultraperson') ||
-      brand.includes('ultraperson') ||
-      pres.includes('caps') ||
-      pres.includes('bottle_(') ||
-      fmt === 'capsules'
+      pSlug.includes('strengthening-conditioner') ||
+      pSlug.includes('trichology') ||
+      pSlug.includes('blue-diamond') ||
+      pSlug.includes('collagen-vege') ||
+      pSlug.includes('collagen-wash-gel') ||
+      pSlug.includes('collagen-lip-care')
     );
   }, [product, slug]);
 
@@ -1581,7 +1588,7 @@ export default function PublicDatasheetView({
     });
   }, [activeSupplierId, activeSupplierObj, availableFormats, sortedStrengths, hierarchy.variantIndex, activeFormatId, selectedStrengthId, isSolventProduct, isDiagnosticKit, suppliersList, lang]);
 
-  // Official Diagnostic Product Packaging Photo for Datasheet Hero
+  // Official Product Packaging / Monograph Photo for Datasheet Hero
   const diagnosticHeroImage = isEternaDiagnostic
     ? (product?.imageUrl || product?.image || '/images/products/eterna/eterna-kit-box.png')
     : (isDiagnosticKit || isBloodoDiagnostic)
@@ -1595,7 +1602,18 @@ export default function PublicDatasheetView({
           slug.includes('vitamin-d') || slug.includes('vit-d') ? '/images/products/bloodo/vitamin-d.jpg' :
           '/images/products/bloodo/nad.jpg'
         ))
-      : null;
+      : (product?.image || product?.imageUrl || product?.images?.[0] || (
+          slug.includes('colvita') ? '/images/products/colway/colvita.png' :
+          slug.includes('blue-diamond-cream') ? '/images/products/colway/blue-diamond-cream.png' :
+          slug.includes('blue-diamond-peeling') ? '/images/products/colway/blue-diamond-peeling.png' :
+          slug.includes('collagen-vege') ? '/images/products/colway/vege-collagen.png' :
+          slug.includes('collagen-wash-gel') ? '/images/products/colway/washing-gel.png' :
+          slug.includes('collagen-lip-care') ? '/images/products/colway/lip-care.png' :
+          slug.includes('strengthening-shampoo') ? '/images/products/colway/shampoo.png' :
+          slug.includes('strengthening-conditioner') ? '/images/products/colway/conditioner.png' :
+          slug.includes('trichology') ? '/images/products/colway/colway-trichology-banner.jpg' :
+          null
+        ));
 
   return (
     <div className="public-datasheet-root">
@@ -1934,7 +1952,11 @@ export default function PublicDatasheetView({
                     <span>
                       {isEternaDiagnostic
                         ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
-                        : (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')}
+                        : (isDiagnosticKit || isBloodoDiagnostic)
+                        ? (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')
+                        : isSupplementProduct
+                        ? (lang === 'es' ? 'Nutracéutico Clínico Oficial' : 'Official Clinical Nutraceutical')
+                        : (lang === 'es' ? 'Cosmecéutico Oficial Colway' : 'Official Colway Cosmeceutical')}
                     </span>
                   </div>
                   <div className="pds-square-zoom-btn" title={lang === 'es' ? 'Ampliar imagen' : 'Enlarge image'}>
@@ -1956,16 +1978,34 @@ export default function PublicDatasheetView({
                 <div className="pds-square-footer-spec">
                   <div className="pds-square-lab-row">
                     <span className="pds-square-lab-name">
-                      {isEternaDiagnostic ? 'Fagron Genomics / European Lab' : 'LifeLab1 Central Lab (Vilnius)'}
+                      {isEternaDiagnostic
+                        ? 'Fagron Genomics / European Lab'
+                        : (isDiagnosticKit || isBloodoDiagnostic)
+                        ? 'LifeLab1 Central Lab (Vilnius)'
+                        : `${displaySupplierName || 'Colway'} · Bioactive Laboratory`}
                     </span>
                     <span className="pds-square-ce-tag">
-                      {isEternaDiagnostic ? 'CE-IVD' : 'CE-IVDR'}
+                      {isEternaDiagnostic ? 'CE-IVD' : (isDiagnosticKit || isBloodoDiagnostic) ? 'CE-IVDR' : 'EU GMP'}
                     </span>
                   </div>
                   <div className="pds-square-sub-meta">
-                    <span>{isEternaDiagnostic ? 'Saliva DNA Buffer' : 'Whatman® 903 Card'}</span>
+                    <span>
+                      {isEternaDiagnostic
+                        ? 'Saliva DNA Buffer'
+                        : (isDiagnosticKit || isBloodoDiagnostic)
+                        ? 'Whatman® 903 Card'
+                        : isSupplementProduct
+                        ? (lang === 'es' ? 'Colágeno Liofilizado Nativo' : 'Native Freeze-Dried Tropocollagen')
+                        : 'Biologically Active Tropocollagen'}
+                    </span>
                     <span>•</span>
-                    <span>{isEternaDiagnostic ? '+700K Microarray' : 'Capillary DBS LC-MS'}</span>
+                    <span>
+                      {isEternaDiagnostic
+                        ? '+700K Microarray'
+                        : (isDiagnosticKit || isBloodoDiagnostic)
+                        ? 'Capillary DBS LC-MS'
+                        : `Batch: ${selectedStrength?.batchCode || 'AS-COL-CL60-2610'}`}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1993,14 +2033,26 @@ export default function PublicDatasheetView({
                     <span>
                       {isEternaDiagnostic
                         ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
-                        : (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')}
+                        : (isDiagnosticKit || isBloodoDiagnostic)
+                        ? (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')
+                        : isSupplementProduct
+                        ? (lang === 'es' ? 'Nutracéutico Clínico' : 'Clinical Nutraceutical')
+                        : (lang === 'es' ? 'Cosmecéutico Oficial' : 'Official Cosmeceutical')}
                     </span>
                   </div>
                   <strong className="pds-mobile-square-title">
-                    {isEternaDiagnostic ? 'Fagron Genomics / European Lab' : 'LifeLab1 Clinical Laboratory'}
+                    {isEternaDiagnostic
+                      ? 'Fagron Genomics / European Lab'
+                      : (isDiagnosticKit || isBloodoDiagnostic)
+                      ? 'LifeLab1 Clinical Laboratory'
+                      : `${displaySupplierName || 'Colway'} Bioactive`}
                   </strong>
                   <span className="pds-mobile-square-sub">
-                    {isEternaDiagnostic ? 'CE-IVD Certified · Saliva DNA Kit' : 'CE-IVDR Certified · Whatman® 903 Card'}
+                    {isEternaDiagnostic
+                      ? 'CE-IVD Certified · Saliva DNA Kit'
+                      : (isDiagnosticKit || isBloodoDiagnostic)
+                      ? 'CE-IVDR Certified · Whatman® 903 Card'
+                      : 'EU GMP Standard · 100% Bioactive Formulations'}
                   </span>
                 </div>
                 <div className="pds-mobile-square-action">

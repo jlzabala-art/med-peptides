@@ -763,7 +763,7 @@ export default function BrandCollectionPage({
                               <strong style={{ color: '#0f172a' }}>{isEs ? 'Laboratorio de Referencia:' : 'Reference Lab:'}</strong> {
                                 brandSlug === 'eterna' ? 'Eurofins Genomics (Munich/Ebersberg) · CAP / CLIA / ISO 17025' :
                                 brandSlug === 'ultraperson' ? 'PharmaPolis Compounding Labs · EU GMP / cGMP' :
-                                brandSlug === 'colway' ? 'Colway International Dermocosmetics · EU Reg. 1223/2009' :
+                                brandSlug === 'colway' ? 'Colway Biological Collagen & Dermocosmetics · EU Reg. 1223/2009' :
                                 'LifeLab1 Central Lab (Vilnius) · ISO 15189'
                               }
                             </div>

@@ -110,8 +110,10 @@ export default function GCPImpersonationDock() {
     window.dispatchEvent(new CustomEvent('open-gcp-command-palette', { detail: { filter: initialFilter } }));
   };
 
-  const activeCount = [resolvedDoctor, resolvedPatient, resolvedSupplier].filter(Boolean).length;
-  const hasSidebar = pathname?.startsWith('/account-manager') || pathname?.startsWith('/tools') || pathname?.startsWith('/admin');
+  const isDoctorView = pathname?.startsWith('/dr/') || pathname?.startsWith('/doctor') || pathname?.startsWith('/medical');
+  const hasLeftSidebar = pathname?.startsWith('/account-manager') || pathname?.startsWith('/tools') || pathname?.startsWith('/admin') || pathname?.startsWith('/dr/') || pathname?.startsWith('/doctor') || pathname?.startsWith('/medical') || pathname?.startsWith('/clinic') || pathname?.startsWith('/wholesaler') || pathname?.startsWith('/supplier');
+  const hasRightSidebar = pathname?.startsWith('/p/') || pathname?.startsWith('/product/');
+  const activeCount = [resolvedDoctor, resolvedPatient, !isDoctorView ? resolvedSupplier : null].filter(Boolean).length;
 
   if (!mounted) return null;
 
@@ -123,7 +125,7 @@ export default function GCPImpersonationDock() {
         style={{
           position: 'fixed',
           bottom: '16px',
-          right: '20px',
+          right: hasRightSidebar ? 'calc(310px + 1rem)' : '20px',
           zIndex: 99990,
           background: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(24px) saturate(190%)',
@@ -199,7 +201,7 @@ export default function GCPImpersonationDock() {
         <span>Contexto ({activeCount})</span>
         {resolvedDoctor && <span style={{ fontSize: '0.72rem', color: '#15803d', fontWeight: 600 }}>🩺 {resolvedDoctor.name.replace('Dr. ', '')}</span>}
         {resolvedPatient && <span style={{ fontSize: '0.72rem', color: '#7e22ce', fontWeight: 600 }}>👤 {resolvedPatient.name}</span>}
-        {resolvedSupplier && <span style={{ fontSize: '0.72rem', color: '#1d4ed8', fontWeight: 600 }}>🏭 {resolvedSupplier.name}</span>}
+        {!isDoctorView && resolvedSupplier && <span style={{ fontSize: '0.72rem', color: '#1d4ed8', fontWeight: 600 }}>🏭 {resolvedSupplier.name}</span>}
         <Maximize2 size={13} style={{ color: '#64748b' }} />
       </aside>
     );
@@ -227,19 +229,40 @@ export default function GCPImpersonationDock() {
           transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @media (min-width: 900px) {
-          .gcp-dock-wrapper.has-sidebar {
-            left: calc(260px + 2rem);
-            right: 2rem;
-            max-width: 1120px;
+        @media (min-width: 1024px) {
+          .gcp-dock-wrapper.has-right-sidebar {
+            left: calc((100vw - 320px) / 2);
+            transform: translateX(-50%);
+            width: auto;
+            max-width: min(calc(100vw - 360px), 820px);
+          }
+          .gcp-dock-wrapper.has-left-sidebar {
+            left: calc(260px + (100vw - 260px) / 2);
+            transform: translateX(-50%);
+            width: auto;
+            max-width: min(calc(100vw - 300px), 820px);
+          }
+          .gcp-dock-wrapper:not(.has-left-sidebar):not(.has-right-sidebar) {
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            max-width: 820px;
+          }
+        }
+
+        @media (min-width: 900px) and (max-width: 1023px) {
+          .gcp-dock-wrapper.has-left-sidebar {
+            left: calc(260px + 1.5rem);
+            right: 1.5rem;
+            max-width: 820px;
             transform: none;
             width: auto;
           }
-          .gcp-dock-wrapper:not(.has-sidebar) {
+          .gcp-dock-wrapper:not(.has-left-sidebar) {
             left: 50%;
             transform: translateX(-50%);
-            width: calc(100% - 32px);
-            max-width: 1100px;
+            width: min(calc(100% - 32px), 820px);
+            max-width: 820px;
           }
         }
 
@@ -261,7 +284,7 @@ export default function GCPImpersonationDock() {
 
       <aside
         aria-label="Active Operations Context Dock"
-        className={`gcp-dock-wrapper ${hasSidebar ? 'has-sidebar' : ''}`}
+        className={`gcp-dock-wrapper ${hasLeftSidebar ? 'has-left-sidebar' : ''} ${hasRightSidebar ? 'has-right-sidebar' : ''}`}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
 
@@ -412,76 +435,78 @@ export default function GCPImpersonationDock() {
               </button>
             )}
 
-            {/* Active Supplier Slot */}
-            {resolvedSupplier ? (
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  padding: '3px 9px',
-                  borderRadius: '9999px',
-                  background: 'rgba(239, 246, 255, 0.9)',
-                  border: '1px solid #bfdbfe',
-                  color: '#1d4ed8',
-                  fontSize: '0.74rem',
-                  fontWeight: 700,
-                  boxShadow: '0 1px 2px rgba(29, 78, 216, 0.08)'
-                }}
-                title={resolvedSupplier.isAutoDetected ? 'Active Supplier (Auto-detected from URL)' : 'Pinned Active Supplier'}
-              >
-                <Building size={13} style={{ flexShrink: 0 }} />
-                <span
-                  onClick={() => resolvedSupplier.slug && router.push(`/collection/${resolvedSupplier.slug}`)}
-                  style={{ cursor: 'pointer', maxWidth: '130px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            {/* Active Supplier Slot (Hidden on Doctor View to avoid confusion) */}
+            {!isDoctorView && (
+              resolvedSupplier ? (
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '3px 9px',
+                    borderRadius: '9999px',
+                    background: 'rgba(239, 246, 255, 0.9)',
+                    border: '1px solid #bfdbfe',
+                    color: '#1d4ed8',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    boxShadow: '0 1px 2px rgba(29, 78, 216, 0.08)'
+                  }}
+                  title={resolvedSupplier.isAutoDetected ? 'Active Supplier (Auto-detected from URL)' : 'Pinned Active Supplier'}
                 >
-                  {resolvedSupplier.name}
-                </span>
+                  <Building size={13} style={{ flexShrink: 0 }} />
+                  <span
+                    onClick={() => resolvedSupplier.slug && router.push(`/collection/${resolvedSupplier.slug}`)}
+                    style={{ cursor: 'pointer', maxWidth: '130px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                    {resolvedSupplier.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      triggerHaptic('selection');
+                      clearActiveSupplier();
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#1d4ed8',
+                      cursor: 'pointer',
+                      padding: '0 2px',
+                      fontSize: '0.85rem',
+                      lineHeight: 1,
+                      fontWeight: 700
+                    }}
+                    title="Unpin active supplier"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    triggerHaptic('selection');
-                    clearActiveSupplier();
-                  }}
+                  onClick={() => handleOpenSearch('Suppliers')}
                   style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#1d4ed8',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '3px 8px',
+                    borderRadius: '9999px',
+                    background: '#ffffff',
+                    border: '1px dashed #cbd5e1',
+                    color: '#64748b',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
                     cursor: 'pointer',
-                    padding: '0 2px',
-                    fontSize: '0.85rem',
-                    lineHeight: 1,
-                    fontWeight: 700
+                    transition: 'all 0.15s ease'
                   }}
-                  title="Unpin active supplier"
+                  title="Search and select active supplier"
                 >
-                  ×
+                  <Building size={11} />
+                  <span>+ Proveedor</span>
                 </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => handleOpenSearch('Suppliers')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '3px 8px',
-                  borderRadius: '9999px',
-                  background: '#ffffff',
-                  border: '1px dashed #cbd5e1',
-                  color: '#64748b',
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-                title="Search and select active supplier"
-              >
-                <Building size={11} />
-                <span>+ Proveedor</span>
-              </button>
+              )
             )}
 
           </div>

@@ -477,32 +477,44 @@ export function getPrescriptionAtlasRecommendations(rx) {
     if (hasCortico) {
       clinicalRationale = 'Topical corticosteroids carry a recognized clinical risk of follicular epidermal atrophy with repeated application. Colway native biologically active collagen provides transdermal bio-scaffolding to sustain dermal matrix thickness without compromising anti-inflammatory efficacy.';
     } else if (hasMinoxidil && has5Ar) {
-      clinicalRationale = 'Combined topical Minoxidil and 5α-reductase inhibitors in vehicle (TrichoSol) frequently provoke epicutaneous lipid depletion, subclinical erythema, and cuticular micro-flaking. Colway Strengthening System utilizes native biologically active tropocollagen, micronized diosmin, and Baicapil™ 2% to preserve follicular Collagen XVII anchorage, calm the epidermal barrier, and optimize drug absorption.';
+      clinicalRationale = 'Combined topical Minoxidil and 5α-reductase inhibitors in vehicle (TrichoSol) frequently provoke epicutaneous lipid depletion, subclinical erythema, and cuticular micro-flaking. Colway Trichology System utilizes native biologically active tropocollagen, micronized diosmin, and Baicapil™ 2% to preserve follicular Collagen XVII anchorage, calm the epidermal barrier, and optimize drug absorption.';
     } else if (hasMinoxidil) {
-      clinicalRationale = 'Chronic topical Minoxidil application routinely induces scalp desquamation, localized pruritus, and barrier disruption. Colway Strengthening System delivers native tropocollagen and microcirculatory flavonoids (diosmin) to decongest the follicular ostium and preserve cutaneous balance between applications.';
+      clinicalRationale = 'Chronic topical Minoxidil application routinely induces scalp desquamation, localized pruritus, and barrier disruption. Colway Trichology System delivers native tropocollagen and microcirculatory flavonoids (diosmin) to decongest the follicular ostium and preserve cutaneous balance between applications.';
     } else {
       clinicalRationale = 'Precision pharmacogenetic follicular therapies require an optimal peribulbar extracellular matrix. Colway biologically active collagen and plant flavonoids reinforce infundibular anchoring and cuticle elasticity, preventing topical vehicle intolerance.';
     }
 
     colwayRec = {
-      brand: 'Colway Laboratories',
-      productName: 'Colway Hair Strengthening System (2-Step Routine)',
+      brand: 'Colway',
+      productName: 'Colway Trichology Hair Strengthening System (2-Step Routine)',
       category: 'Scalp Barrier Integrity & Peribulbar ECM Preservation',
       regulatoryNotice: 'EU Reg. 1223/2009 Compliant · CPNP Registered',
       matchScore: '99% Topical Adjuvant Synergy',
       clinicalRationale,
-      routineAdvice: 'Apply Colway Strengthening Shampoo 3–4 times weekly to purify follicular ostia prior to TrichoSol application. Follow with Colway Strengthening Conditioner on mid-lengths and ends to seal cuticular scales and lock in native moisture.',
-      catalogSlug: 'colway-strengthening-shampoo',
-      catalogUrl: '/p/colway-strengthening-shampoo'
+      routineAdvice: 'Apply Colway Strengthening Shampoo 3–4 times weekly to purify follicular ostia prior to vehicle application. Follow with Colway Strengthening Conditioner on mid-lengths and ends to seal cuticular scales and lock in native moisture.',
+      catalogSlug: 'colway-trichology',
+      catalogUrl: '/p/colway-trichology'
+    };
+  } else if (allText.includes('facial') || allText.includes('wrinkle') || allText.includes('aesthetic') || allText.includes('anti-aging') || allText.includes('dermal')) {
+    colwayRec = {
+      brand: 'Colway',
+      productName: 'Colway Blue Diamond Cream (VEP-Peptides & Native Collagen)',
+      category: 'Facial Neocollagenesis & Extracellular Matrix Dermo-Renewal',
+      regulatoryNotice: 'EU Reg. 1223/2009 Compliant · Patented VEP-Carrier System',
+      matchScore: '97% Dermal Rejuvenation Synergy',
+      clinicalRationale: 'Cellular dermal matrix remodeling requires bio-available signaling peptides capable of crossing the stratum corneum. Blue Diamond Cream delivers native fish tropocollagen combined with Vesicular Epidermal Penetration (VEP) peptides and natural diamond dust, stimulating fibroblast pro-collagen transcription and reversing cellular senescence.',
+      routineAdvice: 'Apply morning and night to thoroughly cleansed facial and neck skin following your clinical protocol routine.',
+      catalogSlug: 'colway-blue-diamond-cream',
+      catalogUrl: '/p/colway-blue-diamond-cream'
     };
   } else if (allText.includes('collagen') || allText.includes('skin') || allText.includes('joint') || allText.includes('tissue') || isTrichoTest || isMitochondrialLongevity || isTissueRepairWound) {
     colwayRec = {
-      brand: 'Colway Laboratories',
+      brand: 'Colway',
       productName: 'Colvita Bioactive Native Collagen & Marine Algae',
       category: 'Systemic Tropocollagen & Fibroblast ECM Regeneration',
       regulatoryNotice: 'EU Food Supplement · Sublimation Freeze-Dried Active Tropocollagen',
       matchScore: '98% Connective Tissue Synergy',
-      clinicalRationale: 'Endogenous collagen synthesis declines with chronological age and metabolic strain. Colvita delivers intact freeze-dried fish tropocollagen triple helices combined with Fucus vesiculosus marine algae and natural vitamin E, providing rate-limiting signaling oligopeptides that stimulate fibroblast neo-collagenesis across skin, hair follicles, and vascular endothelia.',
+      clinicalRationale: 'Endogenous collagen synthesis declines with chronological age and metabolic strain. Colvita delivers intact freeze-dried fish tropocollagen triple helices combined with Fucus vesiculosus marine algae and natural vitamin E, providing rate-limiting signaling oligopeptides that stimulate fibroblast neo-collagenesis across skin, hair follicles, joints, and vascular endothelia.',
       routineAdvice: 'Take 2 capsules daily with meals and a glass of water for 60–90 days alongside your precision protocol.',
       catalogSlug: 'colway-colvita',
       catalogUrl: '/p/colway-colvita'

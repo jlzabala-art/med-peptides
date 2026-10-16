@@ -33,7 +33,8 @@ import {
   Zap,
   ChevronRight,
   Download,
-  LayoutDashboard
+  LayoutDashboard,
+  Play
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
@@ -41,6 +42,8 @@ import CopyableId from '../ui/CopyableId';
 import StatusBadge from '../ui/StatusBadge';
 import GCPSplitDrawer from './GCPSplitDrawer';
 import DataTable from '../ui/DataTable';
+import AppActionGroup from '../ui/AppActionGroup';
+import { setActiveDoctor } from '../../services/activeContextService';
 import { getCachedAMData, setCachedAMData, purgeAMCache } from '../../services/accountManagerCache';
 
 export default function AdminToolsTab() {
@@ -56,6 +59,12 @@ export default function AdminToolsTab() {
   // Side Drawer Split-View state (GCP Master-Detail)
   const [drawerItem, setDrawerItem] = useState(null);
   const [drawerType, setDrawerType] = useState('doctor'); // 'doctor' | 'patient' | 'product'
+
+  const openDrawer = (item, type) => {
+    triggerHaptic('selection');
+    setDrawerItem(item);
+    setDrawerType(type);
+  };
 
   // Dynamic state from Firestore APIs
   const [dynamicDoctors, setDynamicDoctors] = useState([]);
@@ -81,12 +90,12 @@ export default function AdminToolsTab() {
     return () => { isMounted = false; };
   }, []);
 
-  // ── Unified DataTable Columns for Doctors (Golden Rule #3 & #30) ─────────
+  // ── Unified DataTable Columns for Doctors (Golden Rule #3, #4, #30) ─────────
   const doctorColumns = useMemo(() => [
     {
       key: 'name',
       title: 'Doctor & Specialty',
-      width: '32%',
+      width: '38%',
       sortable: true,
       render: (doc) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -134,28 +143,13 @@ export default function AdminToolsTab() {
     {
       key: 'clinicName',
       title: 'Clinic & Territory',
-      width: '24%',
+      width: '28%',
       sortable: true,
       render: (doc) => (
         <div>
           <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.84rem' }}>{doc.clinicName}</div>
           <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
-            {doc.city}, {doc.country} · Lic: <span style={{ fontFamily: 'monospace', color: '#475569' }}>{doc.license}</span>
-          </div>
-        </div>
-      )
-    },
-    {
-      key: 'slug',
-      title: 'Public Portal Endpoint',
-      width: '20%',
-      render: (doc) => (
-        <div>
-          <div style={{ fontSize: '0.76rem', fontFamily: 'monospace', color: '#0284c7', background: '#f8fafc', padding: '3px 8px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
-            <span>/dr/{doc.slug}</span>
-          </div>
-          <div>
-            <CopyableId value={`${typeof window !== 'undefined' ? window.location.origin : ''}/dr/${doc.slug}`} label="Copy link" />
+            {doc.city}, {doc.country}
           </div>
         </div>
       )
@@ -163,15 +157,28 @@ export default function AdminToolsTab() {
     {
       key: 'activity',
       title: 'Activity',
-      width: '12%',
+      width: '16%',
       sortable: true,
       render: (doc) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
-            {doc.activePrescriptionsCount} Prescriptions
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+          <span style={{
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            color: '#0f172a',
+            background: '#f1f5f9',
+            padding: '2px 8px',
+            borderRadius: '6px',
+            whiteSpace: 'nowrap'
+          }}>
+            {doc.activePrescriptionsCount} Rx
           </span>
-          <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-            {doc.patientsCount} Active Patients
+          <span style={{
+            fontSize: '0.74rem',
+            color: '#64748b',
+            fontWeight: 600,
+            whiteSpace: 'nowrap'
+          }}>
+            {doc.patientsCount} Pacientes
           </span>
         </div>
       )
@@ -179,67 +186,208 @@ export default function AdminToolsTab() {
     {
       key: 'status',
       title: 'Status',
-      width: '8%',
+      width: '10%',
       render: () => <StatusBadge status="active" />
     },
     {
       key: 'actions',
       title: 'Actions',
-      width: '140px',
+      width: '8%',
+      align: 'right',
       render: (doc) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              openDrawer(doc, 'doctor');
-            }}
-            style={{
-              padding: '6px 8px',
-              borderRadius: '6px',
-              background: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              fontSize: '0.74rem',
-              fontWeight: 650,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-            title="Inspect traceability drawer"
-          >
-            <Eye size={13} />
-            <span>Detail</span>
-          </button>
-
-          <Link
-            href={`/dr/${doc.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              padding: '6px 10px',
-              borderRadius: '6px',
-              background: '#059669',
-              color: '#ffffff',
-              fontSize: '0.74rem',
-              fontWeight: 700,
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              boxShadow: '0 1px 2px rgba(5, 150, 105, 0.2)'
-            }}
-            title="Open doctor portal in new tab"
-          >
-            <span>Open</span>
-            <ExternalLink size={12} />
-          </Link>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+          <AppActionGroup
+            maxVisible={2}
+            actions={[
+              {
+                type: 'view',
+                tooltip: 'Ver Detalle / Trazabilidad',
+                onClick: (e) => {
+                  e?.stopPropagation?.();
+                  openDrawer(doc, 'doctor');
+                }
+              },
+              {
+                icon: ExternalLink,
+                label: 'Portal Público',
+                tooltip: 'Abrir portal del médico',
+                onClick: (e) => {
+                  e?.stopPropagation?.();
+                  window.open(`/dr/${doc.slug}`, '_blank', 'noopener,noreferrer');
+                }
+              },
+              {
+                icon: Play,
+                label: 'Fijar Contexto Activo',
+                tooltip: 'Fijar como Médico Activo en consola',
+                onClick: (e) => {
+                  e?.stopPropagation?.();
+                  setActiveDoctor(doc);
+                  toast.success(`Dr. ${doc.name?.replace(/^(Dr\.|Dra\.)\s*/, '') || doc.name} fijado como médico activo`);
+                }
+              },
+              {
+                type: 'copy_link',
+                label: 'Copiar Enlace',
+                tooltip: 'Copiar enlace al portal',
+                onClick: (e) => {
+                  e?.stopPropagation?.();
+                  const url = typeof window !== 'undefined' ? `${window.location.origin}/dr/${doc.slug}` : `/dr/${doc.slug}`;
+                  navigator.clipboard.writeText(url);
+                  toast.success('Enlace copiado al portapapeles');
+                }
+              }
+            ]}
+          />
         </div>
       )
     }
   ], []);
+
+  // ── Master-Detail Expandable Row for Doctors (Golden Rule #4 & #11) ──────────
+  const doctorExpandableRender = (doc) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const fullPortalUrl = `${origin}/dr/${doc.slug}`;
+
+    return (
+      <div
+        style={{
+          padding: '1.25rem 1.5rem',
+          backgroundColor: '#f8fafc',
+          borderTop: '1px solid #e2e8f0',
+          borderBottom: '1px solid #e2e8f0',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '1.25rem',
+          fontSize: '0.84rem'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Section 1: Public Portal Endpoint & Link */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+            Portal Público & Endpoint
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.78rem', fontFamily: 'monospace', color: '#0284c7', background: '#e0f2fe', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+              /dr/{doc.slug}
+            </span>
+            <a
+              href={`/dr/${doc.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: '0.75rem',
+                color: '#0284c7',
+                fontWeight: 650,
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}
+            >
+              <span>Abrir</span>
+              <ExternalLink size={12} />
+            </a>
+          </div>
+          <div style={{ marginTop: '2px' }}>
+            <CopyableId value={fullPortalUrl} label="Copiar URL" />
+          </div>
+        </div>
+
+        {/* Section 2: Medical License & Territory */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+            Acreditación Médica & Territorio
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>Licencia Oficial:</span>
+            {doc.license ? (
+              <CopyableId value={doc.license} />
+            ) : (
+              <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.78rem' }}>En trámite</span>
+            )}
+          </div>
+          <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+            <span>{doc.countryFlag}</span>
+            <span style={{ fontWeight: 600, color: '#1e293b' }}>{doc.clinicName}</span>
+            <span>·</span>
+            <span>{doc.city}, {doc.country}</span>
+          </div>
+        </div>
+
+        {/* Section 3: Clinical Activity Metrics */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+            Métricas Clínicas
+          </span>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 14px', textAlign: 'center', minWidth: '80px' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#059669' }}>{doc.activePrescriptionsCount || 0}</div>
+              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Prescripciones</div>
+            </div>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 14px', textAlign: 'center', minWidth: '80px' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0284c7' }}>{doc.patientsCount || 0}</div>
+              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Pacientes</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 4: Operations & Impersonation Actions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', justifyContent: 'center' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+            Acciones de Operaciones
+          </span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveDoctor(doc);
+                toast.success(`Dr. ${doc.name?.replace(/^(Dr\.|Dra\.)\s*/, '') || doc.name} fijado como médico activo`);
+              }}
+              style={{
+                padding: '6px 10px',
+                borderRadius: '6px',
+                background: '#ecfdf5',
+                border: '1px solid #a7f3d0',
+                color: '#065f46',
+                fontSize: '0.76rem',
+                fontWeight: 650,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <Play size={12} fill="#059669" color="#059669" />
+              <span>Fijar como Médico Activo</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => openDrawer(doc, 'doctor')}
+              style={{
+                padding: '6px 10px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                color: '#334155',
+                fontSize: '0.76rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <Eye size={12} />
+              <span>Ver Trazabilidad Completa</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // ── 1. PANTALLA PÚBLICA (Public Views Catalog) ─────────────────────────────
   const publicScreens = useMemo(() => [
@@ -902,12 +1050,6 @@ export default function AdminToolsTab() {
     }
   };
 
-  const openDrawer = (item, type) => {
-    triggerHaptic('selection');
-    setDrawerItem(item);
-    setDrawerType(type);
-  };
-
   return (
     <div style={{ padding: '1.25rem 1.5rem 5rem', maxWidth: '1440px', margin: '0 auto', color: '#0f172a' }}>
       
@@ -924,41 +1066,6 @@ export default function AdminToolsTab() {
           <p style={{ fontSize: '0.86rem', color: '#64748b', margin: '4px 0 0 0' }}>
             Single-click console for Account Managers: inspect and open <strong>Public Screens</strong>, verified <strong>Doctor Portals</strong>, <strong>Patient Dossiers</strong>, and <strong>Product Monographs</strong> with zero credential barriers.
           </p>
-        </div>
-      </div>
-
-      {/* ── Reassurance Banner: Zero Password Required ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-        borderRadius: '12px',
-        padding: '1rem 1.25rem',
-        marginBottom: '1.5rem',
-        color: '#ffffff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        boxShadow: '0 4px 12px rgba(15, 23, 42, 0.12)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: 36, height: 36, borderRadius: '8px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8' }}>
-            <Zap size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.88rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>Account Manager Mode Active · Instant Credential-Free Access</span>
-              <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '999px', background: '#10b981', color: '#ffffff', fontWeight: 800 }}>NO LOGIN REQUIRED</span>
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
-              Audit and launch real-time clinical experiences for patients, attending physicians, compounding labs, and public monographs with 1 single click.
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '6px' }}>
-          <span style={{ fontSize: '0.74rem', background: 'rgba(255,255,255,0.08)', padding: '4px 10px', borderRadius: '6px', color: '#cbd5e1' }}>GCC: Qatar 🇶🇦 · UAE 🇦🇪</span>
-          <span style={{ fontSize: '0.74rem', background: 'rgba(255,255,255,0.08)', padding: '4px 10px', borderRadius: '6px', color: '#cbd5e1' }}>EU: Spain 🇪🇸 · UK 🇬🇧</span>
         </div>
       </div>
 
@@ -1520,6 +1627,7 @@ export default function AdminToolsTab() {
                 keyField="id"
                 pagination={true}
                 initialRowsPerPage={15}
+                expandableRender={doctorExpandableRender}
                 mobileView="cards"
                 emptyTitle="No doctors found"
                 emptyDescription="No physicians match the selected search query or territory filter."

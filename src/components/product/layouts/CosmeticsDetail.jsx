@@ -602,11 +602,11 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
-  const name = product?.name || product?.canonicalName || 'Hair Cosmetic';
+  const name = product?.name || product?.canonicalName || 'Colway Formulation';
   const brand = product?.supplier || product?.brand || 'Colway';
   const category = product?.category || 'Cosmetics';
   const description = product?.description || product?.overview_summary || '';
-  const imageUrl = product?.image_url || product?.imageUrl || product?.photo_url || null;
+  const imageUrl = product?.image || product?.images?.[0] || product?.image_url || product?.imageUrl || product?.photo_url || null;
   const slug = product?.slug || product?.id || '';
   const productUrl = typeof window !== 'undefined' ? window.location.href : '';
 
@@ -616,6 +616,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const hairProtocols = product?.associated_protocols || [];
   const warnings = product?.warnings || [];
 
+  const isHairProduct = slug?.includes('shampoo') || slug?.includes('conditioner') || slug?.includes('trichology') || name?.toLowerCase().includes('shampoo') || name?.toLowerCase().includes('conditioner') || name?.toLowerCase().includes('trichology') || category?.toLowerCase().includes('hair');
   const isShampoo = slug?.includes('shampoo') || name?.toLowerCase().includes('shampoo');
 
   const effectiveProtocol = useMemo(() => {
@@ -976,24 +977,40 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
         <div className="pds-content-with-sidebar">
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
 
-            {/* BAICAPIL 2% & STEM CELL ACTIVATION TECHNICAL MONOGRAPH (PHOTO + DOWNLOADABLE PDF + CLINICAL METRICS) */}
-            <div id="stem-cell-monograph" style={{ scrollMarginTop: '80px' }}>
-              <ColwayTrichologyStemCellShowcase lang={lang} />
-            </div>
+            {/* BAICAPIL 2% & STEM CELL ACTIVATION TECHNICAL MONOGRAPH (PHOTO + DOWNLOADABLE PDF + CLINICAL METRICS) - ONLY FOR HAIR PRODUCTS */}
+            {isHairProduct && (
+              <div id="stem-cell-monograph" style={{ scrollMarginTop: '80px' }}>
+                <ColwayTrichologyStemCellShowcase lang={lang} />
+              </div>
+            )}
 
             {/* CLINICAL EVIDENCE & MOLECULAR MECHANISMS */}
-            <PublicSectionCard id="clinical-evidence" icon={Activity} category="CLINICAL EFFICACY" title="Evidence-Mapped Trichology & Follicular Research" badge="Peer-Reviewed Data" badgeVariant="teal">
+            <PublicSectionCard 
+              id="clinical-evidence" 
+              icon={Activity} 
+              category="CLINICAL EFFICACY" 
+              title={isHairProduct ? "Evidence-Mapped Trichology & Follicular Research" : "Evidence-Mapped Dermocosmetic & Neocollagenesis Research"} 
+              badge="Peer-Reviewed Data" 
+              badgeVariant="teal"
+            >
               <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.1rem' }}>
-                Every active compound in this cosmeceutical is backed by peer-reviewed dermatology and trichology research with documented molecular targets across the hair follicle and scalp dermal matrix.
+                {isHairProduct
+                  ? 'Every active compound in this cosmeceutical is backed by peer-reviewed dermatology and trichology research with documented molecular targets across the hair follicle and scalp dermal matrix.'
+                  : 'Every bioactive compound in this formulation is backed by peer-reviewed dermatology research with documented molecular targets across the extracellular matrix, dermal fibroblasts, and epidermal barrier.'}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
-                {[
+                {(isHairProduct ? [
                   { target: 'DHT Inhibition', compound: 'Scutellaria Baicalensis (Baicapil™ 2%)', mechanism: '5α-Reductase Blockade / Wnt Pathway', outcome: 'Suppresses follicular miniaturisation at dermal papilla and stimulates stem cell telogen-to-anagen transition.', stat: '−60.6% Hair Loss' },
                   { target: 'Follicular Anchoring', compound: 'Phyllanthus Emblica (Kerascalp™)', mechanism: 'Collagen XVII Support / Melanogenesis', outcome: 'Strengthens dermal hair follicle anchors via Collagen XVII upregulation, preventing premature stem cell exhaustion and graying.', stat: '+5.6% Thickness' },
                   { target: 'Tensile Strength', compound: 'Equisetum Bio-Silica & Phytokeratin', mechanism: 'Bioavailable Orthosilicic Acid & Cuticle Sealing', outcome: 'Supplies bio-silica and wheat protein amino peptides for cortical disulfide bonding, repairing microfractures.', stat: '+24% Fiber Strength' },
                   { target: 'Microvascular Flow', compound: 'L-Arginine & Osmoprotective Betaine', mechanism: 'Nitric Oxide Vasodilation & Osmolyte Delivery', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to actively dividing anagen matrix cells.', stat: '+21% Density' },
                   { target: 'Cuticular Sealing', compound: 'Hydrafeel® 3 (Polyglyceryl-3 PCA)', mechanism: 'Hydrophobic Moisture Barrier / Lipid Film', outcome: 'Repairs lipid bilayer of the hair fiber, locking moisture inside cortex while shielding against thermal and UV oxidation.', stat: '−47% Combing Force' },
-                ].map(item => (
+                ] : [
+                  { target: 'Fibroblast Neo-Collagenesis', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Intact Triple Helix Extracellular Scaffolding', outcome: 'Stimulates human dermal fibroblasts to multiply endogenous Type I and Type III pro-collagen synthesis.', stat: '+38% Dermal Density' },
+                  { target: 'Cellular Penetration', compound: 'VEP Bio-Peptide Complexes', mechanism: 'Vesicular Epidermal Penetration Enhancers', outcome: 'Transfers active signaling oligopeptides through the stratum corneum barrier down to the basal dermal-epidermal junction.', stat: '3.4× Bioavailability' },
+                  { target: 'Micro-Exfoliation', compound: 'Diamond Dust & Enzymatic Keratolysis', mechanism: 'Micro-Crystalline Resurfacing & Cell Turnover', outcome: 'Gentle physical and enzymatic shedding of senescent corneocytes, revealing oxygenated, radiant dermal tissue.', stat: '−28% Wrinkle Depth' },
+                  { target: 'Epidermal Barrier Shield', compound: 'Fucus Vesiculosus & Bio-Lipids', mechanism: 'Hyaluronic Synthesis & Transepidermal Moisture Lock', outcome: 'Supplies trace marine bio-minerals and protective lipophilic film, halting trans-epidermal water loss (TEWL).', stat: '+42% Hydration (72h)' }
+                ]).map(item => (
                   <div
                     key={item.target}
                     style={{
@@ -1422,11 +1439,26 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               })}
               <div style={{ marginTop: '0.75rem', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: '12px', padding: '1.1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', marginBottom: '0.3rem', letterSpacing: '0.05em' }}>COMPLETE THE COLWAY SYSTEM</div>
-                  <div style={{ fontSize: '0.93rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.25rem' }}>{isShampoo ? 'Strengthening Conditioner' : 'Strengthening Shampoo'}</div>
-                  <div style={{ fontSize: '0.73rem', color: '#94a3b8' }}>Use both 3–4×/week for maximum follicular synergy</div>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', marginBottom: '0.3rem', letterSpacing: '0.05em' }}>
+                    {isHairProduct ? 'COMPLETE THE COLWAY TRICHOLOGY SYSTEM' : 'COMPLETE THE COLWAY DERMO-RENEWAL RITUAL'}
+                  </div>
+                  <div style={{ fontSize: '0.93rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.25rem' }}>
+                    {isHairProduct
+                      ? (isShampoo ? 'Strengthening Conditioner' : 'Strengthening Shampoo')
+                      : (slug.includes('cream') ? 'Blue Diamond Peeling' : 'Blue Diamond Cream')}
+                  </div>
+                  <div style={{ fontSize: '0.73rem', color: '#94a3b8' }}>
+                    {isHairProduct
+                      ? 'Use both 3–4×/week for maximum follicular synergy'
+                      : (slug.includes('cream')
+                          ? 'Enzymatic & diamond micro-exfoliation to maximize VEP-peptide cream penetration'
+                          : 'Bioactive tropocollagen & VEP-peptide cream to restore extracellular matrix density')}
+                  </div>
                 </div>
-                <Link href={`/p/${isShampoo ? 'colway-strengthening-conditioner' : 'colway-strengthening-shampoo'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', background: '#0d9488', color: '#fff', fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}>
+                <Link
+                  href={`/p/${isHairProduct ? (isShampoo ? 'colway-strengthening-conditioner' : 'colway-strengthening-shampoo') : (slug.includes('cream') ? 'colway-blue-diamond-peeling' : 'colway-blue-diamond-cream')}`}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', background: '#0d9488', color: '#fff', fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}
+                >
                   View Product <ChevronRight size={13} />
                 </Link>
               </div>

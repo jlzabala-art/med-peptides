@@ -570,21 +570,21 @@ export default function GCPCommandPalette() {
         style={{
           width: '100%',
           maxWidth: '720px',
-          background: '#202124',
-          borderRadius: '14px',
-          border: '1px solid #3c4043',
-          boxShadow: '0 24px 48px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08)',
+          background: '#ffffff',
+          borderRadius: '12px',
+          border: '1px solid #dadce0',
+          boxShadow: '0 8px 28px rgba(60, 64, 67, 0.28), 0 4px 8px rgba(60, 64, 67, 0.15)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          color: '#e8eaed'
+          color: '#202124'
         }}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDownList}
       >
         {/* Search Input Bar (Google Cloud Standard Styling) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '1rem 1.25rem', borderBottom: '1px solid #3c4043', background: '#202124' }}>
-          <Search size={20} color="#8ab4f8" style={{ flexShrink: 0 }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '1rem 1.25rem', borderBottom: '1px solid #dadce0', background: '#ffffff' }}>
+          <Search size={20} color="#1a73e8" style={{ flexShrink: 0 }} />
           <input
             ref={inputRef}
             type="text"
@@ -597,12 +597,12 @@ export default function GCPCommandPalette() {
               border: 'none',
               outline: 'none',
               fontSize: '1rem',
-              color: '#e8eaed',
+              color: '#202124',
               fontWeight: 400
             }}
           />
           {isSearching && (
-            <span style={{ fontSize: '0.72rem', color: '#8ab4f8', fontWeight: 500 }}>
+            <span style={{ fontSize: '0.72rem', color: '#1a73e8', fontWeight: 500 }}>
               Searching...
             </span>
           )}
@@ -610,28 +610,57 @@ export default function GCPCommandPalette() {
             <button
               type="button"
               onClick={() => { setQuery(''); setAlgoliaHits([]); }}
-              style={{ background: 'transparent', border: 'none', color: '#9aa0a6', cursor: 'pointer', padding: '2px' }}
+              style={{ background: 'transparent', border: 'none', color: '#5f6368', cursor: 'pointer', padding: '2px' }}
               title="Clear search"
             >
               <X size={16} />
             </button>
           )}
-          <kbd style={{ fontSize: '0.70rem', background: '#303134', padding: '3px 7px', borderRadius: '4px', color: '#9aa0a6', border: '1px solid #3c4043', fontWeight: 600 }}>
+          <kbd style={{ fontSize: '0.70rem', background: '#f1f3f4', padding: '3px 7px', borderRadius: '4px', color: '#5f6368', border: '1px solid #dadce0', fontWeight: 600 }}>
             ESC
           </kbd>
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close search"
+            title="Close (ESC)"
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#5f6368',
+              cursor: 'pointer',
+              padding: '6px',
+              borderRadius: '50%',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background-color 0.15s ease, color 0.15s ease',
+              marginLeft: '2px'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f1f3f4';
+              e.currentTarget.style.color = '#202124';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#5f6368';
+            }}
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        {/* Category Filter Chips Bar */}
+        {/* Category Filter Chips Bar (GCP Console Standard Chips) */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
           padding: '8px 16px',
-          background: '#1a1b1e',
-          borderBottom: '1px solid #303134',
+          background: '#f8f9fa',
+          borderBottom: '1px solid #dadce0',
           overflowX: 'auto'
         }}>
-          <span style={{ fontSize: '0.70rem', color: '#9aa0a6', fontWeight: 600, marginRight: '4px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 600, marginRight: '4px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Filter:
           </span>
           {categories.map((cat) => {
@@ -652,9 +681,9 @@ export default function GCPCommandPalette() {
                   gap: '5px',
                   padding: '4px 10px',
                   borderRadius: '9999px',
-                  border: isCatActive ? '1px solid #8ab4f8' : '1px solid #3c4043',
-                  background: isCatActive ? 'rgba(138, 180, 248, 0.16)' : '#282a2d',
-                  color: isCatActive ? '#8ab4f8' : '#bdc1c6',
+                  border: isCatActive ? '1px solid #1a73e8' : '1px solid #dadce0',
+                  background: isCatActive ? '#e8f0fe' : '#ffffff',
+                  color: isCatActive ? '#1a73e8' : '#3c4043',
                   fontSize: '0.72rem',
                   fontWeight: isCatActive ? 700 : 500,
                   cursor: 'pointer',
@@ -673,8 +702,8 @@ export default function GCPCommandPalette() {
         {!query && (activeContext?.doctor || activeContext?.patient || activeContext?.supplier) && (
           <div style={{
             padding: '10px 16px',
-            background: 'rgba(30, 41, 59, 0.4)',
-            borderBottom: '1px solid #3c4043',
+            background: '#f8fafc',
+            borderBottom: '1px solid #e2e8f0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -682,16 +711,16 @@ export default function GCPCommandPalette() {
             gap: '8px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#81c995', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Active in Dock:
               </span>
               {activeContext.doctor && (
                 <span style={{
                   fontSize: '0.74rem',
                   fontWeight: 650,
-                  color: '#86efac',
-                  background: 'rgba(20, 83, 45, 0.4)',
-                  border: '1px solid #166534',
+                  color: '#15803d',
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
                   padding: '2px 8px',
                   borderRadius: '9999px',
                   display: 'inline-flex',
@@ -702,7 +731,7 @@ export default function GCPCommandPalette() {
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); clearActiveDoctor(); }}
-                    style={{ background: 'transparent', border: 'none', color: '#86efac', cursor: 'pointer', padding: 0, lineHeight: 1 }}
+                    style={{ background: 'transparent', border: 'none', color: '#15803d', cursor: 'pointer', padding: 0, lineHeight: 1 }}
                     title="Clear active doctor"
                   >
                     ×
@@ -713,9 +742,9 @@ export default function GCPCommandPalette() {
                 <span style={{
                   fontSize: '0.74rem',
                   fontWeight: 650,
-                  color: '#d8b4fe',
-                  background: 'rgba(88, 28, 135, 0.4)',
-                  border: '1px solid #6b21a8',
+                  color: '#7e22ce',
+                  background: '#faf5ff',
+                  border: '1px solid #e9d5ff',
                   padding: '2px 8px',
                   borderRadius: '9999px',
                   display: 'inline-flex',
@@ -726,7 +755,7 @@ export default function GCPCommandPalette() {
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); clearActivePatient(); }}
-                    style={{ background: 'transparent', border: 'none', color: '#d8b4fe', cursor: 'pointer', padding: 0, lineHeight: 1 }}
+                    style={{ background: 'transparent', border: 'none', color: '#7e22ce', cursor: 'pointer', padding: 0, lineHeight: 1 }}
                     title="Clear active patient"
                   >
                     ×
@@ -737,9 +766,9 @@ export default function GCPCommandPalette() {
                 <span style={{
                   fontSize: '0.74rem',
                   fontWeight: 650,
-                  color: '#93c5fd',
-                  background: 'rgba(30, 58, 138, 0.4)',
-                  border: '1px solid #1d4ed8',
+                  color: '#1d4ed8',
+                  background: '#eff6ff',
+                  border: '1px solid #bfdbfe',
                   padding: '2px 8px',
                   borderRadius: '9999px',
                   display: 'inline-flex',
@@ -750,7 +779,7 @@ export default function GCPCommandPalette() {
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); clearActiveSupplier(); }}
-                    style={{ background: 'transparent', border: 'none', color: '#93c5fd', cursor: 'pointer', padding: 0, lineHeight: 1 }}
+                    style={{ background: 'transparent', border: 'none', color: '#1d4ed8', cursor: 'pointer', padding: 0, lineHeight: 1 }}
                     title="Clear active supplier"
                   >
                     ×
@@ -767,11 +796,12 @@ export default function GCPCommandPalette() {
           style={{
             maxHeight: '420px',
             overflowY: 'auto',
-            padding: '8px'
+            padding: '8px',
+            background: '#ffffff'
           }}
         >
           {filtered.length === 0 ? (
-            <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#9aa0a6', fontSize: '0.88rem' }}>
+            <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#5f6368', fontSize: '0.88rem' }}>
               No clinical resources or catalog items match &quot;{query}&quot;
             </div>
           ) : (
@@ -793,8 +823,8 @@ export default function GCPCommandPalette() {
                     padding: '10px 14px',
                     borderRadius: '8px',
                     cursor: 'pointer',
-                    background: isSelected ? 'rgba(138, 180, 248, 0.12)' : 'transparent',
-                    border: isSelected ? '1px solid rgba(138, 180, 248, 0.35)' : '1px solid transparent',
+                    background: isSelected ? '#e8f0fe' : 'transparent',
+                    border: isSelected ? '1px solid #aecbfa' : '1px solid transparent',
                     transition: 'all 0.12s ease'
                   }}
                 >
@@ -803,8 +833,8 @@ export default function GCPCommandPalette() {
                       width: 32,
                       height: 32,
                       borderRadius: '6px',
-                      background: isSelected ? '#1a73e8' : '#303134',
-                      color: isSelected ? '#ffffff' : '#8ab4f8',
+                      background: isSelected ? '#1a73e8' : '#f1f3f4',
+                      color: isSelected ? '#ffffff' : '#5f6368',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -814,10 +844,10 @@ export default function GCPCommandPalette() {
                     </div>
 
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: '0.88rem', fontWeight: 600, color: isSelected ? '#8ab4f8' : '#e8eaed', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 600, color: isSelected ? '#1a73e8' : '#202124', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {item.title}
                       </div>
-                      <div style={{ fontSize: '0.74rem', color: '#9aa0a6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '1px' }}>
+                      <div style={{ fontSize: '0.74rem', color: '#5f6368', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '1px' }}>
                         {item.subtitle}
                       </div>
                     </div>
@@ -834,9 +864,9 @@ export default function GCPCommandPalette() {
                           fontWeight: 700,
                           padding: '3px 9px',
                           borderRadius: '4px',
-                          background: isSelected ? '#8ab4f8' : 'rgba(138, 180, 248, 0.12)',
-                          color: isSelected ? '#1a1b1e' : '#8ab4f8',
-                          border: '1px solid rgba(138, 180, 248, 0.4)',
+                          background: isSelected ? '#1a73e8' : '#ffffff',
+                          color: isSelected ? '#ffffff' : '#1a73e8',
+                          border: '1px solid #1a73e8',
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -850,12 +880,12 @@ export default function GCPCommandPalette() {
                       </button>
                     )}
 
-                    <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '4px', background: '#303134', color: '#bdc1c6', border: '1px solid #3c4043', fontWeight: 500 }}>
+                    <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '4px', background: '#f1f3f4', color: '#3c4043', border: '1px solid #dadce0', fontWeight: 500 }}>
                       {item.badge || item.category}
                     </span>
 
                     {isSelected && (
-                      <ArrowRight size={13} color="#8ab4f8" />
+                      <ArrowRight size={13} color="#1a73e8" />
                     )}
                   </div>
                 </div>
@@ -870,15 +900,15 @@ export default function GCPCommandPalette() {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '9px 14px',
-          background: '#18191c',
-          borderTop: '1px solid #3c4043',
+          background: '#f8f9fa',
+          borderTop: '1px solid #dadce0',
           fontSize: '0.72rem',
-          color: '#9aa0a6'
+          color: '#5f6368'
         }}>
           <div>
-            Navigate with <kbd style={{ background: '#303134', padding: '1px 5px', borderRadius: '3px', border: '1px solid #3c4043' }}>↑</kbd> <kbd style={{ background: '#303134', padding: '1px 5px', borderRadius: '3px', border: '1px solid #3c4043' }}>↓</kbd> · Press <kbd style={{ background: '#303134', padding: '1px 5px', borderRadius: '3px', border: '1px solid #3c4043' }}>↵</kbd> to open & activate · <kbd style={{ background: '#303134', padding: '1px 5px', borderRadius: '3px', border: '1px solid #3c4043' }}>ESC</kbd> to dismiss
+            Navigate with <kbd style={{ background: '#ffffff', padding: '1px 5px', borderRadius: '3px', border: '1px solid #dadce0', color: '#3c4043' }}>↑</kbd> <kbd style={{ background: '#ffffff', padding: '1px 5px', borderRadius: '3px', border: '1px solid #dadce0', color: '#3c4043' }}>↓</kbd> · Press <kbd style={{ background: '#ffffff', padding: '1px 5px', borderRadius: '3px', border: '1px solid #dadce0', color: '#3c4043' }}>↵</kbd> to open & activate · <kbd style={{ background: '#ffffff', padding: '1px 5px', borderRadius: '3px', border: '1px solid #dadce0', color: '#3c4043' }}>ESC</kbd> to dismiss
           </div>
-          <div style={{ color: '#81c995', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+          <div style={{ color: '#137333', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
             <span>●</span>
             <span>Operations Hub Active</span>
           </div>

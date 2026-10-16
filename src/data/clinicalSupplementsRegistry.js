@@ -301,8 +301,9 @@ export const CLINICAL_SUPPLEMENTS = {
     canonicalName: 'Colvita Bioactive Native Collagen & Marine Algae',
     polish_name: 'Colvita (Liofilizowany Kolagen Rybi + Algi Morskie + Witamina E)',
     brand: 'Colway',
-    vendor: 'Colway International',
-    supplier: 'Colway International',
+    vendor: 'Colway',
+    supplier: 'Colway',
+    supplierName: 'Colway',
     supplierId: 'supplier-colway',
     suppliers: ['supplier-colway'],
     supplierIds: ['supplier-colway'],
@@ -379,7 +380,8 @@ export const CLINICAL_SUPPLEMENTS = {
         unit_price: 64,
         stock: { available: 50, allocated: 0, reserved: 0 },
         supplierId: 'supplier-colway',
-        supplierName: 'Colway International',
+        supplierName: 'Colway',
+        supplier: 'Colway',
         status: 'published',
         volume: '60 Capsules'
       },
@@ -403,7 +405,8 @@ export const CLINICAL_SUPPLEMENTS = {
         unit_price: 112,
         stock: { available: 45, allocated: 0, reserved: 0 },
         supplierId: 'supplier-colway',
-        supplierName: 'Colway International',
+        supplierName: 'Colway',
+        supplier: 'Colway',
         status: 'published',
         volume: '120 Capsules'
       }
@@ -415,6 +418,125 @@ export const CLINICAL_SUPPLEMENTS = {
     strengths: [
       { id: 'st-60', name: '60 Capsules (30 Days)' },
       { id: 'st-120', name: '120 Capsules (60 Days)' }
+    ]
+  },
+
+  'colway-trichology': {
+    id: 'colway-trichology',
+    slug: 'colway-trichology',
+    canonicalKey: 'colway-trichology',
+    name: 'Colway Trichology Hair Strengthening System (2-Step Synergistic Routine)',
+    canonicalName: 'Colway Trichology Hair Strengthening System',
+    brand: 'Colway',
+    vendor: 'Colway',
+    supplier: 'Colway',
+    supplierName: 'Colway',
+    supplierId: 'supplier-colway',
+    suppliers: ['supplier-colway'],
+    supplierIds: ['supplier-colway'],
+    isSingleSupplierLocked: true,
+    status: 'published',
+    category: 'cosmetics',
+    therapeutic_category: 'Follicular Stem Cell Activation & Anti-Miniaturisation Hair System',
+    type: 'cosmetic',
+    productType: 'cosmetic',
+    is_cosmetic: true,
+    is_trichology: true,
+    leadTimeDays: 2,
+    purity: 'Medical Grade Trichology Cosmeceutical',
+    rating: 4.96,
+    reviewsCount: 64,
+    cost: 32,
+    price: 68,
+    wholesale_price: 44,
+    retail_price: 68,
+    unit_price: 68,
+    image: '/images/products/colway/colway-trichology-banner.jpg',
+    images: [
+      '/images/products/colway/colway-trichology-banner.jpg',
+      '/images/products/colway/shampoo.png',
+      '/images/products/colway/conditioner.png'
+    ],
+    description:
+      'Colway Trichology Hair Strengthening System is a complete 2-step synergistic cosmeceutical therapy specifically formulated to arrest follicular miniaturisation, stimulate dormant stem cells at the dermal papilla, and repair damaged hair shafts. Combining the Strengthening Shampoo (densifying, sulphate-free, with diosmin and caffeine) and Strengthening Conditioner (cuticle sealing, with native fish tropocollagen and bio-silica), this system delivers the clinically validated Baicapil™ 2% complex (Scutellaria Baicalensis, Soy & Wheat Sprouts), Kerascalp™ (Phyllanthus Emblica Collagen XVII booster), and biomimetic Hydrafeel® 3.',
+    shortDescription:
+      'Synergistic 2-Step Trichological System (Shampoo 250mL + Conditioner 200mL) with Baicapil™ 2%, Native Tropocollagen, Kerascalp™ & Bio-Silica for Follicular Stem Cell Activation.',
+    application_protocol: {
+      frequency: '3–4× / Week',
+      duration_of_use: 'Minimum 12 Weeks',
+      steps: [
+        {
+          step: 1,
+          phase: 'STEP 1: SHAMPOO',
+          instruction: 'Apply Colway Strengthening Shampoo to wet scalp. Massage gently for 2–3 minutes to promote microvascular flow and allow diosmin and caffeine to penetrate dermal papilla cells. Rinse thoroughly.',
+          duration: '2–3 min'
+        },
+        {
+          step: 2,
+          phase: 'STEP 2: CONDITIONER',
+          instruction: 'Apply Colway Strengthening Conditioner from roots to ends. Leave in contact for 3–5 minutes for trans-epidermal Baicapil™ delivery and cuticle sealing. Rinse with cool water (≤38°C).',
+          duration: '3–5 min',
+          temp: '≤38°C'
+        }
+      ],
+      professional_notes: [
+        'Synergistic duo routine indicated for androgenetic alopecia, telogen effluvium, post-COVID shedding, and fragile follicular anchoring.',
+        'Sulphate-free, paraben-free, silicone-free, and safe for color-treated hair.',
+        'Integrates with injectable or oral GHK-Cu, PRP scalp sessions, and microneedling protocols.'
+      ]
+    },
+    active_complexes: [
+      {
+        name: 'Baicapil™ 2%',
+        description: 'Synergistic botanical complex (Scutellaria Baicalensis, Soy & Wheat Sprouts) clinically proven to stimulate hair growth, lengthen anagen phase, and increase density by up to 60.6%.'
+      },
+      {
+        name: 'Kerascalp™',
+        description: 'Phyllanthus Emblica (Amla) fruit extract upregulating Collagen XVII expression in follicle stem cells to prevent miniaturisation and graying.'
+      },
+      {
+        name: 'Native Freshwater Fish Tropocollagen',
+        description: 'Intact triple-helix collagen molecules that provide structural extracellular matrix scaffolding to the perifollicular sheath.'
+      },
+      {
+        name: 'Hydrafeel® 3',
+        description: 'Polyglyceryl-3 PCA biomimetic moisture active providing cuticular hydration, lipid bilayer repair, and shielding against thermal oxidation.'
+      }
+    ],
+    variants: [
+      {
+        id: 'colway-trichology-var-duo',
+        productId: 'colway-trichology',
+        productName: 'Colway Trichology Hair Strengthening System',
+        name: 'Colway Trichology Complete Duo System (Shampoo 250mL + Conditioner 200mL)',
+        sku: 'SKU-COLWAY-TRICHOLOGY-DUO',
+        format: 'Complete 2-Step System',
+        dosage: 'Duo Pack (250mL + 200mL)',
+        size: 'Duo Pack (250mL + 200mL)',
+        pricing: {
+          master: { perUnit: 32, currency: 'USD' },
+          wholesale: { perUnit: 44, currency: 'USD' },
+          clinic: { perUnit: 52, currency: 'USD' },
+          retail: { perUnit: 68, currency: 'USD' }
+        },
+        cost: 32,
+        price: 68,
+        unit_price: 68,
+        stock: { available: 50, allocated: 0, reserved: 0 },
+        supplierId: 'supplier-colway',
+        supplierName: 'Colway',
+        supplier: 'Colway',
+        hasCoa: true,
+        hasGmp: true,
+        status: 'published',
+        volume: '450 mL Total'
+      }
+    ],
+    formats: [
+      { id: 'duo-system', name: 'Complete 2-Step System (Shampoo + Conditioner)', description: 'Full synergistic 90-day clinical regimen' }
+    ],
+    strengths: [
+      { id: 'st-duo', name: 'Duo Pack (250mL + 200mL)' }
     ]
   }
 };
