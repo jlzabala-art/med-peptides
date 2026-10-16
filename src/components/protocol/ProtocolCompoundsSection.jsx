@@ -6,23 +6,29 @@ import { FlaskConical, FileText, ArrowRight, Copy, Check, ShieldCheck } from '@/
 import { toast } from 'react-hot-toast';
 import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
 
-export default function ProtocolCompoundsSection({ items = [], lang = 'en' }) {
+export default function ProtocolCompoundsSection({ items = [], lang = 'en', hasVials = true, isColwayOrCosmetic = false }) {
   const isEs = lang === 'es';
   const [copiedIndex, setCopiedIndex] = useState(null);
   const [copiedAll, setCopiedAll] = useState(false);
 
   if (!items || items.length === 0) return null;
 
+  const isNonPeptide = isColwayOrCosmetic || !hasVials;
+
   const handleCopyAllCompounds = async () => {
     const listText = items.map((it, idx) => {
       const name = it.name || it.product_name || 'Compound';
-      const dose = it.dosage || it.dose || (it.quantity ? `${it.quantity} ${it.unit || 'Vials'}` : 'Standard Dose');
-      const route = it.route || 'Subcutaneous (SubQ)';
+      const dose = it.dosage || it.dose || (it.quantity ? `${it.quantity} ${it.unit || (isNonPeptide ? 'Units' : 'Vials')}` : 'Standard Dose');
+      const route = it.route || (isNonPeptide ? 'Topical / Oral' : 'Subcutaneous (SubQ)');
       const timing = it.timing || it.schedule || 'Per titration schedule';
       return `${idx + 1}. ${name} — ${dose}\n   • Route: ${route}\n   • Cadence: ${timing}`;
     }).join('\n\n');
 
-    const text = `*${isEs ? 'FÓRMULAS & PÉPTIDOS ACTIVOS DEL PROTOCOLO' : 'ACTIVE THERAPEUTIC PEPTIDES & COMPOUNDS'}*\n\n${listText}\n\n_Atlas Analytical Standards · Med-Peptides SSOT_`;
+    const heading = isNonPeptide
+      ? (isEs ? 'FÓRMULAS & PRODUCTOS ACTIVOS DEL PROTOCOLO' : 'ACTIVE THERAPEUTIC FORMULATIONS & PRODUCTS')
+      : (isEs ? 'FÓRMULAS & PÉPTIDOS ACTIVOS DEL PROTOCOLO' : 'ACTIVE THERAPEUTIC PEPTIDES & COMPOUNDS');
+
+    const text = `*${heading}*\n\n${listText}\n\n_${isNonPeptide ? 'Atlas Clinical Standards · Dermocosmetic & Nutricosmetic Regimen' : 'Atlas Analytical Standards · Med-Peptides SSOT'}_`;
 
     try {
       await navigator.clipboard.writeText(text);
@@ -55,10 +61,12 @@ export default function ProtocolCompoundsSection({ items = [], lang = 'en' }) {
     <PublicSectionCard
       id="included-compounds"
       icon={FlaskConical}
-      category={isEs ? 'FORMULACIONES ACTIVAS & API' : 'THERAPEUTIC FORMULATIONS & API'}
-      badge={`${items.length} ${isEs ? 'Compuestos Activos' : 'Active Compounds'}`}
+      category={isEs ? 'FORMULACIONES ACTIVAS & PRODUCTOS' : 'THERAPEUTIC FORMULATIONS & PRODUCTS'}
+      badge={`${items.length} ${isEs ? 'Formulaciones Activas' : 'Active Formulations'}`}
       badgeVariant="cyan"
-      title={isEs ? 'Péptidos & Compuestos Activos Incluidos' : 'Included Therapeutic Compounds'}
+      title={isNonPeptide
+        ? (isEs ? 'Formulaciones & Principios Activos Incluidos' : 'Included Formulations & Active Ingredients')
+        : (isEs ? 'Péptidos & Compuestos Activos Incluidos' : 'Included Therapeutic Compounds')}
       rightAction={
         <button
           type="button"
@@ -81,7 +89,7 @@ export default function ProtocolCompoundsSection({ items = [], lang = 'en' }) {
           title={isEs ? 'Copiar resumen de compuestos al portapapeles' : 'Copy compound specs to clipboard'}
         >
           {copiedAll ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
-          <span>{copiedAll ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Fórmulas' : 'Copy API Specs')}</span>
+          <span>{copiedAll ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Fórmulas' : 'Copy Formulations')}</span>
         </button>
       }
     >
@@ -101,14 +109,18 @@ export default function ProtocolCompoundsSection({ items = [], lang = 'en' }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <ShieldCheck size={16} color="#0284c7" />
           <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#334155' }}>
-            {isEs
-              ? 'Especificaciones farmacéuticas y moleculares de alta pureza (>99% HPLC)'
-              : 'Analytical and molecular pharmaceutical specifications (>99% HPLC purity)'}
+            {isNonPeptide
+              ? (isEs
+                ? 'Especificaciones dermocosméticas y nutracéuticas registradas en el portal europeo CPNP'
+                : 'Dermocosmetic and nutricosmetic specifications registered under European CPNP standards')
+              : (isEs
+                ? 'Especificaciones farmacéuticas y moleculares de alta pureza (>99% HPLC)'
+                : 'Analytical and molecular pharmaceutical specifications (>99% HPLC purity)')}
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>
-            CE-IVDR Certified
+            {isNonPeptide ? 'CPNP / EU Compliant' : 'CE-IVDR Certified'}
           </span>
           <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0' }}>
             SSOT Specification
@@ -202,7 +214,7 @@ export default function ProtocolCompoundsSection({ items = [], lang = 'en' }) {
                       {isEs ? 'Formulación:' : 'Formulation:'}
                     </span>
                     <span style={{ color: '#1e293b', fontWeight: 700 }}>
-                      {item.format || (isEs ? 'Vial Liofilizado Estéril (Polvo)' : 'Lyophilized Sterile API')}
+                      {item.format || (isNonPeptide ? (isEs ? 'Fórmula Dermocosmética / Oral' : 'Dermocosmetic / Oral System') : (isEs ? 'Vial Liofilizado Estéril (Polvo)' : 'Lyophilized Sterile API'))}
                     </span>
                   </div>
 
@@ -211,7 +223,7 @@ export default function ProtocolCompoundsSection({ items = [], lang = 'en' }) {
                       {isEs ? 'Vía de Entrega:' : 'Administration Route:'}
                     </span>
                     <span style={{ color: '#0284c7', fontWeight: 700 }}>
-                      {item.route || (isEs ? 'Subcutánea (SubQ)' : 'Subcutaneous (SubQ)')}
+                      {item.route || (isNonPeptide ? (isEs ? 'Tópica / Cutánea' : 'Topical / Dermal') : (isEs ? 'Subcutánea (SubQ)' : 'Subcutaneous (SubQ)'))}
                     </span>
                   </div>
 

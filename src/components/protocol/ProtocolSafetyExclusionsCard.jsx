@@ -13,7 +13,9 @@ export default function ProtocolSafetyExclusionsCard({
   const [copiedChecklist, setCopiedChecklist] = useState(false);
 
   const protoCategory = String(protocol?.category || protocol?.therapeutic_category || protocol?.goal || '').toLowerCase();
+  const protoSlug = String(protocol?.slug || protocol?.id || '').toLowerCase();
   const isCosmeticOrTrichology = 
+    protoSlug.includes('colway') ||
     protoCategory.includes('cosmetic') || 
     protoCategory.includes('trichology') || 
     protoCategory.includes('skin') || 
@@ -34,7 +36,7 @@ export default function ProtocolSafetyExclusionsCard({
       gate: 'GATE 02',
       title: 'Severe Active Scalp Infection or Ulcerative Dermatosis',
       subtitle: 'Follicular Barrier Disruption Safeguard',
-      desc: 'Active purulent folliculitis, severe weeping scalp eczema, untreated tinea capitis, or unepithelialized post-surgical wounds. Requires resolution with topical antimicrobials before initiating peptide or hair strengthening actives.',
+      desc: 'Active purulent folliculitis, severe weeping scalp eczema, untreated tinea capitis, or unepithelialized post-surgical wounds. Requires resolution with topical antimicrobials before initiating hair strengthening or active dermocosmetic regimens.',
       tag: 'DERMATOLOGICAL CLEARANCE REQUIRED',
       rule: 'Contraindication Threshold: Active bacterial/fungal scalp infection. Delay until complete re-epithelialization.'
     },

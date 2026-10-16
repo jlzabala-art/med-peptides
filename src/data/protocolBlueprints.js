@@ -659,7 +659,7 @@ export const PROTOCOL_BLUEPRINTS = {
         weeks: 6,
         startWeek: 5,
         endWeek: 10,
-        goal: "Deep neocollagenesis, VEP peptide delivery, and long-term dermal firming.",
+        goal: "Deep neocollagenesis, active botanical bio-delivery, and long-term dermal firming.",
         medications: [
           { name: "Cellular Collagen Hydrolipid Wash Gel", dosage: "1-2 pumps", weeklyDose: 14, frequency: "Twice daily (AM/PM)", route: "topical", days: ["Daily"], productSlug: "colway-collagen-wash-gel" },
           { name: "Blue Diamond Cream", dosage: "1 spatula", weeklyDose: 14, frequency: "Daily morning & evening", route: "topical", days: ["Daily"], productSlug: "colway-blue-diamond-cream" }
@@ -682,7 +682,7 @@ export const PROTOCOL_BLUEPRINTS = {
       observations: ["Immediate luminous complexion", "Zero dryness or stripping", "Firm contour definition"]
     },
     lifestyle: {
-      nutrition: ["Drink minimum 2L water daily", "Support with oral antioxidant vitamin C", "Collagen peptide rich broths"],
+      nutrition: ["Drink minimum 2L water daily", "Support with oral antioxidant vitamin C", "Collagen and nutrient rich nutrition"],
       activity: ["Facial lymphatic drainage massage during cream application", "Strict SPF 50+ mineral sun protection"]
     },
     safety: {
@@ -692,7 +692,7 @@ export const PROTOCOL_BLUEPRINTS = {
     clinical_metadata: {
       clinical_goal: "skin_rejuvenation",
       secondary_goals: ["anti_aging", "corneocyte_renewal", "hydrolipid_barrier", "collagen_synthesis"],
-      primary_compounds: ["native_tropocollagen", "vep_peptides", "diamond_micro_dust"],
+      primary_compounds: ["native_tropocollagen", "diamond_micro_dust", "coenzyme_q10"],
       protocol_class: "cosmeceutical_based",
       duration_weeks: 10,
       intensity_level: "gentle"

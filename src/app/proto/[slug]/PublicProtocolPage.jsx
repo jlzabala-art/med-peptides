@@ -522,6 +522,14 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
     );
   }, [slug, protocol]);
 
+  // Check if protocol is Colway or purely cosmeceutical/nutricosmetic
+  const isColwayOrCosmetic = useMemo(() => {
+    const s = String(slug || protocol?.slug || protocol?.id || '').toLowerCase();
+    const title = String(protocol?.protocol_title || protocol?.title || protocol?.name || '').toLowerCase();
+    const pClass = String(protocol?.clinical_metadata?.protocol_class || '').toLowerCase();
+    return s.includes('colway') || title.includes('colway') || pClass.includes('cosmeceutical') || !hasVials;
+  }, [slug, protocol, hasVials]);
+
   // ── Protocol Sections for Sticky Sidebar Table of Contents & Mobile QuickNav ──
   const tocSections = useMemo(() => {
     const isEs = lang === 'es';
@@ -532,7 +540,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         href: '#included-compounds',
         icon: FlaskConical 
       },
-      ...((protocol?.topical_adjuncts?.length > 0 || (protocol?.goal && protocol.goal.toLowerCase().includes('hair'))) ? [
+      ...((!isColwayOrCosmetic && (protocol?.topical_adjuncts?.length > 0 || (protocol?.goal && protocol.goal.toLowerCase().includes('hair')))) ? [
         { 
           id: 'cosmeceutical-adjuncts', 
           label: isEs ? 'Coadyuvantes Tópicos' : 'Cosmeceutical Adjuncts', 
@@ -642,7 +650,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         icon: ShieldCheck 
       }
     ];
-  }, [lang, protocol, hasVials, isTirzepatideProtocol, isLongevityProtocol, isImmuneProtocol, isRecoveryProtocol]);
+  }, [lang, protocol, hasVials, isColwayOrCosmetic, isTirzepatideProtocol, isLongevityProtocol, isImmuneProtocol, isRecoveryProtocol]);
 
   return (
     <div className="public-datasheet-root">
@@ -927,11 +935,15 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               icon: FlaskConical,
               iconBg: '#f0fdfa',
               iconColor: '#0d9488',
-              title: t.kpiPeptidesTitle,
+              title: isColwayOrCosmetic
+                ? (lang === 'es' ? 'FORMULACIONES ACTIVAS' : 'ACTIVE FORMULATIONS')
+                : t.kpiPeptidesTitle,
               value: `${items.length || 1} ${items.length === 1 ? t.kpiFormulation : t.kpiFormulations}`,
               subtitle: isHairProtocol 
                 ? (lang === 'es' ? 'Dianas de Anágeno y Papila Dérmica' : 'Anagen & Dermal Papilla Targets')
-                : (items.length > 1 ? t.kpiPeptidesSubtitle : t.kpiPeptidesFallbackSubtitle),
+                : (isColwayOrCosmetic
+                  ? (lang === 'es' ? 'Sinergia Dermocosmética & Tópica' : 'Dermocosmetic & Topical Synergy')
+                  : (items.length > 1 ? t.kpiPeptidesSubtitle : t.kpiPeptidesFallbackSubtitle)),
               subColor: '#0d9488'
             },
             {
@@ -998,10 +1010,15 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
             />
 
             {/* ── STEP 1: Included Therapeutic Compounds & Formulations (Primary Clinical Presentation) ── */}
-            <ProtocolCompoundsSection items={items} lang={lang} />
+            <ProtocolCompoundsSection 
+              items={items} 
+              lang={lang} 
+              hasVials={hasVials} 
+              isColwayOrCosmetic={isColwayOrCosmetic} 
+            />
 
             {/* ── STEP 1B: Topical Cosmeceutical & Nutraceutical Adjuncts (Colway Clinical Systems) ── */}
-            {(protocol?.topical_adjuncts?.length > 0 || 
+            {!isColwayOrCosmetic && (protocol?.topical_adjuncts?.length > 0 || 
               (protocol?.goal && (
                 protocol.goal.toLowerCase().includes('hair') ||
                 protocol.goal.toLowerCase().includes('skin') ||

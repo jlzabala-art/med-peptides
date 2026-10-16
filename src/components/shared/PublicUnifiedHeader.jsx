@@ -375,7 +375,7 @@ function forceCanonicalDomain(urlOrPath) {
                     triggerHaptic('selection');
                     setIsSearchModalOpen(true);
                   }}
-                  title={isSpanish ? 'Buscar otros péptidos en el catálogo (⌘K)' : 'Search other peptides in catalog (⌘K)'}
+                  title={isSpanish ? 'Buscar en el catálogo clínico (⌘K)' : 'Search clinical catalog (⌘K)'}
                 >
                   <Search size={14} />
                   <span className="puh-btn-label">{isSpanish ? 'Buscar' : 'Search'}</span>

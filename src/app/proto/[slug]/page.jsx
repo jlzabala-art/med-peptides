@@ -263,6 +263,7 @@ async function getSimilarProtocols(goal, excludeSlug) {
 
     const goalNorm = String(goal).toLowerCase().trim();
     const excludeNorm = String(excludeSlug || '').toLowerCase().trim();
+    const isColwayCurrent = excludeNorm.includes('colway');
 
     const similar = [];
     for (const doc of snapshot.docs) {
@@ -270,9 +271,13 @@ async function getSimilarProtocols(goal, excludeSlug) {
       const docSlug = (d.slug || d.protocol_slug || doc.id || '').toLowerCase();
       if (docSlug === excludeNorm) continue;
 
+      // If viewing a Colway protocol, strictly recommend other Colway or non-injectable dermatological protocols
+      const isDocColway = docSlug.includes('colway') || String(d.name || d.title || '').toLowerCase().includes('colway');
+      if (isColwayCurrent && !isDocColway) continue;
+
       // Match by any goal-related field
       const docGoal = String(d.primary_goal || d.goal || d.category || d.therapeutic_category || '').toLowerCase();
-      if (!docGoal.includes(goalNorm) && !goalNorm.includes(docGoal)) continue;
+      if (!isColwayCurrent && !docGoal.includes(goalNorm) && !goalNorm.includes(docGoal)) continue;
 
       // Extract evidence grade from metadata or root
       const grade = String(

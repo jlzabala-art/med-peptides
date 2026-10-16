@@ -85,9 +85,12 @@ export default function ProtocolWeeklyRoadmapCard({
           const displayCompound = (lang === 'es' && ws.compound === 'Receptor Rest & Cellular Assimilation')
             ? 'Descanso Receptorial y Asimilación Celular'
             : ws.compound;
-          const displayDose = (lang === 'es' && ws.dose === 'No peptide administration scheduled')
-            ? 'Sin administración de péptidos programada'
-            : ws.dose;
+          const rawDose = ws.dose || '';
+          const displayDose = (rawDose === 'No peptide administration scheduled' || rawDose === 'No administration scheduled')
+            ? (lang === 'es' ? 'Ventana de Reposo Clínico' : 'Clinical Rest Window')
+            : (lang === 'es' && rawDose === 'Progress & Tolerance Review'
+            ? 'Revisión de Progreso y Tolerancia'
+            : rawDose);
           const displayTime = (lang === 'es' && ws.time === 'Clinical Rest Window')
             ? 'Ventana de Reposo Clínico'
             : (lang === 'es' && ws.time === 'Morning Administration')
