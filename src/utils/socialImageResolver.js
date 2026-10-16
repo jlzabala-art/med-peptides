@@ -67,6 +67,24 @@ const COMPOUND_IMAGE_MAP = {
   'eterna-epigenetic-age-test': '/images/products/eterna/eterna-kit-box.png',
   'eterna-longevity-platform': '/images/products/eterna/eterna-kit-box.png',
   'eterna': '/images/products/eterna/eterna-kit-box.png',
+
+  // Colway Official Bioactive Collagen & Dermocosmetics (PNG/JPG High-Res)
+  'colway-colvita': '/images/products/colway/colvita.png',
+  'colvita': '/images/products/colway/colvita.png',
+  'colway-collagen-vege': '/images/products/colway/vege-collagen.png',
+  'collagen-vege': '/images/products/colway/vege-collagen.png',
+  'colway-strengthening-shampoo': '/images/products/colway/shampoo.png',
+  'strengthening-shampoo': '/images/products/colway/shampoo.png',
+  'colway-strengthening-conditioner': '/images/products/colway/conditioner.png',
+  'strengthening-conditioner': '/images/products/colway/conditioner.png',
+  'colway-blue-diamond-cream': '/images/products/colway/blue-diamond-cream.png',
+  'blue-diamond-cream': '/images/products/colway/blue-diamond-cream.png',
+  'colway-blue-diamond-peeling': '/images/products/colway/blue-diamond-peeling.png',
+  'blue-diamond-peeling': '/images/products/colway/blue-diamond-peeling.png',
+  'colway-collagen-lip-care': '/images/products/colway/lip-care.png',
+  'collagen-lip-care': '/images/products/colway/lip-care.png',
+  'colway-collagen-wash-gel': '/images/products/colway/washing-gel.png',
+  'collagen-wash-gel': '/images/products/colway/washing-gel.png',
 };
 
 // Delivery format visual fallbacks

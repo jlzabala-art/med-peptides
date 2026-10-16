@@ -304,7 +304,10 @@ export async function generateMetadata({ params, searchParams }) {
   const pageDesc = isEterna
     ? 'Prueba genética y epigenética de alta resolución a partir de saliva (+700.000 SNPs). Mide edad biológica, 5 pilares de salud y sincronización con wearables (Apple, Garmin, Oura).'
     : resolvedSocial.description;
-  const explicitProductImage = product.image_url || product.imageUrl || product.photo_url || null;
+  const rawExplicitImage = product.image || product.image_url || product.imageUrl || product.photo_url || null;
+  const explicitProductImage = rawExplicitImage
+    ? (rawExplicitImage.startsWith('http') ? rawExplicitImage : `${BASE_URL}${rawExplicitImage.startsWith('/') ? '' : '/'}${rawExplicitImage}`)
+    : null;
   const previewImageUrl = isEterna
     ? `${BASE_URL}/images/products/eterna/eterna-kit-box.png`
     : ((isCosmetic && explicitProductImage)

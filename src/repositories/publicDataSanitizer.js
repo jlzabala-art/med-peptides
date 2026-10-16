@@ -33,7 +33,7 @@ export const PRODUCT_PUBLIC_WHITELIST = [
   'primary_goal', 'target', 'targetSystem', 'pharmacology', 'aiContent', 'translations',
   'isProfessional', 'requiresPrescription', 'professional_use_only', 'atlas_product_code',
   'status', 'isActive', 'qrScans',
-  'images', 'imageUrl', 'image_url', 'molecularWeight', 'molecularFormula', 'sequence', 'formula', 'molecular',
+  'images', 'image', 'imageUrl', 'image_url', 'photo_url', 'photoUrl', 'molecularWeight', 'molecularFormula', 'sequence', 'formula', 'molecular',
   'format', 'presentation', 'storage', 'route', 'treatment_areas', 'specialties', 'active_ingredient',
   'batchNumber', 'lotNumber', 'vialCode', 'batchCode', 'expirationDate', 'expiryDate', 'coaUrl',
   'analyticalSpecs', 'testingStandards', 'storageConditions', 'mfgDate',
