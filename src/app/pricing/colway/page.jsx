@@ -9,7 +9,7 @@ export async function generateMetadata() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
   const title = 'Colway Medical & Cellular Derma • Official UAE Wholesale Price Schedule';
   const description = 'Official UAE B2B price list and landed cost breakdown for Colway native biologically active collagen, trichology hair strengthening systems, and cellular cosmeceuticals.';
-  const ogImageUrl = `${appUrl}/images/products/colway/colway-collection-hero-banner.jpg`;
+  const ogImageUrl = `${appUrl}/images/products/colway/colway-dermatology-clinic-hero-v2.jpg`;
 
   return {
     title,

@@ -33,7 +33,7 @@ const BRAND_CONFIGS = {
     badge: 'Clinical Nutriceuticals, Dermocosmetics & Trichology Desk',
     badgeColor: '#0d9488',
     subtitle: 'Polish pioneer in biologically active native freshwater fish tropocollagen (triple-helix preserved), cellular oral nutriceuticals, advanced diamond cosmeceuticals, and medical follicular trichology.',
-    heroImage: '/images/products/colway/colway-collection-hero-banner.jpg',
+    heroImage: '/images/products/colway/colway-dermatology-clinic-hero-v2.jpg',
     accentColor: '#0d9488',
     kpis: [
       { label: 'Active Tropocollagen', value: 'Triple Helix', sub: 'Sublimation Freeze-Dried Active Form', icon: Sparkles, color: '#0d9488' },
@@ -356,7 +356,7 @@ export default function BrandCollectionPage({
           {brandSlug === 'colway' && (
             <div style={{ marginTop: '1.5rem', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 6px 24px rgba(15, 23, 42, 0.08)', border: '1px solid #e2e8f0' }}>
               <img
-                src="/images/products/colway/colway-collection-hero-banner.jpg"
+                src="/images/products/colway/colway-dermatology-clinic-hero-v2.jpg"
                 alt="Colway Complete Cellular Dermocosmetics & Nutricosmetics Collection"
                 style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '440px', objectFit: 'cover' }}
               />
