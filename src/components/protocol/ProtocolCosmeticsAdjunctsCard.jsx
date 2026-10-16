@@ -28,66 +28,150 @@ export default function ProtocolCosmeticsAdjunctsCard({
 
   const isEs = lang === 'es';
 
+  const goalStr = `${protocolGoal || ''} ${protocol?.goal || ''} ${protocol?.category || ''} ${protocol?.title || ''} ${protocol?.treatmentTitle || ''}`.toLowerCase();
+  const isSkinGoal = goalStr.includes('skin') || goalStr.includes('aging') || goalStr.includes('aesthetic') || goalStr.includes('wrinkle') || goalStr.includes('face') || goalStr.includes('dermal');
+  const isRecoveryGoal = !isSkinGoal && (goalStr.includes('recovery') || goalStr.includes('joint') || goalStr.includes('injury') || goalStr.includes('tissue') || goalStr.includes('wound') || goalStr.includes('longevity') || goalStr.includes('bpc'));
+
   // Normalize products from Firestore or fallback
   const rawProducts = (protocol?.topical_adjuncts && protocol.topical_adjuncts.length > 0)
     ? protocol.topical_adjuncts
     : (products.length > 0 ? products : null);
 
+  let defaultProducts = [];
+  if (isSkinGoal) {
+    defaultProducts = [
+      {
+        slug: 'colway-blue-diamond-peeling',
+        name: 'Colway Blue Diamond Peeling',
+        step: isEs ? 'Paso 1 — Exfoliación Micro-Dermoabrasiva & Enzimática' : 'Step 1 — Diamond Micro-Exfoliation & Peel',
+        tagline: 'Gemmological diamond dust, papain, subtilisin & native tropocollagen',
+        image_url: '/images/products/colway/blue-diamond-peeling.png',
+        key_compounds: ['Diamond Micro-Dust', 'Papain & Subtilisin', 'Native Fish Tropocollagen', 'Almond Oil'],
+        synergy_role: isEs
+          ? 'Remueve suavemente corneocitos queratinizados senescentes del estrato córneo para multiplicar la absorción y reactividad dérmica de los péptidos bioreguladores (GHK-Cu, Snap-8).'
+          : 'Gently clears senescent corneocytes from the stratum corneum to dramatically increase dermal permeability and reactivity to bioregulatory peptides (GHK-Cu, Snap-8).',
+        frequency: isEs ? '2× por semana antes de la aplicación del sérum/crema' : '2× weekly prior to evening peptide serum/cream application',
+        synergy_score: 96,
+        supplier: 'Colway'
+      },
+      {
+        slug: 'colway-blue-diamond-cream',
+        name: 'Colway Blue Diamond Cream',
+        step: isEs ? 'Paso 2 — Neocolagenogénesis & Matriz Extracelular' : 'Step 2 — VEP-Peptides & Neocollagenesis',
+        tagline: 'VEP-endorphin peptides, native tropocollagen, coenzyme Q10 & diamond bio-scaffold',
+        image_url: '/images/products/colway/blue-diamond-cream.png',
+        key_compounds: ['VEP-Carrier Peptides', 'Native Fish Tropocollagen', 'CoQ10', 'Hyaluronic Acid'],
+        synergy_role: isEs
+          ? 'Desencadena la transcripción de pro-colágeno I y III en fibroblastos dérmicos mediante vesículas de penetración epidérmica (VEP), potenciando el efecto tensor y la firmeza dérmica.'
+          : 'Stimulates pro-collagen I and III transcription in dermal fibroblasts via vesicular epidermal penetration (VEP) carriers, maximizing skin turgor and wrinkle smoothing.',
+        frequency: isEs ? 'Diario mañana y noche sobre rostro y cuello' : 'Daily morning and night across facial and neck skin',
+        synergy_score: 98,
+        supplier: 'Colway'
+      },
+      {
+        slug: 'colway-colvita',
+        name: 'Colvita Bioactive Native Collagen & Marine Algae',
+        step: isEs ? 'Paso 3 — Soporte Nutracéutico Sistémico' : 'Step 3 — Oral ECM Systemic Bio-Scaffold',
+        tagline: 'Lyophilized freshwater fish tropocollagen (triple-helix preserved), Fucus algae & Vitamin E',
+        image_url: '/images/products/colway/colvita.png',
+        key_compounds: ['Triple-Helix Tropocollagen', 'Fucus vesiculosus', 'Natural Vitamin E', 'Organic Iodine'],
+        synergy_role: isEs
+          ? 'Aporta oligopéptidos de colágeno intactos (secuencia Gly-Pro-Hyp) biodisponibles por vía oral, actuando como materia prima sistémica para la biosíntesis de matriz extracelular dérmica.'
+          : 'Delivers intact rate-limiting collagen oligopeptides (Gly-Pro-Hyp) with high oral bioavailability, acting as the systemic foundation for dermal fibroblast neo-collagenesis.',
+        frequency: isEs ? '2 cápsulas al día con agua durante las comidas' : '2 capsules daily with a glass of water alongside meals',
+        synergy_score: 95,
+        supplier: 'Colway'
+      }
+    ];
+  } else if (isRecoveryGoal) {
+    defaultProducts = [
+      {
+        slug: 'colway-colvita',
+        name: 'Colvita Bioactive Native Collagen & Marine Algae',
+        step: isEs ? 'Soporte Oral — Bio-Andamio de Tropocolágeno Nativo' : 'Oral Support — Systemic Collagen Bio-Scaffold',
+        tagline: 'Pure freeze-dried fish tropocollagen (triple-helix preserved) + marine algae & Vitamin E',
+        image_url: '/images/products/colway/colvita.png',
+        key_compounds: ['Freeze-Dried Tropocollagen', 'Fucus Algae (Trace Minerals)', 'Vitamin E', 'Triple Helix Conformation'],
+        synergy_role: isEs
+          ? 'Proporciona el andamiaje estructural rate-limiting de oligopéptidos bioactivos necesario para que péptidos tisulares como BPC-157 y TB-500 reparen tendones, ligamentos, cartílago y matriz extracelular con máxima velocidad.'
+          : 'Provides the rate-limiting structural bio-scaffolding of bioactive oligopeptides required for regenerative peptides like BPC-157 and TB-500 to accelerate tendon, ligament, joint cartilage, and ECM repair.',
+        frequency: isEs ? '2 cápsulas al día con agua durante comidas principales' : '2 capsules daily with a glass of water alongside main meals',
+        synergy_score: 98,
+        supplier: 'Colway'
+      }
+    ];
+  } else {
+    // Default: Hair Loss / Scalp Trichology
+    defaultProducts = [
+      {
+        slug: 'colway-strengthening-shampoo',
+        name: 'Colway Strengthening Hair Shampoo',
+        step: isEs ? 'Paso 1 — Preparación del Cuero Cabelludo' : 'Step 1 — Scalp Prep',
+        tagline: 'DHT inhibition, anagen extension, scalp microbiome support',
+        image_url: '/images/products/colway/shampoo.png',
+        key_compounds: ['Caffeine (IGF-1)', 'Zinc PCA (DHT↓)', 'Niacinamide (VEGF↑)', 'Native Collagen'],
+        synergy_role: isEs
+          ? 'Prepara el cuero cabelludo eliminando sebo con DHT, activando microcirculación y fijando un pH 4.5–5.5 ideal para absorción de péptidos.'
+          : 'Prepares the scalp by removing DHT-laden sebum, activating microcirculation, and creating an optimal pH environment for peptide absorption.',
+        frequency: isEs ? '3–4× por semana, aplicado antes de GHK-Cu' : '3–4× per week, applied before GHK-Cu topical if used',
+        synergy_score: 94,
+        supplier: 'Colway'
+      },
+      {
+        slug: 'colway-strengthening-conditioner',
+        name: 'Colway Strengthening Conditioner',
+        step: isEs ? 'Paso 2 — Reparación del Córtex' : 'Step 2 — Cortex Repair',
+        tagline: 'Keratin cortex reinforcement, cuticle sealing, moisture retention',
+        image_url: '/images/products/colway/conditioner.png',
+        key_compounds: ['Argan Oil (barrier)', 'Keratin Hydrolysate', 'Panthenol (B5)', 'Silk Amino Acids'],
+        synergy_role: isEs
+          ? 'Sella la cutícula y refuerza el córtex. Evita la rotura mecánica durante la fase de rebrote del protocolo.'
+          : 'Seals the cuticle and fills cortical micro-fractures after the shampoo phase. Reduces mechanical breakage during the regrowth phase.',
+        frequency: isEs ? 'Tras cada champú, dejar 5–10 min' : 'After every shampoo session, leave 5–10 min before rinsing',
+        synergy_score: 88,
+        supplier: 'Colway'
+      }
+    ];
+  }
+
   const displayProducts = rawProducts ? rawProducts.map((p, idx) => ({
     slug: p.product_slug || p.slug || (idx === 0 ? 'colway-strengthening-shampoo' : 'colway-strengthening-conditioner'),
     name: p.product_name || p.name,
-    step: p.step || (idx === 0 ? (isEs ? 'Paso 1 — Preparación del Cuero Cabelludo' : 'Step 1 — Scalp Prep') : (isEs ? 'Paso 2 — Reparación del Córtex' : 'Step 2 — Cortex Repair')),
-    tagline: p.tagline || (idx === 0 ? 'DHT inhibition, anagen extension, scalp microbiome support' : 'Keratin cortex reinforcement, cuticle sealing, moisture retention'),
-    image_url: p.image_url || (idx === 0 
-      ? 'https://colway.pl/wp-content/uploads/2024/09/szampon-wzmacniajacy-wlosy-colway.png'
-      : 'https://colway.pl/wp-content/uploads/2024/09/odzywka-wzmacniajaca-wlosy.png'),
-    key_compounds: p.key_mechanisms || p.key_compounds || (idx === 0
-      ? ['Caffeine (IGF-1)', 'Zinc PCA (DHT↓)', 'Niacinamide (VEGF↑)', 'Native Collagen']
-      : ['Argan Oil (barrier)', 'Keratin Hydrolysate', 'Panthenol (B5)', 'Silk Amino Acids']),
-    synergy_role: p.synergy_role || (idx === 0
-      ? (isEs 
-          ? 'Despeja el sebo cargado de DHT y optimiza el pH a 4.5–5.5 para maximizar la permeabilidad y estabilidad del complejo peptídico GHK-Cu.'
-          : 'Clears DHT-laden sebum and optimizes scalp pH to 4.5–5.5 to maximize GHK-Cu copper peptide permeability and structural stability.')
-      : (isEs
-          ? 'Protege los tallos anágenos frágiles recién emergidos rellenando microfisuras corticales con queratina hidrolizada y sellando la cutícula.'
-          : 'Protects fragile newly emerged anagen shafts by filling cortical micro-fissures with hydrolysed keratin and sealing the cuticle.')),
+    step: p.step || (idx === 0 ? (isEs ? 'Paso 1' : 'Step 1') : (isEs ? 'Paso 2' : 'Step 2')),
+    tagline: p.tagline || '',
+    image_url: p.image_url || '/images/products/colway/shampoo.png',
+    key_compounds: p.key_mechanisms || p.key_compounds || ['Active Tropocollagen', 'Bioactive Matrix'],
+    synergy_role: p.synergy_role || '',
     clinical_rationale: p.clinical_rationale,
-    frequency: p.frequency || (idx === 0 
-      ? (isEs ? '3–4× por semana, aplicado antes de la aplicación tópica de GHK-Cu' : '3–4× per week, applied immediately before GHK-Cu topical')
-      : (isEs ? 'Tras cada lavado, dejar actuar 5–10 min antes de aclarar' : 'After every shampoo session, leave 5–10 min before cool rinse')),
-    synergy_score: p.synergy_score || (idx === 0 ? 94 : 88),
+    frequency: p.frequency || (isEs ? 'Según pauta' : 'As indicated'),
+    synergy_score: p.synergy_score || 92,
     supplier: p.supplier || 'Colway',
     evidence_citations: p.evidence_citations || []
-  })) : [
-    {
-      slug: 'colway-strengthening-shampoo',
-      name: 'Colway Strengthening Hair Shampoo',
-      step: isEs ? 'Paso 1 — Preparación del Cuero Cabelludo' : 'Step 1 — Scalp Prep',
-      tagline: 'DHT inhibition, anagen extension, scalp microbiome support',
-      image_url: '/images/products/colway/shampoo.png',
-      key_compounds: ['Caffeine (IGF-1)', 'Zinc PCA (DHT↓)', 'Niacinamide (VEGF↑)', 'Native Collagen'],
-      synergy_role: isEs
-        ? 'Prepara el cuero cabelludo eliminando sebo con DHT, activando microcirculación y fijando un pH 4.5–5.5 ideal para absorción de péptidos.'
-        : 'Prepares the scalp by removing DHT-laden sebum, activating microcirculation, and creating an optimal pH environment for peptide absorption.',
-      frequency: isEs ? '3–4× por semana, aplicado antes de GHK-Cu' : '3–4× per week, applied before GHK-Cu topical if used',
-      synergy_score: 94,
-      supplier: 'Colway'
-    },
-    {
-      slug: 'colway-strengthening-conditioner',
-      name: 'Colway Strengthening Conditioner',
-      step: isEs ? 'Paso 2 — Reparación del Córtex' : 'Step 2 — Cortex Repair',
-      tagline: 'Keratin cortex reinforcement, cuticle sealing, moisture retention',
-      image_url: '/images/products/colway/conditioner.png',
-      key_compounds: ['Argan Oil (barrier)', 'Keratin Hydrolysate', 'Panthenol (B5)', 'Silk Amino Acids'],
-      synergy_role: isEs
-        ? 'Sella la cutícula y refuerza el córtex. Evita la rotura mecánica durante la fase de rebrote del protocolo.'
-        : 'Seals the cuticle and fills cortical micro-fractures after the shampoo phase. Reduces mechanical breakage during the regrowth phase.',
-      frequency: isEs ? 'Tras cada champú, dejar 5–10 min' : 'After every shampoo session, leave 5–10 min before rinsing',
-      synergy_score: 88,
-      supplier: 'Colway'
-    }
-  ];
+  })) : defaultProducts;
+
+  const headerLabel = isSkinGoal 
+    ? (isEs ? 'COADYUVANTES DERMOCOSMÉTICOS & REGENERACIÓN CELULAR' : 'DERMOCOSMETIC & CELLULAR ECM ADJUNCTS')
+    : isRecoveryGoal
+      ? (isEs ? 'COADYUVANTES NUTRACÉUTICOS & MATRIZ EXTRACELULAR' : 'NUTRACEUTICAL & SYSTEMIC ECM ADJUNCTS')
+      : (isEs ? 'COADYUVANTES TÓPICOS Y TRICOLOGÍA MÉDICA' : 'TOPICAL TRICHOLOGY & SCALP ADJUNCTS');
+
+  const headerSub = isSkinGoal
+    ? (isEs ? 'Sinergia clínica de superficie y soporte extracelular con tropocolágeno nativo y péptidos VEP' : 'Surface-level neocollagenesis & extracellular matrix support via native collagen & VEP-peptides')
+    : isRecoveryGoal
+      ? (isEs ? 'Soporte de bio-andamio de tropocolágeno liofilizado para acelerar la síntesis de colágeno endógeno' : 'Bioactive freeze-dried tropocollagen scaffold to accelerate endogenous connective tissue synthesis')
+      : (isEs ? 'Sinergia clínica de superficie para potenciar la permeación y anclaje folicular' : 'Recommended surface-level companions to optimize peptide penetration & follicular yield');
+
+  const contextNote = isSkinGoal
+    ? (isEs 
+        ? 'Los protocolos de péptidos bioreguladores faciales (como GHK-Cu, Snap-8, Argireline) actúan sobre la señalización celular dérmica. El sistema de micro-dermoabrasión con polvo de diamante y crema VEP de Colway optimiza la permeabilidad cutánea, desobstruye el estrato córneo senescente y aporta tropocolágeno nativo sinérgico para una redensificación profunda.'
+        : 'Facial bioregulatory peptides (GHK-Cu, Snap-8, Argireline) operate at the level of cellular signaling. Colway’s diamond micro-exfoliation and VEP-peptide carrier cream prepare the stratum corneum, clear senescent cells, and supply native triple-helix tropocollagen for synergistic dermal redensification.')
+    : isRecoveryGoal
+      ? (isEs 
+          ? 'En protocolos de regeneración musculoesquelética y articular (BPC-157, TB-500), la tasa de curación está limitada por la disponibilidad de aminoácidos estructurales específicos (hidroxiprolina, glicina, prolina). Colvita aporta tropocolágeno liofilizado no desnaturalizado que actúa como bio-andamio sistémico directo para los fibroblastos y condrocitos activados.'
+          : 'In musculoskeletal and tissue repair protocols (BPC-157, TB-500), recovery velocity is rate-limited by the bio-availability of specific structural oligopeptides (hydroxyproline, proline, glycine). Colvita provides intact freeze-dried fish tropocollagen that serves as an immediate structural bio-scaffold for activated fibroblasts and chondrocytes.')
+      : (isEs 
+          ? 'Los péptidos como GHK-Cu operan a nivel celular y dérmico profundo (papila dérmica, bulge folicular). Sin embargo, su bioequivalencia tópica depende críticamente de superar la barrera sebácea con DHT y mantener el pH del cuero cabelludo en 4.5–5.5. El sistema Colway actúa como coadyuvante sinérgico de superficie sin alterar el esquema farmacológico.'
+          : 'Peptides like GHK-Cu operate deep at the cellular dermal level (dermal papilla, follicular bulge). However, topical bioavailability critically depends on overcoming the lipophilic DHT sebum barrier and maintaining an acidic scalp pH (4.5–5.5). The Colway system provides mechanistically non-redundant surface support to maximize peptide delivery.');
 
   return (
     <div className="pca-root" id="cosmeceutical-adjuncts" style={{ scrollMarginTop: '100px' }}>
@@ -103,19 +187,13 @@ export default function ProtocolCosmeticsAdjunctsCard({
             <Droplets size={16} />
           </div>
           <div>
-            <div className="pca-header-label">
-              {isEs ? 'COADYUVANTES TÓPICOS Y COSMECEÚTICOS' : 'TOPICAL COSMECEUTICAL ADJUNCTS'}
-            </div>
-            <div className="pca-header-sub">
-              {isEs 
-                ? 'Sinergia clínica de superficie para potenciar la permeación y anclaje folicular'
-                : 'Recommended surface-level companions to optimize peptide penetration & follicular yield'}
-            </div>
+            <div className="pca-header-label">{headerLabel}</div>
+            <div className="pca-header-sub">{headerSub}</div>
           </div>
         </div>
         <div className="pca-header-right">
           <span className="pca-header-count">
-            {displayProducts.length} {isEs ? 'productos' : 'products'} · Synergy 94%
+            {displayProducts.length} {isEs ? 'productos' : 'products'} · Synergy 96%
           </span>
           <span className="pca-header-chevron" style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
             <ChevronRight size={14} />
@@ -130,10 +208,8 @@ export default function ProtocolCosmeticsAdjunctsCard({
             <Info size={15} style={{ color: '#0d9488', flexShrink: 0, marginTop: '2px' }} />
             <div>
               <p style={{ margin: 0, fontSize: '0.79rem', color: '#334155', lineHeight: 1.6 }}>
-                <strong>{isEs ? '¿Por qué coadyuvantes tópicos en un protocolo de péptidos?' : 'Why topical adjuncts in a peptide protocol?'}</strong>{' '}
-                {isEs 
-                  ? 'Los péptidos como GHK-Cu operan a nivel celular y dérmico profundo (papila dérmica, bulge folicular). Sin embargo, su bioequivalencia tópica depende críticamente de superar la barrera sebácea con DHT y mantener el pH del cuero cabelludo en 4.5–5.5. El sistema Colway actúa como coadyuvante sinérgico de superficie sin alterar el esquema farmacológico.'
-                  : 'Peptides like GHK-Cu operate deep at the cellular dermal level (dermal papilla, follicular bulge). However, topical bioavailability critically depends on overcoming the lipophilic DHT sebum barrier and maintaining an acidic scalp pH (4.5–5.5). The Colway system provides mechanistically non-redundant surface support to maximize peptide delivery.'}
+                <strong>{isEs ? 'Fundamento de la Sinergia Clínica:' : 'Clinical Synergy Rationale:'}</strong>{' '}
+                {contextNote}
               </p>
             </div>
           </div>
@@ -196,7 +272,7 @@ export default function ProtocolCosmeticsAdjunctsCard({
 
                 {/* CTA */}
                 <div className="pca-cta-row">
-                  <Link href={`/product/${p.slug}`} className="pca-view-btn">
+                  <Link href={`/p/${p.slug}`} className="pca-view-btn">
                     <Package size={13} /> {isEs ? 'Ver Expediente del Producto' : 'View Product Dossier'} <ChevronRight size={12} />
                   </Link>
                 </div>

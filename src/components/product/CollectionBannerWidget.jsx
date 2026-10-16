@@ -14,21 +14,65 @@ export function resolveBrandCollectionInfo(product) {
 
   // 1. Colway
   if (id.includes('colway') || slug.includes('colway') || brand.includes('colway') || name.includes('colway')) {
+    const isColvita = id.includes('colvita') || slug.includes('colvita') || name.includes('colvita') || cat.includes('supplement') || product.is_supplement || product.isSupplement;
+    const isFacial = id.includes('diamond') || id.includes('peeling') || id.includes('vege') || id.includes('wash') || id.includes('lip') || name.includes('diamond') || name.includes('facial');
     const isConditioner = id.includes('conditioner') || name.includes('conditioner');
     const isShampoo = id.includes('shampoo') || name.includes('shampoo');
 
+    if (isColvita) {
+      return {
+        brandSlug: 'colway',
+        brandName: 'Colway',
+        collectionTitle: 'Colway® Bioactive Collagen & Cellular Nutriceuticals',
+        collectionUrl: '/collection/colway',
+        accentColor: '#16a34a',
+        accentBg: '#f0fdf4',
+        borderColor: '#bbf7d0',
+        badgeLabel: 'Colway® Nutriceuticals',
+        icon: Sparkles,
+        systemName: 'Colway® Cellular Bio-Collagen System',
+        systemSubtitle: 'Sublimation Freeze-Dried Active Fish Tropocollagen + Marine Bladderwrack Algae + Vitamin E',
+        ctaLabel: 'Explore Colway® Collection',
+        quickChips: ['Triple Helix Tropocollagen', 'Fucus Algae', 'Vitamin E', 'Joint & Connective Matrix', 'Skin Elasticity']
+      };
+    }
+
+    if (isFacial) {
+      const isPeeling = id.includes('peeling') || name.includes('peeling');
+      const isCream = id.includes('cream') || id.includes('blue-diamond') || name.includes('cream');
+
+      return {
+        brandSlug: 'colway',
+        brandName: 'Colway',
+        collectionTitle: 'Colway® Diamond Cosmeceuticals & Neocollagenesis',
+        collectionUrl: '/collection/colway',
+        accentColor: '#2563eb',
+        accentBg: '#eff6ff',
+        borderColor: '#bfdbfe',
+        badgeLabel: 'Colway® Diamond Skincare',
+        icon: Sparkles,
+        systemName: 'Colway® Blue Diamond Cellular Neo-Collagenesis',
+        systemSubtitle: 'VEP-Peptides + Gemmological Diamond Dust + Biologically Active Tropocollagen',
+        ctaLabel: 'Explore Colway® Dermocosmetics',
+        steps: [
+          { num: 'Paso 1', name: 'Blue Diamond Peeling', active: isPeeling, url: '/p/colway-blue-diamond-peeling' },
+          { num: 'Paso 2', name: 'Blue Diamond Cream', active: isCream, url: '/p/colway-blue-diamond-cream' }
+        ]
+      };
+    }
+
     return {
       brandSlug: 'colway',
-      brandName: 'Colway® International',
-      collectionTitle: 'Colway® Hair Care & Dermocosmetics',
+      brandName: 'Colway',
+      collectionTitle: 'Colway® Trichology & Scalp System',
       collectionUrl: '/collection/colway',
       accentColor: '#0d9488',
       accentBg: '#f0fdfa',
       borderColor: '#ccfbf1',
-      badgeLabel: 'Colway® Hair Collection',
+      badgeLabel: 'Colway® Hair Restoration',
       icon: Sparkles,
       systemName: 'Colway® Hair Strengthening System',
-      systemSubtitle: '2-Step Synergistic Protocol (Native Tropocollagen + Baicapil 2% + Zinc PCA)',
+      systemSubtitle: '2-Step Synergistic Protocol (Native Tropocollagen + Baicapil 2% + Micronized Diosmin)',
       ctaLabel: 'View Full Colway® Collection',
       steps: [
         { num: 'Paso 1', name: 'Strengthening Shampoo', active: isShampoo, url: '/p/colway-strengthening-shampoo' },

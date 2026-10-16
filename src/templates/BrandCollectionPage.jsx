@@ -28,25 +28,24 @@ import '../styles/collection_shared.css';
 // Brand configurations with clinical metadata and 4 KPIs (Regla Golden #22)
 const BRAND_CONFIGS = {
   colway: {
-    name: 'Colway® International',
-    title: 'Colway® Native Collagen & Follicular Trichology',
-    badge: 'Clinical Dermocosmetics & Trichology Desk',
+    name: 'Colway',
+    title: 'Colway® Bioactive Native Collagen, Cosmeceuticals & Trichology',
+    badge: 'Clinical Nutriceuticals, Dermocosmetics & Trichology Desk',
     badgeColor: '#0d9488',
-    subtitle: 'Biologically active native tropocollagen, 5α-reductase follicular inhibition & medical cosmeceuticals formulated to preserve the cuticular extracellular matrix and support hair restoration protocols.',
-    heroImage: '/images/products/colway/shampoo.png',
+    subtitle: 'Polish pioneer in biologically active native freshwater fish tropocollagen (triple-helix preserved), cellular oral nutriceuticals, advanced diamond cosmeceuticals, and medical follicular trichology.',
+    heroImage: '/images/products/colway/colvita.png',
     accentColor: '#0d9488',
     kpis: [
-      { label: 'Active Tropocollagen', value: 'Type I, II & XVII', sub: 'Native Triple Helix Conformation', icon: Sparkles, color: '#0d9488' },
-      { label: 'Scalp DHT Blockade', value: '5α-Reductase', sub: 'Zinc PCA & Biotin Co-Enzyme Matrix', icon: Shield, color: '#0284c7' },
-      { label: 'Anagen Phase Boost', value: 'Baicapil™ 2%', sub: 'Caffeine-Driven Microvascular IGF-1', icon: Zap, color: '#d97706' },
-      { label: 'Regulatory Compliance', value: 'EU Cosmetics Reg.', sub: 'Dermatologically & Clinically Tested', icon: Award, color: '#16a34a' }
+      { label: 'Active Tropocollagen', value: 'Triple Helix', sub: 'Sublimation Freeze-Dried Active Form', icon: Sparkles, color: '#0d9488' },
+      { label: 'Diamond Peptides', value: 'VEP-Carrier', sub: 'Cellular Neocollagenesis & Remodeling', icon: Award, color: '#2563eb' },
+      { label: 'Scalp Trichology', value: 'Baicapil™ 2%', sub: 'Follicular Anchorage & Diosmin', icon: Zap, color: '#d97706' },
+      { label: 'Regulatory Compliance', value: 'EU Reg. & GMP', sub: 'CPNP Registered & Dermatologically Tested', icon: ShieldCheck, color: '#16a34a' }
     ],
     categories: [
-      { id: 'all', label: 'All Formulations (7)' },
-      { id: 'collagen', label: 'Vegan & Native Collagen' },
-      { id: 'diamond', label: 'Blue Diamond Series' },
-      { id: 'hair', label: 'Hair Strengthening System' },
-      { id: 'hygiene', label: 'Dermal Cleanser & Lip Care' }
+      { id: 'all', label: 'All Formulations (8)' },
+      { id: 'nutraceutical', label: 'Nutraceuticals & Systemic Collagen (Colvita)' },
+      { id: 'facial', label: 'Facial Cosmeceuticals & Blue Diamond' },
+      { id: 'trichology', label: 'Trichology & Hair Strengthening System' }
     ]
   },
   bloodo: {
@@ -156,6 +155,8 @@ function resolveBrandProductImage(product, brandSlug) {
   }
 
   if (brandSlug === 'colway') {
+    if (id.includes('colvita') || name.includes('colvita')) return '/images/products/colway/colvita.png';
+    if (id.includes('trichology') || name.includes('trichology')) return '/images/products/colway/colway-trichology-banner.jpg';
     if (id.includes('vege') || name.includes('vege') || name.includes('vegan')) return '/images/products/colway/vege-collagen.png';
     if (id.includes('peeling') || name.includes('peeling')) return '/images/products/colway/blue-diamond-peeling.png';
     if (id.includes('blue-diamond') || id.includes('diamond') || name.includes('diamond') || name.includes('diament')) return '/images/products/colway/blue-diamond-cream.png';
@@ -246,10 +247,9 @@ export default function BrandCollectionPage({
       list = list.filter(p => {
         const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''}`.toLowerCase();
         if (brandSlug === 'colway') {
-          if (cat === 'collagen') return str.includes('vege') || str.includes('vegan') || str.includes('collagen') || str.includes('kolagen');
-          if (cat === 'diamond') return str.includes('diamond') || str.includes('diament') || str.includes('peeling');
-          if (cat === 'hair') return str.includes('hair') || str.includes('shampoo') || str.includes('conditioner');
-          if (cat === 'hygiene') return str.includes('wash') || str.includes('lip') || str.includes('cleanser');
+          if (cat === 'nutraceutical') return str.includes('colvita') || str.includes('supplement') || str.includes('capsule') || str.includes('suplement');
+          if (cat === 'facial') return str.includes('diamond') || str.includes('diament') || str.includes('peeling') || str.includes('vege') || str.includes('wash') || str.includes('lip') || str.includes('cream');
+          if (cat === 'trichology') return str.includes('hair') || str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('szampon') || str.includes('odzywka');
         }
         return str.includes(cat);
       });

@@ -960,11 +960,29 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
             {/* ── STEP 1: Included Therapeutic Compounds & Formulations (Primary Clinical Presentation) ── */}
             <ProtocolCompoundsSection items={items} lang={lang} />
 
-            {/* ── STEP 1B: Topical Cosmeceutical Adjuncts (Colway Hair System, etc.) ── */}
-            {(protocol?.topical_adjuncts?.length > 0 || (protocol?.goal && protocol.goal.toLowerCase().includes('hair'))) && (
+            {/* ── STEP 1B: Topical Cosmeceutical & Nutraceutical Adjuncts (Colway Clinical Systems) ── */}
+            {(protocol?.topical_adjuncts?.length > 0 || 
+              (protocol?.goal && (
+                protocol.goal.toLowerCase().includes('hair') ||
+                protocol.goal.toLowerCase().includes('skin') ||
+                protocol.goal.toLowerCase().includes('aging') ||
+                protocol.goal.toLowerCase().includes('aesthetic') ||
+                protocol.goal.toLowerCase().includes('recovery') ||
+                protocol.goal.toLowerCase().includes('joint') ||
+                protocol.goal.toLowerCase().includes('longevity')
+              )) ||
+              (protocol?.category && (
+                protocol.category.toLowerCase().includes('hair') ||
+                protocol.category.toLowerCase().includes('skin') ||
+                protocol.category.toLowerCase().includes('aesthetic') ||
+                protocol.category.toLowerCase().includes('recovery') ||
+                protocol.category.toLowerCase().includes('longevity')
+              ))
+            ) && (
               <ProtocolCosmeticsAdjunctsCard
                 products={protocol?.topical_adjuncts}
                 protocol={protocol}
+                protocolGoal={protocol?.goal || protocol?.category || 'Clinical Protocol'}
                 lang={lang}
               />
             )}

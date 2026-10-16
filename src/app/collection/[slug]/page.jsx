@@ -9,11 +9,11 @@ const BASE_URL = 'https://www.atlashealth-services.com';
 
 const BRAND_METADATA = {
   colway: {
-    title: 'Colway® Native Collagen & Follicular Trichology | Atlas Clinical Collection',
-    description: 'Explore Colway® advanced trichology & native biologically active tropocollagen. Formulated with caffeine, Zinc PCA, Biotin, and Baicapil 2% to inhibit DHT, extend anagen phase, and reinforce follicular anchorage.',
-    image: `${BASE_URL}/images/products/colway/shampoo.png`,
-    section: 'Clinical Cosmeceuticals & Follicular Trichology',
-    keywords: ['Colway', 'Native Collagen', 'Hair Strengthening Shampoo', 'Hair Conditioner', 'Baicapil', 'Zinc PCA', 'DHT Blockade']
+    title: 'Colway® Bioactive Native Collagen, Cosmeceuticals & Trichology | Atlas Clinical Collection',
+    description: 'Explore Colway® biologically active freshwater fish tropocollagen (Colvita oral nutriceuticals, Blue Diamond VEP-peptide dermocosmetics, and trichological follicular hair systems). EU GMP and ISO 22716 certified.',
+    image: `${BASE_URL}/images/products/colway/colvita.png`,
+    section: 'Clinical Nutriceuticals, Dermocosmetics & Follicular Trichology',
+    keywords: ['Colway', 'Native Collagen', 'Colvita', 'Blue Diamond Cream', 'Blue Diamond Peeling', 'Trichology Shampoo', 'Conditioner', 'Baicapil', 'Tropocollagen']
   },
   bloodo: {
     title: 'Bloodo™ Capillary Blood Diagnostics | CE-IVDR Test Kits | Atlas Collection',

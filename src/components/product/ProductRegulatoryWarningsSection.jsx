@@ -25,7 +25,8 @@ import {
  * - Peptides / Vials: Physician supervision, sterile SubQ reconstitution, 2-8°C cold chain, RP-HPLC release.
  */
 export default function ProductRegulatoryWarningsSection({
-  _product,
+  product = null,
+  _product = null,
   lang = 'en',
   isCosmeticProduct = false,
   isDiagnosticKit = false,
@@ -34,12 +35,166 @@ export default function ProductRegulatoryWarningsSection({
   isSupplementProduct = false,
   supplierName = 'Atlas Synthesis Partner'
 }) {
+  const p = product || _product;
   const isEs = lang === 'es';
+  const effectiveIsSupplement = Boolean(
+    isSupplementProduct || 
+    p?.is_supplement || 
+    p?.isSupplement || 
+    (p?.category || '').toLowerCase().includes('supplement') || 
+    (p?.id || '').includes('colvita') ||
+    (p?.slug || '').includes('colvita')
+  );
 
   // ─────────────────────────────────────────────────────────────
-  // 1. COSMETIC / TOPICAL CARE (Colway, Shampoos, Conditioners)
+  // 1. CLINICAL SUPPLEMENTS (Colvita, UltraPerson, Pharmapolis)
   // ─────────────────────────────────────────────────────────────
-  if (isCosmeticProduct) {
+  if (effectiveIsSupplement) {
+    return (
+      <section 
+        id="regulatory-warnings" 
+        className="pds-section-card"
+        style={{
+          border: '1px solid #bbf7d0',
+          borderLeft: '4px solid #16a34a',
+          background: '#ffffff',
+          borderRadius: '10px',
+          overflow: 'hidden',
+          marginBottom: '2rem',
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.04)'
+        }}
+      >
+        <div 
+          className="pds-section-header" 
+          style={{ 
+            background: '#f0fdf4',
+            borderBottom: '1px solid #bbf7d0',
+            padding: '1rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: 36,
+              height: 36,
+              borderRadius: '8px',
+              background: '#dcfce7',
+              border: '1px solid #bbf7d0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <ShieldCheck size={20} color="#16a34a" />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#15803d', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                {isEs ? 'GOBERNANZA DE COMPLEMENTOS ALIMENTICIOS & REGULACIÓN UE' : 'DIETARY SUPPLEMENT REGULATION & QUALITY GOVERNANCE'}
+              </div>
+              <h3 style={{ margin: '2px 0 0 0', fontSize: '1.05rem', fontWeight: 800, color: '#14532d' }}>
+                {isEs ? 'Directiva Europea 2002/46/CE & Estándares cGMP' : 'EU Directive 2002/46/EC & cGMP Standards'}
+              </h3>
+            </div>
+          </div>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: '#dcfce7',
+            border: '1px solid #86efac',
+            borderRadius: '99px',
+            padding: '4px 12px',
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            color: '#15803d'
+          }}>
+            <Sparkles size={13} color="#16a34a" />
+            <span>{isEs ? 'Certificación cGMP & ISO 22000' : 'cGMP & ISO 22000 Certified'}</span>
+          </div>
+        </div>
+
+        <div style={{
+          padding: '0.75rem 1.5rem',
+          background: '#f8fafc',
+          borderBottom: '1px solid #e2e8f0',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          color: '#334155',
+          fontSize: '0.82rem',
+          lineHeight: 1.5
+        }}>
+          <Info size={16} color="#0284c7" style={{ flexShrink: 0 }} />
+          <span>
+            {isEs 
+              ? 'Los complementos alimenticios no deben utilizarse como sustitutos de una dieta equilibrada ni de un estilo de vida saludable. Formulación para soporte nutricional y metabólico.'
+              : 'Food supplements should not be used as a substitute for a varied, balanced diet and a healthy lifestyle. Formulated for clinical metabolic and nutritional support.'}
+          </span>
+        </div>
+
+        <div className="gcp-detail-rows-list">
+          {/* Row 1: Dosificación Diaria */}
+          <div className="gcp-detail-row">
+            <div className="gcp-detail-label">
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <CheckCircle2 size={16} color="#16a34a" />
+              </div>
+              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                {isEs ? 'Posología & Dosis Diaria' : 'Recommended Daily Serving'}
+              </h4>
+            </div>
+            <div className="gcp-detail-value">
+              {isEs 
+                ? 'No superar la dosis diaria expresamente recomendada en la etiqueta. Ingerir con un vaso de agua, preferentemente junto a comidas o según indicación del profesional sanitario.'
+                : 'Do not exceed the recommended daily dose stated on the packaging. Take with a glass of water, preferably alongside meals or as directed by a healthcare practitioner.'}
+            </div>
+          </div>
+
+          {/* Row 2: Conservación */}
+          <div className="gcp-detail-row">
+            <div className="gcp-detail-label">
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Clock size={16} color="#2563eb" />
+              </div>
+              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                {isEs ? 'Conservación & Caducidad' : 'Storage & Stability'}
+              </h4>
+            </div>
+            <div className="gcp-detail-value">
+              {isEs 
+                ? 'Conservar en un lugar fresco y seco (15°C–25°C), protegido de la luz solar directa y humedad. Mantener fuera del alcance de los niños más pequeños.'
+                : 'Store in a cool, dry place (15°C–25°C) protected from direct sunlight and humidity. Keep out of reach of young children.'}
+            </div>
+          </div>
+
+          {/* Row 3: Seguridad de Lote */}
+          <div className="gcp-detail-row">
+            <div className="gcp-detail-label">
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <ShieldCheck size={16} color="#d97706" />
+              </div>
+              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                {isEs ? 'Pureza & Metales Pesados' : 'Purity & Heavy Metals Tested'}
+              </h4>
+            </div>
+            <div className="gcp-detail-value">
+              {isEs 
+                ? 'Lotes analizados por laboratorios acreditados para metales pesados (plomo, cadmio, mercurio, arsénico), pesticidas y ausencia de contaminantes microbiológicos.'
+                : 'Batches tested by independent accredited laboratories for heavy metals (lead, cadmium, mercury, arsenic), pesticides, and microbiological safety.'}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // 2. COSMETIC / TOPICAL CARE (Colway, Shampoos, Conditioners)
+  // ─────────────────────────────────────────────────────────────
+  if (isCosmeticProduct && !effectiveIsSupplement) {
     return (
       <section 
         id="regulatory-warnings" 

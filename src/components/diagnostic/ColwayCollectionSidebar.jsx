@@ -80,7 +80,7 @@ export default function ColwayCollectionSidebar({
           </div>
           <div>
             <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.2 }}>
-              Colway® International
+              Colway
             </h4>
             <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
               {isEs ? 'Tricología y Dermocosmética Nativa' : 'Native Collagen & Trichology'}

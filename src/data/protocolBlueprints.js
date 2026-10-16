@@ -129,6 +129,15 @@ export const PROTOCOL_BLUEPRINTS = {
       clinical_goal: "recovery",
       secondary_goals: ["anti_inflammatory", "tissue_repair", "joint_mobility"],
       primary_compounds: ["bpc_157", "tb_500", "ghk_cu"],
+      adjuvants: [
+        {
+          slug: "colway-colvita",
+          name: "Colvita Bioactive Native Collagen & Marine Algae",
+          category: "Nutraceutical",
+          dosage: "2 capsules daily with meals",
+          role: "Provides rate-limiting freeze-dried fish tropocollagen oligopeptides (triple-helix preserved) and marine bladderwrack minerals to accelerate tendon, ligament, and cartilage neo-collagenesis."
+        }
+      ],
       protocol_class: "regenerative_based",
       duration_weeks: 12,
       intensity_level: "moderate"
@@ -352,6 +361,29 @@ export const PROTOCOL_BLUEPRINTS = {
       clinical_goal: "longevity",
       secondary_goals: ["anti_aging", "skin_health", "cellular_rejuvenation"],
       primary_compounds: ["ghk_cu", "epitalon", "foxo4_dri"],
+      adjuvants: [
+        {
+          slug: "colway-blue-diamond-cream",
+          name: "Colway Blue Diamond Cream",
+          category: "Facial Cosmeceutical",
+          dosage: "Apply morning and night",
+          role: "VEP-endorphin peptides and native fish tropocollagen bio-scaffold for dermal fibroblast stimulation."
+        },
+        {
+          slug: "colway-blue-diamond-peeling",
+          name: "Colway Blue Diamond Peeling",
+          category: "Facial Cosmeceutical",
+          dosage: "2x weekly prior to evening routine",
+          role: "Gemmological diamond micro-dermabrasion and enzymatic peel to clear senescent corneocytes and maximize peptide receptivity."
+        },
+        {
+          slug: "colway-colvita",
+          name: "Colvita Bioactive Native Collagen & Marine Algae",
+          category: "Nutraceutical",
+          dosage: "2 capsules daily with meals",
+          role: "Systemic oral tropocollagen triple-helix bio-scaffold supporting dermal matrix elasticity and fibroblast density."
+        }
+      ],
       protocol_class: "epigenetic_based",
       duration_weeks: 10,
       intensity_level: "low"
@@ -510,6 +542,79 @@ export const PROTOCOL_BLUEPRINTS = {
       duration_weeks: 8,
       intensity_level: "low"
     }
+  },
+  hairRestoration: {
+    title: "Comprehensive Follicular Hair Restoration Protocol",
+    summary: {
+      goal: "Reverse follicular miniaturization, block scalp DHT, and reactivate dormant anagen growth.",
+      duration: "16 weeks",
+      benefits: ["Increased hair density", "Inhibition of scalp DHT", "Extended anagen phase", "Cuticle & peribulbar matrix reinforcement"]
+    },
+    phases: [
+      {
+        name: "Phase 1: Follicular Activation & Ostium Detox",
+        weeks: 8,
+        startWeek: 1,
+        endWeek: 8,
+        goal: "Purify follicular ostia and stimulate dermal papilla microcirculation.",
+        medications: [
+          { name: "GHK-Cu", dosage: "2.5mg", weeklyDose: 17.5, frequency: "Daily subcutaneous / topical", route: "subcutaneous", days: ["Daily"], mgPerVial: 50 },
+          { name: "Zinc Thymulin", dosage: "100mcg", weeklyDose: 0.7, frequency: "Daily topical", route: "topical", days: ["Daily"], mgPerVial: 5 }
+        ]
+      },
+      {
+        name: "Phase 2: Anagen Consolidation & Anchorage",
+        weeks: 8,
+        startWeek: 9,
+        endWeek: 16,
+        goal: "Lock in follicular Collagen XVII anchorage and prevent hair shaft shedding.",
+        medications: [
+          { name: "GHK-Cu", dosage: "2mg", weeklyDose: 14, frequency: "Daily", route: "subcutaneous", days: ["Daily"], mgPerVial: 50 }
+        ]
+      }
+    ],
+    monitoring: [
+      { week: 8, labs: ["Trichoscopy Analysis", "Serum Ferritin", "Vitamin D3", "Total & Free Testosterone"], note: "Evaluate hair density and microcirculatory vascularization" }
+    ],
+    safetyFlags: [
+      { trigger: "Scalp irritation", alert: "Use Colway Strengthening Conditioner after each wash to maintain epicutaneous moisture." }
+    ],
+    expectedResults: {
+      metric: "Increase in anagen-to-telogen ratio by >25%",
+      observations: ["Reduced hair fall in shower", "Thicker hair shaft diameter", "Scalp calm with zero erythema"]
+    },
+    lifestyle: {
+      nutrition: ["High protein & collagen intake", "Adequate iron & zinc", "Omega-3 fatty acids"],
+      activity: ["Scalp massage 5 min/day to promote capillary circulation"]
+    },
+    safety: {
+      sideEffects: ["Mild scalp tingling after caffeine application"],
+      recommendedTests: ["Dermatological assessment", "Trichogram"]
+    },
+    clinical_metadata: {
+      clinical_goal: "hair_restoration",
+      secondary_goals: ["alopecia_reduction", "follicular_activation", "dermal_matrix"],
+      primary_compounds: ["ghk_cu", "zinc_thymulin"],
+      adjuvants: [
+        {
+          slug: "colway-trichology",
+          name: "Colway Trichology Hair Strengthening System (2-Step Synergistic Routine)",
+          category: "Trichology Cosmeceutical",
+          dosage: "Shampoo 3-4x weekly, Conditioner after each wash",
+          role: "Native biologically active tropocollagen, micronized diosmin, and Baicapil™ 2% to protect the follicular barrier, purify ostia, and seal cuticular scales."
+        },
+        {
+          slug: "colway-colvita",
+          name: "Colvita Bioactive Native Collagen & Marine Algae",
+          category: "Nutraceutical",
+          dosage: "2 capsules daily with meals",
+          role: "Systemic tropocollagen and marine algae to supply structural amino acids for keratin synthesis and follicular dermal papilla extracellular matrix."
+        }
+      ],
+      protocol_class: "trichological_based",
+      duration_weeks: 16,
+      intensity_level: "moderate"
+    }
   }
 };
 
@@ -521,6 +626,9 @@ export const BLUEPRINT_MAPPING = {
   "Sleep Support": "sleepSupport",
   "Hormonal Support": "hormonalSupport",
   "Skin / Anti-Aging": "skinAntiAging",
+  "Aesthetics & Skin Rejuvenation": "skinAntiAging",
+  "Hair Restoration / Alopecia": "hairRestoration",
+  "Hair Loss / Scalp Health": "hairRestoration",
   "Immune / Inflammation": "immuneInflammation",
   "Energy / Mitochondrial": "energyMitochondrial",
   "Other / General Wellness": "generalSupport"

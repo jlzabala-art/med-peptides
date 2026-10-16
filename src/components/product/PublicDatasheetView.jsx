@@ -2467,6 +2467,8 @@ export default function PublicDatasheetView({
           isDiagnosticKit={isDiagnosticKit || isBloodoDiagnostic}
           isSolventProduct={isSolventProduct}
           isCorporateService={isCorporateService}
+          isSupplementProduct={isSupplementProduct}
+          supplierName={supplierName}
         />
 
         {/* Brand Collection Discovery Banner (Moved to End as requested) */}
