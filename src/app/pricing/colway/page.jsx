@@ -100,23 +100,6 @@ const FALLBACK_COLWAY_PRODUCTS = [
     stockStatus: 'In Stock (Dubai)'
   },
   {
-    id: 'colway-trichology',
-    sku: 'SKU-COLWAY-TRICHOLOGY-DUO',
-    name: 'Colway Trichology Hair Strengthening System (2-Step Duo)',
-    subtitle: 'Synergistic Duo Routine: Shampoo 250mL + Conditioner 200mL',
-    volume: '450 mL Total',
-    presentation: 'Complete 2-Step Therapy Box',
-    category: 'Trichology & Scalp',
-    image: '/images/products/colway/colway-trichology-banner.jpg',
-    keyActives: 'Baicapil™ 2%, Kerascalp™, Native Tropocollagen, Micronized Diosmin, Bio-Silica',
-    clinicalFocus: 'Complete follicular cycle renewal, stem cell activation, anti-miniaturisation, hair density boost (+60%).',
-    landedCostAed: 200,
-    wholesalePriceAed: 230,
-    clinicPriceAed: 280,
-    retailPriceAed: 340,
-    stockStatus: 'In Stock (Dubai)'
-  },
-  {
     id: 'colway-blue-diamond-cream',
     sku: 'SKU-COLWAY-BLUEDIAMOND-50',
     name: 'Colway Blue Diamond Cream (Krem Niebieski Diament)',
