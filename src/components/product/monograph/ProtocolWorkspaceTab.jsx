@@ -25,7 +25,8 @@ import {
   Lock,
   ExternalLink,
   X,
-  Sparkles
+  Sparkles,
+  Microscope
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
@@ -126,7 +127,7 @@ function sanitizeProtocolTitle(rawName = '', canonicalCompound = '') {
   if (!rawName) return 'Clinical Protocol';
   let cleaned = String(rawName).trim();
   // Strip parenthetical generics anywhere in first 40 chars, e.g. "(Bremelanotide)"
-  cleaned = cleaned.replace(/^([^\(]*)\([^)]*\)\s*[-—:]?\s*/i, '$1').trim();
+  cleaned = cleaned.replace(/^([^(]*)\([^)]*\)\s*[-—:]?\s*/i, '$1').trim();
   // Strip compound names
   cleaned = cleaned.replace(/^(PT[- ]?141|Bremelanotide|Semaglutide|Tirzepatide|GHK[- ]?Cu|BPC[- ]?157|TB[- ]?500|Ipamorelin|CJC[- ]?1295|Epitalon|NAD\+?|Tesamorelin|Retatrutide)\s*[-—:]?\s*/i, '').trim();
   if (canonicalCompound) {
@@ -272,7 +273,7 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '', isNasal = false
   let extractedDoseMg = null;
   let extractedFreqPerWeek = null;
   let extractedFreqDesc = '';
-  let extractedRoute = isNasal ? 'Intranasal' : isPen ? 'Subcutaneous (Pen)' : 'Subcutaneous';
+  const extractedRoute = isNasal ? 'Intranasal' : isPen ? 'Subcutaneous (Pen)' : 'Subcutaneous';
   let totalWeeks = 0;
 
   const mappedPhases = phases.map((ph, idx) => {
@@ -493,14 +494,35 @@ export default function ProtocolWorkspaceTab({
       : (activeFormat?.id || activeFormat?.name || product.presentation || product.format || 'vial')
   ).toLowerCase();
 
-  const isNasal = formatStr.includes('nasal') || formatStr.includes('spray');
-  const isPen = formatStr.includes('pen') || formatStr.includes('cartridge');
-  const isVial = !isNasal && !isPen;
-  const currentFormat = isNasal ? 'nasal_spray' : isPen ? 'prefilled_pen' : 'vial';
+  const slugStr = (product.canonicalName || product.name || product.slug || '').toLowerCase();
+  const isDiagnostic = Boolean(
+    product?.category === 'diagnostic' ||
+    product?.category === 'diagnostic_test' ||
+    product?.category === 'diagnostic_tests' ||
+    product?.category?.toLowerCase().includes('diagnostic') ||
+    product?.type?.toLowerCase().includes('diagnostic') ||
+    product?.format === 'diagnostic_kit' ||
+    product?.presentation === 'diagnostic_kit' ||
+    formatStr.includes('kit') ||
+    formatStr.includes('test') ||
+    Boolean(product?.sampleType) ||
+    product?.supplierId?.toLowerCase().includes('teletest') ||
+    product?.supplierName?.toLowerCase().includes('teletest') ||
+    product?.supplierId?.toLowerCase().includes('bloodo') ||
+    slugStr.includes('omega') ||
+    slugStr.includes('htma') ||
+    slugStr.includes('metabolizer') ||
+    slugStr.includes('teletest')
+  );
+
+  const isNasal = !isDiagnostic && (formatStr.includes('nasal') || formatStr.includes('spray'));
+  const isPen = !isDiagnostic && (formatStr.includes('pen') || formatStr.includes('cartridge'));
+  const isVial = !isDiagnostic && !isNasal && !isPen;
+  const currentFormat = isDiagnostic ? 'diagnostic_kit' : isNasal ? 'nasal_spray' : isPen ? 'prefilled_pen' : 'vial';
 
   // Normalize protocols list: strictly filter by presentation format and map into canonical structure
   const availableProtocols = useMemo(() => {
-    let list = Array.isArray(associatedProtocols) && associatedProtocols.length > 0
+    const list = Array.isArray(associatedProtocols) && associatedProtocols.length > 0
       ? associatedProtocols
       : [];
 
@@ -783,6 +805,15 @@ export default function ProtocolWorkspaceTab({
         format: 'prefilled_pen',
         price: product.price || 62.00
       }, procCalc.totalUnitsCount || 1);
+    } else if (isDiagnostic) {
+      onAddToCart?.({
+        id: `${product.id || 'diagnostic-test'}-kit`,
+        productId: product.id || 'diagnostic-test',
+        name: `${product.name || 'Diagnostic Test'} Kit (${product.sampleType || 'Capillary DBS'})`,
+        dosage: product.dosage || product.dose || '1 Diagnostic Test Kit',
+        format: 'diagnostic_kit',
+        price: selectedStrength?.price || product.price || 150.00
+      }, procCalc.totalUnitsCount || 1);
     } else {
       (procCalc.recommendedVials || []).forEach(v => {
         onAddToCart?.({
@@ -817,10 +848,10 @@ export default function ProtocolWorkspaceTab({
   }, [activeProtocol, procCalc, reconCalc, selectedVialStrength, physicianDurationWeeks, physicianDoseMg, currentStep, canonicalName, currentFormat, onProtocolChange]);
 
   const stepsList = [
-    { number: 1, label: 'Protocol' },
-    { number: 2, label: 'Treatment Plan' },
-    { number: 3, label: isNasal ? 'Supply (Sprays)' : isPen ? 'Supply (Pens)' : 'Vials' },
-    { number: 4, label: isNasal ? 'Nasal Spray Guide' : isPen ? 'Pen Calibration' : 'Preparation' },
+    { number: 1, label: isDiagnostic ? 'Diagnostic Protocol' : 'Protocol' },
+    { number: 2, label: isDiagnostic ? 'Testing Schedule' : 'Treatment Plan' },
+    { number: 3, label: isDiagnostic ? 'Kit Procurement' : isNasal ? 'Supply (Sprays)' : isPen ? 'Supply (Pens)' : 'Vials' },
+    { number: 4, label: isDiagnostic ? 'Collection Guide' : isNasal ? 'Nasal Spray Guide' : isPen ? 'Pen Calibration' : 'Preparation' },
     { number: 5, label: 'Review' }
   ];
 
@@ -1897,12 +1928,12 @@ export default function ProtocolWorkspaceTab({
                   padding: '1px 7px',
                   borderRadius: '10px'
                 }}>
-                  {isNasal ? 'Intranasal Supply' : isPen ? 'Multi-Dose Pen Supply' : 'Vial Procurement'}
+                  {isDiagnostic ? 'Test Kit Procurement' : isNasal ? 'Intranasal Supply' : isPen ? 'Multi-Dose Pen Supply' : 'Vial Procurement'}
                 </span>
               </div>
 
               <p style={{ margin: 0, fontSize: '0.76rem', color: '#64748b', lineHeight: 1.45 }}>
-                Add verified clinical {isNasal ? 'nasal spray bottles' : isPen ? 'pre-filled multi-dose pens' : 'laboratory vials'} directly to patient quotation or export itemized BOM.
+                Add verified clinical {isDiagnostic ? 'specimen collection test kits' : isNasal ? 'nasal spray bottles' : isPen ? 'pre-filled multi-dose pens' : 'laboratory vials'} directly to patient quotation or export itemized BOM.
               </p>
 
               <div style={{
@@ -1955,7 +1986,7 @@ export default function ProtocolWorkspaceTab({
                     boxShadow: user ? '0 1px 3px rgba(22, 163, 74, 0.25)' : '0 1px 3px rgba(0, 54, 102, 0.25)',
                     flex: '2 1 auto'
                   }}
-                  title={user ? `Add ${isNasal ? 'spray' : isPen ? 'pen' : 'vial'} requirements to quotation` : "Sign in required to request quotation"}
+                  title={user ? `Add ${isDiagnostic ? 'kit' : isNasal ? 'spray' : isPen ? 'pen' : 'vial'} requirements to quotation` : "Sign in required to request quotation"}
                 >
                   {user ? (
                     <>
@@ -2735,6 +2766,87 @@ export default function ProtocolWorkspaceTab({
                   </div>
                 </div>
               </>
+            )}
+
+            {/* ─── 4D: DIAGNOSTIC SPECIMEN COLLECTION & TRANSPORTATION PROTOCOL ─── */}
+            {isDiagnostic && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: '8px',
+                  padding: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: '8px',
+                    background: '#eff6ff',
+                    color: '#1d4ed8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Microscope size={20} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#003666' }}>
+                      Standardized Specimen Collection & Chain of Custody
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px' }}>
+                      Laboratory analysis performed under ISO 15189:2022 accreditation. Zero dilution, mixing, or reconstitution required.
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6 Step Protocol Cards */}
+                <div style={{
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  overflow: 'hidden'
+                }}>
+                  {[
+                    { step: 1, title: 'Patient Preparation & Fasting', summary: '8–12 hours overnight fast (water permitted)', detail: 'Ensure patient adheres to an 8–12 hour fast. Hydrate with water 30 minutes prior to collection to improve capillary peripheral perfusion.' },
+                    { step: 2, title: 'Sterile Digital Puncture', summary: 'Lancet activation on fingertip (3rd or 4th finger)', detail: 'Disinfect selected puncture site with 70% isopropyl alcohol swab. Allow to air dry. Apply sterile pressure-activated single-use lancet on lateral finger pad.' },
+                    { step: 3, title: 'Whatman 903 Card Collection', summary: 'Spot 4–5 full circles with free-falling capillary drops', detail: 'Wipe away first droplet with dry gauze. Allow subsequent drops to fall freely onto Whatman 903 protein saver card circles without touching paper directly to skin.' },
+                    { step: 4, title: 'Horizontal Ambient Drying', summary: 'Air dry 3 hours at room temperature (18°C–25°C)', detail: 'Keep collection card open horizontally on clean, flat surface away from direct sunlight, humidity, and heat sources for minimum 3 hours until completely dry.' },
+                    { step: 5, title: 'Sealing with Desiccant Pouch', summary: 'Insert card into foil barrier pouch with silica gel', detail: 'Slide dried Whatman 903 card into the moisture-barrier foil envelope containing the active desiccant packet and humidity indicator strip. Press ziplock firmly.' },
+                    { step: 6, title: 'Pre-Addressed Courier Dispatch', summary: 'Dispatch to ISO 15189 Laboratory • Turnaround: 5–7 Days', detail: 'Place sealed specimen pouch into the prepaid courier envelope. Hand over to courier or authorized clinical specimen collection point for express refrigerated/ambient transit.' }
+                  ].map((item, idx) => (
+                    <div key={idx} style={{
+                      padding: '10px 14px',
+                      background: idx % 2 === 0 ? '#ffffff' : '#f8fafc',
+                      borderBottom: idx === 5 ? 'none' : '1px solid #f1f5f9'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span style={{
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '50%',
+                          background: '#e0f2fe',
+                          color: '#0369a1',
+                          fontSize: '0.68rem',
+                          fontWeight: 800,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          {item.step}
+                        </span>
+                        <strong style={{ fontSize: '0.78rem', color: '#0f172a' }}>{item.title}</strong>
+                        <span style={{ fontSize: '0.74rem', color: '#64748b' }}>• {item.summary}</span>
+                      </div>
+                      <div style={{ paddingLeft: '28px', fontSize: '0.74rem', color: '#475569', lineHeight: 1.4 }}>
+                        {item.detail}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
 
             <div style={{

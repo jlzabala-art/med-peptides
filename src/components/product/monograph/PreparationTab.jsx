@@ -66,11 +66,32 @@ export default function PreparationTab({
     ''
   ).toLowerCase();
 
-  const isSpray = formatStr.includes('spray') || formatStr.includes('nasal');
-  const isPen = formatStr.includes('pen') || formatStr.includes('cartridge');
-  const isSublingual = formatStr.includes('sublingual') || formatStr.includes('drop');
-  const isOral = formatStr.includes('capsule') || formatStr.includes('tablet') || formatStr.includes('oral');
-  const isVial = !isSpray && !isPen && !isSublingual && !isOral;
+  const slugStr = (product?.canonicalName || product?.name || slug || '').toLowerCase();
+  const isDiagnostic = Boolean(
+    product?.category === 'diagnostic' ||
+    product?.category === 'diagnostic_test' ||
+    product?.category === 'diagnostic_tests' ||
+    product?.category?.toLowerCase().includes('diagnostic') ||
+    product?.type?.toLowerCase().includes('diagnostic') ||
+    product?.format === 'diagnostic_kit' ||
+    product?.presentation === 'diagnostic_kit' ||
+    formatStr.includes('kit') ||
+    formatStr.includes('test') ||
+    Boolean(product?.sampleType) ||
+    product?.supplierId?.toLowerCase().includes('teletest') ||
+    product?.supplierName?.toLowerCase().includes('teletest') ||
+    product?.supplierId?.toLowerCase().includes('bloodo') ||
+    slugStr.includes('omega') ||
+    slugStr.includes('htma') ||
+    slugStr.includes('metabolizer') ||
+    slugStr.includes('teletest')
+  );
+
+  const isSpray = !isDiagnostic && (formatStr.includes('spray') || formatStr.includes('nasal'));
+  const isPen = !isDiagnostic && (formatStr.includes('pen') || formatStr.includes('cartridge'));
+  const isSublingual = !isDiagnostic && (formatStr.includes('sublingual') || formatStr.includes('drop'));
+  const isOral = !isDiagnostic && (formatStr.includes('capsule') || formatStr.includes('tablet') || formatStr.includes('oral'));
+  const isVial = !isDiagnostic && !isSpray && !isPen && !isSublingual && !isOral;
 
   // ── 2. Derive Dynamic Available Strengths ──
   const dynamicStrengths = useMemo(() => {
@@ -104,7 +125,6 @@ export default function PreparationTab({
 
   const initialStrengthMg = dynamicStrengths[0]?.mg || (isSpray ? 30 : isPen ? 6 : 10);
 
-  const slugStr = (product?.canonicalName || product?.name || slug || '').toLowerCase();
   const isTirzepatide = slugStr.includes('tirzepatide');
   const isSemaglutide = slugStr.includes('semaglutide');
   const isRetatrutide = slugStr.includes('retatrutide');
@@ -245,7 +265,7 @@ export default function PreparationTab({
   // ── Universal Copy Protocol Handler ──
   const handleCopyPrepProtocol = () => {
     triggerHaptic('light');
-    let text = '';
+    let text;
     const title = product.canonicalName || product.name || 'Peptide Monograph';
 
     if (isSpray) {
@@ -915,6 +935,91 @@ export default function PreparationTab({
           </div>
         )}
 
+        {/* ── DIAGNOSTIC SPECIMEN COLLECTION KIT CONFIGURATION ── */}
+        {isDiagnostic && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '1rem',
+              marginBottom: '0.5rem'
+            }}>
+              {/* Sampling Matrix */}
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: '#64748b' }}>
+                  1. Biological Specimen Matrix
+                </span>
+                <div style={{ fontSize: '1rem', fontWeight: 800, color: '#003666', marginTop: '4px' }}>
+                  {product.sampleType || 'Capillary Whole Blood (Dried Blood Spot)'}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px' }}>
+                  Direct micro-perfusion finger puncture (Whatman 903 Grade Matrix)
+                </div>
+              </div>
+
+              {/* Fasting & Pre-analytical */}
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: '#64748b' }}>
+                  2. Pre-Analytical Protocol
+                </span>
+                <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
+                  8–12h Overnight Fast
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px' }}>
+                  Water allowed. Avoid fatty meals & Omega-3 supplements 48h prior.
+                </div>
+              </div>
+
+              {/* Laboratory Processing */}
+              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '12px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: '#166534' }}>
+                  3. Accredited Laboratory Delivery
+                </span>
+                <div style={{ fontSize: '1rem', fontWeight: 800, color: '#15803d', marginTop: '4px' }}>
+                  5–7 Business Days Turnaround
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#166534', marginTop: '3px' }}>
+                  TeleTest Analytika (ISO 15189 Certified · Gas Chromatography GC-FID)
+                </div>
+              </div>
+            </div>
+
+            {/* Specimen Integrity Card */}
+            <div style={{
+              background: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}>
+              <div>
+                <strong style={{ fontSize: '0.84rem', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  🔬 Standardized Clinical Specimen Collection
+                </strong>
+                <p style={{ margin: '3px 0 0 0', fontSize: '0.74rem', color: '#1e3a8a', lineHeight: 1.4 }}>
+                  No syringes, reconstitution, or cold-chain required prior to sampling. Kit includes sterile safety lancets, Whatman 903 protein saver card, desiccant pouch, and prepaid courier mailer.
+                </p>
+              </div>
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #93c5fd',
+                borderRadius: '6px',
+                padding: '4px 10px',
+                fontSize: '0.74rem',
+                fontWeight: 750,
+                color: '#1d4ed8',
+                whiteSpace: 'nowrap'
+              }}>
+                CE-IVD Certified Matrix
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── E. STANDARD VIAL RECONSTITUTION CONFIGURATION ── */}
         {isVial && (
           <div>
@@ -1262,7 +1367,8 @@ export default function PreparationTab({
             textTransform: 'uppercase',
             letterSpacing: '0.04em'
           }}>
-            {isSpray ? 'Intranasal Aseptic Administration Protocol' :
+            {isDiagnostic ? 'Clinical Specimen Collection & Transportation Protocol' :
+             isSpray ? 'Intranasal Aseptic Administration Protocol' :
              isPen ? 'Multi-Dose Pen Stepwise Procedure' :
              isSublingual ? 'Sublingual Administration Protocol' :
              isOral ? 'Oral Enteric Ingestion Protocol' :
@@ -1271,7 +1377,14 @@ export default function PreparationTab({
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
             {/* DYNAMIC STEPS BASED ON PRESENTATION */}
-            {(isSpray ? [
+            {(isDiagnostic ? [
+              { step: 1, title: 'Patient Preparation & Verification', summary: `Confirm 8–12h overnight fast; verify kit lot ${effectiveBatch}`, detail: 'Drink 1–2 glasses of water 30 minutes prior to improve peripheral microvascular perfusion. Avoid taking fish oil or lipid supplements for 48 hours prior to baseline sampling.' },
+              { step: 2, title: 'Warm Water Perfusion Stimulation', summary: 'Wash hands with warm soapy water for 2 minutes', detail: 'Warmth dilates digital capillaries, ensuring effortless blood flow. Dry thoroughly with a clean lint-free towel.' },
+              { step: 3, title: 'Sterile Antisepsis & Puncture', summary: 'Disinfect side of fingertip; trigger safety lancet', detail: 'Clean the lateral side of the middle or ring finger with the included 70% isopropyl alcohol wipe. Place sterile lancet firmly against skin and press activation button.' },
+              { step: 4, title: 'Capillary Spotting on Whatman Card', summary: 'Wipe first drop; saturate 3–4 collection circles', detail: 'Wipe away the very first drop with sterile gauze. Allow large, hanging drops of blood to fall directly onto the circles of the Whatman 903 collection card without touching the paper to your skin.' },
+              { step: 5, title: 'Horizontal Ambient Drying', summary: 'Air-dry horizontally for 20 minutes at room temperature', detail: 'Keep the card flat on a clean surface away from direct sunlight, air conditioners, or heat sources. Do not close or fold the card until spots are completely dry and dark red.' },
+              { step: 6, title: 'Desiccant Packaging & Dispatch', summary: 'Seal in moisture-barrier pouch with desiccant; ship via courier', detail: 'Place dried card into the biohazard envelope with the desiccant pack. Insert the completed requisition form into the prepaid postal mailer and dispatch to the accredited testing laboratory.' }
+            ] : isSpray ? [
               { step: 1, title: 'Verify & Remove Cap', summary: `Remove protective dust cap; confirm lot ${effectiveBatch}`, detail: 'Check actuator nozzle for cleanliness. Maintain sterile integrity and ensure the tip is free from debris.' },
               { step: 2, title: 'Prime Pump (First Use)', summary: 'Pump 2 times into air until fine mist appears', detail: 'Hold bottle upright. Priming ensures the calibrated 0.1 mL metering chamber is completely filled. Only prime prior to the very first dose.' },
               { step: 3, title: 'Prepare Nasal Cavity', summary: 'Gently blow nose before administration', detail: 'Clearing excess mucus ensures maximum direct peptide contact with the highly vascularized nasal mucosa.' },
@@ -1382,13 +1495,15 @@ export default function PreparationTab({
             textTransform: 'uppercase',
             letterSpacing: '0.04em'
           }}>
-            {isOral ? 'Storage & Climate Control Standards' : 'Cold Chain & Beyond-Use Stability'}
+            {isDiagnostic ? 'Specimen Stability & Courier Logistics' :
+             isOral ? 'Storage & Climate Control Standards' : 
+             'Cold Chain & Beyond-Use Stability'}
           </h3>
 
           {/* Primary Condition */}
           <div style={{
-            background: isOral ? '#fff7ed' : isSublingual ? '#faf5ff' : '#eff6ff',
-            border: `1px solid ${isOral ? '#fed7aa' : isSublingual ? '#e9d5ff' : '#bfdbfe'}`,
+            background: isDiagnostic ? '#f8fafc' : isOral ? '#fff7ed' : isSublingual ? '#faf5ff' : '#eff6ff',
+            border: `1px solid ${isDiagnostic ? '#e2e8f0' : isOral ? '#fed7aa' : isSublingual ? '#e9d5ff' : '#bfdbfe'}`,
             borderRadius: '8px',
             padding: '10px 12px'
           }}>
@@ -1396,21 +1511,23 @@ export default function PreparationTab({
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              color: isOral ? '#c2410c' : isSublingual ? '#6b21a8' : '#1e40af',
+              color: isDiagnostic ? '#003666' : isOral ? '#c2410c' : isSublingual ? '#6b21a8' : '#1e40af',
               fontWeight: 800,
               fontSize: '0.78rem'
             }}>
-              {isOral ? <Archive size={14} color="#ea580c" /> : <Snowflake size={14} color="#2563eb" />}
+              {isDiagnostic ? <Archive size={14} color="#003666" /> : isOral ? <Archive size={14} color="#ea580c" /> : <Snowflake size={14} color="#2563eb" />}
               <span>
-                {isSpray ? 'Nasal Spray Solution (Unopened)' :
+                {isDiagnostic ? 'Unopened Specimen Collection Kit' :
+                 isSpray ? 'Nasal Spray Solution (Unopened)' :
                  isPen ? 'Pre-filled Pen Cartridge (Unopened)' :
                  isSublingual ? 'Sublingual Vehicle (Sealed)' :
                  isOral ? 'Oral Capsules in Bottle with Desiccant' :
                  'Lyophilized Dry Powder (Unopened)'}
               </span>
             </div>
-            <p style={{ margin: '4px 0 0 0', fontSize: '0.74rem', color: isOral ? '#9a3412' : isSublingual ? '#581c87' : '#1e3a8a', lineHeight: 1.4 }}>
-              {isSpray ? 'Store at 2°C–8°C (Refrigerated). Protect from heat and direct sunlight. Transit stable up to 14 days at ambient 20°C–25°C.' :
+            <p style={{ margin: '4px 0 0 0', fontSize: '0.74rem', color: isDiagnostic ? '#334155' : isOral ? '#9a3412' : isSublingual ? '#581c87' : '#1e3a8a', lineHeight: 1.4 }}>
+              {isDiagnostic ? 'Store collection kit at ambient room temperature (15°C–25°C). Stable on shelf for up to 24 months before sampling. Keep dry and protected from direct sunlight.' :
+               isSpray ? 'Store at 2°C–8°C (Refrigerated). Protect from heat and direct sunlight. Transit stable up to 14 days at ambient 20°C–25°C.' :
                isPen ? 'Store refrigerated at 2°C–8°C. Do NOT freeze. Stable in transit in temperature-controlled packaging.' :
                isSublingual ? 'Store in a cool, dry location (15°C–25°C). Avoid freezer storage. Protect from strong light.' :
                isOral ? 'Store at controlled room temperature (15°C–25°C). Keep bottle tightly capped with desiccant. Do not store in bathrooms or refrigerators.' :
@@ -1428,7 +1545,8 @@ export default function PreparationTab({
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#166534', fontWeight: 800, fontSize: '0.78rem' }}>
               <Thermometer size={14} color="#16a34a" />
               <span>
-                {isSpray ? 'In-Use Nasal Spray Stability' :
+                {isDiagnostic ? 'Dried Blood Spot Transit Stability' :
+                 isSpray ? 'In-Use Nasal Spray Stability' :
                  isPen ? 'In-Use Pen Stability (Active Period)' :
                  isSublingual ? 'Opened Dropper Stability' :
                  isOral ? 'Enteric Integrity & Shelf-Life' :
@@ -1436,7 +1554,8 @@ export default function PreparationTab({
               </span>
             </div>
             <p style={{ margin: '4px 0 0 0', fontSize: '0.74rem', color: '#14532d', lineHeight: 1.4 }}>
-              {isSpray ? 'Refrigerate at 2°C–8°C after first use. Solution maintains full peptide stability for up to 60 days post-opening. Keep upright.' :
+              {isDiagnostic ? 'Once dried onto Whatman 903 matrix and sealed with desiccant, biological fatty acid specimens are stable at ambient temperature for up to 28 days during transit.' :
+               isSpray ? 'Refrigerate at 2°C–8°C after first use. Solution maintains full peptide stability for up to 60 days post-opening. Keep upright.' :
                isPen ? 'Once attached, in-use pen may be kept at room temperature < 25°C or refrigerated for up to 28 days. Remove needle after each injection.' :
                isSublingual ? 'Maintains full chemical potency for up to 60 days after opening at room temperature (15°C–25°C).' :
                isOral ? 'Enteric coating remains 100% gastro-resistant for 24 months from manufacturing date when stored dry and sealed.' :

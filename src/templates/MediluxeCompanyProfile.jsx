@@ -239,31 +239,31 @@ END:VCARD`;
         {/* ── 4 Key Performance Indicators (Google Cloud UX Rule #22) ── */}
         <div className="mediluxe-kpi-bar">
           <div className="mediluxe-kpi-card">
+            <div className="mediluxe-kpi-icon"><FlaskConical size={22} /></div>
+            <div>
+              <div className="mediluxe-kpi-number">580+</div>
+              <div className="mediluxe-kpi-label">Active Products &amp; Formulations</div>
+            </div>
+          </div>
+          <div className="mediluxe-kpi-card">
             <div className="mediluxe-kpi-icon"><Award size={22} /></div>
             <div>
-              <div className="mediluxe-kpi-number">14+</div>
-              <div className="mediluxe-kpi-label">Years of Excellence (2011–2025)</div>
+              <div className="mediluxe-kpi-number">100+</div>
+              <div className="mediluxe-kpi-label">Clinical Protocols &amp; Regimens</div>
+            </div>
+          </div>
+          <div className="mediluxe-kpi-card">
+            <div className="mediluxe-kpi-icon"><Layers size={22} /></div>
+            <div>
+              <div className="mediluxe-kpi-number">6</div>
+              <div className="mediluxe-kpi-label">Specialized Clinical Departments</div>
             </div>
           </div>
           <div className="mediluxe-kpi-card">
             <div className="mediluxe-kpi-icon"><Globe size={22} /></div>
             <div>
               <div className="mediluxe-kpi-number">4</div>
-              <div className="mediluxe-kpi-label">GCC Countries Served</div>
-            </div>
-          </div>
-          <div className="mediluxe-kpi-card">
-            <div className="mediluxe-kpi-icon"><FlaskConical size={22} /></div>
-            <div>
-              <div className="mediluxe-kpi-number">35+</div>
-              <div className="mediluxe-kpi-label">Specialized Formulations</div>
-            </div>
-          </div>
-          <div className="mediluxe-kpi-card">
-            <div className="mediluxe-kpi-icon"><Layers size={22} /></div>
-            <div>
-              <div className="mediluxe-kpi-number">7</div>
-              <div className="mediluxe-kpi-label">Therapeutic Categories</div>
+              <div className="mediluxe-kpi-label">GCC Operating Hubs (UAE, Qatar, KW, KSA)</div>
             </div>
           </div>
         </div>
@@ -279,8 +279,8 @@ END:VCARD`;
               <p className="mediluxe-section-subtitle">
                 Since its establishment in 2011 in Abu Dhabi, Mediluxe Medical Supplies L.L.C. has 
                 stood as the premier authorized European biotechnology gateway in the Middle East, 
-                supplying private clinics, hospitals, and longevity institutes with pharmaceutical-grade 
-                personalized medical solutions.
+                supplying private clinics, hospitals, and longevity institutes with 580+ pharmaceutical-grade 
+                medical formulations and 100+ evidence-based clinical protocols across 6 specialized departments.
               </p>
 
               {/* Clean Clinical Flow Diagram (Anti-SciFi) */}
@@ -565,6 +565,45 @@ END:VCARD`;
                   <p className="mediluxe-pillar-desc">
                     Exclusive cosmeceutical and peptide formulations meeting stringent international cosmetic standards.
                   </p>
+                </div>
+              </div>
+
+              {/* 6 Specialized Clinical Departments Showcase */}
+              <div style={{ marginTop: '2rem', marginBottom: '1.5rem', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <Layers size={18} style={{ color: '#003666' }} />
+                  <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    6 Specialized Clinical Departments &amp; Therapeutic Portfolios
+                  </h3>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 1.25rem 0' }}>
+                  Full-spectrum pharmaceutical compounding and biotechnology spanning over 580 active catalog references and 100+ clinical protocols.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.85rem' }}>
+                  <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #edf2f7' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.84rem', color: '#003666', marginBottom: '0.2rem' }}>1. Peptide Therapeutics</div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Mitochondrial health, cellular repair, tissue regeneration &amp; longevity signaling.</div>
+                  </div>
+                  <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #edf2f7' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.84rem', color: '#0d9488', marginBottom: '0.2rem' }}>2. Regenerative Medicine</div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Musculoskeletal recovery, joint protection, and orthopedic cellular biomatrices.</div>
+                  </div>
+                  <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #edf2f7' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.84rem', color: '#003666', marginBottom: '0.2rem' }}>3. Bioidentical Endocrinology (BHRT)</div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Subcutaneous pellets, transdermal liposomal creams &amp; precision hormone modulation.</div>
+                  </div>
+                  <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #edf2f7' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.84rem', color: '#0d9488', marginBottom: '0.2rem' }}>4. Aesthetic Cosmeceuticals &amp; Trichology</div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Sterile mesotherapy, TrichoFoam follicular formulas &amp; barrier repair serums.</div>
+                  </div>
+                  <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #edf2f7' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.84rem', color: '#003666', marginBottom: '0.2rem' }}>5. Genomic &amp; Laboratory Diagnostics</div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>CE-IVD DNA swabs, Whatman 903 DBS kits, telomere length &amp; metabolomics.</div>
+                  </div>
+                  <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #edf2f7' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.84rem', color: '#0d9488', marginBottom: '0.2rem' }}>6. Precision Compounding &amp; Custom APIs</div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Magistral capsules, rectal micro-enemas, oral sublingual troches &amp; GMP sterile vials.</div>
+                  </div>
                 </div>
               </div>
 

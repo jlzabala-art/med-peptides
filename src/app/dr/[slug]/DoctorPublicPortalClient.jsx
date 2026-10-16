@@ -55,7 +55,10 @@ import {
   Moon,
   RefreshCw,
   Dna,
-  MoreHorizontal
+  MoreHorizontal,
+  Upload,
+  Building2,
+  Image as ImageIcon
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -79,6 +82,7 @@ import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolida
 import { calculateTreatmentDates, calculateTreatmentDuration } from '@/utils/clinical/clinicalFormulations';
 import DoctorFloatingGlassDock from '@/components/doctor/docks/DoctorFloatingGlassDock';
 import DoctorPracticeSearchModal from '@/components/doctor/modals/DoctorPracticeSearchModal';
+import EditTreatmentDurationModal from '@/components/doctor/modals/EditTreatmentDurationModal';
 
 function safeRenderText(val, fallback = '') {
   if (!val) return fallback;
@@ -603,11 +607,62 @@ export default function DoctorPublicPortalClient({
   const [expandedRecId, setExpandedRecId] = useState(null);
   const [recFilter, setRecFilter] = useState(null); // { id: string, title: string, rxIds: string[] }
 
-  // ── Treatment Timeline & Duration Inline Editing State (Golden Rule #5) ──
-  const [editingTimelineRxId, setEditingTimelineRxId] = useState(null);
-  const [timelineStartDate, setTimelineStartDate] = useState('');
-  const [timelineDurationDays, setTimelineDurationDays] = useState(30);
-  const [isSavingTimeline, setIsSavingTimeline] = useState(false);
+  // ── Treatment Timeline Pop-up Modal State (Mobile & Laptop UX - Golden Rule #5) ──
+  const [timelineModalRx, setTimelineModalRx] = useState(null);
+
+  const openTimelineModal = (rx, e) => {
+    if (e) e.stopPropagation();
+    triggerHaptic('selection');
+    setTimelineModalRx(rx);
+  };
+
+  const handleSaveTimelineModal = async ({ prescription, startDate, durationDays, endDate }) => {
+    const rx = prescription;
+    const parsedDays = Number(durationDays) || 30;
+    const res = await fetch('/api/prescriptions/update-timeline', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prescriptionId: rx.id || rx.code,
+        prescriptionNumber: rx.code || rx.prescriptionNumber,
+        startDate,
+        durationDays: parsedDays,
+        endDate
+      })
+    });
+
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || 'Failed to update treatment timeline');
+    }
+
+    // Optimistically update prescription in reactive client state (Golden Rule #25)
+    setData(prev => {
+      if (!prev?.prescriptions) return prev;
+      const updatedRxList = prev.prescriptions.map(p => {
+        if ((p.id && p.id === rx.id) || (p.code && p.code === rx.code)) {
+          const weeks = Math.round(parsedDays / 7);
+          return {
+            ...p,
+            startDate,
+            treatmentStartDate: startDate,
+            durationDays: parsedDays,
+            durationWeeks: weeks,
+            duration: `${parsedDays} Days (${weeks} Weeks)`,
+            treatmentDuration: `${parsedDays} Days`,
+            endDate: json.updated?.endDate || endDate
+          };
+        }
+        return p;
+      });
+      return {
+        ...prev,
+        prescriptions: updatedRxList
+      };
+    });
+
+    toast.success(`Timeline updated: ${parsedDays} days starting ${startDate} ✓`);
+  };
 
   // ── Quick Action Dots Popover Menu State ──
   const [activeActionsMenuRxId, setActiveActionsMenuRxId] = useState(null);
@@ -622,78 +677,6 @@ export default function DoctorPublicPortalClient({
     window.addEventListener('click', handleOutsideActionClick);
     return () => window.removeEventListener('click', handleOutsideActionClick);
   }, []);
-
-  const startEditingTimeline = (rx, e) => {
-    if (e) e.stopPropagation();
-    triggerHaptic('selection');
-    const dates = calculateTreatmentDates(rx);
-    setTimelineStartDate(dates.startDate);
-    setTimelineDurationDays(dates.durationDays || 30);
-    setEditingTimelineRxId(rx.code || rx.id);
-  };
-
-  const handleCancelEditingTimeline = (e) => {
-    if (e) e.stopPropagation();
-    setEditingTimelineRxId(null);
-  };
-
-  const handleSaveTimeline = async (rx, e) => {
-    if (e) e.stopPropagation();
-    try {
-      setIsSavingTimeline(true);
-      triggerHaptic('medium');
-
-      const parsedDays = Number(timelineDurationDays) || 30;
-      const res = await fetch('/api/prescriptions/update-timeline', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prescriptionId: rx.id || rx.code,
-          prescriptionNumber: rx.code || rx.prescriptionNumber,
-          startDate: timelineStartDate,
-          durationDays: parsedDays
-        })
-      });
-
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || 'Failed to update treatment timeline');
-      }
-
-      // Optimistically update prescription in reactive client state (Golden Rule #25)
-      setData(prev => {
-        if (!prev?.prescriptions) return prev;
-        const updatedRxList = prev.prescriptions.map(p => {
-          if ((p.id && p.id === rx.id) || (p.code && p.code === rx.code)) {
-            const weeks = Math.round(parsedDays / 7);
-            return {
-              ...p,
-              startDate: timelineStartDate,
-              treatmentStartDate: timelineStartDate,
-              durationDays: parsedDays,
-              durationWeeks: weeks,
-              duration: `${parsedDays} Days (${weeks} Weeks)`,
-              treatmentDuration: `${parsedDays} Days`,
-              endDate: json.updated?.endDate
-            };
-          }
-          return p;
-        });
-        return {
-          ...prev,
-          prescriptions: updatedRxList
-        };
-      });
-
-      setEditingTimelineRxId(null);
-      toast.success(`Timeline updated: ${parsedDays} days starting ${timelineStartDate} ✓`);
-    } catch (err) {
-      console.error('Error saving timeline:', err);
-      toast.error(err.message || 'Could not save timeline');
-    } finally {
-      setIsSavingTimeline(false);
-    }
-  };
 
   // Inline Doctor Profile Field Editing State (Rule #5: Inline editing with explicit Save & Cancel)
   const [editingDoctorField, setEditingDoctorField] = useState(null); // 'name' | 'specialty' | 'clinic' | 'license' | 'mobile' | 'email' | null
@@ -760,6 +743,11 @@ export default function DoctorPublicPortalClient({
       }
       if (fieldKey === 'clinic') {
         updates.clinicName = finalValue;
+      }
+      if (fieldKey === 'clinicLogo') {
+        updates.clinicLogo = finalValue;
+        updates.logoUrl = finalValue;
+        updates.whiteLabelEnabled = Boolean(finalValue);
       }
 
       const res = await fetch(`/api/doctor/${encodeURIComponent(slug)}`, {
@@ -1829,12 +1817,32 @@ export default function DoctorPublicPortalClient({
       align: 'left',
       sortable: true,
       render: (rx) => (
-        <div style={{ textAlign: 'left' }}>
-          <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.86rem' }}>
+        <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.88rem' }}>
             {rx.patientName}
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <CopyableId value={rx.prescriptionNumber || rx.code} />
+            {rx.invoiceRef && (
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 650,
+                  color: '#475569',
+                  background: '#f1f5f9',
+                  padding: '1px 6px',
+                  borderRadius: '3px',
+                  border: '1px solid #e2e8f0',
+                  letterSpacing: '0.02em'
+                }}
+                title={`Historical order reference ${rx.invoiceRef}`}
+              >
+                {rx.invoiceRef}
+              </span>
+            )}
+          </div>
           {rx.patient?.dob && (
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
               DOB: {rx.patient.dob}
             </div>
           )}
@@ -1854,12 +1862,20 @@ export default function DoctorPublicPortalClient({
         const rawTitle = rx.regimenShortTitle || rx.treatmentTitle || 'Compounded Precision Regimen';
         const displayTitle = String(rawTitle).replace(/\s*\(Propuesta de Tratamiento\)/gi, '').replace(/\s*\(Sin Pedido\)/gi, '').replace(/\s*\(Propuesta\)/gi, '').trim();
         const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+        const itemsSummary = (rx.items && rx.items.length > 0)
+          ? rx.items.map(i => `${i.name || ''} ${i.dose || ''}`.trim()).filter(Boolean).slice(0, 2).join(' · ')
+          : null;
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', width: '100%' }}>
             <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.86rem', lineHeight: '1.3', textAlign: 'left' }}>
               {displayTitle}
             </div>
+            {itemsSummary && (
+              <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px', fontWeight: 500, lineHeight: 1.25 }}>
+                {itemsSummary}
+              </div>
+            )}
             <div style={{ marginTop: '5px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
               {/* Category Pill */}
               <span style={{
@@ -1942,172 +1958,60 @@ export default function DoctorPublicPortalClient({
       align: 'left',
       sortable: true,
       render: (rx) => {
-        const isEditing = editingTimelineRxId === (rx.code || rx.id);
-        const dates = calculateTreatmentDates(rx, isEditing ? timelineStartDate : null, isEditing ? timelineDurationDays : null);
+        const dates = calculateTreatmentDates(rx);
 
-        if (isEditing) {
-          return (
-            <div
-              onClick={e => e.stopPropagation()}
-              style={{
-                background: '#ffffff',
-                border: '1.5px solid #1a73e8',
-                borderRadius: '6px',
-                padding: '6px 8px',
-                boxShadow: '0 2px 8px rgba(26,115,232,0.15)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '5px',
-                minWidth: '185px'
-              }}
-            >
-              {/* Start Date Input */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#475569' }}>Start:</span>
-                <input
-                  type="date"
-                  value={timelineStartDate}
-                  onChange={(e) => setTimelineStartDate(e.target.value)}
-                  style={{
-                    fontSize: '0.74rem',
-                    padding: '2px 4px',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '4px',
-                    color: '#0f172a',
-                    fontWeight: 600,
-                    outline: 'none',
-                    width: '110px'
-                  }}
-                />
-              </div>
-
-              {/* Duration Presets & Input */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#475569' }}>Days:</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="365"
-                  value={timelineDurationDays}
-                  onChange={(e) => setTimelineDurationDays(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                  style={{
-                    fontSize: '0.74rem',
-                    padding: '2px 4px',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '4px',
-                    color: '#0f172a',
-                    fontWeight: 600,
-                    width: '46px',
-                    textAlign: 'center'
-                  }}
-                />
-                <div style={{ display: 'flex', gap: '2px' }}>
-                  {[30, 60, 90].map(d => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setTimelineDurationDays(d)}
-                      style={{
-                        fontSize: '0.64rem',
-                        padding: '1px 4px',
-                        borderRadius: '3px',
-                        border: timelineDurationDays === d ? '1px solid #1a73e8' : '1px solid #e2e8f0',
-                        background: timelineDurationDays === d ? '#eff6ff' : '#f8fafc',
-                        color: timelineDurationDays === d ? '#1a73e8' : '#64748b',
-                        fontWeight: 650,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {d}d
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Projected End Date Preview */}
-              <div style={{ fontSize: '0.66rem', color: '#64748b', lineHeight: 1.1 }}>
-                End: <strong style={{ color: '#0f172a' }}>{dates.endFormatted}</strong>
-              </div>
-
-              {/* Explicit Save & Cancel Buttons (Golden Rule #5) */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px', marginTop: '2px' }}>
-                <button
-                  type="button"
-                  onClick={handleCancelEditingTimeline}
-                  style={{
-                    height: '22px',
-                    padding: '0 6px',
-                    fontSize: '0.68rem',
-                    borderRadius: '3px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    color: '#64748b',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '2px'
-                  }}
-                  title="Cancel edit"
-                >
-                  <X size={10} />
-                  <span>Cancel</span>
-                </button>
-                <button
-                  type="button"
-                  disabled={isSavingTimeline}
-                  onClick={(e) => handleSaveTimeline(rx, e)}
-                  style={{
-                    height: '22px',
-                    padding: '0 8px',
-                    fontSize: '0.68rem',
-                    borderRadius: '3px',
-                    border: '1px solid #1a73e8',
-                    background: '#1a73e8',
-                    color: '#ffffff',
-                    fontWeight: 650,
-                    cursor: isSavingTimeline ? 'wait' : 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '3px'
-                  }}
-                  title="Save changes to Firestore"
-                >
-                  {isSavingTimeline ? <Loader2 size={10} className="animate-spin" /> : <Check size={10} />}
-                  <span>Save</span>
-                </button>
-              </div>
-            </div>
-          );
-        }
-
-        // Non-editing Display
         return (
           <div
-            onClick={(e) => startEditingTimeline(rx, e)}
+            onClick={(e) => openTimelineModal(rx, e)}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-start',
               cursor: 'pointer',
-              padding: '2px 4px',
-              borderRadius: '4px',
-              transition: 'background 0.12s'
+              padding: '4px 6px',
+              borderRadius: '6px',
+              border: '1px solid transparent',
+              transition: 'all 0.15s ease',
+              maxWidth: '100%'
             }}
             title="Click to edit treatment start date and duration"
-            onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = '#f8fafc';
+              e.currentTarget.style.borderColor = '#e2e8f0';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.borderColor = 'transparent';
+            }}
           >
             {/* Start Date */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
               <Calendar size={12} style={{ color: '#1a73e8', flexShrink: 0 }} />
-              <span style={{ fontSize: '0.78rem', fontWeight: 650, color: '#1e293b' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 650, color: '#1e293b', whiteSpace: 'nowrap' }}>
                 {dates.startFormatted}
               </span>
-              <Edit3 size={10} style={{ color: '#94a3b8', opacity: 0.6, flexShrink: 0 }} />
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '16px',
+                  height: '16px',
+                  borderRadius: '3px',
+                  background: '#eff6ff',
+                  color: '#1a73e8',
+                  opacity: 0.85,
+                  flexShrink: 0,
+                  marginLeft: '2px'
+                }}
+                title="Edit timeline"
+              >
+                <Edit3 size={10} />
+              </span>
             </div>
 
             {/* Duration Badge */}
-            <div style={{ marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span
                 style={{
                   fontSize: '0.68rem',
@@ -2115,17 +2019,20 @@ export default function DoctorPublicPortalClient({
                   color: dates.isEstimated ? '#0369a1' : '#047857',
                   background: dates.isEstimated ? '#f0f9ff' : '#f0fdf4',
                   border: dates.isEstimated ? '1px solid #bae6fd' : '1px solid #bbf7d0',
-                  padding: '1px 6px',
+                  padding: '2px 7px',
                   borderRadius: '4px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '3px'
+                  gap: '4px',
+                  whiteSpace: 'nowrap'
                 }}
                 title={dates.reason}
               >
-                <Clock size={10} />
+                <Clock size={10} style={{ flexShrink: 0 }} />
                 <span>{dates.durationLabel}</span>
-                {dates.isEstimated && <span style={{ opacity: 0.7, fontSize: '0.62rem' }}>~auto</span>}
+                {dates.isEstimated && (
+                  <span style={{ opacity: 0.75, fontSize: '0.62rem', fontWeight: 500 }}>· Auto</span>
+                )}
               </span>
             </div>
           </div>
@@ -2517,7 +2424,7 @@ export default function DoctorPublicPortalClient({
         );
       }
     }
-  ], [signingTaskId, handleSignOffPrescription, handleShareProposalWhatsApp, editingTimelineRxId, timelineStartDate, timelineDurationDays, isSavingTimeline, activeActionsMenuRxId]);
+  ], [signingTaskId, handleSignOffPrescription, handleShareProposalWhatsApp, activeActionsMenuRxId]);
 
   // ── Bloodo Diagnostic Lab Results Columns (DataTable Universal) ─────────
   const labResultsColumns = useMemo(() => [
@@ -3451,6 +3358,10 @@ export default function DoctorPublicPortalClient({
         track="protocols"
         lang={lang}
         onLangChange={setLang}
+        clinicLogo={doctor?.clinicLogo || doctor?.logoUrl}
+        clinicName={doctor?.clinic}
+        copyUrl={`https://www.atlashealth-services.com/dr/${doctor?.opaqueCode || slug}`}
+        shortUrl={`https://www.atlashealth-services.com/dr/${doctor?.opaqueCode || slug}`}
         brandHref={isCustomerAgent ? `/agent?dr=${slug}` : `/dr/${slug}`}
         doctorHomeHref={isCustomerAgent ? `/agent?dr=${slug}` : `/dr/${slug}`}
         doctorName={doctor.name}
@@ -6315,6 +6226,14 @@ export default function DoctorPublicPortalClient({
         triggerHaptic={triggerHaptic}
       />
 
+      {/* ── Treatment Timeline & Duration Pop-up Modal (Mobile & Laptop UX - Rule #5) ── */}
+      <EditTreatmentDurationModal
+        isOpen={!!timelineModalRx}
+        onClose={() => setTimelineModalRx(null)}
+        prescription={timelineModalRx}
+        onSave={handleSaveTimelineModal}
+      />
+
       {/* ── Official Compounding Bottle Labels Modal (Direct from Doctor Portal) ── */}
       {isLabelsModalOpen && activeLabelRx && (
         <PharmacyLabelsModal
@@ -8706,6 +8625,14 @@ export default function DoctorPublicPortalClient({
             type: 'text'
           },
           {
+            key: 'clinicLogo',
+            label: 'Clinic Logo (White-Label)',
+            value: doctor.clinicLogo || doctor.logoUrl || '',
+            placeholder: 'Paste direct image URL or upload file (e.g. https://clinic.com/logo.png)',
+            icon: Building2,
+            type: 'logo'
+          },
+          {
             key: 'license',
             label: 'Medical License (DHA)',
             value: doctor.license || '',
@@ -8897,7 +8824,175 @@ export default function DoctorPublicPortalClient({
                       <div style={{ flex: 1, minWidth: '240px', display: 'flex', alignItems: 'center' }}>
                         {isEditing ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', flexWrap: 'wrap' }}>
-                            {field.type === 'mobile' ? (
+                            {field.type === 'logo' ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', flexWrap: 'wrap' }}>
+                                  <input
+                                    type="url"
+                                    value={tempFieldValue}
+                                    onChange={(e) => setTempFieldValue(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') handleSaveDoctorField('clinicLogo');
+                                      if (e.key === 'Escape') setEditingDoctorField(null);
+                                    }}
+                                    placeholder={field.placeholder}
+                                    disabled={isSavingDoctorField}
+                                    autoFocus
+                                    style={{
+                                      flex: 1,
+                                      minWidth: '220px',
+                                      height: '34px',
+                                      padding: '0 10px',
+                                      borderRadius: '4px',
+                                      border: '1px solid #1a73e8',
+                                      fontSize: '0.84rem',
+                                      color: '#202124',
+                                      outline: 'none'
+                                    }}
+                                  />
+                                  <label
+                                    style={{
+                                      height: '34px',
+                                      padding: '0 10px',
+                                      borderRadius: '4px',
+                                      border: '1px solid #dadce0',
+                                      background: '#f8fafd',
+                                      color: '#1a73e8',
+                                      fontSize: '0.78rem',
+                                      fontWeight: 600,
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '6px',
+                                      flexShrink: 0
+                                    }}
+                                    title="Upload local logo image"
+                                  >
+                                    <Upload size={13} />
+                                    <span>Upload Image</span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      style={{ display: 'none' }}
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          if (file.size > 2 * 1024 * 1024) {
+                                            toast.error('Image file must be under 2 MB');
+                                            return;
+                                          }
+                                          const reader = new FileReader();
+                                          reader.onload = (ev) => {
+                                            setTempFieldValue(ev.target.result);
+                                          };
+                                          reader.readAsDataURL(file);
+                                        }
+                                      }}
+                                    />
+                                  </label>
+
+                                  {/* Explicit Save (✔️) and Cancel (❌) buttons (Golden Rule #5) */}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSaveDoctorField(field.key)}
+                                      disabled={isSavingDoctorField}
+                                      title="Save changes (Enter)"
+                                      style={{
+                                        height: '32px',
+                                        padding: '0 10px',
+                                        borderRadius: '4px',
+                                        border: '1px solid #1a73e8',
+                                        background: '#1a73e8',
+                                        color: '#ffffff',
+                                        fontSize: '0.78rem',
+                                        fontWeight: 600,
+                                        cursor: isSavingDoctorField ? 'wait' : 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px'
+                                      }}
+                                    >
+                                      {isSavingDoctorField ? (
+                                        <Loader2 size={13} className="animate-spin" />
+                                      ) : (
+                                        <Check size={14} />
+                                      )}
+                                      <span>Save</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingDoctorField(null)}
+                                      disabled={isSavingDoctorField}
+                                      title="Cancel (Esc)"
+                                      style={{
+                                        height: '32px',
+                                        padding: '0 8px',
+                                        borderRadius: '4px',
+                                        border: '1px solid #dadce0',
+                                        background: '#ffffff',
+                                        color: '#5f6368',
+                                        fontSize: '0.78rem',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px'
+                                      }}
+                                    >
+                                      <X size={14} />
+                                      <span>Cancel</span>
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Live Patient Portal Header Preview & White-Label Attribution Explanation */}
+                                <div style={{
+                                  padding: '10px 12px',
+                                  borderRadius: '6px',
+                                  background: '#f8fafd',
+                                  border: '1px solid #d2e3fc',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  gap: '12px',
+                                  flexWrap: 'wrap'
+                                }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    {tempFieldValue ? (
+                                      <img
+                                        src={tempFieldValue}
+                                        alt="Clinic Logo Preview"
+                                        style={{ maxHeight: '30px', maxWidth: '110px', objectFit: 'contain', borderRadius: '4px', background: '#ffffff', border: '1px solid #e2e8f0', padding: '2px' }}
+                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                      />
+                                    ) : (
+                                      <div style={{ width: '32px', height: '32px', borderRadius: '4px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#64748b', fontWeight: 600 }}>
+                                        LOGO
+                                      </div>
+                                    )}
+                                    <div style={{ fontSize: '0.74rem', color: '#174ea6', lineHeight: 1.35 }}>
+                                      <strong>Patient Portal Header Preview:</strong> Replaces Atlas brand with your clinic identity across all patient therapy portals, with discreet <em>"Powered by Atlas Health Platform"</em> attribution.
+                                    </div>
+                                  </div>
+                                  {tempFieldValue && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setTempFieldValue('')}
+                                      style={{
+                                        fontSize: '0.72rem',
+                                        color: '#dc2626',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        textDecoration: 'underline'
+                                      }}
+                                    >
+                                      Clear Logo
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            ) : field.type === 'mobile' ? (
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: '200px' }}>
                                 <select
                                   value={tempDialCode}
@@ -8970,58 +9065,60 @@ export default function DoctorPublicPortalClient({
                               />
                             )}
 
-                            {/* Explicit Save (✔️) and Cancel (❌) buttons (Golden Rule #5) */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <button
-                                type="button"
-                                onClick={() => handleSaveDoctorField(field.key)}
-                                disabled={isSavingDoctorField}
-                                title="Save changes (Enter)"
-                                style={{
-                                  height: '32px',
-                                  padding: '0 10px',
-                                  borderRadius: '4px',
-                                  border: '1px solid #1a73e8',
-                                  background: '#1a73e8',
-                                  color: '#ffffff',
-                                  fontSize: '0.78rem',
-                                  fontWeight: 600,
-                                  cursor: isSavingDoctorField ? 'wait' : 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '4px'
-                                }}
-                              >
-                                {isSavingDoctorField ? (
-                                  <Loader2 size={13} className="animate-spin" />
-                                ) : (
-                                  <Check size={14} />
-                                )}
-                                <span>Save</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingDoctorField(null)}
-                                disabled={isSavingDoctorField}
-                                title="Cancel (Esc)"
-                                style={{
-                                  height: '32px',
-                                  padding: '0 8px',
-                                  borderRadius: '4px',
-                                  border: '1px solid #dadce0',
-                                  background: '#ffffff',
-                                  color: '#5f6368',
-                                  fontSize: '0.78rem',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '4px'
-                                }}
-                              >
-                                <X size={14} />
-                                <span>Cancel</span>
-                              </button>
-                            </div>
+                            {/* Explicit Save (✔️) and Cancel (❌) buttons for non-logo fields */}
+                            {field.type !== 'logo' && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveDoctorField(field.key)}
+                                  disabled={isSavingDoctorField}
+                                  title="Save changes (Enter)"
+                                  style={{
+                                    height: '32px',
+                                    padding: '0 10px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #1a73e8',
+                                    background: '#1a73e8',
+                                    color: '#ffffff',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 600,
+                                    cursor: isSavingDoctorField ? 'wait' : 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                  }}
+                                >
+                                  {isSavingDoctorField ? (
+                                    <Loader2 size={13} className="animate-spin" />
+                                  ) : (
+                                    <Check size={14} />
+                                  )}
+                                  <span>Save</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingDoctorField(null)}
+                                  disabled={isSavingDoctorField}
+                                  title="Cancel (Esc)"
+                                  style={{
+                                    height: '32px',
+                                    padding: '0 8px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #dadce0',
+                                    background: '#ffffff',
+                                    color: '#5f6368',
+                                    fontSize: '0.78rem',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                  }}
+                                >
+                                  <X size={14} />
+                                  <span>Cancel</span>
+                                </button>
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <div
@@ -9044,18 +9141,54 @@ export default function DoctorPublicPortalClient({
                             }}
                             title="Click to edit"
                           >
-                            <div
-                              style={{
-                                fontSize: '0.85rem',
-                                color: field.value ? '#202124' : '#9aa0a6',
-                                fontWeight: field.value ? 500 : 400,
-                                fontFamily: field.isMonospace ? 'monospace' : 'inherit',
-                                fontStyle: field.value ? 'normal' : 'italic',
-                                wordBreak: 'break-all'
-                              }}
-                            >
-                              {field.value || 'Not configured'}
-                            </div>
+                            {field.type === 'logo' ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexWrap: 'wrap' }}>
+                                {field.value ? (
+                                  <>
+                                    <img
+                                      src={field.value}
+                                      alt="Clinic Logo"
+                                      style={{ maxHeight: '28px', maxWidth: '110px', objectFit: 'contain', borderRadius: '3px', border: '1px solid #dadce0', padding: '2px', background: '#ffffff' }}
+                                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                    />
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                      <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#137333', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span>White-Label Active</span>
+                                        <span style={{ fontSize: '0.66rem', background: '#e6f4ea', border: '1px solid #ceead6', padding: '1px 6px', borderRadius: '4px', color: '#137333', fontWeight: 700 }}>
+                                          Patient Portals
+                                        </span>
+                                      </span>
+                                      <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>
+                                        Clinic logo replaces Atlas · Discreet "Powered by Atlas Platform" attribution
+                                      </span>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '0.84rem', color: '#9aa0a6', fontStyle: 'italic' }}>
+                                      Not configured (Atlas default branding active)
+                                    </span>
+                                    <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#1a73e8', background: '#e8f0fe', border: '1px solid #d2e3fc', padding: '1px 6px', borderRadius: '4px' }}>
+                                      White-Label Mode
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div
+                                style={{
+                                  fontSize: '0.85rem',
+                                  color: field.value ? '#202124' : '#9aa0a6',
+                                  fontWeight: field.value ? 500 : 400,
+                                  fontFamily: field.isMonospace ? 'monospace' : 'inherit',
+                                  fontStyle: field.value ? 'normal' : 'italic',
+                                  wordBreak: 'break-all'
+                                }}
+                              >
+                                {field.value || 'Not configured'}
+                              </div>
+                            )}
+
                             <div
                               style={{
                                 display: 'flex',
@@ -9070,7 +9203,7 @@ export default function DoctorPublicPortalClient({
                               }}
                             >
                               <Edit3 size={13} />
-                              <span>Edit</span>
+                              <span>{field.type === 'logo' ? (field.value ? 'Change' : 'Configure') : 'Edit'}</span>
                             </div>
                           </div>
                         )}

@@ -12,7 +12,7 @@
 export function normalizeProductTitle(rawName) {
   if (!rawName || typeof rawName !== 'string') return 'Unnamed Product';
 
-  let clean = rawName
+  const clean = rawName
     // Remove dosages like "60mg", "60 mg", "5mg/vial", "1000mcg/ml", "10 mg/ml in 5 ml" (Safari-safe: no lookbehind)
     .replace(/(?:^|[^A-Za-z0-9-])\d+(?:\.\d+)?\s*(?:mg|mcg|iu|g|ml)(?:\s*\/\s*(?:vial|ml|amp))?(?:\s+in\s+\d+\s*ml)?/gi, (match) => {
       return /^[^A-Za-z0-9-]/.test(match) ? match.charAt(0) : '';
@@ -24,8 +24,8 @@ export function normalizeProductTitle(rawName) {
     // Remove trailing volume specs like "5ml", "15ml", "in 5 ml vial"
     .replace(/\b(?:in\s+)?\d+\s*ml\s*(?:vial|bottle|spray)?\b/gi, '')
     // Clean up punctuation and duplicate spaces
-    .replace(/[\/|,·•-]\s*$/, '')
-    .replace(/^\s*[\/|,·•-]/, '')
+    .replace(/[/|,·•-]\s*$/, '')
+    .replace(/^\s*[/|,·•-]/, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
 
@@ -64,6 +64,9 @@ export function extractProductDosage(product) {
  */
 export function extractProductPresentation(product) {
   if (!product) return 'Vial';
+
+  const catLower = String(product.category || product.categoryId || product.therapeutic_category || '').toLowerCase();
+  const typeLower = String(product.type || product.productType || '').toLowerCase();
 
   // Fagron guard: Fagron Iberia only supplies bulk APIs, raw materials and compounding substrates.
   // They never supply finished injectable vials. Always return Bulk API Powder for Fagron products.

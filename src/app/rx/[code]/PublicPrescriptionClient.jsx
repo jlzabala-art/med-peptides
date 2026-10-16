@@ -424,6 +424,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           track="protocols"
           lang={lang}
           onLangChange={(newLang) => setLang(newLang)}
+          clinicLogo={treatingDoc?.clinicLogo || treatingDoc?.logoUrl || currentRx?.clinicLogo}
+          clinicName={clinic || doctorClinic || treatingDoc?.clinic}
           copyUrl={isPatientView ? patientPublicUrl : publicUrl}
           shortUrl={isPatientView ? patientPublicUrl : publicUrl}
           loginRedirect={isPatientView ? patientPublicUrl : publicUrl}

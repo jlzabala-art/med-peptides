@@ -71,14 +71,21 @@ export async function POST(req) {
       cleanTargetUrl = `${appUrl}/p/${encodeURIComponent(slug)}${qStr ? `?${qStr}` : ''}`;
     }
 
-    // Always generate a unique cryptographic tracking code for this share event,
-    // or a deterministic deduplicated code for public monograph shares
-    const recipientType = recipient.type || 'wholesaler';
-    const isPublicMonograph = !recipient?.id && !recipient?.email && 
+    // Distinguish between Doctor Portals, Prescriptions, and Product Monographs
+    const isDoctorTarget = cleanTargetUrl.includes('/dr/') || cleanTargetUrl.includes('/doctor/') || body.assetType === 'doctor_portal' || Boolean(body.doctorName);
+    const isRxTarget = cleanTargetUrl.includes('/rx/') || body.assetType === 'prescription';
+    const resolvedAssetType = isDoctorTarget ? 'doctor_portal' : isRxTarget ? 'prescription' : (body.assetType || 'variant_datasheet');
+
+    // Determine recipient type
+    const recipientType = isDoctorTarget ? 'doctor' : isRxTarget ? 'patient' : (recipient.type || 'wholesaler');
+    const isPublicMonograph = !isDoctorTarget && !isRxTarget && !recipient?.id && !recipient?.email && 
       (recipientType === 'wholesaler' || recipientType === 'general' || recipientType === 'public');
 
     let code;
-    if (isPublicMonograph && cleanTargetUrl) {
+    if (isDoctorTarget && cleanTargetUrl) {
+      const hash = crypto.createHash('sha256').update(cleanTargetUrl).digest('hex').slice(0, 8);
+      code = `dr-${hash}`;
+    } else if (isPublicMonograph && cleanTargetUrl) {
       const hash = crypto.createHash('sha256').update(cleanTargetUrl).digest('hex').slice(0, 8);
       code = `ms-${hash}`;
     } else {
@@ -90,14 +97,22 @@ export async function POST(req) {
 
     const recipientData = {
       id: recipient.id || null,
-      name: recipient.name || (recipientType === 'wholesaler' ? 'Wholesale Partner' : 'Healthcare Practitioner'),
-      company: recipient.company || recipient.clinic || '',
+      name: recipient.name || (isDoctorTarget ? (body.doctorName || 'Doctor') : recipientType === 'wholesaler' ? 'Wholesale Partner' : 'Healthcare Practitioner'),
+      company: recipient.company || recipient.clinic || body.clinicName || '',
       email: recipient.email || '',
       phone: recipient.phone || '',
       type: recipientType,
     };
 
-    const variantData = {
+    const variantData = isDoctorTarget ? {
+      productId: '',
+      productName: body.doctorName ? `${body.doctorName} Practice Portal` : 'Doctor Portal',
+      variantId: null,
+      dose: '',
+      format: '',
+      supplier: '',
+      batch: '',
+    } : {
       productId: variant.productId || slug || '',
       productName: productName || variant.productName || slug || 'Peptide Compound',
       variantId: variant.id || variant.variantId || null,
@@ -119,6 +134,11 @@ export async function POST(req) {
         code,
         shortUrl,
         targetUrl: cleanTargetUrl,
+        assetType: resolvedAssetType,
+        doctorName: body.doctorName || '',
+        clinicName: body.clinicName || body.clinic || '',
+        specialty: body.specialty || '',
+        clinicLogo: body.clinicLogo || body.logoUrl || '',
         slug: slug || '',
         dose: dose || '',
         format: format || '',
@@ -145,6 +165,11 @@ export async function POST(req) {
       if (existingSnap && existingSnap.exists) {
         await adminDb.collection('datasheet_short_links').doc(code).set({
           targetUrl: cleanTargetUrl,
+          assetType: resolvedAssetType,
+          doctorName: body.doctorName || '',
+          clinicName: body.clinicName || body.clinic || '',
+          specialty: body.specialty || '',
+          clinicLogo: body.clinicLogo || body.logoUrl || '',
           slug: slug || '',
           dose: dose || '',
           format: format || '',
@@ -159,11 +184,19 @@ export async function POST(req) {
 
       // 2. Central cross-platform audit record (for CRM and User360Drawer tracking)
       try {
+        const recordTitle = isDoctorTarget
+          ? `${body.doctorName || 'Doctor'} · Clinical Practice Portal`
+          : isRxTarget
+          ? `Medical Prescription · Patient Treatment Dossier`
+          : `${variantData.productName} ${variantData.dose} ${variantData.format} — Technical Datasheet`.trim();
+
         await adminDb.collection('shared_records').doc(code).set({
           shareCode: code,
           shortUrl,
-          assetType: 'variant_datasheet',
-          assetTitle: `${variantData.productName} ${variantData.dose} ${variantData.format} — Technical Datasheet`.trim(),
+          assetType: resolvedAssetType,
+          assetTitle: recordTitle,
+          doctorName: body.doctorName || '',
+          clinicName: body.clinicName || body.clinic || '',
           assetMeta: {
             slug: slug || '',
             dose: dose || '',

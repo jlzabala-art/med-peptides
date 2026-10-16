@@ -204,10 +204,21 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
   const isBloodo = 
     brand.includes('bloodo') || 
     slugLower.includes('bloodo') || 
-    nameLower.includes('bloodo');
+    nameLower.includes('bloodo') ||
+    (product?.supplierId || '').toLowerCase().includes('bloodo');
+
+  const isTeletest = 
+    brand.includes('teletest') || 
+    slugLower.includes('teletest') || 
+    nameLower.includes('teletest') ||
+    (product?.supplierId || '').toLowerCase().includes('teletest') ||
+    (product?.supplierName || '').toLowerCase().includes('teletest') ||
+    (product?.supplier || '').toLowerCase().includes('teletest');
 
   const isDiagnostic = 
     isBloodo ||
+    isTeletest ||
+    cat === 'diagnostic' ||
     cat === 'diagnostic_test' || 
     cat === 'diagnostic_tests' || 
     cat === 'genomics_biomarkers' || 
@@ -215,7 +226,8 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
     slugLower.endsWith('-test') || 
     slugLower.includes('-test-') ||
     nameLower.includes('test kit') ||
-    nameLower.includes('blood test');
+    nameLower.includes('blood test') ||
+    Boolean(product?.sampleType);
 
   const isAesthetic = 
     cat === 'aesthetic' || 
@@ -229,7 +241,7 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
   const rawSize = variant?.size || product?.size || product?.volume || '';
 
   // ── 1. ATTRACTIVE & ACCURATE TITLE ──
-  let title = '';
+  let title;
 
   if (isCosmetic) {
     const sizeSpec = rawSize || (rawFormat && !['bottle', 'tube', 'jar', 'vial', 'pump'].includes(rawFormat.toLowerCase()) ? rawFormat : '');
@@ -242,29 +254,42 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
   } else if (isDiagnostic) {
     if (slugLower.includes('eterna') || nameLower.includes('eterna')) {
       title = `🧬 ETERNA® DNA & Epigenetic Longevity Test (+700K SNPs) | ETERNA DX · Fagron Genomics`;
-    } else if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
-      title = `⚡ Bloodo™ Testosterona+ Test (Total & Libre) | CE-IVDR Kit`;
-    } else if (slugLower.includes('cortisol') || nameLower.includes('cortisol')) {
-      title = `⏱️ Bloodo™ Cortisol Ritmo Circadiano (CAR) | CE-IVDR Kit`;
-    } else if (slugLower.includes('nad') || nameLower.includes('nad')) {
-      title = `🔬 Bloodo™ Test de Nivel NAD+ Celular | CE-IVDR Kit`;
-    } else if (slugLower.includes('hba1c') || slugLower.includes('hemoglobin') || nameLower.includes('hba1c') || nameLower.includes('hemoglobina')) {
-      title = `🩸 Bloodo™ HbA1c Glicación 90 Días | CE-IVDR Kit`;
-    } else if (slugLower.includes('omega') || nameLower.includes('omega')) {
-      title = `🛡️ Bloodo™ Ratio Omega-3/6 & Índice Omega | CE-IVDR Kit`;
-    } else if (slugLower.includes('vitamin-d') || slugLower.includes('vitamina-d') || nameLower.includes('vitamina d') || nameLower.includes('vitamin d')) {
-      title = `☀️ Bloodo™ Vitamina D3 [25-OH] Test | CE-IVDR Kit`;
+    } else if (isTeletest) {
+      if (slugLower.includes('omega') || nameLower.includes('omega')) {
+        title = `🛡️ TeleTest Analytika | Comprehensive Omega Fatty Acid Profile & Cellular Inflammation Index (Test Omega)`;
+      } else if (slugLower.includes('htma') || slugLower.includes('mineral') || nameLower.includes('htma') || nameLower.includes('mineral')) {
+        title = `🔬 TeleTest Analytika | Hair Tissue Mineral Analysis (HTMA - 33 Elements & Ratios)`;
+      } else if (slugLower.includes('hla') || nameLower.includes('hla') || slugLower.includes('celiac') || nameLower.includes('celiac')) {
+        title = `🧬 TeleTest Analytika | High-Resolution HLA & Autoimmunity Immunogenetic Screen`;
+      } else if (slugLower.includes('detox') || slugLower.includes('metabolizer') || nameLower.includes('metabolizer')) {
+        title = `🧬 TeleTest Analytika | Hepatic Biotransformation & Pharmacogenetic Detoxification Panel`;
+      } else {
+        title = `🔬 TeleTest Analytika | ${pName} — Clinical Diagnostic Monograph`;
+      }
+    } else if (isBloodo) {
+      if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
+        title = `⚡ Bloodo™ Testosterone+ Free & Total Test | CE-IVDR Fingerstick Kit`;
+      } else if (slugLower.includes('cortisol') || nameLower.includes('cortisol')) {
+        title = `⏱️ Bloodo™ Diurnal Cortisol CAR Rhythm Test | CE-IVDR Kit`;
+      } else if (slugLower.includes('nad') || nameLower.includes('nad')) {
+        title = `🔬 Bloodo™ Intracellular NAD+ Level Test | CE-IVDR Kit`;
+      } else if (slugLower.includes('hba1c') || slugLower.includes('hemoglobin') || nameLower.includes('hba1c') || nameLower.includes('hemoglobina')) {
+        title = `🩸 Bloodo™ HbA1c 90-Day Glycation Test | CE-IVDR Kit`;
+      } else if (slugLower.includes('omega') || nameLower.includes('omega')) {
+        title = `🛡️ Bloodo™ Omega-3/6 Ratio & Omega Index Test | CE-IVDR Kit`;
+      } else if (slugLower.includes('vitamin-d') || slugLower.includes('vitamina-d') || nameLower.includes('vitamina d') || nameLower.includes('vitamin d')) {
+        title = `☀️ Bloodo™ Vitamin D3 [25-OH] Test | CE-IVDR Kit`;
+      } else {
+        title = `🔬 Bloodo™ ${pName} | CE-IVDR Capillary Blood Test Kit`;
+      }
     } else {
-      title = `🔬 Bloodo™ ${pName} | CE-IVDR Capillary Blood Test Kit`;
+      title = `${pName} — Clinical Diagnostic Specimen Dossier | Atlas Health Services`;
     }
   } else if (isAesthetic) {
     const spec = [rawDose, rawSize || rawFormat].filter(Boolean).join(' · ');
     title = spec ? `${pName} (${spec}) — Aesthetic Medicine Monograph` : `${pName} — Clinical Aesthetics Monograph`;
   } else {
     // Standard Peptides / API Compounds
-    // NOTE: rawDose intentionally excluded from page <title>.
-    // Dose can change when the user selects a different presentation.
-    // Dose is still included in OG/social titles below for WhatsApp unfurling.
     const specDetails = [rawFormat].filter(Boolean).join(' · ');
     title = specDetails
       ? `${pName} (${specDetails}) — Clinical Monograph`
@@ -276,8 +301,8 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
     title = `${title} • ${recipient.name}`;
   }
 
-  // ── 2. ATTRACTIVE & ACCURATE DESCRIPTION ──
-  let description = '';
+  // ── 2. ATTRACTIVE & ACCURATE DESCRIPTION (ENGLISH) ──
+  let description;
 
   if (isCosmetic) {
     if (product?.short_description && product.short_description.length > 25) {
@@ -287,33 +312,49 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
       if (!description.endsWith('.')) description += '...';
     } else {
       description = isColway
-        ? 'Colágeno nativo biológicamente activo, péptidos señal biomiméticos y formulación dermocosmética certificada bajo normativa europea (Reg. CE 1223/2009).'
-        : 'Fórmula dermocosmética celular de alta pureza con activos biofuncionales certificados bajo normativa europea (Reg. CE 1223/2009). Monografía técnica e INCI.';
+        ? 'Biologically active native tropocollagen, biomimetic signal peptides, and European-certified dermocosmetic formulations (EU Reg. 1223/2009).'
+        : 'High-purity cellular dermocosmetic formula with biofunctional actives compliant with European Cosmetic Regulation 1223/2009.';
     }
   } else if (isDiagnostic) {
     if (slugLower.includes('eterna') || nameLower.includes('eterna')) {
-      description = 'Genómica y epigenética de alta resolución a partir de saliva (+700.000 SNPs). Evalúa velocidad de envejecimiento celular, 5 pilares de salud y sincronización con wearables. ETERNA DX · Fagron Genomics.';
-    } else if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
-      description = 'LC-MS/MS Gold Standard para cuantificar Testosterona Total, Libre, SHBG e Índice FAI por punción capilar DBS. Evalúa tu vitalidad hormonal y eje HPTA con LifeLab1.';
-    } else if (slugLower.includes('cortisol') || nameLower.includes('cortisol')) {
-      description = 'Curva de Cortisol Diurno y Respuesta al Despertar (CAR) por punción capilar DBS. Mide estrés neuroendocrino, fatiga suprarrenal y calidad de descanso con LifeLab1.';
-    } else if (slugLower.includes('nad') || nameLower.includes('nad')) {
-      description = 'Test cuantitativo CE-IVDR de NAD⁺ intracelular total y NADH por punción capilar DBS. Analítica centralizada en LifeLab1 (Vilnius) con informe clínico de longevidad.';
-    } else if (slugLower.includes('hba1c') || slugLower.includes('hemoglobin') || nameLower.includes('hba1c') || nameLower.includes('hemoglobina')) {
-      description = 'Microcromatografía de afinidad para medir Hemoglobina Glicada y Glucosa Media de 90 días por punción capilar DBS. Optimiza tu sensibilidad a la insulina y control metabólico.';
-    } else if (slugLower.includes('omega') || nameLower.includes('omega')) {
-      description = 'Perfil de ácidos grasos en membrana eritrocitaria por GC-MS. Cuantifica tu Índice Omega-3, ratio inflamatorio AA/EPA y ácidos trans con LifeLab1.';
-    } else if (slugLower.includes('vitamin-d') || slugLower.includes('vitamina-d') || nameLower.includes('vitamina d') || nameLower.includes('vitamin d')) {
-      description = 'Dilución isotópica LC-MS/MS para cuantificar 25-Hidroxivitamina D3 y D2 total por punción capilar DBS. Clave para inmunidad innata, expresión génica y eje VDR.';
+      description = 'High-resolution salivary genomics and epigenetics (+700,000 SNPs). Measures cellular aging velocity, 5 health pillars, and continuous biometric wearable synchronization. ETERNA DX · Fagron Genomics.';
+    } else if (isTeletest) {
+      if (slugLower.includes('omega') || nameLower.includes('omega')) {
+        description = 'Erythrocyte membrane fatty acid lipidomics by Capillary Gas Chromatography (GC-FID). Accurately quantifies HS-Omega-3 Index (>8%), AA/EPA cellular inflammation ratio, and trans fatty acids with clinical nutritional report.';
+      } else if (slugLower.includes('htma') || slugLower.includes('mineral') || nameLower.includes('htma') || nameLower.includes('mineral')) {
+        description = 'High-resolution ICP-MS/MS hair tissue mineral analysis assessing 33 elements: essential trace minerals, toxic neurotoxic metals (Pb, Hg, Cd, As), and adrenal-metabolic cellular ratios.';
+      } else if (slugLower.includes('hla') || nameLower.includes('hla') || slugLower.includes('celiac') || nameLower.includes('celiac')) {
+        description = 'High-resolution HLA Class I & II typing evaluating immunogenetic predisposition to Celiac disease (HLA-DQ2/DQ8), Hashimoto thyroiditis, Rheumatoid Arthritis, and systemic autoimmunity.';
+      } else if (slugLower.includes('detox') || slugLower.includes('metabolizer') || nameLower.includes('metabolizer')) {
+        description = 'Comprehensive 48-SNP pharmacogenetic and hepatic biotransformation panel covering Phase I (CYP450) and Phase II (UGT, GST, MTHFR) to optimize drug dosing and metabolic clearance.';
+      } else {
+        description = 'Accredited clinical diagnostic test by TeleTest Analytika S.A. (ISO 15189 / CE-IVD accredited central laboratory). Includes verified digital clinical report.';
+      }
+    } else if (isBloodo) {
+      if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
+        description = 'Gold-standard LC-MS/MS quantification of Total & Free Testosterone, SHBG, and FAI Index via capillary Dried Blood Spot (DBS). Evaluates androgen axis with LifeLab1.';
+      } else if (slugLower.includes('cortisol') || nameLower.includes('cortisol')) {
+        description = 'Multi-point diurnal cortisol curve and Awakening Response (CAR) via capillary Dried Blood Spot (DBS). Evaluates neuroendocrine stress and adrenal fatigue with LifeLab1.';
+      } else if (slugLower.includes('nad') || nameLower.includes('nad')) {
+        description = 'Quantitative CE-IVDR test for intracellular NAD+ total pool and NADH via capillary Dried Blood Spot (DBS). Centralized accredited analysis at LifeLab1.';
+      } else if (slugLower.includes('hba1c') || slugLower.includes('hemoglobin') || nameLower.includes('hba1c') || nameLower.includes('hemoglobina')) {
+        description = 'Affinity micro-chromatography measuring 90-day Glycated Hemoglobin and mean estimated blood glucose via capillary Dried Blood Spot (DBS).';
+      } else if (slugLower.includes('omega') || nameLower.includes('omega')) {
+        description = 'Erythrocyte membrane fatty acid lipidomics by GC-MS. Accurately quantifies Omega-3 Index, pro-inflammatory AA/EPA ratio, and trans fatty acids with LifeLab1.';
+      } else if (slugLower.includes('vitamin-d') || slugLower.includes('vitamina-d') || nameLower.includes('vitamina d') || nameLower.includes('vitamin d')) {
+        description = 'Direct isotope dilution LC-MS/MS for 25-Hydroxyvitamin D3 and D2 total via capillary Dried Blood Spot (DBS) for immune and endocrine health.';
+      } else {
+        description = 'Quantitative CE-IVDR capillary Dried Blood Spot (DBS) test. Centralized analysis at accredited reference laboratory LifeLab1 with digital clinical report.';
+      }
     } else if (product?.description && product.description.length > 30) {
       description = product.description.slice(0, 160);
     } else {
-      description = 'Test cuantitativo CE-IVDR por punción capilar Dried Blood Spot (DBS). Análisis centralizado en laboratorio de referencia LifeLab1 con informe clínico digital.';
+      description = 'Certified clinical diagnostic laboratory testing with standardized specimen collection and official analytical dossier.';
     }
   } else if (isAesthetic) {
     description = product?.description && product.description.length > 30
       ? product.description.slice(0, 160)
-      : 'Matriz dérmica biocompatible de grado médico, ácido hialurónico reticulado y bioestimuladores celulares. Referencia técnica para medicina estética avanzada.';
+      : 'Medical-grade biocompatible dermal matrix, cross-linked hyaluronic acid, and cellular bio-stimulators for aesthetic medicine.';
   } else {
     // Default Research Peptides / APIs
     const purity = product?.purity || '≥ 99.0% (RP-HPLC & ESI-MS)';

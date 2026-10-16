@@ -201,7 +201,7 @@ export default function AdminToolsTab() {
             actions={[
               {
                 type: 'view',
-                tooltip: 'Ver Detalle / Trazabilidad',
+                tooltip: 'View Details / Traceability',
                 onClick: (e) => {
                   e?.stopPropagation?.();
                   openDrawer(doc, 'doctor');
@@ -209,8 +209,8 @@ export default function AdminToolsTab() {
               },
               {
                 icon: ExternalLink,
-                label: 'Portal Público',
-                tooltip: 'Abrir portal del médico',
+                label: 'Public Portal',
+                tooltip: 'Open doctor public portal',
                 onClick: (e) => {
                   e?.stopPropagation?.();
                   window.open(`/dr/${doc.slug}`, '_blank', 'noopener,noreferrer');
@@ -218,23 +218,23 @@ export default function AdminToolsTab() {
               },
               {
                 icon: Play,
-                label: 'Fijar Contexto Activo',
-                tooltip: 'Fijar como Médico Activo en consola',
+                label: 'Set Active Doctor',
+                tooltip: 'Set as active physician in console',
                 onClick: (e) => {
                   e?.stopPropagation?.();
                   setActiveDoctor(doc);
-                  toast.success(`Dr. ${doc.name?.replace(/^(Dr\.|Dra\.)\s*/, '') || doc.name} fijado como médico activo`);
+                  toast.success(`Dr. ${doc.name?.replace(/^(Dr\.|Dra\.)\s*/, '') || doc.name} set as active doctor`);
                 }
               },
               {
                 type: 'copy_link',
-                label: 'Copiar Enlace',
-                tooltip: 'Copiar enlace al portal',
+                label: 'Copy Portal Link',
+                tooltip: 'Copy link to portal',
                 onClick: (e) => {
                   e?.stopPropagation?.();
                   const url = typeof window !== 'undefined' ? `${window.location.origin}/dr/${doc.slug}` : `/dr/${doc.slug}`;
                   navigator.clipboard.writeText(url);
-                  toast.success('Enlace copiado al portapapeles');
+                  toast.success('Portal link copied to clipboard');
                 }
               }
             ]}
@@ -266,7 +266,7 @@ export default function AdminToolsTab() {
         {/* Section 1: Public Portal Endpoint & Link */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
-            Portal Público & Endpoint
+            Public Portal & Endpoint
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ fontSize: '0.78rem', fontFamily: 'monospace', color: '#0284c7', background: '#e0f2fe', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
@@ -286,26 +286,26 @@ export default function AdminToolsTab() {
                 gap: '3px'
               }}
             >
-              <span>Abrir</span>
+              <span>Open</span>
               <ExternalLink size={12} />
             </a>
           </div>
           <div style={{ marginTop: '2px' }}>
-            <CopyableId value={fullPortalUrl} label="Copiar URL" />
+            <CopyableId value={fullPortalUrl} label="Copy URL" />
           </div>
         </div>
 
         {/* Section 2: Medical License & Territory */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
-            Acreditación Médica & Territorio
+            Medical Licensing & Territory
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>Licencia Oficial:</span>
+            <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>Official License:</span>
             {doc.license ? (
               <CopyableId value={doc.license} />
             ) : (
-              <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.78rem' }}>En trámite</span>
+              <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.78rem' }}>In review / Pending</span>
             )}
           </div>
           <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
@@ -319,16 +319,16 @@ export default function AdminToolsTab() {
         {/* Section 3: Clinical Activity Metrics */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
-            Métricas Clínicas
+            Clinical Metrics
           </span>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
             <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 14px', textAlign: 'center', minWidth: '80px' }}>
               <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#059669' }}>{doc.activePrescriptionsCount || 0}</div>
-              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Prescripciones</div>
+              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Prescriptions</div>
             </div>
             <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 14px', textAlign: 'center', minWidth: '80px' }}>
               <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0284c7' }}>{doc.patientsCount || 0}</div>
-              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Pacientes</div>
+              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Patients</div>
             </div>
           </div>
         </div>
@@ -336,14 +336,14 @@ export default function AdminToolsTab() {
         {/* Section 4: Operations & Impersonation Actions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', justifyContent: 'center' }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
-            Acciones de Operaciones
+            Operations & Context Actions
           </span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
             <button
               type="button"
               onClick={() => {
                 setActiveDoctor(doc);
-                toast.success(`Dr. ${doc.name?.replace(/^(Dr\.|Dra\.)\s*/, '') || doc.name} fijado como médico activo`);
+                toast.success(`Dr. ${doc.name?.replace(/^(Dr\.|Dra\.)\s*/, '') || doc.name} set as active doctor`);
               }}
               style={{
                 padding: '6px 10px',
@@ -360,7 +360,7 @@ export default function AdminToolsTab() {
               }}
             >
               <Play size={12} fill="#059669" color="#059669" />
-              <span>Fijar como Médico Activo</span>
+              <span>Set as Active Doctor</span>
             </button>
 
             <button
@@ -381,7 +381,7 @@ export default function AdminToolsTab() {
               }}
             >
               <Eye size={12} />
-              <span>Ver Trazabilidad Completa</span>
+              <span>View Full Traceability</span>
             </button>
           </div>
         </div>
@@ -389,48 +389,48 @@ export default function AdminToolsTab() {
     );
   };
 
-  // ── 1. PANTALLA PÚBLICA (Public Views Catalog) ─────────────────────────────
+  // ── 1. PUBLIC PORTAL & INTERACTIVE VIEWS (Public Screens) ──────────────────
   const publicScreens = useMemo(() => [
     {
       id: 'pub-home',
-      title: 'Storefront & Portal Principal',
+      title: 'Storefront & Primary Portal',
       path: '/',
       category: 'General',
-      badge: 'Público',
-      desc: 'Página de inicio institucional, navegación principal, buscador semántico Algolia y acceso a las áreas clínicas.',
+      badge: 'Public View',
+      desc: 'Institutional homepage, primary navigation, Algolia semantic search, and clinical department gateways.',
       icon: Globe,
       color: '#0284c7',
       bg: '#eff6ff'
     },
     {
       id: 'pub-catalog',
-      title: 'Catálogo de Péptidos & Fórmulas',
+      title: 'Peptide & Formulation Catalog',
       path: '/catalog',
-      category: 'Catálogo',
+      category: 'Catalog',
       badge: 'Public Catalog',
-      desc: 'Catálogo completo de péptidos puros, combinaciones sinérgicas, reactivos de investigación y nutracéuticos.',
+      desc: 'Complete catalog of clinical peptides, synergistic formulations, research compounds, and nutraceuticals.',
       icon: Box,
       color: '#7c3aed',
       bg: '#f5f3ff'
     },
     {
       id: 'pub-protocols',
-      title: 'Biblioteca de Protocolos Clínicos',
+      title: 'Clinical Protocols Library',
       path: '/protocols',
-      category: 'Clínica',
+      category: 'Clinical',
       badge: 'Protocols',
-      desc: 'Guías de dosificación clínica, ciclos semanales, fases de inducción y pautas de optimización metabólica.',
+      desc: 'Clinical dosing guidelines, multi-week titration cycles, induction phases, and metabolic optimization blueprints.',
       icon: FlaskConical,
       color: '#059669',
       bg: '#ecfdf5'
     },
     {
       id: 'pub-what-are-peptides',
-      title: 'Monografías de Educación Médica',
+      title: 'Medical Education Monographs',
       path: '/what-are-peptides',
-      category: 'Educación',
+      category: 'Education',
       badge: 'Evidence Base',
-      desc: 'Guía científica sobre mecanismos de acción celular, estabilidad molecular y aplicaciones biomédicas.',
+      desc: 'Scientific guidelines covering cellular mechanisms of action, molecular stability, and clinical applications.',
       icon: FileText,
       color: '#d97706',
       bg: '#fffbeb'
@@ -439,42 +439,42 @@ export default function AdminToolsTab() {
       id: 'pub-mediluxe',
       title: 'Mediluxe Corporate Profile',
       path: '/mediluxe',
-      category: 'Corporativo',
+      category: 'Corporate',
       badge: 'Institutional',
-      desc: 'Presentación de la entidad matriz, compliance regulatorio, acreditaciones ISO/GMP y centros en GCC y Europa.',
+      desc: 'Corporate institutional profile, regulatory compliance, ISO/GMP accreditations, and EMEA/GCC logistics hubs.',
       icon: Building2,
       color: '#0f172a',
       bg: '#f1f5f9'
     },
     {
       id: 'pub-b2b',
-      title: 'B2B Showcase & Portales Corporativos',
+      title: 'B2B Showcase & Corporate Portals',
       path: '/b2b/corporate-wellness',
-      category: 'Comercial',
+      category: 'Commercial',
       badge: 'B2B Tier',
-      desc: 'Presentación comercial con márgenes de distribución, paquetes mayoristas y esquemas de dispensación clínica.',
+      desc: 'Commercial presentation with B2B distribution margins, wholesale volume tiers, and clinical dispensing models.',
       icon: ShoppingBag,
       color: '#ea580c',
       bg: '#fff7ed'
     },
     {
       id: 'pub-verify',
-      title: 'Verificador de Viales & Lotes QR',
+      title: 'Batch & QR Code Authenticator',
       path: '/verify/RP-LOT-RT10-2609',
-      category: 'Trazabilidad',
-      badge: 'Certificados CoA',
-      desc: 'Herramienta pública de auditoría de lote, pureza HPLC por cromatografía y verificación de autenticidad.',
+      category: 'Traceability',
+      badge: 'CoA Verified',
+      desc: 'Public analytical batch verification, HPLC chromatography audit, and COA certificate authentication tool.',
       icon: QrCode,
       color: '#2563eb',
       bg: '#eff6ff'
     },
     {
       id: 'pub-intake',
-      title: 'Formulario de Ingesta de Pacientes',
+      title: 'Patient Clinical Intake Form',
       path: '/rx/intake',
-      category: 'Clínica',
+      category: 'Clinical',
       badge: 'Patient Intake',
-      desc: 'Formulario de entrada digital para pacientes referidos por médicos y clínicas de la red Atlas Health.',
+      desc: 'Digital clinical intake workflow for patients referred by Atlas Health verified physicians and clinics.',
       icon: User,
       color: '#0d9488',
       bg: '#f0fdfa'
@@ -548,8 +548,8 @@ export default function AdminToolsTab() {
         id: 'haydee-camacho',
         name: 'Dra. Haydee Camacho Gamboa',
         slug: 'haydee-camacho',
-        specialty: 'Medicina Estética & Regenerativa',
-        clinicName: 'Clínica Dra. Haydee Camacho',
+        specialty: 'Aesthetic & Regenerative Medicine',
+        clinicName: 'Dr. Haydee Camacho Aesthetic Clinic',
         city: 'Madrid',
         country: 'Spain',
         countryCode: 'ES',
@@ -563,8 +563,8 @@ export default function AdminToolsTab() {
         id: 'carlos-mendez',
         name: 'Dr. Carlos Méndez',
         slug: 'carlos-mendez',
-        specialty: 'Tricología Médica & Terapia Celular',
-        clinicName: 'Clínica Regenerativa Capilar',
+        specialty: 'Clinical Trichology & Cellular Therapy',
+        clinicName: 'Capillary Regenerative Clinic',
         city: 'Barcelona',
         country: 'Spain',
         countryCode: 'ES',
@@ -1043,10 +1043,10 @@ export default function AdminToolsTab() {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedId(id);
-      toast.success('Enlace copiado al portapapeles ✓');
+      toast.success('Link copied to clipboard ✓');
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
-      toast.error('Error al copiar enlace');
+      toast.error('Failed to copy link');
     }
   };
 
@@ -1511,7 +1511,7 @@ export default function AdminToolsTab() {
           )}
 
           {/* ───────────────────────────────────────────────────────────────────────────
-              VIEW 1: PANTALLA PÚBLICA (Public Views)
+              VIEW 1: PUBLIC PORTAL VIEWS (Public Screens)
           ─────────────────────────────────────────────────────────────────────────── */}
           {activeView === 'public' && (
             <div>
@@ -1678,15 +1678,15 @@ export default function AdminToolsTab() {
 
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '8px 0 12px' }}>
                     <div style={{ background: '#eff6ff', color: '#1d4ed8', padding: '3px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 650 }}>
-                      Muestra: <CopyableId value={pt.sampleCode} />
+                      Specimen: <CopyableId value={pt.sampleCode} />
                     </div>
                     <div style={{ background: '#f5f3ff', color: '#6d28d9', padding: '3px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 650 }}>
-                      Receta: <CopyableId value={pt.rxCode} />
+                      Prescription: <CopyableId value={pt.rxCode} />
                     </div>
                   </div>
 
                   <div style={{ fontSize: '0.76rem', color: '#475569', marginBottom: '12px' }}>
-                    Test: <strong>{pt.testType}</strong> · Fecha informe: <code>{pt.testEndDate}</code>
+                    Test: <strong>{pt.testType}</strong> · Report Date: <code>{pt.testEndDate}</code>
                   </div>
                 </div>
 
@@ -1708,10 +1708,10 @@ export default function AdminToolsTab() {
                         alignItems: 'center',
                         gap: '4px'
                       }}
-                      title="Abrir Split Drawer de Trazabilidad"
+                      title="Open Traceability Split Drawer"
                     >
                       <Eye size={13} />
-                      <span>Detalle</span>
+                      <span>Details</span>
                     </button>
 
                     <Link
@@ -1734,7 +1734,7 @@ export default function AdminToolsTab() {
                         gap: '6px'
                       }}
                     >
-                      <span>Ver Receta (/rx)</span>
+                      <span>View Rx (/rx)</span>
                       <ExternalLink size={13} />
                     </Link>
 
@@ -1759,7 +1759,7 @@ export default function AdminToolsTab() {
                         gap: '6px'
                       }}
                     >
-                      <span>Ver Lab (/lab)</span>
+                      <span>View Lab (/lab)</span>
                       <ExternalLink size={13} />
                     </Link>
 
@@ -1774,7 +1774,7 @@ export default function AdminToolsTab() {
                         color: '#475569',
                         cursor: 'pointer'
                       }}
-                      title="Copiar URL del Paciente"
+                      title="Copy Patient Rx URL"
                     >
                       {copiedId === pt.id ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
                     </button>
@@ -1799,7 +1799,7 @@ export default function AdminToolsTab() {
       {activeView === 'products' && (
         <div>
           <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 650, marginBottom: '0.85rem' }}>
-            PÉPTIDOS, FÓRMULAS & ACTIVOS FARMACÉUTICOS ({filteredProducts.length} productos)
+            PEPTIDES, FORMULATIONS & PHARMACEUTICAL ACTIVES ({filteredProducts.length} products)
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
@@ -1834,11 +1834,11 @@ export default function AdminToolsTab() {
                   </div>
 
                   <div style={{ fontSize: '0.8rem', color: '#475569', margin: '4px 0 8px' }}>
-                    Dosis: <strong>{prod.dose}</strong> · Formato: {prod.format}
+                    Dose: <strong>{prod.dose}</strong> · Format: {prod.format}
                   </div>
 
                   <div style={{ background: '#f8fafc', padding: '6px 10px', borderRadius: '6px', fontSize: '0.74rem', color: '#64748b', marginBottom: '12px' }}>
-                    Lote Activo: <CopyableId value={prod.batch} />
+                    Active Batch: <CopyableId value={prod.batch} />
                   </div>
                 </div>
 
@@ -1860,10 +1860,10 @@ export default function AdminToolsTab() {
                         alignItems: 'center',
                         gap: '4px'
                       }}
-                      title="Abrir Split Drawer de Trazabilidad"
+                      title="Open Traceability Split Drawer"
                     >
                       <Eye size={13} />
-                      <span>Detalle</span>
+                      <span>Details</span>
                     </button>
 
                     <Link
@@ -1886,7 +1886,7 @@ export default function AdminToolsTab() {
                         gap: '6px'
                       }}
                     >
-                      <span>Ver Monografía (/p)</span>
+                      <span>View Monograph (/p)</span>
                       <ExternalLink size={13} />
                     </Link>
 
@@ -1908,10 +1908,10 @@ export default function AdminToolsTab() {
                         alignItems: 'center',
                         gap: '4px'
                       }}
-                      title="Generar Etiqueta 300 DPI"
+                      title="Generate 300 DPI Thermal Label"
                     >
                       <Tag size={13} />
-                      <span>Etiqueta</span>
+                      <span>Label</span>
                     </Link>
 
                     <button
@@ -1925,7 +1925,7 @@ export default function AdminToolsTab() {
                         color: '#475569',
                         cursor: 'pointer'
                       }}
-                      title="Copiar URL del Producto"
+                      title="Copy Product URL"
                     >
                       {copiedId === prod.id ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
                     </button>
@@ -1938,26 +1938,26 @@ export default function AdminToolsTab() {
       )}
 
       {/* ───────────────────────────────────────────────────────────────────────────
-          AUXILIARY: ADUANAS & ETIQUETAS
+          AUXILIARY: CUSTOMS & LABELS
       ─────────────────────────────────────────────────────────────────────────── */}
       {activeView === 'ops' && (
         <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 8px', color: '#0f172a' }}>
-            Operaciones de Exportación y Cumplimiento Aduanero
+            Export Operations & Customs Compliance
           </h2>
           <p style={{ fontSize: '0.84rem', color: '#64748b', margin: '0 0 1.5rem' }}>
-            Reglas de etiquetado clínico de viales (DHA / MOPH / EMA) y valoración aduanera para envíos internacionales.
+            Clinical specimen & container labeling rules (DHA / MOPH / EMA) and customs valuation for international express dispatch.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
             <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', background: '#f8fafc' }}>
               <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a', marginBottom: '4px' }}>
-                Reglas de Impresión de Etiquetas 300 DPI
+                300 DPI Thermal Label Printing Rules
               </div>
               <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#475569', lineHeight: 1.6 }}>
-                <li>Dimensiones estándar: 50mm x 25mm para viales de 2mL y 3mL.</li>
-                <li>QR Code con micro-URL encriptada dirigida a <code>/verify/[code]</code>.</li>
-                <li>Purity HPLC, Batch ID y Fecha de Caducidad obligatorios en cada vial.</li>
+                <li>Standard dimensions: 50mm x 25mm for 2mL and 3mL clinical containers.</li>
+                <li>QR Code with encrypted micro-URL linking to <code>/verify/[code]</code>.</li>
+                <li>HPLC Purity, Batch ID, and Expiration Date mandatory on each container.</li>
               </ul>
               <div style={{ marginTop: '12px' }}>
                 <Link
@@ -1973,7 +1973,7 @@ export default function AdminToolsTab() {
                     textDecoration: 'none'
                   }}
                 >
-                  <span>Abrir Administrador de Etiquetas (/labels)</span>
+                  <span>Open Label Studio (/labels)</span>
                   <ArrowRight size={13} />
                 </Link>
               </div>
@@ -1981,12 +1981,12 @@ export default function AdminToolsTab() {
 
             <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', background: '#f8fafc' }}>
               <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a', marginBottom: '4px' }}>
-                Declaración Aduanera GCC / EAU / Qatar
+                GCC / UAE / Qatar Customs Declarations
               </div>
               <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#475569', lineHeight: 1.6 }}>
-                <li>HS Code Declarado: <strong>2937.19.00</strong> (Péptidos y derivados hormonales).</li>
-                <li>Temperatura de Cadena Fría: 2°C - 8°C con indicador térmico certificado.</li>
-                <li>Carta de exención clínica adjunta con firma del médico supervisor.</li>
+                <li>Declared HS Code: <strong>2937.19.00</strong> (Peptide hormones and synthetic biological analogues).</li>
+                <li>Cold Chain Temperature: 2°C – 8°C with certified temperature data-logger.</li>
+                <li>Clinical exemption certificate and physician prescription attached to air waybill.</li>
               </ul>
             </div>
           </div>

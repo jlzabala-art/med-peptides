@@ -202,30 +202,63 @@ export default function DoctorPracticeSearchModal({
                 padding: '4px 0'
               }}
             />
-            {query ? (
-              <button 
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              {query && (
+                <button 
+                  type="button"
+                  onClick={() => setQuery('')}
+                  title="Clear input"
+                  style={{
+                    border: 'none',
+                    background: '#e2e8f0',
+                    borderRadius: '50%',
+                    width: '22px',
+                    height: '22px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: '#475569'
+                  }}
+                >
+                  <X size={13} />
+                </button>
+              )}
+              <span style={{ fontSize: '11px', color: '#94a3b8', background: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                ESC
+              </span>
+              <button
                 type="button"
-                onClick={() => setQuery('')}
+                onClick={onClose}
+                aria-label="Close search"
+                title="Close dialog (ESC)"
                 style={{
-                  border: 'none',
-                  background: '#e2e8f0',
-                  borderRadius: '50%',
-                  width: '24px',
-                  height: '24px',
+                  border: '1px solid #e2e8f0',
+                  background: '#ffffff',
+                  borderRadius: '6px',
+                  width: '28px',
+                  height: '28px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  color: '#475569'
+                  color: '#64748b',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f1f5f9';
+                  e.currentTarget.style.color = '#0f172a';
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.color = '#64748b';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
                 }}
               >
-                <X size={14} />
+                <X size={16} />
               </button>
-            ) : (
-              <span style={{ fontSize: '11px', color: '#94a3b8', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
-                ESC
-              </span>
-            )}
+            </div>
           </div>
 
           {/* Scope Indicator & Filter Tabs */}

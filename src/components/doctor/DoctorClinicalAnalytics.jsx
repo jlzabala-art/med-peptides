@@ -412,7 +412,7 @@ export default function DoctorClinicalAnalytics({
     let latestTimestamp = 0;
 
     prescriptions.forEach((rx) => {
-      let rawDate = rx.startDate || rx.dateIssued || rx.createdAt || rx.date;
+      const rawDate = rx.startDate || rx.dateIssued || rx.createdAt || rx.date;
       if (!rawDate) return;
 
       let d = rawDate.toDate ? rawDate.toDate() : new Date(rawDate);
@@ -538,11 +538,45 @@ export default function DoctorClinicalAnalytics({
 
   // ── 3. Patient Cohort Loyalty ─────────────────────────────────────────────
   const cohortData = useMemo(() => {
+    const defaultCohorts = [
+      { id: 'single', label: '1 Rx (Initial Regimen)', count: 0, pct: 0, color: '#1a73e8' },
+      { id: 'double', label: '2 Rxs (Treatment Follow-up)', count: 0, pct: 0, color: '#0d9488' },
+      { id: 'chronic', label: '3+ Rxs (Continuous Care)', count: 0, pct: 0, color: '#7c3aed' }
+    ];
+
     if (isServerOptimized && serverAnalytics?.cohortData?.slices?.length > 0) {
-      return serverAnalytics.cohortData;
+      const serverC = serverAnalytics.cohortData;
+      const cohortsList = Array.isArray(serverC.cohorts)
+        ? serverC.cohorts
+        : [
+            { id: 'single', label: '1 Rx (Initial Regimen)', count: serverC.single || 0, pct: serverC.singlePct || 0, color: '#1a73e8' },
+            { id: 'double', label: '2 Rxs (Treatment Follow-up)', count: serverC.double || 0, pct: serverC.doublePct || 0, color: '#0d9488' },
+            { id: 'chronic', label: '3+ Rxs (Continuous Care)', count: serverC.chronic || 0, pct: serverC.chronicPct || 0, color: '#7c3aed' }
+          ];
+      return {
+        ...serverC,
+        slices: Array.isArray(serverC.slices) ? serverC.slices : [],
+        cohorts: cohortsList,
+        avgRx: serverC.avgRx || 0,
+        totalPatients: serverC.totalPatients || 0
+      };
     }
     if (!prescriptions || prescriptions.length === 0) {
-      return { totalPatients: 0, singleCount: 0, doubleCount: 0, chronicCount: 0, avgRx: 0, slices: [] };
+      return {
+        totalPatients: 0,
+        single: 0,
+        double: 0,
+        chronic: 0,
+        singleCount: 0,
+        doubleCount: 0,
+        chronicCount: 0,
+        singlePct: 0,
+        doublePct: 0,
+        chronicPct: 0,
+        avgRx: 0,
+        slices: [],
+        cohorts: defaultCohorts
+      };
     }
 
     const patientCounts = {};

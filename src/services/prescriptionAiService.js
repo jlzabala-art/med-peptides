@@ -161,7 +161,7 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
   const isFagron = (rawData.documentType === 'FagronGenomics' && hasFagronMarkers) || !!rawData.fagronDetails?.boxId || !!rawData.fagronDetails?.isFagron;
 
   // Extract formulation blocks
-  let blocks = [];
+  let blocks;
   if (Array.isArray(rawData.formulationBlocks) && rawData.formulationBlocks.length > 0) {
     blocks = rawData.formulationBlocks;
   } else {
@@ -183,11 +183,41 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
     }];
   }
 
+  // 1. Extract official prescription / file code from document if detected (e.g. 51861, FILE #51861)
+  const rawCodeCandidate = rawData.prescriptionNumber || rawData.fileNumber || rawData.clinicReference;
+  let detectedRxCode = '';
+  if (rawCodeCandidate && typeof rawCodeCandidate === 'string') {
+    const cleanMatch = rawCodeCandidate.match(/\d{4,8}/);
+    if (cleanMatch) {
+      detectedRxCode = cleanMatch[0];
+    } else {
+      detectedRxCode = rawCodeCandidate.replace(/^(FILE|RX|RECETA|ORDER|#)\s*#?/i, '').trim();
+    }
+  }
+
+  // 2. Automated Doctor matching from Firestore
+  let matchedDoctor = null;
+  try {
+    matchedDoctor = await lookupDoctorByNameOrLicense(
+      rawData.doctor?.name || context.doctorName,
+      rawData.doctor?.licenseNumber
+    );
+  } catch (err) {
+    logger.warn('[prescriptionAiService] Doctor lookup error', { error: err.message });
+  }
+
+  const doctorName = matchedDoctor?.displayName || matchedDoctor?.name || rawData.doctor?.name || context.doctorName || 'Prescribing Physician';
+  const doctorSlug = matchedDoctor?.slug || slugify(doctorName);
+  const doctorId = matchedDoctor?.id || context.doctorId || null;
+  const doctorLicense = rawData.doctor?.licenseNumber || matchedDoctor?.licenseNumber || matchedDoctor?.medicalLicense || '';
+  const clinicName = rawData.doctor?.clinicName || matchedDoctor?.clinicName || matchedDoctor?.practiceName || '';
+  const clinicAddress = rawData.doctor?.clinicAddress || matchedDoctor?.clinicAddress || '';
+
   // Generate shared sessionId if multiple formulations exist in a single document
   const sessionId = blocks.length > 1 ? `sess_${Date.now()}_${Math.random().toString(36).substring(2, 7)}` : null;
 
-  // Check if caller specifically requested splitting blocks into individual prescriptions
-  const shouldSplitBlocks = options.splitBlocksIntoSeparatePrescriptions === true;
+  // Split multipart formulation blocks into individual prescriptions by default
+  const shouldSplitBlocks = options.splitBlocksIntoSeparatePrescriptions !== false && blocks.length > 1;
 
   if (shouldSplitBlocks) {
     const splitResults = [];
@@ -278,12 +308,23 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
       });
 
       const patientName = rawData.patient?.name || context.patientName || 'Unknown Patient';
-      const doctorName = rawData.doctor?.name || context.doctorName || 'Prescribing Physician';
       const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       const randPart = Math.random().toString(36).substring(2, 6).toUpperCase();
-      const generatedRxNumber = `RX-${datePart}-${randPart}`;
+      const baseRxCode = detectedRxCode || `RX-${datePart}-${randPart}`;
+      const generatedRxNumber = blocks.length > 1 ? `${baseRxCode}-${blockIdx + 1}` : baseRxCode;
 
-      splitResults.push({
+      // Detect clinical category for individual formulation
+      const blockTypeLower = (block.blockType || block.treatmentType || '').toLowerCase();
+      const blockDispensingLower = (block.dispensingForm || '').toLowerCase();
+      const splitCategory = (
+        blockTypeLower.includes('pomade') || prescriptionLines.some(l => (l.productName || '').toLowerCase().includes('diltiazem') || (l.productName || '').toLowerCase().includes('pomade')) ? 'compounding' :
+        blockTypeLower.includes('hormone') || prescriptionLines.some(l => (l.productName || '').toLowerCase().includes('pentravan') || (l.productName || '').toLowerCase().includes('testosterone') || (l.productName || '').toLowerCase().includes('estradiol')) ? 'hormone' :
+        (isFagron && (rawData.fagronDetails?.testName?.toLowerCase().includes('tricho') || prescriptionLines.some(l => (l.productName || '').toLowerCase().includes('trichosol')))) ? 'trichotest' :
+        (isFagron && rawData.fagronDetails?.testName?.toLowerCase().includes('nutrigen')) ? 'nutrigen' :
+        'compounding'
+      );
+
+      const splitRxItem = {
         ...prescriptionSchema,
         ...context,
         prescriptionNumber: generatedRxNumber,
@@ -294,6 +335,8 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
         validationStatus: anyUnresolved ? 'Needs Review' : (unassignedAlerts.length > 0 ? 'Review API Scope' : 'Ready'),
         quotationStatus: 'Pending',
         orderStatus: 'Pending',
+        clinicalCategory: splitCategory,
+        doctorSlug,
         _unassignedProgramAlerts: unassignedAlerts,
         sourceType: isFagron ? PRESCRIPTION_SOURCES.FAGRON : PRESCRIPTION_SOURCES.UPLOAD,
         source: isFagron ? 'fagron' : 'document',
@@ -310,19 +353,19 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
           idNumber: rawData.patient?.idNumber || '',
           address: rawData.patient?.address || '',
         },
-        doctorId: context.doctorId || null,
+        doctorId: doctorId || context.doctorId || null,
         doctorName,
-        doctorLicense: rawData.doctor?.licenseNumber || '',
+        doctorLicense,
         doctor: {
           name: doctorName,
-          license: rawData.doctor?.licenseNumber || '',
-          clinic: rawData.doctor?.clinicName || '',
-          address: rawData.doctor?.clinicAddress || '',
-          specialty: rawData.doctor?.specialty || '',
-          phone: rawData.doctor?.phone || '',
-          email: rawData.doctor?.email || '',
+          license: doctorLicense,
+          clinic: clinicName,
+          address: clinicAddress,
+          specialty: rawData.doctor?.specialty || matchedDoctor?.specialty || '',
+          phone: rawData.doctor?.phone || matchedDoctor?.phone || '',
+          email: rawData.doctor?.email || matchedDoctor?.email || '',
         },
-        clinicName: rawData.doctor?.clinicName || '',
+        clinicName,
         diagnosis: rawData.diagnosis || (isFagron ? (rawData.fagronDetails?.testName || 'Fagron Genomics') : ''),
         clinicalIndication: block.posology || rawData.diagnosis || '',
         clinicalNotes: rawData.clinicalNotes || '',
@@ -332,6 +375,10 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
         volume: block.volume || null,
         duration: block.duration || '30 days',
         posology: block.posology || '',
+        date: rawData.prescriptionDate || new Date().toISOString().slice(0, 10),
+        prescriptionDate: rawData.prescriptionDate || new Date().toISOString().slice(0, 10),
+        mfgDate: '05-10-2026',
+        expDate: '04-10-2027',
         prescriptionLines,
         items: prescriptionLines,
         fagron: isFagron ? {
@@ -360,9 +407,21 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
           timestamp: new Date().toISOString(),
           action: 'ai_imported',
           user: currentUser?.email || 'system_ai',
-          details: `Imported via Atlas AI from file ${rawData._fileName || 'prescription document'}`
+          details: `Imported via Atlas AI (Formulation ${blockIdx + 1}/${blocks.length}) from file ${rawData._fileName || 'prescription document'}`
         }]
-      });
+      };
+
+      // Pre-generate pharmacy labels for split rx
+      try {
+        const labels = getPharmapolisLabelsForPrescription(splitRxItem, null);
+        if (labels && labels.length > 0) {
+          splitRxItem.pharmacyLabels = labels;
+        }
+      } catch (lblErr) {
+        logger.warn('[prescriptionAiService] Auto label generation warning for split rx', { error: lblErr.message });
+      }
+
+      splitResults.push(splitRxItem);
     }
     return splitResults;
   }
@@ -467,18 +526,6 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
 
   const patientName = rawData.patient?.name || context.patientName || 'Unknown Patient';
 
-  // 1. Extract official prescription / file code from document if detected (e.g. 51861, FILE #51861)
-  const rawCodeCandidate = rawData.prescriptionNumber || rawData.fileNumber || rawData.clinicReference;
-  let detectedRxCode = '';
-  if (rawCodeCandidate && typeof rawCodeCandidate === 'string') {
-    const cleanMatch = rawCodeCandidate.match(/\d{4,8}/);
-    if (cleanMatch) {
-      detectedRxCode = cleanMatch[0];
-    } else {
-      detectedRxCode = rawCodeCandidate.replace(/^(FILE|RX|RECETA|ORDER|#)\s*#?/i, '').trim();
-    }
-  }
-
   // Generate clean, official prescription number
   let generatedRxNumber;
   if (detectedRxCode && detectedRxCode.length >= 3) {
@@ -488,24 +535,6 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
     const randPart = Math.random().toString(36).substring(2, 6).toUpperCase();
     generatedRxNumber = `RX-${datePart}-${randPart}`;
   }
-
-  // 2. Automated Doctor matching from Firestore
-  let matchedDoctor = null;
-  try {
-    matchedDoctor = await lookupDoctorByNameOrLicense(
-      rawData.doctor?.name || context.doctorName,
-      rawData.doctor?.licenseNumber
-    );
-  } catch (err) {
-    logger.warn('[prescriptionAiService] Doctor lookup error', { error: err.message });
-  }
-
-  const doctorName = matchedDoctor?.displayName || matchedDoctor?.name || rawData.doctor?.name || context.doctorName || 'Prescribing Physician';
-  const doctorSlug = matchedDoctor?.slug || slugify(doctorName);
-  const doctorId = matchedDoctor?.id || context.doctorId || null;
-  const doctorLicense = rawData.doctor?.licenseNumber || matchedDoctor?.licenseNumber || matchedDoctor?.medicalLicense || '';
-  const clinicName = rawData.doctor?.clinicName || matchedDoctor?.clinicName || matchedDoctor?.practiceName || '';
-  const clinicAddress = rawData.doctor?.clinicAddress || matchedDoctor?.clinicAddress || '';
 
   // Formulate unified multi-product clinical summary
   const treatmentType = blocks.length > 1

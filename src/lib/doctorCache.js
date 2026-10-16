@@ -625,6 +625,18 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         isMultiPart: !!d.isMultiPart || resolvedParts.length > 1,
         totalParts: d.totalParts || (resolvedParts.length > 1 ? resolvedParts.length : null),
         clinic: d.clinic || d.clinicName || doctorDoc.clinicName || doctorDoc.clinic || 'Clinical Dispensary',
+        invoiceRef: d.invoiceRef || d.invoiceNumber || (d.fileNumber ? `# INV ${d.fileNumber}` : null),
+        invoiceNumber: d.invoiceNumber || null,
+        fileNumber: d.fileNumber || null,
+        dateIssued: d.dateIssued || d.date || null,
+        date: d.date || d.dateIssued || null,
+        startDate: d.startDate || d.treatmentStartDate || d.dateIssued || d.date || null,
+        treatmentStartDate: d.treatmentStartDate || d.startDate || d.dateIssued || d.date || null,
+        durationDays: d.durationDays || null,
+        durationWeeks: d.durationWeeks || null,
+        duration: d.duration || null,
+        treatmentDuration: d.treatmentDuration || null,
+        endDate: d.endDate || null,
         createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt.seconds ? d.createdAt.seconds * 1000 : String(d.createdAt))) : null,
         items: resolvedItems,
         parts: resolvedParts.length > 0 ? resolvedParts : null,
@@ -1768,6 +1780,16 @@ export async function updateDoctorProfile(slug, updates = {}) {
     if (updates.email !== undefined) payload.email = updates.email;
     if (updates.location !== undefined) payload.location = updates.location;
     if (updates.title !== undefined) payload.title = updates.title;
+    if (updates.clinicLogo !== undefined) {
+      payload.clinicLogo = updates.clinicLogo;
+      payload.logoUrl = updates.clinicLogo;
+    }
+    if (updates.logoUrl !== undefined) {
+      payload.logoUrl = updates.logoUrl;
+      if (!payload.clinicLogo) payload.clinicLogo = updates.logoUrl;
+    }
+    if (updates.whiteLabelEnabled !== undefined) payload.whiteLabelEnabled = updates.whiteLabelEnabled;
+    if (updates.tier !== undefined) payload.tier = updates.tier;
 
     // Update in Firestore users collection
     await adminDb.collection('users').doc(docId).set(payload, { merge: true });

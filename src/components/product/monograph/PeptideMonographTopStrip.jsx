@@ -47,6 +47,24 @@ export default function PeptideMonographTopStrip({
   const cleanSlug = slug || product.slug || 'product';
   const pageUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : `https://www.atlashealth-services.com/p/${cleanSlug}`);
   const isPt141 = cleanSlug.toLowerCase().includes('pt-141') || (product.canonicalName || product.name || '').toLowerCase().includes('pt-141');
+  const isDiagnostic = Boolean(
+    product?.category === 'diagnostic' ||
+    product?.category === 'diagnostic_test' ||
+    product?.category === 'diagnostic_tests' ||
+    product?.category?.toLowerCase().includes('diagnostic') ||
+    product?.type?.toLowerCase().includes('diagnostic') ||
+    product?.format === 'diagnostic_kit' ||
+    product?.presentation === 'diagnostic_kit' ||
+    Boolean(product?.sampleType) ||
+    product?.supplierId?.toLowerCase().includes('teletest') ||
+    product?.supplierName?.toLowerCase().includes('teletest') ||
+    product?.supplierId?.toLowerCase().includes('bloodo') ||
+    cleanSlug.includes('omega') ||
+    cleanSlug.includes('htma') ||
+    cleanSlug.includes('metabolizer') ||
+    cleanSlug.includes('teletest') ||
+    (product?.name || '').toLowerCase().includes('omega')
+  );
   const refDossier = getPeptideReferenceDossier(product?.slug || product?.canonicalName || product?.name || cleanSlug);
 
   const handleCopyUrl = async () => {
@@ -104,183 +122,348 @@ export default function PeptideMonographTopStrip({
             minWidth: 0
           }}>
             {/* PROTOCOLS TAB CONTEXT */}
+            {/* PROTOCOLS TAB CONTEXT */}
             {activeTab === 'protocols' && (
-              <>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
-                    Active Protocol Focus
-                  </span>
-                  <strong style={{ fontSize: '0.82rem', color: '#003666', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '320px' }}>
-                    {protocolContext?.activeProtocol?.cleanTitle || protocolContext?.activeProtocol?.name || (isPt141 ? 'On-Demand Libido Enhancement' : 'Clinical Titration Pathway')}
-                  </strong>
-                </div>
+              isDiagnostic ? (
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Diagnostic Focus
+                    </span>
+                    <strong style={{ fontSize: '0.82rem', color: '#003666', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '320px' }}>
+                      {protocolContext?.activeProtocol?.cleanTitle || protocolContext?.activeProtocol?.name || 'Lipidomic Profiling & Inflammatory Risk Assessment'}
+                    </strong>
+                  </div>
 
-                <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
 
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
-                    Duration & Step
-                  </span>
-                  <span style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 750, whiteSpace: 'nowrap' }}>
-                    {protocolContext?.physicianDurationWeeks || protocolContext?.activeProtocol?.durationWeeks || 4} Wks • Step {protocolContext?.currentStep || 1}/5
-                  </span>
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Re-Test Cadence
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 750, whiteSpace: 'nowrap' }}>
+                      12–16 Weeks Post-Therapy
+                    </span>
+                  </div>
 
-                <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
 
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
-                    Administration Dose
-                  </span>
-                  <span style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 750, whiteSpace: 'nowrap' }}>
-                    {protocolContext?.physicianDoseMg 
-                      ? (protocolContext.physicianDoseMg < 1 
-                          ? `${Math.round(protocolContext.physicianDoseMg * 1000)} mcg / admin`
-                          : `${protocolContext.physicianDoseMg} mg / admin`)
-                      : '1.25 mg / admin'} • {
-                        protocolContext?.activeProtocol?.route || 
-                        ((protocolContext?.procCalc?.formatType || product?.presentation || '').includes('nasal') ? 'Intranasal' : 'SubQ')
-                      }
-                  </span>
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Clinical Action Target
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 750, whiteSpace: 'nowrap' }}>
+                      Omega-3 Index &gt; 8.0% · AA/EPA &lt; 3.0
+                    </span>
+                  </div>
 
-                <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
 
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#0284c7' }}>
-                    Calculated Supply
-                  </span>
-                  <span style={{
-                    fontSize: '0.80rem',
-                    fontWeight: 850,
-                    color: '#003666',
-                    background: '#eff6ff',
-                    padding: '1px 8px',
-                    borderRadius: '4px',
-                    border: '1px solid #bfdbfe',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {protocolContext?.procCalc?.procurementSummary 
-                      ? `${protocolContext.procCalc.totalApiRequiredMg} mg API (${protocolContext.procCalc.procurementSummary})`
-                      : '10.0 mg (1 × 10mg vial)'}
-                  </span>
-                </div>
-              </>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#0284c7' }}>
+                      Requisition Supply
+                    </span>
+                    <span style={{
+                      fontSize: '0.80rem',
+                      fontWeight: 850,
+                      color: '#003666',
+                      background: '#eff6ff',
+                      padding: '1px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid #bfdbfe',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      1 Specimen Kit
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Active Protocol Focus
+                    </span>
+                    <strong style={{ fontSize: '0.82rem', color: '#003666', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '320px' }}>
+                      {protocolContext?.activeProtocol?.cleanTitle || protocolContext?.activeProtocol?.name || (isPt141 ? 'On-Demand Libido Enhancement' : 'Clinical Titration Pathway')}
+                    </strong>
+                  </div>
+
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Duration & Step
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 750, whiteSpace: 'nowrap' }}>
+                      {protocolContext?.physicianDurationWeeks || protocolContext?.activeProtocol?.durationWeeks || 4} Wks • Step {protocolContext?.currentStep || 1}/5
+                    </span>
+                  </div>
+
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Administration Dose
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 750, whiteSpace: 'nowrap' }}>
+                      {protocolContext?.physicianDoseMg 
+                        ? (protocolContext.physicianDoseMg < 1 
+                            ? `${Math.round(protocolContext.physicianDoseMg * 1000)} mcg / admin`
+                            : `${protocolContext.physicianDoseMg} mg / admin`)
+                        : '1.25 mg / admin'} • {
+                          protocolContext?.activeProtocol?.route || 
+                          ((protocolContext?.procCalc?.formatType || product?.presentation || '').includes('nasal') ? 'Intranasal' : 'SubQ')
+                        }
+                    </span>
+                  </div>
+
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#0284c7' }}>
+                      Calculated Supply
+                    </span>
+                    <span style={{
+                      fontSize: '0.80rem',
+                      fontWeight: 850,
+                      color: '#003666',
+                      background: '#eff6ff',
+                      padding: '1px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid #bfdbfe',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {protocolContext?.procCalc?.procurementSummary 
+                        ? `${protocolContext.procCalc.totalApiRequiredMg} mg API (${protocolContext.procCalc.procurementSummary})`
+                        : '10.0 mg (1 × 10mg vial)'}
+                    </span>
+                  </div>
+                </>
+              )
             )}
 
             {/* PREPARATION TAB CONTEXT */}
             {activeTab === 'preparation' && (
-              <>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
-                    Presentation
-                  </span>
-                  <strong style={{ fontSize: '0.82rem', color: '#003666', fontWeight: 800, whiteSpace: 'nowrap' }}>
-                    {protocolContext?.selectedVialStrength ? `${protocolContext.selectedVialStrength} mg SubQ Vial` : '10 mg SubQ Vial'}
-                  </strong>
-                </div>
+              isDiagnostic ? (
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Presentation
+                    </span>
+                    <strong style={{ fontSize: '0.82rem', color: '#003666', fontWeight: 800, whiteSpace: 'nowrap' }}>
+                      Diagnostic Specimen Kit
+                    </strong>
+                  </div>
 
-                <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
 
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
-                    Concentration
-                  </span>
-                  <span style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 750, whiteSpace: 'nowrap' }}>
-                    {protocolContext?.reconCalc?.concentrationMgMl ? `${protocolContext.reconCalc.concentrationMgMl} mg/mL` : '5.0 mg/mL'}
-                  </span>
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Sample Matrix
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 750, whiteSpace: 'nowrap' }}>
+                      {product.sampleType ? 'Whatman 903 Card' : 'Capillary DBS Spot'}
+                    </span>
+                  </div>
 
-                <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
 
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
-                    Target Dose
-                  </span>
-                  <span style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 750, whiteSpace: 'nowrap' }}>
-                    {protocolContext?.physicianDoseMg || 1.25} mg
-                  </span>
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Pre-Analytical
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 750, whiteSpace: 'nowrap' }}>
+                      8–12h Overnight Fast
+                    </span>
+                  </div>
 
-                <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
 
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#15803d' }}>
-                    U-100 Syringe Draw
-                  </span>
-                  <span style={{
-                    fontSize: '0.80rem',
-                    fontWeight: 850,
-                    color: '#166534',
-                    background: '#f0fdf4',
-                    padding: '1px 8px',
-                    borderRadius: '4px',
-                    border: '1px solid #bbf7d0',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {protocolContext?.reconCalc?.syringeUnitsU100 != null
-                      ? `${protocolContext.reconCalc.syringeUnitsU100} Units (${protocolContext.reconCalc.injectionVolumeMl} mL)`
-                      : '25 Units (0.25 mL)'}
-                  </span>
-                </div>
-              </>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#15803d' }}>
+                      Lab Turnaround
+                    </span>
+                    <span style={{
+                      fontSize: '0.80rem',
+                      fontWeight: 850,
+                      color: '#166534',
+                      background: '#f0fdf4',
+                      padding: '1px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid #bbf7d0',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      5–7 Business Days
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Presentation
+                    </span>
+                    <strong style={{ fontSize: '0.82rem', color: '#003666', fontWeight: 800, whiteSpace: 'nowrap' }}>
+                      {protocolContext?.selectedVialStrength ? `${protocolContext.selectedVialStrength} mg SubQ Vial` : '10 mg SubQ Vial'}
+                    </strong>
+                  </div>
+
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Concentration
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 750, whiteSpace: 'nowrap' }}>
+                      {protocolContext?.reconCalc?.concentrationMgMl ? `${protocolContext.reconCalc.concentrationMgMl} mg/mL` : '5.0 mg/mL'}
+                    </span>
+                  </div>
+
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Target Dose
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 750, whiteSpace: 'nowrap' }}>
+                      {protocolContext?.physicianDoseMg || 1.25} mg
+                    </span>
+                  </div>
+
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#15803d' }}>
+                      U-100 Syringe Draw
+                    </span>
+                    <span style={{
+                      fontSize: '0.80rem',
+                      fontWeight: 850,
+                      color: '#166534',
+                      background: '#f0fdf4',
+                      padding: '1px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid #bbf7d0',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {protocolContext?.reconCalc?.syringeUnitsU100 != null
+                        ? `${protocolContext.reconCalc.syringeUnitsU100} Units (${protocolContext.reconCalc.injectionVolumeMl} mL)`
+                        : '25 Units (0.25 mL)'}
+                    </span>
+                  </div>
+                </>
+              )
             )}
 
             {/* OVERVIEW TAB CONTEXT */}
             {activeTab === 'overview' && (
-              <>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
-                    Molecular Weight
-                  </span>
-                  <strong style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 800 }}>
-                    {product.molecularWeight || product.molecular_weight || product.molecular?.molecularWeight 
-                      ? `${product.molecularWeight || product.molecular_weight || product.molecular?.molecularWeight} Da` 
-                      : (isPt141 ? '1025.16 Da' : 'Verified')}
-                  </strong>
-                </div>
+              isDiagnostic ? (
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Accreditation
+                    </span>
+                    <strong style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 800 }}>
+                      ISO 15189 · CE-IVD
+                    </strong>
+                  </div>
 
-                <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
 
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
-                    CAS Registry
-                  </span>
-                  <span style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 750 }}>
-                    {product.casNumber || product.cas || product.molecular?.cas || (isPt141 ? '189691-06-3' : 'Verified')}
-                  </span>
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Methodology
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 750 }}>
+                      GC-FID / FAME
+                    </span>
+                  </div>
 
-                <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
 
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
-                    Elimination Half-Life
-                  </span>
-                  <span style={{ fontSize: '0.82rem', color: '#0284c7', fontWeight: 750 }}>
-                    {product.eliminationHalfLife || product.halfLife || product.pharmacokinetics?.halfLife || (isPt141 ? '~2.7 Hours' : '~2–4 Hours')}
-                  </span>
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Biological Matrix
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#0284c7', fontWeight: 750 }}>
+                      Capillary Blood (DBS)
+                    </span>
+                  </div>
 
-                <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
 
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#166534' }}>
-                    Quality Assurance
-                  </span>
-                  <span style={{
-                    fontSize: '0.78rem',
-                    fontWeight: 800,
-                    color: '#166534',
-                    background: '#f0fdf4',
-                    padding: '1px 8px',
-                    borderRadius: '4px',
-                    border: '1px solid #bbf7d0'
-                  }}>
-                    {product.purity || '≥99% HPLC Verified'}
-                  </span>
-                </div>
-              </>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#166534' }}>
+                      Analytical Precision
+                    </span>
+                    <span style={{
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      color: '#166534',
+                      background: '#f0fdf4',
+                      padding: '1px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid #bbf7d0'
+                    }}>
+                      CV &lt; 4.5% (CE-IVD)
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Molecular Weight
+                    </span>
+                    <strong style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 800 }}>
+                      {product.molecularWeight || product.molecular_weight || product.molecular?.molecularWeight 
+                        ? `${product.molecularWeight || product.molecular_weight || product.molecular?.molecularWeight} Da` 
+                        : (isPt141 ? '1025.16 Da' : 'Verified')}
+                    </strong>
+                  </div>
+
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      CAS Registry
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 750 }}>
+                      {product.casNumber || product.cas || product.molecular?.cas || (isPt141 ? '189691-06-3' : 'Verified')}
+                    </span>
+                  </div>
+
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                      Elimination Half-Life
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#0284c7', fontWeight: 750 }}>
+                      {product.eliminationHalfLife || product.halfLife || product.pharmacokinetics?.halfLife || (isPt141 ? '~2.7 Hours' : '~2–4 Hours')}
+                    </span>
+                  </div>
+
+                  <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#166534' }}>
+                      Quality Assurance
+                    </span>
+                    <span style={{
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      color: '#166534',
+                      background: '#f0fdf4',
+                      padding: '1px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid #bbf7d0'
+                    }}>
+                      {product.purity || '≥99% HPLC Verified'}
+                    </span>
+                  </div>
+                </>
+              )
             )}
 
             {/* QUALITY TAB CONTEXT */}

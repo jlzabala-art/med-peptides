@@ -227,6 +227,16 @@ export async function GET(request, { params }) {
     const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
     let targetUrl = explicitUrl;
 
+    const isDiagnosticSlug = slug.includes('teletest') || 
+      slug.includes('bloodo') || 
+      slug.includes('eterna') || 
+      slug.includes('test') || 
+      slug.includes('htma') || 
+      slug.includes('omega');
+
+    const defaultPresentation = isDiagnosticSlug ? 'diagnostic_kit' : 'vial';
+    const defaultDose = isDiagnosticSlug ? '1 Analytical Profile' : '10 mg';
+
     if (targetUrl) {
       if (targetUrl.startsWith('/')) {
         targetUrl = `${baseUrl}${targetUrl}`;
@@ -242,24 +252,32 @@ export async function GET(request, { params }) {
         targetUrl += (targetUrl.includes('?') ? '&' : '?') + `supplier=${encodeURIComponent(suppParam)}`;
       }
       if (!targetUrl.includes('presentation=')) {
-        targetUrl += (targetUrl.includes('?') ? '&' : '?') + `presentation=vial`;
+        targetUrl += (targetUrl.includes('?') ? '&' : '?') + `presentation=${defaultPresentation}`;
       }
       if (!targetUrl.includes('dose=')) {
-        targetUrl += (targetUrl.includes('?') ? '&' : '?') + `dose=10%20mg`;
+        targetUrl += (targetUrl.includes('?') ? '&' : '?') + `dose=${encodeURIComponent(defaultDose)}`;
       }
     } else {
       const qParams = new URLSearchParams();
-      const dose = searchParams.get('dose') || searchParams.get('strength') || '10 mg';
-      const presentation = searchParams.get('presentation') || searchParams.get('format') || 'vial';
-      const batch = searchParams.get('batch') || searchParams.get('vialCode');
-      const vialCode = searchParams.get('vialCode') || searchParams.get('batch');
+      const dose = searchParams.get('dose') || searchParams.get('strength') || defaultDose;
+      const rawPresentation = searchParams.get('presentation') || searchParams.get('format');
+      const presentation = (isDiagnosticSlug && (!rawPresentation || rawPresentation.toLowerCase().includes('vial')))
+        ? 'diagnostic_kit'
+        : (rawPresentation || defaultPresentation);
+      const batch = searchParams.get('batch') || searchParams.get('vialCode') || searchParams.get('kitCode');
       const lang = searchParams.get('lang');
 
       qParams.set('dose', dose.replace(/_/g, ' '));
       qParams.set('presentation', presentation);
       qParams.set('supplier', suppParam);
-      if (batch) qParams.set('batch', batch);
-      if (vialCode) qParams.set('vialCode', vialCode);
+      if (batch) {
+        qParams.set('batch', batch);
+        if (isDiagnosticSlug) {
+          qParams.set('kitCode', batch);
+        } else {
+          qParams.set('vialCode', batch);
+        }
+      }
       if (lang && lang !== 'en') qParams.set('lang', lang);
 
       const qs = qParams.toString();

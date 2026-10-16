@@ -92,7 +92,7 @@ export default function StandardDrawer({
         right: 0,
         bottom: 0,
         width: '100vw',
-        height: '100vh',
+        minHeight: '100vh',
         height: '100dvh',
         display: 'flex',
         justifyContent: 'flex-end',
@@ -166,10 +166,9 @@ export default function StandardDrawer({
                         margin: '0.2rem 0 0 0',
                         fontSize: '0.8rem',
                         color: 'var(--color-text-tertiary, #64748b)',
-                        lineHeight: '1.3',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
+                        lineHeight: '1.4',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
                       }}
                     >
                       {subtitle}

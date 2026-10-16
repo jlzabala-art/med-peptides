@@ -483,7 +483,7 @@ export function calculateTreatmentDates(rx, explicitStartDate = null, explicitDu
     reason: 'Physician authorized duration'
   } : calculateTreatmentDuration(rx);
 
-  let rawStart = explicitStartDate || rx?.startDate || rx?.treatmentStartDate || rx?.createdAt;
+  const rawStart = explicitStartDate || rx?.startDate || rx?.treatmentStartDate || rx?.dateIssued || rx?.date || rx?.createdAt;
   let startDateObj = null;
 
   if (rawStart) {
@@ -547,7 +547,7 @@ export function recalculateDurationFromPosologyOrVolumeChange(currentRx, newVolu
   const newDates = calculateTreatmentDates(simulatedRx);
 
   const diffDays = newDates.durationDays - oldDates.durationDays;
-  let summaryMessage = '';
+  let summaryMessage;
 
   if (diffDays > 0) {
     summaryMessage = `Regimen extended by +${diffDays} days (+${Math.round(diffDays / 7)}w). New projected end: ${newDates.endFormatted}`;

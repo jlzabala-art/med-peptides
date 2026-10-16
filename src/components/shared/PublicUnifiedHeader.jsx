@@ -76,6 +76,9 @@ export default function PublicUnifiedHeader({
   onImportRx = null,
   onSwitchRx = null,
   rxSwitcherCount = 0,
+  // White-Label Practice Branding
+  clinicLogo = null,
+  clinicName = null,
   // Sticky sub-banner (e.g. Doctor View / Patient View Mode indicator)
   banner = null
 }) {
@@ -187,7 +190,7 @@ function forceCanonicalDomain(urlOrPath) {
   }
 }
 
-  // Copy link (prefers clean shortUrl for discreet WhatsApp & social sharing, always canonical atlashealth-services.com)
+  // Copy link (distinct behavior per entity: doctor portals, prescriptions, and product monographs)
   const handleCopyLink = async () => {
     triggerHaptic('selection');
     let effectiveShortUrl = shortUrl ? forceCanonicalDomain(shortUrl) : null;
@@ -196,15 +199,24 @@ function forceCanonicalDomain(urlOrPath) {
       baseTarget = forceCanonicalDomain(`${window.location.pathname}${window.location.search}${window.location.hash}`);
     }
 
-    // If shortUrl is not yet available, resolve it on-the-fly via API
-    if (!effectiveShortUrl && baseTarget) {
+    const isDoctor = isDoctorView || baseTarget.includes('/dr/') || baseTarget.includes('/doctor/');
+    const isRx = baseTarget.includes('/rx/');
+
+    // Distinct URL resolution per case:
+    // 1. Doctor Portals: Always copy the authoritative, semantic /dr/[slug] URL (human-readable, verified OpenGraph profile)
+    // 2. Prescriptions: Copy the canonical /rx/[code] or /rx/[code]?view=patient
+    // 3. Products/Monographs: Resolve trackable short URL (/d/...) if not already present
+    if (isDoctor || isRx) {
+      if (!effectiveShortUrl) effectiveShortUrl = baseTarget;
+    } else if (!effectiveShortUrl && baseTarget) {
       try {
         const res = await fetch('/api/short-url', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             targetUrl: baseTarget,
-            slug: currentSlug,
+            slug: currentSlug || '',
+            assetType: 'variant_datasheet',
             recipient: { type: 'public' }
           })
         });
@@ -234,7 +246,11 @@ function forceCanonicalDomain(urlOrPath) {
         document.body.removeChild(textarea);
       }
       setCopied(true);
-      if (effectiveShortUrl) {
+      if (isDoctor) {
+        toast.success(lang === 'es' ? 'Enlace del portal médico copiado ✓' : 'Doctor practice portal link copied ✓');
+      } else if (isRx) {
+        toast.success(lang === 'es' ? 'Enlace de la prescripción copiado ✓' : 'Prescription dossier link copied ✓');
+      } else if (effectiveShortUrl?.includes('/d/')) {
         toast.success(lang === 'es' ? 'Enlace corto copiado (sin marcas, ideal para WhatsApp) ✓' : 'Short link copied (clean preview for WhatsApp) ✓');
       } else {
         toast.success(lang === 'es' ? 'Enlace copiado al portapapeles' : 'Link copied to clipboard');
@@ -291,11 +307,34 @@ function forceCanonicalDomain(urlOrPath) {
         {/* ── Executive TopBar (Google Cloud Console Standard) ── */}
         <div className="puh-brand-row">
           <div className="puh-brand-row-inner">
-            {/* Left: Brand Logo / Title */}
+            {/* Left: Brand Logo / Title or White-Label Clinic Logo */}
             <div className="puh-brand-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Link href={brandHref || "/c/CAT-MU9L9GBN"} className="puh-brand-link" title={brandTitle || "Atlas Health Services Clinical & Healthcare Intelligence"}>
-                <BrandLogo variant="light" size="compact" />
-              </Link>
+              {clinicLogo ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <img
+                    src={clinicLogo}
+                    alt={clinicName || doctorName || 'Clinic Logo'}
+                    style={{
+                      maxHeight: '34px',
+                      maxWidth: '140px',
+                      objectFit: 'contain',
+                      borderRadius: '4px'
+                    }}
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#ffffff' }}>
+                      {clinicName || doctorName}
+                    </span>
+                    <span style={{ fontSize: '0.62rem', color: 'rgba(255, 255, 255, 0.7)', letterSpacing: '0.02em' }}>
+                      Powered by Atlas Health Platform
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <Link href={brandHref || "/c/CAT-MU9L9GBN"} className="puh-brand-link" title={brandTitle || "Atlas Health Services Clinical & Healthcare Intelligence"}>
+                  <BrandLogo variant="light" size="compact" />
+                </Link>
+              )}
 
               {doctorHomeHref && (
                 <Link

@@ -277,7 +277,9 @@ export default function GCPCommandPalette() {
       url: '/rx/RX-BOX02574AATRI',
       icon: User,
       badge: 'TrichoTest',
-      patientData: { id: 'turky', name: 'Turky Bakhit Al-shahwani', code: 'RX-BOX02574AATRI', condition: 'Androgenetic Alopecia' }
+      doctorName: 'Dr. Raffanie Lucenio',
+      doctorSlug: 'dr-raffanie-lucenio',
+      patientData: { id: 'turky', name: 'Turky Bakhit Al-shahwani', code: 'RX-BOX02574AATRI', condition: 'Androgenetic Alopecia', doctorName: 'Dr. Raffanie Lucenio', doctorSlug: 'dr-raffanie-lucenio' }
     },
     {
       id: 'pt-aisha',
@@ -287,7 +289,9 @@ export default function GCPCommandPalette() {
       url: '/rx/RX-BOX02550AATRI',
       icon: User,
       badge: 'TrichoTest',
-      patientData: { id: 'aisha', name: 'Aisha Mohammed Alsulaiti', code: 'RX-BOX02550AATRI', condition: 'Female Pattern Thinning' }
+      doctorName: 'Dr. Raffanie Lucenio',
+      doctorSlug: 'dr-raffanie-lucenio',
+      patientData: { id: 'aisha', name: 'Aisha Mohammed Alsulaiti', code: 'RX-BOX02550AATRI', condition: 'Female Pattern Thinning', doctorName: 'Dr. Raffanie Lucenio', doctorSlug: 'dr-raffanie-lucenio' }
     },
     {
       id: 'pt-maryam',
@@ -297,7 +301,9 @@ export default function GCPCommandPalette() {
       url: '/rx/RX-BOX02571AATRI',
       icon: User,
       badge: 'TrichoTest',
-      patientData: { id: 'maryam', name: 'Maryam Mohammed Al-Sulaiti', code: 'RX-BOX02571AATRI', condition: 'Telogen Effluvium' }
+      doctorName: 'Dr. Raffanie Lucenio',
+      doctorSlug: 'dr-raffanie-lucenio',
+      patientData: { id: 'maryam', name: 'Maryam Mohammed Al-Sulaiti', code: 'RX-BOX02571AATRI', condition: 'Telogen Effluvium', doctorName: 'Dr. Raffanie Lucenio', doctorSlug: 'dr-raffanie-lucenio' }
     },
     {
       id: 'pt-rashid',
@@ -307,7 +313,9 @@ export default function GCPCommandPalette() {
       url: '/rx/RX-BOX03484AATRI',
       icon: User,
       badge: 'TrichoTest',
-      patientData: { id: 'rashid', name: 'Rashid Shahin Malalla', code: 'RX-BOX03484AATRI', condition: 'Post-Transplant Recovery' }
+      doctorName: 'Dr. Çağatay Sezgin',
+      doctorSlug: 'dr-cagatay-sezgin',
+      patientData: { id: 'rashid', name: 'Rashid Shahin Malalla', code: 'RX-BOX03484AATRI', condition: 'Post-Transplant Recovery', doctorName: 'Dr. Çağatay Sezgin', doctorSlug: 'dr-cagatay-sezgin' }
     },
     {
       id: 'pt-fakhro',
@@ -317,7 +325,9 @@ export default function GCPCommandPalette() {
       url: '/rx/RX-BOX03054AATRI',
       icon: User,
       badge: 'TrichoTest',
-      patientData: { id: 'fakhro', name: 'Abdulrahman Darwish Fakhro', code: 'RX-BOX03054AATRI', condition: 'Alopecia Grade III' }
+      doctorName: 'Dr. Raffanie Lucenio',
+      doctorSlug: 'dr-raffanie-lucenio',
+      patientData: { id: 'fakhro', name: 'Abdulrahman Darwish Fakhro', code: 'RX-BOX03054AATRI', condition: 'Alopecia Grade III', doctorName: 'Dr. Raffanie Lucenio', doctorSlug: 'dr-raffanie-lucenio' }
     },
     {
       id: 'pt-alkhulaifi',
@@ -327,7 +337,9 @@ export default function GCPCommandPalette() {
       url: '/rx/RX-BOX03044AATRI',
       icon: User,
       badge: 'TrichoTest',
-      patientData: { id: 'alkhulaifi', name: 'Mohammed Yousuf Al-khulaifi', code: 'RX-BOX03044AATRI', condition: 'Follicular Miniaturization' }
+      doctorName: 'Dr. Raffanie Lucenio',
+      doctorSlug: 'dr-raffanie-lucenio',
+      patientData: { id: 'alkhulaifi', name: 'Mohammed Yousuf Al-khulaifi', code: 'RX-BOX03044AATRI', condition: 'Follicular Miniaturization', doctorName: 'Dr. Raffanie Lucenio', doctorSlug: 'dr-raffanie-lucenio' }
     },
     {
       id: 'pt-saadat',
@@ -337,7 +349,9 @@ export default function GCPCommandPalette() {
       url: '/rx/RX-FAG-YDL-001',
       icon: User,
       badge: 'TrichoTest',
-      patientData: { id: 'saadat', name: 'Saadat Valiyeva', code: 'RX-FAG-YDL-001', condition: 'Diffuse Thinning' }
+      doctorName: 'Dr. M Jay Alkhatib',
+      doctorSlug: 'dr-m-jay-alkhatib',
+      patientData: { id: 'saadat', name: 'Saadat Valiyeva', code: 'RX-FAG-YDL-001', condition: 'Diffuse Thinning', doctorName: 'Dr. M Jay Alkhatib', doctorSlug: 'dr-m-jay-alkhatib' }
     },
     {
       id: 'pt-melissa',
@@ -347,7 +361,9 @@ export default function GCPCommandPalette() {
       url: '/rx/RX-BOX03531AATEL',
       icon: User,
       badge: 'TeloTest',
-      patientData: { id: 'melissa', name: 'Melissa Nel', code: 'RX-BOX03531AATEL', condition: 'Biological Age Telomere' }
+      doctorName: 'Dr. Sobia Mirza',
+      doctorSlug: 'dr-sobia-mirza',
+      patientData: { id: 'melissa', name: 'Melissa Nel', code: 'RX-BOX03531AATEL', condition: 'Biological Age Telomere', doctorName: 'Dr. Sobia Mirza', doctorSlug: 'dr-sobia-mirza' }
     },
 
     // 4. Products & Catalog Highlights
@@ -436,11 +452,36 @@ export default function GCPCommandPalette() {
     }
   ], []);
 
-  // Filter by query and category
+  // Filter by query and category with Strict Medical Confidentiality
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
 
     let pool = staticResources;
+
+    // Strict Patient Confidentiality:
+    // If a physician is selected / active in context, ONLY show patients belonging to that physician.
+    // Patients belonging to other doctors are strictly excluded.
+    if (activeContext?.doctor) {
+      const activeDocName = (activeContext.doctor.name || '').toLowerCase().trim();
+      const activeDocSlug = (activeContext.doctor.slug || '').toLowerCase().trim();
+      const cleanDocName = activeDocName.replace(/^dr\.\s*/i, '').trim();
+
+      pool = pool.filter(r => {
+        if (r.category !== 'Patients') return true;
+
+        const pDocName = (r.patientData?.doctorName || r.doctorName || '').toLowerCase().trim();
+        const pDocSlug = (r.patientData?.doctorSlug || r.doctorSlug || '').toLowerCase().trim();
+        const pSub = (r.subtitle || '').toLowerCase();
+
+        return (
+          (activeDocName && pDocName.includes(activeDocName)) ||
+          (activeDocSlug && pDocSlug.includes(activeDocSlug)) ||
+          (cleanDocName && pDocName.includes(cleanDocName)) ||
+          (cleanDocName && pSub.includes(cleanDocName))
+        );
+      });
+    }
+
     if (selectedCategory !== 'All') {
       pool = pool.filter(r => r.category === selectedCategory);
     }
@@ -477,7 +518,7 @@ export default function GCPCommandPalette() {
     });
 
     return merged.slice(0, 18);
-  }, [staticResources, algoliaHits, query, selectedCategory]);
+  }, [staticResources, algoliaHits, query, selectedCategory, activeContext]);
 
   // Handle Keyboard Selection
   const handleKeyDownList = (e) => {

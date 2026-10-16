@@ -438,17 +438,39 @@ export default function PublicDatasheetView({
     const pres = (product?.presentation || '').toLowerCase();
     const fmt = (product?.format || '').toLowerCase();
     const supp = (product?.supplierId || '').toLowerCase();
+    const sName = (product?.supplierName || '').toLowerCase();
     return Boolean(
-      cat === 'genomics_biomarkers' || 
+      cat === 'diagnostic' ||
+      cat === 'diagnostic_test' ||
       cat === 'diagnostic_tests' ||
+      cat === 'genomics_biomarkers' || 
       cat === 'tests' ||
+      cat.includes('diagnostic') ||
+      pt === 'diagnostic' ||
+      pt.includes('diagnostic') ||
+      pres === 'diagnostic_kit' ||
       pres === 'blood_test' || 
       pres === 'home_test_kit' ||
+      pres === 'saliva_kit' ||
+      fmt === 'diagnostic_kit' ||
       fmt === 'blood_test' || 
+      fmt === 'saliva_kit' ||
       supp === 'supplier-bloodo' ||
+      supp.includes('teletest') ||
+      supp.includes('eternadx') ||
+      sName.includes('teletest') ||
+      sName.includes('bloodo') ||
+      sName.includes('eterna') ||
+      Boolean(product?.sampleType) ||
       slug.includes('bloodo') ||
+      slug.includes('teletest') ||
+      slug.includes('omega') ||
+      slug.includes('htma') ||
+      slug.includes('metabolizer') ||
       slug.endsWith('-test') ||
-      pName.includes('test kit') ||
+      slug.includes('test-') ||
+      pName.includes('test') ||
+      pName.includes('kit') ||
       pName.includes('level test')
     );
   }, [product]);
@@ -542,8 +564,8 @@ export default function PublicDatasheetView({
   }, [product, slug]);
 
   const isPeptideCompound = useMemo(() => {
-    return !isCorporateService && !isDiagnosticKit && !isCosmeticProduct && !isSolventProduct && !isSupplementProduct;
-  }, [isCorporateService, isDiagnosticKit, isCosmeticProduct, isSolventProduct, isSupplementProduct]);
+    return !isCorporateService && !isCosmeticProduct && !isSolventProduct && !isSupplementProduct;
+  }, [isCorporateService, isCosmeticProduct, isSolventProduct, isSupplementProduct]);
 
   const brandCollection = useMemo(() => resolveBrandCollectionInfo(product), [product]);
 
@@ -845,8 +867,19 @@ export default function PublicDatasheetView({
     return supplierFilteredFormats;
   }, [isStrictlyLotusland, supplierFilteredFormats]);
 
-  // Priority-ordered available formats: Lyophilized Vial is the primary clinical standard
+  // Priority-ordered available formats: Lyophilized Vial for peptides; Specimen Collection Kit for diagnostic tests
   const availableFormats = useMemo(() => {
+    if (isDiagnosticKit) {
+      const nonVialFormats = sanitizedFormats.filter(f => !f.id.toLowerCase().includes('vial'));
+      if (nonVialFormats.length > 0) return nonVialFormats;
+      return [
+        { 
+          id: 'diagnostic_kit', 
+          name: product.sampleType ? `Specimen Collection Kit (${product.sampleType})` : 'Diagnostic Specimen Collection Kit', 
+          strengths: sortedStrengths.map(s => s.id) 
+        }
+      ];
+    }
     const list = sanitizedFormats.length > 0 ? [...sanitizedFormats] : [
       { id: 'vial', name: 'Lyophilized Subcutaneous Vial', strengths: sortedStrengths.map(s => s.id) }
     ];
@@ -860,9 +893,17 @@ export default function PublicDatasheetView({
       return 10;
     };
     return list.sort((a, b) => getOrder(a.id) - getOrder(b.id));
-  }, [sanitizedFormats, sortedStrengths]);
+  }, [isDiagnosticKit, sanitizedFormats, sortedStrengths, product.sampleType]);
 
   const [activeFormatId, setActiveFormatId] = useState(() => {
+    if (isDiagnosticKit) {
+      if (initialFormat && !initialFormat.toLowerCase().includes('vial')) {
+        const cleanF = String(initialFormat).toLowerCase();
+        const found = availableFormats.find(f => f.id.toLowerCase() === cleanF || f.id.toLowerCase().includes(cleanF));
+        if (found) return found.id;
+      }
+      return availableFormats[0]?.id || 'diagnostic_kit';
+    }
     if (initialFormat) {
       const cleanF = String(initialFormat).toLowerCase();
       const found = availableFormats.find(f => f.id.toLowerCase() === cleanF || f.id.toLowerCase().includes(cleanF));
@@ -876,9 +917,9 @@ export default function PublicDatasheetView({
   // Keep activeFormatId valid when available formats change
   useEffect(() => {
     if (!availableFormats.some(f => f.id === activeFormatId)) {
-      setActiveFormatId(availableFormats[0]?.id || 'vial');
+      setActiveFormatId(availableFormats[0]?.id || (isDiagnosticKit ? 'diagnostic_kit' : 'vial'));
     }
-  }, [availableFormats, activeFormatId]);
+  }, [availableFormats, activeFormatId, isDiagnosticKit]);
 
   const activeFormat = availableFormats.find(f => f.id === activeFormatId) || availableFormats[0];
   const activeFormatStrengthIds = Array.isArray(activeFormat?.strengths) ? activeFormat.strengths : [];
@@ -1219,17 +1260,23 @@ export default function PublicDatasheetView({
     const currentDose = (selectedStrength?.name || selectedStrengthId || '10 mg').replace(/_/g, ' ');
     params.set('dose', currentDose);
 
-    // 2. Presentation / Format: Always bound (e.g. "vial")
-    const currentFormat = activeFormat?.id || activeFormatId || 'vial';
+    // 2. Presentation / Format
+    const currentFormat = isDiagnosticKit
+      ? (activeFormat?.id && !activeFormat.id.includes('vial') ? activeFormat.id : 'diagnostic_kit')
+      : (activeFormat?.id || activeFormatId || 'vial');
     params.set('presentation', currentFormat);
 
-    // 3. Supplier: Always bind the concrete active or canonical supplier (e.g. "supplier-lotusland")
+    // 3. Supplier: Always bind the concrete active or canonical supplier
     const targetSupplier = getConcreteSupplierId(activeSupplierId, supplierName);
     params.set('supplier', targetSupplier);
 
-    // 4. Batch & VialCode: Synchronized authentic discreet lot code
+    // 4. Batch & Code: Synchronized authentic discreet lot code
     params.set('batch', effectiveBatchCode);
-    params.set('vialCode', effectiveBatchCode);
+    if (isDiagnosticKit) {
+      params.set('kitCode', effectiveBatchCode);
+    } else {
+      params.set('vialCode', effectiveBatchCode);
+    }
 
     // 5. Language (if not default)
     if (lang && lang !== 'en') {
@@ -1287,7 +1334,9 @@ export default function PublicDatasheetView({
     const targetDose = (selectedStrength?.name || selectedStrengthId || '10 mg').replace(/_/g, ' ');
     p.set('dose', targetDose);
 
-    const currentFormat = activeFormat?.id || activeFormatId || 'vial';
+    const currentFormat = isDiagnosticKit
+      ? (activeFormat?.id && !activeFormat.id.includes('vial') ? activeFormat.id : 'diagnostic_kit')
+      : (activeFormat?.id || activeFormatId || 'vial');
     p.set('presentation', currentFormat);
     p.set('format', currentFormat);
 
@@ -1299,7 +1348,11 @@ export default function PublicDatasheetView({
     }
 
     p.set('batch', effectiveBatchCode);
-    p.set('vialCode', effectiveBatchCode);
+    if (isDiagnosticKit) {
+      p.set('kitCode', effectiveBatchCode);
+    } else {
+      p.set('vialCode', effectiveBatchCode);
+    }
 
     if (lang && lang !== 'en') p.set('lang', lang);
 
@@ -1308,32 +1361,38 @@ export default function PublicDatasheetView({
     }
     const qs = p.toString();
     return qs ? `&${qs}` : '';
-  }, [selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, supplierName, effectiveBatchCode, lang, dynamicPublicUrl]);
+  }, [selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, supplierName, effectiveBatchCode, lang, dynamicPublicUrl, isDiagnosticKit]);
 
   // Variant-specific file naming suffix so operators never confuse downloaded labels
   const variantFileSuffix = useMemo(() => {
     const clean = (s) => String(s || '').trim().replace(/^supplier[-_]/i, '').replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').toLowerCase();
     const d = clean(selectedStrength?.name || selectedStrengthId || '10mg');
-    const p = clean(activeFormat?.name || activeFormatId || 'vial');
+    const p = clean(activeFormat?.name || activeFormatId || (isDiagnosticKit ? 'kit' : 'vial'));
     const s = clean(supplierName || activeSupplierId || 'lotusland');
     const b = clean(effectiveBatchCode || 'batch');
     return `${clean(slug)}_${d}_${p}_${s}_${b}`;
-  }, [slug, selectedStrength, selectedStrengthId, activeFormat, activeFormatId, supplierName, activeSupplierId, effectiveBatchCode]);
+  }, [slug, selectedStrength, selectedStrengthId, activeFormat, activeFormatId, supplierName, activeSupplierId, effectiveBatchCode, isDiagnosticKit]);
 
   // Live Scannable 2D/3D Barcode SVG URL synced with current variant state
   const barcodeSupplier = getConcreteSupplierId(activeSupplierId, supplierName);
   const barcodeImageUrl = useMemo(() => {
     const qs = new URLSearchParams();
-    const currentDose = (selectedStrength?.name || selectedStrengthId || '10 mg').replace(/_/g, ' ');
+    const currentDose = (selectedStrength?.name || selectedStrengthId || (isDiagnosticKit ? '1 Analytical Profile' : '10 mg')).replace(/_/g, ' ');
     qs.set('dose', currentDose);
-    const currentFormat = activeFormat?.id || activeFormatId || 'vial';
+    const currentFormat = isDiagnosticKit
+      ? (activeFormat?.id && !activeFormat.id.includes('vial') ? activeFormat.id : 'diagnostic_kit')
+      : (activeFormat?.id || activeFormatId || 'vial');
     qs.set('presentation', currentFormat);
     qs.set('supplier', barcodeSupplier);
     qs.set('batch', effectiveBatchCode);
-    qs.set('vialCode', effectiveBatchCode);
+    if (isDiagnosticKit) {
+      qs.set('kitCode', effectiveBatchCode);
+    } else {
+      qs.set('vialCode', effectiveBatchCode);
+    }
     if (dynamicPublicUrl) qs.set('url', dynamicPublicUrl);
     return `/api/barcode/${encodeURIComponent(slug)}?${qs.toString()}`;
-  }, [slug, barcodeSupplier, selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, effectiveBatchCode, dynamicPublicUrl]);
+  }, [slug, barcodeSupplier, selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, effectiveBatchCode, dynamicPublicUrl, isDiagnosticKit]);
 
   // Fetch SVG inline — <img> cannot render nested <svg> (QR inside label)
   useEffect(() => {

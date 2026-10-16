@@ -249,39 +249,165 @@ export function getProductClinicalRecommendations(product = {}, slug = '', lang 
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // 5. DIAGNOSTIC TESTS (TELETEST HTMA, OMEGA, CELIAC, METABOLIZER)
+  // 5. DIAGNOSTIC TESTS (SPECIFIC CLINICAL PROTOCOLS PER TEST TYPE)
   // ─────────────────────────────────────────────────────────────────────────
-  if (cat.includes('diagnostic') || type.includes('diagnostic') || pSlug.includes('teletest') || pSlug.includes('bloodo')) {
+  
+  // 5A. Omega Fatty Acids & Cellular Inflammation (TeleTest Test Omega / Bloodo Omega)
+  if (pSlug.includes('omega') || pName.includes('omega') || pSlug.includes('lipid')) {
     return [
-      {
-        id: 'colway-colvita',
-        slug: 'colway-colvita',
-        name: 'Colvita Tropocolágeno Nativo Liofilizado',
-        category: isEs ? 'Nutracéutico Sistémico de Reparación' : 'Systemic Tissue Repair Nutricosmetic',
-        presentation: isEs ? 'Cápsulas Orales (60 / 120 cápsulas)' : 'Oral Capsules (60 / 120 capsules)',
-        image: '/images/products/colway/colvita.png',
-        url: '/p/colway-colvita',
-        synergyBadge: isEs ? 'Repleción Estructural Post-Diagnóstico' : 'Post-Diagnostic Structural Repletion',
-        synergyBadgeColor: '#0284c7',
-        clinicalRationale: isEs
-          ? 'Ante hallazgos de toxicidad por metales, disbiosis o estrés oxidativo en pruebas diagnósticas, Colvita provee aminoácidos estructurales para reparar la barrera mucosal intestinal y los tejidos articulares.'
-          : 'Following diagnostic detection of heavy metal toxicity, dysbiosis, or oxidative imbalance, Colvita supplies undamaged structural amino acids to restore gut barrier and connective integrity.',
-        role: isEs ? 'Repleción Estructural Nutracéutica' : 'Nutraceutical Structural Repletion'
-      },
       {
         id: 'bpc-157',
         slug: 'bpc-157',
         name: 'BPC-157 (Body Protection Compound-157)',
-        category: isEs ? 'Péptido Terapéutico Dirigido' : 'Targeted Therapeutic Peptide',
-        presentation: isEs ? 'Vial Liofilizado (5 mg / 10 mg)' : 'Lyophilized Vial (5 mg / 10 mg)',
+        category: 'Endothelial Cytoprotection & Anti-Inflammatory Axis',
+        presentation: 'Lyophilized Sterile Vial (5 mg / 10 mg)',
         image: '/images/products/lotusland/bpc-157.png',
         url: '/p/bpc-157',
-        synergyBadge: isEs ? 'Restauración de Barrera & Microinflamación' : 'Barrier Restoration & Anti-Inflammatory',
+        synergyBadge: 'Microvascular & AA/EPA Resolution',
         synergyBadgeColor: '#16a34a',
-        clinicalRationale: isEs
-          ? 'Péptido de referencia para restablecer uniones estrechas (zonulina/claudina) en mucosa intestinal o tejidos vasculares tras la detección de marcadores inflamatorios o genotipos autoinmunes.'
-          : 'Gold-standard clinical peptide to restore tight junctions and resolve subclinical endothelial or mucosal inflammation identified by diagnostic testing.',
-        role: isEs ? 'Terapia Dirigida por Biomarcadores' : 'Biomarker-Directed Therapy'
+        clinicalRationale: 'When the erythrocyte AA/EPA ratio is elevated (>10:1), excessive arachidonic acid metabolites drive systemic eicosanoid cascades and endothelial hyperpermeability. BPC-157 directly stabilizes microvascular tight junctions, promotes endothelial nitric oxide synthase (eNOS) activation, down-regulates pro-inflammatory cytokines (TNF-α, IL-6), and resolves subclinical tissue inflammation in synergy with membrane fatty acid rebalancing.',
+        role: 'Endothelial Cytoprotection'
+      },
+      {
+        id: 'nad-plus',
+        slug: 'nad-plus',
+        name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
+        category: 'Cellular Bioenergetics & Mitochondrial Beta-Oxidation',
+        presentation: 'Lyophilized Sterile Vial (500 mg)',
+        image: '/assets/vials/nadplus.png',
+        url: '/p/nad-plus',
+        synergyBadge: 'Mitochondrial Lipid Beta-Oxidation',
+        synergyBadgeColor: '#0284c7',
+        clinicalRationale: 'Cellular desaturation of polyunsaturated fatty acids and mitochondrial beta-oxidation of free fatty acids depend directly on the intracellular NAD+/NADH redox balance. Restoring NAD+ pool reserves activates sirtuin deacetylases (SIRT1/SIRT3), reduces membrane lipid peroxidation, and accelerates cardioprotective membrane fluidity recovery.',
+        role: 'Mitochondrial Metabolic Optimization'
+      }
+    ];
+  }
+
+  // 5B. HTMA Hair Tissue Mineral & Heavy Metal Toxicology (TeleTest HTMA)
+  if (pSlug.includes('htma') || pSlug.includes('mineral') || pName.includes('mineral') || pName.includes('htma') || pSlug.includes('cabello')) {
+    return [
+      {
+        id: 'bpc-157',
+        slug: 'bpc-157',
+        name: 'BPC-157 (Body Protection Compound-157)',
+        category: 'Intestinal Mucosal Barrier Protection',
+        presentation: 'Lyophilized Sterile Vial (5 mg / 10 mg)',
+        image: '/images/products/lotusland/bpc-157.png',
+        url: '/p/bpc-157',
+        synergyBadge: 'Heavy Metal Mucosal Defense',
+        synergyBadgeColor: '#16a34a',
+        clinicalRationale: 'When hair mineral analysis detects neurotoxic heavy metals (Lead, Mercury, Cadmium, Arsenic) or altered Na/K adrenal stress ratios, mucosal tight junctions are compromised. BPC-157 up-regulates claudin and occludin expression in the intestinal lamina propria, preventing toxic metal trans-epithelial migration and systemic inflammatory leakage.',
+        role: 'Mucosal Barrier Defense'
+      },
+      {
+        id: 'colway-colvita',
+        slug: 'colway-colvita',
+        name: 'Colvita Native Freeze-Dried Tropocollagen',
+        category: 'Extracellular Matrix Repair Substrate',
+        presentation: 'Oral Capsules (60 / 120 capsules)',
+        image: '/images/products/colway/colvita.png',
+        url: '/p/colway-colvita',
+        synergyBadge: 'Post-Toxic Connective Repletion',
+        synergyBadgeColor: '#0284c7',
+        clinicalRationale: 'Chronic heavy metal accumulation and endocrine exhaustion degrade systemic extracellular matrices and deplete trace minerals. Undenatured native tropocollagen combined with marine algae trace elements supplies bioactive triple-helix amino acid substrates (glycine, proline, hydroxyproline) to restore structural connective tissue and joint matrix integrity.',
+        role: 'Nutraceutical Connective Repletion'
+      }
+    ];
+  }
+
+  // 5C. HLA Immunogenetics & Autoimmunity (TeleTest HLA / Celiac)
+  if (pSlug.includes('hla') || pSlug.includes('celiac') || pName.includes('hla') || pName.includes('celiac') || pSlug.includes('autoinmunidad')) {
+    return [
+      {
+        id: 'bpc-157',
+        slug: 'bpc-157',
+        name: 'BPC-157 (Body Protection Compound-157)',
+        category: 'Intestinal Mucosal & Tight Junction Restoration',
+        presentation: 'Lyophilized Sterile Vial (5 mg / 10 mg)',
+        image: '/images/products/lotusland/bpc-157.png',
+        url: '/p/bpc-157',
+        synergyBadge: 'Autoimmune Barrier Restoration',
+        synergyBadgeColor: '#16a34a',
+        clinicalRationale: 'In individuals carrying HLA-DQ2/DQ8 or HLA-B27/DRB1 immunogenetic risk alleles, intestinal hyperpermeability triggers systemic antigen translocation. BPC-157 reverses zonulin-mediated junctional breakdown, stabilizes gut mucosal integrity, and dampens autoimmune antibody-mediated inflammatory cascades.',
+        role: 'Tight Junction Restoration'
+      },
+      {
+        id: 'kpv',
+        slug: 'kpv',
+        name: 'KPV (Lysine-Proline-Valine)',
+        category: 'Targeted Mucosal Anti-Inflammatory Tripeptide',
+        presentation: 'Lyophilized Sterile Vial (5 mg)',
+        image: '/assets/vials/kpv.png',
+        url: '/p/kpv',
+        synergyBadge: 'Mucosal NF-κB Pathway Down-Regulation',
+        synergyBadgeColor: '#d97706',
+        clinicalRationale: 'Biomimetic alpha-MSH tripeptide that directly blocks nuclear translocation of NF-κB in intestinal epithelial cells. Attenuates interleukin-8 (IL-8) and TNF-α synthesis in genetically susceptible autoimmune and mucosal inflammatory phenotypes.',
+        role: 'Mucosal NF-κB Down-Regulation'
+      }
+    ];
+  }
+
+  // 5D. Pharmacogenetics & Hepatic Biotransformation (TeleTest Saliva Metabolizer)
+  if (pSlug.includes('detox') || pSlug.includes('metabolizer') || pName.includes('metabolizer') || pName.includes('farmacogenetica')) {
+    return [
+      {
+        id: 'bpc-157',
+        slug: 'bpc-157',
+        name: 'BPC-157 (Body Protection Compound-157)',
+        category: 'Hepatic Cytoprotection & Biotransformation Support',
+        presentation: 'Lyophilized Sterile Vial (5 mg / 10 mg)',
+        image: '/images/products/lotusland/bpc-157.png',
+        url: '/p/bpc-157',
+        synergyBadge: 'Hepatic Microvascular Cytoprotection',
+        synergyBadgeColor: '#16a34a',
+        clinicalRationale: 'When pharmacogenetic profiling reveals slow or intermediate CYP450 or Phase II biotransformation phenotypes, reactive xenobiotic intermediates pose significant hepatic risk. BPC-157 exerts profound hepatoprotective and endothelial-stabilizing activity, mitigating drug-induced liver injury and promoting liver tissue regeneration.',
+        role: 'Hepatoprotective Cytoprotection'
+      },
+      {
+        id: 'nad-plus',
+        slug: 'nad-plus',
+        name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
+        category: 'Phase I & II Enzymatic Redox Cofactor',
+        presentation: 'Lyophilized Sterile Vial (500 mg)',
+        image: '/assets/vials/nadplus.png',
+        url: '/p/nad-plus',
+        synergyBadge: 'Enzymatic Clearance Redox Support',
+        synergyBadgeColor: '#0284c7',
+        clinicalRationale: 'Hepatic Phase I cytochrome P450 monooxygenases and Phase II conjugation pathways rely on cellular pyridine nucleotides. Supplying pure NAD+ restores bioenergetic mitochondrial reserves, ensuring efficient metabolic clearance of pharmaceutical and environmental compounds.',
+        role: 'Biotransformation Redox Cofactor'
+      }
+    ];
+  }
+
+  // General Diagnostic fallback
+  if (cat.includes('diagnostic') || type.includes('diagnostic') || pSlug.includes('teletest') || pSlug.includes('bloodo')) {
+    return [
+      {
+        id: 'bpc-157',
+        slug: 'bpc-157',
+        name: 'BPC-157 (Body Protection Compound-157)',
+        category: 'Targeted Therapeutic Cytoprotection',
+        presentation: 'Lyophilized Sterile Vial (5 mg / 10 mg)',
+        image: '/images/products/lotusland/bpc-157.png',
+        url: '/p/bpc-157',
+        synergyBadge: 'Biomarker-Directed Cytoprotection',
+        synergyBadgeColor: '#16a34a',
+        clinicalRationale: 'Gold-standard clinical peptide to restore cellular junction integrity, modulate microvascular endothelial tone, and resolve subclinical systemic inflammation identified by diagnostic biomarker monitoring.',
+        role: 'Biomarker-Directed Therapy'
+      },
+      {
+        id: 'colway-colvita',
+        slug: 'colway-colvita',
+        name: 'Colvita Native Freeze-Dried Tropocollagen',
+        category: 'Systemic Connective Matrix Substrate',
+        presentation: 'Oral Capsules (60 / 120 capsules)',
+        image: '/images/products/colway/colvita.png',
+        url: '/p/colway-colvita',
+        synergyBadge: 'Post-Diagnostic Structural Repletion',
+        synergyBadgeColor: '#0284c7',
+        clinicalRationale: 'Supplies undamaged, biologically active native marine tropocollagen triple-helix amino acids to replenish the extracellular matrix and support tissue regeneration following clinical diagnostic evaluation.',
+        role: 'Nutraceutical Structural Repletion'
       }
     ];
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Copy, Check, Printer, Share2, ShieldCheck, FileText, FlaskConical, ExternalLink, QrCode, X } from '@/lib/icons';
+import { Copy, Check, Printer, Share2, ShieldCheck, FileText, FlaskConical, ExternalLink, QrCode, X, Microscope } from '@/lib/icons';
 import { QRCodeSVG } from 'qrcode.react';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
@@ -51,6 +51,24 @@ export default function PeptideMonographHeader({
     cleanScientific = '';
   }
 
+  // Detect if product is a Diagnostic Test Kit
+  const isDiagnostic = Boolean(
+    product?.category === 'diagnostic' ||
+    product?.category === 'diagnostic_test' ||
+    product?.category === 'diagnostic_tests' ||
+    product?.category?.toLowerCase().includes('diagnostic') ||
+    product?.type?.toLowerCase().includes('diagnostic') ||
+    product?.supplierId?.toLowerCase().includes('teletest') ||
+    product?.supplierName?.toLowerCase().includes('teletest') ||
+    product?.supplierId?.toLowerCase().includes('bloodo') ||
+    product?.sampleType ||
+    slug?.toLowerCase().includes('omega') ||
+    slug?.toLowerCase().includes('htma') ||
+    slug?.toLowerCase().includes('metabolizer') ||
+    slug?.toLowerCase().includes('teletest') ||
+    primaryName.toLowerCase().includes('test omega')
+  );
+
   // FDA reference formulation details (Vyleesi)
   const hasFdaRef = isPt141 || product.hasFdaReference;
   const fdaRefBrand = product.referenceBrand || 'Vyleesi® (bremelanotide)';
@@ -68,11 +86,28 @@ export default function PeptideMonographHeader({
   const uniqueVariantDoses = [...new Set(variantDoses)];
 
   const strengthsList = (sortedStrengths || []).map(s => s.name || s.id).filter(Boolean);
-  const strengthsArray = strengthsList.length > 0 
+  const rawStrengthsArray = strengthsList.length > 0 
     ? strengthsList 
     : uniqueVariantDoses.length > 0 
       ? uniqueVariantDoses 
       : (product.availableStrengths ? String(product.availableStrengths).split('|').map(s => s.trim()).filter(Boolean) : ['Standard Formulation']);
+  
+  // Clean strengths array to English
+  const strengthsArray = rawStrengthsArray.map(str => {
+    if (isDiagnostic || /perfil/i.test(str)) {
+      if (/omega|l[ií]pido/i.test(str) || slug?.toLowerCase().includes('omega') || primaryName.toLowerCase().includes('omega')) {
+        return '1 Complete 24 Fatty Acid Analytical Profile + Evaluation';
+      }
+      if (/htma|mineral/i.test(str)) {
+        return '1 Complete 33 Mineral & Toxic Element Profile';
+      }
+      if (/hla|auto/i.test(str)) {
+        return '1 High-Resolution HLA Class I & II Screen';
+      }
+      return '1 Complete Clinical Analytical Profile';
+    }
+    return str;
+  });
   const availableStrengths = strengthsArray.join(' | ');
 
   // Dynamic Presentation Format Resolution
@@ -91,31 +126,35 @@ export default function PeptideMonographHeader({
   const isPen = rawFormat.includes('pen') || rawFormat.includes('cartridge');
   const isOral = rawFormat.includes('capsule') || rawFormat.includes('tablet') || rawFormat.includes('oral');
 
-  const presentation = isNasalSpray 
-    ? 'Nasal Spray (Intranasal)' 
-    : isSublingual 
-      ? 'Sublingual Dropper' 
-      : isPen 
-        ? 'Multi-Dose Pen (SubQ)' 
-        : isOral 
-          ? 'Oral Capsules' 
-          : (product.presentationFormat || product.presentation || 'Lyophilized sterile vial');
+  const presentation = isDiagnostic
+    ? (product.sampleType ? `Specimen Matrix: ${product.sampleType}` : 'Diagnostic Specimen Collection Kit')
+    : isNasalSpray 
+      ? 'Nasal Spray (Intranasal)' 
+      : isSublingual 
+        ? 'Sublingual Dropper' 
+        : isPen 
+          ? 'Multi-Dose Pen (SubQ)' 
+          : isOral 
+            ? 'Oral Capsules' 
+            : (product.presentationFormat || product.presentation || 'Lyophilized sterile vial');
 
-  const verifiedPurity = product.purity || '≥99% (99.4% HPLC verified)';
-  const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || (product.variants?.[0]?.supplier) || 'Lotusland';
+  const verifiedPurity = isDiagnostic
+    ? 'ISO 15189 · CE-IVD (CV < 4.5% GC-FID)'
+    : (product.purity || '≥99% (99.4% HPLC verified)');
+  const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || (product.variants?.[0]?.supplier) || (isDiagnostic ? 'TeleTest Analytika' : 'Lotusland');
   const supplier = formatCommercialSupplierName(rawSupplier);
-  const batchCode = effectiveBatch || product.batchNumber || 'AS-LOT-PT05-2609';
+  const batchCode = effectiveBatch || (product.testCode ? `TEST-TL01-${product.testCode}` : (product.batchNumber || (isDiagnostic ? 'AS-TEL-TL01-2610' : 'AS-LOT-PT05-2609')));
 
   const handleCopySpec = () => {
     triggerHaptic('light');
     const resolvedMonographUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : `https://www.atlashealth-services.com/p/${slug}`);
     const text = [
       `Product: ${primaryName}${cleanScientific ? ` (${cleanScientific})` : ''}`,
-      `Classification: Peptide • Clinical monograph`,
+      `Classification: ${isDiagnostic ? 'Diagnostic Test • Laboratory Monograph' : 'Peptide • Clinical Monograph'}`,
       hasFdaRef ? `FDA Reference Product: ${fdaRefBrand} (Approved ${fdaRefYear})` : null,
       `Available Strengths: ${availableStrengths}`,
       `Presentation: ${presentation}`,
-      `Verified Purity: ${verifiedPurity}`,
+      `Verified Precision / Purity: ${verifiedPurity}`,
       `Supplier / Laboratory: ${supplier}`,
       `Verified Batch: ${batchCode}`,
       `URL: ${resolvedMonographUrl}`
@@ -161,8 +200,8 @@ export default function PeptideMonographHeader({
               color: '#64748b',
               marginBottom: '0.2rem'
             }}>
-              <FlaskConical size={13} color="#003666" />
-              <span>Peptide • Clinical Monograph</span>
+              {isDiagnostic ? <Microscope size={13} color="#003666" /> : <FlaskConical size={13} color="#003666" />}
+              <span>{isDiagnostic ? 'Diagnostic Test • Laboratory Monograph' : 'Peptide • Clinical Monograph'}</span>
             </div>
 
             <h1 style={{
@@ -280,11 +319,13 @@ export default function PeptideMonographHeader({
                 <div className="pds-header-format-select-wrap" style={{ marginTop: '4px' }}>
                   <span style={{ fontSize: '0.9rem', lineHeight: 1, pointerEvents: 'none', position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)' }}>
                     {(() => {
+                      if (isDiagnostic) return '🔬';
                       const af = availableFormats.find(f => f.id === (activeFormat?.id || activeFormat));
                       if (!af) return '🧪';
                       const id = af.id;
                       if (id.includes('spray') || id.includes('nasal')) return '💨';
                       if (id.includes('pen') || id.includes('cartridge')) return '🖊️';
+                      if (id.includes('kit') || id.includes('test')) return '🔬';
                       return '🧪';
                     })()}
                   </span>
@@ -320,7 +361,8 @@ export default function PeptideMonographHeader({
                       const id = fmt.id;
                       const isFmtSpray = id.includes('spray') || id.includes('nasal');
                       const isFmtPen = id.includes('pen') || id.includes('cartridge');
-                      const shortLabel = isFmtSpray ? 'Nasal Spray' : isFmtPen ? 'Pre-filled Pen' : (fmt.name || id);
+                      const isFmtKit = id.includes('kit') || id.includes('test');
+                      const shortLabel = isFmtKit ? 'Collection Kit' : isFmtSpray ? 'Nasal Spray' : isFmtPen ? 'Pre-filled Pen' : (fmt.name || id);
                       return (
                         <option key={id} value={id}>{shortLabel}</option>
                       );

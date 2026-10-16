@@ -50,48 +50,73 @@ export default function PeptideMonographSidebar({
   const batchCode = effectiveBatch || product.batchNumber || 'RP-LOT-RT10-2609';
   const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || 'Lotusland';
   const supplier = formatCommercialSupplierName(rawSupplier);
-  const purityText = product.purity || '≥99.2% (HPLC Verified)';
+  // Detect if product is a diagnostic test
+  const isDiagnostic = Boolean(
+    product?.category === 'diagnostic' ||
+    product?.category === 'diagnostic_test' ||
+    product?.category === 'diagnostic_tests' ||
+    product?.category?.toLowerCase().includes('diagnostic') ||
+    product?.type?.toLowerCase().includes('diagnostic') ||
+    product?.supplierId?.toLowerCase().includes('teletest') ||
+    product?.supplierName?.toLowerCase().includes('teletest') ||
+    product?.supplierId?.toLowerCase().includes('bloodo') ||
+    product?.sampleType ||
+    cleanSlug.includes('omega') ||
+    cleanSlug.includes('htma') ||
+    cleanSlug.includes('metabolizer') ||
+    (product?.name || '').toLowerCase().includes('test omega') ||
+    (product?.canonicalName || '').toLowerCase().includes('test omega')
+  );
 
-  // Active strength & presentation label
-  const strengthLabel = selectedStrength?.name || selectedStrength?.id || (typeof selectedStrength === 'string' ? selectedStrength : '10 mg');
-  const formatLabel = activeFormat?.name || activeFormat?.id || product.presentation || 'Lyophilized SubQ Vial';
+  // Active strength & presentation label in English
+  const rawStrength = selectedStrength?.name || selectedStrength?.id || (typeof selectedStrength === 'string' ? selectedStrength : '');
+  const cleanStrength = rawStrength && !rawStrength.toLowerCase().includes('perfil') 
+    ? rawStrength 
+    : '1 Complete 24 Fatty Acid Analytical Profile + Evaluation';
+  const strengthLabel = isDiagnostic ? cleanStrength : (rawStrength || 'Standard Formulation');
+  const formatLabel = isDiagnostic 
+    ? (product.sampleType ? `Matrix: ${product.sampleType}` : 'Diagnostic Specimen Collection Kit') 
+    : (activeFormat?.name || activeFormat?.id || product.presentation || 'Lyophilized SubQ Vial');
+  const purityText = isDiagnostic 
+    ? 'ISO 15189 · CE-IVD (CV < 4.5%)' 
+    : (product.purity || '≥99.2% (HPLC Verified)');
 
   const tabs = [
     {
       id: 'overview',
       label: 'Overview',
-      subtitle: 'Clinical identity & specifications',
+      subtitle: isDiagnostic ? 'Diagnostic identity & biomarkers' : 'Clinical identity & specifications',
       icon: LayoutTemplate
     },
     {
       id: 'protocols',
-      label: 'Protocols',
-      subtitle: 'Titration & clinical planning',
+      label: isDiagnostic ? 'Clinical Protocols' : 'Protocols',
+      subtitle: isDiagnostic ? 'Action thresholds & guidelines' : 'Titration & clinical planning',
       icon: FlaskConical,
       count: protocolCount
     },
     {
       id: 'preparation',
-      label: 'Preparation & Admin',
-      subtitle: 'Reconstitution & U-100 syringe',
+      label: isDiagnostic ? 'Specimen Collection' : 'Preparation & Admin',
+      subtitle: isDiagnostic ? 'Pre-analytical prep & packaging' : 'Reconstitution & U-100 syringe',
       icon: Droplet
     },
     {
       id: 'quality',
-      label: 'Quality & Batch',
-      subtitle: 'HPLC purity & analytical CoA',
+      label: isDiagnostic ? 'Quality & Lab' : 'Quality & Batch',
+      subtitle: isDiagnostic ? 'GC-FID validation & ISO 15189 CoA' : 'HPLC purity & analytical CoA',
       icon: ShieldCheck
     },
     {
       id: 'references',
       label: 'References',
-      subtitle: 'FDA dossiers & PubMed citations',
+      subtitle: isDiagnostic ? 'PubMed lipidology citations' : 'FDA dossiers & PubMed citations',
       icon: BookOpen
     },
     {
       id: 'synergy',
       label: 'Clinical Synergy',
-      subtitle: 'Biochemical pairings & cross-sell',
+      subtitle: isDiagnostic ? 'Targeted therapeutic pairings' : 'Biochemical pairings & cross-sell',
       icon: Sparkles
     }
   ];
@@ -445,7 +470,7 @@ export default function PeptideMonographSidebar({
             <span>Print Clinical Label (300 DPI)</span>
           </div>
           <span style={{ fontSize: '0.62rem', color: '#64748b', background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px' }}>
-            {formatLabel?.toLowerCase().includes('capsule') ? 'Capsule' : formatLabel?.toLowerCase().includes('pen') ? 'Pen' : 'Vial'}
+            {isDiagnostic ? 'Specimen Kit' : formatLabel?.toLowerCase().includes('capsule') ? 'Capsule' : formatLabel?.toLowerCase().includes('pen') ? 'Pen' : 'Vial'}
           </span>
         </button>
 

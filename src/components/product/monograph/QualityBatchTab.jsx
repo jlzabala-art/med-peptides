@@ -27,19 +27,38 @@ export default function QualityBatchTab({
 }) {
   const [copiedBatch, setCopiedBatch] = useState(false);
 
-  const batchId = effectiveBatch || product.batchNumber || 'AS-LOT-PT05-2609';
-  const purity = product.purityPercentage || '99.4%';
-  const identity = 'LC-MS Confirmed (Single Quadrupole & ESI-TOF)';
-  const molecularMass = product.molecularWeight || '1025.16 Da';
-  const molecularFormula = product.molecularFormula || 'C50H68N14O10';
-  const casNumber = product.casNumber || product.cas || '189691-06-3';
-  const labName = product.supplierName || 'Lotusland Analytical Services';
+  const isDiagnostic = Boolean(
+    product?.category === 'diagnostic' ||
+    product?.category === 'diagnostic_test' ||
+    product?.category === 'diagnostic_tests' ||
+    product?.category?.toLowerCase().includes('diagnostic') ||
+    product?.type?.toLowerCase().includes('diagnostic') ||
+    product?.format === 'diagnostic_kit' ||
+    product?.presentation === 'diagnostic_kit' ||
+    product?.sampleType ||
+    product?.supplierId?.toLowerCase().includes('teletest') ||
+    product?.supplierName?.toLowerCase().includes('teletest') ||
+    product?.supplierId?.toLowerCase().includes('bloodo') ||
+    slug?.toLowerCase().includes('omega') ||
+    slug?.toLowerCase().includes('htma') ||
+    slug?.toLowerCase().includes('metabolizer') ||
+    slug?.toLowerCase().includes('teletest') ||
+    (product?.name || '').toLowerCase().includes('omega')
+  );
+
+  const batchId = effectiveBatch || product.batchNumber || (isDiagnostic ? 'AS-TEL-TL01-2610' : 'AS-LOT-PT05-2609');
+  const purity = isDiagnostic ? 'CV < 4.5% (CE-IVD)' : (product.purityPercentage || '99.4%');
+  const identity = isDiagnostic ? 'GC-FID / FAME 24 Fatty Acid Spectrum' : 'LC-MS Confirmed (Single Quadrupole & ESI-TOF)';
+  const molecularMass = isDiagnostic ? 'ISO 15189:2022' : (product.molecularWeight || '1025.16 Da');
+  const molecularFormula = isDiagnostic ? 'NIST SRM 1950' : (product.molecularFormula || 'C50H68N14O10');
+  const casNumber = isDiagnostic ? 'CE-IVDR 2017/746' : (product.casNumber || product.cas || '189691-06-3');
+  const labName = product.supplierName || (isDiagnostic ? 'TeleTest Analytika S.A.' : 'Lotusland Analytical Services');
 
   const handleCopyBatch = () => {
     triggerHaptic('light');
     navigator.clipboard?.writeText(batchId);
     setCopiedBatch(true);
-    toast.success('Batch number copied ✓');
+    toast.success(isDiagnostic ? 'Kit lot number copied ✓' : 'Batch number copied ✓');
     setTimeout(() => setCopiedBatch(false), 2000);
   };
 
@@ -47,10 +66,14 @@ export default function QualityBatchTab({
     triggerHaptic('light');
     const coaUrl = `/api/coa/${encodeURIComponent(slug)}?batch=${encodeURIComponent(batchId)}&download=1`;
     window.open(coaUrl, '_blank');
-    toast.success('Downloading Certificate of Analysis (CoA) PDF...');
+    toast.success(isDiagnostic ? 'Downloading Laboratory Certificate of Analysis (CoA) PDF...' : 'Downloading Certificate of Analysis (CoA) PDF...');
   };
 
-  const batchHistory = [
+  const batchHistory = isDiagnostic ? [
+    { batch: 'AS-TEL-TL01-2610', date: 'October 2026', purity: 'ISO 15189 Validated', status: 'Active Release' },
+    { batch: 'AS-TEL-TL01-2607', date: 'July 2026', purity: 'ISO 15189 Validated', status: 'Archived' },
+    { batch: 'AS-TEL-TL01-2604', date: 'April 2026', purity: 'ISO 15189 Validated', status: 'Archived' }
+  ] : [
     { batch: 'AS-LOT-PT05-2609', date: 'September 2026', purity: '99.4%', status: 'Active Release' },
     { batch: 'AS-LOT-PT05-2606', date: 'June 2026', purity: '99.6%', status: 'Archived' },
     { batch: 'AS-LOT-PT05-2603', date: 'March 2026', purity: '99.3%', status: 'Archived' }
@@ -196,56 +219,67 @@ export default function QualityBatchTab({
             </div>
           </div>
 
-          {/* Chromatographic Purity */}
+          {/* Parameter 2: Purity / Precision */}
           <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '12px' }}>
             <span style={{ fontSize: '0.68rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>
-              RP-HPLC Purity
+              {isDiagnostic ? 'Analytical Precision' : 'RP-HPLC Purity'}
             </span>
             <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#15803d', marginTop: '2px' }}>
               {purity}
             </div>
-            <span style={{ fontSize: '0.68rem', color: '#166534' }}>USP & EP Specification: &ge; 98.0%</span>
+            <span style={{ fontSize: '0.68rem', color: '#166534' }}>
+              {isDiagnostic ? 'ISO 15189 / CE-IVD Specification: CV < 5.0%' : 'USP & EP Specification: ≥ 98.0%'}
+            </span>
           </div>
 
-          {/* Mass Spectrometry Identity */}
+          {/* Parameter 3: Identity / Methodology */}
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
             <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              Identity (LC-MS)
+              {isDiagnostic ? 'Analytical Methodology' : 'Identity (LC-MS)'}
             </span>
             <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
-              Confirmed
+              {isDiagnostic ? 'Validated Spectrum' : 'Confirmed'}
             </div>
             <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{identity}</span>
           </div>
 
-          {/* Molecular Mass */}
+          {/* Parameter 4: Accreditation / Molecular Mass */}
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
             <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              Molecular Mass (MW)
+              {isDiagnostic ? 'Laboratory Accreditation' : 'Molecular Mass (MW)'}
             </span>
             <div style={{ fontSize: '1.05rem', fontWeight: 850, color: '#0f172a', marginTop: '2px', fontFamily: 'monospace' }}>
               {molecularMass}
             </div>
+            {isDiagnostic && (
+              <span style={{ fontSize: '0.68rem', color: '#64748b' }}>Medical Testing Laboratory Certified</span>
+            )}
           </div>
 
-          {/* Chemical Formula */}
+          {/* Parameter 5: Calibration / Formula */}
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
             <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              Molecular Formula
+              {isDiagnostic ? 'Traceability Standard' : 'Molecular Formula'}
             </span>
             <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0284c7', marginTop: '2px', fontFamily: 'monospace' }}>
               {molecularFormula}
             </div>
+            {isDiagnostic && (
+              <span style={{ fontSize: '0.68rem', color: '#64748b' }}>NIST Traceable Reference Material</span>
+            )}
           </div>
 
-          {/* CAS Registry Number */}
+          {/* Parameter 6: Regulatory / CAS */}
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
             <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              CAS Number
+              {isDiagnostic ? 'Regulatory Conformity' : 'CAS Number'}
             </span>
             <div style={{ fontSize: '1.05rem', fontWeight: 850, color: '#0f172a', marginTop: '2px', fontFamily: 'monospace' }}>
               {casNumber}
             </div>
+            {isDiagnostic && (
+              <span style={{ fontSize: '0.68rem', color: '#64748b' }}>In Vitro Diagnostic Medical Device</span>
+            )}
           </div>
         </div>
 

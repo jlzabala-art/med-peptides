@@ -22,10 +22,11 @@ export const revalidate = 0;
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
 import { resolveSocialImage, resolveSocialContent } from '@/utils/socialImageResolver';
+import { KNOWN_DOCTORS_DIRECTORY } from '@/services/doctorDirectoryService';
 
 /**
  * Dynamic OpenGraph & Twitter Metadata for WhatsApp / Telegram / Social Previews.
- * Resolves exact compound/diagnostic test, recipient personalization, and related image.
+ * Resolves exact compound, doctor practice portal, prescription, and related image.
  */
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
@@ -34,32 +35,79 @@ export async function generateMetadata({ params }) {
   let title = 'Clinical Technical Monograph & Protocol Reference';
   let description = 'Verified analytical reference, standardized dosing specifications, and clinical administration guidelines. Confidential medical reference.';
   let previewImage = `${BASE_URL}/og-catalog.png`;
+  let siteName = 'Atlas Health Services';
+  let ogType = 'article';
 
   if (adminDb && code) {
     try {
       const snap = await adminDb.collection('datasheet_short_links').doc(code).get();
       if (snap.exists) {
         const linkData = snap.data();
-        const slug = linkData.slug || linkData.variant?.productId || '';
-        let productData = null;
+        const targetUrl = linkData.targetUrl || '';
+        const isDoctorLink = targetUrl.includes('/dr/') || targetUrl.includes('/doctor/') || linkData.assetType === 'doctor_portal' || Boolean(linkData.doctorName);
+        const isRxLink = targetUrl.includes('/rx/') || linkData.assetType === 'prescription';
 
-        if (slug) {
-          const prodSnap = await adminDb.collection('products').doc(slug).get().catch(() => null);
-          if (prodSnap?.exists) {
-            productData = { id: prodSnap.id, ...prodSnap.data() };
+        if (isDoctorLink) {
+          ogType = 'profile';
+          let doctorName = linkData.doctorName || '';
+          let clinic = linkData.clinicName || linkData.clinic || '';
+          let specialty = linkData.specialty || '';
+          const doctorSlugMatch = targetUrl.match(/\/dr\/([^/?#]+)/);
+          const cleanSlug = doctorSlugMatch ? decodeURIComponent(doctorSlugMatch[1]).trim().toLowerCase() : '';
+
+          if ((!doctorName || !clinic) && cleanSlug) {
+            const known = KNOWN_DOCTORS_DIRECTORY.find(d => {
+              const s = cleanSlug.replace(/^dr[-.]?/, '');
+              const idMatch = d.id.toLowerCase() === cleanSlug || d.id.toLowerCase().replace(/^dr[-.]?/, '') === s;
+              const nameSlug = (d.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+              const cleanNoHyphens = cleanSlug.replace(/[^a-z0-9]/g, '');
+              const nameMatch = nameSlug.includes(cleanNoHyphens) || cleanNoHyphens.includes(nameSlug.replace('dr', ''));
+              const aliasMatch = (d.aliases || []).some(a => a.toLowerCase() === cleanSlug || a.toLowerCase().replace(/^dr[-.]?/, '') === s);
+              return idMatch || nameMatch || aliasMatch;
+            });
+            if (known) {
+              doctorName = doctorName || known.name;
+              clinic = clinic || known.clinic || known.clinicName || '';
+              specialty = specialty || known.specialty || '';
+            }
           }
+
+          title = linkData.title || (doctorName ? `${doctorName} · Clinical Practice Portal` : 'Physician Clinical Practice Portal');
+          description = linkData.description || (doctorName
+            ? `Official digital clinical prescription & medical portal for ${doctorName}${specialty ? ` (${specialty}${clinic ? ` at ${clinic}` : ''})` : clinic ? ` (${clinic})` : ''}. View prescribed therapies, compounding formulations, and patient care dossiers.`
+            : 'Official digital clinical practice portal. View personalized treatments, formulations, and patient care dossiers.');
+          previewImage = linkData.clinicLogo || linkData.logoUrl || `${BASE_URL}/og-card.png`;
+          siteName = doctorName ? `${doctorName} · Practice Portal` : 'Atlas Health Platform';
+        } else if (isRxLink) {
+          const rxCode = targetUrl.match(/\/rx\/([^/?#]+)/)?.[1] || code;
+          title = `Medical Prescription #${rxCode} · Clinical Treatment Dossier`;
+          description = `Official patient therapy protocol, dosing schedule, and reconstitution guide. Confidential medical reference.`;
+          previewImage = `${BASE_URL}/og-card.png`;
+          siteName = 'Atlas Health Clinical Prescriptions';
+        } else {
+          // Standard product monograph resolution
+          const slug = linkData.slug || linkData.variant?.productId || '';
+          let productData = null;
+
+          if (slug) {
+            const prodSnap = await adminDb.collection('products').doc(slug).get().catch(() => null);
+            if (prodSnap?.exists) {
+              productData = { id: prodSnap.id, ...prodSnap.data() };
+            }
+          }
+
+          const resolved = resolveSocialContent({
+            product: productData,
+            variant: linkData.variant,
+            code,
+            recipient: linkData.recipient
+          });
+
+          title = resolved.title || title;
+          description = resolved.description || description;
+          previewImage = resolveSocialImage(productData || slug, linkData.format || linkData.variant?.format);
+          siteName = 'Clinical Reference Library';
         }
-
-        const resolved = resolveSocialContent({
-          product: productData,
-          variant: linkData.variant,
-          code,
-          recipient: linkData.recipient
-        });
-
-        title = resolved.title || title;
-        description = resolved.description || description;
-        previewImage = resolveSocialImage(productData || slug, linkData.format || linkData.variant?.format);
       }
     } catch (err) {
       console.warn('[d/[code]/generateMetadata] Error resolving short link metadata:', err.message);
@@ -75,8 +123,8 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title,
       description,
-      type: 'article',
-      siteName: 'Clinical Reference Library',
+      type: ogType || 'article',
+      siteName: siteName || 'Atlas Health Services',
       url: `${BASE_URL}/d/${code}`,
       images: [
         {

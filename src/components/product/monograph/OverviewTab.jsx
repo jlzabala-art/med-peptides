@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { ArrowRight, ArrowUpRight, Target, ShieldCheck, Activity, Clock, Syringe, Info, Sparkles, FlaskConical } from '@/lib/icons';
+import { ArrowRight, ArrowUpRight, Target, ShieldCheck, Activity, Clock, Syringe, Info, Sparkles, FlaskConical, Microscope } from '@/lib/icons';
 import DataTable from '@/components/ui/DataTable';
 import { STANDARD_PRESENTATIONS } from './monographCalculationEngine';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
@@ -11,13 +11,14 @@ import { triggerHaptic } from '@/utils/haptics';
  * OverviewTab
  * ─────────────────────────────────────────────────────────────────────────────
  * Section 3: Overview Workspace
- * Answers: "What is this peptide and what presentations are available?"
+ * Answers: "What is this compound / test and what presentations are available?"
  * Components:
  * A. Clinical Identity (Generic, Target/Receptor, Pharmacological summary, FDA reference)
  * B. Available Presentations (Multi-format segmented matrix with Route badging)
  * C. Key Clinical Considerations (Concise; deep literature deferred to References)
  */
 function PresentationStrengthCard({ row, onRowClick }) {
+  const isDiagnostic = row.isDiagnostic || String(row.format || '').toLowerCase().includes('kit') || String(row.format || '').toLowerCase().includes('test');
   const r = String(row.route || row.format || '').toLowerCase();
   const isSpray = r.includes('nasal') || r.includes('spray');
   const isPen = r.includes('pen');
@@ -60,7 +61,7 @@ function PresentationStrengthCard({ row, onRowClick }) {
             padding: '2px 6px',
             borderRadius: '4px'
           }}>
-            {row.format}
+            {isDiagnostic ? '🔬 Collection Kit' : row.format}
           </span>
         </div>
 
@@ -105,7 +106,7 @@ function PresentationStrengthCard({ row, onRowClick }) {
         </div>
       </div>
 
-      {/* Grid Strip: Diluent, Concentration, Route */}
+      {/* Grid Strip */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
@@ -113,17 +114,23 @@ function PresentationStrengthCard({ row, onRowClick }) {
         fontSize: '0.72rem'
       }}>
         <div style={{ background: '#f8fafc', padding: '0.35rem 0.5rem', borderRadius: '4px', border: '1px solid #f1f5f9' }}>
-          <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Diluent / Vehicle</div>
+          <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>
+            {isDiagnostic ? 'Specimen Matrix' : 'Diluent / Vehicle'}
+          </div>
           <div style={{ color: '#0284c7', fontWeight: 700, marginTop: '2px' }}>{row.recommendedDiluent}</div>
         </div>
 
         <div style={{ background: '#f8fafc', padding: '0.35rem 0.5rem', borderRadius: '4px', border: '1px solid #f1f5f9' }}>
-          <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Concentration</div>
+          <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>
+            {isDiagnostic ? 'Methodology' : 'Concentration'}
+          </div>
           <div style={{ color: '#003666', fontWeight: 750, marginTop: '2px' }}>{row.concentrationMgMl}</div>
         </div>
 
         <div style={{ background: '#f8fafc', padding: '0.35rem 0.5rem', borderRadius: '4px', border: '1px solid #f1f5f9' }}>
-          <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Route</div>
+          <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>
+            {isDiagnostic ? 'Lab Turnaround' : 'Route'}
+          </div>
           <div style={{ marginTop: '2px' }}>
             <span style={{
               display: 'inline-flex',
@@ -133,11 +140,11 @@ function PresentationStrengthCard({ row, onRowClick }) {
               borderRadius: '4px',
               fontSize: '0.68rem',
               fontWeight: 750,
-              background: isSpray ? '#fdf4ff' : isPen ? '#eff6ff' : isOral ? '#fffbeb' : '#f0fdf4',
-              color: isSpray ? '#86198f' : isPen ? '#1d4ed8' : isOral ? '#b45309' : '#166534',
-              border: isSpray ? '1px solid #f0abfc' : isPen ? '1px solid #bfdbfe' : isOral ? '1px solid #fde68a' : '1px solid #bbf7d0'
+              background: isDiagnostic ? '#eff6ff' : isSpray ? '#fdf4ff' : isPen ? '#eff6ff' : isOral ? '#fffbeb' : '#f0fdf4',
+              color: isDiagnostic ? '#1d4ed8' : isSpray ? '#86198f' : isPen ? '#1d4ed8' : isOral ? '#b45309' : '#166534',
+              border: isDiagnostic ? '1px solid #bfdbfe' : isSpray ? '1px solid #f0abfc' : isPen ? '1px solid #bfdbfe' : isOral ? '1px solid #fde68a' : '1px solid #bbf7d0'
             }}>
-              {isSpray ? '👃 Intranasal' : isPen ? '💉 SubQ Pen' : isOral ? '💊 Oral Solid' : '🧪 SubQ'}
+              {isDiagnostic ? '🔬 ' + row.route : isSpray ? '👃 Intranasal' : isPen ? '💉 SubQ Pen' : isOral ? '💊 Oral Solid' : '🧪 SubQ'}
             </span>
           </div>
         </div>
@@ -160,62 +167,100 @@ export default function OverviewTab({
   const currentLang = lang || (typeof window !== 'undefined' ? (new URLSearchParams(window?.location?.search || '').get('lang') || localStorage.getItem('atlas_portal_lang')) : 'en') || 'en';
   const resolvedSlug = slug || product.slug || product.canonicalName || product.id || 'pt-141';
   const isPt141 = (product.slug || product.canonicalName || product.name || '').toLowerCase().includes('pt-141') || (product.slug || '').toLowerCase().includes('pt141');
-  const genericName = product.scientificName || product.chemical_name || product.genericName || (isPt141 ? 'Bremelanotide' : (product.canonicalName || product.name || ''));
-  const targetReceptor = product.targetSystem || product.mechanism_of_action || (isPt141 ? 'Central Melanocortin MC3R / MC4R Receptors' : 'Target Receptor / Biomolecular Pathway');
+
+  // Determine dominant format & diagnostic classification
+  const rawFmt = String(activeFormat?.id || activeFormat?.name || product.format || product.presentation || product.variants?.[0]?.format || product.variants?.[0]?.presentation || '').toLowerCase();
+  const slugStr = (product?.canonicalName || product?.name || slug || '').toLowerCase();
+  const isDiagnostic = Boolean(
+    product?.category === 'diagnostic' ||
+    product?.category === 'diagnostic_test' ||
+    product?.category === 'diagnostic_tests' ||
+    product?.category?.toLowerCase().includes('diagnostic') ||
+    product?.type?.toLowerCase().includes('diagnostic') ||
+    product?.format === 'diagnostic_kit' ||
+    product?.presentation === 'diagnostic_kit' ||
+    rawFmt.includes('kit') ||
+    rawFmt.includes('test') ||
+    Boolean(product?.sampleType) ||
+    product?.supplierId?.toLowerCase().includes('teletest') ||
+    product?.supplierName?.toLowerCase().includes('teletest') ||
+    product?.supplierId?.toLowerCase().includes('bloodo') ||
+    slugStr.includes('omega') ||
+    slugStr.includes('htma') ||
+    slugStr.includes('metabolizer') ||
+    slugStr.includes('teletest')
+  );
+
+  const genericName = product.scientificName || product.chemical_name || product.genericName || 
+    (isDiagnostic ? (product.name || product.canonicalName || 'Diagnostic Laboratory Test Panel') : (isPt141 ? 'Bremelanotide' : (product.canonicalName || product.name || '')));
+
+  const targetReceptor = product.targetSystem || product.mechanism_of_action || 
+    (isDiagnostic 
+      ? (product.methodology || 'Analytical Gas Chromatography (GC-FID) / 24 Fatty Acid Biomarker Spectrum')
+      : (isPt141 ? 'Central Melanocortin MC3R / MC4R Receptors' : 'Target Receptor / Biomolecular Pathway'));
+
   const pharmacologicalSummary = product.overview_summary || product.summary || product.description || product.desc || 
-    (isPt141 ? 'Synthetic cyclic heptapeptide analogue of alpha-melanocyte-stimulating hormone (α-MSH). Acts centrally across the blood-brain barrier to stimulate hypothalamic melanocortin receptors (primarily MC3R and MC4R), promoting dopamine release in the medial preoptic area to restore sexual desire and arousal without vascular dependency.' : 'Authoritative pharmaceutical technical profile and clinical reference data for therapeutic peptides.');
+    (isDiagnostic
+      ? 'Clinical laboratory diagnostic kit for comprehensive biomarker quantification and metabolic profiling. Specimen collected via standardized dried blood spot (DBS) or specimen matrix and analyzed under certified ISO 15189 clinical laboratory standards with automated GC-FID/FAME chromatography.'
+      : (isPt141 ? 'Synthetic cyclic heptapeptide analogue of alpha-melanocyte-stimulating hormone (α-MSH). Acts centrally across the blood-brain barrier to stimulate hypothalamic melanocortin receptors (primarily MC3R and MC4R), promoting dopamine release in the medial preoptic area to restore sexual desire and arousal without vascular dependency.' : 'Authoritative pharmaceutical technical profile and clinical reference data for therapeutic peptides.'));
 
   const fdaStatusObj = getFdaPeptideStatus(product.slug || product.canonicalName || product.name || '');
   const rawRef = product.referenceBrand 
     ? `${product.referenceBrand}${product.referenceApprovalYear ? ` (Approved ${product.referenceApprovalYear})` : ''}` 
-    : (fdaStatusObj?.referenceBrand || (isPt141 ? 'Vyleesi® (bremelanotide injection 1.75 mg/0.3 mL, NDA 210583, FDA Approved June 2019)' : null));
+    : (isDiagnostic ? 'CE-IVD In Vitro Diagnostic Medical Device (EU IVDR 2017/746 Compliant) • ISO 15189:2022 Accredited' : (fdaStatusObj?.referenceBrand || (isPt141 ? 'Vyleesi® (bremelanotide injection 1.75 mg/0.3 mL, NDA 210583, FDA Approved June 2019)' : null)));
   const fdaRefProduct = rawRef && String(rawRef).trim().length > 0 ? String(rawRef).trim() : null;
 
-  // Determine dominant format
-  const rawFmt = String(product.format || product.presentation || product.variants?.[0]?.format || '').toLowerCase();
-  const isSpray = rawFmt.includes('spray') || rawFmt.includes('nasal');
-  const isSublingual = rawFmt.includes('sublingual') || rawFmt.includes('drop');
-  const isPen = rawFmt.includes('pen') || rawFmt.includes('cartridge');
+  const isSpray = !isDiagnostic && (rawFmt.includes('spray') || rawFmt.includes('nasal'));
+  const isSublingual = !isDiagnostic && (rawFmt.includes('sublingual') || rawFmt.includes('drop'));
+  const isPen = !isDiagnostic && (rawFmt.includes('pen') || rawFmt.includes('cartridge'));
 
   // Note: product.category is intentionally excluded — it stores type ('peptide'), not a clinical indication.
-  const defaultIndication = isPt141
-    ? 'Hypoactive Sexual Desire Disorder (HSDD) & Non-vascular Erectile Dysfunction'
-    : (product.primaryIndication || product.indication || product.targetSystem || product.clinicalCategory || 'Targeted Physiological & Cellular Optimization');
+  const defaultIndication = isDiagnostic
+    ? (product.primaryIndication || product.indication || 'Comprehensive Fatty Acid Profile (Omega-3/6/9, AA/EPA, DGLA/EPA, Trans-Fatty Acids Index)')
+    : isPt141
+      ? 'Hypoactive Sexual Desire Disorder (HSDD) & Non-vascular Erectile Dysfunction'
+      : (product.primaryIndication || product.indication || product.targetSystem || product.clinicalCategory || 'Targeted Physiological & Cellular Optimization');
 
-  const defaultRoute = isSpray
-    ? 'Intranasal Mucosal (Metered needle-free spray, 1–2 sprays per nostril)'
-    : isSublingual
-      ? 'Sublingual (Drops held under tongue for 60–90 seconds prior to swallowing)'
-      : isPen
-        ? 'Subcutaneous injection via calibrated multi-dose pen (lower abdomen or anterolateral thigh)'
-        : 'Subcutaneous injection (lower abdomen or anterolateral thigh)';
+  const defaultRoute = isDiagnostic
+    ? 'Capillary Blood / Dried Blood Spot (Whatman 903 Collection Card)'
+    : isSpray
+      ? 'Intranasal Mucosal (Metered needle-free spray, 1–2 sprays per nostril)'
+      : isSublingual
+        ? 'Sublingual (Drops held under tongue for 60–90 seconds prior to swallowing)'
+        : isPen
+          ? 'Subcutaneous injection via calibrated multi-dose pen (lower abdomen or anterolateral thigh)'
+          : 'Subcutaneous injection (lower abdomen or anterolateral thigh)';
 
-  const defaultPk = isPt141
-    ? 'Tmax: 45–60 min • Terminal t½: ~2.7 hours • On-demand duration: 8–12 hours'
-    : (product.pharmacokineticsSummary || (product.eliminationHalfLife ? `Elimination t½: ${product.eliminationHalfLife} • Rapid target bioavailability` : 'High bioavailability across mucosal/subcutaneous administration routes'));
+  const defaultPk = isDiagnostic
+    ? 'Analytical Precision: Gas Chromatography GC-FID (CV < 4.5% CE-IVD) • Turnaround: 5–7 Business Days'
+    : isPt141
+      ? 'Tmax: 45–60 min • Terminal t½: ~2.7 hours • On-demand duration: 8–12 hours'
+      : (product.pharmacokineticsSummary || (product.eliminationHalfLife ? `Elimination t½: ${product.eliminationHalfLife} • Rapid target bioavailability` : 'High bioavailability across mucosal/subcutaneous administration routes'));
 
-  const defaultDosing = isPt141
-    ? 'Administer at least 45 minutes prior to anticipated activity (max 1 dose/24h, max 8 doses/month)'
-    : (product.clinicalDosingWindow || (isSpray ? 'Daily morning administration or split protocol as directed by physician' : 'Follow physician clinical protocol and titration guidelines'));
+  const defaultDosing = isDiagnostic
+    ? 'Collect early morning fasting specimen (8–12h water only) prior to therapeutic interventions'
+    : isPt141
+      ? 'Administer at least 45 minutes prior to anticipated activity (max 1 dose/24h, max 8 doses/month)'
+      : (product.clinicalDosingWindow || (isSpray ? 'Daily morning administration or split protocol as directed by physician' : 'Follow physician clinical protocol and titration guidelines'));
 
   const clinicalConsiderations = [
     {
-      label: 'Primary Indication / Axis',
+      label: isDiagnostic ? 'Diagnostic Target / Biomarkers' : 'Primary Indication / Axis',
       value: defaultIndication,
       icon: Target
     },
     {
-      label: 'Administration Route',
+      label: isDiagnostic ? 'Specimen Collection Matrix' : 'Administration Route',
       value: defaultRoute,
-      icon: Syringe
+      icon: isDiagnostic ? Microscope : Syringe
     },
     {
-      label: 'Pharmacokinetics',
+      label: isDiagnostic ? 'Analytical Methodology & Precision' : 'Pharmacokinetics',
       value: defaultPk,
       icon: Clock
     },
     {
-      label: 'Clinical Dosing Window',
+      label: isDiagnostic ? 'Patient Preparation & Fasting' : 'Clinical Dosing Window',
       value: defaultDosing,
       icon: Activity
     }
@@ -235,166 +280,280 @@ export default function OverviewTab({
     }
   };
 
-  const presentationColumns = [
-    {
-      header: 'Strength',
-      field: 'strengthMg',
-      width: '20%',
-      render: (row) => {
-        const val = String(row.strengthMg || '');
-        const displayDose = val.toLowerCase().includes('mg') || val.toLowerCase().includes('mcg') || val.toLowerCase().includes('g') ? val : `${val} mg`;
-        return (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontWeight: 850, color: '#003666', fontFamily: 'monospace', fontSize: '0.90rem' }}>
-              {displayDose}
+  const presentationColumns = useMemo(() => {
+    if (isDiagnostic) {
+      return [
+        {
+          header: 'Panel / Test Variant',
+          field: 'strengthMg',
+          width: '28%',
+          render: (row) => {
+            const val = String(row.strengthMg || '');
+            return (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.86rem' }}>
+                  {val}
+                </span>
+                {row.isCurrentlyActive ? (
+                  <span style={{
+                    background: '#ecfdf5',
+                    color: '#065f46',
+                    border: '1px solid #a7f3d0',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    fontSize: '0.62rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px'
+                  }}>
+                    Active ✓
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRowClick(row);
+                    }}
+                    style={{
+                      background: '#f8fafc',
+                      border: '1px solid #cbd5e1',
+                      color: '#475569',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      fontSize: '0.62rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    Set Active
+                  </button>
+                )}
+              </div>
+            );
+          }
+        },
+        {
+          header: 'Format',
+          field: 'format',
+          width: '18%',
+          render: (row) => <span style={{ color: '#475569', fontWeight: 600 }}>{row.format || 'Diagnostic Kit'}</span>
+        },
+        {
+          header: 'Specimen Matrix',
+          field: 'recommendedDiluent',
+          width: '20%',
+          render: (row) => <span style={{ color: '#0284c7', fontWeight: 700 }}>{row.recommendedDiluent}</span>
+        },
+        {
+          header: 'Methodology & Tech',
+          field: 'concentrationMgMl',
+          width: '18%',
+          render: (row) => <span style={{ color: '#003666', fontWeight: 750 }}>{row.concentrationMgMl}</span>
+        },
+        {
+          header: 'Lab & Turnaround',
+          field: 'route',
+          width: '16%',
+          render: (row) => (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontSize: '0.70rem',
+              fontWeight: 750,
+              background: '#eff6ff',
+              color: '#1d4ed8',
+              border: '1px solid #bfdbfe',
+              whiteSpace: 'nowrap'
+            }}>
+              🔬 {row.route}
             </span>
-            {row.isCurrentlyActive ? (
-              <span style={{
-                background: '#ecfdf5',
-                color: '#065f46',
-                border: '1px solid #a7f3d0',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                fontSize: '0.62rem',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px'
-              }}>
-                Active ✓
+          )
+        }
+      ];
+    }
+
+    return [
+      {
+        header: 'Strength',
+        field: 'strengthMg',
+        width: '20%',
+        render: (row) => {
+          const val = String(row.strengthMg || '');
+          const displayDose = val.toLowerCase().includes('mg') || val.toLowerCase().includes('mcg') || val.toLowerCase().includes('g') ? val : `${val} mg`;
+          return (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontWeight: 850, color: '#003666', fontFamily: 'monospace', fontSize: '0.90rem' }}>
+                {displayDose}
               </span>
-            ) : (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRowClick(row);
-                }}
-                style={{
-                  background: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  color: '#475569',
+              {row.isCurrentlyActive ? (
+                <span style={{
+                  background: '#ecfdf5',
+                  color: '#065f46',
+                  border: '1px solid #a7f3d0',
                   padding: '2px 6px',
                   borderRadius: '4px',
                   fontSize: '0.62rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#003666';
-                  e.currentTarget.style.color = '#ffffff';
-                  e.currentTarget.style.borderColor = '#003666';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#f8fafc';
-                  e.currentTarget.style.color = '#475569';
-                  e.currentTarget.style.borderColor = '#cbd5e1';
-                }}
-              >
-                Set Active
-              </button>
-            )}
-          </div>
-        );
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px'
+                }}>
+                  Active ✓
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRowClick(row);
+                  }}
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid #cbd5e1',
+                    color: '#475569',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    fontSize: '0.62rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#003666';
+                    e.currentTarget.style.color = '#ffffff';
+                    e.currentTarget.style.borderColor = '#003666';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#f8fafc';
+                    e.currentTarget.style.color = '#475569';
+                    e.currentTarget.style.borderColor = '#cbd5e1';
+                  }}
+                >
+                  Set Active
+                </button>
+              )}
+            </div>
+          );
+        }
+      },
+      {
+        header: 'Format',
+        field: 'format',
+        width: '20%',
+        render: (row) => <span style={{ color: '#475569', fontWeight: 600 }}>{row.format}</span>
+      },
+      {
+        header: 'Vehicle / Diluent',
+        field: 'recommendedDiluent',
+        width: '24%',
+        render: (row) => <span style={{ color: '#0284c7', fontWeight: 700 }}>{row.recommendedDiluent}</span>
+      },
+      {
+        header: 'Concentration / Volume',
+        field: 'concentrationMgMl',
+        width: '18%',
+        render: (row) => <span style={{ color: '#003666', fontWeight: 750 }}>{row.concentrationMgMl}</span>
+      },
+      {
+        header: 'Route & Delivery',
+        field: 'route',
+        width: '18%',
+        render: (row) => {
+          const r = String(row.route || row.format || '').toLowerCase();
+          const isSpray = r.includes('nasal') || r.includes('spray');
+          const isPen = r.includes('pen');
+          const isOral = r.includes('oral') || r.includes('capsule');
+          return (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontSize: '0.70rem',
+              fontWeight: 750,
+              background: isSpray ? '#fdf4ff' : isPen ? '#eff6ff' : isOral ? '#fffbeb' : '#f0fdf4',
+              color: isSpray ? '#86198f' : isPen ? '#1d4ed8' : isOral ? '#b45309' : '#166534',
+              border: isSpray ? '1px solid #f0abfc' : isPen ? '1px solid #bfdbfe' : isOral ? '1px solid #fde68a' : '1px solid #bbf7d0',
+              whiteSpace: 'nowrap'
+            }}>
+              {isSpray ? '👃 Intranasal' : isPen ? '💉 SubQ Pen' : isOral ? '💊 Oral Solid' : '🧪 SubQ Injection'}
+            </span>
+          );
+        }
       }
-    },
-    {
-      header: 'Format',
-      field: 'format',
-      width: '20%',
-      render: (row) => <span style={{ color: '#475569', fontWeight: 600 }}>{row.format}</span>
-    },
-    {
-      header: 'Vehicle / Diluent',
-      field: 'recommendedDiluent',
-      width: '24%',
-      render: (row) => <span style={{ color: '#0284c7', fontWeight: 700 }}>{row.recommendedDiluent}</span>
-    },
-    {
-      header: 'Concentration / Volume',
-      field: 'concentrationMgMl',
-      width: '18%',
-      render: (row) => <span style={{ color: '#003666', fontWeight: 750 }}>{row.concentrationMgMl}</span>
-    },
-    {
-      header: 'Route & Delivery',
-      field: 'route',
-      width: '18%',
-      render: (row) => {
-        const r = String(row.route || row.format || '').toLowerCase();
-        const isSpray = r.includes('nasal') || r.includes('spray');
-        const isPen = r.includes('pen');
-        const isVial = r.includes('subcutaneous') && !isPen;
-        const isOral = r.includes('oral') || r.includes('capsule');
-        return (
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            fontSize: '0.70rem',
-            fontWeight: 750,
-            background: isSpray ? '#fdf4ff' : isPen ? '#eff6ff' : isOral ? '#fffbeb' : '#f0fdf4',
-            color: isSpray ? '#86198f' : isPen ? '#1d4ed8' : isOral ? '#b45309' : '#166534',
-            border: isSpray ? '1px solid #f0abfc' : isPen ? '1px solid #bfdbfe' : isOral ? '1px solid #fde68a' : '1px solid #bbf7d0',
-            whiteSpace: 'nowrap'
-          }}>
-            {isSpray ? '👃 Intranasal' : isPen ? '💉 SubQ Pen' : isOral ? '💊 Oral Solid' : '🧪 SubQ Injection'}
-          </span>
-        );
-      }
-    }
-  ];
+    ];
+  }, [isDiagnostic, handleRowClick]);
 
   const presentationData = (presentationMatrixRows && presentationMatrixRows.length > 0)
     ? presentationMatrixRows.map((row, idx) => ({
         id: row.key || `row-${idx}`,
-        formatId: row.formatId,
+        formatId: isDiagnostic ? 'diagnostic_kit' : row.formatId,
         strengthId: row.strengthId,
         supplierId: row.supplierId,
         strengthMg: row.strengthName,
-        format: row.formatName,
-        recommendedDiluent: row.diluentText,
-        concentrationMgMl: row.concText,
-        route: row.adminText,
+        format: isDiagnostic ? 'Diagnostic Specimen Collection Kit' : row.formatName,
+        recommendedDiluent: isDiagnostic ? (product.sampleType || 'Capillary Whole Blood (DBS Whatman 903)') : row.diluentText,
+        concentrationMgMl: isDiagnostic ? 'GC-FID / FAME Chromatography' : row.concText,
+        route: isDiagnostic ? '5–7 Business Days (ISO 15189)' : row.adminText,
         isCurrentlyActive: row.isCurrentlyActive,
+        isDiagnostic,
         rawRow: row
       }))
     : (product.variants && product.variants.length > 0)
       ? product.variants.map((v, idx) => {
           const vFmt = String(v.format || v.presentation || '').toLowerCase();
-          const isVial = !vFmt.includes('spray') && !vFmt.includes('sublingual') && !vFmt.includes('pen');
-          const isVialSpray = vFmt.includes('spray') || vFmt.includes('nasal');
-          const isVialSublingual = vFmt.includes('sublingual') || vFmt.includes('drop');
-          const isVialPen = vFmt.includes('pen') || vFmt.includes('cartridge');
+          const isVial = !isDiagnostic && !vFmt.includes('spray') && !vFmt.includes('sublingual') && !vFmt.includes('pen');
+          const isVialSpray = !isDiagnostic && (vFmt.includes('spray') || vFmt.includes('nasal'));
+          const isVialSublingual = !isDiagnostic && (vFmt.includes('sublingual') || vFmt.includes('drop'));
+          const isVialPen = !isDiagnostic && (vFmt.includes('pen') || vFmt.includes('cartridge'));
           const sprayVol = String(v.fill_volume || v.pack_size || v.name || v.id || '').match(/(\d+(?:\.\d+)?)\s*m[lL]/i)?.[1] || (String(v.dosage || v.dose).includes('30') ? '4' : '10');
           const sprayCount = Math.round(Number(sprayVol) / 0.1);
           return {
             id: v.id || `var-${idx}`,
-            formatId: v.format || v.presentation,
+            formatId: isDiagnostic ? 'diagnostic_kit' : (v.format || v.presentation),
             strengthId: v.id || v.strength,
             supplierId: v.supplierId || null,
-            strengthMg: v.dosage || v.dose || v.strength || 'Standard',
-            format: isVialSpray ? 'Nasal Spray' : isVialSublingual ? 'Sublingual Dropper' : isVialPen ? 'Pre-filled Pen' : (v.format || 'Lyophilized vial'),
-            recommendedDiluent: isVialSpray ? 'Pre-metered Intranasal Solution' : isVialSublingual ? 'Sublingual Vehicle' : isVialPen ? 'Pre-filled Solution' : '1.0–2.0 mL BAC Water',
-            concentrationMgMl: isVialSpray ? `${sprayVol} mL (~${sprayCount} sprays)` : isVialPen ? '3.0 mL Pen' : '5.0 mg/mL',
-            route: isVialSpray ? 'Intranasal (Needle-Free)' : isVialSublingual ? 'Sublingual' : isVialPen ? 'Subcutaneous Pen' : 'Subcutaneous',
-            isCurrentlyActive: false
+            strengthMg: v.dosage || v.dose || v.strength || (isDiagnostic ? '1 Perfil Lipídico Analítico + Valoración' : 'Standard'),
+            format: isDiagnostic ? 'Diagnostic Specimen Collection Kit' : isVialSpray ? 'Nasal Spray' : isVialSublingual ? 'Sublingual Dropper' : isVialPen ? 'Pre-filled Pen' : (v.format || 'Lyophilized vial'),
+            recommendedDiluent: isDiagnostic ? (product.sampleType || 'Capillary Whole Blood (DBS Whatman 903)') : isVialSpray ? 'Pre-metered Intranasal Solution' : isVialSublingual ? 'Sublingual Vehicle' : isVialPen ? 'Pre-filled Solution' : '1.0–2.0 mL BAC Water',
+            concentrationMgMl: isDiagnostic ? 'GC-FID / FAME Chromatography' : isVialSpray ? `${sprayVol} mL (~${sprayCount} sprays)` : isVialPen ? '3.0 mL Pen' : '5.0 mg/mL',
+            route: isDiagnostic ? '5–7 Business Days (ISO 15189)' : isVialSpray ? 'Intranasal (Needle-Free)' : isVialSublingual ? 'Sublingual' : isVialPen ? 'Subcutaneous Pen' : 'Subcutaneous',
+            isCurrentlyActive: false,
+            isDiagnostic
           };
         })
-      : STANDARD_PRESENTATIONS.map((row) => ({
-          id: `strength-${row.strengthMg}`,
-          formatId: 'vial',
-          strengthMg: row.strengthMg,
-          format: 'Standard Lyophilized Vial',
-          recommendedDiluent: row.diluentText,
-          concentrationMgMl: row.concText,
-          route: 'Subcutaneous Injection',
-          isCurrentlyActive: false
-        }));
+      : isDiagnostic
+        ? [{
+            id: 'test-kit-standard',
+            formatId: 'diagnostic_kit',
+            strengthMg: 'Complete Diagnostic Panel',
+            format: 'Diagnostic Specimen Collection Kit',
+            recommendedDiluent: product.sampleType || 'Capillary Whole Blood (DBS Whatman 903)',
+            concentrationMgMl: 'GC-FID / FAME Chromatography',
+            route: '5–7 Business Days (ISO 15189)',
+            isCurrentlyActive: true,
+            isDiagnostic: true
+          }]
+        : STANDARD_PRESENTATIONS.map((row) => ({
+            id: `strength-${row.strengthMg}`,
+            formatId: 'vial',
+            strengthMg: row.strengthMg,
+            format: 'Standard Lyophilized Vial',
+            recommendedDiluent: row.diluentText,
+            concentrationMgMl: row.concText,
+            route: 'Subcutaneous Injection',
+            isCurrentlyActive: false,
+            isDiagnostic: false
+          }));
 
   const hasBulkApi = useMemo(() => {
     return (availableFormats || []).some(f => String(f.id || f.name || '').toLowerCase().includes('bulk')) ||
@@ -559,25 +718,29 @@ export default function OverviewTab({
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
             }}>
-              {allAreReadyToUse ? 'B. Available Formulations & Delivery Dosimetry' : 'B. Available Presentations & Reconstitution Matrix'}
+              {isDiagnostic
+                ? 'B. Diagnostic Specimen Requirements & Laboratory Parameters'
+                : allAreReadyToUse ? 'B. Available Formulations & Delivery Dosimetry' : 'B. Available Presentations & Reconstitution Matrix'}
             </h2>
             <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: '#64748b' }}>
-              {allAreReadyToUse 
-                ? 'Pre-formulated ready-to-use clinical presentations with calibrated delivery mechanisms.'
-                : 'Standard reconstitution parameters targeting standard 5.0 mg/mL clinical concentration.'}
+              {isDiagnostic
+                ? 'Certified specimen matrix requirements, analytical methodology, and ISO 15189 turnaround times.'
+                : allAreReadyToUse 
+                  ? 'Pre-formulated ready-to-use clinical presentations with calibrated delivery mechanisms.'
+                  : 'Standard reconstitution parameters targeting standard 5.0 mg/mL clinical concentration.'}
             </p>
           </div>
 
           <span style={{
             fontSize: '0.70rem',
             fontWeight: 700,
-            background: allAreReadyToUse ? '#eff6ff' : '#f0fdf4',
-            color: allAreReadyToUse ? '#1e40af' : '#166534',
-            border: allAreReadyToUse ? '1px solid #bfdbfe' : '1px solid #bbf7d0',
+            background: isDiagnostic ? '#eff6ff' : allAreReadyToUse ? '#eff6ff' : '#f0fdf4',
+            color: isDiagnostic ? '#1e40af' : allAreReadyToUse ? '#1e40af' : '#166534',
+            border: isDiagnostic ? '1px solid #bfdbfe' : allAreReadyToUse ? '1px solid #bfdbfe' : '1px solid #bbf7d0',
             padding: '2px 8px',
             borderRadius: '4px'
           }}>
-            {allAreReadyToUse ? 'Pre-Formulated Sterile Solution' : 'ISO 11137 Sterile Lyophilized'}
+            {isDiagnostic ? 'ISO 15189:2022 Certified Lab' : allAreReadyToUse ? 'Pre-Formulated Sterile Solution' : 'ISO 11137 Sterile Lyophilized'}
           </span>
         </div>
 
@@ -834,10 +997,12 @@ export default function OverviewTab({
           <div>
             <div style={{ fontSize: '0.86rem', fontWeight: 850, color: '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Sparkles size={16} color="#0284c7" />
-              <span>Ready to configure treatment protocols?</span>
+              <span>{isDiagnostic ? 'Ready to review diagnostic protocols & interpretation guidelines?' : 'Ready to configure treatment protocols?'}</span>
             </div>
             <p style={{ margin: '3px 0 0 0', fontSize: '0.76rem', color: '#475569' }}>
-              Switch into the dedicated protocol workspace to select on-demand or multi-week protocols and compute exact vial requirements.
+              {isDiagnostic
+                ? 'Switch into the clinical protocol workspace to review specimen collection protocols, clinical cutoff ranges, and interpretation algorithms.'
+                : 'Switch into the dedicated protocol workspace to select on-demand or multi-week protocols and compute exact requirements.'}
             </p>
           </div>
 
@@ -860,7 +1025,7 @@ export default function OverviewTab({
               transition: 'all 0.15s ease'
             }}
           >
-            <span>Explore Clinical Protocols</span>
+            <span>{isDiagnostic ? 'Explore Diagnostic Protocols' : 'Explore Clinical Protocols'}</span>
             <ArrowRight size={15} />
           </button>
         </div>

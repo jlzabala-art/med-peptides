@@ -86,6 +86,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     specialty: treatingDocObj.specialty || docObj.specialty || docObj.title || rx.doctorSpecialty || '',
     phone: treatingDocObj.phone || docObj.phone || rx.doctorPhone || '',
     email: treatingDocObj.email || docObj.email || rx.doctorEmail || '',
+    clinicLogo: treatingDocObj.clinicLogo || treatingDocObj.logoUrl || docObj.clinicLogo || docObj.logoUrl || rx.clinicLogo || rx.logoUrl || '',
     id: docObj.id || treatingDocObj.id || rx.doctorId || null
   } : null;
 
