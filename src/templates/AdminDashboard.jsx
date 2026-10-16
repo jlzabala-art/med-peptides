@@ -23,6 +23,33 @@ import { useRoleAccess } from '../hooks/useRoleAccess';
 import GlobalNotificationCenter from '../components/shared/widgets/GlobalNotificationCenter';
 import MarketIntelligenceHub from '../components/admin/market/MarketIntelligenceHub';
 
+// ── Keep-Alive Core Tabs Dynamic Components (Fast 0ms switching) ──────────────
+const CachedCatalogTab = dynamic(() => import('../components/admin/AdminCatalogTabClient'), {
+  ssr: false,
+  loading: () => <AdminLoadingFallback />
+});
+const CachedPhysiciansTab = dynamic(() => import('../components/admin/physicians/AdminPhysiciansTab'), {
+  ssr: false,
+  loading: () => <AdminLoadingFallback />
+});
+const CachedPrescriptionsTab = dynamic(() => import('../components/admin/prescriptions/AdminPrescriptionsTableClient'), {
+  ssr: false,
+  loading: () => <AdminLoadingFallback />
+});
+const CachedPatientsTab = dynamic(() => import('../components/admin/AdminPatientsTab'), {
+  ssr: false,
+  loading: () => <AdminLoadingFallback />
+});
+
+const CORE_KEEP_ALIVE_MAP = {
+  catalog: 'catalog',
+  products: 'catalog',
+  doctors: 'doctors',
+  physicians: 'doctors',
+  prescriptions: 'prescriptions',
+  patients: 'patients'
+};
+
 // ── Removed unused tab component imports for code splitting ─────────────────
 // icon alias (lucide doesn't export MailPlus2 — must be before NAV_GROUPS)
 function MailPlus2(props) {
@@ -277,6 +304,38 @@ export default function AdminDashboard({ children }) {
 
   const activeTab = ROUTE_ALIASES[rawTab] ?? rawTab;
 
+  // ── 0ms Instant Keep-Alive Tab State for Core Modules ───────────────────────
+  const initialServerTabRef = React.useRef(activeTab);
+  const [clientActiveTab, setClientActiveTab] = useState(activeTab);
+  const [mountedCoreTabs, setMountedCoreTabs] = useState(() => {
+    const canonical = CORE_KEEP_ALIVE_MAP[activeTab];
+    return canonical ? new Set([canonical]) : new Set();
+  });
+
+  // Keep clientActiveTab in sync when external route (pathname) changes
+  useEffect(() => {
+    setClientActiveTab(activeTab);
+    const canonical = CORE_KEEP_ALIVE_MAP[activeTab];
+    if (canonical) {
+      setMountedCoreTabs((prev) => new Set(prev).add(canonical));
+    }
+  }, [activeTab]);
+
+  // Synchronize browser history Back/Forward buttons without destroying memory state
+  useEffect(() => {
+    const handlePopState = () => {
+      const parts = window.location.pathname.split('/').filter(Boolean);
+      const tab = parts.length > 1 ? parts[1] : 'dashboard';
+      const canonical = CORE_KEEP_ALIVE_MAP[tab] || ROUTE_ALIASES[tab] || tab;
+      setClientActiveTab(canonical);
+      if (CORE_KEEP_ALIVE_MAP[canonical]) {
+        setMountedCoreTabs((prev) => new Set(prev).add(canonical));
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Flatten allowed tab IDs from the filtered groups
   const allowedNavIds = React.useMemo(() => {
     return filteredNavGroups.flatMap(group => group.items.map(i => i.id));
@@ -308,6 +367,15 @@ export default function AdminDashboard({ children }) {
 
   const navToTab = useCallback(
     (tabId) => {
+      const canonical = CORE_KEEP_ALIVE_MAP[tabId];
+      if (canonical) {
+        // Fast 0ms instant transition for the 4 core clinical/catalog tabs
+        setClientActiveTab(canonical);
+        setMountedCoreTabs((prev) => new Set(prev).add(canonical));
+        window.history.pushState(null, '', `/admin/${canonical}`);
+        return;
+      }
+
       startTransition(() => {
         if (tabId === 'b2c-shop') {
           router.push('/');
@@ -332,21 +400,21 @@ export default function AdminDashboard({ children }) {
     window.location.href = '/';
   };
 
-  const currentGroup = NAV_GROUPS.find((g) => g.items.some((i) => i.id === activeTab));
+  const currentGroup = NAV_GROUPS.find((g) => g.items.some((i) => i.id === clientActiveTab));
   const currentItem =
-    currentGroup?.items.find((i) => i.id === activeTab) ??
-    PINNED_ITEMS.find((i) => i.id === activeTab);
+    currentGroup?.items.find((i) => i.id === clientActiveTab) ??
+    PINNED_ITEMS.find((i) => i.id === clientActiveTab);
 
   return (
     <PanelShell
       sidebarNavGroups={filteredNavGroups}
       sidebarPinnedItems={dynamicPinnedItems}
-      activeNavId={activeTab}
+      activeNavId={clientActiveTab}
       onNavigate={navToTab}
       portalTitle={isAccountManager ? "Clinical Portal" : "Admin Portal"}
       roleContext={isAccountManager ? "account_manager" : "admin"}
       pageContext={{
-        activeTab: activeTab,
+        activeTab: clientActiveTab,
         label: currentItem?.label || (isAccountManager ? 'Prescripciones' : 'Dashboard'),
         group: currentGroup?.label || (isAccountManager ? 'Gestión Clínica' : 'Overview'),
       }}
@@ -386,9 +454,101 @@ export default function AdminDashboard({ children }) {
           transform: 'translate3d(0, 0, 0)'
         }}
       >
-        <React.Suspense fallback={<AdminLoadingFallback />}>
-          {children}
-        </React.Suspense>
+        {/* Core Keep-Alive Tab Containers (0ms instantaneous switching, state and scroll preserved) */}
+        {mountedCoreTabs.has('catalog') && (
+          <div
+            id="keep-alive-catalog"
+            style={{
+              display: clientActiveTab === 'catalog' ? 'flex' : 'none',
+              flexDirection: 'column',
+              flex: 1,
+              minHeight: 0
+            }}
+          >
+            {initialServerTabRef.current === 'catalog' ? (
+              <React.Suspense fallback={<AdminLoadingFallback />}>
+                {children}
+              </React.Suspense>
+            ) : (
+              <CachedCatalogTab />
+            )}
+          </div>
+        )}
+
+        {mountedCoreTabs.has('doctors') && (
+          <div
+            id="keep-alive-doctors"
+            style={{
+              display: clientActiveTab === 'doctors' ? 'flex' : 'none',
+              flexDirection: 'column',
+              flex: 1,
+              minHeight: 0
+            }}
+          >
+            {initialServerTabRef.current === 'doctors' || initialServerTabRef.current === 'physicians' ? (
+              <React.Suspense fallback={<AdminLoadingFallback />}>
+                {children}
+              </React.Suspense>
+            ) : (
+              <CachedPhysiciansTab />
+            )}
+          </div>
+        )}
+
+        {mountedCoreTabs.has('prescriptions') && (
+          <div
+            id="keep-alive-prescriptions"
+            style={{
+              display: clientActiveTab === 'prescriptions' ? 'flex' : 'none',
+              flexDirection: 'column',
+              flex: 1,
+              minHeight: 0
+            }}
+          >
+            {initialServerTabRef.current === 'prescriptions' ? (
+              <React.Suspense fallback={<AdminLoadingFallback />}>
+                {children}
+              </React.Suspense>
+            ) : (
+              <CachedPrescriptionsTab />
+            )}
+          </div>
+        )}
+
+        {mountedCoreTabs.has('patients') && (
+          <div
+            id="keep-alive-patients"
+            style={{
+              display: clientActiveTab === 'patients' ? 'flex' : 'none',
+              flexDirection: 'column',
+              flex: 1,
+              minHeight: 0
+            }}
+          >
+            {initialServerTabRef.current === 'patients' ? (
+              <React.Suspense fallback={<AdminLoadingFallback />}>
+                {children}
+              </React.Suspense>
+            ) : (
+              <CachedPatientsTab />
+            )}
+          </div>
+        )}
+
+        {/* Dynamic Non-Core Tab Container (falls back to Next.js route children) */}
+        <div
+          id="dynamic-admin-route-container"
+          style={{
+            display: !CORE_KEEP_ALIVE_MAP[clientActiveTab] ? 'flex' : 'none',
+            flexDirection: 'column',
+            flex: 1,
+            minHeight: 0
+          }}
+        >
+          <React.Suspense fallback={<AdminLoadingFallback />}>
+            {children}
+          </React.Suspense>
+        </div>
       </div>
       <Omnibar isOpen={isOmnibarOpen} onClose={() => setIsOmnibarOpen(false)} />
     </PanelShell>

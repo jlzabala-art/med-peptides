@@ -133,8 +133,9 @@ const BRAND_CONFIGS = {
     categories: [
       { id: 'all', label: 'All Diagnostic Panels (5)' },
       { id: 'genomics', label: 'Genomics & Autoimmunity (HLA)' },
-      { id: 'toxicology', label: 'Hair Mineral & Heavy Metals (HTMA)' },
-      { id: 'celiac', label: 'Celiac & Gluten Predisposition' }
+      { id: 'toxicology', label: 'Hair Mineral Analysis (HTMA)' },
+      { id: 'metabolic', label: 'Omega Fatty Acids & Inflammatory Balance' },
+      { id: 'detox', label: 'Pharmacogenetics & Metabolizer Detox' }
     ]
   }
 };
@@ -150,6 +151,8 @@ function resolveBrandProductImage(product, brandSlug) {
   if (brandSlug === 'teletest') {
     if (id.includes('hla') || id.includes('gnt')) return '/images/products/teletest/hla-autoinmunidad.svg';
     if (id.includes('celiac') || id.includes('gluten')) return '/images/products/teletest/celiac-genetics.svg';
+    if (id.includes('omega') || name.includes('omega')) return '/images/products/teletest/omega-test.svg';
+    if (id.includes('detox') || id.includes('metabolizer') || name.includes('detox')) return '/images/products/teletest/metabolizer-detox.svg';
     if (id.includes('tox') || id.includes('pesados')) return '/images/products/teletest/heavy-metals.svg';
     return '/images/products/teletest/mineralograma-cabello.svg';
   }

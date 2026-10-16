@@ -12,10 +12,11 @@ import ProtocolWorkspaceTab from './ProtocolWorkspaceTab';
 import PreparationTab from './PreparationTab';
 import QualityBatchTab from './QualityBatchTab';
 import ReferencesTab from './ReferencesTab';
+import ClinicalSynergySection from '../ClinicalSynergySection';
 import CoaModal from '../CoaModal';
 import MonographPreviewModal from '../MonographPreviewModal';
 import { triggerHaptic } from '@/utils/haptics';
-import { LayoutTemplate, FlaskConical, Droplet, ShieldCheck, BookOpen, ChevronDown, ChevronUp } from '@/lib/icons';
+import { LayoutTemplate, FlaskConical, Droplet, ShieldCheck, BookOpen, Sparkles, ChevronDown, ChevronUp } from '@/lib/icons';
 import './monographWorkspace.css';
 
 /**
@@ -54,7 +55,7 @@ export default function PeptideMonographWorkspace({
 }) {
   const searchParams = useSearchParams();
 
-  const VALID_TABS = ['overview', 'protocols', 'preparation', 'quality', 'references'];
+  const VALID_TABS = ['overview', 'protocols', 'preparation', 'quality', 'references', 'synergy'];
   const initialTab = searchParams?.get('tab')?.toLowerCase();
   const [activeTab, setActiveTab] = useState(
     initialTab && VALID_TABS.includes(initialTab) ? initialTab : 'overview'
@@ -73,7 +74,8 @@ export default function PeptideMonographWorkspace({
     protocols: React.useRef(null),
     preparation: React.useRef(null),
     quality: React.useRef(null),
-    references: React.useRef(null)
+    references: React.useRef(null),
+    synergy: React.useRef(null)
   };
 
   // Modals state
@@ -225,6 +227,14 @@ export default function PeptideMonographWorkspace({
 
             {activeTab === 'references' && (
               <ReferencesTab product={product} slug={slug} />
+            )}
+
+            {activeTab === 'synergy' && (
+              <ClinicalSynergySection
+                product={product}
+                slug={slug}
+                lang={lang}
+              />
             )}
           </div>
 
@@ -572,6 +582,63 @@ export default function PeptideMonographWorkspace({
             {activeTab === 'references' && (
               <div className="pds-mobile-accordion-body">
                 <ReferencesTab product={product} slug={slug} />
+              </div>
+            )}
+          </div>
+
+          {/* Section 6: Clinical Synergy */}
+          <div ref={moduleRefs.synergy} className={`pds-mobile-accordion-item ${activeTab === 'synergy' ? 'is-open' : 'is-closed'}`}>
+            <div
+              className="pds-mobile-accordion-header"
+              onClick={() => {
+                triggerHaptic('light');
+                handleTabChange(activeTab === 'synergy' ? '' : 'synergy');
+              }}
+              role="button"
+              tabIndex={0}
+              aria-expanded={activeTab === 'synergy'}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  background: activeTab === 'synergy' ? '#003666' : '#eff6ff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  transition: 'all 0.15s ease'
+                }}>
+                  <Sparkles size={16} color={activeTab === 'synergy' ? '#ffffff' : '#003666'} />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <span style={{ fontSize: '0.64rem', fontWeight: 800, color: activeTab === 'synergy' ? '#003666' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Module 6
+                  </span>
+                  <h3 style={{ margin: '1px 0 0 0', fontSize: '0.88rem', fontWeight: 800, color: activeTab === 'synergy' ? '#003666' : '#1e293b' }}>
+                    Clinical Synergy & Pairings
+                  </h3>
+                </div>
+              </div>
+              <div style={{
+                width: '26px',
+                height: '26px',
+                borderRadius: '50%',
+                background: activeTab === 'synergy' ? '#e0f2fe' : '#f1f5f9',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: activeTab === 'synergy' ? '#003666' : '#64748b',
+                flexShrink: 0
+              }}>
+                {activeTab === 'synergy' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </div>
+            </div>
+
+            {activeTab === 'synergy' && (
+              <div className="pds-mobile-accordion-body">
+                <ClinicalSynergySection product={product} slug={slug} lang={lang} />
               </div>
             )}
           </div>

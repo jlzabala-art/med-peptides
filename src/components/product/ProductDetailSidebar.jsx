@@ -6,7 +6,8 @@ import {
   Menu, 
   X, 
   ChevronRight, 
-  ArrowUp 
+  ArrowUp,
+  Sparkles
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import BloodoSuiteNav from './BloodoSuiteNav';
@@ -18,6 +19,7 @@ import SolventReconWidget from './widgets/SolventReconWidget';
 import CorporateServiceWidget from './widgets/CorporateServiceWidget';
 import SupplementSidebarWidget from './widgets/SupplementSidebarWidget';
 import FdaApprovedPeptidesNetworkWidget from './FdaApprovedPeptidesNetworkWidget';
+import ClinicalRecommendationsSidebarWidget from './widgets/ClinicalRecommendationsSidebarWidget';
 import { isFdaApprovedPeptide } from '@/data/fdaPeptidesRegistry';
 import { QRCodeSVG } from 'qrcode.react';
 import './PublicDatasheetTableOfContents.css';
@@ -63,10 +65,18 @@ export default function ProductDetailSidebar({
     return isFdaApprovedPeptide(product || slug);
   }, [product, slug]);
 
-  // Filter sections that actually exist in the current DOM
+  // Filter sections that actually exist in the current DOM + always include clinical synergy
   const availableSections = useMemo(() => {
-    return sections.filter(sec => sec && sec.id);
-  }, [sections]);
+    const list = [...sections.filter(sec => sec && sec.id)];
+    if (!list.some(s => s.id === 'clinical-synergy')) {
+      list.push({
+        id: 'clinical-synergy',
+        label: isEs ? 'Sinergia Clínica' : 'Clinical Synergy',
+        icon: Sparkles
+      });
+    }
+    return list;
+  }, [sections, isEs]);
 
   // Support external trigger (e.g. from PublicStickyActionBar)
   useEffect(() => {
@@ -289,6 +299,13 @@ export default function ProductDetailSidebar({
 
       {/* ── Dynamic Category-Specific Specialized Widget ── */}
       {renderContextualWidget()}
+
+      {/* ── Always-Visible Clinical Recommendations & Synergy Widget (Golden Rule Universal Cross-Sell) ── */}
+      <ClinicalRecommendationsSidebarWidget
+        product={product}
+        slug={slug}
+        lang={lang}
+      />
 
       {/* ── Associated Clinical Protocols (FIRST — clinical context before network) ── */}
       {!isCosmeticProduct && !isCorporateService && Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (

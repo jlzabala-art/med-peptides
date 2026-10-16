@@ -12,12 +12,14 @@ import {
   Printer, 
   FileText, 
   QrCode,
-  ExternalLink
+  ExternalLink,
+  Sparkles
 } from '@/lib/icons';
 import { QRCodeSVG } from 'qrcode.react';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
 import { formatCommercialSupplierName } from '@/utils/supplierCommercialNames';
+import ClinicalRecommendationsSidebarWidget from '../widgets/ClinicalRecommendationsSidebarWidget';
 
 /**
  * PeptideMonographSidebar
@@ -85,6 +87,12 @@ export default function PeptideMonographSidebar({
       label: 'References',
       subtitle: 'FDA dossiers & PubMed citations',
       icon: BookOpen
+    },
+    {
+      id: 'synergy',
+      label: 'Clinical Synergy',
+      subtitle: 'Biochemical pairings & cross-sell',
+      icon: Sparkles
     }
   ];
 
@@ -341,6 +349,13 @@ export default function PeptideMonographSidebar({
         </div>
       </div>
 
+      {/* ── Universal Cross-Sell & Biochemical Synergy Widget ── */}
+      <ClinicalRecommendationsSidebarWidget
+        product={product}
+        slug={slug}
+        lang="en"
+      />
+
       {/* ── CARD 3: Direct Operative Actions (CoA, Label 300DPI, PDF) ── */}
       <div style={{
         background: '#ffffff',
@@ -430,7 +445,7 @@ export default function PeptideMonographSidebar({
             <span>Print Clinical Label (300 DPI)</span>
           </div>
           <span style={{ fontSize: '0.62rem', color: '#64748b', background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px' }}>
-            Vial
+            {formatLabel?.toLowerCase().includes('capsule') ? 'Capsule' : formatLabel?.toLowerCase().includes('pen') ? 'Pen' : 'Vial'}
           </span>
         </button>
 

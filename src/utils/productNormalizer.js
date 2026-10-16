@@ -76,23 +76,64 @@ export function extractProductPresentation(product) {
                 product.format === 'bulk_api' ||
                 isFagron; // Fagron always means raw/compounding
 
-  const pres = product.presentationName || product.presentation || product.format || product.form || product.presentationType;
+  const pres = product.presentationName || 
+               product.presentation || 
+               product.format || 
+               product.form || 
+               product.presentationType ||
+               product.dosageForm ||
+               product.dispensingForm;
+
   if (pres && typeof pres === 'string' && pres.trim()) {
     const p = pres.trim().toLowerCase();
     if (isRaw || /bulk|granel|api|powder/i.test(p)) return 'Bulk API Powder';
     if (/pen/i.test(p)) return 'Pre-filled Pen';
     if (/lyophilized|liofilizado/i.test(p)) return 'Lyophilized Vial';
     if (/nasal/i.test(p)) return 'Nasal Spray';
-    if (/capsule/i.test(p)) return 'Oral Capsule';
+    if (/capsule|cápsula/i.test(p)) return 'Oral Capsule';
     if (/sublingual/i.test(p)) return 'Sublingual';
     if (/cartridge/i.test(p)) return 'Refill Cartridge';
     if (/foam|espuma/i.test(p)) return 'Topical Foam';
     if (/serum|suero/i.test(p)) return 'Dermal Serum';
-    if (/cream|topical/i.test(p)) return 'Topical Cream';
-    if (/oil/i.test(p)) return 'Topical Oil';
-    if (/tablet/i.test(p)) return 'Oral Tablet';
-    if (/bottle/i.test(p)) return 'Bottle';
+    if (/cream|topical|crema/i.test(p)) return 'Topical Cream';
+    if (/oil|aceite/i.test(p)) return 'Topical Oil';
+    if (/tablet|comprimido/i.test(p)) return 'Oral Tablet';
+    if (/bottle|frasco/i.test(p)) return 'Bottle';
+    if (/swab|saliva|blood/i.test(p)) return 'Diagnostic Kit';
     return isRaw ? 'Bulk API Powder' : 'Vial';
+  }
+
+  // Inspect variants if parent doesn't have an explicit presentation
+  if (Array.isArray(product.variants) && product.variants.length > 0) {
+    for (const v of product.variants) {
+      const vStr = String(v.presentation || v.presentationName || v.format || v.dosageForm || v.dispensingForm || v.size || v.name || '').toLowerCase();
+      if (/capsule|cápsula/i.test(vStr)) return 'Oral Capsule';
+      if (/tablet|comprimido/i.test(vStr)) return 'Oral Tablet';
+      if (/pen/i.test(vStr)) return 'Pre-filled Pen';
+      if (/cartridge/i.test(vStr)) return 'Refill Cartridge';
+      if (/nasal|spray/i.test(vStr)) return 'Nasal Spray';
+      if (/lyophilized|liofilizado/i.test(vStr)) return 'Lyophilized Vial';
+      if (/serum|suero/i.test(vStr)) return 'Dermal Serum';
+      if (/cream|crema/i.test(vStr)) return 'Topical Cream';
+      if (/oil|aceite/i.test(vStr)) return 'Topical Oil';
+      if (/foam|espuma/i.test(vStr)) return 'Topical Foam';
+      if (/bottle|frasco/i.test(vStr)) return 'Bottle';
+      if (/swab|saliva|blood|test/i.test(vStr)) return 'Diagnostic Kit';
+      if (/bulk|api|powder/i.test(vStr)) return 'Bulk API Powder';
+    }
+  }
+
+  // Category and Type fallback inference
+  const catLower = String(product.category || product.therapeutic_category || '').toLowerCase();
+  const typeLower = String(product.type || product.productType || '').toLowerCase();
+  if (catLower.includes('supplement') || typeLower.includes('supplement') || product.is_supplement || product.isSupplement) {
+    return 'Oral Capsule';
+  }
+  if (catLower.includes('diagnostic') || typeLower.includes('diagnostic')) {
+    return 'Diagnostic Kit';
+  }
+  if (catLower.includes('cosmetic') || typeLower.includes('cosmetic') || product.is_cosmetic) {
+    return 'Dermal Serum';
   }
 
   const str = `${product.objectID || ''} ${product.id || ''} ${product.name || ''} ${product.sku || ''}`.toLowerCase();

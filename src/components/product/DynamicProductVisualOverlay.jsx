@@ -34,7 +34,22 @@ export default function DynamicProductVisualOverlay({ product, variant, selected
   const isDiluent = presentation.includes('water') || presentation.includes('bac') || presentation.includes('diluent') || presentation.includes('saline');
   const isDiagnostic = productType === 'diagnostic' || product?.category === 'Diagnostic' || presentation.includes('test') || presentation.includes('panel');
   const isService = productType === 'service' || product?.category === 'Service' || presentation.includes('consultation') || presentation.includes('protocol');
-  const isVial = !isRaw && !isPen && !isDevice && !isDiluent && !isDiagnostic && !isService && (presentation.includes('vial') || format.includes('vial') || !format || format === 'vial');
+  const isCapsule = format.includes('capsule') || 
+                    format.includes('cápsula') || 
+                    presentation.includes('capsule') || 
+                    presentation.includes('cápsula') || 
+                    productType === 'supplement' || 
+                    product?.is_supplement || 
+                    product?.isSupplement || 
+                    String(product?.category || '').toLowerCase().includes('supplement');
+  const isCosmetic = productType === 'cosmetic' || 
+                     product?.is_cosmetic || 
+                     format.includes('serum') || 
+                     format.includes('cream') || 
+                     presentation.includes('serum') || 
+                     presentation.includes('cream') || 
+                     String(product?.category || '').toLowerCase().includes('cosmetic');
+  const isVial = !isRaw && !isPen && !isDevice && !isDiluent && !isDiagnostic && !isService && !isCapsule && !isCosmetic && (presentation.includes('vial') || format.includes('vial') || !format || format === 'vial');
 
   // Dynamic Label Information
   const brandName = (product?.canonicalName || product?.name || 'Peptide Compound').toUpperCase();
@@ -85,6 +100,18 @@ export default function DynamicProductVisualOverlay({ product, variant, selected
             <span>Lyophilized Borosilicate Vial</span>
           </div>
         )}
+        {isCapsule && (
+          <div className="dpv-badge dpv-badge-emerald">
+            <ShieldCheck size={13} color="#10b981" />
+            <span>Oral Bioactive Capsules</span>
+          </div>
+        )}
+        {isCosmetic && (
+          <div className="dpv-badge dpv-badge-cyan">
+            <Sparkles size={13} color="#06b6d4" />
+            <span>Topical Dermal Formulation</span>
+          </div>
+        )}
         {isDevice && (
           <div className="dpv-badge dpv-badge-indigo">
             <Zap size={12} color="#818cf8" />
@@ -118,7 +145,7 @@ export default function DynamicProductVisualOverlay({ product, variant, selected
             <Snowflake size={12} color="#60a5fa" />
             <span>-20°C Desiccated</span>
           </div>
-        ) : (isDiagnostic || isDiluent || isDevice || isService) ? (
+        ) : (isDiagnostic || isDiluent || isDevice || isService || isCapsule || isCosmetic) ? (
           <div className="dpv-badge dpv-badge-storage">
             <Thermometer size={12} color="#fbbf24" />
             <span>15°C – 25°C Room Temp</span>
@@ -141,7 +168,9 @@ export default function DynamicProductVisualOverlay({ product, variant, selected
           <div className="dpv-ribbon-line2">
             <span>{lotNumber}</span>
             <span>•</span>
-            <span className="dpv-purity-text">≥99.2% Purity HPLC</span>
+            <span className="dpv-purity-text">
+              {isCapsule ? 'Native Freeze-Dried · Bioactive' : isCosmetic ? 'Bioactive Native Tropocollagen' : isDiagnostic ? 'ISO 17025 / CLIA Validated' : isDiluent ? 'USP Grade Sterile' : '≥99.2% Purity HPLC'}
+            </span>
           </div>
         </div>
 

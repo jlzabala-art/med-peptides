@@ -88,6 +88,7 @@ import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedCo
 import ProductDetailSidebar from './ProductDetailSidebar';
 import EternaPublicOverviewShowcase from './EternaPublicOverviewShowcase';
 import SupplementPublicOverviewShowcase from './SupplementPublicOverviewShowcase';
+import ClinicalSynergySection from './ClinicalSynergySection';
 import DiagnosticReportVisualPreview from '../diagnostic/DiagnosticReportVisualPreview';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import ProductSectionFooterNav from './ProductSectionFooterNav';
@@ -1153,6 +1154,7 @@ export default function PublicDatasheetView({
         { id: 'inci-dossier', label: lang === 'es' ? 'Composición INCI Completa' : 'Full INCI Composition', icon: Microscope },
         { id: 'application-protocol', label: lang === 'es' ? 'Protocolo de Aplicación' : 'Clinical Usage Protocol', icon: ClipboardList },
         { id: 'colway-system', label: lang === 'es' ? 'Sistema Capilar Colway' : 'Colway 2-Step System', icon: Sparkles },
+        { id: 'clinical-synergy', label: lang === 'es' ? 'Sinergia Clínica y Maridajes' : 'Clinical Synergy & Pairings', icon: Sparkles },
         { id: 'contraindications-section', label: lang === 'es' ? 'Seguridad y Test de Parche' : 'Safety & Patch Test', icon: ShieldCheck }
       ];
     }
@@ -1166,6 +1168,7 @@ export default function PublicDatasheetView({
         { id: 'publications-section', label: lang === 'es' ? 'Respaldos Científicos' : 'Scientific Evidence & Trials', icon: FileText },
         { id: 'contraindications-section', label: lang === 'es' ? 'Seguridad y Precauciones' : 'Safety & Precautions', icon: ShieldCheck },
         { id: 'labels-section', label: lang === 'es' ? 'Etiquetas de Farmacia' : 'Compounding Pharmacy Labels', icon: Tag },
+        { id: 'clinical-synergy', label: lang === 'es' ? 'Sinergias Clínicas y Maridajes' : 'Clinical Synergy & Pairings', icon: Sparkles },
         { id: 'related-peptides-section', label: lang === 'es' ? 'Sinergias y Protocolos' : 'Synergies & Protocols', icon: FlaskConical }
       ];
     }
@@ -1179,6 +1182,7 @@ export default function PublicDatasheetView({
       ...(!isSolventProduct ? [
         { id: 'publications-section', label: lang === 'es' ? 'Ensayos y Literatura' : 'Scientific Literature', icon: FileText },
         { id: 'contraindications-section', label: lang === 'es' ? 'Seguridad y Precauciones' : 'Safety & Contraindications', icon: ShieldCheck },
+        { id: 'clinical-synergy', label: lang === 'es' ? 'Sinergia Clínica y Maridajes' : 'Clinical Synergy & Pairings', icon: Sparkles },
         { id: 'labels-section', label: lang === 'es' ? 'Etiquetas de Dispensación' : 'Dispensing Vial Labels', icon: Tag },
         { id: 'analytical-specs', label: lang === 'es' ? 'Cromatografía y Pureza' : 'HPLC Purity & Mass', icon: Activity }
       ] : []),
@@ -2414,6 +2418,11 @@ export default function PublicDatasheetView({
         {/* ── Block 5: Targeted Therapeutic Peptides (Lotusland Limited) ── */}
         {effectiveActiveSection === 'related-peptides-section' && (
           <BloodoRelatedPeptidesSection product={product} lang={lang} />
+        )}
+
+        {/* ── Block 5.5: Universal Clinical Synergy & Adjuvant Recommendations (Cross-Sell Engine) ── */}
+        {effectiveActiveSection === 'clinical-synergy' && (
+          <ClinicalSynergySection product={product} slug={slug || product?.slug} lang={lang} />
         )}
 
         {/* ── Block 6: Bloodo™ Diagnostic Suite Switcher (All 6 Clinical DBS Tests) ── */}
