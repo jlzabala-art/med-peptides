@@ -597,11 +597,18 @@ export const PROTOCOL_BLUEPRINTS = {
       primary_compounds: ["ghk_cu", "zinc_thymulin"],
       adjuvants: [
         {
-          slug: "colway-trichology",
-          name: "Colway Trichology Hair Strengthening System (2-Step Synergistic Routine)",
+          slug: "colway-strengthening-shampoo",
+          name: "Colway Strengthening Hair Shampoo",
           category: "Trichology Cosmeceutical",
-          dosage: "Shampoo 3-4x weekly, Conditioner after each wash",
-          role: "Native biologically active tropocollagen, micronized diosmin, and Baicapil™ 2% to protect the follicular barrier, purify ostia, and seal cuticular scales."
+          dosage: "3-4x weekly on wet scalp (2-3 min contact)",
+          role: "Diosmin, caffeine and Baicapil™ 2% to clear follicular ostia and stimulate dermal papilla microvascular flow before GHK-Cu application."
+        },
+        {
+          slug: "colway-strengthening-conditioner",
+          name: "Colway Strengthening Hair Conditioner",
+          category: "Trichology Cosmeceutical",
+          dosage: "After every wash, leave 3-5 min before rinsing",
+          role: "Native fish tropocollagen and bio-silica to seal the hair cuticle and reinforce follicular anchorage."
         },
         {
           slug: "colway-colvita",
@@ -614,6 +621,230 @@ export const PROTOCOL_BLUEPRINTS = {
       protocol_class: "trichological_based",
       duration_weeks: 16,
       intensity_level: "moderate"
+    }
+  },
+
+  colwayDermoRenewal: {
+    id: "colway-dermo-renewal",
+    slug: "colway-dermo-renewal",
+    title: "Colway Dermo-Renewal & Cellular Collagen Ritual",
+    name: "Colway Dermo-Renewal & Cellular Collagen Ritual",
+    category: "Skin / Anti-Aging",
+    therapeutic_category: "Dermocosmetic Neocollagenesis & Enzymatic Diamond Micro-Exfoliation",
+    summary: {
+      goal: "Stimulate dermal fibroblast neocollagenesis, polish cutaneous micro-texture, and restore the hydrolipid protective barrier.",
+      duration: "10 weeks",
+      benefits: [
+        "Elimination of senescent corneocytes via papain/subtilisin enzymatic action",
+        "Neocollagenesis trigger via VEP-carrier peptides & CoQ10",
+        "Intense transdermal hydration and skin turgor restoration",
+        "Microbiome & cutaneous acid mantle stabilization (pH 5.5)"
+      ]
+    },
+    phases: [
+      {
+        name: "Phase 1: Hydrolipid Preparation & Enzymatic Clearance",
+        weeks: 4,
+        startWeek: 1,
+        endWeek: 4,
+        goal: "Purify skin with sulfate-free amphoteric matrix and eliminate keratolytic debris via diamond micro-peel.",
+        medications: [
+          { name: "Cellular Collagen Hydrolipid Wash Gel", dosage: "1-2 pumps", weeklyDose: 14, frequency: "Twice daily (AM/PM)", route: "topical", days: ["Daily"], productSlug: "colway-collagen-wash-gel" },
+          { name: "Blue Diamond Peeling", dosage: "Dime size", weeklyDose: 2, frequency: "2x weekly (Evening)", route: "topical", days: ["Wednesday", "Sunday"], productSlug: "colway-blue-diamond-peeling" },
+          { name: "Blue Diamond Cream", dosage: "1 spatula", weeklyDose: 14, frequency: "Daily morning & evening", route: "topical", days: ["Daily"], productSlug: "colway-blue-diamond-cream" }
+        ]
+      },
+      {
+        name: "Phase 2: Dermal Architecture Consolidation",
+        weeks: 6,
+        startWeek: 5,
+        endWeek: 10,
+        goal: "Deep neocollagenesis, VEP peptide delivery, and long-term dermal firming.",
+        medications: [
+          { name: "Cellular Collagen Hydrolipid Wash Gel", dosage: "1-2 pumps", weeklyDose: 14, frequency: "Twice daily (AM/PM)", route: "topical", days: ["Daily"], productSlug: "colway-collagen-wash-gel" },
+          { name: "Blue Diamond Cream", dosage: "1 spatula", weeklyDose: 14, frequency: "Daily morning & evening", route: "topical", days: ["Daily"], productSlug: "colway-blue-diamond-cream" }
+        ]
+      }
+    ],
+    items: [
+      { name: "Colway Blue Diamond Cream (50 mL)", dosage: "Apply AM/PM to face and neck", route: "Topical", frequency: "Daily", slug: "colway-blue-diamond-cream" },
+      { name: "Colway Blue Diamond Peeling (75 mL)", dosage: "Apply 2x weekly with gentle circular massage", route: "Topical", frequency: "2x Weekly", slug: "colway-blue-diamond-peeling" },
+      { name: "Colway Cellular Collagen Hydrolipid Wash Gel (250 mL)", dosage: "Gentle cleanse AM/PM with lukewarm water", route: "Topical", frequency: "Twice Daily", slug: "colway-collagen-wash-gel" }
+    ],
+    monitoring: [
+      { week: 4, labs: ["High-Frequency Dermal Ultrasound", "Visia Skin Analysis"], note: "Evaluate epidermal thickness, dermal echogenicity, and wrinkle volume reduction." }
+    ],
+    safetyFlags: [
+      { trigger: "Active Erythema", alert: "Do not vigorously scrub peeling over active broken capillaries or rosacea flare-ups; let enzymes act without mechanical friction." }
+    ],
+    expectedResults: {
+      metric: "Increase in skin hydration (+42%) and dermal elasticity (+28%)",
+      observations: ["Immediate luminous complexion", "Zero dryness or stripping", "Firm contour definition"]
+    },
+    lifestyle: {
+      nutrition: ["Drink minimum 2L water daily", "Support with oral antioxidant vitamin C", "Collagen peptide rich broths"],
+      activity: ["Facial lymphatic drainage massage during cream application", "Strict SPF 50+ mineral sun protection"]
+    },
+    safety: {
+      sideEffects: ["None observed in dermatological testing (CPNP registered, EU 1223/2009 compliant)."],
+      recommendedTests: ["Dermatological baseline consultation"]
+    },
+    clinical_metadata: {
+      clinical_goal: "skin_rejuvenation",
+      secondary_goals: ["anti_aging", "corneocyte_renewal", "hydrolipid_barrier", "collagen_synthesis"],
+      primary_compounds: ["native_tropocollagen", "vep_peptides", "diamond_micro_dust"],
+      protocol_class: "cosmeceutical_based",
+      duration_weeks: 10,
+      intensity_level: "gentle"
+    }
+  },
+
+  colwayHairRestoration: {
+    id: "colway-hair-restoration",
+    slug: "colway-hair-restoration",
+    title: "Colway Anti-DHT Follicular Hair Restoration Protocol",
+    name: "Colway Anti-DHT Follicular Hair Restoration Protocol",
+    category: "Hair Loss / Scalp Health",
+    therapeutic_category: "Follicular Stem Cell Activation & 5α-Reductase Scalp Shield",
+    summary: {
+      goal: "Arrest follicular miniaturization, clear sebum DHT, extend the anagen growth phase, and lock Collagen XVII at the dermal papilla.",
+      duration: "16 weeks",
+      benefits: [
+        "Inhibition of scalp 5α-reductase without systemic anti-androgen side effects",
+        "Stimulation of dermal papilla stem cells via Baicapil™ 2% botanical complex",
+        "Microvascular perfusion boost through micronized diosmin and caffeine",
+        "Systemic amino acid delivery for keratin synthesis via lyophilized Colvita"
+      ]
+    },
+    phases: [
+      {
+        name: "Phase 1: Ostium Detox & Microvascular Priming",
+        weeks: 8,
+        startWeek: 1,
+        endWeek: 8,
+        goal: "Decongest sebaceous ostia, reduce scalp inflammation, and initiate follicular recruitment.",
+        medications: [
+          { name: "Strengthening Hair Shampoo", dosage: "5-10 mL", weeklyDose: 4, frequency: "3-4x weekly", route: "topical scalp", days: ["Mon", "Wed", "Fri", "Sun"], productSlug: "colway-strengthening-shampoo" },
+          { name: "Strengthening Hair Conditioner", dosage: "5-10 mL", weeklyDose: 4, frequency: "3-4x weekly after wash", route: "topical hair", days: ["Mon", "Wed", "Fri", "Sun"], productSlug: "colway-strengthening-conditioner" },
+          { name: "Colvita Bioactive Collagen", dosage: "2 capsules", weeklyDose: 14, frequency: "Daily with main meals", route: "oral", days: ["Daily"], productSlug: "colway-colvita" }
+        ]
+      },
+      {
+        name: "Phase 2: Anagen Anchorage & Stem Cell Consolidation",
+        weeks: 8,
+        startWeek: 9,
+        endWeek: 16,
+        goal: "Consolidate Collagen XVII anchoring fibrils and increase hair shaft tensile thickness.",
+        medications: [
+          { name: "Strengthening Hair Shampoo", dosage: "5-10 mL", weeklyDose: 3, frequency: "3x weekly", route: "topical scalp", days: ["Tue", "Thu", "Sat"], productSlug: "colway-strengthening-shampoo" },
+          { name: "Strengthening Hair Conditioner", dosage: "5-10 mL", weeklyDose: 3, frequency: "3x weekly", route: "topical hair", days: ["Tue", "Thu", "Sat"], productSlug: "colway-strengthening-conditioner" },
+          { name: "Colvita Bioactive Collagen", dosage: "2 capsules", weeklyDose: 14, frequency: "Daily with meals", route: "oral", days: ["Daily"], productSlug: "colway-colvita" }
+        ]
+      }
+    ],
+    items: [
+      { name: "Colway Strengthening Hair Shampoo (250 mL)", dosage: "Massage into wet scalp for 2-3 min, rinse with cool water", route: "Topical", frequency: "3-4x Weekly", slug: "colway-strengthening-shampoo" },
+      { name: "Colway Strengthening Hair Conditioner (200 mL)", dosage: "Apply roots to ends, leave 3-5 min, rinse", route: "Topical", frequency: "After Every Wash", slug: "colway-strengthening-conditioner" },
+      { name: "Colvita Bioactive Native Collagen (60/120 Caps)", dosage: "2 capsules daily with a glass of water and meal", route: "Oral", frequency: "Daily", slug: "colway-colvita" }
+    ],
+    monitoring: [
+      { week: 8, labs: ["Digital Trichoscopy (Fotofinder)", "Hair Pull Test", "Serum Ferritin & Zinc"], note: "Quantify anagen/telogen ratio and hair shaft caliber." }
+    ],
+    safetyFlags: [
+      { trigger: "Post-Hair Transplant", alert: "Safe to resume Colway Strengthening Shampoo starting Day 14 post-FUE once graft sites have fully re-epithelialized." }
+    ],
+    expectedResults: {
+      metric: "Hair density improvement (+18% to +26%) and shedding reduction (-60%)",
+      observations: ["Dramatically less hair in drain after week 4", "Increased volume and hair anchoring", "Absence of scalp sebum itchiness"]
+    },
+    lifestyle: {
+      nutrition: ["High sulfur amino acids (cysteine, methionine)", "Iron & Biotin optimization", "Adequate protein intake (1.5g/kg)"],
+      activity: ["Daily circular scalp massage for 3-5 minutes", "Avoid excessive heat styling >160°C"]
+    },
+    safety: {
+      sideEffects: ["None; 100% free of finasteride/minoxidil systemic cardiovascular or endocrine side effects."],
+      recommendedTests: ["Trichogram", "Serum 25-OH Vitamin D3", "Free Testosterone", "Ferritin"]
+    },
+    clinical_metadata: {
+      clinical_goal: "hair_restoration",
+      secondary_goals: ["alopecia_reduction", "follicular_stem_cells", "dht_block", "collagen_xvii"],
+      primary_compounds: ["baicapil_2pct", "diosmin", "native_tropocollagen", "keratin"],
+      protocol_class: "trichological_based",
+      duration_weeks: 16,
+      intensity_level: "moderate"
+    }
+  },
+
+  colwayNutricosmetic: {
+    id: "colway-nutricosmetic",
+    slug: "colway-nutricosmetic",
+    title: "Colway Extracellular Matrix & Cellular Longevity Protocol",
+    name: "Colway Extracellular Matrix & Cellular Longevity Protocol",
+    category: "Longevity & Cellular",
+    therapeutic_category: "Systemic Native Tropocollagen & Chlorella Plant Hydroxyproline Bio-Scaffold",
+    summary: {
+      goal: "Supply the systemic amino acid pool (Gly-Pro-Hyp) required for fibroblast neo-collagenesis, protect joint cartilage, and reinforce connective tissue longevity.",
+      duration: "12 weeks",
+      benefits: [
+        "Freeze-dried active native fish tropocollagen preserving the intact triple-helix",
+        "Marine algae Fucus vesiculosus supplying organic trace iodine and minerals",
+        "Dual inside-out synergy: oral systemic replenishment + transdermal vegan matrix",
+        "Zero gastric degradation: rapid small-intestine oligopeptide transcellular uptake"
+      ]
+    },
+    phases: [
+      {
+        name: "Phase 1: Systemic ECM Saturation",
+        weeks: 6,
+        startWeek: 1,
+        endWeek: 6,
+        goal: "Saturate the systemic pool of native hydroxyproline and activate fibroblast receptors.",
+        medications: [
+          { name: "Colvita Bioactive Native Collagen", dosage: "2 capsules", weeklyDose: 14, frequency: "Twice daily with meals (1 AM, 1 PM)", route: "oral", days: ["Daily"], productSlug: "colway-colvita" },
+          { name: "Collagen Vege Airless Gel", dosage: "1-2 pumps", weeklyDose: 7, frequency: "Every evening on moist skin", route: "topical", days: ["Daily"], productSlug: "colway-collagen-vege" }
+        ]
+      },
+      {
+        name: "Phase 2: Cellular Longevity & Neocollagenesis Maintenance",
+        weeks: 6,
+        startWeek: 7,
+        endWeek: 12,
+        goal: "Maintain optimal extracellular matrix density and connective tissue resilience.",
+        medications: [
+          { name: "Colvita Bioactive Native Collagen", dosage: "2 capsules", weeklyDose: 14, frequency: "Morning with breakfast", route: "oral", days: ["Daily"], productSlug: "colway-colvita" },
+          { name: "Collagen Vege Airless Gel", dosage: "1-2 pumps", weeklyDose: 7, frequency: "Every evening on moist skin", route: "topical", days: ["Daily"], productSlug: "colway-collagen-vege" }
+        ]
+      }
+    ],
+    items: [
+      { name: "Colway Colvita Freeze-Dried Native Collagen (60/120 Caps)", dosage: "2 capsules daily with a glass of water and meal", route: "Oral", frequency: "Daily", slug: "colway-colvita" },
+      { name: "Colway Collagen Vege (45 mL)", dosage: "1-2 pumps applied on clean, slightly damp skin every evening", route: "Topical", frequency: "Nightly", slug: "colway-collagen-vege" }
+    ],
+    monitoring: [
+      { week: 6, labs: ["HS-Omega-3 Index", "Intracellular NAD+ DBS", "Dermal Biometric Elasticity"], note: "Assess cellular membrane lipid balance and biological aging rate." }
+    ],
+    safetyFlags: [
+      { trigger: "Iodine Sensitivity", alert: "Colvita contains natural bladderwrack algae (Fucus vesiculosus) with organic trace iodine. Consult your endocrinologist if diagnosed with active untreated hyperthyroidism or Hashimoto's with high iodine sensitivity." }
+    ],
+    expectedResults: {
+      metric: "Connective tissue joint comfort (+35%) and skin barrier hydration (+40%)",
+      observations: ["Reduced morning joint stiffness", "Smoother skin texture over entire body", "Strengthened nail beds and thicker hair"]
+    },
+    lifestyle: {
+      nutrition: ["Vitamin C rich foods to act as essential cofactor for lysyl oxidase crosslinking", "Plenty of mineralized water"],
+      activity: ["Low-impact resistance training to stimulate mechanical osteocyte and chondrocyte signaling"]
+    },
+    safety: {
+      sideEffects: ["Extremely well tolerated; food supplement registered across the European Union under EFSA guidelines."],
+      recommendedTests: ["Thyroid panel (TSH, Free T4) if sensitive to natural marine iodine"]
+    },
+    clinical_metadata: {
+      clinical_goal: "extracellular_matrix_longevity",
+      secondary_goals: ["anti_aging", "joint_health", "skin_turgor", "collagen_triple_helix"],
+      primary_compounds: ["native_tropocollagen", "fucus_algae", "chlorella_hydroxyproline"],
+      protocol_class: "cosmeceutical_based",
+      duration_weeks: 12,
+      intensity_level: "gentle"
     }
   }
 };

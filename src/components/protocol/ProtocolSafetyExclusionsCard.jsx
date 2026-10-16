@@ -12,7 +12,41 @@ export default function ProtocolSafetyExclusionsCard({
 }) {
   const [copiedChecklist, setCopiedChecklist] = useState(false);
 
-  const absoluteExclusions = [
+  const protoCategory = String(protocol?.category || protocol?.therapeutic_category || protocol?.goal || '').toLowerCase();
+  const isCosmeticOrTrichology = 
+    protoCategory.includes('cosmetic') || 
+    protoCategory.includes('trichology') || 
+    protoCategory.includes('skin') || 
+    protoCategory.includes('hair') ||
+    protocol?.clinical_metadata?.protocol_class === 'trichological_based' ||
+    protocol?.clinical_metadata?.protocol_class === 'cosmeceutical_based';
+
+  const absoluteExclusions = isCosmeticOrTrichology ? [
+    {
+      gate: 'GATE 01',
+      title: 'Severe Fish / Marine Tropocollagen Hypersensitivity',
+      subtitle: 'Native Freshwater / Marine Protein Allergy Barrier',
+      desc: 'Documented history of severe IgE-mediated anaphylaxis or acute urticaria following oral or topical exposure to native fish proteins, freshwater carp/hypophthalmichthys extracts, or marine algae (Fucus vesiculosus).',
+      tag: 'ABSOLUTE STOP · HALT THERAPY',
+      rule: 'Contraindication Threshold: Confirmed marine protein anaphylaxis. For vegan patients, recommend 100% plant-based Collagen Vege.'
+    },
+    {
+      gate: 'GATE 02',
+      title: 'Severe Active Scalp Infection or Ulcerative Dermatosis',
+      subtitle: 'Follicular Barrier Disruption Safeguard',
+      desc: 'Active purulent folliculitis, severe weeping scalp eczema, untreated tinea capitis, or unepithelialized post-surgical wounds. Requires resolution with topical antimicrobials before initiating peptide or hair strengthening actives.',
+      tag: 'DERMATOLOGICAL CLEARANCE REQUIRED',
+      rule: 'Contraindication Threshold: Active bacterial/fungal scalp infection. Delay until complete re-epithelialization.'
+    },
+    {
+      gate: 'GATE 03',
+      title: 'Active Untreated Severe Hyperthyroidism & Iodine Sensitivity',
+      subtitle: 'Marine Bladderwrack Iodine Metabolic Safeguard',
+      desc: 'Uncontrolled thyrotoxicosis, active toxic multinodular goiter, or severe documented iodine hypersensitivity. Colvita contains natural organic trace iodine from Fucus vesiculosus algae.',
+      tag: 'ENDOCRINE CLEARANCE MANDATORY',
+      rule: 'Contraindication Threshold: Uncontrolled TSH suppression < 0.1 mIU/L or documented iodine anaphylactoid reaction.'
+    }
+  ] : [
     {
       gate: 'GATE 01',
       title: 'Active Peptide Hypersensitivity & Excipient Anaphylaxis',
@@ -39,7 +73,32 @@ export default function ProtocolSafetyExclusionsCard({
     }
   ];
 
-  const relativePrecautions = [
+  const relativePrecautions = isCosmeticOrTrichology ? [
+    {
+      gate: 'PREC 01',
+      title: 'Immediate Post-Hair Transplant Follicular Fragility (Day 0–14 FUE/FUT)',
+      subtitle: 'Graft Dislodgement & Mechanical Friction Surveillance',
+      desc: 'Newly implanted follicular units require 10–14 days for firm perifollicular dermal anchoring. Avoid vigorous mechanical scalp massage or abrasive exfoliation during the initial 14-day re-epithelialization phase.',
+      tag: 'GRAFT HEALING WINDOW',
+      rule: 'Monitoring Directive: Begin gentle foam application on Day 14 post-op with surgeon clearance.'
+    },
+    {
+      gate: 'PREC 02',
+      title: 'Active Cutaneous Rosacea Flare or Severe Facial Erythema',
+      subtitle: 'Micro-Abrasive Friction Avoidance',
+      desc: 'During active inflammatory papulopustular rosacea or acute barrier breakdown, avoid physical micro-abrasive friction. Use enzymatic exfoliating action only without vigorous rubbing.',
+      tag: 'DERMAL BARRIER INTEGRITY',
+      rule: 'Monitoring Directive: Allow enzymatic action for 2–3 minutes without mechanical friction; rinse thoroughly with tepid water.'
+    },
+    {
+      gate: 'PREC 03',
+      title: 'Thermal Denaturation of Native Collagen Triple Helix (>26°C Topical Exposure)',
+      subtitle: 'Bio-Activity Temperature Threshold Safeguard',
+      desc: 'Native freshwater fish tropocollagen maintains its triple-helix spatial conformation exclusively at physiological and ambient temperatures below 26°C. Rinsing hair or skin with scalding water (>38°C) denatures the tropocollagen into broken gelatin fragments.',
+      tag: 'TEMPERATURE SENSITIVE BIO-ACTIVES',
+      rule: 'Usage Directive: Always cleanse and rinse treated skin and scalp with lukewarm or cool water (≤30°C).'
+    }
+  ] : [
     {
       gate: 'PREC 01',
       title: 'Renal Filtration Compromise & Clearance Adjustment (eGFR < 45 mL/min)',

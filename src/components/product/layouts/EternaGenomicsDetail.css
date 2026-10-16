@@ -1,1795 +1,1378 @@
 /* ==========================================================================
-   EternaGenomicsDetail.css — ETERNA DX Dedicated Public Product Layout
-   Aesthetic: Ultra-premium dark canvas with clinical cyan/teal & gold accents.
-   Features: Dual-column grid with right sidebar, multi-photo original gallery,
-             patient wellness tracking application modules & institutional footer.
+   EternaGenomicsDetail.css — ETERNA DX Dedicated Product Experience
+   UX Architecture: Google Cloud Console UX (GCP)
+   Palette: Google Cloud Dark Canvas (#18191c / #202124), GCP Blue (#1a73e8 / #8ab4f8),
+            GCP Surface (#292a2d / #303134), GCP Borders (#3c4043 / #5f6368),
+            and Semantic Status Accents (Green #81c995, Amber #fdd663, Mint #4FC5BB).
+   Components: Rectangular 4px/6px GCP buttons, Google Cloud resource cards,
+               console-grade data tables, sticky right inspector drawer, zero prices.
    ========================================================================== */
+
+:root {
+  --gcp-bg: #18191c;
+  --gcp-surface: #202124;
+  --gcp-surface-card: #28292d;
+  --gcp-surface-hover: #303136;
+  --gcp-border: #3c4043;
+  --gcp-border-subtle: rgba(255, 255, 255, 0.08);
+  --gcp-border-focus: #8ab4f8;
+  
+  /* Google Cloud Semantic Palette */
+  --gcp-blue-primary: #1a73e8;
+  --gcp-blue-hover: #1557b0;
+  --gcp-blue-active: #174ea6;
+  --gcp-blue-light: #8ab4f8;
+  --gcp-blue-surface: rgba(138, 180, 248, 0.08);
+  
+  --gcp-green: #81c995;
+  --gcp-green-surface: rgba(129, 201, 149, 0.12);
+  --gcp-amber: #fdd663;
+  --gcp-amber-surface: rgba(253, 214, 99, 0.12);
+  --gcp-mint: #4FC5BB;
+  
+  --gcp-text-primary: #ffffff;
+  --gcp-text-secondary: #bdc1c6;
+  --gcp-text-muted: #9aa0a6;
+  --gcp-text-disabled: #80868b;
+  
+  --gcp-radius-btn: 4px;
+  --gcp-radius-card: 8px;
+  --gcp-shadow-btn: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  --gcp-shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.37), 0 2px 6px 2px rgba(0, 0, 0, 0.18);
+}
 
 .eterna-page-root {
   min-height: 100vh;
-  background-color: #07090e;
-  color: #f1f5f9;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  padding-bottom: 5rem;
+  background-color: var(--gcp-bg);
+  color: var(--gcp-text-primary);
+  font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   position: relative;
   overflow-x: hidden;
+  padding-bottom: 5rem;
 }
 
-/* Background Ambient Glows */
-.eterna-bg-glow-top {
+/* Subtle Console Ambient Mesh */
+.eterna-hero-bg-texture {
   position: absolute;
   top: 0;
+  left: 0;
+  right: 0;
+  height: 700px;
+  background-image: url('/images/products/eterna/hero_bg_epigenetic.webp');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.06;
+  mix-blend-mode: luminosity;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.eterna-radial-glow {
+  position: absolute;
+  top: 80px;
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: 1200px;
-  height: 550px;
-  background: radial-gradient(circle at 50% 15%, rgba(13, 148, 136, 0.16) 0%, rgba(20, 184, 166, 0.05) 45%, transparent 70%);
+  width: min(1100px, 92vw);
+  height: 480px;
+  background: radial-gradient(ellipse at 50% 15%, rgba(26, 115, 232, 0.12) 0%, rgba(79, 197, 187, 0.04) 50%, transparent 75%);
   pointer-events: none;
   z-index: 0;
 }
 
-.eterna-bg-glow-amber {
-  position: absolute;
-  top: 900px;
-  right: -100px;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(217, 119, 6, 0.08) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Container */
-.eterna-container {
-  max-width: 1280px;
+/* Page Master Grid: Console Canvas + Right Inspector Sidebar */
+.eterna-master-layout {
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0 1.25rem;
-  position: relative;
-  z-index: 1;
-}
-
-/* ── Hero Section ── */
-.eterna-hero-grid {
+  padding: 1.5rem 1rem;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2.5rem;
-  padding: 2.5rem 0 3rem;
-  align-items: center;
-}
-
-@media (min-width: 992px) {
-  .eterna-hero-grid {
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: 3.5rem;
-  }
-}
-
-.eterna-hero-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-}
-
-.eterna-badge-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 99px;
-  background: rgba(13, 148, 136, 0.15);
-  border: 1px solid rgba(13, 148, 136, 0.35);
-  color: #2dd4bf;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.eterna-badge-saliva {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 99px;
-  background: rgba(234, 179, 8, 0.12);
-  border: 1px solid rgba(234, 179, 8, 0.3);
-  color: #facc15;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.eterna-badge-ce {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 99px;
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.25);
-  color: #4ade80;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.eterna-hero-title {
-  font-size: 2.15rem;
-  font-weight: 900;
-  color: #ffffff;
-  line-height: 1.18;
-  letter-spacing: -0.02em;
-  margin: 0 0 1rem 0;
-}
-
-@media (min-width: 768px) {
-  .eterna-hero-title {
-    font-size: 2.85rem;
-  }
-}
-
-.eterna-hero-tagline {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2dd4bf;
-  margin-bottom: 0.85rem;
-  font-style: italic;
-}
-
-.eterna-hero-subtitle {
-  font-size: 0.96rem;
-  color: #94a3b8;
-  line-height: 1.65;
-  margin: 0 0 1.75rem 0;
-  max-width: 640px;
-}
-
-/* Hero Key Metric Pills */
-.eterna-hero-stats-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.85rem;
-  margin-bottom: 1.75rem;
-}
-
-@media (min-width: 576px) {
-  .eterna-hero-stats-row {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.eterna-stat-card {
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 12px;
-  padding: 0.85rem 1rem;
-  backdrop-filter: blur(8px);
-}
-
-.eterna-stat-num {
-  font-size: 1.45rem;
-  font-weight: 900;
-  line-height: 1.1;
-  margin-bottom: 0.25rem;
-}
-
-.eterna-stat-num.teal { color: #2dd4bf; }
-.eterna-stat-num.gold { color: #facc15; }
-.eterna-stat-num.cyan { color: #38bdf8; }
-.eterna-stat-num.purple { color: #c084fc; }
-
-.eterna-stat-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.eterna-credentials-row {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-  padding-top: 0.35rem;
-}
-
-.eterna-credential-item {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.78rem;
-  color: #94a3b8;
-}
-
-/* ── Hero Media Showcase with Multi-Photo Gallery ── */
-.eterna-hero-media-card {
-  background: #0d121c;
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7), 0 0 30px rgba(13, 148, 136, 0.12);
-  display: flex;
-  flex-direction: column;
-}
-
-.eterna-media-viewport {
+  gap: 1.75rem;
   position: relative;
-  background: radial-gradient(circle at 50% 50%, #151d2a 0%, #0d121c 100%);
-  padding: 1.75rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: zoom-in;
-  min-height: 310px;
-  overflow: hidden;
-}
-
-.eterna-kit-img {
-  max-width: 100%;
-  max-height: 290px;
-  object-fit: contain;
-  transition: transform 0.3s ease;
-  filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.6));
-}
-
-.eterna-media-viewport:hover .eterna-kit-img {
-  transform: scale(1.03);
-}
-
-.eterna-media-tag-overlay {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
   z-index: 2;
 }
 
-.eterna-media-pill-tag {
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(45, 212, 191, 0.4);
-  color: #2dd4bf;
-  padding: 0.25rem 0.65rem;
-  border-radius: 99px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  backdrop-filter: blur(6px);
-}
-
-.eterna-zoom-overlay {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(51, 65, 85, 0.6);
-  border-radius: 99px;
-  padding: 0.35rem 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.72rem;
-  color: #cbd5e1;
-  font-weight: 600;
-  backdrop-filter: blur(6px);
-  transition: all 0.2s ease;
-}
-
-.eterna-media-viewport:hover .eterna-zoom-overlay {
-  background: #2dd4bf;
-  color: #07090e;
-  border-color: #2dd4bf;
-}
-
-/* Media Thumbnails Selector */
-.eterna-media-thumbs-strip {
-  display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: #090e17;
-  border-top: 1px solid rgba(51, 65, 85, 0.4);
-  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
-
-.eterna-thumb-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 8px;
-  padding: 0.35rem 0.45rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 68px;
-  flex-shrink: 0;
-}
-
-.eterna-thumb-btn:hover {
-  border-color: rgba(45, 212, 191, 0.5);
-  background: rgba(15, 23, 42, 0.9);
-}
-
-.eterna-thumb-btn.active {
-  border-color: #2dd4bf;
-  background: rgba(45, 212, 191, 0.12);
-  box-shadow: 0 0 10px rgba(45, 212, 191, 0.2);
-}
-
-.eterna-thumb-img {
-  width: 38px;
-  height: 38px;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.eterna-thumb-label {
-  font-size: 0.62rem;
-  font-weight: 700;
-  color: #94a3b8;
-  white-space: nowrap;
-  max-width: 66px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.eterna-thumb-btn.active .eterna-thumb-label {
-  color: #2dd4bf;
-}
-
-/* Procurement Bar in Hero */
-.eterna-hero-procurement-bar {
-  padding: 1.25rem;
-  background: #0d121c;
-}
-
-.eterna-price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.eterna-price-val {
-  font-size: 1.85rem;
-  font-weight: 900;
-  color: #ffffff;
-  line-height: 1;
-}
-
-.eterna-price-sub {
-  font-size: 0.74rem;
-  color: #94a3b8;
-  margin-top: 0.25rem;
-}
-
-.eterna-batch-tag {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.2rem;
-  font-size: 0.72rem;
-}
-
-.eterna-batch-code {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: rgba(30, 41, 59, 0.8);
-  border: 1px solid rgba(51, 65, 85, 0.6);
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #2dd4bf;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.eterna-batch-code:hover {
-  border-color: #2dd4bf;
-  background: rgba(45, 212, 191, 0.1);
-}
-
-.eterna-order-actions {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 0.75rem;
-}
-
-.eterna-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-  border: 1px solid #14b8a6;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 0.88rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 10px;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
-  transition: all 0.2s ease;
-}
-
-.eterna-btn-primary:hover {
-  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.45);
-}
-
-.eterna-btn-primary.full-width {
-  width: 100%;
-}
-
-.eterna-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.7);
-  color: #f1f5f9;
-  font-weight: 600;
-  font-size: 0.85rem;
-  padding: 0.75rem 1.1rem;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.eterna-btn-secondary:hover {
-  background: rgba(51, 65, 85, 0.8);
-  border-color: #94a3b8;
-}
-
-.eterna-btn-secondary.full-width {
-  width: 100%;
-}
-
-/* ── Segmented Navigation Tabs ── */
-.eterna-tabs-wrapper {
-  margin: 1.5rem 0 2rem;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
-  position: sticky;
-  top: 56px;
-  background: rgba(7, 9, 14, 0.95);
-  backdrop-filter: blur(12px);
-  z-index: 10;
-  padding: 0.5rem 0;
-}
-
-.eterna-tabs-scroll {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding-bottom: 0.25rem;
-}
-
-.eterna-tabs-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.eterna-tab-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  background: transparent;
-  border: 1px solid transparent;
-  color: #94a3b8;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-
-.eterna-tab-btn:hover {
-  color: #f1f5f9;
-  background: rgba(30, 41, 59, 0.4);
-}
-
-.eterna-tab-btn.active {
-  color: #2dd4bf;
-  background: rgba(13, 148, 136, 0.15);
-  border-color: rgba(13, 148, 136, 0.35);
-  font-weight: 700;
-}
-
-/* ── Dual-Column Layout: Main Content + Right Sidebar ── */
-.eterna-layout-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  align-items: start;
-}
-
-@media (min-width: 992px) {
-  .eterna-layout-grid {
-    grid-template-columns: 1fr 340px;
+@media (min-width: 1100px) {
+  .eterna-master-layout {
+    grid-template-columns: minmax(0, 1fr) 350px;
     gap: 2.25rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .eterna-layout-grid {
-    grid-template-columns: 1fr 360px;
-    gap: 2.75rem;
+    padding: 1.75rem 2rem;
   }
 }
 
 .eterna-main-content {
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
 }
 
-/* ── Section Cards (Main Content Area) ── */
-.eterna-section-card {
-  background: #0d121c;
-  border: 1px solid rgba(51, 65, 85, 0.45);
-  border-radius: 18px;
-  padding: 1.75rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-@media (min-width: 768px) {
-  .eterna-section-card {
-    padding: 2.25rem;
-  }
-}
-
-.eterna-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1.75rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.eterna-section-title-wrap {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-}
-
-.eterna-section-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(13, 148, 136, 0.15);
-  border: 1px solid rgba(13, 148, 136, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #2dd4bf;
-  flex-shrink: 0;
-}
-
-.eterna-section-title {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0 0 0.35rem 0;
-}
-
-.eterna-section-subtitle {
-  font-size: 0.85rem;
-  color: #94a3b8;
-  margin: 0;
-  max-width: 600px;
-  line-height: 1.5;
-}
-
-/* ── Featured Patient Wellness Tracking Features ── */
-.eterna-tracking-features-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.15rem;
-  margin-bottom: 2rem;
-}
-
-@media (min-width: 640px) {
-  .eterna-tracking-features-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.eterna-tracking-feature-box {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.45);
-  border-radius: 14px;
-  padding: 1.15rem 1.25rem;
-  transition: all 0.2s ease;
-}
-
-.eterna-tracking-feature-box:hover {
-  border-color: rgba(45, 212, 191, 0.4);
-  background: rgba(15, 23, 42, 0.8);
-}
-
-.eterna-feature-header {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-bottom: 0.65rem;
-}
-
-.eterna-feature-header h4 {
-  font-size: 0.92rem;
-  font-weight: 800;
-  color: #f1f5f9;
-  margin: 0;
-}
-
-.eterna-tracking-feature-box p {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  line-height: 1.55;
-  margin: 0;
-}
-
-/* App Screenshots Gallery Strip */
-.eterna-app-gallery-section {
-  background: #090e17;
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 16px;
-  padding: 1.5rem;
-  margin-bottom: 1.75rem;
-}
-
-.eterna-app-gallery-title {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.88rem;
-  font-weight: 800;
-  color: #2dd4bf;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 1.25rem;
-}
-
-.eterna-app-screenshots-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-}
-
-@media (min-width: 640px) {
-  .eterna-app-screenshots-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.eterna-app-screen-card {
-  background: #0d121c;
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  display: flex;
-  flex-direction: column;
-}
-
-.eterna-app-screen-card:hover {
-  border-color: #2dd4bf;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(45, 212, 191, 0.15);
-}
-
-.eterna-app-img-wrap {
-  position: relative;
-  height: 240px;
-  background: #06090e;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.eterna-app-screen-img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.eterna-app-screen-card:hover .eterna-app-screen-img {
-  transform: scale(1.04);
-}
-
-.eterna-app-zoom-badge {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(51, 65, 85, 0.6);
-  border-radius: 99px;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #2dd4bf;
-  backdrop-filter: blur(4px);
-}
-
-.eterna-app-screen-caption {
-  padding: 0.85rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  background: #0d121c;
-}
-
-.eterna-app-screen-caption strong {
-  font-size: 0.78rem;
-  color: #f1f5f9;
-  font-weight: 700;
-}
-
-.eterna-app-screen-caption span {
-  font-size: 0.7rem;
-  color: #94a3b8;
-}
-
-/* Doctor Callout Box */
-.eterna-doctor-callout-box {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.25rem;
-  background: linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(15, 23, 42, 0.6) 100%);
-  border: 1px solid rgba(45, 212, 191, 0.3);
-  border-radius: 14px;
-}
-
-.eterna-doctor-callout-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: rgba(13, 148, 136, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-/* ── Biological Age & Epigenetic Clocks ── */
-.eterna-bioage-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-@media (min-width: 768px) {
-  .eterna-bioage-grid {
-    grid-template-columns: 1.1fr 1fr;
-  }
-}
-
-.eterna-rate-meter-box {
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  border-radius: 16px;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.eterna-rate-val-row {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  margin: 0.75rem 0 1rem;
-}
-
-.eterna-rate-huge {
-  font-size: 3.5rem;
-  font-weight: 900;
-  color: #2dd4bf;
-  line-height: 1;
-  letter-spacing: -0.03em;
-}
-
-.eterna-rate-subtext {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.eterna-rate-status-good {
-  color: #4ade80;
-  font-weight: 700;
-  font-size: 0.88rem;
-}
-
-.eterna-bio-compare-box {
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  border-radius: 16px;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.eterna-organ-pill {
-  font-size: 0.73rem;
-  color: #94a3b8;
-  background: rgba(30, 41, 59, 0.6);
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  border: 1px solid rgba(51, 65, 85, 0.4);
-}
-
-/* ── 5 Genomic Pillars Navigation & Content ── */
-.eterna-pillars-nav {
-  display: flex;
-  gap: 0.6rem;
-  overflow-x: auto;
-  scrollbar-width: thin;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.eterna-pillar-card-btn {
+/* ==========================================================================
+   GOOGLE CLOUD UX: BUTTONS SYSTEM
+   ========================================================================== */
+.gcp-btn-primary {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.65rem 1rem;
-  border-radius: 10px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.45);
-  color: #cbd5e1;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-}
-
-.eterna-pillar-card-btn:hover {
-  background: rgba(30, 41, 59, 0.8);
-  border-color: #94a3b8;
-}
-
-.eterna-pillar-card-btn.active {
-  background: rgba(15, 23, 42, 0.95);
-  border-color: #2dd4bf;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: var(--gcp-radius-btn);
+  background-color: var(--gcp-blue-primary);
+  border: 1px solid var(--gcp-blue-primary);
   color: #ffffff;
-  box-shadow: 0 0 12px rgba(45, 212, 191, 0.2);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  cursor: pointer;
+  box-shadow: var(--gcp-shadow-btn);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+  text-decoration: none;
 }
 
-.eterna-pillar-dossier {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 14px;
-  padding: 1.5rem;
+.gcp-btn-primary:hover:not(:disabled) {
+  background-color: var(--gcp-blue-hover);
+  border-color: var(--gcp-blue-hover);
+  box-shadow: 0 1px 3px 0 rgba(60, 64, 67, 0.35), 0 4px 8px 3px rgba(60, 64, 67, 0.2);
+  color: #ffffff;
 }
 
-.eterna-gene-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-  margin-top: 1.25rem;
+.gcp-btn-primary:active:not(:disabled) {
+  background-color: var(--gcp-blue-active);
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3);
 }
 
-@media (min-width: 768px) {
-  .eterna-gene-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.eterna-gene-card {
-  background: #090e17;
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 10px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.eterna-gene-symbol {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.88rem;
-  font-weight: 800;
-  color: #2dd4bf;
-  margin-bottom: 0.2rem;
-}
-
-.eterna-gene-name {
-  font-size: 0.74rem;
-  color: #94a3b8;
-  margin-bottom: 0.65rem;
-}
-
-.eterna-gene-finding {
-  font-size: 0.8rem;
-  color: #e2e8f0;
-  line-height: 1.45;
-}
-
-/* ── Wearables Showcase ── */
-.eterna-wearables-showcase {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  align-items: center;
-}
-
-@media (min-width: 768px) {
-  .eterna-wearables-showcase {
-    grid-template-columns: 1.2fr 0.8fr;
-  }
-}
-
-.eterna-devices-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.eterna-device-pill {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #cbd5e1;
-  background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  padding: 0.25rem 0.6rem;
-  border-radius: 6px;
-}
-
-.eterna-wearables-img-card {
-  position: relative;
-  background: radial-gradient(circle at 50% 50%, #151d2a 0%, #0d121c 100%);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  border-radius: 16px;
-  padding: 1rem;
-  cursor: zoom-in;
-  overflow: hidden;
-  display: flex;
+.gcp-btn-secondary,
+.gcp-btn-outlined {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: var(--gcp-radius-btn);
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--gcp-border);
+  color: var(--gcp-blue-light);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+  text-decoration: none;
 }
 
-.eterna-wearables-img {
-  max-width: 100%;
-  border-radius: 10px;
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+.gcp-btn-secondary:hover:not(:disabled),
+.gcp-btn-outlined:hover:not(:disabled) {
+  background-color: var(--gcp-blue-surface);
+  border-color: var(--gcp-blue-light);
+  color: #a8c7fa;
+}
+
+.gcp-btn-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  background: transparent;
+  border: none;
+  border-radius: var(--gcp-radius-btn);
+  color: var(--gcp-blue-light);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  text-decoration: none;
+}
+
+.gcp-btn-text:hover {
+  background-color: var(--gcp-blue-surface);
+}
+
+/* ==========================================================================
+   GOOGLE CLOUD UX: STATUS CHIPS & BADGES
+   ========================================================================== */
+.gcp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.gcp-badge.blue {
+  background-color: var(--gcp-blue-surface);
+  border: 1px solid rgba(138, 180, 248, 0.35);
+  color: var(--gcp-blue-light);
+}
+
+.gcp-badge.green {
+  background-color: var(--gcp-green-surface);
+  border: 1px solid rgba(129, 201, 149, 0.35);
+  color: var(--gcp-green);
+}
+
+.gcp-badge.amber {
+  background-color: var(--gcp-amber-surface);
+  border: 1px solid rgba(253, 214, 99, 0.35);
+  color: var(--gcp-amber);
+}
+
+.gcp-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* ==========================================================================
+   HERO SECTION: GCP CONSOLE + ORIGINAL 3D MOCKUP
+   ========================================================================== */
+.eterna-hero-section {
+  position: relative;
+  padding: 1.25rem 0 3rem;
+  text-align: center;
+}
+
+.eterna-pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  background: var(--gcp-blue-surface);
+  border: 1px solid rgba(138, 180, 248, 0.35);
+  color: var(--gcp-blue-light);
+  font-weight: 500;
+  margin-bottom: 1.75rem;
+}
+
+/* Tri-Device 3D Stage */
+.eterna-tri-device-stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 240px;
+  margin: 1rem auto 2.5rem;
+  max-width: 900px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .eterna-tri-device-stage {
+    min-height: 380px;
+    margin: 1.5rem auto 3.5rem;
+  }
+}
+
+.eterna-floating-device-left {
+  position: absolute;
+  left: 4%;
+  bottom: 0.5rem;
+  z-index: 10;
+  transform: rotate(-13deg);
+  opacity: 0.95;
   transition: transform 0.3s ease;
+  display: none;
 }
 
-.eterna-wearables-img-card:hover .eterna-wearables-img {
-  transform: scale(1.03);
-}
-
-/* ── Saliva Protocol Steps ── */
-.eterna-protocol-steps {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-@media (min-width: 576px) {
-  .eterna-protocol-steps {
-    grid-template-columns: repeat(2, 1fr);
+@media (min-width: 640px) {
+  .eterna-floating-device-left {
+    display: block;
+    width: 140px;
+    height: 280px;
   }
 }
 
 @media (min-width: 992px) {
-  .eterna-protocol-steps {
-    grid-template-columns: repeat(4, 1fr);
+  .eterna-floating-device-left {
+    width: 160px;
+    height: 320px;
+    left: 6%;
   }
 }
 
-.eterna-step-card {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 12px;
-  padding: 1.25rem;
-  position: relative;
-}
-
-.eterna-step-number {
-  font-size: 1.75rem;
-  font-weight: 900;
-  color: rgba(45, 212, 191, 0.25);
-  line-height: 1;
-  margin-bottom: 0.5rem;
-}
-
-.eterna-step-title {
-  font-size: 0.88rem;
-  font-weight: 800;
-  color: #f1f5f9;
-  margin: 0 0 0.4rem 0;
-}
-
-.eterna-step-desc {
-  font-size: 0.78rem;
-  color: #94a3b8;
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* ── Traceability Table ── */
-.eterna-traceability-table {
+.eterna-floating-device-left .device-shell {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 0.84rem;
-}
-
-.eterna-traceability-table tr {
-  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
-}
-
-.eterna-traceability-table td {
-  padding: 0.85rem 0.5rem;
-}
-
-.eterna-traceability-table td:first-child {
-  color: #94a3b8;
-  font-weight: 600;
-  width: 32%;
-}
-
-.eterna-traceability-table td:last-child {
-  color: #f1f5f9;
-}
-
-/* ── Companion Protocols ── */
-.eterna-protocols-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-@media (min-width: 640px) {
-  .eterna-protocols-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.eterna-protocol-card {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.4);
+  height: 100%;
   border-radius: 12px;
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.eterna-protocol-target {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #2dd4bf;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin-bottom: 0.35rem;
-}
-
-.eterna-protocol-name {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #ffffff;
-  margin-bottom: 0.4rem;
-}
-
-.eterna-protocol-desc {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.eterna-protocol-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #38bdf8;
-  text-decoration: none;
-  align-self: flex-start;
-  transition: gap 0.2s ease;
-}
-
-.eterna-protocol-link:hover {
-  gap: 0.55rem;
-  color: #2dd4bf;
-}
-
-/* ── RIGHT COLUMN: DEDICATED CLINICAL SIDEBAR ── */
-.eterna-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  position: sticky;
-  top: 130px;
-}
-
-.eterna-sidebar-card {
-  background: #0d121c;
-  border: 1px solid rgba(51, 65, 85, 0.45);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  position: relative;
   overflow: hidden;
+  border: 1px solid var(--gcp-border);
+  background: var(--gcp-surface-card);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
 }
 
-.eterna-sidebar-card.highlight {
-  border-color: rgba(45, 212, 191, 0.4);
-  background: linear-gradient(180deg, rgba(13, 148, 136, 0.1) 0%, #0d121c 100%);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 20px rgba(45, 212, 191, 0.1);
-}
-
-.eterna-sidebar-card-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: rgba(13, 148, 136, 0.2);
-  border: 1px solid rgba(45, 212, 191, 0.4);
-  color: #2dd4bf;
-  padding: 0.25rem 0.55rem;
-  border-radius: 99px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  margin-bottom: 0.75rem;
-}
-
-.eterna-sidebar-title {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0 0 0.45rem 0;
-}
-
-.eterna-sidebar-desc {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  line-height: 1.5;
-  margin: 0 0 1rem 0;
-}
-
-.eterna-sidebar-specs-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  border-top: 1px solid rgba(51, 65, 85, 0.4);
-  padding-top: 0.85rem;
-}
-
-.eterna-sidebar-spec-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.76rem;
-}
-
-.eterna-spec-label {
-  color: #94a3b8;
-}
-
-.eterna-spec-val {
-  font-weight: 700;
-  color: #e2e8f0;
-}
-
-/* Sidebar Pricing & Actions */
-.eterna-sidebar-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.85rem;
-}
-
-.eterna-sidebar-price {
-  font-size: 1.75rem;
-  font-weight: 900;
-  color: #ffffff;
-  line-height: 1;
-}
-
-.eterna-sidebar-price-sub {
-  font-size: 0.72rem;
-  color: #94a3b8;
-  margin-top: 0.25rem;
-}
-
-.eterna-sidebar-batch-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
-.eterna-sidebar-cta-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  margin-bottom: 0.85rem;
-}
-
-.eterna-sidebar-guarantee-note {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.72rem;
-  color: #94a3b8;
-}
-
-/* Sidebar Lab Credentials */
-.eterna-sidebar-section-heading {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: #ffffff;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin: 0 0 0.65rem 0;
-}
-
-.eterna-sidebar-checks-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.eterna-sidebar-checks-list li {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.76rem;
-  color: #cbd5e1;
-}
-
-/* Sidebar Quick Links */
-.eterna-sidebar-quick-links {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.eterna-quick-nav-btn {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: transparent;
-  border: 1px solid transparent;
-  color: #94a3b8;
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 0.5rem 0.65rem;
-  border-radius: 8px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease;
-}
-
-.eterna-quick-nav-btn:hover {
-  background: rgba(30, 41, 59, 0.5);
-  color: #f1f5f9;
-}
-
-.eterna-quick-nav-btn.active {
-  background: rgba(13, 148, 136, 0.12);
-  border-color: rgba(45, 212, 191, 0.3);
-  color: #2dd4bf;
-  font-weight: 700;
-}
-
-/* ── Comprehensive Institutional Dark Footer ── */
-.eterna-footer {
-  margin-top: 5rem;
-  background: #04060a;
-  border-top: 1px solid rgba(51, 65, 85, 0.4);
-  padding: 4rem 0 2.5rem;
+.eterna-floating-device-center {
   position: relative;
-  z-index: 2;
+  z-index: 20;
+  width: min(680px, 92vw);
+  border-radius: var(--gcp-radius-card);
+  overflow: hidden;
+  border: 1px solid var(--gcp-border);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 24px 60px rgba(0, 0, 0, 0.75);
+  background: var(--gcp-surface);
+  transition: transform 0.3s ease;
 }
 
-.eterna-footer-inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1.25rem;
+.eterna-floating-device-center img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.eterna-footer-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2.5rem;
-  margin-bottom: 3rem;
+.eterna-floating-device-right {
+  position: absolute;
+  right: 4%;
+  bottom: 0.5rem;
+  z-index: 10;
+  transform: rotate(13deg);
+  opacity: 0.95;
+  transition: transform 0.3s ease;
+  display: none;
 }
 
 @media (min-width: 640px) {
-  .eterna-footer-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .eterna-floating-device-right {
+    display: block;
+    width: 140px;
+    height: 280px;
   }
 }
 
-@media (min-width: 1024px) {
-  .eterna-footer-grid {
-    grid-template-columns: 1.4fr 1fr 1fr 1fr;
-    gap: 3rem;
+@media (min-width: 992px) {
+  .eterna-floating-device-right {
+    width: 160px;
+    height: 320px;
+    right: 6%;
   }
 }
 
-.eterna-footer-brand {
-  display: flex;
-  align-items: baseline;
-  gap: 0.65rem;
-  margin-bottom: 0.85rem;
-}
-
-.eterna-footer-logo-text {
-  font-size: 1.35rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  color: #ffffff;
-}
-
-.eterna-footer-tag {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #2dd4bf;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.eterna-footer-text {
-  font-size: 0.82rem;
-  color: #94a3b8;
-  line-height: 1.6;
-  margin: 0 0 1.25rem 0;
-  max-width: 320px;
-}
-
-.eterna-footer-badge-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  background: rgba(13, 148, 136, 0.12);
-  border: 1px solid rgba(45, 212, 191, 0.3);
-  padding: 0.35rem 0.75rem;
-  border-radius: 99px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #2dd4bf;
-}
-
-.eterna-footer-heading {
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: #f1f5f9;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0 0 1.15rem 0;
-}
-
-.eterna-footer-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-}
-
-.eterna-footer-links li button,
-.eterna-footer-links li a,
-.eterna-footer-links li span {
-  background: transparent;
-  border: none;
-  padding: 0;
-  color: #94a3b8;
-  font-size: 0.8rem;
-  text-align: left;
-  cursor: pointer;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.eterna-footer-links li button:hover,
-.eterna-footer-links li a:hover {
-  color: #2dd4bf;
-}
-
-.eterna-footer-disclaimer-box {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(51, 65, 85, 0.35);
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.eterna-footer-disclaimer-box p {
-  font-size: 0.75rem;
-  color: #64748b;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.eterna-footer-disclaimer-box strong {
-  color: #94a3b8;
-}
-
-.eterna-footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  border-top: 1px solid rgba(51, 65, 85, 0.3);
-  padding-top: 1.75rem;
-  font-size: 0.75rem;
-  color: #64748b;
-}
-
-.eterna-footer-bottom-links {
-  display: flex;
-  gap: 1.25rem;
-  align-items: center;
-}
-
-.eterna-footer-bottom-links a,
-.eterna-footer-bottom-links button {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  text-decoration: none;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.eterna-footer-bottom-links a:hover,
-.eterna-footer-bottom-links button:hover {
-  color: #2dd4bf;
-}
-
-/* ── Interactive Media Arrows ── */
-.eterna-media-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #f1f5f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 5;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
-}
-
-.eterna-media-arrow:hover {
-  background: #2dd4bf;
-  color: #07090e;
-  border-color: #2dd4bf;
-  transform: translateY(-50%) scale(1.1);
-}
-
-.eterna-media-arrow.left {
-  left: 0.75rem;
-}
-
-.eterna-media-arrow.right {
-  right: 0.75rem;
-}
-
-/* ── Interactive Epigenetic Pace of Aging Simulator ── */
-.eterna-simulator-card {
-  background: linear-gradient(145deg, #0f172a 0%, #090e17 100%);
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin: 1.75rem 0;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-.eterna-simulator-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.85rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.eterna-simulator-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.eterna-simulator-badge {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 0.25rem 0.65rem;
-  border-radius: 99px;
-  letter-spacing: 0.03em;
-}
-
-.eterna-simulator-body {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-@media (min-width: 768px) {
-  .eterna-simulator-body {
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: 2rem;
-  }
-}
-
-.eterna-simulator-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.eterna-sim-control-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.eterna-sim-label-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.8rem;
-  color: #94a3b8;
-}
-
-.eterna-sim-val {
-  font-weight: 700;
-  color: #2dd4bf;
-  font-size: 0.9rem;
-}
-
-.eterna-sim-slider {
+.eterna-floating-device-right .device-shell {
   width: 100%;
-  accent-color: #2dd4bf;
-  cursor: pointer;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--gcp-border);
+  background: var(--gcp-surface-card);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
 }
 
-.eterna-simulator-results {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 1.25rem;
+.eterna-floating-device-left:hover {
+  transform: rotate(-10deg) translateY(-6px);
+}
+
+.eterna-floating-device-right:hover {
+  transform: rotate(10deg) translateY(-6px);
+}
+
+/* Hero Typography */
+.eterna-hero-h1 {
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
+  font-weight: 400;
+  line-height: 1.14;
+  color: #ffffff;
+  letter-spacing: -0.015em;
+  margin: 0 auto 1.25rem;
+  max-width: 820px;
+}
+
+.eterna-hero-h1 span.mint-accent {
+  color: var(--gcp-blue-light);
+  font-weight: 400;
+}
+
+.eterna-hero-desc {
+  font-size: clamp(0.92rem, 1.4vw, 1.08rem);
+  color: var(--gcp-text-secondary);
+  max-width: 680px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Hero Action CTAs */
+.eterna-hero-cta-group {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.eterna-sim-kpi-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-.eterna-sim-kpi-item {
-  background: rgba(2, 6, 23, 0.5);
-  border-radius: 8px;
-  padding: 0.75rem;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.eterna-sim-kpi-num {
-  font-size: 1.35rem;
-  font-weight: 800;
-  line-height: 1.1;
-  margin-bottom: 0.25rem;
-}
-
-.eterna-sim-kpi-label {
-  font-size: 0.7rem;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.eterna-sim-summary-box {
-  font-size: 0.78rem;
-  line-height: 1.5;
-  color: #cbd5e1;
-  background: rgba(45, 212, 191, 0.08);
-  border-left: 3px solid #2dd4bf;
-  padding: 0.65rem 0.85rem;
-  border-radius: 0 6px 6px 0;
-}
-
-/* ── 34-Page Sample Clinical Report Module ── */
-.eterna-report-radar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  justify-content: center;
+  align-items: center;
   gap: 0.85rem;
   margin-bottom: 1.75rem;
 }
 
-.eterna-report-radar-card {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 1rem 0.75rem;
+@media (min-width: 540px) {
+  .eterna-hero-cta-group {
+    flex-direction: row;
+    gap: 1rem;
+  }
+}
+
+.eterna-social-proof {
+  font-size: 12px;
+  color: var(--gcp-text-muted);
+  font-weight: 400;
+}
+
+/* ==========================================================================
+   COMPATIBLE WEARABLES MARQUEE (GCP Console Dark Band)
+   ========================================================================== */
+.eterna-wearables-section {
+  padding: 1.25rem 0 1.5rem;
+  background: var(--gcp-surface);
+  border-radius: var(--gcp-radius-card);
+  margin: 1.5rem 0 2rem;
+  overflow: hidden;
+  border: 1px solid var(--gcp-border);
+}
+
+.eterna-wearables-label {
+  text-align: center;
+  font-size: 11px;
+  color: var(--gcp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.eterna-marquee-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+}
+
+.eterna-marquee-track {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  animation: scrollMarquee 26s linear infinite;
+  white-space: nowrap;
+  width: max-content;
+}
+
+.eterna-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.eterna-wearable-item {
+  height: 30px;
+  width: 135px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.eterna-wearable-item img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  filter: grayscale(100%) brightness(0.85);
+  opacity: 0.7;
+  transition: all 0.25s ease;
+}
+
+.eterna-wearable-item:hover img {
+  filter: grayscale(0%) brightness(1);
+  opacity: 1;
+}
+
+@keyframes scrollMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ==========================================================================
+   KEY METRIC STATS GRID (Google Cloud Metrics Format)
+   ========================================================================== */
+.eterna-stats-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  margin: 2rem 0;
+  border-radius: var(--gcp-radius-card);
+  overflow: hidden;
+  border: 1px solid var(--gcp-border);
+  background: var(--gcp-surface);
+}
+
+@media (min-width: 600px) {
+  .eterna-stats-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.eterna-stat-box {
+  padding: 2.25rem 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid var(--gcp-border);
+}
+
+@media (min-width: 600px) {
+  .eterna-stat-box {
+    border-bottom: none;
+  }
+  .eterna-stat-box:first-child {
+    border-right: 1px solid var(--gcp-border);
+  }
+}
+
+.eterna-stat-value {
+  font-size: clamp(2.4rem, 4vw, 3.2rem);
+  font-weight: 500;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.eterna-stat-value.amber {
+  color: var(--gcp-blue-light);
+}
+
+.eterna-stat-value.mint {
+  color: var(--gcp-green);
+}
+
+.eterna-stat-title {
+  color: var(--gcp-text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+
+.eterna-stat-sub {
+  color: var(--gcp-text-muted);
+  font-size: 0.78rem;
+}
+
+/* ==========================================================================
+   SECTION: "YOUR WEARABLE GIVES DATA. ETERNA GIVES ANSWERS."
+   ========================================================================== */
+.eterna-biometrics-section {
+  padding: 2.5rem 0;
+}
+
+.eterna-section-heading {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.eterna-section-h2 {
+  font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+  font-weight: 400;
+  line-height: 1.2;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.85rem;
+}
+
+.eterna-section-h2 span.mint {
+  color: var(--gcp-blue-light);
+}
+
+.eterna-section-h2 span.amber {
+  color: var(--gcp-amber);
+}
+
+.eterna-section-p {
+  color: var(--gcp-text-secondary);
+  max-width: 640px;
+  margin: 0 auto;
+  line-height: 1.6;
+  font-size: 0.92rem;
+}
+
+/* 3 Phones Display Showcase */
+.eterna-phones-showcase {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin: 2rem 0 2.5rem;
+  overflow-x: auto;
+  padding: 1rem 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 768px) {
+  .eterna-phones-showcase {
+    gap: 1.5rem;
+  }
+}
+
+.eterna-phone-card {
+  position: relative;
+  flex-shrink: 0;
+  width: 200px;
+  height: 400px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--gcp-border);
+  background: var(--gcp-surface-card);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+@media (min-width: 640px) {
+  .eterna-phone-card {
+    width: 240px;
+    height: 480px;
+  }
+}
+
+.eterna-phone-card.featured {
+  border-color: var(--gcp-blue-light);
+  box-shadow: 0 0 30px rgba(26, 115, 232, 0.2), 0 20px 40px rgba(0, 0, 0, 0.6);
+  transform: translateY(-6px);
+}
+
+.eterna-phone-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.eterna-phone-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--gcp-blue-light);
+}
+
+/* ==========================================================================
+   5 GENETIC PILLARS (GCP Selection Cards)
+   ========================================================================== */
+.eterna-genetics-showcase {
+  margin: 3.5rem 0;
+}
+
+.eterna-genetics-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.eterna-badge-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gcp-blue-light);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+  margin-bottom: 0.6rem;
+}
+
+.eterna-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 500px) {
+  .eterna-pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .eterna-pillars-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.eterna-pillar-card {
+  border-radius: var(--gcp-radius-card);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.eterna-pillar-card:hover,
+.eterna-pillar-card.active {
+  border-color: var(--gcp-blue-light);
+  background: var(--gcp-surface-card);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.eterna-pillar-card.active {
+  outline: 2px solid var(--gcp-blue-primary);
+}
+
+.eterna-pillar-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  margin: 0 auto 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.eterna-pillar-card:hover .eterna-pillar-icon-wrap {
+  transform: scale(1.06);
+}
+
+.eterna-pillar-title {
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin: 0 0 0.4rem 0;
+}
+
+.eterna-pillar-desc {
+  color: var(--gcp-text-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Genetic Profile vs Detailed Markers (2-Column Demo) */
+.eterna-profile-demo-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+@media (min-width: 820px) {
+  .eterna-profile-demo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.eterna-profile-box {
+  border-radius: var(--gcp-radius-card);
+  padding: 1.75rem 1.5rem;
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.eterna-profile-box.highlight {
+  border: 1px solid var(--gcp-border);
+}
+
+.eterna-box-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.eterna-box-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eterna-box-title {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.eterna-box-subtitle {
+  color: var(--gcp-text-muted);
+  font-size: 0.8rem;
+  font-style: italic;
+  margin-bottom: 1.25rem;
+}
+
+.eterna-traits-group {
+  margin-bottom: 1.25rem;
+}
+
+.eterna-trait-category {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--gcp-blue-light);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.eterna-trait-question {
+  font-size: 11px;
+  color: var(--gcp-text-muted);
+  margin-bottom: 0.65rem;
+}
+
+.eterna-trait-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.eterna-trait-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--gcp-text-secondary);
+}
+
+.eterna-trait-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gcp-blue-light);
+  flex-shrink: 0;
+}
+
+/* Detailed Marker Cards (GCP Console Inset) */
+.eterna-marker-card {
+  border-radius: 6px;
+  padding: 1rem 1.15rem;
+  background: var(--gcp-surface-card);
+  border: 1px solid var(--gcp-border);
+  margin-bottom: 1rem;
+}
+
+.eterna-marker-h5 {
+  font-size: 0.9rem;
+  color: #ffffff;
+  font-weight: 500;
+  margin: 0 0 0.4rem 0;
+}
+
+.eterna-marker-gene-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-family: monospace;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(138, 180, 248, 0.1);
+  color: var(--gcp-blue-light);
+  border: 1px solid rgba(138, 180, 248, 0.25);
+  margin-bottom: 0.5rem;
+}
+
+.eterna-marker-desc {
+  font-size: 0.8rem;
+  color: var(--gcp-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.eterna-marker-insight {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 4px;
+  background: var(--gcp-green-surface);
+  border: 1px solid rgba(129, 201, 149, 0.3);
+  font-size: 0.78rem;
+  color: var(--gcp-green);
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   SECTION: HOW IT WORKS (GCP STEP CARDS)
+   ========================================================================= */
+.eterna-process-section {
+  padding: 3rem 0;
+  background: var(--gcp-surface);
+  border-radius: var(--gcp-radius-card);
+  margin: 3rem 0;
+  border: 1px solid var(--gcp-border);
+}
+
+.eterna-process-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  padding: 0 1.5rem;
+}
+
+@media (min-width: 600px) {
+  .eterna-process-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1050px) {
+  .eterna-process-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.eterna-process-card {
+  border-radius: 6px;
+  padding: 1.75rem 1.25rem;
+  background: var(--gcp-surface-card);
+  border: 1px solid var(--gcp-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.eterna-report-radar-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(45, 212, 191, 0.35);
+.eterna-process-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--gcp-blue-light);
 }
 
-.eterna-radar-score {
-  font-size: 1.45rem;
-  font-weight: 800;
-  line-height: 1.1;
-  margin-bottom: 0.25rem;
-}
-
-.eterna-radar-name {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #f1f5f9;
-  margin-bottom: 0.25rem;
-}
-
-.eterna-radar-tag {
-  font-size: 0.68rem;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.eterna-report-sections-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.75rem;
-}
-
-.eterna-report-section-box {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 8px;
-  padding: 1.1rem 1.25rem;
-}
-
-.eterna-report-section-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-}
-
-.eterna-report-section-badge {
-  background: rgba(45, 212, 191, 0.15);
-  border: 1px solid rgba(45, 212, 191, 0.35);
-  color: #2dd4bf;
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-}
-
-.eterna-report-section-header h4 {
-  margin: 0;
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.eterna-report-section-box p {
-  margin: 0;
-  font-size: 0.82rem;
-  line-height: 1.6;
-  color: #94a3b8;
-}
-
-.eterna-report-section-box strong {
-  color: #e2e8f0;
-}
-
-.eterna-report-download-banner {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(20, 30, 48, 0.95) 100%);
-  border: 1px solid rgba(45, 212, 191, 0.3);
-  border-radius: 10px;
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-/* ── Live B2B Portal Modal / Iframe Viewer ── */
-.eterna-b2b-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  z-index: 99999;
+.eterna-process-icon-box {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  backdrop-filter: blur(8px);
+}
+
+.eterna-process-icon-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.eterna-process-step-num {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--gcp-blue-light);
+  margin-bottom: 0.4rem;
+}
+
+.eterna-process-card-h3 {
+  font-size: 1rem;
+  color: #ffffff;
+  font-weight: 500;
+  margin: 0 0 0.65rem 0;
+}
+
+.eterna-process-card-p {
+  font-size: 0.8rem;
+  color: var(--gcp-text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ==========================================================================
+   SECTION: IN-HOUSE RESEARCH & SCIENTIFIC BACKING
+   ========================================================================== */
+.eterna-science-section {
+  padding: 3rem 0;
+}
+
+.eterna-science-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin: 2rem 0;
+}
+
+@media (min-width: 720px) {
+  .eterna-science-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.eterna-science-card {
+  border-radius: var(--gcp-radius-card);
+  padding: 1.75rem 1.5rem;
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  transition: border-color 0.2s ease;
+}
+
+.eterna-science-card:hover {
+  border-color: var(--gcp-blue-light);
+}
+
+.eterna-science-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gcp-blue-surface);
+  border: 1px solid rgba(138, 180, 248, 0.3);
+  color: var(--gcp-blue-light);
+  margin-bottom: 1.25rem;
+}
+
+.eterna-science-card-title {
+  font-size: 1rem;
+  color: #ffffff;
+  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+}
+
+.eterna-science-card-text {
+  font-size: 0.82rem;
+  color: var(--gcp-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.eterna-cert-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding: 1.25rem;
+  border-radius: var(--gcp-radius-card);
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+}
+
+.eterna-cert-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--gcp-surface-card);
+  border: 1px solid var(--gcp-border);
+  font-size: 0.78rem;
+  color: var(--gcp-text-secondary);
+}
+
+/* ==========================================================================
+   PRODUCT SUITE (GCP CONSOLE PLANS & TIERS - NO PRICES)
+   ========================================================================== */
+.eterna-catalog-section {
+  padding: 3rem 0;
+  margin: 2rem 0;
+}
+
+.eterna-tiers-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin: 2rem 0;
+}
+
+@media (min-width: 768px) {
+  .eterna-tiers-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.eterna-tier-card {
+  border-radius: var(--gcp-radius-card);
+  padding: 1.75rem 1.5rem;
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.eterna-tier-card:hover {
+  border-color: var(--gcp-blue-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.eterna-tier-card.featured {
+  border-color: var(--gcp-blue-primary);
+  background: var(--gcp-surface-card);
+}
+
+.eterna-tier-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--gcp-blue-primary);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.eterna-tier-title {
+  font-size: 1.15rem;
+  color: #ffffff;
+  font-weight: 500;
+  margin: 0 0 0.4rem 0;
+}
+
+.eterna-tier-subtitle {
+  font-size: 0.8rem;
+  color: var(--gcp-text-muted);
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+  min-height: 44px;
+}
+
+.eterna-tier-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.75rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  flex-grow: 1;
+}
+
+.eterna-tier-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--gcp-text-secondary);
+  line-height: 1.45;
+}
+
+.eterna-tier-feature-item svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--gcp-green);
+}
+
+/* Institutional Backing / Partner Logos */
+.eterna-partners-section {
+  text-align: center;
+  padding: 2.25rem 0 1rem;
+  border-top: 1px solid var(--gcp-border);
+  margin-top: 2.5rem;
+}
+
+.eterna-partners-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--gcp-text-muted);
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+}
+
+.eterna-partners-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+}
+
+.eterna-partner-badge {
+  height: 38px;
+  max-width: 130px;
+  object-fit: contain;
+  opacity: 0.7;
+  filter: grayscale(80%);
+  transition: all 0.25s ease;
+}
+
+.eterna-partner-badge:hover {
+  opacity: 1;
+  filter: grayscale(0%);
+}
+
+/* ==========================================================================
+   STICKY RIGHT SIDEBAR (Google Cloud Console Resource Inspector)
+   ========================================================================== */
+.eterna-sticky-sidebar {
+  position: relative;
+}
+
+@media (min-width: 1100px) {
+  .eterna-sticky-sidebar {
+    position: sticky;
+    top: 84px;
+    align-self: start;
+    height: fit-content;
+  }
+}
+
+.eterna-sidebar-card {
+  border-radius: var(--gcp-radius-card);
+  padding: 1.25rem 1.25rem;
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  box-shadow: var(--gcp-shadow-card);
+  margin-bottom: 1.25rem;
+}
+
+.eterna-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gcp-border);
+}
+
+.eterna-sidebar-brand {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.eterna-sidebar-brand span {
+  color: var(--gcp-blue-light);
+}
+
+/* Active Batch Spec (GCP Resource Hash / Copyable) */
+.eterna-sidebar-batch-box {
+  background: var(--gcp-surface-card);
+  border: 1px solid var(--gcp-border);
+  border-radius: 4px;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.eterna-batch-label {
+  font-size: 0.74rem;
+  color: var(--gcp-text-muted);
+}
+
+.eterna-batch-code-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--gcp-blue-surface);
+  border: 1px solid rgba(138, 180, 248, 0.3);
+  color: var(--gcp-blue-light);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.76rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.eterna-batch-code-btn:hover {
+  background: rgba(138, 180, 248, 0.16);
+  border-color: var(--gcp-blue-light);
+}
+
+/* Sidebar CTAs */
+.eterna-sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Technical Specification Checklist in Sidebar */
+.eterna-sidebar-specs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--gcp-border);
+}
+
+.eterna-sidebar-spec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+}
+
+.eterna-sidebar-spec-row span.label {
+  color: var(--gcp-text-muted);
+}
+
+.eterna-sidebar-spec-row span.value {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Quick Page Navigation in Sidebar */
+.eterna-sidebar-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.eterna-sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 4px;
+  color: var(--gcp-text-secondary);
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.eterna-sidebar-nav-link:hover {
+  background: var(--gcp-blue-surface);
+  color: var(--gcp-blue-light);
+}
+
+/* Interactive B2B Modal */
+.eterna-b2b-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
 }
 
 .eterna-b2b-modal-container {
   width: 100%;
-  max-width: 1240px;
-  height: 90vh;
-  background: #0d0e11;
-  border: 1px solid rgba(45, 212, 191, 0.4);
-  border-radius: 12px;
+  max-width: 1100px;
+  height: 85vh;
+  border-radius: var(--gcp-radius-card);
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
 }
 
 .eterna-b2b-modal-header {
-  padding: 0.75rem 1.25rem;
-  background: #11141c;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: var(--gcp-surface-card);
+  border-bottom: 1px solid var(--gcp-border);
 }
 
 .eterna-b2b-modal-iframe {
   flex: 1;
   width: 100%;
+  height: 100%;
   border: none;
-  background: #0d0e11;
+  background: var(--gcp-bg);
 }
-
-

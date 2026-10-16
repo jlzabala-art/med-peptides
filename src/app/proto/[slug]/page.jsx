@@ -160,6 +160,52 @@ async function getPublicProtocol(slug) {
     }
   }
 
+  // 4. Try PROTOCOL_BLUEPRINTS fallback (for specialized clinical cosmeceutical & trichology protocols)
+  if (!doc) {
+    const { PROTOCOL_BLUEPRINTS } = await import('../../../data/protocolBlueprints');
+    const blueprintKey = Object.keys(PROTOCOL_BLUEPRINTS).find(k => {
+      const bp = PROTOCOL_BLUEPRINTS[k];
+      return (
+        k.toLowerCase() === target ||
+        (bp.slug && bp.slug.toLowerCase() === target) ||
+        (bp.id && bp.id.toLowerCase() === target)
+      );
+    });
+
+    if (blueprintKey) {
+      const bp = PROTOCOL_BLUEPRINTS[blueprintKey];
+      const blueprintProtocol = {
+        id: bp.id || bp.slug || blueprintKey,
+        slug: bp.slug || blueprintKey,
+        name: bp.name || bp.title,
+        title: bp.title || bp.name,
+        category: bp.category,
+        therapeutic_category: bp.therapeutic_category,
+        description: bp.summary?.goal || bp.title,
+        summary: bp.summary?.goal,
+        duration: bp.summary?.duration,
+        durationWeeks: bp.clinical_metadata?.duration_weeks || 12,
+        benefits: bp.summary?.benefits || [],
+        phases: bp.phases || [],
+        items: bp.items || [],
+        monitoring: bp.monitoring || [],
+        safetyFlags: bp.safetyFlags || [],
+        expectedResults: bp.expectedResults || {},
+        lifestyle: bp.lifestyle || {},
+        safety: bp.safety || {},
+        clinical_metadata: bp.clinical_metadata || {},
+        status: 'published'
+      };
+
+      const result = sanitizePublicProtocol(blueprintProtocol);
+      PUBLIC_PROTOCOL_RAM_CACHE.set(target, {
+        data: result,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      });
+      return result;
+    }
+  }
+
   if (!doc) return null;
 
   const raw = { id: doc.id, slug: doc.data()?.slug || doc.data()?.protocol_slug || doc.id, ...doc.data() };

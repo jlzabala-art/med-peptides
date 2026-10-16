@@ -65,6 +65,7 @@ export default function ColwayCollectionSidebar({
   const protocols = [
     {
       id: 'dermo-renewal',
+      slug: 'colway-dermo-renewal',
       title: isEs ? 'Ritual Dermo-Renovación' : 'Dermo-Renewal Ritual',
       badge: isEs ? 'Facial & Escote' : 'Facial & Neck',
       desc: isEs ? 'Blue Diamond Cream + Peeling + Gel Colágeno' : 'Blue Diamond Cream + Peeling + Wash Gel',
@@ -73,6 +74,7 @@ export default function ColwayCollectionSidebar({
     },
     {
       id: 'hair-restoration',
+      slug: 'colway-hair-restoration',
       title: isEs ? 'Restauración Folicular Anti-DHT' : 'Anti-DHT Hair Restoration',
       badge: isEs ? 'Tricología Médica' : 'Trichology',
       desc: isEs ? 'Szampon + Odżywka + Colvita (60/120 cap)' : 'Strengthening Shampoo + Conditioner + Colvita',
@@ -81,6 +83,7 @@ export default function ColwayCollectionSidebar({
     },
     {
       id: 'nutricosmetic-deep',
+      slug: 'colway-nutricosmetic',
       title: isEs ? 'Matriz Extracelular & Longevidad' : 'Extracellular Matrix & Longevity',
       badge: isEs ? 'Nutricosmética' : 'Nutricosmetic',
       desc: isEs ? 'Colvita Colágeno Liofilizado + Vege Kolagen' : 'Colvita Lyophilized Collagen + Vege Collagen',
@@ -262,8 +265,29 @@ export default function ColwayCollectionSidebar({
                     {proto.badge}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.69rem', color: '#64748b', lineHeight: 1.3 }}>
+                <div style={{ fontSize: '0.69rem', color: '#64748b', lineHeight: 1.3, marginBottom: '6px' }}>
                   {proto.desc}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingTop: '4px', borderTop: '1px dashed #e2e8f0' }}>
+                  <Link
+                    href={`/proto/${proto.slug}`}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: '#0d9488',
+                      textDecoration: 'none',
+                      background: 'rgba(13, 148, 136, 0.08)',
+                      padding: '2px 8px',
+                      borderRadius: '5px'
+                    }}
+                  >
+                    <span>{isEs ? 'Ver Protocolo Clínico' : 'Open Protocol Dossier'}</span>
+                    <ArrowRight size={11} />
+                  </Link>
                 </div>
               </div>
             );
