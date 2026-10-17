@@ -171,6 +171,58 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
   }, [protocol, lang]);
   const phases = protocol?.phases || [];
 
+  // Check if protocol includes injectable/lyophilized vials or is purely non-injectable (oral/topical/cosmetic)
+  const hasVials = useMemo(() => {
+    const protoDelivery = String(protocol?.delivery_mode || protocol?.route || protocol?.format || '').toLowerCase();
+    if (protoDelivery.includes('topical') || protoDelivery.includes('oral') || protoDelivery.includes('cosmetic') || protoDelivery.includes('supplement')) {
+      const hasInjectable = items.some(it => {
+        const r = String(it.route || '').toLowerCase();
+        const f = String(it.format || it.presentation || it.dosageForm || '').toLowerCase();
+        return r.includes('subcutaneous') || r.includes('subq') || r.includes('injection') || r.includes('intramuscular') || f.includes('vial') || f.includes('lyophilized');
+      });
+      if (!hasInjectable) return false;
+    }
+
+    if (!items || items.length === 0) return true;
+    const allNonVial = items.every(it => {
+      const r = String(it.route || '').toLowerCase();
+      const f = String(it.format || it.presentation || it.dosageForm || '').toLowerCase();
+      const name = String(it.name || it.product_name || it.id || '').toLowerCase();
+      const isOralOrTopicalRoute = r.includes('topical') || r.includes('oral') || r.includes('cutánea') || r.includes('enteral') || r.includes('dermal');
+      const isNonVialFormat = f.includes('tube') || f.includes('bottle') || f.includes('capsule') || f.includes('caps') || f.includes('cream') || f.includes('serum') || f.includes('shampoo') || f.includes('peeling') || f.includes('gel');
+      const isColwayOrNutri = it.is_supplement || it.is_topical || it.isCosmetic || name.includes('colvita') || name.includes('colway') || name.includes('vege') || name.includes('diamond');
+      return (isOralOrTopicalRoute || isNonVialFormat || isColwayOrNutri) && !r.includes('subcutaneous') && !r.includes('subq') && !r.includes('injection') && !f.includes('vial') && !f.includes('lyophilized');
+    });
+
+    return !allNonVial;
+  }, [protocol, items]);
+
+  // Check if protocol is Colway or purely cosmeceutical/nutricosmetic
+  const isColwayOrCosmetic = useMemo(() => {
+    const s = String(slug || protocol?.slug || protocol?.id || '').toLowerCase();
+    const title = String(protocol?.protocol_title || protocol?.title || protocol?.name || '').toLowerCase();
+    const pClass = String(protocol?.clinical_metadata?.protocol_class || '').toLowerCase();
+    return s.includes('colway') || title.includes('colway') || pClass.includes('cosmeceutical') || !hasVials;
+  }, [slug, protocol, hasVials]);
+
+  const hasOral = useMemo(() => {
+    return (items || []).some(it => {
+      const r = String(it.route || '').toLowerCase();
+      const f = String(it.format || it.presentation || it.dosageForm || '').toLowerCase();
+      const name = String(it.name || it.product_name || it.id || '').toLowerCase();
+      return r.includes('oral') || r.includes('enteral') || f.includes('caps') || f.includes('tablet') || name.includes('colvita');
+    });
+  }, [items]);
+
+  const hasTopical = useMemo(() => {
+    return (items || []).some(it => {
+      const r = String(it.route || '').toLowerCase();
+      const f = String(it.format || it.presentation || it.dosageForm || '').toLowerCase();
+      const name = String(it.name || it.product_name || it.id || '').toLowerCase();
+      return r.includes('topical') || r.includes('dermal') || r.includes('cutánea') || f.includes('cream') || f.includes('serum') || f.includes('gel') || f.includes('peeling') || f.includes('shampoo') || f.includes('mask') || (!hasVials && !name.includes('colvita'));
+    });
+  }, [items, hasVials]);
+
   // ── Version & Update Date System (Homogeneous GCP Standard) ──
   const versionInfo = useMemo(() => {
     const rawUpdated = protocol?.updatedAt || protocol?._updatedAt;
@@ -232,7 +284,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         localStorage.setItem('atlas_portal_lang', nextLang);
         localStorage.setItem('atlas_catalog_lang', nextLang);
         window.dispatchEvent(new CustomEvent('atlas_lang_change', { detail: nextLang }));
-      } catch (_e) {
+      } catch {
         // ignore storage errors
       }
       const url = new URL(window.location.href);
@@ -252,6 +304,93 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
       toast.error('Could not copy link');
     }
   };
+
+  // Biomarkers extraction or clinical fallbacks
+  const biomarkers = useMemo(() => {
+    if (Array.isArray(protocol?.biomarkers) && protocol.biomarkers.length > 0) {
+      return protocol.biomarkers;
+    }
+    if (Array.isArray(protocol?.monitoring) && protocol.monitoring.length > 0) {
+      return protocol.monitoring.map((m, idx) => ({
+        phase: lang === 'es' ? `Control Dérmico (Semana ${m.week || (idx + 1) * 4})` : `Dermal Evaluation (Week ${m.week || (idx + 1) * 4})`,
+        tests: Array.isArray(m.labs) ? m.labs.join(', ') : (m.labs || (lang === 'es' ? 'Análisis Dérmico Visia, Ecografía Cutánea' : 'Visia Skin Analysis, Dermal Ultrasound')),
+        notes: m.note || (lang === 'es' ? 'Evaluación de espesor epidérmico y elasticidad cutánea.' : 'Evaluation of epidermal thickness and dermal elasticity.')
+      }));
+    }
+    if (isColwayOrCosmetic) {
+      return [
+        {
+          phase: lang === 'es' ? 'Evaluación Cutánea Basal' : 'Baseline Dermal Assessment',
+          tests: lang === 'es' ? 'Fotodocumentación Estándar, Análisis Visia, Nivel de Hidratación Cutánea' : 'Standardized Photodocumentation, Visia Analysis, Corneometry Hydration',
+          notes: lang === 'es' ? 'Establecer línea base de profundidad de arrugas y barrera epidérmica.' : 'Establish baseline wrinkle depth and epidermal barrier integrity.'
+        },
+        {
+          phase: lang === 'es' ? 'Control de Neocolagénesis (Semana 6)' : 'Neocollagenesis Review (Week 6)',
+          tests: lang === 'es' ? 'Biometría Dérmica, Elasticidad Cutánea (Cutometría)' : 'Dermal Biometrics, Cutometry Skin Elasticity',
+          notes: lang === 'es' ? 'Verificar incremento en firmeza dérmica y tolerancia cutánea.' : 'Assess dermal firmness increase and cutaneous tolerance.'
+        }
+      ];
+    }
+    return [
+      {
+        phase: lang === 'es' ? 'Evaluación Basal Inicial' : 'Baseline Pre-Screening',
+        tests: lang === 'es' 
+          ? 'Panel Metabólico Completo (CMP), Insulina Basal, Perfil Lipídico, hs-CRP, Frecuencia Cardíaca en Reposo'
+          : 'Comprehensive Metabolic Panel (CMP), Fasting Insulin, Lipid Profile, hs-CRP, Resting Heart Rate',
+        notes: lang === 'es'
+          ? 'Realizar previo a la Fase 1 para establecer línea de base metabólica y verificar tolerancia cardíaca.'
+          : 'Conduct prior to Phase 1 induction to establish metabolic baseline and ensure cardiac tolerance.'
+      },
+      {
+        phase: lang === 'es' ? 'Punto de Control de Titulación (Semana 6)' : 'Mid-Cycle Titration Checkpoint (Week 6)',
+        tests: lang === 'es' 
+          ? 'Glucosa en Ayunas, Función Renal (BUN/Creatinina), Transaminasas Hepáticas (AST/ALT), Electrolitos'
+          : 'Fasting Glucose, Renal Function (BUN/Creatinine), Liver Enzymes (AST/ALT), Electrolytes',
+        notes: lang === 'es'
+          ? 'Monitorizado en Semana 6 durante el escalado para verificar aclaramiento renal y respuesta glucémica.'
+          : 'Monitored at Week 6 during Phase 2 escalation to verify renal clearance and glycemic response.'
+      },
+      {
+        phase: lang === 'es' ? 'Evaluación de Consolidación Post-Ciclo (Semana 14)' : 'Post-Cycle Consolidation Assessment (Week 14)',
+        tests: lang === 'es' 
+          ? 'HbA1c, Cascada Hormonal Completa, Perfil Lipídico, Composición Corporal (DEXA)'
+          : 'HbA1c, Full Hormone Cascade, Lipid Panel, Body Composition (DEXA)',
+        notes: lang === 'es'
+          ? 'Efectuada 2 semanas tras finalizar para evaluar optimización metabólica sostenida y retención de masa magra.'
+          : 'Conducted 2 weeks following protocol completion to evaluate sustained metabolic enhancement and lean mass retention.'
+      }
+    ];
+  }, [protocol, lang, isColwayOrCosmetic]);
+
+  const handleCopyLabRequisition = () => {
+    try {
+      const text = biomarkers.map((b, i) => 
+        `[${b.phase || `Checkpoint ${i + 1}`}]\nRequired Tests: ${b.tests}\nClinical Rationale: ${b.notes || 'Routine clinical monitoring'}\n`
+      ).join('\n');
+      navigator.clipboard.writeText(
+        `CLINICAL LABORATORY REQUISITION CHECKLIST\nProtocol: ${displayName}\nReference Code: ${protocol?.code || 'PR-001'}\n\n${text}`
+      );
+      triggerHaptic('success');
+      toast.success(lang === 'es' ? 'Orden de analítica copiada al portapapeles ✓' : 'Lab checklist copied to clipboard ✓');
+    } catch {
+      toast.error('Could not copy lab checklist');
+    }
+  };
+
+  // Dynamic translated texts
+  const dynT = dynamicTranslations[lang] || {};
+  const displayName = dynT.name || (lang === 'es' && protocol?.name_es) || baseName;
+  const displayDescription = dynT.description || (lang === 'es' && protocol?.description_es) || baseDescription;
+  const displayDuration = anatomicalCalibration?.cycleWeeks
+    ? (lang === 'es' ? `${anatomicalCalibration.cycleWeeks} Semanas` : `${anatomicalCalibration.cycleWeeks} Weeks`)
+    : (lang === 'es'
+        ? rawDuration.replace(/\bWeeks?\b/i, 'Semanas').replace(/\bDays?\b/i, 'Días').replace(/\bMonths?\b/i, 'Meses')
+        : rawDuration);
+
+  // Protocol Supply Engine — Single Source of Truth
+  const supplySummary = useMemo(() => {
+    return generateDynamicSupplySummary(protocol, anatomicalCalibration);
+  }, [protocol, anatomicalCalibration]);
 
   const handleCopyClinicalBlueprint = async () => {
     try {
@@ -310,72 +449,6 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
     }
   };
 
-  // Biomarkers extraction or clinical fallbacks
-  const biomarkers = useMemo(() => {
-    if (Array.isArray(protocol?.biomarkers) && protocol.biomarkers.length > 0) {
-      return protocol.biomarkers;
-    }
-    return [
-      {
-        phase: lang === 'es' ? 'Evaluación Basal Inicial' : 'Baseline Pre-Screening',
-        tests: lang === 'es' 
-          ? 'Panel Metabólico Completo (CMP), Insulina Basal, Perfil Lipídico, hs-CRP, Frecuencia Cardíaca en Reposo'
-          : 'Comprehensive Metabolic Panel (CMP), Fasting Insulin, Lipid Profile, hs-CRP, Resting Heart Rate',
-        notes: lang === 'es'
-          ? 'Realizar previo a la Fase 1 para establecer línea de base metabólica y verificar tolerancia cardíaca.'
-          : 'Conduct prior to Phase 1 induction to establish metabolic baseline and ensure cardiac tolerance.'
-      },
-      {
-        phase: lang === 'es' ? 'Punto de Control de Titulación (Semana 6)' : 'Mid-Cycle Titration Checkpoint (Week 6)',
-        tests: lang === 'es' 
-          ? 'Glucosa en Ayunas, Función Renal (BUN/Creatinina), Transaminasas Hepáticas (AST/ALT), Electrolitos'
-          : 'Fasting Glucose, Renal Function (BUN/Creatinine), Liver Enzymes (AST/ALT), Electrolytes',
-        notes: lang === 'es'
-          ? 'Monitorizado en Semana 6 durante el escalado para verificar aclaramiento renal y respuesta glucémica.'
-          : 'Monitored at Week 6 during Phase 2 escalation to verify renal clearance and glycemic response.'
-      },
-      {
-        phase: lang === 'es' ? 'Evaluación de Consolidación Post-Ciclo (Semana 14)' : 'Post-Cycle Consolidation Assessment (Week 14)',
-        tests: lang === 'es' 
-          ? 'HbA1c, Cascada Hormonal Completa, Perfil Lipídico, Composición Corporal (DEXA)'
-          : 'HbA1c, Full Hormone Cascade, Lipid Panel, Body Composition (DEXA)',
-        notes: lang === 'es'
-          ? 'Efectuada 2 semanas tras finalizar para evaluar optimización metabólica sostenida y retención de masa magra.'
-          : 'Conducted 2 weeks following protocol completion to evaluate sustained metabolic enhancement and lean mass retention.'
-      }
-    ];
-  }, [protocol, lang]);
-
-  const handleCopyLabRequisition = () => {
-    try {
-      const text = biomarkers.map((b, i) => 
-        `[${b.phase || `Checkpoint ${i + 1}`}]\nRequired Tests: ${b.tests}\nClinical Rationale: ${b.notes || 'Routine clinical monitoring'}\n`
-      ).join('\n');
-      navigator.clipboard.writeText(
-        `CLINICAL LABORATORY REQUISITION CHECKLIST\nProtocol: ${displayName}\nReference Code: ${protocol?.code || 'PR-001'}\n\n${text}`
-      );
-      triggerHaptic('success');
-      toast.success(lang === 'es' ? 'Orden de analítica copiada al portapapeles ✓' : 'Lab checklist copied to clipboard ✓');
-    } catch {
-      toast.error('Could not copy lab checklist');
-    }
-  };
-
-  // Dynamic translated texts
-  const dynT = dynamicTranslations[lang] || {};
-  const displayName = dynT.name || (lang === 'es' && protocol?.name_es) || baseName;
-  const displayDescription = dynT.description || (lang === 'es' && protocol?.description_es) || baseDescription;
-  const displayDuration = anatomicalCalibration?.cycleWeeks
-    ? (lang === 'es' ? `${anatomicalCalibration.cycleWeeks} Semanas` : `${anatomicalCalibration.cycleWeeks} Weeks`)
-    : (lang === 'es'
-        ? rawDuration.replace(/\bWeeks?\b/i, 'Semanas').replace(/\bDays?\b/i, 'Días').replace(/\bMonths?\b/i, 'Meses')
-        : rawDuration);
-
-  // Protocol Supply Engine — Single Source of Truth
-  const supplySummary = useMemo(() => {
-    return generateDynamicSupplySummary(protocol, anatomicalCalibration);
-  }, [protocol, anatomicalCalibration]);
-
   // Reconstitution Specs for interactive console — Single Source of Truth
   const reconData = useMemo(() => {
     return generateDynamicReconData(protocol);
@@ -417,35 +490,6 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
     }
     return `${supplySummary.totalVials} Vials`;
   }, [supplySummary]);
-
-  // Check if protocol includes injectable/lyophilized vials or is purely non-injectable (oral/topical/cosmetic)
-  const hasVials = useMemo(() => {
-    // If protocol explicitly flags delivery route or formulation type
-    const protoDelivery = String(protocol?.delivery_mode || protocol?.route || protocol?.format || '').toLowerCase();
-    if (protoDelivery.includes('topical') || protoDelivery.includes('oral') || protoDelivery.includes('cosmetic') || protoDelivery.includes('supplement')) {
-      // Check if any item is actually an injection
-      const hasInjectable = items.some(it => {
-        const r = String(it.route || '').toLowerCase();
-        const f = String(it.format || it.presentation || it.dosageForm || '').toLowerCase();
-        return r.includes('subcutaneous') || r.includes('subq') || r.includes('injection') || r.includes('intramuscular') || f.includes('vial') || f.includes('lyophilized');
-      });
-      if (!hasInjectable) return false;
-    }
-
-    // Inspect all items in protocol
-    if (!items || items.length === 0) return true; // Default fallback to standard peptide protocol
-    const allNonVial = items.every(it => {
-      const r = String(it.route || '').toLowerCase();
-      const f = String(it.format || it.presentation || it.dosageForm || '').toLowerCase();
-      const name = String(it.name || it.product_name || it.id || '').toLowerCase();
-      const isOralOrTopicalRoute = r.includes('topical') || r.includes('oral') || r.includes('cutánea') || r.includes('enteral') || r.includes('dermal');
-      const isNonVialFormat = f.includes('tube') || f.includes('bottle') || f.includes('capsule') || f.includes('caps') || f.includes('cream') || f.includes('serum') || f.includes('shampoo') || f.includes('peeling') || f.includes('gel');
-      const isColwayOrNutri = it.is_supplement || it.is_topical || it.isCosmetic || name.includes('colvita') || name.includes('colway') || name.includes('vege') || name.includes('diamond');
-      return (isOralOrTopicalRoute || isNonVialFormat || isColwayOrNutri) && !r.includes('subcutaneous') && !r.includes('subq') && !r.includes('injection') && !f.includes('vial') && !f.includes('lyophilized');
-    });
-
-    return !allNonVial;
-  }, [protocol, items]);
 
   // Check if protocol is specifically Tirzepatide (single-agent metabolic titration)
   const isTirzepatideProtocol = useMemo(() => {
@@ -521,14 +565,6 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
       compounds.includes('ghk-cu') && (s.includes('scalp') || title.includes('scalp') || title.includes('hair'))
     );
   }, [slug, protocol]);
-
-  // Check if protocol is Colway or purely cosmeceutical/nutricosmetic
-  const isColwayOrCosmetic = useMemo(() => {
-    const s = String(slug || protocol?.slug || protocol?.id || '').toLowerCase();
-    const title = String(protocol?.protocol_title || protocol?.title || protocol?.name || '').toLowerCase();
-    const pClass = String(protocol?.clinical_metadata?.protocol_class || '').toLowerCase();
-    return s.includes('colway') || title.includes('colway') || pClass.includes('cosmeceutical') || !hasVials;
-  }, [slug, protocol, hasVials]);
 
   // ── Protocol Sections for Sticky Sidebar Table of Contents & Mobile QuickNav ──
   const tocSections = useMemo(() => {
@@ -980,10 +1016,20 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               iconBg: hasVials ? '#fff7ed' : '#f0fdf4',
               iconColor: hasVials ? '#c2410c' : '#16a34a',
               title: hasVials ? t.kpiInjectionsTitle : (lang === 'es' ? 'VÍA DE ADMINISTRACIÓN' : 'DELIVERY ROUTE'),
-              value: hasVials ? `${supplySummary.totalInjections} ${t.kpiInjectionsUnit}` : (lang === 'es' ? 'Oral & Tópica' : 'Oral & Topical'),
+              value: hasVials
+                ? `${supplySummary.totalInjections} ${t.kpiInjectionsUnit}`
+                : (hasOral && hasTopical
+                    ? (lang === 'es' ? 'Oral & Tópica' : 'Oral & Topical')
+                    : (hasOral
+                        ? (lang === 'es' ? 'Vía Oral' : 'Oral Administration')
+                        : (lang === 'es' ? 'Vía Tópica Cutánea' : 'Topical / Dermal Route'))),
               subtitle: hasVials
                 ? (isHairProtocol ? (lang === 'es' ? 'Vía SubQ / Mesoterapia Capilar' : 'SubQ & Scalp Mesotherapy') : t.kpiInjectionsSubtitle)
-                : (lang === 'es' ? 'No invasivo • Sin viales ni agujas' : 'Non-invasive • No needles or vials'),
+                : (hasOral && hasTopical
+                    ? (lang === 'es' ? 'Cápsulas nativas + aplicación dérmica' : 'Native capsules + dermal skincare')
+                    : (hasOral
+                        ? (lang === 'es' ? 'Cápsulas orales con agua' : 'Daily oral capsules with water')
+                        : (lang === 'es' ? 'No invasivo • Sin viales ni agujas' : 'Non-invasive • No needles or vials'))),
               subColor: hasVials ? '#c2410c' : '#16a34a'
             }
           ]}
@@ -994,20 +1040,22 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
 
             {/* ── STEP 1: Biomarker-Driven Calibration Banner ──
-                 Always first — personalises all downstream sections */}
-            <BiomarkerCalibrationBanner
-              calibrationDisplay={calibrationDisplay}
-              biomarkerCalibration={biomarkerCalibration}
-              onCalibrate={(newCal) => {
-                setBiomarkerCalibration(newCal);
-                toast.success(lang === 'es' ? 'Pauta recalibrada con éxito' : 'Protocol recalibrated successfully');
-              }}
-              onClearCalibration={handleClearCalibration}
-              slug={slug}
-              protocolCategory={protocol?.category}
-              protocolTitle={protocol?.title || protocol?.name}
-              lang={lang}
-            />
+                 Always first — personalises all downstream sections (Suppressed for non-invasive cosmetic protocols) */}
+            {!isColwayOrCosmetic && (
+              <BiomarkerCalibrationBanner
+                calibrationDisplay={calibrationDisplay}
+                biomarkerCalibration={biomarkerCalibration}
+                onCalibrate={(newCal) => {
+                  setBiomarkerCalibration(newCal);
+                  toast.success(lang === 'es' ? 'Pauta recalibrada con éxito' : 'Protocol recalibrated successfully');
+                }}
+                onClearCalibration={handleClearCalibration}
+                slug={slug}
+                protocolCategory={protocol?.category}
+                protocolTitle={protocol?.title || protocol?.name}
+                lang={lang}
+              />
+            )}
 
             {/* ── STEP 1: Included Therapeutic Compounds & Formulations (Primary Clinical Presentation) ── */}
             <ProtocolCompoundsSection 

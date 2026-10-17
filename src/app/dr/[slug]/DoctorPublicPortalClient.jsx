@@ -1668,32 +1668,15 @@ export default function DoctorPublicPortalClient({
         const codeDisplay = t.code || (t.codes && t.codes[0]) || null;
         const medicationSummary = rxMatch?.treatmentTitle || rxMatch?.items?.map(i => i.name).filter(Boolean).slice(0, 2).join(' + ') || null;
 
-        let taskActionName = 'Prescription Sign-off';
-        if (t.type === 'refill') taskActionName = 'Supply Refill Assessment';
-        else if (t.type === 'milestone') taskActionName = 'Clinical Milestone Review';
-        else if (t.type === 'proposal_followup') taskActionName = 'Treatment Offer Follow-up';
-        else if (t.pendingCount > 1) taskActionName = `Prescription Sign-off (${t.pendingCount} Formulations)`;
-
-        let taskDescription = t.description;
-        // Clean up legacy repetitive phrases following GCP UX guidelines
-        if (!taskDescription || taskDescription.includes('awaiting physician clinical verification and authorization')) {
-          taskDescription = medicationSummary
-            ? `${medicationSummary} • Awaiting physician digital authorization for dispensing.`
-            : 'Compounded formulation awaiting physician digital authorization.';
-        } else if (taskDescription.includes('awaiting physician clinical verification')) {
-          taskDescription = `${t.pendingCount || 'Multiple'} compounded formulations awaiting physician digital authorization.`;
-        }
-
-        return (
-          <div style={{ textAlign: 'left', width: '100%' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-              <span style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.86rem' }}>
-                {taskActionName}
-              </span>
-              {codeDisplay && (
-                <CopyableId value={codeDisplay} />
-              )}
-              {t.type === 'proposal_followup' ? (
+        if (t.type === 'proposal_followup') {
+          const treatmentName = t.treatmentTitle || medicationSummary || 'Compounded Treatment';
+          return (
+            <div style={{ textAlign: 'left', width: '100%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.86rem' }}>
+                  {treatmentName}
+                </span>
+                {codeDisplay && <CopyableId value={codeDisplay} />}
                 <span
                   style={{
                     display: 'inline-flex',
@@ -1711,7 +1694,35 @@ export default function DoctorPublicPortalClient({
                   <Clock size={11} />
                   {t.daysAgo ? `Offer Unaccepted (${t.daysAgo}d)` : 'Offer Unaccepted'}
                 </span>
-              ) : isSigned ? (
+              </div>
+              <div style={{ fontSize: '0.73rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>Proposal sent</span>
+                <span>•</span>
+                <span style={{ color: '#0d9488', fontWeight: 600 }}>Awaiting patient checkout</span>
+              </div>
+            </div>
+          );
+        }
+
+        let taskActionName = 'Prescription Sign-off';
+        if (t.type === 'refill') taskActionName = 'Supply Refill Assessment';
+        else if (t.type === 'milestone') taskActionName = 'Clinical Milestone Review';
+        else if (t.pendingCount > 1) taskActionName = `Prescription Sign-off (${t.pendingCount} Formulations)`;
+
+        let taskSubtitle = medicationSummary ? `${medicationSummary} • Awaiting digital authorization` : 'Compounded formulation awaiting authorization';
+        if (t.type === 'refill') taskSubtitle = medicationSummary ? `${medicationSummary} • Supply refill review` : 'Supply replenishment review';
+        else if (t.type === 'milestone') taskSubtitle = 'Biomarker checkpoint & clinical titration assessment';
+
+        return (
+          <div style={{ textAlign: 'left', width: '100%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+              <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.86rem' }}>
+                {taskActionName}
+              </span>
+              {codeDisplay && (
+                <CopyableId value={codeDisplay} />
+              )}
+              {isSigned ? (
                 <span
                   style={{
                     display: 'inline-flex',
@@ -1749,8 +1760,8 @@ export default function DoctorPublicPortalClient({
                 </span>
               )}
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px', lineHeight: 1.35, textAlign: 'left' }}>
-              {taskDescription}
+            <div style={{ fontSize: '0.73rem', color: '#64748b', textAlign: 'left' }}>
+              {taskSubtitle}
             </div>
           </div>
         );

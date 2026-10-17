@@ -332,7 +332,12 @@ export function resolveClinicalCompoundDose(compound, phase, phaseIndex = 0, tot
   }
 
   // Dose value parsing
-  if (typeof rawDose === 'number') {
+  const isCosmeticOrOralDose = /pump|pulsaci|spatula|espátula|dime|caps|cápsula|drop|gota|pea-size|ml\b|layer|capa|aplicaci|massage|cleanse|spray/i.test(String(rawDose));
+
+  if (isCosmeticOrOralDose) {
+    doseVal = String(rawDose).trim();
+    doseUnit = '';
+  } else if (typeof rawDose === 'number') {
     doseVal = rawDose;
     doseUnit = 'mg';
   } else if (typeof rawDose === 'string' && rawDose.trim()) {
@@ -383,8 +388,8 @@ export function resolveClinicalCompoundDose(compound, phase, phaseIndex = 0, tot
 
   // 2. Authoritative Clinical Benchmark Calibration
   // If no dose was found, or if Phase > 0 repeats Phase 0 initiation dose verbatim on an escalating peptide
-  const isGenericRepeatedInitDose = (phaseIndex > 0 && benchmark && benchmark.steps.length > 1 && doseVal === benchmark.steps[0]);
-  if (doseVal === null || isNaN(doseVal) || doseVal <= 0 || isGenericRepeatedInitDose) {
+  const isGenericRepeatedInitDose = (phaseIndex > 0 && benchmark && benchmark.steps.length > 1 && typeof doseVal === 'number' && doseVal === benchmark.steps[0]);
+  if (!isCosmeticOrOralDose && (doseVal === null || (typeof doseVal === 'number' && (isNaN(doseVal) || doseVal <= 0)) || isGenericRepeatedInitDose)) {
     if (benchmark && benchmark.steps) {
       const stepIdx = Math.min(phaseIndex, benchmark.steps.length - 1);
       doseVal = benchmark.steps[stepIdx];
@@ -396,16 +401,26 @@ export function resolveClinicalCompoundDose(compound, phase, phaseIndex = 0, tot
     }
   }
 
-  const unitDose = `${doseVal} ${doseUnit}`;
+  const unitDose = isCosmeticOrOralDose ? String(doseVal) : `${doseVal} ${doseUnit}`;
 
   // Calculate cumulative weekly payload
-  let weeklyTotal = '';
-  const totalVal = Math.round((doseVal * timesPerWeek) * 100) / 100;
-  if (doseUnit === 'mcg' && totalVal >= 1000) {
-    const mgVal = Math.round((totalVal / 1000) * 10) / 10;
-    weeklyTotal = `${mgVal} mg/wk (${totalVal.toLocaleString()} mcg)`;
+  let weeklyTotal;
+  if (isCosmeticOrOralDose) {
+    if (timesPerWeek >= 14) {
+      weeklyTotal = 'Twice Daily (AM/PM)';
+    } else if (timesPerWeek >= 7) {
+      weeklyTotal = 'Daily Routine';
+    } else {
+      weeklyTotal = `${shortCadence} Application`;
+    }
   } else {
-    weeklyTotal = `${totalVal} ${doseUnit}/wk`;
+    const totalVal = Math.round((doseVal * timesPerWeek) * 100) / 100;
+    if (doseUnit === 'mcg' && totalVal >= 1000) {
+      const mgVal = Math.round((totalVal / 1000) * 10) / 10;
+      weeklyTotal = `${mgVal} mg/wk (${totalVal.toLocaleString()} mcg)`;
+    } else {
+      weeklyTotal = `${totalVal} ${doseUnit}/wk`;
+    }
   }
 
   const isStepUp = phaseIndex > 0;
@@ -711,7 +726,7 @@ export function generateDynamicWeeklySchedule(protocol, activePhaseIdx = 0) {
       else times = 1;
     }
 
-    let targetDays = [];
+    let targetDays;
     if (times === 7) {
       targetDays = DAYS;
     } else if (times === 5) {

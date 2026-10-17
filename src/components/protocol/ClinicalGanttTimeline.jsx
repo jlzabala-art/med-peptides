@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Activity, Calendar, Clock, ShieldAlert, Sparkles, CheckCircle2, 
   ChevronRight, ChevronDown, ChevronUp, Stethoscope, User, Droplets, Snowflake, AlertCircle,
@@ -24,6 +24,21 @@ import { resolveClinicalCompoundDose } from '../../utils/clinicalDosingEngine';
 function resolveWeeklyCompoundDose(compound, phase, phaseIndex, weekNumber, totalPhases = 3) {
   if (!compound) return { unitDose: 'Active', shortCadence: '1x/wk', weeklyTotal: '', isStepUp: false };
 
+  const cName = (compound.name || compound.product_name || compound.productId || '').toLowerCase();
+  const rawFmt = (compound.format || compound.presentation || compound.dosageForm || '').toLowerCase();
+  const rawRoute = (compound.route || '').toLowerCase();
+  const isCosmeticOrOral = rawRoute.includes('topical') || rawRoute.includes('oral') || rawRoute.includes('cutánea') || rawRoute.includes('dermal') ||
+    rawFmt.includes('cream') || rawFmt.includes('serum') || rawFmt.includes('gel') || rawFmt.includes('peeling') || rawFmt.includes('caps') || rawFmt.includes('shampoo') || rawFmt.includes('conditioner') || rawFmt.includes('bottle') || rawFmt.includes('tube') ||
+    cName.includes('colway') || cName.includes('colvita') || cName.includes('wash') || cName.includes('diamond');
+
+  const defaultStorage = isCosmeticOrOral ? '🌡️ Room Temperature (15°C–25°C)' : '❄️ 2°C – 8°C Refrigerator';
+  const defaultFormat = isCosmeticOrOral
+    ? (rawRoute.includes('oral') || rawFmt.includes('caps') || cName.includes('colvita') ? '💊 Native Oral Capsules' : '🧴 Topical Cosmeceutical')
+    : '🧪 Sterile Lyophilized Vial';
+  const defaultRoute = isCosmeticOrOral
+    ? (rawRoute.includes('oral') || cName.includes('colvita') ? 'Oral' : 'Topical Cutaneous')
+    : 'Subcutaneous';
+
   if (compound.isCalibrated && compound.dosage) {
     const isBpc = (compound.name || '').toUpperCase().includes('BPC-157');
     const isTb = (compound.name || '').toUpperCase().includes('TB-500');
@@ -41,9 +56,9 @@ function resolveWeeklyCompoundDose(compound, phase, phaseIndex, weekNumber, tota
       weeklyTotal,
       isStepUp: false,
       frequency: compound.frequency || (isBpc ? 'Daily (morning & evening)' : 'Weekly'),
-      route: compound.route || 'Subcutaneous',
-      storage: compound.storage || '❄️ 2°C – 8°C Refrigerator',
-      format: compound.format || '🧪 Sterile Lyophilized Vial',
+      route: compound.route || defaultRoute,
+      storage: compound.storage || defaultStorage,
+      format: compound.format || defaultFormat,
       isCalibrated: true
     };
   }
@@ -51,7 +66,7 @@ function resolveWeeklyCompoundDose(compound, phase, phaseIndex, weekNumber, tota
   const res = resolveClinicalCompoundDose(compound, phase, phaseIndex, totalPhases);
 
   let isStepUp = false;
-  if (phaseIndex > 0) {
+  if (phaseIndex > 0 && !isCosmeticOrOral) {
     const priorDose = resolveClinicalCompoundDose(compound, null, 0, totalPhases);
     if (priorDose.unitDose !== res.unitDose && priorDose.unitDose !== 'Active') {
       isStepUp = true;
@@ -64,10 +79,10 @@ function resolveWeeklyCompoundDose(compound, phase, phaseIndex, weekNumber, tota
     timesPerWeek: res.timesPerWeek,
     weeklyTotal: res.weeklyTotal,
     isStepUp: res.isStepUp || isStepUp,
-    frequency: compound.frequency || `${res.shortCadence} (${compound.route || 'Subcutaneous'})`,
-    route: compound.route || 'Subcutaneous',
-    storage: compound.storage || '❄️ 2°C – 8°C Refrigerator',
-    format: compound.format || '🧪 Sterile Lyophilized Vial'
+    frequency: compound.frequency || `${res.shortCadence} (${compound.route || defaultRoute})`,
+    route: compound.route || defaultRoute,
+    storage: compound.storage || defaultStorage,
+    format: compound.format || defaultFormat
   };
 }
 
@@ -81,105 +96,189 @@ export default function ClinicalGanttTimeline({
   const [activeLayout, setActiveLayout] = useState('accordions'); // 'accordions' | 'gantt'
   const [openPhaseIdx, setOpenPhaseIdx] = useState(0);
 
-  // Default phased dataset if protocol lacks full phases
-  const defaultPhases = useMemo(() => [
-    {
-      phaseNumber: 1,
-      phaseName: 'Induction & Adaptation',
-      type: 'induction',
-      durationWeeks: 4,
-      colorClass: 'gantt-bar-induction',
-      instructions: 'Gradual cellular receptor up-regulation with weekly GI tolerance monitoring.',
-      compounds: [
-        {
-          name: protocol?.name?.includes('Tirzepatide') ? 'Tirzepatide' : 'Primary Peptide API',
-          dosage: '2.5 mg',
-          frequency: 'Once Weekly (Sunday PM)',
-          format: '🖊️ Reusable Pen (20mg Cartridge)',
-          route: 'Subcutaneous',
-          storage: '❄️ 2°C – 8°C Refrigerator'
-        },
-        {
-          name: 'BPC-157 (Gastric Protection)',
-          dosage: '500 mcg',
-          frequency: 'Daily (Morning Fasted)',
-          format: '🧪 10mg Lyophilized Vial',
-          route: 'Subcutaneous',
-          storage: '❄️ 2°C – 8°C Refrigerator'
-        }
-      ],
-      biomarkerCheck: '🩸 Baseline Panel (HbA1c, Fasting Glucose, Lipid Profile)'
-    },
-    {
-      phaseNumber: 2,
-      phaseName: 'Therapeutic Titration',
-      type: 'optimization',
-      durationWeeks: 4,
-      colorClass: 'gantt-bar-optimization',
-      instructions: 'Target therapeutic window for optimal metabolic efficiency.',
-      compounds: [
-        {
-          name: protocol?.name?.includes('Tirzepatide') ? 'Tirzepatide' : 'Primary Peptide API',
-          dosage: '5.0 mg',
-          frequency: 'Once Weekly (Sunday PM)',
-          format: '🖊️ Reusable Pen (20mg Cartridge)',
-          route: 'Subcutaneous',
-          storage: '❄️ 2°C – 8°C Refrigerator'
-        },
-        {
-          name: 'MOTS-c (Mitochondrial Energy)',
-          dosage: '5.0 mg',
-          frequency: '3x Weekly (Mon/Wed/Fri)',
-          format: '🧪 10mg Lyophilized Vial',
-          route: 'Subcutaneous',
-          storage: '❄️ 2°C – 8°C Refrigerator'
-        }
-      ],
-      biomarkerCheck: '🩸 Mid-Cycle Re-Test (Fasting Insulin & HOMA-IR)'
-    },
-    {
-      phaseNumber: 3,
-      phaseName: 'Peak Maintenance',
-      type: 'maintenance',
-      durationWeeks: 4,
-      colorClass: 'gantt-bar-maintenance',
-      instructions: 'Sustained metabolic equilibrium and lean mass retention.',
-      compounds: [
-        {
-          name: protocol?.name?.includes('Tirzepatide') ? 'Tirzepatide' : 'Primary Peptide API',
-          dosage: '7.5 mg',
-          frequency: 'Once Weekly (Sunday PM)',
-          format: '🖊️ Reusable Pen (20mg Cartridge)',
-          route: 'Subcutaneous',
-          storage: '❄️ 2°C – 8°C Refrigerator'
-        }
-      ],
-      biomarkerCheck: null
-    },
-    {
-      phaseNumber: 4,
-      phaseName: 'Washout / Off-Cycle',
-      type: 'washout',
-      durationWeeks: 2,
-      colorClass: 'gantt-bar-washout',
-      instructions: 'Receptor clearance and baseline biological reset.',
-      compounds: [
-        {
-          name: 'Glutathione + NAD+ Support',
-          dosage: '100 mg',
-          frequency: 'Twice Weekly',
-          format: '🧪 Multi-Dose Vial',
-          route: 'Subcutaneous',
-          storage: '❄️ 2°C – 8°C Refrigerator'
-        }
-      ],
-      biomarkerCheck: '🩸 Post-Cycle Comprehensive Longevity Biomarkers'
-    }
-  ], [protocol]);
+  // Check if protocol is Colway or purely cosmetic / non-injectable
+  const isCosmeticProtocol = useMemo(() => {
+    const s = String(protocol?.slug || protocol?.id || '').toLowerCase();
+    const title = String(protocol?.name || protocol?.protocol_title || protocol?.title || '').toLowerCase();
+    const cat = String(protocol?.category || '').toLowerCase();
+    const pClass = String(protocol?.clinical_metadata?.protocol_class || '').toLowerCase();
+    return s.includes('colway') || title.includes('colway') || cat.includes('cosmetic') || cat.includes('skincare') || pClass.includes('cosmeceutical') || protocol?.hasVials === false;
+  }, [protocol]);
 
-  const rawPhases = (Array.isArray(protocol?.phases) && protocol.phases.length > 0)
-    ? protocol.phases
-    : defaultPhases;
+  // Default phased dataset if protocol lacks full phases
+  const defaultPhases = useMemo(() => {
+    if (isCosmeticProtocol) {
+      const itemsList = Array.isArray(protocol?.items) && protocol.items.length > 0 ? protocol.items : [];
+      const compoundsList = itemsList.length > 0
+        ? itemsList.map(it => ({
+            name: it.name || it.product_name,
+            dosage: it.dosage || '1-2 pumps / spatula',
+            frequency: it.frequency || 'Daily morning & evening',
+            format: it.format || (String(it.route || '').toLowerCase().includes('oral') ? '💊 Native Oral Capsules' : '🧴 Topical Cosmeceutical'),
+            route: it.route || (String(it.name || '').toLowerCase().includes('colvita') ? 'Oral' : 'Topical Cutaneous'),
+            storage: '🌡️ Room Temperature (15°C–25°C)'
+          }))
+        : [
+            {
+              name: 'Cellular Collagen Hydrolipid Wash Gel',
+              dosage: '1-2 pumps',
+              frequency: 'Twice daily (AM/PM)',
+              format: '🧴 Dermal Dispenser',
+              route: 'Topical Cutaneous',
+              storage: '🌡️ Room Temperature (15°C–25°C)'
+            },
+            {
+              name: 'Blue Diamond Dermal Cream',
+              dosage: '1 spatula',
+              frequency: 'Daily morning & evening',
+              format: '🧴 Dermocosmetic Jar',
+              route: 'Topical Cutaneous',
+              storage: '🌡️ Room Temperature (15°C–25°C)'
+            }
+          ];
+
+      return [
+        {
+          phaseNumber: 1,
+          phaseName: 'Skin Activation & Dermal Preparation',
+          type: 'induction',
+          durationWeeks: 4,
+          colorClass: 'gantt-bar-induction',
+          instructions: 'Gentle stratum corneum preparation, sebum clearance, and epidermal hydration barrier priming.',
+          compounds: compoundsList,
+          biomarkerCheck: null
+        },
+        {
+          phaseNumber: 2,
+          phaseName: 'Cellular Neocollagenesis & Repair',
+          type: 'optimization',
+          durationWeeks: 4,
+          colorClass: 'gantt-bar-optimization',
+          instructions: 'Intensive transdermal collagen peptide bio-delivery to activate dermal fibroblast neocollagenesis.',
+          compounds: compoundsList,
+          biomarkerCheck: null
+        },
+        {
+          phaseNumber: 3,
+          phaseName: 'Matrix Consolidation & Radiance',
+          type: 'maintenance',
+          durationWeeks: 4,
+          colorClass: 'gantt-bar-maintenance',
+          instructions: 'Sustained extracellular matrix density, micro-wrinkle volume reduction, and long-term dermal firming.',
+          compounds: compoundsList,
+          biomarkerCheck: null
+        }
+      ];
+    }
+
+    return [
+      {
+        phaseNumber: 1,
+        phaseName: 'Induction & Adaptation',
+        type: 'induction',
+        durationWeeks: 4,
+        colorClass: 'gantt-bar-induction',
+        instructions: 'Gradual cellular receptor up-regulation with weekly GI tolerance monitoring.',
+        compounds: [
+          {
+            name: protocol?.name?.includes('Tirzepatide') ? 'Tirzepatide' : 'Primary Peptide API',
+            dosage: '2.5 mg',
+            frequency: 'Once Weekly (Sunday PM)',
+            format: '🖊️ Reusable Pen (20mg Cartridge)',
+            route: 'Subcutaneous',
+            storage: '❄️ 2°C – 8°C Refrigerator'
+          },
+          {
+            name: 'BPC-157 (Gastric Protection)',
+            dosage: '500 mcg',
+            frequency: 'Daily (Morning Fasted)',
+            format: '🧪 10mg Lyophilized Vial',
+            route: 'Subcutaneous',
+            storage: '❄️ 2°C – 8°C Refrigerator'
+          }
+        ],
+        biomarkerCheck: '🩸 Baseline Panel (HbA1c, Fasting Glucose, Lipid Profile)'
+      },
+      {
+        phaseNumber: 2,
+        phaseName: 'Therapeutic Titration',
+        type: 'optimization',
+        durationWeeks: 4,
+        colorClass: 'gantt-bar-optimization',
+        instructions: 'Target therapeutic window for optimal metabolic efficiency.',
+        compounds: [
+          {
+            name: protocol?.name?.includes('Tirzepatide') ? 'Tirzepatide' : 'Primary Peptide API',
+            dosage: '5.0 mg',
+            frequency: 'Once Weekly (Sunday PM)',
+            format: '🖊️ Reusable Pen (20mg Cartridge)',
+            route: 'Subcutaneous',
+            storage: '❄️ 2°C – 8°C Refrigerator'
+          },
+          {
+            name: 'MOTS-c (Mitochondrial Energy)',
+            dosage: '5.0 mg',
+            frequency: '3x Weekly (Mon/Wed/Fri)',
+            format: '🧪 10mg Lyophilized Vial',
+            route: 'Subcutaneous',
+            storage: '❄️ 2°C – 8°C Refrigerator'
+          }
+        ],
+        biomarkerCheck: '🩸 Mid-Cycle Re-Test (Fasting Insulin & HOMA-IR)'
+      },
+      {
+        phaseNumber: 3,
+        phaseName: 'Peak Maintenance',
+        type: 'maintenance',
+        durationWeeks: 4,
+        colorClass: 'gantt-bar-maintenance',
+        instructions: 'Sustained metabolic equilibrium and lean mass retention.',
+        compounds: [
+          {
+            name: protocol?.name?.includes('Tirzepatide') ? 'Tirzepatide' : 'Primary Peptide API',
+            dosage: '7.5 mg',
+            frequency: 'Once Weekly (Sunday PM)',
+            format: '🖊️ Reusable Pen (20mg Cartridge)',
+            route: 'Subcutaneous',
+            storage: '❄️ 2°C – 8°C Refrigerator'
+          }
+        ],
+        biomarkerCheck: null
+      },
+      {
+        phaseNumber: 4,
+        phaseName: 'Washout / Off-Cycle',
+        type: 'washout',
+        durationWeeks: 2,
+        colorClass: 'gantt-bar-washout',
+        instructions: 'Receptor clearance and baseline biological reset.',
+        compounds: [
+          {
+            name: 'Glutathione + NAD+ Support',
+            dosage: '100 mg',
+            frequency: 'Twice Weekly',
+            format: '🧪 Multi-Dose Vial',
+            route: 'Subcutaneous',
+            storage: '❄️ 2°C – 8°C Refrigerator'
+          }
+        ],
+        biomarkerCheck: '🩸 Post-Cycle Comprehensive Longevity Biomarkers'
+      }
+    ];
+  }, [protocol, isCosmeticProtocol]);
+
+  // Support both p.compounds and p.medications from protocol blueprints
+  const rawPhases = useMemo(() => {
+    if (Array.isArray(protocol?.phases) && protocol.phases.length > 0) {
+      return protocol.phases.map(p => ({
+        ...p,
+        compounds: Array.isArray(p.compounds) && p.compounds.length > 0
+          ? p.compounds
+          : (Array.isArray(p.medications) && p.medications.length > 0 ? p.medications : [])
+      }));
+    }
+    return defaultPhases;
+  }, [protocol, defaultPhases]);
 
   // Adapt phases dynamically when patient-specific calibration is active
   const effectivePhases = useMemo(() => {
@@ -232,8 +331,9 @@ export default function ClinicalGanttTimeline({
         }
       }
 
-      // Update compounds with calibrated dosages
+      // Update compounds with calibrated dosages (Skip peptide overwrites if cosmetic)
       const updatedCompounds = (p.compounds || []).map(c => {
+        if (isCosmeticProtocol) return c;
         const cName = (c.name || c.product_name || c.product_slug || '').toUpperCase();
         if (cName.includes('BPC-157') && calibratedDoses.bpcDailyMcg) {
           const doseStr = `${calibratedDoses.bpcDailyMcg} mcg`;
@@ -295,18 +395,20 @@ export default function ClinicalGanttTimeline({
         compounds: updatedCompounds
       };
     });
-  }, [rawPhases, calibratedDoses]);
+  }, [rawPhases, calibratedDoses, isCosmeticProtocol]);
 
   // Normalized phases with accurate start/end week bounds
   const normalizedPhases = useMemo(() => {
-    let currentStart = 1;
     const colorClasses = ['gantt-bar-induction', 'gantt-bar-optimization', 'gantt-bar-maintenance', 'gantt-bar-washout'];
-    return effectivePhases.map((p, idx) => {
+    let runningStart = 1;
+    const result = [];
+    for (let idx = 0; idx < effectivePhases.length; idx++) {
+      const p = effectivePhases[idx];
       const duration = Number(p.durationWeeks) || 4;
-      const start = currentStart;
-      const end = currentStart + duration - 1;
-      currentStart = end + 1;
-      return {
+      const start = runningStart;
+      const end = runningStart + duration - 1;
+      runningStart = end + 1;
+      result.push({
         ...p,
         phaseNumber: p.phaseNumber || (idx + 1),
         phaseName: p.phaseName || p.name || `Phase ${idx + 1}`,
@@ -314,8 +416,9 @@ export default function ClinicalGanttTimeline({
         endWeek: end,
         durationWeeks: duration,
         colorClass: p.colorClass || colorClasses[idx % colorClasses.length]
-      };
-    });
+      });
+    }
+    return result;
   }, [effectivePhases]);
 
   const totalWeeks = normalizedPhases.reduce((acc, p) => acc + (Number(p.durationWeeks) || 4), 0);
@@ -353,20 +456,23 @@ export default function ClinicalGanttTimeline({
         const key = (name || '').trim().toUpperCase();
         if (key && !seen.has(key)) {
           seen.add(key);
+          const rawFmt = (it.format || it.presentation || it.dosageForm || '').toLowerCase();
+          const rawRoute = (it.route || '').toLowerCase();
+          const isCosm = isCosmeticProtocol || rawRoute.includes('topical') || rawRoute.includes('oral') || rawFmt.includes('cream') || rawFmt.includes('caps') || rawFmt.includes('gel');
           list.push({
             name,
             dosage: it.dosage,
             dose: it.dosage,
-            frequency: it.frequency || 'Once weekly',
-            route: it.route || 'Subcutaneous',
-            format: it.format || '🧪 Sterile Lyophilized Vial',
-            storage: '❄️ 2°C – 8°C Refrigerator'
+            frequency: it.frequency || (isCosm ? 'Daily application' : 'Once weekly'),
+            route: it.route || (isCosm ? 'Topical Cutaneous' : 'Subcutaneous'),
+            format: it.format || (isCosm ? '🧴 Topical Cosmeceutical' : '🧪 Sterile Lyophilized Vial'),
+            storage: it.storage || (isCosm ? '🌡️ Room Temperature (15°C–25°C)' : '❄️ 2°C – 8°C Refrigerator')
           });
         }
       }
     }
     return list;
-  }, [normalizedPhases, protocol]);
+  }, [normalizedPhases, protocol, isCosmeticProtocol]);
 
   // Detected compound helper flags for clinical calibration controls
   const hasIpamorelin = useMemo(() => distinctCompounds.some(c => (c.name || '').toUpperCase().includes('IPAMORELIN')), [distinctCompounds]);
@@ -402,6 +508,14 @@ export default function ClinicalGanttTimeline({
     // Map ALL compounds active in this week
     const compoundBlocks = (activeWeekCompounds && activeWeekCompounds.length > 0)
       ? activeWeekCompounds.map((c, i) => {
+          if (isCosmeticProtocol) {
+            return `  [Formulation ${i + 1}]: ${c.name}
+  • Prescribed Dose:        ${c.unitDose || '1-2 pumps / recommended spatula'}
+  • Administration Cadence: ${c.frequency || 'Daily morning & evening'}
+  • Target Schedule:        ${c.weeklyTotal || 'Standard daily cosmetic routine'}
+  • Application Route:      ${c.route || 'Topical Cutaneous (Apply on cleansed skin)'}
+  • Product Presentation:   ${c.format || 'Airless Dispenser / Dermocosmetic Jar'}`;
+          }
           return `  [Compound ${i + 1}]: ${c.name}
   • Prescribed Unit Dose:   ${c.unitDose || 'Standard Therapeutic Calibration'} per injection
   • Administration Cadence: ${c.frequency || 'Follow physician prescription schedule'}
@@ -410,6 +524,34 @@ export default function ClinicalGanttTimeline({
   • Pharmaceutical Format:  ${c.format || 'Sterile Lyophilized Peptide Vial (Reconstitute with BAC water)'}`;
         }).join('\n\n')
       : '  • No active compounds recorded for this week interval.';
+
+    const cosmeticDirectives = `3. APPLICATION RITUAL & TRANSDERMAL PREPARATION
+--------------------------------------------------------------------------------
+• Skin Cleansing: Cleanse skin thoroughly with lukewarm water prior to application.
+• Application:    Dispense prescribed pumps/spatula amount onto fingertips.
+• Massage:        Gently pat and massage into damp skin with upward circular motions.
+• Absorption:     Allow 2-3 minutes for full dermal absorption before applying SPF or cosmetics.
+
+4. PRODUCT STORAGE & STABILITY DIRECTIVES
+--------------------------------------------------------------------------------
+• Storage Regimen:    Store at room temperature (15°C – 25°C / 59°F – 77°F).
+• Critical Safeguard: Keep dispenser or jar tightly closed after each application.
+• Non-Invasive:       No needles, vials, bacteriostatic water, or refrigeration required.
+• Light Sensitivity:  Keep away from direct heat sources or continuous sun exposure.`;
+
+    const peptideDirectives = `3. ASEPTIC RECONSTITUTION & PREPARATION DIRECTIVES
+--------------------------------------------------------------------------------
+• Disinfection:   Swab rubber septum with 70% isopropyl alcohol swab and air-dry 15s.
+• Fluid Transfer: Dispense bacteriostatic sterile water slowly along inner glass vial wall.
+• Dissolution:    Swirl gently in slow circular motion until fully clear. NEVER shake vigorously.
+• Syringe Check:  Verify calibrated unit volume on U-100 insulin syringe prior to subcutaneous injection.
+
+4. BIO-STABILITY & COLD-CHAIN INTEGRITY DIRECTIVES
+--------------------------------------------------------------------------------
+• Storage Regimen:    Refrigerate continuously at 2°C – 8°C (36°F – 46°F).
+• Critical Safeguard: Do NOT freeze reconstituted peptide solutions under any circumstance.
+• Expiration Horizon: Maximum 28-day microbiological stability post-first septum puncture.
+• Light Sensitivity:  Shield vials from prolonged direct sunlight or elevated ambient heat.`;
 
     const text = `================================================================================
 PATIENT CLINICAL ADMINISTRATION SCHEDULE & PRESCRIBING REGIMEN
@@ -427,25 +569,12 @@ Atlas Health SSOT Clinical Governance Framework · ISO 15189 Standard
 --------------------------------------------------------------------------------
 ${compoundBlocks}
 
-3. ASEPTIC RECONSTITUTION & PREPARATION DIRECTIVES
---------------------------------------------------------------------------------
-• Disinfection:   Swab rubber septum with 70% isopropyl alcohol swab and air-dry 15s.
-• Fluid Transfer: Dispense bacteriostatic sterile water slowly along inner glass vial wall.
-• Dissolution:    Swirl gently in slow circular motion until fully clear. NEVER shake vigorously.
-• Syringe Check:  Verify calibrated unit volume on U-100 insulin syringe prior to subcutaneous injection.
+${isCosmeticProtocol ? cosmeticDirectives : peptideDirectives}
 
-4. BIO-STABILITY & COLD-CHAIN INTEGRITY DIRECTIVES
+5. CLINICAL MONITORING & PATIENT COMFORT
 --------------------------------------------------------------------------------
-• Storage Regimen:    Refrigerate continuously at 2°C – 8°C (36°F – 46°F).
-• Critical Safeguard: Do NOT freeze reconstituted peptide solutions under any circumstance.
-• Expiration Horizon: Maximum 28-day microbiological stability post-first septum puncture.
-• Light Sensitivity:  Shield vials from prolonged direct sunlight or elevated ambient heat.
-
-5. PHARMACOVIGILANCE & ESCALATION SENTINEL
---------------------------------------------------------------------------------
-• Expected Response: Mild transient injection-site tingling or minimal erythema (<1 inch).
-• Immediate Physician Escalation: Discontinue use and contact your prescribing clinician
-  if you experience systemic urticaria, dyspnea, acute tachycardia, or persistent abdominal pain.
+• Expected Response: ${isCosmeticProtocol ? 'Smooth skin hydration, improved barrier elasticity, absence of irritation.' : 'Mild transient injection-site tingling or minimal erythema (<1 inch).'}
+• Clinician Follow-up: Contact your provider if you develop skin hypersensitivity or adverse dermal reaction.
 
 ================================================================================
 PRESCRIBING MEDICAL DIRECTOR ATTESTATION:
@@ -468,11 +597,11 @@ Date Issued:    ${new Date().toISOString().split('T')[0]}                       
     return idx >= 0 ? idx : 0;
   }, [normalizedPhases, selectedWeek]);
 
-  useEffect(() => {
-    if (currentPhaseIndex >= 0 && currentPhaseIndex !== openPhaseIdx) {
-      setOpenPhaseIdx(currentPhaseIndex);
-    }
-  }, [currentPhaseIndex, openPhaseIdx]);
+  const [prevPhaseIndex, setPrevPhaseIndex] = useState(currentPhaseIndex);
+  if (currentPhaseIndex !== prevPhaseIndex) {
+    setPrevPhaseIndex(currentPhaseIndex);
+    setOpenPhaseIdx(currentPhaseIndex);
+  }
 
   return (
     <div className="clinical-gantt-container">
@@ -549,45 +678,58 @@ Date Issued:    ${new Date().toISOString().split('T')[0]}                       
             </span>
           </div>
           <div className="gcp-calib-chips">
-            {calibratedDoses.weightKg && (
-              <span className="gcp-chip">
-                Weight: <strong>{calibratedDoses.weightKg} kg</strong>
-              </span>
-            )}
             {calibratedDoses.tissueName && (
               <span className="gcp-chip">
                 Target: <strong>{calibratedDoses.tissueName}</strong>
               </span>
             )}
-            {calibratedDoses.chronicityLabel && (
-              <span className="gcp-chip">
-                Phase: <strong>{calibratedDoses.chronicityLabel}</strong>
-              </span>
-            )}
-            {hasIpamorelin && (
-              <span className="gcp-chip highlight">
-                Ipamorelin: <strong>{calibratedDoses.ipamorelinDailyMcg || 200} mcg/day</strong>
-              </span>
-            )}
-            {hasCjc && (
-              <span className="gcp-chip highlight">
-                CJC-1295: <strong>{calibratedDoses.cjcDailyMcg || 100} mcg/day</strong>
-              </span>
-            )}
-            {hasGhk && (
-              <span className="gcp-chip highlight">
-                GHK-Cu: <strong>{calibratedDoses.ghkDailyMg || 2.0} mg/day</strong>
-              </span>
-            )}
-            {(hasBpc || (!hasIpamorelin && !hasGhk && !hasCjc)) && (
-              <span className="gcp-chip highlight">
-                BPC-157: <strong>{calibratedDoses.bpcDailyMcg || 500} mcg/day</strong>
-              </span>
-            )}
-            {hasTb && (
-              <span className="gcp-chip highlight">
-                TB-500: <strong>{calibratedDoses.tb500WeeklyMg || 2.5} mg/wk</strong>
-              </span>
+            {isCosmeticProtocol ? (
+              <>
+                <span className="gcp-chip highlight">
+                  Route: <strong>Topical / Dermal (Non-invasive)</strong>
+                </span>
+                <span className="gcp-chip highlight">
+                  Application: <strong>Daily AM/PM Ritual</strong>
+                </span>
+              </>
+            ) : (
+              <>
+                {calibratedDoses.weightKg && (
+                  <span className="gcp-chip">
+                    Weight: <strong>{calibratedDoses.weightKg} kg</strong>
+                  </span>
+                )}
+                {calibratedDoses.chronicityLabel && (
+                  <span className="gcp-chip">
+                    Phase: <strong>{calibratedDoses.chronicityLabel}</strong>
+                  </span>
+                )}
+                {hasIpamorelin && (
+                  <span className="gcp-chip highlight">
+                    Ipamorelin: <strong>{calibratedDoses.ipamorelinDailyMcg || 200} mcg/day</strong>
+                  </span>
+                )}
+                {hasCjc && (
+                  <span className="gcp-chip highlight">
+                    CJC-1295: <strong>{calibratedDoses.cjcDailyMcg || 100} mcg/day</strong>
+                  </span>
+                )}
+                {hasGhk && (
+                  <span className="gcp-chip highlight">
+                    GHK-Cu: <strong>{calibratedDoses.ghkDailyMg || 2.0} mg/day</strong>
+                  </span>
+                )}
+                {(hasBpc || (!hasIpamorelin && !hasGhk && !hasCjc)) && (
+                  <span className="gcp-chip highlight">
+                    BPC-157: <strong>{calibratedDoses.bpcDailyMcg || 500} mcg/day</strong>
+                  </span>
+                )}
+                {hasTb && (
+                  <span className="gcp-chip highlight">
+                    TB-500: <strong>{calibratedDoses.tb500WeeklyMg || 2.5} mg/wk</strong>
+                  </span>
+                )}
+              </>
             )}
             <span className="gcp-chip">
               Duration: <strong>{calibratedDoses.cycleWeeks || totalWeeks || 8} Weeks</strong>
@@ -611,244 +753,270 @@ Date Issued:    ${new Date().toISOString().split('T')[0]}                       
         <div className="gcp-doctor-console" role="region" aria-label="Physician Calibration Console" style={{ marginBottom: '1rem' }}>
           <div className="gcp-doc-header">
             <div className="gcp-doc-title">
-              <Stethoscope size={16} style={{ color: '#0d9488' }} />
-              <span>Physician Dosing Titration & Calibration Console</span>
+              {isCosmeticProtocol ? <Sparkles size={16} style={{ color: '#0d9488' }} /> : <Stethoscope size={16} style={{ color: '#0d9488' }} />}
+              <span>{isCosmeticProtocol ? 'Dermocosmetic Regimen & Cycle Duration Console' : 'Physician Dosing Titration & Calibration Console'}</span>
             </div>
             <span style={{ fontSize: '0.73rem', color: '#64748b' }}>
-              Fine-tune daily & systemic kinetics for individual patient tolerance (Safety bounds: 6–16 Weeks)
+              {isCosmeticProtocol
+                ? 'Standardized non-invasive cellular skincare & nutricosmetic protocols (Cycle Range: 6–16 Weeks)'
+                : 'Fine-tune daily & systemic kinetics for individual patient tolerance (Safety bounds: 6–16 Weeks)'}
             </span>
           </div>
 
           <div className="gcp-doc-grid">
-            {/* Primary Compound 1 Stepper */}
-            {hasIpamorelin ? (
-              <div className="gcp-doc-card">
-                <span className="gcp-doc-card-label">Ipamorelin Daily Titration</span>
-                <div className="gcp-doc-card-controls">
-                  <button
-                    type="button"
-                    className="gcp-doc-step-btn"
-                    disabled={(calibratedDoses?.ipamorelinDailyMcg || 200) <= 100}
-                    onClick={() => {
-                      const current = calibratedDoses?.ipamorelinDailyMcg || 200;
-                      const next = Math.max(100, current - 25);
-                      if (onCalibrationUpdate) {
-                        onCalibrationUpdate(prev => ({
-                          ...(prev || { cycleWeeks: 8 }),
-                          ipamorelinDailyMcg: next
-                        }));
-                      }
-                    }}
-                    title="Decrease 25 mcg"
-                  >
-                    -
-                  </button>
-                  <span className="gcp-doc-val">
-                    {calibratedDoses?.ipamorelinDailyMcg || 200} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mcg/day</small>
-                  </span>
-                  <button
-                    type="button"
-                    className="gcp-doc-step-btn"
-                    disabled={(calibratedDoses?.ipamorelinDailyMcg || 200) >= 400}
-                    onClick={() => {
-                      const current = calibratedDoses?.ipamorelinDailyMcg || 200;
-                      const next = Math.min(400, current + 25);
-                      if (onCalibrationUpdate) {
-                        onCalibrationUpdate(prev => ({
-                          ...(prev || { cycleWeeks: 8 }),
-                          ipamorelinDailyMcg: next
-                        }));
-                      }
-                    }}
-                    title="Increase 25 mcg"
-                  >
-                    +
-                  </button>
+            {isCosmeticProtocol ? (
+              <>
+                <div className="gcp-doc-card">
+                  <span className="gcp-doc-card-label">Application Cadence</span>
+                  <div className="gcp-doc-card-controls">
+                    <span className="gcp-doc-val" style={{ fontSize: '0.88rem', color: '#0f172a' }}>
+                      Twice Daily <small style={{ fontSize: '0.72rem', color: '#64748b' }}>Morning & Evening</small>
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ) : hasGhk ? (
-              <div className="gcp-doc-card">
-                <span className="gcp-doc-card-label">GHK-Cu Daily Dose</span>
-                <div className="gcp-doc-card-controls">
-                  <button
-                    type="button"
-                    className="gcp-doc-step-btn"
-                    disabled={(calibratedDoses?.ghkDailyMg || 2.0) <= 1.0}
-                    onClick={() => {
-                      const current = calibratedDoses?.ghkDailyMg || 2.0;
-                      const next = Math.max(1.0, Number((current - 0.25).toFixed(2)));
-                      if (onCalibrationUpdate) {
-                        onCalibrationUpdate(prev => ({
-                          ...(prev || { cycleWeeks: 8 }),
-                          ghkDailyMg: next
-                        }));
-                      }
-                    }}
-                    title="Decrease 0.25 mg"
-                  >
-                    -
-                  </button>
-                  <span className="gcp-doc-val">
-                    {calibratedDoses?.ghkDailyMg || 2.0} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mg/day</small>
-                  </span>
-                  <button
-                    type="button"
-                    className="gcp-doc-step-btn"
-                    disabled={(calibratedDoses?.ghkDailyMg || 2.0) >= 3.0}
-                    onClick={() => {
-                      const current = calibratedDoses?.ghkDailyMg || 2.0;
-                      const next = Math.min(3.0, Number((current + 0.25).toFixed(2)));
-                      if (onCalibrationUpdate) {
-                        onCalibrationUpdate(prev => ({
-                          ...(prev || { cycleWeeks: 8 }),
-                          ghkDailyMg: next
-                        }));
-                      }
-                    }}
-                    title="Increase 0.25 mg"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="gcp-doc-card">
-                <span className="gcp-doc-card-label">BPC-157 Daily Titration</span>
-                <div className="gcp-doc-card-controls">
-                  <button
-                    type="button"
-                    className="gcp-doc-step-btn"
-                    disabled={(calibratedDoses?.bpcDailyMcg || 500) <= 250}
-                    onClick={() => {
-                      const current = calibratedDoses?.bpcDailyMcg || 500;
-                      const next = Math.max(250, current - 50);
-                      if (onCalibrationUpdate) {
-                        onCalibrationUpdate(prev => ({
-                          ...(prev || { weightKg: 75, tb500WeeklyMg: 2.5, cycleWeeks: 8 }),
-                          bpcDailyMcg: next
-                        }));
-                      }
-                    }}
-                    title="Decrease 50 mcg"
-                  >
-                    -
-                  </button>
-                  <span className="gcp-doc-val">
-                    {calibratedDoses?.bpcDailyMcg || 500} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mcg/day</small>
-                  </span>
-                  <button
-                    type="button"
-                    className="gcp-doc-step-btn"
-                    disabled={(calibratedDoses?.bpcDailyMcg || 500) >= 1000}
-                    onClick={() => {
-                      const current = calibratedDoses?.bpcDailyMcg || 500;
-                      const next = Math.min(1000, current + 50);
-                      if (onCalibrationUpdate) {
-                        onCalibrationUpdate(prev => ({
-                          ...(prev || { weightKg: 75, tb500WeeklyMg: 2.5, cycleWeeks: 8 }),
-                          bpcDailyMcg: next
-                        }));
-                      }
-                    }}
-                    title="Increase 50 mcg"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            )}
 
-            {/* Primary Compound 2 Stepper */}
-            {hasCjc ? (
-              <div className="gcp-doc-card">
-                <span className="gcp-doc-card-label">CJC-1295 Daily Cadence</span>
-                <div className="gcp-doc-card-controls">
-                  <button
-                    type="button"
-                    className="gcp-doc-step-btn"
-                    disabled={(calibratedDoses?.cjcDailyMcg || 100) <= 50}
-                    onClick={() => {
-                      const current = calibratedDoses?.cjcDailyMcg || 100;
-                      const next = Math.max(50, current - 25);
-                      if (onCalibrationUpdate) {
-                        onCalibrationUpdate(prev => ({
-                          ...(prev || { cycleWeeks: 8 }),
-                          cjcDailyMcg: next
-                        }));
-                      }
-                    }}
-                    title="Decrease 25 mcg"
-                  >
-                    -
-                  </button>
-                  <span className="gcp-doc-val">
-                    {calibratedDoses?.cjcDailyMcg || 100} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mcg/day</small>
-                  </span>
-                  <button
-                    type="button"
-                    className="gcp-doc-step-btn"
-                    disabled={(calibratedDoses?.cjcDailyMcg || 100) >= 300}
-                    onClick={() => {
-                      const current = calibratedDoses?.cjcDailyMcg || 100;
-                      const next = Math.min(300, current + 25);
-                      if (onCalibrationUpdate) {
-                        onCalibrationUpdate(prev => ({
-                          ...(prev || { cycleWeeks: 8 }),
-                          cjcDailyMcg: next
-                        }));
-                      }
-                    }}
-                    title="Increase 25 mcg"
-                  >
-                    +
-                  </button>
+                <div className="gcp-doc-card">
+                  <span className="gcp-doc-card-label">Skin Tolerance Profile</span>
+                  <div className="gcp-doc-card-controls">
+                    <span className="gcp-doc-val" style={{ fontSize: '0.86rem', color: '#16a34a' }}>
+                      Hypoallergenic <small style={{ fontSize: '0.72rem', color: '#64748b' }}>Gentle Barrier</small>
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </>
             ) : (
-              <div className="gcp-doc-card">
-                <span className="gcp-doc-card-label">TB-500 Systemic Cadence</span>
-                <div className="gcp-doc-card-controls">
-                  <button
-                    type="button"
-                    className="gcp-doc-step-btn"
-                    disabled={(calibratedDoses?.tb500WeeklyMg || 2.5) <= 1.0}
-                    onClick={() => {
-                      const current = calibratedDoses?.tb500WeeklyMg || 2.5;
-                      const next = Math.max(1.0, Number((current - 0.5).toFixed(1)));
-                      if (onCalibrationUpdate) {
-                        onCalibrationUpdate(prev => ({
-                          ...(prev || { weightKg: 75, bpcDailyMcg: 500, cycleWeeks: 8 }),
-                          tb500WeeklyMg: next
-                        }));
-                      }
-                    }}
-                    title="Decrease 0.5 mg/wk"
-                  >
-                    -
-                  </button>
-                  <span className="gcp-doc-val">
-                    {calibratedDoses?.tb500WeeklyMg || 2.5} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mg/wk</small>
-                  </span>
-                  <button
-                    type="button"
-                    className="gcp-doc-step-btn"
-                    disabled={(calibratedDoses?.tb500WeeklyMg || 2.5) >= 5.0}
-                    onClick={() => {
-                      const current = calibratedDoses?.tb500WeeklyMg || 2.5;
-                      const next = Math.min(5.0, Number((current + 0.5).toFixed(1)));
-                      if (onCalibrationUpdate) {
-                        onCalibrationUpdate(prev => ({
-                          ...(prev || { weightKg: 75, bpcDailyMcg: 500, cycleWeeks: 8 }),
-                          tb500WeeklyMg: next
-                        }));
-                      }
-                    }}
-                    title="Increase 0.5 mg/wk"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
+              <>
+                {/* Primary Compound 1 Stepper */}
+                {hasIpamorelin ? (
+                  <div className="gcp-doc-card">
+                    <span className="gcp-doc-card-label">Ipamorelin Daily Titration</span>
+                    <div className="gcp-doc-card-controls">
+                      <button
+                        type="button"
+                        className="gcp-doc-step-btn"
+                        disabled={(calibratedDoses?.ipamorelinDailyMcg || 200) <= 100}
+                        onClick={() => {
+                          const current = calibratedDoses?.ipamorelinDailyMcg || 200;
+                          const next = Math.max(100, current - 25);
+                          if (onCalibrationUpdate) {
+                            onCalibrationUpdate(prev => ({
+                              ...(prev || { cycleWeeks: 8 }),
+                              ipamorelinDailyMcg: next
+                            }));
+                          }
+                        }}
+                        title="Decrease 25 mcg"
+                      >
+                        -
+                      </button>
+                      <span className="gcp-doc-val">
+                        {calibratedDoses?.ipamorelinDailyMcg || 200} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mcg/day</small>
+                      </span>
+                      <button
+                        type="button"
+                        className="gcp-doc-step-btn"
+                        disabled={(calibratedDoses?.ipamorelinDailyMcg || 200) >= 400}
+                        onClick={() => {
+                          const current = calibratedDoses?.ipamorelinDailyMcg || 200;
+                          const next = Math.min(400, current + 25);
+                          if (onCalibrationUpdate) {
+                            onCalibrationUpdate(prev => ({
+                              ...(prev || { cycleWeeks: 8 }),
+                              ipamorelinDailyMcg: next
+                            }));
+                          }
+                        }}
+                        title="Increase 25 mcg"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ) : hasGhk ? (
+                  <div className="gcp-doc-card">
+                    <span className="gcp-doc-card-label">GHK-Cu Daily Dose</span>
+                    <div className="gcp-doc-card-controls">
+                      <button
+                        type="button"
+                        className="gcp-doc-step-btn"
+                        disabled={(calibratedDoses?.ghkDailyMg || 2.0) <= 1.0}
+                        onClick={() => {
+                          const current = calibratedDoses?.ghkDailyMg || 2.0;
+                          const next = Math.max(1.0, Number((current - 0.25).toFixed(2)));
+                          if (onCalibrationUpdate) {
+                            onCalibrationUpdate(prev => ({
+                              ...(prev || { cycleWeeks: 8 }),
+                              ghkDailyMg: next
+                            }));
+                          }
+                        }}
+                        title="Decrease 0.25 mg"
+                      >
+                        -
+                      </button>
+                      <span className="gcp-doc-val">
+                        {calibratedDoses?.ghkDailyMg || 2.0} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mg/day</small>
+                      </span>
+                      <button
+                        type="button"
+                        className="gcp-doc-step-btn"
+                        disabled={(calibratedDoses?.ghkDailyMg || 2.0) >= 3.0}
+                        onClick={() => {
+                          const current = calibratedDoses?.ghkDailyMg || 2.0;
+                          const next = Math.min(3.0, Number((current + 0.25).toFixed(2)));
+                          if (onCalibrationUpdate) {
+                            onCalibrationUpdate(prev => ({
+                              ...(prev || { cycleWeeks: 8 }),
+                              ghkDailyMg: next
+                            }));
+                          }
+                        }}
+                        title="Increase 0.25 mg"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="gcp-doc-card">
+                    <span className="gcp-doc-card-label">BPC-157 Daily Titration</span>
+                    <div className="gcp-doc-card-controls">
+                      <button
+                        type="button"
+                        className="gcp-doc-step-btn"
+                        disabled={(calibratedDoses?.bpcDailyMcg || 500) <= 250}
+                        onClick={() => {
+                          const current = calibratedDoses?.bpcDailyMcg || 500;
+                          const next = Math.max(250, current - 50);
+                          if (onCalibrationUpdate) {
+                            onCalibrationUpdate(prev => ({
+                              ...(prev || { weightKg: 75, tb500WeeklyMg: 2.5, cycleWeeks: 8 }),
+                              bpcDailyMcg: next
+                            }));
+                          }
+                        }}
+                        title="Decrease 50 mcg"
+                      >
+                        -
+                      </button>
+                      <span className="gcp-doc-val">
+                        {calibratedDoses?.bpcDailyMcg || 500} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mcg/day</small>
+                      </span>
+                      <button
+                        type="button"
+                        className="gcp-doc-step-btn"
+                        disabled={(calibratedDoses?.bpcDailyMcg || 500) >= 1000}
+                        onClick={() => {
+                          const current = calibratedDoses?.bpcDailyMcg || 500;
+                          const next = Math.min(1000, current + 50);
+                          if (onCalibrationUpdate) {
+                            onCalibrationUpdate(prev => ({
+                              ...(prev || { weightKg: 75, tb500WeeklyMg: 2.5, cycleWeeks: 8 }),
+                              bpcDailyMcg: next
+                            }));
+                          }
+                        }}
+                        title="Increase 50 mcg"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Primary Compound 2 Stepper */}
+                {hasCjc ? (
+                  <div className="gcp-doc-card">
+                    <span className="gcp-doc-card-label">CJC-1295 Daily Cadence</span>
+                    <div className="gcp-doc-card-controls">
+                      <button
+                        type="button"
+                        className="gcp-doc-step-btn"
+                        disabled={(calibratedDoses?.cjcDailyMcg || 100) <= 50}
+                        onClick={() => {
+                          const current = calibratedDoses?.cjcDailyMcg || 100;
+                          const next = Math.max(50, current - 25);
+                          if (onCalibrationUpdate) {
+                            onCalibrationUpdate(prev => ({
+                              ...(prev || { cycleWeeks: 8 }),
+                              cjcDailyMcg: next
+                            }));
+                          }
+                        }}
+                        title="Decrease 25 mcg"
+                      >
+                        -
+                      </button>
+                      <span className="gcp-doc-val">
+                        {calibratedDoses?.cjcDailyMcg || 100} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mcg/day</small>
+                      </span>
+                      <button
+                        type="button"
+                        className="gcp-doc-step-btn"
+                        disabled={(calibratedDoses?.cjcDailyMcg || 100) >= 300}
+                        onClick={() => {
+                          const current = calibratedDoses?.cjcDailyMcg || 100;
+                          const next = Math.min(300, current + 25);
+                          if (onCalibrationUpdate) {
+                            onCalibrationUpdate(prev => ({
+                              ...(prev || { cycleWeeks: 8 }),
+                              cjcDailyMcg: next
+                            }));
+                          }
+                        }}
+                        title="Increase 25 mcg"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="gcp-doc-card">
+                    <span className="gcp-doc-card-label">TB-500 Systemic Cadence</span>
+                    <div className="gcp-doc-card-controls">
+                      <button
+                        type="button"
+                        className="gcp-doc-step-btn"
+                        disabled={(calibratedDoses?.tb500WeeklyMg || 2.5) <= 1.0}
+                        onClick={() => {
+                          const current = calibratedDoses?.tb500WeeklyMg || 2.5;
+                          const next = Math.max(1.0, Number((current - 0.5).toFixed(1)));
+                          if (onCalibrationUpdate) {
+                            onCalibrationUpdate(prev => ({
+                              ...(prev || { weightKg: 75, bpcDailyMcg: 500, cycleWeeks: 8 }),
+                              tb500WeeklyMg: next
+                            }));
+                          }
+                        }}
+                        title="Decrease 0.5 mg/wk"
+                      >
+                        -
+                      </button>
+                      <span className="gcp-doc-val">
+                        {calibratedDoses?.tb500WeeklyMg || 2.5} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mg/wk</small>
+                      </span>
+                      <button
+                        type="button"
+                        className="gcp-doc-step-btn"
+                        disabled={(calibratedDoses?.tb500WeeklyMg || 2.5) >= 5.0}
+                        onClick={() => {
+                          const current = calibratedDoses?.tb500WeeklyMg || 2.5;
+                          const next = Math.min(5.0, Number((current + 0.5).toFixed(1)));
+                          if (onCalibrationUpdate) {
+                            onCalibrationUpdate(prev => ({
+                              ...(prev || { weightKg: 75, bpcDailyMcg: 500, cycleWeeks: 8 }),
+                              tb500WeeklyMg: next
+                            }));
+                          }
+                        }}
+                        title="Increase 0.5 mg/wk"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Total Protocol Duration Weeks (Guardrails: 6 to 16 Weeks) */}
@@ -1224,35 +1392,55 @@ Date Issued:    ${new Date().toISOString().split('T')[0]}                       
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.85rem' }}>
                             <div style={{ background: '#ffffff', border: '1px solid #e6fffa', borderRadius: '8px', padding: '0.85rem' }}>
                               <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', marginBottom: '4px' }}>
-                                1. Prescribed Weekly Dose
+                                {isCosmeticProtocol ? '1. Prescribed Formulation' : '1. Prescribed Weekly Dose'}
                               </div>
                               <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
-                                {activeWeekCompounds[0]?.name || 'Active Peptide Compound'}
+                                {activeWeekCompounds[0]?.name || (isCosmeticProtocol ? 'Cellular Dermal Formula' : 'Active Peptide Compound')}
                               </div>
                               <div style={{ fontSize: '0.76rem', color: '#047857', fontWeight: 700, marginTop: '2px' }}>
-                                Calibration: {activeWeekCompounds[0]?.unitDose || 'Standard Dose'} · {activeWeekCompounds[0]?.frequency || 'Once weekly'}
+                                Calibration: {activeWeekCompounds[0]?.unitDose || (isCosmeticProtocol ? '1-2 pumps' : 'Standard Dose')} · {activeWeekCompounds[0]?.frequency || (isCosmeticProtocol ? 'Daily routine' : 'Once weekly')}
                               </div>
                             </div>
 
                             <div style={{ background: '#ffffff', border: '1px solid #e6fffa', borderRadius: '8px', padding: '0.85rem' }}>
                               <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', marginBottom: '4px' }}>
-                                2. Vial Reconstitution
+                                {isCosmeticProtocol ? '2. Application Ritual' : '2. Vial Reconstitution'}
                               </div>
                               <div style={{ fontSize: '0.76rem', color: '#334155', lineHeight: 1.45 }}>
-                                • Swab rubber septum with 70% isopropyl alcohol.<br />
-                                • Dispense bacteriostatic water smoothly along vial wall.<br />
-                                • Swirl gently in slow circles — do not shake.
+                                {isCosmeticProtocol ? (
+                                  <>
+                                    • Cleanse skin with lukewarm water before applying.<br />
+                                    • Dispense 1-2 pumps onto clean fingertips.<br />
+                                    • Gently pat into damp skin with upward motions.
+                                  </>
+                                ) : (
+                                  <>
+                                    • Swab rubber septum with 70% isopropyl alcohol.<br />
+                                    • Dispense bacteriostatic water smoothly along vial wall.<br />
+                                    • Swirl gently in slow circles — do not shake.
+                                  </>
+                                )}
                               </div>
                             </div>
 
                             <div style={{ background: '#ffffff', border: '1px solid #e6fffa', borderRadius: '8px', padding: '0.85rem' }}>
                               <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', marginBottom: '4px' }}>
-                                3. Cold Chain Storage
+                                {isCosmeticProtocol ? '3. Room Temp Storage' : '3. Cold Chain Storage'}
                               </div>
                               <div style={{ fontSize: '0.76rem', color: '#334155', lineHeight: 1.45 }}>
-                                • Keep refrigerated at 2°C – 8°C (36°F – 46°F).<br />
-                                • Never freeze reconstituted peptide vials.<br />
-                                • Maximum 28-day stability post-reconstitution.
+                                {isCosmeticProtocol ? (
+                                  <>
+                                    • Store at room temperature (15°C – 25°C).<br />
+                                    • Keep dispenser hermetically sealed after each use.<br />
+                                    • No needles, vials, or cold-chain required.
+                                  </>
+                                ) : (
+                                  <>
+                                    • Keep refrigerated at 2°C – 8°C (36°F – 46°F).<br />
+                                    • Never freeze reconstituted peptide vials.<br />
+                                    • Maximum 28-day stability post-reconstitution.
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>

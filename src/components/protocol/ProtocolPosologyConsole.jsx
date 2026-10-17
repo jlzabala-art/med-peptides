@@ -27,7 +27,7 @@ import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedCo
 export default function ProtocolPosologyConsole({
   items = [],
   phases = [],
-  protocol = null,
+  _protocol = null,
   lang = 'en'
 }) {
   const isEs = lang === 'es';
@@ -112,16 +112,15 @@ export default function ProtocolPosologyConsole({
           </div>
         </div>
 
-        {/* ── ACTIVE ITEMS POSOLOGY GRID ── */}
+        {/* ── ACTIVE ITEMS POSOLOGY LIST (HORIZONTAL CARDS) ── */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '1.25rem'
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
         }}>
           {items.map((item, idx) => {
             const rawFormat = (item.format || item.presentation || item.dosageForm || '').toLowerCase();
             const isOral = rawFormat.includes('caps') || rawFormat.includes('oral') || rawFormat.includes('supplement') || item.is_supplement || item.id?.includes('colvita');
-            const isTopical = !isOral;
 
             return (
               <div
@@ -130,18 +129,20 @@ export default function ProtocolPosologyConsole({
                   background: '#ffffff',
                   border: '1.5px solid #e2e8f0',
                   borderRadius: '12px',
-                  padding: '1.25rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  padding: '1.25rem 1.5rem',
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(240px, 1.2fr) minmax(200px, 1fr) minmax(260px, 1.5fr)',
+                  gap: '1.5rem',
+                  alignItems: 'center',
                   boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
                 }}
+                className="posology-horizontal-card"
               >
-                <div>
-                  {/* Header Badge */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                {/* Column 1: Identity & Volume */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <span style={{
-                      fontSize: '0.70rem',
+                      fontSize: '0.68rem',
                       fontWeight: 800,
                       textTransform: 'uppercase',
                       letterSpacing: '0.04em',
@@ -157,71 +158,59 @@ export default function ProtocolPosologyConsole({
                       {item.volume || item.presentation || (isOral ? '60 / 120 Caps' : 'Formulación Tópica')}
                     </span>
                   </div>
-
-                  {/* Compound Name */}
-                  <h4 style={{ fontSize: '1.02rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
+                  <h4 style={{ fontSize: '1.02rem', fontWeight: 800, color: '#0f172a', margin: '2px 0 0 0' }}>
                     {item.name || item.product_name || 'Compound'}
                   </h4>
+                </div>
 
-                  {/* Dose & Frequency Specs */}
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '8px',
-                    background: '#f8fafc',
-                    borderRadius: '8px',
-                    padding: '10px',
-                    border: '1px solid #f1f5f9',
-                    marginBottom: '0.85rem'
-                  }}>
-                    <div>
-                      <div style={{ fontSize: '0.66rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
-                        {isEs ? 'Posología Diaria' : 'Daily Dose'}
-                      </div>
-                      <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
-                        {item.dosage || item.dose || (isOral ? '2 cápsulas / día' : '1–2 aplicaciones / día')}
-                      </div>
+                {/* Column 2: Dose & Timing Box */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '8px',
+                  background: '#f8fafc',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  border: '1px solid #f1f5f9'
+                }}>
+                  <div>
+                    <div style={{ fontSize: '0.66rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {isEs ? 'Posología' : 'Daily Dose'}
                     </div>
-                    <div>
-                      <div style={{ fontSize: '0.66rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
-                        {isEs ? 'Momento Óptimo' : 'Timing'}
-                      </div>
-                      <div style={{ fontSize: '0.86rem', fontWeight: 800, color: isOral ? '#1d4ed8' : '#0d9488', marginTop: '2px' }}>
-                        {item.timing || (isOral ? (isEs ? 'Con comida principal' : 'With main meal') : (isEs ? 'Noche sobre piel limpia' : 'Night on clean skin'))}
-                      </div>
+                    <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                      {item.dosage || item.dose || (isOral ? '2 cápsulas / día' : '1–2 aplicaciones / día')}
                     </div>
                   </div>
-
-                  {/* Clinical Administration Ritual Instructions */}
-                  <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.5 }}>
-                    <strong style={{ color: '#0f172a' }}>{isEs ? 'Instrucciones Clínicas:' : 'Clinical Instructions:'} </strong>
-                    {isOral
-                      ? (isEs
-                          ? 'Ingerir con un vaso completo de agua mineral templada. No masticar. La presencia de vitamina C y bioflavonoides optimiza la absorción entérica de los oligopéptidos de tropocolágeno.'
-                          : 'Swallow with a full glass of room temperature water. Do not chew. Dietary vitamin C and bioflavonoids synergize enteric absorption of intact tropocollagen oligopeptides.')
-                      : (isEs
-                          ? 'Aplicar con movimientos circulares ascendentes sobre la zona limpia y ligeramente humedecida para facilitar el arrastre transepidérmico.'
-                          : 'Apply in gentle upward circular motions onto freshly cleansed and slightly damp skin to enhance transepidermal delivery.')}
+                  <div>
+                    <div style={{ fontSize: '0.66rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {isEs ? 'Momento' : 'Timing'}
+                    </div>
+                    <div style={{ fontSize: '0.86rem', fontWeight: 800, color: isOral ? '#1d4ed8' : '#0d9488', marginTop: '2px' }}>
+                      {item.timing || (isOral ? (isEs ? 'Con comida' : 'With meal') : (isEs ? 'Mañana / Noche' : 'AM / PM'))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Storage & Stability Note */}
-                <div style={{
-                  marginTop: '1rem',
-                  paddingTop: '0.75rem',
-                  borderTop: '1px solid #f1f5f9',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.70rem',
-                  color: '#64748b'
-                }}>
-                  <Clock size={13} color="#94a3b8" />
-                  <span>
+                {/* Column 3: Clinical Application Ritual Instructions & Storage */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
+                    <strong style={{ color: '#0f172a' }}>{isEs ? 'Ritual de Aplicación:' : 'Application Ritual:'} </strong>
                     {isOral
-                      ? (isEs ? 'Conservar en lugar fresco y seco (<25°C). Proteger de la luz directa.' : 'Store below 25°C in a dry place. Protect from direct solar exposure.')
-                      : (isEs ? 'Mantener envase cerrado herméticamente tras cada uso.' : 'Keep dispenser hermetically sealed after use.')}
-                  </span>
+                      ? (isEs
+                          ? 'Ingerir con un vaso completo de agua mineral templada. No masticar. La vitamina C optimiza la absorción entérica de oligopéptidos de tropocolágeno.'
+                          : 'Swallow with room temperature water. Do not chew. Dietary vitamin C synergizes enteric absorption of intact tropocollagen oligopeptides.')
+                      : (isEs
+                          ? 'Aplicar con movimientos circulares ascendentes sobre la piel limpia y ligeramente humedecida para optimizar la biodisponibilidad transepidérmica.'
+                          : 'Apply in gentle upward circular motions onto freshly cleansed, damp skin to enhance transepidermal delivery.')}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.70rem', color: '#64748b' }}>
+                    <Clock size={12} color="#94a3b8" />
+                    <span>
+                      {isOral
+                        ? (isEs ? 'Conservar en lugar fresco y seco (<25°C). Proteger de la luz solar directa.' : 'Store below 25°C in a dry place. Protect from direct solar exposure.')
+                        : (isEs ? 'Mantener envase cerrado herméticamente tras cada aplicación.' : 'Keep dispenser hermetically sealed after use.')}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
