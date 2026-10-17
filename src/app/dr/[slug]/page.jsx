@@ -1,4 +1,5 @@
 import React from 'react';
+import { redirect } from 'next/navigation';
 import DoctorPublicPortalClient from './DoctorPublicPortalClient';
 import { getDoctorPortalData } from '@/lib/doctorCache';
 
@@ -7,55 +8,46 @@ export const revalidate = 0;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
-import { KNOWN_DOCTORS_DIRECTORY } from '@/services/doctorDirectoryService';
-
+/**
+ * DHA / UAE Health Data Law / HIPAA De-identification Compliance (Golden Rule)
+ * Metadata must NOT expose doctor name, clinic name, or any medical PII to public crawlers.
+ * Strictly blocks search engine indexing with noindex, nofollow, noarchive.
+ */
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const cleanSlug = decodeURIComponent(slug || '').trim().toLowerCase();
 
-  let doctorName = 'Treating Physician Clinical Portal';
-  let clinic = 'Clinical Practice & Dispensary';
-  let specialty = 'Regenerative Medicine & Nutrigenomics';
   let canonicalSlug = cleanSlug;
 
-  // 1. Instant Synchronous Resolution from Known Directory (0ms - Golden Rule #2)
-  const known = KNOWN_DOCTORS_DIRECTORY.find(d => {
-    const s = cleanSlug.replace(/^dr[-.]?/, '');
-    const idMatch = d.id.toLowerCase() === cleanSlug || d.id.toLowerCase().replace(/^dr[-.]?/, '') === s;
-    const nameSlug = (d.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    const cleanNoHyphens = cleanSlug.replace(/[^a-z0-9]/g, '');
-    const nameMatch = nameSlug.includes(cleanNoHyphens) || cleanNoHyphens.includes(nameSlug.replace('dr', ''));
-    const aliasMatch = (d.aliases || []).some(a => a.toLowerCase() === cleanSlug || a.toLowerCase().replace(/^dr[-.]?/, '') === s);
-    return idMatch || nameMatch || aliasMatch;
-  });
-
-  if (known) {
-    doctorName = known.name || doctorName;
-    clinic = known.clinic || known.clinicName || clinic;
-    specialty = known.specialty || specialty;
-  }
-
-  // 2. Layer 2 Firestore / Cache Enrichment
   try {
     const portalData = await getDoctorPortalData(cleanSlug);
-    if (portalData?.doctor) {
-      const doc = portalData.doctor;
-      doctorName = doc.name || doctorName;
-      clinic = doc.clinic || clinic;
-      specialty = doc.specialty || specialty;
-      canonicalSlug = doc.opaqueCode || cleanSlug;
+    if (portalData?.doctor?.opaqueCode) {
+      canonicalSlug = portalData.doctor.opaqueCode;
     }
   } catch (e) {
     console.warn('Doctor metadata fetch error', e);
   }
 
-  const shareTitle = `${doctorName} | Clinical Prescriptions & Patient Dossier`;
-  const shareDesc = `Official digital clinical prescription & medical portal for ${doctorName} (${specialty} at ${clinic}). View prescribed therapies, patient posology regimens, and personalized medical care dossiers.`;
+  const shareTitle = 'Clinical Practice Portal | Atlas Health Services';
+  const shareDesc = 'Secure, authenticated clinical dispensary & medical prescription management portal. Authorized medical practitioners can sign in to view dossiers.';
   const pageUrl = `${BASE_URL}/dr/${canonicalSlug}`;
 
   return {
     title: shareTitle,
     description: shareDesc,
+    robots: {
+      index: false,
+      follow: false,
+      nocache: true,
+      noarchive: true,
+      googleBot: {
+        index: false,
+        follow: false,
+        'max-video-preview': -1,
+        'max-image-preview': 'none',
+        'max-snippet': -1
+      }
+    },
     alternates: {
       canonical: pageUrl
     },
@@ -63,9 +55,9 @@ export async function generateMetadata({ params }) {
       title: shareTitle,
       description: shareDesc,
       url: pageUrl,
-      siteName: `${doctorName} · Clinical Practice`,
+      siteName: 'Atlas Health Services · Clinical Practice Portal',
       locale: 'en_US',
-      type: 'profile',
+      type: 'website',
       images: [
         {
           url: `${BASE_URL}/og-card.png`,
@@ -73,7 +65,7 @@ export async function generateMetadata({ params }) {
           width: 1200,
           height: 630,
           type: 'image/png',
-          alt: doctorName
+          alt: 'Atlas Clinical Practice Portal'
         }
       ]
     },
@@ -96,6 +88,17 @@ export default async function DoctorPublicPage({ params }) {
     initialData = await getDoctorPortalData(cleanSlug);
   } catch (err) {
     console.error('Error preloading doctor portal data:', err);
+  }
+
+  // DHA / UAE Health Data Law / HIPAA Double Codification:
+  // If navigated via nominal name (e.g. /dr/khalid-shukri), automatically 307-redirect
+  // to the opaque codified URL (e.g. /dr/DR-SSEJV9MC) so the URL bar contains zero PII.
+  if (initialData?.doctor?.opaqueCode) {
+    const targetCode = initialData.doctor.opaqueCode;
+    const isAlreadyOpaque = cleanSlug.toUpperCase() === targetCode.toUpperCase();
+    if (!isAlreadyOpaque) {
+      redirect(`/dr/${targetCode}`);
+    }
   }
 
   return <DoctorPublicPortalClient slug={cleanSlug} initialData={initialData} />;

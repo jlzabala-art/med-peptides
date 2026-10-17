@@ -82,6 +82,7 @@ import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolida
 import { calculateTreatmentDates, calculateTreatmentDuration } from '@/utils/clinical/clinicalFormulations';
 import DoctorFloatingGlassDock from '@/components/doctor/docks/DoctorFloatingGlassDock';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
+import PrescriptionProtocolAlignmentCard from '@/components/doctor/PrescriptionProtocolAlignmentCard';
 import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
 import { useAuth } from '@/context/AuthContext';
 
@@ -1272,14 +1273,15 @@ export default function DoctorPublicPortalClient({
   const handleShareWhatsApp = () => {
     triggerHaptic('light');
     const intakeUrl = `${window.location.origin}/rx/intake?refDoctor=${encodeURIComponent(opaqueCode)}`;
-    const text = encodeURIComponent(`Hello, you can submit your medical prescription directly to ${doctor.name} at Atlas Clinical Services here: ${intakeUrl}`);
+    const doctorDisplay = isAuthorizedViewer ? (doctor.name || 'our clinic') : 'our accredited medical practice';
+    const text = encodeURIComponent(`Hello, you can submit your medical prescription directly to ${doctorDisplay} at Atlas Clinical Services here: ${intakeUrl}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
   // ── Atlas WhatsApp for Doctor Communications (+971 55 356 1058) ───────────
   const handleContactAtlasWhatsApp = (topic = '', extraDetails = '') => {
     triggerHaptic('light');
-    const doctorName = doctor.name || 'Doctor';
+    const doctorName = isAuthorizedViewer ? (doctor.name || 'Doctor') : `Prescribing Physician (${opaqueCode})`;
     let text = `Hello Atlas Support, I am ${doctorName}. I am contacting you directly from the Clinical Doctor Portal.`;
     if (topic) {
       text += `\n\n*Subject / Formulation:* ${topic}`;
@@ -1287,7 +1289,7 @@ export default function DoctorPublicPortalClient({
     if (extraDetails) {
       text += `\n*Clinical Inquiry:* ${extraDetails}`;
     }
-    text += `\n\n*Clinic:* ${doctor.clinic || 'Atlas Partner Clinic'}`;
+    text += `\n\n*Practice:* ${isAuthorizedViewer ? (doctor.clinic || 'Atlas Partner Clinic') : `Practice ID: ${opaqueCode}`}`;
     const url = `https://wa.me/971553561058?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -1303,8 +1305,9 @@ export default function DoctorPublicPortalClient({
     if (!rx) return;
     triggerHaptic('light');
     const parts = resolvePrescriptionParts(rx);
-    const patientName = rx.patientName || 'Patient';
-    let text = `Dear ${patientName},\n\nHere is your treatment posology and administration guidance prescribed by Dr. ${doctor.name}:\n\n`;
+    const patientName = isAuthorizedViewer ? (rx.patientName || 'Patient') : `Patient PT-${String(rx.code || rx.id).slice(-4).toUpperCase()}`;
+    const docSignature = isAuthorizedViewer ? `Dr. ${doctor.name}` : `Treating Physician (${opaqueCode})`;
+    let text = `Dear ${patientName},\n\nHere is your treatment posology and administration guidance prescribed by ${docSignature}:\n\n`;
     text += `📋 *Treatment:* ${rx.treatmentTitle || 'Custom Compounded Formulation'}\n`;
     text += `🆔 *Reference:* #${rx.code || rx.prescriptionNumber || rx.id}\n\n`;
     parts.forEach(p => {
@@ -1319,7 +1322,7 @@ export default function DoctorPublicPortalClient({
     text += `• Apply to clean and dry skin/scalp.\n`;
     text += `• Wash hands thoroughly after application.\n`;
     text += `• Store below 25°C, protected from direct sunlight.\n\n`;
-    text += `For medical inquiries, consult Dr. ${doctor.name} or Atlas Clinical Support on WhatsApp.`;
+    text += `For medical inquiries, consult ${docSignature} or Atlas Clinical Support on WhatsApp.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
   };
 
@@ -1504,9 +1507,9 @@ export default function DoctorPublicPortalClient({
     try {
       const practiceContext = {
         doctor: {
-          name: doctor.name,
+          name: isAuthorizedViewer ? doctor.name : `Physician ${opaqueCode}`,
           specialty: doctor.specialty,
-          clinic: doctor.clinic,
+          clinic: isAuthorizedViewer ? doctor.clinic : 'Verified Medical Practice',
           city: doctor.city,
           country: doctor.country
         },
@@ -1576,9 +1579,10 @@ export default function DoctorPublicPortalClient({
       });
 
       const json = await res.json();
+      const safeDocName = isAuthorizedViewer ? doctor.name : `Practice ${opaqueCode}`;
       const replyContent =
         json?.reply ||
-        `**Practice Intelligence for ${doctor.name}:**\n• **${doctorPatientsList.length} Unique Patients** (${soldPatientsCount} Sold Customers · ${unacceptedPatientsCount} Unaccepted Proposal Patients)\n• **${allPrescriptions.length} Prescriptions** (${quickCounts.active} Sold & Invoiced · ${quickCounts.proposals} Unaccepted Offers)`;
+        `**Practice Intelligence for ${safeDocName}:**\n• **${doctorPatientsList.length} Unique Patients** (${soldPatientsCount} Sold Customers · ${unacceptedPatientsCount} Unaccepted Proposal Patients)\n• **${allPrescriptions.length} Prescriptions** (${quickCounts.active} Sold & Invoiced · ${quickCounts.proposals} Unaccepted Offers)`;
 
       const assistantMsg = {
         role: 'assistant',
@@ -1588,10 +1592,10 @@ export default function DoctorPublicPortalClient({
       };
       setAiMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
-      console.warn('[AtlasAICopilot] Client fallback triggered:', err?.message);
+      const fallbackDocName = isAuthorizedViewer ? doctor.name : `Practice ${opaqueCode}`;
       const assistantMsg = {
         role: 'assistant',
-        content: `**Practice Overview — ${doctor.name}:**\n\n• **Unique Patients:** **${doctorPatientsList.length}** (**${soldPatientsCount}** Sold & Invoiced Customers · **${unacceptedPatientsCount}** Unaccepted Proposal Patients)\n• **Total Prescriptions:** **${allPrescriptions.length}** (**${quickCounts.active}** Sold & Invoiced · **${quickCounts.proposals}** Unaccepted Offers)\n• **Signature APIs:** ${doctorTopApis.map((a) => `${a.name} (${a.count})`).join(', ') || 'Custom Trichology & Regenerative APIs'}`,
+        content: `**Practice Overview — ${fallbackDocName}:**\n\n• **Unique Patients:** **${doctorPatientsList.length}** (**${soldPatientsCount}** Sold & Invoiced Customers · **${unacceptedPatientsCount}** Unaccepted Proposal Patients)\n• **Total Prescriptions:** **${allPrescriptions.length}** (**${quickCounts.active}** Sold & Invoiced · **${quickCounts.proposals}** Unaccepted Offers)\n• **Signature APIs:** ${doctorTopApis.map((a) => `${a.name} (${a.count})`).join(', ') || 'Custom Trichology & Regenerative APIs'}`,
         actions: [
           { label: `🟢 View ${quickCounts.active} Sold & Invoiced`, type: 'filter_sold' },
           { label: `⏳ View ${quickCounts.proposals} Unaccepted Offers`, type: 'filter_proposals' }
@@ -4493,9 +4497,13 @@ export default function DoctorPublicPortalClient({
               type="button"
               onClick={() => {
                 triggerHaptic('light');
-                setIsCredentialsModalOpen(true);
+                if (isAuthorizedViewer) {
+                  setIsCredentialsModalOpen(true);
+                } else {
+                  window.location.href = `/login?tab=register&role=doctor&redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : `/dr/${opaqueCode}`)}`;
+                }
               }}
-              title={`View and manage physician profile: ${doctor.name || 'Treating Physician'}`}
+              title={isAuthorizedViewer ? `View and manage physician profile: ${doctor.name || 'Treating Physician'}` : 'Sign in or claim practice to unlock nominal dossiers'}
               style={{
                 width: '100%',
                 display: 'flex',
@@ -4533,7 +4541,7 @@ export default function DoctorPublicPortalClient({
                     boxShadow: '0 1px 3px rgba(0,54,102,0.2)'
                   }}
                 >
-                  {doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D'}
+                  {isAuthorizedViewer ? (doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D') : <Shield size={14} color="#ffffff" />}
                   <span
                     style={{
                       position: 'absolute',
@@ -4560,7 +4568,7 @@ export default function DoctorPublicPortalClient({
                         wordBreak: 'break-word'
                       }}
                     >
-                      {doctor.name || 'Treating Physician'}
+                      {isAuthorizedViewer ? (doctor.name || 'Treating Physician') : 'Verified Medical Practice'}
                     </div>
                     <div
                       style={{
@@ -4572,7 +4580,7 @@ export default function DoctorPublicPortalClient({
                         marginTop: '2px'
                       }}
                     >
-                      {doctor.clinic || doctor.specialty || 'Verified Medical Practice'}
+                      {isAuthorizedViewer ? (doctor.clinic || doctor.specialty || 'Verified Medical Practice') : `Practice ID: ${opaqueCode}`}
                     </div>
                   </div>
                 )}
@@ -4584,16 +4592,16 @@ export default function DoctorPublicPortalClient({
                     width: '24px',
                     height: '24px',
                     borderRadius: '5px',
-                    background: '#f1f5f9',
-                    color: '#64748b',
+                    background: isAuthorizedViewer ? '#f1f5f9' : '#e0f2fe',
+                    color: isAuthorizedViewer ? '#64748b' : '#0284c7',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}
-                  title="View and edit physician profile"
+                  title={isAuthorizedViewer ? "View and edit physician profile" : "Sign in with DHA credentials to unlock dossiers"}
                 >
-                  <Edit3 size={12} />
+                  {isAuthorizedViewer ? <Edit3 size={12} /> : <Lock size={12} />}
                 </div>
               )}
             </button>
@@ -4659,10 +4667,14 @@ export default function DoctorPublicPortalClient({
             <div
               onClick={() => {
                 triggerHaptic('light');
-                setIsCredentialsModalOpen(true);
+                if (isAuthorizedViewer) {
+                  setIsCredentialsModalOpen(true);
+                } else {
+                  window.location.href = `/login?tab=register&role=doctor&redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : `/dr/${opaqueCode}`)}`;
+                }
               }}
               style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, cursor: 'pointer' }}
-              title="Click to view verified doctor credentials & DHA license"
+              title={isAuthorizedViewer ? "Click to view verified doctor credentials & DHA license" : "Sign in to unlock authorized nominal dossiers"}
             >
               <div
                 style={{
@@ -4679,19 +4691,19 @@ export default function DoctorPublicPortalClient({
                   flexShrink: 0
                 }}
               >
-                {doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D'}
+                {isAuthorizedViewer ? (doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D') : <Shield size={15} color="#ffffff" />}
               </div>
               <div style={{ minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {doctor.name}
+                    {isAuthorizedViewer ? doctor.name : 'Verified DHA Practice'}
                   </span>
                   <span style={{ fontSize: '0.60rem', fontWeight: 700, background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '1px 5px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
                     DHA Verified ✓
                   </span>
                 </div>
                 <div style={{ fontSize: '0.68rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {doctor.specialty} • {doctor.license}
+                  {isAuthorizedViewer ? `${doctor.specialty} • ${doctor.license}` : `Practice ID: ${opaqueCode}`}
                 </div>
               </div>
             </div>
@@ -4701,7 +4713,11 @@ export default function DoctorPublicPortalClient({
                 type="button"
                 onClick={() => {
                   triggerHaptic('light');
-                  setIsCredentialsModalOpen(true);
+                  if (isAuthorizedViewer) {
+                    setIsCredentialsModalOpen(true);
+                  } else {
+                    window.location.href = `/login?tab=register&role=doctor&redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : `/dr/${opaqueCode}`)}`;
+                  }
                 }}
                 style={{
                   height: '28px',
@@ -4717,10 +4733,19 @@ export default function DoctorPublicPortalClient({
                   alignItems: 'center',
                   gap: '4px'
                 }}
-                title="View Doctor Credentials & License"
+                title={isAuthorizedViewer ? "View Doctor Credentials & License" : "Sign in to unlock authorized nominal dossiers"}
               >
-                <ShieldCheck size={12} style={{ color: '#0d9488' }} />
-                <span>Info</span>
+                {isAuthorizedViewer ? (
+                  <>
+                    <ShieldCheck size={12} style={{ color: '#0d9488' }} />
+                    <span>Info</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock size={12} style={{ color: '#0284c7' }} />
+                    <span>Sign In</span>
+                  </>
+                )}
               </button>
 
               <button
@@ -4766,10 +4791,10 @@ export default function DoctorPublicPortalClient({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <span style={{ fontSize: '0.74rem', color: '#5f6368', fontWeight: 500 }}>
-                  Doctor Portal &gt; {doctor.name}
+                  {isAuthorizedViewer ? `Doctor Portal > ${doctor.name}` : `Clinical Practice Portal > Practice ${opaqueCode}`}
                 </span>
                 <span style={{ fontSize: '0.64rem', background: '#e8f0fe', color: '#1a73e8', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                  {doctor.license || 'DHA Verified'}
+                  {isAuthorizedViewer ? (doctor.license || 'DHA Verified') : 'DHA Verified Practice'}
                 </span>
               </div>
               <h1 style={{ fontSize: '1.24rem', fontWeight: 600, color: '#202124', margin: 0 }}>
@@ -5902,11 +5927,11 @@ export default function DoctorPublicPortalClient({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#0369a1' }}>
                     <Lock size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
                     <span>
-                      <strong>Patient Privacy Protection Active:</strong> Patient names are codified as unique clinical tokens (e.g. <code>PT-XXXX</code>) in compliance with DHA & HIPAA medical privacy regulations.
+                      <strong>DHA & HIPAA Double Codification Active:</strong> Physician and patient identities are de-identified with unique clinical tokens (<code>{opaqueCode}</code>, <code>PT-XXXX</code>) in compliance with UAE Health Data Law & HIPAA.
                     </span>
                   </div>
                   <Link
-                    href={`/login?tab=register&role=doctor&redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : `/dr/${slug}`)}`}
+                    href={`/login?tab=register&role=doctor&redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : `/dr/${opaqueCode}`)}`}
                     style={{
                       padding: '5px 12px',
                       background: '#003666',
@@ -6128,8 +6153,10 @@ export default function DoctorPublicPortalClient({
                             Total Active Ingredients: <strong>{totalApisCount}</strong>
                           </span>
                         </div>
-
                       </div>
+
+                      {/* Atlas Clinical Protocol Cross-Reference & Physician Calibration */}
+                      <PrescriptionProtocolAlignmentCard rx={rx} doctor={doctor} />
 
                       {/* Multi-Part Formulations Container (Full Horizontal Width) */}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -7234,9 +7261,9 @@ export default function DoctorPublicPortalClient({
           isOpen={true}
           doctorContext={{
             doctorId: doctor.id,
-            doctorName: doctor.name,
-            doctorSlug: doctor.slug,
-            clinicName: doctor.clinic
+            doctorName: isAuthorizedViewer ? doctor.name : `Physician (${opaqueCode})`,
+            doctorSlug: doctor.slug || opaqueCode,
+            clinicName: isAuthorizedViewer ? doctor.clinic : 'Verified Medical Practice'
           }}
           onClose={() => {
             setIsIntakeOpen(false);
@@ -7247,7 +7274,7 @@ export default function DoctorPublicPortalClient({
           }}
           onSaveSuccess={() => {
             intakeSavedRef.current = true;
-            toast.success(`Prescription attributed to ${doctor.name}`);
+            toast.success(isAuthorizedViewer ? `Prescription attributed to ${doctor.name}` : 'Prescription attributed to practice');
           }}
         />
       )}
@@ -7412,7 +7439,7 @@ export default function DoctorPublicPortalClient({
                   boxShadow: '0 1px 2px rgba(60,64,67,0.3)'
                 }}
               >
-                Inquire in Custom Regimen with {doctor.name}
+                Inquire in Custom Regimen with {isAuthorizedViewer ? doctor.name : 'Treating Physician'}
               </button>
             </div>
           </div>
@@ -7455,7 +7482,7 @@ export default function DoctorPublicPortalClient({
                   Clinical Protocol Consultation
                 </h3>
                 <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                  Attributed to {doctor.name}
+                  Attributed to {isAuthorizedViewer ? doctor.name : `Practice ${opaqueCode}`}
                 </div>
               </div>
               <button
@@ -7610,7 +7637,7 @@ export default function DoctorPublicPortalClient({
                     </span>
                   </div>
                   <div style={{ fontSize: '0.73rem', opacity: 0.94, marginTop: '2px' }}>
-                    Personalized for {doctor.name} · <strong>{doctorPatientsList.length} Unique Patients</strong> ({soldPatientsCount} Sold · {unacceptedPatientsCount} Unaccepted) · <strong>{allPrescriptions.length} Prescriptions</strong>
+                    Personalized for {isAuthorizedViewer ? doctor.name : `Practice ${opaqueCode}`} · <strong>{doctorPatientsList.length} Unique Patients</strong> ({soldPatientsCount} Sold · {unacceptedPatientsCount} Unaccepted) · <strong>{allPrescriptions.length} Prescriptions</strong>
                   </div>
                 </div>
               </div>
@@ -7648,7 +7675,7 @@ export default function DoctorPublicPortalClient({
               <ShieldCheck size={14} color={!isAuthorizedViewer ? '#2563eb' : '#6366f1'} />
               <span>
                 {!isAuthorizedViewer ? (
-                  <><strong>Patient Privacy Active (DHA/HIPAA):</strong> Patient records are codified as clinical tokens (<code>PT-XXXX</code>). Register or sign in to practice portal for nominal files.</>
+                  <><strong>DHA & HIPAA Privacy Active:</strong> Physician and patient identities are de-identified (<code>{opaqueCode}</code>, <code>PT-XXXX</code>). Register or sign in to practice portal for nominal files.</>
                 ) : (
                   <><strong>Isolated Practice Graph:</strong> Dedicated to {doctor.name} ({doctor.clinic || doctor.specialty || 'Clinical Practice'}). Full global practice context remains active regardless of table filters.</>
                 )}
@@ -7681,12 +7708,16 @@ export default function DoctorPublicPortalClient({
                     <Bot size={13} /> Atlas Clinical & Practice Intelligence — Live Briefing
                   </span>
                   <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
-                    {doctor.specialty || 'Regenerative & Compounding Medicine'} {doctor.clinic ? `· ${doctor.clinic}` : ''}
+                    {isAuthorizedViewer ? (
+                      `${doctor.specialty || 'Regenerative & Compounding Medicine'} ${doctor.clinic ? `· ${doctor.clinic}` : ''}`
+                    ) : (
+                      `Accredited Practice · ID: ${opaqueCode}`
+                    )}
                   </span>
                 </div>
 
                 <div style={{ fontSize: '0.80rem', color: '#1e293b', lineHeight: 1.5 }}>
-                  Welcome, <strong>{doctor.name}</strong>. I am synchronized with your complete practice graph (independent of any active table filter):
+                  Welcome{isAuthorizedViewer ? <>, <strong>{doctor.name}</strong></> : <> to <strong>Practice {opaqueCode}</strong></>}. I am synchronized with your complete practice graph (independent of any active table filter):
                 </div>
 
                 {/* 4-Box Real-Data Practice Snapshot */}
@@ -7772,7 +7803,7 @@ export default function DoctorPublicPortalClient({
                     fontWeight: 700,
                     marginBottom: '4px'
                   }}>
-                    {msg.role === 'user' ? 'You' : `Atlas Copilot · ${doctor.name}`} · {msg.time}
+                    {msg.role === 'user' ? 'You' : `Atlas Copilot · ${isAuthorizedViewer ? doctor.name : opaqueCode}`} · {msg.time}
                   </div>
                   {msg.role === 'user' ? (
                     <div style={{
@@ -7838,7 +7869,7 @@ export default function DoctorPublicPortalClient({
                   color: '#475569'
                 }}>
                   <Loader2 size={14} className="animate-spin" />
-                  <span>Analyzing {doctor.name}&apos;s {doctorPatientsList.length} patients & {allPrescriptions.length} prescriptions...</span>
+                  <span>Analyzing {isAuthorizedViewer ? `${doctor.name}'s` : 'practice'} {doctorPatientsList.length} patients & {allPrescriptions.length} prescriptions...</span>
                 </div>
               )}
 
@@ -8084,7 +8115,7 @@ export default function DoctorPublicPortalClient({
               flexWrap: 'wrap',
               gap: '6px'
             }}>
-              <span>Attributed Physician: <strong style={{ color: '#202124' }}>{doctor.name}</strong></span>
+              <span>Attributed Physician: <strong style={{ color: '#202124' }}>{isAuthorizedViewer ? doctor.name : `Physician (${opaqueCode})`}</strong></span>
               <span>Liaison Channel: <strong style={{ color: '#137333' }}>Official WhatsApp</strong></span>
             </div>
 
@@ -8278,7 +8309,7 @@ export default function DoctorPublicPortalClient({
                   <button
                     type="button"
                     onClick={() => {
-                      const text = `Physician: ${doctor.name}\nTopic: ${requestInfoSubject}\n${requestInfoSelectedRx ? `Ref: ${requestInfoSelectedRx}\n` : ''}${requestInfoNotes ? `Notes: ${requestInfoNotes}\n` : ''}`;
+                      const text = `Physician: ${isAuthorizedViewer ? doctor.name : `Physician (${opaqueCode})`}\nTopic: ${requestInfoSubject}\n${requestInfoSelectedRx ? `Ref: ${requestInfoSelectedRx}\n` : ''}${requestInfoNotes ? `Notes: ${requestInfoNotes}\n` : ''}`;
                       navigator.clipboard?.writeText(text);
                       toast.success('Inquiry copied to clipboard ✓');
                     }}
@@ -8441,13 +8472,15 @@ export default function DoctorPublicPortalClient({
               >
                 <div>
                   <span style={{ color: '#64748b', display: 'block', fontSize: '11px', fontWeight: 600 }}>PATIENT</span>
-                  <strong style={{ color: '#0f172a', fontSize: '13px' }}>{handoutRx.patientName || 'Patient'}</strong>
-                  {handoutRx.patient?.dob && <span style={{ color: '#64748b', display: 'block' }}>DOB: {handoutRx.patient.dob}</span>}
+                  <strong style={{ color: '#0f172a', fontSize: '13px' }}>
+                    {isAuthorizedViewer ? (handoutRx.patientName || 'Patient') : `Patient PT-${String(handoutRx.code || handoutRx.id).slice(-4).toUpperCase()}`}
+                  </strong>
+                  {isAuthorizedViewer && handoutRx.patient?.dob && <span style={{ color: '#64748b', display: 'block' }}>DOB: {handoutRx.patient.dob}</span>}
                 </div>
                 <div>
                   <span style={{ color: '#64748b', display: 'block', fontSize: '11px', fontWeight: 600 }}>PRESCRIBING PHYSICIAN</span>
-                  <strong style={{ color: '#0f172a' }}>{doctor.name || 'Treating Physician'}</strong>
-                  <span style={{ color: '#64748b', display: 'block' }}>{doctor.clinic || 'Specialized Clinic'}</span>
+                  <strong style={{ color: '#0f172a' }}>{isAuthorizedViewer ? (doctor.name || 'Treating Physician') : `Accredited Physician (${opaqueCode})`}</strong>
+                  <span style={{ color: '#64748b', display: 'block' }}>{isAuthorizedViewer ? (doctor.clinic || 'Specialized Clinic') : 'DHA Verified Practice'}</span>
                 </div>
                 <div>
                   <span style={{ color: '#64748b', display: 'block', fontSize: '11px', fontWeight: 600 }}>PRESCRIPTION CODE</span>
@@ -8534,7 +8567,7 @@ export default function DoctorPublicPortalClient({
 
               {/* Safety Precautions Note */}
               <div style={{ padding: '10px 14px', background: '#fffbeb', borderRadius: '6px', border: '1px solid #fde68a', fontSize: '11.5px', color: '#92400e' }}>
-                <strong>Important:</strong> Keep compounded medicines in a cool, dry place away from direct sunlight. Follow the exact posology prescribed by {doctor.name || 'your physician'}. In case of any adverse reaction, discontinue use and contact your clinic immediately.
+                <strong>Important:</strong> Keep compounded medicines in a cool, dry place away from direct sunlight. Follow the exact posology prescribed by {isAuthorizedViewer ? (doctor.name || 'your physician') : 'your treating physician'}. In case of any adverse reaction, discontinue use and contact your clinic immediately.
               </div>
             </div>
 
@@ -8578,7 +8611,9 @@ export default function DoctorPublicPortalClient({
                   type="button"
                   onClick={() => {
                     const partsText = resolvePrescriptionParts(handoutRx).map(p => `• ${p.title}:\n  APIs: ${(p.apis || []).map(a => `${a.name} ${a.dose || ''}`).join(', ')}\n  Directions: ${p.posology || 'As directed'}`).join('\n\n');
-                    const handoutText = `📋 POSOLOGY HANDOUT\nPatient: ${handoutRx.patientName}\nPhysician: ${doctor.name}\nCode: #${handoutRx.code || handoutRx.prescriptionNumber}\n\n${partsText}`;
+                    const safeHandoutPat = isAuthorizedViewer ? (handoutRx.patientName || 'Patient') : `Patient PT-${String(handoutRx.code || handoutRx.id).slice(-4).toUpperCase()}`;
+                    const safeHandoutDoc = isAuthorizedViewer ? doctor.name : `Physician (${opaqueCode})`;
+                    const handoutText = `📋 POSOLOGY HANDOUT\nPatient: ${safeHandoutPat}\nPhysician: ${safeHandoutDoc}\nCode: #${handoutRx.code || handoutRx.prescriptionNumber}\n\n${partsText}`;
                     navigator.clipboard?.writeText(handoutText);
                     toast.success('Handout text copied to clipboard ✓');
                   }}
@@ -8686,11 +8721,15 @@ export default function DoctorPublicPortalClient({
                     flexShrink: 0
                   }}
                 >
-                  {doctor.name ? doctor.name.replace(/^Dr\.\s*/i, '').charAt(0) : 'D'}
+                  {isAuthorizedViewer ? (doctor.name ? doctor.name.replace(/^Dr\.\s*/i, '').charAt(0) : 'D') : <Shield size={16} color="#ffffff" />}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doctor.name}</div>
-                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Clinical Operations</div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {isAuthorizedViewer ? doctor.name : 'Verified DHA Practice'}
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                    {isAuthorizedViewer ? 'Clinical Operations' : `Practice ID: ${opaqueCode}`}
+                  </div>
                 </div>
               </div>
               <button
@@ -8931,9 +8970,10 @@ export default function DoctorPublicPortalClient({
       {selectedInspectorItem && (() => {
         const isTask = selectedInspectorItem.type === 'task';
         const item = selectedInspectorItem.data;
-        const rx = isTask ? selectedInspectorItem.prescription : item;
         const rxCode = rx?.code || rx?.prescriptionNumber || item?.code || 'N/A';
-        const patientName = rx?.patientName || item?.patientName || 'Anonymous Patient';
+        const rawPatientName = rx?.patientName || item?.patientName || 'Anonymous Patient';
+        const codifiedPatientId = getCodifiedPatientId(rawPatientName, rxCode);
+        const patientName = isAuthorizedViewer ? rawPatientName : `Patient ${codifiedPatientId}`;
         const rawTitle = rx?.treatmentTitle || item?.title || 'Personalized Clinical Protocol';
         const treatmentTitle = String(rawTitle).replace(/\s*\(Propuesta de Tratamiento\)/gi, '').replace(/\s*\(Sin Pedido\)/gi, '').replace(/\s*\(Propuesta\)/gi, '').trim();
         const itemsList = rx?.items && rx.items.length > 0 ? rx.items : (rx?.prescriptionLines || []);
@@ -9163,10 +9203,14 @@ export default function DoctorPublicPortalClient({
                       </div>
                       <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Stethoscope size={14} />
-                        <span>{doctor.name || 'Dr. Marina Cordeiro Fernandes'}</span>
+                        <span>{isAuthorizedViewer ? (doctor.name || 'Treating Physician') : `Accredited Physician (${opaqueCode})`}</span>
                       </div>
                       <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '3px' }}>
-                        {doctor.specialty || 'Regenerative Medicine & Longevity'} · Lic: {doctor.licenseNumber || 'DHA-P-0319842'}
+                        {isAuthorizedViewer ? (
+                          `${doctor.specialty || 'Regenerative Medicine & Longevity'} · Lic: ${doctor.licenseNumber || doctor.license || 'DHA Verified'}`
+                        ) : (
+                          `Clinical Practice · DHA Licensed · ID: ${opaqueCode}`
+                        )}
                       </div>
                     </div>
 
@@ -9332,7 +9376,7 @@ export default function DoctorPublicPortalClient({
                             marginBottom: '12px'
                           }}>
                             {isSigned
-                              ? `Prescription digitally authorized by ${doctor.name || 'Treating Physician'} for compounding and release.`
+                              ? `Prescription digitally authorized by ${isAuthorizedViewer ? (doctor.name || 'Treating Physician') : 'Treating Physician'} for compounding and release.`
                               : (item?.description || `Compounded prescription awaiting physician electronic sign-off.`)}
                           </div>
 
@@ -9698,30 +9742,32 @@ export default function DoctorPublicPortalClient({
       )}
 
       {/* ── Official Physician Credentials & Profile Popup Modal (Modularized) ── */}
-      <DoctorCredentialsModal
-        isOpen={isCredentialsModalOpen}
-        onClose={() => setIsCredentialsModalOpen(false)}
-        doctor={doctor}
-        slug={slug}
-        onDoctorUpdated={(updates, serverDoctor) => {
-          setData(prev => ({
-            ...prev,
-            doctor: {
-              ...prev?.doctor,
-              ...updates,
-              ...serverDoctor
-            }
-          }));
-        }}
-      />
+      {isAuthorizedViewer && (
+        <DoctorCredentialsModal
+          isOpen={isCredentialsModalOpen}
+          onClose={() => setIsCredentialsModalOpen(false)}
+          doctor={doctor}
+          slug={slug}
+          onDoctorUpdated={(updates, serverDoctor) => {
+            setData(prev => ({
+              ...prev,
+              doctor: {
+                ...prev?.doctor,
+                ...updates,
+                ...serverDoctor
+              }
+            }));
+          }}
+        />
+      )}
 
       {/* ── Atlas Platform Services & Membership Tiers Modal (GCP UX Style) ── */}
       <DoctorServicesMembershipModal
         isOpen={isServicesModalOpen}
         onClose={handleCloseServicesModal}
         doctor={doctor}
-        doctorName={doctor.name || 'Doctor'}
-        clinicName={doctor.clinic || 'Medical Practice'}
+        doctorName={isAuthorizedViewer ? (doctor.name || 'Doctor') : `Doctor ${opaqueCode}`}
+        clinicName={isAuthorizedViewer ? (doctor.clinic || 'Medical Practice') : 'Verified Medical Practice'}
         currentTier={doctor.tier || doctor.membershipTier || doctor.subscriptionTier || 'basic'}
       />
     </div>

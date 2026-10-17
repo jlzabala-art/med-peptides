@@ -42,15 +42,52 @@ export function slugify(text) {
 }
 
 /**
- * Generates an opaque codified doctor identifier (e.g. "DR-XIHVYF56")
+ * Deterministically generates an opaque alphanumeric code (base32) from an input string.
+ * Completely eliminates any PII or doctor names from the URL token.
+ */
+function deterministicOpaqueHash(input, length = 8) {
+  const str = String(input || '').toLowerCase().replace(/^dr[-.]?/, '').trim();
+  let h1 = 0xdeadbeef;
+  let h2 = 0x41c64e6d;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const combined = (BigInt(h1 >>> 0) << 32n) | BigInt(h2 >>> 0);
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let result = '';
+  let n = combined;
+  while (result.length < length) {
+    result += chars[Number(n % 32n)];
+    n = n / 32n;
+  }
+  return result;
+}
+
+/**
+ * Generates an opaque codified doctor identifier (e.g. "DR-SSEJV9MC")
  * Ensures physician identity is not exposed in shared URLs.
  */
 export function getDoctorOpaqueCode(docId, doctorData = {}) {
-  if (doctorData?.doctorCode) return String(doctorData.doctorCode).toUpperCase();
+  // If doctor has an explicitly set opaque doctorCode that contains no personal names
+  if (doctorData?.doctorCode && !/khalid|shukri|sezgin|haytham|salem|marina|erdmann|cordeiro|soudah|doctor/i.test(doctorData.doctorCode)) {
+    return String(doctorData.doctorCode).toUpperCase();
+  }
   if (!docId) return 'DR-ATLAS01';
-  const cleanId = String(docId).replace(/[^a-zA-Z0-9]/g, '');
-  const prefix = cleanId.slice(0, 8).toUpperCase();
-  return `DR-${prefix}`;
+
+  // If docId is a typical Firestore UID (16+ random characters without hyphens or dictionary names)
+  const isFirestoreUid = typeof docId === 'string' && docId.length >= 16 && !docId.includes('-') && !docId.includes(' ') && !/^[a-z]+$/i.test(docId);
+  if (isFirestoreUid) {
+    const cleanId = String(docId).replace(/[^a-zA-Z0-9]/g, '');
+    return `DR-${cleanId.slice(0, 8).toUpperCase()}`;
+  }
+
+  // Generate deterministic 8-char base32 token for slugs / names (zero PII)
+  const token = deterministicOpaqueHash(docId, 8);
+  return `DR-${token}`;
 }
 
 export function formatDoctorName(name) {
@@ -360,7 +397,7 @@ export async function getDoctorsWithPrescriptions({ forceRefresh = false } = {})
         clinic: val.clinic || 'Dispensary Partner',
         specialty: 'Clinical Medicine',
         nameSlug: slug,
-        opaqueCode: `DR-${(val.docId || slug).slice(0, 8).toUpperCase()}`,
+        opaqueCode: getDoctorOpaqueCode(val.docId || slug, { name: val.docName, clinic: val.clinic }),
         rxCount: val.count
       });
     }

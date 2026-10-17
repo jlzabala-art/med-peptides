@@ -56,6 +56,7 @@ import {
   computeCalibrationDisplay 
 } from '../../../utils/biomarkerCalibrationHelper';
 import BiomarkerCalibrationBanner from '@/components/protocol/BiomarkerCalibrationBanner';
+import PhysicianCalibrationBanner from '@/components/protocol/PhysicianCalibrationBanner';
 import ProtocolCompoundsSection from '@/components/protocol/ProtocolCompoundsSection';
 import ProtocolReconstitutionConsole from '@/components/protocol/ProtocolReconstitutionConsole';
 import ProtocolPosologyConsole from '@/components/protocol/ProtocolPosologyConsole';
@@ -106,6 +107,37 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
 
   // ── Anatomical & Musculoskeletal Kinetic Calibration State ──
   const [anatomicalCalibration, setAnatomicalCalibration] = useState(null);
+
+  // ── Physician Clinical Calibration State (Doctor Dosage Titration) ──
+  const [physicianCalibration, setPhysicianCalibration] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    const docName = params.get('doctor_name');
+    const calApi = params.get('calibrated_api');
+    if (docName || calApi) {
+      return {
+        doctorName: docName || 'Treating Physician',
+        doctorSlug: params.get('calibrated_by') || '',
+        calibratedApi: calApi || 'Active Peptide Formulation',
+        calibratedDose: params.get('calibrated_dose') || 'Personalized',
+        standardDose: params.get('standard_dose') || 'Standard literature benchmark',
+        patientName: params.get('patient') || '',
+        rxCode: params.get('rx') || '',
+        status: params.get('status') || 'physician_calibrated'
+      };
+    }
+    return null;
+  });
+
+  const handleClearPhysicianCalibration = () => {
+    setPhysicianCalibration(null);
+    if (typeof window !== 'undefined' && window.history) {
+      const url = new URL(window.location.href);
+      ['calibrated_by', 'doctor_name', 'calibrated_api', 'calibrated_dose', 'standard_dose', 'patient', 'rx', 'status'].forEach((k) => url.searchParams.delete(k));
+      window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+    }
+    toast.success(lang === 'es' ? 'Restablecido a la vista estándar de farmacopea' : 'Reset to standard pharmacopeia protocol view');
+  };
 
   const handleClearCalibration = () => {
     setBiomarkerCalibration(null);
@@ -1038,6 +1070,14 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         {/* ── Google Cloud Console 2-Column Layout (Main Stream + Desktop Sticky Sidebar TOC) ── */}
         <div className="pds-content-with-sidebar">
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+
+            {/* ── Physician Sovereign Clinical Calibration Banner (Doctor Dosage Personalization) ── */}
+            {physicianCalibration && (
+              <PhysicianCalibrationBanner
+                calibration={physicianCalibration}
+                onReset={handleClearPhysicianCalibration}
+              />
+            )}
 
             {/* ── STEP 1: Biomarker-Driven Calibration Banner ──
                  Always first — personalises all downstream sections (Suppressed for non-invasive cosmetic protocols) */}
