@@ -29,8 +29,9 @@ export default function CosmeticsSidebarWidget({
 
   const isHair = slugLower.includes('shampoo') || slugLower.includes('conditioner') || slugLower.includes('hair');
   const isVege = slugLower.includes('vege') || slugLower.includes('wash-gel');
-  // If not hair and not vege, or explicitly diamond/cream/peeling, it belongs to the Blue Diamond cellular line
-  const isBlueDiamond = !isHair && !isVege;
+  const isColvita = slugLower.includes('colvita');
+  // If not hair, not vege, and not colvita, it belongs to the Blue Diamond cellular line
+  const isBlueDiamond = !isHair && !isVege && !isColvita;
 
   // Configuration according to active product ecosystem
   let systemConfig;
@@ -161,6 +162,60 @@ export default function CosmeticsSidebarWidget({
           label: isEs ? 'Fabricación UE · GMP ISO 22716' : 'Made in EU · GMP ISO 22716',
           detail: isEs ? 'Colway Laboratories · Control por lote con trazabilidad' : 'Colway Laboratories · Batch traceability & stability verified',
           icon: Award,
+          badgeColor: '#6366f1'
+        }
+      ]
+    };
+  } else if (isColvita) {
+    systemConfig = {
+      title: isEs ? 'LÍNEA NUTRICOSMÉTICA COLWAY' : 'COLWAY NUTRICOSMETICS SYSTEM',
+      subtitle: isEs ? 'Tropocolágeno nativo puro liofilizado + algas marinas' : 'Pure lyophilized native fish tropocollagen + marine algae',
+      badge: 'SYSTEMIC TROPOCOLLAGEN',
+      headerGradient: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+      accentColor: '#6366f1',
+      badgeBg: 'rgba(99, 102, 241, 0.25)',
+      badgeBorder: 'rgba(99, 102, 241, 0.4)',
+      badgeColor: '#c7d2fe',
+      products: [
+        {
+          slug: 'colway-colvita',
+          step: isEs ? 'Ingesta Diaria' : 'Daily Intake',
+          name: isEs ? 'Colvita Colágeno Liofilizado' : 'Colvita Bioactive Collagen',
+          action: isEs ? 'Estimulación Sistémica de Fibroblastos' : 'Systemic Fibroblast Neo-Collagenesis',
+          actives: isEs ? 'Tropocolágeno Liofilizado · Algas Fucus · Vitamina E' : 'Freeze-Dried Tropocollagen · Fucus Algae · Vitamin E',
+          volume: '60 / 120 Caps',
+          dwell: isEs ? '2 cápsulas al día con comidas' : '2 capsules daily with meals',
+          icon: '💊',
+          stepColor: '#6366f1'
+        }
+      ],
+      protocolTitle: isEs ? 'Pauta Nutricosmética Celular' : 'Cellular Nutricosmetic Regimen',
+      protocolDesc: isEs
+        ? 'Aporta péptidos de tropocolágeno intactos (triple hélice) y yodo orgánico de algas Fucus para estimular la síntesis endógena de colágeno desde el interior.'
+        : 'Supplies intact tropocollagen triple-helix peptides and organic Fucus algae trace minerals to upregulate endogenous collagen synthesis from within.',
+      complianceBadges: [
+        {
+          label: isEs ? '100% Colágeno Liofilizado' : '100% Freeze-Dried Collagen',
+          detail: isEs ? 'Triple hélice intacta de pez de agua dulce (no desnaturalizado)' : 'Intact triple-helix native freshwater fish collagen (non-denatured)',
+          icon: Award,
+          badgeColor: '#6366f1'
+        },
+        {
+          label: isEs ? 'Conforme EFSA y Directiva UE' : 'EFSA & EU Directive Compliant',
+          detail: isEs ? 'Conforme Directiva 2002/46/CE y Reglamento 1169/2011' : 'Compliant with Directive 2002/46/EC & Reg. 1169/2011',
+          icon: ShieldCheck,
+          badgeColor: '#16a34a'
+        },
+        {
+          label: isEs ? 'Cápsulas 100% Gelatina de Pez' : '100% Fish Gelatin Capsules',
+          detail: isEs ? '0% gelatina bovina o porcina · Libre de gluten y OGM' : '0% bovine or porcine gelatin · Gluten-free & Non-GMO',
+          icon: CheckCircle2,
+          badgeColor: '#0284c7'
+        },
+        {
+          label: isEs ? 'Fabricación UE · GMP ISO 22716' : 'Made in EU · GMP ISO 22716',
+          detail: isEs ? 'Colway Laboratories · Control por lote con trazabilidad' : 'Colway Laboratories · Batch traceability & stability verified',
+          icon: CheckCircle2,
           badgeColor: '#6366f1'
         }
       ]

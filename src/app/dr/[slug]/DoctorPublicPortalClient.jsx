@@ -18,6 +18,7 @@ import {
   AlertCircle,
   ArrowUpRight,
   ShieldCheck,
+  Lock,
   MapPin,
   Mail,
   Edit3,
@@ -81,6 +82,8 @@ import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolida
 import { calculateTreatmentDates, calculateTreatmentDuration } from '@/utils/clinical/clinicalFormulations';
 import DoctorFloatingGlassDock from '@/components/doctor/docks/DoctorFloatingGlassDock';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
+import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
+import { useAuth } from '@/context/AuthContext';
 
 const PrescriptionIntakeWorkspace = dynamic(
   () => import('@/features/prescriptions/components/PrescriptionIntakeWorkspace'),
@@ -88,10 +91,6 @@ const PrescriptionIntakeWorkspace = dynamic(
 );
 const PharmacyLabelsModal = dynamic(
   () => import('@/components/prescription/PharmacyLabelsModal'),
-  { ssr: false }
-);
-const DoctorClinicalAnalytics = dynamic(
-  () => import('@/components/doctor/DoctorClinicalAnalytics'),
   { ssr: false }
 );
 const DoctorServicesMembershipModal = dynamic(
@@ -310,6 +309,25 @@ export function isSoldPrescription(rx) {
   return Boolean(hasInv || rx.orderStatus === 'Ordered' || ['active', 'approved', 'dispensed'].includes(s));
 }
 
+/**
+ * Codified patient identifier for public/unregistered clinical views (DHA/HIPAA compliance)
+ */
+export function getCodifiedPatientId(patientName, rxCode) {
+  if (rxCode) {
+    const clean = String(rxCode).replace(/[^a-zA-Z0-9]/g, '');
+    const suffix = clean.length >= 4 ? clean.slice(-4).toUpperCase() : clean.toUpperCase();
+    return `PT-${suffix}`;
+  }
+  if (!patientName) return 'PT-8800';
+  let hash = 0;
+  for (let i = 0; i < patientName.length; i++) {
+    hash = (hash << 5) - hash + patientName.charCodeAt(i);
+    hash |= 0;
+  }
+  const positive = (Math.abs(hash) % 9000) + 1000;
+  return `PT-${positive}`;
+}
+
 export function resolvePrescriptionParts(rx) {
   if (!rx) return [];
 
@@ -512,20 +530,33 @@ export default function DoctorPublicPortalClient({
   const [agentDoctors, setAgentDoctors] = useState(availableDoctors || []);
   const [isSwitchingDoctor, setIsSwitchingDoctor] = useState(false);
 
+  const { user, activeRole, isAdmin } = useAuth();
+
+  // DHA / HIPAA Medical Privacy Compliance:
+  // Nominal patient identity is strictly restricted to authenticated authorized practitioners.
+  const isAuthorizedViewer = useMemo(() => {
+    if (isCustomerAgent) return true;
+    if (!user) return false;
+    if (isAdmin || activeRole === 'admin' || activeRole === 'doctor' || activeRole === 'clinic_admin') return true;
+    const docEmail = data?.doctor?.email || initialData?.doctor?.email;
+    if (docEmail && user.email && user.email.toLowerCase() === docEmail.toLowerCase()) return true;
+    return false;
+  }, [user, activeRole, isAdmin, data?.doctor?.email, initialData?.doctor?.email, isCustomerAgent]);
+
   // Sync if propSlug changes externally
   useEffect(() => {
     if (propSlug && propSlug !== slug) {
       setSlug(propSlug);
     }
-  }, [propSlug]);
+  }, [propSlug, slug]);
 
-  // Sync if initialData changes externally
+  // Sync if initialData changes externally (guarded against mount re-renders)
   useEffect(() => {
-    if (initialData) {
+    if (initialData && (!data || (initialData?.doctor?.id && initialData.doctor.id !== data?.doctor?.id))) {
       setData(initialData);
       setLoading(false);
     }
-  }, [initialData]);
+  }, [initialData, data]);
 
   // Sync availableDoctors if provided or updated
   useEffect(() => {
@@ -1494,9 +1525,12 @@ export default function DoctorPublicPortalClient({
           const soldRxs = (pt.prescriptions || []).filter(isSoldPrescription);
           const proposalRxs = (pt.prescriptions || []).filter(isProposalPrescription);
           const latestRx = pt.prescriptions?.[0];
+          const codifiedId = getCodifiedPatientId(pt.name, latestRx?.code || latestRx?.prescriptionNumber || latestRx?.id);
+          const safeName = isAuthorizedViewer ? pt.name : `Patient ${codifiedId}`;
+          const safePhone = isAuthorizedViewer ? (pt.phone || '') : '';
           return {
-            name: pt.name,
-            phone: pt.phone || '',
+            name: safeName,
+            phone: safePhone,
             rxCount: (pt.prescriptions || []).length,
             soldRxCount: soldRxs.length,
             proposalRxCount: proposalRxs.length,
@@ -1508,22 +1542,27 @@ export default function DoctorPublicPortalClient({
             lastSeen: pt.latestDate || ''
           };
         }),
-        prescriptions: allPrescriptions.slice(0, 60).map((rx) => ({
-          code: rx.code || rx.prescriptionNumber || rx.id,
-          patientName: rx.patientName || rx.patient?.name || 'Patient',
-          patientPhone: rx.patientPhone || rx.patient?.phone || '',
-          status: rx.status,
-          isProposal: Boolean(rx.isProposal),
-          invoiceNumber: rx.invoiceNumber || rx.zohoInvoiceNumber || null,
-          treatmentTitle: rx.treatmentTitle || 'Compounded Regimen',
-          dispensingForm: rx.dispensingForm || '',
-          createdAt: rx.createdAt || rx.date || '',
-          partCount: rx.partCount || 1,
-          items: (rx.items || []).map((i) => ({
-            name: i.name || i.drugName || i.activeIngredient || '',
-            dose: i.dose || i.concentration || ''
-          }))
-        }))
+        prescriptions: allPrescriptions.slice(0, 60).map((rx) => {
+          const codifiedId = getCodifiedPatientId(rx.patientName, rx.code || rx.prescriptionNumber || rx.id);
+          const safePatientName = isAuthorizedViewer ? (rx.patientName || rx.patient?.name || 'Patient') : `Patient ${codifiedId}`;
+          const safePatientPhone = isAuthorizedViewer ? (rx.patientPhone || rx.patient?.phone || '') : '';
+          return {
+            code: rx.code || rx.prescriptionNumber || rx.id,
+            patientName: safePatientName,
+            patientPhone: safePatientPhone,
+            status: rx.status,
+            isProposal: Boolean(rx.isProposal),
+            invoiceNumber: rx.invoiceNumber || rx.zohoInvoiceNumber || null,
+            treatmentTitle: rx.treatmentTitle || 'Compounded Regimen',
+            dispensingForm: rx.dispensingForm || '',
+            createdAt: rx.createdAt || rx.date || '',
+            partCount: rx.partCount || 1,
+            items: (rx.items || []).map((i) => ({
+              name: i.name || i.drugName || i.activeIngredient || '',
+              dose: i.dose || i.concentration || ''
+            }))
+          };
+        })
       };
 
       const res = await fetch(`/api/doctor/${encodeURIComponent(slug)}/ai-copilot`, {
@@ -1531,7 +1570,8 @@ export default function DoctorPublicPortalClient({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: text,
-          practiceContext
+          practiceContext,
+          isPublicUnverified: !isAuthorizedViewer
         })
       });
 
@@ -1580,7 +1620,7 @@ export default function DoctorPublicPortalClient({
 
   // ── Autonomous Background Registry Synchronization (SWR + Focus Revalidation) ──
   const isSyncingRegistryRef = useRef(false);
-  const lastSyncTimestampRef = useRef(0);
+  const lastSyncTimestampRef = useRef(Date.now());
   const [isBackgroundSyncing, setIsBackgroundSyncing] = useState(false);
 
   const syncDoctorRegistry = useCallback(async (force = false) => {
@@ -1838,16 +1878,55 @@ export default function DoctorPublicPortalClient({
       align: 'left',
       sortable: true,
       render: (t) => {
+        const codifiedId = getCodifiedPatientId(t.patientName, t.code || (t.codes && t.codes[0]));
         const dob = t.patient?.dob || t.patientDob || t.dob || (
           allPrescriptions.find(p => p.patientName && t.patientName && p.patientName.toLowerCase().trim() === t.patientName.toLowerCase().trim())?.patient?.dob
         );
 
         return (
           <div>
-            <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.86rem' }}>
-              {t.patientName}
-            </div>
-            {dob && (
+            {!isAuthorizedViewer ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <span
+                  style={{
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    fontSize: '0.86rem',
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.03em',
+                    background: '#f1f5f9',
+                    padding: '2px 7px',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1'
+                  }}
+                >
+                  {codifiedId}
+                </span>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    fontSize: '0.66rem',
+                    fontWeight: 650,
+                    color: '#b45309',
+                    background: '#fffbeb',
+                    border: '1px solid #fde68a',
+                    padding: '1px 6px',
+                    borderRadius: '12px'
+                  }}
+                  title="Patient identity protected under DHA/HIPAA standards. Sign in to view nominal records."
+                >
+                  <Lock size={10} />
+                  <span>Protected</span>
+                </span>
+              </div>
+            ) : (
+              <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.86rem' }}>
+                {t.patientName}
+              </div>
+            )}
+            {isAuthorizedViewer && dob && (
               <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
                 DOB: {dob}
               </div>
@@ -2185,7 +2264,7 @@ export default function DoctorPublicPortalClient({
         );
       }
     }
-  ], [signingTaskId, handleSignOffPrescription, allPrescriptions]);
+  ], [signingTaskId, handleSignOffPrescription, allPrescriptions, isAuthorizedViewer]);
 
   // ── Prescriptions Dossier Columns (DataTable Exclusive Rendering) ─────────
   const prescriptionColumns = useMemo(() => [
@@ -2201,10 +2280,53 @@ export default function DoctorPublicPortalClient({
         const isLegitInvoice = rawInvoice && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInvoice);
         const patientPhone = rx.patientPhone || rx.phone || rx.mobile || rx.patient?.phone || rx.patient?.mobile;
 
+        const codifiedId = getCodifiedPatientId(rx.patientName, rx.prescriptionNumber || rx.code);
+
         return (
           <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.88rem' }}>
-              {rx.patientName}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {!isAuthorizedViewer ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span
+                    style={{
+                      fontWeight: 700,
+                      color: '#0f172a',
+                      fontSize: '0.86rem',
+                      fontFamily: 'monospace',
+                      letterSpacing: '0.03em',
+                      background: '#f1f5f9',
+                      padding: '2px 7px',
+                      borderRadius: '4px',
+                      border: '1px solid #cbd5e1'
+                    }}
+                  >
+                    {codifiedId}
+                  </span>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      fontSize: '0.66rem',
+                      fontWeight: 650,
+                      color: '#b45309',
+                      background: '#fffbeb',
+                      border: '1px solid #fde68a',
+                      padding: '1px 6px',
+                      borderRadius: '12px',
+                      cursor: 'help'
+                    }}
+                    title="Patient identity protected under DHA/HIPAA standards. Sign in or claim this medical practice portal to view nominal medical records."
+                  >
+                    <Lock size={10} />
+                    <span>Protected</span>
+                  </span>
+                </div>
+              ) : (
+                <span style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.88rem' }}>
+                  {rx.patientName}
+                </span>
+              )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               <CopyableId value={rx.prescriptionNumber || rx.code} />
@@ -2226,17 +2348,22 @@ export default function DoctorPublicPortalClient({
                 </span>
               )}
             </div>
-            {patientPhone ? (
+            {isAuthorizedViewer && patientPhone ? (
               <div style={{ fontSize: '0.72rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
                 <Phone size={11} style={{ color: '#059669', flexShrink: 0 }} />
                 <span>{patientPhone}</span>
+              </div>
+            ) : !isAuthorizedViewer ? (
+              <div style={{ fontSize: '0.70rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
+                <Lock size={10} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                <span>Contact verified on file</span>
               </div>
             ) : isProposal ? (
               <div style={{ fontSize: '0.70rem', color: '#94a3b8', fontStyle: 'italic', marginTop: '1px' }}>
                 No phone on file
               </div>
             ) : null}
-            {rx.patient?.dob && (
+            {isAuthorizedViewer && rx.patient?.dob && (
               <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
                 DOB: {rx.patient.dob}
               </div>
@@ -2995,7 +3122,7 @@ export default function DoctorPublicPortalClient({
         );
       }
     }
-  ], [signingTaskId, handleSignOffPrescription, handleShareProposalWhatsApp, activeActionsMenuRxId, mobileActionRx]);
+  ], [signingTaskId, handleSignOffPrescription, handleShareProposalWhatsApp, activeActionsMenuRxId, mobileActionRx, isAuthorizedViewer]);
 
   // ── Monitored Patients Directory (Aggregated from clinical records) ────────
   const doctorPatientsList = useMemo(() => {
@@ -3106,29 +3233,75 @@ export default function DoctorPublicPortalClient({
       width: '28%',
       align: 'left',
       sortable: true,
-      render: (pat) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', textAlign: 'left' }}>
-          <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.88rem' }}>
-            {pat.name}
+      render: (pat) => {
+        const codifiedId = getCodifiedPatientId(pat.name, pat.latestRxCode);
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', textAlign: 'left' }}>
+            {!isAuthorizedViewer ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <span
+                  style={{
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    fontSize: '0.86rem',
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.03em',
+                    background: '#f1f5f9',
+                    padding: '2px 7px',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1'
+                  }}
+                >
+                  {codifiedId}
+                </span>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    fontSize: '0.66rem',
+                    fontWeight: 650,
+                    color: '#b45309',
+                    background: '#fffbeb',
+                    border: '1px solid #fde68a',
+                    padding: '1px 6px',
+                    borderRadius: '12px'
+                  }}
+                  title="Patient identity protected under DHA/HIPAA standards. Sign in to view nominal records."
+                >
+                  <Lock size={10} />
+                  <span>Protected</span>
+                </span>
+              </div>
+            ) : (
+              <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.88rem' }}>
+                {pat.name}
+              </div>
+            )}
+            {isAuthorizedViewer && pat.phone ? (
+              <div style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Phone size={11} style={{ color: '#059669', flexShrink: 0 }} />
+                <CopyableId value={pat.phone} />
+              </div>
+            ) : !isAuthorizedViewer ? (
+              <div style={{ fontSize: '0.70rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Lock size={10} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                <span>Contact verified on file</span>
+              </div>
+            ) : (
+              <div style={{ fontSize: '0.70rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                No direct phone
+              </div>
+            )}
+            {isAuthorizedViewer && pat.email && (
+              <div style={{ fontSize: '0.70rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Mail size={11} style={{ color: '#0284c7', flexShrink: 0 }} />
+                <span>{pat.email}</span>
+              </div>
+            )}
           </div>
-          {pat.phone ? (
-            <div style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Phone size={11} style={{ color: '#059669', flexShrink: 0 }} />
-              <CopyableId value={pat.phone} />
-            </div>
-          ) : (
-            <div style={{ fontSize: '0.70rem', color: '#94a3b8', fontStyle: 'italic' }}>
-              No direct phone
-            </div>
-          )}
-          {pat.email && (
-            <div style={{ fontSize: '0.70rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Mail size={11} style={{ color: '#0284c7', flexShrink: 0 }} />
-              <span>{pat.email}</span>
-            </div>
-          )}
-        </div>
-      )
+        );
+      }
     },
     {
       key: 'status',
@@ -3238,7 +3411,7 @@ export default function DoctorPublicPortalClient({
         );
       }
     }
-  ], [setPatientFilter, setQuickRxFilter, setActiveAnchor]);
+  ], [setPatientFilter, setQuickRxFilter, setActiveAnchor, isAuthorizedViewer]);
 
   // ── Bloodo Diagnostic Lab Results Columns (DataTable Universal) ─────────
   const labResultsColumns = useMemo(() => [
@@ -4176,8 +4349,8 @@ export default function DoctorPublicPortalClient({
         copyUrl={`https://www.atlashealth-services.com/dr/${doctor?.opaqueCode || slug}`}
         shortUrl={`https://www.atlashealth-services.com/dr/${doctor?.opaqueCode || slug}`}
         brandHref={isCustomerAgent ? `/agent?dr=${slug}` : `/dr/${slug}`}
-        doctorHomeHref={isCustomerAgent ? `/agent?dr=${slug}` : `/dr/${slug}`}
-        doctorName={doctor.name}
+        doctorHomeHref={null}
+        doctorName={null}
         hideTier2={true}
         hideImportRx={true}
         hideSwitchRx={true}
@@ -5710,6 +5883,49 @@ export default function DoctorPublicPortalClient({
                   )}
                 </div>
               </div>
+
+              {!isAuthorizedViewer && (
+                <div
+                  style={{
+                    margin: '12px 20px 0 20px',
+                    padding: '10px 14px',
+                    background: '#f0f9ff',
+                    border: '1px solid #bae6fd',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    flexWrap: 'wrap'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#0369a1' }}>
+                    <Lock size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
+                    <span>
+                      <strong>Patient Privacy Protection Active:</strong> Patient names are codified as unique clinical tokens (e.g. <code>PT-XXXX</code>) in compliance with DHA & HIPAA medical privacy regulations.
+                    </span>
+                  </div>
+                  <Link
+                    href={`/login?tab=register&role=doctor&redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : `/dr/${slug}`)}`}
+                    style={{
+                      padding: '5px 12px',
+                      background: '#003666',
+                      color: '#ffffff',
+                      borderRadius: '6px',
+                      fontSize: '0.74rem',
+                      fontWeight: 650,
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    <span>Verify Practice & Unlock Dossiers</span>
+                    <ArrowUpRight size={12} />
+                  </Link>
+                </div>
+              )}
 
               <DataTable
                 columns={prescriptionColumns}

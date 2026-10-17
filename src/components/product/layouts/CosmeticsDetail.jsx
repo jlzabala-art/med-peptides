@@ -661,7 +661,7 @@ function QrModal({ isOpen, onClose, url, productName }) {
 export default function CosmeticsDetail({ product, region = 'US', isProfessional = false }) {
   const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || null);
   const [lang] = useState('en');
-  const [inciFilter, setInciFilter] = useState('key_active');
+  const [inciFilter, setInciFilter] = useState('all');
   const [inciSearchQuery, setInciSearchQuery] = useState('');
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
@@ -698,10 +698,6 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
         setActiveSection('overview');
       }
     };
-    if (window.location.hash) {
-      const initialHash = window.location.hash.replace('#', '').trim();
-      if (initialHash) setActiveSection(initialHash);
-    }
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
@@ -714,7 +710,9 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const slug = product?.slug || product?.id || '';
   const productUrl = typeof window !== 'undefined' ? window.location.href : '';
 
-  const colwayData = useMemo(() => getColwayProductData(slug), [slug]);
+  const colwayData = useMemo(() => {
+    return getColwayProductData(slug) || getColwayProductData(name) || getColwayProductData(product?.id) || getColwayProductData(product?.title);
+  }, [slug, name, product]);
 
   const ingredients = useMemo(() => {
     if (Array.isArray(colwayData?.ingredients) && colwayData.ingredients.length > 0) {
@@ -725,6 +723,17 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
     }
     if (Array.isArray(product?.inci_list) && product.inci_list.length > 0) {
       return product.inci_list;
+    }
+    if (Array.isArray(product?.inci) && product.inci.length > 0) {
+      return product.inci;
+    }
+    if (Array.isArray(product?.activeIngredients) && product.activeIngredients.length > 0) {
+      return product.activeIngredients.map(a => ({
+        inci_name: a.inci_name || a.name,
+        common_name: a.common_name || a.name,
+        inci_group: 'key_active',
+        role: a.role || a.target || ''
+      }));
     }
     return [];
   }, [product, colwayData]);
@@ -1930,18 +1939,40 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
         contextAnchor={{
           name,
           slug,
-          category: 'Hair Care · Cosmeceutical Monograph',
+          category: isHairProduct
+            ? 'Hair Care · Trichology Monograph'
+            : isNutricosmetic
+              ? 'Nutricosmetics · Bioactive Supplement'
+              : 'Skincare · Cosmeceutical Monograph',
           supplier: brand,
           description,
           inciCount: ingredients.length,
           keyActives: keyActives.map(i => `${i.inci_name} (${(i.function || []).join(', ')})`).join('; '),
-          clinicalTarget: 'Follicular DHT, hair fiber strength, anagen phase support',
-          associatedProtocols: 'GHK-Cu Scalp Protocol · Androgenic Alopecia Protocol',
-          suggestedQuestions: [
+          clinicalTarget: isHairProduct
+            ? 'Follicular DHT, hair fiber strength, anagen phase support'
+            : isNutricosmetic
+              ? 'Endogenous pro-collagen transcription, systemic connective tissue & joint cartilage support'
+              : 'Extracellular matrix (ECM) remodeling, barrier repair, epidermal hydration and cellular turnover',
+          associatedProtocols: isHairProduct
+            ? 'Colway Hair Restoration System · GHK-Cu Scalp Protocol'
+            : isNutricosmetic
+              ? 'Systemic Longevity Protocol · BPC-157 Tissue Repair Adjunct'
+              : 'Colway Dermo-Renewal Ritual · GHK-Cu Skin Rejuvenation Protocol',
+          suggestedQuestions: isHairProduct ? [
             'What is the clinical evidence for Caffeine in androgenetic alopecia?',
             'How does Zinc PCA inhibit 5-alpha reductase at the scalp?',
             'What is the recommended contact time for optimal active absorption?',
             'Which clinical hair peptide protocols pair with this product?'
+          ] : isNutricosmetic ? [
+            'How does freeze-dried fish tropocollagen differ from broken hydrolyzed collagen?',
+            'What role does Fucus vesiculosus algae play in thyroid and ECM synergy?',
+            'What is the recommended course duration for optimal connective tissue synthesis?',
+            'Can Colvita be combined with injectable GHK-Cu or BPC-157 protocols?'
+          ] : [
+            'How does encapsulated FGF-1 trigger fibroblast neocollagenesis?',
+            'What is the role of biomimetic ceramides in epidermal barrier restoration?',
+            'How should Blue Diamond Peeling and Cream be sequenced in a clinical protocol?',
+            'Is this formulation safe following micro-needling or chemical peels?'
           ]
         }}
         storageKey={`cosmetic_${slug}`}
@@ -1951,7 +1982,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
       {/* PERSISTENT GOOGLE CLOUD STICKY BOTTOM ACTION BAR */}
       <PublicStickyActionBar
         title={name}
-        subtitle={`${volumeText} • Colway Hair Strengthening System • EU Reg. 1223/2009`}
+        subtitle={`${volumeText} • ${isHairProduct ? 'Colway Hair Strengthening System' : isNutricosmetic ? 'Colway Oral Nutricosmetics' : (slug.includes('vege') || slug.includes('wash-gel')) ? 'Colway Native Dermal Collagen Line' : 'Colway Blue Diamond Cellular Line'} • ${isNutricosmetic ? 'EU Reg. 1169/2011' : 'EU Reg. 1223/2009'}`}
         badge="Cosmeceutical Monograph"
         badgeType="default"
         inquireLabel="Inquire Product"
