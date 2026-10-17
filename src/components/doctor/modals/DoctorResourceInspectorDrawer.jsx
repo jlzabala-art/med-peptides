@@ -309,7 +309,7 @@ export default function DoctorResourceInspectorDrawer({
                     gap: '6px'
                   }}>
                     <Clock size={13} color="#b06000" />
-                    <span>Clinical Treatment Proposal · Offer Not Accepted</span>
+                    <span>Clinical Treatment Proposal · Awaiting Patient</span>
                   </div>
                   <div style={{
                     fontSize: '0.82rem',
@@ -317,7 +317,7 @@ export default function DoctorResourceInspectorDrawer({
                     lineHeight: 1.45,
                     marginBottom: '12px'
                   }}>
-                    This personalized formulation was recommended by {doctor?.name || 'treating physician'}, but the patient has not yet confirmed or purchased the treatment order.
+                    This personalized formulation was recommended by Dr. {doctor?.name || 'treating physician'}, but the patient has not yet confirmed or purchased the treatment order.
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <button
@@ -342,7 +342,7 @@ export default function DoctorResourceInspectorDrawer({
                       }}
                     >
                       <MessageCircle size={15} style={{ color: '#ffffff' }} />
-                      <span>Share Offer via WhatsApp</span>
+                      <span>WhatsApp Clinical Follow-up</span>
                     </button>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button

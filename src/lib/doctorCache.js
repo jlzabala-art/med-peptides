@@ -604,6 +604,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         patientName: patName,
         patientId: patId,
         patient: d.patient || null,
+        patientPhone: d.patientPhone || d.phone || d.mobile || d.patient?.phone || d.patient?.mobile || null,
+        patientEmail: d.patientEmail || d.email || d.patient?.email || null,
         status: normalizedStatus,
         state: normalizedStatus,
         isTreatmentProposal: isProposal,
@@ -727,6 +729,39 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         dueDate: 'Next 7 days',
         actionLabel: 'Issue Refill',
         actionUrl: `/rx/${rx.code}`
+      });
+    }
+
+    // Clinical Action 3: Unaccepted Treatment Proposal / Re-engagement Follow-up
+    const isUnacceptedProposal = rx.isTreatmentProposal || rxStatus === 'proposal_pending' || rx.orderStatus === 'Offer Not Accepted' || String(rx.treatmentProgram || '').toLowerCase().includes('proposal');
+    const proposalKey = `${patientKey}_proposal`;
+
+    if (isUnacceptedProposal && !seenPatientTasks.has(proposalKey)) {
+      seenPatientTasks.add(proposalKey);
+      const treatmentName = rx.treatmentTitle || rx.regimenShortTitle || 'Compounded Protocol';
+      const patientPhone = rx.patient?.phone || rx.phone || '';
+      const doctorDisplayName = cleanDoctorName || 'Treating Physician';
+      const effectiveAgeDays = rx.dateIssued || rx.date ? Math.max(1, Math.floor((now - new Date(rx.dateIssued || rx.date).getTime()) / (1000 * 60 * 60 * 24))) : rxAgeDays;
+
+      clinicalTasks.push({
+        id: `task-prop-${rx.id}`,
+        rxId: rx.id,
+        code: rx.code,
+        codes: [rx.code],
+        patientName: rx.patientName,
+        patient: rx.patient || null,
+        patientDob: rx.patient?.dob || null,
+        patientPhone: patientPhone,
+        type: 'proposal_followup',
+        priority: effectiveAgeDays > 14 ? 'medium' : 'action_required',
+        daysAgo: effectiveAgeDays,
+        treatmentTitle: treatmentName,
+        title: 'Treatment Proposal Follow-up',
+        description: `Patient has not yet confirmed or purchased ${treatmentName}. Follow up via WhatsApp to assist patient.`,
+        dueDate: effectiveAgeDays > 7 ? 'Re-engagement' : 'Decision Due',
+        actionLabel: 'WhatsApp Reminder',
+        actionUrl: `/rx/${rx.code}`,
+        whatsappMessage: `Hello ${rx.patientName}, this is Dr. ${doctorDisplayName}'s clinical practice following up on your personalized ${treatmentName} regimen. You can access your clinical proposal here: https://atlashealth-services.com/rx/${rx.code}. Please let us know if you have any questions or would like to proceed with dispensing.`
       });
     }
   });

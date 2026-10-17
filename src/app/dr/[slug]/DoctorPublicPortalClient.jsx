@@ -920,6 +920,8 @@ export default function DoctorPublicPortalClient({
       if (taskFilter !== 'all') {
         if (taskFilter === 'refill') {
           if (t.type !== 'refill' && t.type !== 'cycles') return false;
+        } else if (taskFilter === 'proposal_followup' || taskFilter === 'followup') {
+          if (t.type !== 'proposal_followup' && t.type !== 'followup') return false;
         } else if (t.type !== taskFilter) {
           return false;
         }
@@ -1239,14 +1241,43 @@ export default function DoctorPublicPortalClient({
       .replace(/\s*\(Propuesta\)/gi, '')
       .trim();
 
-    let text = `Dear ${patientName},\n\nDr. ${doctor.name} has prepared your personalized Clinical Treatment Proposal:\n\n`;
-    text += `📋 *Regimen:* ${cleanTitle}\n`;
-    text += `🆔 *Proposal Reference:* #${rxCode}\n\n`;
-    text += `You can review your complete clinical dossier, formulation details, and confirm your treatment order here:\n`;
-    text += `🔗 ${proposalUrl}\n\n`;
-    text += `For any clinical questions regarding this protocol, please contact our medical team directly.`;
+    // Calculate days pending to customize the follow-up cadence
+    const createdAtMs = rx.createdAt ? new Date(rx.createdAt).getTime() : (rx.startDate ? new Date(rx.startDate).getTime() : Date.now());
+    const daysPending = Math.max(0, Math.floor((Date.now() - createdAtMs) / (1000 * 60 * 60 * 24)));
+    const doctorName = doctor?.name || 'Physician';
 
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+    let text = '';
+    if (daysPending >= 10) {
+      // Cadence 3: Allocation / Expiry clinical reminder (English)
+      text = `Dear ${patientName},\n\n`;
+      text += `This is a clinical update from Dr. ${doctorName}'s practice regarding your personalized regimen for *${cleanTitle}* (Ref #${rxCode}).\n\n`;
+      text += `Compounded formulation ingredients are held in allocation for a limited time. You can review your clinical protocol and activate your treatment order here:\n`;
+      text += `🔗 ${proposalUrl}\n\n`;
+      text += `If you would like to adjust your regimen or have questions before proceeding, please reply to our medical team.`;
+    } else if (daysPending >= 4) {
+      // Cadence 2: Gentle follow-up check-in (English)
+      text = `Dear ${patientName},\n\n`;
+      text += `Following up on your clinical consultation with Dr. ${doctorName}:\n\n`;
+      text += `We wanted to check if you had a chance to review your personalized formulation for *${cleanTitle}* (Ref #${rxCode}).\n\n`;
+      text += `You can review your protocol details, posology, and confirm fulfillment here:\n`;
+      text += `🔗 ${proposalUrl}\n\n`;
+      text += `Please let us know if you have any questions or need any adjustments to your regimen.`;
+    } else {
+      // Cadence 1: Fresh proposal / initial presentation (English)
+      text = `Dear ${patientName},\n\n`;
+      text += `Dr. ${doctorName} has prepared your personalized Clinical Treatment Proposal:\n\n`;
+      text += `📋 *Regimen:* ${cleanTitle}\n`;
+      text += `🆔 *Proposal Reference:* #${rxCode}\n\n`;
+      text += `You can review your complete clinical dossier, formulation details, and confirm your treatment order here:\n`;
+      text += `🔗 ${proposalUrl}\n\n`;
+      text += `For any clinical questions regarding this protocol, please contact our medical team directly.`;
+    }
+
+    const rawPhone = rx.patientPhone || rx.phone || rx.mobile || rx.patient?.phone || rx.patient?.mobile || '';
+    const cleanPhone = String(rawPhone).replace(/[^\d+]/g, '').replace(/^00/, '+');
+    const waBase = cleanPhone ? `https://wa.me/${cleanPhone.replace('+', '')}` : 'https://wa.me/';
+
+    window.open(`${waBase}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
   };
 
   const handleCopyProposalLink = (rx, e) => {
@@ -1623,6 +1654,7 @@ export default function DoctorPublicPortalClient({
         let taskActionName = 'Prescription Sign-off';
         if (t.type === 'refill') taskActionName = 'Supply Refill Assessment';
         else if (t.type === 'milestone') taskActionName = 'Clinical Milestone Review';
+        else if (t.type === 'proposal_followup') taskActionName = 'Treatment Offer Follow-up';
         else if (t.pendingCount > 1) taskActionName = `Prescription Sign-off (${t.pendingCount} Formulations)`;
 
         let taskDescription = t.description;
@@ -1644,7 +1676,25 @@ export default function DoctorPublicPortalClient({
               {codeDisplay && (
                 <CopyableId value={codeDisplay} />
               )}
-              {isSigned ? (
+              {t.type === 'proposal_followup' ? (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '0.68rem',
+                    fontWeight: 650,
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    background: '#fffbeb',
+                    color: '#b45309',
+                    border: '1px solid #fde68a'
+                  }}
+                >
+                  <Clock size={11} />
+                  {t.daysAgo ? `Offer Unaccepted (${t.daysAgo}d)` : 'Offer Unaccepted'}
+                </span>
+              ) : isSigned ? (
                 <span
                   style={{
                     display: 'inline-flex',
@@ -1699,6 +1749,70 @@ export default function DoctorPublicPortalClient({
       render: (t) => {
         const isSigned = t.isSigned || t.status === 'approved';
         const isSigning = signingTaskId === (t.id || t.code);
+
+        if (t.type === 'proposal_followup') {
+          const patientPhone = (t.patientPhone || t.patient?.phone || '').replace(/[^0-9+]/g, '');
+          const encodedMsg = encodeURIComponent(t.whatsappMessage || `Hello ${t.patientName}, this is Dr. ${doctor.name || 'Khalid Shukri'}'s clinical practice following up on your personalized ${t.treatmentTitle || 'treatment plan'}. You can review your medical protocol here: https://atlashealth-services.com/rx/${t.code}. Please let us know if you have any questions or would like to proceed.`);
+          const waUrl = patientPhone ? `https://wa.me/${patientPhone}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
+
+          return (
+            <div
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', width: '100%' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  height: '30px',
+                  padding: '0 10px',
+                  borderRadius: '4px',
+                  background: '#16a34a',
+                  border: '1px solid #15803d',
+                  color: '#ffffff',
+                  fontSize: '0.74rem',
+                  fontWeight: 650,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 1px 2px rgba(22,163,74,0.2)',
+                  transition: 'all 0.12s'
+                }}
+                title="Send personalized clinical reminder via WhatsApp"
+              >
+                <MessageCircle size={13} style={{ color: '#ffffff' }} />
+                <span>WhatsApp</span>
+              </a>
+
+              <Link
+                href={t.actionUrl || `/rx/${t.code}`}
+                target="_blank"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  height: '30px',
+                  padding: '0 8px',
+                  borderRadius: '4px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#1a73e8',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+                title="Review treatment proposal dossier"
+              >
+                <span>Review Offer</span>
+                <ArrowUpRight size={12} />
+              </Link>
+            </div>
+          );
+        }
 
         if (isSigned) {
           return (
@@ -1819,38 +1933,55 @@ export default function DoctorPublicPortalClient({
       width: '22%',
       align: 'left',
       sortable: true,
-      render: (rx) => (
-        <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-          <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.88rem' }}>
-            {rx.patientName}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            <CopyableId value={rx.prescriptionNumber || rx.code} />
-            {rx.invoiceRef && (
-              <span
-                style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 650,
-                  color: '#475569',
-                  background: '#f1f5f9',
-                  padding: '1px 6px',
-                  borderRadius: '3px',
-                  border: '1px solid #e2e8f0',
-                  letterSpacing: '0.02em'
-                }}
-                title={`Historical order reference ${rx.invoiceRef}`}
-              >
-                {rx.invoiceRef}
-              </span>
+      render: (rx) => {
+        const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+        const rawInvoice = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
+        const isLegitInvoice = rawInvoice && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInvoice);
+        const patientPhone = rx.patientPhone || rx.phone || rx.mobile || rx.patient?.phone || rx.patient?.mobile;
+
+        return (
+          <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.88rem' }}>
+              {rx.patientName}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <CopyableId value={rx.prescriptionNumber || rx.code} />
+              {isLegitInvoice && (
+                <span
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 650,
+                    color: '#475569',
+                    background: '#f1f5f9',
+                    padding: '1px 6px',
+                    borderRadius: '3px',
+                    border: '1px solid #e2e8f0',
+                    letterSpacing: '0.02em'
+                  }}
+                  title={`Historical order reference ${rawInvoice}`}
+                >
+                  {rawInvoice}
+                </span>
+              )}
+            </div>
+            {patientPhone ? (
+              <div style={{ fontSize: '0.72rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
+                <Phone size={11} style={{ color: '#059669', flexShrink: 0 }} />
+                <span>{patientPhone}</span>
+              </div>
+            ) : isProposal ? (
+              <div style={{ fontSize: '0.70rem', color: '#94a3b8', fontStyle: 'italic', marginTop: '1px' }}>
+                No phone on file
+              </div>
+            ) : null}
+            {rx.patient?.dob && (
+              <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                DOB: {rx.patient.dob}
+              </div>
             )}
           </div>
-          {rx.patient?.dob && (
-            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-              DOB: {rx.patient.dob}
-            </div>
-          )}
-        </div>
-      )
+        );
+      }
     },
     {
       key: 'treatmentTitle',
@@ -1932,23 +2063,53 @@ export default function DoctorPublicPortalClient({
     {
       key: 'status',
       header: 'Status',
-      width: '12%',
+      width: '14%',
       align: 'left',
       sortable: true,
       render: (rx) => {
         const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
         const effectiveStatus = isProposal ? 'proposal_pending' : (rx.status || 'active');
         const isDraftOrReview = !isProposal && (['draft', 'pending', 'awaiting_validation'].includes(String(rx.status || '').toLowerCase()) || rx.ingestionStage === 'awaiting_atlas_review');
+
+        const createdAtMs = rx.createdAt ? new Date(rx.createdAt).getTime() : (rx.startDate ? new Date(rx.startDate).getTime() : Date.now());
+        const daysPending = Math.max(0, Math.floor((Date.now() - createdAtMs) / (1000 * 60 * 60 * 24)));
+
         return (
           <div
             title={isProposal ? "Clinical proposal recommended by physician; patient has not yet confirmed or purchased the order." : (isDraftOrReview ? "Atlas AI clinical pharmacist review in progress (~24h SLA)." : undefined)}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
           >
-            <StatusBadge status={effectiveStatus} />
+            <StatusBadge status={effectiveStatus} customLabel={isProposal ? 'Offer Pending' : undefined} />
             {isProposal && (
-              <span style={{ fontSize: '0.66rem', color: '#b06000', marginTop: '2px', fontWeight: 500, lineHeight: 1.2 }}>
-                Offer not accepted
-              </span>
+              daysPending >= 4 ? (
+                <span
+                  style={{
+                    fontSize: '0.67rem',
+                    color: '#b45309',
+                    marginTop: '3px',
+                    fontWeight: 650,
+                    lineHeight: 1.2,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px'
+                  }}
+                  title={`Proposal created ${daysPending} days ago. Follow-up recommended.`}
+                >
+                  ⚠️ Follow-up due ({daysPending}d)
+                </span>
+              ) : (
+                <span
+                  style={{
+                    fontSize: '0.67rem',
+                    color: '#64748b',
+                    marginTop: '3px',
+                    fontWeight: 500,
+                    lineHeight: 1.2
+                  }}
+                >
+                  ⏳ {daysPending}d open
+                </span>
+              )
             )}
           </div>
         );
@@ -1957,7 +2118,7 @@ export default function DoctorPublicPortalClient({
     {
       key: 'createdAt',
       header: 'Start Date & Duration',
-      width: '19%',
+      width: '17%',
       align: 'left',
       sortable: true,
       render: (rx) => {
@@ -2128,32 +2289,35 @@ export default function DoctorPublicPortalClient({
                 onClick={(e) => handleShareProposalWhatsApp(rx, e)}
                 style={{
                   height: '28px',
-                  width: '28px',
+                  padding: '0 8px',
                   borderRadius: '4px',
-                  background: '#ffffff',
-                  border: '1px solid #dadce0',
-                  color: '#5f6368',
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  color: '#15803d',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  gap: '4px',
+                  fontSize: '0.74rem',
+                  fontWeight: 650,
                   flexShrink: 0,
                   transition: 'all 0.12s ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#f0fdf4';
-                  e.currentTarget.style.borderColor = '#16a34a';
-                  e.currentTarget.style.color = '#16a34a';
+                  e.currentTarget.style.background = '#25d366';
+                  e.currentTarget.style.borderColor = '#1ebc59';
+                  e.currentTarget.style.color = '#ffffff';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#ffffff';
-                  e.currentTarget.style.borderColor = '#dadce0';
-                  e.currentTarget.style.color = '#5f6368';
+                  e.currentTarget.style.background = '#f0fdf4';
+                  e.currentTarget.style.borderColor = '#bbf7d0';
+                  e.currentTarget.style.color = '#15803d';
                 }}
-                title="Share treatment proposal with patient via WhatsApp"
-                aria-label="Share treatment proposal via WhatsApp"
+                title={`Send clinical follow-up WhatsApp message to ${rx.patientName || 'patient'}`}
+                aria-label="Send clinical follow-up via WhatsApp"
               >
-                <MessageCircle size={14} />
+                <MessageCircle size={13} />
+                <span>Follow-up</span>
               </button>
             ) : (
               <button
@@ -4160,6 +4324,7 @@ export default function DoctorPublicPortalClient({
                     label: 'Tasks',
                     options: [
                       { label: 'All Tasks', value: 'all' },
+                      { label: 'Follow-ups (Unaccepted)', value: 'proposal_followup' },
                       { label: 'Titrations', value: 'titration' },
                       { label: 'Refills', value: 'refill' },
                       { label: 'Sign-offs', value: 'approval' }
@@ -4327,6 +4492,7 @@ export default function DoctorPublicPortalClient({
                 <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '3px', gap: '2px' }}>
                   {[
                     { id: 'all', label: 'All' },
+                    { id: 'proposal_followup', label: 'Follow-ups' },
                     { id: 'titration', label: 'Titrations' },
                     { id: 'refill', label: 'Refills' },
                     { id: 'approval', label: 'Sign-offs' }
@@ -4392,43 +4558,125 @@ export default function DoctorPublicPortalClient({
                           alignItems: 'center',
                           gap: '4px',
                           fontSize: '0.72rem',
-                          fontWeight: 600,
+                          fontWeight: 650,
                           padding: '2px 8px',
                           borderRadius: '4px',
-                          background: task.isSigned || task.status === 'approved' ? '#f0fdf4' : '#fffbeb',
-                          color: task.isSigned || task.status === 'approved' ? '#16a34a' : '#b45309',
-                          border: `1px solid ${task.isSigned || task.status === 'approved' ? '#bbf7d0' : '#fde68a'}`
+                          background: task.type === 'proposal_followup' ? '#fffbeb' : (task.isSigned || task.status === 'approved' ? '#f0fdf4' : '#fffbeb'),
+                          color: task.type === 'proposal_followup' ? '#b45309' : (task.isSigned || task.status === 'approved' ? '#16a34a' : '#b45309'),
+                          border: `1px solid ${task.type === 'proposal_followup' ? '#fde68a' : (task.isSigned || task.status === 'approved' ? '#bbf7d0' : '#fde68a')}`
                         }}>
-                          {task.isSigned || task.status === 'approved' ? 'Signed & Authorized' : 'Pending Authorization'}
+                          {task.type === 'proposal_followup' ? (task.daysAgo ? `Offer Unaccepted (${task.daysAgo}d)` : 'Offer Unaccepted') : (task.isSigned || task.status === 'approved' ? 'Signed & Authorized' : 'Pending Authorization')}
                         </span>
                       </div>
                       <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                        Trigger: Automated Chronobiological Protocol Monitor
+                        Trigger: {task.type === 'proposal_followup' ? 'Patient Conversion & Re-engagement Monitor' : 'Automated Chronobiological Protocol Monitor'}
                       </span>
                     </div>
                     <p style={{ margin: '0 0 12px 0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
                       {task.description}
                     </p>
+
+                    {task.type === 'proposal_followup' && (
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 14px', marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            Recommended Patient Re-engagement Message (WhatsApp)
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                                navigator.clipboard.writeText(task.whatsappMessage || '');
+                                toast.success('Clinical reminder copied to clipboard');
+                              }
+                            }}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '0.70rem',
+                              fontWeight: 600,
+                              color: '#1a73e8',
+                              background: 'transparent',
+                              border: 'none',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <Copy size={11} />
+                            <span>Copy Template</span>
+                          </button>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#1e293b', fontStyle: 'italic', background: '#f8fafc', padding: '8px 10px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                          &ldquo;{task.whatsappMessage}&rdquo;
+                        </div>
+                      </div>
+                    )}
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                      <Link
-                        href={task.actionUrl}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '6px 14px',
-                          borderRadius: '4px',
-                          background: '#1a73e8',
-                          color: '#ffffff',
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                          textDecoration: 'none',
-                          boxShadow: '0 1px 2px rgba(60,64,67,0.3)'
-                        }}
-                      >
-                        <span>Execute {task.actionLabel}</span>
-                        <ArrowUpRight size={13} />
-                      </Link>
+                      {task.type === 'proposal_followup' ? (
+                        <>
+                          <a
+                            href={task.patientPhone ? `https://wa.me/${task.patientPhone.replace(/[^0-9+]/g, '')}?text=${encodeURIComponent(task.whatsappMessage || '')}` : `https://wa.me/?text=${encodeURIComponent(task.whatsappMessage || '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '6px 14px',
+                              borderRadius: '4px',
+                              background: '#16a34a',
+                              color: '#ffffff',
+                              fontSize: '0.78rem',
+                              fontWeight: 650,
+                              textDecoration: 'none',
+                              boxShadow: '0 1px 2px rgba(22,163,74,0.25)'
+                            }}
+                          >
+                            <MessageCircle size={13} style={{ color: '#ffffff' }} />
+                            <span>Send WhatsApp Reminder</span>
+                          </a>
+                          <Link
+                            href={task.actionUrl}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '6px 14px',
+                              borderRadius: '4px',
+                              background: '#ffffff',
+                              border: '1px solid #dadce0',
+                              color: '#1a73e8',
+                              fontSize: '0.78rem',
+                              fontWeight: 600,
+                              textDecoration: 'none'
+                            }}
+                          >
+                            <span>View Proposal Dossier</span>
+                            <ArrowUpRight size={13} />
+                          </Link>
+                        </>
+                      ) : (
+                        <Link
+                          href={task.actionUrl}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 14px',
+                            borderRadius: '4px',
+                            background: '#1a73e8',
+                            color: '#ffffff',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            textDecoration: 'none',
+                            boxShadow: '0 1px 2px rgba(60,64,67,0.3)'
+                          }}
+                        >
+                          <span>Execute {task.actionLabel}</span>
+                          <ArrowUpRight size={13} />
+                        </Link>
+                      )}
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                         <span style={{ fontSize: '0.74rem', color: '#64748b' }}>Reference Prescription:</span>
                         <CopyableId value={task.code} iconOnly={false} />
@@ -4684,7 +4932,7 @@ export default function DoctorPublicPortalClient({
                             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                               <Clock size={16} color="#d97706" />
                               <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#92400e' }}>
-                                Clinical Treatment Proposal · Offer Not Accepted
+                                Clinical Treatment Proposal · Awaiting Patient
                               </span>
                               <span style={{
                                 fontSize: '0.70rem',
@@ -4695,7 +4943,7 @@ export default function DoctorPublicPortalClient({
                                 fontWeight: 700,
                                 border: '1px solid #fcd34d'
                               }}>
-                                Patient Pending Purchase
+                                Offer Pending
                               </span>
                             </div>
                             <div style={{ display: 'flex', gap: '6px' }}>
@@ -4716,7 +4964,7 @@ export default function DoctorPublicPortalClient({
                                   cursor: 'pointer'
                                 }}
                               >
-                                Share on WhatsApp
+                                WhatsApp Follow-up
                               </button>
                               <button
                                 type="button"
@@ -4735,12 +4983,12 @@ export default function DoctorPublicPortalClient({
                                   cursor: 'pointer'
                                 }}
                               >
-                                Copy Link
+                                Copy Patient Link
                               </button>
                             </div>
                           </div>
                           <div style={{ fontSize: '0.74rem', color: '#78350f', lineHeight: 1.5 }}>
-                            Dr. Khalid Shukri formulated this personalized regimen. The patient has not yet confirmed the dispensing order.
+                            Dr. {doctor?.name || 'Physician'} formulated this personalized regimen. The patient has not yet confirmed the dispensing order.
                           </div>
                         </div>
                       )}
@@ -7441,7 +7689,7 @@ export default function DoctorPublicPortalClient({
                           gap: '6px'
                         }}>
                           <Clock size={13} color="#b06000" />
-                          <span>Clinical Treatment Proposal · Offer Not Accepted</span>
+                          <span>Clinical Treatment Proposal · Awaiting Patient</span>
                         </div>
                         <div style={{
                           fontSize: '0.82rem',
@@ -7449,7 +7697,7 @@ export default function DoctorPublicPortalClient({
                           lineHeight: 1.45,
                           marginBottom: '12px'
                         }}>
-                          This personalized formulation was recommended by Dr. Khalid Shukri, but the patient has not yet confirmed or purchased the treatment order.
+                          This personalized formulation was recommended by Dr. {doctor?.name || 'treating physician'}, but the patient has not yet confirmed or purchased the treatment order.
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           <button
@@ -7474,7 +7722,7 @@ export default function DoctorPublicPortalClient({
                             }}
                           >
                             <MessageCircle size={15} style={{ color: '#ffffff' }} />
-                            <span>Share Offer via WhatsApp</span>
+                            <span>WhatsApp Clinical Follow-up</span>
                           </button>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button

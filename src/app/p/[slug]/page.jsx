@@ -520,7 +520,7 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const catLower = (safeProduct.category || '').toLowerCase();
   const typeLower = (safeProduct.type || safeProduct.productType || '').toLowerCase();
   const isAesthetic = catLower === 'aesthetic injectables' || catLower === 'aesthetic injectable' || safeProduct.is_aesthetic_injectable === true;
-  const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || safeProduct.is_cosmetic === true;
+  const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || catLower === 'trichology_hair_care' || catLower === 'nutricosmetics' || safeProduct.is_cosmetic === true || slug.toLowerCase().startsWith('colway-');
   const isRawApi = typeLower === 'raw_api' || typeLower === 'raw_material' || catLower === 'raw_material' || catLower === 'compounding_material' || safeProduct.is_raw_api === true;
   const isEterna = slug.toLowerCase().includes('eterna') || 
     (safeProduct.supplierId || '').toLowerCase().includes('eternadx') || 

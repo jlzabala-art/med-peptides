@@ -47,9 +47,10 @@ export default function StatusChip({ status, customLabel, style = {}, variant = 
   
   // Canonical English label dictionary for any legacy status string
   const SPANISH_TO_ENGLISH_MAP = {
-    'proposal_pending': 'Offer Unaccepted',
-    'offer_not_accepted': 'Offer Unaccepted',
-    'unaccepted_offer': 'Offer Unaccepted',
+    'proposal_pending': 'Offer Pending',
+    'offer_not_accepted': 'Offer Pending',
+    'unaccepted_offer': 'Offer Pending',
+    'offer_pending': 'Offer Pending',
     'proposal': 'Clinical Proposal',
     'pending_atlas_review': 'Pending Review',
     'en tránsito': 'In Transit',

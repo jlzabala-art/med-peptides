@@ -403,6 +403,31 @@ const FALLBACK_SKINCARE_APPLICATION = {
   ]
 };
 
+const FALLBACK_COLVITA_APPLICATION = {
+  title: 'Systemic Cellular Collagen Supplementation Protocol',
+  frequency: '2 capsules daily: 1 with morning meal, 1 with evening meal',
+  duration_of_use: 'Minimum 3 months continuous cycle; recommended 6–12 months for sustained matrix redensification',
+  steps: [
+    {
+      step: 1,
+      phase: 'Oral Ingestion with Food',
+      instruction: 'Take 1 capsule twice daily with meals accompanied by a full glass of water. Taking with food enhances gastrointestinal peptide assimilation.',
+      clinical_note: 'Vitamin C co-administration accelerates endogenous prolyl hydroxylase activity and pro-collagen synthesis.'
+    },
+    {
+      step: 2,
+      phase: 'Systemic Hydration Foundation',
+      instruction: 'Maintain daily fluid intake of at least 1.5–2.0 liters of pure water. Collagen peptides bind water within the extracellular matrix to rehydrate deep dermis.',
+      clinical_note: 'Adequate interstitial water volume is mandatory to support neocollagenesis.'
+    }
+  ],
+  professional_notes: [
+    'Contraindicated in individuals with severe allergy to fish or seafood proteins.',
+    'Rich in natural iodine from Fucus algae: patients with hyperthyroidism should consult their physician.',
+    'Ideal systemic adjunct to injectable peptide therapies (GHK-Cu, BPC-157, TB-500).'
+  ]
+};
+
 function TechSpecsGrid({ specs }) {
   if (!specs) return null;
   // 8 balanced specs forming a perfectly symmetrical 2-column grid without orphan cards
@@ -654,15 +679,17 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
   const isHairProduct = slug?.includes('shampoo') || slug?.includes('conditioner') || slug?.includes('trichology') || name?.toLowerCase().includes('shampoo') || name?.toLowerCase().includes('conditioner') || name?.toLowerCase().includes('trichology') || category?.toLowerCase().includes('hair') || category?.toLowerCase().includes('trichology');
   const isShampoo = slug?.includes('shampoo') || name?.toLowerCase().includes('shampoo');
+  const isNutricosmetic = slug?.includes('colvita') || name?.toLowerCase().includes('colvita') || category?.toLowerCase().includes('nutricosmetic') || category?.toLowerCase().includes('supplement');
 
   const effectiveProtocol = useMemo(() => {
     if (applicationProtocol?.steps?.length > 0) {
       return applicationProtocol;
     }
+    if (isNutricosmetic) return FALLBACK_COLVITA_APPLICATION;
     if (isShampoo) return FALLBACK_SHAMPOO_APPLICATION;
     if (isHairProduct) return FALLBACK_CONDITIONER_APPLICATION;
     return FALLBACK_SKINCARE_APPLICATION;
-  }, [applicationProtocol, isHairProduct, isShampoo]);
+  }, [applicationProtocol, isNutricosmetic, isHairProduct, isShampoo]);
 
   const filteredIngredients = useMemo(() => {
     let list = ingredients;
@@ -701,21 +728,21 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
   const tocSections = useMemo(() => {
     const list = [
-      { id: 'overview', label: 'Formulation Overview', icon: Layers }
+      { id: 'overview', label: isNutricosmetic ? 'Nutraceutical Overview' : 'Formulation Overview', icon: Layers }
     ];
     if (isHairProduct) {
       list.push({ id: 'stem-cell-monograph', label: 'Baicapil™ 2% Monograph', icon: Sparkles });
     }
     list.push(
       { id: 'clinical-evidence', label: 'Clinical Evidence & Targets', icon: Activity },
-      { id: 'inci-dossier', label: 'Full INCI Composition', icon: Microscope },
-      { id: 'application-protocol', label: isHairProduct ? 'Application Protocol & Infogram' : 'Clinical Application Protocol', icon: ClipboardList },
+      { id: 'inci-dossier', label: isNutricosmetic ? 'Nutrient & Bioactive Composition' : 'Full INCI Composition', icon: Microscope },
+      { id: 'application-protocol', label: isNutricosmetic ? 'Oral Administration Protocol' : isHairProduct ? 'Application Protocol & Infogram' : 'Clinical Application Protocol', icon: ClipboardList },
       { id: 'technical-specs', label: 'Technical Specifications', icon: Beaker },
-      { id: 'clinical-protocols', label: isHairProduct ? 'Hair Protocols Integration' : 'Clinical Protocols Integration', icon: isHairProduct ? Scissors : Sparkles },
-      { id: 'safety', label: 'Clinical Safety & Patch Test', icon: AlertTriangle }
+      { id: 'clinical-protocols', label: isNutricosmetic ? 'Nutricosmetic Protocols Integration' : isHairProduct ? 'Hair Protocols Integration' : 'Clinical Protocols Integration', icon: isHairProduct ? Scissors : Sparkles },
+      { id: 'safety', label: isNutricosmetic ? 'Safety & Contraindications' : 'Clinical Safety & Patch Test', icon: AlertTriangle }
     );
     return list;
-  }, [isHairProduct]);
+  }, [isHairProduct, isNutricosmetic]);
 
   if (!product) return null;
 
