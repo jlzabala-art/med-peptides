@@ -59,6 +59,7 @@ import {
   MoreHorizontal,
   Upload,
   Building2,
+  Network,
   Image as ImageIcon
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -94,6 +95,10 @@ const DoctorClinicalAnalytics = dynamic(
 );
 const DoctorServicesMembershipModal = dynamic(
   () => import('@/components/doctor/DoctorServicesMembershipModal'),
+  { ssr: false }
+);
+const AtlasEcosystemHubTab = dynamic(
+  () => import('@/components/doctor/AtlasEcosystemHubTab'),
   { ssr: false }
 );
 const DoctorPracticeSearchModal = dynamic(
@@ -290,6 +295,21 @@ export function resolveClinicalVehicle(rxObj = {}, items = [], explicitVehicle =
     value: 'Pharmacopeial Compounding Vehicle Base (GMP Validated)',
     badge: 'EU GMP Validated Pharmacopeia Base'
   };
+}
+
+export function isProposalPrescription(rx) {
+  if (!rx) return false;
+  const s = (rx.status || rx.state || '').toLowerCase();
+  return Boolean(s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted');
+}
+
+export function isSoldPrescription(rx) {
+  if (!rx) return false;
+  const isProp = isProposalPrescription(rx);
+  const rawInv = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
+  const hasInv = rawInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInv);
+  const s = (rx.status || rx.state || '').toLowerCase();
+  return Boolean(hasInv || rx.orderStatus === 'Ordered' || (!isProp && ['active', 'approved', 'dispensed'].includes(s)));
 }
 
 export function resolvePrescriptionParts(rx) {
@@ -675,7 +695,7 @@ export default function DoctorPublicPortalClient({
 
   const [isHandoutOpen, setIsHandoutOpen] = useState(false);
   const [handoutRx, setHandoutRx] = useState(null);
-  const [quickRxFilter, setQuickRxFilter] = useState('pending'); // 'pending' | 'all' | 'active' | 'multipart' (Default to actionable pending items)
+  const [quickRxFilter, setQuickRxFilter] = useState('all'); // 'all' | 'active' (Sold & Invoiced) | 'proposals' (Unaccepted Offers) | 'multipart'
   const [apiFilter, setApiFilter] = useState(null); // Active pharmaceutical ingredient filter from Analytics
 
   // Atlas Recommendations UI State (Consolidated Master Catalog)
@@ -683,6 +703,8 @@ export default function DoctorPublicPortalClient({
   const [recSearchQuery, setRecSearchQuery] = useState('');
   const [expandedRecId, setExpandedRecId] = useState(null);
   const [recFilter, setRecFilter] = useState(null); // { id: string, title: string, rxIds: string[] }
+  const [patientSearchQuery, setPatientSearchQuery] = useState('');
+  const [patientFilterMode, setPatientFilterMode] = useState('all'); // 'all' | 'sold' | 'unaccepted'
 
   // ── Treatment Timeline Pop-up Modal State (Mobile & Laptop UX - Golden Rule #5) ──
   const [timelineModalRx, setTimelineModalRx] = useState(null);
@@ -904,7 +926,7 @@ export default function DoctorPublicPortalClient({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const sectionIds = ['overview', 'tasks', 'prescriptions', 'diagnostics', 'patients'];
+    const sectionIds = ['overview', 'tasks', 'prescriptions', 'patients', 'diagnostics', 'ecosystem'];
     const handleScroll = () => {
       const scrollPos = window.scrollY + 120;
       for (let i = sectionIds.length - 1; i >= 0; i--) {
@@ -1044,20 +1066,17 @@ export default function DoctorPublicPortalClient({
       if (!searchQuery.trim()) {
         // Quick Status / Category Filter (Proposal #3)
         if (quickRxFilter === 'proposals') {
-          const s = (rx.status || rx.state || '').toLowerCase();
-          const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
-          if (!isProp) return false;
+          if (!isProposalPrescription(rx)) return false;
         } else if (quickRxFilter === 'drafts') {
           const s = (rx.status || rx.state || '').toLowerCase();
-          const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+          const isProp = isProposalPrescription(rx);
           if (isProp || (!['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review')) return false;
         } else if (quickRxFilter === 'pending') {
           const s = (rx.status || rx.state || '').toLowerCase();
-          const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+          const isProp = isProposalPrescription(rx);
           if (!isProp && !['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review') return false;
         } else if (quickRxFilter === 'active') {
-          const s = (rx.status || rx.state || '').toLowerCase();
-          if (!['active', 'approved', 'dispensed'].includes(s)) return false;
+          if (!isSoldPrescription(rx)) return false;
         } else if (quickRxFilter === 'multipart') {
           const parts = resolvePrescriptionParts(rx);
           if (parts.length <= 1) return false;
@@ -1075,20 +1094,17 @@ export default function DoctorPublicPortalClient({
 
       // Also apply quickRxFilter if search query is present
       if (quickRxFilter === 'proposals') {
-        const s = (rx.status || rx.state || '').toLowerCase();
-        const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
-        if (!isProp) return false;
+        if (!isProposalPrescription(rx)) return false;
       } else if (quickRxFilter === 'drafts') {
         const s = (rx.status || rx.state || '').toLowerCase();
-        const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+        const isProp = isProposalPrescription(rx);
         if (isProp || (!['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review')) return false;
       } else if (quickRxFilter === 'pending') {
         const s = (rx.status || rx.state || '').toLowerCase();
-        const isProp = s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
+        const isProp = isProposalPrescription(rx);
         if (!isProp && !['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) && rx.ingestionStage !== 'awaiting_atlas_review') return false;
       } else if (quickRxFilter === 'active') {
-        const s = (rx.status || rx.state || '').toLowerCase();
-        if (!['active', 'approved', 'dispensed'].includes(s)) return false;
+        if (!isSoldPrescription(rx)) return false;
       } else if (quickRxFilter === 'multipart') {
         const parts = resolvePrescriptionParts(rx);
         if (parts.length <= 1) return false;
@@ -1105,14 +1121,17 @@ export default function DoctorPublicPortalClient({
     let activeCount = 0;
     let multipartCount = 0;
     allPrescriptions.forEach(p => {
+      const isSold = isSoldPrescription(p);
+      const isProp = isProposalPrescription(p);
       const s = (p.status || p.state || '').toLowerCase();
-      const isProp = s === 'proposal_pending' || p.isTreatmentProposal || p.orderStatus === 'Offer Not Accepted';
-      if (isProp) {
+
+      if (isSold) {
+        activeCount++;
+      } else if (isProp) {
         proposalsCount++;
       } else if (['draft', 'pending', 'awaiting', 'awaiting_validation'].includes(s) || p.ingestionStage === 'awaiting_atlas_review') {
         draftsCount++;
       }
-      if (['active', 'approved', 'dispensed'].includes(s)) activeCount++;
       const parts = resolvePrescriptionParts(p);
       if (parts.length > 1) multipartCount++;
     });
@@ -1281,7 +1300,7 @@ export default function DoctorPublicPortalClient({
     const daysPending = Math.max(0, Math.floor((Date.now() - createdAtMs) / (1000 * 60 * 60 * 24)));
     const doctorName = doctor?.name || 'Physician';
 
-    let text = '';
+    let text;
     if (daysPending >= 10) {
       // Cadence 3: Allocation / Expiry clinical reminder (English)
       text = `Dear ${patientName},\n\n`;
@@ -1371,7 +1390,7 @@ export default function DoctorPublicPortalClient({
     setAiLoading(true);
 
     setTimeout(() => {
-      let response = '';
+      let response;
       const lower = text.toLowerCase();
       const patientCount = doctor.patients?.length || new Set(filteredPrescriptions.map(p => p.patientName || p.patientId)).size;
       const rxCount = filteredPrescriptions.length;
@@ -1422,7 +1441,7 @@ export default function DoctorPublicPortalClient({
 
   // ── Autonomous Background Registry Synchronization (SWR + Focus Revalidation) ──
   const isSyncingRegistryRef = useRef(false);
-  const lastSyncTimestampRef = useRef(Date.now());
+  const lastSyncTimestampRef = useRef(0);
   const [isBackgroundSyncing, setIsBackgroundSyncing] = useState(false);
 
   const syncDoctorRegistry = useCallback(async (force = false) => {
@@ -2149,54 +2168,80 @@ export default function DoctorPublicPortalClient({
     },
     {
       key: 'status',
-      header: 'Status',
-      width: '14%',
+      header: 'Commercial & Clinical Status',
+      width: '16%',
       align: 'left',
       sortable: true,
       render: (rx) => {
-        const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
-        const effectiveStatus = isProposal ? 'proposal_pending' : (rx.status || 'active');
-        const isDraftOrReview = !isProposal && (['draft', 'pending', 'awaiting_validation'].includes(String(rx.status || '').toLowerCase()) || rx.ingestionStage === 'awaiting_atlas_review');
+        const isProposal = isProposalPrescription(rx);
+        const isSold = isSoldPrescription(rx);
+        const rawInvoice = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
+        const isLegitInvoice = rawInvoice && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInvoice);
+        const effectiveStatus = isSold ? 'approved' : (isProposal ? 'proposal_pending' : (rx.status || 'active'));
+        const isDraftOrReview = !isProposal && !isSold && (['draft', 'pending', 'awaiting_validation'].includes(String(rx.status || '').toLowerCase()) || rx.ingestionStage === 'awaiting_atlas_review');
 
         const createdAtMs = rx.createdAt ? new Date(rx.createdAt).getTime() : (rx.startDate ? new Date(rx.startDate).getTime() : Date.now());
         const daysPending = Math.max(0, Math.floor((Date.now() - createdAtMs) / (1000 * 60 * 60 * 24)));
 
         return (
           <div
-            title={isProposal ? "Clinical proposal recommended by physician; patient has not yet confirmed or purchased the order." : (isDraftOrReview ? "Atlas AI clinical pharmacist review in progress (~24h SLA)." : undefined)}
+            title={isSold ? `Confirmed & invoiced order (${rawInvoice || 'Authorized'}).` : (isProposal ? "Clinical proposal recommended by physician; patient has not yet confirmed or purchased the order." : (isDraftOrReview ? "Atlas AI clinical pharmacist review in progress (~24h SLA)." : undefined))}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
           >
-            <StatusBadge status={effectiveStatus} customLabel={isProposal ? 'Offer Pending' : undefined} />
-            {isProposal && (
-              daysPending >= 4 ? (
+            {isSold ? (
+              <>
+                <StatusBadge status="approved" customLabel="Sold & Invoiced" />
                 <span
                   style={{
-                    fontSize: '0.67rem',
-                    color: '#b45309',
+                    fontSize: '0.69rem',
+                    color: '#15803d',
                     marginTop: '3px',
-                    fontWeight: 650,
+                    fontWeight: 700,
                     lineHeight: 1.2,
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '3px'
                   }}
-                  title={`Proposal created ${daysPending} days ago. Follow-up recommended.`}
+                  title={rawInvoice ? `Confirmed invoice ${rawInvoice}` : 'Confirmed customer purchase'}
                 >
-                  ⚠️ Follow-up due ({daysPending}d)
+                  ✓ {rawInvoice || 'Invoiced Order'}
                 </span>
-              ) : (
-                <span
-                  style={{
-                    fontSize: '0.67rem',
-                    color: '#64748b',
-                    marginTop: '3px',
-                    fontWeight: 500,
-                    lineHeight: 1.2
-                  }}
-                >
-                  ⏳ {daysPending}d open
-                </span>
-              )
+              </>
+            ) : isProposal ? (
+              <>
+                <StatusBadge status="proposal_pending" customLabel="Offer Unaccepted" />
+                {daysPending >= 4 ? (
+                  <span
+                    style={{
+                      fontSize: '0.67rem',
+                      color: '#b45309',
+                      marginTop: '3px',
+                      fontWeight: 650,
+                      lineHeight: 1.2,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px'
+                    }}
+                    title={`Proposal created ${daysPending} days ago. Follow-up recommended.`}
+                  >
+                    ⚠️ Follow-up due ({daysPending}d)
+                  </span>
+                ) : (
+                  <span
+                    style={{
+                      fontSize: '0.67rem',
+                      color: '#b06000',
+                      marginTop: '3px',
+                      fontWeight: 600,
+                      lineHeight: 1.2
+                    }}
+                  >
+                    ⏳ Pending checkout ({daysPending}d)
+                  </span>
+                )}
+              </>
+            ) : (
+              <StatusBadge status={effectiveStatus} />
             )}
           </div>
         );
@@ -2301,10 +2346,12 @@ export default function DoctorPublicPortalClient({
             onClick={e => e.stopPropagation()}
           >
             {/* QUICK ACTION 1: View Public Prescription Page (Simple Icon Button per User Request & Rule #45) */}
-            <Link
-              href={`/rx/${rx.code}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`/rx/${rx.code}`, '_blank', 'noopener,noreferrer');
+              }}
               style={{
                 height: '28px',
                 width: '28px',
@@ -2312,10 +2359,10 @@ export default function DoctorPublicPortalClient({
                 background: '#ffffff',
                 border: '1px solid #dadce0',
                 color: '#5f6368',
+                cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                textDecoration: 'none',
                 flexShrink: 0,
                 transition: 'all 0.12s ease'
               }}
@@ -2333,7 +2380,7 @@ export default function DoctorPublicPortalClient({
               aria-label="View public prescription page"
             >
               <ExternalLink size={14} />
-            </Link>
+            </button>
 
             {/* QUICK ACTION 2: Contextual Primary Clinical Action (Sign if pending, Share Offer if proposal, or Patient Posology Handout if active/approved) */}
             {isPending ? (
@@ -2756,6 +2803,208 @@ export default function DoctorPublicPortalClient({
       }
     }
   ], [signingTaskId, handleSignOffPrescription, handleShareProposalWhatsApp, activeActionsMenuRxId, mobileActionRx]);
+
+  // ── Monitored Patients Directory (Aggregated from clinical records) ────────
+  const doctorPatientsList = useMemo(() => {
+    const pMap = new Map();
+
+    allPrescriptions.forEach(rx => {
+      const pName = (rx.patientName || rx.patient?.name || 'Patient').trim();
+      if (!pName) return;
+      const normKey = pName.toLowerCase();
+      const isSold = isSoldPrescription(rx);
+      const isProp = isProposalPrescription(rx);
+      const rawInv = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
+      const isLegitInv = rawInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInv);
+
+      const phone = rx.patientPhone || rx.phone || rx.mobile || rx.patient?.phone || rx.patient?.mobile || '';
+      const email = rx.patientEmail || rx.email || rx.patient?.email || '';
+
+      const existing = pMap.get(normKey);
+      if (!existing) {
+        pMap.set(normKey, {
+          id: rx.patientId || normKey,
+          name: pName,
+          phone,
+          email,
+          prescriptions: [rx],
+          hasSold: isSold,
+          hasUnaccepted: isProp,
+          invoices: isLegitInv ? [rawInv] : [],
+          latestDate: rx.createdAt || rx.startDate || rx.createdDate || '',
+          latestProduct: rx.treatmentTitle || rx.regimenShortTitle || 'Compounded Precision Regimen'
+        });
+      } else {
+        existing.prescriptions.push(rx);
+        if (isSold) existing.hasSold = true;
+        if (isProp) existing.hasUnaccepted = true;
+        if (isLegitInv && !existing.invoices.includes(rawInv)) {
+          existing.invoices.push(rawInv);
+        }
+        if (!existing.phone && phone) existing.phone = phone;
+        if (!existing.email && email) existing.email = email;
+      }
+    });
+
+    return Array.from(pMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [allPrescriptions]);
+
+  const filteredDoctorPatients = useMemo(() => {
+    return doctorPatientsList.filter(pat => {
+      if (patientFilterMode === 'sold' && !pat.hasSold) return false;
+      if (patientFilterMode === 'unaccepted' && pat.hasSold) return false;
+
+      if (!patientSearchQuery.trim()) return true;
+      const q = patientSearchQuery.toLowerCase().trim();
+      const matchName = pat.name.toLowerCase().includes(q);
+      const matchPhone = pat.phone.toLowerCase().includes(q);
+      const matchEmail = pat.email.toLowerCase().includes(q);
+      const matchInvoice = pat.invoices.some(inv => inv.toLowerCase().includes(q));
+      const matchProduct = pat.latestProduct.toLowerCase().includes(q);
+      return matchName || matchPhone || matchEmail || matchInvoice || matchProduct;
+    });
+  }, [doctorPatientsList, patientFilterMode, patientSearchQuery]);
+
+  const patientColumns = useMemo(() => [
+    {
+      key: 'name',
+      header: 'Patient Profile',
+      width: '28%',
+      align: 'left',
+      sortable: true,
+      render: (pat) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', textAlign: 'left' }}>
+          <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.88rem' }}>
+            {pat.name}
+          </div>
+          {pat.phone ? (
+            <div style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Phone size={11} style={{ color: '#059669', flexShrink: 0 }} />
+              <CopyableId value={pat.phone} />
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.70rem', color: '#94a3b8', fontStyle: 'italic' }}>
+              No direct phone
+            </div>
+          )}
+          {pat.email && (
+            <div style={{ fontSize: '0.70rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Mail size={11} style={{ color: '#0284c7', flexShrink: 0 }} />
+              <span>{pat.email}</span>
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      header: 'Commercial Status',
+      width: '22%',
+      align: 'left',
+      sortable: true,
+      render: (pat) => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          {pat.hasSold ? (
+            <>
+              <StatusBadge status="approved" customLabel="Sold Customer" />
+              <div style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 650, marginTop: '3px' }}>
+                ✓ {pat.invoices.join(', ') || 'Invoiced Order'}
+              </div>
+            </>
+          ) : (
+            <>
+              <StatusBadge status="proposal_pending" customLabel="Offer Unaccepted" />
+              <div style={{ fontSize: '0.70rem', color: '#b45309', fontWeight: 600, marginTop: '3px' }}>
+                ⏳ Awaiting Confirmation
+              </div>
+            </>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'regimens',
+      header: 'Prescriptions & History',
+      width: '32%',
+      align: 'left',
+      render: (pat) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
+          <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b' }}>
+            {pat.prescriptions.length === 1 ? '1 Clinical Regimen' : `${pat.prescriptions.length} Clinical Regimens`}
+          </div>
+          <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.25 }}>
+            {pat.latestProduct}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      width: '18%',
+      align: 'right',
+      render: (pat) => {
+        const cleanPhone = (pat.phone || '').replace(/[^0-9]/g, '');
+        const waUrl = cleanPhone ? `https://wa.me/${cleanPhone}` : null;
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+            {waUrl && (
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  color: '#15803d',
+                  fontSize: '0.72rem',
+                  fontWeight: 650,
+                  textDecoration: 'none',
+                  cursor: 'pointer'
+                }}
+                title={`Open WhatsApp chat with ${pat.name}`}
+              >
+                <MessageSquare size={12} />
+                <span>WhatsApp</span>
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPatientFilter(pat.name);
+                setQuickRxFilter('all');
+                setActiveAnchor('prescriptions');
+                toast.success(`Showing prescriptions for ${pat.name}`, { id: 'filter-patient' });
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                color: '#1d4ed8',
+                fontSize: '0.72rem',
+                fontWeight: 650,
+                cursor: 'pointer'
+              }}
+            >
+              <FileText size={12} />
+              <span>Dossier</span>
+            </button>
+          </div>
+        );
+      }
+    }
+  ], [setPatientFilter, setQuickRxFilter, setActiveAnchor]);
 
   // ── Bloodo Diagnostic Lab Results Columns (DataTable Universal) ─────────
   const labResultsColumns = useMemo(() => [
@@ -3206,6 +3455,12 @@ export default function DoctorPublicPortalClient({
           label: 'Platform & Services',
           icon: Award,
           badge: null
+        },
+        {
+          id: 'ecosystem',
+          label: 'Ecosystem & Collectives',
+          icon: Network,
+          badge: '4 Roles'
         }
       ]
     }
@@ -3220,9 +3475,27 @@ export default function DoctorPublicPortalClient({
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
       return;
     }
-    if (id === 'search' || id === 'patients') {
+    if (id === 'search') {
       setIsPracticeSearchOpen(true);
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      return;
+    }
+    if (id === 'patients') {
+      setPatientFilterMode('all');
+      setPatientSearchQuery('');
+      setActiveAnchor('patients');
+      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
+    }
+    if (id === 'ecosystem') {
+      setActiveAnchor('ecosystem');
+      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       return;
     }
     if (id === 'credentials') {
@@ -4122,6 +4395,8 @@ export default function DoctorPublicPortalClient({
                 {activeAnchor === 'search' && 'Clinical Registry Search & Multi-Table Query'}
                 {activeAnchor === 'tasks' && `Pending To-Do Queue (${filteredTasks.length} Action Items)`}
                 {activeAnchor === 'prescriptions' && `Compounded Prescriptions Dossier (${filteredPrescriptions.length} Records)`}
+                {activeAnchor === 'patients' && `Monitored Patients Directory (${doctorPatientsList.length} Patient Dossiers)`}
+                {activeAnchor === 'ecosystem' && 'Atlas Partner Ecosystem & Collective Value Engine'}
                 {activeAnchor === 'recommendations' && 'Atlas Recommendations & Peptide Clinical Synergy'}
               </h1>
             </div>
@@ -4288,34 +4563,34 @@ export default function DoctorPublicPortalClient({
               </div>
 
               <div className="gcp-kpi-grid">
-                {/* KPI 1: Active Prescriptions */}
+                {/* KPI 1: Sold & Invoiced Orders (Golden Rule: Clear distinction) */}
                 <div
                   className="gcp-kpi-card"
                   onClick={() => {
                     triggerHaptic('light');
-                    setStatusFilter('active');
+                    setQuickRxFilter('active');
+                    setStatusFilter('all');
                     setPatientFilter('all');
                     setTemporalFilter('all');
                     setSearchQuery('');
-                    setScopeMode('filtered');
-                    handleSidebarNavigate('prescriptions');
-                    toast.success(`Filtered table: Showing ${activeKpis.activePrescriptions} active prescriptions`, { id: 'kpi-filter' });
+                    setActiveAnchor('prescriptions');
+                    toast.success(`Filtered table: Showing ${quickCounts.active} sold & invoiced prescriptions`, { id: 'kpi-filter' });
                   }}
                   style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
-                  title="Click to view Active Prescriptions in table"
+                  title="Click to view Sold & Invoiced orders in table"
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Active Prescriptions</span>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Sold & Invoiced</span>
                     <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Pill size={16} style={{ color: '#16a34a' }} />
+                      <CheckCircle2 size={16} style={{ color: '#16a34a' }} />
                     </div>
                   </div>
-                  <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
-                    {activeKpis.activePrescriptions}
+                  <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#15803d', lineHeight: 1.1 }}>
+                    {quickCounts.active}
                   </div>
                   <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Compounded posology regimens</span>
-                    <span style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 600 }}>Filter table →</span>
+                    <span>Confirmed & invoiced orders</span>
+                    <span style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 600 }}>Filter sold →</span>
                   </div>
                 </div>
 
@@ -4324,13 +4599,8 @@ export default function DoctorPublicPortalClient({
                   className="gcp-kpi-card"
                   onClick={() => {
                     triggerHaptic('light');
-                    setStatusFilter('all');
-                    setPatientFilter('all');
-                    setTemporalFilter('all');
-                    setSearchQuery('');
-                    setScopeMode('global');
-                    handleSidebarNavigate('prescriptions');
-                    toast.success(`Displaying all ${globalKpis.monitoredPatients} monitored patient dossiers`, { id: 'kpi-filter' });
+                    handleSidebarNavigate('patients');
+                    toast.success(`Displaying all ${doctorPatientsList.length} monitored patient dossiers`, { id: 'kpi-filter' });
                   }}
                   style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
                   title="Click to view Monitored Patients directory"
@@ -4342,7 +4612,7 @@ export default function DoctorPublicPortalClient({
                     </div>
                   </div>
                   <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
-                    {activeKpis.monitoredPatients}
+                    {doctorPatientsList.length}
                   </div>
                   <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span>Unique patient dossiers managed</span>
@@ -4350,7 +4620,38 @@ export default function DoctorPublicPortalClient({
                   </div>
                 </div>
 
-                {/* KPI 3: Pending Clinical Tasks */}
+                {/* KPI 3: Unaccepted Treatment Offers (Golden Rule: Clear distinction) */}
+                <div
+                  className="gcp-kpi-card"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setQuickRxFilter('proposals');
+                    setStatusFilter('all');
+                    setPatientFilter('all');
+                    setTemporalFilter('all');
+                    setSearchQuery('');
+                    setActiveAnchor('prescriptions');
+                    toast.success(`Showing ${quickCounts.proposals} unaccepted proposals awaiting checkout`, { id: 'kpi-filter' });
+                  }}
+                  style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
+                  title="Click to view Unaccepted Offers in table"
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Unaccepted Offers</span>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Clock size={16} style={{ color: '#d97706' }} />
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#d97706', lineHeight: 1.1 }}>
+                    {quickCounts.proposals}
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span>Proposals pending checkout</span>
+                    <span style={{ fontSize: '0.70rem', color: '#d97706', fontWeight: 600 }}>Filter offers →</span>
+                  </div>
+                </div>
+
+                {/* KPI 4: Pending Clinical Tasks */}
                 <div
                   className="gcp-kpi-card"
                   onClick={() => {
@@ -4365,45 +4666,16 @@ export default function DoctorPublicPortalClient({
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Action Tasks</span>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Clock size={16} style={{ color: '#d97706' }} />
-                    </div>
-                  </div>
-                  <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#d97706', lineHeight: 1.1 }}>
-                    {activeKpis.pendingTasksCount}
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Actionable reviews & titrations</span>
-                    <span style={{ fontSize: '0.70rem', color: '#d97706', fontWeight: 600 }}>View tasks →</span>
-                  </div>
-                </div>
-
-                {/* KPI 4: Refills & Titrations Due */}
-                <div
-                  className="gcp-kpi-card"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setTaskFilter('refill');
-                    setSearchQuery('');
-                    setScopeMode('filtered');
-                    handleSidebarNavigate('tasks');
-                    toast.success(`Filtered To-Do Queue: Showing ${activeKpis.refillsDueCount} refills due`, { id: 'kpi-filter' });
-                  }}
-                  style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
-                  title="Click to view Refill & Renewal Tasks in to-do list"
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Refills & Cycles</span>
                     <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Sparkles size={16} style={{ color: '#7c3aed' }} />
                     </div>
                   </div>
                   <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#7c3aed', lineHeight: 1.1 }}>
-                    {activeKpis.refillsDueCount}
+                    {activeKpis.pendingTasksCount}
                   </div>
                   <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Upcoming supply cycles (14 days)</span>
-                    <span style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 600 }}>Filter refills →</span>
+                    <span>Actionable reviews & titrations</span>
+                    <span style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 600 }}>View tasks →</span>
                   </div>
                 </div>
               </div>
@@ -5144,7 +5416,7 @@ export default function DoctorPublicPortalClient({
                     quickRxFilter !== 'all' && {
                       key: 'quick',
                       label: 'Filter',
-                      value: quickRxFilter === 'proposals' ? 'Unaccepted Offers' : quickRxFilter === 'drafts' ? 'Doctor Drafts' : quickRxFilter === 'active' ? 'Active Prescriptions' : 'Multi-Part',
+                      value: quickRxFilter === 'proposals' ? 'Unaccepted Offers' : quickRxFilter === 'drafts' ? 'Doctor Drafts' : quickRxFilter === 'active' ? 'Sold & Invoiced' : 'Multi-Part',
                       onRemove: () => setQuickRxFilter('all')
                     },
                     apiFilter && {
@@ -5193,8 +5465,8 @@ export default function DoctorPublicPortalClient({
                     Quick Filter:
                   </span>
                   {[
-                    { id: 'all', label: `All (${quickCounts.all})`, color: '#003666', bg: '#f1f5f9' },
-                    { id: 'active', label: `🟢 Active Prescriptions (${quickCounts.active})`, color: '#137333', bg: '#f0fdf4' },
+                    { id: 'all', label: `All Formulations (${quickCounts.all})`, color: '#003666', bg: '#f1f5f9' },
+                    { id: 'active', label: `🟢 Sold & Invoiced (${quickCounts.active})`, color: '#137333', bg: '#f0fdf4' },
                     { id: 'proposals', label: `⏳ Unaccepted Offers (${quickCounts.proposals})`, color: '#b06000', bg: '#fef7e0' },
                     ...(quickCounts.drafts > 0 ? [{ id: 'drafts', label: `🟡 Doctor Drafts (${quickCounts.drafts})`, color: '#b45309', bg: '#fffbeb' }] : []),
                     { id: 'multipart', label: `🔵 Multi-Part Formulations (${quickCounts.multipart})`, color: '#1a73e8', bg: '#eff6ff' }
@@ -5264,14 +5536,22 @@ export default function DoctorPublicPortalClient({
                 initialRowsPerPage={10}
                 alwaysShowPagination={true}
                 onRowClick={handleRowClickPrescription}
-                emptyTitle={quickRxFilter === 'pending' ? "No Prescriptions Awaiting Action" : "No Prescriptions Found"}
+                emptyTitle={
+                  quickRxFilter === 'active'
+                    ? "No Sold & Invoiced Prescriptions Found"
+                    : quickRxFilter === 'proposals'
+                    ? "No Unaccepted Proposals Found"
+                    : "No Prescriptions Found"
+                }
                 emptyDescription={
-                  quickRxFilter === 'pending'
-                    ? "All clinical prescriptions have been authorized or processed. There are no drafts or pending approvals requiring physician action."
+                  quickRxFilter === 'active'
+                    ? "No historical prescriptions with confirmed customer orders match the active criteria."
+                    : quickRxFilter === 'proposals'
+                    ? "All physician treatment proposals have been accepted or converted."
                     : "No prescriptions match the active search criteria or filters. Adjust search keywords or register a new patient."
                 }
-                emptyActionLabel={quickRxFilter === 'pending' && quickCounts.all > 0 ? `Show All Prescriptions (${quickCounts.all})` : undefined}
-                onEmptyAction={quickRxFilter === 'pending' && quickCounts.all > 0 ? () => setQuickRxFilter('all') : undefined}
+                emptyActionLabel={quickRxFilter !== 'all' && quickCounts.all > 0 ? `Show All Prescriptions (${quickCounts.all})` : undefined}
+                onEmptyAction={quickRxFilter !== 'all' && quickCounts.all > 0 ? () => setQuickRxFilter('all') : undefined}
                 expandableRender={(rx) => {
                   const parts = resolvePrescriptionParts(rx);
                   const totalApisCount = parts.reduce((acc, p) => acc + (p.apis?.length || 0), 0);
@@ -5695,6 +5975,305 @@ export default function DoctorPublicPortalClient({
                   );
                 }}
               />
+            </section>
+          )}
+
+          {/* ── View 3.2: Monitored Patients Directory (Google Cloud Standard DataTable) ── */}
+          {activeAnchor === 'patients' && (
+            <section
+              id="patients"
+              style={{
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                borderRadius: '8px',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                overflow: 'hidden',
+                marginBottom: '24px'
+              }}
+            >
+              <div
+                style={{
+                  padding: '16px 20px',
+                  borderBottom: '1px solid #dadce0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '12px'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Users size={18} style={{ color: '#003666' }} />
+                    <h2 style={{ fontSize: '1.05rem', fontWeight: 650, color: '#202124', margin: 0 }}>
+                      Monitored Patients Directory
+                    </h2>
+                    <span style={{ fontSize: '0.74rem', background: '#eff6ff', color: '#1d4ed8', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                      {doctorPatientsList.length} Active Dossiers
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.78rem', color: '#5f6368', margin: '4px 0 0 0' }}>
+                    Physician cohort monitoring, commercial fulfillment verification, and contact actions.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setPatientFilterMode('all');
+                      setPatientSearchQuery('');
+                    }}
+                    style={{
+                      height: '28px',
+                      padding: '0 10px',
+                      borderRadius: '4px',
+                      border: '1px solid #dadce0',
+                      background: '#ffffff',
+                      color: '#3c4043',
+                      fontSize: '0.74rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Reset View
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Google Cloud KPI Metric Cards for Patients */}
+              <div style={{ padding: '16px 20px 0 20px' }}>
+                <div className="gcp-kpi-grid" style={{ marginBottom: '16px' }}>
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => setPatientFilterMode('all')}
+                    style={{ cursor: 'pointer', border: patientFilterMode === 'all' ? '2px solid #003666' : '1px solid #e8eaed' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>Total Patients</span>
+                      <Users size={15} style={{ color: '#003666' }} />
+                    </div>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 700, color: '#202124' }}>
+                      {doctorPatientsList.length}
+                    </div>
+                    <div style={{ fontSize: '0.70rem', color: '#70757a', marginTop: '4px' }}>All registered patient dossiers</div>
+                  </div>
+
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => setPatientFilterMode('sold')}
+                    style={{ cursor: 'pointer', border: patientFilterMode === 'sold' ? '2px solid #16a34a' : '1px solid #e8eaed' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#15803d', textTransform: 'uppercase' }}>Sold Customers</span>
+                      <CheckCircle2 size={15} style={{ color: '#16a34a' }} />
+                    </div>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 700, color: '#15803d' }}>
+                      {doctorPatientsList.filter(p => p.hasSold).length}
+                    </div>
+                    <div style={{ fontSize: '0.70rem', color: '#15803d', marginTop: '4px', fontWeight: 650 }}>Confirmed invoice on file</div>
+                  </div>
+
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => setPatientFilterMode('unaccepted')}
+                    style={{ cursor: 'pointer', border: patientFilterMode === 'unaccepted' ? '2px solid #d97706' : '1px solid #e8eaed' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#b45309', textTransform: 'uppercase' }}>Unaccepted Proposals</span>
+                      <Clock size={15} style={{ color: '#d97706' }} />
+                    </div>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 700, color: '#d97706' }}>
+                      {doctorPatientsList.filter(p => !p.hasSold && p.hasUnaccepted).length}
+                    </div>
+                    <div style={{ fontSize: '0.70rem', color: '#b45309', marginTop: '4px', fontWeight: 650 }}>Proposal pending checkout</div>
+                  </div>
+
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => {
+                      setQuickRxFilter('all');
+                      setActiveAnchor('prescriptions');
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>Prescriptions</span>
+                      <Layers size={15} style={{ color: '#1a73e8' }} />
+                    </div>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 700, color: '#1a73e8' }}>
+                      {allPrescriptions.length}
+                    </div>
+                    <div style={{ fontSize: '0.70rem', color: '#1a73e8', marginTop: '4px', fontWeight: 650 }}>View prescriptions table →</div>
+                  </div>
+                </div>
+
+                {/* Global Search Bar (Rule #7) & Filter Chips */}
+                <div style={{ marginBottom: '14px' }}>
+                  <GlobalSearchBar
+                    searchQuery={patientSearchQuery}
+                    onSearchChange={setPatientSearchQuery}
+                    placeholder="Search by patient name, phone, email, or invoice number..."
+                    resultCount={filteredDoctorPatients.length}
+                    storageKey={`doctor-patients-search-${slug}`}
+                    size="md"
+                    filters={[
+                      patientFilterMode !== 'all' && {
+                        key: 'mode',
+                        label: 'Status',
+                        value: patientFilterMode === 'sold' ? 'Sold Customers' : 'Unaccepted Proposals',
+                        onRemove: () => setPatientFilterMode('all')
+                      }
+                    ].filter(Boolean)}
+                  />
+
+                  {/* Filter chips */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase' }}>
+                      Filter Status:
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPatientFilterMode('all')}
+                      style={{
+                        height: '26px',
+                        padding: '0 10px',
+                        borderRadius: '9999px',
+                        border: patientFilterMode === 'all' ? '2px solid #003666' : '1px solid #dadce0',
+                        background: patientFilterMode === 'all' ? '#f1f5f9' : '#ffffff',
+                        color: '#003666',
+                        fontSize: '0.72rem',
+                        fontWeight: patientFilterMode === 'all' ? 700 : 500,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      All Patients ({doctorPatientsList.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPatientFilterMode('sold')}
+                      style={{
+                        height: '26px',
+                        padding: '0 10px',
+                        borderRadius: '9999px',
+                        border: patientFilterMode === 'sold' ? '2px solid #16a34a' : '1px solid #dadce0',
+                        background: patientFilterMode === 'sold' ? '#f0fdf4' : '#ffffff',
+                        color: '#15803d',
+                        fontSize: '0.72rem',
+                        fontWeight: patientFilterMode === 'sold' ? 700 : 500,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      🟢 Sold Customers ({doctorPatientsList.filter(p => p.hasSold).length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPatientFilterMode('unaccepted')}
+                      style={{
+                        height: '26px',
+                        padding: '0 10px',
+                        borderRadius: '9999px',
+                        border: patientFilterMode === 'unaccepted' ? '2px solid #d97706' : '1px solid #dadce0',
+                        background: patientFilterMode === 'unaccepted' ? '#fffbeb' : '#ffffff',
+                        color: '#b45309',
+                        fontSize: '0.72rem',
+                        fontWeight: patientFilterMode === 'unaccepted' ? 700 : 500,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ⏳ Unaccepted Proposals ({doctorPatientsList.filter(p => !p.hasSold && p.hasUnaccepted).length})
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Monitored Patients DataTable */}
+              <DataTable
+                columns={patientColumns}
+                data={filteredDoctorPatients}
+                keyField="id"
+                tableId={`doctor-patients-table-${slug}`}
+                pagination={true}
+                initialRowsPerPage={10}
+                alwaysShowPagination={true}
+                emptyTitle="No Patients Found"
+                emptyDescription={patientSearchQuery ? `No patient dossiers match "${patientSearchQuery}".` : "No registered patients in clinical directory."}
+                expandableRender={(pat) => (
+                  <div style={{ padding: '14px 18px', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Associated Clinical Prescriptions & Proposals ({pat.prescriptions.length})
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {pat.prescriptions.map((p, idx) => {
+                        const pIsSold = isSoldPrescription(p);
+                        const pIsProp = isProposalPrescription(p);
+                        const pInv = p.invoiceRef ? String(p.invoiceRef).trim() : '';
+                        const pHasInv = pInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(pInv);
+                        return (
+                          <div
+                            key={p.id || idx}
+                            style={{
+                              background: '#ffffff',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '6px',
+                              padding: '10px 14px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              flexWrap: 'wrap',
+                              gap: '8px'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                              <CopyableId value={p.prescriptionNumber || p.code || p.id} />
+                              <span style={{ fontSize: '0.84rem', fontWeight: 650, color: '#0f172a' }}>
+                                {p.treatmentTitle || p.regimenShortTitle || 'Compounded Precision Regimen'}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {pIsSold ? (
+                                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '4px' }}>
+                                  ✓ Sold {pHasInv ? `(${pInv})` : ''}
+                                </span>
+                              ) : pIsProp ? (
+                                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#b45309', background: '#fffbeb', border: '1px solid #fde68a', padding: '2px 8px', borderRadius: '4px' }}>
+                                  ⏳ Offer Unaccepted
+                                </span>
+                              ) : (
+                                <StatusBadge status={p.status || 'active'} />
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleRowClickPrescription(p)}
+                                style={{
+                                  padding: '3px 8px',
+                                  fontSize: '0.72rem',
+                                  borderRadius: '4px',
+                                  border: '1px solid #cbd5e1',
+                                  background: '#ffffff',
+                                  color: '#334155',
+                                  cursor: 'pointer',
+                                  fontWeight: 600
+                                }}
+                              >
+                                View Regimen →
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              />
+            </section>
+          )}
+
+          {/* ── View 3.3: Atlas Partner Ecosystem & Collective Value Engine ── */}
+          {activeAnchor === 'ecosystem' && (
+            <section id="ecosystem" style={{ marginBottom: '24px' }}>
+              <AtlasEcosystemHubTab doctor={doctor} />
             </section>
           )}
 

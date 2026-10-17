@@ -360,6 +360,7 @@
 
   /* 3. Estandarizar touch targets en botones de iconos */
   button:has(> svg:only-child),
+  a:has(> svg:only-child),
   .mobile-catalog-actions-row button,
   .ui-pagination-footer button {
     min-width: 44px;
