@@ -1836,22 +1836,31 @@ export default function DoctorPublicPortalClient({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '3px',
+                  justifyContent: 'center',
+                  width: '28px',
                   height: '28px',
-                  padding: '0 8px',
                   borderRadius: '4px',
                   background: '#ffffff',
                   border: '1px solid #dadce0',
-                  color: '#1a73e8',
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
+                  color: '#5f6368',
                   textDecoration: 'none',
-                  whiteSpace: 'nowrap'
+                  flexShrink: 0,
+                  transition: 'all 0.12s ease'
                 }}
-                title="Review treatment proposal dossier"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#eff6ff';
+                  e.currentTarget.style.borderColor = '#1a73e8';
+                  e.currentTarget.style.color = '#1a73e8';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#dadce0';
+                  e.currentTarget.style.color = '#5f6368';
+                }}
+                title="Open treatment proposal dossier"
+                aria-label="Open treatment proposal dossier"
               >
-                <span>Review</span>
-                <ArrowUpRight size={12} />
+                <ExternalLink size={14} />
               </Link>
             </div>
           );
@@ -1878,6 +1887,7 @@ export default function DoctorPublicPortalClient({
                 target="_blank"
                 onClick={(e) => e.stopPropagation()}
                 title="Open official signed prescription pad in new tab"
+                aria-label="Open official signed prescription pad in new tab"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1887,10 +1897,23 @@ export default function DoctorPublicPortalClient({
                   borderRadius: '4px',
                   background: '#ffffff',
                   border: '1px solid #dadce0',
-                  color: '#475569'
+                  color: '#5f6368',
+                  textDecoration: 'none',
+                  flexShrink: 0,
+                  transition: 'all 0.12s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#eff6ff';
+                  e.currentTarget.style.borderColor = '#1a73e8';
+                  e.currentTarget.style.color = '#1a73e8';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#dadce0';
+                  e.currentTarget.style.color = '#5f6368';
                 }}
               >
-                <ArrowUpRight size={13} />
+                <ExternalLink size={14} />
               </Link>
             </div>
           );
@@ -1943,24 +1966,34 @@ export default function DoctorPublicPortalClient({
                 e.stopPropagation();
                 handleRowClickTask(t);
               }}
-              title="Review prescription details in slide-over Inspector Drawer"
+              title="Inspect prescription details in slide-over Inspector Drawer"
+              aria-label="Inspect prescription details in slide-over Inspector Drawer"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                justifyContent: 'center',
+                width: '30px',
                 height: '30px',
-                padding: '0 8px',
                 borderRadius: '4px',
                 background: '#ffffff',
                 border: '1px solid #dadce0',
-                color: '#334155',
-                fontSize: '0.74rem',
-                fontWeight: 500,
+                color: '#5f6368',
                 cursor: 'pointer',
-                whiteSpace: 'nowrap'
+                flexShrink: 0,
+                transition: 'all 0.12s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#eff6ff';
+                e.currentTarget.style.borderColor = '#1a73e8';
+                e.currentTarget.style.color = '#1a73e8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.borderColor = '#dadce0';
+                e.currentTarget.style.color = '#5f6368';
               }}
             >
-              <span>Review</span>
+              <ExternalLink size={14} />
             </button>
           </div>
         );
