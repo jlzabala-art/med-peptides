@@ -33,6 +33,11 @@ export const ProtocolCompoundSchema = z.object({
   route: z.string().default('Subcutaneous (SC)'),
   timing: z.string().default('morning_fasted'),
   clinicalNotes: z.string().optional(),
+  catalogRef: z.object({
+    productId: z.string().optional(),
+    variantId: z.string().optional(),
+    sku: z.string().optional()
+  }).optional(),
   reconstitution: z.object({
     vialQuantityMg: z.number().optional(),
     bacWaterMl: z.number().optional(),
@@ -76,6 +81,13 @@ export const ClinicalProtocolSchema = z.object({
   synergies: z.array(z.string()).default([]),
   requiresMedicalSupervision: z.boolean().default(true),
   authorDoctorId: z.string().optional(),
+  clinicalVersion: z.string().default('2.0.0'),
+  changelog: z.array(z.object({
+    version: z.string(),
+    date: z.string(),
+    author: z.string(),
+    reason: z.string()
+  })).default([]),
   createdAt: z.any().optional(),
   updatedAt: z.any().optional()
 });

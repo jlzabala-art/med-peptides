@@ -525,7 +525,15 @@ export default function PrescriptionIntakeWorkspace({
     );
   };
 
-  const isSubmittedResult = savedPrescriptionsResult?.some(r => r.status === 'pending');
+  // Adaptive drawer width compliant with Google Cloud UX standards:
+  // - Step 1 (Upload): 580px (focused, zero wasted whitespace, dashboard/sidebar remains contextual)
+  // - Step 2 (Review): min(1160px, calc(100vw - 280px)) (spacious side-by-side workspace without masking navigation)
+  // - Step 3 (Saved): 620px (clean summary card)
+  const resolvedDrawerWidth = useMemo(() => {
+    if (currentStep === 1) return '580px';
+    if (currentStep === 3) return '620px';
+    return 'min(1160px, calc(100vw - 280px))';
+  }, [currentStep]);
 
   return (
     <>
@@ -533,8 +541,15 @@ export default function PrescriptionIntakeWorkspace({
         isOpen={isOpen}
         onClose={handleSafeClose}
         title="New prescription"
-        subtitle="Upload a prescription or report, then review the extracted details."
-        width="min(1240px, 94vw)"
+        subtitle={
+          currentStep === 1
+            ? "Upload a prescription or clinical report to begin AI extraction."
+            : currentStep === 2
+            ? "Review and verify extracted active ingredients, dosages, and posology."
+            : "Prescription successfully saved."
+        }
+        width={resolvedDrawerWidth}
+        preserveSidebar={true}
         footer={renderFooter()}
       >
         <div className="prescription-intake-body">

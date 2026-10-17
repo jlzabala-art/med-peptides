@@ -36,6 +36,7 @@ export default function StandardDrawer({
   hideHeader = false,
   disableBodyScroll = false,
   zIndex = 9999,
+  preserveSidebar = false,
 }) {
   const bodyRef = React.useRef(null);
   const panelRef = React.useRef(null);
@@ -116,7 +117,7 @@ export default function StandardDrawer({
 
   const drawerContent = (
     <div
-      className="standard-drawer-backdrop"
+      className={`standard-drawer-backdrop ${preserveSidebar ? 'preserve-sidebar' : ''}`}
       style={{
         position: 'fixed',
         top: 0,
@@ -337,6 +338,18 @@ export default function StandardDrawer({
           backdrop-filter: blur(2px);
           animation: drawerFadeIn 0.2s ease-out;
           touch-action: none;
+        }
+        @media (min-width: 1024px) {
+          .standard-drawer-backdrop.preserve-sidebar {
+            left: var(--sidebar-current-width, var(--sb-w-full, 260px)) !important;
+            width: calc(100vw - var(--sidebar-current-width, var(--sb-w-full, 260px))) !important;
+          }
+        }
+        @media (max-width: 1023px) {
+          .standard-drawer-backdrop.preserve-sidebar {
+            left: 0 !important;
+            width: 100vw !important;
+          }
         }
         .drawer-full-workspace {
           width: calc(100vw - 260px);

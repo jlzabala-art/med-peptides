@@ -48,7 +48,34 @@
   font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   position: relative;
   overflow-x: hidden;
-  padding-bottom: 5rem;
+  padding-bottom: 0;
+}
+
+/* Google Cloud Dark Console Override for PublicUnifiedFooter */
+.eterna-page-root .public-unified-footer {
+  background: var(--gcp-surface) !important;
+  color: var(--gcp-text-muted) !important;
+  border-top: 1px solid var(--gcp-border) !important;
+}
+
+.eterna-page-root .public-unified-footer .public-footer-title {
+  color: var(--gcp-text-primary) !important;
+}
+
+.eterna-page-root .public-unified-footer .public-footer-links a {
+  color: var(--gcp-text-secondary) !important;
+}
+
+.eterna-page-root .public-unified-footer .public-footer-links a:hover {
+  color: var(--gcp-blue-light) !important;
+}
+
+.eterna-page-root .public-unified-footer p {
+  color: var(--gcp-text-muted) !important;
+}
+
+.eterna-page-root .public-unified-footer span {
+  color: var(--gcp-text-muted) !important;
 }
 
 /* Subtle Console Ambient Mesh */

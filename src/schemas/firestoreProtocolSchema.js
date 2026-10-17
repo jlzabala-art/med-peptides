@@ -136,4 +136,6 @@ export const DEPRECATED_PROTOCOL_FIELDS = Object.freeze([
   'summary',              // → overview_summary o description
   'overview',             // → overview_summary
   'protocolName',         // → name (camelCase variant)
+  'phase_blueprints',     // → phases (canonical unified schema)
+  'drugs_used',           // → compounds (canonical unified schema)
 ]);

@@ -123,6 +123,57 @@ export function normalizeProtocol(data, id = null) {
     'Regenerative'
   );
 
+  const rawPhases = Array.isArray(data.phases) ? data.phases : (Array.isArray(data.phase_blueprints) ? data.phase_blueprints : []);
+  const normalizedPhases = rawPhases.map((ph, idx) => {
+    const phaseNum = ph.phaseNumber ?? ph.index ?? (idx + 1);
+    const phaseName = safeString(ph.phaseName || ph.name || ph.phase_title, `Phase ${phaseNum}`);
+    const durWeeks = Number(ph.durationWeeks || ph.duration_weeks || ph.default_duration_weeks) || 4;
+    const rawCompounds = Array.isArray(ph.compounds) ? ph.compounds : (Array.isArray(ph.drugs) ? ph.drugs : []);
+    
+    const compounds = rawCompounds.map((c, cIdx) => {
+      const compId = c.id || c.productId || c.product_slug || `comp_${cIdx + 1}`;
+      const compName = safeString(c.name || c.product_title || c.compound, 'Compound');
+      const doseUnit = c.doseUnit || c.unit || 'mg';
+      const doseAmt = c.doseAmount != null ? Number(c.doseAmount) : null;
+      const freqTimes = c.frequencyTimesPerWeek != null ? Number(c.frequencyTimesPerWeek) : 1;
+      const weeklyDoseMg = c.weeklyDoseMg != null 
+        ? Number(c.weeklyDoseMg) 
+        : (doseAmt != null ? (doseUnit === 'mcg' ? (doseAmt * freqTimes) / 1000 : doseAmt * freqTimes) : null);
+
+      return {
+        ...c,
+        id: compId,
+        name: compName,
+        doseAmount: doseAmt,
+        doseUnit,
+        dosage: c.dosage || (doseAmt != null ? `${doseAmt} ${doseUnit}` : '—'),
+        frequency: c.frequency || 'once_weekly',
+        frequencyTimesPerWeek: freqTimes,
+        weeklyDose: c.weeklyDose || (weeklyDoseMg != null ? `${weeklyDoseMg} mg` : '—'),
+        weeklyDoseMg,
+        route: c.route || 'Subcutaneous (SC)',
+        timing: c.timing || 'morning_fasted',
+        reconstitution: c.reconstitution || null,
+        catalogRef: c.catalogRef || null
+      };
+    });
+
+    return {
+      ...ph,
+      phaseNumber: phaseNum,
+      phaseName,
+      name: phaseName,
+      durationWeeks: durWeeks,
+      duration_weeks: durWeeks,
+      startWeek: ph.startWeek ?? ph.start_week ?? 1,
+      endWeek: ph.endWeek ?? ph.end_week ?? durWeeks,
+      objective: safeString(ph.objective || ph.clinical_goal, ''),
+      instructions: safeString(ph.instructions, ''),
+      compounds,
+      drugs: compounds // backwards compatibility
+    };
+  });
+
   return {
     ...data,
     id: id || data.id,
@@ -134,6 +185,11 @@ export function normalizeProtocol(data, id = null) {
     description: safeString(data.description, ''),
     primary_goal: safeString(data.primary_goal || data.goal, ''),
     status: safeString(data.status, 'active'),
+    durationWeeks: Number(data.durationWeeks || data.duration_weeks) || normalizedPhases.reduce((s, p) => s + p.durationWeeks, 0) || 12,
+    duration_weeks: Number(data.durationWeeks || data.duration_weeks) || normalizedPhases.reduce((s, p) => s + p.durationWeeks, 0) || 12,
+    phases: normalizedPhases,
+    clinicalVersion: data.clinicalVersion || '2.0.0',
+    changelog: Array.isArray(data.changelog) ? data.changelog : [],
     version_number: data.version_number || data.protocol_version || data.version || 1,
   };
 }
@@ -154,7 +210,7 @@ function cleanProductName(name) {
   if (!name) return name;
   let cleaned = name.replace(/\s*\d+(?:\.\d+)?\s*(?:mg|mcg|iu|ml|g|kg|unit)s?\b/gi, '');
   cleaned = cleaned.replace(/\s*\b(?:vial|vials|drops|pen|capsules?|tablets?|kit|pack|amp|amps)s?\b/gi, '');
-  cleaned = cleaned.replace(/[\s\/\-|]+$/, '').trim();
+  cleaned = cleaned.replace(/[\s/\-|]+$/, '').trim();
   return cleaned || name;
 }
 

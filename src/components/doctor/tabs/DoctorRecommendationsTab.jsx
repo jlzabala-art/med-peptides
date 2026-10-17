@@ -263,7 +263,7 @@ export default function DoctorRecommendationsTab({
       synergisticApis: ['Topical/Oral Minoxidil', 'Finasteride', 'Dutasteride', 'Epithalon', 'Metformin', 'TeloTest™'],
       matchingItems: eternaMatches,
       protocolTitle: 'Request ETERNA® DX Diagnostic Kit',
-      protocolUrl: '/p/eternadx-genetic-test'
+      protocolUrl: '/p/eterna-epigenetic-age-test'
     },
 
     // ─── Barrier & Cuticular ECM (Colway Clinical Care) ───

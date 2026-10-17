@@ -418,6 +418,117 @@ export const CLINICAL_SUPPLEMENTS = {
       { id: 'st-60', name: '60 Capsules (30 Days)' },
       { id: 'st-120', name: '120 Capsules (60 Days)' }
     ]
+  },
+  'eterna-epigenetic-age-test': {
+    id: 'eterna-epigenetic-age-test',
+    slug: 'eterna-epigenetic-age-test',
+    canonicalKey: 'eterna-epigenetic-age-test',
+    name: 'ETERNA® DNA & Epigenetic Longevity Test',
+    canonicalName: 'ETERNA® DNA & Epigenetic Longevity Test',
+    brand: 'ETERNA DX',
+    category: 'Genomics & Longevity Diagnostics',
+    therapeutic_category: 'Multi-Omics DNA & Biological Age Epigenetics',
+    type: 'diagnostic',
+    productType: 'diagnostic',
+    is_diagnostic: true,
+    isDiagnostic: true,
+    dosageForm: 'Saliva Swab Collection Kit',
+    dispensingForm: 'CE-IVDR Certified Saliva Stabilization Tube',
+    supplierName: 'ETERNA Diagnostics S.L.',
+    supplier: 'ETERNA Diagnostics S.L.',
+    supplierId: 'supplier-eternadx',
+    suppliers: ['supplier-eternadx'],
+    supplierIds: ['supplier-eternadx'],
+    isSingleSupplierLocked: true,
+    status: 'published',
+    batchCode: 'AS-ETR-EUR01-2610',
+    lotNumber: '2610-ETR01',
+    description: 'High-resolution saliva-based DNA and epigenetic longevity profiling (+700,000 SNPs). Measures cellular biological age, rate of aging, organ system breakdown, and bi-directional wearable telemetry sync.',
+    variants: [
+      {
+        id: 'var-eterna-kit-1',
+        name: 'Single Individual Kit',
+        strength: '1 test / kit',
+        dose: '1 test / kit',
+        supplierId: 'supplier-eternadx',
+        supplierName: 'ETERNA Diagnostics S.L.',
+        status: 'published'
+      }
+    ]
+  },
+  'eterna-longevity-platform': {
+    id: 'eterna-longevity-platform',
+    slug: 'eterna-epigenetic-age-test',
+    canonicalKey: 'eterna-epigenetic-age-test',
+    name: 'ETERNA® DNA & Epigenetic Longevity Test',
+    canonicalName: 'ETERNA® DNA & Epigenetic Longevity Test',
+    brand: 'ETERNA DX',
+    category: 'Genomics & Longevity Diagnostics',
+    therapeutic_category: 'Multi-Omics DNA & Biological Age Epigenetics',
+    type: 'diagnostic',
+    productType: 'diagnostic',
+    is_diagnostic: true,
+    isDiagnostic: true,
+    dosageForm: 'Saliva Swab Collection Kit',
+    dispensingForm: 'CE-IVDR Certified Saliva Stabilization Tube',
+    supplierName: 'ETERNA Diagnostics S.L.',
+    supplier: 'ETERNA Diagnostics S.L.',
+    supplierId: 'supplier-eternadx',
+    suppliers: ['supplier-eternadx'],
+    supplierIds: ['supplier-eternadx'],
+    isSingleSupplierLocked: true,
+    status: 'published',
+    batchCode: 'AS-ETR-EUR01-2610',
+    lotNumber: '2610-ETR01',
+    description: 'High-resolution saliva-based DNA and epigenetic longevity profiling (+700,000 SNPs). Measures cellular biological age, rate of aging, organ system breakdown, and bi-directional wearable telemetry sync.',
+    variants: [
+      {
+        id: 'var-eterna-kit-1',
+        name: 'Single Individual Kit',
+        strength: '1 test / kit',
+        dose: '1 test / kit',
+        supplierId: 'supplier-eternadx',
+        supplierName: 'ETERNA Diagnostics S.L.',
+        status: 'published'
+      }
+    ]
+  },
+  'eternadx-genetic-test': {
+    id: 'eternadx-genetic-test',
+    slug: 'eterna-epigenetic-age-test',
+    canonicalKey: 'eterna-epigenetic-age-test',
+    name: 'ETERNA® DNA & Epigenetic Longevity Test',
+    canonicalName: 'ETERNA® DNA & Epigenetic Longevity Test',
+    brand: 'ETERNA DX',
+    category: 'Genomics & Longevity Diagnostics',
+    therapeutic_category: 'Multi-Omics DNA & Biological Age Epigenetics',
+    type: 'diagnostic',
+    productType: 'diagnostic',
+    is_diagnostic: true,
+    isDiagnostic: true,
+    dosageForm: 'Saliva Swab Collection Kit',
+    dispensingForm: 'CE-IVDR Certified Saliva Stabilization Tube',
+    supplierName: 'ETERNA Diagnostics S.L.',
+    supplier: 'ETERNA Diagnostics S.L.',
+    supplierId: 'supplier-eternadx',
+    suppliers: ['supplier-eternadx'],
+    supplierIds: ['supplier-eternadx'],
+    isSingleSupplierLocked: true,
+    status: 'published',
+    batchCode: 'AS-ETR-EUR01-2610',
+    lotNumber: '2610-ETR01',
+    description: 'High-resolution saliva-based DNA and epigenetic longevity profiling (+700,000 SNPs). Measures cellular biological age, rate of aging, organ system breakdown, and bi-directional wearable telemetry sync.',
+    variants: [
+      {
+        id: 'var-eterna-kit-1',
+        name: 'Single Individual Kit',
+        strength: '1 test / kit',
+        dose: '1 test / kit',
+        supplierId: 'supplier-eternadx',
+        supplierName: 'ETERNA Diagnostics S.L.',
+        status: 'published'
+      }
+    ]
   }
 };
 

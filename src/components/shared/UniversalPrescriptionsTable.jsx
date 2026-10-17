@@ -12,7 +12,6 @@ import PageHeader from '../ui/PageHeader';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 import PrescriptionsKPIs from '../admin/prescriptions/PrescriptionsKPIs';
 import UniversalOrderBuilder from './order-builder/UniversalOrderBuilder';
-import ImportPrescriptionModal from '../../features/prescriptions/components/ImportPrescriptionModal';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -31,7 +30,7 @@ import { PRESCRIPTION_SOURCES } from '../../schemas/prescriptionSchema';
 import BuilderProtocolSearch from './order-builder/BuilderProtocolSearch';
 import MobilePrescriptionCard from './mobile/MobilePrescriptionCard';
 import MobileActionSheet from '../ui/MobileActionSheet';
-import { Eye, Edit3, XCircle, Tag, Package, Link2 } from '@/lib/icons';
+import { Eye, Edit3, XCircle, Tag, Package, Link2, ExternalLink } from '@/lib/icons';
 import notifier from '../../services/NotificationService';
 import { exportToCSV, triggerServerExport } from '../../utils/universalExporter';
 import { useRoleAccess } from '../../hooks/useRoleAccess';
@@ -834,7 +833,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         onClick: (selectedRows) => {
           if (!selectedRows || selectedRows.length === 0) return;
           
-          let allItems = [];
+          const allItems = [];
           let targetPatient = null;
           
           selectedRows.forEach(rx => {
@@ -1480,34 +1479,49 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         <MobileActionSheet
           isOpen={!!mobileActionRx}
           onClose={() => setMobileActionRx(null)}
-          title={`Rx #${mobileActionRx?.id?.slice(-6).toUpperCase() || ''}`}
+          title={`Rx #${mobileActionRx?.prescriptionNumber || mobileActionRx?.code || mobileActionRx?.id?.slice(-8).toUpperCase() || ''}`}
           items={[
             {
-              label: 'View Details',
+              label: 'View Details Modal',
               icon: Eye,
-              onClick: () => { setSelectedItem(mobileActionRx); loadProductsLazy(); },
+              onClick: () => { 
+                const rx = mobileActionRx;
+                setMobileActionRx(null);
+                setSelectedItem(rx); 
+                loadProductsLazy(); 
+              },
             },
             {
-              label: 'View Prescription',
-              icon: Eye,
-              onClick: () => { setSelectedItem(mobileActionRx); loadProductsLazy(); setMobileActionRx(null); },
+              label: 'Open Public Dossier (/rx)',
+              icon: ExternalLink,
+              onClick: () => {
+                const code = mobileActionRx?.code || mobileActionRx?.prescriptionNumber || mobileActionRx?.id;
+                setMobileActionRx(null);
+                window.open(`/rx/${code}`, '_blank');
+              },
             },
             {
               label: 'Refill / Re-prescribe',
               icon: RefreshCw,
-              onClick: () => handleRefill(mobileActionRx),
+              onClick: () => {
+                const rx = mobileActionRx;
+                setMobileActionRx(null);
+                handleRefill(rx);
+              },
             },
             {
               label: 'Cancel Prescription',
               icon: XCircle,
               variant: 'danger',
               onClick: () => {
+                const targetRx = mobileActionRx;
+                setMobileActionRx(null);
                 notifier?.confirmCritical(
-                  `Cancel prescription for ${mobileActionRx?.patientName || 'this patient'}?`,
+                  `Cancel prescription for ${targetRx?.patientName || 'this patient'}?`,
                   async () => {
                     const { doc, updateDoc } = await import('firebase/firestore');
                     const { db } = await import('../../firebase');
-                    await updateDoc(doc(db, 'prescriptions', mobileActionRx.id), { status: 'cancelled' });
+                    await updateDoc(doc(db, 'prescriptions', targetRx.id), { status: 'cancelled' });
                     toast.success('Prescription cancelled.');
                     refresh();
                   }

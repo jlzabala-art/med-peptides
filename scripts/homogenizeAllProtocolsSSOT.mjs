@@ -43,6 +43,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   tirzepatide: {
     id: 'tirzepatide',
     name: 'Tirzepatide',
+    catalogRef: { productId: 'tirzepatide', sku: 'RP-TIRZ-10MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -61,6 +62,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   semaglutide: {
     id: 'semaglutide',
     name: 'Semaglutide',
+    catalogRef: { productId: 'semaglutide', sku: 'RP-SEMA-5MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -79,6 +81,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   retatrutide: {
     id: 'retatrutide',
     name: 'Retatrutide',
+    catalogRef: { productId: 'retatrutide', sku: 'RP-RETA-10MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -97,6 +100,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   cagrilintide: {
     id: 'cagrilintide',
     name: 'Cagrilintide',
+    catalogRef: { productId: 'cagrilintide', sku: 'RP-CAGRI-5MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -115,6 +119,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   bpc157: {
     id: 'bpc-157',
     name: 'BPC-157',
+    catalogRef: { productId: 'bpc-157', sku: 'RP-BPC157-5MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mcg',
@@ -133,6 +138,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   tb500: {
     id: 'tb-500',
     name: 'TB-500',
+    catalogRef: { productId: 'tb-500', sku: 'RP-TB500-5MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -151,6 +157,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   motsc: {
     id: 'mots-c',
     name: 'MOTS-c',
+    catalogRef: { productId: 'mots-c', sku: 'RP-MOTSC-10MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -169,6 +176,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   ss31: {
     id: 'ss-31',
     name: 'SS-31 (Elamipretide)',
+    catalogRef: { productId: 'ss-31', sku: 'RP-SS31-50MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -187,6 +195,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   aod9604: {
     id: 'aod-9604',
     name: 'AOD-9604',
+    catalogRef: { productId: 'aod-9604', sku: 'RP-AOD-5MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mcg',
@@ -205,6 +214,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   ghkcu: {
     id: 'ghk-cu',
     name: 'GHK-Cu',
+    catalogRef: { productId: 'ghk-cu', sku: 'RP-GHKCU-50MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -223,6 +233,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   ipamorelin: {
     id: 'ipamorelin',
     name: 'Ipamorelin',
+    catalogRef: { productId: 'ipamorelin', sku: 'RP-IPA-5MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mcg',
@@ -241,6 +252,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   cjc1295: {
     id: 'cjc-1295',
     name: 'CJC-1295 (No DAC)',
+    catalogRef: { productId: 'cjc-1295', sku: 'RP-CJC-2MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mcg',
@@ -259,6 +271,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   tesamorelin: {
     id: 'tesamorelin',
     name: 'Tesamorelin',
+    catalogRef: { productId: 'tesamorelin', sku: 'RP-TESA-10MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -277,6 +290,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   epithalon: {
     id: 'epithalon',
     name: 'Epithalon',
+    catalogRef: { productId: 'epithalon', sku: 'RP-EPITH-10MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -295,6 +309,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   pinealon: {
     id: 'pinealon',
     name: 'Pinealon',
+    catalogRef: { productId: 'pinealon', sku: 'RP-PINE-10MG' },
     route: 'Subcutaneous or Oral',
     dosageForm: 'vial',
     defaultUnit: 'mcg',
@@ -313,6 +328,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   semax: {
     id: 'semax',
     name: 'Semax',
+    catalogRef: { productId: 'semax', sku: 'RP-SEMAX-30MG' },
     route: 'Intranasal',
     dosageForm: 'nasal spray',
     defaultUnit: 'mcg',
@@ -331,6 +347,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   selank: {
     id: 'selank',
     name: 'Selank',
+    catalogRef: { productId: 'selank', sku: 'RP-SELANK-30MG' },
     route: 'Intranasal',
     dosageForm: 'nasal spray',
     defaultUnit: 'mcg',
@@ -349,6 +366,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   dsip: {
     id: 'dsip',
     name: 'DSIP',
+    catalogRef: { productId: 'dsip', sku: 'RP-DSIP-2MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mcg',
@@ -367,6 +385,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   thymosinalpha1: {
     id: 'thymosin-alpha-1',
     name: 'Thymosin Alpha-1',
+    catalogRef: { productId: 'thymosin-alpha-1', sku: 'RP-TA1-5MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -385,6 +404,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   kpv: {
     id: 'kpv',
     name: 'KPV',
+    catalogRef: { productId: 'kpv', sku: 'RP-KPV-5MG' },
     route: 'Subcutaneous or Oral',
     dosageForm: 'vial',
     defaultUnit: 'mcg',
@@ -403,6 +423,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   ara290: {
     id: 'ara-290',
     name: 'ARA-290 (Cibinetide)',
+    catalogRef: { productId: 'ara-290', sku: 'RP-ARA-16MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -421,6 +442,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   nad: {
     id: 'nad-plus',
     name: 'NAD+',
+    catalogRef: { productId: 'nad-plus', sku: 'RP-NAD-500MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -439,6 +461,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   pt141: {
     id: 'pt-141',
     name: 'PT-141 (Bremelanotide)',
+    catalogRef: { productId: 'pt-141', sku: 'RP-PT141-10MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mg',
@@ -457,6 +480,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   kisspeptin: {
     id: 'kisspeptin-10',
     name: 'Kisspeptin-10',
+    catalogRef: { productId: 'kisspeptin-10', sku: 'RP-KISS-5MG' },
     route: 'Subcutaneous',
     dosageForm: 'vial',
     defaultUnit: 'mcg',
@@ -475,6 +499,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   minoxidil_dutasteride: {
     id: 'minoxidil-dutasteride-topical',
     name: 'Minoxidil + Dutasteride Scalp Solution',
+    catalogRef: { productId: 'minoxidil-dutasteride-topical', sku: 'RP-MINOX-DUT-60ML' },
     route: 'Topical (Scalp)',
     dosageForm: 'topical solution',
     defaultUnit: 'mL',
@@ -490,6 +515,7 @@ export const CLINICAL_COMPOUND_REGISTRY = {
   testosterone_pentravan: {
     id: 'testosterone-micronized-transdermal',
     name: 'Testosterone Micronized USP (Pentravan)',
+    catalogRef: { productId: 'testosterone-micronized-transdermal', sku: 'RP-TESTO-PENT-50ML' },
     route: 'Topical / Transdermal',
     dosageForm: 'transdermal cream',
     defaultUnit: 'mg',
@@ -750,7 +776,11 @@ export function homogenizeProtocol(rawDoc, docId = null) {
           unitsPerDose: 10,
           finalConcentration: 'Standard'
         },
-        clinicalNotes: c.clinicalNotes || cRef?.clinicalNotes || 'Verify reconstitution sterility and rotate injection sites.'
+        clinicalNotes: c.clinicalNotes || cRef?.clinicalNotes || 'Verify reconstitution sterility and rotate injection sites.',
+        catalogRef: c.catalogRef || cRef?.catalogRef || {
+          productId: finalId,
+          sku: `RP-${finalId.toUpperCase()}`
+        }
       };
     });
 
@@ -779,7 +809,7 @@ export function homogenizeProtocol(rawDoc, docId = null) {
 
   const totalDurationWeeks = unifiedPhases.reduce((acc, ph) => acc + (ph.durationWeeks || 0), 0) || rawDoc.durationWeeks || rawDoc.duration_weeks || 12;
 
-  // Build unified BOM (Bill of Materials)
+  // Build unified BOM (Bill of Materials) with canonical catalog linking
   const unifiedBom = [];
   unifiedPhases.forEach(ph => {
     ph.compounds.forEach(c => {
@@ -788,6 +818,8 @@ export function homogenizeProtocol(rawDoc, docId = null) {
         unifiedBom.push({
           productId: c.id,
           product_name: c.name,
+          sku: c.catalogRef?.sku || `RP-${c.id.toUpperCase()}`,
+          catalogRef: c.catalogRef || { productId: c.id, sku: `RP-${c.id.toUpperCase()}` },
           route: c.route,
           format: c.dosageForm,
           quantity: Math.ceil(totalDurationWeeks / 4)
@@ -866,3 +898,57 @@ export function homogenizeProtocol(rawDoc, docId = null) {
     _unifiedAt: new Date().toISOString()
   };
 }
+
+// ── Batch Migration Runner (SSOT Firestore Updates) ───────────────────────────
+export async function runMigration() {
+  const isDryRun = process.argv.includes('--dry-run');
+  console.log(`\n🚀 Starting Clinical Protocols SSOT Homogenization (Phase 2 Canonical Catalog Linking)...`);
+  if (isDryRun) {
+    console.log(`ℹ️  [DRY-RUN MODE] No Firestore documents will be written.`);
+  }
+
+  const snapshot = await db.collection('protocols').get();
+  console.log(`📋 Retrieved ${snapshot.size} protocols from Firestore.`);
+
+  let batch = db.batch();
+  let opCount = 0;
+  let totalProcessed = 0;
+
+  for (const docSnap of snapshot.docs) {
+    const rawData = docSnap.data();
+    const docId = docSnap.id;
+    const homogenized = homogenizeProtocol(rawData, docId);
+
+    if (!isDryRun) {
+      batch.set(docSnap.ref, homogenized, { merge: true });
+      opCount++;
+      totalProcessed++;
+
+      if (opCount >= 400) {
+        await batch.commit();
+        console.log(`  💾 Committed batch of ${opCount} protocols...`);
+        batch = db.batch();
+        opCount = 0;
+      }
+    } else {
+      totalProcessed++;
+      console.log(`  [DRY-RUN] Would synchronize: "${homogenized.name}" (${docId}) - ${homogenized.phases.length} phases, ${homogenized.bom.length} BOM products.`);
+    }
+  }
+
+  if (!isDryRun && opCount > 0) {
+    await batch.commit();
+    console.log(`  💾 Committed final batch of ${opCount} protocols.`);
+  }
+
+  console.log(`\n✅ Successfully homogenized and linked catalog references for ${totalProcessed} protocols in Firestore.\n`);
+}
+
+// Auto-run if executed directly via node CLI
+if (process.argv[1] && process.argv[1].endsWith('homogenizeAllProtocolsSSOT.mjs')) {
+  runMigration().catch((err) => {
+    console.error('❌ Homogenization script failed:', err);
+    process.exit(1);
+  });
+}
+

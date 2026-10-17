@@ -206,7 +206,7 @@ export default function EternaDiagnosticsShowcase({ onSelectProduct }) {
     if (onSelectProduct) {
       onSelectProduct(eternaProduct);
     } else {
-      window.location.href = `/testing/eterna-longevity-platform`;
+      window.location.href = `/p/eterna-epigenetic-age-test`;
     }
   };
 

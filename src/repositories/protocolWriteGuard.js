@@ -177,6 +177,50 @@ export function validateProtocolWrite(data, opts = {}) {
     }
   }
 
+  // ── 4c. Canonical Phases Anti-Regression & Structure Validation ───────────
+  if (cleaned.phase_blueprints !== undefined) {
+    if (strict || !isUpdate) {
+      errors.push(
+        'Forbidden legacy "phase_blueprints" detected. Protocols must exclusively use the canonical "phases" array.'
+      );
+    } else {
+      warnings.push(
+        'Legacy "phase_blueprints" detected in write payload. Please migrate to canonical "phases".'
+      );
+    }
+  }
+
+  if (Array.isArray(cleaned.phases)) {
+    cleaned.phases.forEach((ph, pIdx) => {
+      if (typeof ph !== 'object' || ph === null) {
+        errors.push(`Phase at index ${pIdx} must be a valid object`);
+        return;
+      }
+      if (ph.phaseNumber == null) {
+        ph.phaseNumber = pIdx + 1;
+      }
+      if (!ph.phaseName && !ph.name) {
+        ph.phaseName = `Phase ${ph.phaseNumber}`;
+      } else if (!ph.phaseName && ph.name) {
+        ph.phaseName = ph.name;
+      }
+      if (ph.durationWeeks == null && ph.duration_weeks != null) {
+        ph.durationWeeks = Number(ph.duration_weeks);
+      }
+      // Ensure compounds array exists
+      if (!Array.isArray(ph.compounds)) {
+        if (Array.isArray(ph.drugs)) {
+          ph.compounds = ph.drugs;
+          warnings.push(`Phase ${ph.phaseNumber}: legacy "drugs" auto-resolved to "compounds"`);
+        } else {
+          ph.compounds = [];
+        }
+      }
+      // Guarantee backward-compatible alias without polluting canonical model
+      ph.drugs = ph.compounds;
+    });
+  }
+
   // ── 5. Detect other deprecated fields (non-name) ──────────────────────────
   const otherDeprecated = DEPRECATED_PROTOCOL_FIELDS.filter(
     (f) => !DEPRECATED_PROTOCOL_NAME_FIELDS.includes(f) && cleaned[f] !== undefined

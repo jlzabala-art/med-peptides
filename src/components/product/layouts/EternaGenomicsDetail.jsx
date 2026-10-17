@@ -38,6 +38,7 @@ import ImageModal from '@/snippets/ImageModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import ShareProductMonographDrawer from '@/components/admin/catalog/drawers/ShareProductMonographDrawer';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import toast from 'react-hot-toast';
 import './EternaGenomicsDetail.css';
 
@@ -1110,6 +1111,9 @@ export default function EternaGenomicsDetail({
           </div>
         </div>
       )}
+
+      {/* ── Google Cloud Console Standard Unified Footer ── */}
+      <PublicUnifiedFooter lang={lang} />
     </div>
   );
 }
