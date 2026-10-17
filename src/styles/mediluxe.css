@@ -873,3 +873,244 @@
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   ATLAS EXECUTIVE OVERVIEW — GOOGLE CLOUD UX ENHANCEMENTS (PHASES 1–6)
+   ========================================================================== */
+
+/* Phase 1: Sticky GCP Console Institutional Topbar */
+.atlas-sticky-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 95;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ml-slate-200);
+  padding: 0.65rem 0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.atlas-brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: var(--ml-slate-900);
+}
+
+.atlas-brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #003666 0%, #0d9488 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.92rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 54, 102, 0.25);
+}
+
+.atlas-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+  display: inline-block;
+}
+
+/* Phase 2: Interactive Compounding Formulary Explorer Tabs */
+.atlas-gcp-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--ml-slate-200);
+  padding-bottom: 0.65rem;
+  margin-bottom: 1.15rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.atlas-gcp-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ml-slate-600);
+  background: var(--ml-slate-50);
+  border: 1px solid var(--ml-slate-200);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.atlas-gcp-tab:hover {
+  border-color: var(--ml-navy);
+  color: var(--ml-navy);
+}
+
+.atlas-gcp-tab.active {
+  background: var(--ml-navy);
+  color: #ffffff;
+  border-color: var(--ml-navy);
+}
+
+.atlas-formulary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+}
+
+.atlas-formulary-card {
+  background: #ffffff;
+  border: 1px solid var(--ml-slate-200);
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.65rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.atlas-formulary-card:hover {
+  border-color: var(--ml-teal);
+  box-shadow: var(--ml-shadow-subtle);
+}
+
+/* Phase 3: GCP Comparison Matrix (Traditional vs Atlas OS) */
+.atlas-comparison-wrap {
+  border: 1px solid var(--ml-slate-200);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  margin-top: 1.25rem;
+}
+
+.atlas-comparison-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1.3fr 1.6fr;
+  border-bottom: 1px solid var(--ml-slate-200);
+}
+
+.atlas-comparison-row:last-child {
+  border-bottom: none;
+}
+
+.atlas-comparison-header {
+  background: var(--ml-slate-50);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ml-slate-600);
+}
+
+.atlas-comparison-cell {
+  padding: 0.85rem 1rem;
+  font-size: 0.81rem;
+  line-height: 1.45;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.atlas-comparison-cell--atlas {
+  background: rgba(13, 148, 136, 0.04);
+  border-left: 1px solid var(--ml-slate-200);
+  color: var(--ml-slate-900);
+  font-weight: 500;
+}
+
+/* Phase 4: Interactive Micro-Demo Console */
+.atlas-demo-console {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 1.5rem;
+}
+
+.atlas-demo-topbar {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.atlas-demo-body {
+  padding: 1.25rem;
+  background: #ffffff;
+}
+
+/* Phase 5: Regulatory & Licensing Vault */
+.atlas-vault-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+}
+
+.atlas-vault-card {
+  background: var(--ml-slate-50);
+  border: 1px solid var(--ml-slate-200);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .atlas-formulary-grid,
+  .atlas-vault-grid {
+    grid-template-columns: 1fr;
+  }
+  .atlas-comparison-row {
+    grid-template-columns: 1fr;
+  }
+  .atlas-comparison-header {
+    display: none;
+  }
+  .atlas-comparison-cell--atlas {
+    border-left: none;
+    border-top: 1px dashed var(--ml-slate-200);
+  }
+}
+
+/* Phase 6: Executive One-Pager Print / PDF Stylesheet */
+@media print {
+  .atlas-sticky-topbar,
+  .mediluxe-mobile-chips,
+  .mediluxe-sidebar,
+  .mediluxe-hero-actions,
+  .no-print {
+    display: none !important;
+  }
+  .mediluxe-page {
+    background: #ffffff !important;
+    padding-bottom: 0 !important;
+  }
+  .mediluxe-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .mediluxe-section {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    break-inside: avoid;
+    margin-bottom: 1.25rem !important;
+    padding: 1.25rem !important;
+  }
+}
+

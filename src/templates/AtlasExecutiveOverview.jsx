@@ -8,7 +8,6 @@ import {
   Award,
   Globe,
   CheckCircle2,
-  Dna,
   FlaskConical,
   Activity,
   Layers,
@@ -23,7 +22,6 @@ import {
   Phone,
   ArrowRight,
   Sparkles,
-  Lock,
   Cpu,
   Stethoscope,
   Scale,
@@ -35,7 +33,9 @@ import {
   Microscope,
   ThermometerSnowflake,
   Compass,
-  FileCheck
+  FileCheck,
+  Printer,
+  XCircle
 } from '@/lib/icons';
 import StatusBadge from '../components/ui/StatusBadge';
 import CopyableId from '../components/ui/CopyableId';
@@ -45,17 +45,251 @@ import '../styles/mediluxe.css';
 const SECTIONS = [
   { id: 'overview', label: 'Executive Summary' },
   { id: 'compounding', label: 'Advanced Compounding' },
-  { id: 'ecosystem', label: 'Atlas Digital OS' },
+  { id: 'comparison', label: 'Traditional vs. Atlas OS' },
+  { id: 'ecosystem', label: 'Atlas Digital OS & Demo' },
   { id: 'workflow', label: 'Clinical-to-Pharmacy Loop' },
   { id: 'portals', label: 'Role-Based Portals' },
-  { id: 'logistics', label: 'Global Hubs & Governance' },
+  { id: 'logistics', label: 'Global Hubs & Licensing' },
   { id: 'contact', label: 'Executive Contact & QR' },
+];
+
+// ── Phase 2 Data: Interactive Compounding Formulary Categories ───────────────
+const FORMULARY_CATEGORIES = [
+  {
+    id: 'vials',
+    label: 'Sterile Vials & Peptides',
+    items: [
+      {
+        code: 'CMP-PEP-001',
+        name: 'BPC-157 + TB-500 Regenerative Blend',
+        form: 'Lyophilized Sterile Vial (5 mg / 5 mg)',
+        purity: '99.6% HPLC',
+        application: 'Musculoskeletal repair, tendon remodeling & systemic inflammation control',
+        link: '/proto'
+      },
+      {
+        code: 'CMP-PEP-002',
+        name: 'Tirzepatide + Cyanocobalamin (B12)',
+        form: 'Compounded Multi-Dose Vial (15 mg / 0.5 mg)',
+        purity: '99.5% HPLC',
+        application: 'Dual GIP/GLP-1 metabolic optimization with neuroprotective B12 co-formulation',
+        link: '/proto'
+      },
+      {
+        code: 'CMP-PEP-003',
+        name: 'CJC-1295 (No DAC) + Ipamorelin',
+        form: 'Lyophilized Sterile Vial (5 mg / 5 mg)',
+        purity: '99.4% HPLC',
+        application: 'Pulsatile endogenous GH secretagogue synergy & cellular recovery',
+        link: '/proto'
+      },
+      {
+        code: 'CMP-PEP-004',
+        name: 'Epithalon + GHK-Cu Longevity Matrix',
+        form: 'Sterile Subcutaneous Vial (10 mg / 50 mg)',
+        purity: '99.7% HPLC',
+        application: 'Telomerase activation, pineal circadian support & extracellular matrix remodeling',
+        link: '/proto'
+      }
+    ]
+  },
+  {
+    id: 'bhrt',
+    label: 'BHRT Pellets & Liposomal',
+    items: [
+      {
+        code: 'CMP-HRT-101',
+        name: 'Bioidentical Testosterone Implants',
+        form: 'Compressed Subcutaneous Pellets (75 mg / 100 mg / 200 mg)',
+        purity: 'USP / EP Grade',
+        application: 'Sustained 4–6 month zero-peak androgen optimization for male & female protocols',
+        link: '/catalog'
+      },
+      {
+        code: 'CMP-HRT-102',
+        name: 'Estradiol + Estriol (Bi-Est 80/20) Liposomal',
+        form: 'Metered Transdermal Dispenser (30 mL)',
+        purity: 'USP / EP Grade',
+        application: 'Precision transdermal bioidentical estrogen replacement with high dermal permeation',
+        link: '/catalog'
+      },
+      {
+        code: 'CMP-HRT-103',
+        name: 'Micronized Progesterone SR',
+        form: 'Slow-Release Magistral Capsules (100 mg / 200 mg)',
+        purity: 'USP / EP Grade',
+        application: 'Endocrine balance, neurosteroid GABA-A support & sleep architecture',
+        link: '/catalog'
+      },
+      {
+        code: 'CMP-HRT-104',
+        name: 'DHEA + Pregnenolone Neuro-Endocrine Complex',
+        form: 'Sublingual Micronized Troches (25 mg / 30 mg)',
+        purity: '99.5% GMP API',
+        application: 'Adrenal HPA-axis resilience and steroidogenic precursor replenishment',
+        link: '/catalog'
+      }
+    ]
+  },
+  {
+    id: 'mucosal',
+    label: 'Troches & Nasal Sprays',
+    items: [
+      {
+        code: 'CMP-MUC-201',
+        name: 'Semax + Selank Neuro-Peptide Spray',
+        form: 'Metered Intranasal Atomizer (7500 mcg / 15 mL)',
+        purity: '99.4% HPLC',
+        application: 'BDNF upregulation, executive focus, and non-sedating anxiolytic balance',
+        link: '/proto'
+      },
+      {
+        code: 'CMP-MUC-202',
+        name: 'Oxytocin + PT-141 Rapid-Dissolve Troches',
+        form: 'Scored Sublingual Lozenge (50 IU / 1000 mcg)',
+        purity: '99.3% HPLC',
+        application: 'Bypass first-pass hepatic metabolism via buccal mucosal absorption',
+        link: '/catalog'
+      },
+      {
+        code: 'CMP-MUC-203',
+        name: 'BPC-157 Arginine Salt Gastro-Capsules',
+        form: 'Enteric-Coated Delayed Release (500 mcg)',
+        purity: '99.6% HPLC',
+        application: 'Targeted gastrointestinal mucosal healing, tight-junction repair & IBS/IBD support',
+        link: '/proto'
+      },
+      {
+        code: 'CMP-MUC-204',
+        name: 'KPV + Larazotide Gut Barrier Complex',
+        form: 'Targeted Oral Magistral Capsules (500 mcg / 250 mcg)',
+        purity: '99.4% HPLC',
+        application: 'Zonulin modulation and mast-cell / NF-kB intestinal anti-inflammatory signaling',
+        link: '/proto'
+      }
+    ]
+  },
+  {
+    id: 'iv_nad',
+    label: 'Sterile IV / NAD+ & Biomatrices',
+    items: [
+      {
+        code: 'CMP-IVN-301',
+        name: 'Buffered NAD+ Clinical Solution',
+        form: 'Sterile Multi-Dose Vial (500 mg / 1000 mg)',
+        purity: '99.8% HPLC',
+        application: 'pH-balanced mitochondrial coenzyme restoration for IV infusion or SC micro-dosing',
+        link: '/proto'
+      },
+      {
+        code: 'CMP-IVN-302',
+        name: 'MOTS-c + SS-31 (Elamipretide) Protocol',
+        form: 'Sterile Lyophilized Vials (10 mg)',
+        purity: '99.5% HPLC',
+        application: 'Cardiolipin stabilization, inner mitochondrial membrane repair & AMPK activation',
+        link: '/proto'
+      },
+      {
+        code: 'CMP-IVN-303',
+        name: 'Glutathione + Ascorbate Antioxidant Infusion',
+        form: 'Sterile Cleanroom Ampoules (200 mg/mL)',
+        purity: 'EP Sterile Grade',
+        application: 'Hepatic phase-II detoxification, oxidative stress reduction & cellular brightening',
+        link: '/catalog'
+      },
+      {
+        code: 'CMP-IVN-304',
+        name: 'Thymosin Alpha-1 Immune Resilience',
+        form: 'Lyophilized Sterile Vial (10 mg)',
+        purity: '99.6% HPLC',
+        application: 'T-cell maturation, NK-cell modulation & chronic immune dysregulation support',
+        link: '/proto'
+      }
+    ]
+  },
+  {
+    id: 'aesthetic',
+    label: 'Aesthetic & Trichology',
+    items: [
+      {
+        code: 'CMP-AES-401',
+        name: 'GHK-Cu + SNAP-8 + Hyaluronic Dermal Serum',
+        form: 'Airless Cosmeceutical Dispenser (30 mL)',
+        purity: '99.5% Peptide API',
+        application: 'Type I/III collagen synthesis, neuromuscular wrinkle relaxation & post-laser repair',
+        link: '/catalog'
+      },
+      {
+        code: 'CMP-AES-402',
+        name: 'TrichoFoam Follicular Compounding Matrix',
+        form: 'Custom Scalp Foam (Minoxidil + Finasteride + GHK-Cu)',
+        purity: 'GMP Magistral',
+        application: 'Propylene-glycol-free follicular stimulation for androgenetic alopecia protocols',
+        link: '/catalog'
+      }
+    ]
+  }
+];
+
+// ── Phase 4 Data: Live Interactive Micro-Demo Presets ────────────────────────
+const DEMO_VIALS = [
+  { id: 'bpc10', name: 'BPC-157 Sterile Vial', vialMg: 10, defaultWaterMl: 2, defaultDoseMcg: 250 },
+  { id: 'trz15', name: 'Tirzepatide Compounded Vial', vialMg: 15, defaultWaterMl: 1.5, defaultDoseMcg: 2500 },
+  { id: 'cjc5', name: 'CJC-1295 / Ipamorelin Blend', vialMg: 5, defaultWaterMl: 2.5, defaultDoseMcg: 200 },
+  { id: 'nad500', name: 'Buffered NAD+ Solution', vialMg: 500, defaultWaterMl: 5, defaultDoseMcg: 50000 }
+];
+
+const DEMO_BATCHES = [
+  {
+    batchId: 'ATL-2026-BPC157-094',
+    compound: 'BPC-157 Lyophilized Acetate (10 mg)',
+    purity: '99.64%',
+    method: 'RP-HPLC + ESI-MS',
+    endotoxin: '< 0.03 EU/mg (Pass)',
+    sterility: 'USP <71> Compliant',
+    lab: 'EU ISO/IEC 17025 Accredited Lab'
+  },
+  {
+    batchId: 'ATL-2026-TRZ15-118',
+    compound: 'Tirzepatide GMP Active (15 mg)',
+    purity: '99.58%',
+    method: 'RP-HPLC + MALDI-TOF',
+    endotoxin: '< 0.04 EU/mg (Pass)',
+    sterility: 'USP <71> Compliant',
+    lab: 'EU ISO/IEC 17025 Accredited Lab'
+  },
+  {
+    batchId: 'ATL-2026-NAD500-042',
+    compound: 'Buffered NAD+ Sterile Vial (500 mg)',
+    purity: '99.82%',
+    method: 'UV-HPLC + Ion Chromatography',
+    endotoxin: '< 0.02 EU/mg (Pass)',
+    sterility: 'USP <71> Compliant',
+    lab: 'EU ISO/IEC 17025 Accredited Lab'
+  }
 ];
 
 export default function AtlasExecutiveOverview() {
   const [activeSection, setActiveSection] = useState('overview');
   const [readingProgress, setReadingProgress] = useState(0);
   const [copiedKey, setCopiedKey] = useState(null);
+
+  // Phase 2 State: Active Compounding Formulary Tab
+  const [activeFormularyTab, setActiveFormularyTab] = useState('vials');
+
+  // Phase 4 State: Interactive Micro-Demo Console
+  const [demoMode, setDemoMode] = useState('calculator'); // 'calculator' | 'coa'
+  const [selectedVialId, setSelectedVialId] = useState('bpc10');
+  const [waterMl, setWaterMl] = useState(2);
+  const [doseMcg, setDoseMcg] = useState(250);
+  const [selectedBatchIdx, setSelectedBatchIdx] = useState(0);
+
+  const activeVial = DEMO_VIALS.find(v => v.id === selectedVialId) || DEMO_VIALS[0];
+  const totalMcg = activeVial.vialMg * 1000;
+  const concentrationMcgPerMl = waterMl > 0 ? totalMcg / waterMl : 0;
+  const volumeMlPerDose = concentrationMcgPerMl > 0 ? doseMcg / concentrationMcgPerMl : 0;
+  const syringeUnitsIU = Math.round(volumeMlPerDose * 100 * 10) / 10; // U-100 syringe: 100 IU = 1 mL
+  const dosesPerVial = doseMcg > 0 ? Math.floor(totalMcg / doseMcg) : 0;
 
   // ── Scroll Spy & Reading Progress Tracking ─────────────────────────────────
   useEffect(() => {
@@ -99,9 +333,15 @@ export default function AtlasExecutiveOverview() {
 
   const handleShareWhatsApp = () => {
     const text = encodeURIComponent(
-      "Atlas Health Services — Advanced Pharmaceutical Compounding, Peptide Therapeutics & Digital Clinical Infrastructure:\nhttps://www.atlashealth-services.com/atlas"
+      "Hello Jose, I visited your Atlas Health Services executive overview (https://www.atlashealth-services.com/atlas) and would like to schedule a conversation."
     );
-    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    window.open(`https://api.whatsapp.com/send?phone=971564179256&text=${text}`, '_blank');
+  };
+
+  const handlePrintExecutivePDF = () => {
+    if (typeof window !== 'undefined') {
+      window.print();
+    }
   };
 
   const downloadVCard = () => {
@@ -129,27 +369,60 @@ END:VCARD`;
     document.body.removeChild(link);
   };
 
+  const currentFormularyCategory = FORMULARY_CATEGORIES.find(c => c.id === activeFormularyTab) || FORMULARY_CATEGORIES[0];
+  const currentBatch = DEMO_BATCHES[selectedBatchIdx] || DEMO_BATCHES[0];
+
   return (
     <div className="mediluxe-page">
-      {/* ── Top Bar Breadcrumb / GCP Console Header Strip ── */}
-      <div className="mediluxe-topbar">
+      {/* ── PHASE 1: Sticky Institutional GCP Console Topbar (Golden Rule #9) ── */}
+      <header className="atlas-sticky-topbar">
         <div className="mediluxe-container mediluxe-topbar-inner">
-          <div className="mediluxe-topbar-left">
-            <Link href="/">Atlas Health Platform</Link>
-            <span>/</span>
-            <span style={{ color: 'var(--ml-slate-900)' }}>Executive Overview</span>
-            <span>/</span>
-            <strong>Compounding &amp; Clinical Infrastructure</strong>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-            <StatusBadge status="active" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+            <Link href="/" className="atlas-brand-lockup">
+              <span className="atlas-brand-mark">A</span>
+              <span style={{ fontWeight: 800, fontSize: '0.95rem', letterSpacing: '-0.02em', color: '#003666' }}>
+                Atlas Health <span style={{ color: '#0d9488', fontWeight: 700 }}>Services</span>
+              </span>
+            </Link>
+            <span style={{ color: '#cbd5e1' }}>|</span>
+            <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#475569' }}>
+              Executive &amp; Institutional Dossier
+            </span>
             <div className="mediluxe-topbar-badge">
-              <ShieldCheck size={13} />
-              <span>GMP Compounding · UAE (HQ) · EU · US · HK</span>
+              <span className="atlas-status-dot" />
+              <span>All 4 Global Hubs Operational (UAE · EU · US · HK)</span>
             </div>
           </div>
+
+          <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button
+              onClick={handlePrintExecutivePDF}
+              className="mediluxe-btn mediluxe-btn-outline"
+              style={{ minHeight: '34px', padding: '0.35rem 0.75rem', fontSize: '0.76rem' }}
+              title="Print or Save Executive One-Pager as PDF"
+            >
+              <Printer size={13} />
+              <span>Save PDF</span>
+            </button>
+            <button
+              onClick={handleShareWhatsApp}
+              className="mediluxe-btn mediluxe-btn-whatsapp"
+              style={{ minHeight: '34px', padding: '0.35rem 0.85rem', fontSize: '0.76rem' }}
+            >
+              <Phone size={13} />
+              <span>Book a Meeting</span>
+            </button>
+            <Link
+              href="/"
+              className="mediluxe-btn mediluxe-btn-primary"
+              style={{ minHeight: '34px', padding: '0.35rem 0.85rem', fontSize: '0.76rem' }}
+            >
+              <span>Open Platform</span>
+              <ArrowRight size={13} />
+            </Link>
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* ── Mobile Sticky Section Tabs ── */}
       <nav className="mediluxe-mobile-chips" aria-label="Page Sections">
@@ -165,7 +438,7 @@ END:VCARD`;
       </nav>
 
       {/* ── Hero Executive Header ── */}
-      <header id="overview" className="mediluxe-hero">
+      <section id="overview" className="mediluxe-hero">
         <div className="mediluxe-container mediluxe-hero-inner">
           <div>
             <div className="mediluxe-hero-eyebrow">
@@ -196,7 +469,7 @@ END:VCARD`;
               </Link>
               <button onClick={handleShareWhatsApp} className="mediluxe-btn mediluxe-btn-whatsapp">
                 <Share2 size={15} />
-                <span>Executive Inquiry</span>
+                <span>Book Executive Meeting</span>
               </button>
             </div>
           </div>
@@ -261,7 +534,7 @@ END:VCARD`;
             </div>
           </div>
         </div>
-      </header>
+      </section>
 
       {/* ── 4 Default KPI Highlights Bar (Golden Rule #22) ── */}
       <div className="mediluxe-container">
@@ -311,7 +584,7 @@ END:VCARD`;
         <div className="mediluxe-layout">
           <main className="mediluxe-main">
 
-            {/* ── Section 1: Advanced Pharmaceutical Compounding ── */}
+            {/* ── Section 1: Advanced Pharmaceutical Compounding + Phase 2 Interactive Formulary Explorer ── */}
             <section id="compounding" className="mediluxe-section">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <span className="mediluxe-section-badge" style={{ marginBottom: 0 }}>
@@ -384,59 +657,61 @@ END:VCARD`;
                 </div>
               </div>
 
-              {/* 6 Therapeutic Portfolios Matrix */}
-              <div style={{ marginTop: '1.75rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.35rem' }}>
+              {/* ── PHASE 2: Interactive Compounding Formulary Explorer ── */}
+              <div style={{ marginTop: '2rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.35rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.85rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Microscope size={18} style={{ color: '#003666' }} />
                     <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                      6 Specialized Therapeutic Portfolios Across 580+ Catalog References
+                      Interactive Compounding Formulary Explorer (Sample Representative Formulations)
                     </h3>
                   </div>
                   <Link href="/catalog" style={{ fontSize: '0.78rem', fontWeight: 700, color: '#003666', textDecoration: 'none' }}>
-                    Browse Full Formulary →
+                    Browse Full 580+ Formulary →
                   </Link>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
-                  {[
-                    {
-                      title: '1. Metabolic & GLP-1/GIP Pathways',
-                      desc: 'Next-generation incretin mimetics, insulin sensitization, visceral adiposity reduction & energy homeostasis.',
-                      color: '#003666'
-                    },
-                    {
-                      title: '2. Tissue Repair & Regeneration',
-                      desc: 'Angiogenesis, tendon/ligament remodeling, gut mucosal integrity (BPC-157, TB-500, KPV) & post-surgical recovery.',
-                      color: '#0d9488'
-                    },
-                    {
-                      title: '3. Cellular Longevity & Mitochondrial',
-                      desc: 'Telomere support (Epithalon), NAD+ precursors, MOTS-c, SS-31 & senolytic cellular rejuvenation.',
-                      color: '#003666'
-                    },
-                    {
-                      title: '4. Neuro-Cognitive & Circadian',
-                      desc: 'BDNF upregulation, neuroprotection, anxiolytic balance (Semax, Selank, Dihexa, DSIP) & deep sleep architecture.',
-                      color: '#0d9488'
-                    },
-                    {
-                      title: '5. Hormonal & Secretagogue Optimization',
-                      desc: 'Pulsatile GH secretagogues (Tesamorelin, Ipamorelin, CJC-1295), HPG-axis support & bioidentical hormone replacement.',
-                      color: '#003666'
-                    },
-                    {
-                      title: '6. Immune Modulation & Thymic Peptides',
-                      desc: 'Innate and adaptive immune balancing (Thymosin Alpha-1, LL-37) for chronic inflammatory and post-viral resilience.',
-                      color: '#0d9488'
-                    }
-                  ].map((item, idx) => (
-                    <div key={idx} style={{ background: '#ffffff', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.82rem', color: item.color, marginBottom: '0.25rem' }}>
-                        {item.title}
+                {/* GCP Filter Tabs */}
+                <div className="atlas-gcp-tabs" role="tablist" aria-label="Compounding Categories">
+                  {FORMULARY_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.id}
+                      role="tab"
+                      aria-selected={activeFormularyTab === cat.id}
+                      className={`atlas-gcp-tab ${activeFormularyTab === cat.id ? 'active' : ''}`}
+                      onClick={() => setActiveFormularyTab(cat.id)}
+                    >
+                      <span>{cat.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Active Tab Cards */}
+                <div className="atlas-formulary-grid">
+                  {currentFormularyCategory.items.map((item) => (
+                    <div key={item.code} className="atlas-formulary-card">
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                          <CopyableId value={item.code} />
+                          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '2px 7px', borderRadius: '999px' }}>
+                            {item.purity}
+                          </span>
+                        </div>
+                        <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a', marginBottom: '0.2rem' }}>
+                          {item.name}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#003666', marginBottom: '0.35rem' }}>
+                          {item.form}
+                        </div>
+                        <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                          {item.application}
+                        </p>
                       </div>
-                      <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.45 }}>
-                        {item.desc}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.55rem', borderTop: '1px solid #f1f5f9' }}>
+                        <StatusBadge status="published" />
+                        <Link href={item.link} style={{ fontSize: '0.74rem', fontWeight: 700, color: '#003666', textDecoration: 'none' }}>
+                          Inspect Clinical Spec →
+                        </Link>
                       </div>
                     </div>
                   ))}
@@ -444,7 +719,74 @@ END:VCARD`;
               </div>
             </section>
 
-            {/* ── Section 2: The Atlas Digital Ecosystem (Ideas Built into Atlas) ── */}
+            {/* ── PHASE 3: Executive Comparison Matrix (Traditional vs. Atlas OS) ── */}
+            <section id="comparison" className="mediluxe-section">
+              <span className="mediluxe-section-badge">
+                <Layers size={13} /> Architectural Advantage
+              </span>
+              <h2 className="mediluxe-section-title">Why Leading Clinics Transition to the Atlas Operating System</h2>
+              <p className="mediluxe-section-subtitle">
+                A side-by-side comparison between fragmented legacy compounding workflows and the integrated 
+                Atlas Health Services clinical and pharmaceutical infrastructure.
+              </p>
+
+              <div className="atlas-comparison-wrap">
+                <div className="atlas-comparison-row atlas-comparison-header">
+                  <div className="atlas-comparison-cell">Operational Dimension</div>
+                  <div className="atlas-comparison-cell">Legacy Pharmacy / Distributor</div>
+                  <div className="atlas-comparison-cell" style={{ color: '#003666' }}>Atlas Health Operating System</div>
+                </div>
+
+                {[
+                  {
+                    dimension: 'Prescribing & Intake',
+                    legacy: 'Manual PDF forms, WhatsApp messages, or paper scripts prone to transcription delays.',
+                    atlas: 'Encrypted digital intake (/rx/intake) routing e-prescriptions directly to the pharmacy queue (/pharmacy).'
+                  },
+                  {
+                    dimension: 'Protocol Intelligence',
+                    legacy: 'Static product price lists with zero guidance on synergies, titration, or cycling.',
+                    atlas: 'Atlas Clinical AI with 200+ evidence-based multi-phase titration protocols and stack architectures.'
+                  },
+                  {
+                    dimension: 'Reconstitution & Dosing',
+                    legacy: 'Manual dilution calculations by clinic staff or patients, increasing dosing error risk.',
+                    atlas: 'Interactive Reconstitution & Syringe Unit Engine (/calculator) with visual U-100 / U-40 tick marks.'
+                  },
+                  {
+                    dimension: 'Analytical Verification',
+                    legacy: 'Generic or unverified paper CoAs with no batch-to-vial serialization.',
+                    atlas: 'Cryptographic QR Batch Vault (/verify) with downloadable HPLC & Mass Spec reports (>99% purity).'
+                  },
+                  {
+                    dimension: 'Clinical Branding & B2B',
+                    legacy: 'One-size-fits-all ordering with no support for clinic branding or custom B2B margins.',
+                    atlas: 'White-label Doctor Portals (/dr/[slug]), Pharmacy Label Studio (/labels) & B2B Catalog Builder.'
+                  },
+                  {
+                    dimension: 'Global Fulfillment',
+                    legacy: 'Single-country dispatch vulnerable to customs bottlenecks and stockouts.',
+                    atlas: 'Multi-node cold-chain fulfillment coordinated across UAE (HQ), European Union, US & Hong Kong.'
+                  }
+                ].map((row, idx) => (
+                  <div key={idx} className="atlas-comparison-row">
+                    <div className="atlas-comparison-cell" style={{ fontWeight: 700, color: '#0f172a' }}>
+                      {row.dimension}
+                    </div>
+                    <div className="atlas-comparison-cell" style={{ color: '#64748b' }}>
+                      <XCircle size={15} style={{ color: '#94a3b8', flexShrink: 0, marginTop: '2px' }} />
+                      <span>{row.legacy}</span>
+                    </div>
+                    <div className="atlas-comparison-cell atlas-comparison-cell--atlas">
+                      <CheckCircle2 size={15} style={{ color: '#0d9488', flexShrink: 0, marginTop: '2px' }} />
+                      <span>{row.atlas}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ── Section 2 + PHASE 4: The Atlas Digital Ecosystem & Live Micro-Demo ── */}
             <section id="ecosystem" className="mediluxe-section">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <span className="mediluxe-section-badge" style={{ marginBottom: 0 }}>
@@ -577,6 +919,177 @@ END:VCARD`;
                       Explore Label Studio →
                     </Link>
                   </div>
+                </div>
+              </div>
+
+              {/* ── PHASE 4: Interactive Live Micro-Demo Console ("See Atlas Precision in Action") ── */}
+              <div className="atlas-demo-console no-print">
+                <div className="atlas-demo-topbar">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span className="atlas-status-dot" />
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.03em' }}>
+                      LIVE INTERACTIVE PREVIEW · TEST ATLAS CLINICAL TOOLS
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setDemoMode('calculator')}
+                      style={{
+                        padding: '0.3rem 0.75rem',
+                        borderRadius: '6px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: demoMode === 'calculator' ? '#0d9488' : 'rgba(255,255,255,0.12)',
+                        color: '#ffffff'
+                      }}
+                    >
+                      1. Live Reconstitution Solver
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDemoMode('coa')}
+                      style={{
+                        padding: '0.3rem 0.75rem',
+                        borderRadius: '6px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: demoMode === 'coa' ? '#0d9488' : 'rgba(255,255,255,0.12)',
+                        color: '#ffffff'
+                      }}
+                    >
+                      2. Sample Batch CoA Vault
+                    </button>
+                  </div>
+                </div>
+
+                <div className="atlas-demo-body">
+                  {demoMode === 'calculator' ? (
+                    <div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '0.85rem', marginBottom: '1rem' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
+                            Select Compounded Vial
+                          </label>
+                          <select
+                            value={selectedVialId}
+                            onChange={(e) => {
+                              const next = DEMO_VIALS.find(v => v.id === e.target.value);
+                              setSelectedVialId(e.target.value);
+                              if (next) {
+                                setWaterMl(next.defaultWaterMl);
+                                setDoseMcg(next.defaultDoseMcg);
+                              }
+                            }}
+                            style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}
+                          >
+                            {DEMO_VIALS.map(v => (
+                              <option key={v.id} value={v.id}>{v.name} ({v.vialMg} mg)</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
+                            Bacteriostatic Water (mL)
+                          </label>
+                          <select
+                            value={waterMl}
+                            onChange={(e) => setWaterMl(Number(e.target.value))}
+                            style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}
+                          >
+                            {[1, 1.5, 2, 2.5, 3, 5].map(val => (
+                              <option key={val} value={val}>{val} mL BAC Water</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
+                            Target Prescribed Dose
+                          </label>
+                          <select
+                            value={doseMcg}
+                            onChange={(e) => setDoseMcg(Number(e.target.value))}
+                            style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}
+                          >
+                            {[100, 200, 250, 500, 1000, 2500, 5000, 50000].map(val => (
+                              <option key={val} value={val}>
+                                {val >= 1000 ? `${val / 1000} mg (${val} mcg)` : `${val} mcg`}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Output Result Bar */}
+                      <div style={{ background: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '8px', padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+                        <div>
+                          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#0d9488', textTransform: 'uppercase' }}>
+                            U-100 Insulin Syringe Draw
+                          </div>
+                          <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#003666' }}>
+                            {syringeUnitsIU} IU <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#475569' }}>({volumeMlPerDose.toFixed(3)} mL)</span>
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                            Vial Concentration
+                          </div>
+                          <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
+                            {(concentrationMcgPerMl / 1000).toFixed(2)} mg/mL ({dosesPerVial} doses/vial)
+                          </div>
+                        </div>
+                        <Link href="/calculator" className="mediluxe-btn mediluxe-btn-primary" style={{ minHeight: '36px', padding: '0.4rem 0.9rem', fontSize: '0.78rem' }}>
+                          <span>Open Full Calculator</span>
+                          <ArrowRight size={13} />
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                        {DEMO_BATCHES.map((b, i) => (
+                          <button
+                            key={b.batchId}
+                            type="button"
+                            onClick={() => setSelectedBatchIdx(i)}
+                            className={`atlas-gcp-tab ${selectedBatchIdx === i ? 'active' : ''}`}
+                          >
+                            <span>{b.batchId}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.85rem', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Compound &amp; Batch ID</div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>{currentBatch.compound}</div>
+                          <CopyableId value={currentBatch.batchId} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Analytical Purity</div>
+                          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#16a34a' }}>{currentBatch.purity}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#475569' }}>{currentBatch.method}</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Endotoxin &amp; Sterility</div>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{currentBatch.endotoxin}</div>
+                          <div style={{ fontSize: '0.74rem', color: '#0d9488', fontWeight: 600 }}>{currentBatch.sterility}</div>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                          <Link href={`/verify/${currentBatch.batchId}`} className="mediluxe-btn mediluxe-btn-outline" style={{ minHeight: '36px', padding: '0.4rem 0.85rem', fontSize: '0.78rem' }}>
+                            <span>Verify Batch Portal</span>
+                            <ExternalLink size={13} />
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
@@ -726,16 +1239,16 @@ END:VCARD`;
               </div>
             </section>
 
-            {/* ── Section 5: Global Logistics & Institutional Heritage ── */}
+            {/* ── Section 5 + PHASE 5: Global Logistics & Regulatory Licensing Vault ── */}
             <section id="logistics" className="mediluxe-section">
               <span className="mediluxe-section-badge">
-                <Globe size={13} /> Global Supply Chain &amp; Regional Heritage
+                <Globe size={13} /> Global Supply Chain &amp; Regulatory Governance
               </span>
-              <h2 className="mediluxe-section-title">Globally Coordinated Fulfillment &amp; GCC Institutional Backing</h2>
+              <h2 className="mediluxe-section-title">Globally Coordinated Fulfillment &amp; Institutional Licensing</h2>
               <p className="mediluxe-section-subtitle">
                 Headquartered in the <strong>United Arab Emirates</strong> and backed by over 14 years of licensed medical 
-                supply operations in Abu Dhabi and Dubai through <strong>MediLuxe Medical Supplies L.L.C.</strong>, Atlas operates 
-                four strategic fulfillment hubs for resilient international distribution.
+                supply operations in Abu Dhabi and Dubai through <strong>MediLuxe Health Solutions / Medical Supplies L.L.C.</strong>, 
+                Atlas operates four strategic fulfillment hubs for resilient international distribution.
               </p>
 
               <div className="mediluxe-geo-grid">
@@ -772,10 +1285,59 @@ END:VCARD`;
                 </div>
               </div>
 
+              {/* ── PHASE 5: Official Regulatory & Corporate Licensing Vault ── */}
+              <div style={{ marginTop: '1.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <Award size={18} style={{ color: '#003666' }} />
+                  <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    Institutional Regulatory &amp; Licensing Vault
+                  </h3>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 0.85rem 0' }}>
+                  Verified corporate credentials and compliance documentation available for hospital procurement and institutional due diligence.
+                </p>
+
+                <div className="atlas-vault-grid">
+                  <div className="atlas-vault-card">
+                    <div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#0d9488', textTransform: 'uppercase' }}>UAE Commercial License</div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>Mediluxe Health Solutions FZE (2026–2027)</div>
+                    </div>
+                    <a
+                      href="/documents/corporate/Mediluxe_Health_Solutions_FZE_Business_License_2026_2027.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mediluxe-btn mediluxe-btn-outline"
+                      style={{ minHeight: '32px', padding: '0.3rem 0.65rem', fontSize: '0.74rem' }}
+                    >
+                      <FileText size={13} />
+                      <span>View PDF</span>
+                    </a>
+                  </div>
+
+                  <div className="atlas-vault-card">
+                    <div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#003666', textTransform: 'uppercase' }}>UAE Federal Tax Authority</div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>Official VAT Registration Certificate</div>
+                    </div>
+                    <a
+                      href="/documents/corporate/Mediluxe_Health_Solutions_FZE_VAT_Certificate.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mediluxe-btn mediluxe-btn-outline"
+                      style={{ minHeight: '32px', padding: '0.3rem 0.65rem', fontSize: '0.74rem' }}
+                    >
+                      <FileText size={13} />
+                      <span>View PDF</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
               <div className="mediluxe-bridge-box">
                 <div className="mediluxe-bridge-text">
                   <h4>Institutional Synergy: MediLuxe Medical Supplies L.L.C. (Est. 2011)</h4>
-                  <p>Inspect our official GCC corporate licensing, regulatory credentials, and regional healthcare portfolio.</p>
+                  <p>Inspect our complete GCC corporate history, regional presence map, and healthcare leadership dossier.</p>
                 </div>
                 <Link href="/mediluxe" className="mediluxe-btn mediluxe-btn-outline">
                   <span>View MediLuxe Corporate Dossier</span>
@@ -855,7 +1417,7 @@ END:VCARD`;
                   </div>
 
                   {/* Action Buttons */}
-                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                  <div className="no-print" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
                     <button
                       onClick={downloadVCard}
                       className="mediluxe-btn mediluxe-btn-primary"
@@ -979,6 +1541,14 @@ END:VCARD`;
                 <span>Pharmacy Label Studio</span>
                 <Tag size={14} />
               </Link>
+              <button
+                onClick={handlePrintExecutivePDF}
+                className="mediluxe-btn mediluxe-btn-outline"
+                style={{ width: '100%', fontSize: '0.8rem' }}
+              >
+                <Printer size={14} />
+                <span>Print / Save Executive PDF</span>
+              </button>
               <button
                 onClick={downloadVCard}
                 className="mediluxe-btn mediluxe-btn-outline"
