@@ -364,6 +364,7 @@ const FALLBACK_CONDITIONER_APPLICATION = {
     'Use as part of the GHK-Cu Hair Restoration Protocol: apply conditioner 24–48 hours post-mesotherapy.',
     'Colour longevity: The acidic pH (4.0–4.5) reduces pigment elution from dyed fibers, extending color longevity by 25–35%.',
     'Protein balance check: If hair feels stiff after 4–6 weeks, reduce frequency to 2×/week and introduce a hydrating humectant mask.'
+  ]
 };
 
 const FALLBACK_SKINCARE_APPLICATION = {
