@@ -745,7 +745,7 @@ nav.site-nav,
     display: none !important;
   }
   .pds-content-with-sidebar {
-    padding-bottom: 70px !important;
+    padding-bottom: 24px !important;
   }
 }
 
@@ -1022,12 +1022,20 @@ nav.site-nav,
 }
 @media (max-width: 640px) {
   .rx-bottom-dock {
-    bottom: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
     width: calc(100% - 20px);
     padding: 6px 10px;
     gap: 6px;
   }
-  .rx-dock-patient-meta {
+  .rx-dock-patient-pill {
+    padding: 3px 8px 3px 4px;
+    max-width: 130px;
+  }
+  .rx-dock-patient-name {
+    font-size: 0.72rem;
+    max-width: 75px;
+  }
+  .rx-dock-patient-ref {
     display: none;
   }
   .rx-dock-btn {
@@ -1040,4 +1048,64 @@ nav.site-nav,
     display: none;
   }
 }
+
+/* ── Google Cloud UX Safe-Area & Mobile-First High Density Layout ──────────── */
+.rx-dossier-main-wrapper {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  padding-bottom: 4rem;
+}
+
+.rx-dossier-inner-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem 80px 1rem;
+}
+
+@media (max-width: 768px) {
+  .rx-dossier-main-wrapper {
+    padding-bottom: max(140px, calc(100px + env(safe-area-inset-bottom, 20px)));
+  }
+
+  .rx-dossier-inner-container {
+    padding: 0.50rem 0.65rem max(140px, calc(100px + env(safe-area-inset-bottom, 20px))) 0.65rem;
+  }
+
+  .pds-main-column {
+    padding-bottom: max(120px, calc(80px + env(safe-area-inset-bottom, 20px))) !important;
+  }
+
+  .rx-mode-subbanner {
+    padding: 4px 10px !important;
+    gap: 6px !important;
+  }
+
+  .rx-card {
+    padding: 0.85rem 0.95rem !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .gcp-resource-header-card {
+    padding: 10px 12px !important;
+  }
+
+  .rx-master-header-icon {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .gcp-subtabs-strip {
+    margin-top: 8px !important;
+    padding-top: 6px !important;
+    gap: 2px !important;
+  }
+
+  .gcp-subtabs-strip button {
+    padding: 4px 8px !important;
+    font-size: 0.72rem !important;
+  }
+}
+
 

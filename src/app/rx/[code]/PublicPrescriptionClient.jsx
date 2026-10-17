@@ -45,7 +45,7 @@ import {
 } from '@/lib/icons';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { RotateCcw, Home, Loader2, AlertTriangle } from 'lucide-react';
+import { RotateCcw, Home, Loader2, AlertTriangle, MessageCircle } from 'lucide-react';
 
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
@@ -78,10 +78,11 @@ import { usePrescriptionData, getPosologyText } from '@/hooks/usePrescriptionDat
 
 export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake: _onBackToIntake = null, initialView = null }) {
   const [currentRx, setCurrentRx] = useState(rx || {});
-
-  useEffect(() => {
-    if (rx) setCurrentRx(rx);
-  }, [rx]);
+  const [prevRx, setPrevRx] = useState(rx);
+  if (rx !== prevRx) {
+    setPrevRx(rx);
+    setCurrentRx(rx || {});
+  }
 
   const searchParams = useSearchParams();
   const viewParam = initialView || searchParams?.get('view') || searchParams?.get('mode');
@@ -411,13 +412,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f8fafc',
-      color: '#0f172a',
-      fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-      paddingBottom: '4rem'
-    }}>
+    <div className="rx-dossier-main-wrapper">
       {/* ── Public Unified Header (GCP Standard with Login, Lang, Clinical AI) ───── */}
       {!embedded && (
         <PublicUnifiedHeader 
@@ -461,7 +456,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           onImportRx={() => { window.location.href = `/rx/intake?from=${rxId}&fromRole=doctor`; }}
           onSwitchRx={() => setShowRxSwitcherModal(true)}
           banner={
-            <div style={{
+            <div className="rx-mode-subbanner" style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -554,7 +549,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         @media (min-width: 640px) { .rx-banner-desc { display: inline !important; } }
       `}</style>
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0.75rem 1rem 120px 1rem' }}>
+      <div className="rx-dossier-inner-container">
         <div className="pds-content-with-sidebar">
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             
@@ -1712,12 +1707,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         </div>
         )}
 
-            {/* Standardized Institutional Footer with Reference */}
+            {/* Standardized Institutional Footer with Reference (Google Cloud Console Compliant) */}
             <footer style={{
-              marginTop: '2.5rem',
+              marginTop: '2rem',
               borderTop: '1px solid #e2e8f0',
-              paddingTop: '1.5rem',
-              paddingBottom: '2.5rem',
+              paddingTop: '1.25rem',
+              paddingBottom: '2rem',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -1738,8 +1733,15 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 <span style={{ color: '#64748b', fontWeight: 600 }}>Ref:</span>
                 <span style={{ color: '#0f172a', fontWeight: 800, fontFamily: 'monospace' }}>{rxId}</span>
               </div>
-              <div style={{ color: '#94a3b8', fontSize: '0.72rem' }}>
-                Atlas Services Clinical Intelligence Platform · Confidential Patient Prescription Dossier
+              <div style={{ color: '#64748b', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <span>Atlas Clinical Intelligence Infrastructure</span>
+                <span>•</span>
+                <span>ISO 15189 / 17025 Accredited</span>
+                <span>•</span>
+                <span>EU GMP Compounding Alliance</span>
+              </div>
+              <div style={{ color: '#94a3b8', fontSize: '0.70rem' }}>
+                Confidential Patient Prescription Dossier · Authorized Clinical Access Only
               </div>
             </footer>
           </div>
@@ -1767,9 +1769,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         </div>
       </div>
 
-      {/* Institutional Unified Public Footer */}
-      {!embedded && <PublicUnifiedFooter lang={lang} />}
-
       {/* Floating Bottom Action Dock (Doctor & Patient View - GCP Standard) */}
       {!embedded && (
         <div className="rx-bottom-dock">
@@ -1790,7 +1789,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             className="rx-dock-patient-pill"
             title={isEs ? 'Ver datos y acreditación de paciente y médico' : 'View patient & doctor credentials'}
           >
-            <span className="rx-dock-patient-avatar">{patientName?.charAt(0) || 'P'}</span>
+            <span className="rx-dock-patient-avatar">
+              <User size={13} color="#ffffff" />
+            </span>
             <div className="rx-dock-patient-meta">
               <span className="rx-dock-patient-name">{patientName}</span>
               <span className="rx-dock-patient-ref">#{rxId}</span>
@@ -1922,19 +1923,57 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Fórmula galénica completa' : 'Complete compounding formula'}</div>
                         </div>
                       </button>
+
+                      <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
+                      <button
+                        type="button"
+                        onClick={() => { setShowDocDropdown(false); setShowAtlasQuotationModal(true); }}
+                        className="rx-dock-drop-item"
+                      >
+                        <FileText size={16} color="#0284c7" />
+                        <div>
+                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Cotización de Laboratorio' : 'Lab Compounding Quote'}</div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Solicitar presupuesto a Fagron / Atlas' : 'Request compounding quotation'}</div>
+                        </div>
+                      </button>
                     </div>
                   )}
                 </div>
 
-                {/* 3. Request Quotation / Pedir Cotización */}
+                {/* 3. Follow-up / Share with Patient via WhatsApp (Contextual Clinical Action) */}
                 <button
                   type="button"
-                  onClick={() => { triggerHaptic('selection'); setShowAtlasQuotationModal(true); }}
-                  className="rx-dock-btn rx-dock-btn-quote"
-                  title={isEs ? 'Solicitar cotización oficial a Atlas' : 'Request compounding quotation'}
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    const rawPhone = rx?.patientPhone || patient?.phone || patient?.mobile || '';
+                    const cleanPhone = String(rawPhone).replace(/[^\d+]/g, '').replace(/^00/, '+');
+                    const isProposal = currentStatus === 'proposal_pending' || rx?.isTreatmentProposal || rx?.orderStatus === 'Offer Not Accepted';
+                    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+                    const text = isProposal
+                      ? (isEs
+                          ? `Estimado/a ${patientName},\n\nEl Dr/a. ${doctorName} le remite su Propuesta de Tratamiento Personalizada:\n\n📋 Pauta: ${resolvedFormulaSummary}\n🆔 Ref: #${rxId}\n\nPuede revisar su formulación y confirmar la dispensación aquí:\n🔗 ${origin}/rx/${rxId}`
+                          : `Dear ${patientName},\n\nDr. ${doctorName} has prepared your personalized Clinical Treatment Proposal:\n\n📋 Regimen: ${resolvedFormulaSummary}\n🆔 Proposal Ref: #${rxId}\n\nYou can review your formulation and activate your order here:\n🔗 ${origin}/rx/${rxId}`)
+                      : (isEs
+                          ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por Dr/a. ${doctorName}:\n🔗 ${patientPublicUrl}`
+                          : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by Dr. ${doctorName}:\n🔗 ${patientPublicUrl}`);
+                    const waBase = cleanPhone ? `https://wa.me/${cleanPhone.replace('+', '')}` : 'https://wa.me/';
+                    window.open(`${waBase}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+                  }}
+                  className="rx-dock-btn"
+                  style={{
+                    background: '#16a34a',
+                    color: '#ffffff',
+                    border: '1px solid #15803d',
+                    boxShadow: '0 2px 6px rgba(22, 163, 74, 0.25)'
+                  }}
+                  title={isEs ? 'Compartir pauta o seguimiento con el paciente por WhatsApp' : 'Share posology or follow up with patient on WhatsApp'}
                 >
-                  <FileText size={14} color="#ffffff" />
-                  <span>{isEs ? 'Pedir Cotización' : 'Request Quote'}</span>
+                  <MessageCircle size={14} color="#ffffff" />
+                  <span>
+                    {currentStatus === 'proposal_pending' || rx?.isTreatmentProposal
+                      ? (isEs ? 'Seguimiento' : 'Follow-up')
+                      : (isEs ? 'Compartir Paciente' : 'Share with Patient')}
+                  </span>
                 </button>
 
                 {/* 4. QR Verification */}

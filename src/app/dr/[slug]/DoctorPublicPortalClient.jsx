@@ -66,6 +66,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import CopyableId from '@/components/ui/CopyableId';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import DataTable from '@/components/ui/DataTable';
+import MobileActionSheet from '@/components/ui/MobileActionSheet';
 import EmptyState from '@/components/ui/EmptyState';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
@@ -615,6 +616,21 @@ export default function DoctorPublicPortalClient({
     setIsSidebarCollapsed(false);
   }, []);
 
+  // Publish sidebar width as a CSS variable so drawers (e.g. StandardDrawer)
+  // align to the sidebar edge without masking the left clinical navigation.
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const updateSidebarWidth = () => {
+        const isMobileScreen = window.innerWidth < 1024;
+        const w = isMobileScreen ? '0px' : isSidebarCollapsed ? '64px' : '250px';
+        document.documentElement.style.setProperty('--sidebar-current-width', w);
+      };
+      updateSidebarWidth();
+      window.addEventListener('resize', updateSidebarWidth);
+      return () => window.removeEventListener('resize', updateSidebarWidth);
+    }
+  }, [isSidebarCollapsed]);
+
   // Deep-link synchronization: Check URL query param for ?modal=services or #services
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -725,8 +741,9 @@ export default function DoctorPublicPortalClient({
     toast.success(`Timeline updated: ${parsedDays} days starting ${startDate} ✓`);
   };
 
-  // ── Quick Action Dots Popover Menu State ──
+  // ── Quick Action Dots Menu State (Mobile & Desktop GCP Action Sheet) ──
   const [activeActionsMenuRxId, setActiveActionsMenuRxId] = useState(null);
+  const [mobileActionRx, setMobileActionRx] = useState(null);
 
   // Close floating action menu when clicking outside
   useEffect(() => {
@@ -2400,15 +2417,15 @@ export default function DoctorPublicPortalClient({
               onClick={(e) => {
                 e.stopPropagation();
                 triggerHaptic('selection');
-                setActiveActionsMenuRxId(prev => prev === (rx.code || rx.id) ? null : (rx.code || rx.id));
+                setMobileActionRx(rx);
               }}
               style={{
                 height: '28px',
                 width: '28px',
                 borderRadius: '4px',
-                background: isMenuOpen ? '#eff6ff' : '#ffffff',
-                border: isMenuOpen ? '1px solid #1a73e8' : '1px solid #dadce0',
-                color: isMenuOpen ? '#1a73e8' : '#5f6368',
+                background: mobileActionRx?.id === rx.id ? '#eff6ff' : '#ffffff',
+                border: mobileActionRx?.id === rx.id ? '1px solid #1a73e8' : '1px solid #dadce0',
+                color: mobileActionRx?.id === rx.id ? '#1a73e8' : '#5f6368',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -2668,7 +2685,7 @@ export default function DoctorPublicPortalClient({
         );
       }
     }
-  ], [signingTaskId, handleSignOffPrescription, handleShareProposalWhatsApp, activeActionsMenuRxId]);
+  ], [signingTaskId, handleSignOffPrescription, handleShareProposalWhatsApp, activeActionsMenuRxId, mobileActionRx]);
 
   // ── Bloodo Diagnostic Lab Results Columns (DataTable Universal) ─────────
   const labResultsColumns = useMemo(() => [
@@ -3105,15 +3122,9 @@ export default function DoctorPublicPortalClient({
       ]
     },
     {
-      group: 'ACTIONS & CREDENTIALS',
-      groupTitle: 'ACTIONS & CREDENTIALS',
+      group: 'PRACTICE SETTINGS & CREDENTIALS',
+      groupTitle: 'PRACTICE SETTINGS & CREDENTIALS',
       items: [
-        {
-          id: 'intake',
-          label: 'New Prescription',
-          icon: Plus,
-          badge: null
-        },
         {
           id: 'credentials',
           label: 'Physician Credentials',
@@ -3287,6 +3298,14 @@ export default function DoctorPublicPortalClient({
           transition: all 0.15s ease;
           white-space: nowrap;
           border: 1px solid transparent;
+        }
+        .doctor-dock-mobile-only {
+          display: none !important;
+        }
+        @media (max-width: 768px) {
+          .doctor-dock-mobile-only {
+            display: inline-flex !important;
+          }
         }
         .doctor-dock-btn-primary {
           background: linear-gradient(180deg, #1a73e8 0%, #1557b0 100%);
@@ -3608,7 +3627,7 @@ export default function DoctorPublicPortalClient({
         doctorHomeHref={isCustomerAgent ? `/agent?dr=${slug}` : `/dr/${slug}`}
         doctorName={doctor.name}
         hideTier2={true}
-        hideImportRx={false}
+        hideImportRx={true}
         hideSwitchRx={true}
         hideSearchButton={true}
         isDoctorView={true}
@@ -4036,6 +4055,93 @@ export default function DoctorPublicPortalClient({
                 {activeAnchor === 'recommendations' && 'Atlas Recommendations & Peptide Clinical Synergy'}
               </h1>
             </div>
+
+            {/* Actions Area: GCP Consolidated Command Bar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setLastRefreshed(new Date());
+                  toast.success('Clinical records synchronized with Firestore ✓');
+                }}
+                title={`Last synchronized: ${lastRefreshed ? lastRefreshed.toLocaleTimeString() : 'Just now'}. Click to refresh.`}
+                style={{
+                  height: '34px',
+                  padding: '0 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#5f6368',
+                  fontSize: '0.74rem',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <RefreshCw size={13} />
+                <span className="hidden sm:inline">Refresh</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setIsIntakeOpen(true);
+                }}
+                style={{
+                  height: '34px',
+                  padding: '0 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#3c4043',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
+                }}
+                title="Import medical records, PDF lab results, or clinical data"
+              >
+                <Upload size={14} style={{ color: '#5f6368' }} />
+                <span>Import EHR / Data</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setIsIntakeOpen(true);
+                }}
+                style={{
+                  height: '34px',
+                  padding: '0 14px',
+                  borderRadius: '6px',
+                  border: '1px solid #1a73e8',
+                  background: '#1a73e8',
+                  color: '#ffffff',
+                  fontSize: '0.80rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 1px 2px rgba(26,115,232,0.3)'
+                }}
+                title="Create a new compounded prescription or treatment proposal"
+              >
+                <Plus size={15} />
+                <span>New Prescription</span>
+              </button>
+            </div>
           </header>
 
           {/* ── View 1: Practice Overview & Core Operational KPIs (Google Cloud Rule #22) ─ */}
@@ -4426,7 +4532,7 @@ export default function DoctorPublicPortalClient({
                   emptyMessage={searchQuery ? `No prescriptions match "${searchQuery}"` : "No prescriptions found in clinical registry"}
                   defaultPageSize={10}
                   pageSizeOptions={[10, 25, 50]}
-                  onRowClick={(row) => setSelectedPrescription(row)}
+                  onRowClick={handleRowClickPrescription}
                 />
               </div>
 
@@ -5824,6 +5930,72 @@ export default function DoctorPublicPortalClient({
           hideShippingLabel={true}
         />
       )}
+
+      {/* ── Quick Action Sheet for Prescriptions (Mobile & Desktop GCP Standard) ── */}
+      <MobileActionSheet
+        isOpen={Boolean(mobileActionRx)}
+        onClose={() => setMobileActionRx(null)}
+        title={mobileActionRx ? `Prescription #${mobileActionRx.code || mobileActionRx.id || ''}` : ''}
+        items={mobileActionRx ? [
+          {
+            label: 'View Public Dossier (/rx)',
+            icon: ExternalLink,
+            onClick: () => {
+              const code = mobileActionRx.code || mobileActionRx.prescriptionNumber || mobileActionRx.id;
+              window.open(`/rx/${code}`, '_blank');
+              setMobileActionRx(null);
+            }
+          },
+          {
+            label: 'Patient Posology Handout',
+            icon: FileText,
+            onClick: () => {
+              const target = mobileActionRx;
+              setMobileActionRx(null);
+              handleOpenHandout(target);
+            }
+          },
+          {
+            label: 'Re-prescribe Formula',
+            icon: RefreshCw,
+            onClick: () => {
+              const target = mobileActionRx;
+              setMobileActionRx(null);
+              handleReprescribeFormula(target);
+            }
+          },
+          {
+            label: 'Official Bottle Labels',
+            icon: Tag,
+            onClick: () => {
+              const target = mobileActionRx;
+              setMobileActionRx(null);
+              handleOpenLabelsModal(target);
+            }
+          },
+          {
+            label: 'Contact Atlas on WhatsApp',
+            icon: MessageCircle,
+            onClick: () => {
+              const target = mobileActionRx;
+              setMobileActionRx(null);
+              handleContactAtlasWhatsApp(
+                `Prescription #${target.code || target.id} (${target.patientName || 'Patient'})`,
+                `Clinical formulation inquiry: ${target.treatmentTitle || 'Compounded Formula'}`
+              );
+            }
+          },
+          ...(mobileActionRx.protocolUrl || mobileActionRx.protocolSlug ? [{
+            label: 'View Protocol Reference',
+            icon: Stethoscope,
+            onClick: () => {
+              const url = mobileActionRx.protocolUrl || `/proto/${mobileActionRx.protocolSlug}`;
+              window.open(url, '_blank');
+              setMobileActionRx(null);
+            }
+          }] : [])
+        ] : []}
+      />
 
       {/* ── AI Prescription Intake Workspace (Attributed to this Physician) ── */}
       {isIntakeOpen && (
