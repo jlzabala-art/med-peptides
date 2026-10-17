@@ -907,6 +907,29 @@ export default function DoctorClinicalAnalytics({
                 gap: 14px;
               }
             }
+            @media (max-width: 640px) {
+              .doctor-donut-container {
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 14px !important;
+              }
+              .doctor-donut-legend {
+                width: 100% !important;
+              }
+              .doctor-complexity-strip {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 12px !important;
+              }
+              .doctor-complexity-left {
+                width: 100% !important;
+              }
+              .doctor-complexity-right {
+                width: 100% !important;
+                min-width: 0 !important;
+                justify-content: space-between !important;
+              }
+            }
           `}</style>
           <div className="doctor-clinical-analytics-grid">
             {/* ── CARD 1: Monthly Prescription Volume ──────────────────────── */}
@@ -1277,6 +1300,7 @@ export default function DoctorClinicalAnalytics({
 
               {/* Donut Chart + Legend */}
               <div 
+                className="doctor-donut-container"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1320,7 +1344,7 @@ export default function DoctorClinicalAnalytics({
                 </div>
 
                 {/* Cohort Legend */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                <div className="doctor-donut-legend" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: 0 }}>
                   {cohortData.cohorts.map((c) => (
                     <div 
                       key={c.id} 
@@ -1421,6 +1445,7 @@ export default function DoctorClinicalAnalytics({
 
               {/* Donut Chart + Legend */}
               <div 
+                className="doctor-donut-container"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1464,7 +1489,7 @@ export default function DoctorClinicalAnalytics({
                 </div>
 
                 {/* Axes Legend */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: 0 }}>
+                <div className="doctor-donut-legend" style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: 0 }}>
                   {axisData.axes.map((a) => (
                     <div 
                       key={a.id} 
@@ -1523,6 +1548,7 @@ export default function DoctorClinicalAnalytics({
 
           {/* ── CARD 5: Formulation Complexity Strip (Multi-Part vs Single-Part) ── */}
           <div 
+            className="doctor-complexity-strip"
             style={{
               marginTop: '16px',
               padding: '12px 16px',
@@ -1536,7 +1562,7 @@ export default function DoctorClinicalAnalytics({
               gap: '12px'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+            <div className="doctor-complexity-left" style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
               <Layers size={16} color="#5f6368" style={{ flexShrink: 0 }} />
               <div>
                 <span style={{ fontSize: '12px', fontWeight: 600, color: '#202124' }}>
@@ -1548,7 +1574,7 @@ export default function DoctorClinicalAnalytics({
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '240px', flexShrink: 0 }}>
+            <div className="doctor-complexity-right" style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '240px', flexShrink: 0 }}>
               <div 
                 style={{
                   width: '120px',

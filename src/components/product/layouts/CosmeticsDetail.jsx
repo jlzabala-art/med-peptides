@@ -26,6 +26,8 @@ import HairProtocolsSidebarWidget from '@/components/product/HairProtocolsSideba
 import CosmeticsSidebarWidget from '@/components/product/CosmeticsSidebarWidget';
 import ColwayProtocolInfogram from '@/components/product/ColwayProtocolInfogram';
 import ColwayTrichologyStemCellShowcase from '@/components/product/ColwayTrichologyStemCellShowcase';
+import ColwayActiveIngredientsShowcase from '@/components/product/ColwayActiveIngredientsShowcase';
+import { getColwayProductData } from '@/data/colwayInciRegistry';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import ImageModal from '@/snippets/ImageModal';
 import { CollectionBadgePill, CollectionCompanionBanner } from '@/components/product/CollectionBannerWidget';
@@ -712,7 +714,20 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const slug = product?.slug || product?.id || '';
   const productUrl = typeof window !== 'undefined' ? window.location.href : '';
 
-  const ingredients = useMemo(() => product?.ingredients || [], [product]);
+  const colwayData = useMemo(() => getColwayProductData(slug), [slug]);
+
+  const ingredients = useMemo(() => {
+    if (Array.isArray(colwayData?.ingredients) && colwayData.ingredients.length > 0) {
+      return colwayData.ingredients;
+    }
+    if (Array.isArray(product?.ingredients) && product.ingredients.length > 0) {
+      return product.ingredients;
+    }
+    if (Array.isArray(product?.inci_list) && product.inci_list.length > 0) {
+      return product.inci_list;
+    }
+    return [];
+  }, [product, colwayData]);
   const applicationProtocol = product?.application_protocol || null;
   const technicalSpecs = product?.technical_specs || null;
   const hairProtocols = product?.associated_protocols || [];
@@ -773,6 +788,8 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
     ];
     if (isHairProduct) {
       list.push({ id: 'stem-cell-monograph', label: 'Baicapil™ 2% Monograph', icon: Sparkles });
+    } else if (colwayData) {
+      list.push({ id: 'active-ingredients-showcase', label: isNutricosmetic ? 'Bioactive Monograph' : 'Active Compounds Monograph', icon: Sparkles });
     }
     list.push(
       { id: 'clinical-evidence', label: 'Clinical Evidence & Targets', icon: Activity },
@@ -783,13 +800,37 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
       { id: 'safety', label: isNutricosmetic ? 'Safety & Contraindications' : 'Clinical Safety & Patch Test', icon: AlertTriangle }
     );
     return list;
-  }, [isHairProduct, isNutricosmetic]);
+  }, [isHairProduct, isNutricosmetic, colwayData]);
 
   const effectiveActiveSection = useMemo(() => {
     if (!activeSection || activeSection === 'overview') return 'overview';
     const exists = tocSections.some(s => s.id === activeSection);
     return exists ? activeSection : 'overview';
   }, [activeSection, tocSections]);
+
+  const clinicalEvidenceList = useMemo(() => {
+    if (Array.isArray(product?.clinical_evidence) && product.clinical_evidence.length > 0) {
+      return product.clinical_evidence;
+    }
+    if (Array.isArray(colwayData?.clinical_evidence) && colwayData.clinical_evidence.length > 0) {
+      return colwayData.clinical_evidence;
+    }
+    if (isHairProduct) {
+      return [
+        { target: 'DHT Inhibition', compound: 'Scutellaria Baicalensis (Baicapil™ 2%)', mechanism: '5α-Reductase Blockade / Wnt Pathway', outcome: 'Suppresses follicular miniaturisation at dermal papilla and stimulates stem cell telogen-to-anagen transition.', stat: '−60.6% Hair Loss' },
+        { target: 'Follicular Anchoring', compound: 'Phyllanthus Emblica (Kerascalp™)', mechanism: 'Collagen XVII Support / Melanogenesis', outcome: 'Strengthens dermal hair follicle anchors via Collagen XVII upregulation, preventing premature stem cell exhaustion and graying.', stat: '+5.6% Thickness' },
+        { target: 'Tensile Strength', compound: 'Equisetum Bio-Silica & Phytokeratin', mechanism: 'Bioavailable Orthosilicic Acid & Cuticle Sealing', outcome: 'Supplies bio-silica and wheat protein amino peptides for cortical disulfide bonding, repairing microfractures.', stat: '+24% Fiber Strength' },
+        { target: 'Microvascular Flow', compound: 'L-Arginine & Osmoprotective Betaine', mechanism: 'Nitric Oxide Vasodilation & Osmolyte Delivery', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to actively dividing anagen matrix cells.', stat: '+21% Density' },
+        { target: 'Cuticular Sealing', compound: 'Hydrafeel® 3 (Polyglyceryl-3 PCA)', mechanism: 'Hydrophobic Moisture Barrier / Lipid Film', outcome: 'Repairs lipid bilayer of the hair fiber, locking moisture inside cortex while shielding against thermal and UV oxidation.', stat: '−47% Combing Force' },
+      ];
+    }
+    return [
+      { target: 'Fibroblast Neo-Collagenesis', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Intact Triple Helix Extracellular Scaffolding', outcome: 'Stimulates human dermal fibroblasts to multiply endogenous Type I and Type III pro-collagen synthesis.', stat: '+38% Dermal Density' },
+      { target: 'Cellular Penetration', compound: 'VEP Bio-Peptide Complexes', mechanism: 'Vesicular Epidermal Penetration Enhancers', outcome: 'Transfers active signaling oligopeptides through the stratum corneum barrier down to the basal dermal-epidermal junction.', stat: '3.4× Bioavailability' },
+      { target: 'Micro-Exfoliation', compound: 'Diamond Dust & Enzymatic Keratolysis', mechanism: 'Micro-Crystalline Resurfacing & Cell Turnover', outcome: 'Gentle physical and enzymatic shedding of senescent corneocytes, revealing oxygenated, radiant dermal tissue.', stat: '−28% Wrinkle Depth' },
+      { target: 'Epidermal Barrier Shield', compound: 'Fucus Vesiculosus & Bio-Lipids', mechanism: 'Hyaluronic Synthesis & Transepidermal Moisture Lock', outcome: 'Supplies trace marine bio-minerals and protective lipophilic film, halting trans-epidermal water loss (TEWL).', stat: '+42% Hydration (72h)' }
+    ];
+  }, [product, colwayData, isHairProduct]);
 
   if (!product) return null;
 
@@ -1098,6 +1139,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
             {/* OVERVIEW EXECUTIVE SUMMARY (SHOWN ONLY WHEN OVERVIEW IS SELECTED) */}
             {effectiveActiveSection === 'overview' && (
+              <>
               <PublicSectionCard
                 id="executive-overview"
                 icon={Layers}
@@ -1175,6 +1217,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                             </div>
                             <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
                               {sec.id === 'stem-cell-monograph' && 'Baicapil™ 2% hair follicle stem cell activation & shedding reduction.'}
+                              {sec.id === 'active-ingredients-showcase' && 'Biological mechanisms of action, molecular targets, and clinical properties.'}
                               {sec.id === 'clinical-evidence' && 'Peer-reviewed evidence, molecular mechanisms, and cellular endpoints.'}
                               {sec.id === 'inci-dossier' && `Full declared pharmacopoeial breakdown (${ingredients.length} ingredients) per EU 1223/2009.`}
                               {sec.id === 'application-protocol' && 'Standardized clinical application protocol, contact times, and biological infogram.'}
@@ -1212,6 +1255,13 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                   </span>
                 </div>
               </PublicSectionCard>
+              {/* Active Ingredients & Clinical Showcase (embedded in overview for immediate deep exploration) */}
+              {isHairProduct ? (
+                <ColwayTrichologyStemCellShowcase lang={lang} />
+              ) : colwayData ? (
+                <ColwayActiveIngredientsShowcase product={product} slug={slug} lang={lang} />
+              ) : null}
+            </>
             )}
 
             {/* SINGLE SECTION GCP NAVIGATION HEADER (SHOWN WHEN A SPECIFIC SECTION IS SELECTED) */}
@@ -1274,6 +1324,13 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               </div>
             )}
 
+            {/* ACTIVE INGREDIENTS & CLINICAL MOLECULAR MONOGRAPH - FOR NON-HAIR COLWAY PRODUCTS */}
+            {effectiveActiveSection === 'active-ingredients-showcase' && !isHairProduct && colwayData && (
+              <div id="active-ingredients-showcase" style={{ scrollMarginTop: '80px' }}>
+                <ColwayActiveIngredientsShowcase product={product} slug={slug} lang={lang} />
+              </div>
+            )}
+
             {/* CLINICAL EVIDENCE & MOLECULAR MECHANISMS */}
             {effectiveActiveSection === 'clinical-evidence' && (
               <PublicSectionCard 
@@ -1290,18 +1347,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                     : 'Every bioactive compound in this formulation is backed by peer-reviewed dermatology research with documented molecular targets across the extracellular matrix, dermal fibroblasts, and epidermal barrier.'}
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
-                  {(isHairProduct ? [
-                    { target: 'DHT Inhibition', compound: 'Scutellaria Baicalensis (Baicapil™ 2%)', mechanism: '5α-Reductase Blockade / Wnt Pathway', outcome: 'Suppresses follicular miniaturisation at dermal papilla and stimulates stem cell telogen-to-anagen transition.', stat: '−60.6% Hair Loss' },
-                    { target: 'Follicular Anchoring', compound: 'Phyllanthus Emblica (Kerascalp™)', mechanism: 'Collagen XVII Support / Melanogenesis', outcome: 'Strengthens dermal hair follicle anchors via Collagen XVII upregulation, preventing premature stem cell exhaustion and graying.', stat: '+5.6% Thickness' },
-                    { target: 'Tensile Strength', compound: 'Equisetum Bio-Silica & Phytokeratin', mechanism: 'Bioavailable Orthosilicic Acid & Cuticle Sealing', outcome: 'Supplies bio-silica and wheat protein amino peptides for cortical disulfide bonding, repairing microfractures.', stat: '+24% Fiber Strength' },
-                    { target: 'Microvascular Flow', compound: 'L-Arginine & Osmoprotective Betaine', mechanism: 'Nitric Oxide Vasodilation & Osmolyte Delivery', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to actively dividing anagen matrix cells.', stat: '+21% Density' },
-                    { target: 'Cuticular Sealing', compound: 'Hydrafeel® 3 (Polyglyceryl-3 PCA)', mechanism: 'Hydrophobic Moisture Barrier / Lipid Film', outcome: 'Repairs lipid bilayer of the hair fiber, locking moisture inside cortex while shielding against thermal and UV oxidation.', stat: '−47% Combing Force' },
-                  ] : [
-                    { target: 'Fibroblast Neo-Collagenesis', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Intact Triple Helix Extracellular Scaffolding', outcome: 'Stimulates human dermal fibroblasts to multiply endogenous Type I and Type III pro-collagen synthesis.', stat: '+38% Dermal Density' },
-                    { target: 'Cellular Penetration', compound: 'VEP Bio-Peptide Complexes', mechanism: 'Vesicular Epidermal Penetration Enhancers', outcome: 'Transfers active signaling oligopeptides through the stratum corneum barrier down to the basal dermal-epidermal junction.', stat: '3.4× Bioavailability' },
-                    { target: 'Micro-Exfoliation', compound: 'Diamond Dust & Enzymatic Keratolysis', mechanism: 'Micro-Crystalline Resurfacing & Cell Turnover', outcome: 'Gentle physical and enzymatic shedding of senescent corneocytes, revealing oxygenated, radiant dermal tissue.', stat: '−28% Wrinkle Depth' },
-                    { target: 'Epidermal Barrier Shield', compound: 'Fucus Vesiculosus & Bio-Lipids', mechanism: 'Hyaluronic Synthesis & Transepidermal Moisture Lock', outcome: 'Supplies trace marine bio-minerals and protective lipophilic film, halting trans-epidermal water loss (TEWL).', stat: '+42% Hydration (72h)' }
-                  ]).map(item => (
+                  {clinicalEvidenceList.map(item => (
                     <div
                       key={item.target}
                       style={{
@@ -1360,9 +1406,11 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             {/* INCI DOSSIER */}
             {effectiveActiveSection === 'inci-dossier' && (
               <PublicSectionCard id="inci-dossier" icon={Microscope} category="INGREDIENT DOSSIER" title="Full INCI Composition & Pharmacopoeial Breakdown" badge={`${ingredients.length} Declared Ingredients`} badgeVariant="green">
-              <p style={{ fontSize: '0.81rem', color: '#64748b', marginBottom: '0.85rem', lineHeight: 1.6 }}>
-                Official International Nomenclature of Cosmetic Ingredients (INCI) declaration complying with Article 19(1)(g) of EU Cosmetics Regulation 1223/2009. Listed in descending concentration order (w/w). Features <strong>Baicapil™ (2%), Kerascalp™ (Amla), Hydrafeel® 3, and Field Horsetail Bio-Silica</strong>.
-              </p>
+                <p style={{ fontSize: '0.81rem', color: '#64748b', marginBottom: '0.85rem', lineHeight: 1.6 }}>
+                  Official {isNutricosmetic ? 'Nutritional and Active Ingredient' : 'International Nomenclature of Cosmetic Ingredients (INCI)'} declaration complying with {isNutricosmetic ? 'EU Food Supplement Regulations (EC 1169/2011 & 1223/2009)' : 'Article 19(1)(g) of EU Cosmetics Regulation 1223/2009'}. Listed in descending concentration order (w/w).{colwayData?.key_actives_summary ? (
+                    <> Key declared actives: <strong>{colwayData.key_actives_summary}</strong>.</>
+                  ) : null}
+                </p>
 
               {/* Complete Raw INCI Copy Box (GCP Standard Copyable Format) */}
               <div style={{
