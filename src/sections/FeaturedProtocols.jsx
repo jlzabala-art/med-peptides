@@ -56,26 +56,26 @@ function getProtocolBadge(protocol) {
 
 /* ─── Helpers ────────────────────────────────────────────────── */
 function getDuration(p) {
+  if (p.durationWeeks) return `${p.durationWeeks}w`;
   if (p.duration_weeks) return `${p.duration_weeks}w`;
   if (p.timeline?.total_duration_weeks) return `${p.timeline.total_duration_weeks}w`;
-  const phases = p.phases || p.phase_blueprints || [];
-  if (phases.length) {
-    const total = phases.reduce((s, ph) => s + (ph.duration_weeks || 0), 0);
+  if (Array.isArray(p.phases) && p.phases.length) {
+    const total = p.phases.reduce((s, ph) => s + (Number(ph.durationWeeks || ph.duration_weeks) || 0), 0);
     if (total) return `${total}w`;
   }
   return '—';
 }
 
 function getPhaseCount(p) {
-  return (p.phase_blueprints || p.phases || []).length || null;
+  return Array.isArray(p.phases) ? p.phases.length : null;
 }
 
 function getCompoundCount(p) {
-  const sources = p.phase_blueprints?.length ? p.phase_blueprints : (p.phases || []);
+  if (!Array.isArray(p.phases)) return null;
   const names = new Set(
-    sources.flatMap(ph => ph.drugs_used || ph.drugs || ph.compounds || [])
-           .map(d => d.product_slug || d.product_title || d.name || d.compound)
-           .filter(Boolean)
+    p.phases.flatMap(ph => ph.compounds || [])
+            .map(c => c.name || c.id)
+            .filter(Boolean)
   );
   return names.size || null;
 }

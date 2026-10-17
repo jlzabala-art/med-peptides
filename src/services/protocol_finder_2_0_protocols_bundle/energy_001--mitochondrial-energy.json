@@ -1,418 +1,100 @@
 {
+  "id": "energy_001",
   "protocol_id": "energy_001",
-  "protocol_slug": "mitochondrial-energy-structured",
+  "name": "Mitochondrial Energy Protocol",
+  "title": "Mitochondrial Energy Protocol",
   "protocol_title": "Mitochondrial Energy Protocol",
-  "protocol_version": "v6.0",
+  "slug": "mitochondrial-energy-structured",
+  "protocol_slug": "mitochondrial-energy-structured",
+  "shortCode": "ENERGY-001",
+  "short_code": "ENERGY-001",
+  "category": "Regenerative",
+  "therapeutic_category": "Regenerative",
+  "categoryId": "Regenerative",
   "status": "approved",
-  "active": true,
-  "metadata": {
-    "primary_goal": "mitochondrial_energy",
-    "primary_condition": "bioenergetic_support_fatigue_reduction_mitochondrial_efficiency",
-    "complexity_level": "standard",
-    "visibility": "public",
-    "source_type": "curated_library",
-    "source_reference": "Atlas Health_ENERGY_001_Protocol_2026",
-    "author": {
-      "name": "Atlas Health Clinical Team",
-      "organization": "Atlas Health",
-      "title": "Peptide Specialists"
-    },
-    "review": {
-      "review_status": "approved",
-      "last_reviewed_at": "2026-04-02"
-    },
-    "created_at": "2026-04-02T00:00:00.000Z",
-    "updated_at": "2026-04-02T00:00:00.000Z",
-    "evidence_basis": {
-      "core_active": "MOTS-c",
-      "optional_support": "Elamipretide",
-      "evidence_strength": "mixed_clinical_translational",
-      "evidence_notes": [
-        "MOTS-c remains translational / emerging in humans.",
-        "Elamipretide has stronger clinical-trial exposure in mitochondrial disease settings."
-      ]
-    },
-    "evidence_grade": "B",
-    "evidence_grade_note": "Grade B: MOTS-c Phase I clinical evaluation (CB4211 human trials; Lee C, Cell Metab 2015). SS-31 (Elamipretide) supported by Phase II randomized trials in mitochondrial bioenergetics and exercise tolerance (Karaa A et al., Neurology 2018; NEJM 2023)."
-  },
-  "eligibility_rules": {
-    "supported_age_groups": [
-      "18-35",
-      "36-50",
-      "51-65",
-      "65+"
-    ],
-    "supported_sex": [
-      "female",
-      "male"
-    ],
-    "supported_goals": [
-      "mitochondrial_energy",
-      "fatigue_support",
-      "bioenergetic_support",
-      "metabolic_efficiency"
-    ],
-    "required_patient_inputs": [
-      "primary_clinical_focus",
-      "patient_demographic",
-      "age_group",
-      "start_date"
-    ],
-    "contraindications": [],
-    "relative_cautions": []
-  },
-  "variant_rules": {
-    "age_variants": {
-      "18-35": {
-        "default_duration_weeks": 8,
-        "monitoring_intensity": "standard"
-      },
-      "36-50": {
-        "default_duration_weeks": 12,
-        "monitoring_intensity": "moderate"
-      },
-      "51-65": {
-        "default_duration_weeks": 16,
-        "monitoring_intensity": "enhanced"
-      },
-      "65+": {
-        "default_duration_weeks": 16,
-        "monitoring_intensity": "enhanced"
-      }
-    },
-    "sex_variants": {
-      "female": {
-        "recommended_flags": [],
-        "special_notes": [
-          "Use conservative ramping if sensitivity profile is high."
-        ]
-      },
-      "male": {
-        "recommended_flags": [],
-        "special_notes": [
-          "Reassess tolerance and response before escalation."
-        ]
-      }
-    },
-    "duration_variants": {
-      "8_weeks": {
-        "mode": "short",
-        "extra_monitoring": false
-      },
-      "12_weeks": {
-        "mode": "standard",
-        "extra_monitoring": false
-      },
-      "16_weeks": {
-        "mode": "extended",
-        "extra_monitoring": true
-      },
-      "20_weeks": {
-        "mode": "extended_plus",
-        "extra_monitoring": true
-      }
-    },
-    "tempo_variants": {
-      "conservative": {
-        "dose_step_interval_weeks": 4,
-        "monitoring_intensity_modifier": "up"
-      },
-      "standard": {
-        "dose_step_interval_weeks": 4,
-        "monitoring_intensity_modifier": "none"
-      },
-      "aggressive": {
-        "dose_step_interval_weeks": 2,
-        "monitoring_intensity_modifier": "up"
-      }
-    }
-  },
-  "phase_blueprints": [
+  "durationWeeks": 12,
+  "duration_weeks": 12,
+  "duration": "12 Weeks",
+  "primaryGoal": "Therapeutic Cellular Optimization",
+  "primary_goal": "Therapeutic Cellular Optimization",
+  "goals": [
+    "regenerative"
+  ],
+  "description": "Clinical peptide protocol designed for cellular regeneration and systemic optimization.",
+  "clinicalRationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "clinical_rationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "evidenceLevel": "Tier 2 - Clinical Trial / Cohort",
+  "evidence_level": "Tier 2 - Clinical Trial / Cohort",
+  "evidenceGrade": "B",
+  "evidence_grade": "B",
+  "evidenceGradeNote": "Grade B: MOTS-c Phase I clinical evaluation (CB4211 human trials; Lee C, Cell Metab 2015). SS-31 (Elamipretide) supported by Phase II randomized trials in mitochondrial bioenergetics and exercise tolerance (Karaa A et al., Neurology 2018; NEJM 2023).",
+  "evidence_grade_note": "Grade B: MOTS-c Phase I clinical evaluation (CB4211 human trials; Lee C, Cell Metab 2015). SS-31 (Elamipretide) supported by Phase II randomized trials in mitochondrial bioenergetics and exercise tolerance (Karaa A et al., Neurology 2018; NEJM 2023).",
+  "requiredLabs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "required_labs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "monitoringPlan": [
     {
-      "phase_key": "activation",
-      "phase_title": "Mitochondrial Activation",
-      "default_start_week": 1,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "bioenergetic_support",
-        "fatigue_reduction",
-        "tolerance_building"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_motsc",
-          "product_title": "MOTS-c",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "2x_week",
-            "starting_intensity": "standard",
-            "administration_days_default": [
-              "Monday",
-              "Wednesday",
-              "Friday"
-            ],
-            "timing_hint": "morning",
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10,
-            "dose_per_administration": 5
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_motsc",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_elamipretide",
-          "product_title": "Elamipretide",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "daily",
-            "starting_intensity": "optional_low",
-            "administration_days_default": [
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-              "Sunday"
-            ],
-            "activation_condition": "if_clinician_enables_mito_support_variant",
-            "starting_weekly_dose": 280,
-            "default_weekly_dose": 280,
-            "dose_per_administration": 40
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_elamipretide",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 1,
-          "event_type": "baseline_review",
-          "title": "Baseline energy, recovery, and exercise tolerance review"
-        }
-      ]
+      "week": 0,
+      "title": "Baseline Comprehensive Panel"
     },
     {
-      "phase_key": "optimization",
-      "phase_title": "Bioenergetic Optimization",
-      "default_start_week": 5,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "mitochondrial_efficiency",
-        "recovery_support",
-        "fatigue_resilience"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_motsc",
-          "product_title": "MOTS-c",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "2x_week",
-            "intensity": "standard_plus",
-            "administration_days_default": [
-              "Monday",
-              "Wednesday",
-              "Friday"
-            ],
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10,
-            "dose_per_administration": 5
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_motsc",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_elamipretide",
-          "product_title": "Elamipretide",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "daily",
-            "intensity": "conditional",
-            "administration_days_default": [
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-              "Sunday"
-            ],
-            "activation_condition": "if_mitochondrial_support_priority_high",
-            "starting_weekly_dose": 280,
-            "default_weekly_dose": 280,
-            "dose_per_administration": 40
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_elamipretide",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 6,
-          "event_type": "checkpoint",
-          "title": "Fatigue and recovery checkpoint"
-        }
-      ]
+      "week": 6,
+      "title": "Mid-Cycle Checkpoint & Tolerance"
     },
     {
-      "phase_key": "maintenance",
-      "phase_title": "Maintenance",
-      "default_start_week": 9,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "response_maintenance",
-        "exercise_recovery_support"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_motsc",
-          "product_title": "MOTS-c",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "2x_week",
-            "intensity": "maintenance",
-            "administration_days_default": [
-              "Tuesday",
-              "Thursday"
-            ],
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10,
-            "dose_per_administration": 5
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_motsc",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 12,
-          "event_type": "outcome_review",
-          "title": "Final mitochondrial energy review"
-        }
-      ]
+      "week": 12,
+      "title": "End-of-Cycle Outcome Review"
     }
   ],
-  "monitoring_plan": {
-    "baseline_required": [
-      "fatigue_score",
-      "exercise_tolerance",
-      "sleep_quality",
-      "metabolic_profile"
-    ],
-    "scheduled_checkpoints": [
-      {
-        "week": 4,
-        "type": "energy_review",
-        "measures": [
-          "fatigue",
-          "exercise_recovery",
-          "sleep"
-        ],
-        "purpose": "Confirm tolerance and early signal"
-      },
-      {
-        "week": 8,
-        "type": "bioenergetic_reassessment",
-        "measures": [
-          "fatigue",
-          "training_tolerance",
-          "perceived_exertion"
-        ],
-        "purpose": "Assess mitochondrial response"
-      },
-      {
-        "week": 12,
-        "type": "final_outcome_review",
-        "measures": [
-          "overall_energy",
-          "recovery_capacity"
-        ],
-        "purpose": "End-of-cycle evaluation"
-      }
-    ],
-    "labs": []
-  },
-  "expected_outcomes": {
-    "qualitative": [
-      "better energy stability",
-      "improved recovery",
-      "better exercise tolerance"
-    ],
-    "quantitative_ranges": {
-      "fatigue_reduction_expected": "mild_to_moderate",
-      "recovery_improvement_expected": "mild_to_moderate"
-    }
-  },
-  "generator_rules": {
-    "selection_priority": [
-      "goal_match",
-      "age_variant_match",
-      "fatigue_pattern",
-      "exercise_load"
-    ],
-    "profile_notes": [
-      "Escalate cautiously in highly reactive or sleep-fragile users."
-    ]
-  },
-  "generated_protocol_template": {
-    "patient_context": {
-      "primary_clinical_focus": null,
-      "patient_demographic": null,
-      "age_group": null,
-      "duration_weeks": null,
-      "start_date": null,
-      "tempo_preference": "standard"
+  "contraindications": [
+    "Active malignancy or uninvestigated neoplastic lesions",
+    "Pregnancy, planned conception, or lactation",
+    "Severe hepatic impairment (Child-Pugh Class C) or end-stage renal disease"
+  ],
+  "relativeCautions": [
+    "History of cardiac arrhythmia or severe hypertension",
+    "Concurrent administration of insulin secretagogues without dose adjustment"
+  ],
+  "expectedOutcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "expected_outcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "recommendedSupplements": [
+    {
+      "name": "CoQ10 (Ubiquinol)",
+      "dosage": "100mg",
+      "rationale": "Mitochondrial electron transport chain cofactor",
+      "frequency": "Daily",
+      "weekly_dose": "700mg"
     },
-    "applied_variants": {
-      "age_variant": null,
-      "sex_variant": null,
-      "duration_variant": null,
-      "tempo_variant": "standard"
+    {
+      "name": "Rhodiola Rosea",
+      "dosage": "300mg",
+      "rationale": "Reduces fatigue and improves energy under stress",
+      "frequency": "Daily",
+      "weekly_dose": "2100mg"
     },
-    "resolved_phases": [],
-    "resolved_timeline": [],
-    "resolved_monitoring": [],
-    "resolved_costs": {},
-    "validation": {
-      "state": "NOT_EVALUATED",
-      "modules": []
+    {
+      "name": "NMN",
+      "dosage": "250mg",
+      "rationale": "Replenishes NAD+ for cellular energy production",
+      "frequency": "Daily",
+      "weekly_dose": "1750mg"
     }
-  },
-  "legacy_compatibility": {
-    "enabled": true,
-    "deprecated_fields": [
-      "phases",
-      "computedTimeline",
-      "computedCost"
-    ],
-    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode."
-  },
+  ],
   "recommended_supplements": [
     {
       "name": "CoQ10 (Ubiquinol)",
@@ -436,25 +118,444 @@
       "weekly_dose": "1750mg"
     }
   ],
-  "mechanism_of_action": [
-    "Targeted receptor modulation and cellular signaling optimization.",
-    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  "bom": [
+    {
+      "productId": "mots-c",
+      "product_name": "MOTS-c",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "ss-31",
+      "product_name": "SS-31 (Elamipretide)",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    }
   ],
-  "safety_profile": {
-    "adverse_events": [
-      "Mild injection site reactions (redness, transient pain).",
-      "Potential for mild, transient nausea during initial dose titration."
-    ],
-    "drug_interactions": [
-      "Monitor concurrent use of medications that affect blood glucose levels.",
-      "No severe drug-drug interactions documented, but caution advised with polypharmacy."
-    ],
-    "contraindications": [
-      "Pregnancy and lactation.",
-      "Active malignancies or history of specific hormone-sensitive cancers.",
-      "Known hypersensitivity to any protocol components."
-    ]
-  },
-  "evidence_grade": "B",
-  "evidence_grade_note": "Grade B: MOTS-c Phase I clinical evaluation (CB4211 human trials; Lee C, Cell Metab 2015). SS-31 (Elamipretide) supported by Phase II randomized trials in mitochondrial bioenergetics and exercise tolerance (Karaa A et al., Neurology 2018; NEJM 2023)."
+  "phases": [
+    {
+      "id": "phase_1",
+      "name": "Mitochondrial Activation",
+      "phaseName": "Mitochondrial Activation",
+      "phase_name": "Mitochondrial Activation",
+      "phase_title": "Mitochondrial Activation",
+      "phaseNumber": 1,
+      "phase_number": 1,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 1,
+      "start_week": 1,
+      "endWeek": 4,
+      "end_week": 4,
+      "objective": "bioenergetic_support · fatigue_reduction · tolerance_building",
+      "clinical_goal": "bioenergetic_support · fatigue_reduction · tolerance_building",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        },
+        {
+          "id": "ss-31",
+          "product_id": "ss-31",
+          "product_slug": "ss-31",
+          "name": "SS-31 (Elamipretide)",
+          "product_name": "SS-31 (Elamipretide)",
+          "product_title": "SS-31 (Elamipretide)",
+          "compound": "SS-31 (Elamipretide)",
+          "dosage": "280 mg",
+          "dose": "280 mg (Daily (morning))",
+          "doseAmount": 280,
+          "dose_amount": 280,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "1960 mg/wk",
+          "weekly_dose": "1960 mg/wk",
+          "weeklyDoseAmount": 1960,
+          "weekly_dose_amount": 1960,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning upon waking",
+          "storage": "Refrigerate at 2°C – 8°C. Light-sensitive vial.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 5,
+            "unitsPerDose": 40,
+            "finalConcentration": "10 mg/mL"
+          },
+          "clinicalNotes": "Cardiolipin-targeted peptide restoring electron transport chain efficiency and quenching mitochondrial ROS."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        },
+        {
+          "id": "ss-31",
+          "product_id": "ss-31",
+          "product_slug": "ss-31",
+          "name": "SS-31 (Elamipretide)",
+          "product_name": "SS-31 (Elamipretide)",
+          "product_title": "SS-31 (Elamipretide)",
+          "compound": "SS-31 (Elamipretide)",
+          "dosage": "280 mg",
+          "dose": "280 mg (Daily (morning))",
+          "doseAmount": 280,
+          "dose_amount": 280,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "1960 mg/wk",
+          "weekly_dose": "1960 mg/wk",
+          "weeklyDoseAmount": 1960,
+          "weekly_dose_amount": 1960,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning upon waking",
+          "storage": "Refrigerate at 2°C – 8°C. Light-sensitive vial.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 5,
+            "unitsPerDose": 40,
+            "finalConcentration": "10 mg/mL"
+          },
+          "clinicalNotes": "Cardiolipin-targeted peptide restoring electron transport chain efficiency and quenching mitochondrial ROS."
+        }
+      ]
+    },
+    {
+      "id": "phase_2",
+      "name": "Bioenergetic Optimization",
+      "phaseName": "Bioenergetic Optimization",
+      "phase_name": "Bioenergetic Optimization",
+      "phase_title": "Bioenergetic Optimization",
+      "phaseNumber": 2,
+      "phase_number": 2,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 5,
+      "start_week": 5,
+      "endWeek": 8,
+      "end_week": 8,
+      "objective": "mitochondrial_efficiency · recovery_support · fatigue_resilience",
+      "clinical_goal": "mitochondrial_efficiency · recovery_support · fatigue_resilience",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        },
+        {
+          "id": "ss-31",
+          "product_id": "ss-31",
+          "product_slug": "ss-31",
+          "name": "SS-31 (Elamipretide)",
+          "product_name": "SS-31 (Elamipretide)",
+          "product_title": "SS-31 (Elamipretide)",
+          "compound": "SS-31 (Elamipretide)",
+          "dosage": "280 mg",
+          "dose": "280 mg (Daily (morning))",
+          "doseAmount": 280,
+          "dose_amount": 280,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "1960 mg/wk",
+          "weekly_dose": "1960 mg/wk",
+          "weeklyDoseAmount": 1960,
+          "weekly_dose_amount": 1960,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning upon waking",
+          "storage": "Refrigerate at 2°C – 8°C. Light-sensitive vial.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 5,
+            "unitsPerDose": 40,
+            "finalConcentration": "10 mg/mL"
+          },
+          "clinicalNotes": "Cardiolipin-targeted peptide restoring electron transport chain efficiency and quenching mitochondrial ROS."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        },
+        {
+          "id": "ss-31",
+          "product_id": "ss-31",
+          "product_slug": "ss-31",
+          "name": "SS-31 (Elamipretide)",
+          "product_name": "SS-31 (Elamipretide)",
+          "product_title": "SS-31 (Elamipretide)",
+          "compound": "SS-31 (Elamipretide)",
+          "dosage": "280 mg",
+          "dose": "280 mg (Daily (morning))",
+          "doseAmount": 280,
+          "dose_amount": 280,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "1960 mg/wk",
+          "weekly_dose": "1960 mg/wk",
+          "weeklyDoseAmount": 1960,
+          "weekly_dose_amount": 1960,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning upon waking",
+          "storage": "Refrigerate at 2°C – 8°C. Light-sensitive vial.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 5,
+            "unitsPerDose": 40,
+            "finalConcentration": "10 mg/mL"
+          },
+          "clinicalNotes": "Cardiolipin-targeted peptide restoring electron transport chain efficiency and quenching mitochondrial ROS."
+        }
+      ]
+    },
+    {
+      "id": "phase_3",
+      "name": "Maintenance",
+      "phaseName": "Maintenance",
+      "phase_name": "Maintenance",
+      "phase_title": "Maintenance",
+      "phaseNumber": 3,
+      "phase_number": 3,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 9,
+      "start_week": 9,
+      "endWeek": 12,
+      "end_week": 12,
+      "objective": "response_maintenance · exercise_recovery_support",
+      "clinical_goal": "response_maintenance · exercise_recovery_support",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        }
+      ]
+    }
+  ],
+  "phasesCount": 3,
+  "_schemaVersion": 2,
+  "_unifiedAt": "2026-10-16T19:45:21.177Z"
 }

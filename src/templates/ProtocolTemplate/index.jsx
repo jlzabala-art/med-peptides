@@ -430,9 +430,9 @@ export default function ProtocolTemplate({
     const resolvedName   = firestoreTitle || (isRawId(rawName) ? '' : rawName);
 
     // Ultimate fallback: build from compound names
-    const compoundNames = (protocol.phase_blueprints || [])
-      .flatMap(ph => ph.drugs || ph.compounds || ph.drugs_used || [])
-      .map(d => d.product_title || d.name || d.product_slug)
+    const compoundNames = (protocol.phases || [])
+      .flatMap(ph => ph.compounds || ph.drugs || [])
+      .map(d => d.name)
       .filter(Boolean);
     const uniqueNames   = [...new Set(compoundNames)];
     const compoundTitle = uniqueNames.length
@@ -443,14 +443,10 @@ export default function ProtocolTemplate({
     const primaryTitle = sciName || name;
 
     // Build a rich, informative description for SEO
-    const durationWks = protocol.protocol_duration_weeks
-      || protocol.duration_weeks
-      || protocol.timeline?.total_duration_weeks
-      || (protocol.phase_blueprints || []).reduce((s, ph) => s + (ph.duration_weeks || ph.default_duration_weeks || 0), 0)
-      || null;
-    const allDrugs    = (protocol.phase_blueprints || protocol.phases || [])
-      .flatMap(ph => ph.drugs || ph.compounds || ph.drugs_used || [])
-      .map(d => d.product_title || d.name || d.product_slug)
+    const durationWks = protocol.durationWeeks || protocol.duration_weeks || 12;
+    const allDrugs    = (protocol.phases || [])
+      .flatMap(ph => ph.compounds || ph.drugs || [])
+      .map(d => d.name)
       .filter(Boolean);
     const uniqueCompounds = [...new Set(allDrugs)];
     const goalLabel   = humanize(protocol.primary_goal || protocol.metadata?.primary_goal || protocol.category || '');
@@ -561,82 +557,39 @@ export default function ProtocolTemplate({
   // Must stay BEFORE render guards to comply with Rules of Hooks.
   // Uses optional chaining so it's safe when protocol is null (returns empty/zero values).
   const precomputed = useMemo(() => {
-    const blueprints = protocol?.phase_blueprints || protocol?.phases || [];
+    const phases = protocol?.phases || [];
     let totalMg = 0;
     const compoundSet = new Set();
     let totalWeeks = 0;
 
-    blueprints.forEach(ph => {
-      const dur = ph.default_duration_weeks || ph.duration_weeks || 4;
+    phases.forEach(ph => {
+      const dur = ph.durationWeeks || ph.duration_weeks || 4;
       totalWeeks += dur;
-      const drugs = ph.drugs || ph.compounds || ph.medications || ph.drugs_used || [];
+      const drugs = ph.compounds || ph.drugs || [];
       drugs.forEach(d => {
-        const logic = d.dose_logic || {};
-        const start = parseFloat(logic.starting_dose || logic.starting_weekly_dose || 0);
-        const end   = parseFloat(logic.peak_dose || logic.max_dose || logic.maintenance_dose || start);
-        totalMg += ((start + end) / 2) * dur;
-        const cname = d.product_title || d.name || d.compound || d.product_slug;
+        const dose = d.weeklyDoseAmount || d.doseAmount || 0;
+        totalMg += dose * dur;
+        const cname = d.name || d.product_name || d.id;
         if (cname) compoundSet.add(cname.toLowerCase());
       });
     });
 
     return {
       totalMg:       +totalMg.toFixed(1),
-      totalWeeks,
+      totalWeeks:    totalWeeks || 12,
       compoundList:  [...compoundSet],
-      phaseCount:    blueprints.length,
-      primaryGoalKey: protocol?.metadata?.primary_goal
+      phaseCount:    phases.length,
+      primaryGoalKey: protocol?.primaryGoal
                       || protocol?.primary_goal
                       || protocol?.category
                       || '',
     };
-  }, [protocol?.id]);
+  }, [protocol?.id, protocol?.phases]);
 
-  // ── Unified phase source (handles both schema variants) ────────────────────
-  // `phase_blueprints` is the v2 schema used by wm_001; `phases` is the legacy
-  // schema used by wm_003. We normalise both into `activeBlueprintPhases` so
-  // every downstream section (Weekly Dosing, Vial Requirements, Reconstitution,
-  // Treatment Flow) works regardless of which field the Firestore doc uses.
-  // NOTE: useMemo MUST remain above render guards to comply with Rules of Hooks.
+  // ── Unified phase source (Single SSOT schema, zero runtime mapping) ───────
   const activeBlueprintPhases = useMemo(() => {
-    const phaseBlueprintsArr = Array.isArray(protocol?.phase_blueprints) ? protocol.phase_blueprints : [];
-    if (phaseBlueprintsArr.length > 0) return phaseBlueprintsArr;
-
-    // Map legacy `phases` array to the canonical phase_blueprints shape
-    const phasesArr = Array.isArray(protocol?.phases) ? protocol.phases : [];
-    return phasesArr.map((ph) => ({
-      phase_title:            ph.name || ph.phase_name || '',
-      default_duration_weeks: ph.duration_weeks || 4,
-      clinical_goal:          ph.objective || '',
-      clinical_purpose:       ph.objective ? [ph.objective] : [],
-      clinical_events:        [],
-      drugs: (ph.drugs || ph.compounds || ph.medications || []).map((d) => {
-        const firstSched = d.schedule?.[0];
-        const freqVal = firstSched?.frequency;
-        const injPerWeek = freqVal ? frequencyToInjectionsPerWeek(freqVal) : 1;
-        const derivedWeeklyDose = firstSched?.dose?.amount ? firstSched.dose.amount * injPerWeek : null;
-
-        return {
-          product_title:  d.product_title || d.name || d.compound || '',
-          route:          d.dose_logic?.route_of_administration || d.route || 'subcutaneous',
-          vial_strength:  d.vial_strength || d.dose_logic?.vial_strength || null,
-          reconstitution: d.reconstitution || null,
-          dose_logic: {
-            starting_weekly_dose:     d.dose_logic?.starting_weekly_dose     ?? derivedWeeklyDose,
-            dose_per_administration:  d.dose_logic?.dose_per_administration  ?? firstSched?.dose?.amount ?? null,
-            dose_unit:                d.dose_logic?.dose_unit                || firstSched?.dose?.unit || '',
-            administration_frequency: d.dose_logic?.administration_frequency || firstSched?.frequency?.label || d.frequency || '',
-            route_of_administration:  d.dose_logic?.route_of_administration  || d.route    || 'subcutaneous',
-            vials_required:           d.dose_logic?.vials_required            ?? d.procurement?.vialCount ?? null,
-            administrations_per_week: d.dose_logic?.administrations_per_week  ?? (freqVal ? injPerWeek : null) ?? null,
-            vial_strength:            d.dose_logic?.vial_strength             || d.vial_strength || null,
-            reconstitution_water_ml:  d.dose_logic?.reconstitution_water_ml   ?? d.reconstitution?.water_volume_ml ?? null,
-            final_concentration:      d.dose_logic?.final_concentration       ?? d.reconstitution?.final_concentration ?? null,
-          },
-        };
-      }),
-    }));
-  }, [protocol?.id, protocol?.phase_blueprints, protocol?.phases]);
+    return Array.isArray(protocol?.phases) ? protocol.phases : [];
+  }, [protocol?.id, protocol?.phases]);
 
   // ── Render guards ──────────────────────────────────────────────────────────
   if (loading) return <ProtocolSkeleton />;
@@ -853,15 +806,15 @@ export default function ProtocolTemplate({
               const seen = new Set();
               const reconRows = [];
               activeBlueprintPhases.forEach((ph) => {
-                (ph.drugs || []).forEach((d) => {
-                  const key = d.product_title || d.name || 'Unknown';
+                (ph.compounds || ph.drugs || []).forEach((d) => {
+                  const key = d.name || d.product_name || 'Unknown';
                   if (seen.has(key)) return;
                   seen.add(key);
-                  const strength = d.vial_strength || d.dose_logic?.vial_strength || null;
-                  const water = d.reconstitution?.water_volume_ml ?? d.dose_logic?.reconstitution_water_ml ?? null;
-                  const conc = d.reconstitution?.final_concentration ?? d.dose_logic?.final_concentration ?? null;
-                  const notes = d.reconstitution?.notes ?? null;
-                  const targetDose = d.dose_logic?.starting_weekly_dose || d.dose_logic?.dose_per_administration || 250;
+                  const strength = d.reconstitution?.vialStrengthMg ? `${d.reconstitution.vialStrengthMg}mg` : (d.vial_strength ? `${d.vial_strength}mg` : null);
+                  const water = d.reconstitution?.diluentMl ? `${d.reconstitution.diluentMl}mL` : null;
+                  const conc = d.reconstitution?.finalConcentration || null;
+                  const notes = d.clinicalNotes || d.storage || null;
+                  const targetDose = d.dosage || d.dose || '250 mcg';
                   reconRows.push({ compound: key, strength, water, conc, notes, targetDose });
                 });
               });
@@ -882,13 +835,7 @@ export default function ProtocolTemplate({
 
             {/* ── Phase 2: Pharmacokinetics Simulator Accordion ───────────────── */}
             {(() => {
-              const simCompounds = [];
-              protocol.phase_blueprints?.forEach((ph) => {
-                const drugs = ph.drugs || ph.compounds || ph.medications || ph.drugs_used || [];
-                drugs.forEach((d) => {
-                  simCompounds.push(d);
-                });
-              });
+              const simCompounds = activeBlueprintPhases.flatMap(ph => ph.compounds || ph.drugs || []);
               if (simCompounds.length === 0) return null;
               return (
                 <SectionAccordion
@@ -903,81 +850,28 @@ export default function ProtocolTemplate({
               );
             })()}
 
-
             {/* Interactive Clinical Gantt Diagram & Phased Timeline */}
             <div style={{ marginBottom: '2rem' }}>
               <ClinicalGanttTimeline protocol={protocol} />
             </div>
 
-            {/* Phases accordion (detailed) — Section: Treatment Flow */}
-            {activeBlueprintPhases.length > 0 && (() => {
-              // Compute cumulative week ranges for each phase
-              let cursor = 1;
-              const phaseData = activeBlueprintPhases.map((ph) => {
-                const dur = ph.default_duration_weeks || 4;
-                const startWk = cursor;
-                const endWk = cursor + dur - 1;
-                cursor += dur;
-                return {
-                  ph,
-                  weekRange: `Wk ${startWk}–${endWk}`,
-                  clinicalGoal: Array.isArray(ph.clinical_purpose)
-                    ? ph.clinical_purpose.join(' · ')
-                    : (ph.clinical_goal || ph.objective || ''),
-                };
-              });
-
-              return (
-                <SectionAccordion
-                  id={`${slug}_treatment_flow`}
-                  title="Treatment Flow"
-                  icon={Layers}
-                  accentColor="var(--color-primary)"
-                >
-                  <div className="proto-phases">
-                    {phaseData.map(({ ph, weekRange, clinicalGoal }, i) => {
-                      const bluePh = {
-                        name: ph.phase_title,
-                        phase_name: ph.phase_title,
-                        duration_weeks: ph.default_duration_weeks,
-                        objective: clinicalGoal,
-                        drugs: (ph.drugs || []).map(d => ({
-                          name: d.product_title,
-                          dose: d.dose_logic?.starting_weekly_dose
-                            ? `${d.dose_logic.starting_weekly_dose}${d.dose_logic.dose_unit} (start)`
-                            : d.dose_logic?.dose_per_administration
-                            ? `${d.dose_logic.dose_per_administration}${d.dose_logic.dose_unit}` : '',
-                          frequency: d.dose_logic?.administration_frequency?.replace(/_/g, ' '),
-                          route: d.route,
-                        })),
-                        notes: ph.clinical_events?.map(e => `Wk ${e.week}: ${e.title}`).join(' | '),
-                      };
-                      return (
-                        <div key={i} ref={el => (phaseRefs.current[i] = el)}>
-                          <PhaseAccordion
-                            phase={bluePh}
-                            index={i}
-                            weekRange={weekRange}
-                            clinicalGoal={clinicalGoal}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </SectionAccordion>
-              );
-            })()}
-
-            {/* Legacy fallback — only shown when activeBlueprintPhases is empty (edge case) */}
-            {phases.length > 0 && activeBlueprintPhases.length === 0 && (
+            {/* Phases accordion — Section: Treatment Flow (Single SSOT Scheme, zero mapping) */}
+            {activeBlueprintPhases.length > 0 && (
               <SectionAccordion
-                id={`${slug}_phases`}
-                title="Protocol Phases"
+                id={`${slug}_treatment_flow`}
+                title="Treatment Flow & Clinical Phases"
                 icon={Layers}
                 accentColor="var(--color-primary)"
               >
                 <div className="proto-phases">
-                  {phases.map((ph, i) => (<PhaseAccordion key={i} phase={ph} index={i} />))}
+                  {activeBlueprintPhases.map((ph, i) => (
+                    <div key={i} ref={el => (phaseRefs.current[i] = el)}>
+                      <PhaseAccordion
+                        phase={ph}
+                        index={i}
+                      />
+                    </div>
+                  ))}
                 </div>
               </SectionAccordion>
             )}
@@ -992,16 +886,15 @@ export default function ProtocolTemplate({
               safetyNotes={safetyNotes}
               references={references}
             />
-            {/* ── Included Peptides ─────────────────────────────────────────── */}
+            {/* ── Included Peptides (Single SSOT schema) ───────────────────── */}
             {(() => {
-              // Extract unique compounds from v2 phase_blueprints OR legacy phases
-              const allCompounds = (protocol?.phase_blueprints || protocol?.phases || [])
-                .flatMap(ph => ph.drugs || ph.compounds || ph.drugs_used || []);
+              const allCompounds = (protocol?.phases || [])
+                .flatMap(ph => ph.compounds || ph.drugs || []);
 
               // Deduplicate by slug/name
               const seen = new Set();
               const uniqueCompounds = allCompounds.filter(d => {
-                const key = d.product_slug || d.slug || d.name || d.product_title;
+                const key = d.id || d.name || d.product_name;
                 if (!key || seen.has(key)) return false;
                 seen.add(key);
                 return true;
@@ -1106,7 +999,7 @@ export default function ProtocolTemplate({
                 defaultOpen={false}
               >
                 <ProtocolSupplyEngine
-                  phase_blueprints={activeBlueprintPhases}
+                  phases={activeBlueprintPhases}
                   products={protocolProducts || []}
                   region={region || 'US'}
                   tier={isProfessional ? 'clinic' : 'retail'}
@@ -1166,7 +1059,7 @@ export default function ProtocolTemplate({
       </div>
 
       {/* ── Floating Action Bar (Glassmorphism) ───────────────────────────────── */}
-      {Array.isArray(protocol.phase_blueprints) && protocol.phase_blueprints.length > 0 && (
+      {Array.isArray(protocol.phases) && protocol.phases.length > 0 && (
         <div style={{
           position: 'fixed',
           bottom: '1.5rem',

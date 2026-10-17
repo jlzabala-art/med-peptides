@@ -188,18 +188,18 @@ export function calculateVialsNeeded({ doseAmount, maxDose, dosingPerWeek, durat
  */
 export function derivePhaseSupply(phase_blueprints = [], dailyDose = null) {
   return phase_blueprints.map((ph, phIdx) => {
-    const dur = ph.default_duration_weeks || ph.duration_weeks || 4;
-    const phaseTitle = ph.phase_title || ph.name || `Phase ${phIdx + 1}`;
+    const dur = ph.durationWeeks || ph.duration_weeks || ph.default_duration_weeks || 4;
+    const phaseTitle = ph.phaseName || ph.name || ph.phase_title || `Phase ${phIdx + 1}`;
 
-    const drugList = ph.drugs_used || ph.drugs || [];
+    const drugList = ph.compounds || ph.drugs || ph.drugs_used || [];
 
     const compounds = drugList.map((d, dIdx) => {
       const logic = d.dose_logic || {};
-      const key   = d.productId || d.product_slug || d.product_title || `drug_${phIdx}_${dIdx}`;
+      const key   = d.id || d.productId || d.product_slug || d.product_title || `drug_${phIdx}_${dIdx}`;
 
       let override = null;
       if (dailyDose?.compounds) {
-        const searchSlug = d.product_slug || d.productId || d.product_title || '';
+        const searchSlug = d.product_slug || d.productId || d.product_title || d.name || '';
         const normalised = searchSlug.toLowerCase().replace(/[-_\\s]+/g, '');
         const found = Object.entries(dailyDose.compounds).find(
           ([k]) => k.toLowerCase().replace(/[-_\\s]+/g, '') === normalised
@@ -208,23 +208,24 @@ export function derivePhaseSupply(phase_blueprints = [], dailyDose = null) {
       }
 
       const canonicalVials =
-        logic.vials_required != null ? Number(logic.vials_required)
+        d.reconstitution?.vials_required != null ? Number(d.reconstitution.vials_required)
+        : logic.vials_required != null ? Number(logic.vials_required)
         : d.vials_required   != null ? Number(d.vials_required)
         : null;
 
       const freq = override?.frequency
+        || d.frequency
         || logic.administration_frequency
-        || logic.frequency
         || d.dosing_frequency
         || 'once_weekly';
-      const dosingPerWeek = parseFrequencyToInjectionsPerWeek(freq);
+      const dosingPerWeek = d.frequencyTimesPerWeek || parseFrequencyToInjectionsPerWeek(freq);
 
-      let doseAmountRaw = override?.doseAmount ?? parseFloat(
+      let doseAmountRaw = override?.doseAmount ?? d.doseAmount ?? parseFloat(
         logic.starting_weekly_dose || logic.dose_per_administration || 0
       );
       let maxDoseRaw = override?.maxDose ?? parseFloat(logic.max_weekly_dose || logic.possible_next_step_dose || 0);
       
-      const doseUnit = override?.doseUnit || logic.dose_unit || 'mg';
+      const doseUnit = override?.doseUnit || d.doseUnit || logic.dose_unit || 'mg';
       const doseAmount = doseUnit === 'mcg' ? doseAmountRaw / 1000 : doseAmountRaw;
       const maxDose = (doseUnit === 'mcg' && maxDoseRaw) ? maxDoseRaw / 1000 : (maxDoseRaw || null);
 

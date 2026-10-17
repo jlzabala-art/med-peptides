@@ -1,417 +1,100 @@
 {
+  "id": "horm_001",
   "protocol_id": "horm_001",
-  "protocol_slug": "hormonal-support-structured",
+  "name": "Hormonal Support Protocol",
+  "title": "Hormonal Support Protocol",
   "protocol_title": "Hormonal Support Protocol",
-  "protocol_version": "v6.0",
+  "slug": "hormonal-support-structured",
+  "protocol_slug": "hormonal-support-structured",
+  "shortCode": "HORM-001",
+  "short_code": "HORM-001",
+  "category": "Regenerative",
+  "therapeutic_category": "Regenerative",
+  "categoryId": "Regenerative",
   "status": "approved",
-  "active": true,
-  "metadata": {
-    "primary_goal": "hormonal_support",
-    "primary_condition": "reproductive_axis_support_hormonal_signaling_support",
-    "complexity_level": "standard",
-    "visibility": "public",
-    "source_type": "curated_library",
-    "source_reference": "Atlas Health_Hormonal_Protocols_2026",
-    "marker_alignment": {
-      "hormonal_objective": {
-        "gh_axis": {
-          "score": 95,
-          "note": "Direct GH-axis stimulation"
-        },
-        "metabolic": {
-          "score": 80,
-          "note": "IGF-1 mediated metabolic support"
-        },
-        "repair": {
-          "score": 85,
-          "note": "Systemic repair signaling via GH"
-        }
-      }
-    },
-    "author": {
-      "name": "Atlas Health Clinical Team",
-      "organization": "Atlas Health",
-      "title": "Peptide Specialists"
-    },
-    "review": {
-      "review_status": "approved",
-      "last_reviewed_at": "2026-04-02"
-    },
-    "created_at": "2026-04-02T00:00:00.000Z",
-    "updated_at": "2026-04-02T00:00:00.000Z",
-    "evidence_basis": {
-      "core_active": "Kisspeptin",
-      "optional_support": "Gonadorelin",
-      "evidence_strength": "moderate_clinical_basis",
-      "evidence_notes": [
-        "Kisspeptin has a meaningful human reproductive endocrinology literature base.",
-        "Protocol should remain focused on axis support rather than disease treatment claims."
-      ]
-    },
-    "evidence_grade": "B",
-    "evidence_grade_note": "Grade B: Kisspeptin-10/54 clinical literature demonstrates potent, physiological stimulation of pulsatile LH/FSH and endogenous testosterone in published human RCTs (Jayasena CN et al., J Clin Invest 2014; Abbara A et al., JAMA Netw Open 2020)."
-  },
-  "eligibility_rules": {
-    "supported_age_groups": [
-      "18-35",
-      "36-50",
-      "51-65",
-      "65+"
-    ],
-    "supported_sex": [
-      "female",
-      "male"
-    ],
-    "supported_goals": [
-      "hormonal_support",
-      "reproductive_axis_support",
-      "libido_signal_support",
-      "hpga_support"
-    ],
-    "required_patient_inputs": [
-      "primary_clinical_focus",
-      "patient_demographic",
-      "age_group",
-      "start_date"
-    ],
-    "contraindications": [],
-    "relative_cautions": []
-  },
-  "variant_rules": {
-    "age_variants": {
-      "18-35": {
-        "default_duration_weeks": 8,
-        "monitoring_intensity": "standard"
-      },
-      "36-50": {
-        "default_duration_weeks": 12,
-        "monitoring_intensity": "moderate"
-      },
-      "51-65": {
-        "default_duration_weeks": 16,
-        "monitoring_intensity": "enhanced"
-      },
-      "65+": {
-        "default_duration_weeks": 16,
-        "monitoring_intensity": "enhanced"
-      }
-    },
-    "sex_variants": {
-      "female": {
-        "recommended_flags": [
-          "hormonal_cyclicity_watch"
-        ],
-        "special_notes": [
-          "Use conservative ramping if sensitivity profile is high."
-        ]
-      },
-      "male": {
-        "recommended_flags": [],
-        "special_notes": [
-          "Reassess tolerance and response before escalation."
-        ]
-      }
-    },
-    "duration_variants": {
-      "8_weeks": {
-        "mode": "short",
-        "extra_monitoring": false
-      },
-      "12_weeks": {
-        "mode": "standard",
-        "extra_monitoring": false
-      },
-      "16_weeks": {
-        "mode": "extended",
-        "extra_monitoring": true
-      },
-      "20_weeks": {
-        "mode": "extended_plus",
-        "extra_monitoring": true
-      }
-    },
-    "tempo_variants": {
-      "conservative": {
-        "dose_step_interval_weeks": 4,
-        "monitoring_intensity_modifier": "up"
-      },
-      "standard": {
-        "dose_step_interval_weeks": 4,
-        "monitoring_intensity_modifier": "none"
-      },
-      "aggressive": {
-        "dose_step_interval_weeks": 2,
-        "monitoring_intensity_modifier": "up"
-      }
-    }
-  },
-  "phase_blueprints": [
+  "durationWeeks": 12,
+  "duration_weeks": 12,
+  "duration": "12 Weeks",
+  "primaryGoal": "Therapeutic Cellular Optimization",
+  "primary_goal": "Therapeutic Cellular Optimization",
+  "goals": [
+    "regenerative"
+  ],
+  "description": "Clinical peptide protocol designed for cellular regeneration and systemic optimization.",
+  "clinicalRationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "clinical_rationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "evidenceLevel": "Tier 2 - Clinical Trial / Cohort",
+  "evidence_level": "Tier 2 - Clinical Trial / Cohort",
+  "evidenceGrade": "B",
+  "evidence_grade": "B",
+  "evidenceGradeNote": "Grade B: Kisspeptin-10/54 clinical literature demonstrates potent, physiological stimulation of pulsatile LH/FSH and endogenous testosterone in published human RCTs (Jayasena CN et al., J Clin Invest 2014; Abbara A et al., JAMA Netw Open 2020).",
+  "evidence_grade_note": "Grade B: Kisspeptin-10/54 clinical literature demonstrates potent, physiological stimulation of pulsatile LH/FSH and endogenous testosterone in published human RCTs (Jayasena CN et al., J Clin Invest 2014; Abbara A et al., JAMA Netw Open 2020).",
+  "requiredLabs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "required_labs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "monitoringPlan": [
     {
-      "phase_key": "axis_activation",
-      "phase_title": "Axis Activation",
-      "default_start_week": 1,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "hpga_signaling_support",
-        "hormonal_rhythm_support",
-        "tolerance_building"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_kisspeptin",
-          "product_title": "Kisspeptin",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "administration_frequency": "daily",
-            "starting_intensity": "standard",
-            "administration_days_default": [
-              "Tuesday",
-              "Thursday"
-            ],
-            "timing_hint": "consistent_time",
-            "starting_weekly_dose": 700,
-            "default_weekly_dose": 700,
-            "dose_per_administration": 100
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_kisspeptin",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_gonadorelin",
-          "product_title": "Gonadorelin",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "administration_frequency": "2x_week",
-            "starting_intensity": "optional_low",
-            "administration_days_default": [
-              "Friday"
-            ],
-            "activation_condition": "if_clinician_enables_secondary_axis_support",
-            "starting_weekly_dose": 200,
-            "default_weekly_dose": 200,
-            "dose_per_administration": 100
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_gonadorelin",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 1,
-          "event_type": "baseline_review",
-          "title": "Baseline hormonal rhythm and symptom review"
-        }
-      ]
+      "week": 0,
+      "title": "Baseline Comprehensive Panel"
     },
     {
-      "phase_key": "regulation",
-      "phase_title": "Regulation",
-      "default_start_week": 5,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "hormonal_pattern_support",
-        "symptom_reassessment"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_kisspeptin",
-          "product_title": "Kisspeptin",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "administration_frequency": "daily",
-            "intensity": "standard_plus",
-            "administration_days_default": [
-              "Tuesday",
-              "Thursday"
-            ],
-            "starting_weekly_dose": 700,
-            "default_weekly_dose": 700,
-            "dose_per_administration": 100
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_kisspeptin",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_gonadorelin",
-          "product_title": "Gonadorelin",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "administration_frequency": "2x_week",
-            "intensity": "conditional",
-            "administration_days_default": [
-              "Friday"
-            ],
-            "activation_condition": "if_midpoint_axis_support_needed",
-            "starting_weekly_dose": 200,
-            "default_weekly_dose": 200,
-            "dose_per_administration": 100
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_gonadorelin",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 8,
-          "event_type": "checkpoint",
-          "title": "Axis response reassessment"
-        }
-      ]
+      "week": 6,
+      "title": "Mid-Cycle Checkpoint & Tolerance"
     },
     {
-      "phase_key": "maintenance",
-      "phase_title": "Maintenance",
-      "default_start_week": 9,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "response_maintenance",
-        "symptom_stability"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_kisspeptin",
-          "product_title": "Kisspeptin",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "administration_frequency": "daily",
-            "intensity": "maintenance",
-            "administration_days_default": [
-              "Thursday"
-            ],
-            "starting_weekly_dose": 700,
-            "default_weekly_dose": 700,
-            "dose_per_administration": 100
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_kisspeptin",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 12,
-          "event_type": "outcome_review",
-          "title": "Final hormonal support review"
-        }
-      ]
+      "week": 12,
+      "title": "End-of-Cycle Outcome Review"
     }
   ],
-  "monitoring_plan": {
-    "baseline_required": [
-      "symptom_inventory",
-      "sleep_quality",
-      "stress_load",
-      "cycle_or_libido_pattern"
-    ],
-    "scheduled_checkpoints": [
-      {
-        "week": 4,
-        "type": "tolerance_review",
-        "measures": [
-          "sleep",
-          "symptoms",
-          "tolerance"
-        ],
-        "purpose": "Confirm early tolerance"
-      },
-      {
-        "week": 8,
-        "type": "axis_reassessment",
-        "measures": [
-          "subjective_response",
-          "cycle_or_libido_stability"
-        ],
-        "purpose": "Mid-cycle reassessment"
-      },
-      {
-        "week": 12,
-        "type": "final_outcome_review",
-        "measures": [
-          "overall_response",
-          "stability"
-        ],
-        "purpose": "End-of-cycle evaluation"
-      }
-    ],
-    "labs": []
-  },
-  "expected_outcomes": {
-    "qualitative": [
-      "better hormonal rhythm stability",
-      "improved endocrine signaling support"
-    ],
-    "quantitative_ranges": {
-      "symptom_support_expected": "variable_mild_to_moderate"
-    }
-  },
-  "generator_rules": {
-    "selection_priority": [
-      "goal_match",
-      "sex_variant_match",
-      "age_variant_match",
-      "symptom_pattern"
-    ],
-    "profile_notes": [
-      "Use clinician-supervised interpretation if pairing with other endocrine therapies."
-    ]
-  },
-  "generated_protocol_template": {
-    "patient_context": {
-      "primary_clinical_focus": null,
-      "patient_demographic": null,
-      "age_group": null,
-      "duration_weeks": null,
-      "start_date": null,
-      "tempo_preference": "standard"
+  "contraindications": [
+    "Active malignancy or uninvestigated neoplastic lesions",
+    "Pregnancy, planned conception, or lactation",
+    "Severe hepatic impairment (Child-Pugh Class C) or end-stage renal disease"
+  ],
+  "relativeCautions": [
+    "History of cardiac arrhythmia or severe hypertension",
+    "Concurrent administration of insulin secretagogues without dose adjustment"
+  ],
+  "expectedOutcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "expected_outcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "recommendedSupplements": [
+    {
+      "name": "Zinc",
+      "dosage": "15mg",
+      "rationale": "Essential mineral for testosterone synthesis and immune function",
+      "frequency": "Daily",
+      "weekly_dose": "105mg"
     },
-    "applied_variants": {
-      "age_variant": null,
-      "sex_variant": null,
-      "duration_variant": null,
-      "tempo_variant": "standard"
+    {
+      "name": "Ashwagandha",
+      "dosage": "300mg",
+      "rationale": "KSM-66 extract supporting hormonal balance",
+      "frequency": "Daily",
+      "weekly_dose": "2100mg"
     },
-    "resolved_phases": [],
-    "resolved_timeline": [],
-    "resolved_monitoring": [],
-    "resolved_costs": {},
-    "validation": {
-      "state": "NOT_EVALUATED",
-      "modules": []
+    {
+      "name": "Vitamin D3 + K2",
+      "dosage": "5000 IU / 100mcg",
+      "rationale": "Steroid hormone precursor and cardiovascular support",
+      "frequency": "Daily",
+      "weekly_dose": "35000 IU / 700mcg"
     }
-  },
-  "legacy_compatibility": {
-    "enabled": true,
-    "deprecated_fields": [
-      "phases",
-      "computedTimeline",
-      "computedCost"
-    ],
-    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode."
-  },
+  ],
   "recommended_supplements": [
     {
       "name": "Zinc",
@@ -435,25 +118,444 @@
       "weekly_dose": "35000 IU / 700mcg"
     }
   ],
-  "mechanism_of_action": [
-    "Targeted receptor modulation and cellular signaling optimization.",
-    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  "bom": [
+    {
+      "productId": "kisspeptin-10",
+      "product_name": "Kisspeptin-10",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "nad-plus",
+      "product_name": "NAD+",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    }
   ],
-  "safety_profile": {
-    "adverse_events": [
-      "Mild injection site reactions (redness, transient pain).",
-      "Potential for mild, transient nausea during initial dose titration."
-    ],
-    "drug_interactions": [
-      "Monitor concurrent use of medications that affect blood glucose levels.",
-      "No severe drug-drug interactions documented, but caution advised with polypharmacy."
-    ],
-    "contraindications": [
-      "Pregnancy and lactation.",
-      "Active malignancies or history of specific hormone-sensitive cancers.",
-      "Known hypersensitivity to any protocol components."
-    ]
-  },
-  "evidence_grade": "B",
-  "evidence_grade_note": "Grade B: Kisspeptin-10/54 clinical literature demonstrates potent, physiological stimulation of pulsatile LH/FSH and endogenous testosterone in published human RCTs (Jayasena CN et al., J Clin Invest 2014; Abbara A et al., JAMA Netw Open 2020)."
+  "phases": [
+    {
+      "id": "phase_1",
+      "name": "Axis Activation",
+      "phaseName": "Axis Activation",
+      "phase_name": "Axis Activation",
+      "phase_title": "Axis Activation",
+      "phaseNumber": 1,
+      "phase_number": 1,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 1,
+      "start_week": 1,
+      "endWeek": 4,
+      "end_week": 4,
+      "objective": "hpga_signaling_support · hormonal_rhythm_support · tolerance_building",
+      "clinical_goal": "hpga_signaling_support · hormonal_rhythm_support · tolerance_building",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "kisspeptin-10",
+          "product_id": "kisspeptin-10",
+          "product_slug": "kisspeptin-10",
+          "name": "Kisspeptin-10",
+          "product_name": "Kisspeptin-10",
+          "product_title": "Kisspeptin-10",
+          "compound": "Kisspeptin-10",
+          "dosage": "700 mg",
+          "dose": "700 mg (Daily (morning))",
+          "doseAmount": 700,
+          "dose_amount": 700,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "4900 mg/wk",
+          "weekly_dose": "4900 mg/wk",
+          "weeklyDoseAmount": 4900,
+          "weekly_dose_amount": 4900,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-workout",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 4,
+            "finalConcentration": "2.5 mg/mL (100 mcg per 4 UI)"
+          },
+          "clinicalNotes": "Upstream regulator of GnRH stimulating endogenous LH and FSH secretion and pulsatile testosterone."
+        },
+        {
+          "id": "nad-plus",
+          "product_id": "nad-plus",
+          "product_slug": "nad-plus",
+          "name": "NAD+",
+          "product_name": "NAD+",
+          "product_title": "NAD+",
+          "compound": "NAD+",
+          "dosage": "200 mg",
+          "dose": "200 mg (Once weekly)",
+          "doseAmount": 200,
+          "dose_amount": 200,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Once weekly",
+          "dosing_frequency": "Once weekly",
+          "frequencyTimesPerWeek": 1,
+          "weeklyDose": "200 mg/wk",
+          "weekly_dose": "200 mg/wk",
+          "weeklyDoseAmount": 200,
+          "weekly_dose_amount": 200,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or early afternoon • Avoid evening",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 500,
+            "diluentMl": 5,
+            "unitsPerDose": 50,
+            "finalConcentration": "100 mg/mL (50 mg per 50 UI)"
+          },
+          "clinicalNotes": "Essential metabolic coenzyme activating sirtuins (SIRT1-3) and PARP-mediated DNA repair."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "kisspeptin-10",
+          "product_id": "kisspeptin-10",
+          "product_slug": "kisspeptin-10",
+          "name": "Kisspeptin-10",
+          "product_name": "Kisspeptin-10",
+          "product_title": "Kisspeptin-10",
+          "compound": "Kisspeptin-10",
+          "dosage": "700 mg",
+          "dose": "700 mg (Daily (morning))",
+          "doseAmount": 700,
+          "dose_amount": 700,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "4900 mg/wk",
+          "weekly_dose": "4900 mg/wk",
+          "weeklyDoseAmount": 4900,
+          "weekly_dose_amount": 4900,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-workout",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 4,
+            "finalConcentration": "2.5 mg/mL (100 mcg per 4 UI)"
+          },
+          "clinicalNotes": "Upstream regulator of GnRH stimulating endogenous LH and FSH secretion and pulsatile testosterone."
+        },
+        {
+          "id": "nad-plus",
+          "product_id": "nad-plus",
+          "product_slug": "nad-plus",
+          "name": "NAD+",
+          "product_name": "NAD+",
+          "product_title": "NAD+",
+          "compound": "NAD+",
+          "dosage": "200 mg",
+          "dose": "200 mg (Once weekly)",
+          "doseAmount": 200,
+          "dose_amount": 200,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Once weekly",
+          "dosing_frequency": "Once weekly",
+          "frequencyTimesPerWeek": 1,
+          "weeklyDose": "200 mg/wk",
+          "weekly_dose": "200 mg/wk",
+          "weeklyDoseAmount": 200,
+          "weekly_dose_amount": 200,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or early afternoon • Avoid evening",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 500,
+            "diluentMl": 5,
+            "unitsPerDose": 50,
+            "finalConcentration": "100 mg/mL (50 mg per 50 UI)"
+          },
+          "clinicalNotes": "Essential metabolic coenzyme activating sirtuins (SIRT1-3) and PARP-mediated DNA repair."
+        }
+      ]
+    },
+    {
+      "id": "phase_2",
+      "name": "Regulation",
+      "phaseName": "Regulation",
+      "phase_name": "Regulation",
+      "phase_title": "Regulation",
+      "phaseNumber": 2,
+      "phase_number": 2,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 5,
+      "start_week": 5,
+      "endWeek": 8,
+      "end_week": 8,
+      "objective": "hormonal_pattern_support · symptom_reassessment",
+      "clinical_goal": "hormonal_pattern_support · symptom_reassessment",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "kisspeptin-10",
+          "product_id": "kisspeptin-10",
+          "product_slug": "kisspeptin-10",
+          "name": "Kisspeptin-10",
+          "product_name": "Kisspeptin-10",
+          "product_title": "Kisspeptin-10",
+          "compound": "Kisspeptin-10",
+          "dosage": "700 mg",
+          "dose": "700 mg (Daily (morning))",
+          "doseAmount": 700,
+          "dose_amount": 700,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "4900 mg/wk",
+          "weekly_dose": "4900 mg/wk",
+          "weeklyDoseAmount": 4900,
+          "weekly_dose_amount": 4900,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-workout",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 4,
+            "finalConcentration": "2.5 mg/mL (100 mcg per 4 UI)"
+          },
+          "clinicalNotes": "Upstream regulator of GnRH stimulating endogenous LH and FSH secretion and pulsatile testosterone."
+        },
+        {
+          "id": "nad-plus",
+          "product_id": "nad-plus",
+          "product_slug": "nad-plus",
+          "name": "NAD+",
+          "product_name": "NAD+",
+          "product_title": "NAD+",
+          "compound": "NAD+",
+          "dosage": "200 mg",
+          "dose": "200 mg (Once weekly)",
+          "doseAmount": 200,
+          "dose_amount": 200,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Once weekly",
+          "dosing_frequency": "Once weekly",
+          "frequencyTimesPerWeek": 1,
+          "weeklyDose": "200 mg/wk",
+          "weekly_dose": "200 mg/wk",
+          "weeklyDoseAmount": 200,
+          "weekly_dose_amount": 200,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or early afternoon • Avoid evening",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 500,
+            "diluentMl": 5,
+            "unitsPerDose": 50,
+            "finalConcentration": "100 mg/mL (50 mg per 50 UI)"
+          },
+          "clinicalNotes": "Essential metabolic coenzyme activating sirtuins (SIRT1-3) and PARP-mediated DNA repair."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "kisspeptin-10",
+          "product_id": "kisspeptin-10",
+          "product_slug": "kisspeptin-10",
+          "name": "Kisspeptin-10",
+          "product_name": "Kisspeptin-10",
+          "product_title": "Kisspeptin-10",
+          "compound": "Kisspeptin-10",
+          "dosage": "700 mg",
+          "dose": "700 mg (Daily (morning))",
+          "doseAmount": 700,
+          "dose_amount": 700,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "4900 mg/wk",
+          "weekly_dose": "4900 mg/wk",
+          "weeklyDoseAmount": 4900,
+          "weekly_dose_amount": 4900,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-workout",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 4,
+            "finalConcentration": "2.5 mg/mL (100 mcg per 4 UI)"
+          },
+          "clinicalNotes": "Upstream regulator of GnRH stimulating endogenous LH and FSH secretion and pulsatile testosterone."
+        },
+        {
+          "id": "nad-plus",
+          "product_id": "nad-plus",
+          "product_slug": "nad-plus",
+          "name": "NAD+",
+          "product_name": "NAD+",
+          "product_title": "NAD+",
+          "compound": "NAD+",
+          "dosage": "200 mg",
+          "dose": "200 mg (Once weekly)",
+          "doseAmount": 200,
+          "dose_amount": 200,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Once weekly",
+          "dosing_frequency": "Once weekly",
+          "frequencyTimesPerWeek": 1,
+          "weeklyDose": "200 mg/wk",
+          "weekly_dose": "200 mg/wk",
+          "weeklyDoseAmount": 200,
+          "weekly_dose_amount": 200,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or early afternoon • Avoid evening",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 500,
+            "diluentMl": 5,
+            "unitsPerDose": 50,
+            "finalConcentration": "100 mg/mL (50 mg per 50 UI)"
+          },
+          "clinicalNotes": "Essential metabolic coenzyme activating sirtuins (SIRT1-3) and PARP-mediated DNA repair."
+        }
+      ]
+    },
+    {
+      "id": "phase_3",
+      "name": "Maintenance",
+      "phaseName": "Maintenance",
+      "phase_name": "Maintenance",
+      "phase_title": "Maintenance",
+      "phaseNumber": 3,
+      "phase_number": 3,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 9,
+      "start_week": 9,
+      "endWeek": 12,
+      "end_week": 12,
+      "objective": "response_maintenance · symptom_stability",
+      "clinical_goal": "response_maintenance · symptom_stability",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "kisspeptin-10",
+          "product_id": "kisspeptin-10",
+          "product_slug": "kisspeptin-10",
+          "name": "Kisspeptin-10",
+          "product_name": "Kisspeptin-10",
+          "product_title": "Kisspeptin-10",
+          "compound": "Kisspeptin-10",
+          "dosage": "700 mg",
+          "dose": "700 mg (Daily (morning))",
+          "doseAmount": 700,
+          "dose_amount": 700,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "4900 mg/wk",
+          "weekly_dose": "4900 mg/wk",
+          "weeklyDoseAmount": 4900,
+          "weekly_dose_amount": 4900,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-workout",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 4,
+            "finalConcentration": "2.5 mg/mL (100 mcg per 4 UI)"
+          },
+          "clinicalNotes": "Upstream regulator of GnRH stimulating endogenous LH and FSH secretion and pulsatile testosterone."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "kisspeptin-10",
+          "product_id": "kisspeptin-10",
+          "product_slug": "kisspeptin-10",
+          "name": "Kisspeptin-10",
+          "product_name": "Kisspeptin-10",
+          "product_title": "Kisspeptin-10",
+          "compound": "Kisspeptin-10",
+          "dosage": "700 mg",
+          "dose": "700 mg (Daily (morning))",
+          "doseAmount": 700,
+          "dose_amount": 700,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "4900 mg/wk",
+          "weekly_dose": "4900 mg/wk",
+          "weeklyDoseAmount": 4900,
+          "weekly_dose_amount": 4900,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-workout",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 4,
+            "finalConcentration": "2.5 mg/mL (100 mcg per 4 UI)"
+          },
+          "clinicalNotes": "Upstream regulator of GnRH stimulating endogenous LH and FSH secretion and pulsatile testosterone."
+        }
+      ]
+    }
+  ],
+  "phasesCount": 3,
+  "_schemaVersion": 2,
+  "_unifiedAt": "2026-10-16T19:45:21.178Z"
 }

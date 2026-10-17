@@ -1,462 +1,100 @@
 {
+  "id": "wm_004",
   "protocol_id": "wm_004",
-  "protocol_slug": "personalized-metabolic-weight-loss-12w",
+  "name": "Personalized Tirzepatide + Metabolic Adjunct Protocol",
+  "title": "Personalized Tirzepatide + Metabolic Adjunct Protocol",
   "protocol_title": "Personalized Tirzepatide + Metabolic Adjunct Protocol",
-  "protocol_version": "v6.0",
+  "slug": "personalized-metabolic-weight-loss-12w",
+  "protocol_slug": "personalized-metabolic-weight-loss-12w",
+  "shortCode": "WM-004",
+  "short_code": "WM-004",
+  "category": "Regenerative",
+  "therapeutic_category": "Regenerative",
+  "categoryId": "Regenerative",
   "status": "approved",
-  "active": true,
-  "metadata": {
-    "primary_goal": "weight_management",
-    "primary_condition": "obesity_metabolic_dysfunction",
-    "complexity_level": "moderate",
-    "visibility": "public",
-    "source_type": "curated_library",
-    "source_reference": "Atlas Health_Weight_Management_Protocols_2026",
-    "author": {
-      "name": "Atlas Health Clinical Team",
-      "organization": "Atlas Health",
-      "title": "Peptide Specialists"
-    },
-    "review": {
-      "review_status": "approved",
-      "last_reviewed_at": "2026-04-02"
-    },
-    "created_at": "2026-04-02T00:00:00.000Z",
-    "updated_at": "2026-04-02T00:00:00.000Z",
-    "evidence_grade": "B",
-    "evidence_grade_note": "Grade B: Core anchor Tirzepatide possesses Grade A evidence. Adjunctive mitochondrial and lipolytic components (MOTS-c, AOD-9604) have Phase I/II human data (Cell Metab 2015; Stier et al., 2004). Combined synergistic stack graded B as an integrative protocol."
-  },
-  "eligibility_rules": {
-    "supported_age_groups": [
-      "18-35",
-      "36-50",
-      "51-65",
-      "65+"
-    ],
-    "supported_sex": [
-      "female",
-      "male"
-    ],
-    "supported_goals": [
-      "weight_management",
-      "obesity",
-      "metabolic_health",
-      "body_composition"
-    ],
-    "required_patient_inputs": [
-      "primary_clinical_focus",
-      "patient_demographic",
-      "age_group",
-      "start_date",
-      "baseline_weight",
-      "height",
-      "bmi",
-      "metabolic_status",
-      "tolerance_profile",
-      "duration_weeks"
-    ],
-    "contraindications": [
-      "history_of_pancreatitis",
-      "active_gallbladder_disease",
-      "pregnancy",
-      "MEN2_syndrome",
-      "medullary_thyroid_carcinoma_history",
-      "severe_gi_disorder"
-    ],
-    "relative_cautions": [
-      "frailty",
-      "advanced_renal_impairment",
-      "poor_oral_intake",
-      "rapid_weight_loss_history"
-    ]
-  },
-  "variant_rules": {
-    "age_variants": {
-      "18-35": {
-        "default_duration_weeks": 12,
-        "escalation_profile": "standard",
-        "monitoring_intensity": "standard"
-      },
-      "36-50": {
-        "default_duration_weeks": 12,
-        "escalation_profile": "moderate",
-        "monitoring_intensity": "moderate"
-      },
-      "51-65": {
-        "default_duration_weeks": 16,
-        "escalation_profile": "conservative",
-        "monitoring_intensity": "enhanced"
-      },
-      "65+": {
-        "default_duration_weeks": 16,
-        "escalation_profile": "conservative",
-        "monitoring_intensity": "enhanced"
-      }
-    },
-    "sex_variants": {
-      "female": {
-        "recommended_baseline_labs": [
-          "ferritin",
-          "TSH",
-          "free_T4"
-        ],
-        "special_flags": [
-          "cycle_variability",
-          "fluid_retention"
-        ]
-      },
-      "male": {
-        "recommended_baseline_labs": [
-          "total_testosterone",
-          "SHBG",
-          "estradiol"
-        ],
-        "special_flags": [
-          "androgen_status"
-        ]
-      }
-    },
-    "duration_variants": {
-      "8_weeks": {
-        "mode": "short",
-        "maintenance_phase": false,
-        "extra_monitoring": false
-      },
-      "12_weeks": {
-        "mode": "standard",
-        "maintenance_phase": true,
-        "extra_monitoring": false
-      },
-      "16_weeks": {
-        "mode": "extended",
-        "maintenance_phase": true,
-        "extra_monitoring": true
-      },
-      "20_weeks": {
-        "mode": "extended_metabolic",
-        "maintenance_phase": true,
-        "extra_monitoring": true
-      }
-    },
-    "tempo_variants": {
-      "conservative": {
-        "dose_step_interval_weeks": 4,
-        "monitoring_intensity_modifier": "up"
-      },
-      "standard": {
-        "dose_step_interval_weeks": 4,
-        "monitoring_intensity_modifier": "none"
-      },
-      "aggressive": {
-        "dose_step_interval_weeks": 2,
-        "monitoring_intensity_modifier": "up",
-        "restricted_to": [
-          "18-35",
-          "36-50"
-        ]
-      }
-    }
-  },
-  "phase_blueprints": [
+  "durationWeeks": 12,
+  "duration_weeks": 12,
+  "duration": "12 Weeks",
+  "primaryGoal": "Therapeutic Cellular Optimization",
+  "primary_goal": "Therapeutic Cellular Optimization",
+  "goals": [
+    "regenerative"
+  ],
+  "description": "Clinical peptide protocol designed for cellular regeneration and systemic optimization.",
+  "clinicalRationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "clinical_rationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "evidenceLevel": "Tier 2 - Clinical Trial / Cohort",
+  "evidence_level": "Tier 2 - Clinical Trial / Cohort",
+  "evidenceGrade": "B",
+  "evidence_grade": "B",
+  "evidenceGradeNote": "Grade B: Core anchor Tirzepatide possesses Grade A evidence. Adjunctive mitochondrial and lipolytic components (MOTS-c, AOD-9604) have Phase I/II human data (Cell Metab 2015; Stier et al., 2004). Combined synergistic stack graded B as an integrative protocol.",
+  "evidence_grade_note": "Grade B: Core anchor Tirzepatide possesses Grade A evidence. Adjunctive mitochondrial and lipolytic components (MOTS-c, AOD-9604) have Phase I/II human data (Cell Metab 2015; Stier et al., 2004). Combined synergistic stack graded B as an integrative protocol.",
+  "requiredLabs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "required_labs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "monitoringPlan": [
     {
-      "phase_key": "metabolic_induction",
-      "phase_title": "Metabolic Induction",
-      "default_start_week": 1,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "appetite_control_onboarding",
-        "metabolic_priming"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_tirzepatide",
-          "product_title": "Tirzepatide",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "starting_weekly_dose": 2.5,
-            "administration_frequency": "weekly",
-            "administration_days_default": [
-              "Monday"
-            ],
-            "default_weekly_dose": 5,
-            "dose_per_administration": 2.5
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_tirzepatide",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_mots-c",
-          "product_title": "MOTS-C",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "dose_per_administration": 5,
-            "administration_frequency": "2x_week",
-            "administration_days_default": [
-              "Tuesday",
-              "Friday"
-            ],
-            "role": "optional_personalization_adjunct",
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10
-          },
-          "variantRef": {
-            "type": "exact",
-            "variantId": "var_mots-c_sc_5mg",
-            "productId": "prd_mots-c",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 1,
-          "event_type": "baseline_review",
-          "title": "Baseline tolerance and metabolic induction review"
-        }
-      ]
+      "week": 0,
+      "title": "Baseline Comprehensive Panel"
     },
     {
-      "phase_key": "metabolic_acceleration",
-      "phase_title": "Metabolic Acceleration",
-      "default_start_week": 5,
-      "default_duration_weeks": 8,
-      "clinical_purpose": [
-        "fat_loss_acceleration",
-        "metabolic_response_optimization"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_tirzepatide",
-          "product_title": "Tirzepatide",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "default_weekly_dose": 5,
-            "possible_next_step_dose": 7.5,
-            "administration_frequency": "weekly",
-            "administration_days_default": [
-              "Monday"
-            ],
-            "starting_weekly_dose": 2.5,
-            "dose_per_administration": 2.5
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_tirzepatide",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_aod-9604",
-          "product_title": "AOD-9604",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "dose_per_administration": 300,
-            "administration_frequency": "daily",
-            "administration_days_default": [
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-              "Sunday"
-            ],
-            "role": "optional_lipolytic_adjunct",
-            "starting_weekly_dose": 2100,
-            "default_weekly_dose": 2100
-          },
-          "variantRef": {
-            "type": "exact",
-            "variantId": "var_aod9604_sc_2mg",
-            "productId": "prd_aod-9604",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_mots-c",
-          "product_title": "MOTS-C",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "dose_per_administration": 5,
-            "administration_frequency": "2x_week",
-            "administration_days_default": [
-              "Monday",
-              "Wednesday",
-              "Friday"
-            ],
-            "role": "optional_metabolic_adjunct",
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10
-          },
-          "variantRef": {
-            "type": "exact",
-            "variantId": "var_mots-c_sc_5mg",
-            "productId": "prd_mots-c",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 4,
-          "event_type": "escalation_review",
-          "title": "Dose escalation review"
-        },
-        {
-          "week": 8,
-          "event_type": "progress_audit",
-          "title": "Progress and adherence audit"
-        },
-        {
-          "week": 12,
-          "event_type": "final_review",
-          "title": "Final continuation or maintenance decision"
-        }
-      ]
+      "week": 6,
+      "title": "Mid-Cycle Checkpoint & Tolerance"
+    },
+    {
+      "week": 12,
+      "title": "End-of-Cycle Outcome Review"
     }
   ],
-  "monitoring_plan": {
-    "baseline_required": [
-      "HbA1c",
-      "fasting_glucose",
-      "insulin",
-      "lipid_profile",
-      "AST",
-      "ALT",
-      "creatinine",
-      "blood_pressure",
-      "body_weight",
-      "waist_circumference",
-      "body_composition"
-    ],
-    "scheduled_checkpoints": [
-      {
-        "week": 4,
-        "type": "tolerance_and_safety",
-        "labs": [
-          "fasting_glucose",
-          "AST",
-          "ALT",
-          "body_weight",
-          "blood_pressure"
-        ],
-        "purpose": "early tolerance and metabolic response review"
-      },
-      {
-        "week": 8,
-        "type": "metabolic_reassessment",
-        "labs": [
-          "HbA1c",
-          "fasting_glucose",
-          "insulin",
-          "lipid_profile"
-        ],
-        "purpose": "mid-course metabolic reassessment"
-      },
-      {
-        "week": 12,
-        "type": "outcome_and_safety_review",
-        "labs": [
-          "HbA1c",
-          "lipid_profile",
-          "AST",
-          "ALT",
-          "creatinine"
-        ],
-        "purpose": "end-of-cycle review"
-      }
-    ],
-    "labs": []
-  },
-  "expected_outcomes": {
-    "qualitative": [
-      "reduced appetite",
-      "progressive fat loss",
-      "improved metabolic efficiency"
-    ],
-    "quantitative_ranges": {
-      "weight_loss_percent": "5-15%",
-      "waist_reduction_cm": "5-12",
-      "HbA1c_reduction_percent": "0.4-1.2",
-      "fat_mass_reduction_percent": "4-10%"
-    }
-  },
-  "generator_rules": {
-    "selection_priority": [
-      "goal_match",
-      "age_variant_match",
-      "sex_variant_match",
-      "duration_variant_match",
-      "contraindication_screen",
-      "tolerance_profile"
-    ],
-    "tolerance_profiles": {
-      "good": {
-        "max_intensity": "aggressive"
-      },
-      "average": {
-        "max_intensity": "standard"
-      },
-      "sensitive": {
-        "max_intensity": "conservative"
-      }
-    }
-  },
-  "generated_protocol_template": {
-    "patient_context": {
-      "primary_clinical_focus": null,
-      "patient_demographic": null,
-      "age_group": null,
-      "baseline_weight": null,
-      "height_cm": null,
-      "bmi": null,
-      "metabolic_status": null,
-      "duration_weeks": null,
-      "start_date": null,
-      "tempo_preference": "standard"
+  "contraindications": [
+    "Active malignancy or uninvestigated neoplastic lesions",
+    "Pregnancy, planned conception, or lactation",
+    "Severe hepatic impairment (Child-Pugh Class C) or end-stage renal disease"
+  ],
+  "relativeCautions": [
+    "History of cardiac arrhythmia or severe hypertension",
+    "Concurrent administration of insulin secretagogues without dose adjustment"
+  ],
+  "expectedOutcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "expected_outcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "recommendedSupplements": [
+    {
+      "name": "Berberine",
+      "dosage": "500mg",
+      "rationale": "Supports insulin sensitivity and glucose metabolism",
+      "frequency": "2x Daily",
+      "weekly_dose": "7000mg"
     },
-    "applied_variants": {
-      "age_variant": null,
-      "sex_variant": null,
-      "duration_variant": null,
-      "tempo_variant": "standard"
+    {
+      "name": "Alpha-Lipoic Acid",
+      "dosage": "300mg",
+      "rationale": "Mitochondrial antioxidant supporting fat metabolism",
+      "frequency": "Daily",
+      "weekly_dose": "2100mg"
     },
-    "resolved_phases": [],
-    "resolved_timeline": [],
-    "resolved_monitoring": [],
-    "resolved_costs": {},
-    "validation": {
-      "state": "NOT_EVALUATED",
-      "modules": []
+    {
+      "name": "Coenzyme Q10",
+      "dosage": "100mg",
+      "rationale": "Cellular energy production and metabolic support",
+      "frequency": "Daily",
+      "weekly_dose": "700mg"
     }
-  },
-  "legacy_compatibility": {
-    "enabled": true,
-    "legacy_aliases": {
-      "protocol_duration_weeks": 12,
-      "primary_goal": "Weight Management / Obesity",
-      "author": "system"
-    },
-    "notes": "Legacy simplified fields can be generated downstream if needed."
-  },
-  "economics": {
-    "estimated_total_cost": 1450,
-    "estimated_weekly_cost": 121,
-    "currency": "USD"
-  },
+  ],
   "recommended_supplements": [
     {
       "name": "Berberine",
@@ -480,25 +118,428 @@
       "weekly_dose": "700mg"
     }
   ],
-  "mechanism_of_action": [
-    "Targeted receptor modulation and cellular signaling optimization.",
-    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  "bom": [
+    {
+      "productId": "tirzepatide",
+      "product_name": "Tirzepatide",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "mots-c",
+      "product_name": "MOTS-c",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "aod-9604",
+      "product_name": "AOD-9604",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    }
   ],
-  "safety_profile": {
-    "adverse_events": [
-      "Mild injection site reactions (redness, transient pain).",
-      "Potential for mild, transient nausea during initial dose titration."
-    ],
-    "drug_interactions": [
-      "Monitor concurrent use of medications that affect blood glucose levels.",
-      "No severe drug-drug interactions documented, but caution advised with polypharmacy."
-    ],
-    "contraindications": [
-      "Pregnancy and lactation.",
-      "Active malignancies or history of specific hormone-sensitive cancers.",
-      "Known hypersensitivity to any protocol components."
-    ]
-  },
-  "evidence_grade": "B",
-  "evidence_grade_note": "Grade B: Core anchor Tirzepatide possesses Grade A evidence. Adjunctive mitochondrial and lipolytic components (MOTS-c, AOD-9604) have Phase I/II human data (Cell Metab 2015; Stier et al., 2004). Combined synergistic stack graded B as an integrative protocol."
+  "phases": [
+    {
+      "id": "phase_1",
+      "name": "Metabolic Induction",
+      "phaseName": "Metabolic Induction",
+      "phase_name": "Metabolic Induction",
+      "phase_title": "Metabolic Induction",
+      "phaseNumber": 1,
+      "phase_number": 1,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 1,
+      "start_week": 1,
+      "endWeek": 4,
+      "end_week": 4,
+      "objective": "appetite_control_onboarding · metabolic_priming",
+      "clinical_goal": "appetite_control_onboarding · metabolic_priming",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "tirzepatide",
+          "product_id": "tirzepatide",
+          "product_slug": "tirzepatide",
+          "name": "Tirzepatide",
+          "product_name": "Tirzepatide",
+          "product_title": "Tirzepatide",
+          "compound": "Tirzepatide",
+          "dosage": "2.5 mg",
+          "dose": "2.5 mg (Once weekly)",
+          "doseAmount": 2.5,
+          "dose_amount": 2.5,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Once weekly",
+          "dosing_frequency": "Once weekly",
+          "frequencyTimesPerWeek": 1,
+          "weeklyDose": "2.5 mg/wk",
+          "weekly_dose": "2.5 mg/wk",
+          "weeklyDoseAmount": 2.5,
+          "weekly_dose_amount": 2.5,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Evening • Same day each week",
+          "storage": "Refrigerate at 2°C – 8°C (Do Not Freeze). Aqueous stability: 28 days post-reconstitution.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 50,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Dual GIP/GLP-1 receptor agonist. Titrate slowly: start 2.5 mg x 4 weeks, then 5.0 mg, then 7.5-10 mg."
+        },
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "tirzepatide",
+          "product_id": "tirzepatide",
+          "product_slug": "tirzepatide",
+          "name": "Tirzepatide",
+          "product_name": "Tirzepatide",
+          "product_title": "Tirzepatide",
+          "compound": "Tirzepatide",
+          "dosage": "2.5 mg",
+          "dose": "2.5 mg (Once weekly)",
+          "doseAmount": 2.5,
+          "dose_amount": 2.5,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Once weekly",
+          "dosing_frequency": "Once weekly",
+          "frequencyTimesPerWeek": 1,
+          "weeklyDose": "2.5 mg/wk",
+          "weekly_dose": "2.5 mg/wk",
+          "weeklyDoseAmount": 2.5,
+          "weekly_dose_amount": 2.5,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Evening • Same day each week",
+          "storage": "Refrigerate at 2°C – 8°C (Do Not Freeze). Aqueous stability: 28 days post-reconstitution.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 50,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Dual GIP/GLP-1 receptor agonist. Titrate slowly: start 2.5 mg x 4 weeks, then 5.0 mg, then 7.5-10 mg."
+        },
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        }
+      ]
+    },
+    {
+      "id": "phase_2",
+      "name": "Metabolic Acceleration",
+      "phaseName": "Metabolic Acceleration",
+      "phase_name": "Metabolic Acceleration",
+      "phase_title": "Metabolic Acceleration",
+      "phaseNumber": 2,
+      "phase_number": 2,
+      "durationWeeks": 8,
+      "duration_weeks": 8,
+      "default_duration_weeks": 8,
+      "startWeek": 5,
+      "start_week": 5,
+      "endWeek": 12,
+      "end_week": 12,
+      "objective": "fat_loss_acceleration · metabolic_response_optimization",
+      "clinical_goal": "fat_loss_acceleration · metabolic_response_optimization",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "tirzepatide",
+          "product_id": "tirzepatide",
+          "product_slug": "tirzepatide",
+          "name": "Tirzepatide",
+          "product_name": "Tirzepatide",
+          "product_title": "Tirzepatide",
+          "compound": "Tirzepatide",
+          "dosage": "2.5 mg",
+          "dose": "2.5 mg (Once weekly)",
+          "doseAmount": 2.5,
+          "dose_amount": 2.5,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Once weekly",
+          "dosing_frequency": "Once weekly",
+          "frequencyTimesPerWeek": 1,
+          "weeklyDose": "2.5 mg/wk",
+          "weekly_dose": "2.5 mg/wk",
+          "weeklyDoseAmount": 2.5,
+          "weekly_dose_amount": 2.5,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Evening • Same day each week",
+          "storage": "Refrigerate at 2°C – 8°C (Do Not Freeze). Aqueous stability: 28 days post-reconstitution.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 50,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Dual GIP/GLP-1 receptor agonist. Titrate slowly: start 2.5 mg x 4 weeks, then 5.0 mg, then 7.5-10 mg."
+        },
+        {
+          "id": "aod-9604",
+          "product_id": "aod-9604",
+          "product_slug": "aod-9604",
+          "name": "AOD-9604",
+          "product_name": "AOD-9604",
+          "product_title": "AOD-9604",
+          "compound": "AOD-9604",
+          "dosage": "2100 mg",
+          "dose": "2100 mg (Daily (morning))",
+          "doseAmount": 2100,
+          "dose_amount": 2100,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "14700 mg/wk",
+          "weekly_dose": "14700 mg/wk",
+          "weeklyDoseAmount": 14700,
+          "weekly_dose_amount": 14700,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Strictly fasted upon waking • Delay caloric intake 30 min",
+          "storage": "Refrigerate at 2°C – 8°C. Aqueous stability: 28 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 12,
+            "finalConcentration": "2.5 mg/mL (250 mcg per 10 UI)"
+          },
+          "clinicalNotes": "C-terminal GH fragment (177-191). Stimulates adipose lipolysis without elevating insulin or IGF-1."
+        },
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "tirzepatide",
+          "product_id": "tirzepatide",
+          "product_slug": "tirzepatide",
+          "name": "Tirzepatide",
+          "product_name": "Tirzepatide",
+          "product_title": "Tirzepatide",
+          "compound": "Tirzepatide",
+          "dosage": "2.5 mg",
+          "dose": "2.5 mg (Once weekly)",
+          "doseAmount": 2.5,
+          "dose_amount": 2.5,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Once weekly",
+          "dosing_frequency": "Once weekly",
+          "frequencyTimesPerWeek": 1,
+          "weeklyDose": "2.5 mg/wk",
+          "weekly_dose": "2.5 mg/wk",
+          "weeklyDoseAmount": 2.5,
+          "weekly_dose_amount": 2.5,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Evening • Same day each week",
+          "storage": "Refrigerate at 2°C – 8°C (Do Not Freeze). Aqueous stability: 28 days post-reconstitution.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 50,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Dual GIP/GLP-1 receptor agonist. Titrate slowly: start 2.5 mg x 4 weeks, then 5.0 mg, then 7.5-10 mg."
+        },
+        {
+          "id": "aod-9604",
+          "product_id": "aod-9604",
+          "product_slug": "aod-9604",
+          "name": "AOD-9604",
+          "product_name": "AOD-9604",
+          "product_title": "AOD-9604",
+          "compound": "AOD-9604",
+          "dosage": "2100 mg",
+          "dose": "2100 mg (Daily (morning))",
+          "doseAmount": 2100,
+          "dose_amount": 2100,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "14700 mg/wk",
+          "weekly_dose": "14700 mg/wk",
+          "weeklyDoseAmount": 14700,
+          "weekly_dose_amount": 14700,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Strictly fasted upon waking • Delay caloric intake 30 min",
+          "storage": "Refrigerate at 2°C – 8°C. Aqueous stability: 28 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 12,
+            "finalConcentration": "2.5 mg/mL (250 mcg per 10 UI)"
+          },
+          "clinicalNotes": "C-terminal GH fragment (177-191). Stimulates adipose lipolysis without elevating insulin or IGF-1."
+        },
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        }
+      ]
+    }
+  ],
+  "phasesCount": 2,
+  "_schemaVersion": 2,
+  "_unifiedAt": "2026-10-16T19:45:21.186Z"
 }

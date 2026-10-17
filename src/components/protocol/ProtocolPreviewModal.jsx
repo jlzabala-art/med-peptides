@@ -39,36 +39,36 @@ const fmt = (v) => safeStr(v);
 
 // ── Section Accordion (lazy-render + localStorage persistence) ────────────────
 export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTotal, bundleAdded, localTier = 'retail', audienceType = 'doctor' }) {
-  const phases  = protocol?.phase_blueprints || protocol?.phases || [];
-  const name    = protocol?.protocol_title || protocol?.name || protocol?.protocol_name || 'Protocol';
+  const phases  = Array.isArray(protocol?.phases) ? protocol.phases : [];
+  const name    = protocol?.name || protocol?.protocol_title || 'Protocol';
   const meta    = protocol?.metadata || {};
   const today   = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 
   // Derived metadata
   const category         = protocol?.category || meta.category || '—';
-  const primaryGoal      = meta.primary_goal || protocol?.primary_goal || '—';
-  const totalWeeks       = protocol?.protocol_duration_weeks || '—';
-  const numPhases        = protocol?.number_of_phases || phases.length || '—';
-  const evidenceGrade    = meta.evidence_grade || '—';
-  const complexity       = meta.complexity_level || protocol?.complexity_level || '—';
-  const version          = protocol?.protocol_version || meta.version || '—';
+  const primaryGoal      = protocol?.primary_goal || meta.primary_goal || '—';
+  const totalWeeks       = protocol?.durationWeeks || protocol?.duration_weeks || protocol?.protocol_duration_weeks || '—';
+  const numPhases        = phases.length || '—';
+  const evidenceGrade    = protocol?.evidence_level || meta.evidence_grade || '—';
+  const complexity       = protocol?.complexity || meta.complexity_level || '—';
+  const version          = protocol?.version || meta.version || '2.0.0';
   const author           = protocol?.protocol_author_name || 'Atlas Health Clinical Team';
   const authorOrg        = protocol?.protocol_author_organization || 'Atlas Health';
-  const shortCode        = meta.shortCode || protocol?.protocol_id || '';
-  const reviewStatus     = (protocol?.protocol_review_status || protocol?.status || 'pending').toUpperCase();
-  const clinicalSummary  = meta.clinical_summary || meta.description || protocol?.overview_summary || '';
+  const shortCode        = protocol?.id || meta.shortCode || '';
+  const reviewStatus     = (protocol?.status || 'approved').toUpperCase();
+  const clinicalSummary  = protocol?.summary || meta.clinical_summary || meta.description || '';
   const longDescription  = meta.longDescription || '';
   const lastReviewed     = protocol?.protocol_last_reviewed_at || '—';
-  const washoutWeeks     = protocol?.washout_recommended_weeks || protocol?.safety_profile?.washout_recommended_weeks || null;
+  const washoutWeeks     = protocol?.washout_recommended_weeks || null;
 
   const { isGenerating, error: pdfError, generatePDF } = useProtocolPDF();
 
   const numCompounds     = useMemo(() => {
     const compoundMap = new Map();
     phases.forEach(ph => {
-      const drugs = ph.drugs || ph.drugs_used || ph.compounds || [];
-      drugs.forEach(d => {
-        const key = d.product_slug || d.name || d.product_title || 'unknown';
+      const compounds = ph.compounds || [];
+      compounds.forEach(d => {
+        const key = d.id || d.name || 'unknown';
         if (!compoundMap.has(key)) compoundMap.set(key, d);
       });
     });
@@ -77,39 +77,17 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
 
   // ── Procurement Payload Calculation for Cart ────────────────────────────
   const procurementPayload = useMemo(() => {
-    const procPhases = protocol?.phase_blueprints || protocol?.phases || [];
     const payloadItems = [];
     let bundleTotal = 0;
 
-    procPhases.forEach((phase, phIdx) => {
-      const dur = phase.duration_weeks || phase.default_duration_weeks ||
-        ((phase.end_week || 0) - (phase.start_week || 1) + 1) || 4;
-      const drugs = phase.drugs_used || phase.compounds || [];
+    phases.forEach((phase, phIdx) => {
+      const dur = phase.durationWeeks || phase.duration_weeks || 4;
+      const compounds = phase.compounds || [];
 
-      drugs.forEach(d => {
-        const logic = d.dose_logic || {};
-        const canonicalVials = logic.vials_required != null ? Number(logic.vials_required)
-          : d.vials_required != null ? Number(d.vials_required)
-          : null;
-
-        let vialsNeeded;
-        if (canonicalVials !== null && !isNaN(canonicalVials)) {
-          vialsNeeded = canonicalVials;
-        } else {
-          const freqNum = (f => {
-            const fl = (f || '').toLowerCase();
-            if (fl.includes('daily') || fl.includes('nightly')) return 7;
-            if (fl.includes('3x') || fl.includes('3 x')) return 3;
-            if (fl.includes('2x') || fl.includes('2 x')) return 2;
-            if (fl.includes('5x') || fl.includes('5 x')) return 5;
-            return 1;
-          })(d.dosing_frequency || logic.administration_frequency);
-          const doseAmt = parseFloat(logic.starting_weekly_dose || logic.dose_per_administration || d.weekly_dose || 0);
-          const vialSz  = parseFloat(d.vial_size_mg || logic.vial_strength || 5) || 5;
-          const total   = doseAmt * freqNum * dur;
-          vialsNeeded   = total > 0 ? Math.ceil(total / vialSz) : 1;
-        }
-
+      compounds.forEach(d => {
+        const vialSz = d.reconstitution?.vialQuantityMg || 5;
+        const totalNeeded = (d.weeklyDoseMg || 0) * dur;
+        const vialsNeeded = totalNeeded > 0 ? Math.ceil(totalNeeded / vialSz) : 1;
         const resolvedPrice = resolveVariantPrice(
           { pricing: d.pricing ?? null },
           { tier: localTier }
@@ -648,10 +626,10 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
             {sectionTitle('Clinical Phases & Dosing Schedule', 'var(--color-primary)', '04')}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {phases.length > 0 ? phases.map((ph, phIdx) => {
-                const dur   = ph.default_duration_weeks || ph.duration_weeks || 4;
-                const drugs = ph.drugs || ph.compounds || ph.drugs_used || [];
-                const startWk = weekCursor;
-                const endWk   = weekCursor + dur - 1;
+                const dur   = ph.durationWeeks || ph.duration_weeks || 4;
+                const compounds = ph.compounds || [];
+                const startWk = ph.startWeek || weekCursor;
+                const endWk   = ph.endWeek || (weekCursor + dur - 1);
                 weekCursor   += dur;
                 const clinPurpose = Array.isArray(ph.clinical_purpose)
                   ? ph.clinical_purpose.map(s => s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))
@@ -668,10 +646,10 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem', marginBottom: clinPurpose.length ? '0.4rem' : 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
                           <span style={{ background: 'var(--color-primary)', color: 'var(--color-bg-surface)', borderRadius: 5, padding: '0.15rem 0.5rem', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                            Phase {phIdx + 1}
+                            Phase {ph.phaseNumber || (phIdx + 1)}
                           </span>
                           <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem' }}>
-                            {safeStr(ph.phase_title || ph.name) || `Phase ${phIdx + 1}`}
+                            {safeStr(ph.phaseName || ph.name) || `Phase ${phIdx + 1}`}
                           </span>
                         </div>
                         <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--color-text-secondary)', background: '#f1f5f9', borderRadius: 5, padding: '0.15rem 0.55rem' }}>
@@ -691,86 +669,66 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
                     </div>
 
                     {/* Clinical goal / objective */}
-                    {(ph.clinical_goal || ph.objective) && (
+                    {(ph.objective || ph.clinical_goal) && (
                       <div style={{ padding: '0.55rem 1.25rem', background: '#fafbff', borderBottom: '1px solid #f0f4f8' }}>
                         <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
-                          {safeStr(ph.clinical_goal || ph.objective)}
+                          {safeStr(ph.objective || ph.clinical_goal)}
                         </p>
                       </div>
                     )}
 
                     {/* Compounds table */}
-                    {drugs.length > 0 && (
+                    {compounds.length > 0 && (
                       <div className="overflow-hidden border-t border-slate-200">
                         <DataTable
-                          data={drugs}
-                          keyField="product_title"
+                          data={compounds}
+                          keyField="name"
                           columns={[
                             {
                               id: 'compound',
                               header: 'Compound',
                               width: '32%',
-                              render: (d) => {
-                                const dl = d.dose_logic || {};
-                                const maxDose = dl.max_weekly_dose || dl.possible_next_step_dose;
-                                return (
-                                  <div>
-                                    <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                                      {safeStr(d.product_title || d.name)}
+                              render: (d) => (
+                                <div>
+                                  <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                                    {safeStr(d.name || d.id)}
+                                  </span>
+                                  {d.weeklyDose && (
+                                    <span style={{ fontSize: '0.62rem', color: '#6366f1', marginLeft: '0.35rem', fontWeight: 600 }}>
+                                      ({safeStr(d.weeklyDose)} / wk)
                                     </span>
-                                    {maxDose && (
-                                      <span style={{ fontSize: '0.62rem', color: '#6366f1', marginLeft: '0.35rem', fontWeight: 600 }}>
-                                        → up to {safeStr(maxDose)} {dl.dose_unit || ''}
-                                      </span>
-                                    )}
-                                  </div>
-                                );
-                              }
+                                  )}
+                                </div>
+                              )
                             },
                             {
                               id: 'startingDose',
-                              header: 'Starting Dose',
+                              header: 'Dose',
                               width: '20%',
-                              render: (d) => {
-                                const dl = d.dose_logic || {};
-                                const dose = dl.starting_weekly_dose != null
-                                  ? `${dl.starting_weekly_dose} ${dl.dose_unit || ''}`.trim()
-                                  : dl.dose_per_administration != null
-                                  ? `${dl.dose_per_administration} ${dl.dose_unit || ''}`.trim()
-                                  : dl.default_weekly_dose != null
-                                  ? `${dl.default_weekly_dose} ${dl.dose_unit || ''}`.trim()
-                                  : safeStr(d.weekly_dose ?? d.dose);
-                                return (
-                                  <span style={{ fontFamily: 'monospace', color: '#0369a1', fontWeight: 700 }}>
-                                    {safeStr(dose)}
-                                  </span>
-                                );
-                              }
+                              render: (d) => (
+                                <span style={{ fontFamily: 'monospace', color: '#0369a1', fontWeight: 700 }}>
+                                  {safeStr(d.dosage || (d.doseAmount ? `${d.doseAmount} ${d.doseUnit || ''}` : '—'))}
+                                </span>
+                              )
                             },
                             {
                               id: 'frequency',
                               header: 'Frequency',
                               width: '20%',
-                              render: (d) => {
-                                const dl = d.dose_logic || {};
-                                const freq = safeStr(dl.administration_frequency || d.frequency || d.frequency_of_use).replace(/_/g, ' ');
-                                return (
-                                  <span style={{ color: 'var(--color-text-secondary)', textTransform: 'capitalize' }}>
-                                    {safeStr(freq)}
-                                  </span>
-                                );
-                              }
+                              render: (d) => (
+                                <span style={{ color: 'var(--color-text-secondary)', textTransform: 'capitalize' }}>
+                                  {safeStr(d.frequency || (d.frequencyTimesPerWeek ? `${d.frequencyTimesPerWeek}×/wk` : '—'))}
+                                </span>
+                              )
                             },
                             {
                               id: 'vialsRequired',
                               header: 'Vials Required',
                               width: '14%',
                               render: (d) => {
-                                const dl = d.dose_logic || {};
-                                const weeklyDose = dl.starting_weekly_dose || dl.default_weekly_dose || 0;
-                                const totalNeeded = weeklyDose * dur;
-                                const strength = parseFloat((d.product_strength || '5').replace(/[^0-9.]/g, '')) || 5;
-                                const qty = Math.ceil(totalNeeded / strength) || 1;
+                                const vialSz = d.reconstitution?.vialQuantityMg || 5;
+                                const totalNeeded = (d.weeklyDoseMg || 0) * dur;
+                                const qty = totalNeeded > 0 ? Math.ceil(totalNeeded / vialSz) : 1;
                                 return (
                                   <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>
                                     {`${qty} vial${qty > 1 ? 's' : ''}`}
@@ -783,8 +741,7 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
                               header: 'Route',
                               width: '14%',
                               render: (d) => {
-                                const dl = d.dose_logic || {};
-                                const route = safeStr(d.route || dl.route_of_administration || d.administration_route || d.route_of_administration);
+                                const route = safeStr(d.route || 'Subcutaneous (SC)');
                                 const isSC = route.toLowerCase().includes('sub') || route.toLowerCase() === 'sc';
                                 return (
                                   <span style={{ fontSize: '0.67rem', fontWeight: 600, borderRadius: 4, padding: '0.15rem 0.45rem', background: isSC ? 'rgba(99,102,241,0.1)' : 'rgba(0,54,102,0.08)', color: isSC ? '#4f46e5' : 'var(--color-primary)' }}>
@@ -892,19 +849,26 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
                 {(() => {
                   const wd2 = [];
                   let cur2 = 1;
-                  (protocol?.phase_blueprints || []).forEach(ph2 => {
-                    const d2 = ph2.default_duration_weeks || 4;
-                    const pd = (ph2.drugs || [])[0];
+                  (protocol?.phases || []).forEach(ph2 => {
+                    const d2 = ph2.durationWeeks || ph2.duration_weeks || 4;
+                    const pd = (ph2.compounds || [])[0];
                     if (pd) {
-                      const dl2 = pd.dose_logic || {};
-                      const rd = dl2.starting_weekly_dose ?? dl2.default_weekly_dose ?? dl2.dose_per_administration ?? pd.starting_weekly_dose ?? 0;
-                      for (let w = 0; w < d2; w++) wd2.push({ week: cur2 + w, dose: rd, phase: ph2.name?.toLowerCase().includes('prim') ? 'priming' : ph2.name?.toLowerCase().includes('titr') ? 'titration' : 'therapeutic', note: ph2.purpose || '' });
+                      const rd = pd.weeklyDoseMg || (pd.doseAmount ? pd.doseAmount * (pd.frequencyTimesPerWeek || 1) : 0);
+                      const phaseKey = (ph2.phaseName || ph2.name || '').toLowerCase();
+                      for (let w = 0; w < d2; w++) {
+                        wd2.push({
+                          week: cur2 + w,
+                          dose: rd,
+                          phase: phaseKey.includes('prim') ? 'priming' : phaseKey.includes('titr') ? 'titration' : 'therapeutic',
+                          note: ph2.objective || ''
+                        });
+                      }
                     }
                     cur2 += d2;
                   });
                   return (
                     <div style={{ background: 'var(--color-bg-app)', padding: '1rem', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-                      <ProtocolTimeline weeks={cur2 - 1} weeklyDoses={wd2} productName={protocol?.protocol_title || protocol?.name} />
+                      <ProtocolTimeline weeks={cur2 - 1} weeklyDoses={wd2} productName={protocol?.name || protocol?.protocol_title} />
                     </div>
                   );
                 })()}
@@ -999,42 +963,21 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
 
           {/* ── 06: PROCUREMENT SUMMARY ── */}
           {(() => {
-            const procPhases = protocol?.phase_blueprints || protocol?.phases || [];
-            if (!procPhases.length) return null;
+            if (!phases.length) return null;
 
-            // Build procurement rows — mirrors pdfService.js logic exactly
+            // Build procurement rows — mirrors canonical phases
             const procRows = [];
             let grandTotal = 0;
 
-            procPhases.forEach((phase, phIdx) => {
-              const phLabel = `Phase ${phIdx + 1}: ${phase.phase_title || ''}`.trim();
-              const dur = phase.duration_weeks || phase.default_duration_weeks ||
-                ((phase.end_week || 0) - (phase.start_week || 1) + 1) || 4;
-              const drugs = phase.drugs_used || phase.compounds || [];
+            phases.forEach((phase, phIdx) => {
+              const phLabel = `Phase ${phase.phaseNumber || (phIdx + 1)}: ${phase.phaseName || phase.name || ''}`.trim();
+              const dur = phase.durationWeeks || phase.duration_weeks || 4;
+              const compounds = phase.compounds || [];
 
-              drugs.forEach(d => {
-                const logic = d.dose_logic || {};
-                const canonicalVials = logic.vials_required != null ? Number(logic.vials_required)
-                  : d.vials_required != null ? Number(d.vials_required)
-                  : null;
-
-                let vialsNeeded;
-                if (canonicalVials !== null && !isNaN(canonicalVials)) {
-                  vialsNeeded = canonicalVials;
-                } else {
-                  const freqNum = (f => {
-                    const fl = (f || '').toLowerCase();
-                    if (fl.includes('daily') || fl.includes('nightly')) return 7;
-                    if (fl.includes('3x') || fl.includes('3 x')) return 3;
-                    if (fl.includes('2x') || fl.includes('2 x')) return 2;
-                    if (fl.includes('5x') || fl.includes('5 x')) return 5;
-                    return 1;
-                  })(d.dosing_frequency || logic.administration_frequency);
-                  const doseAmt = parseFloat(logic.starting_weekly_dose || logic.dose_per_administration || d.weekly_dose || 0);
-                  const vialSz  = parseFloat(d.vial_size_mg || logic.vial_strength || 5) || 5;
-                  const total   = doseAmt * freqNum * dur;
-                  vialsNeeded   = total > 0 ? Math.ceil(total / vialSz) : 1;
-                }
+              compounds.forEach(d => {
+                const vialSz = d.reconstitution?.vialQuantityMg || 5;
+                const totalNeeded = (d.weeklyDoseMg || 0) * dur;
+                const vialsNeeded = totalNeeded > 0 ? Math.ceil(totalNeeded / vialSz) : 1;
 
                 const resolvedPrice = resolveVariantPrice(
                   { pricing: d.pricing ?? null },

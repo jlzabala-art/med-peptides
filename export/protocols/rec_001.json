@@ -1,446 +1,376 @@
 {
-  "active": true,
-  "complexity_level": "standard",
-  "confidence_score": 92,
-  "economics": {
-    "total_protocol_cost_estimate": 950,
-    "total_vials_required": 18
-  },
-  "number_of_phases": 2,
-  "overview_summary": "Eight-week tissue-repair protocol combining BPC-157 and TB-500 to support soft-tissue healing, angiogenesis, inflammation control, and musculoskeletal recovery.",
-  "protocol_author_name": "Atlas Health Clinical Team",
-  "protocol_author_organization": "Atlas Health",
-  "protocol_author_title": "Peptide Specialists",
-  "protocol_duration_weeks": 8,
+  "id": "rec_001",
   "protocol_id": "rec_001",
-  "protocol_is_curated": true,
-  "protocol_is_physician_authored": false,
-  "protocol_last_reviewed_at": "2026-03-29",
-  "protocol_review_status": "approved",
-  "protocol_slug": "injury-recovery-8w",
-  "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
-  "protocol_source_type": "curated_library",
-  "protocol_source_version": "v5.0",
-  "protocol_author_notes": "Official curated protocol for general clinical use.",
-  "protocol_source_reference": "internal_guide",
+  "name": "BPC-157 & TB-500 Tissue Repair Protocol",
+  "title": "BPC-157 & TB-500 Tissue Repair Protocol",
   "protocol_title": "BPC-157 & TB-500 Tissue Repair Protocol",
+  "slug": "injury-recovery-8w",
+  "protocol_slug": "injury-recovery-8w",
+  "shortCode": "REC-001",
+  "short_code": "REC-001",
+  "category": "Recovery & Tissue Repair",
+  "therapeutic_category": "Recovery & Tissue Repair",
+  "categoryId": "Recovery & Tissue Repair",
   "status": "approved",
-  "seeded_at": "2026-04-25T06:10:36.131Z",
-  "phases": [
-    {
-      "drugs_used": [
-        {
-          "dosing_frequency": "daily",
-          "product_slug": "bpc-157",
-          "selected_strength": "5mg",
-          "vials_required_for_phase": 8,
-          "productId": "BPC-157-5mg-vial"
-        },
-        {
-          "dosing_frequency": "weekly",
-          "product_slug": "tb-500",
-          "selected_strength": "5mg",
-          "vials_required_for_phase": 4,
-          "productId": "TB-500-5mg-vial"
-        }
-      ],
-      "end_week": 4,
-      "phase_number": 1,
-      "phase_title": "Acute Recovery",
-      "start_week": 1
-    },
-    {
-      "drugs_used": [
-        {
-          "dosing_frequency": "3x_week",
-          "product_slug": "bpc-157",
-          "selected_strength": "5mg",
-          "vials_required_for_phase": 6,
-          "productId": "BPC-157-5mg-vial"
-        }
-      ],
-      "end_week": 8,
-      "phase_number": 2,
-      "phase_title": "Regeneration",
-      "start_week": 5
-    }
+  "durationWeeks": 8,
+  "duration_weeks": 8,
+  "duration": "8 Weeks",
+  "primaryGoal": "Recovery / Injury",
+  "primary_goal": "Recovery / Injury",
+  "goals": [
+    "recovery & tissue repair"
   ],
-  "bundleVersion": "2.0",
-  "protocol_version": "v6.1",
-  "legacy_compatibility": {
-    "enabled": true,
-    "notes": "Enhanced protocol preserves legacy fields while supporting canonical blueprint-based loading.",
-    "deprecated_fields": [
-      "phases",
-      "computedTimeline",
-      "computedCost"
-    ]
-  },
-  "generated_protocol_template": {
-    "patient_context": {
-      "primary_clinical_focus": null,
-      "tempo_preference": "standard",
-      "age_group": null,
-      "patient_demographic": null,
-      "duration_weeks": null,
-      "start_date": null
-    },
-    "resolved_costs": {},
-    "applied_variants": {
-      "age_variant": null,
-      "sex_variant": null,
-      "duration_variant": null,
-      "tempo_variant": "standard"
-    },
-    "resolved_phases": [],
-    "resolved_timeline": [],
-    "validation": {
-      "state": "NOT_EVALUATED",
-      "modules": []
-    },
-    "resolved_monitoring": []
-  },
-  "monitoring_plan": {
-    "baseline_required": [
-      "injury_type",
-      "pain_score",
-      "range_of_motion",
-      "functional_score",
-      "inflammation_score",
-      "wound_status_if_applicable",
-      "current_NSAID_or_steroid_use"
-    ],
-    "scheduled_checkpoints": [
-      {
-        "week": 2,
-        "type": "acute_repair_review",
-        "measures": [
-          "pain_score",
-          "range_of_motion",
-          "swelling",
-          "wound_status_if_applicable"
-        ],
-        "purpose": "Confirm early tissue-repair trajectory and tolerability."
-      },
-      {
-        "week": 4,
-        "type": "transition_review",
-        "measures": [
-          "functional_score",
-          "pain_score",
-          "range_of_motion"
-        ],
-        "purpose": "Determine readiness to transition from acute to regeneration phase."
-      },
-      {
-        "week": 8,
-        "type": "final_recovery_review",
-        "measures": [
-          "functional_score",
-          "pain_score",
-          "range_of_motion",
-          "return_to_activity_status"
-        ],
-        "purpose": "Assess structural recovery and need for additional cycle."
-      }
-    ]
-  },
-  "eligibility_rules": {
-    "supported_goals": [
-      "tissue_repair",
-      "injury_recovery",
-      "musculoskeletal_recovery",
-      "post_surgical_recovery"
-    ],
-    "contraindications": [
-      "active_malignancy",
-      "pregnancy_or_breastfeeding",
-      "active_uncontrolled_infection_at_injury_site",
-      "known_hypersensitivity_to_protocol_compounds"
-    ],
-    "relative_cautions": [
-      "recent_surgery_without_surgeon_clearance",
-      "anticoagulant_use",
-      "severe_diabetes_with_poor_wound_healing",
-      "NSAID_or_steroid_dependency"
-    ],
-    "required_patient_inputs": [
-      "injury_type",
-      "injury_date",
-      "pain_score",
-      "functional_limitation",
-      "surgical_status",
-      "age_group",
-      "start_date"
-    ],
-    "supported_age_groups": [
-      "18-35",
-      "36-50",
-      "51-65",
-      "65+"
-    ],
-    "supported_sex": [
-      "female",
-      "male"
-    ]
-  },
-  "dosing_enrichment": {
-    "cycling_recommendation": "8-week tissue repair cycle. Repeat after 4-6 week reassessment only if structural symptoms persist or functional recovery remains incomplete.",
-    "maintenance_dose": "BPC-157: 250-500 mcg daily or 3x/week during regeneration/maintenance. TB-500: weekly during acute phase, then discontinue or reduce based on tissue response.",
-    "timing_optimization": "BPC-157 may be administered daily, preferably near the time of rehabilitation work or recovery period. TB-500 can be administered weekly on a consistent day. Combine with graded physical therapy rather than immobilization unless medically required.",
-    "titration_note": "Use stronger combined BPC-157 + TB-500 support in weeks 1-4. Transition to BPC-157-only or lower-frequency dosing in weeks 5-8 once pain and range of motion improve."
-  },
-  "risk_class": "low_to_moderate",
-  "physician_supervision_required": false,
-  "monitoringSchedule": [
+  "description": "Clinical peptide protocol designed for cellular regeneration and systemic optimization.",
+  "clinicalRationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "clinical_rationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "evidenceLevel": "Tier 2 - Clinical Trial / Cohort",
+  "evidence_level": "Tier 2 - Clinical Trial / Cohort",
+  "evidenceGrade": "B",
+  "evidence_grade": "B",
+  "evidenceGradeNote": "Grade B: BPC-157 exhibits robust, reproducible angiogenic, tendon, and ligament repair in extensive preclinical controlled trials (Sikiric P et al., Curr Med Chem 2020; Gwyer et al., 2019). TB-500 (Thymosin Beta-4) is supported by Phase II clinical wound healing and tissue regeneration trials (Goldstein AL et al., Expert Opin Biol Ther 2012).",
+  "evidence_grade_note": "Grade B: BPC-157 exhibits robust, reproducible angiogenic, tendon, and ligament repair in extensive preclinical controlled trials (Sikiric P et al., Curr Med Chem 2020; Gwyer et al., 2019). TB-500 (Thymosin Beta-4) is supported by Phase II clinical wound healing and tissue regeneration trials (Goldstein AL et al., Expert Opin Biol Ther 2012).",
+  "requiredLabs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "required_labs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "monitoringPlan": [
     {
       "week": 0,
-      "label": "Baseline Assessment",
-      "tests": [
-        "Full blood count (CBC)",
-        "Comprehensive metabolic panel (CMP)",
-        "Vitals & weight"
-      ],
-      "notes": "Establish baseline before starting protocol."
+      "title": "Baseline Comprehensive Panel"
     },
     {
       "week": 4,
-      "label": "Mid-Protocol Check-In",
-      "tests": [
-        "Symptom review",
-        "Subjective wellbeing score (1–10)",
-        "Side-effect screening",
-        "Fasting glucose",
-        "Insulin",
-        "HOMA-IR",
-        "Lipid panel"
-      ],
-      "notes": "Assess tolerability and early response."
+      "title": "Mid-Cycle Checkpoint & Tolerance"
     },
     {
       "week": 8,
-      "label": "End-of-Protocol Evaluation",
-      "tests": [
-        "Repeat CBC & CMP",
-        "Outcome questionnaire",
-        "Physician review",
-        "HbA1c",
-        "Full lipid panel",
-        "Body composition (DEXA or impedance)"
-      ],
-      "notes": "Full outcome assessment and decision on continuation or cycling."
+      "title": "End-of-Cycle Outcome Review"
     }
   ],
-  "riskManagement": {
-    "contraindications": [
-      "Type 1 diabetes (insulin-dependent, use with caution)",
-      "Severe renal impairment",
-      "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
-    ],
-    "side_effects": [
-      {
-        "effect": "Injection site reactions",
-        "frequency": "Common (10–30%)",
-        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
-      },
-      {
-        "effect": "Mild nausea (first 1–2 weeks)",
-        "frequency": "Uncommon (5–15%)",
-        "management": "Administer with food; reduce dose temporarily if persistent."
-      },
-      {
-        "effect": "Fatigue or somnolence",
-        "frequency": "Rare (<5%)",
-        "management": "Adjust injection timing; evaluate sleep hygiene."
-      },
-      {
-        "effect": "Headache",
-        "frequency": "Uncommon (5–10%)",
-        "management": "Hydration; paracetamol as needed; review dosing."
-      }
-    ],
-    "escalation_criteria": [
-      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
-      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
-      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
-      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
-    ],
-    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
-    "patient_education": [
-      "Demonstrate subcutaneous injection technique before starting.",
-      "Provide written dosing schedule and injection site rotation map.",
-      "Instruct patient to report any unusual symptoms within 24h.",
-      "Advise on proper sharps disposal.",
-      "Provide emergency contact number for out-of-hours concerns."
-    ]
-  },
-  "category": "Recovery & Tissue Repair",
-  "generator_rules": {
-    "allow_acceleration": false,
-    "base_duration_weeks": 8,
-    "notes": "Default generator rules – pending clinical review.",
-    "tempo_variants": [
-      "standard"
-    ],
-    "allow_extension": false
-  },
-  "primary_goal": "Recovery / Injury",
-  "_syncSource": "export/protocols/rec_001.json",
-  "metadata": {
-    "visibility": "public",
-    "primary_condition": "tissue_injury_recovery",
-    "abbreviatedName": "REC-001 · Multi-Peptide Repair Escalation – 12wk",
-    "version": "1.0",
-    "longDescription": "Body Protection Compound-157 (BPC-157) is a pentadecapeptide derived from gastric juice that promotes tendon-to-bone healing, muscle and ligament repair, and neurological recovery via upregulation of the nitric oxide (NO) system, VEGF expression, and FAK-paxillin pathway activation (Sikiric P et al., Curr Pharm Des 2018; Chang CH et al., Acta Physiol 2011). TB-500 (a synthetic peptide derived from thymosin beta-4, amino acids 17–23) sequesters G-actin, reduces inflammation, promotes angiogenesis, and facilitates keratinocyte and endothelial cell migration (Goldstein AL et al., Ann N Y Acad Sci 2012). The 8-week dual-phase protocol applies maximal dosing in the acute recovery phase (weeks 1–4) transitioning to BPC-157 maintenance for consolidation of structural repair (weeks 5–8). Suited for musculoskeletal injuries, post-surgical recovery, and overuse conditions.",
-    "keywords": [
-      "BPC-157 protocol",
-      "TB-500 tissue repair",
-      "thymosin beta-4 peptide",
-      "tendon healing peptide",
-      "musculoskeletal recovery protocol",
-      "BPC-157 TB-500 combined"
-    ],
-    "references": [
-      {
-        "pmid": "29998482",
-        "citation": "Sikiric P et al. Brain-gut Axis and Pentadecapeptide BPC 157. Curr Pharm Des 2018;24:1821-1832."
-      },
-      {
-        "pmid": "21272094",
-        "citation": "Chang CH et al. The promoting effect of pentadecapeptide BPC 157 on tendon healing. Acta Physiol 2011;201:497-507."
-      },
-      {
-        "pmid": "22295120",
-        "citation": "Goldstein AL et al. Thymosin β4: A multi-functional regenerative peptide. Ann N Y Acad Sci 2012;1269:1-8."
-      }
-    ],
-    "scientificName": "BPC-157 & Thymosin β4 (TB-500) Angiogenic Tissue Repair Protocol",
-    "description": "8-week musculoskeletal recovery protocol combining BPC-157 cytoprotective signaling and TB-500 actin-sequestering angiogenesis for accelerated soft tissue and tendon healing.",
-    "schema_version": "antigravity_v2",
-    "updated_at": "2026-04-25T00:00:00.000Z",
-    "review": {
-      "last_reviewed_at": "2026-04-25",
-      "review_status": "approved"
-    },
-    "shortCode": "REC-001",
-    "primary_goal": "Recovery / Injury",
-    "duration_weeks": 8,
-    "evidence_grade": "B",
-    "evidence_grade_note": "Grade B: BPC-157 exhibits robust, reproducible angiogenic, tendon, and ligament repair in extensive preclinical controlled trials (Sikiric P et al., Curr Med Chem 2020; Gwyer et al., 2019). TB-500 (Thymosin Beta-4) is supported by Phase II clinical wound healing and tissue regeneration trials (Goldstein AL et al., Expert Opin Biol Ther 2012)."
-  },
-  "_patchedAt": {
-    "schema_gap_fix": "2026-04-26T12:37:11Z",
-    "phase1_fix": "2026-05-17T08:28:52.937542+00:00"
-  },
-  "_schemaVersion": "antigravity_v2",
-  "_patchSchema": "antigravity_v2",
-  "expected_outcomes": {
-    "qualitative": [
-      "Improvement in primary protocol goal",
-      "Enhanced patient-reported wellbeing"
-    ],
-    "time_to_onset_weeks": null,
-    "quantitative_ranges": {},
-    "responder_rate_pct": "Pending clinical data"
-  },
-  "variant_rules": {
-    "tempo": {
-      "standard": {
-        "notes": "Standard tempo – no adjustment.",
-        "phase_duration_multiplier": 1
-      },
-      "accelerated": {
-        "notes": "Accelerated tempo – physician review required.",
-        "phase_duration_multiplier": 0.75
-      },
-      "extended": {
-        "notes": "Extended tempo – for slower responders.",
-        "phase_duration_multiplier": 1.33
-      }
-    }
-  },
-  "phase_blueprints": [
+  "contraindications": [
+    "Active malignancy or uninvestigated neoplastic lesions",
+    "Pregnancy, planned conception, or lactation",
+    "Severe hepatic impairment (Child-Pugh Class C) or end-stage renal disease"
+  ],
+  "relativeCautions": [
+    "History of cardiac arrhythmia or severe hypertension",
+    "Concurrent administration of insulin secretagogues without dose adjustment"
+  ],
+  "expectedOutcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "expected_outcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "recommendedSupplements": [
     {
-      "phase_id": "rec_001_ph1",
+      "name": "Electrolyte Hydration Complex",
+      "dose": "1 serving daily",
+      "rationale": "Maintain intracellular osmolarity during peptide therapy"
+    },
+    {
+      "name": "CoQ10 (Ubiquinol)",
+      "dose": "100 mg daily",
+      "rationale": "Mitochondrial respiratory chain electron transport support"
+    }
+  ],
+  "recommended_supplements": [
+    {
+      "name": "Electrolyte Hydration Complex",
+      "dose": "1 serving daily",
+      "rationale": "Maintain intracellular osmolarity during peptide therapy"
+    },
+    {
+      "name": "CoQ10 (Ubiquinol)",
+      "dose": "100 mg daily",
+      "rationale": "Mitochondrial respiratory chain electron transport support"
+    }
+  ],
+  "bom": [
+    {
+      "productId": "bpc-157",
+      "product_name": "BPC-157",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 2
+    },
+    {
+      "productId": "tb-500",
+      "product_name": "TB-500",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 2
+    }
+  ],
+  "phases": [
+    {
+      "id": "phase_1",
+      "name": "Acute Recovery",
+      "phaseName": "Acute Recovery",
       "phase_name": "Acute Recovery",
+      "phase_title": "Acute Recovery",
+      "phaseNumber": 1,
+      "phase_number": 1,
+      "durationWeeks": 4,
       "duration_weeks": 4,
-      "drugs": [
+      "default_duration_weeks": 4,
+      "startWeek": 1,
+      "start_week": 1,
+      "endWeek": 4,
+      "end_week": 4,
+      "objective": "Therapeutic optimization and metabolic stabilization.",
+      "clinical_goal": "Therapeutic optimization and metabolic stabilization.",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
         {
-          "product_id": "BPC-157-5mg-vial",
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
           "product_title": "BPC-157",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "administration_frequency": "daily",
-            "starting_daily_dose": 500,
-            "dose_per_administration": 500,
-            "administration_days_default": [
-              "monday",
-              "tuesday",
-              "wednesday",
-              "thursday",
-              "friday",
-              "saturday",
-              "sunday"
-            ],
-            "timing_hint": "Administer near rehabilitation work or recovery period"
-          }
+          "compound": "BPC-157",
+          "dosage": "250 mcg",
+          "dose": "250 mcg (Daily (morning))",
+          "doseAmount": 250,
+          "dose_amount": 250,
+          "doseUnit": "mcg",
+          "dose_unit": "mcg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "1750 mcg/wk",
+          "weekly_dose": "1750 mcg/wk",
+          "weeklyDoseAmount": 1750,
+          "weekly_dose_amount": 1750,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
         },
         {
-          "product_id": "TB-500-5mg-vial",
+          "id": "tb-500",
+          "product_id": "tb-500",
+          "product_slug": "tb-500",
+          "name": "TB-500",
+          "product_name": "TB-500",
           "product_title": "TB-500",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "weekly",
-            "starting_weekly_dose": 5,
-            "dose_per_administration": 5,
-            "administration_days_default": [
-              "monday"
-            ],
-            "timing_hint": "Administer consistently on the same day each week"
-          }
+          "compound": "TB-500",
+          "dosage": "2 mg",
+          "dose": "2 mg (2x weekly (Mon/Thu))",
+          "doseAmount": 2,
+          "dose_amount": 2,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "2x weekly (Mon/Thu)",
+          "dosing_frequency": "2x weekly (Mon/Thu)",
+          "frequencyTimesPerWeek": 2,
+          "weeklyDose": "4 mg/wk",
+          "weekly_dose": "4 mg/wk",
+          "weeklyDoseAmount": 4,
+          "weekly_dose_amount": 4,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or post-workout",
+          "storage": "Refrigerate at 2°C – 8°C. Handle gently, do not shake vigorously.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 80,
+            "finalConcentration": "2.5 mg/mL"
+          },
+          "clinicalNotes": "Thymosin Beta-4 bio-active fragment. G-actin sequestering peptide driving cellular migration and angiogenesis."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
+          "product_title": "BPC-157",
+          "compound": "BPC-157",
+          "dosage": "250 mcg",
+          "dose": "250 mcg (Daily (morning))",
+          "doseAmount": 250,
+          "dose_amount": 250,
+          "doseUnit": "mcg",
+          "dose_unit": "mcg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "1750 mcg/wk",
+          "weekly_dose": "1750 mcg/wk",
+          "weeklyDoseAmount": 1750,
+          "weekly_dose_amount": 1750,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
+        },
+        {
+          "id": "tb-500",
+          "product_id": "tb-500",
+          "product_slug": "tb-500",
+          "name": "TB-500",
+          "product_name": "TB-500",
+          "product_title": "TB-500",
+          "compound": "TB-500",
+          "dosage": "2 mg",
+          "dose": "2 mg (2x weekly (Mon/Thu))",
+          "doseAmount": 2,
+          "dose_amount": 2,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "2x weekly (Mon/Thu)",
+          "dosing_frequency": "2x weekly (Mon/Thu)",
+          "frequencyTimesPerWeek": 2,
+          "weeklyDose": "4 mg/wk",
+          "weekly_dose": "4 mg/wk",
+          "weeklyDoseAmount": 4,
+          "weekly_dose_amount": 4,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or post-workout",
+          "storage": "Refrigerate at 2°C – 8°C. Handle gently, do not shake vigorously.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 80,
+            "finalConcentration": "2.5 mg/mL"
+          },
+          "clinicalNotes": "Thymosin Beta-4 bio-active fragment. G-actin sequestering peptide driving cellular migration and angiogenesis."
         }
       ]
     },
     {
-      "phase_id": "rec_001_ph2",
+      "id": "phase_2",
+      "name": "Regeneration",
+      "phaseName": "Regeneration",
       "phase_name": "Regeneration",
+      "phase_title": "Regeneration",
+      "phaseNumber": 2,
+      "phase_number": 2,
+      "durationWeeks": 4,
       "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 5,
+      "start_week": 5,
+      "endWeek": 8,
+      "end_week": 8,
+      "objective": "Therapeutic optimization and metabolic stabilization.",
+      "clinical_goal": "Therapeutic optimization and metabolic stabilization.",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
+          "product_title": "BPC-157",
+          "compound": "BPC-157",
+          "dosage": "250 mcg",
+          "dose": "250 mcg (Daily (morning))",
+          "doseAmount": 250,
+          "dose_amount": 250,
+          "doseUnit": "mcg",
+          "dose_unit": "mcg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "1750 mcg/wk",
+          "weekly_dose": "1750 mcg/wk",
+          "weeklyDoseAmount": 1750,
+          "weekly_dose_amount": 1750,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
+        }
+      ],
       "drugs": [
         {
-          "product_id": "BPC-157-5mg-vial",
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
           "product_title": "BPC-157",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "administration_frequency": "3x_week",
-            "starting_weekly_dose": 1500,
-            "dose_per_administration": 500,
-            "administration_days_default": [
-              "monday",
-              "wednesday",
-              "friday"
-            ],
-            "timing_hint": "Reduce frequency once pain and range of motion improve"
-          }
+          "compound": "BPC-157",
+          "dosage": "250 mcg",
+          "dose": "250 mcg (Daily (morning))",
+          "doseAmount": 250,
+          "dose_amount": 250,
+          "doseUnit": "mcg",
+          "dose_unit": "mcg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "1750 mcg/wk",
+          "weekly_dose": "1750 mcg/wk",
+          "weeklyDoseAmount": 1750,
+          "weekly_dose_amount": 1750,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
         }
       ]
     }
   ],
-  "safety_profile": {
-    "risk_level": "moderate",
-    "common_side_effects": [],
-    "monitoring_flags": [],
-    "serious_adverse_events": [],
-    "contraindication_summary": "See eligibility_rules.contraindications."
-  },
-  "_syncedAt": "2026-04-26T12:46:32.830Z",
-  "title": "BPC-157 & TB-500 Tissue Repair Protocol",
-  "recommended_tests": [
-    "fagron-trichotest",
-    "fagron-acnetest"
-  ],
-  "evidence_grade": "B",
-  "evidence_grade_note": "Grade B: BPC-157 exhibits robust, reproducible angiogenic, tendon, and ligament repair in extensive preclinical controlled trials (Sikiric P et al., Curr Med Chem 2020; Gwyer et al., 2019). TB-500 (Thymosin Beta-4) is supported by Phase II clinical wound healing and tissue regeneration trials (Goldstein AL et al., Expert Opin Biol Ther 2012)."
+  "phasesCount": 2,
+  "_schemaVersion": 2,
+  "_unifiedAt": "2026-10-16T19:45:21.168Z"
 }

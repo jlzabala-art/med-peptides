@@ -573,6 +573,25 @@ export default async function PublicProductRoute({ params, searchParams }) {
       </>
     );
   }
+  if (isEterna) {
+    return (
+      <>
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        {breadcrumbJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+          />
+        )}
+        <EternaGenomicsDetail product={safeProduct} slug={slug} baseUrl={BASE_URL} />
+      </>
+    );
+  }
   if (isRawApi) {
     const cleanRawSlug = safeProduct.canonicalKey || slug.replace(/^api-/, '').replace(/-bulk$/, '');
     redirect(`/raw/${cleanRawSlug}`);

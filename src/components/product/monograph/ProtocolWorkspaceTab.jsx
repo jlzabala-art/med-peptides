@@ -264,9 +264,7 @@ export function buildCanonicalCompoundProtocols(canonicalName = 'PT-141', format
 }
 
 function extractProtocolClinicalSpecs(p, canonicalCompound = '', isNasal = false, isPen = false, isVial = true) {
-  const phases = Array.isArray(p.phases) && p.phases.length > 0
-    ? p.phases
-    : (Array.isArray(p.phase_blueprints) ? p.phase_blueprints : []);
+  const phases = Array.isArray(p.phases) ? p.phases : [];
 
   const benchmark = matchClinicalBenchmark(canonicalCompound || p.name || '');
 
@@ -277,58 +275,39 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '', isNasal = false
   let totalWeeks = 0;
 
   const mappedPhases = phases.map((ph, idx) => {
-    // Pick the drug/compound matching canonical compound
+    // Pick the compound matching canonical compound
     let drug = null;
-    const compoundCandidates = Array.isArray(ph.drugs) && ph.drugs.length > 0
-      ? ph.drugs
-      : (Array.isArray(ph.compounds) && ph.compounds.length > 0
-        ? ph.compounds
-        : (Array.isArray(ph.items) && ph.items.length > 0 ? ph.items : []));
+    const compounds = Array.isArray(ph.compounds) ? ph.compounds : [];
 
-    if (compoundCandidates.length > 0) {
+    if (compounds.length > 0) {
       if (canonicalCompound) {
         const compLower = canonicalCompound.toLowerCase().split(/[\s-]/)[0];
-        drug = compoundCandidates.find(d => {
-          const dTitle = (d.product_title || d.product_name || d.name || d.compound_name || '').toLowerCase();
-          const dId = (d.product_id || d.productId || d.id || '').toLowerCase();
-          return dTitle.includes(compLower) || dId.includes(compLower);
-        }) || compoundCandidates[0];
+        drug = compounds.find(d => {
+          const dTitle = (d.name || d.id || '').toLowerCase();
+          return dTitle.includes(compLower);
+        }) || compounds[0];
       } else {
-        drug = compoundCandidates[0];
+        drug = compounds[0];
       }
     }
 
-    const doseLogic = drug?.dose_logic || {};
-    const phaseWeeks = Number(ph.durationWeeks || ph.default_duration_weeks || ph.duration) || 4;
+    const phaseWeeks = Number(ph.durationWeeks || ph.duration_weeks) || 4;
     totalWeeks += phaseWeeks;
 
     let phaseDose = null;
-    let unit = 'mg';
-    const rawUnit = (ph.unit || drug?.unit || doseLogic.dose_unit || '').toLowerCase();
-    if (rawUnit === 'mcg' || rawUnit === 'µg') {
+    let unit = (drug?.doseUnit || 'mg').toLowerCase();
+    if (unit === 'mcg' || unit === 'µg') {
       unit = 'mcg';
     }
 
-    if (ph.doseMg) {
-      phaseDose = parseFloat(ph.doseMg);
-    } else if (ph.dose) {
-      const match = String(ph.dose).match(/([\d.]+)\s*(mg|mcg|µg)?/i);
+    if (drug?.doseAmount != null) {
+      phaseDose = Number(drug.doseAmount);
+    } else if (drug?.dosage) {
+      const match = String(drug.dosage).match(/([\d.]+)\s*(mg|mcg|µg)?/i);
       if (match) {
         phaseDose = parseFloat(match[1]);
         if (match[2]?.toLowerCase() === 'mcg') unit = 'mcg';
       }
-    } else if (drug?.dose) {
-      const match = String(drug.dose).match(/([\d.]+)\s*(mg|mcg|µg)?/i);
-      if (match) {
-        phaseDose = parseFloat(match[1]);
-        if (match[2]?.toLowerCase() === 'mcg') unit = 'mcg';
-      }
-    } else if (doseLogic.starting_weekly_dose) {
-      const swd = parseFloat(doseLogic.starting_weekly_dose);
-      phaseDose = (unit === 'mcg' && swd > 50) ? swd / 1000 : swd;
-    } else if (doseLogic.dose_per_administration) {
-      const dpa = parseFloat(doseLogic.dose_per_administration);
-      phaseDose = (unit === 'mcg' && dpa >= 100) ? dpa / 1000 : dpa;
     }
 
     // Convert mcg to mg if unit is mcg and dose is large (e.g. 250 mcg -> 0.25 mg)
@@ -336,7 +315,7 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '', isNasal = false
       phaseDose = phaseDose / 1000;
     }
 
-    let phaseFreq = ph.frequency || drug?.frequency || doseLogic.administration_frequency || '';
+    let phaseFreq = drug?.frequency || ph.frequency || '';
     if (/once|weekly|1x|semanal/i.test(phaseFreq)) {
       if (extractedFreqPerWeek === null) extractedFreqPerWeek = 1;
       phaseFreq = 'Once weekly';

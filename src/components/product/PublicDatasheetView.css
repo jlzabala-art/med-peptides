@@ -2260,6 +2260,23 @@
   width: 100%;
 }
 
+.proto-compounds-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.proto-compound-row {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.proto-compound-row:hover {
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important;
+}
+
 .proto-compound-card {
   box-sizing: border-box;
 }
@@ -2326,6 +2343,10 @@
   .proto-compound-card {
     padding: 0.95rem !important;
     border-radius: 10px !important;
+  }
+
+  .proto-compound-row {
+    padding: 0.85rem !important;
   }
 }
 

@@ -6,6 +6,7 @@ export const PRODUCT_CATEGORIES = [
   { id: 'genomics_biomarkers',       label: 'Genomics & Biomarkers', icon: '🧬' },
   { id: 'nutricosmetics',            label: 'Nutricosmetics', icon: '🌿' },
   { id: 'cosmetics',                 label: 'Cosmeceuticals & Skincare', icon: '🧴' },
+  { id: 'trichology_hair_care',      label: 'Trichology & Hair Care', icon: '💇' },
   { id: 'clinical_supplies',         label: 'Clinical Supplies', icon: '🩺' },
   { id: 'iv_drips',                  label: 'IV Drips & Protocols', icon: '💧' },
   { id: 'corporate_services',        label: 'B2B Services', icon: '💼' },
@@ -23,6 +24,9 @@ const CATEGORY_ALIASES = {
   'logistics_service': 'corporate_services',
   'medical_supplies': 'clinical_supplies',
   'diagnostic': 'diagnostic_test',
+  'hair_care': 'trichology_hair_care',
+  'trichology': 'trichology_hair_care',
+  'Dietary Supplement': 'nutricosmetics',
 };
 
 export function getCategoryLabel(categoryId) {

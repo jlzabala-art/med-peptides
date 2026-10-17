@@ -1,433 +1,100 @@
 {
+  "id": "lon_002",
   "protocol_id": "lon_002",
-  "protocol_slug": "longevity-circadian-structured",
+  "name": "Longevity Circadian Protocol",
+  "title": "Longevity Circadian Protocol",
   "protocol_title": "Longevity Circadian Protocol",
-  "protocol_version": "v6.0",
+  "slug": "longevity-circadian-structured",
+  "protocol_slug": "longevity-circadian-structured",
+  "shortCode": "LON-002",
+  "short_code": "LON-002",
+  "category": "Regenerative",
+  "therapeutic_category": "Regenerative",
+  "categoryId": "Regenerative",
   "status": "approved",
-  "active": true,
-  "metadata": {
-    "primary_goal": "longevity_circadian",
-    "primary_condition": "circadian_alignment_sleep_timing_recovery_support",
-    "complexity_level": "standard",
-    "visibility": "public",
-    "source_type": "curated_library",
-    "source_reference": "Atlas Health_LON_002_Protocol_2026",
-    "marker_alignment": {
-      "longevity_focus": {
-        "mitochondria": {
-          "score": 80,
-          "note": "Bioenergetic support"
-        },
-        "circadian": {
-          "score": 95,
-          "note": "Primary circadian longevity focus"
-        },
-        "pineal": {
-          "score": 90,
-          "note": "Endocrine longevity support"
-        }
-      }
-    },
-    "author": {
-      "name": "Atlas Health Clinical Team",
-      "organization": "Atlas Health",
-      "title": "Peptide Specialists"
-    },
-    "review": {
-      "review_status": "approved",
-      "last_reviewed_at": "2026-04-02"
-    },
-    "created_at": "2026-04-02T00:00:00.000Z",
-    "updated_at": "2026-04-02T00:00:00.000Z",
-    "evidence_basis": {
-      "core_active": "Epitalon",
-      "optional_support": "DSIP",
-      "evidence_strength": "exploratory_translational",
-      "evidence_notes": [
-        "Circadian peptide literature is more exploratory than metabolic or immune peptide literature.",
-        "Use as a research-oriented circadian support blueprint."
-      ]
-    },
-    "evidence_grade": "C",
-    "evidence_grade_note": "Grade C: Epithalon pineal peptide bioregulation paired with circadian neuroendocrine signaling. Demonstrates restoration of nocturnal melatonin production and circadian clock gene expression in longitudinal clinical cohorts (Khavinson & Anisimov, Neuro Endocrinol Lett 2003)."
-  },
-  "eligibility_rules": {
-    "supported_age_groups": [
-      "18-35",
-      "36-50",
-      "51-65",
-      "65+"
-    ],
-    "supported_sex": [
-      "female",
-      "male"
-    ],
-    "supported_goals": [
-      "longevity_circadian",
-      "circadian_support",
-      "sleep_timing_support",
-      "recovery_rhythm_support"
-    ],
-    "required_patient_inputs": [
-      "primary_clinical_focus",
-      "patient_demographic",
-      "age_group",
-      "start_date"
-    ],
-    "contraindications": [],
-    "relative_cautions": []
-  },
-  "variant_rules": {
-    "age_variants": {
-      "18-35": {
-        "default_duration_weeks": 8,
-        "monitoring_intensity": "standard"
-      },
-      "36-50": {
-        "default_duration_weeks": 12,
-        "monitoring_intensity": "moderate"
-      },
-      "51-65": {
-        "default_duration_weeks": 12,
-        "monitoring_intensity": "enhanced"
-      },
-      "65+": {
-        "default_duration_weeks": 16,
-        "monitoring_intensity": "enhanced"
-      }
-    },
-    "sex_variants": {
-      "female": {
-        "recommended_flags": [
-          "hormonal_cyclicity_watch"
-        ],
-        "special_notes": [
-          "Use conservative ramping if sensitivity profile is high."
-        ]
-      },
-      "male": {
-        "recommended_flags": [
-          "sleep_recovery_watch"
-        ],
-        "special_notes": [
-          "Reassess tolerance and response before escalation."
-        ]
-      }
-    },
-    "duration_variants": {
-      "8_weeks": {
-        "mode": "short",
-        "extra_monitoring": false
-      },
-      "12_weeks": {
-        "mode": "standard",
-        "extra_monitoring": false
-      },
-      "16_weeks": {
-        "mode": "extended",
-        "extra_monitoring": true
-      },
-      "20_weeks": {
-        "mode": "extended_plus",
-        "extra_monitoring": true
-      }
-    },
-    "tempo_variants": {
-      "conservative": {
-        "dose_step_interval_weeks": 4,
-        "monitoring_intensity_modifier": "up"
-      },
-      "standard": {
-        "dose_step_interval_weeks": 4,
-        "monitoring_intensity_modifier": "none"
-      },
-      "aggressive": {
-        "dose_step_interval_weeks": 2,
-        "monitoring_intensity_modifier": "up"
-      }
-    }
-  },
-  "phase_blueprints": [
+  "durationWeeks": 12,
+  "duration_weeks": 12,
+  "duration": "12 Weeks",
+  "primaryGoal": "Therapeutic Cellular Optimization",
+  "primary_goal": "Therapeutic Cellular Optimization",
+  "goals": [
+    "regenerative"
+  ],
+  "description": "Clinical peptide protocol designed for cellular regeneration and systemic optimization.",
+  "clinicalRationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "clinical_rationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "evidenceLevel": "Tier 2 - Clinical Trial / Cohort",
+  "evidence_level": "Tier 2 - Clinical Trial / Cohort",
+  "evidenceGrade": "C",
+  "evidence_grade": "C",
+  "evidenceGradeNote": "Grade C: Epithalon pineal peptide bioregulation paired with circadian neuroendocrine signaling. Demonstrates restoration of nocturnal melatonin production and circadian clock gene expression in longitudinal clinical cohorts (Khavinson & Anisimov, Neuro Endocrinol Lett 2003).",
+  "evidence_grade_note": "Grade C: Epithalon pineal peptide bioregulation paired with circadian neuroendocrine signaling. Demonstrates restoration of nocturnal melatonin production and circadian clock gene expression in longitudinal clinical cohorts (Khavinson & Anisimov, Neuro Endocrinol Lett 2003).",
+  "requiredLabs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "required_labs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "monitoringPlan": [
     {
-      "phase_key": "alignment",
-      "phase_title": "Circadian Alignment",
-      "default_start_week": 1,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "sleep_timing_support",
-        "rhythm_regularization",
-        "tolerance_building"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_epitalon",
-          "product_title": "Epitalon",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "daily",
-            "starting_intensity": "standard",
-            "administration_days_default": [
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday"
-            ],
-            "timing_hint": "evening",
-            "starting_weekly_dose": 35,
-            "default_weekly_dose": 35,
-            "dose_per_administration": 5
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_epitalon",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_dsip",
-          "product_title": "DSIP",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "administration_frequency": "daily",
-            "starting_intensity": "optional_low",
-            "administration_days_default": [
-              "Tuesday",
-              "Thursday"
-            ],
-            "activation_condition": "if_sleep_initiation_support_needed",
-            "starting_weekly_dose": 700,
-            "default_weekly_dose": 700,
-            "dose_per_administration": 100
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_dsip",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 1,
-          "event_type": "baseline_review",
-          "title": "Baseline sleep and circadian rhythm review"
-        }
-      ]
+      "week": 0,
+      "title": "Baseline Comprehensive Panel"
     },
     {
-      "phase_key": "stabilization",
-      "phase_title": "Rhythm Stabilization",
-      "default_start_week": 5,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "recovery_support",
-        "sleep_consistency",
-        "circadian_resilience"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_epitalon",
-          "product_title": "Epitalon",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "daily",
-            "intensity": "standard_plus",
-            "administration_days_default": [
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday"
-            ],
-            "timing_hint": "evening",
-            "starting_weekly_dose": 35,
-            "default_weekly_dose": 35,
-            "dose_per_administration": 5
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_epitalon",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_dsip",
-          "product_title": "DSIP",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "administration_frequency": "daily",
-            "intensity": "conditional",
-            "administration_days_default": [
-              "Tuesday",
-              "Thursday"
-            ],
-            "activation_condition": "if_sleep_fragmentation_persists",
-            "starting_weekly_dose": 700,
-            "default_weekly_dose": 700,
-            "dose_per_administration": 100
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_dsip",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 8,
-          "event_type": "checkpoint",
-          "title": "Sleep architecture reassessment"
-        }
-      ]
+      "week": 6,
+      "title": "Mid-Cycle Checkpoint & Tolerance"
     },
     {
-      "phase_key": "maintenance",
-      "phase_title": "Maintenance",
-      "default_start_week": 9,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "maintenance_of_response",
-        "schedule_stability"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_epitalon",
-          "product_title": "Epitalon",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "daily",
-            "intensity": "maintenance",
-            "administration_days_default": [
-              "Monday",
-              "Wednesday",
-              "Friday"
-            ],
-            "timing_hint": "evening",
-            "starting_weekly_dose": 35,
-            "default_weekly_dose": 35,
-            "dose_per_administration": 5
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_epitalon",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 12,
-          "event_type": "outcome_review",
-          "title": "Final circadian support review"
-        }
-      ]
+      "week": 12,
+      "title": "End-of-Cycle Outcome Review"
     }
   ],
-  "monitoring_plan": {
-    "baseline_required": [
-      "sleep_quality",
-      "sleep_timing",
-      "sleep_fragmentation",
-      "daytime_energy"
-    ],
-    "scheduled_checkpoints": [
-      {
-        "week": 4,
-        "type": "alignment_review",
-        "measures": [
-          "sleep_latency",
-          "waking_consistency",
-          "daytime_energy"
-        ],
-        "purpose": "Assess alignment response"
-      },
-      {
-        "week": 8,
-        "type": "rhythm_reassessment",
-        "measures": [
-          "sleep_quality",
-          "sleep_fragmentation"
-        ],
-        "purpose": "Midpoint reassessment"
-      },
-      {
-        "week": 12,
-        "type": "final_outcome_review",
-        "measures": [
-          "overall_circadian_support",
-          "sleep_consistency"
-        ],
-        "purpose": "End-of-cycle evaluation"
-      }
-    ],
-    "labs": []
-  },
-  "expected_outcomes": {
-    "qualitative": [
-      "better sleep timing consistency",
-      "improved circadian regularity",
-      "better recovery rhythm"
-    ],
-    "quantitative_ranges": {
-      "sleep_consistency_expected": "mild_to_moderate"
-    }
-  },
-  "generator_rules": {
-    "selection_priority": [
-      "goal_match",
-      "sleep_profile",
-      "age_variant_match",
-      "stress_load"
-    ],
-    "profile_notes": [
-      "Prefer conservative tempo in highly sleep-fragile profiles."
-    ]
-  },
-  "generated_protocol_template": {
-    "patient_context": {
-      "primary_clinical_focus": null,
-      "patient_demographic": null,
-      "age_group": null,
-      "duration_weeks": null,
-      "start_date": null,
-      "tempo_preference": "standard"
+  "contraindications": [
+    "Active malignancy or uninvestigated neoplastic lesions",
+    "Pregnancy, planned conception, or lactation",
+    "Severe hepatic impairment (Child-Pugh Class C) or end-stage renal disease"
+  ],
+  "relativeCautions": [
+    "History of cardiac arrhythmia or severe hypertension",
+    "Concurrent administration of insulin secretagogues without dose adjustment"
+  ],
+  "expectedOutcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "expected_outcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "recommendedSupplements": [
+    {
+      "name": "NMN",
+      "dosage": "250mg",
+      "rationale": "NAD+ support for circadian clock gene regulation",
+      "frequency": "Daily",
+      "weekly_dose": "1750mg"
     },
-    "applied_variants": {
-      "age_variant": null,
-      "sex_variant": null,
-      "duration_variant": null,
-      "tempo_variant": "standard"
+    {
+      "name": "Ashwagandha",
+      "dosage": "300mg",
+      "rationale": "Cortisol modulation for circadian balance",
+      "frequency": "Daily",
+      "weekly_dose": "2100mg"
     },
-    "resolved_phases": [],
-    "resolved_timeline": [],
-    "resolved_monitoring": [],
-    "resolved_costs": {},
-    "validation": {
-      "state": "NOT_EVALUATED",
-      "modules": []
+    {
+      "name": "Magnesium",
+      "dosage": "200mg",
+      "rationale": "Sleep quality and circadian rhythm regulation",
+      "frequency": "Daily (Bedtime)",
+      "weekly_dose": "1400mg"
     }
-  },
-  "legacy_compatibility": {
-    "enabled": true,
-    "deprecated_fields": [
-      "phases",
-      "computedTimeline",
-      "computedCost"
-    ],
-    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode."
-  },
+  ],
   "recommended_supplements": [
     {
       "name": "NMN",
@@ -451,25 +118,444 @@
       "weekly_dose": "1400mg"
     }
   ],
-  "mechanism_of_action": [
-    "Targeted receptor modulation and cellular signaling optimization.",
-    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  "bom": [
+    {
+      "productId": "epithalon",
+      "product_name": "Epithalon",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "dsip",
+      "product_name": "DSIP",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    }
   ],
-  "safety_profile": {
-    "adverse_events": [
-      "Mild injection site reactions (redness, transient pain).",
-      "Potential for mild, transient nausea during initial dose titration."
-    ],
-    "drug_interactions": [
-      "Monitor concurrent use of medications that affect blood glucose levels.",
-      "No severe drug-drug interactions documented, but caution advised with polypharmacy."
-    ],
-    "contraindications": [
-      "Pregnancy and lactation.",
-      "Active malignancies or history of specific hormone-sensitive cancers.",
-      "Known hypersensitivity to any protocol components."
-    ]
-  },
-  "evidence_grade": "C",
-  "evidence_grade_note": "Grade C: Epithalon pineal peptide bioregulation paired with circadian neuroendocrine signaling. Demonstrates restoration of nocturnal melatonin production and circadian clock gene expression in longitudinal clinical cohorts (Khavinson & Anisimov, Neuro Endocrinol Lett 2003)."
+  "phases": [
+    {
+      "id": "phase_1",
+      "name": "Circadian Alignment",
+      "phaseName": "Circadian Alignment",
+      "phase_name": "Circadian Alignment",
+      "phase_title": "Circadian Alignment",
+      "phaseNumber": 1,
+      "phase_number": 1,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 1,
+      "start_week": 1,
+      "endWeek": 4,
+      "end_week": 4,
+      "objective": "sleep_timing_support · rhythm_regularization · tolerance_building",
+      "clinical_goal": "sleep_timing_support · rhythm_regularization · tolerance_building",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "epithalon",
+          "product_id": "epithalon",
+          "product_slug": "epithalon",
+          "name": "Epithalon",
+          "product_name": "Epithalon",
+          "product_title": "Epithalon",
+          "compound": "Epithalon",
+          "dosage": "35 mg",
+          "dose": "35 mg (Daily (morning))",
+          "doseAmount": 35,
+          "dose_amount": 35,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "245 mg/wk",
+          "weekly_dose": "245 mg/wk",
+          "weeklyDoseAmount": 245,
+          "weekly_dose_amount": 245,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-sleep",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5.0 mg/mL (5 mg per 100 UI)"
+          },
+          "clinicalNotes": "Pineal bioregulator peptide. Administer as a cyclical 10-20 day protocol, 1-2 times per year."
+        },
+        {
+          "id": "dsip",
+          "product_id": "dsip",
+          "product_slug": "dsip",
+          "name": "DSIP",
+          "product_name": "DSIP",
+          "product_title": "DSIP",
+          "compound": "DSIP",
+          "dosage": "700 mg",
+          "dose": "700 mg (Daily (morning))",
+          "doseAmount": 700,
+          "dose_amount": 700,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "4900 mg/wk",
+          "weekly_dose": "4900 mg/wk",
+          "weeklyDoseAmount": 4900,
+          "weekly_dose_amount": 4900,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "30–60 minutes prior to anticipated sleep",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 2,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "1.0 mg/mL (100 mcg per 10 UI)"
+          },
+          "clinicalNotes": "Delta Sleep-Inducing Peptide. Induces physiological delta slow-wave sleep. Intermittent use preserves receptor sensitivity."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "epithalon",
+          "product_id": "epithalon",
+          "product_slug": "epithalon",
+          "name": "Epithalon",
+          "product_name": "Epithalon",
+          "product_title": "Epithalon",
+          "compound": "Epithalon",
+          "dosage": "35 mg",
+          "dose": "35 mg (Daily (morning))",
+          "doseAmount": 35,
+          "dose_amount": 35,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "245 mg/wk",
+          "weekly_dose": "245 mg/wk",
+          "weeklyDoseAmount": 245,
+          "weekly_dose_amount": 245,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-sleep",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5.0 mg/mL (5 mg per 100 UI)"
+          },
+          "clinicalNotes": "Pineal bioregulator peptide. Administer as a cyclical 10-20 day protocol, 1-2 times per year."
+        },
+        {
+          "id": "dsip",
+          "product_id": "dsip",
+          "product_slug": "dsip",
+          "name": "DSIP",
+          "product_name": "DSIP",
+          "product_title": "DSIP",
+          "compound": "DSIP",
+          "dosage": "700 mg",
+          "dose": "700 mg (Daily (morning))",
+          "doseAmount": 700,
+          "dose_amount": 700,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "4900 mg/wk",
+          "weekly_dose": "4900 mg/wk",
+          "weeklyDoseAmount": 4900,
+          "weekly_dose_amount": 4900,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "30–60 minutes prior to anticipated sleep",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 2,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "1.0 mg/mL (100 mcg per 10 UI)"
+          },
+          "clinicalNotes": "Delta Sleep-Inducing Peptide. Induces physiological delta slow-wave sleep. Intermittent use preserves receptor sensitivity."
+        }
+      ]
+    },
+    {
+      "id": "phase_2",
+      "name": "Rhythm Stabilization",
+      "phaseName": "Rhythm Stabilization",
+      "phase_name": "Rhythm Stabilization",
+      "phase_title": "Rhythm Stabilization",
+      "phaseNumber": 2,
+      "phase_number": 2,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 5,
+      "start_week": 5,
+      "endWeek": 8,
+      "end_week": 8,
+      "objective": "recovery_support · sleep_consistency · circadian_resilience",
+      "clinical_goal": "recovery_support · sleep_consistency · circadian_resilience",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "epithalon",
+          "product_id": "epithalon",
+          "product_slug": "epithalon",
+          "name": "Epithalon",
+          "product_name": "Epithalon",
+          "product_title": "Epithalon",
+          "compound": "Epithalon",
+          "dosage": "35 mg",
+          "dose": "35 mg (Daily (morning))",
+          "doseAmount": 35,
+          "dose_amount": 35,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "245 mg/wk",
+          "weekly_dose": "245 mg/wk",
+          "weeklyDoseAmount": 245,
+          "weekly_dose_amount": 245,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-sleep",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5.0 mg/mL (5 mg per 100 UI)"
+          },
+          "clinicalNotes": "Pineal bioregulator peptide. Administer as a cyclical 10-20 day protocol, 1-2 times per year."
+        },
+        {
+          "id": "dsip",
+          "product_id": "dsip",
+          "product_slug": "dsip",
+          "name": "DSIP",
+          "product_name": "DSIP",
+          "product_title": "DSIP",
+          "compound": "DSIP",
+          "dosage": "700 mg",
+          "dose": "700 mg (Daily (morning))",
+          "doseAmount": 700,
+          "dose_amount": 700,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "4900 mg/wk",
+          "weekly_dose": "4900 mg/wk",
+          "weeklyDoseAmount": 4900,
+          "weekly_dose_amount": 4900,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "30–60 minutes prior to anticipated sleep",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 2,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "1.0 mg/mL (100 mcg per 10 UI)"
+          },
+          "clinicalNotes": "Delta Sleep-Inducing Peptide. Induces physiological delta slow-wave sleep. Intermittent use preserves receptor sensitivity."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "epithalon",
+          "product_id": "epithalon",
+          "product_slug": "epithalon",
+          "name": "Epithalon",
+          "product_name": "Epithalon",
+          "product_title": "Epithalon",
+          "compound": "Epithalon",
+          "dosage": "35 mg",
+          "dose": "35 mg (Daily (morning))",
+          "doseAmount": 35,
+          "dose_amount": 35,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "245 mg/wk",
+          "weekly_dose": "245 mg/wk",
+          "weeklyDoseAmount": 245,
+          "weekly_dose_amount": 245,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-sleep",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5.0 mg/mL (5 mg per 100 UI)"
+          },
+          "clinicalNotes": "Pineal bioregulator peptide. Administer as a cyclical 10-20 day protocol, 1-2 times per year."
+        },
+        {
+          "id": "dsip",
+          "product_id": "dsip",
+          "product_slug": "dsip",
+          "name": "DSIP",
+          "product_name": "DSIP",
+          "product_title": "DSIP",
+          "compound": "DSIP",
+          "dosage": "700 mg",
+          "dose": "700 mg (Daily (morning))",
+          "doseAmount": 700,
+          "dose_amount": 700,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "4900 mg/wk",
+          "weekly_dose": "4900 mg/wk",
+          "weeklyDoseAmount": 4900,
+          "weekly_dose_amount": 4900,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "30–60 minutes prior to anticipated sleep",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 2,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "1.0 mg/mL (100 mcg per 10 UI)"
+          },
+          "clinicalNotes": "Delta Sleep-Inducing Peptide. Induces physiological delta slow-wave sleep. Intermittent use preserves receptor sensitivity."
+        }
+      ]
+    },
+    {
+      "id": "phase_3",
+      "name": "Maintenance",
+      "phaseName": "Maintenance",
+      "phase_name": "Maintenance",
+      "phase_title": "Maintenance",
+      "phaseNumber": 3,
+      "phase_number": 3,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 9,
+      "start_week": 9,
+      "endWeek": 12,
+      "end_week": 12,
+      "objective": "maintenance_of_response · schedule_stability",
+      "clinical_goal": "maintenance_of_response · schedule_stability",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "epithalon",
+          "product_id": "epithalon",
+          "product_slug": "epithalon",
+          "name": "Epithalon",
+          "product_name": "Epithalon",
+          "product_title": "Epithalon",
+          "compound": "Epithalon",
+          "dosage": "35 mg",
+          "dose": "35 mg (Daily (morning))",
+          "doseAmount": 35,
+          "dose_amount": 35,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "245 mg/wk",
+          "weekly_dose": "245 mg/wk",
+          "weeklyDoseAmount": 245,
+          "weekly_dose_amount": 245,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-sleep",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5.0 mg/mL (5 mg per 100 UI)"
+          },
+          "clinicalNotes": "Pineal bioregulator peptide. Administer as a cyclical 10-20 day protocol, 1-2 times per year."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "epithalon",
+          "product_id": "epithalon",
+          "product_slug": "epithalon",
+          "name": "Epithalon",
+          "product_name": "Epithalon",
+          "product_title": "Epithalon",
+          "compound": "Epithalon",
+          "dosage": "35 mg",
+          "dose": "35 mg (Daily (morning))",
+          "doseAmount": 35,
+          "dose_amount": 35,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "245 mg/wk",
+          "weekly_dose": "245 mg/wk",
+          "weeklyDoseAmount": 245,
+          "weekly_dose_amount": 245,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or pre-sleep",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5.0 mg/mL (5 mg per 100 UI)"
+          },
+          "clinicalNotes": "Pineal bioregulator peptide. Administer as a cyclical 10-20 day protocol, 1-2 times per year."
+        }
+      ]
+    }
+  ],
+  "phasesCount": 3,
+  "_schemaVersion": 2,
+  "_unifiedAt": "2026-10-16T19:45:21.181Z"
 }

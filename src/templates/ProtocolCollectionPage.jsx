@@ -165,22 +165,8 @@ function phaseToString(p) {
 }
 
 function extractPhases(doc) {
-  // 1. Direct canonical phases array
   if (Array.isArray(doc.phases) && doc.phases.length) {
-    return doc.phases.map(phaseToString).filter(Boolean).slice(0, 4);
-  }
-  // 2. phase_blueprints
-  const blueprints = Array.isArray(doc.phase_blueprints) ? doc.phase_blueprints : [];
-  if (blueprints.length) {
-    return blueprints
-      .map(phaseToString)
-      .filter(Boolean)
-      .slice(0, 4); // cap to keep cards compact
-  }
-  // 3. Firestore resolved_phases fallback
-  const resolved = doc.generated_protocol_template?.resolved_phases;
-  if (Array.isArray(resolved) && resolved.length) {
-    return resolved.map(phaseToString).filter(Boolean).slice(0, 4);
+    return doc.phases.map(p => p.phaseName || p.name || `Phase ${p.phaseNumber || ''}`).filter(Boolean).slice(0, 4);
   }
   return [];
 }
@@ -189,79 +175,35 @@ function extractPhases(doc) {
  * Extracts compound names used across all phases.
  * Returns an array of unique product titles (e.g. ['Semax', 'Selank']).
  */
-/** Coerces every element to a string; drops nulls and objects we can't label. */
-function toStringArray(arr) {
-  if (!Array.isArray(arr)) return [];
-  return arr
-    .map(item => {
-      if (item == null) return null;
-      if (typeof item === 'string') return item;
-      if (typeof item === 'number' || typeof item === 'boolean') return String(item);
-      if (typeof item === 'object') {
-        // Try common label fields
-        const label =
-          item.phase_title  ??
-          item.phase_key    ??
-          item.title        ??
-          item.name         ??
-          item.product_title ??
-          item.product_id   ??
-          item.phase_number ??
-          null;
-        return label != null ? String(label) : null;
-      }
-      return null;
-    })
-    .filter(Boolean);
-}
-
 function extractCompounds(doc) {
-  // 1. Direct peptides array
-  if (Array.isArray(doc.peptides) && doc.peptides.length) {
-    const list = doc.peptides.map(p => p.name || p.product_title || p.id).filter(Boolean);
-    if (list.length) return [...new Set(list)].slice(0, 5);
-  }
-  // 2. Compounds from phases
+  // 1. Direct compounds from canonical phases
   if (Array.isArray(doc.phases) && doc.phases.length) {
-    const names = doc.phases.flatMap(p => [
-      ...(Array.isArray(p.compounds) ? p.compounds : []),
-      ...(Array.isArray(p.items) ? p.items : []),
-      ...(Array.isArray(p.drugs) ? p.drugs : [])
-    ]).map(d => d.name || d.product_name || d.product_title || d.title || d.id).filter(Boolean);
+    const names = doc.phases
+      .flatMap(p => Array.isArray(p.compounds) ? p.compounds : [])
+      .map(c => c.name || c.id)
+      .filter(Boolean);
     if (names.length) return [...new Set(names)].slice(0, 5);
   }
-  // 3. phase_blueprints
-  const blueprints = Array.isArray(doc.phase_blueprints) ? doc.phase_blueprints : [];
-  const names = blueprints
-    .flatMap(p => Array.isArray(p.drugs) ? p.drugs : [])
-    .map(d => d.product_title || d.product_id)
-    .filter(v => v != null && typeof v === 'string' && v.length > 0);
-  return [...new Set(names)].slice(0, 5);
+  // 2. Fallback to top-level peptides if present
+  if (Array.isArray(doc.peptides) && doc.peptides.length) {
+    const list = doc.peptides.map(p => p.name || p.id).filter(Boolean);
+    if (list.length) return [...new Set(list)].slice(0, 5);
+  }
+  return [];
 }
 
 /**
- * Total duration — uses variant_rules or falls back to summing phases.
+ * Total duration — uses durationWeeks or sums phases.
  */
 function extractDuration(doc) {
-  if (doc.duration) return String(doc.duration);
   if (doc.durationWeeks) return `${doc.durationWeeks} wks`;
-  if (doc.duration_weeks) return `${doc.duration_weeks} wks`;
-  // Try to pull a representative age-group default
-  const ageVariants = doc.variant_rules?.age_variants;
-  if (ageVariants) {
-    const durations = Object.values(ageVariants)
-      .map(v => v.default_duration_weeks)
-      .filter(Number.isFinite);
-    if (durations.length) {
-      const min = Math.min(...durations);
-      const max = Math.max(...durations);
-      return min === max ? `${min} wks` : `${min}–${max} wks`;
-    }
+  if (doc.duration) return String(doc.duration);
+  // Sum phase durations from canonical schema
+  if (Array.isArray(doc.phases) && doc.phases.length) {
+    const total = doc.phases.reduce((sum, p) => sum + (Number(p.durationWeeks) || 0), 0);
+    if (total > 0) return `${total} wks`;
   }
-  // Sum phase durations
-  const phases = Array.isArray(doc.phases) ? doc.phases : (Array.isArray(doc.phase_blueprints) ? doc.phase_blueprints : []);
-  const total = phases.reduce((sum, p) => sum + (Number(p.durationWeeks || p.duration_weeks || p.default_duration_weeks) || 0), 0);
-  return total > 0 ? `${total} wks` : null;
+  return null;
 }
 
 /**

@@ -1,159 +1,100 @@
 {
+  "id": "rec_002",
   "protocol_id": "rec_002",
-  "protocol_slug": "recovery-advanced-chronic",
+  "name": "Advanced Recovery Protocol (Chronic Degeneration Focus)",
+  "title": "Advanced Recovery Protocol (Chronic Degeneration Focus)",
   "protocol_title": "Advanced Recovery Protocol (Chronic Degeneration Focus)",
-  "protocol_version": "v1.0",
+  "slug": "recovery-advanced-chronic",
+  "protocol_slug": "recovery-advanced-chronic",
+  "shortCode": "REC-002",
+  "short_code": "REC-002",
+  "category": "Regenerative",
+  "therapeutic_category": "Regenerative",
+  "categoryId": "Regenerative",
   "status": "approved",
-  "active": true,
-  "metadata": {
-    "primary_goal": "recovery_repair",
-    "primary_condition": "chronic_tendinopathy_degeneration",
-    "complexity_level": "advanced",
-    "visibility": "public",
-    "marker_alignment": {
-      "condition_type": {
-        "acute": {
-          "score": 30,
-          "note": "Consider Foundation Recovery instead"
-        },
-        "chronic": {
-          "score": 90,
-          "note": "Optimized for long-term tissue remodeling"
-        }
-      }
-    },
-    "author": {
-      "name": "Atlas Health Clinical Team",
-      "organization": "Atlas Health"
-    },
-    "created_at": "2026-05-04T00:00:00.000Z",
-    "updated_at": "2026-05-04T00:00:00.000Z",
-    "evidence_grade": "B",
-    "evidence_grade_note": "Grade B: Advanced musculoskeletal repair integrating BPC-157 and TB-500 with ARA-290 (Cibinetide). ARA-290 has demonstrated significant nerve regeneration and inflammatory attenuation in double-blind Phase II RCTs (Dahan A et al., Mol Med 2013)."
-  },
-  "eligibility_rules": {
-    "supported_age_groups": [
-      "20-35",
-      "36-50",
-      "51-65",
-      "65+"
-    ],
-    "supported_goals": [
-      "Recovery & Repair",
-      "recovery_repair"
-    ],
-    "contraindications": [
-      "active_malignancy",
-      "pregnancy"
-    ],
-    "relative_cautions": [
-      "history_of_angioma"
-    ]
-  },
-  "phase_blueprints": [
+  "durationWeeks": 12,
+  "duration_weeks": 12,
+  "duration": "12 Weeks",
+  "primaryGoal": "Therapeutic Cellular Optimization",
+  "primary_goal": "Therapeutic Cellular Optimization",
+  "goals": [
+    "regenerative"
+  ],
+  "description": "Clinical peptide protocol designed for cellular regeneration and systemic optimization.",
+  "clinicalRationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "clinical_rationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "evidenceLevel": "Tier 2 - Clinical Trial / Cohort",
+  "evidence_level": "Tier 2 - Clinical Trial / Cohort",
+  "evidenceGrade": "B",
+  "evidence_grade": "B",
+  "evidenceGradeNote": "Grade B: Advanced musculoskeletal repair integrating BPC-157 and TB-500 with ARA-290 (Cibinetide). ARA-290 has demonstrated significant nerve regeneration and inflammatory attenuation in double-blind Phase II RCTs (Dahan A et al., Mol Med 2013).",
+  "evidence_grade_note": "Grade B: Advanced musculoskeletal repair integrating BPC-157 and TB-500 with ARA-290 (Cibinetide). ARA-290 has demonstrated significant nerve regeneration and inflammatory attenuation in double-blind Phase II RCTs (Dahan A et al., Mol Med 2013).",
+  "requiredLabs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "required_labs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "monitoringPlan": [
     {
-      "phase_key": "loading",
-      "phase_title": "Phase 1: Systemic Loading",
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "systemic_repair_signaling",
-        "inflammation_reduction"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_bpc157",
-          "product_title": "BPC-157",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "dose_per_administration": 250,
-            "administration_frequency": "2x_daily",
-            "starting_weekly_dose": 3500,
-            "default_weekly_dose": 3500
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_tb500",
-          "product_title": "TB-500",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "dose_per_administration": 2.5,
-            "administration_frequency": "2x_week",
-            "starting_weekly_dose": 5,
-            "default_weekly_dose": 5
-          },
-          "dosage_form": "vial"
-        }
-      ]
+      "week": 0,
+      "title": "Baseline Comprehensive Panel"
     },
     {
-      "phase_key": "remodeling",
-      "phase_title": "Phase 2: Tissue Remodeling",
-      "default_duration_weeks": 8,
-      "clinical_purpose": [
-        "collagen_crosslinking",
-        "extracellular_matrix_repair"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_bpc157",
-          "product_title": "BPC-157",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "dose_per_administration": 250,
-            "administration_frequency": "2x_daily",
-            "starting_weekly_dose": 3500,
-            "default_weekly_dose": 3500
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_tb500",
-          "product_title": "TB-500",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "dose_per_administration": 2.5,
-            "administration_frequency": "2x_week",
-            "starting_weekly_dose": 5,
-            "default_weekly_dose": 5
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_ghkcu",
-          "product_title": "GHK-Cu",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "dose_per_administration": 2,
-            "administration_frequency": "5x_week",
-            "role": "collagen_synthesis_adjunct",
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10
-          },
-          "dosage_form": "vial"
-        }
-      ]
+      "week": 6,
+      "title": "Mid-Cycle Checkpoint & Tolerance"
+    },
+    {
+      "week": 12,
+      "title": "End-of-Cycle Outcome Review"
     }
   ],
-  "monitoring_plan": {
-    "baseline_required": [
-      "inflammatory_markers",
-      "ultrasound_imaging"
-    ],
-    "scheduled_checkpoints": [
-      {
-        "week": 6,
-        "type": "reassessment",
-        "purpose": "Tissue response evaluation"
-      }
-    ],
-    "labs": []
-  },
+  "contraindications": [
+    "Active malignancy or uninvestigated neoplastic lesions",
+    "Pregnancy, planned conception, or lactation",
+    "Severe hepatic impairment (Child-Pugh Class C) or end-stage renal disease"
+  ],
+  "relativeCautions": [
+    "History of cardiac arrhythmia or severe hypertension",
+    "Concurrent administration of insulin secretagogues without dose adjustment"
+  ],
+  "expectedOutcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "expected_outcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "recommendedSupplements": [
+    {
+      "name": "Ashwagandha",
+      "dosage": "300mg",
+      "rationale": "HPA axis modulation and cortisol management",
+      "frequency": "Daily",
+      "weekly_dose": "2100mg"
+    },
+    {
+      "name": "Boswellia",
+      "dosage": "300mg",
+      "rationale": "5-LOX inhibition for joint and inflammation support",
+      "frequency": "Daily",
+      "weekly_dose": "2100mg"
+    },
+    {
+      "name": "Magnesium",
+      "dosage": "200mg",
+      "rationale": "Muscle relaxation, sleep and repair support",
+      "frequency": "Daily (Bedtime)",
+      "weekly_dose": "1400mg"
+    }
+  ],
   "recommended_supplements": [
     {
       "name": "Ashwagandha",
@@ -177,25 +118,428 @@
       "weekly_dose": "1400mg"
     }
   ],
-  "mechanism_of_action": [
-    "Targeted receptor modulation and cellular signaling optimization.",
-    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  "bom": [
+    {
+      "productId": "bpc-157",
+      "product_name": "BPC-157",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "tb-500",
+      "product_name": "TB-500",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "ghk-cu",
+      "product_name": "GHK-Cu",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    }
   ],
-  "safety_profile": {
-    "adverse_events": [
-      "Mild injection site reactions (redness, transient pain).",
-      "Potential for mild, transient nausea during initial dose titration."
-    ],
-    "drug_interactions": [
-      "Monitor concurrent use of medications that affect blood glucose levels.",
-      "No severe drug-drug interactions documented, but caution advised with polypharmacy."
-    ],
-    "contraindications": [
-      "Pregnancy and lactation.",
-      "Active malignancies or history of specific hormone-sensitive cancers.",
-      "Known hypersensitivity to any protocol components."
-    ]
-  },
-  "evidence_grade": "B",
-  "evidence_grade_note": "Grade B: Advanced musculoskeletal repair integrating BPC-157 and TB-500 with ARA-290 (Cibinetide). ARA-290 has demonstrated significant nerve regeneration and inflammatory attenuation in double-blind Phase II RCTs (Dahan A et al., Mol Med 2013)."
+  "phases": [
+    {
+      "id": "phase_1",
+      "name": "Phase 1: Systemic Loading",
+      "phaseName": "Phase 1: Systemic Loading",
+      "phase_name": "Phase 1: Systemic Loading",
+      "phase_title": "Phase 1: Systemic Loading",
+      "phaseNumber": 1,
+      "phase_number": 1,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 1,
+      "start_week": 1,
+      "endWeek": 4,
+      "end_week": 4,
+      "objective": "systemic_repair_signaling · inflammation_reduction",
+      "clinical_goal": "systemic_repair_signaling · inflammation_reduction",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
+          "product_title": "BPC-157",
+          "compound": "BPC-157",
+          "dosage": "3500 mg",
+          "dose": "3500 mg (Daily (morning))",
+          "doseAmount": 3500,
+          "dose_amount": 3500,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "24500 mg/wk",
+          "weekly_dose": "24500 mg/wk",
+          "weeklyDoseAmount": 24500,
+          "weekly_dose_amount": 24500,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
+        },
+        {
+          "id": "tb-500",
+          "product_id": "tb-500",
+          "product_slug": "tb-500",
+          "name": "TB-500",
+          "product_name": "TB-500",
+          "product_title": "TB-500",
+          "compound": "TB-500",
+          "dosage": "5 mg",
+          "dose": "5 mg (2x weekly (Mon/Thu))",
+          "doseAmount": 5,
+          "dose_amount": 5,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "2x weekly (Mon/Thu)",
+          "dosing_frequency": "2x weekly (Mon/Thu)",
+          "frequencyTimesPerWeek": 2,
+          "weeklyDose": "10 mg/wk",
+          "weekly_dose": "10 mg/wk",
+          "weeklyDoseAmount": 10,
+          "weekly_dose_amount": 10,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or post-workout",
+          "storage": "Refrigerate at 2°C – 8°C. Handle gently, do not shake vigorously.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 80,
+            "finalConcentration": "2.5 mg/mL"
+          },
+          "clinicalNotes": "Thymosin Beta-4 bio-active fragment. G-actin sequestering peptide driving cellular migration and angiogenesis."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
+          "product_title": "BPC-157",
+          "compound": "BPC-157",
+          "dosage": "3500 mg",
+          "dose": "3500 mg (Daily (morning))",
+          "doseAmount": 3500,
+          "dose_amount": 3500,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "24500 mg/wk",
+          "weekly_dose": "24500 mg/wk",
+          "weeklyDoseAmount": 24500,
+          "weekly_dose_amount": 24500,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
+        },
+        {
+          "id": "tb-500",
+          "product_id": "tb-500",
+          "product_slug": "tb-500",
+          "name": "TB-500",
+          "product_name": "TB-500",
+          "product_title": "TB-500",
+          "compound": "TB-500",
+          "dosage": "5 mg",
+          "dose": "5 mg (2x weekly (Mon/Thu))",
+          "doseAmount": 5,
+          "dose_amount": 5,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "2x weekly (Mon/Thu)",
+          "dosing_frequency": "2x weekly (Mon/Thu)",
+          "frequencyTimesPerWeek": 2,
+          "weeklyDose": "10 mg/wk",
+          "weekly_dose": "10 mg/wk",
+          "weeklyDoseAmount": 10,
+          "weekly_dose_amount": 10,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or post-workout",
+          "storage": "Refrigerate at 2°C – 8°C. Handle gently, do not shake vigorously.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 80,
+            "finalConcentration": "2.5 mg/mL"
+          },
+          "clinicalNotes": "Thymosin Beta-4 bio-active fragment. G-actin sequestering peptide driving cellular migration and angiogenesis."
+        }
+      ]
+    },
+    {
+      "id": "phase_2",
+      "name": "Phase 2: Tissue Remodeling",
+      "phaseName": "Phase 2: Tissue Remodeling",
+      "phase_name": "Phase 2: Tissue Remodeling",
+      "phase_title": "Phase 2: Tissue Remodeling",
+      "phaseNumber": 2,
+      "phase_number": 2,
+      "durationWeeks": 8,
+      "duration_weeks": 8,
+      "default_duration_weeks": 8,
+      "startWeek": 5,
+      "start_week": 5,
+      "endWeek": 12,
+      "end_week": 12,
+      "objective": "collagen_crosslinking · extracellular_matrix_repair",
+      "clinical_goal": "collagen_crosslinking · extracellular_matrix_repair",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
+          "product_title": "BPC-157",
+          "compound": "BPC-157",
+          "dosage": "3500 mg",
+          "dose": "3500 mg (Daily (morning))",
+          "doseAmount": 3500,
+          "dose_amount": 3500,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "24500 mg/wk",
+          "weekly_dose": "24500 mg/wk",
+          "weeklyDoseAmount": 24500,
+          "weekly_dose_amount": 24500,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
+        },
+        {
+          "id": "tb-500",
+          "product_id": "tb-500",
+          "product_slug": "tb-500",
+          "name": "TB-500",
+          "product_name": "TB-500",
+          "product_title": "TB-500",
+          "compound": "TB-500",
+          "dosage": "5 mg",
+          "dose": "5 mg (2x weekly (Mon/Thu))",
+          "doseAmount": 5,
+          "dose_amount": 5,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "2x weekly (Mon/Thu)",
+          "dosing_frequency": "2x weekly (Mon/Thu)",
+          "frequencyTimesPerWeek": 2,
+          "weeklyDose": "10 mg/wk",
+          "weekly_dose": "10 mg/wk",
+          "weeklyDoseAmount": 10,
+          "weekly_dose_amount": 10,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or post-workout",
+          "storage": "Refrigerate at 2°C – 8°C. Handle gently, do not shake vigorously.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 80,
+            "finalConcentration": "2.5 mg/mL"
+          },
+          "clinicalNotes": "Thymosin Beta-4 bio-active fragment. G-actin sequestering peptide driving cellular migration and angiogenesis."
+        },
+        {
+          "id": "ghk-cu",
+          "product_id": "ghk-cu",
+          "product_slug": "ghk-cu",
+          "name": "GHK-Cu",
+          "product_name": "GHK-Cu",
+          "product_title": "GHK-Cu",
+          "compound": "GHK-Cu",
+          "dosage": "10 mg",
+          "dose": "10 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "50 mg/wk",
+          "weekly_dose": "50 mg/wk",
+          "weeklyDoseAmount": 50,
+          "weekly_dose_amount": 50,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning subcutaneous or topical BID",
+          "storage": "Refrigerate at 2°C – 8°C. Protect from direct sunlight.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 3,
+            "unitsPerDose": 12,
+            "finalConcentration": "16.6 mg/mL (2 mg per 12 UI)"
+          },
+          "clinicalNotes": "Copper tripeptide. Upregulates collagen synthesis and tissue remodeling. Rotate injection sites to minimize local sting."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
+          "product_title": "BPC-157",
+          "compound": "BPC-157",
+          "dosage": "3500 mg",
+          "dose": "3500 mg (Daily (morning))",
+          "doseAmount": 3500,
+          "dose_amount": 3500,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "24500 mg/wk",
+          "weekly_dose": "24500 mg/wk",
+          "weeklyDoseAmount": 24500,
+          "weekly_dose_amount": 24500,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
+        },
+        {
+          "id": "tb-500",
+          "product_id": "tb-500",
+          "product_slug": "tb-500",
+          "name": "TB-500",
+          "product_name": "TB-500",
+          "product_title": "TB-500",
+          "compound": "TB-500",
+          "dosage": "5 mg",
+          "dose": "5 mg (2x weekly (Mon/Thu))",
+          "doseAmount": 5,
+          "dose_amount": 5,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "2x weekly (Mon/Thu)",
+          "dosing_frequency": "2x weekly (Mon/Thu)",
+          "frequencyTimesPerWeek": 2,
+          "weeklyDose": "10 mg/wk",
+          "weekly_dose": "10 mg/wk",
+          "weeklyDoseAmount": 10,
+          "weekly_dose_amount": 10,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning or post-workout",
+          "storage": "Refrigerate at 2°C – 8°C. Handle gently, do not shake vigorously.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 80,
+            "finalConcentration": "2.5 mg/mL"
+          },
+          "clinicalNotes": "Thymosin Beta-4 bio-active fragment. G-actin sequestering peptide driving cellular migration and angiogenesis."
+        },
+        {
+          "id": "ghk-cu",
+          "product_id": "ghk-cu",
+          "product_slug": "ghk-cu",
+          "name": "GHK-Cu",
+          "product_name": "GHK-Cu",
+          "product_title": "GHK-Cu",
+          "compound": "GHK-Cu",
+          "dosage": "10 mg",
+          "dose": "10 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "50 mg/wk",
+          "weekly_dose": "50 mg/wk",
+          "weeklyDoseAmount": 50,
+          "weekly_dose_amount": 50,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning subcutaneous or topical BID",
+          "storage": "Refrigerate at 2°C – 8°C. Protect from direct sunlight.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 3,
+            "unitsPerDose": 12,
+            "finalConcentration": "16.6 mg/mL (2 mg per 12 UI)"
+          },
+          "clinicalNotes": "Copper tripeptide. Upregulates collagen synthesis and tissue remodeling. Rotate injection sites to minimize local sting."
+        }
+      ]
+    }
+  ],
+  "phasesCount": 2,
+  "_schemaVersion": 2,
+  "_unifiedAt": "2026-10-16T19:45:21.183Z"
 }

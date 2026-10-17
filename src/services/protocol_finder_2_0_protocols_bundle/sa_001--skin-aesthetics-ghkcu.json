@@ -1,137 +1,100 @@
 {
+  "id": "sa_001",
   "protocol_id": "sa_001",
-  "protocol_slug": "skin-aesthetics-ghkcu-structured",
+  "name": "Structured Skin & Aesthetics Protocol",
+  "title": "Structured Skin & Aesthetics Protocol",
   "protocol_title": "Structured Skin & Aesthetics Protocol",
-  "protocol_version": "v6.1",
+  "slug": "skin-aesthetics-ghkcu-structured",
+  "protocol_slug": "skin-aesthetics-ghkcu-structured",
+  "shortCode": "SA-001",
+  "short_code": "SA-001",
+  "category": "Regenerative",
+  "therapeutic_category": "Regenerative",
+  "categoryId": "Regenerative",
   "status": "approved",
-  "active": true,
-  "metadata": {
-    "primary_goal": "Skin / Anti-Aging",
-    "complexity_level": "standard",
-    "visibility": "public",
-    "evidence_grade": "B",
-    "evidence_grade_note": "Grade B: GHK-Cu is clinically validated in multiple controlled human clinical trials demonstrating significant stimulation of procollagen synthesis, glycosaminoglycan accumulation, and dermal remodeling (Pickart L et al., Int J Mol Sci 2018; Finkey et al.)."
-  },
-  "phase_blueprints": [
+  "durationWeeks": 12,
+  "duration_weeks": 12,
+  "duration": "12 Weeks",
+  "primaryGoal": "Therapeutic Cellular Optimization",
+  "primary_goal": "Therapeutic Cellular Optimization",
+  "goals": [
+    "regenerative"
+  ],
+  "description": "Clinical peptide protocol designed for cellular regeneration and systemic optimization.",
+  "clinicalRationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "clinical_rationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "evidenceLevel": "Tier 2 - Clinical Trial / Cohort",
+  "evidence_level": "Tier 2 - Clinical Trial / Cohort",
+  "evidenceGrade": "B",
+  "evidence_grade": "B",
+  "evidenceGradeNote": "Grade B: GHK-Cu is clinically validated in multiple controlled human clinical trials demonstrating significant stimulation of procollagen synthesis, glycosaminoglycan accumulation, and dermal remodeling (Pickart L et al., Int J Mol Sci 2018; Finkey et al.).",
+  "evidence_grade_note": "Grade B: GHK-Cu is clinically validated in multiple controlled human clinical trials demonstrating significant stimulation of procollagen synthesis, glycosaminoglycan accumulation, and dermal remodeling (Pickart L et al., Int J Mol Sci 2018; Finkey et al.).",
+  "requiredLabs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "required_labs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "monitoringPlan": [
     {
-      "phase_key": "barrier_priming",
-      "phase_title": "Barrier Priming",
-      "default_duration_weeks": 4,
-      "drugs": [
-        {
-          "product_id": "prd_ghkcu",
-          "product_title": "GHK-Cu",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "administration_frequency": "5x_week",
-            "intensity": "standard",
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10,
-            "dose_per_administration": 2,
-            "dose_unit": "mg"
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_ghkcu",
-            "route": "TOP"
-          },
-          "dosage_form": "vial"
-        }
-      ]
+      "week": 0,
+      "title": "Baseline Comprehensive Panel"
     },
     {
-      "phase_key": "remodeling",
-      "phase_title": "Active Remodeling",
-      "default_duration_weeks": 4,
-      "drugs": [
-        {
-          "product_id": "prd_ghkcu",
-          "product_title": "GHK-Cu",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "administration_frequency": "5x_week",
-            "intensity": "standard_plus",
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10,
-            "dose_per_administration": 2,
-            "dose_unit": "mg"
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_ghkcu",
-            "route": "TOP"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_bpc157",
-          "product_title": "BPC-157",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "administration_frequency": "2x_daily",
-            "intensity": "low_optional",
-            "starting_weekly_dose": 3500,
-            "default_weekly_dose": 3500,
-            "dose_per_administration": 250,
-            "dose_unit": "mcg"
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_bpc157",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ]
+      "week": 6,
+      "title": "Mid-Cycle Checkpoint & Tolerance"
     },
     {
-      "phase_key": "consolidation",
-      "phase_title": "Consolidation & Maintenance",
-      "default_duration_weeks": 4,
-      "drugs": [
-        {
-          "product_id": "prd_ghkcu",
-          "product_title": "GHK-Cu",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "administration_frequency": "5x_week",
-            "intensity": "maintenance",
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10,
-            "dose_per_administration": 2,
-            "dose_unit": "mg"
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_ghkcu",
-            "route": "TOP"
-          },
-          "dosage_form": "vial"
-        }
-      ]
+      "week": 12,
+      "title": "End-of-Cycle Outcome Review"
     }
   ],
-  "monitoring_plan": {
-    "baseline_required": [
-      "photography",
-      "skin_scoring"
-    ],
-    "checkpoints": [
-      {
-        "type": "barrier_review",
-        "week": 4
-      },
-      {
-        "type": "remodeling_review",
-        "week": 8
-      },
-      {
-        "type": "final_review",
-        "week": 12
-      }
-    ],
-    "labs": []
-  },
+  "contraindications": [
+    "Active malignancy or uninvestigated neoplastic lesions",
+    "Pregnancy, planned conception, or lactation",
+    "Severe hepatic impairment (Child-Pugh Class C) or end-stage renal disease"
+  ],
+  "relativeCautions": [
+    "History of cardiac arrhythmia or severe hypertension",
+    "Concurrent administration of insulin secretagogues without dose adjustment"
+  ],
+  "expectedOutcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "expected_outcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "recommendedSupplements": [
+    {
+      "name": "Vitamin C",
+      "dosage": "500mg",
+      "rationale": "Collagen synthesis cofactor and skin antioxidant",
+      "frequency": "Daily",
+      "weekly_dose": "3500mg"
+    },
+    {
+      "name": "Astaxanthin",
+      "dosage": "4mg",
+      "rationale": "Potent carotenoid for UV and skin protection",
+      "frequency": "Daily",
+      "weekly_dose": "28mg"
+    },
+    {
+      "name": "Collagen",
+      "dosage": "10g",
+      "rationale": "Marine collagen peptides for skin elasticity",
+      "frequency": "Daily",
+      "weekly_dose": "70g"
+    }
+  ],
   "recommended_supplements": [
     {
       "name": "Vitamin C",
@@ -155,25 +118,374 @@
       "weekly_dose": "70g"
     }
   ],
-  "mechanism_of_action": [
-    "Targeted receptor modulation and cellular signaling optimization.",
-    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  "bom": [
+    {
+      "productId": "ghk-cu",
+      "product_name": "GHK-Cu",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "bpc-157",
+      "product_name": "BPC-157",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    }
   ],
-  "safety_profile": {
-    "adverse_events": [
-      "Mild injection site reactions (redness, transient pain).",
-      "Potential for mild, transient nausea during initial dose titration."
-    ],
-    "drug_interactions": [
-      "Monitor concurrent use of medications that affect blood glucose levels.",
-      "No severe drug-drug interactions documented, but caution advised with polypharmacy."
-    ],
-    "contraindications": [
-      "Pregnancy and lactation.",
-      "Active malignancies or history of specific hormone-sensitive cancers.",
-      "Known hypersensitivity to any protocol components."
-    ]
-  },
-  "evidence_grade": "B",
-  "evidence_grade_note": "Grade B: GHK-Cu is clinically validated in multiple controlled human clinical trials demonstrating significant stimulation of procollagen synthesis, glycosaminoglycan accumulation, and dermal remodeling (Pickart L et al., Int J Mol Sci 2018; Finkey et al.)."
+  "phases": [
+    {
+      "id": "phase_1",
+      "name": "Barrier Priming",
+      "phaseName": "Barrier Priming",
+      "phase_name": "Barrier Priming",
+      "phase_title": "Barrier Priming",
+      "phaseNumber": 1,
+      "phase_number": 1,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 1,
+      "start_week": 1,
+      "endWeek": 4,
+      "end_week": 4,
+      "objective": "Therapeutic optimization and metabolic stabilization.",
+      "clinical_goal": "Therapeutic optimization and metabolic stabilization.",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "ghk-cu",
+          "product_id": "ghk-cu",
+          "product_slug": "ghk-cu",
+          "name": "GHK-Cu",
+          "product_name": "GHK-Cu",
+          "product_title": "GHK-Cu",
+          "compound": "GHK-Cu",
+          "dosage": "10 mg",
+          "dose": "10 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "50 mg/wk",
+          "weekly_dose": "50 mg/wk",
+          "weeklyDoseAmount": 50,
+          "weekly_dose_amount": 50,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning subcutaneous or topical BID",
+          "storage": "Refrigerate at 2°C – 8°C. Protect from direct sunlight.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 3,
+            "unitsPerDose": 12,
+            "finalConcentration": "16.6 mg/mL (2 mg per 12 UI)"
+          },
+          "clinicalNotes": "Copper tripeptide. Upregulates collagen synthesis and tissue remodeling. Rotate injection sites to minimize local sting."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "ghk-cu",
+          "product_id": "ghk-cu",
+          "product_slug": "ghk-cu",
+          "name": "GHK-Cu",
+          "product_name": "GHK-Cu",
+          "product_title": "GHK-Cu",
+          "compound": "GHK-Cu",
+          "dosage": "10 mg",
+          "dose": "10 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "50 mg/wk",
+          "weekly_dose": "50 mg/wk",
+          "weeklyDoseAmount": 50,
+          "weekly_dose_amount": 50,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning subcutaneous or topical BID",
+          "storage": "Refrigerate at 2°C – 8°C. Protect from direct sunlight.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 3,
+            "unitsPerDose": 12,
+            "finalConcentration": "16.6 mg/mL (2 mg per 12 UI)"
+          },
+          "clinicalNotes": "Copper tripeptide. Upregulates collagen synthesis and tissue remodeling. Rotate injection sites to minimize local sting."
+        }
+      ]
+    },
+    {
+      "id": "phase_2",
+      "name": "Active Remodeling",
+      "phaseName": "Active Remodeling",
+      "phase_name": "Active Remodeling",
+      "phase_title": "Active Remodeling",
+      "phaseNumber": 2,
+      "phase_number": 2,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 5,
+      "start_week": 5,
+      "endWeek": 8,
+      "end_week": 8,
+      "objective": "Therapeutic optimization and metabolic stabilization.",
+      "clinical_goal": "Therapeutic optimization and metabolic stabilization.",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "ghk-cu",
+          "product_id": "ghk-cu",
+          "product_slug": "ghk-cu",
+          "name": "GHK-Cu",
+          "product_name": "GHK-Cu",
+          "product_title": "GHK-Cu",
+          "compound": "GHK-Cu",
+          "dosage": "10 mg",
+          "dose": "10 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "50 mg/wk",
+          "weekly_dose": "50 mg/wk",
+          "weeklyDoseAmount": 50,
+          "weekly_dose_amount": 50,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning subcutaneous or topical BID",
+          "storage": "Refrigerate at 2°C – 8°C. Protect from direct sunlight.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 3,
+            "unitsPerDose": 12,
+            "finalConcentration": "16.6 mg/mL (2 mg per 12 UI)"
+          },
+          "clinicalNotes": "Copper tripeptide. Upregulates collagen synthesis and tissue remodeling. Rotate injection sites to minimize local sting."
+        },
+        {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
+          "product_title": "BPC-157",
+          "compound": "BPC-157",
+          "dosage": "3500 mg",
+          "dose": "3500 mg (Daily (morning))",
+          "doseAmount": 3500,
+          "dose_amount": 3500,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "24500 mg/wk",
+          "weekly_dose": "24500 mg/wk",
+          "weeklyDoseAmount": 24500,
+          "weekly_dose_amount": 24500,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "ghk-cu",
+          "product_id": "ghk-cu",
+          "product_slug": "ghk-cu",
+          "name": "GHK-Cu",
+          "product_name": "GHK-Cu",
+          "product_title": "GHK-Cu",
+          "compound": "GHK-Cu",
+          "dosage": "10 mg",
+          "dose": "10 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "50 mg/wk",
+          "weekly_dose": "50 mg/wk",
+          "weeklyDoseAmount": 50,
+          "weekly_dose_amount": 50,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning subcutaneous or topical BID",
+          "storage": "Refrigerate at 2°C – 8°C. Protect from direct sunlight.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 3,
+            "unitsPerDose": 12,
+            "finalConcentration": "16.6 mg/mL (2 mg per 12 UI)"
+          },
+          "clinicalNotes": "Copper tripeptide. Upregulates collagen synthesis and tissue remodeling. Rotate injection sites to minimize local sting."
+        },
+        {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
+          "product_title": "BPC-157",
+          "compound": "BPC-157",
+          "dosage": "3500 mg",
+          "dose": "3500 mg (Daily (morning))",
+          "doseAmount": 3500,
+          "dose_amount": 3500,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "24500 mg/wk",
+          "weekly_dose": "24500 mg/wk",
+          "weeklyDoseAmount": 24500,
+          "weekly_dose_amount": 24500,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
+        }
+      ]
+    },
+    {
+      "id": "phase_3",
+      "name": "Consolidation & Maintenance",
+      "phaseName": "Consolidation & Maintenance",
+      "phase_name": "Consolidation & Maintenance",
+      "phase_title": "Consolidation & Maintenance",
+      "phaseNumber": 3,
+      "phase_number": 3,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 9,
+      "start_week": 9,
+      "endWeek": 12,
+      "end_week": 12,
+      "objective": "Therapeutic optimization and metabolic stabilization.",
+      "clinical_goal": "Therapeutic optimization and metabolic stabilization.",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "ghk-cu",
+          "product_id": "ghk-cu",
+          "product_slug": "ghk-cu",
+          "name": "GHK-Cu",
+          "product_name": "GHK-Cu",
+          "product_title": "GHK-Cu",
+          "compound": "GHK-Cu",
+          "dosage": "10 mg",
+          "dose": "10 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "50 mg/wk",
+          "weekly_dose": "50 mg/wk",
+          "weeklyDoseAmount": 50,
+          "weekly_dose_amount": 50,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning subcutaneous or topical BID",
+          "storage": "Refrigerate at 2°C – 8°C. Protect from direct sunlight.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 3,
+            "unitsPerDose": 12,
+            "finalConcentration": "16.6 mg/mL (2 mg per 12 UI)"
+          },
+          "clinicalNotes": "Copper tripeptide. Upregulates collagen synthesis and tissue remodeling. Rotate injection sites to minimize local sting."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "ghk-cu",
+          "product_id": "ghk-cu",
+          "product_slug": "ghk-cu",
+          "name": "GHK-Cu",
+          "product_name": "GHK-Cu",
+          "product_title": "GHK-Cu",
+          "compound": "GHK-Cu",
+          "dosage": "10 mg",
+          "dose": "10 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "50 mg/wk",
+          "weekly_dose": "50 mg/wk",
+          "weeklyDoseAmount": 50,
+          "weekly_dose_amount": 50,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning subcutaneous or topical BID",
+          "storage": "Refrigerate at 2°C – 8°C. Protect from direct sunlight.",
+          "reconstitution": {
+            "vialStrengthMg": 50,
+            "diluentMl": 3,
+            "unitsPerDose": 12,
+            "finalConcentration": "16.6 mg/mL (2 mg per 12 UI)"
+          },
+          "clinicalNotes": "Copper tripeptide. Upregulates collagen synthesis and tissue remodeling. Rotate injection sites to minimize local sting."
+        }
+      ]
+    }
+  ],
+  "phasesCount": 3,
+  "_schemaVersion": 2,
+  "_unifiedAt": "2026-10-16T19:45:21.183Z"
 }

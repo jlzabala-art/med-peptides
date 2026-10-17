@@ -1,676 +1,987 @@
 {
   "id": "wm_005",
-  "active": true,
-  "bundleVersion": "1.1",
-  "complexity_level": "advanced",
-  "confidence_score": 87,
-  "eligibility_rules": {
-    "baseline_requirements": [
-      "Body weight",
-      "Waist circumference",
-      "Fasting glucose",
-      "Fasting insulin",
-      "HbA1c",
-      "Lipid panel",
-      "IGF-1",
-      "Body composition (DEXA or BIA)"
-    ],
-    "contraindications": [
-      "Active malignancy",
-      "Pregnancy or breastfeeding",
-      "Uncontrolled diabetes mellitus",
-      "Severe cardiovascular instability",
-      "Known hypersensitivity to peptide compounds",
-      "Severe renal or hepatic impairment"
-    ],
-    "indications": [
-      "Central adiposity",
-      "Age-related metabolic decline",
-      "Weight loss resistance",
-      "Reduced mitochondrial efficiency",
-      "Fatigue associated with metabolic dysfunction",
-      "Insulin resistance patterns",
-      "Visceral fat accumulation",
-      "Recovery impairment",
-      "Suboptimal metabolic flexibility"
-    ],
-    "relative_cautions": [
-      "hypothyroidism_uncontrolled",
-      "history_of_pituitary_disorders",
-      "fluid_retention_history"
-    ],
-    "supported_age_groups": [
-      "36-50",
-      "51-65",
-      "65+"
-    ],
-    "supported_goals": [
-      "weight_management",
-      "metabolic_health",
-      "fat_loss",
-      "mitochondrial_support",
-      "longevity"
-    ],
-    "supported_sex": [
-      "female",
-      "male"
-    ]
-  },
-  "expected_outcomes": {
-    "qualitative": [
-      "Improved energy levels",
-      "Enhanced recovery capacity",
-      "Reduced visceral fat",
-      "Improved metabolic flexibility",
-      "Improved sleep patterns",
-      "Enhanced physical resilience"
-    ],
-    "quantitative_ranges": [
-      "Reduction in waist circumference",
-      "Improved body composition",
-      "Improved fasting glucose",
-      "Improved metabolic markers",
-      "Improved lipid profile"
-    ]
-  },
-  "monitoring_plan": {
-    "baseline_required": [
-      "HbA1c",
-      "fasting_glucose",
-      "fasting_insulin",
-      "lipid_profile",
-      "IGF-1",
-      "AST",
-      "ALT",
-      "creatinine",
-      "body_weight",
-      "waist_circumference",
-      "body_composition",
-      "blood_pressure"
-    ],
-    "scheduled_checkpoints": [
-      {
-        "labs": [
-          "fasting_glucose",
-          "body_weight",
-          "waist_circumference"
-        ],
-        "purpose": "Evaluate tolerance and early metabolic response at end of Initiation Phase.",
-        "type": "end_of_phase_review",
-        "week": 8
-      },
-      {
-        "labs": [
-          "IGF-1",
-          "fasting_glucose",
-          "fasting_insulin",
-          "HbA1c",
-          "body_composition"
-        ],
-        "purpose": "Assess GH-axis response and lipolytic progress at end of Activation Phase.",
-        "type": "mid_protocol_review",
-        "week": 16
-      },
-      {
-        "labs": [
-          "HbA1c",
-          "lipid_profile",
-          "IGF-1",
-          "AST",
-          "ALT",
-          "creatinine",
-          "body_composition",
-          "waist_circumference"
-        ],
-        "purpose": "Final metabolic outcome review and washout decision.",
-        "type": "final_outcome_review",
-        "week": 24
-      }
-    ],
-    "every_8_weeks": [
-      "Fasting glucose",
-      "Insulin",
-      "IGF-1"
-    ],
-    "monthly": [
-      "Weight",
-      "Waist circumference",
-      "Blood pressure"
-    ]
-  },
-  "overview_summary": "Six-month structured multi-compound peptide protocol targeting visceral fat, GH-axis activation, mitochondrial efficiency, and metabolic resilience through three progressive 8-week phases.",
-  "phase_blueprints": [
-    {
-      "clinical_purpose": [
-        "metabolic_activation",
-        "tissue_repair",
-        "gh_axis_initiation",
-        "neuro_stabilization"
-      ],
-      "default_duration_weeks": 8,
-      "default_start_week": 1,
-      "drugs": [
-        {
-          "dose_logic": {
-            "administration_frequency": "daily",
-            "dose_per_administration": 250,
-            "dose_unit": "mcg",
-            "timing_hint": "morning_intranasal"
-          },
-          "product_id": "selank",
-          "product_title": "Selank",
-          "route": "intranasal"
-        },
-        {
-          "dose_logic": {
-            "administration_frequency": "daily",
-            "dose_per_administration": 500,
-            "dose_unit": "mcg",
-            "timing_hint": "morning_subcutaneous"
-          },
-          "product_id": "bpc-157",
-          "product_title": "BPC-157",
-          "route": "subcutaneous"
-        },
-        {
-          "dose_logic": {
-            "administration_frequency": "daily",
-            "dose_per_administration": 50,
-            "dose_unit": "mg",
-            "timing_hint": "morning_oral"
-          },
-          "product_id": "5-amino-1mq",
-          "product_title": "5-Amino-1MQ",
-          "route": "oral"
-        },
-        {
-          "dose_logic": {
-            "administration_frequency": "5x_week",
-            "dose_per_administration": 1,
-            "dose_unit": "mg",
-            "timing_hint": "night_subcutaneous"
-          },
-          "product_id": "tesamorelin",
-          "product_title": "Tesamorelin",
-          "route": "subcutaneous"
-        },
-        {
-          "dose_logic": {
-            "administration_frequency": "5x_week",
-            "dose_per_administration": 200,
-            "dose_unit": "mcg",
-            "timing_hint": "night_subcutaneous"
-          },
-          "product_id": "ipamorelin",
-          "product_title": "Ipamorelin",
-          "route": "subcutaneous"
-        }
-      ],
-      "objectives": [
-        "Initiate metabolic activation",
-        "Enhance tissue repair",
-        "Begin GH-axis stimulation",
-        "Establish metabolic baseline"
-      ],
-      "phase_key": "initiation_phase",
-      "phase_title": "Initiation Phase"
-    },
-    {
-      "clinical_purpose": [
-        "lipolysis_enhancement",
-        "metabolic_turnover",
-        "neuro_support_maintenance"
-      ],
-      "default_duration_weeks": 8,
-      "default_start_week": 9,
-      "drugs": [
-        {
-          "dose_logic": {
-            "administration_frequency": "daily",
-            "dose_per_administration": 250,
-            "dose_unit": "mcg",
-            "timing_hint": "morning_intranasal"
-          },
-          "product_id": "selank",
-          "product_title": "Selank",
-          "route": "intranasal"
-        },
-        {
-          "dose_logic": {
-            "administration_frequency": "daily",
-            "dose_per_administration": 50,
-            "dose_unit": "mg",
-            "timing_hint": "morning_oral"
-          },
-          "product_id": "5-amino-1mq",
-          "product_title": "5-Amino-1MQ",
-          "route": "oral"
-        },
-        {
-          "dose_logic": {
-            "administration_frequency": "5x_week",
-            "dose_per_administration": 2,
-            "dose_unit": "mg",
-            "timing_hint": "night_subcutaneous"
-          },
-          "product_id": "tesamorelin",
-          "product_title": "Tesamorelin",
-          "route": "subcutaneous"
-        }
-      ],
-      "objectives": [
-        "Enhance lipolysis",
-        "Support metabolic turnover",
-        "Maintain neuro-support"
-      ],
-      "phase_key": "activation_phase",
-      "phase_title": "Activation Phase"
-    },
-    {
-      "clinical_purpose": [
-        "metabolic_stabilization",
-        "tissue_regeneration",
-        "weight_management_consolidation",
-        "mitochondrial_activation"
-      ],
-      "default_duration_weeks": 8,
-      "default_start_week": 17,
-      "drugs": [
-        {
-          "dose_logic": {
-            "administration_frequency": "daily",
-            "dose_per_administration": 500,
-            "dose_unit": "mcg",
-            "timing_hint": "morning_subcutaneous"
-          },
-          "product_id": "bpc-157",
-          "product_title": "BPC-157",
-          "route": "subcutaneous"
-        },
-        {
-          "dose_logic": {
-            "administration_frequency": "daily",
-            "dose_per_administration": 50,
-            "dose_unit": "mg",
-            "timing_hint": "morning_oral"
-          },
-          "product_id": "5-amino-1mq",
-          "product_title": "5-Amino-1MQ",
-          "route": "oral"
-        },
-        {
-          "dose_logic": {
-            "administration_frequency": "once_weekly",
-            "dose_per_administration": 5,
-            "dose_unit": "mg",
-            "timing_hint": "morning_subcutaneous",
-            "note": "Active during Month 5 (weeks 17–21)"
-          },
-          "product_id": "mots-c",
-          "product_title": "MOTS-C",
-          "route": "subcutaneous"
-        }
-      ],
-      "objectives": [
-        "Stabilize metabolic improvements",
-        "Support tissue regeneration",
-        "Consolidate weight-management gains",
-        "Activate mitochondrial pathways"
-      ],
-      "phase_key": "optimization_phase",
-      "phase_title": "Optimization Phase"
-    }
-  ],
-  "physician_supervision_required": true,
-  "protocol_duration_weeks": 24,
   "protocol_id": "wm_005",
+  "name": "Advanced Weight Management & Metabolic Longevity Protocol",
+  "title": "Advanced Weight Management & Metabolic Longevity Protocol",
   "protocol_title": "Advanced Weight Management & Metabolic Longevity Protocol",
-  "protocol_version": "v1.0",
-  "risk_class": "moderate_complexity",
-  "safety_profile": {
-    "notes": [
-      "Store reconstituted vials at 2–8°C",
-      "Rotate injection sites regularly",
-      "Use sterile injection technique",
-      "Monitor metabolic parameters periodically",
-      "Follow physician supervision"
-    ],
-    "reconstitution": {
-      "dilution_volume_ml": 2,
-      "solvent": "Bacteriostatic Water"
-    },
-    "accessories": [
-      "Bacteriostatic Water 10 mL",
-      "Insulin Syringes 1 mL",
-      "Alcohol Prep Pads"
-    ],
-    "washout_recommended_weeks": 4
-  },
+  "slug": "wm-005",
+  "protocol_slug": "wm-005",
+  "shortCode": "WM-005",
+  "short_code": "WM-005",
+  "category": "Weight Management",
+  "therapeutic_category": "Weight Management",
+  "categoryId": "Weight Management",
   "status": "approved",
-  "monitoringSchedule": [
+  "durationWeeks": 12,
+  "duration_weeks": 12,
+  "duration": "12 Weeks",
+  "primaryGoal": "Weight Management",
+  "primary_goal": "Weight Management",
+  "goals": [
+    "weight management"
+  ],
+  "description": "Clinical peptide protocol designed for cellular regeneration and systemic optimization.",
+  "clinicalRationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "clinical_rationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "evidenceLevel": "Tier 2 - Clinical Trial / Cohort",
+  "evidence_level": "Tier 2 - Clinical Trial / Cohort",
+  "evidenceGrade": "B",
+  "evidence_grade": "B",
+  "evidenceGradeNote": "Grade B: Multi-target metabolic protocol anchoring approved incretin therapy with cellular bioenergetic agents (MOTS-c) and tissue integrity support (BPC-157). Supported by published Phase II/III trial data for individual active components.",
+  "evidence_grade_note": "Grade B: Multi-target metabolic protocol anchoring approved incretin therapy with cellular bioenergetic agents (MOTS-c) and tissue integrity support (BPC-157). Supported by published Phase II/III trial data for individual active components.",
+  "requiredLabs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "required_labs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "monitoringPlan": [
     {
       "week": 0,
-      "label": "Baseline Assessment",
-      "tests": [
-        "Full blood count (CBC)",
-        "Comprehensive metabolic panel (CMP)",
-        "Vitals & weight"
-      ],
-      "notes": "Establish baseline before starting protocol."
+      "title": "Baseline Comprehensive Panel"
+    },
+    {
+      "week": 6,
+      "title": "Mid-Cycle Checkpoint & Tolerance"
     },
     {
       "week": 12,
-      "label": "Mid-Protocol Check-In",
-      "tests": [
-        "Symptom review",
-        "Subjective wellbeing score (1–10)",
-        "Side-effect screening",
-        "Fasting glucose",
-        "Insulin",
-        "HOMA-IR",
-        "Lipid panel"
-      ],
-      "notes": "Assess tolerability and early response."
-    },
-    {
-      "week": 24,
-      "label": "End-of-Protocol Evaluation",
-      "tests": [
-        "Repeat CBC & CMP",
-        "Outcome questionnaire",
-        "Physician review",
-        "HbA1c",
-        "Full lipid panel",
-        "Body composition (DEXA or impedance)"
-      ],
-      "notes": "Full outcome assessment and decision on continuation or cycling."
+      "title": "End-of-Cycle Outcome Review"
     }
   ],
-  "riskManagement": {
-    "contraindications": [
-      "Type 1 diabetes (insulin-dependent, use with caution)",
-      "Severe renal impairment",
-      "Personal/family history of medullary thyroid carcinoma (GLP-1 class)"
-    ],
-    "side_effects": [
-      {
-        "effect": "Injection site reactions",
-        "frequency": "Common (10–30%)",
-        "management": "Rotate injection sites; use 29–31G insulin needles; apply cold compress."
-      },
-      {
-        "effect": "Mild nausea (first 1–2 weeks)",
-        "frequency": "Uncommon (5–15%)",
-        "management": "Administer with food; reduce dose temporarily if persistent."
-      },
-      {
-        "effect": "Fatigue or somnolence",
-        "frequency": "Rare (<5%)",
-        "management": "Adjust injection timing; evaluate sleep hygiene."
-      },
-      {
-        "effect": "Headache",
-        "frequency": "Uncommon (5–10%)",
-        "management": "Hydration; paracetamol as needed; review dosing."
-      }
-    ],
-    "escalation_criteria": [
-      "Allergic reaction (urticaria, angioedema, anaphylaxis) — STOP immediately, administer epinephrine if severe",
-      "Persistent injection site infection (redness, warmth, pus) — STOP, antibiotics, dermatology review",
-      "Significant mood deterioration or psychotic symptoms — STOP, psychiatric referral",
-      "Unexplained abnormal labs > 2× upper limit of normal — STOP, specialist review"
-    ],
-    "storage_handling": "Store peptides at 2–8°C (refrigerated). Reconstituted vials: stable for 28 days refrigerated. Do not freeze reconstituted product. Protect from light.",
-    "patient_education": [
-      "Demonstrate subcutaneous injection technique before starting.",
-      "Provide written dosing schedule and injection site rotation map.",
-      "Instruct patient to report any unusual symptoms within 24h.",
-      "Advise on proper sharps disposal.",
-      "Provide emergency contact number for out-of-hours concerns."
-    ]
-  },
-  "primary_goal": "Weight Management",
-  "metadata": {
-    "abbreviatedName": "Selank + BPC-157 + 5-Amino-1MQ + Tesamorelin",
-    "clinical_summary": "A structured six-month multi-phase peptide protocol designed to support fat metabolism, mitochondrial efficiency, recovery, and metabolic resilience. The protocol integrates neuro-support, GH-axis stimulation, metabolic enhancers, and mitochondrial peptides to promote progressive weight-management support and metabolic optimization in aging populations.",
-    "description": "Six-month advanced weight management protocol combining neuropeptide stress modulation (Selank), tissue repair (BPC-157), NNMT inhibition for fat metabolism (5-Amino-1MQ), visceral fat reduction via GHRH stimulation (Tesamorelin), GH pulse augmentation (Ipamorelin), and mitochondrial activation (MOTS-C). Structured in three progressive 8-week phases.",
-    "evidence_grade": "B",
-    "keywords": [
-      "selank",
-      "BPC-157",
-      "5-Amino-1MQ",
-      "tesamorelin",
-      "ipamorelin",
-      "MOTS-C",
-      "visceral fat",
-      "metabolic longevity",
-      "GH axis",
-      "mitochondrial peptide"
-    ],
-    "primary_condition": "obesity_metabolic_dysfunction",
-    "references": [
-      {
-        "citation": "Falutz J et al. Tesamorelin and visceral adiposity in HIV-associated lipodystrophy. NEJM 2007.",
-        "pmid": "17989384"
-      },
-      {
-        "citation": "Sikiric P et al. BPC-157: a review of central and peripheral healing effects. Curr Pharm Des 2018.",
-        "pmid": "29591529"
-      },
-      {
-        "citation": "Lee C et al. MOTS-c: a mitochondrial-derived peptide regulating muscle and fat metabolism. Cell Metabolism 2015.",
-        "pmid": "25738459"
-      },
-      {
-        "citation": "Neelapu BC et al. 5-Amino-1MQ as NNMT inhibitor in metabolic disease models. J Med Chem 2019.",
-        "pmid": "31026175"
-      },
-      {
-        "citation": "Smirnova EN et al. Selank anxiolytic and neuroprotective effects. Zh Vyssh Nerv Deiat Im I P Pavlova 2015."
-      }
-    ],
-    "schema_version": "antigravity_v2",
-    "scientificName": "Selank + BPC-157 + 5-Amino-1MQ + Tesamorelin + Ipamorelin + MOTS-C Metabolic Protocol",
-    "shortCode": "WML-005",
-    "visibility": "public",
-    "primary_goal": "Weight Management",
-    "evidence_grade_note": "Grade B: Multi-target metabolic protocol anchoring approved incretin therapy with cellular bioenergetic agents (MOTS-c) and tissue integrity support (BPC-157). Supported by published Phase II/III trial data for individual active components."
-  },
-  "category": "Weight Management",
+  "contraindications": [
+    "Active malignancy or uninvestigated neoplastic lesions",
+    "Pregnancy, planned conception, or lactation",
+    "Severe hepatic impairment (Child-Pugh Class C) or end-stage renal disease"
+  ],
+  "relativeCautions": [
+    "History of cardiac arrhythmia or severe hypertension",
+    "Concurrent administration of insulin secretagogues without dose adjustment"
+  ],
+  "expectedOutcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "expected_outcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "recommendedSupplements": [
+    {
+      "name": "Electrolyte Hydration Complex",
+      "dose": "1 serving daily",
+      "rationale": "Maintain intracellular osmolarity during peptide therapy"
+    },
+    {
+      "name": "CoQ10 (Ubiquinol)",
+      "dose": "100 mg daily",
+      "rationale": "Mitochondrial respiratory chain electron transport support"
+    }
+  ],
+  "recommended_supplements": [
+    {
+      "name": "Electrolyte Hydration Complex",
+      "dose": "1 serving daily",
+      "rationale": "Maintain intracellular osmolarity during peptide therapy"
+    },
+    {
+      "name": "CoQ10 (Ubiquinol)",
+      "dose": "100 mg daily",
+      "rationale": "Mitochondrial respiratory chain electron transport support"
+    }
+  ],
+  "bom": [
+    {
+      "productId": "selank",
+      "product_name": "Selank",
+      "route": "Intranasal",
+      "format": "nasal spray",
+      "quantity": 3
+    },
+    {
+      "productId": "bpc-157",
+      "product_name": "BPC-157",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "5-amino-1mq",
+      "product_name": "5-Amino-1MQ",
+      "route": "Oral",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "tesamorelin",
+      "product_name": "Tesamorelin",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "ipamorelin",
+      "product_name": "Ipamorelin",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "mots-c",
+      "product_name": "MOTS-c",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    }
+  ],
   "phases": [
     {
-      "phase_number": 1,
-      "phase_key": "initiation_phase",
+      "id": "phase_1",
+      "name": "Initiation Phase",
+      "phaseName": "Initiation Phase",
+      "phase_name": "Initiation Phase",
       "phase_title": "Initiation Phase",
+      "phaseNumber": 1,
+      "phase_number": 1,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 1,
       "start_week": 1,
+      "endWeek": 8,
       "end_week": 8,
-      "objectives": [
-        "Initiate metabolic activation",
-        "Enhance tissue repair",
-        "Begin GH-axis stimulation",
-        "Establish metabolic baseline"
-      ],
-      "clinical_purpose": [
-        "metabolic_activation",
-        "tissue_repair",
-        "gh_axis_initiation",
-        "neuro_stabilization"
-      ],
-      "drugs_used": [
+      "objective": "metabolic_activation · tissue_repair · gh_axis_initiation · neuro_stabilization",
+      "clinical_goal": "metabolic_activation · tissue_repair · gh_axis_initiation · neuro_stabilization",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
         {
+          "id": "selank",
+          "product_id": "selank",
           "product_slug": "selank",
+          "name": "Selank",
+          "product_name": "Selank",
           "product_title": "Selank",
-          "route": "intranasal",
-          "dosing_frequency": "daily",
-          "dose_per_administration": 250,
+          "compound": "Selank",
+          "dosage": "1750 mcg",
+          "dose": "1750 mcg (Daily (morning))",
+          "doseAmount": 1750,
+          "dose_amount": 1750,
+          "doseUnit": "mcg",
           "dose_unit": "mcg",
-          "timing_hint": "morning_intranasal",
-          "weekly_dose": "1750 mcg",
-          "vials_required_for_phase": null
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "12250 mcg/wk",
+          "weekly_dose": "12250 mcg/wk",
+          "weeklyDoseAmount": 12250,
+          "weekly_dose_amount": 12250,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Intranasal",
+          "dosageForm": "nasal spray",
+          "timing": "Morning and/or prior to acute cognitive or emotional stress",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 30,
+            "diluentMl": 3,
+            "unitsPerDose": 1,
+            "finalConcentration": "10 mg/mL"
+          },
+          "clinicalNotes": "Tuftsin analogue modulating GABAergic transmission and dopamine/serotonin balance. Potent anxiolytic without sedation."
         },
         {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
           "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
           "product_title": "BPC-157",
-          "route": "subcutaneous",
-          "dosing_frequency": "daily",
-          "dose_per_administration": 500,
+          "compound": "BPC-157",
+          "dosage": "3500 mcg",
+          "dose": "3500 mcg (Daily (morning))",
+          "doseAmount": 3500,
+          "dose_amount": 3500,
+          "doseUnit": "mcg",
           "dose_unit": "mcg",
-          "timing_hint": "morning_subcutaneous",
-          "weekly_dose": "3500 mcg",
-          "vials_required_for_phase": null
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "24500 mcg/wk",
+          "weekly_dose": "24500 mcg/wk",
+          "weeklyDoseAmount": 24500,
+          "weekly_dose_amount": 24500,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
         },
         {
+          "id": "5-amino-1mq",
+          "product_id": "5-amino-1mq",
           "product_slug": "5-amino-1mq",
+          "name": "5-Amino-1MQ",
+          "product_name": "5-Amino-1MQ",
           "product_title": "5-Amino-1MQ",
-          "route": "oral",
-          "dosing_frequency": "daily",
-          "dose_per_administration": 50,
+          "compound": "5-Amino-1MQ",
+          "dosage": "350 mg",
+          "dose": "350 mg (Daily (morning))",
+          "doseAmount": 350,
+          "dose_amount": 350,
+          "doseUnit": "mg",
           "dose_unit": "mg",
-          "timing_hint": "morning_oral",
-          "weekly_dose": "350 mg",
-          "vials_required_for_phase": null
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "2450 mg/wk",
+          "weekly_dose": "2450 mg/wk",
+          "weeklyDoseAmount": 2450,
+          "weekly_dose_amount": 2450,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Oral",
+          "dosageForm": "vial",
+          "timing": "Morning on empty stomach",
+          "storage": "Store at 2°C–8°C. Protect from light.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "Standard"
+          },
+          "clinicalNotes": "Verify reconstitution sterility and rotate injection sites."
         },
         {
+          "id": "tesamorelin",
+          "product_id": "tesamorelin",
           "product_slug": "tesamorelin",
+          "name": "Tesamorelin",
+          "product_name": "Tesamorelin",
           "product_title": "Tesamorelin",
-          "route": "subcutaneous",
-          "dosing_frequency": "5x_week",
-          "dose_per_administration": 1,
+          "compound": "Tesamorelin",
+          "dosage": "5 mg",
+          "dose": "5 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 5,
+          "dose_amount": 5,
+          "doseUnit": "mg",
           "dose_unit": "mg",
-          "timing_hint": "night_subcutaneous",
-          "weekly_dose": "5 mg",
-          "vials_required_for_phase": null
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "25 mg/wk",
+          "weekly_dose": "25 mg/wk",
+          "weeklyDoseAmount": 25,
+          "weekly_dose_amount": 25,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Pre-bedtime • Strictly fasted",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 20,
+            "finalConcentration": "5.0 mg/mL (1 mg per 20 UI)"
+          },
+          "clinicalNotes": "Potent GHRH analogue specifically reducing visceral adipose tissue (VAT) and enhancing deep slow-wave sleep."
         },
         {
+          "id": "ipamorelin",
+          "product_id": "ipamorelin",
           "product_slug": "ipamorelin",
+          "name": "Ipamorelin",
+          "product_name": "Ipamorelin",
           "product_title": "Ipamorelin",
-          "route": "subcutaneous",
-          "dosing_frequency": "5x_week",
-          "dose_per_administration": 200,
+          "compound": "Ipamorelin",
+          "dosage": "1000 mcg",
+          "dose": "1000 mcg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 1000,
+          "dose_amount": 1000,
+          "doseUnit": "mcg",
           "dose_unit": "mcg",
-          "timing_hint": "night_subcutaneous",
-          "weekly_dose": "1000 mcg",
-          "vials_required_for_phase": null
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "5000 mcg/wk",
+          "weekly_dose": "5000 mcg/wk",
+          "weeklyDoseAmount": 5000,
+          "weekly_dose_amount": 5000,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Pre-bedtime • Strictly fasted min 2 hours post-dinner",
+          "storage": "Refrigerate at 2°C – 8°C. Protect from temperature fluctuations.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 8,
+            "finalConcentration": "2.5 mg/mL (200 mcg per 8 UI)"
+          },
+          "clinicalNotes": "Selective GH secretagogue (ghrelin receptor agonist). Fasting is mandatory to prevent somatostatin blunting of GH pulse."
         }
       ],
-      "_injected_from": "phase_blueprints"
-    },
-    {
-      "phase_number": 2,
-      "phase_key": "activation_phase",
-      "phase_title": "Activation Phase",
-      "start_week": 9,
-      "end_week": 16,
-      "objectives": [
-        "Enhance lipolysis",
-        "Support metabolic turnover",
-        "Maintain neuro-support"
-      ],
-      "clinical_purpose": [
-        "lipolysis_enhancement",
-        "metabolic_turnover",
-        "neuro_support_maintenance"
-      ],
-      "drugs_used": [
+      "drugs": [
         {
+          "id": "selank",
+          "product_id": "selank",
           "product_slug": "selank",
+          "name": "Selank",
+          "product_name": "Selank",
           "product_title": "Selank",
-          "route": "intranasal",
-          "dosing_frequency": "daily",
-          "dose_per_administration": 250,
+          "compound": "Selank",
+          "dosage": "1750 mcg",
+          "dose": "1750 mcg (Daily (morning))",
+          "doseAmount": 1750,
+          "dose_amount": 1750,
+          "doseUnit": "mcg",
           "dose_unit": "mcg",
-          "timing_hint": "morning_intranasal",
-          "weekly_dose": "1750 mcg",
-          "vials_required_for_phase": null
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "12250 mcg/wk",
+          "weekly_dose": "12250 mcg/wk",
+          "weeklyDoseAmount": 12250,
+          "weekly_dose_amount": 12250,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Intranasal",
+          "dosageForm": "nasal spray",
+          "timing": "Morning and/or prior to acute cognitive or emotional stress",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 30,
+            "diluentMl": 3,
+            "unitsPerDose": 1,
+            "finalConcentration": "10 mg/mL"
+          },
+          "clinicalNotes": "Tuftsin analogue modulating GABAergic transmission and dopamine/serotonin balance. Potent anxiolytic without sedation."
         },
         {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
+          "product_title": "BPC-157",
+          "compound": "BPC-157",
+          "dosage": "3500 mcg",
+          "dose": "3500 mcg (Daily (morning))",
+          "doseAmount": 3500,
+          "dose_amount": 3500,
+          "doseUnit": "mcg",
+          "dose_unit": "mcg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "24500 mcg/wk",
+          "weekly_dose": "24500 mcg/wk",
+          "weeklyDoseAmount": 24500,
+          "weekly_dose_amount": 24500,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
+        },
+        {
+          "id": "5-amino-1mq",
+          "product_id": "5-amino-1mq",
           "product_slug": "5-amino-1mq",
+          "name": "5-Amino-1MQ",
+          "product_name": "5-Amino-1MQ",
           "product_title": "5-Amino-1MQ",
-          "route": "oral",
-          "dosing_frequency": "daily",
-          "dose_per_administration": 50,
+          "compound": "5-Amino-1MQ",
+          "dosage": "350 mg",
+          "dose": "350 mg (Daily (morning))",
+          "doseAmount": 350,
+          "dose_amount": 350,
+          "doseUnit": "mg",
           "dose_unit": "mg",
-          "timing_hint": "morning_oral",
-          "weekly_dose": "350 mg",
-          "vials_required_for_phase": null
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "2450 mg/wk",
+          "weekly_dose": "2450 mg/wk",
+          "weeklyDoseAmount": 2450,
+          "weekly_dose_amount": 2450,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Oral",
+          "dosageForm": "vial",
+          "timing": "Morning on empty stomach",
+          "storage": "Store at 2°C–8°C. Protect from light.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "Standard"
+          },
+          "clinicalNotes": "Verify reconstitution sterility and rotate injection sites."
         },
         {
+          "id": "tesamorelin",
+          "product_id": "tesamorelin",
           "product_slug": "tesamorelin",
+          "name": "Tesamorelin",
+          "product_name": "Tesamorelin",
           "product_title": "Tesamorelin",
-          "route": "subcutaneous",
-          "dosing_frequency": "5x_week",
-          "dose_per_administration": 2,
+          "compound": "Tesamorelin",
+          "dosage": "5 mg",
+          "dose": "5 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 5,
+          "dose_amount": 5,
+          "doseUnit": "mg",
           "dose_unit": "mg",
-          "timing_hint": "night_subcutaneous",
-          "weekly_dose": "10 mg",
-          "vials_required_for_phase": null
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "25 mg/wk",
+          "weekly_dose": "25 mg/wk",
+          "weeklyDoseAmount": 25,
+          "weekly_dose_amount": 25,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Pre-bedtime • Strictly fasted",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 20,
+            "finalConcentration": "5.0 mg/mL (1 mg per 20 UI)"
+          },
+          "clinicalNotes": "Potent GHRH analogue specifically reducing visceral adipose tissue (VAT) and enhancing deep slow-wave sleep."
+        },
+        {
+          "id": "ipamorelin",
+          "product_id": "ipamorelin",
+          "product_slug": "ipamorelin",
+          "name": "Ipamorelin",
+          "product_name": "Ipamorelin",
+          "product_title": "Ipamorelin",
+          "compound": "Ipamorelin",
+          "dosage": "1000 mcg",
+          "dose": "1000 mcg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 1000,
+          "dose_amount": 1000,
+          "doseUnit": "mcg",
+          "dose_unit": "mcg",
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "5000 mcg/wk",
+          "weekly_dose": "5000 mcg/wk",
+          "weeklyDoseAmount": 5000,
+          "weekly_dose_amount": 5000,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Pre-bedtime • Strictly fasted min 2 hours post-dinner",
+          "storage": "Refrigerate at 2°C – 8°C. Protect from temperature fluctuations.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 8,
+            "finalConcentration": "2.5 mg/mL (200 mcg per 8 UI)"
+          },
+          "clinicalNotes": "Selective GH secretagogue (ghrelin receptor agonist). Fasting is mandatory to prevent somatostatin blunting of GH pulse."
         }
-      ],
-      "_injected_from": "phase_blueprints"
+      ]
     },
     {
-      "phase_number": 3,
-      "phase_key": "optimization_phase",
-      "phase_title": "Optimization Phase",
-      "start_week": 17,
-      "end_week": 24,
-      "objectives": [
-        "Stabilize metabolic improvements",
-        "Support tissue regeneration",
-        "Consolidate weight-management gains",
-        "Activate mitochondrial pathways"
-      ],
-      "clinical_purpose": [
-        "metabolic_stabilization",
-        "tissue_regeneration",
-        "weight_management_consolidation",
-        "mitochondrial_activation"
-      ],
-      "drugs_used": [
+      "id": "phase_2",
+      "name": "Activation Phase",
+      "phaseName": "Activation Phase",
+      "phase_name": "Activation Phase",
+      "phase_title": "Activation Phase",
+      "phaseNumber": 2,
+      "phase_number": 2,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 9,
+      "start_week": 9,
+      "endWeek": 16,
+      "end_week": 16,
+      "objective": "lipolysis_enhancement · metabolic_turnover · neuro_support_maintenance",
+      "clinical_goal": "lipolysis_enhancement · metabolic_turnover · neuro_support_maintenance",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
         {
-          "product_slug": "bpc-157",
-          "product_title": "BPC-157",
-          "route": "subcutaneous",
-          "dosing_frequency": "daily",
-          "dose_per_administration": 500,
+          "id": "selank",
+          "product_id": "selank",
+          "product_slug": "selank",
+          "name": "Selank",
+          "product_name": "Selank",
+          "product_title": "Selank",
+          "compound": "Selank",
+          "dosage": "1750 mcg",
+          "dose": "1750 mcg (Daily (morning))",
+          "doseAmount": 1750,
+          "dose_amount": 1750,
+          "doseUnit": "mcg",
           "dose_unit": "mcg",
-          "timing_hint": "morning_subcutaneous",
-          "weekly_dose": "3500 mcg",
-          "vials_required_for_phase": null
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "12250 mcg/wk",
+          "weekly_dose": "12250 mcg/wk",
+          "weeklyDoseAmount": 12250,
+          "weekly_dose_amount": 12250,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Intranasal",
+          "dosageForm": "nasal spray",
+          "timing": "Morning and/or prior to acute cognitive or emotional stress",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 30,
+            "diluentMl": 3,
+            "unitsPerDose": 1,
+            "finalConcentration": "10 mg/mL"
+          },
+          "clinicalNotes": "Tuftsin analogue modulating GABAergic transmission and dopamine/serotonin balance. Potent anxiolytic without sedation."
         },
         {
+          "id": "5-amino-1mq",
+          "product_id": "5-amino-1mq",
           "product_slug": "5-amino-1mq",
+          "name": "5-Amino-1MQ",
+          "product_name": "5-Amino-1MQ",
           "product_title": "5-Amino-1MQ",
-          "route": "oral",
-          "dosing_frequency": "daily",
-          "dose_per_administration": 50,
+          "compound": "5-Amino-1MQ",
+          "dosage": "350 mg",
+          "dose": "350 mg (Daily (morning))",
+          "doseAmount": 350,
+          "dose_amount": 350,
+          "doseUnit": "mg",
           "dose_unit": "mg",
-          "timing_hint": "morning_oral",
-          "weekly_dose": "350 mg",
-          "vials_required_for_phase": null
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "2450 mg/wk",
+          "weekly_dose": "2450 mg/wk",
+          "weeklyDoseAmount": 2450,
+          "weekly_dose_amount": 2450,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Oral",
+          "dosageForm": "vial",
+          "timing": "Morning on empty stomach",
+          "storage": "Store at 2°C–8°C. Protect from light.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "Standard"
+          },
+          "clinicalNotes": "Verify reconstitution sterility and rotate injection sites."
         },
         {
-          "product_slug": "mots-c",
-          "product_title": "MOTS-C",
-          "route": "subcutaneous",
-          "dosing_frequency": "once_weekly",
-          "dose_per_administration": 5,
+          "id": "tesamorelin",
+          "product_id": "tesamorelin",
+          "product_slug": "tesamorelin",
+          "name": "Tesamorelin",
+          "product_name": "Tesamorelin",
+          "product_title": "Tesamorelin",
+          "compound": "Tesamorelin",
+          "dosage": "10 mg",
+          "dose": "10 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
           "dose_unit": "mg",
-          "timing_hint": "morning_subcutaneous",
-          "weekly_dose": "5 mg",
-          "vials_required_for_phase": null
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "50 mg/wk",
+          "weekly_dose": "50 mg/wk",
+          "weeklyDoseAmount": 50,
+          "weekly_dose_amount": 50,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Pre-bedtime • Strictly fasted",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 20,
+            "finalConcentration": "5.0 mg/mL (1 mg per 20 UI)"
+          },
+          "clinicalNotes": "Potent GHRH analogue specifically reducing visceral adipose tissue (VAT) and enhancing deep slow-wave sleep."
         }
       ],
-      "_injected_from": "phase_blueprints"
+      "drugs": [
+        {
+          "id": "selank",
+          "product_id": "selank",
+          "product_slug": "selank",
+          "name": "Selank",
+          "product_name": "Selank",
+          "product_title": "Selank",
+          "compound": "Selank",
+          "dosage": "1750 mcg",
+          "dose": "1750 mcg (Daily (morning))",
+          "doseAmount": 1750,
+          "dose_amount": 1750,
+          "doseUnit": "mcg",
+          "dose_unit": "mcg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "12250 mcg/wk",
+          "weekly_dose": "12250 mcg/wk",
+          "weeklyDoseAmount": 12250,
+          "weekly_dose_amount": 12250,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Intranasal",
+          "dosageForm": "nasal spray",
+          "timing": "Morning and/or prior to acute cognitive or emotional stress",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 30,
+            "diluentMl": 3,
+            "unitsPerDose": 1,
+            "finalConcentration": "10 mg/mL"
+          },
+          "clinicalNotes": "Tuftsin analogue modulating GABAergic transmission and dopamine/serotonin balance. Potent anxiolytic without sedation."
+        },
+        {
+          "id": "5-amino-1mq",
+          "product_id": "5-amino-1mq",
+          "product_slug": "5-amino-1mq",
+          "name": "5-Amino-1MQ",
+          "product_name": "5-Amino-1MQ",
+          "product_title": "5-Amino-1MQ",
+          "compound": "5-Amino-1MQ",
+          "dosage": "350 mg",
+          "dose": "350 mg (Daily (morning))",
+          "doseAmount": 350,
+          "dose_amount": 350,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "2450 mg/wk",
+          "weekly_dose": "2450 mg/wk",
+          "weeklyDoseAmount": 2450,
+          "weekly_dose_amount": 2450,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Oral",
+          "dosageForm": "vial",
+          "timing": "Morning on empty stomach",
+          "storage": "Store at 2°C–8°C. Protect from light.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "Standard"
+          },
+          "clinicalNotes": "Verify reconstitution sterility and rotate injection sites."
+        },
+        {
+          "id": "tesamorelin",
+          "product_id": "tesamorelin",
+          "product_slug": "tesamorelin",
+          "name": "Tesamorelin",
+          "product_name": "Tesamorelin",
+          "product_title": "Tesamorelin",
+          "compound": "Tesamorelin",
+          "dosage": "10 mg",
+          "dose": "10 mg (5 days on, 2 days off (bedtime))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "5 days on, 2 days off (bedtime)",
+          "dosing_frequency": "5 days on, 2 days off (bedtime)",
+          "frequencyTimesPerWeek": 5,
+          "weeklyDose": "50 mg/wk",
+          "weekly_dose": "50 mg/wk",
+          "weeklyDoseAmount": 50,
+          "weekly_dose_amount": 50,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Pre-bedtime • Strictly fasted",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 20,
+            "finalConcentration": "5.0 mg/mL (1 mg per 20 UI)"
+          },
+          "clinicalNotes": "Potent GHRH analogue specifically reducing visceral adipose tissue (VAT) and enhancing deep slow-wave sleep."
+        }
+      ]
+    },
+    {
+      "id": "phase_3",
+      "name": "Optimization Phase",
+      "phaseName": "Optimization Phase",
+      "phase_name": "Optimization Phase",
+      "phase_title": "Optimization Phase",
+      "phaseNumber": 3,
+      "phase_number": 3,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 17,
+      "start_week": 17,
+      "endWeek": 24,
+      "end_week": 24,
+      "objective": "metabolic_stabilization · tissue_regeneration · weight_management_consolidation · mitochondrial_activation",
+      "clinical_goal": "metabolic_stabilization · tissue_regeneration · weight_management_consolidation · mitochondrial_activation",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
+          "product_title": "BPC-157",
+          "compound": "BPC-157",
+          "dosage": "3500 mcg",
+          "dose": "3500 mcg (Daily (morning))",
+          "doseAmount": 3500,
+          "dose_amount": 3500,
+          "doseUnit": "mcg",
+          "dose_unit": "mcg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "24500 mcg/wk",
+          "weekly_dose": "24500 mcg/wk",
+          "weeklyDoseAmount": 24500,
+          "weekly_dose_amount": 24500,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
+        },
+        {
+          "id": "5-amino-1mq",
+          "product_id": "5-amino-1mq",
+          "product_slug": "5-amino-1mq",
+          "name": "5-Amino-1MQ",
+          "product_name": "5-Amino-1MQ",
+          "product_title": "5-Amino-1MQ",
+          "compound": "5-Amino-1MQ",
+          "dosage": "350 mg",
+          "dose": "350 mg (Daily (morning))",
+          "doseAmount": 350,
+          "dose_amount": 350,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "2450 mg/wk",
+          "weekly_dose": "2450 mg/wk",
+          "weeklyDoseAmount": 2450,
+          "weekly_dose_amount": 2450,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Oral",
+          "dosageForm": "vial",
+          "timing": "Morning on empty stomach",
+          "storage": "Store at 2°C–8°C. Protect from light.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "Standard"
+          },
+          "clinicalNotes": "Verify reconstitution sterility and rotate injection sites."
+        },
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "5 mg",
+          "dose": "5 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 5,
+          "dose_amount": 5,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "15 mg/wk",
+          "weekly_dose": "15 mg/wk",
+          "weeklyDoseAmount": 15,
+          "weekly_dose_amount": 15,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "bpc-157",
+          "product_id": "bpc-157",
+          "product_slug": "bpc-157",
+          "name": "BPC-157",
+          "product_name": "BPC-157",
+          "product_title": "BPC-157",
+          "compound": "BPC-157",
+          "dosage": "3500 mcg",
+          "dose": "3500 mcg (Daily (morning))",
+          "doseAmount": 3500,
+          "dose_amount": 3500,
+          "doseUnit": "mcg",
+          "dose_unit": "mcg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "24500 mcg/wk",
+          "weekly_dose": "24500 mcg/wk",
+          "weeklyDoseAmount": 24500,
+          "weekly_dose_amount": 24500,
+          "weeklyDoseUnit": "mcg",
+          "weekly_dose_unit": "mcg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning fasted and/or pre-sleep on empty stomach",
+          "storage": "Refrigerate at 2°C – 8°C. Stable in BAC solution for 30 days.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "2.5 mg/mL (250 mcg / 10 UI)"
+          },
+          "clinicalNotes": "Stable gastric pentadecapeptide. Promotes VEGFR2 upregulation, focal collagen deposition, and mucosal integrity."
+        },
+        {
+          "id": "5-amino-1mq",
+          "product_id": "5-amino-1mq",
+          "product_slug": "5-amino-1mq",
+          "name": "5-Amino-1MQ",
+          "product_name": "5-Amino-1MQ",
+          "product_title": "5-Amino-1MQ",
+          "compound": "5-Amino-1MQ",
+          "dosage": "350 mg",
+          "dose": "350 mg (Daily (morning))",
+          "doseAmount": 350,
+          "dose_amount": 350,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Daily (morning)",
+          "dosing_frequency": "Daily (morning)",
+          "frequencyTimesPerWeek": 7,
+          "weeklyDose": "2450 mg/wk",
+          "weekly_dose": "2450 mg/wk",
+          "weeklyDoseAmount": 2450,
+          "weekly_dose_amount": 2450,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Oral",
+          "dosageForm": "vial",
+          "timing": "Morning on empty stomach",
+          "storage": "Store at 2°C–8°C. Protect from light.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 10,
+            "finalConcentration": "Standard"
+          },
+          "clinicalNotes": "Verify reconstitution sterility and rotate injection sites."
+        },
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "5 mg",
+          "dose": "5 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 5,
+          "dose_amount": 5,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "15 mg/wk",
+          "weekly_dose": "15 mg/wk",
+          "weeklyDoseAmount": 15,
+          "weekly_dose_amount": 15,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        }
+      ]
     }
   ],
-  "_enrichment_notes": [
-    "phases: INJECTED from phase_blueprints (3 phases)"
-  ],
-  "mechanism_of_action": [
-    "Targeted receptor modulation and cellular signaling optimization.",
-    "Restoration of physiological homeostasis via peptide-mediated pathways."
-  ],
-  "evidence_grade": "B",
-  "evidence_grade_note": "Grade B: Multi-target metabolic protocol anchoring approved incretin therapy with cellular bioenergetic agents (MOTS-c) and tissue integrity support (BPC-157). Supported by published Phase II/III trial data for individual active components."
+  "phasesCount": 3,
+  "_schemaVersion": 2,
+  "_unifiedAt": "2026-10-16T19:45:21.187Z"
 }

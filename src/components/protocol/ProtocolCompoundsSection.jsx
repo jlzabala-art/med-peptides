@@ -128,13 +128,14 @@ export default function ProtocolCompoundsSection({ items = [], lang = 'en', hasV
         </div>
       </div>
 
-      {/* ── Responsive Compounds Grid (Laptop 3-Col/2-Col, Mobile 1-Col) ── */}
+      {/* ── Responsive Compounds List (100% Full-Width Rows, Avoids Grid Orphan Cards) ── */}
       <div
-        className="proto-compounds-grid"
+        className="proto-compounds-list"
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))',
-          gap: '1rem'
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          width: '100%'
         }}
       >
         {items.map((item, idx) => {
@@ -143,157 +144,165 @@ export default function ProtocolCompoundsSection({ items = [], lang = 'en', hasV
           const itemDosage = item.dosage || item.dose || (item.quantity ? `${item.quantity} ${item.unit || (isEs ? 'Viales' : 'Vials')}` : null);
           const isCopied = copiedIndex === idx;
 
+          const formatVal = item.format || (isNonPeptide ? (isEs ? 'Fórmula Dermocosmética / Oral' : 'Dermocosmetic / Oral System') : (isEs ? 'Vial Liofilizado Estéril (Polvo)' : 'Lyophilized Sterile API'));
+          const routeVal = item.route || (isNonPeptide ? (isEs ? 'Tópica / Cutánea' : 'Topical / Dermal') : (isEs ? 'Subcutánea (SubQ)' : 'Subcutaneous (SubQ)'));
+          const timingVal = item.timing || item.schedule || (isEs ? 'Titulación por fases' : 'Phased titration');
+
+          const targetSupplier = item.supplierId || item.supplier || (item.isCosmetic ? 'supplier-colway' : 'supplier-lotusland');
+          const targetFormat = (item.format || (item.isCosmetic ? 'topical' : 'vial')).toLowerCase();
+          const targetDose = item.selected_strength || item.dosage || item.dose || null;
+          const itemUrlParams = new URLSearchParams();
+          if (targetSupplier) itemUrlParams.set('supplier', targetSupplier);
+          if (targetFormat) itemUrlParams.set('format', targetFormat);
+          if (targetDose) itemUrlParams.set('dose', targetDose);
+          const fullItemUrl = itemSlug ? `/p/${itemSlug}${itemUrlParams.toString() ? `?${itemUrlParams.toString()}` : ''}` : null;
+
           return (
             <div
               key={idx}
-              className="proto-compound-card"
+              className="proto-compound-row"
               style={{
                 border: '1px solid #e2e8f0',
-                borderTop: '3px solid #0284c7',
-                borderRadius: '10px',
-                padding: '1.20rem',
+                borderLeft: '4px solid #0284c7',
+                borderRadius: '8px',
+                padding: '0.85rem 1.15rem',
                 background: '#ffffff',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-                transition: 'box-shadow 0.15s ease, border-color 0.15s ease'
-              }}
-            >
-              <div>
-                {/* Header: Title + Dosage Badge */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: '6px',
-                      background: '#f0f9ff',
-                      border: '1px solid #bae6fd',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#0284c7',
-                      flexShrink: 0
-                    }}>
-                      <FlaskConical size={14} />
-                    </div>
-                    <strong style={{ color: '#0f172a', fontSize: '1.05rem', fontWeight: 800 }}>
-                      {itemName}
-                    </strong>
-                  </div>
-                  {itemDosage && (
-                    <span style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: '#0d9488',
-                      background: '#f0fdfa',
-                      border: '1px solid #ccfbf1',
-                      padding: '2px 8px',
-                      borderRadius: '6px',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {itemDosage}
-                    </span>
-                  )}
-                </div>
-
-                {/* Key-Value Specifications Ledger */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.45rem',
-                  background: '#f8fafc',
-                  border: '1px solid #f1f5f9',
-                  borderRadius: '6px',
-                  padding: '0.65rem 0.85rem',
-                  marginBottom: '0.85rem'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.76rem' }}>
-                    <span style={{ color: '#64748b', fontWeight: 600 }}>
-                      {isEs ? 'Formulación:' : 'Formulation:'}
-                    </span>
-                    <span style={{ color: '#1e293b', fontWeight: 700 }}>
-                      {item.format || (isNonPeptide ? (isEs ? 'Fórmula Dermocosmética / Oral' : 'Dermocosmetic / Oral System') : (isEs ? 'Vial Liofilizado Estéril (Polvo)' : 'Lyophilized Sterile API'))}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.76rem' }}>
-                    <span style={{ color: '#64748b', fontWeight: 600 }}>
-                      {isEs ? 'Vía de Entrega:' : 'Administration Route:'}
-                    </span>
-                    <span style={{ color: '#0284c7', fontWeight: 700 }}>
-                      {item.route || (isNonPeptide ? (isEs ? 'Tópica / Cutánea' : 'Topical / Dermal') : (isEs ? 'Subcutánea (SubQ)' : 'Subcutaneous (SubQ)'))}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.76rem' }}>
-                    <span style={{ color: '#64748b', fontWeight: 600 }}>
-                      {isEs ? 'Cronograma / Cadencia:' : 'Cadence / Timing:'}
-                    </span>
-                    <span style={{ color: '#0f172a', fontWeight: 700, textAlign: 'right', maxWidth: '65%' }}>
-                      {item.timing || item.schedule || (isEs ? 'Titulación por fases' : 'Phased titration')}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Indications / Mechanism snippet if available */}
-                {item.indications && (
-                  <p style={{
-                    fontSize: '0.75rem',
-                    color: '#64748b',
-                    margin: '0 0 1rem 0',
-                    lineHeight: 1.45,
-                    fontStyle: 'italic',
-                    borderLeft: '2px solid #cbd5e1',
-                    paddingLeft: '8px'
-                  }}>
-                    {item.indications}
-                  </p>
-                )}
-              </div>
-
-              {/* Card Footer Actions */}
-              <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                gap: '0.5rem',
-                borderTop: '1px solid #f1f5f9',
-                paddingTop: '0.75rem',
-                marginTop: '0.5rem'
-              }}>
-                {itemSlug ? (() => {
-                  const targetSupplier = item.supplierId || item.supplier || (item.isCosmetic ? 'supplier-colway' : 'supplier-lotusland');
-                  const targetFormat = (item.format || (item.isCosmetic ? 'topical' : 'vial')).toLowerCase();
-                  const targetDose = item.selected_strength || item.dosage || item.dose || null;
-                  const itemUrlParams = new URLSearchParams();
-                  if (targetSupplier) itemUrlParams.set('supplier', targetSupplier);
-                  if (targetFormat) itemUrlParams.set('format', targetFormat);
-                  if (targetDose) itemUrlParams.set('dose', targetDose);
-                  const fullItemUrl = `/p/${itemSlug}${itemUrlParams.toString() ? `?${itemUrlParams.toString()}` : ''}`;
-
-                  return (
-                    <Link
-                      href={fullItemUrl}
-                      target="_blank"
-                      style={{
-                        fontSize: '0.76rem',
+                gap: '1rem',
+                flexWrap: 'wrap',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {/* Left: Icon + Title + Dosage Badge (+ Indications if any) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 280px', minWidth: '240px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '7px',
+                  background: '#f0f9ff',
+                  border: '1px solid #bae6fd',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#0284c7',
+                  flexShrink: 0
+                }}>
+                  <FlaskConical size={16} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <strong style={{ color: '#0f172a', fontSize: '0.96rem', fontWeight: 800 }}>
+                      {itemName}
+                    </strong>
+                    {itemDosage && (
+                      <span style={{
+                        fontSize: '0.72rem',
                         fontWeight: 700,
-                        color: '#0284c7',
-                        textDecoration: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '5px'
-                      }}
-                    >
-                      <FileText size={13} />
-                      <span>{isEs ? 'Ver Ficha Técnica Atlas' : 'View Technical Monograph'}</span>
-                      <ArrowRight size={11} />
-                    </Link>
-                  );
-                })() : (
-                  <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                        color: '#0d9488',
+                        background: '#f0fdfa',
+                        border: '1px solid #ccfbf1',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {itemDosage}
+                      </span>
+                    )}
+                  </div>
+                  {item.indications && (
+                    <span style={{ fontSize: '0.74rem', color: '#64748b', fontStyle: 'italic', lineHeight: 1.35 }}>
+                      {item.indications}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Middle: Specifications Ledger (Format, Route, Timing) */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                flex: '2 1 340px'
+              }}>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.74rem',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  padding: '3px 8px',
+                  borderRadius: '5px'
+                }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>{isEs ? 'Formato:' : 'Format:'}</span>
+                  <strong style={{ color: '#1e293b' }}>{formatVal}</strong>
+                </div>
+
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.74rem',
+                  background: '#f0f9ff',
+                  border: '1px solid #bae6fd',
+                  padding: '3px 8px',
+                  borderRadius: '5px'
+                }}>
+                  <span style={{ color: '#0369a1', fontWeight: 600 }}>{isEs ? 'Vía:' : 'Route:'}</span>
+                  <strong style={{ color: '#0284c7' }}>{routeVal}</strong>
+                </div>
+
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.74rem',
+                  background: '#faf5ff',
+                  border: '1px solid #f3e8ff',
+                  padding: '3px 8px',
+                  borderRadius: '5px'
+                }}>
+                  <span style={{ color: '#7e22ce', fontWeight: 600 }}>{isEs ? 'Pauta:' : 'Timing:'}</span>
+                  <strong style={{ color: '#6b21a8' }}>{timingVal}</strong>
+                </div>
+              </div>
+
+              {/* Right: Actions (Monograph Link + Copy Specs) */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                flexShrink: 0
+              }}>
+                {fullItemUrl ? (
+                  <Link
+                    href={fullItemUrl}
+                    target="_blank"
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#0284c7',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      background: '#f0f9ff',
+                      border: '1px solid #bae6fd',
+                      padding: '4px 10px',
+                      borderRadius: '5px',
+                      transition: 'background 0.15s ease'
+                    }}
+                  >
+                    <FileText size={13} />
+                    <span>{isEs ? 'Ficha Técnica' : 'Monograph'}</span>
+                    <ArrowRight size={11} />
+                  </Link>
+                ) : (
+                  <span style={{ fontSize: '0.72rem', color: '#94a3b8', background: '#f8fafc', padding: '4px 8px', borderRadius: '4px' }}>
                     {isEs ? 'Formulación Clínica' : 'Clinical Formulation'}
                   </span>
                 )}
@@ -305,18 +314,19 @@ export default function ProtocolCompoundsSection({ items = [], lang = 'en', hasV
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '4px',
-                    padding: '3px 8px',
-                    borderRadius: '4px',
+                    padding: '4px 9px',
+                    borderRadius: '5px',
                     background: '#f1f5f9',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid #cbd5e1',
                     color: '#475569',
-                    fontSize: '0.70rem',
+                    fontSize: '0.72rem',
                     fontWeight: 600,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    transition: 'background 0.15s ease'
                   }}
                   title={isEs ? 'Copiar especificación del compuesto' : 'Copy compound specs'}
                 >
-                  {isCopied ? <Check size={11} style={{ color: '#16a34a' }} /> : <Copy size={11} />}
+                  {isCopied ? <Check size={12} style={{ color: '#16a34a' }} /> : <Copy size={12} />}
                   <span>{isCopied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Copiar' : 'Copy')}</span>
                 </button>
               </div>

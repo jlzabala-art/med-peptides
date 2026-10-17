@@ -231,17 +231,16 @@ export function RelatedCard({ id, protocol, matchReason, onClick }) {
             <Clock size={12} />
             <span style={{ fontWeight: 600 }}>
               {
-                protocol.protocol_duration_weeks 
+                protocol.durationWeeks
                 || protocol.duration_weeks 
-                || protocol.timeline?.total_duration_weeks
-                || (protocol.phase_blueprints || []).reduce((s, ph) => s + (ph.duration_weeks || ph.default_duration_weeks || 0), 0) 
+                || (protocol.phases || []).reduce((s, ph) => s + (Number(ph.durationWeeks) || 0), 0) 
                 || '?'
               } wks
             </span>
             <span style={{ opacity: 0.4 }}>·</span>
             <Layers size={12} />
             <span style={{ fontWeight: 600 }}>
-              {protocol.phase_blueprints?.length || protocol.phases?.length || 1} phase{(protocol.phase_blueprints?.length || protocol.phases?.length) !== 1 ? 's' : ''}
+              {protocol.phases?.length || 1} phase{(protocol.phases?.length || 1) !== 1 ? 's' : ''}
             </span>
           </div>
           <div style={{

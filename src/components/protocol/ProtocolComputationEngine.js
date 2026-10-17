@@ -76,97 +76,42 @@ function parseMg(val) {
 }
 
 export function resolveDrug(d, phaseIdx) {
-  // ── NEW FLAT SCHEMA (post-migration) ──────────────────────────────────────
-  // After migration, dose fields live directly on the drug object.
-  // We still support legacy dose_logic for any document not yet migrated.
-  const legacy = d.dose_logic || null;
-  const name   = d.product_title || d.name || d.compound || d.product_slug || ('Compound ' + (phaseIdx + 1));
+  // ── CANONICAL SCHEMA FIRST (post-homogenization) ──────────────────────────
+  const name = d.name || d.product_title || d.compound || d.id || ('Compound ' + (phaseIdx + 1));
 
   // ── Frequency ─────────────────────────────────────────────────────────────
-  const frequency = d.frequency
-    || legacy?.frequency
-    || legacy?.administration_frequency
-    || d.dosing_frequency
-    || 'weekly';
-  const injectionsPerWeek = d.injections_per_week
+  const frequency = d.frequency || 'weekly';
+  const injectionsPerWeek = d.frequencyTimesPerWeek
+    ?? d.injections_per_week
     ?? parseFrequencyToInjectionsPerWeek(frequency);
 
   // ── Administration days ───────────────────────────────────────────────────
-  const rawDays = d.administration_days
-    || legacy?.administration_days_default
-    || legacy?.administration_days
-    || [];
+  const rawDays = d.administration_days || [];
   const administrationDays = Array.isArray(rawDays) ? rawDays : [];
 
   // ── Dose resolution ───────────────────────────────────────────────────────
-  // New flat schema: weekly_dose is pre-computed; dose_per_injection is per-shot.
-  // Legacy fallback: use dose_logic fields via parseMg chain.
   let rawStartWeekly;
   let rawEndWeekly;
 
-  if (d.weekly_dose_amount != null) {
-    // ✅ New separated model — use numeric weekly dose amount directly
-    const unit = d.weekly_dose_unit || 'mg';
+  if (d.weeklyDoseMg != null) {
+    // Canonical unified schema — exact numeric weekly dose in mg
+    rawStartWeekly = Number(d.weeklyDoseMg);
+    rawEndWeekly = rawStartWeekly;
+  } else if (d.doseAmount != null) {
+    const unit = (d.doseUnit || 'mg').toLowerCase();
     const isMcg = unit === 'mcg' || unit === 'µg' || unit === 'ug';
-    rawStartWeekly = isMcg ? d.weekly_dose_amount / 1000 : d.weekly_dose_amount;
-    
-    // Resolve peak weekly dose
-    let peakMg = null;
-    if (d.peak_dose_per_injection_amount != null) {
-      const peakUnit = d.peak_dose_per_injection_unit || unit;
-      const isPeakMcg = peakUnit === 'mcg' || peakUnit === 'µg' || peakUnit === 'ug';
-      peakMg = isPeakMcg ? d.peak_dose_per_injection_amount / 1000 : d.peak_dose_per_injection_amount;
-    } else if (d.peak_dose_per_injection != null) {
-      peakMg = parseMg(d.peak_dose_per_injection);
-    }
-    
-    rawEndWeekly = peakMg != null
-      ? peakMg * injectionsPerWeek
-      : rawStartWeekly;
-  } else if (d.weekly_dose != null) {
-    // ✅ New flat schema string fallback — parse numeric value safely
-    rawStartWeekly = parseMg(d.weekly_dose);
-    rawEndWeekly   = d.peak_dose_per_injection != null
-      ? parseMg(d.peak_dose_per_injection) * injectionsPerWeek
-      : rawStartWeekly;
-  } else if (legacy) {
-    // 🔄 Legacy dose_logic fallback
-    const perAdminDose = parseMg(legacy.dose_per_administration);
-    const hasExplicitWeekly =
-      parseMg(legacy.starting_weekly_dose) != null ||
-      parseMg(legacy.default_weekly_dose)  != null ||
-      parseMg(legacy.weekly_dose)          != null;
-
-    rawStartWeekly =
-      parseMg(legacy.starting_dose) ??
-      parseMg(legacy.starting_weekly_dose) ??
-      parseMg(legacy.default_weekly_dose) ??
-      (perAdminDose != null && !hasExplicitWeekly
-        ? perAdminDose * injectionsPerWeek
-        : null) ??
-      parseMg(legacy.weekly_dose) ??
-      (parseMg(legacy.starting_daily_dose) != null
-        ? parseMg(legacy.starting_daily_dose) * injectionsPerWeek
-        : null) ??
-      (parseMg(d.selected_strength) != null
-        ? parseMg(d.selected_strength) * injectionsPerWeek
-        : null) ??
-      0;
-
-    rawEndWeekly =
-      parseMg(legacy.peak_dose) ??
-      parseMg(legacy.max_dose) ??
-      parseMg(legacy.max_weekly_dose) ??
-      (parseMg(legacy.possible_daily_dose) != null
-        ? parseMg(legacy.possible_daily_dose) * injectionsPerWeek
-        : null) ??
-      parseMg(legacy.maintenance_dose) ??
-      parseMg(legacy.possible_next_step_dose) ??
-      parseMg(legacy.default_weekly_dose) ??
-      rawStartWeekly;
+    const amountMg = isMcg ? Number(d.doseAmount) / 1000 : Number(d.doseAmount);
+    rawStartWeekly = amountMg * (d.frequencyTimesPerWeek || injectionsPerWeek || 1);
+    rawEndWeekly = rawStartWeekly;
+  } else if (d.weeklyDose != null) {
+    rawStartWeekly = parseMg(d.weeklyDose);
+    rawEndWeekly = rawStartWeekly;
+  } else if (d.dosage != null) {
+    rawStartWeekly = parseMg(d.dosage) * (injectionsPerWeek || 1);
+    rawEndWeekly = rawStartWeekly;
   } else {
     rawStartWeekly = 0;
-    rawEndWeekly   = 0;
+    rawEndWeekly = 0;
   }
 
   // ── Intensity-based schema ────────────────────────────────────────────────
@@ -203,9 +148,9 @@ export function resolveDrug(d, phaseIdx) {
 }
 
 // ── Build chart data ──────────────────────────────────────────────────────────
-export function buildChartData(phase_blueprints = [], phases = []) {
+export function buildChartData(phases = [], phase_blueprints = []) {
   try {
-    const source = phase_blueprints.length ? phase_blueprints : phases;
+    const source = phases.length ? phases : phase_blueprints;
     if (!source.length) return null;
 
     const compoundMap = {};
@@ -461,9 +406,9 @@ export function buildClinicalEvents(phaseBlocks) {
  */
 export function computeCostBreakdown(protocol, phaseBlocks) {
   try {
-    const source      = protocol?.phase_blueprints || protocol?.phases || [];
+    const source      = protocol?.phases || protocol?.phase_blueprints || [];
     const firstPhase  = source[0] || {};
-    const firstDrug   = (firstPhase.drugs || firstPhase.compounds || firstPhase.medications || [])[0];
+    const firstDrug   = (firstPhase.compounds || firstPhase.drugs || firstPhase.medications || [])[0];
     const vialSize    = parseFloat(firstDrug?.vial_size || protocol?.vial_size || 2) || 2;
     const pricePerVial = parseFloat(protocol?.cost_per_vial || protocol?.price_per_vial || firstDrug?.cost_per_vial || 0) || 0;
 

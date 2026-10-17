@@ -77,7 +77,7 @@ export default function ColwayCollectionSidebar({
       slug: 'colway-hair-restoration',
       title: isEs ? 'Restauración Folicular Anti-DHT' : 'Anti-DHT Hair Restoration',
       badge: isEs ? 'Tricología Médica' : 'Trichology',
-      desc: isEs ? 'Szampon + Odżywka + Colvita (60/120 cap)' : 'Strengthening Shampoo + Conditioner + Colvita',
+      desc: isEs ? 'Champú Fortalecedor + Acondicionador + Colvita (60/120 cap)' : 'Strengthening Shampoo + Conditioner + Colvita',
       category: 'hair',
       search: 'Strengthening'
     },
@@ -86,7 +86,7 @@ export default function ColwayCollectionSidebar({
       slug: 'colway-nutricosmetic',
       title: isEs ? 'Matriz Extracelular & Longevidad' : 'Extracellular Matrix & Longevity',
       badge: isEs ? 'Nutricosmética' : 'Nutricosmetic',
-      desc: isEs ? 'Colvita Colágeno Liofilizado + Vege Kolagen' : 'Colvita Lyophilized Collagen + Vege Collagen',
+      desc: isEs ? 'Colvita Colágeno Liofilizado + Colágeno Vege' : 'Colvita Lyophilized Collagen + Vege Collagen',
       category: 'anti-aging',
       search: 'Colvita'
     }

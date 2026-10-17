@@ -281,28 +281,8 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
 
   // ── Phase-grouped supply (memoized) ──────────────────────────────────────
   const enginePhases = useMemo(() => {
-    if (canonicalPhases && canonicalPhases.length > 0) {
-      // Map canonical v3 phases to the internal engine format
-      return canonicalPhases.map(ph => ({
-        phaseTitle: ph.phase_name,
-        durationWeeks: ph.end_week - ph.start_week + 1,
-        compounds: ph.compounds.map(c => ({
-          key: c.peptide_id,
-          label: c.name,
-          slug: c.product_slug || c.peptide_id,
-          productId: c.productId || c.peptide_id,
-          unit: c.schedule?.[0]?.dose?.unit || 'mg',
-          doseAmount: c.schedule?.[0]?.dose?.amount || 0,
-          dosingPerWeek: 1, // Placeholder, engine uses vialsNeeded mostly
-          vialSize: c.vial_max_capacity_mg || 10,
-          vialsNeeded: c.procurement?.vialCount || 1,
-          reconstitutionMl: c.reconstitution_volume_ml || 2,
-          totalWeeks: ph.end_week - ph.start_week + 1,
-          product: c, // Pass back original for price resolution
-        }))
-      }));
-    }
-    return derivePhaseSupply(phase_blueprints, dailyDose);
+    const active = (canonicalPhases && canonicalPhases.length > 0) ? canonicalPhases : phase_blueprints;
+    return derivePhaseSupply(active, dailyDose);
   }, [canonicalPhases, phase_blueprints, dailyDose]);
 
   // Build a lookup map: Firestore product ID → product object

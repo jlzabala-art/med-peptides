@@ -61,44 +61,27 @@ const BrochureDosingTable = memo(function BrochureDosingTable({ phases }) {
   const uniqueCompounds = new Set();
 
   const phaseGroups = phases.map((ph, phIdx) => {
-    const dur = ph.default_duration_weeks || ph.duration_weeks || 4;
+    const dur = ph.durationWeeks || ph.duration_weeks || 4;
     totalWeeks += dur;
 
     const color = PHASE_COLORS[phIdx % PHASE_COLORS.length];
-    const drugs = ph.drugs || ph.compounds || ph.medications || [];
+    const compounds = ph.compounds || [];
 
-    const rows = drugs.map((d) => {
-      const compoundName = d.product_title || d.name || '—';
+    const rows = compounds.map((d) => {
+      const compoundName = d.name || d.id || '—';
       uniqueCompounds.add(compoundName);
 
-      // Dose resolution — supports multiple schema variants
-      const startDose = d.dose_logic?.starting_weekly_dose
-        ?? d.dose_logic?.default_weekly_dose
-        ?? d.dose_logic?.dose_per_administration
-        ?? d.weekly_dose
-        ?? d.per_administration_dose
-        ?? d.selected_strength
-        ?? null;
-      const maxDose = d.dose_logic?.max_weekly_dose
-        ?? d.dose_logic?.possible_next_step_dose
-        ?? null;
-      const doseUnit = d.dose_logic?.dose_unit || d.dose_unit || d.unit || '';
-      const freq = d.dose_logic?.administration_frequency || d.frequency || d.admin_frequency || '';
-      const route = d.dose_logic?.route_of_administration || d.route || d.administration_route || '';
-      const adminPerWeek = d.dose_logic?.administrations_per_week ?? null;
-
-      let doseStr;
-      if (startDose && maxDose && startDose !== maxDose) {
-        doseStr = `${startDose} → ${maxDose}`;
-      } else {
-        doseStr = normalizeDose(startDose) || d.dose_logic?.intensity || '—';
-      }
+      // Dose resolution — directly read canonical fields
+      const doseStr = d.dosage || (d.doseAmount ? `${d.doseAmount} ${d.doseUnit || ''}` : '—');
+      const doseUnit = d.doseUnit || '';
+      const freq = d.frequency || '';
+      const route = d.route || 'Subcutaneous (SC)';
 
       return {
         compound: compoundName,
         dose: doseStr,
         unit: humanizeLocal(doseUnit),
-        freq: humanizeLocal(freq) || (adminPerWeek ? `${adminPerWeek}×/wk` : '—'),
+        freq: humanizeLocal(freq) || (d.frequencyTimesPerWeek ? `${d.frequencyTimesPerWeek}×/wk` : '—'),
         route: humanizeLocal(route),
         routeCls: routeClass(route),
         duration: `${dur}w`,
@@ -107,8 +90,8 @@ const BrochureDosingTable = memo(function BrochureDosingTable({ phases }) {
     });
 
     return {
-      phase: ph.phase_title || ph.name || ph.phase_name || `Phase ${phIdx + 1}`,
-      phaseNum: phIdx + 1,
+      phase: ph.phaseName || ph.name || `Phase ${phIdx + 1}`,
+      phaseNum: ph.phaseNumber || (phIdx + 1),
       dur,
       color,
       rows,

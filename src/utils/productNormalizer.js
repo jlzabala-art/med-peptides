@@ -132,7 +132,12 @@ export function extractProductPresentation(product) {
 
   const str = `${product.objectID || ''} ${product.id || ''} ${product.name || ''} ${product.sku || ''}`.toLowerCase();
   if (/stick|labial|lip|balm|pomadka/i.test(str)) return 'Lip Care Stick';
-  if (/shampoo|champú|conditioner|acondicionador|peeling|scrub|cleanser|wash|gel|jabón|soap|shower/i.test(str)) return 'Dermal Cleanser / Gel';
+  if (/peeling|scrub|exfoli/i.test(str)) return 'Enzymatic Peeling / Scrub';
+  if (/conditioner|acondicionador/i.test(str)) return 'Hair Conditioner';
+  if (/shampoo|champú/i.test(str)) return 'Trichological Shampoo';
+  if (/cleanser|wash|jabón|soap|shower/i.test(str)) return 'Dermal Cleanser / Gel';
+  if (/cream|crema/i.test(str)) return 'Topical Cream';
+  if (/vege|hydro-gel|biogel|bio-gel/i.test(str)) return 'Dermal Bio-Gel';
   if (/swab|saliva|blood|hair|cabello|htma|mineralograma|omega|metabolizer|test/i.test(str)) return 'Diagnostic Kit';
 
   // Category and Type fallback inference

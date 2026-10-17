@@ -3,51 +3,28 @@ import React from 'react';
 
 const ProtocolTechnicalAccessories = ({ 
   accessories = [], 
-  phase_blueprints = [], 
+  phases = [], 
+  phase_blueprints = [], // backwards compatibility fallback
   onSelectionChange, 
   selectedIds = new Set() 
 }) => {
-  // Derive standard accessories from phase blueprints if not provided explicitly
+  const activePhases = phases.length > 0 ? phases : phase_blueprints;
+  // Derive standard accessories from canonical phases if not provided explicitly
   let calculatedAccessories = [...accessories];
-  if (calculatedAccessories.length === 0 && phase_blueprints.length > 0) {
+  if (calculatedAccessories.length === 0 && activePhases.length > 0) {
     let totalInjections = 0;
     let totalBacWaterMl = 0;
 
-    phase_blueprints.forEach(ph => {
-      const dur = ph.default_duration_weeks || ph.duration_weeks || 4;
-      const drugs = ph.drugs || ph.compounds || ph.medications || [];
+    activePhases.forEach(ph => {
+      const dur = ph.durationWeeks || ph.duration_weeks || 4;
+      const compounds = ph.compounds || ph.drugs || [];
       
-      drugs.forEach(d => {
-        const logic = d.dose_logic || {};
-        const canonicalVials =
-          logic.vials_required != null ? Number(logic.vials_required)
-          : d.vials_required   != null ? Number(d.vials_required)
-          : null;
-
-        const freq = logic.administration_frequency || logic.frequency || d.dosing_frequency || 'once_weekly';
-        let dosingPerWeek = 1;
-        const normFreq = freq.toLowerCase();
-        if (normFreq.includes('daily') || normFreq.includes('diario')) dosingPerWeek = 7;
-        else if (normFreq.includes('2x') || normFreq.includes('twice')) dosingPerWeek = 2;
-        else if (normFreq.includes('3x') || normFreq.includes('thrice')) dosingPerWeek = 3;
-        else if (normFreq.includes('4x')) dosingPerWeek = 4;
-        else if (normFreq.includes('5x')) dosingPerWeek = 5;
-        else if (normFreq.includes('6x')) dosingPerWeek = 6;
-
-        const doseAmount = parseFloat(logic.starting_weekly_dose || logic.dose_per_administration || 0);
-        const vialSize = parseFloat(d.vial_size_mg || logic.vial_strength || 5);
-        const isWeeklyDose = Boolean(logic.starting_weekly_dose || logic.max_weekly_dose);
-
-        const baseWeeklyDose = isWeeklyDose ? doseAmount : (doseAmount * dosingPerWeek);
-        const maxDose = logic.max_weekly_dose || logic.possible_next_step_dose || null;
-        const weeklyDose = maxDose && maxDose > baseWeeklyDose ? (baseWeeklyDose + maxDose) / 2 : baseWeeklyDose;
-        const totalRequirement = weeklyDose * dur;
-        const vialsNeeded = canonicalVials !== null && !isNaN(canonicalVials) 
-          ? canonicalVials 
-          : (totalRequirement > 0 ? Math.ceil(totalRequirement / vialSize) : 1);
-
-        const explicitWaterMl = d.reconstitution?.water_volume_ml ?? logic.reconstitution_water_ml ?? null;
-        const reconstitutionMl = explicitWaterMl !== null ? Number(explicitWaterMl) : (vialSize > 0 ? 2 : 0);
+      compounds.forEach(d => {
+        const dosingPerWeek = d.frequencyTimesPerWeek || 1;
+        const totalRequirement = (d.weeklyDoseMg || 0) * dur;
+        const vialSize = d.reconstitution?.vialQuantityMg || 5;
+        const vialsNeeded = totalRequirement > 0 ? Math.ceil(totalRequirement / vialSize) : 1;
+        const reconstitutionMl = d.reconstitution?.bacWaterMl ?? 2;
 
         totalInjections += (dosingPerWeek * dur);
         totalBacWaterMl += (reconstitutionMl * vialsNeeded);

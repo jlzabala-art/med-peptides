@@ -19,10 +19,10 @@ import { safeStr } from '../../utils/textUtils';
 const BrochurePhaseCard = memo(function BrochurePhaseCard({
   phase, index, weekRange, clinicalGoal, simplified_explanation,
 }) {
-  const drugs = phase.drugs || phase.compounds || phase.medications || phase.drugs_used || [];
-  const phaseName = phase.name || phase.phase_name || `Phase ${index + 1}`;
+  const compounds = phase.compounds || [];
+  const phaseName = phase.phaseName || phase.name || `Phase ${index + 1}`;
   const goal = clinicalGoal || phase.objective || '';
-  const phaseType = phase.phase_type || phase.type || '';
+  const phaseType = phase.phaseType || phase.type || '';
   const colorIdx = index % 8; // cycles through 8 palette slots
 
   return (
@@ -51,10 +51,10 @@ const BrochurePhaseCard = memo(function BrochurePhaseCard({
             <span>{weekRange}</span>
           </div>
         )}
-        {phase.duration_weeks && (
+        {(phase.durationWeeks || phase.duration_weeks) && (
           <div className="brochure-phase-card__dur">
             <Clock size={11} strokeWidth={2.5} />
-            <span>{phase.duration_weeks}w</span>
+            <span>{phase.durationWeeks || phase.duration_weeks}w</span>
           </div>
         )}
       </div>
@@ -75,12 +75,12 @@ const BrochurePhaseCard = memo(function BrochurePhaseCard({
         )}
 
         {/* ── COMPOUND TABLE ── */}
-        {drugs.length > 0 && (
+        {compounds.length > 0 && (
           <div className="brochure-phase-card__compounds">
             <div className="brochure-phase-card__compounds-header">
               <FlaskConical size={12} strokeWidth={2.5} />
               <span>Compound Registry</span>
-              <span className="brochure-phase-card__compounds-count">{drugs.length}</span>
+              <span className="brochure-phase-card__compounds-count">{compounds.length}</span>
             </div>
 
             <div className="brochure-phase-compound-table">
@@ -91,28 +91,20 @@ const BrochurePhaseCard = memo(function BrochurePhaseCard({
                 <span>Route</span>
               </div>
 
-              {drugs.map((d, i) => (
+              {compounds.map((d, i) => (
                 <div key={i} className="brochure-phase-compound-row">
                   <span className="brochure-phase-compound-row__name">
                     <div className="brochure-phase-compound-row__dot" />
-                    {safeStr(d.name || d.product_name || d.compound || d.product_slug)}
+                    {safeStr(d.name || d.id)}
                   </span>
                   <span className="brochure-phase-compound-row__dose">
-                    {d.weekly_dose_amount != null
-                      ? `${d.weekly_dose_amount} ${d.weekly_dose_unit || ''}`
-                      : d.dose_logic?.starting_weekly_dose != null
-                        ? `${d.dose_logic.starting_weekly_dose} ${d.dose_logic.dose_unit || ''}`
-                        : d.dose_logic?.dose_per_administration != null
-                          ? `${d.dose_logic.dose_per_administration} ${d.dose_logic.dose_unit || ''}`
-                          : safeStr(d.weekly_dose ?? d.dose)}
+                    {safeStr(d.dosage || d.weeklyDose || (d.doseAmount ? `${d.doseAmount} ${d.doseUnit || ''}` : '—'))}
                   </span>
                   <span className="brochure-phase-compound-row__freq">
-                    {d.dose_logic?.administration_frequency
-                      ? safeStr(d.dose_logic.administration_frequency).replace(/_/g, ' ')
-                      : safeStr(d.frequency || d.frequency_of_use || d.administration_schedule)}
+                    {safeStr(d.frequency || (d.frequencyTimesPerWeek ? `${d.frequencyTimesPerWeek}×/wk` : '—'))}
                   </span>
                   <span className="brochure-phase-compound-row__route">
-                    {safeStr(d.dose_logic?.route_of_administration || d.route || d.administration_route || d.route_of_administration)}
+                    {safeStr(d.route || 'Subcutaneous (SC)')}
                   </span>
                 </div>
               ))}

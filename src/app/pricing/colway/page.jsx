@@ -102,7 +102,7 @@ const FALLBACK_COLWAY_PRODUCTS = [
   {
     id: 'colway-blue-diamond-cream',
     sku: 'SKU-COLWAY-BLUEDIAMOND-50',
-    name: 'Colway Blue Diamond Cream (Krem Niebieski Diament)',
+    name: 'Colway Blue Diamond Cream',
     subtitle: 'FGF-1 Recombinant Vector & Native Tropocollagen Cellular Emulsion',
     volume: '50 mL',
     presentation: 'Luxury Frosted Cosmetic Jar',
@@ -119,7 +119,7 @@ const FALLBACK_COLWAY_PRODUCTS = [
   {
     id: 'colway-blue-diamond-peeling',
     sku: 'SKU-COLWAY-BLUEDIAMOND-PEELING-75',
-    name: 'Colway Blue Diamond Peeling (Peeling Niebieski Diament)',
+    name: 'Colway Blue Diamond Peeling',
     subtitle: 'Diamond Powder Micro-Dermabrasion & Enzymatic Exfoliator',
     volume: '75 mL',
     presentation: 'Cosmetic Treatment Tube',

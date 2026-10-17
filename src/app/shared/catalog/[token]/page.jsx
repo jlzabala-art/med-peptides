@@ -77,17 +77,35 @@ export async function generateMetadata({ params, searchParams }) {
   const filterSummary = filterLabels.join(' • ');
   const hasFilter = filterSummary.length > 0;
 
-  const baseTitle = hasRecipient
-    ? (isWholesaler ? `Wholesale Peptide Catalog • ${recipientName}` : `Clinical Peptide Catalog • ${recipientName}`)
-    : `Clinical Peptide Catalog • ${supplierTitle}`;
+  const hasSpecificProductIds = Array.isArray(catalogData.productIds) && catalogData.productIds.length > 0;
+  const isColwayOrCosmeticMeta = 
+    catalogData.category === 'cosmetics' ||
+    String(catalogData.title || '').toLowerCase().includes('colway') ||
+    (hasSpecificProductIds && catalogData.productIds.every(id => String(id).toLowerCase().includes('colway')));
+
+  const defaultCatalogTitle = isColwayOrCosmeticMeta
+    ? 'Dermocosmetic & Nutricosmetic Portfolio'
+    : (hasSpecificProductIds ? 'Curated Formulations Catalog' : 'Clinical Peptide Catalog');
+
+  const baseTitle = catalogData.title || (
+    hasRecipient
+      ? (isWholesaler ? `Wholesale Portfolio • ${recipientName}` : `${defaultCatalogTitle} • ${recipientName}`)
+      : `${defaultCatalogTitle} • ${supplierTitle}`
+  );
 
   const title = hasFilter
     ? `Curated Catalog: ${filterSummary} • ${hasRecipient ? recipientName : supplierTitle}`
     : baseTitle;
 
+  const defaultDescription = isColwayOrCosmeticMeta
+    ? `Biologically active tropocollagen, botanical complexes and specialized dermocosmetic systems in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock and registered safety dossiers.`
+    : (hasSpecificProductIds
+      ? `Curated clinical formulations portfolio in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock and batch traceability.`
+      : `Clinical peptide portfolio and analytical-grade lyophilized formulations in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch traceability & verified analytical assays.`);
+
   const description = hasFilter
-    ? `Curated clinical peptide selection matching ${filterSummary} in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch purity assays, and cold-chain logistics.`
-    : `Clinical peptide portfolio and analytical-grade lyophilized formulations in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch traceability & verified analytical assays.`;
+    ? `Curated selection matching ${filterSummary} in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}.`
+    : defaultDescription;
 
   const appUrl = 'https://www.atlashealth-services.com';
   const catalogCode = catalogData.catalogId || token || '';
@@ -102,6 +120,10 @@ export async function generateMetadata({ params, searchParams }) {
   const qs = queryParts.join('&');
   const canonicalUrl = `${appUrl}/c/${catalogCode}${qs ? `?${qs}` : ''}`;
 
+  const ogSiteName = isColwayOrCosmeticMeta 
+    ? 'Colway Clinical Portfolio' 
+    : (hasSpecificProductIds ? 'Atlas Formulations Directory' : 'Clinical Peptide Catalog');
+
   return {
     title,
     description,
@@ -109,7 +131,7 @@ export async function generateMetadata({ params, searchParams }) {
       title,
       description,
       type: 'website',
-      siteName: 'Clinical Peptide Catalog',
+      siteName: ogSiteName,
       url: canonicalUrl,
       locale: 'en_US',
       images: [
@@ -117,7 +139,7 @@ export async function generateMetadata({ params, searchParams }) {
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: 'Clinical Peptide Catalog Verification & 3D Barcode',
+          alt: `${ogSiteName} Verification`,
           type: 'image/png',
         }
       ]

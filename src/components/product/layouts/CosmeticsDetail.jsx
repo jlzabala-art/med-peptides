@@ -364,6 +364,42 @@ const FALLBACK_CONDITIONER_APPLICATION = {
     'Use as part of the GHK-Cu Hair Restoration Protocol: apply conditioner 24–48 hours post-mesotherapy.',
     'Colour longevity: The acidic pH (4.0–4.5) reduces pigment elution from dyed fibers, extending color longevity by 25–35%.',
     'Protein balance check: If hair feels stiff after 4–6 weeks, reduce frequency to 2×/week and introduce a hydrating humectant mask.'
+};
+
+const FALLBACK_SKINCARE_APPLICATION = {
+  title: 'Professional Facial Rejuvenation & Barrier Protocol',
+  frequency: 'Twice daily: Morning (AM) & Evening (PM)',
+  duration_of_use: 'Continuous daily cellular regimen; minimum 28 days for full epidermal turnover cycle',
+  steps: [
+    {
+      step: 1,
+      phase: 'Cutaneous Preparation',
+      instruction: 'Cleanse face and neck thoroughly with a mild physiological cleanser. Leave skin slightly damp to facilitate active peptide absorption.',
+      duration: '60 seconds'
+    },
+    {
+      step: 2,
+      phase: 'Dosing & Distribution',
+      instruction: 'Dispense a pearl-sized amount (~1 mL) onto fingertips. Dot evenly across the forehead, cheeks, chin, neck, and décolleté.',
+      duration: '15 seconds'
+    },
+    {
+      step: 3,
+      phase: 'Ascending Effleurage Massage',
+      instruction: 'Spread the formulation using gentle ascending effleurage strokes from the center of the face outward toward the hairline along Langer’s lines.',
+      duration: '60–90 seconds',
+      clinical_note: 'Ascending massage stimulates microcirculation and accelerates active delivery to the basal dermal-epidermal junction.'
+    },
+    {
+      step: 4,
+      phase: 'Absorption & Barrier Sealing',
+      instruction: 'Gently press warm palms against cheeks and forehead for 10 seconds to enhance lamellar lipid integration into the stratum corneum.',
+      duration: '15 seconds'
+    }
+  ],
+  professional_notes: [
+    'Compatible with clinical peptide mesotherapy and post-peel regimens.',
+    'Formulated at skin-neutral physiological pH 5.5 to support the natural cutaneous microbiome.'
   ]
 };
 
@@ -616,15 +652,17 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const hairProtocols = product?.associated_protocols || [];
   const warnings = product?.warnings || [];
 
-  const isHairProduct = slug?.includes('shampoo') || slug?.includes('conditioner') || slug?.includes('trichology') || name?.toLowerCase().includes('shampoo') || name?.toLowerCase().includes('conditioner') || name?.toLowerCase().includes('trichology') || category?.toLowerCase().includes('hair');
+  const isHairProduct = slug?.includes('shampoo') || slug?.includes('conditioner') || slug?.includes('trichology') || name?.toLowerCase().includes('shampoo') || name?.toLowerCase().includes('conditioner') || name?.toLowerCase().includes('trichology') || category?.toLowerCase().includes('hair') || category?.toLowerCase().includes('trichology');
   const isShampoo = slug?.includes('shampoo') || name?.toLowerCase().includes('shampoo');
 
   const effectiveProtocol = useMemo(() => {
     if (applicationProtocol?.steps?.length > 0) {
       return applicationProtocol;
     }
-    return isShampoo ? FALLBACK_SHAMPOO_APPLICATION : FALLBACK_CONDITIONER_APPLICATION;
-  }, [applicationProtocol, isShampoo]);
+    if (isShampoo) return FALLBACK_SHAMPOO_APPLICATION;
+    if (isHairProduct) return FALLBACK_CONDITIONER_APPLICATION;
+    return FALLBACK_SKINCARE_APPLICATION;
+  }, [applicationProtocol, isHairProduct, isShampoo]);
 
   const filteredIngredients = useMemo(() => {
     let list = ingredients;
@@ -661,16 +699,23 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
   const keyActives = ingredients.filter(i => i.inci_group === 'key_active' || i.inci_group === 'functional_active');
 
-  const tocSections = useMemo(() => [
-    { id: 'overview', label: 'Formulation Overview', icon: Layers },
-    { id: 'stem-cell-monograph', label: 'Baicapil™ 2% Monograph', icon: Sparkles },
-    { id: 'clinical-evidence', label: 'Clinical Evidence & Targets', icon: Activity },
-    { id: 'inci-dossier', label: 'Full INCI Composition', icon: Microscope },
-    { id: 'application-protocol', label: 'Professional Application Protocol & Infogram', icon: ClipboardList },
-    { id: 'technical-specs', label: 'Technical Specifications', icon: Beaker },
-    { id: 'hair-protocols', label: 'Hair Protocols Integration', icon: Scissors },
-    { id: 'safety', label: 'Clinical Safety & Patch Test', icon: AlertTriangle },
-  ], []);
+  const tocSections = useMemo(() => {
+    const list = [
+      { id: 'overview', label: 'Formulation Overview', icon: Layers }
+    ];
+    if (isHairProduct) {
+      list.push({ id: 'stem-cell-monograph', label: 'Baicapil™ 2% Monograph', icon: Sparkles });
+    }
+    list.push(
+      { id: 'clinical-evidence', label: 'Clinical Evidence & Targets', icon: Activity },
+      { id: 'inci-dossier', label: 'Full INCI Composition', icon: Microscope },
+      { id: 'application-protocol', label: isHairProduct ? 'Application Protocol & Infogram' : 'Clinical Application Protocol', icon: ClipboardList },
+      { id: 'technical-specs', label: 'Technical Specifications', icon: Beaker },
+      { id: 'clinical-protocols', label: isHairProduct ? 'Hair Protocols Integration' : 'Clinical Protocols Integration', icon: isHairProduct ? Scissors : Sparkles },
+      { id: 'safety', label: 'Clinical Safety & Patch Test', icon: AlertTriangle }
+    );
+    return list;
+  }, [isHairProduct]);
 
   if (!product) return null;
 
@@ -727,7 +772,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: '5rem' }}>
       <PublicUnifiedHeader track="products" lang={lang} copyUrl={productUrl} inquiryContextType="product" inquiryEntity={{ name, slug, category }} hideTier2={true}
-        breadcrumb={[{ label: 'Catalog', href: '/catalog' }, { label: 'Colway® Trichology', href: '/collection/colway' }, { label: name }]} />
+        breadcrumb={[{ label: 'Catalog', href: '/catalog' }, { label: isHairProduct ? 'Colway® Trichology' : 'Colway® Clinical Skincare', href: '/collection/colway' }, { label: name }]} />
 
       <PublicPageShell>
         <div id="overview" style={{ scrollMarginTop: '80px' }}>
@@ -1336,24 +1381,28 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               </div>
             </PublicSectionCard>
 
-            {/* APPLICATION PROTOCOL & TRICHOLOGY INFOGRAM */}
+            {/* APPLICATION PROTOCOL & INFOGRAM */}
             <PublicSectionCard
               id="application-protocol"
               icon={ClipboardList}
               category="CLINICAL USAGE & MECHANISM"
-              title="Professional Application Protocol & Biological Infogram"
-              badge={effectiveProtocol.frequency || '3–4× Weekly'}
+              title={isHairProduct ? "Professional Application Protocol & Biological Infogram" : "Professional Application Protocol"}
+              badge={effectiveProtocol.frequency || (isHairProduct ? '3–4× Weekly' : 'Twice Daily')}
               badgeVariant="teal"
             >
               <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                Standardized trichological protocol developed for clinical application, mesotherapy recovery, and long-term hair follicle restoration. Interactive biological infogram details active transdermal diffusion down the follicular canal and structural cuticular biosealing.
+                {isHairProduct
+                  ? 'Standardized trichological protocol developed for clinical application, mesotherapy recovery, and long-term hair follicle restoration. Interactive biological infogram details active transdermal diffusion down the follicular canal and structural cuticular biosealing.'
+                  : 'Standardized dermocosmetic protocol developed for clinical application, barrier reconstruction, and enhanced cellular bioavailability of active peptides across the dermal-epidermal junction.'}
               </p>
 
-              {/* Interactive Visual Biological Trichology Infogram for Both Products */}
-              <ColwayProtocolInfogram
-                currentProduct={isShampoo ? 'shampoo' : 'conditioner'}
-                lang={lang}
-              />
+              {/* Interactive Visual Biological Trichology Infogram ONLY for Hair Products */}
+              {isHairProduct && (
+                <ColwayProtocolInfogram
+                  currentProduct={isShampoo ? 'shampoo' : 'conditioner'}
+                  lang={lang}
+                />
+              )}
 
               {/* Treatment Frequency & Cycle Cards */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
@@ -1371,7 +1420,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <ListChecks size={16} color="#0d9488" />
-                  <span>Sequential Clinical Steps ({isShampoo ? 'Scalp Focus' : 'Fiber Focus'})</span>
+                  <span>Sequential Clinical Steps ({isHairProduct ? (isShampoo ? 'Scalp Focus' : 'Fiber Focus') : 'Facial & Cutaneous Application'})</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {(effectiveProtocol.steps || []).map((step, i) => (
@@ -1380,10 +1429,12 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                 </div>
               </div>
 
-              {/* Trichologist Clinical Notes */}
+              {/* Clinical Notes */}
               {effectiveProtocol.professional_notes?.length > 0 && (
                 <div style={{ marginTop: '1.25rem', padding: '0.85rem 1rem', background: 'linear-gradient(135deg, #0f172a, #1e3a5f)', borderRadius: '10px' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>PROFESSIONAL / TRICHOLOGIST NOTES</div>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
+                    {isHairProduct ? 'PROFESSIONAL / TRICHOLOGIST NOTES' : 'CLINICAL / DERMATOLOGIST NOTES'}
+                  </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     {effectiveProtocol.professional_notes.map((note, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
@@ -1402,15 +1453,27 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               {!technicalSpecs && <p style={{ fontSize: '0.82rem', color: '#64748b' }}>Technical specifications available on request. Contact Atlas Health distribution for the full cosmetic safety assessment dossier.</p>}
             </PublicSectionCard>
 
-            {/* HAIR PROTOCOLS */}
-            <PublicSectionCard id="hair-protocols" icon={Scissors} category="CLINICAL INTEGRATION" title="Hair Restoration Protocols — Integration" badge={hairProtocols.length > 0 ? `${hairProtocols.length} Protocols` : undefined} badgeVariant="teal">
+            {/* CLINICAL PROTOCOLS */}
+            <PublicSectionCard
+              id="clinical-protocols"
+              icon={isHairProduct ? Scissors : Sparkles}
+              category="CLINICAL INTEGRATION"
+              title={isHairProduct ? "Hair Restoration Protocols — Integration" : "Clinical Skin Rejuvenation Protocols — Integration"}
+              badge={hairProtocols.length > 0 ? `${hairProtocols.length} Protocols` : undefined}
+              badgeVariant="teal"
+            >
               <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '1.25rem', lineHeight: 1.6 }}>
-                This cosmeceutical is recommended as a <strong>topical adjunct</strong> in clinically validated hair loss protocols. Works synergistically with mesotherapy-administered peptides (GHK-Cu, PTD-DBM) to reinforce the follicular microenvironment at the scalp surface.
+                {isHairProduct
+                  ? 'This cosmeceutical is recommended as a topical adjunct in clinically validated hair loss protocols. Works synergistically with mesotherapy-administered peptides (GHK-Cu, PTD-DBM) to reinforce the follicular microenvironment at the scalp surface.'
+                  : 'This advanced cosmeceutical is recommended as a topical regenerative layer in clinically validated skin renewal protocols, enhancing pro-collagen transcription and safeguarding the epidermal barrier.'}
               </p>
-              {(hairProtocols.length > 0 ? hairProtocols : [
-                { slug: 'ghk-cu-scalp-follicular-support', isPrimary: true, name: 'GHK-Cu Scalp & Follicular Support Protocol', category: 'Hair Regeneration', duration: '12 Weeks', integration_role: `Applied 3–4×/wk to reinforce GHK-Cu absorption and maintain optimal scalp pH throughout the protocol.`, synergy_score: 94 },
-                { slug: 'androgenic-alopecia-protocol', name: 'Androgenic Alopecia Combined Protocol', category: 'Hair Loss', duration: '16 Weeks', integration_role: 'Zinc PCA synergises with systemic DHT blockers. Caffeine extends anagen phase while peptide therapy targets follicular miniaturisation at the papilla level.', synergy_score: 88 }
-              ]).map(p => {
+              {(hairProtocols.length > 0 ? hairProtocols : (isHairProduct ? [
+                { slug: 'colway-hair-restoration', isPrimary: true, name: 'Colway Hair Restoration System', category: 'Trichology', duration: '16 Weeks', integration_role: 'Applied 3–4×/wk to reinforce follicular anchoring and maintain optimal scalp pH throughout the protocol.', synergy_score: 99 },
+                { slug: 'ghk-cu-scalp-follicular-support', name: 'GHK-Cu Scalp & Follicular Support Protocol', category: 'Hair Regeneration', duration: '12 Weeks', integration_role: 'Works synergistically with mesotherapy peptides to reinforce the follicular microenvironment.', synergy_score: 94 }
+              ] : [
+                { slug: 'colway-dermo-renewal', isPrimary: true, name: 'Colway Dermo-Renewal Ritual', category: 'Cellular Skincare', duration: '12 Weeks', integration_role: 'Primary morning and evening regenerative emulsion maintaining barrier integrity and cellular turnover.', synergy_score: 98 },
+                { slug: 'skin_001', name: 'GHK-Cu Skin Rejuvenation Protocol', category: 'Aesthetic Medicine', duration: '8–12 Weeks', integration_role: 'Topical barrier rebuild layer supporting subcutaneous/mesotherapy GHK-Cu pro-collagen induction.', synergy_score: 95 }
+              ])).map(p => {
                 const score = p.synergy_score || 80;
                 const scoreColor = score >= 90 ? '#16a34a' : score >= 75 ? '#0d9488' : '#d97706';
                 return (
@@ -1494,7 +1557,9 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             <footer style={{ marginTop: '1.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.25rem', fontSize: '0.7rem', color: '#94a3b8', lineHeight: 1.5 }}>
               <p style={{ margin: '0 0 0.35rem 0' }}>
                 <strong style={{ color: '#64748b' }}>Clinical Cosmeceutical Disclaimer:</strong>{' '}
-                Professional-grade cosmeceutical for topical use. Not a medicinal product. Clinical ingredient data based on published peer-reviewed literature and supplier dossiers. Individual results may vary. Consult a trichologist or dermatologist for persistent hair loss.
+                {isHairProduct
+                  ? 'Professional-grade cosmeceutical for topical use. Not a medicinal product. Clinical ingredient data based on published peer-reviewed literature and supplier dossiers. Individual results may vary. Consult a trichologist or dermatologist for persistent hair loss.'
+                  : 'Professional-grade cosmeceutical for topical use. Not a medicinal product. Clinical ingredient data based on published peer-reviewed literature and supplier dossiers. Individual results may vary. Dermatologically tested for sensitive, reactive, and mature skin.'}
               </p>
               <span>Supplier: {brand} · Atlas Health Distribution · {category} · INCI Dossier v{new Date().getFullYear()}</span>
             </footer>
@@ -1508,15 +1573,15 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             hideFloatingTrigger={true}
             currentProductSlug={slug}
           >
-            {/* COLWAY HAIR SYSTEM & CLINICAL PURITY WIDGET */}
+            {/* COLWAY CLINICAL PURITY WIDGET */}
             <CosmeticsSidebarWidget
               currentSlug={slug}
               lang={lang}
               onInquireRoutine={() => setIsInquiryDrawerOpen(true)}
             />
 
-            {/* ASSOCIATED HAIR RESTORATION PROTOCOLS WIDGET */}
-            {hairProtocols.length > 0 && (
+            {/* ASSOCIATED PROTOCOLS WIDGET */}
+            {hairProtocols.length > 0 && isHairProduct && (
               <div style={{ marginTop: '0.85rem' }}>
                 <HairProtocolsSidebarWidget protocols={hairProtocols} lang={lang} />
               </div>
@@ -1533,8 +1598,8 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
         initialEntity={{
           name,
           slug,
-          volume: selectedVariant?.volume || '250 mL Bottle',
-          category: 'Hair Care & Scalp Health · Cosmeceuticals',
+          volume: selectedVariant?.volume || 'Standard Presentation',
+          category: isHairProduct ? 'Hair Care & Scalp Health · Cosmeceuticals' : 'Cosmeceuticals & Cellular Skincare',
           supplier: brand
         }}
         lang={lang}

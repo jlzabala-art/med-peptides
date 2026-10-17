@@ -260,6 +260,8 @@ export function detectProductPresentation(productOrVariant, parentProduct = null
     String(varItem.presentation || varItem.format || varItem.name || '').toLowerCase()
   );
 
+  const hasWord = (str, word) => new RegExp(`(^|[^a-z0-9])${word}([^a-z0-9]|$)`, 'i').test(str);
+
   const isSpecificVariant = !v.variants;
   if (isSpecificVariant) {
     const singleText = [v.presentation, v.format, v.name, v.dosage]
@@ -267,7 +269,9 @@ export function detectProductPresentation(productOrVariant, parentProduct = null
       .map(s => String(s).toLowerCase())
       .join(' ');
 
-    if (singleText.includes('pen') || singleText.includes('cartridge') || singleText.includes('autoinject') || singleText.includes('pluma')) {
+    // 1. Prefilled Auto-Injector Pen (strict word matching to avoid 'dispenser' false positives)
+    const isPen = hasWord(singleText, 'pen') || singleText.includes('cartridge') || singleText.includes('autoinject') || hasWord(singleText, 'pluma');
+    if (isPen) {
       return {
         type: 'pen',
         label: 'Prefilled Auto-Injector Pen',
@@ -278,6 +282,8 @@ export function detectProductPresentation(productOrVariant, parentProduct = null
         Icon: PenIcon
       };
     }
+
+    // 2. Metered Nasal / Sublingual Spray
     if (singleText.includes('spray') || singleText.includes('nasal') || singleText.includes('pulveriz')) {
       return {
         type: 'spray',
@@ -289,7 +295,9 @@ export function detectProductPresentation(productOrVariant, parentProduct = null
         Icon: SprayIcon
       };
     }
-    if (singleText.includes('capsul') || singleText.includes('tablet') || singleText.includes('pill') || singleText.includes('oral') || singleText.includes('troche')) {
+
+    // 3. Oral Tablets, Capsules & Blisters
+    if (singleText.includes('capsul') || singleText.includes('tablet') || singleText.includes('pill') || singleText.includes('oral') || singleText.includes('troche') || singleText.includes('blister') || singleText.includes('colvita')) {
       return {
         type: 'tablet',
         label: 'Oral Tablets / Capsules',
@@ -300,18 +308,61 @@ export function detectProductPresentation(productOrVariant, parentProduct = null
         Icon: TabletIcon
       };
     }
-    if (singleText.includes('topical') || singleText.includes('serum') || singleText.includes('cream') || singleText.includes('gel') || singleText.includes('dropper')) {
+
+    // 4. Topical Dropper, Serum, Cream, Gel, Tube, Jar, Shampoo, Dispenser Bottle
+    const isTopicalOrCosmetic = 
+      singleText.includes('topical') || 
+      singleText.includes('serum') || 
+      singleText.includes('cream') || 
+      singleText.includes('gel') || 
+      singleText.includes('dropper') ||
+      singleText.includes('jar') ||
+      singleText.includes('tarro') ||
+      singleText.includes('tube') ||
+      singleText.includes('tubo') ||
+      singleText.includes('peeling') ||
+      singleText.includes('shampoo') ||
+      singleText.includes('conditioner') ||
+      singleText.includes('wash') ||
+      singleText.includes('bottle') ||
+      singleText.includes('dispenser') ||
+      singleText.includes('airless') ||
+      singleText.includes('stick') ||
+      singleText.includes('labial') ||
+      singleText.includes('lip care') ||
+      singleText.includes('vege') ||
+      singleText.includes('lotion');
+
+    if (isTopicalOrCosmetic) {
+      let customLabel = 'Topical Formulation / Dermal System';
+      let customShort = 'Topical';
+      if (singleText.includes('jar') || singleText.includes('cream')) {
+        customLabel = 'Cosmetic Jar / Dermal Bio-Cream';
+        customShort = 'Cream';
+      } else if (singleText.includes('tube') || singleText.includes('peeling')) {
+        customLabel = 'Dermatological Tube / Exfoliant';
+        customShort = 'Tube';
+      } else if (singleText.includes('shampoo') || singleText.includes('conditioner') || singleText.includes('wash') || singleText.includes('dispenser') || singleText.includes('bottle')) {
+        customLabel = 'Dispenser Bottle / Dermo-Cleanser';
+        customShort = 'Bottle';
+      } else if (singleText.includes('stick') || singleText.includes('lip')) {
+        customLabel = 'Labial Protective Stick';
+        customShort = 'Stick';
+      }
+
       return {
         type: 'topical',
-        label: 'Topical Dropper / Serum',
-        shortLabel: 'Topical',
+        label: customLabel,
+        shortLabel: customShort,
         color: '#16a34a',
         bg: '#f0fdf4',
         border: '#bbf7d0',
         Icon: DropperIcon
       };
     }
-    if (singleText.includes('bulk') || singleText.includes('api') || singleText.includes('powder') || singleText.includes('granel')) {
+
+    // 5. Bulk API Lyophilized Powder
+    if (singleText.includes('bulk') || (hasWord(singleText, 'api') && !singleText.includes('colway')) || singleText.includes('granel')) {
       return {
         type: 'powder',
         label: 'Bulk API Lyophilized Powder',
@@ -322,6 +373,7 @@ export function detectProductPresentation(productOrVariant, parentProduct = null
         Icon: PowderFlaskIcon
       };
     }
+
     return {
       type: 'vial',
       label: 'Lyophilized Borosilicate Vial',
@@ -336,19 +388,34 @@ export function detectProductPresentation(productOrVariant, parentProduct = null
   // Multi-variant or Product Master Header Level
   const distinctFormats = new Set();
   variantFormats.forEach(f => {
-    if (f.includes('pen') || f.includes('cartridge')) distinctFormats.add('pen');
+    if (hasWord(f, 'pen') || f.includes('cartridge')) distinctFormats.add('pen');
     else if (f.includes('spray') || f.includes('nasal')) distinctFormats.add('spray');
-    else if (f.includes('capsul') || f.includes('tablet')) distinctFormats.add('tablet');
-    else if (f.includes('topical') || f.includes('serum') || f.includes('cream')) distinctFormats.add('topical');
+    else if (f.includes('capsul') || f.includes('tablet') || f.includes('oral') || f.includes('blister')) distinctFormats.add('tablet');
+    else if (f.includes('topical') || f.includes('serum') || f.includes('cream') || f.includes('tube') || f.includes('jar') || f.includes('bottle') || f.includes('gel') || f.includes('peeling') || f.includes('dispenser') || f.includes('stick') || f.includes('shampoo')) distinctFormats.add('topical');
     else distinctFormats.add('vial');
   });
 
   const hasSpray = texts.includes('spray') || texts.includes('nasal') || texts.includes('pulveriz');
-  const hasPen = texts.includes('pen') || texts.includes('autoinject') || texts.includes('cartridge');
-  const hasTablet = texts.includes('capsule') || texts.includes('tablet') || texts.includes('oral') || texts.includes('troche');
-  const hasTopical = texts.includes('topical') || texts.includes('serum') || texts.includes('cream') || texts.includes('gel');
+  const hasPen = hasWord(texts, 'pen') || texts.includes('autoinject') || texts.includes('cartridge');
+  const hasTablet = texts.includes('capsule') || texts.includes('tablet') || texts.includes('oral') || texts.includes('troche') || texts.includes('blister');
+  const hasTopical = 
+    texts.includes('topical') || 
+    texts.includes('serum') || 
+    texts.includes('cream') || 
+    texts.includes('gel') ||
+    texts.includes('tube') ||
+    texts.includes('jar') ||
+    texts.includes('bottle') ||
+    texts.includes('dispenser') ||
+    texts.includes('peeling') ||
+    texts.includes('shampoo') ||
+    texts.includes('conditioner') ||
+    texts.includes('wash') ||
+    texts.includes('stick') ||
+    texts.includes('lip care') ||
+    p.category === 'cosmetics';
   const hasDiagnostic = texts.includes('test') || texts.includes('panel') || texts.includes('bloodo') || p.category === 'Diagnostic' || p.type === 'diagnostic';
-  const hasBulk = texts.includes('bulk') || texts.includes('api') || texts.includes('powder') || p.type === 'raw_material';
+  const hasBulk = texts.includes('bulk') || (hasWord(texts, 'api') && !texts.includes('colway')) || texts.includes('granel') || p.type === 'raw_material';
 
   if (hasSpray && distinctFormats.size === 1) {
     return {
@@ -361,7 +428,7 @@ export function detectProductPresentation(productOrVariant, parentProduct = null
       Icon: SprayIcon
     };
   }
-  if (hasPen && !distinctFormats.has('vial')) {
+  if (hasPen && !distinctFormats.has('vial') && !hasTopical) {
     return {
       type: 'pen',
       label: 'Prefilled Auto-Injector Pen',
@@ -386,7 +453,7 @@ export function detectProductPresentation(productOrVariant, parentProduct = null
   if (hasTopical) {
     return {
       type: 'topical',
-      label: 'Topical Dropper / Solution',
+      label: 'Topical & Dermocosmetic System',
       shortLabel: 'Topical',
       color: '#16a34a',
       bg: '#f0fdf4',

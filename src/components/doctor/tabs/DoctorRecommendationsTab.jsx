@@ -358,35 +358,35 @@ export default function DoctorRecommendationsTab({
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{
             fontSize: '0.74rem',
-            background: '#f8fafc',
-            color: '#0f172a',
-            border: '1px solid #e2e8f0',
+            background: '#ffffff',
+            color: '#3c4043',
+            border: '1px solid #dadce0',
             padding: '6px 12px',
-            borderRadius: '6px',
-            fontWeight: 650,
+            borderRadius: '4px',
+            fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
             gap: '6px'
           }}>
-            <Users size={14} style={{ color: '#2563eb' }} />
+            <Users size={14} style={{ color: '#1a73e8' }} />
             <span><strong>{totalCoveredRxs}</strong> of {allPrescriptions.length} prescriptions with synergy</span>
           </div>
-          <span style={{ fontSize: '0.74rem', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '6px 12px', borderRadius: '6px', fontWeight: 650 }}>
+          <span style={{ fontSize: '0.74rem', background: '#e6f4ea', color: '#137333', border: '1px solid #ceead6', padding: '6px 12px', borderRadius: '4px', fontWeight: 600 }}>
             ✓ {masterSolutions.length} Prioritized Master Formulation{masterSolutions.length === 1 ? '' : 's'}
           </span>
         </div>
       </div>
 
-      {/* Filter Tabs & Patient Search Controls */}
+      {/* Filter Tabs & Patient Search Controls (Google Cloud Segmented Bar) */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: '12px',
-        padding: '12px 16px',
-        background: '#f8fafd',
-        border: '1px solid #e2e8f0',
+        padding: '10px 14px',
+        background: '#ffffff',
+        border: '1px solid #dadce0',
         borderRadius: '8px',
         marginBottom: '20px'
       }}>
@@ -398,7 +398,7 @@ export default function DoctorRecommendationsTab({
             flexWrap: 'nowrap',
             overflowX: 'auto',
             WebkitOverflowScrolling: 'touch',
-            paddingBottom: '4px',
+            paddingBottom: '2px',
             maxWidth: '100%'
           }}
         >
@@ -418,12 +418,12 @@ export default function DoctorRecommendationsTab({
               }}
               style={{
                 fontSize: '0.74rem',
-                fontWeight: effectiveCategoryFilter === cat.id ? 700 : 500,
-                color: effectiveCategoryFilter === cat.id ? '#1e40af' : '#475569',
-                background: effectiveCategoryFilter === cat.id ? '#dbeafe' : '#ffffff',
-                border: effectiveCategoryFilter === cat.id ? '1px solid #93c5fd' : '1px solid #cbd5e1',
+                fontWeight: effectiveCategoryFilter === cat.id ? 600 : 500,
+                color: effectiveCategoryFilter === cat.id ? '#1a73e8' : '#5f6368',
+                background: effectiveCategoryFilter === cat.id ? '#e8f0fe' : '#ffffff',
+                border: effectiveCategoryFilter === cat.id ? '1px solid #1a73e8' : '1px solid #dadce0',
                 padding: '5px 12px',
-                borderRadius: '6px',
+                borderRadius: '4px',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 transition: 'all 0.12s'
@@ -436,7 +436,7 @@ export default function DoctorRecommendationsTab({
 
         {/* Search input for recommendations */}
         <div style={{ position: 'relative', width: '260px', maxWidth: '100%' }}>
-          <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+          <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#5f6368' }} />
           <input
             type="text"
             value={recSearchQuery}
@@ -446,10 +446,11 @@ export default function DoctorRecommendationsTab({
               width: '100%',
               fontSize: '0.76rem',
               padding: '6px 10px 6px 30px',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
+              border: '1px solid #dadce0',
+              borderRadius: '4px',
               outline: 'none',
-              background: '#ffffff'
+              background: '#ffffff',
+              color: '#202124'
             }}
           />
         </div>
@@ -467,7 +468,7 @@ export default function DoctorRecommendationsTab({
                 borderRadius: '8px',
                 padding: '16px 20px',
                 background: '#ffffff',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '10px'
@@ -478,11 +479,11 @@ export default function DoctorRecommendationsTab({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span
                     style={{
-                      fontSize: '0.66rem',
-                      fontWeight: 800,
-                      color: sol.badgeColor,
-                      background: sol.badgeBg,
-                      border: `1px solid ${sol.borderColor}`,
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: '#3c4043',
+                      background: '#f1f3f4',
+                      border: '1px solid #dadce0',
                       padding: '2px 8px',
                       borderRadius: '4px',
                       textTransform: 'uppercase',
@@ -491,17 +492,17 @@ export default function DoctorRecommendationsTab({
                   >
                     {sol.badge}
                   </span>
-                  <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 700, color: '#0f172a' }}>
+                  <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 700, color: '#202124' }}>
                     {sol.title}
                   </h3>
                   <span
                     style={{
                       fontSize: '0.70rem',
                       fontWeight: 700,
-                      color: '#059669',
-                      background: '#ecfdf5',
-                      border: '1px solid #a7f3d0',
-                      padding: '1px 6px',
+                      color: '#137333',
+                      background: '#e6f4ea',
+                      border: '1px solid #ceead6',
+                      padding: '2px 8px',
                       borderRadius: '4px'
                     }}
                   >
@@ -537,14 +538,14 @@ export default function DoctorRecommendationsTab({
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '5px',
                         fontSize: '0.72rem',
-                        fontWeight: 650,
-                        color: '#1d4ed8',
-                        background: '#eff6ff',
-                        border: '1px solid #bfdbfe',
+                        fontWeight: 600,
+                        color: '#1a73e8',
+                        background: '#ffffff',
+                        border: '1px solid #dadce0',
                         padding: '5px 12px',
-                        borderRadius: '5px',
+                        borderRadius: '4px',
                         cursor: 'pointer',
                         transition: 'all 0.15s ease'
                       }}
@@ -563,17 +564,18 @@ export default function DoctorRecommendationsTab({
                     rel="noopener noreferrer"
                     style={{
                       fontSize: '0.72rem',
-                      fontWeight: 650,
-                      color: sol.badgeColor,
-                      background: sol.badgeBg,
-                      border: `1px solid ${sol.borderColor}`,
-                      padding: '5px 12px',
-                      borderRadius: '5px',
+                      fontWeight: 600,
+                      color: '#ffffff',
+                      background: '#1a73e8',
+                      border: '1px solid #1a73e8',
+                      padding: '5px 14px',
+                      borderRadius: '4px',
                       textDecoration: 'none',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '4px',
-                      transition: 'all 0.15s ease'
+                      gap: '5px',
+                      transition: 'background-color 0.15s ease',
+                      boxShadow: '0 1px 2px rgba(26,115,232,0.2)'
                     }}
                   >
                     <span>{sol.protocolTitle}</span>
@@ -583,18 +585,18 @@ export default function DoctorRecommendationsTab({
               </div>
 
               {/* Middle Sub-Row: Cellular Target & Rationale */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div style={{ fontSize: '0.78rem', color: sol.badgeColor, fontWeight: 700 }}>
-                  🎯 {sol.target}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                <div style={{ fontSize: '0.76rem', color: '#1a73e8', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  <span style={{ color: '#5f6368', fontWeight: 600 }}>Target:</span> {sol.target}
                 </div>
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.48 }}>
+                <p style={{ margin: 0, fontSize: '0.80rem', color: '#475569', lineHeight: 1.5 }}>
                   {sol.summary}
                 </p>
               </div>
 
               {/* Bottom Sub-Row: Synergistic APIs Chips */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '2px' }}>
-                <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 650 }}>
+                <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 600 }}>
                   Proven synergy with:
                 </span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
@@ -603,12 +605,12 @@ export default function DoctorRecommendationsTab({
                       key={aIdx}
                       style={{
                         fontSize: '0.70rem',
-                        background: '#f8fafc',
-                        color: '#334155',
-                        border: '1px solid #e2e8f0',
-                        padding: '2px 7px',
+                        background: '#f1f3f4',
+                        color: '#3c4043',
+                        border: '1px solid #dadce0',
+                        padding: '2px 8px',
                         borderRadius: '4px',
-                        fontWeight: 600
+                        fontWeight: 500
                       }}
                     >
                       {api}

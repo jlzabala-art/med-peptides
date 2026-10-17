@@ -20,35 +20,37 @@ export const CLINICAL_EVIDENCE_LEVELS = Object.freeze([
   'Tier 4 - Preclinical / In-Vitro'
 ]);
 
-export const ProtocolItemSchema = z.object({
-  productId: z.string().min(1, 'Product ID is required'),
-  productName: z.string().min(1, 'Product name is required'),
-  variantId: z.string().optional(),
-  dosageAmount: z.number().positive('Dosage must be positive'),
-  dosageUnit: z.enum(['mcg', 'mg', 'IU', 'ml', 'capsule', 'drop', 'spray', 'vial']),
-  frequency: z.string().default('daily'), // e.g. 'daily', '5_days_on_2_off', 'once_weekly', 'twice_weekly'
-  route: z.enum([
-    'subcutaneous_injection',
-    'intramuscular_injection',
-    'reusable_pen',
-    'prefilled_pen',
-    'oral',
-    'sublingual',
-    'nasal',
-    'topical',
-    'iv_infusion'
-  ]).default('subcutaneous_injection'),
-  timing: z.string().default('morning_fasted'), // 'morning_fasted', 'pre_bed', 'post_workout'
-  notes: z.string().optional()
+export const ProtocolCompoundSchema = z.object({
+  id: z.string().min(1, 'Compound ID is required'),
+  name: z.string().min(1, 'Compound name is required'),
+  doseAmount: z.number().positive('Dose amount must be positive'),
+  doseUnit: z.string().default('mg'),
+  dosage: z.string().optional(),
+  weeklyDose: z.string().optional(),
+  weeklyDoseMg: z.number().optional(),
+  frequency: z.string().default('once_weekly'),
+  frequencyTimesPerWeek: z.number().int().positive().default(1),
+  route: z.string().default('Subcutaneous (SC)'),
+  timing: z.string().default('morning_fasted'),
+  clinicalNotes: z.string().optional(),
+  reconstitution: z.object({
+    vialQuantityMg: z.number().optional(),
+    bacWaterMl: z.number().optional(),
+    resultingConcentrationMgMl: z.number().optional(),
+    syringeUnitsPerDose: z.number().optional(),
+    instructions: z.string().optional()
+  }).optional()
 });
 
 export const ProtocolPhaseSchema = z.object({
   phaseNumber: z.number().int().min(1),
-  phaseName: z.string().min(1, 'Phase name is required'), // 'Induction / Titration', 'Active Optimization', 'Maintenance', 'Washout'
+  phaseName: z.string().min(1, 'Phase name is required'),
   durationWeeks: z.number().int().positive('Duration weeks must be positive'),
-  items: z.array(ProtocolItemSchema).min(1, 'At least one compound is required per phase'),
+  startWeek: z.number().int().optional(),
+  endWeek: z.number().int().optional(),
+  objective: z.string().optional(),
   instructions: z.string().optional(),
-  biomarkerCheckpoints: z.array(z.string()).default([])
+  compounds: z.array(ProtocolCompoundSchema).min(1, 'At least one compound is required per phase')
 });
 
 export const BiomarkerRuleSchema = z.object({

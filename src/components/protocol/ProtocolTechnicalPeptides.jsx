@@ -7,18 +7,18 @@ const ProtocolTechnicalPeptides = ({ peptides = [], activeProtocolPhases = [] })
   if (resolvedPeptides.length === 0 && activeProtocolPhases.length > 0) {
     const seen = new Set();
     activeProtocolPhases.forEach(ph => {
-      const drugs = ph.drugs || ph.compounds || ph.medications || [];
-      drugs.forEach(d => {
-        const title = d.product_title || d.name || d.compound || '';
+      const compounds = ph.compounds || [];
+      compounds.forEach(d => {
+        const title = d.name || d.id || '';
         if (title && !seen.has(title)) {
           seen.add(title);
           resolvedPeptides.push({
             name: title,
-            route: d.route || d.dose_logic?.route_of_administration || 'subcutaneous',
-            weekly_dose: d.dose_logic?.starting_weekly_dose || '—',
-            dose_unit: d.dose_logic?.dose_unit || 'mg',
-            frequency: d.dose_logic?.administration_frequency || '—',
-            vial_size: d.vial_strength || d.dose_logic?.vial_strength || null,
+            route: d.route || 'Subcutaneous (SC)',
+            weekly_dose: d.weeklyDose || d.dosage || '—',
+            dose_unit: d.doseUnit || 'mg',
+            frequency: d.frequency || '—',
+            vial_size: d.reconstitution?.vialQuantityMg ? `${d.reconstitution.vialQuantityMg} mg` : null,
             dosage_form: 'vial'
           });
         }

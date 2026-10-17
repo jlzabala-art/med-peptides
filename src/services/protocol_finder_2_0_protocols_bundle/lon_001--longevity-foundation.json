@@ -1,423 +1,100 @@
 {
+  "id": "lon_001",
   "protocol_id": "lon_001",
-  "protocol_slug": "longevity-foundation-structured",
+  "name": "Longevity Foundation Protocol",
+  "title": "Longevity Foundation Protocol",
   "protocol_title": "Longevity Foundation Protocol",
-  "protocol_version": "v6.0",
+  "slug": "longevity-foundation-structured",
+  "protocol_slug": "longevity-foundation-structured",
+  "shortCode": "LON-001",
+  "short_code": "LON-001",
+  "category": "Regenerative",
+  "therapeutic_category": "Regenerative",
+  "categoryId": "Regenerative",
   "status": "approved",
-  "active": true,
-  "metadata": {
-    "primary_goal": "longevity_foundation",
-    "primary_condition": "metabolic_immune_recovery_foundation_support",
-    "complexity_level": "standard",
-    "visibility": "public",
-    "source_type": "curated_library",
-    "source_reference": "Atlas Health_LON_001_Protocol_2026",
-    "marker_alignment": {
-      "longevity_focus": {
-        "mitochondria": {
-          "score": 95,
-          "note": "Core mitochondrial longevity focus"
-        },
-        "senescence": {
-          "score": 70,
-          "note": "Secondary cellular health support"
-        },
-        "metabolism": {
-          "score": 85,
-          "note": "Longevity-oriented metabolic support"
-        }
-      }
-    },
-    "author": {
-      "name": "Atlas Health Clinical Team",
-      "organization": "Atlas Health",
-      "title": "Peptide Specialists"
-    },
-    "review": {
-      "review_status": "approved",
-      "last_reviewed_at": "2026-04-02"
-    },
-    "created_at": "2026-04-02T00:00:00.000Z",
-    "updated_at": "2026-04-02T00:00:00.000Z",
-    "evidence_basis": {
-      "core_active": "MOTS-c",
-      "optional_support": "Thymosin Alpha-1",
-      "evidence_strength": "mixed_clinical_translational",
-      "evidence_notes": [
-        "Built around metabolic and resilience foundations rather than anti-aging claims.",
-        "TA1 is optional to support immune resilience where appropriate."
-      ]
-    },
-    "evidence_grade": "B",
-    "evidence_grade_note": "Grade B: Combines MOTS-c mitochondrial signal transduction (human Phase I data) with Epithalon telomerase activation and NAD+ cellular energetic restoration. Human longitudinal cohort studies (Khavinson et al.) demonstrate biogerontological biomarker improvement."
-  },
-  "eligibility_rules": {
-    "supported_age_groups": [
-      "18-35",
-      "36-50",
-      "51-65",
-      "65+"
-    ],
-    "supported_sex": [
-      "female",
-      "male"
-    ],
-    "supported_goals": [
-      "longevity_foundation",
-      "healthy_aging_support",
-      "resilience_support",
-      "metabolic_foundation"
-    ],
-    "required_patient_inputs": [
-      "primary_clinical_focus",
-      "patient_demographic",
-      "age_group",
-      "start_date"
-    ],
-    "contraindications": [],
-    "relative_cautions": []
-  },
-  "variant_rules": {
-    "age_variants": {
-      "18-35": {
-        "default_duration_weeks": 8,
-        "monitoring_intensity": "standard"
-      },
-      "36-50": {
-        "default_duration_weeks": 12,
-        "monitoring_intensity": "moderate"
-      },
-      "51-65": {
-        "default_duration_weeks": 16,
-        "monitoring_intensity": "enhanced"
-      },
-      "65+": {
-        "default_duration_weeks": 20,
-        "monitoring_intensity": "enhanced"
-      }
-    },
-    "sex_variants": {
-      "female": {
-        "recommended_flags": [
-          "hormonal_cyclicity_watch"
-        ],
-        "special_notes": [
-          "Use conservative ramping if sensitivity profile is high."
-        ]
-      },
-      "male": {
-        "recommended_flags": [],
-        "special_notes": [
-          "Reassess tolerance and response before escalation."
-        ]
-      }
-    },
-    "duration_variants": {
-      "8_weeks": {
-        "mode": "short",
-        "extra_monitoring": false
-      },
-      "12_weeks": {
-        "mode": "standard",
-        "extra_monitoring": false
-      },
-      "16_weeks": {
-        "mode": "extended",
-        "extra_monitoring": true
-      },
-      "20_weeks": {
-        "mode": "extended_plus",
-        "extra_monitoring": true
-      }
-    },
-    "tempo_variants": {
-      "conservative": {
-        "dose_step_interval_weeks": 4,
-        "monitoring_intensity_modifier": "up"
-      },
-      "standard": {
-        "dose_step_interval_weeks": 4,
-        "monitoring_intensity_modifier": "none"
-      },
-      "aggressive": {
-        "dose_step_interval_weeks": 2,
-        "monitoring_intensity_modifier": "up"
-      }
-    }
-  },
-  "phase_blueprints": [
+  "durationWeeks": 12,
+  "duration_weeks": 12,
+  "duration": "12 Weeks",
+  "primaryGoal": "Therapeutic Cellular Optimization",
+  "primary_goal": "Therapeutic Cellular Optimization",
+  "goals": [
+    "regenerative"
+  ],
+  "description": "Clinical peptide protocol designed for cellular regeneration and systemic optimization.",
+  "clinicalRationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "clinical_rationale": "Engineered according to clinical peptide consensus and pharmacokinetic half-life parameters.",
+  "evidenceLevel": "Tier 2 - Clinical Trial / Cohort",
+  "evidence_level": "Tier 2 - Clinical Trial / Cohort",
+  "evidenceGrade": "B",
+  "evidence_grade": "B",
+  "evidenceGradeNote": "Grade B: Combines MOTS-c mitochondrial signal transduction (human Phase I data) with Epithalon telomerase activation and NAD+ cellular energetic restoration. Human longitudinal cohort studies (Khavinson et al.) demonstrate biogerontological biomarker improvement.",
+  "evidence_grade_note": "Grade B: Combines MOTS-c mitochondrial signal transduction (human Phase I data) with Epithalon telomerase activation and NAD+ cellular energetic restoration. Human longitudinal cohort studies (Khavinson et al.) demonstrate biogerontological biomarker improvement.",
+  "requiredLabs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "required_labs": [
+    "Comprehensive Metabolic Panel (CMP)",
+    "CBC",
+    "Lipid Panel"
+  ],
+  "monitoringPlan": [
     {
-      "phase_key": "foundation",
-      "phase_title": "Foundation Building",
-      "default_start_week": 1,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "metabolic_foundation",
-        "recovery_support",
-        "resilience_support"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_motsc",
-          "product_title": "MOTS-c",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "2x_week",
-            "starting_intensity": "standard",
-            "administration_days_default": [
-              "Tuesday",
-              "Thursday"
-            ],
-            "timing_hint": "morning",
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10,
-            "dose_per_administration": 5
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_motsc",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_ta1",
-          "product_title": "Thymosin Alpha-1",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "administration_frequency": "2x_week",
-            "starting_intensity": "optional_low",
-            "administration_days_default": [
-              "Friday"
-            ],
-            "activation_condition": "if_immune_resilience_priority",
-            "starting_weekly_dose": 3000,
-            "default_weekly_dose": 3000,
-            "dose_per_administration": 1500
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_ta1",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 1,
-          "event_type": "baseline_review",
-          "title": "Baseline resilience, recovery, and function review"
-        }
-      ]
+      "week": 0,
+      "title": "Baseline Comprehensive Panel"
     },
     {
-      "phase_key": "optimization",
-      "phase_title": "Optimization",
-      "default_start_week": 5,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "energy_resilience",
-        "immune_support",
-        "healthy_aging_foundation"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_motsc",
-          "product_title": "MOTS-c",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "2x_week",
-            "intensity": "standard_plus",
-            "administration_days_default": [
-              "Monday",
-              "Wednesday",
-              "Friday"
-            ],
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10,
-            "dose_per_administration": 5
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_motsc",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        },
-        {
-          "product_id": "prd_ta1",
-          "product_title": "Thymosin Alpha-1",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mcg",
-            "administration_frequency": "2x_week",
-            "intensity": "conditional",
-            "administration_days_default": [
-              "Friday"
-            ],
-            "activation_condition": "if_immune_support_needed",
-            "starting_weekly_dose": 3000,
-            "default_weekly_dose": 3000,
-            "dose_per_administration": 1500
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_ta1",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 8,
-          "event_type": "checkpoint",
-          "title": "Foundation response reassessment"
-        }
-      ]
+      "week": 6,
+      "title": "Mid-Cycle Checkpoint & Tolerance"
     },
     {
-      "phase_key": "maintenance",
-      "phase_title": "Maintenance",
-      "default_start_week": 9,
-      "default_duration_weeks": 4,
-      "clinical_purpose": [
-        "maintenance_of_response",
-        "sustainable_resilience"
-      ],
-      "drugs": [
-        {
-          "product_id": "prd_motsc",
-          "product_title": "MOTS-c",
-          "route": "subcutaneous",
-          "dose_logic": {
-            "dose_unit": "mg",
-            "administration_frequency": "2x_week",
-            "intensity": "maintenance",
-            "administration_days_default": [
-              "Tuesday",
-              "Thursday"
-            ],
-            "starting_weekly_dose": 10,
-            "default_weekly_dose": 10,
-            "dose_per_administration": 5
-          },
-          "variantRef": {
-            "type": "resolved",
-            "productId": "prd_motsc",
-            "route": "SC"
-          },
-          "dosage_form": "vial"
-        }
-      ],
-      "clinical_events": [
-        {
-          "week": 12,
-          "event_type": "outcome_review",
-          "title": "Final longevity foundation review"
-        }
-      ]
+      "week": 12,
+      "title": "End-of-Cycle Outcome Review"
     }
   ],
-  "monitoring_plan": {
-    "baseline_required": [
-      "sleep_quality",
-      "energy_score",
-      "recovery_score",
-      "stress_load",
-      "exercise_tolerance"
-    ],
-    "scheduled_checkpoints": [
-      {
-        "week": 4,
-        "type": "foundation_review",
-        "measures": [
-          "energy",
-          "sleep",
-          "recovery"
-        ],
-        "purpose": "Assess early response"
-      },
-      {
-        "week": 8,
-        "type": "reassessment",
-        "measures": [
-          "resilience",
-          "recovery",
-          "fatigue"
-        ],
-        "purpose": "Midpoint reassessment"
-      },
-      {
-        "week": 12,
-        "type": "final_outcome_review",
-        "measures": [
-          "overall_foundation_support",
-          "recovery_consistency"
-        ],
-        "purpose": "End-of-cycle evaluation"
-      }
-    ],
-    "labs": []
-  },
-  "expected_outcomes": {
-    "qualitative": [
-      "better resilience foundation",
-      "improved recovery consistency",
-      "better energy stability"
-    ],
-    "quantitative_ranges": {
-      "foundation_support_expected": "mild_to_moderate"
-    }
-  },
-  "generator_rules": {
-    "selection_priority": [
-      "goal_match",
-      "age_variant_match",
-      "recovery_pattern",
-      "metabolic_profile"
-    ],
-    "profile_notes": [
-      "Frame as healthy-aging support, not disease reversal."
-    ]
-  },
-  "generated_protocol_template": {
-    "patient_context": {
-      "primary_clinical_focus": null,
-      "patient_demographic": null,
-      "age_group": null,
-      "duration_weeks": null,
-      "start_date": null,
-      "tempo_preference": "standard"
+  "contraindications": [
+    "Active malignancy or uninvestigated neoplastic lesions",
+    "Pregnancy, planned conception, or lactation",
+    "Severe hepatic impairment (Child-Pugh Class C) or end-stage renal disease"
+  ],
+  "relativeCautions": [
+    "History of cardiac arrhythmia or severe hypertension",
+    "Concurrent administration of insulin secretagogues without dose adjustment"
+  ],
+  "expectedOutcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "expected_outcomes": [
+    "Restoration of target cellular and metabolic signaling pathways",
+    "Documented improvement in clinical biomarkers and subjective vigor",
+    "Sustained systemic resilience and tissue regeneration"
+  ],
+  "recommendedSupplements": [
+    {
+      "name": "NMN",
+      "dosage": "250mg",
+      "rationale": "NAD+ precursor supporting cellular longevity pathways",
+      "frequency": "Daily",
+      "weekly_dose": "1750mg"
     },
-    "applied_variants": {
-      "age_variant": null,
-      "sex_variant": null,
-      "duration_variant": null,
-      "tempo_variant": "standard"
+    {
+      "name": "Spermidine",
+      "dosage": "1mg",
+      "rationale": "Autophagy induction and mitochondrial renewal",
+      "frequency": "Daily",
+      "weekly_dose": "7mg"
     },
-    "resolved_phases": [],
-    "resolved_timeline": [],
-    "resolved_monitoring": [],
-    "resolved_costs": {},
-    "validation": {
-      "state": "NOT_EVALUATED",
-      "modules": []
+    {
+      "name": "Coenzyme Q10",
+      "dosage": "100mg",
+      "rationale": "Mitochondrial cofactor and antioxidant",
+      "frequency": "Daily",
+      "weekly_dose": "700mg"
     }
-  },
-  "legacy_compatibility": {
-    "enabled": true,
-    "deprecated_fields": [
-      "phases",
-      "computedTimeline",
-      "computedCost"
-    ],
-    "notes": "Legacy fields may still be generated temporarily for backward compatibility while the generator transitions to blueprint + resolved output mode."
-  },
+  ],
   "recommended_supplements": [
     {
       "name": "NMN",
@@ -441,25 +118,444 @@
       "weekly_dose": "700mg"
     }
   ],
-  "mechanism_of_action": [
-    "Targeted receptor modulation and cellular signaling optimization.",
-    "Restoration of physiological homeostasis via peptide-mediated pathways."
+  "bom": [
+    {
+      "productId": "mots-c",
+      "product_name": "MOTS-c",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    },
+    {
+      "productId": "thymosin-alpha-1",
+      "product_name": "Thymosin Alpha-1",
+      "route": "Subcutaneous",
+      "format": "vial",
+      "quantity": 3
+    }
   ],
-  "safety_profile": {
-    "adverse_events": [
-      "Mild injection site reactions (redness, transient pain).",
-      "Potential for mild, transient nausea during initial dose titration."
-    ],
-    "drug_interactions": [
-      "Monitor concurrent use of medications that affect blood glucose levels.",
-      "No severe drug-drug interactions documented, but caution advised with polypharmacy."
-    ],
-    "contraindications": [
-      "Pregnancy and lactation.",
-      "Active malignancies or history of specific hormone-sensitive cancers.",
-      "Known hypersensitivity to any protocol components."
-    ]
-  },
-  "evidence_grade": "B",
-  "evidence_grade_note": "Grade B: Combines MOTS-c mitochondrial signal transduction (human Phase I data) with Epithalon telomerase activation and NAD+ cellular energetic restoration. Human longitudinal cohort studies (Khavinson et al.) demonstrate biogerontological biomarker improvement."
+  "phases": [
+    {
+      "id": "phase_1",
+      "name": "Foundation Building",
+      "phaseName": "Foundation Building",
+      "phase_name": "Foundation Building",
+      "phase_title": "Foundation Building",
+      "phaseNumber": 1,
+      "phase_number": 1,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 1,
+      "start_week": 1,
+      "endWeek": 4,
+      "end_week": 4,
+      "objective": "metabolic_foundation · recovery_support · resilience_support",
+      "clinical_goal": "metabolic_foundation · recovery_support · resilience_support",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        },
+        {
+          "id": "thymosin-alpha-1",
+          "product_id": "thymosin-alpha-1",
+          "product_slug": "thymosin-alpha-1",
+          "name": "Thymosin Alpha-1",
+          "product_name": "Thymosin Alpha-1",
+          "product_title": "Thymosin Alpha-1",
+          "compound": "Thymosin Alpha-1",
+          "dosage": "3000 mg",
+          "dose": "3000 mg (Twice weekly (Mon/Thu))",
+          "doseAmount": 3000,
+          "dose_amount": 3000,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Twice weekly (Mon/Thu)",
+          "dosing_frequency": "Twice weekly (Mon/Thu)",
+          "frequencyTimesPerWeek": 2,
+          "weeklyDose": "6000 mg/wk",
+          "weekly_dose": "6000 mg/wk",
+          "weeklyDoseAmount": 6000,
+          "weekly_dose_amount": 6000,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 64,
+            "finalConcentration": "2.5 mg/mL (1.6 mg per 64 UI)"
+          },
+          "clinicalNotes": "Thymic peptide TLR-9 agonist. Augments T-cell maturation and innate antiviral/immune surveillance."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        },
+        {
+          "id": "thymosin-alpha-1",
+          "product_id": "thymosin-alpha-1",
+          "product_slug": "thymosin-alpha-1",
+          "name": "Thymosin Alpha-1",
+          "product_name": "Thymosin Alpha-1",
+          "product_title": "Thymosin Alpha-1",
+          "compound": "Thymosin Alpha-1",
+          "dosage": "3000 mg",
+          "dose": "3000 mg (Twice weekly (Mon/Thu))",
+          "doseAmount": 3000,
+          "dose_amount": 3000,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Twice weekly (Mon/Thu)",
+          "dosing_frequency": "Twice weekly (Mon/Thu)",
+          "frequencyTimesPerWeek": 2,
+          "weeklyDose": "6000 mg/wk",
+          "weekly_dose": "6000 mg/wk",
+          "weeklyDoseAmount": 6000,
+          "weekly_dose_amount": 6000,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 64,
+            "finalConcentration": "2.5 mg/mL (1.6 mg per 64 UI)"
+          },
+          "clinicalNotes": "Thymic peptide TLR-9 agonist. Augments T-cell maturation and innate antiviral/immune surveillance."
+        }
+      ]
+    },
+    {
+      "id": "phase_2",
+      "name": "Optimization",
+      "phaseName": "Optimization",
+      "phase_name": "Optimization",
+      "phase_title": "Optimization",
+      "phaseNumber": 2,
+      "phase_number": 2,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 5,
+      "start_week": 5,
+      "endWeek": 8,
+      "end_week": 8,
+      "objective": "energy_resilience · immune_support · healthy_aging_foundation",
+      "clinical_goal": "energy_resilience · immune_support · healthy_aging_foundation",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        },
+        {
+          "id": "thymosin-alpha-1",
+          "product_id": "thymosin-alpha-1",
+          "product_slug": "thymosin-alpha-1",
+          "name": "Thymosin Alpha-1",
+          "product_name": "Thymosin Alpha-1",
+          "product_title": "Thymosin Alpha-1",
+          "compound": "Thymosin Alpha-1",
+          "dosage": "3000 mg",
+          "dose": "3000 mg (Twice weekly (Mon/Thu))",
+          "doseAmount": 3000,
+          "dose_amount": 3000,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Twice weekly (Mon/Thu)",
+          "dosing_frequency": "Twice weekly (Mon/Thu)",
+          "frequencyTimesPerWeek": 2,
+          "weeklyDose": "6000 mg/wk",
+          "weekly_dose": "6000 mg/wk",
+          "weeklyDoseAmount": 6000,
+          "weekly_dose_amount": 6000,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 64,
+            "finalConcentration": "2.5 mg/mL (1.6 mg per 64 UI)"
+          },
+          "clinicalNotes": "Thymic peptide TLR-9 agonist. Augments T-cell maturation and innate antiviral/immune surveillance."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        },
+        {
+          "id": "thymosin-alpha-1",
+          "product_id": "thymosin-alpha-1",
+          "product_slug": "thymosin-alpha-1",
+          "name": "Thymosin Alpha-1",
+          "product_name": "Thymosin Alpha-1",
+          "product_title": "Thymosin Alpha-1",
+          "compound": "Thymosin Alpha-1",
+          "dosage": "3000 mg",
+          "dose": "3000 mg (Twice weekly (Mon/Thu))",
+          "doseAmount": 3000,
+          "dose_amount": 3000,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "Twice weekly (Mon/Thu)",
+          "dosing_frequency": "Twice weekly (Mon/Thu)",
+          "frequencyTimesPerWeek": 2,
+          "weeklyDose": "6000 mg/wk",
+          "weekly_dose": "6000 mg/wk",
+          "weeklyDoseAmount": 6000,
+          "weekly_dose_amount": 6000,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted",
+          "storage": "Refrigerate at 2°C – 8°C.",
+          "reconstitution": {
+            "vialStrengthMg": 5,
+            "diluentMl": 2,
+            "unitsPerDose": 64,
+            "finalConcentration": "2.5 mg/mL (1.6 mg per 64 UI)"
+          },
+          "clinicalNotes": "Thymic peptide TLR-9 agonist. Augments T-cell maturation and innate antiviral/immune surveillance."
+        }
+      ]
+    },
+    {
+      "id": "phase_3",
+      "name": "Maintenance",
+      "phaseName": "Maintenance",
+      "phase_name": "Maintenance",
+      "phase_title": "Maintenance",
+      "phaseNumber": 3,
+      "phase_number": 3,
+      "durationWeeks": 4,
+      "duration_weeks": 4,
+      "default_duration_weeks": 4,
+      "startWeek": 9,
+      "start_week": 9,
+      "endWeek": 12,
+      "end_week": 12,
+      "objective": "maintenance_of_response · sustainable_resilience",
+      "clinical_goal": "maintenance_of_response · sustainable_resilience",
+      "instructions": "Administer according to verified clinical schedule and maintain hydration.",
+      "compounds": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        }
+      ],
+      "drugs": [
+        {
+          "id": "mots-c",
+          "product_id": "mots-c",
+          "product_slug": "mots-c",
+          "name": "MOTS-c",
+          "product_name": "MOTS-c",
+          "product_title": "MOTS-c",
+          "compound": "MOTS-c",
+          "dosage": "10 mg",
+          "dose": "10 mg (3x weekly (Mon/Wed/Fri))",
+          "doseAmount": 10,
+          "dose_amount": 10,
+          "doseUnit": "mg",
+          "dose_unit": "mg",
+          "frequency": "3x weekly (Mon/Wed/Fri)",
+          "dosing_frequency": "3x weekly (Mon/Wed/Fri)",
+          "frequencyTimesPerWeek": 3,
+          "weeklyDose": "30 mg/wk",
+          "weekly_dose": "30 mg/wk",
+          "weeklyDoseAmount": 30,
+          "weekly_dose_amount": 30,
+          "weeklyDoseUnit": "mg",
+          "weekly_dose_unit": "mg",
+          "route": "Subcutaneous",
+          "dosageForm": "vial",
+          "timing": "Morning • Fasted • 30–60 min prior to exercise",
+          "storage": "Refrigerate at 2°C – 8°C. Highly heat sensitive. Protect from thermal spikes.",
+          "reconstitution": {
+            "vialStrengthMg": 10,
+            "diluentMl": 2,
+            "unitsPerDose": 100,
+            "finalConcentration": "5 mg/mL"
+          },
+          "clinicalNotes": "Mitochondrial-derived peptide stimulating AMPK phosphorylation. Administer strictly before exercise in the morning; avoid evening use."
+        }
+      ]
+    }
+  ],
+  "phasesCount": 3,
+  "_schemaVersion": 2,
+  "_unifiedAt": "2026-10-16T19:45:21.181Z"
 }
