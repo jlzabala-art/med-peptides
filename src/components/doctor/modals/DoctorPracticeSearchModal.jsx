@@ -40,12 +40,24 @@ export default function DoctorPracticeSearchModal({
     prescriptions.forEach(rx => {
       const name = (rx.patientName || rx.patient?.name || rx.patientId || '').trim();
       if (!name) return;
-      const key = name.toLowerCase();
+      const key = String(name)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/^(mr\.?|mrs\.?|ms\.?|miss|dr\.?|prof\.?|patient:?|paciente:?)\s+/i, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase() || String(rx.patientId || rx.id || '').toLowerCase();
       const s = (rx.status || rx.state || '').toLowerCase();
-      const isProp = Boolean(s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted');
+      const isProp = Boolean(
+        s === 'proposal_pending' ||
+        rx.isTreatmentProposal ||
+        rx.orderStatus === 'Offer Not Accepted' ||
+        String(rx.treatmentProgram || '').toLowerCase().includes('proposal') ||
+        String(rx.invoiceRef || '').toLowerCase().includes('proposal')
+      );
       const rawInv = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
       const hasInv = rawInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInv);
-      const isSold = !isProp && Boolean(hasInv || rx.orderStatus === 'Ordered' || ['active', 'approved', 'dispensed'].includes(s));
+      const isSold = !isProp && Boolean(hasInv || rx.orderStatus === 'Ordered' || ['active', 'approved', 'completed', 'paid', 'shipped', 'delivered', 'en tránsito', 'processing', 'dispensed'].includes(s));
 
       if (!map.has(key)) {
         map.set(key, {

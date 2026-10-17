@@ -459,15 +459,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
                     (cleanDoctorQuery && dDocNormalized && (dDocNormalized.includes(cleanDocQueryNormalized) || cleanDocQueryNormalized.includes(dDocNormalized)));
 
     if (isMatch) {
-      const patName = d.patientName || d.patient?.name || 'Patient';
+      const patName = (d.patientName || d.patient?.name || 'Patient').trim();
       const patId = d.patientId || d.patient?.id || doc.id;
-      patientMap.set(patId, {
-        id: patId,
-        name: patName,
-        dob: d.patient?.dob || null,
-        phone: d.patient?.phone || null,
-        email: d.patient?.email || null
-      });
       // Priority to concise clinical titles, avoiding generic 'Personalized Compounded Protocol'
       let baseTitle = d.treatmentTitle;
       if (!baseTitle || baseTitle === 'Personalized Compounded Protocol' || baseTitle === 'Personalized Formulation') {
@@ -661,16 +654,79 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
   // Consolidate multi-part prescriptions sharing a session or patient group
   const prescriptions = consolidateMultiPartPrescriptions(rawPrescriptionsList);
 
+  const isRxProposal = (rx) => {
+    const s = String(rx.status || rx.state || '').toLowerCase();
+    return Boolean(
+      rx.isTreatmentProposal ||
+      s === 'proposal_pending' ||
+      rx.orderStatus === 'Offer Not Accepted' ||
+      String(rx.treatmentProgram || '').toLowerCase().includes('proposal') ||
+      String(rx.invoiceRef || '').toLowerCase().includes('proposal')
+    );
+  };
+
+  const isRxSold = (rx) => {
+    if (isRxProposal(rx)) return false;
+    const s = String(rx.status || rx.state || '').toLowerCase();
+    const rawInv = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
+    const isLegitInv = Boolean(rawInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInv));
+    return ['approved', 'active', 'completed', 'paid', 'shipped', 'delivered', 'en tránsito', 'processing'].includes(s) || isLegitInv;
+  };
+
+  const normalizePatientKey = (name, fallbackId) => {
+    const cleaned = String(name || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/^(mr\.?|mrs\.?|ms\.?|miss|dr\.?|prof\.?|patient:?|paciente:?)\s+/i, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+    if (!cleaned || cleaned === 'patient' || cleaned === 'unknown' || cleaned === 'n/a') {
+      return String(fallbackId || 'unknown').toLowerCase();
+    }
+    return cleaned;
+  };
+
   // Sort: Confirmed / Sold & Active prescriptions FIRST, then unaccepted proposals, then by date descending
   prescriptions.sort((a, b) => {
-    const isPropA = Boolean(a.isTreatmentProposal) || a.status === 'proposal_pending' || a.orderStatus === 'Offer Not Accepted';
-    const isPropB = Boolean(b.isTreatmentProposal) || b.status === 'proposal_pending' || b.orderStatus === 'Offer Not Accepted';
-    if (isPropA !== isPropB) {
-      return isPropA ? 1 : -1;
-    }
+    const soldA = isRxSold(a);
+    const soldB = isRxSold(b);
+    if (soldA !== soldB) return soldA ? -1 : 1;
     const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
     const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
     return tB - tA;
+  });
+
+  // Populate deduplicated patientMap from consolidated prescriptions
+  prescriptions.forEach((rx) => {
+    const pName = (rx.patientName || rx.patient?.name || 'Patient').trim();
+    const pKey = normalizePatientKey(pName, rx.patientId || rx.id);
+    const sold = isRxSold(rx);
+    const prop = isRxProposal(rx);
+    const phone = rx.patientPhone || rx.patient?.phone || null;
+    const email = rx.patientEmail || rx.patient?.email || null;
+    const dob = rx.patient?.dob || null;
+
+    const existing = patientMap.get(pKey);
+    if (!existing) {
+      patientMap.set(pKey, {
+        id: rx.patientId || pKey,
+        name: pName,
+        dob,
+        phone,
+        email,
+        hasSold: sold,
+        hasUnaccepted: prop,
+        prescriptionsCount: 1
+      });
+    } else {
+      existing.prescriptionsCount = (existing.prescriptionsCount || 1) + 1;
+      if (sold) existing.hasSold = true;
+      if (prop) existing.hasUnaccepted = true;
+      if (!existing.phone && phone) existing.phone = phone;
+      if (!existing.email && email) existing.email = email;
+      if (!existing.dob && dob) existing.dob = dob;
+    }
   });
 
   // 3. Generate Patient-Centric Clinical Tasks (Deduplicated per patient)
@@ -681,12 +737,12 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
 
   prescriptions.forEach((rx) => {
     const rxAgeDays = rx.createdAt ? Math.floor((now - new Date(rx.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0;
-    const patientKey = rx.patientName.toLowerCase().trim();
+    const patientKey = normalizePatientKey(rx.patientName, rx.patientId || rx.id);
     const rxStatus = String(rx.status || '').toLowerCase();
 
     // Clinical Action 1: Pending / Imported Prescription Review & Clinical Sign-off
     if (['pending', 'draft', 'imported', 'review'].includes(rxStatus)) {
-      const existingTask = clinicalTasks.find(t => t.type === 'approval' && t.patientName.toLowerCase().trim() === patientKey);
+      const existingTask = clinicalTasks.find(t => t.type === 'approval' && normalizePatientKey(t.patientName, t.id) === patientKey);
       if (existingTask) {
         existingTask.pendingCount = (existingTask.pendingCount || 1) + 1;
         existingTask.codes = existingTask.codes || [existingTask.code];
@@ -738,13 +794,13 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     }
 
     // Clinical Action 3: Unaccepted Treatment Proposal / Re-engagement Follow-up
-    const isUnacceptedProposal = rx.isTreatmentProposal || rxStatus === 'proposal_pending' || rx.orderStatus === 'Offer Not Accepted' || String(rx.treatmentProgram || '').toLowerCase().includes('proposal');
+    const isUnacceptedProposal = isRxProposal(rx);
     const proposalKey = `${patientKey}_proposal`;
 
     if (isUnacceptedProposal && !seenPatientTasks.has(proposalKey)) {
       seenPatientTasks.add(proposalKey);
       const treatmentName = rx.treatmentTitle || rx.regimenShortTitle || 'Compounded Protocol';
-      const patientPhone = rx.patient?.phone || rx.phone || '';
+      const patientPhone = rx.patient?.phone || rx.patientPhone || '';
       const rawDocName = (cleanDoctorName || 'Khalid Shukri').replace(/^Dr\.?\s*/i, '').trim();
       const effectiveAgeDays = rx.dateIssued || rx.date ? Math.max(1, Math.floor((now - new Date(rx.dateIssued || rx.date).getTime()) / (1000 * 60 * 60 * 24))) : rxAgeDays;
 
@@ -792,9 +848,13 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
   }
 
   // 4. Compute GCP Standard KPIs (Server-calculated for instant 0ms response)
-  const activePrescriptions = prescriptions.filter(p => ['approved', 'active'].includes(p.status.toLowerCase())).length;
-  const draftIntakesCount = prescriptions.filter(p => ['draft', 'pending', 'awaiting_validation'].includes(p.status.toLowerCase()) || p.ingestionStage === 'awaiting_atlas_review').length;
-  const monitoredPatients = patientMap.size;
+  const deduplicatedPatients = Array.from(patientMap.values());
+  const activePrescriptions = prescriptions.filter(p => isRxSold(p)).length;
+  const proposalsCount = prescriptions.filter(p => isRxProposal(p)).length;
+  const draftIntakesCount = prescriptions.filter(p => !isRxProposal(p) && !isRxSold(p) && (['draft', 'pending', 'awaiting_validation'].includes(p.status.toLowerCase()) || p.ingestionStage === 'awaiting_atlas_review')).length;
+  const monitoredPatients = deduplicatedPatients.length;
+  const soldPatientsCount = deduplicatedPatients.filter(p => p.hasSold).length;
+  const unacceptedPatientsCount = deduplicatedPatients.filter(p => !p.hasSold && p.hasUnaccepted).length;
   const pendingTasksCount = clinicalTasks.length;
   const refillsDueCount = clinicalTasks.filter(t => t.type === 'refill').length;
 
@@ -831,7 +891,10 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     subscriptionTier: doctorDoc.subscriptionTier || 'basic',
     slug: opaqueCode, // Codified opaque URL (e.g. "DR-XIHVYF56")
     nameSlug: nameSlug,
-    opaqueCode: opaqueCode
+    opaqueCode: opaqueCode,
+    patientsCount: monitoredPatients,
+    soldPatientsCount,
+    unacceptedPatientsCount
   };
 
     // 5. Fetch Curated Compounding Active Pharmaceutical Ingredients (APIs - CAT-MUWWS6JL)
@@ -1087,15 +1150,18 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       doctor: doctorProfile,
       kpis: {
         activePrescriptions,
+        proposalsCount,
         draftIntakesCount,
         monitoredPatients,
+        soldPatientsCount,
+        unacceptedPatientsCount,
         pendingTasksCount,
         refillsDueCount
       },
       tasks: clinicalTasks,
       prescriptions: enrichedPrescriptions,
       labResults,
-      patients: Array.from(patientMap.values()),
+      patients: deduplicatedPatients,
       formulary,
       bloodoPanels,
       protocols,

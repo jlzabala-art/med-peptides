@@ -41,7 +41,59 @@ export default function PrescriptionIntakeWorkspace({
   const [error, setError] = useState(null);
 
   const [rawAiData, setRawAiData] = useState(null);
-  const [normalizedRxList, setNormalizedRxList] = useState([]);
+  const [normalizedRxList, setNormalizedRxList] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const rawPrefill = sessionStorage.getItem('atlas_represcribe_prefill');
+        if (rawPrefill) {
+          sessionStorage.removeItem('atlas_represcribe_prefill');
+          const parsed = JSON.parse(rawPrefill);
+          const rawItems = Array.isArray(parsed.items) && parsed.items.length > 0
+            ? parsed.items
+            : [{ name: parsed.treatmentTitle || 'Compounded Active', dose: 'Standard Concentration' }];
+          const lines = rawItems.map((it, idx) => ({
+            id: it.id || `cloned_line_${idx}`,
+            productId: it.productId || it.id || `cloned_prod_${idx}`,
+            productName: it.name || it.productName || it.activeIngredient || 'Compounded Ingredient',
+            activeIngredient: it.activeIngredient || it.name || 'Compounded Ingredient',
+            dose: it.dose || it.dosage || it.concentration || 'Standard',
+            dosage: it.dose || it.dosage || it.concentration || 'Standard',
+            strength: it.dose || it.dosage || it.concentration || 'Standard',
+            vehicle: it.vehicle || parsed.vehicle || 'Magistral Base',
+            instructions: it.instructions || parsed.posology || 'Apply as directed by physician',
+            quantity: it.quantity || 1,
+            status: 'Ready',
+            _isPlaceholder: false
+          }));
+          return [{
+            id: `cloned_${Date.now()}`,
+            patientName: parsed.patientName || '',
+            patientPhone: parsed.patientPhone || '',
+            patient: {
+              name: parsed.patientName || '',
+              dob: parsed.patientDob || '',
+              phone: parsed.patientPhone || ''
+            },
+            doctorName: doctorContext?.doctorName || parsed.doctorName || 'Prescribing Physician',
+            doctorId: doctorContext?.doctorId || parsed.doctorId || null,
+            clinic: doctorContext?.clinicName || parsed.clinic || 'Clinical Practice',
+            treatmentTitle: parsed.treatmentTitle || 'Compounded Formulation',
+            treatmentType: parsed.treatmentTitle || 'Compounded Formulation',
+            dispensingForm: parsed.dispensingForm || 'Magistral Solution',
+            volume: parsed.volume || '60 mL',
+            posology: parsed.posology || 'Apply as directed by prescribing physician.',
+            prescriptionLines: lines,
+            items: lines,
+            validationStatus: 'Ready',
+            _clonedFromCode: parsed.sourceRx || null
+          }];
+        }
+      } catch (e) {
+        console.warn('Could not parse atlas_represcribe_prefill:', e);
+      }
+    }
+    return [];
+  });
   // Default to false so we never silently select or merge similarly named patients without physician opt-in
   const [alsoCreatePatient, setAlsoCreatePatient] = useState(false);
   const [savedPrescriptionsResult, setSavedPrescriptionsResult] = useState(null);
@@ -54,13 +106,13 @@ export default function PrescriptionIntakeWorkspace({
   // Workflow progress determination: 1 = Upload, 2 = Review, 3 = Save draft
   const currentStep = useMemo(() => {
     if (savedPrescriptionsResult) return 3;
-    if (file) return 2;
+    if (file || normalizedRxList.length > 0) return 2;
     return 1;
-  }, [file, savedPrescriptionsResult]);
+  }, [file, normalizedRxList.length, savedPrescriptionsResult]);
 
   const hasUnsavedChanges = useMemo(() => {
-    return Boolean(file) && normalizedRxList.length > 0 && !savedPrescriptionsResult;
-  }, [file, normalizedRxList, savedPrescriptionsResult]);
+    return (Boolean(file) || normalizedRxList.length > 0) && !savedPrescriptionsResult;
+  }, [file, normalizedRxList.length, savedPrescriptionsResult]);
 
   const handleSafeClose = useCallback(() => {
     if (hasUnsavedChanges) {
@@ -406,7 +458,7 @@ export default function PrescriptionIntakeWorkspace({
     }
 
     // Initial state: only Cancel (no unexplained, permanently disabled Save button)
-    if (!file) {
+    if (!file && normalizedRxList.length === 0) {
       return (
         <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
           <button type="button" className="gcp-btn-secondary" onClick={handleSafeClose}>
@@ -672,7 +724,7 @@ export default function PrescriptionIntakeWorkspace({
                 ))}
               </div>
             </div>
-          ) : !file ? (
+          ) : (!file && normalizedRxList.length === 0) ? (
             /* ── INITIAL STATE: CENTERED UPLOAD AREA (NO EMPTY RIGHT PANEL) ── */
             <div className="upload-screen-centered">
               {/* Brief Process Note */}
@@ -780,13 +832,13 @@ export default function PrescriptionIntakeWorkspace({
           ) : (
             /* ── REVIEW STATE: TWO-COLUMN WORKSPACE (FILE ON LEFT, EXTRACTED ON RIGHT) ── */
             <div className="review-workspace-split">
-              {/* LEFT PANE: Document Preview */}
+              {/* LEFT PANE: Document Preview or Cloned Regimen Reference */}
               <div className="review-document-pane">
                 <div className="document-pane-header">
                   <div className="document-file-identity">
                     <FileText size={15} className="text-slate-500" />
-                    <span className="document-filename font-medium" title={file?.name}>
-                      {file?.name || 'Uploaded Document'}
+                    <span className="document-filename font-medium" title={file?.name || 'Cloned Clinical Regimen'}>
+                      {file?.name || `Renewal / Clone (${normalizedRxList[0]?._clonedFromCode ? `#${normalizedRxList[0]._clonedFromCode}` : 'Formula Template'})`}
                     </span>
                     {file?.size && (
                       <span className="document-filesize text-xs text-slate-400">
@@ -799,26 +851,52 @@ export default function PrescriptionIntakeWorkspace({
                     type="button"
                     onClick={handleSafeChangeFile}
                     className="change-file-btn"
-                    title="Choose a different document"
+                    title="Upload a document instead"
                   >
                     <X size={13} />
-                    <span>Change file</span>
+                    <span>{file ? 'Change file' : 'Switch to Upload'}</span>
                   </button>
                 </div>
 
                 <div className="document-preview-viewport">
-                  {file?.type === 'application/pdf' ? (
-                    <iframe
-                      src={`${filePreview}#toolbar=0`}
-                      className="pdf-preview-frame"
-                      title="Document Preview"
-                    />
+                  {file ? (
+                    file?.type === 'application/pdf' ? (
+                      <iframe
+                        src={`${filePreview}#toolbar=0`}
+                        className="pdf-preview-frame"
+                        title="Document Preview"
+                      />
+                    ) : (
+                      <img
+                        src={filePreview}
+                        alt="Prescription Document Preview"
+                        className="image-preview-frame"
+                      />
+                    )
                   ) : (
-                    <img
-                      src={filePreview}
-                      alt="Prescription Document Preview"
-                      className="image-preview-frame"
-                    />
+                    <div style={{ padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: '14px', background: '#f8fafc', height: '100%' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d', padding: '6px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, alignSelf: 'flex-start' }}>
+                        <RefreshCw size={13} />
+                        <span>1-Click Regimen Renewal / Clone Mode</span>
+                      </div>
+                      <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>
+                        {normalizedRxList[0]?.treatmentTitle || 'Compounded Regimen'}
+                      </h4>
+                      <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.5 }}>
+                        Pre-populated from existing clinical record <strong>#{normalizedRxList[0]?._clonedFromCode || 'RX'}</strong>. You can keep the current patient name for a cycle renewal, or change the patient name on the right to prescribe this exact formula to a new patient.
+                      </p>
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                          Cloned Active Ingredients ({normalizedRxList[0]?.prescriptionLines?.length || 0})
+                        </div>
+                        {(normalizedRxList[0]?.prescriptionLines || []).map((l, idx) => (
+                          <div key={idx} style={{ fontSize: '0.8rem', color: '#1e293b', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '4px' }}>
+                            <strong>{l.productName}</strong>
+                            <span style={{ color: '#0369a1', fontWeight: 600 }}>{l.dose}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

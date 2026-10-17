@@ -796,11 +796,15 @@ export default function DoctorPublicPortalClient({
     const params = new URLSearchParams(window.location.search);
     const q = params.get('q');
     const s = params.get('status');
+    const f = params.get('filter');
+    const pmode = params.get('pmode');
     const t = params.get('task');
     const tab = params.get('tab');
     const time = params.get('time');
     if (q) setSearchQuery(q);
     if (s) setStatusFilter(s);
+    if (f) setQuickRxFilter(f);
+    if (pmode) setPatientFilterMode(pmode);
     if (t) {
       setTaskFilter(t);
       setActiveAnchor('tasks');
@@ -815,6 +819,8 @@ export default function DoctorPublicPortalClient({
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.set('q', searchQuery.trim());
     if (statusFilter !== 'all') params.set('status', statusFilter);
+    if (quickRxFilter !== 'all') params.set('filter', quickRxFilter);
+    if (patientFilterMode !== 'all') params.set('pmode', patientFilterMode);
     if (taskFilter !== 'all') params.set('task', taskFilter);
     if (temporalFilter !== 'all') params.set('time', temporalFilter);
     if (activeAnchor !== 'overview') params.set('tab', activeAnchor);
@@ -822,7 +828,7 @@ export default function DoctorPublicPortalClient({
     if (window.location.search !== newSearch) {
       window.history.replaceState(null, '', `${window.location.pathname}${newSearch}`);
     }
-  }, [searchQuery, statusFilter, taskFilter, temporalFilter, activeAnchor]);
+  }, [searchQuery, statusFilter, quickRxFilter, patientFilterMode, taskFilter, temporalFilter, activeAnchor]);
 
   useEffect(() => {
     // If initialData is already hydrated from server, do NOT flash loading screen or re-fetch on mount
@@ -1353,22 +1359,92 @@ export default function DoctorPublicPortalClient({
 
   const handleReprescribeFormula = (rx) => {
     triggerHaptic('selection');
+    const resolvedParts = resolvePrescriptionParts(rx);
+    let extractedItems = Array.isArray(rx.items) && rx.items.length > 0 ? rx.items : [];
+    if (extractedItems.length === 0 && resolvedParts.length > 0) {
+      extractedItems = resolvedParts.flatMap((part) =>
+        (part.actives || []).map((act) => ({
+          name: act.name,
+          concentration: act.concentration || '',
+          role: act.role || 'Active Compound'
+        }))
+      );
+    }
     const formulaSummary = {
       treatmentTitle: rx.treatmentTitle || 'Compounded Formulation',
-      dispensingForm: rx.dispensingForm || 'Magistral Solution',
-      items: rx.items || [],
-      volume: rx.volume || '60 mL',
+      dispensingForm: rx.dispensingForm || resolvedParts[0]?.vehicle || 'Magistral Solution',
+      items: extractedItems,
+      volume: rx.volume || resolvedParts[0]?.volume || '60 mL',
+      posology: rx.posology || resolvedParts[0]?.posology || '',
+      patientName: rx.patientName || rx.patient?.name || '',
+      patientPhone: rx.patientPhone || rx.patient?.phone || '',
+      patientDob: rx.patient?.dob || '',
       sourceRx: rx.code || rx.id
     };
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('atlas_represcribe_prefill', JSON.stringify(formulaSummary));
     }
-    toast.success(`Formula #${rx.code} ready to prescribe for new patient ✓`);
+    toast.success(`Regimen #${rx.code || rx.id} cloned into Prescription Builder ✓`);
     setIsIntakeOpen(true);
   };
 
-  // ── Atlas AI Clinical Reasoning Engine (Isolated, Max 5 uses per session) ───
-  const handleSendAtlasAiQuery = (queryText) => {
+  const handleExecuteAiAction = (action) => {
+    if (!action) return;
+    triggerHaptic('selection');
+    if (action.type === 'filter_sold') {
+      setIsAtlasAiOpen(false);
+      setActiveAnchor('prescriptions');
+      setQuickRxFilter('active');
+      setStatusFilter('all');
+      toast.success('Filtered to Sold & Invoiced prescriptions');
+    } else if (action.type === 'filter_proposals') {
+      setIsAtlasAiOpen(false);
+      setActiveAnchor('prescriptions');
+      setQuickRxFilter('proposals');
+      setStatusFilter('all');
+      toast.success('Filtered to Unaccepted Proposals');
+    } else if (action.type === 'filter_patient') {
+      setIsAtlasAiOpen(false);
+      setActiveAnchor('prescriptions');
+      setQuickRxFilter('all');
+      setStatusFilter('all');
+      setSearchQuery(action.payload || '');
+      toast.success(`Showing records for ${action.payload}`);
+    } else if (action.type === 'open_tasks') {
+      setIsAtlasAiOpen(false);
+      setActiveAnchor('tasks');
+      toast.success('Opened Clinical Tasks Queue');
+    } else if (action.type === 'whatsapp_followup') {
+      const targetRx = allPrescriptions.find(
+        (p) => (p.code || p.id) === action.payload?.rxCode || p.patientName === action.payload?.patientName
+      );
+      if (targetRx) {
+        handleRemindPatientProposal(targetRx);
+      } else {
+        setIsAtlasAiOpen(false);
+        setActiveAnchor('prescriptions');
+        setQuickRxFilter('proposals');
+      }
+    } else if (action.type === 'renew_rx') {
+      const targetRx = allPrescriptions.find((p) => (p.code || p.id) === action.payload);
+      if (targetRx) {
+        setIsAtlasAiOpen(false);
+        handleReprescribeFormula(targetRx);
+      }
+    } else if (action.type === 'open_synergies') {
+      setIsAtlasAiOpen(false);
+      setActiveAnchor('recommendations');
+    } else if (action.type === 'open_discovery') {
+      setIsAtlasAiOpen(false);
+      setActiveAnchor('discovery');
+    } else if (action.type === 'open_labs') {
+      setIsAtlasAiOpen(false);
+      setActiveAnchor('lab_results');
+    }
+  };
+
+  // ── Atlas AI Clinical Reasoning Engine (Doctor-Personalized + Gemini 2.5 + Deterministic Graph) ───
+  const handleSendAtlasAiQuery = async (queryText) => {
     const text = (queryText || aiInput).trim();
     if (!text) return;
     if (aiUsesRemaining <= 0) {
@@ -1389,44 +1465,96 @@ export default function DoctorPublicPortalClient({
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    setAiMessages(prev => [...prev, userMsg]);
+    setAiMessages((prev) => [...prev, userMsg]);
     setAiInput('');
     setAiLoading(true);
 
-    setTimeout(() => {
-      let response;
-      const lower = text.toLowerCase();
-      const patientCount = doctor.patients?.length || new Set(filteredPrescriptions.map(p => p.patientName || p.patientId)).size;
-      const rxCount = filteredPrescriptions.length;
-      const pendingCount = filteredTasks.length;
+    try {
+      const practiceContext = {
+        doctor: {
+          name: doctor.name,
+          specialty: doctor.specialty,
+          clinic: doctor.clinic,
+          city: doctor.city,
+          country: doctor.country
+        },
+        counts: {
+          totalPatients: doctorPatientsList.length,
+          soldPatients: soldPatientsCount,
+          unacceptedPatients: unacceptedPatientsCount,
+          totalPrescriptions: allPrescriptions.length,
+          soldPrescriptions: quickCounts.active,
+          unacceptedProposals: quickCounts.proposals,
+          pendingTasks: filteredTasks.length,
+          labReportsCount: allLabResults.length
+        },
+        topApis: doctorTopApis,
+        patients: doctorPatientsList.slice(0, 60).map((pt) => ({
+          name: pt.name,
+          phone: pt.phone || '',
+          rxCount: pt.rxCount,
+          soldRxCount: pt.soldRxCount,
+          proposalRxCount: pt.proposalRxCount,
+          hasSoldOrder: pt.hasSoldOrder,
+          latestRxCode: pt.latestRxCode,
+          latestTreatment: pt.latestTreatment,
+          latestStatus: pt.latestStatus,
+          lastSeen: pt.lastSeen
+        })),
+        prescriptions: allPrescriptions.slice(0, 60).map((rx) => ({
+          code: rx.code || rx.prescriptionNumber || rx.id,
+          patientName: rx.patientName || rx.patient?.name || 'Patient',
+          patientPhone: rx.patientPhone || rx.patient?.phone || '',
+          status: rx.status,
+          isProposal: Boolean(rx.isProposal),
+          invoiceNumber: rx.invoiceNumber || rx.zohoInvoiceNumber || null,
+          treatmentTitle: rx.treatmentTitle || 'Compounded Regimen',
+          dispensingForm: rx.dispensingForm || '',
+          createdAt: rx.createdAt || rx.date || '',
+          partCount: rx.partCount || 1,
+          items: (rx.items || []).map((i) => ({
+            name: i.name || i.drugName || i.activeIngredient || '',
+            dose: i.dose || i.concentration || ''
+          }))
+        }))
+      };
 
-      if (lower.includes('patient') || lower.includes('paciente') || lower.includes('summarize') || lower.includes('resumen')) {
-        const topPatients = filteredPrescriptions.slice(0, 5).map(p => `• **${p.patientName || 'Patient'}** (${p.id}): ${p.treatmentTitle || 'Compounded Treatment'} — Status: *${p.status || 'Active'}*`).join('\n');
-        response = `**Clinical Summary for ${doctor.name}:**\n\nYou currently have **${patientCount} registered patients** and **${rxCount} active prescription records** in your dispensary view.\n\n**Recent Patient Regimens:**\n${topPatients}\n\n*All formulas are compounded in accordance with EU GMP standards.*`;
-      } else if (lower.includes('dose') || lower.includes('dosis') || lower.includes('api') || lower.includes('active') || lower.includes('formula') || lower.includes('part') || lower.includes('ingrediente')) {
-        const apiMap = new Map();
-        filteredPrescriptions.forEach(p => {
-          (p.items || []).forEach(it => {
-            const n = it.name || it.drugName || it.activeIngredient;
-            if (n && !apiMap.has(n)) apiMap.set(n, it.dose || it.concentration || 'Compounded Standard');
-          });
-        });
-        const apiList = Array.from(apiMap.entries()).slice(0, 6).map(([name, dose]) => `• **${name}**: ${dose}`).join('\n');
-        response = `**Active Pharmaceutical Ingredients (APIs) in your formulary:**\n\n${apiList || '• Minoxidil 5%, Dutasteride 0.1%, Melatonin 0.1%'}\n\n*Multi-Part Notice:* Formulations organized into **Part 1** and **Part 2** are concurrent components of the same comprehensive treatment regimen.`;
-      } else if (lower.includes('sign') || lower.includes('pend') || lower.includes('task') || lower.includes('tarea') || lower.includes('revis')) {
-        response = `**Physician Task Status:**\n\nYou have **${pendingCount} pending task(s)** requiring physician sign-off or clinical verification.\n\nOnce reviewed, prescriptions transition to *Active / Dispensary Processing*. You can approve them directly from the table or inspection drawer.`;
-      } else {
-        response = `**Clinical Analysis for ${doctor.name}:**\n\nBased on your **${rxCount} prescriptions** and patient registry, your active regimens focus on targeted trichology and regenerative formulations (e.g., dual-part liposomal solutions with TrichoSol™/TrichoOil™ vehicles).\n\nIf you require custom active ingredient titration, vehicle stabilization certificates, or batch logistics, you can also request dedicated liaison support with **Atlas Clinical Support on WhatsApp**.`;
-      }
+      const res = await fetch(`/api/doctor/${encodeURIComponent(slug)}/ai-copilot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: text,
+          practiceContext
+        })
+      });
+
+      const json = await res.json();
+      const replyContent =
+        json?.reply ||
+        `**Practice Intelligence for ${doctor.name}:**\n• **${doctorPatientsList.length} Unique Patients** (${soldPatientsCount} Sold Customers · ${unacceptedPatientsCount} Unaccepted Proposal Patients)\n• **${allPrescriptions.length} Prescriptions** (${quickCounts.active} Sold & Invoiced · ${quickCounts.proposals} Unaccepted Offers)`;
 
       const assistantMsg = {
         role: 'assistant',
-        content: response,
+        content: replyContent,
+        actions: Array.isArray(json?.actions) ? json.actions : [],
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      setAiMessages(prev => [...prev, assistantMsg]);
+      setAiMessages((prev) => [...prev, assistantMsg]);
+    } catch (err) {
+      console.warn('[AtlasAICopilot] Client fallback triggered:', err?.message);
+      const assistantMsg = {
+        role: 'assistant',
+        content: `**Practice Overview — ${doctor.name}:**\n\n• **Unique Patients:** **${doctorPatientsList.length}** (**${soldPatientsCount}** Sold & Invoiced Customers · **${unacceptedPatientsCount}** Unaccepted Proposal Patients)\n• **Total Prescriptions:** **${allPrescriptions.length}** (**${quickCounts.active}** Sold & Invoiced · **${quickCounts.proposals}** Unaccepted Offers)\n• **Signature APIs:** ${doctorTopApis.map((a) => `${a.name} (${a.count})`).join(', ') || 'Custom Trichology & Regenerative APIs'}`,
+        actions: [
+          { label: `🟢 View ${quickCounts.active} Sold & Invoiced`, type: 'filter_sold' },
+          { label: `⏳ View ${quickCounts.proposals} Unaccepted Offers`, type: 'filter_proposals' }
+        ],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setAiMessages((prev) => [...prev, assistantMsg]);
+    } finally {
       setAiLoading(false);
-    }, 550);
+    }
   };
 
   const handleShareDoctorPortal = () => {
@@ -1510,16 +1638,33 @@ export default function DoctorPublicPortalClient({
 
   const handleExportCsv = () => {
     triggerHaptic('selection');
-    const rows = filteredPrescriptions.map(p => ({
-      Code: p.code || p.prescriptionNumber || '',
-      Patient: p.patientName || '',
-      Status: p.status || '',
-      Treatment: p.treatmentTitle || '',
-      Items: (p.items || []).map(i => i.name).join('; '),
-      Created: p.createdAt || p.createdDate || ''
-    }));
-    const headers = ['Code', 'Patient', 'Status', 'Treatment', 'Items', 'Created'];
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => Object.values(r).map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(','))].join('\n');
+    const rows = filteredPrescriptions.map((p) => {
+      const st = String(p.status || '').toLowerCase();
+      const isSold =
+        ['approved', 'active', 'dispensed', 'completed', 'processing', 'en tránsito'].includes(st) ||
+        Boolean(p.invoiceNumber || p.zohoInvoiceNumber);
+      return {
+        Code: p.code || p.prescriptionNumber || p.id || '',
+        Patient: p.patientName || p.patient?.name || '',
+        Phone: p.patientPhone || p.patient?.phone || '',
+        CommercialStatus: isSold ? 'Sold & Invoiced' : p.isProposal ? 'Offer Unaccepted' : p.status || 'Draft',
+        InvoiceRef: p.invoiceNumber || p.zohoInvoiceNumber || '',
+        Treatment: p.treatmentTitle || '',
+        Items: (p.items || []).map((i) => `${i.name || ''}${i.dose ? ` (${i.dose})` : ''}`).join('; '),
+        Created: p.createdAt || p.createdDate || p.date || ''
+      };
+    });
+    const headers = ['Code', 'Patient', 'Phone', 'CommercialStatus', 'InvoiceRef', 'Treatment', 'Items', 'Created'];
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [
+        headers.join(','),
+        ...rows.map((r) =>
+          Object.values(r)
+            .map((v) => `"${String(v || '').replace(/"/g, '""')}"`)
+            .join(',')
+        )
+      ].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
@@ -1527,7 +1672,7 @@ export default function DoctorPublicPortalClient({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success('Prescriptions CSV exported successfully ✓');
+    toast.success(`Exported ${rows.length} prescriptions to CSV ✓`);
   };
 
   const labelsForActiveRx = useMemo(() => {
@@ -2532,6 +2677,43 @@ export default function DoctorPublicPortalClient({
               <Tag size={14} />
             </button>
 
+            {/* QUICK ACTION 4: 1-Click Renew / Clone Prescription Regimen */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleReprescribeFormula(rx);
+              }}
+              style={{
+                height: '28px',
+                width: '28px',
+                borderRadius: '4px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#5f6368',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                transition: 'all 0.12s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#f0fdf4';
+                e.currentTarget.style.borderColor = '#16a34a';
+                e.currentTarget.style.color = '#16a34a';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.borderColor = '#dadce0';
+                e.currentTarget.style.color = '#5f6368';
+              }}
+              title="1-Click Renew / Clone Prescription Regimen"
+              aria-label="Renew or Clone Prescription"
+            >
+              <RefreshCw size={13} />
+            </button>
+
             {/* OVERFLOW MENU BUTTON ("⋯" — Secondary Actions per Golden Rule #33) */}
             <button
               type="button"
@@ -2815,7 +2997,13 @@ export default function DoctorPublicPortalClient({
     allPrescriptions.forEach(rx => {
       const pName = (rx.patientName || rx.patient?.name || 'Patient').trim();
       if (!pName) return;
-      const normKey = pName.toLowerCase();
+      const normKey = String(pName)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/^(mr\.?|mrs\.?|ms\.?|miss|dr\.?|prof\.?|patient:?|paciente:?)\s+/i, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase() || String(rx.patientId || rx.id || '').toLowerCase();
       const isSold = isSoldPrescription(rx);
       const isProp = isProposalPrescription(rx);
       const rawInv = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
@@ -2855,6 +3043,38 @@ export default function DoctorPublicPortalClient({
       return a.name.localeCompare(b.name);
     });
   }, [allPrescriptions]);
+
+  const soldPatientsCount = useMemo(
+    () => doctorPatientsList.filter(p => p.hasSold).length,
+    [doctorPatientsList]
+  );
+
+  const unacceptedPatientsCount = useMemo(
+    () => doctorPatientsList.filter(p => !p.hasSold && p.hasUnaccepted).length,
+    [doctorPatientsList]
+  );
+
+  const doctorTopApis = useMemo(() => {
+    if (Array.isArray(data?.serverAnalytics?.topApis) && data.serverAnalytics.topApis.length > 0) {
+      return data.serverAnalytics.topApis;
+    }
+    const counts = new Map();
+    allPrescriptions.forEach(rx => {
+      const parts = resolvePrescriptionParts(rx);
+      const apis = parts.flatMap(p => p.apis || []);
+      const list = apis.length > 0 ? apis : (rx.items || []);
+      list.forEach(item => {
+        const name = String(item.name || item.activeIngredient || '').trim();
+        if (!name || name.length < 2) return;
+        const key = name.toLowerCase();
+        const prev = counts.get(key) || { name, count: 0, commonDose: item.dose || '' };
+        prev.count += 1;
+        if (!prev.commonDose && item.dose) prev.commonDose = item.dose;
+        counts.set(key, prev);
+      });
+    });
+    return Array.from(counts.values()).sort((a, b) => b.count - a.count);
+  }, [data?.serverAnalytics?.topApis, allPrescriptions]);
 
   const filteredDoctorPatients = useMemo(() => {
     return doctorPatientsList.filter(pat => {
@@ -3376,14 +3596,7 @@ export default function DoctorPublicPortalClient({
     ];
   }, [data]);
 
-  const uniquePatientsCount = useMemo(() => {
-    const set = new Set();
-    allPrescriptions.forEach(rx => {
-      const p = (rx.patientName || rx.patient?.name || rx.patientId || '').trim().toLowerCase();
-      if (p) set.add(p);
-    });
-    return set.size;
-  }, [allPrescriptions]);
+  const uniquePatientsCount = doctorPatientsList.length;
 
   const sidebarNavGroups = useMemo(() => [
     {
@@ -3409,7 +3622,10 @@ export default function DoctorPublicPortalClient({
           id: 'patients',
           label: 'Monitored Patients',
           icon: Users,
-          badge: uniquePatientsCount > 0 ? uniquePatientsCount : null
+          badge: uniquePatientsCount > 0 ? uniquePatientsCount : null,
+          actionBadgeTooltip: uniquePatientsCount > 0
+            ? `${uniquePatientsCount} unique patients (${soldPatientsCount} sold customers, ${unacceptedPatientsCount} unaccepted proposals)`
+            : undefined
         },
         {
           id: 'tasks',
@@ -4693,206 +4909,6 @@ export default function DoctorPublicPortalClient({
             </div>
           )}
 
-          {/* ── View 2: Clinical Search & Universal Multi-Table Query (Rule #7) ─ */}
-          {activeAnchor === 'search' && (
-            <section
-              id="search-workspace"
-              style={{
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                borderRadius: '8px',
-                padding: '24px',
-                marginBottom: '32px',
-                boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-              }}
-            >
-              {/* Header Title */}
-              <div style={{ marginBottom: '18px' }}>
-                <h2 style={{ fontSize: '1.10rem', fontWeight: 600, color: '#202124', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Search size={18} style={{ color: '#1a73e8' }} />
-                  <span>Universal Clinical Registry Search</span>
-                </h2>
-                <p style={{ margin: 0, fontSize: '0.80rem', color: '#5f6368' }}>
-                  Instant cross-table query across patients, prescription numbers, compound pharmacopeia, and clinical tasks.
-                </p>
-              </div>
-
-              {/* Prominent Global Search Bar */}
-              <GlobalSearchBar
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search patient, prescription code (e.g. RX-2024-001), active compound, or status..."
-                resultCount={filteredPrescriptions.length + filteredTasks.length}
-                namespace={`doctor-${slug}`}
-                size="lg"
-                filters={[
-                  statusFilter !== 'all' && {
-                    key: 'status',
-                    label: 'Status',
-                    value: statusFilter.toUpperCase(),
-                    onRemove: () => setStatusFilter('all')
-                  },
-                  taskFilter !== 'all' && {
-                    key: 'task',
-                    label: 'Task Type',
-                    value: taskFilter.toUpperCase(),
-                    onRemove: () => setTaskFilter('all')
-                  },
-                  apiFilter && {
-                    key: 'api',
-                    label: 'Active API',
-                    value: apiFilter,
-                    onRemove: () => setApiFilter(null)
-                  }
-                ].filter(Boolean)}
-                filterOptions={[
-                  {
-                    key: 'status',
-                    label: 'Status',
-                    options: [
-                      { label: 'All Statuses', value: 'all' },
-                      { label: 'Approved', value: 'approved' },
-                      { label: 'Active', value: 'active' },
-                      { label: 'Pending', value: 'pending' },
-                      { label: 'Draft', value: 'draft' }
-                    ],
-                    value: statusFilter,
-                    onChange: setStatusFilter
-                  },
-                  {
-                    key: 'task',
-                    label: 'Tasks',
-                    options: [
-                      { label: 'All Tasks', value: 'all' },
-                      { label: 'Follow-ups (Unaccepted)', value: 'proposal_followup' },
-                      { label: 'Titrations', value: 'titration' },
-                      { label: 'Refills', value: 'refill' },
-                      { label: 'Sign-offs', value: 'approval' }
-                    ],
-                    value: taskFilter,
-                    onChange: setTaskFilter
-                  }
-                ]}
-              />
-
-              {/* Quick Query Shortcuts (Chips) */}
-              <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#5f6368' }}>Quick Queries:</span>
-                {[
-                  { label: 'Tirzepatide Regimens', q: 'Tirzepatide' },
-                  { label: 'GHK-Cu Formulations', q: 'GHK-Cu' },
-                  { label: 'NAD+ Cycles', q: 'NAD' },
-                  { label: 'BPC-157 Formulations', q: 'BPC-157' },
-                  { label: 'Pending Actions', q: 'pending' }
-                ].map((chip) => (
-                  <button
-                    key={chip.label}
-                    type="button"
-                    onClick={() => setSearchQuery(chip.q)}
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 500,
-                      color: '#1a73e8',
-                      background: '#f8fafd',
-                      border: '1px solid #dadce0',
-                      borderRadius: '16px',
-                      padding: '3px 10px',
-                      cursor: 'pointer',
-                      transition: 'all 0.12s'
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#e8f0fe'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = '#f8fafd'; }}
-                  >
-                    {chip.label}
-                  </button>
-                ))}
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 500,
-                      color: '#d93025',
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: '3px 6px'
-                    }}
-                  >
-                    Clear ×
-                  </button>
-                )}
-              </div>
-
-              {/* Breakdown Pill */}
-              {searchQuery.trim() && (
-                <div
-                  style={{
-                    marginTop: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '8px',
-                    background: '#eff6ff',
-                    border: '1px solid #bfdbfe',
-                    borderRadius: '6px',
-                    padding: '10px 14px',
-                    fontSize: '0.80rem',
-                    color: '#1e40af'
-                  }}
-                >
-                  <span style={{ fontWeight: 600 }}>Active Search: &ldquo;{searchQuery}&rdquo;</span>
-                  <span style={{ color: '#93c5fd' }}>•</span>
-                  <span><strong>{filteredPrescriptions.length}</strong> matching prescriptions</span>
-                  <span style={{ color: '#93c5fd' }}>•</span>
-                  <span><strong>{filteredTasks.length}</strong> care tasks</span>
-                </div>
-              )}
-
-              {/* Live Search Results: Prescriptions Table */}
-              <div style={{ marginTop: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <h3 style={{ fontSize: '0.94rem', fontWeight: 600, color: '#202124', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Layers size={16} style={{ color: '#1a73e8' }} />
-                    <span>Matching Prescriptions ({filteredPrescriptions.length})</span>
-                  </h3>
-                </div>
-                <DataTable
-                  data={filteredPrescriptions}
-                  columns={prescriptionColumns}
-                  keyField="id"
-                  loading={loading}
-                  emptyMessage={searchQuery ? `No prescriptions match "${searchQuery}"` : "No prescriptions found in clinical registry"}
-                  defaultPageSize={10}
-                  pageSizeOptions={[10, 25, 50]}
-                  onRowClick={handleRowClickPrescription}
-                />
-              </div>
-
-              {/* Live Search Results: Care Tasks (if any match) */}
-              {filteredTasks.length > 0 && (
-                <div style={{ marginTop: '28px', paddingTop: '20px', borderTop: '1px solid #e8eaed' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <h3 style={{ fontSize: '0.94rem', fontWeight: 600, color: '#202124', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Clock size={16} style={{ color: '#d97706' }} />
-                      <span>Matching Care Tasks ({filteredTasks.length})</span>
-                    </h3>
-                  </div>
-                  <DataTable
-                    data={filteredTasks}
-                    columns={taskColumns}
-                    keyField="id"
-                    loading={loading}
-                    emptyMessage="No clinical action tasks match query"
-                    defaultPageSize={5}
-                    pageSizeOptions={[5, 10, 25]}
-                  />
-                </div>
-              )}
-            </section>
-          )}
-
           {/* ── View 2: Pending Clinical Tasks & To-Do Actions (DataTable Universal) ── */}
           {activeAnchor === 'tasks' && (
             <section id="tasks" style={{ marginBottom: '32px' }}>
@@ -5398,6 +5414,157 @@ export default function DoctorPublicPortalClient({
                   <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
                     Complete verified repository of compounded prescriptions and clinical regimens.
                   </p>
+                </div>
+
+                {/* Direct CSV Export Action */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={handleExportCsv}
+                    style={{
+                      height: '32px',
+                      padding: '0 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #dadce0',
+                      background: '#ffffff',
+                      color: '#3c4043',
+                      fontSize: '0.76rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.12s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#f8fafc';
+                      e.currentTarget.style.borderColor = '#1a73e8';
+                      e.currentTarget.style.color = '#1a73e8';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#ffffff';
+                      e.currentTarget.style.borderColor = '#dadce0';
+                      e.currentTarget.style.color = '#3c4043';
+                    }}
+                    title="Export current prescription view to CSV"
+                  >
+                    <Download size={14} />
+                    <span>Export CSV ({filteredPrescriptions.length})</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* ── Persistent 4-Card Commercial & Clinical KPI Bar (Rule #22) ── */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(195px, 1fr))',
+                  gap: '10px',
+                  padding: '14px 20px 4px 20px',
+                  background: '#f8fafc',
+                  borderBottom: '1px solid #f1f5f9'
+                }}
+              >
+                <div
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setQuickRxFilter('all');
+                    setStatusFilter('all');
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: `1.5px solid ${quickRxFilter === 'all' && statusFilter === 'all' ? '#1a73e8' : '#e2e8f0'}`,
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    cursor: 'pointer',
+                    boxShadow: quickRxFilter === 'all' && statusFilter === 'all' ? '0 2px 6px rgba(26,115,232,0.12)' : 'none'
+                  }}
+                >
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    All Prescriptions
+                  </div>
+                  <div style={{ fontSize: '1.30rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    {allPrescriptions.length}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                    Consolidated clinical regimens
+                  </div>
+                </div>
+
+                <div
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setQuickRxFilter(quickRxFilter === 'active' ? 'all' : 'active');
+                    setStatusFilter('all');
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: `1.5px solid ${quickRxFilter === 'active' ? '#16a34a' : '#e2e8f0'}`,
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    cursor: 'pointer',
+                    boxShadow: quickRxFilter === 'active' ? '0 2px 6px rgba(22,163,74,0.14)' : 'none'
+                  }}
+                >
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    🟢 Sold & Invoiced
+                  </div>
+                  <div style={{ fontSize: '1.30rem', fontWeight: 800, color: '#15803d', marginTop: '2px' }}>
+                    {quickCounts.active}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                    Confirmed orders ({soldPatientsCount} patients)
+                  </div>
+                </div>
+
+                <div
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setQuickRxFilter(quickRxFilter === 'proposals' ? 'all' : 'proposals');
+                    setStatusFilter('all');
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: `1.5px solid ${quickRxFilter === 'proposals' ? '#d97706' : '#e2e8f0'}`,
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    cursor: 'pointer',
+                    boxShadow: quickRxFilter === 'proposals' ? '0 2px 6px rgba(217,119,6,0.14)' : 'none'
+                  }}
+                >
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    ⏳ Unaccepted Offers
+                  </div>
+                  <div style={{ fontSize: '1.30rem', fontWeight: 800, color: '#b45309', marginTop: '2px' }}>
+                    {quickCounts.proposals}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                    Awaiting checkout ({unacceptedPatientsCount} patients)
+                  </div>
+                </div>
+
+                <div
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setActiveAnchor('patients');
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: '1.5px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    👥 Unique Patients
+                  </div>
+                  <div style={{ fontSize: '1.30rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    {doctorPatientsList.length}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                    {soldPatientsCount} sold · {unacceptedPatientsCount} unaccepted →
+                  </div>
                 </div>
               </div>
 
@@ -7148,7 +7315,7 @@ export default function DoctorPublicPortalClient({
 
 
 
-      {/* ── Atlas AI Clinical Copilot Modal (Isolated, 5 Session Uses) ─────── */}
+      {/* ── Atlas AI Clinical Copilot Modal (Doctor-Personalized Practice Intelligence) ─────── */}
       {isAtlasAiOpen && (
         <div
           style={{
@@ -7169,7 +7336,7 @@ export default function DoctorPublicPortalClient({
         >
           <div
             style={{
-              width: '640px',
+              width: '680px',
               maxWidth: '100%',
               maxHeight: '90vh',
               display: 'flex',
@@ -7204,9 +7371,9 @@ export default function DoctorPublicPortalClient({
                   <Bot size={20} color="#ffffff" />
                 </div>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>
-                      Atlas AI — Clinical Copilot
+                      Atlas AI — Clinical & Practice Copilot
                     </h3>
                     <span style={{
                       fontSize: '0.68rem',
@@ -7219,8 +7386,8 @@ export default function DoctorPublicPortalClient({
                       {aiUsesRemaining}/5 uses left
                     </span>
                   </div>
-                  <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: '2px' }}>
-                    Personalized for {doctor.name} · {filteredPrescriptions.length} Prescriptions Indexed
+                  <div style={{ fontSize: '0.73rem', opacity: 0.94, marginTop: '2px' }}>
+                    Personalized for {doctor.name} · <strong>{doctorPatientsList.length} Unique Patients</strong> ({soldPatientsCount} Sold · {unacceptedPatientsCount} Unaccepted) · <strong>{allPrescriptions.length} Prescriptions</strong>
                   </div>
                 </div>
               </div>
@@ -7257,7 +7424,7 @@ export default function DoctorPublicPortalClient({
             }}>
               <ShieldCheck size={14} color="#6366f1" />
               <span>
-                <strong>Isolated Session:</strong> Reads only your active patients & compounding formulas. No queries or history are retained or shared across users.
+                <strong>Isolated Practice Graph:</strong> Dedicated to {doctor.name} ({doctor.clinic || doctor.specialty || 'Clinical Practice'}). Full global practice context remains active regardless of table filters.
               </span>
             </div>
 
@@ -7270,25 +7437,90 @@ export default function DoctorPublicPortalClient({
               flexDirection: 'column',
               gap: '12px',
               background: '#fdfdfe',
-              maxHeight: '360px'
+              maxHeight: '420px'
             }}>
-              {/* Welcome Assistant Message */}
+              {/* Personalized Practice Briefing Welcome Card */}
               <div style={{
                 alignSelf: 'flex-start',
-                maxWidth: '88%',
+                width: '100%',
                 background: '#ffffff',
                 border: '1px solid #e2e8f0',
                 borderRadius: '12px',
-                padding: '12px 14px',
+                padding: '14px 16px',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
               }}>
-                <div style={{ fontSize: '0.70rem', color: '#6366f1', fontWeight: 700, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Bot size={12} /> Atlas Clinical Intelligence
+                <div style={{ fontSize: '0.72rem', color: '#4f46e5', fontWeight: 700, marginBottom: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <Bot size={13} /> Atlas Clinical & Practice Intelligence — Live Briefing
+                  </span>
+                  <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
+                    {doctor.specialty || 'Regenerative & Compounding Medicine'} {doctor.clinic ? `· ${doctor.clinic}` : ''}
+                  </span>
                 </div>
+
                 <div style={{ fontSize: '0.80rem', color: '#1e293b', lineHeight: 1.5 }}>
-                  Hello {doctor.name}. I am initialized with your current clinical context: <strong>{doctor.patients?.length || filteredPrescriptions.length} patients</strong> and <strong>{filteredPrescriptions.length} compounded prescriptions</strong>.
-                  <br /><br />
-                  You have <strong>{aiUsesRemaining} query credits</strong> in this session. Ask me to summarize patient regimens, verify API concentrations, or check multi-part compounding protocols.
+                  Welcome, <strong>{doctor.name}</strong>. I am synchronized with your complete practice graph (independent of any active table filter):
+                </div>
+
+                {/* 4-Box Real-Data Practice Snapshot */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
+                  gap: '8px',
+                  marginTop: '10px',
+                  marginBottom: '12px'
+                }}>
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
+                    <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Unique Patients</div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>{doctorPatientsList.length}</div>
+                    <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
+                      <strong style={{ color: '#15803d' }}>{soldPatientsCount}</strong> Sold · <strong style={{ color: '#b45309' }}>{unacceptedPatientsCount}</strong> Unaccepted
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '8px 10px' }}>
+                    <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase' }}>Sold & Invoiced</div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#15803d' }}>{quickCounts.active} Rx</div>
+                    <div style={{ fontSize: '0.65rem', color: '#166534' }}>
+                      Confirmed & dispensed orders
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '8px 10px' }}>
+                    <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#b45309', textTransform: 'uppercase' }}>Unaccepted Offers</div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#b45309' }}>{quickCounts.proposals} Rx</div>
+                    <div style={{ fontSize: '0.65rem', color: '#92400e' }}>
+                      Ready for 1-click conversion
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: '8px', padding: '8px 10px' }}>
+                    <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#4338ca', textTransform: 'uppercase' }}>Your Top APIs</div>
+                    <div style={{ fontSize: '0.73rem', fontWeight: 700, color: '#312e81', marginTop: '2px', lineHeight: 1.3 }}>
+                      {doctorTopApis.length > 0
+                        ? doctorTopApis.slice(0, 3).map((a) => `${a.name} (${a.count})`).join(', ')
+                        : 'Minoxidil, Finasteride, Melatonin'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Clear Explanation of What Atlas AI Does for This Doctor */}
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  padding: '9px 12px',
+                  fontSize: '0.74rem',
+                  color: '#334155',
+                  lineHeight: 1.5
+                }}>
+                  <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
+                    How I can assist your practice right now ({aiUsesRemaining} session credits):
+                  </div>
+                  <div>• <strong>Patient & Rx Lookup:</strong> Ask about any patient by name or Rx code to inspect their exact formula, invoice status, and phone.</div>
+                  <div>• <strong>Commercial Conversion:</strong> Identify which of your <strong>{quickCounts.proposals} Unaccepted Offers</strong> ({unacceptedPatientsCount} patients) to follow up via WhatsApp.</div>
+                  <div>• <strong>30/90-Day Renewal Radar:</strong> Detect which of your <strong>{soldPatientsCount} Sold Customers</strong> are due for regimen refills or 1-click cloning.</div>
+                  <div>• <strong>Formulation & Clinical Synergies:</strong> Cross-check dosages, vehicles, and peptide/diagnostic pairings tailored to your top APIs.</div>
                 </div>
               </div>
 
@@ -7298,7 +7530,7 @@ export default function DoctorPublicPortalClient({
                   key={idx}
                   style={{
                     alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                    maxWidth: '88%',
+                    maxWidth: '90%',
                     background: msg.role === 'user' ? '#4f46e5' : '#ffffff',
                     color: msg.role === 'user' ? '#ffffff' : '#1e293b',
                     border: msg.role === 'user' ? 'none' : '1px solid #e2e8f0',
@@ -7313,7 +7545,7 @@ export default function DoctorPublicPortalClient({
                     fontWeight: 700,
                     marginBottom: '4px'
                   }}>
-                    {msg.role === 'user' ? 'You' : 'Atlas Assistant'} · {msg.time}
+                    {msg.role === 'user' ? 'You' : `Atlas Copilot · ${doctor.name}`} · {msg.time}
                   </div>
                   <div style={{
                     fontSize: '0.80rem',
@@ -7322,6 +7554,40 @@ export default function DoctorPublicPortalClient({
                   }}>
                     {msg.content}
                   </div>
+                  {msg.role === 'assistant' && Array.isArray(msg.actions) && msg.actions.length > 0 && (
+                    <div style={{
+                      marginTop: '10px',
+                      paddingTop: '8px',
+                      borderTop: '1px solid #f1f5f9',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '6px'
+                    }}>
+                      {msg.actions.map((act, aIdx) => (
+                        <button
+                          key={aIdx}
+                          type="button"
+                          onClick={() => handleExecuteAiAction(act)}
+                          style={{
+                            padding: '5px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #c7d2fe',
+                            background: '#eef2ff',
+                            color: '#4338ca',
+                            fontSize: '0.72rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <span>{act.label}</span>
+                          <ArrowUpRight size={12} />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
 
@@ -7338,7 +7604,7 @@ export default function DoctorPublicPortalClient({
                   color: '#475569'
                 }}>
                   <Loader2 size={14} className="animate-spin" />
-                  <span>Synthesizing patient & API formulation data...</span>
+                  <span>Analyzing {doctor.name}&apos;s {doctorPatientsList.length} patients & {allPrescriptions.length} prescriptions...</span>
                 </div>
               )}
 
@@ -7355,7 +7621,7 @@ export default function DoctorPublicPortalClient({
                   gap: '8px'
                 }}>
                   <div>
-                    <strong>Session Quota Reached (5/5):</strong> You have utilized all 5 free clinical intelligence queries allocated to this browser session.
+                    <strong>Session Quota Reached (5/5):</strong> You have utilized all 5 clinical intelligence queries allocated to this session.
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <button
@@ -7383,7 +7649,7 @@ export default function DoctorPublicPortalClient({
               )}
             </div>
 
-            {/* Quick Suggestion Chips */}
+            {/* Personalized Quick Suggestion Chips */}
             {aiUsesRemaining > 0 && (
               <div style={{
                 padding: '10px 16px',
@@ -7394,10 +7660,10 @@ export default function DoctorPublicPortalClient({
                 overflowX: 'auto'
               }}>
                 {[
-                  'Summarize active patients',
-                  'Verify dosages & APIs',
-                  'Pending sign-off tasks',
-                  'Multi-part formulations'
+                  `🟢 My ${quickCounts.active} Sold & Invoiced orders`,
+                  `⏳ Convert ${quickCounts.proposals} Unaccepted Offers`,
+                  `🔄 Patients due for renewal`,
+                  `🧬 My top APIs & Clinical Synergies`
                 ].map((chip, cIdx) => (
                   <button
                     key={cIdx}
@@ -7410,9 +7676,9 @@ export default function DoctorPublicPortalClient({
                       borderRadius: '9999px',
                       border: '1px solid #cbd5e1',
                       background: '#ffffff',
-                      color: '#475569',
+                      color: '#334155',
                       fontSize: '0.72rem',
-                      fontWeight: 500,
+                      fontWeight: 600,
                       cursor: 'pointer'
                     }}
                   >
@@ -7433,7 +7699,7 @@ export default function DoctorPublicPortalClient({
             }}>
               <input
                 type="text"
-                placeholder={aiUsesRemaining > 0 ? "Ask Atlas AI about your patients, APIs, or formulas..." : "Session limit reached. Contact Atlas Support on WhatsApp."}
+                placeholder={aiUsesRemaining > 0 ? `Ask about any of your ${doctorPatientsList.length} patients, ${allPrescriptions.length} prescriptions, renewals, or APIs...` : "Session limit reached. Contact Atlas Support on WhatsApp."}
                 value={aiInput}
                 onChange={(e) => setAiInput(e.target.value)}
                 onKeyDown={(e) => {
