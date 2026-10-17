@@ -658,7 +658,7 @@ export default function SharedCatalogClientView({
         const itemTotal = item.quantity * itemUnitPrice;
         const kits = Math.floor(item.quantity / 10);
         const singles = item.quantity % 10;
-        const formatLabel = item.presentation || 'Vial';
+        const formatLabel = item.presentation || 'Unit';
         const packDesc = kits > 0
           ? `${kits} Kit${kits > 1 ? 's' : ''} (10 pk)${singles > 0 ? ` + ${singles} Single${singles > 1 ? 's' : ''}` : ''}`
           : `${singles} Single ${formatLabel}${singles > 1 ? 's' : ''}`;
@@ -1374,7 +1374,7 @@ export default function SharedCatalogClientView({
                         <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', backgroundColor: '#f8fafc', borderRadius: '8px', padding: '8px 12px', border: '1px solid #e2e8f0', fontSize: '0.825rem' }}>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.productName}</div>
-                            <div style={{ fontSize: '0.74rem', color: '#64748b' }}>{item.dosage} • {item.quantity} {item.presentation || 'vials'}</div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b' }}>{item.dosage} • {item.quantity} {item.presentation ? `${item.presentation}${item.quantity > 1 ? 's' : ''}` : (item.quantity > 1 ? 'units' : 'unit')}</div>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                             <div style={{ fontWeight: 800, color: '#003666', minWidth: '56px', textAlign: 'right' }}>{currencySymbol}{(item.quantity * itemUnitPrice).toFixed(2)}</div>
@@ -2237,7 +2237,7 @@ export default function SharedCatalogClientView({
 
                       <div className="access-field-group">
                         <label className="access-field-label">
-                          Est. Monthly Peptide Volume
+                          Est. Monthly Order Volume
                         </label>
                         <select
                           value={registerForm.estimatedMonthlyVolume}
@@ -2245,10 +2245,10 @@ export default function SharedCatalogClientView({
                           className="access-input-control"
                           style={{ backgroundColor: '#ffffff' }}
                         >
-                          <option value="10 - 25 vials / month">10 - 25 vials / month</option>
-                          <option value="25 - 100 vials / month">25 - 100 vials / month (Standard Practice)</option>
-                          <option value="100 - 500 vials / month">100 - 500 vials / month (Multi-Doctor Clinic)</option>
-                          <option value="500+ vials / month">500+ vials / month (Institutional Supply)</option>
+                          <option value="10 - 25 units / month">10 - 25 units / month</option>
+                          <option value="25 - 100 units / month">25 - 100 units / month (Standard Practice)</option>
+                          <option value="100 - 500 units / month">100 - 500 units / month (Multi-Doctor Clinic)</option>
+                          <option value="500+ units / month">500+ units / month (Institutional Supply)</option>
                         </select>
                       </div>
                     </div>

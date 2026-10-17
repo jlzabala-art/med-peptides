@@ -81,8 +81,8 @@ export default function SharedCatalogFilterBar({
     if (packagingMode === 'sprays') return '👃 Nasal Sprays';
     if (packagingMode === 'sublingual') return '💧 Sublingual Droppers';
     if (packagingMode === 'oral') return '💊 Oral Capsules / Tablets';
-    if (packagingMode === 'kits') return '📦 10-Vial Kits';
-    if (packagingMode === 'units') return 'Single Vials';
+    if (packagingMode === 'kits') return '📦 10-Unit Kits';
+    if (packagingMode === 'units') return 'Single Units';
     if (routeFilter && routeFilter !== 'all' && ROUTE_LABELS[routeFilter]) {
       return `${ROUTE_LABELS[routeFilter].icon} ${ROUTE_LABELS[routeFilter].label}`;
     }
@@ -204,8 +204,9 @@ export default function SharedCatalogFilterBar({
                   { id: 'pens', label: '🖊️ Pre-filled Pens', action: () => setPackagingMode(packagingMode === 'pens' ? 'all' : 'pens') },
                   { id: 'sprays', label: '👃 Nasal Sprays', action: () => setPackagingMode(packagingMode === 'sprays' ? 'all' : 'sprays') },
                   { id: 'oral', label: '💊 Oral Capsules / Tablets', action: () => setPackagingMode(packagingMode === 'oral' ? 'all' : 'oral') },
+                  { id: 'topical', label: '🧴 Topical / Dermocosmetic', action: () => setRouteFilter(routeFilter === 'topical' ? 'all' : 'topical') },
                   { id: 'sublingual', label: '💧 Sublingual Droppers', action: () => setPackagingMode(packagingMode === 'sublingual' ? 'all' : 'sublingual') },
-                  { id: 'kits', label: '📦 10-Vial Kits', action: () => setPackagingMode(packagingMode === 'kits' ? 'all' : 'kits') },
+                  { id: 'kits', label: '📦 10-Unit Kits', action: () => setPackagingMode(packagingMode === 'kits' ? 'all' : 'kits') },
                 ].map(item => (
                   <button
                     key={item.id}
@@ -411,7 +412,7 @@ export default function SharedCatalogFilterBar({
                 packagingMode === 'sprays' ? 'Nasal Sprays' :
                 packagingMode === 'sublingual' ? 'Sublingual Droppers' :
                 packagingMode === 'oral' ? 'Oral Capsules' :
-                packagingMode === 'kits' ? '10-Vial Kits' :
+                packagingMode === 'kits' ? '10-Unit Kits' :
                 packagingMode
               }</span>
               <button

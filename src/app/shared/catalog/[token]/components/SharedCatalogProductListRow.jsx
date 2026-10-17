@@ -127,7 +127,7 @@ export default function SharedCatalogProductListRow({
               onClick={onToggleExpand}
               className="catalog-row-expand-btn"
               aria-expanded={isExpanded}
-              aria-label={isExpanded ? 'Collapse peptide details' : 'Expand peptide details and dosages'}
+              aria-label={isExpanded ? 'Collapse formulation details' : 'Expand formulation details and formats'}
               title={isExpanded ? (t ? t('product.collapse', 'Collapse') : 'Collapse') : (t ? t('product.expand', 'Expand Formats') : 'Expand Formats')}
             >
               {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

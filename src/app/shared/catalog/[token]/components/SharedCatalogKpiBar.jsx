@@ -49,7 +49,7 @@ export default function SharedCatalogKpiBar({
         ? 'Enterprise repository'
         : isFiltered
         ? 'Matching active search criteria'
-        : (serverKpis?.formulasSubtitle || 'Lyophilized peptide formulations'),
+        : (serverKpis?.formulasSubtitle || 'Active clinical formulations'),
       color: isGlobalScope ? '#0d9488' : '#0284c7',
       bg: isGlobalScope ? 'rgba(13, 148, 136, 0.07)' : 'rgba(2, 132, 199, 0.06)',
       border: isGlobalScope ? 'rgba(13, 148, 136, 0.22)' : 'rgba(2, 132, 199, 0.18)',

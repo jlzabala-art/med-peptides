@@ -278,12 +278,12 @@ export default function SharedCatalogProductCard({
             const tier10Rate = (v.tier10UnitPrice && v.tier10UnitPrice > 0 ? v.tier10UnitPrice : (v.price > 0 ? v.price * 0.9 : 0)) * fxMultiplier;
             const kitDisplayPrice = (v.kitPrice && v.kitPrice > 0 ? v.kitPrice : tier10Rate * 10) * fxMultiplier;
 
-            const formatLower = (v.presentation || '').toLowerCase();
+            const formatLower = (v.presentation || prod.dosageForm || '').toLowerCase();
             const unitPlural = formatLower.includes('pen') ? 'Pens'
               : formatLower.includes('spray') ? 'Sprays'
-              : (formatLower.includes('capsule') || formatLower.includes('bottle')) ? 'Bottles'
+              : (formatLower.includes('capsule') || formatLower.includes('bottle') || formatLower.includes('jar') || formatLower.includes('tube') || formatLower.includes('stick') || formatLower.includes('cream') || formatLower.includes('gel')) ? 'Units'
               : (formatLower.includes('serum') || formatLower.includes('topical')) ? 'Units'
-              : 'Vials';
+              : (formatLower.includes('vial') ? 'Vials' : 'Units');
 
             const savingsPct = displayPrice > 0 && tier10Rate > 0 && tier10Rate < displayPrice
               ? Math.round((1 - (tier10Rate / displayPrice)) * 100)
@@ -325,7 +325,7 @@ export default function SharedCatalogProductCard({
                       {v.dosage || v.name || 'Standard Presentation'}
                     </div>
                     <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
-                      <span style={{ textTransform: 'capitalize' }}>Format: {v.presentation || 'Vial'}</span>
+                      <span style={{ textTransform: 'capitalize' }}>Format: {v.presentation || (prod.category === 'cosmetics' ? 'Dermocosmetic' : 'Unit')}</span>
                       <span>•</span>
                       {isOutOfStock ? (
                         <span style={{ color: '#dc2626', fontWeight: 700 }}>🔴 Out of Stock</span>
@@ -466,7 +466,7 @@ export default function SharedCatalogProductCard({
                       {Math.floor(cart[v.id].quantity / 10) > 0 && (
                         <span style={{ backgroundColor: '#dcfce7', color: '#15803d', padding: '1px 6px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 800 }}>
                           {Math.floor(cart[v.id].quantity / 10)} Kit{Math.floor(cart[v.id].quantity / 10) > 1 ? 's' : ''} (10 pk)
-                          {cart[v.id].quantity % 10 > 0 ? ` + ${cart[v.id].quantity % 10} Single Vial(s)` : ''}
+                          {cart[v.id].quantity % 10 > 0 ? ` + ${cart[v.id].quantity % 10} Single ${unitPlural.replace(/s$/, '')}(s)` : ''}
                         </span>
                       )}
                     </div>

@@ -62,6 +62,34 @@ export default function SharedCatalogHeader({
     ? rawRecipientName.split('·')[0].trim()
     : (isWholesaler && rawRecipientName.includes(' • ') ? rawRecipientName.split(' • ')[0].trim() : rawRecipientName);
 
+  const hasSpecificProductIds = Array.isArray(catalogMeta?.productIds) && catalogMeta.productIds.length > 0;
+  const isCosmeticCatalog = products.length > 0 && products.every(p => {
+    const cat = String(p.category || '').toLowerCase();
+    const id = String(p.id || '').toLowerCase();
+    const name = String(p.canonicalName || p.name || '').toLowerCase();
+    const brand = String(p.brand || '').toLowerCase();
+    return (
+      cat === 'cosmetics' ||
+      cat === 'cosmeceuticals' ||
+      cat === 'skincare' ||
+      brand.includes('colway') ||
+      name.includes('colway') ||
+      id.startsWith('colway')
+    );
+  });
+
+  const isColway = isCosmeticCatalog || 
+    String(catalogMeta?.title || '').toLowerCase().includes('colway') ||
+    (hasSpecificProductIds && catalogMeta.productIds.every(id => String(id).toLowerCase().includes('colway')));
+
+  const hasPeptides = products.some(p => {
+    const cat = String(p.category || '').toLowerCase();
+    const type = String(p.type || '').toLowerCase();
+    return cat.includes('peptide') || type.includes('peptide');
+  });
+
+  const isNeutralCustom = hasSpecificProductIds && !hasPeptides && !isCosmeticCatalog;
+
   const verifiedCode = batchCode || catalogCode || 'RP-CATALOG';
   const cleanBaseUrl = shareUrl || (typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : 'https://www.atlashealth-services.com');
   const activeFilteredUrl = typeof window !== 'undefined' ? window.location.href : cleanBaseUrl;
@@ -88,8 +116,9 @@ export default function SharedCatalogHeader({
         await navigator.clipboard.writeText(verifiedCode);
       }
       setCopiedType('code');
-      setTimeout(() => setCopiedType(null), 2000);
-    } catch (e) {}
+    } catch (_e) {
+      // Non-blocking clipboard fallback
+    }
   };
 
   return (
@@ -152,7 +181,13 @@ export default function SharedCatalogHeader({
                 fontWeight: 700
               }}>
                 <ShieldCheck size={11} color="#16a34a" />
-                <span>RP-HPLC & LC-MS Certified</span>
+                <span>
+                  {isColway
+                    ? 'CPNP & EU 1223/2009 Certified'
+                    : isNeutralCustom
+                      ? 'Institutional Quality Certified'
+                      : 'RP-HPLC & LC-MS Certified'}
+                </span>
               </span>
 
               <span style={{
@@ -209,11 +244,21 @@ export default function SharedCatalogHeader({
               letterSpacing: '-0.02em',
               lineHeight: 1.2
             }}>
-              {cleanRecipientName
-                ? (isWholesaler
-                    ? `Wholesale Peptide Catalog • ${cleanRecipientName}`
-                    : `Clinical Peptide Catalog • ${cleanRecipientName}`)
-                : 'Clinical Peptide Catalog'}
+              {catalogMeta?.title
+                ? (cleanRecipientName && !catalogMeta.title.includes(cleanRecipientName)
+                    ? `${catalogMeta.title} • ${cleanRecipientName}`
+                    : catalogMeta.title)
+                : cleanRecipientName
+                  ? (isColway
+                      ? (isWholesaler ? `Wholesale Colway Portfolio • ${cleanRecipientName}` : `Colway Cellular Formulations • ${cleanRecipientName}`)
+                      : isNeutralCustom
+                        ? (isWholesaler ? `Wholesale Formulations • ${cleanRecipientName}` : `Curated Formulations Portfolio • ${cleanRecipientName}`)
+                        : (isWholesaler ? `Wholesale Peptide Catalog • ${cleanRecipientName}` : `Clinical Peptide Catalog • ${cleanRecipientName}`))
+                  : (isColway
+                      ? 'Colway Cellular Bio-Cosmetics & Nutricosmetics'
+                      : isNeutralCustom
+                        ? 'Curated Clinical Formulations Portfolio'
+                        : 'Clinical Peptide Catalog')}
             </h1>
 
             {/* Description (Compact 1-line summary) */}
@@ -224,7 +269,11 @@ export default function SharedCatalogHeader({
               lineHeight: 1.35,
               maxWidth: '720px'
             }}>
-              Analytical-grade lyophilized peptide vials & standardized therapeutic protocols. Verified institutional terms.
+              {isColway
+                ? 'Biologically active native tropocollagen, botanical complexes and specialized dermocosmetic systems. Verified institutional terms.'
+                : isNeutralCustom
+                  ? 'Curated clinical formulations portfolio and technical specifications. Verified institutional delivery terms.'
+                  : 'Analytical-grade lyophilized peptide vials & standardized therapeutic protocols. Verified institutional terms.'}
             </p>
 
             {/* GCP High-Density Unified Action Toolbar */}

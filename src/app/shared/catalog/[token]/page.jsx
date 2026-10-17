@@ -244,7 +244,7 @@ async function fetchCatalogData(supplierId, category, catalogueFilter, productId
   }
 
   let productDocs = [];
-  let protosSnapshot = null;
+  let protosSnapshot;
 
   if (hasSpecificIds) {
     const CHUNK = 30;
@@ -648,24 +648,49 @@ export default async function SharedCatalogPage({ params }) {
   products.sort((a, b) => a.canonicalName.localeCompare(b.canonicalName));
 
   // ── Build Protocols (Clinical Dossier Only — Zero Economic Data) ───────────
-  const protocols = protoDocs
-    .filter(p => p.status !== 'archived' && p.status !== 'draft')
-    .map(p => ({
-      id:                  p.id,
-      title:               p.title || p.name || 'Clinical Protocol',
-      goal:                p.goal || p.category || 'Therapeutic Optimization',
-      targetSystem:        p.targetSystem || p.indication || 'Cellular System',
-      duration:            p.duration || '8 – 12 Weeks',
-      compounds:           Array.isArray(p.compounds) ? p.compounds : (Array.isArray(p.drugs) ? p.drugs : []),
-      description:         p.summary || p.description || p.clinicalRationale || '',
-      phasesCount:         Array.isArray(p.phases) ? p.phases.length : 1,
-      phases:              Array.isArray(p.phases) ? p.phases : [],
-      dosage:              p.dosage || p.dose || '',
-      frequency:           p.frequency || p.schedule || '',
-      administrationRoute: p.administrationRoute || p.route || 'Subcutaneous (SubQ)',
-      cautions:            p.cautions || p.contraindications || '',
-      scientificRationale: p.scientificRationale || p.mechanism || ''
-    }));
+  // If this is a curated custom view with specific productIds, only attach protocols referencing those products
+  const productIdsSet = hasSpecificProductIds ? new Set((catalogMeta.productIds || []).map(id => String(id).toLowerCase())) : null;
+  const productNamesSet = hasSpecificProductIds ? new Set(products.flatMap(pr => [
+    String(pr.id || '').toLowerCase(),
+    String(pr.canonicalName || '').toLowerCase(),
+    String(pr.name || '').toLowerCase()
+  ]).filter(Boolean)) : null;
+
+  const filteredProtoDocs = protoDocs.filter(p => {
+    if (p.status === 'archived' || p.status === 'draft') return false;
+    if (!hasSpecificProductIds) return true;
+
+    // In a custom curated view, only keep protocols referencing the curated products
+    const protoItems = [
+      ...(Array.isArray(p.items) ? p.items.map(it => String(it.productId || it.id || it.name || '').toLowerCase()) : []),
+      ...(Array.isArray(p.compounds) ? p.compounds.map(c => String(c.id || c.name || c.compound || c).toLowerCase()) : []),
+      ...(Array.isArray(p.products) ? p.products.map(pr => String(pr.id || pr.productId || pr.name || '').toLowerCase()) : []),
+      ...(Array.isArray(p.drugs) ? p.drugs.map(d => String(d.id || d.name || d).toLowerCase()) : [])
+    ];
+    return protoItems.some(item => 
+      productIdsSet.has(item) || 
+      productNamesSet.has(item) ||
+      [...productIdsSet].some(pid => item.includes(pid)) ||
+      [...productNamesSet].some(pname => pname.length > 4 && item.includes(pname))
+    );
+  });
+
+  const protocols = filteredProtoDocs.map(p => ({
+    id:                  p.id,
+    title:               p.title || p.name || 'Clinical Protocol',
+    goal:                p.goal || p.category || 'Therapeutic Optimization',
+    targetSystem:        p.targetSystem || p.indication || 'Cellular System',
+    duration:            p.duration || '8 – 12 Weeks',
+    compounds:           Array.isArray(p.compounds) ? p.compounds : (Array.isArray(p.drugs) ? p.drugs : []),
+    description:         p.summary || p.description || p.clinicalRationale || '',
+    phasesCount:         Array.isArray(p.phases) ? p.phases.length : 1,
+    phases:              Array.isArray(p.phases) ? p.phases : [],
+    dosage:              p.dosage || p.dose || '',
+    frequency:           p.frequency || p.schedule || '',
+    administrationRoute: p.administrationRoute || p.route || 'Subcutaneous (SubQ)',
+    cautions:            p.cautions || p.contraindications || '',
+    scientificRationale: p.scientificRationale || p.mechanism || ''
+  }));
 
   // ── Server-Side KPIs Calculation (Golden Rule #22 — O(1) in client, zero render performance penalty) ──
   let totalCatalogVariants = 0;
@@ -681,22 +706,78 @@ export default async function SharedCatalogPage({ params }) {
     }
   }
 
+  const isCosmeticCatalog = products.length > 0 && products.every(p => {
+    const cat = String(p.category || '').toLowerCase();
+    const id = String(p.id || '').toLowerCase();
+    const name = String(p.canonicalName || p.name || '').toLowerCase();
+    const brand = String(p.brand || '').toLowerCase();
+    return (
+      cat === 'cosmetics' ||
+      cat === 'cosmeceuticals' ||
+      cat === 'skincare' ||
+      brand.includes('colway') ||
+      name.includes('colway') ||
+      id.startsWith('colway')
+    );
+  });
+
+  const hasPeptides = products.some(p => {
+    const cat = String(p.category || '').toLowerCase();
+    const type = String(p.type || '').toLowerCase();
+    return cat.includes('peptide') || type.includes('peptide');
+  });
+
   const normCatFilter = String(catalogueFilter || '').toLowerCase().trim();
-  const isCompoundingCatalog = 
+  const isCompoundingCatalog = !isCosmeticCatalog && (
     normCatFilter === 'magenta-compounding' ||
     normCatFilter === 'compounding' ||
-    catalogMeta?.category === 'compounding' ||
-    (products.length > 0 && products.every(p => !String(p.category || '').toLowerCase().includes('peptide')));
+    catalogMeta?.category === 'compounding'
+  );
+
+  const isCuratedCustomView = hasSpecificProductIds && !hasPeptides && !isCosmeticCatalog;
 
   if (!catalogMeta.title) {
-    if (normCatFilter === 'magenta-peptides') {
+    if (isCosmeticCatalog) {
+      catalogMeta.title = 'Colway Cellular Bio-Cosmetics & Nutricosmetics';
+    } else if (normCatFilter === 'magenta-peptides') {
       catalogMeta.title = 'Magenta Medical — Clinical Peptides Portfolio';
     } else if (normCatFilter === 'magenta-compounding') {
       catalogMeta.title = 'Magenta Medical — Compounding & Wellness Portfolio';
+    } else if (isCuratedCustomView) {
+      catalogMeta.title = 'Curated Clinical Formulations Portfolio';
     }
   }
 
-  const serverKpis = isCompoundingCatalog ? {
+  const serverKpis = isCosmeticCatalog ? {
+    // 1. Authoritative Global Database Facets (from _meta/catalog_facets)
+    globalTotalProducts: metaFacets?.totals?.products || 430,
+    globalTotalVariants: metaFacets?.totals?.variants || 830,
+    globalActiveProducts: metaFacets?.totals?.activeProducts || 429,
+
+    // 2. Pre-calculated Catalog-slice Metrics
+    catalogTotalProducts: products.length,
+    catalogTotalVariants: totalCatalogVariants,
+    readyStockCount: readyStockVariants,
+    coaVerifiedCount,
+
+    // 3. Dermocosmetics & Nutricosmetics Benchmarks
+    isCosmetic: true,
+    formulasTitle: 'Cellular Formulations',
+    formulasSubtitle: 'Registered CPNP dermocosmetics & nutricosmetics',
+    purityTitle: 'Formulation Integrity',
+    purityValue: 'CPNP / EU',
+    purityBadge: 'EU 1223/2009',
+    puritySubtitle: 'Biologically active native tropocollagen',
+    dispatchTitle: 'Fulfillment',
+    dispatchSlaValue: '24-48h',
+    dispatchBadge: 'Ready Stock',
+    dispatchSubtitle: 'Immediate warehouse fulfillment',
+    traceabilityTitle: 'Quality Certification',
+    traceabilityValue: 'CPNP Registered',
+    traceabilityBadge: 'Batch Trace',
+    traceabilitySubtitle: 'Dermatologically certified & safety dossiers',
+    updatedAt: metaFacets?.updatedAt || new Date().toISOString()
+  } : isCompoundingCatalog ? {
     // 1. Authoritative Global Database Facets (from _meta/catalog_facets)
     globalTotalProducts: metaFacets?.totals?.products || 430,
     globalTotalVariants: metaFacets?.totals?.variants || 830,
@@ -724,6 +805,35 @@ export default async function SharedCatalogPage({ params }) {
     traceabilityValue: 'TrichoSol™ & Lipoderm®',
     traceabilityBadge: 'Advanced Vehicles',
     traceabilitySubtitle: 'Transdermal & follicular delivery',
+    updatedAt: metaFacets?.updatedAt || new Date().toISOString()
+  } : isCuratedCustomView ? {
+    // 1. Authoritative Global Database Facets (from _meta/catalog_facets)
+    globalTotalProducts: metaFacets?.totals?.products || 430,
+    globalTotalVariants: metaFacets?.totals?.variants || 830,
+    globalActiveProducts: metaFacets?.totals?.activeProducts || 429,
+
+    // 2. Pre-calculated Catalog-slice Metrics
+    catalogTotalProducts: products.length,
+    catalogTotalVariants: totalCatalogVariants,
+    readyStockCount: readyStockVariants,
+    coaVerifiedCount,
+
+    // 3. Neutral Curated Benchmarks
+    isCompounding: false,
+    formulasTitle: 'Curated Formulations',
+    formulasSubtitle: 'Specialized clinical formulations',
+    purityTitle: 'Quality Standard',
+    purityValue: 'Verified Grade',
+    purityBadge: 'Certified',
+    puritySubtitle: 'Quality-verified active ingredients',
+    dispatchTitle: 'Fulfillment',
+    dispatchSlaValue: '24-48h',
+    dispatchBadge: 'Priority',
+    dispatchSubtitle: 'Institutional fulfillment terms',
+    traceabilityTitle: 'Traceability',
+    traceabilityValue: 'Verified Lot',
+    traceabilityBadge: 'Batch Trace',
+    traceabilitySubtitle: 'Full batch verification & release',
     updatedAt: metaFacets?.updatedAt || new Date().toISOString()
   } : {
     // 1. Authoritative Global Database Facets (from _meta/catalog_facets)
