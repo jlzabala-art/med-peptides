@@ -38,6 +38,7 @@ const PORTAL_PREFIXES = [
   '/c',
   '/mediluxe',
   '/company',
+  '/atlas',
   '/rx',
   '/d',
   '/intake',
