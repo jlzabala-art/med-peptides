@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck, Sparkles, FlaskConical, Leaf,
@@ -8,13 +8,15 @@ import {
   Droplets, Zap, Activity, Star, Package, Microscope, Heart,
   AlertTriangle, ClipboardList, Scissors, Beaker, BookOpen,
   TestTube, ListChecks, Thermometer, Clock, BarChart2, BadgeCheck,
-  RefreshCcw, Layers, Mail, QrCode, Copy, Check, ZoomIn, X, Search
+  RefreshCcw, Layers, Mail, QrCode, Copy, Check, ZoomIn, X, Search,
+  ArrowLeft
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import PublicDatasheetTableOfContents from '@/components/product/PublicDatasheetTableOfContents';
+import ProductSectionFooterNav from '@/components/product/ProductSectionFooterNav';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicPageHero from '@/components/shared/public/PublicPageHero';
@@ -664,6 +666,44 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
+  // Active section management (Single-section display rule)
+  const [activeSection, setActiveSection] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash) return hash;
+    }
+    return 'overview';
+  });
+
+  const handleSelectSection = useCallback((targetId) => {
+    if (!targetId) return;
+    setActiveSection(targetId);
+    if (typeof window !== 'undefined') {
+      if (window.history?.replaceState) {
+        window.history.replaceState(null, '', `#${targetId}`);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash) {
+        setActiveSection(hash);
+      } else {
+        setActiveSection('overview');
+      }
+    };
+    if (window.location.hash) {
+      const initialHash = window.location.hash.replace('#', '').trim();
+      if (initialHash) setActiveSection(initialHash);
+    }
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   const name = product?.name || product?.canonicalName || 'Colway Formulation';
   const brand = product?.supplier || product?.brand || 'Colway';
   const category = product?.category || 'Cosmetics';
@@ -745,6 +785,12 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
     return list;
   }, [isHairProduct, isNutricosmetic]);
 
+  const effectiveActiveSection = useMemo(() => {
+    if (!activeSection || activeSection === 'overview') return 'overview';
+    const exists = tocSections.some(s => s.id === activeSection);
+    return exists ? activeSection : 'overview';
+  }, [activeSection, tocSections]);
+
   if (!product) return null;
 
   // Cosmetics KPIs — derived from product data, no hardcoded peptide/vial concepts
@@ -803,343 +849,517 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
         breadcrumb={[{ label: 'Catalog', href: '/catalog' }, { label: isHairProduct ? 'Colway® Trichology' : 'Colway® Clinical Skincare', href: '/collection/colway' }, { label: name }]} />
 
       <PublicPageShell>
-        <div id="overview" style={{ scrollMarginTop: '80px' }}>
-          <PublicPageHero
-            badges={<>
-              <span className="pds-cat-tag">{category}</span>
-              <CollectionBadgePill product={product} />
-              <span className="pds-cgmp-tag">{brand}</span>
-              <span className="pds-purity-tag"><ShieldCheck size={12} /><span>EU Reg. 1223/2009</span></span>
-              <span className="pds-purity-tag" style={{ background: '#fdf2f8', color: '#db2777', borderColor: '#fbcfe8' }}><Leaf size={12} /><span>Dermatologically Tested</span></span>
-              <span className="pds-purity-tag" style={{ background: '#eff6ff', color: '#2563eb', borderColor: '#bfdbfe' }}><CheckCircle2 size={12} /><span>Sulphate-Free</span></span>
-            </>}
-            title={name}
-            description={<>
-              <span style={{ display: 'block', fontSize: '0.94rem', color: '#475569', lineHeight: 1.6, marginBottom: '0.75rem' }}>{description}</span>
-              {technicalSpecs && (
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-                  {technicalSpecs.ph_range && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', background: '#e0f2fe', padding: '3px 9px', borderRadius: '99px' }}><TestTube size={10} /> pH {technicalSpecs.ph_range}</span>}
-                  {technicalSpecs.shelf_life && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#64748b', background: '#f1f5f9', padding: '3px 9px', borderRadius: '99px' }}><Clock size={10} /> {technicalSpecs.shelf_life}</span>}
-                  {applicationProtocol?.frequency && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', padding: '3px 9px', borderRadius: '99px' }}><RefreshCcw size={10} /> {applicationProtocol.frequency}</span>}
-                </div>
-              )}
-            </>}
-            desktopSecondary={
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-                <div
-                  style={{
-                    position: 'relative',
-                    background: '#ffffff',
-                    borderRadius: '16px',
-                    border: '1px solid #e2e8f0',
-                    padding: '1.1rem 1.1rem 0.9rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '240px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-                    transition: 'transform 0.2s, box-shadow 0.2s'
-                  }}
-                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.09)'; }}
-                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)'; }}
-                >
-                  {imageUrl && (
-                    <div
-                      onClick={() => setIsImageModalOpen(true)}
-                      role="button"
-                      tabIndex={0}
-                      title="Click to enlarge product packaging"
-                      style={{
-                        position: 'relative',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '100%',
-                        height: '210px',
-                        cursor: 'zoom-in'
-                      }}
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={name}
-                        loading="eager"
-                        fetchPriority="high"
+        {effectiveActiveSection === 'overview' && (
+          <div id="overview" style={{ scrollMarginTop: '80px' }}>
+            <PublicPageHero
+              badges={<>
+                <span className="pds-cat-tag">{category}</span>
+                <CollectionBadgePill product={product} />
+                <span className="pds-cgmp-tag">{brand}</span>
+                <span className="pds-purity-tag"><ShieldCheck size={12} /><span>EU Reg. 1223/2009</span></span>
+                <span className="pds-purity-tag" style={{ background: '#fdf2f8', color: '#db2777', borderColor: '#fbcfe8' }}><Leaf size={12} /><span>Dermatologically Tested</span></span>
+                <span className="pds-purity-tag" style={{ background: '#eff6ff', color: '#2563eb', borderColor: '#bfdbfe' }}><CheckCircle2 size={12} /><span>Sulphate-Free</span></span>
+              </>}
+              title={name}
+              description={<>
+                <span style={{ display: 'block', fontSize: '0.94rem', color: '#475569', lineHeight: 1.6, marginBottom: '0.75rem' }}>{description}</span>
+                {technicalSpecs && (
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                    {technicalSpecs.ph_range && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', background: '#e0f2fe', padding: '3px 9px', borderRadius: '99px' }}><TestTube size={10} /> pH {technicalSpecs.ph_range}</span>}
+                    {technicalSpecs.shelf_life && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#64748b', background: '#f1f5f9', padding: '3px 9px', borderRadius: '99px' }}><Clock size={10} /> {technicalSpecs.shelf_life}</span>}
+                    {applicationProtocol?.frequency && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', padding: '3px 9px', borderRadius: '99px' }}><RefreshCcw size={10} /> {applicationProtocol.frequency}</span>}
+                  </div>
+                )}
+              </>}
+              desktopSecondary={
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                  <div
+                    style={{
+                      position: 'relative',
+                      background: '#ffffff',
+                      borderRadius: '16px',
+                      border: '1px solid #e2e8f0',
+                      padding: '1.1rem 1.1rem 0.9rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '240px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                      transition: 'transform 0.2s, box-shadow 0.2s'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.09)'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)'; }}
+                  >
+                    {imageUrl && (
+                      <div
+                        onClick={() => setIsImageModalOpen(true)}
+                        role="button"
+                        tabIndex={0}
+                        title="Click to enlarge product packaging"
                         style={{
-                          maxWidth: '100%',
-                          maxHeight: '100%',
-                          width: 'auto',
-                          height: 'auto',
-                          objectFit: 'contain',
-                          borderRadius: '6px'
+                          position: 'relative',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '100%',
+                          height: '210px',
+                          cursor: 'zoom-in'
                         }}
-                      />
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '4px',
-                        right: '4px',
-                        background: 'rgba(15,23,42,0.75)',
-                        borderRadius: '6px',
-                        padding: '4px 6px',
-                        color: '#ffffff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        fontSize: '0.62rem',
-                        fontWeight: 600
-                      }}>
-                        <ZoomIn size={12} />
-                        <span>Zoom</span>
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={name}
+                          loading="eager"
+                          fetchPriority="high"
+                          style={{
+                            maxWidth: '100%',
+                            maxHeight: '100%',
+                            width: 'auto',
+                            height: 'auto',
+                            objectFit: 'contain',
+                            borderRadius: '6px'
+                          }}
+                        />
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '4px',
+                          right: '4px',
+                          background: 'rgba(15,23,42,0.75)',
+                          borderRadius: '6px',
+                          padding: '4px 6px',
+                          color: '#ffffff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '0.62rem',
+                          fontWeight: 600
+                        }}>
+                          <ZoomIn size={12} />
+                          <span>Zoom</span>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Integrated GCP-Style Digital Verification & Mobile Scan Bar */}
-                  <div style={{
-                    width: '100%',
-                    marginTop: imageUrl ? '10px' : '0',
-                    paddingTop: imageUrl ? '10px' : '0',
-                    borderTop: imageUrl ? '1px solid #f1f5f9' : 'none'
-                  }}>
+                    {/* Integrated GCP-Style Digital Verification & Mobile Scan Bar */}
+                    <div style={{
+                      width: '100%',
+                      marginTop: imageUrl ? '10px' : '0',
+                      paddingTop: imageUrl ? '10px' : '0',
+                      borderTop: imageUrl ? '1px solid #f1f5f9' : 'none'
+                    }}>
+                      <button
+                        type="button"
+                        onClick={() => setIsQrModalOpen(true)}
+                        title="Click to view digital certificate & mobile scan QR code"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          padding: '7px 10px',
+                          borderRadius: '8px',
+                          background: '#f8fafc',
+                          border: '1px solid #cbd5e1',
+                          color: '#003666',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.background = '#f0fdfa';
+                          e.currentTarget.style.borderColor = '#0d9488';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.background = '#f8fafc';
+                          e.currentTarget.style.borderColor = '#cbd5e1';
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <QrCode size={14} style={{ color: '#0d9488' }} />
+                          <span>Digital QR Verification</span>
+                        </div>
+                        <span style={{
+                          fontSize: '0.60rem',
+                          fontWeight: 800,
+                          color: '#0d9488',
+                          background: '#ccfbf1',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          letterSpacing: '0.04em'
+                        }}>
+                          SCAN
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+              mobileSecondary={
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  width: '100%',
+                  maxWidth: '260px',
+                  margin: '0.5rem auto'
+                }}>
+                  <div
+                    style={{
+                      position: 'relative',
+                      width: '100%',
+                      background: '#ffffff',
+                      borderRadius: '14px',
+                      border: '1px solid #e2e8f0',
+                      padding: '0.75rem',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {imageUrl && (
+                      <div
+                        onClick={() => setIsImageModalOpen(true)}
+                        role="button"
+                        tabIndex={0}
+                        title="Tap to enlarge product photo"
+                        style={{
+                          position: 'relative',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          width: '100%',
+                          height: '180px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={name}
+                          loading="eager"
+                          fetchPriority="high"
+                          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px' }}
+                        />
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '4px',
+                          right: '4px',
+                          background: 'rgba(15,23,42,0.75)',
+                          borderRadius: '4px',
+                          padding: '3px 6px',
+                          color: '#ffffff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          fontSize: '0.58rem',
+                          fontWeight: 700
+                        }}>
+                          <ZoomIn size={11} />
+                          <span>Zoom</span>
+                        </div>
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={() => setIsQrModalOpen(true)}
-                      title="Click to view digital certificate & mobile scan QR code"
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
+                        justifyContent: 'center',
+                        gap: '6px',
                         width: '100%',
-                        padding: '7px 10px',
+                        marginTop: '8px',
+                        padding: '6px 10px',
                         borderRadius: '8px',
                         background: '#f8fafc',
                         border: '1px solid #cbd5e1',
                         color: '#003666',
-                        fontSize: '0.72rem',
+                        fontSize: '0.70rem',
                         fontWeight: 700,
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease'
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.background = '#f0fdfa';
-                        e.currentTarget.style.borderColor = '#0d9488';
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.background = '#f8fafc';
-                        e.currentTarget.style.borderColor = '#cbd5e1';
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <QrCode size={14} style={{ color: '#0d9488' }} />
-                        <span>Digital QR Verification</span>
-                      </div>
-                      <span style={{
-                        fontSize: '0.60rem',
-                        fontWeight: 800,
-                        color: '#0d9488',
-                        background: '#ccfbf1',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        letterSpacing: '0.04em'
-                      }}>
-                        SCAN
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            }
-            mobileSecondary={
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                width: '100%',
-                maxWidth: '260px',
-                margin: '0.5rem auto'
-              }}>
-                <div
-                  style={{
-                    position: 'relative',
-                    width: '100%',
-                    background: '#ffffff',
-                    borderRadius: '14px',
-                    border: '1px solid #e2e8f0',
-                    padding: '0.75rem',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center'
-                  }}
-                >
-                  {imageUrl && (
-                    <div
-                      onClick={() => setIsImageModalOpen(true)}
-                      role="button"
-                      tabIndex={0}
-                      title="Tap to enlarge product photo"
-                      style={{
-                        position: 'relative',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        width: '100%',
-                        height: '180px',
                         cursor: 'pointer'
                       }}
                     >
-                      <img
-                        src={imageUrl}
-                        alt={name}
-                        loading="eager"
-                        fetchPriority="high"
-                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px' }}
-                      />
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '4px',
-                        right: '4px',
-                        background: 'rgba(15,23,42,0.75)',
-                        borderRadius: '4px',
-                        padding: '3px 6px',
-                        color: '#ffffff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '3px',
-                        fontSize: '0.58rem',
-                        fontWeight: 700
-                      }}>
-                        <ZoomIn size={11} />
-                        <span>Zoom</span>
-                      </div>
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setIsQrModalOpen(true)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      width: '100%',
-                      marginTop: '8px',
-                      padding: '6px 10px',
-                      borderRadius: '8px',
-                      background: '#f8fafc',
-                      border: '1px solid #cbd5e1',
-                      color: '#003666',
-                      fontSize: '0.70rem',
-                      fontWeight: 700,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <QrCode size={13} style={{ color: '#0d9488' }} />
-                    <span>Digital QR Verification</span>
-                  </button>
+                      <QrCode size={13} style={{ color: '#0d9488' }} />
+                      <span>Digital QR Verification</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            }
-          />
-        </div>
-
-        <CollectionCompanionBanner product={product} />
-
-        <PublicKpiGrid items={kpis} />
+              }
+            />
+            <CollectionCompanionBanner product={product} />
+            <PublicKpiGrid items={kpis} />
+          </div>
+        )}
 
         <div className="pds-content-with-sidebar">
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
 
+            {/* OVERVIEW EXECUTIVE SUMMARY (SHOWN ONLY WHEN OVERVIEW IS SELECTED) */}
+            {effectiveActiveSection === 'overview' && (
+              <PublicSectionCard
+                id="executive-overview"
+                icon={Layers}
+                category="EXECUTIVE SUMMARY"
+                title={isNutricosmetic ? "Nutraceutical Architecture & Clinical Dossier" : "Formulation Architecture & Clinical Dossier"}
+                badge="EU CPNP Regulated"
+                badgeVariant="green"
+              >
+                <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+                  {isHairProduct
+                    ? 'Standardized trichological formulation engineered for follicular rejuvenation, microvascular stimulation, and stem cell protection. Explore the in-depth sections below or select from the navigation menu on the right to inspect biological mechanisms, full INCI breakdown, or clinical integration.'
+                    : 'Standardized dermocosmetic formulation engineered for extracellular matrix reinforcement, native collagen bioavailability, and epidermal barrier protection. Explore the in-depth sections below or select from the navigation menu on the right to inspect biological mechanisms, full INCI breakdown, or clinical integration.'}
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '1.25rem' }}>
+                  {tocSections.filter(s => s.id !== 'overview').map((sec, idx) => {
+                    const IconComp = sec.icon || Sparkles;
+                    return (
+                      <div
+                        key={sec.id}
+                        onClick={() => handleSelectSection(sec.id)}
+                        role="button"
+                        tabIndex={0}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.9rem 1.15rem',
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#003666';
+                          e.currentTarget.style.backgroundColor = '#f8fafc';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#e2e8f0';
+                          e.currentTarget.style.backgroundColor = '#ffffff';
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 26,
+                            height: 26,
+                            borderRadius: '6px',
+                            background: '#f1f5f9',
+                            color: '#475569',
+                            fontSize: '0.72rem',
+                            fontWeight: 800,
+                            fontFamily: 'monospace'
+                          }}>
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 30,
+                            height: 30,
+                            borderRadius: '6px',
+                            background: '#f0fdfa',
+                            color: '#0d9488'
+                          }}>
+                            <IconComp size={15} />
+                          </span>
+                          <div>
+                            <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
+                              {sec.label}
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                              {sec.id === 'stem-cell-monograph' && 'Baicapil™ 2% hair follicle stem cell activation & shedding reduction.'}
+                              {sec.id === 'clinical-evidence' && 'Peer-reviewed evidence, molecular mechanisms, and cellular endpoints.'}
+                              {sec.id === 'inci-dossier' && `Full declared pharmacopoeial breakdown (${ingredients.length} ingredients) per EU 1223/2009.`}
+                              {sec.id === 'application-protocol' && 'Standardized clinical application protocol, contact times, and biological infogram.'}
+                              {sec.id === 'technical-specs' && 'Physicochemical parameters, pH range, and stability profile.'}
+                              {sec.id === 'clinical-protocols' && 'Synergistic protocol integration and adjunct recommendations.'}
+                              {sec.id === 'safety' && 'Clinical safety, contraindications, and ICDRG patch test protocol.'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.76rem', fontWeight: 700, color: '#003666', flexShrink: 0 }}>
+                          <span>{lang === 'es' ? 'Explorar' : 'Explore'}</span>
+                          <ChevronRight size={14} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div style={{
+                  padding: '0.75rem 1rem',
+                  background: '#f8fafc',
+                  borderRadius: '6px',
+                  border: '1px solid #e2e8f0',
+                  fontSize: '0.72rem',
+                  color: '#64748b',
+                  lineHeight: 1.55,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <ShieldCheck size={16} style={{ color: '#16a34a', flexShrink: 0 }} />
+                  <span>
+                    <strong>EU Cosmetics Regulation 1223/2009 & ISO 22716 GMP:</strong> All formula documentation, active concentrations, and stability data are verified and registered in the European CPNP. Select any individual section from the Table of Contents on the right to examine specific pharmacopoeial monographs.
+                  </span>
+                </div>
+              </PublicSectionCard>
+            )}
+
+            {/* SINGLE SECTION GCP NAVIGATION HEADER (SHOWN WHEN A SPECIFIC SECTION IS SELECTED) */}
+            {effectiveActiveSection !== 'overview' && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 14px',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                flexWrap: 'wrap',
+                gap: '10px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSection('overview')}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '5px 10px',
+                      borderRadius: '6px',
+                      background: '#f8fafc',
+                      border: '1px solid #cbd5e1',
+                      color: '#003666',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <ArrowLeft size={13} />
+                    <span>{lang === 'es' ? 'Volver al Inicio (Overview)' : 'Back to Overview'}</span>
+                  </button>
+                  <span style={{ color: '#cbd5e1' }}>/</span>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
+                    {tocSections.find(s => s.id === effectiveActiveSection)?.label || effectiveActiveSection}
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: '#0d9488',
+                  background: '#f0fdfa',
+                  padding: '3px 9px',
+                  borderRadius: '99px',
+                  border: '1px solid #ccfbf1'
+                }}>
+                  {lang === 'es' ? 'Sección' : 'Section'} {tocSections.findIndex(s => s.id === effectiveActiveSection) + 1} / {tocSections.length}
+                </span>
+              </div>
+            )}
+
             {/* BAICAPIL 2% & STEM CELL ACTIVATION TECHNICAL MONOGRAPH (PHOTO + DOWNLOADABLE PDF + CLINICAL METRICS) - ONLY FOR HAIR PRODUCTS */}
-            {isHairProduct && (
+            {effectiveActiveSection === 'stem-cell-monograph' && isHairProduct && (
               <div id="stem-cell-monograph" style={{ scrollMarginTop: '80px' }}>
                 <ColwayTrichologyStemCellShowcase lang={lang} />
               </div>
             )}
 
             {/* CLINICAL EVIDENCE & MOLECULAR MECHANISMS */}
-            <PublicSectionCard 
-              id="clinical-evidence" 
-              icon={Activity} 
-              category="CLINICAL EFFICACY" 
-              title={isHairProduct ? "Evidence-Mapped Trichology & Follicular Research" : "Evidence-Mapped Dermocosmetic & Neocollagenesis Research"} 
-              badge="Peer-Reviewed Data" 
-              badgeVariant="teal"
-            >
-              <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.1rem' }}>
-                {isHairProduct
-                  ? 'Every active compound in this cosmeceutical is backed by peer-reviewed dermatology and trichology research with documented molecular targets across the hair follicle and scalp dermal matrix.'
-                  : 'Every bioactive compound in this formulation is backed by peer-reviewed dermatology research with documented molecular targets across the extracellular matrix, dermal fibroblasts, and epidermal barrier.'}
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
-                {(isHairProduct ? [
-                  { target: 'DHT Inhibition', compound: 'Scutellaria Baicalensis (Baicapil™ 2%)', mechanism: '5α-Reductase Blockade / Wnt Pathway', outcome: 'Suppresses follicular miniaturisation at dermal papilla and stimulates stem cell telogen-to-anagen transition.', stat: '−60.6% Hair Loss' },
-                  { target: 'Follicular Anchoring', compound: 'Phyllanthus Emblica (Kerascalp™)', mechanism: 'Collagen XVII Support / Melanogenesis', outcome: 'Strengthens dermal hair follicle anchors via Collagen XVII upregulation, preventing premature stem cell exhaustion and graying.', stat: '+5.6% Thickness' },
-                  { target: 'Tensile Strength', compound: 'Equisetum Bio-Silica & Phytokeratin', mechanism: 'Bioavailable Orthosilicic Acid & Cuticle Sealing', outcome: 'Supplies bio-silica and wheat protein amino peptides for cortical disulfide bonding, repairing microfractures.', stat: '+24% Fiber Strength' },
-                  { target: 'Microvascular Flow', compound: 'L-Arginine & Osmoprotective Betaine', mechanism: 'Nitric Oxide Vasodilation & Osmolyte Delivery', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to actively dividing anagen matrix cells.', stat: '+21% Density' },
-                  { target: 'Cuticular Sealing', compound: 'Hydrafeel® 3 (Polyglyceryl-3 PCA)', mechanism: 'Hydrophobic Moisture Barrier / Lipid Film', outcome: 'Repairs lipid bilayer of the hair fiber, locking moisture inside cortex while shielding against thermal and UV oxidation.', stat: '−47% Combing Force' },
-                ] : [
-                  { target: 'Fibroblast Neo-Collagenesis', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Intact Triple Helix Extracellular Scaffolding', outcome: 'Stimulates human dermal fibroblasts to multiply endogenous Type I and Type III pro-collagen synthesis.', stat: '+38% Dermal Density' },
-                  { target: 'Cellular Penetration', compound: 'VEP Bio-Peptide Complexes', mechanism: 'Vesicular Epidermal Penetration Enhancers', outcome: 'Transfers active signaling oligopeptides through the stratum corneum barrier down to the basal dermal-epidermal junction.', stat: '3.4× Bioavailability' },
-                  { target: 'Micro-Exfoliation', compound: 'Diamond Dust & Enzymatic Keratolysis', mechanism: 'Micro-Crystalline Resurfacing & Cell Turnover', outcome: 'Gentle physical and enzymatic shedding of senescent corneocytes, revealing oxygenated, radiant dermal tissue.', stat: '−28% Wrinkle Depth' },
-                  { target: 'Epidermal Barrier Shield', compound: 'Fucus Vesiculosus & Bio-Lipids', mechanism: 'Hyaluronic Synthesis & Transepidermal Moisture Lock', outcome: 'Supplies trace marine bio-minerals and protective lipophilic film, halting trans-epidermal water loss (TEWL).', stat: '+42% Hydration (72h)' }
-                ]).map(item => (
-                  <div
-                    key={item.target}
-                    style={{
-                      padding: '0.95rem 1.25rem',
-                      background: '#ffffff',
-                      borderRadius: '10px',
-                      border: '1px solid #e2e8f0',
-                      boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '6px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {effectiveActiveSection === 'clinical-evidence' && (
+              <PublicSectionCard 
+                id="clinical-evidence" 
+                icon={Activity} 
+                category="CLINICAL EFFICACY" 
+                title={isHairProduct ? "Evidence-Mapped Trichology & Follicular Research" : "Evidence-Mapped Dermocosmetic & Neocollagenesis Research"} 
+                badge="Peer-Reviewed Data" 
+                badgeVariant="teal"
+              >
+                <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.1rem' }}>
+                  {isHairProduct
+                    ? 'Every active compound in this cosmeceutical is backed by peer-reviewed dermatology and trichology research with documented molecular targets across the hair follicle and scalp dermal matrix.'
+                    : 'Every bioactive compound in this formulation is backed by peer-reviewed dermatology research with documented molecular targets across the extracellular matrix, dermal fibroblasts, and epidermal barrier.'}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+                  {(isHairProduct ? [
+                    { target: 'DHT Inhibition', compound: 'Scutellaria Baicalensis (Baicapil™ 2%)', mechanism: '5α-Reductase Blockade / Wnt Pathway', outcome: 'Suppresses follicular miniaturisation at dermal papilla and stimulates stem cell telogen-to-anagen transition.', stat: '−60.6% Hair Loss' },
+                    { target: 'Follicular Anchoring', compound: 'Phyllanthus Emblica (Kerascalp™)', mechanism: 'Collagen XVII Support / Melanogenesis', outcome: 'Strengthens dermal hair follicle anchors via Collagen XVII upregulation, preventing premature stem cell exhaustion and graying.', stat: '+5.6% Thickness' },
+                    { target: 'Tensile Strength', compound: 'Equisetum Bio-Silica & Phytokeratin', mechanism: 'Bioavailable Orthosilicic Acid & Cuticle Sealing', outcome: 'Supplies bio-silica and wheat protein amino peptides for cortical disulfide bonding, repairing microfractures.', stat: '+24% Fiber Strength' },
+                    { target: 'Microvascular Flow', compound: 'L-Arginine & Osmoprotective Betaine', mechanism: 'Nitric Oxide Vasodilation & Osmolyte Delivery', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to actively dividing anagen matrix cells.', stat: '+21% Density' },
+                    { target: 'Cuticular Sealing', compound: 'Hydrafeel® 3 (Polyglyceryl-3 PCA)', mechanism: 'Hydrophobic Moisture Barrier / Lipid Film', outcome: 'Repairs lipid bilayer of the hair fiber, locking moisture inside cortex while shielding against thermal and UV oxidation.', stat: '−47% Combing Force' },
+                  ] : [
+                    { target: 'Fibroblast Neo-Collagenesis', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Intact Triple Helix Extracellular Scaffolding', outcome: 'Stimulates human dermal fibroblasts to multiply endogenous Type I and Type III pro-collagen synthesis.', stat: '+38% Dermal Density' },
+                    { target: 'Cellular Penetration', compound: 'VEP Bio-Peptide Complexes', mechanism: 'Vesicular Epidermal Penetration Enhancers', outcome: 'Transfers active signaling oligopeptides through the stratum corneum barrier down to the basal dermal-epidermal junction.', stat: '3.4× Bioavailability' },
+                    { target: 'Micro-Exfoliation', compound: 'Diamond Dust & Enzymatic Keratolysis', mechanism: 'Micro-Crystalline Resurfacing & Cell Turnover', outcome: 'Gentle physical and enzymatic shedding of senescent corneocytes, revealing oxygenated, radiant dermal tissue.', stat: '−28% Wrinkle Depth' },
+                    { target: 'Epidermal Barrier Shield', compound: 'Fucus Vesiculosus & Bio-Lipids', mechanism: 'Hyaluronic Synthesis & Transepidermal Moisture Lock', outcome: 'Supplies trace marine bio-minerals and protective lipophilic film, halting trans-epidermal water loss (TEWL).', stat: '+42% Hydration (72h)' }
+                  ]).map(item => (
+                    <div
+                      key={item.target}
+                      style={{
+                        padding: '0.95rem 1.25rem',
+                        background: '#ffffff',
+                        borderRadius: '10px',
+                        border: '1px solid #e2e8f0',
+                        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '6px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{
+                            fontSize: '0.65rem',
+                            fontWeight: 800,
+                            color: '#0d9488',
+                            letterSpacing: '0.05em',
+                            background: '#f0fdfa',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            border: '1px solid #ccfbf1'
+                          }}>
+                            {item.target.toUpperCase()}
+                          </span>
+                          <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                            {item.compound}
+                          </span>
+                        </div>
                         <span style={{
-                          fontSize: '0.65rem',
+                          fontSize: '0.72rem',
                           fontWeight: 800,
-                          color: '#0d9488',
-                          letterSpacing: '0.05em',
-                          background: '#f0fdfa',
+                          color: '#16a34a',
+                          background: '#f0fdf4',
                           padding: '2px 8px',
                           borderRadius: '4px',
-                          border: '1px solid #ccfbf1'
+                          border: '1px solid #bbf7d0'
                         }}>
-                          {item.target.toUpperCase()}
-                        </span>
-                        <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
-                          {item.compound}
+                          {item.stat}
                         </span>
                       </div>
-                      <span style={{
-                        fontSize: '0.72rem',
-                        fontWeight: 800,
-                        color: '#16a34a',
-                        background: '#f0fdf4',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        border: '1px solid #bbf7d0'
-                      }}>
-                        {item.stat}
-                      </span>
+                      <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
+                        <span style={{ color: '#475569' }}>Mechanism:</span> {item.mechanism}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>
+                        {item.outcome}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
-                      <span style={{ color: '#475569' }}>Mechanism:</span> {item.mechanism}
-                    </div>
-                    <div style={{ fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>
-                      {item.outcome}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </PublicSectionCard>
+                  ))}
+                </div>
+              </PublicSectionCard>
+            )}
 
             {/* INCI DOSSIER */}
-            <PublicSectionCard id="inci-dossier" icon={Microscope} category="INGREDIENT DOSSIER" title="Full INCI Composition & Pharmacopoeial Breakdown" badge={`${ingredients.length} Declared Ingredients`} badgeVariant="green">
+            {effectiveActiveSection === 'inci-dossier' && (
+              <PublicSectionCard id="inci-dossier" icon={Microscope} category="INGREDIENT DOSSIER" title="Full INCI Composition & Pharmacopoeial Breakdown" badge={`${ingredients.length} Declared Ingredients`} badgeVariant="green">
               <p style={{ fontSize: '0.81rem', color: '#64748b', marginBottom: '0.85rem', lineHeight: 1.6 }}>
                 Official International Nomenclature of Cosmetic Ingredients (INCI) declaration complying with Article 19(1)(g) of EU Cosmetics Regulation 1223/2009. Listed in descending concentration order (w/w). Features <strong>Baicapil™ (2%), Kerascalp™ (Amla), Hydrafeel® 3, and Field Horsetail Bio-Silica</strong>.
               </p>
@@ -1408,179 +1628,198 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                 <strong style={{ color: '#475569' }}>EU Regulatory Notice:</strong> Full INCI declared per Article 19(1)(g) of EU Cosmetics Regulation 1223/2009. CPNP notified. Allergens at ≥0.001% (rinse-off) / ≥0.0001% (leave-on) individually declared.
               </div>
             </PublicSectionCard>
+            )}
 
             {/* APPLICATION PROTOCOL & INFOGRAM */}
-            <PublicSectionCard
-              id="application-protocol"
-              icon={ClipboardList}
-              category="CLINICAL USAGE & MECHANISM"
-              title={isHairProduct ? "Professional Application Protocol & Biological Infogram" : "Professional Application Protocol"}
-              badge={effectiveProtocol.frequency || (isHairProduct ? '3–4× Weekly' : 'Twice Daily')}
-              badgeVariant="teal"
-            >
-              <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                {isHairProduct
-                  ? 'Standardized trichological protocol developed for clinical application, mesotherapy recovery, and long-term hair follicle restoration. Interactive biological infogram details active transdermal diffusion down the follicular canal and structural cuticular biosealing.'
-                  : 'Standardized dermocosmetic protocol developed for clinical application, barrier reconstruction, and enhanced cellular bioavailability of active peptides across the dermal-epidermal junction.'}
-              </p>
+            {effectiveActiveSection === 'application-protocol' && (
+              <PublicSectionCard
+                id="application-protocol"
+                icon={ClipboardList}
+                category="CLINICAL USAGE & MECHANISM"
+                title={isHairProduct ? "Professional Application Protocol & Biological Infogram" : "Professional Application Protocol"}
+                badge={effectiveProtocol.frequency || (isHairProduct ? '3–4× Weekly' : 'Twice Daily')}
+                badgeVariant="teal"
+              >
+                <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+                  {isHairProduct
+                    ? 'Standardized trichological protocol developed for clinical application, mesotherapy recovery, and long-term hair follicle restoration. Interactive biological infogram details active transdermal diffusion down the follicular canal and structural cuticular biosealing.'
+                    : 'Standardized dermocosmetic protocol developed for clinical application, barrier reconstruction, and enhanced cellular bioavailability of active peptides across the dermal-epidermal junction.'}
+                </p>
 
-              {/* Interactive Visual Biological Trichology Infogram ONLY for Hair Products */}
-              {isHairProduct && (
-                <ColwayProtocolInfogram
-                  currentProduct={isShampoo ? 'shampoo' : 'conditioner'}
-                  lang={lang}
-                />
-              )}
+                {/* Interactive Visual Biological Trichology Infogram ONLY for Hair Products */}
+                {isHairProduct && (
+                  <ColwayProtocolInfogram
+                    currentProduct={isShampoo ? 'shampoo' : 'conditioner'}
+                    lang={lang}
+                  />
+                )}
 
-              {/* Treatment Frequency & Cycle Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
-                <div style={{ padding: '0.7rem 0.9rem', background: '#f0fdfa', borderRadius: '8px', border: '1px solid #99f6e4' }}>
-                  <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#0d9488', marginBottom: '2px' }}>CLINICAL FREQUENCY</div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{effectiveProtocol.frequency}</div>
-                </div>
-                <div style={{ padding: '0.7rem 0.9rem', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
-                  <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#2563eb', marginBottom: '2px' }}>TREATMENT CYCLE DURATION</div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{effectiveProtocol.duration_of_use}</div>
-                </div>
-              </div>
-
-              {/* Step-by-Step Clinical Workflow */}
-              <div style={{ marginBottom: '1rem' }}>
-                <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ListChecks size={16} color="#0d9488" />
-                  <span>Sequential Clinical Steps ({isHairProduct ? (isShampoo ? 'Scalp Focus' : 'Fiber Focus') : 'Facial & Cutaneous Application'})</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {(effectiveProtocol.steps || []).map((step, i) => (
-                    <ApplicationStep key={step.step || i} step={step} isLast={i === (effectiveProtocol.steps.length - 1)} />
-                  ))}
-                </div>
-              </div>
-
-              {/* Clinical Notes */}
-              {effectiveProtocol.professional_notes?.length > 0 && (
-                <div style={{ marginTop: '1.25rem', padding: '0.85rem 1rem', background: 'linear-gradient(135deg, #0f172a, #1e3a5f)', borderRadius: '10px' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
-                    {isHairProduct ? 'PROFESSIONAL / TRICHOLOGIST NOTES' : 'CLINICAL / DERMATOLOGIST NOTES'}
+                {/* Treatment Frequency & Cycle Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                  <div style={{ padding: '0.7rem 0.9rem', background: '#f0fdfa', borderRadius: '8px', border: '1px solid #99f6e4' }}>
+                    <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#0d9488', marginBottom: '2px' }}>CLINICAL FREQUENCY</div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{effectiveProtocol.frequency}</div>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {effectiveProtocol.professional_notes.map((note, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                        <CheckCircle2 size={12} style={{ color: '#0d9488', flexShrink: 0, marginTop: '2px' }} />
-                        <span style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: 1.5 }}>{note}</span>
-                      </div>
+                  <div style={{ padding: '0.7rem 0.9rem', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                    <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#2563eb', marginBottom: '2px' }}>TREATMENT CYCLE DURATION</div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{effectiveProtocol.duration_of_use}</div>
+                  </div>
+                </div>
+
+                {/* Step-by-Step Clinical Workflow */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ListChecks size={16} color="#0d9488" />
+                    <span>Sequential Clinical Steps ({isHairProduct ? (isShampoo ? 'Scalp Focus' : 'Fiber Focus') : 'Facial & Cutaneous Application'})</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {(effectiveProtocol.steps || []).map((step, i) => (
+                      <ApplicationStep key={step.step || i} step={step} isLast={i === (effectiveProtocol.steps.length - 1)} />
                     ))}
                   </div>
                 </div>
-              )}
-            </PublicSectionCard>
+
+                {/* Clinical Notes */}
+                {effectiveProtocol.professional_notes?.length > 0 && (
+                  <div style={{ marginTop: '1.25rem', padding: '0.85rem 1rem', background: 'linear-gradient(135deg, #0f172a, #1e3a5f)', borderRadius: '10px' }}>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
+                      {isHairProduct ? 'PROFESSIONAL / TRICHOLOGIST NOTES' : 'CLINICAL / DERMATOLOGIST NOTES'}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {effectiveProtocol.professional_notes.map((note, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                          <CheckCircle2 size={12} style={{ color: '#0d9488', flexShrink: 0, marginTop: '2px' }} />
+                          <span style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: 1.5 }}>{note}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </PublicSectionCard>
+            )}
 
             {/* TECHNICAL SPECS */}
-            <PublicSectionCard id="technical-specs" icon={Beaker} category="TECHNICAL DOSSIER" title="Formulation Technical Specifications">
-              <TechSpecsGrid specs={technicalSpecs} />
-              {!technicalSpecs && <p style={{ fontSize: '0.82rem', color: '#64748b' }}>Technical specifications available on request. Contact Atlas Health distribution for the full cosmetic safety assessment dossier.</p>}
-            </PublicSectionCard>
+            {effectiveActiveSection === 'technical-specs' && (
+              <PublicSectionCard id="technical-specs" icon={Beaker} category="TECHNICAL DOSSIER" title="Formulation Technical Specifications">
+                <TechSpecsGrid specs={technicalSpecs} />
+                {!technicalSpecs && <p style={{ fontSize: '0.82rem', color: '#64748b' }}>Technical specifications available on request. Contact Atlas Health distribution for the full cosmetic safety assessment dossier.</p>}
+              </PublicSectionCard>
+            )}
 
             {/* CLINICAL PROTOCOLS */}
-            <PublicSectionCard
-              id="clinical-protocols"
-              icon={isHairProduct ? Scissors : Sparkles}
-              category="CLINICAL INTEGRATION"
-              title={isHairProduct ? "Hair Restoration Protocols — Integration" : "Clinical Skin Rejuvenation Protocols — Integration"}
-              badge={hairProtocols.length > 0 ? `${hairProtocols.length} Protocols` : undefined}
-              badgeVariant="teal"
-            >
-              <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '1.25rem', lineHeight: 1.6 }}>
-                {isHairProduct
-                  ? 'This cosmeceutical is recommended as a topical adjunct in clinically validated hair loss protocols. Works synergistically with mesotherapy-administered peptides (GHK-Cu, PTD-DBM) to reinforce the follicular microenvironment at the scalp surface.'
-                  : 'This advanced cosmeceutical is recommended as a topical regenerative layer in clinically validated skin renewal protocols, enhancing pro-collagen transcription and safeguarding the epidermal barrier.'}
-              </p>
-              {(hairProtocols.length > 0 ? hairProtocols : (isHairProduct ? [
-                { slug: 'colway-hair-restoration', isPrimary: true, name: 'Colway Hair Restoration System', category: 'Trichology', duration: '16 Weeks', integration_role: 'Applied 3–4×/wk to reinforce follicular anchoring and maintain optimal scalp pH throughout the protocol.', synergy_score: 99 },
-                { slug: 'ghk-cu-scalp-follicular-support', name: 'GHK-Cu Scalp & Follicular Support Protocol', category: 'Hair Regeneration', duration: '12 Weeks', integration_role: 'Works synergistically with mesotherapy peptides to reinforce the follicular microenvironment.', synergy_score: 94 }
-              ] : [
-                { slug: 'colway-dermo-renewal', isPrimary: true, name: 'Colway Dermo-Renewal Ritual', category: 'Cellular Skincare', duration: '12 Weeks', integration_role: 'Primary morning and evening regenerative emulsion maintaining barrier integrity and cellular turnover.', synergy_score: 98 },
-                { slug: 'skin_001', name: 'GHK-Cu Skin Rejuvenation Protocol', category: 'Aesthetic Medicine', duration: '8–12 Weeks', integration_role: 'Topical barrier rebuild layer supporting subcutaneous/mesotherapy GHK-Cu pro-collagen induction.', synergy_score: 95 }
-              ])).map(p => {
-                const score = p.synergy_score || 80;
-                const scoreColor = score >= 90 ? '#16a34a' : score >= 75 ? '#0d9488' : '#d97706';
-                return (
-                  <div key={p.slug} style={{ border: `1px solid ${p.isPrimary ? '#99f6e4' : '#e2e8f0'}`, borderRadius: '12px', overflow: 'hidden', marginBottom: '0.85rem', background: p.isPrimary ? '#f0fdfa' : '#ffffff' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0.9rem 1rem', borderBottom: `1px solid ${p.isPrimary ? '#ccfbf1' : '#f1f5f9'}` }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: '8px', background: p.isPrimary ? '#ccfbf1' : '#f1f5f9', color: p.isPrimary ? '#0d9488' : '#64748b', flexShrink: 0 }}><FlaskConical size={16} /></div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '2px' }}>
-                          {p.isPrimary && <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#0f766e', background: '#ccfbf1', padding: '1px 7px', borderRadius: '99px' }}>★ PRIMARY</span>}
-                          <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>{p.category}</span>
-                          <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>· {p.duration}</span>
+            {effectiveActiveSection === 'clinical-protocols' && (
+              <PublicSectionCard
+                id="clinical-protocols"
+                icon={isHairProduct ? Scissors : Sparkles}
+                category="CLINICAL INTEGRATION"
+                title={isHairProduct ? "Hair Restoration Protocols — Integration" : "Clinical Skin Rejuvenation Protocols — Integration"}
+                badge={hairProtocols.length > 0 ? `${hairProtocols.length} Protocols` : undefined}
+                badgeVariant="teal"
+              >
+                <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+                  {isHairProduct
+                    ? 'This cosmeceutical is recommended as a topical adjunct in clinically validated hair loss protocols. Works synergistically with mesotherapy-administered peptides (GHK-Cu, PTD-DBM) to reinforce the follicular microenvironment at the scalp surface.'
+                    : 'This advanced cosmeceutical is recommended as a topical regenerative layer in clinically validated skin renewal protocols, enhancing pro-collagen transcription and safeguarding the epidermal barrier.'}
+                </p>
+                {(hairProtocols.length > 0 ? hairProtocols : (isHairProduct ? [
+                  { slug: 'colway-hair-restoration', isPrimary: true, name: 'Colway Hair Restoration System', category: 'Trichology', duration: '16 Weeks', integration_role: 'Applied 3–4×/wk to reinforce follicular anchoring and maintain optimal scalp pH throughout the protocol.', synergy_score: 99 },
+                  { slug: 'ghk-cu-scalp-follicular-support', name: 'GHK-Cu Scalp & Follicular Support Protocol', category: 'Hair Regeneration', duration: '12 Weeks', integration_role: 'Works synergistically with mesotherapy peptides to reinforce the follicular microenvironment.', synergy_score: 94 }
+                ] : [
+                  { slug: 'colway-dermo-renewal', isPrimary: true, name: 'Colway Dermo-Renewal Ritual', category: 'Cellular Skincare', duration: '12 Weeks', integration_role: 'Primary morning and evening regenerative emulsion maintaining barrier integrity and cellular turnover.', synergy_score: 98 },
+                  { slug: 'skin_001', name: 'GHK-Cu Skin Rejuvenation Protocol', category: 'Aesthetic Medicine', duration: '8–12 Weeks', integration_role: 'Topical barrier rebuild layer supporting subcutaneous/mesotherapy GHK-Cu pro-collagen induction.', synergy_score: 95 }
+                ])).map(p => {
+                  const score = p.synergy_score || 80;
+                  const scoreColor = score >= 90 ? '#16a34a' : score >= 75 ? '#0d9488' : '#d97706';
+                  return (
+                    <div key={p.slug} style={{ border: `1px solid ${p.isPrimary ? '#99f6e4' : '#e2e8f0'}`, borderRadius: '12px', overflow: 'hidden', marginBottom: '0.85rem', background: p.isPrimary ? '#f0fdfa' : '#ffffff' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0.9rem 1rem', borderBottom: `1px solid ${p.isPrimary ? '#ccfbf1' : '#f1f5f9'}` }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: '8px', background: p.isPrimary ? '#ccfbf1' : '#f1f5f9', color: p.isPrimary ? '#0d9488' : '#64748b', flexShrink: 0 }}><FlaskConical size={16} /></div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                            {p.isPrimary && <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#0f766e', background: '#ccfbf1', padding: '1px 7px', borderRadius: '99px' }}>★ PRIMARY</span>}
+                            <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>{p.category}</span>
+                            <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>· {p.duration}</span>
+                          </div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>{p.name}</div>
                         </div>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>{p.name}</div>
+                        <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                          <div style={{ fontSize: '1.1rem', fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{score}</div>
+                          <div style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: 600 }}>SYNERGY</div>
+                        </div>
                       </div>
-                      <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                        <div style={{ fontSize: '1.1rem', fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{score}</div>
-                        <div style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: 600 }}>SYNERGY</div>
+                      {p.integration_role && <div style={{ padding: '0.65rem 1rem', display: 'flex', gap: '8px' }}><Info size={13} style={{ color: '#0d9488', flexShrink: 0, marginTop: '2px' }} /><p style={{ margin: 0, fontSize: '0.75rem', color: '#475569', lineHeight: 1.55 }}><strong>Integration:</strong> {p.integration_role}</p></div>}
+                      <div style={{ padding: '0 1rem 0.75rem' }}>
+                        <Link href={`/proto/${p.slug}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: 700, color: '#0d9488', textDecoration: 'none' }}>View Protocol <ChevronRight size={12} /></Link>
                       </div>
                     </div>
-                    {p.integration_role && <div style={{ padding: '0.65rem 1rem', display: 'flex', gap: '8px' }}><Info size={13} style={{ color: '#0d9488', flexShrink: 0, marginTop: '2px' }} /><p style={{ margin: 0, fontSize: '0.75rem', color: '#475569', lineHeight: 1.55 }}><strong>Integration:</strong> {p.integration_role}</p></div>}
-                    <div style={{ padding: '0 1rem 0.75rem' }}>
-                      <Link href={`/proto/${p.slug}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: 700, color: '#0d9488', textDecoration: 'none' }}>View Protocol <ChevronRight size={12} /></Link>
+                  );
+                })}
+                <div style={{ marginTop: '0.75rem', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: '12px', padding: '1.1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', marginBottom: '0.3rem', letterSpacing: '0.05em' }}>
+                      {isHairProduct ? 'COMPLETE THE COLWAY TRICHOLOGY SYSTEM' : 'COMPLETE THE COLWAY DERMO-RENEWAL RITUAL'}
+                    </div>
+                    <div style={{ fontSize: '0.93rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.25rem' }}>
+                      {isHairProduct
+                        ? (isShampoo ? 'Strengthening Conditioner' : 'Strengthening Shampoo')
+                        : (slug.includes('cream') ? 'Blue Diamond Peeling' : 'Blue Diamond Cream')}
+                    </div>
+                    <div style={{ fontSize: '0.73rem', color: '#94a3b8' }}>
+                      {isHairProduct
+                        ? 'Use both 3–4×/week for maximum follicular synergy'
+                        : (slug.includes('cream')
+                            ? 'Enzymatic & diamond micro-exfoliation to maximize VEP-peptide cream penetration'
+                            : 'Bioactive tropocollagen & VEP-peptide cream to restore extracellular matrix density')}
                     </div>
                   </div>
-                );
-              })}
-              <div style={{ marginTop: '0.75rem', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: '12px', padding: '1.1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', marginBottom: '0.3rem', letterSpacing: '0.05em' }}>
-                    {isHairProduct ? 'COMPLETE THE COLWAY TRICHOLOGY SYSTEM' : 'COMPLETE THE COLWAY DERMO-RENEWAL RITUAL'}
-                  </div>
-                  <div style={{ fontSize: '0.93rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.25rem' }}>
-                    {isHairProduct
-                      ? (isShampoo ? 'Strengthening Conditioner' : 'Strengthening Shampoo')
-                      : (slug.includes('cream') ? 'Blue Diamond Peeling' : 'Blue Diamond Cream')}
-                  </div>
-                  <div style={{ fontSize: '0.73rem', color: '#94a3b8' }}>
-                    {isHairProduct
-                      ? 'Use both 3–4×/week for maximum follicular synergy'
-                      : (slug.includes('cream')
-                          ? 'Enzymatic & diamond micro-exfoliation to maximize VEP-peptide cream penetration'
-                          : 'Bioactive tropocollagen & VEP-peptide cream to restore extracellular matrix density')}
-                  </div>
+                  <Link
+                    href={`/p/${isHairProduct ? (isShampoo ? 'colway-strengthening-conditioner' : 'colway-strengthening-shampoo') : (slug.includes('cream') ? 'colway-blue-diamond-peeling' : 'colway-blue-diamond-cream')}`}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', background: '#0d9488', color: '#fff', fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}
+                  >
+                    View Product <ChevronRight size={13} />
+                  </Link>
                 </div>
-                <Link
-                  href={`/p/${isHairProduct ? (isShampoo ? 'colway-strengthening-conditioner' : 'colway-strengthening-shampoo') : (slug.includes('cream') ? 'colway-blue-diamond-peeling' : 'colway-blue-diamond-cream')}`}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', background: '#0d9488', color: '#fff', fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}
-                >
-                  View Product <ChevronRight size={13} />
-                </Link>
-              </div>
-            </PublicSectionCard>
+              </PublicSectionCard>
+            )}
 
             {/* SAFETY */}
-            <PublicSectionCard id="safety" icon={AlertTriangle} category="SAFETY & PRECAUTIONS" title="Clinical Safety, Contraindications & Patch Testing">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {(warnings.length > 0 ? warnings : [
-                  'For external use only. Avoid contact with eyes; rinse immediately with water if contact occurs.',
-                  'Perform a 48-hour patch test prior to first use: apply to inner forearm, leave 24h, read at 48h and 72h.',
-                  'Not recommended on damaged scalp with open lesions, active dermatitis, or psoriatic plaques without prior dermatological consultation.',
-                  'Keep out of reach of children under 3 years.',
-                  'Individuals with known sensitivity to any listed INCI component should consult a dermatologist before use.',
-                ]).map((w, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                    <AlertTriangle size={13} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
-                    <span style={{ fontSize: '0.78rem', color: '#374151', lineHeight: 1.55 }}>{typeof w === 'string' ? w : w.text}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{ marginTop: '1rem', padding: '0.85rem 1rem', background: '#fffbeb', borderRadius: '8px', border: '1px solid #fde68a' }}>
-                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#d97706', marginBottom: '0.4rem', letterSpacing: '0.04em' }}>DERMATOLOGICAL PATCH TEST PROTOCOL (ICDRG)</div>
-                {['Apply 0.05 mL to Finn Chamber or inner forearm (2×2 cm area).', 'Occlude for 48 hours. Do not wash test area.', 'Read results at 48h and 72h (or 96h if delayed reaction suspected).', 'Score per ICDRG scale: 0 (negative) → 3+ (strong positive). ICDRG ≥1+: contraindicated.'].map((pt, i) => (
-                  <div key={i} style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', marginBottom: '3px' }}>
-                    <span style={{ fontSize: '0.67rem', fontWeight: 800, color: '#d97706', flexShrink: 0 }}>{i + 1}.</span>
-                    <span style={{ fontSize: '0.72rem', color: '#92400e', lineHeight: 1.5 }}>{pt}</span>
-                  </div>
-                ))}
-              </div>
-            </PublicSectionCard>
+            {effectiveActiveSection === 'safety' && (
+              <PublicSectionCard id="safety" icon={AlertTriangle} category="SAFETY & PRECAUTIONS" title="Clinical Safety, Contraindications & Patch Testing">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {(warnings.length > 0 ? warnings : [
+                    'For external use only. Avoid contact with eyes; rinse immediately with water if contact occurs.',
+                    'Perform a 48-hour patch test prior to first use: apply to inner forearm, leave 24h, read at 48h and 72h.',
+                    'Not recommended on damaged scalp with open lesions, active dermatitis, or psoriatic plaques without prior dermatological consultation.',
+                    'Keep out of reach of children under 3 years.',
+                    'Individuals with known sensitivity to any listed INCI component should consult a dermatologist before use.',
+                  ]).map((w, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                      <AlertTriangle size={13} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
+                      <span style={{ fontSize: '0.78rem', color: '#374151', lineHeight: 1.55 }}>{typeof w === 'string' ? w : w.text}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: '1rem', padding: '0.85rem 1rem', background: '#fffbeb', borderRadius: '8px', border: '1px solid #fde68a' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#d97706', marginBottom: '0.4rem', letterSpacing: '0.04em' }}>DERMATOLOGICAL PATCH TEST PROTOCOL (ICDRG)</div>
+                  {['Apply 0.05 mL to Finn Chamber or inner forearm (2×2 cm area).', 'Occlude for 48 hours. Do not wash test area.', 'Read results at 48h and 72h (or 96h if delayed reaction suspected).', 'Score per ICDRG scale: 0 (negative) → 3+ (strong positive). ICDRG ≥1+: contraindicated.'].map((pt, i) => (
+                    <div key={i} style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', marginBottom: '3px' }}>
+                      <span style={{ fontSize: '0.67rem', fontWeight: 800, color: '#d97706', flexShrink: 0 }}>{i + 1}.</span>
+                      <span style={{ fontSize: '0.72rem', color: '#92400e', lineHeight: 1.5 }}>{pt}</span>
+                    </div>
+                  ))}
+                </div>
+              </PublicSectionCard>
+            )}
+
+            {/* Bottom section navigation */}
+            {effectiveActiveSection !== 'overview' && (
+              <ProductSectionFooterNav
+                activeSection={effectiveActiveSection}
+                sections={tocSections}
+                onSelectSection={handleSelectSection}
+                lang={lang}
+              />
+            )}
 
             <footer style={{ marginTop: '1.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.25rem', fontSize: '0.7rem', color: '#94a3b8', lineHeight: 1.5 }}>
               <p style={{ margin: '0 0 0.35rem 0' }}>
@@ -1597,9 +1836,11 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
           <PublicDatasheetTableOfContents
             sections={tocSections}
             lang={lang}
-            title="ON THIS PAGE"
+            title={lang === 'es' ? 'EN ESTA PÁGINA' : 'ON THIS PAGE'}
             hideFloatingTrigger={true}
             currentProductSlug={slug}
+            activeSection={effectiveActiveSection}
+            onSelectSection={handleSelectSection}
           >
             {/* COLWAY CLINICAL PURITY WIDGET */}
             <CosmeticsSidebarWidget

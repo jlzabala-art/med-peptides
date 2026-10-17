@@ -25,16 +25,48 @@ export default function SharedCatalogProductListRow({
 }) {
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
 
-  const isProductPeptide = React.useMemo(() => {
-    if (!isPeptideCatalog) return false;
-    const cat = String(prod?.category || '').toLowerCase();
+  const isProductCosmetic = React.useMemo(() => {
+    const slug = String(prod?.slug || prod?.id || '').toLowerCase();
+    const cat = String(prod?.category || prod?.categoryId || '').toLowerCase();
     const type = String(prod?.productType || prod?.type || '').toLowerCase();
-    const slug = String(prod?.slug || '').toLowerCase();
-    if (cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('trichology') || cat.includes('nutricosmetic') || slug.startsWith('colway-') || prod?.supplierId === 'supplier-lotusland') {
-      return false;
-    }
-    return cat.includes('peptide') || type.includes('peptide') || prod?.isPeptide;
-  }, [prod, isPeptideCatalog]);
+    const name = String(prod?.canonicalName || prod?.name || prod?.title || '').toLowerCase();
+    const brand = String(prod?.brand || prod?.supplierId || '').toLowerCase();
+
+    // Colvita is a nutricosmetic/dietary supplement capsule, not topical cosmetic
+    if (slug.includes('colvita') || name.includes('colvita')) return false;
+
+    return (
+      Boolean(prod?.is_cosmetic) ||
+      Boolean(prod?.isCosmetic) ||
+      slug.startsWith('colway-') ||
+      brand.includes('colway') ||
+      cat === 'cosmetics' || cat === 'cosmetic' || cat.includes('skincare') || cat.includes('trichology') ||
+      type === 'cosmetic' || type === 'cosmetics' ||
+      name.includes('shampoo') || name.includes('conditioner') ||
+      name.includes('blue diamond') || name.includes('peeling') ||
+      name.includes('lip care') || name.includes('wash gel')
+    );
+  }, [prod]);
+
+  const isProductDiagnostic = React.useMemo(() => {
+    const slug = String(prod?.slug || prod?.id || '').toLowerCase();
+    const cat = String(prod?.category || '').toLowerCase();
+    const name = String(prod?.canonicalName || prod?.name || '').toLowerCase();
+    return (
+      slug.includes('eterna') || slug.includes('bloodo') ||
+      slug.includes('diagnostic') || cat.includes('diagnostic') ||
+      name.includes('epigenetic age') || name.includes('diagnostic test')
+    );
+  }, [prod]);
+
+  const isProductPeptide = React.useMemo(() => {
+    if (isProductCosmetic || isProductDiagnostic) return false;
+    const slug = String(prod?.slug || prod?.id || '').toLowerCase();
+    const type = String(prod?.productType || prod?.type || '').toLowerCase();
+    if (slug.includes('bacteriostatic') || slug.includes('bac-water') || type === 'solvent') return false;
+    if (slug.includes('colvita')) return false;
+    return true;
+  }, [isProductCosmetic, isProductDiagnostic, prod]);
 
   const fdaStatus = React.useMemo(() => isProductPeptide ? getFdaPeptideStatus(prod) : null, [prod, isProductPeptide]);
 
@@ -99,7 +131,7 @@ export default function SharedCatalogProductListRow({
                 </span>
               )}
 
-              {!isProductPeptide && (
+              {isProductCosmetic && (
                 <span
                   className="catalog-row-fda-badge"
                   title="Formally registered on the EU Cosmetic Products Notification Portal (EC No 1223/2009)"
@@ -121,6 +153,31 @@ export default function SharedCatalogProductListRow({
                 >
                   <span style={{ fontSize: '0.74rem', lineHeight: 1 }}>✓</span>
                   <span className="fda-badge-text">EU CPNP</span>
+                </span>
+              )}
+
+              {isProductDiagnostic && (
+                <span
+                  className="catalog-row-fda-badge"
+                  title="Validated Clinical Epigenetic Biomarker & Laboratory Diagnostic Panel"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    padding: '1.5px 6px',
+                    borderRadius: '4px',
+                    backgroundColor: '#eff6ff',
+                    color: '#2563eb',
+                    border: '1px solid #bfdbfe',
+                    lineHeight: 1.2,
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  <span style={{ fontSize: '0.74rem', lineHeight: 1 }}>🧬</span>
+                  <span className="fda-badge-text">CLIA / CAP</span>
                 </span>
               )}
 
@@ -153,10 +210,12 @@ export default function SharedCatalogProductListRow({
               target="_blank"
               rel="noopener noreferrer"
               className="catalog-row-monograph-btn"
-              title={isProductPeptide ? "Official Clinical Monograph" : "Product Dossier & Formulation Details"}
+              title={isProductPeptide ? "Official Clinical Monograph" : isProductDiagnostic ? "Validated Diagnostic Biomarker Sheet" : "Product Dossier & Formulation Details"}
             >
               <FileText size={13} />
-              <span className="monograph-btn-label">{isProductPeptide ? 'Monograph' : 'Product Sheet'}</span>
+              <span className="monograph-btn-label">
+                {isProductPeptide ? (t ? t('product.monograph', 'Monograph') : 'Monograph') : isProductDiagnostic ? 'Diagnostic' : 'Product Sheet'}
+              </span>
             </a>
 
             <button

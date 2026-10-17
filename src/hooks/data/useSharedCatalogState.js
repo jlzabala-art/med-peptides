@@ -93,6 +93,39 @@ export function resolveProductCanonicalGoals(product) {
     return ['supplies'];
   }
 
+  const cat = String(product.category || product.categoryId || '').toLowerCase();
+  const name = String(product.canonicalName || product.name || product.title || '').toLowerCase();
+  const slug = String(product.slug || product.id || '').toLowerCase();
+  const supp = String(product.supplierId || '').toLowerCase();
+
+  // 1. Trichology & Hair Products: strictly mapped to Trichology & Hair Restoration
+  const isHair =
+    cat.includes('trichology') || cat.includes('hair') ||
+    name.includes('shampoo') || name.includes('conditioner') || name.includes('hair') ||
+    name.includes('scalp') || slug.includes('shampoo') || slug.includes('conditioner');
+
+  if (isHair) {
+    return [GOAL_TYPES.HAIR_RESTORATION];
+  }
+
+  // 2. Colway & Cosmeceuticals / Dermal Care: strictly mapped to Dermal Care & Skin Regeneration
+  const isCosmeticOrDermal =
+    cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('nutricosmetic') ||
+    slug.startsWith('colway-') || supp.includes('colway') ||
+    name.includes('blue diamond') || slug.includes('blue-diamond') ||
+    name.includes('peeling') || slug.includes('peeling') ||
+    name.includes('lip care') || slug.includes('lip-care') ||
+    name.includes('wash gel') || slug.includes('wash-gel') ||
+    name.includes('collagen vege') || slug.includes('collagen-vege') ||
+    name.includes('colvita') || slug.includes('colvita');
+
+  if (isCosmeticOrDermal) {
+    if (slug.includes('colvita') || name.includes('colvita')) {
+      return [GOAL_TYPES.ANTI_AGING, GOAL_TYPES.SKIN_REGENERATION];
+    }
+    return [GOAL_TYPES.SKIN_REGENERATION];
+  }
+
   const goals = new Set();
   
   if (Array.isArray(product.canonicalGoals) && product.canonicalGoals.length > 0) {
@@ -130,24 +163,7 @@ export function resolveProductCanonicalGoals(product) {
     else if (norm.includes('immune') || norm.includes('health')) goals.add(GOAL_TYPES.GENERAL_HEALTH);
   }
   if (goals.size === 0) {
-    const cat = String(product.category || '').toLowerCase();
-    const name = String(product.canonicalName || product.name || product.title || '').toLowerCase();
-    const slug = String(product.slug || product.id || '').toLowerCase();
-
-    if (
-      cat.includes('trichology') || cat.includes('hair') ||
-      name.includes('shampoo') || name.includes('conditioner') || name.includes('hair') ||
-      name.includes('scalp') || slug.includes('shampoo') || slug.includes('conditioner')
-    ) {
-      goals.add(GOAL_TYPES.HAIR_RESTORATION);
-    } else if (
-      cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('nutricosmetic') ||
-      name.includes('collagen') || name.includes('colway') || name.includes('serum') ||
-      name.includes('cream') || name.includes('peeling') || name.includes('colvita') ||
-      slug.includes('collagen') || slug.includes('cream') || slug.includes('serum')
-    ) {
-      goals.add(GOAL_TYPES.SKIN_REGENERATION);
-    } else if (cat.includes('weight') || name.includes('semaglutide') || name.includes('tirzepatide') || name.includes('retatrutide') || name.includes('aod') || name.includes('5-amino')) {
+    if (cat.includes('weight') || name.includes('semaglutide') || name.includes('tirzepatide') || name.includes('retatrutide') || name.includes('aod') || name.includes('5-amino')) {
       goals.add(GOAL_TYPES.FAT_LOSS);
     } else if (cat.includes('longevity') || name.includes('epitalon') || name.includes('nad') || name.includes('ghk')) {
       goals.add(GOAL_TYPES.ANTI_AGING);
@@ -195,20 +211,31 @@ export function useSharedCatalogState({
     const title = String(catalogMeta?.title || catalogMeta?.name || '').toLowerCase();
     const supplier = String(catalogMeta?.supplierId || '').toLowerCase();
 
+    // If explicitly configured as a dedicated cosmetics catalog
     if (
-      cat.includes('cosmetic') || cat.includes('colway') || cat.includes('skincare') ||
-      supplier.includes('lotusland') || title.includes('colway') || title.includes('cosmetic')
+      cat === 'cosmetic' || cat === 'cosmetics' || cat === 'colway' ||
+      title.includes('colway') || title.includes('cosmetic catalog') ||
+      (supplier === 'supplier-colway' && !title.includes('peptid'))
     ) {
       return false;
     }
 
     if (products && products.length > 0) {
-      const hasOnlyCosmetics = products.every(p => {
+      // If products contain any peptide / therapeutic API (not pure cosmetic), it's a peptide catalog
+      const hasTherapeuticPeptides = products.some(p => {
         const pCat = String(p.category || '').toLowerCase();
         const pSlug = String(p.slug || p.id || '').toLowerCase();
-        return pCat.includes('cosmetic') || pCat.includes('skincare') || pCat.includes('trichology') || pCat.includes('nutricosmetic') || pSlug.startsWith('colway-');
+        const pType = String(p.productType || p.type || '').toLowerCase();
+        const pName = String(p.canonicalName || p.name || '').toLowerCase();
+        const isCosm = (
+          pSlug.startsWith('colway-') ||
+          pCat.includes('cosmetic') || pCat.includes('skincare') || pCat.includes('trichology') ||
+          pType.includes('cosmetic') || pName.includes('shampoo') || pName.includes('conditioner') ||
+          pName.includes('blue diamond') || pName.includes('peeling')
+        );
+        return !isCosm;
       });
-      if (hasOnlyCosmetics) return false;
+      return hasTherapeuticPeptides;
     }
 
     return true;

@@ -35,13 +35,24 @@ export default function SharedCatalogProductCard({
 
   const isProductPeptide = React.useMemo(() => {
     if (!isPeptideCatalog) return false;
-    const cat = String(prod?.category || '').toLowerCase();
+    const cat = String(prod?.category || prod?.categoryId || '').toLowerCase();
     const type = String(prod?.productType || prod?.type || '').toLowerCase();
-    const slug = String(prod?.slug || '').toLowerCase();
-    if (cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('trichology') || cat.includes('nutricosmetic') || slug.startsWith('colway-') || prod?.supplierId === 'supplier-lotusland') {
+    const slug = String(prod?.slug || prod?.id || '').toLowerCase();
+    const name = String(prod?.canonicalName || prod?.name || prod?.title || '').toLowerCase();
+    const supp = String(prod?.supplierId || '').toLowerCase();
+
+    if (
+      slug.startsWith('colway-') || supp.includes('colway') ||
+      cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('trichology') ||
+      cat.includes('nutricosmetic') || cat.includes('hair') ||
+      type.includes('cosmetic') || type.includes('shampoo') || type.includes('cream') ||
+      name.includes('shampoo') || name.includes('conditioner') || name.includes('collagen') ||
+      name.includes('cream') || name.includes('peeling') || name.includes('lip care') ||
+      name.includes('wash gel') || name.includes('colvita')
+    ) {
       return false;
     }
-    return cat.includes('peptide') || type.includes('peptide') || prod?.isPeptide;
+    return cat.includes('peptide') || type.includes('peptide') || Boolean(prod?.isPeptide);
   }, [prod, isPeptideCatalog]);
 
   const fdaStatus = React.useMemo(() => isProductPeptide ? getFdaPeptideStatus(prod) : null, [prod, isProductPeptide]);

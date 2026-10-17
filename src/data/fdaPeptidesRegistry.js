@@ -681,10 +681,11 @@ export function getFdaPeptideStatus(productOrSlug) {
 
     if (
       cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('trichology') ||
-      cat.includes('nutricosmetic') || cat.includes('hair') ||
-      slug.startsWith('colway-') || supp.includes('lotusland') ||
-      type.includes('cosmetic') || type.includes('shampoo') || type.includes('cream') ||
-      name.includes('shampoo') || name.includes('conditioner') || name.includes('collagen')
+      cat.includes('nutricosmetic') ||
+      slug.startsWith('colway-') || supp.includes('colway') ||
+      type.includes('cosmetic') || type.includes('shampoo') ||
+      name.includes('shampoo') || name.includes('conditioner') || name.includes('blue diamond') ||
+      name.includes('peeling') || name.includes('wash gel') || name.includes('lip care')
     ) {
       return null;
     }
@@ -692,7 +693,7 @@ export function getFdaPeptideStatus(productOrSlug) {
     const s = productOrSlug.toLowerCase();
     if (
       s.startsWith('colway-') || s.includes('shampoo') || s.includes('conditioner') ||
-      s.includes('cream') || s.includes('serum') || s.includes('cosmetic') || s.includes('trichology')
+      s.includes('blue-diamond') || s.includes('peeling') || s.includes('cosmetic') || s.includes('trichology')
     ) {
       return null;
     }

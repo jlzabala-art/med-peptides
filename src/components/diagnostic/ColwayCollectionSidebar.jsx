@@ -69,7 +69,7 @@ export default function ColwayCollectionSidebar({
       title: isEs ? 'Ritual Dermo-Renovación' : 'Dermo-Renewal Ritual',
       badge: isEs ? 'Facial & Escote' : 'Facial & Neck',
       desc: isEs ? 'Blue Diamond Cream + Peeling + Gel Colágeno' : 'Blue Diamond Cream + Peeling + Wash Gel',
-      category: 'skincare',
+      category: 'facial',
       search: 'Blue Diamond'
     },
     {
@@ -78,7 +78,7 @@ export default function ColwayCollectionSidebar({
       title: isEs ? 'Restauración Folicular Anti-DHT' : 'Anti-DHT Hair Restoration',
       badge: isEs ? 'Tricología Médica' : 'Trichology',
       desc: isEs ? 'Champú Fortalecedor + Acondicionador + Colvita (60/120 cap)' : 'Strengthening Shampoo + Conditioner + Colvita',
-      category: 'hair',
+      category: 'trichology',
       search: 'Strengthening'
     },
     {
@@ -87,7 +87,7 @@ export default function ColwayCollectionSidebar({
       title: isEs ? 'Matriz Extracelular & Longevidad' : 'Extracellular Matrix & Longevity',
       badge: isEs ? 'Nutricosmética' : 'Nutricosmetic',
       desc: isEs ? 'Colvita Colágeno Liofilizado + Colágeno Vege' : 'Colvita Lyophilized Collagen + Vege Collagen',
-      category: 'anti-aging',
+      category: 'nutraceutical',
       search: 'Colvita'
     }
   ];

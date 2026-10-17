@@ -39,16 +39,20 @@ export default function PublicDatasheetTableOfContents({
   similarProtocols = [],
   currentProtocolSlug = '',
   topicalAdjuncts = [],
+  activeSection = '',
+  onSelectSection = null,
   children
 }) {
   const isEs = lang === 'es';
-  const [activeId, setActiveId] = useState(sections[0]?.id || '');
+  const [activeId, setActiveId] = useState(activeSection || sections[0]?.id || '');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
-  // Filter sections that actually exist in the current DOM
+  // Filter sections that actually exist
   const availableSections = useMemo(() => {
     return sections.filter(sec => sec && sec.id);
   }, [sections]);
+
+  const currentActiveId = activeSection || activeId || availableSections[0]?.id || '';
 
   // Support external trigger (e.g. from PublicStickyActionBar)
   useEffect(() => {
@@ -60,9 +64,9 @@ export default function PublicDatasheetTableOfContents({
     return () => window.removeEventListener('open-datasheet-toc', handleExternalOpen);
   }, []);
 
-  // Real-time ScrollSpy via IntersectionObserver
+  // Real-time ScrollSpy via IntersectionObserver (only when NOT in single-section controlled mode)
   useEffect(() => {
-    if (typeof window === 'undefined' || !availableSections.length) return;
+    if (onSelectSection || typeof window === 'undefined' || !availableSections.length) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -89,14 +93,21 @@ export default function PublicDatasheetTableOfContents({
     });
 
     return () => observer.disconnect();
-  }, [availableSections]);
+  }, [availableSections, onSelectSection]);
 
-  // Smooth scroll handler with header offset
+  // Section click handler: delegates to onSelectSection or scrolls smoothly
   const scrollToSection = (e, targetId) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!targetId) return;
 
     triggerHaptic('light');
+
+    if (onSelectSection) {
+      setActiveId(targetId);
+      setIsMobileDrawerOpen(false);
+      onSelectSection(targetId);
+      return;
+    }
 
     const el = document.getElementById(targetId);
     if (el) {
@@ -116,15 +127,19 @@ export default function PublicDatasheetTableOfContents({
   const scrollToTop = () => {
     triggerHaptic('light');
     setIsMobileDrawerOpen(false);
+    if (onSelectSection) {
+      onSelectSection(availableSections[0]?.id || 'overview');
+      return;
+    }
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   // Find active index for reading progress indicator
-  const activeIndex = availableSections.findIndex(s => s.id === activeId);
+  const activeIndex = availableSections.findIndex(s => s.id === currentActiveId);
   const currentProgress = activeIndex >= 0 ? activeIndex + 1 : 1;
-  const activeLabel = availableSections.find(s => s.id === activeId)?.label || '';
+  const activeLabel = availableSections.find(s => s.id === currentActiveId)?.label || '';
 
   // Broadcast TOC progress to bottom sticky action bar
   useEffect(() => {
@@ -133,12 +148,12 @@ export default function PublicDatasheetTableOfContents({
         detail: {
           currentProgress,
           totalSections: availableSections.length,
-          activeId,
+          activeId: currentActiveId,
           activeLabel
         }
       }));
     }
-  }, [currentProgress, availableSections.length, activeId, activeLabel]);
+  }, [currentProgress, availableSections.length, currentActiveId, activeLabel]);
 
   if (!availableSections.length) return null;
 
@@ -166,7 +181,7 @@ export default function PublicDatasheetTableOfContents({
           <nav className="pds-toc-nav" role="navigation">
             <ul className="pds-toc-list">
               {availableSections.map((sec, idx) => {
-                const isActive = activeId === sec.id;
+                const isActive = currentActiveId === sec.id;
                 const IconComponent = sec.icon;
 
                 return (
@@ -321,7 +336,7 @@ export default function PublicDatasheetTableOfContents({
             <div className="pds-drawer-body">
               <ul className="pds-drawer-list">
                 {availableSections.map((sec, idx) => {
-                  const isActive = activeId === sec.id;
+                  const isActive = currentActiveId === sec.id;
                   const IconComponent = sec.icon;
 
                   return (

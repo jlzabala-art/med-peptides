@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Dna,
@@ -33,12 +33,14 @@ import {
   Microscope,
   ChevronRight,
   ChevronDown,
-  Search
+  Search,
+  ArrowLeft
 } from '@/lib/icons';
 import ImageModal from '@/snippets/ImageModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import ShareProductMonographDrawer from '@/components/admin/catalog/drawers/ShareProductMonographDrawer';
+import ProductSectionFooterNav from '@/components/product/ProductSectionFooterNav';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import StatusBadge from '@/components/ui/StatusBadge';
 import CopyableId from '@/components/ui/CopyableId';
@@ -72,17 +74,75 @@ export default function EternaGenomicsDetail({
     setIsImageModalOpen(true);
   };
 
-  const [activeTab, setActiveTab] = useState('inicio');
+  const eternaSections = useMemo(() => [
+    { id: 'overview', label: isEs ? 'Visión General' : 'Overview & 3D Stage', icon: Sparkles },
+    { id: 'biometrics', label: isEs ? 'Biometría & Wearables' : 'Biometrics & Wearables', icon: Smartphone },
+    { id: 'pilares', label: isEs ? '5 Pilares Genómicos' : '5 Genomic Pillars', icon: Layers },
+    { id: 'snp-table', label: isEs ? 'SNPs & Datos Técnicos' : 'SNPs & Technical Data', icon: BarChart3 },
+    { id: 'como-funciona', label: isEs ? 'Cómo Funciona' : 'How It Works (4 Steps)', icon: Clock },
+    { id: 'investigacion', label: isEs ? 'Rigor Científico' : 'Scientific Backing & Rigor', icon: ShieldCheck },
+    { id: 'integracion', label: isEs ? 'Protocolos Clínicos' : 'Clinical Protocols Integration', icon: Activity },
+    { id: 'productos', label: isEs ? 'Gama Eterna DX' : 'Product Suite & Formats', icon: Package }
+  ], [isEs]);
+
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash === 'inicio') return 'overview';
+      if (hash) return hash;
+    }
+    return 'overview';
+  });
+
   const [snpSearch, setSnpSearch] = useState('');
   const [selectedPillarFilter, setSelectedPillarFilter] = useState('all');
 
-  const scrollToSection = (id) => {
-    setActiveTab(id);
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+  const scrollToSection = useCallback((id) => {
+    if (!id) return;
+    const targetId = id === 'inicio' ? 'overview' : id;
+    setActiveTab(targetId);
+    if (typeof window !== 'undefined') {
+      if (window.history?.replaceState) {
+        window.history.replaceState(null, '', `#${targetId}`);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash === 'inicio' || hash === 'overview') {
+        setActiveTab('overview');
+      } else if (hash) {
+        setActiveTab(hash);
+      } else {
+        setActiveTab('overview');
+      }
+    };
+    if (window.location.hash) {
+      const initialHash = window.location.hash.replace('#', '').trim();
+      if (initialHash === 'inicio') setActiveTab('overview');
+      else if (initialHash) setActiveTab(initialHash);
+    }
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const effectiveActiveTab = useMemo(() => {
+    if (!activeTab || activeTab === 'overview' || activeTab === 'inicio') return 'overview';
+    const exists = eternaSections.some(s => s.id === activeTab);
+    return exists ? activeTab : 'overview';
+  }, [activeTab, eternaSections]);
+
+  const currentSectionIndex = useMemo(() => {
+    return eternaSections.findIndex(s => s.id === effectiveActiveTab);
+  }, [eternaSections, effectiveActiveTab]);
+
+  const currentSectionObj = useMemo(() => {
+    return eternaSections[currentSectionIndex] || eternaSections[0];
+  }, [eternaSections, currentSectionIndex]);
 
   // Structured High-Impact Genomic SNPs Analyzed
   const snpData = [
@@ -466,131 +526,86 @@ export default function EternaGenomicsDetail({
       </div>
 
       {/* ── 2. Top 4 GCP KPI Metrics Cards (Golden Rule #22) ── */}
-      <div className="eterna-kpis-container">
-        <div className="eterna-kpi-grid">
-          <div className="eterna-kpi-card" style={{ '--card-accent': '#8ab4f8' }}>
-            <div className="eterna-kpi-header">
-              <span>{isEs ? 'Cobertura Genómica' : 'Genomic Coverage'}</span>
-              <Dna size={15} style={{ color: '#8ab4f8' }} />
+      {effectiveActiveTab === 'overview' && (
+        <div className="eterna-kpis-container">
+          <div className="eterna-kpi-grid">
+            <div className="eterna-kpi-card" style={{ '--card-accent': '#8ab4f8' }}>
+              <div className="eterna-kpi-header">
+                <span>{isEs ? 'Cobertura Genómica' : 'Genomic Coverage'}</span>
+                <Dna size={15} style={{ color: '#8ab4f8' }} />
+              </div>
+              <div className="eterna-kpi-value">692K+</div>
+              <div className="eterna-kpi-sub">
+                {isEs ? 'Polimorfismos analizados (Illumina Infinium)' : 'High-density SNPs analyzed (Illumina GSA)'}
+              </div>
             </div>
-            <div className="eterna-kpi-value">692K+</div>
-            <div className="eterna-kpi-sub">
-              {isEs ? 'Polimorfismos analizados (Illumina Infinium)' : 'High-density SNPs analyzed (Illumina GSA)'}
+
+            <div className="eterna-kpi-card" style={{ '--card-accent': '#81c995' }}>
+              <div className="eterna-kpi-header">
+                <span>{isEs ? 'Conformidad Regulatoria' : 'Regulatory Approval'}</span>
+                <ShieldCheck size={15} style={{ color: '#81c995' }} />
+              </div>
+              <div className="eterna-kpi-value" style={{ fontSize: '1.45rem' }}>CE-IVDR</div>
+              <div className="eterna-kpi-sub">
+                {isEs ? 'Tubo estabilizador 24m temp. ambiente' : 'Room-temp 24 mo preservation buffer'}
+              </div>
+            </div>
+
+            <div className="eterna-kpi-card" style={{ '--card-accent': '#c58af9' }}>
+              <div className="eterna-kpi-header">
+                <span>{isEs ? 'Dominios Clínicos' : 'Clinical Domains'}</span>
+                <Layers size={15} style={{ color: '#c58af9' }} />
+              </div>
+              <div className="eterna-kpi-value">5 Pillars</div>
+              <div className="eterna-kpi-sub">
+                {isEs ? 'Deporte, Nutrición, Prevención, Longevidad, Bienestar' : 'Sport, Nutrition, Prevention, Longevity, Social'}
+              </div>
+            </div>
+
+            <div className="eterna-kpi-card" style={{ '--card-accent': '#fdd663' }}>
+              <div className="eterna-kpi-header">
+                <span>{isEs ? 'Tiempo de Respuesta (TAT)' : 'Turnaround Time'}</span>
+                <Clock size={15} style={{ color: '#fdd663' }} />
+              </div>
+              <div className="eterna-kpi-value">14–21 d</div>
+              <div className="eterna-kpi-sub">
+                {isEs ? 'Recepción de muestra a informe digital' : 'Courier sample intake to verified report'}
+              </div>
             </div>
           </div>
 
-          <div className="eterna-kpi-card" style={{ '--card-accent': '#81c995' }}>
-            <div className="eterna-kpi-header">
-              <span>{isEs ? 'Conformidad Regulatoria' : 'Regulatory Approval'}</span>
-              <ShieldCheck size={15} style={{ color: '#81c995' }} />
+          <div className="eterna-kpi-scope-bar">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: '#81c995' }} />
+              <span>
+                {isEs 
+                  ? 'Alcance: Activo de Laboratorio Certificado · Eurofins Genomics Central Laboratory · Encriptación RGPD' 
+                  : 'Scope: Certified Laboratory Asset · Eurofins Genomics Central Laboratory · GDPR Encrypted'}
+              </span>
             </div>
-            <div className="eterna-kpi-value" style={{ fontSize: '1.45rem' }}>CE-IVDR</div>
-            <div className="eterna-kpi-sub">
-              {isEs ? 'Tubo estabilizador 24m temp. ambiente' : 'Room-temp 24 mo preservation buffer'}
-            </div>
-          </div>
-
-          <div className="eterna-kpi-card" style={{ '--card-accent': '#c58af9' }}>
-            <div className="eterna-kpi-header">
-              <span>{isEs ? 'Dominios Clínicos' : 'Clinical Domains'}</span>
-              <Layers size={15} style={{ color: '#c58af9' }} />
-            </div>
-            <div className="eterna-kpi-value">5 Pillars</div>
-            <div className="eterna-kpi-sub">
-              {isEs ? 'Deporte, Nutrición, Prevención, Longevidad, Bienestar' : 'Sport, Nutrition, Prevention, Longevity, Social'}
-            </div>
-          </div>
-
-          <div className="eterna-kpi-card" style={{ '--card-accent': '#fdd663' }}>
-            <div className="eterna-kpi-header">
-              <span>{isEs ? 'Tiempo de Respuesta (TAT)' : 'Turnaround Time'}</span>
-              <Clock size={15} style={{ color: '#fdd663' }} />
-            </div>
-            <div className="eterna-kpi-value">14–21 d</div>
-            <div className="eterna-kpi-sub">
-              {isEs ? 'Recepción de muestra a informe digital' : 'Courier sample intake to verified report'}
-            </div>
+            <span style={{ fontFamily: 'ui-monospace, monospace' }}>VERIFIED ASSAY v2.4</span>
           </div>
         </div>
-
-        <div className="eterna-kpi-scope-bar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: '#81c995' }} />
-            <span>
-              {isEs 
-                ? 'Alcance: Activo de Laboratorio Certificado · Eurofins Genomics Central Laboratory · Encriptación RGPD' 
-                : 'Scope: Certified Laboratory Asset · Eurofins Genomics Central Laboratory · GDPR Encrypted'}
-            </span>
-          </div>
-          <span style={{ fontFamily: 'ui-monospace, monospace' }}>VERIFIED ASSAY v2.4</span>
-        </div>
-      </div>
+      )}
 
       {/* ── 3. GCP Sticky Navigation Ribbon (Tabs) ── */}
       <nav className="eterna-gcp-tab-ribbon" aria-label="Page Sections">
         <div className="eterna-gcp-tab-ribbon-inner">
-          <button 
-            type="button" 
-            className={`eterna-gcp-tab-btn ${activeTab === 'inicio' ? 'active' : ''}`}
-            onClick={() => scrollToSection('inicio')}
-          >
-            <Sparkles size={14} />
-            <span>{isEs ? 'Visión General' : 'Overview'}</span>
-          </button>
-
-          <button 
-            type="button" 
-            className={`eterna-gcp-tab-btn ${activeTab === 'biometrics' ? 'active' : ''}`}
-            onClick={() => scrollToSection('biometrics')}
-          >
-            <Smartphone size={14} />
-            <span>{isEs ? 'Biometría & Wearables' : 'Biometrics & Wearables'}</span>
-          </button>
-
-          <button 
-            type="button" 
-            className={`eterna-gcp-tab-btn ${activeTab === 'pilares' ? 'active' : ''}`}
-            onClick={() => scrollToSection('pilares')}
-          >
-            <Layers size={14} />
-            <span>{isEs ? '5 Pilares Genómicos' : '5 Genomic Pillars'}</span>
-          </button>
-
-          <button 
-            type="button" 
-            className={`eterna-gcp-tab-btn ${activeTab === 'snp-table' ? 'active' : ''}`}
-            onClick={() => scrollToSection('snp-table')}
-          >
-            <BarChart3 size={14} />
-            <span>{isEs ? 'SNPs & Datos Técnicos' : 'SNPs & Technical Data'}</span>
-          </button>
-
-          <button 
-            type="button" 
-            className={`eterna-gcp-tab-btn ${activeTab === 'como-funciona' ? 'active' : ''}`}
-            onClick={() => scrollToSection('como-funciona')}
-          >
-            <Clock size={14} />
-            <span>{isEs ? 'Cómo Funciona' : 'How It Works'}</span>
-          </button>
-
-          <button 
-            type="button" 
-            className={`eterna-gcp-tab-btn ${activeTab === 'integracion' ? 'active' : ''}`}
-            onClick={() => scrollToSection('integracion')}
-          >
-            <Activity size={14} />
-            <span>{isEs ? 'Protocolos Clínicos' : 'Clinical Protocols'}</span>
-          </button>
-
-          <button 
-            type="button" 
-            className={`eterna-gcp-tab-btn ${activeTab === 'investigacion' ? 'active' : ''}`}
-            onClick={() => scrollToSection('investigacion')}
-          >
-            <ShieldCheck size={14} />
-            <span>{isEs ? 'Rigor Científico' : 'Scientific Backing'}</span>
-          </button>
+          {eternaSections.map((sec) => {
+            const IconComp = sec.icon || Sparkles;
+            const isActive = effectiveActiveTab === sec.id;
+            return (
+              <button 
+                key={sec.id}
+                type="button" 
+                className={`eterna-gcp-tab-btn ${isActive ? 'active' : ''}`}
+                onClick={() => scrollToSection(sec.id)}
+              >
+                <IconComp size={14} />
+                <span>{sec.label}</span>
+              </button>
+            );
+          })}
         </div>
       </nav>
 

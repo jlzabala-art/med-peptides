@@ -43,9 +43,9 @@ const BRAND_CONFIGS = {
     ],
     categories: [
       { id: 'all', label: 'All Formulations (8)' },
-      { id: 'nutraceutical', label: 'Nutraceuticals & Systemic Collagen (Colvita)' },
-      { id: 'facial', label: 'Facial Cosmeceuticals & Blue Diamond' },
-      { id: 'trichology', label: 'Trichology & Hair Strengthening System' }
+      { id: 'facial', label: 'Facial Cosmeceuticals & Blue Diamond (5)' },
+      { id: 'trichology', label: 'Trichology & Scalp System (2)' },
+      { id: 'nutraceutical', label: 'Oral Nutricosmetics & Colvita (1)' }
     ]
   },
   bloodo: {
@@ -223,6 +223,22 @@ export default function BrandCollectionPage({
     path: `/collection/${brandSlug}`,
   });
 
+  // Google Cloud UX Rule #7: Global Cmd+K / Ctrl+K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const input = document.getElementById('catalog-search-input');
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const breadcrumbs = [
     { label: 'Home', path: '/' },
     { label: 'Collections', path: '/collection/peptides' },
@@ -253,9 +269,9 @@ export default function BrandCollectionPage({
       list = list.filter(p => {
         const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''}`.toLowerCase();
         if (brandSlug === 'colway') {
-          if (cat === 'nutraceutical') return str.includes('colvita') || str.includes('supplement') || str.includes('capsule') || str.includes('suplement');
-          if (cat === 'facial') return str.includes('diamond') || str.includes('diament') || str.includes('peeling') || str.includes('vege') || str.includes('wash') || str.includes('lip') || str.includes('cream');
-          if (cat === 'trichology') return str.includes('hair') || str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('szampon') || str.includes('odzywka');
+          if (cat === 'nutraceutical' || cat === 'anti-aging') return str.includes('colvita') || str.includes('supplement') || str.includes('capsule') || str.includes('suplement');
+          if (cat === 'facial' || cat === 'skincare') return str.includes('diamond') || str.includes('diament') || str.includes('peeling') || str.includes('vege') || str.includes('wash') || str.includes('lip') || str.includes('cream');
+          if (cat === 'trichology' || cat === 'hair') return str.includes('hair') || str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('szampon') || str.includes('odzywka');
         }
         return str.includes(cat);
       });
@@ -488,6 +504,12 @@ export default function BrandCollectionPage({
         </section>
       )}
 
+      {brandSlug === 'colway' && (
+        <section style={{ maxWidth: '1440px', margin: '0 auto 2.5rem', padding: '0 2rem' }}>
+          <ColwayTrichologyStemCellShowcase lang={lang} />
+        </section>
+      )}
+
 
       {/* ── 6. MAIN WORKSPACE (70% Main Products Grid + 30% Sticky Sidebar) ── */}
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem 5rem' }}>
@@ -513,7 +535,11 @@ export default function BrandCollectionPage({
                   <input
                     id="catalog-search-input"
                     type="text"
-                    placeholder={isEs ? `Buscar en ${config.name} (ej. NAD+, cortisol, DBS)... ⌘K` : `Search in ${config.name} (e.g. NAD+, cortisol)... ⌘K`}
+                    placeholder={
+                      brandSlug === 'colway'
+                        ? (isEs ? 'Buscar en Colway (ej. Colvita, Blue Diamond, Champú, Vege)... ⌘K' : 'Search Colway (e.g. Colvita, Blue Diamond, Shampoo, Tropocollagen)... ⌘K')
+                        : (isEs ? `Buscar en ${config.name} (ej. NAD+, cortisol, DBS)... ⌘K` : `Search in ${config.name} (e.g. NAD+, cortisol)... ⌘K`)
+                    }
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     style={{
@@ -539,7 +565,9 @@ export default function BrandCollectionPage({
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
-                    {filteredProducts.length} {filteredProducts.length === 1 ? 'test' : 'tests'}
+                    {filteredProducts.length} {filteredProducts.length === 1 
+                      ? (brandSlug === 'colway' ? (isEs ? 'formulación' : 'formulation') : (isEs ? 'test' : 'test')) 
+                      : (brandSlug === 'colway' ? (isEs ? 'formulaciones' : 'formulations') : (isEs ? 'tests' : 'tests'))}
                   </span>
 
                   <select
@@ -604,7 +632,9 @@ export default function BrandCollectionPage({
               <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '4rem 2rem', textAlign: 'center' }}>
                 <FlaskConical size={48} color="#94a3b8" style={{ margin: '0 auto 1rem' }} />
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem' }}>
-                  {isEs ? 'No se encontraron pruebas diagnósticas' : 'No diagnostic panels found'}
+                  {isEs 
+                    ? (brandSlug === 'colway' ? 'No se encontraron formulaciones' : 'No se encontraron resultados')
+                    : (brandSlug === 'colway' ? 'No Colway formulations found' : 'No diagnostic panels found')}
                 </h3>
                 <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0 0 1.5rem' }}>
                   {isEs ? 'Prueba limpiando los filtros o utilizando otros términos de búsqueda.' : 'Try adjusting your search criteria or resetting filters.'}
@@ -621,7 +651,7 @@ export default function BrandCollectionPage({
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(310px, 1fr))' : '1fr',
-                gap: '1.25rem'
+                gap: viewMode === 'grid' ? '1.25rem' : '0.75rem'
               }}>
                 {filteredProducts.map(product => {
                   const imageSrc = resolveBrandProductImage(product, brandSlug);
@@ -634,6 +664,241 @@ export default function BrandCollectionPage({
                     : (product.sampleType || product.presentation || product.volume || 'Clinical Formulation');
                   const isExpanded = !!expandedDetails[product.id];
                   const isAdded = addedItem === product.id;
+
+                  if (viewMode === 'table') {
+                    return (
+                      <div
+                        key={product.id}
+                        style={{
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '12px',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          transition: 'all 0.15s ease',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+                        }}
+                      >
+                        <div style={{
+                          padding: '1rem 1.25rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '1rem'
+                        }}>
+                          {/* Left: Thumbnail & Essential Identifiers */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 360px', minWidth: 0 }}>
+                            <div
+                              onClick={() => handleProductClick(product)}
+                              style={{
+                                width: '70px',
+                                height: '70px',
+                                borderRadius: '8px',
+                                background: 'radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%)',
+                                border: '1px solid #f1f5f9',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                flexShrink: 0
+                              }}
+                            >
+                              <img
+                                src={imageSrc}
+                                alt={displayName}
+                                style={{ maxHeight: '56px', maxWidth: '85%', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.06))' }}
+                              />
+                            </div>
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                                <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                                  <CopyableId value={product.id} maxLength={18} />
+                                </span>
+                                <span style={{
+                                  fontSize: '0.66rem',
+                                  fontWeight: 800,
+                                  padding: '2px 7px',
+                                  borderRadius: '4px',
+                                  background: 'rgba(22, 163, 74, 0.12)',
+                                  color: '#15803d',
+                                  border: '1px solid rgba(22, 163, 74, 0.25)'
+                                }}>
+                                  {brandSlug === 'colway' ? 'EU 1223/2009' : brandSlug === 'eterna' ? 'CAP / CLIA' : 'CE-IVDR'}
+                                </span>
+                                <span style={{ fontSize: '0.70rem', color: '#0d9488', fontWeight: 650 }}>
+                                  {sampleType}
+                                </span>
+                              </div>
+                              <h3
+                                onClick={() => handleProductClick(product)}
+                                style={{
+                                  fontSize: '0.98rem',
+                                  fontWeight: 800,
+                                  color: '#0f172a',
+                                  margin: '0 0 3px 0',
+                                  lineHeight: 1.3,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {displayName}
+                              </h3>
+                              <p style={{
+                                fontSize: '0.78rem',
+                                color: '#64748b',
+                                margin: 0,
+                                whiteSpace: isExpanded ? 'normal' : 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}>
+                                {desc}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Right: Actions */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                            <button
+                              type="button"
+                              onClick={(e) => toggleExpand(product.id, e)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#64748b',
+                                fontSize: '0.74rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                padding: '6px 8px'
+                              }}
+                            >
+                              <span>{isExpanded ? (isEs ? 'Menos' : 'Less') : (isEs ? 'Detalles' : 'Details')}</span>
+                              <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleProductClick(product)}
+                              style={{
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                border: '1px solid #cbd5e1',
+                                background: '#ffffff',
+                                color: '#0f172a',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <Eye size={13} />
+                              <span>{isEs ? 'Ficha' : 'View'}</span>
+                            </button>
+
+                            {!user ? (
+                              <button
+                                type="button"
+                                onClick={() => setIsAuthModalOpen(true)}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  border: `1px solid ${config.accentColor}`,
+                                  background: 'rgba(255, 255, 255, 0.95)',
+                                  color: config.accentColor,
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                <Lock size={12} />
+                                <span>{isEs ? 'Acceso Requerido' : 'Sign In to Order'}</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => handleQuickAdd(product, e)}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  background: isAdded ? '#16a34a' : config.accentColor,
+                                  color: '#ffffff',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                {isAdded ? (
+                                  <>
+                                    <Check size={13} /> {isEs ? 'Añadido' : 'Added'}
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>
+                                      {isEs
+                                        ? (brandSlug === 'bloodo' ? 'Pedir Kit' : 'Ver Formulación')
+                                        : (brandSlug === 'bloodo' ? 'Order Kit' : 'View Formulation')}
+                                    </span>
+                                    <ArrowRight size={13} />
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Inline Expandable Details in Table mode */}
+                        {isExpanded && (
+                          <div style={{
+                            background: '#f8fafc',
+                            borderTop: '1px solid #e2e8f0',
+                            padding: '10px 14px',
+                            fontSize: '0.76rem',
+                            color: '#334155',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                            gap: '8px'
+                          }}>
+                            <div>
+                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Laboratorio de Referencia:' : 'Reference Lab:'}</strong> {
+                                brandSlug === 'eterna' ? 'Eurofins Genomics (Munich/Ebersberg) · CAP / CLIA / ISO 17025' :
+                                brandSlug === 'ultraperson' ? 'PharmaPolis Compounding Labs · EU GMP / cGMP' :
+                                brandSlug === 'colway' ? 'Colway Biological Collagen & Dermocosmetics · EU Reg. 1223/2009' :
+                                'LifeLab1 Central Lab (Vilnius) · ISO 15189'
+                              }
+                            </div>
+                            <div>
+                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Tecnología / Metodología:' : 'Analytical Method:'}</strong> {
+                                brandSlug === 'eterna' ? 'Illumina Infinium +700k SNPs & High-Density Proteomics' :
+                                brandSlug === 'ultraperson' ? 'Vegan HPMC Delayed-Release Capsule Standardization' :
+                                brandSlug === 'colway' ? 'Native Tropocollagen Triple Helix & Baicapil™ 2%' :
+                                'LC-MS/MS & UHPLC Tandem MS'
+                              }
+                            </div>
+                            <div>
+                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:'}</strong> {
+                                brandSlug === 'eterna' ? '15 – 20 Business Days' :
+                                brandSlug === 'ultraperson' ? '48 – 72h Compounding Dispatch' :
+                                brandSlug === 'colway' ? '24 – 48h Direct Clinic Dispatch' :
+                                '48 – 72h post-receipt'
+                              }
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
 
                   return (
                     <div

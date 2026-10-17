@@ -183,7 +183,7 @@ export default function ColwayTrichologyStemCellShowcase({ lang = 'en' }) {
       }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
           gap: '1rem'
         }}>
           <div style={{
@@ -270,97 +270,260 @@ export default function ColwayTrichologyStemCellShowcase({ lang = 'en' }) {
           {isEs ? 'Foco Activo Primario: Baicapil™ 2% y Registro de Células Madre' : 'Primary Active Focus: Baicapil™ 2% & Stem Cell Registration'}
         </h3>
 
+        {/* ── 4. Primary Active Focus: 3 Biological Mechanisms (GCP Stacked Lines) ── */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '1.25rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
           marginBottom: '2rem'
         }}>
-          <div style={{
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '12px',
-            padding: '1.25rem'
-          }}>
+          {/* Mechanism 1 */}
+          <div
+            style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.25rem',
+              transition: 'all 0.15s ease',
+              boxShadow: '0 1px 2px rgba(15, 23, 42, 0.03)'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f8fafc'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#ffffff'; }}
+          >
             <div style={{
-              width: '36px',
-              height: '36px',
+              width: '42px',
+              height: '42px',
               borderRadius: '8px',
               background: 'rgba(13, 148, 136, 0.12)',
               color: '#0d9488',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: '0.75rem'
+              flexShrink: 0
             }}>
-              <Zap size={20} />
+              <Zap size={22} />
             </div>
-            <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>
-              {isEs ? '1. Activación de Células Madre (HFSC)' : '1. HFSC Stem Cell Activation'}
-            </h4>
-            <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.55 }}>
-              {isEs
-                ? 'Estimula las células madre del folículo piloso en la región de la protuberancia (bulge), iniciando la renovación metabólica y promoviendo la proliferación celular.'
-                : 'Stimulates hair follicle stem cells (HFSCs) in the bulge region, initiating metabolic renewal and promoting cellular proliferation.'}
-            </p>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  fontFamily: 'monospace',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: '#f1f5f9',
+                  color: '#475569'
+                }}>
+                  MEC-01
+                </span>
+                <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  {isEs ? '1. Activación de Células Madre (HFSC)' : '1. HFSC Stem Cell Activation'}
+                </h4>
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  background: '#f0fdfa',
+                  color: '#0d9488',
+                  border: '1px solid rgba(13, 148, 136, 0.25)'
+                }}>
+                  {isEs ? 'Nicho Bulge Folicular' : 'Bulge Stem Cell Niche'}
+                </span>
+              </div>
+              <p style={{ fontSize: '0.82rem', color: '#475569', margin: 0, lineHeight: 1.55 }}>
+                {isEs
+                  ? 'Estimula las células madre del folículo piloso en la región de la protuberancia (bulge), iniciando la renovación metabólica y promoviendo la proliferación celular.'
+                  : 'Stimulates hair follicle stem cells (HFSCs) in the bulge region, initiating metabolic renewal and promoting cellular proliferation.'}
+              </p>
+            </div>
+
+            <div style={{
+              flexShrink: 0,
+              textAlign: 'right',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              justifyContent: 'center',
+              minWidth: '130px'
+            }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? 'Diana Biológica' : 'Target Pathway'}
+              </span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0d9488', marginTop: '2px' }}>
+                {isEs ? 'Células Madre HFSC' : 'Quiescent HFSCs'}
+              </span>
+            </div>
           </div>
 
-          <div style={{
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '12px',
-            padding: '1.25rem'
-          }}>
+          {/* Mechanism 2 */}
+          <div
+            style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.25rem',
+              transition: 'all 0.15s ease',
+              boxShadow: '0 1px 2px rgba(15, 23, 42, 0.03)'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f8fafc'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#ffffff'; }}
+          >
             <div style={{
-              width: '36px',
-              height: '36px',
+              width: '42px',
+              height: '42px',
               borderRadius: '8px',
               background: 'rgba(2, 132, 199, 0.12)',
               color: '#0284c7',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: '0.75rem'
+              flexShrink: 0
             }}>
-              <Clock size={20} />
+              <Clock size={22} />
             </div>
-            <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>
-              {isEs ? '2. Prolongación de la Fase Anágena' : '2. Anagen Phase Prolongation'}
-            </h4>
-            <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.55 }}>
-              {isEs
-                ? 'Induce a los folículos pilosos a entrar en la fase de crecimiento activo (anágena) y extiende significativamente su duración, retrasando el inicio de la fase catágena.'
-                : 'Forces hair follicles into the active growth (anagen) phase and significantly extends its duration, delaying the onset of catagen.'}
-            </p>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  fontFamily: 'monospace',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: '#f1f5f9',
+                  color: '#475569'
+                }}>
+                  MEC-02
+                </span>
+                <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  {isEs ? '2. Prolongación de la Fase Anágena' : '2. Anagen Phase Prolongation'}
+                </h4>
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  background: '#f0f9ff',
+                  color: '#0284c7',
+                  border: '1px solid rgba(2, 132, 199, 0.25)'
+                }}>
+                  {isEs ? 'Ciclo Activo Extendido' : 'Growth Phase Extension'}
+                </span>
+              </div>
+              <p style={{ fontSize: '0.82rem', color: '#475569', margin: 0, lineHeight: 1.55 }}>
+                {isEs
+                  ? 'Induce a los folículos pilosos a entrar en la fase de crecimiento activo (anágena) y extiende significativamente su duración, retrasando el inicio de la fase catágena.'
+                  : 'Forces hair follicles into the active growth (anagen) phase and significantly extends its duration, delaying the onset of catagen.'}
+              </p>
+            </div>
+
+            <div style={{
+              flexShrink: 0,
+              textAlign: 'right',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              justifyContent: 'center',
+              minWidth: '130px'
+            }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? 'Cinética Folicular' : 'Growth Kinetics'}
+              </span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0284c7', marginTop: '2px' }}>
+                {isEs ? 'Fase Anágena +' : 'Extended Anagen'}
+              </span>
+            </div>
           </div>
 
-          <div style={{
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '12px',
-            padding: '1.25rem'
-          }}>
+          {/* Mechanism 3 */}
+          <div
+            style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.25rem',
+              transition: 'all 0.15s ease',
+              boxShadow: '0 1px 2px rgba(15, 23, 42, 0.03)'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f8fafc'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#ffffff'; }}
+          >
             <div style={{
-              width: '36px',
-              height: '36px',
+              width: '42px',
+              height: '42px',
               borderRadius: '8px',
               background: 'rgba(225, 29, 72, 0.12)',
               color: '#e11d48',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: '0.75rem'
+              flexShrink: 0
             }}>
-              <ShieldCheck size={20} />
+              <ShieldCheck size={22} />
             </div>
-            <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>
-              {isEs ? '3. Reducción de la Caída Telógena' : '3. Telogen Shedding Reduction'}
-            </h4>
-            <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.55 }}>
-              {isEs
-                ? 'Previene la miniaturización folicular y la caída prematura, generando incrementos medibles en la densidad capilar total y el calibre de la fibra.'
-                : 'Prevents follicle miniaturization and premature shedding, resulting in measurable increases in total hair density and fiber caliber.'}
-            </p>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  fontFamily: 'monospace',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: '#f1f5f9',
+                  color: '#475569'
+                }}>
+                  MEC-03
+                </span>
+                <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  {isEs ? '3. Reducción de la Caída Telógena' : '3. Telogen Shedding Reduction'}
+                </h4>
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  background: '#fff1f2',
+                  color: '#e11d48',
+                  border: '1px solid rgba(225, 29, 72, 0.25)'
+                }}>
+                  {isEs ? 'Anclaje & Anti-Caída' : 'Follicle Anchoring'}
+                </span>
+              </div>
+              <p style={{ fontSize: '0.82rem', color: '#475569', margin: 0, lineHeight: 1.55 }}>
+                {isEs
+                  ? 'Previene la miniaturización folicular y la caída prematura, generando incrementos medibles en la densidad capilar total y el calibre de la fibra.'
+                  : 'Prevents follicle miniaturization and premature shedding, resulting in measurable increases in total hair density and fiber caliber.'}
+              </p>
+            </div>
+
+            <div style={{
+              flexShrink: 0,
+              textAlign: 'right',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              justifyContent: 'center',
+              minWidth: '130px'
+            }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? 'Eficacia Clínica' : 'Clinical Endpoint'}
+              </span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#e11d48', marginTop: '2px' }}>
+                {isEs ? '-60.6% Caída Telógena' : '−60.6% Telogen'}
+              </span>
+            </div>
           </div>
         </div>
 
