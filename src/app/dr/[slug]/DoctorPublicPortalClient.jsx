@@ -1461,6 +1461,8 @@ export default function DoctorPublicPortalClient({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // 1. Focus / Tab Visibility Revalidation (SWR)
     const handleVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
         syncDoctorRegistry(false);
@@ -1468,9 +1470,18 @@ export default function DoctorPublicPortalClient({
     };
     window.addEventListener('focus', handleVisibilityOrFocus);
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+
+    // 2. Autonomous Background Heartbeat (every 60s while tab is active)
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        syncDoctorRegistry(false);
+      }
+    }, 60000);
+
     return () => {
       window.removeEventListener('focus', handleVisibilityOrFocus);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      clearInterval(intervalId);
     };
   }, [syncDoctorRegistry]);
 
@@ -4117,33 +4128,40 @@ export default function DoctorPublicPortalClient({
 
             {/* Actions Area: GCP Consolidated Command Bar */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  setLastRefreshed(new Date());
-                  toast.success('Clinical records synchronized with Firestore ✓');
-                }}
-                title={`Last synchronized: ${lastRefreshed ? lastRefreshed.toLocaleTimeString() : 'Just now'}. Click to refresh.`}
+              {/* Google Cloud Live Status Indicator (Rule #25 / Non-blocking) */}
+              <div
+                title="Continuous background synchronization active. Clinical registry is automatically updated every 60s and on window focus."
                 style={{
-                  height: '34px',
-                  padding: '0 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #dadce0',
-                  background: '#ffffff',
-                  color: '#5f6368',
-                  fontSize: '0.74rem',
-                  fontWeight: 500,
-                  cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  transition: 'all 0.15s ease'
+                  padding: '5px 10px',
+                  borderRadius: '16px',
+                  background: isBackgroundSyncing ? '#eff6ff' : '#f8fafc',
+                  border: `1px solid ${isBackgroundSyncing ? '#bfdbfe' : '#e2e8f0'}`,
+                  fontSize: '0.72rem',
+                  color: isBackgroundSyncing ? '#1d4ed8' : '#64748b',
+                  fontWeight: 500,
+                  transition: 'all 0.2s ease',
+                  userSelect: 'none'
                 }}
               >
-                <RefreshCw size={13} />
-                <span className="hidden sm:inline">Refresh</span>
-              </button>
+                <span
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: isBackgroundSyncing ? '#2563eb' : '#16a34a',
+                    boxShadow: isBackgroundSyncing ? '0 0 0 2px rgba(37,99,235,0.2)' : '0 0 0 2px rgba(22,163,74,0.18)',
+                    display: 'inline-block'
+                  }}
+                />
+                <span>
+                  {isBackgroundSyncing
+                    ? 'Updating...'
+                    : `Live · ${lastRefreshed ? lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Auto-synced'}`}
+                </span>
+              </div>
 
               <button
                 type="button"
