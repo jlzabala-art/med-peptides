@@ -80,6 +80,7 @@ import { COUNTRIES } from '@/data/countries';
 import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolidator';
 import { calculateTreatmentDates, calculateTreatmentDuration } from '@/utils/clinical/clinicalFormulations';
 import DoctorFloatingGlassDock from '@/components/doctor/docks/DoctorFloatingGlassDock';
+import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
 
 const PrescriptionIntakeWorkspace = dynamic(
   () => import('@/features/prescriptions/components/PrescriptionIntakeWorkspace'),
@@ -1489,18 +1490,24 @@ export default function DoctorPublicPortalClient({
           labReportsCount: allLabResults.length
         },
         topApis: doctorTopApis,
-        patients: doctorPatientsList.slice(0, 60).map((pt) => ({
-          name: pt.name,
-          phone: pt.phone || '',
-          rxCount: pt.rxCount,
-          soldRxCount: pt.soldRxCount,
-          proposalRxCount: pt.proposalRxCount,
-          hasSoldOrder: pt.hasSoldOrder,
-          latestRxCode: pt.latestRxCode,
-          latestTreatment: pt.latestTreatment,
-          latestStatus: pt.latestStatus,
-          lastSeen: pt.lastSeen
-        })),
+        patients: doctorPatientsList.slice(0, 60).map((pt) => {
+          const soldRxs = (pt.prescriptions || []).filter(isSoldPrescription);
+          const proposalRxs = (pt.prescriptions || []).filter(isProposalPrescription);
+          const latestRx = pt.prescriptions?.[0];
+          return {
+            name: pt.name,
+            phone: pt.phone || '',
+            rxCount: (pt.prescriptions || []).length,
+            soldRxCount: soldRxs.length,
+            proposalRxCount: proposalRxs.length,
+            hasSold: Boolean(pt.hasSold),
+            invoices: pt.invoices || [],
+            latestRxCode: latestRx?.code || latestRx?.prescriptionNumber || latestRx?.id || '',
+            latestTreatment: pt.latestProduct || latestRx?.treatmentTitle || '',
+            latestStatus: latestRx?.status || '',
+            lastSeen: pt.latestDate || ''
+          };
+        }),
         prescriptions: allPrescriptions.slice(0, 60).map((rx) => ({
           code: rx.code || rx.prescriptionNumber || rx.id,
           patientName: rx.patientName || rx.patient?.name || 'Patient',
@@ -7547,13 +7554,20 @@ export default function DoctorPublicPortalClient({
                   }}>
                     {msg.role === 'user' ? 'You' : `Atlas Copilot · ${doctor.name}`} · {msg.time}
                   </div>
-                  <div style={{
-                    fontSize: '0.80rem',
-                    lineHeight: 1.55,
-                    whiteSpace: 'pre-line'
-                  }}>
-                    {msg.content}
-                  </div>
+                  {msg.role === 'user' ? (
+                    <div style={{
+                      fontSize: '0.80rem',
+                      lineHeight: 1.55,
+                      whiteSpace: 'pre-line'
+                    }}>
+                      {msg.content}
+                    </div>
+                  ) : (
+                    <DoctorAiMessageRenderer
+                      content={msg.content}
+                      onExecuteAction={handleExecuteAiAction}
+                    />
+                  )}
                   {msg.role === 'assistant' && Array.isArray(msg.actions) && msg.actions.length > 0 && (
                     <div style={{
                       marginTop: '10px',
