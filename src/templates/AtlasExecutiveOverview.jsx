@@ -39,6 +39,7 @@ import {
 } from '@/lib/icons';
 import StatusBadge from '../components/ui/StatusBadge';
 import CopyableId from '../components/ui/CopyableId';
+import AtlasEcosystemHubTab from '../components/doctor/AtlasEcosystemHubTab';
 import '../styles/mediluxe.css';
 
 // ── Navigation Section Anchors (GCP "On This Page" Standard) ─────────────────
@@ -48,7 +49,7 @@ const SECTIONS = [
   { id: 'comparison', label: 'Traditional vs. Atlas OS' },
   { id: 'ecosystem', label: 'Atlas Digital OS & Demo' },
   { id: 'workflow', label: 'Clinical-to-Pharmacy Loop' },
-  { id: 'portals', label: 'Role-Based Portals' },
+  { id: 'portals', label: 'Partner Ecosystem by Collective' },
   { id: 'logistics', label: 'Global Network & QA' },
   { id: 'contact', label: 'Executive Contact & QR' },
 ];
@@ -1164,16 +1165,25 @@ END:VCARD`;
               </div>
             </section>
 
-            {/* ── Section 4: Dedicated Role-Based Portals ── */}
+            {/* ── Section 4: Dedicated Role-Based Portals & Stakeholder Collective Hub ── */}
             <section id="portals" className="mediluxe-section">
               <span className="mediluxe-section-badge">
-                <Building2 size={13} /> Multi-Stakeholder Architecture
+                <Building2 size={13} /> Multi-Stakeholder Architecture · What Each Collective Achieves
               </span>
-              <h2 className="mediluxe-section-title">Dedicated Portals for Every Healthcare Stakeholder</h2>
+              <h2 className="mediluxe-section-title">The Atlas Partner Ecosystem by Collective</h2>
               <p className="mediluxe-section-subtitle">
-                Atlas adapts dynamically to your operational role. Select your environment below to access specialized tools, 
-                pricing tiers, and clinical workflows.
+                Explore specialized value propositions, operational capabilities, and automated workflows tailored for
+                prescribing physicians, API manufacturers, compounding pharmacies, and wholesale distributors.
               </p>
+
+              {/* Interactive Collective Value Engine */}
+              <div style={{ marginTop: '1.25rem', marginBottom: '2.5rem' }}>
+                <AtlasEcosystemHubTab />
+              </div>
+
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.85rem' }}>
+                Dedicated Stakeholder Console Access
+              </h3>
 
               <div className="mediluxe-tests-grid">
                 <div className="mediluxe-test-card" style={{ borderLeft: '4px solid #0d9488' }}>

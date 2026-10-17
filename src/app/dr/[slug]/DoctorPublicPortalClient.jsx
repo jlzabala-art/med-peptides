@@ -97,10 +97,6 @@ const DoctorServicesMembershipModal = dynamic(
   () => import('@/components/doctor/DoctorServicesMembershipModal'),
   { ssr: false }
 );
-const AtlasEcosystemHubTab = dynamic(
-  () => import('@/components/doctor/AtlasEcosystemHubTab'),
-  { ssr: false }
-);
 const DoctorPracticeSearchModal = dynamic(
   () => import('@/components/doctor/modals/DoctorPracticeSearchModal'),
   { ssr: false }
@@ -937,7 +933,7 @@ export default function DoctorPublicPortalClient({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const sectionIds = ['overview', 'tasks', 'prescriptions', 'patients', 'diagnostics', 'ecosystem'];
+    const sectionIds = ['overview', 'tasks', 'prescriptions', 'patients', 'diagnostics'];
     const handleScroll = () => {
       const scrollPos = window.scrollY + 120;
       for (let i = sectionIds.length - 1; i >= 0; i--) {
@@ -3459,12 +3455,6 @@ export default function DoctorPublicPortalClient({
           label: 'Platform & Services',
           icon: Award,
           badge: null
-        },
-        {
-          id: 'ecosystem',
-          label: 'Ecosystem & Collectives',
-          icon: Network,
-          badge: '4 Roles'
         }
       ]
     }
@@ -3488,14 +3478,6 @@ export default function DoctorPublicPortalClient({
       setPatientFilterMode('all');
       setPatientSearchQuery('');
       setActiveAnchor('patients');
-      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
-      if (typeof window !== 'undefined') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-      return;
-    }
-    if (id === 'ecosystem') {
-      setActiveAnchor('ecosystem');
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
       if (typeof window !== 'undefined') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4400,7 +4382,6 @@ export default function DoctorPublicPortalClient({
                 {activeAnchor === 'tasks' && `Pending To-Do Queue (${filteredTasks.length} Action Items)`}
                 {activeAnchor === 'prescriptions' && `Compounded Prescriptions Dossier (${filteredPrescriptions.length} Records)`}
                 {activeAnchor === 'patients' && `Monitored Patients Directory (${doctorPatientsList.length} Patient Dossiers)`}
-                {activeAnchor === 'ecosystem' && 'Atlas Partner Ecosystem & Collective Value Engine'}
                 {activeAnchor === 'recommendations' && 'Atlas Recommendations & Peptide Clinical Synergy'}
               </h1>
             </div>
@@ -6296,13 +6277,6 @@ export default function DoctorPublicPortalClient({
                   </div>
                 )}
               />
-            </section>
-          )}
-
-          {/* ── View 3.3: Atlas Partner Ecosystem & Collective Value Engine ── */}
-          {activeAnchor === 'ecosystem' && (
-            <section id="ecosystem" style={{ marginBottom: '24px' }}>
-              <AtlasEcosystemHubTab doctor={doctor} />
             </section>
           )}
 
