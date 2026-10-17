@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Package, CheckCircle2, ClipboardList, FileText, FlaskConical } from 'lucide-react';
+import { Package, CheckCircle2, ClipboardList, ExternalLink, FlaskConical } from 'lucide-react';
 import ProductPresentationIcon from '@/components/ui/ProductPresentationIcon';
 import { sortVariantsAscending } from '@/utils/variantSorter';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
@@ -24,7 +24,7 @@ export default function SharedCatalogProductCard({
   protocols,
   catalogMeta,
   hideMasterImage = false,
-  isPeptideCatalog = true,
+  isPeptideCatalog: _IS_PEPTIDE_CATALOG = true,
   t,
 }) {
   const cleanVariants = React.useMemo(() => {
@@ -33,27 +33,47 @@ export default function SharedCatalogProductCard({
 
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (cleanVariants[0]?.price || 0)) * fxMultiplier;
 
-  const isProductPeptide = React.useMemo(() => {
-    if (!isPeptideCatalog) return false;
+  const isProductCosmetic = React.useMemo(() => {
+    const slug = String(prod?.slug || prod?.id || '').toLowerCase();
     const cat = String(prod?.category || prod?.categoryId || '').toLowerCase();
     const type = String(prod?.productType || prod?.type || '').toLowerCase();
-    const slug = String(prod?.slug || prod?.id || '').toLowerCase();
     const name = String(prod?.canonicalName || prod?.name || prod?.title || '').toLowerCase();
-    const supp = String(prod?.supplierId || '').toLowerCase();
+    const brand = String(prod?.brand || prod?.supplierId || '').toLowerCase();
 
-    if (
-      slug.startsWith('colway-') || supp.includes('colway') ||
-      cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('trichology') ||
-      cat.includes('nutricosmetic') || cat.includes('hair') ||
-      type.includes('cosmetic') || type.includes('shampoo') || type.includes('cream') ||
-      name.includes('shampoo') || name.includes('conditioner') || name.includes('collagen') ||
-      name.includes('cream') || name.includes('peeling') || name.includes('lip care') ||
-      name.includes('wash gel') || name.includes('colvita')
-    ) {
-      return false;
-    }
-    return cat.includes('peptide') || type.includes('peptide') || Boolean(prod?.isPeptide);
-  }, [prod, isPeptideCatalog]);
+    if (slug.includes('colvita') || name.includes('colvita')) return false;
+
+    return (
+      Boolean(prod?.is_cosmetic) ||
+      Boolean(prod?.isCosmetic) ||
+      slug.startsWith('colway-') ||
+      brand.includes('colway') ||
+      cat === 'cosmetics' || cat === 'cosmetic' || cat.includes('skincare') || cat.includes('trichology') ||
+      type === 'cosmetic' || type === 'cosmetics' ||
+      name.includes('shampoo') || name.includes('conditioner') ||
+      name.includes('blue diamond') || name.includes('peeling') ||
+      name.includes('lip care') || name.includes('wash gel')
+    );
+  }, [prod]);
+
+  const isProductDiagnostic = React.useMemo(() => {
+    const slug = String(prod?.slug || prod?.id || '').toLowerCase();
+    const cat = String(prod?.category || '').toLowerCase();
+    const name = String(prod?.canonicalName || prod?.name || '').toLowerCase();
+    return (
+      slug.includes('eterna') || slug.includes('bloodo') ||
+      slug.includes('diagnostic') || cat.includes('diagnostic') ||
+      name.includes('epigenetic age') || name.includes('diagnostic test')
+    );
+  }, [prod]);
+
+  const isProductPeptide = React.useMemo(() => {
+    if (isProductCosmetic || isProductDiagnostic) return false;
+    const slug = String(prod?.slug || prod?.id || '').toLowerCase();
+    const type = String(prod?.productType || prod?.type || '').toLowerCase();
+    if (slug.includes('bacteriostatic') || slug.includes('bac-water') || type === 'solvent') return false;
+    if (slug.includes('colvita')) return false;
+    return true;
+  }, [isProductCosmetic, isProductDiagnostic, prod]);
 
   const fdaStatus = React.useMemo(() => isProductPeptide ? getFdaPeptideStatus(prod) : null, [prod, isProductPeptide]);
 
@@ -70,14 +90,17 @@ export default function SharedCatalogProductCard({
   }, [prod, catalogMeta]);
 
   const monographLabel = React.useMemo(() => {
-    if (!isProductPeptide) {
+    if (isProductCosmetic) {
       return 'Product Sheet ↗';
+    }
+    if (isProductDiagnostic) {
+      return 'Diagnostic Sheet ↗';
     }
     if (resolvedSupplier.includes('magenta')) {
       return t ? t('product.officialMonographMagenta', 'Monograph (Magenta) ↗') : 'Monograph (Magenta) ↗';
     }
     return t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗';
-  }, [resolvedSupplier, isProductPeptide, t]);
+  }, [resolvedSupplier, isProductCosmetic, isProductDiagnostic, t]);
 
   function getRelatedProtocols(product, allProtocols) {
     if (!allProtocols || allProtocols.length === 0 || !product) return [];
@@ -160,7 +183,7 @@ export default function SharedCatalogProductCard({
                     <span>{fdaStatus.shortBadge}</span>
                   </span>
                 )}
-                {!isProductPeptide && (
+                {isProductCosmetic && (
                   <span
                     className="catalog-card-fda-badge"
                     title="Formally registered on the EU Cosmetic Products Notification Portal (EC No 1223/2009)"
@@ -180,6 +203,28 @@ export default function SharedCatalogProductCard({
                   >
                     <span>✓</span>
                     <span>EU CPNP</span>
+                  </span>
+                )}
+                {isProductDiagnostic && (
+                  <span
+                    className="catalog-card-fda-badge"
+                    title="Validated Clinical Epigenetic Biomarker & Laboratory Diagnostic Panel"
+                    style={{
+                      fontSize: '0.70rem',
+                      fontWeight: 700,
+                      backgroundColor: '#eff6ff',
+                      color: '#2563eb',
+                      padding: '2.5px 7px',
+                      borderRadius: '5px',
+                      border: '1px solid #bfdbfe',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      lineHeight: 1.2
+                    }}
+                  >
+                    <span>🧬</span>
+                    <span>CLIA / CAP</span>
                   </span>
                 )}
                 {isProductPeptide && prod.purity && (
@@ -213,7 +258,7 @@ export default function SharedCatalogProductCard({
                   className="pds-catalog-monograph-btn"
                   title={monographLabel}
                 >
-                  <FileText size={13} />
+                  <ExternalLink size={13} />
                   <span>{monographLabel}</span>
                 </a>
               </div>
@@ -389,10 +434,11 @@ export default function SharedCatalogProductCard({
                         target="_blank"
                         rel="noopener noreferrer"
                         className="pds-variant-protocol-pill"
-                        title={t ? t('product.protocolDilution', 'Protocol & Dilution ↗') : 'Protocol & Dilution ↗'}
+                        title={t ? t('product.protocolDilution', 'Protocol & Dilution') : 'Protocol & Dilution'}
                       >
                         <FlaskConical size={11} />
-                        <span>{t ? t('product.protocolDilution', 'Protocol & Dilution ↗') : 'Protocol & Dilution ↗'}</span>
+                        <span>{t ? t('product.protocolDilution', 'Protocol & Dilution') : 'Protocol & Dilution'}</span>
+                        <ExternalLink size={10} style={{ marginLeft: 2 }} />
                       </a>
                     </div>
                   </div>

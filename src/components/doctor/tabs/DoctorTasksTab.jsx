@@ -154,7 +154,8 @@ export default function DoctorTasksTab({
                     type="button"
                     onClick={() => {
                       if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                        navigator.clipboard.writeText(task.whatsappMessage || '');
+                        const cleanMsg = (task.whatsappMessage || '').replace(/Dr\.\s+Dr\.\s+/gi, 'Dr. ');
+                        navigator.clipboard.writeText(cleanMsg);
                         toast.success('Clinical reminder copied to clipboard');
                       }
                     }}
@@ -175,7 +176,7 @@ export default function DoctorTasksTab({
                   </button>
                 </div>
                 <div style={{ fontSize: '0.78rem', color: '#1e293b', fontStyle: 'italic', background: '#f8fafc', padding: '8px 10px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-                  &ldquo;{task.whatsappMessage}&rdquo;
+                  &ldquo;{(task.whatsappMessage || '').replace(/Dr\.\s+Dr\.\s+/gi, 'Dr. ')}&rdquo;
                 </div>
               </div>
             )}
@@ -184,7 +185,7 @@ export default function DoctorTasksTab({
               {task.type === 'proposal_followup' ? (
                 <>
                   <a
-                    href={task.patientPhone ? `https://wa.me/${task.patientPhone.replace(/[^0-9+]/g, '')}?text=${encodeURIComponent(task.whatsappMessage || '')}` : `https://wa.me/?text=${encodeURIComponent(task.whatsappMessage || '')}`}
+                    href={task.patientPhone ? `https://wa.me/${task.patientPhone.replace(/[^0-9+]/g, '')}?text=${encodeURIComponent((task.whatsappMessage || '').replace(/Dr\.\s+Dr\.\s+/gi, 'Dr. '))}` : `https://wa.me/?text=${encodeURIComponent((task.whatsappMessage || '').replace(/Dr\.\s+Dr\.\s+/gi, 'Dr. '))}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

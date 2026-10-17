@@ -960,6 +960,17 @@ export default function DoctorPublicPortalClient({
     });
   }, [allTasks, taskFilter, searchQuery]);
 
+  // Aggregate Task Counts for Quick Facet Badges (GCP Golden Rule #22)
+  const taskCounts = useMemo(() => {
+    return {
+      all: allTasks.length,
+      proposal_followup: allTasks.filter(t => t.type === 'proposal_followup' || t.type === 'followup').length,
+      titration: allTasks.filter(t => t.type === 'titration').length,
+      refill: allTasks.filter(t => t.type === 'refill' || t.type === 'cycles').length,
+      approval: allTasks.filter(t => t.type === 'approval').length,
+    };
+  }, [allTasks]);
+
   // Unique Monitored Patients List (for quick clinical dossier filter)
   const uniquePatientList = useMemo(() => {
     const set = new Set();
@@ -1683,7 +1694,6 @@ export default function DoctorPublicPortalClient({
                 <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.86rem' }}>
                   {treatmentName}
                 </span>
-                {codeDisplay && <CopyableId value={codeDisplay} />}
                 <span
                   style={{
                     display: 'inline-flex',
@@ -1726,9 +1736,6 @@ export default function DoctorPublicPortalClient({
               <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.86rem' }}>
                 {taskActionName}
               </span>
-              {codeDisplay && (
-                <CopyableId value={codeDisplay} />
-              )}
               {isSigned ? (
                 <span
                   style={{
@@ -1787,7 +1794,10 @@ export default function DoctorPublicPortalClient({
 
         if (t.type === 'proposal_followup') {
           const patientPhone = (t.patientPhone || t.patient?.phone || '').replace(/[^0-9+]/g, '');
-          const encodedMsg = encodeURIComponent(t.whatsappMessage || `Hello ${t.patientName}, this is Dr. ${doctor.name || 'Khalid Shukri'}'s clinical practice following up on your personalized ${t.treatmentTitle || 'treatment plan'}. You can review your medical protocol here: https://atlashealth-services.com/rx/${t.code}. Please let us know if you have any questions or would like to proceed.`);
+          const cleanDocTitle = (doctor?.name || 'Khalid Shukri').replace(/^Dr\.?\s*/i, '').trim();
+          const rawMsg = (t.whatsappMessage || `Hello ${t.patientName}, this is Dr. ${cleanDocTitle}'s clinical practice following up on your personalized ${t.treatmentTitle || 'treatment plan'}. You can review your medical protocol here: https://atlashealth-services.com/rx/${t.code}. Please let us know if you have any questions or would like to proceed.`)
+            .replace(/Dr\.\s+Dr\.\s+/gi, 'Dr. ');
+          const encodedMsg = encodeURIComponent(rawMsg);
           const waUrl = patientPhone ? `https://wa.me/${patientPhone}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
 
           return (
@@ -4577,70 +4587,250 @@ export default function DoctorPublicPortalClient({
 
           {/* ── View 2: Pending Clinical Tasks & To-Do Actions (DataTable Universal) ── */}
           {activeAnchor === 'tasks' && (
-            <section
-              id="tasks"
-              style={{
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                borderRadius: '8px',
-                marginBottom: '32px',
-                boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
-                overflow: 'hidden'
-              }}
-            >
-              <div
-                style={{
-                  padding: '16px 20px',
-                  borderBottom: '1px solid #dadce0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '12px',
-                  background: '#ffffff'
-                }}
-              >
-                <div>
-                  <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Clock size={18} style={{ color: '#1a73e8' }} />
-                    <span>Patient Care To-Do List & Pending Clinical Actions</span>
-                  </h2>
-                  <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
-                    Automated clinical vigilance based on treatment schedules, phase titrations, and intake submissions.
-                  </p>
+            <section id="tasks" style={{ marginBottom: '32px' }}>
+              {/* ── Google Cloud Console Standard: 4 Queue KPI Metric Cards (Golden Rule #22) ── */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+                {/* KPI 1: Total Queue */}
+                <div
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setTaskFilter('all');
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: `1.5px solid ${taskFilter === 'all' ? '#1a73e8' : '#e2e8f0'}`,
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    boxShadow: taskFilter === 'all' ? '0 2px 6px rgba(26,115,232,0.15)' : '0 1px 2px rgba(60,64,67,0.06)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Total Queue
+                    </span>
+                    <Clock size={15} style={{ color: '#1a73e8' }} />
+                  </div>
+                  <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a' }}>
+                    {taskCounts.all}
+                  </div>
+                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                    All clinical action items
+                  </div>
                 </div>
 
-                {/* Quick Task Filter Pills */}
-                <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '3px', gap: '2px' }}>
-                  {[
-                    { id: 'all', label: 'All' },
-                    { id: 'proposal_followup', label: 'Follow-ups' },
-                    { id: 'titration', label: 'Titrations' },
-                    { id: 'refill', label: 'Refills' },
-                    { id: 'approval', label: 'Sign-offs' }
-                  ].map(f => (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => setTaskFilter(f.id)}
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '4px',
-                        border: 'none',
-                        fontSize: '0.74rem',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        background: taskFilter === f.id ? '#ffffff' : 'transparent',
-                        color: taskFilter === f.id ? '#0f172a' : '#64748b',
-                        boxShadow: taskFilter === f.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
-                        transition: 'all 0.12s'
-                      }}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
+                {/* KPI 2: Follow-ups */}
+                <div
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setTaskFilter('proposal_followup');
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: `1.5px solid ${taskFilter === 'proposal_followup' ? '#b45309' : '#e2e8f0'}`,
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    boxShadow: taskFilter === 'proposal_followup' ? '0 2px 6px rgba(180,83,9,0.15)' : '0 1px 2px rgba(60,64,67,0.06)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Proposal Follow-ups
+                    </span>
+                    <MessageCircle size={15} style={{ color: '#b45309' }} />
+                  </div>
+                  <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a' }}>
+                    {taskCounts.proposal_followup}
+                  </div>
+                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                    Awaiting patient checkout
+                  </div>
+                </div>
+
+                {/* KPI 3: Sign-offs */}
+                <div
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setTaskFilter('approval');
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: `1.5px solid ${taskFilter === 'approval' ? '#4f46e5' : '#e2e8f0'}`,
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    boxShadow: taskFilter === 'approval' ? '0 2px 6px rgba(79,70,229,0.15)' : '0 1px 2px rgba(60,64,67,0.06)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Prescription Sign-offs
+                    </span>
+                    <CheckCircle2 size={15} style={{ color: '#4f46e5' }} />
+                  </div>
+                  <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a' }}>
+                    {taskCounts.approval}
+                  </div>
+                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                    Awaiting physician authorization
+                  </div>
+                </div>
+
+                {/* KPI 4: Refills & Titrations */}
+                <div
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setTaskFilter('refill');
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: `1.5px solid ${taskFilter === 'refill' ? '#0d9488' : '#e2e8f0'}`,
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    boxShadow: taskFilter === 'refill' ? '0 2px 6px rgba(13,148,136,0.15)' : '0 1px 2px rgba(60,64,67,0.06)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#0d9488', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Refills & Titrations
+                    </span>
+                    <RefreshCw size={15} style={{ color: '#0d9488' }} />
+                  </div>
+                  <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a' }}>
+                    {taskCounts.refill + taskCounts.titration}
+                  </div>
+                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                    Adherence & cycle titrations
+                  </div>
                 </div>
               </div>
+
+              {/* ── Action Queue Table Card ── */}
+              <div
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  borderRadius: '8px',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                  overflow: 'hidden'
+                }}
+              >
+                <div
+                  style={{
+                    padding: '14px 20px',
+                    borderBottom: '1px solid #dadce0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                    background: '#ffffff'
+                  }}
+                >
+                  <div>
+                    <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Clock size={18} style={{ color: '#1a73e8' }} />
+                      <span>Patient Care To-Do List & Pending Clinical Actions</span>
+                    </h2>
+                    <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+                      Automated clinical vigilance based on treatment schedules, phase titrations, and intake submissions.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    {/* Inline Filter Search (Google Cloud Rule #7) */}
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                      <Search size={13} style={{ position: 'absolute', left: '9px', color: '#94a3b8', pointerEvents: 'none' }} />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Filter queue by patient, compound..."
+                        style={{
+                          padding: '5px 26px 5px 26px',
+                          borderRadius: '6px',
+                          border: '1px solid #dadce0',
+                          fontSize: '0.74rem',
+                          color: '#1e293b',
+                          width: '210px',
+                          background: '#ffffff',
+                          outline: 'none',
+                          transition: 'border-color 0.15s ease'
+                        }}
+                      />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          style={{
+                            position: 'absolute',
+                            right: '7px',
+                            background: 'none',
+                            border: 'none',
+                            padding: 0,
+                            cursor: 'pointer',
+                            color: '#94a3b8'
+                          }}
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Quick Task Filter Pills with Badges */}
+                    <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '3px', gap: '2px' }}>
+                      {[
+                        { id: 'all', label: 'All', count: taskCounts.all },
+                        { id: 'proposal_followup', label: 'Follow-ups', count: taskCounts.proposal_followup },
+                        { id: 'titration', label: 'Titrations', count: taskCounts.titration },
+                        { id: 'refill', label: 'Refills', count: taskCounts.refill },
+                        { id: 'approval', label: 'Sign-offs', count: taskCounts.approval }
+                      ].map(f => (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic('light');
+                            setTaskFilter(f.id);
+                          }}
+                          style={{
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            border: 'none',
+                            fontSize: '0.73rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            background: taskFilter === f.id ? '#ffffff' : 'transparent',
+                            color: taskFilter === f.id ? '#0f172a' : '#64748b',
+                            boxShadow: taskFilter === f.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                            transition: 'all 0.12s',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <span>{f.label}</span>
+                          <span style={{
+                            fontSize: '0.64rem',
+                            fontWeight: 700,
+                            padding: '0 4px',
+                            borderRadius: '99px',
+                            background: taskFilter === f.id ? '#e8f0fe' : 'rgba(0,0,0,0.05)',
+                            color: taskFilter === f.id ? '#1a73e8' : '#64748b'
+                          }}>
+                            {f.count}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
               <DataTable
                 columns={taskColumns}
@@ -4708,7 +4898,8 @@ export default function DoctorPublicPortalClient({
                             type="button"
                             onClick={() => {
                               if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                                navigator.clipboard.writeText(task.whatsappMessage || '');
+                                const cleanMsg = (task.whatsappMessage || '').replace(/Dr\.\s+Dr\.\s+/gi, 'Dr. ');
+                                navigator.clipboard.writeText(cleanMsg);
                                 toast.success('Clinical reminder copied to clipboard');
                               }
                             }}
@@ -4729,7 +4920,7 @@ export default function DoctorPublicPortalClient({
                           </button>
                         </div>
                         <div style={{ fontSize: '0.78rem', color: '#1e293b', fontStyle: 'italic', background: '#f8fafc', padding: '8px 10px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-                          &ldquo;{task.whatsappMessage}&rdquo;
+                          &ldquo;{(task.whatsappMessage || '').replace(/Dr\.\s+Dr\.\s+/gi, 'Dr. ')}&rdquo;
                         </div>
                       </div>
                     )}
@@ -4738,7 +4929,7 @@ export default function DoctorPublicPortalClient({
                       {task.type === 'proposal_followup' ? (
                         <>
                           <a
-                            href={task.patientPhone ? `https://wa.me/${task.patientPhone.replace(/[^0-9+]/g, '')}?text=${encodeURIComponent(task.whatsappMessage || '')}` : `https://wa.me/?text=${encodeURIComponent(task.whatsappMessage || '')}`}
+                            href={task.patientPhone ? `https://wa.me/${task.patientPhone.replace(/[^0-9+]/g, '')}?text=${encodeURIComponent((task.whatsappMessage || '').replace(/Dr\.\s+Dr\.\s+/gi, 'Dr. '))}` : `https://wa.me/?text=${encodeURIComponent((task.whatsappMessage || '').replace(/Dr\.\s+Dr\.\s+/gi, 'Dr. '))}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{
@@ -4807,8 +4998,9 @@ export default function DoctorPublicPortalClient({
                   </div>
                 )}
               />
-            </section>
-          )}
+            </div>
+          </section>
+        )}
 
           {/* ── View 3: Associated Clinical Prescriptions Dossier (DataTable Universal) ── */}
           {activeAnchor === 'prescriptions' && (

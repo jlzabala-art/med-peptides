@@ -121,11 +121,6 @@ export default function EternaGenomicsDetail({
         setActiveTab('overview');
       }
     };
-    if (window.location.hash) {
-      const initialHash = window.location.hash.replace('#', '').trim();
-      if (initialHash === 'inicio') setActiveTab('overview');
-      else if (initialHash) setActiveTab(initialHash);
-    }
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
@@ -617,203 +612,362 @@ export default function EternaGenomicsDetail({
            ==================================================================== */}
         <main className="eterna-main-content">
           
-          {/* ── 1. Hero Section: Tri-Device 3D Mockup ── */}
-          <section id="inicio" className="eterna-hero-section">
-            <div className="eterna-pill-tag">
-              <Dna size={13} style={{ color: 'var(--gcp-blue-light)' }} />
-              <span>{isEs ? 'Test Genético · Envío a domicilio incluido' : 'Genetic test · Home delivery included'}</span>
-            </div>
-
-            {/* Tri-Device 3D Stage (Center Desktop App + 2 Tilted Phones) */}
-            <div className="eterna-tri-device-stage">
-              {/* Left Mobile (-13deg) */}
-              <div 
-                className="eterna-floating-device-left"
-                onClick={() => handleOpenModal('/images/products/eterna/img_hero_movil_2.png', 'Eterna Mobile App - Left View')}
-                style={{ cursor: 'pointer' }}
-                title={isEs ? 'Ampliar pantalla móvil' : 'Inspect mobile screen'}
-              >
-                <div className="device-shell">
-                  <img 
-                    src="/images/products/eterna/img_hero_movil_2.png" 
-                    alt="Eterna Mobile App Screen 2" 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </div>
-              </div>
-
-              {/* Center Web App Desktop Screen */}
-              <div 
-                className="eterna-floating-device-center"
-                onClick={() => handleOpenModal('/images/products/eterna/img_hero_eterna2.png', 'Eterna DX Web Platform')}
-                style={{ cursor: 'pointer' }}
-                title={isEs ? 'Ampliar plataforma web' : 'Inspect web platform'}
-              >
-                <img 
-                  src="/images/products/eterna/img_hero_eterna2.png" 
-                  alt="Eterna DX Web App Interface" 
-                />
-              </div>
-
-              {/* Right Mobile (+13deg) */}
-              <div 
-                className="eterna-floating-device-right"
-                onClick={() => handleOpenModal('/images/products/eterna/img_hero_movil.png', 'Eterna Mobile App - Right View')}
-                style={{ cursor: 'pointer' }}
-                title={isEs ? 'Ampliar pantalla móvil' : 'Inspect mobile screen'}
-              >
-                <div className="device-shell">
-                  <img 
-                    src="/images/products/eterna/img_hero_movil.png" 
-                    alt="Eterna Mobile App Screen 1" 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Hero Main Copy */}
-            <h1 className="eterna-hero-h1">
-              {isEs ? (
-                <>Tu ADN es el mapa. <span className="mint-accent">Tu reloj, tu brújula.</span></>
-              ) : (
-                <>Your DNA is the map. <span className="mint-accent">Your watch, your compass.</span></>
-              )}
-            </h1>
-
-            <p className="eterna-hero-desc">
-              {isEs 
-                ? 'La única plataforma que reúne tu genética, proteínas, analíticas y wearable para mostrarte tus datos biológicos de forma clara y organizada.' 
-                : 'The only platform that brings together your genetics, proteins, analytics and wearable to show you your biological data clearly and in an organized way.'}
-            </p>
-
-            {/* CTAs (Strictly No Prices - Google Cloud UX) */}
-            <div className="eterna-hero-cta-group">
+          {/* GCP Single-Section Header Strip (Golden Rule) */}
+          {effectiveActiveTab !== 'overview' && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 16px',
+              background: 'var(--gcp-surface)',
+              border: '1px solid var(--gcp-border)',
+              borderRadius: '8px',
+              marginBottom: '1.5rem',
+              flexWrap: 'wrap',
+              gap: '10px'
+            }}>
               <button
                 type="button"
-                className="gcp-btn-primary"
-                onClick={() => setIsInquiryDrawerOpen(true)}
+                onClick={() => scrollToSection('overview')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  background: 'var(--gcp-surface-card)',
+                  border: '1px solid var(--gcp-border)',
+                  color: 'var(--gcp-text-primary)',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
               >
-                <span>{isEs ? 'Solicitar test genético' : 'Request your genetic test'}</span>
-                <ArrowRight size={15} />
+                <ArrowLeft size={14} />
+                <span>{isEs ? 'Volver a Visión General' : 'Back to Overview'}</span>
               </button>
-              
-              <button
-                type="button"
-                className="gcp-btn-secondary"
-                onClick={() => scrollToSection('como-funciona')}
-              >
-                <span>{isEs ? 'Cómo funciona' : 'How it works'}</span>
-                <ChevronRight size={15} />
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem' }}>
+                <span style={{ color: 'var(--gcp-text-muted)' }}>{isEs ? 'Plataforma Eterna' : 'Eterna Platform'}</span>
+                <span style={{ color: 'var(--gcp-border)' }}>/</span>
+                <span style={{ fontWeight: 700, color: 'var(--gcp-blue-light)' }}>{currentSectionObj?.label}</span>
+              </div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--gcp-text-muted)', fontFamily: 'ui-monospace, monospace' }}>
+                {isEs ? `Sección ${currentSectionIndex + 1} de ${eternaSections.length}` : `Section ${currentSectionIndex + 1} of ${eternaSections.length}`}
+              </div>
             </div>
+          )}
 
-            <div className="eterna-social-proof">
-              <span>{isEs ? '+74.500 personas midiendo su biología' : '+74,500 people measuring their biology'}</span>
-            </div>
-          </section>
+          {/* ── Section: Overview & 3D Stage (Golden Rule) ── */}
+          {effectiveActiveTab === 'overview' && (
+            <>
+              {/* ── 1. Hero Section: Tri-Device 3D Mockup ── */}
+              <section id="overview" className="eterna-hero-section">
+                <div className="eterna-pill-tag">
+                  <Dna size={13} style={{ color: 'var(--gcp-blue-light)' }} />
+                  <span>{isEs ? 'Test Genético · Envío a domicilio incluido' : 'Genetic test · Home delivery included'}</span>
+                </div>
 
-          {/* ── 2. Infinite Compatible Wearables Marquee ── */}
-          <section className="eterna-wearables-section">
-            <div className="eterna-wearables-label">
-              {isEs ? 'Compatible con' : 'Compatible with'}
-            </div>
-            
-            <div className="eterna-marquee-wrapper">
-              <div className="eterna-marquee-track">
-                {/* Render twice for seamless continuous loop */}
-                {[...wearableLogos, ...wearableLogos, ...wearableLogos].map((item, idx) => (
-                  <div key={idx} className="eterna-wearable-item" title={item.name}>
-                    <img src={item.src} alt={item.name} />
+                {/* Tri-Device 3D Stage (Center Desktop App + 2 Tilted Phones) */}
+                <div className="eterna-tri-device-stage">
+                  {/* Left Mobile (-13deg) */}
+                  <div 
+                    className="eterna-floating-device-left"
+                    onClick={() => handleOpenModal('/images/products/eterna/img_hero_movil_2.png', 'Eterna Mobile App - Left View')}
+                    style={{ cursor: 'pointer' }}
+                    title={isEs ? 'Ampliar pantalla móvil' : 'Inspect mobile screen'}
+                  >
+                    <div className="device-shell">
+                      <img 
+                        src="/images/products/eterna/img_hero_movil_2.png" 
+                        alt="Eterna Mobile App Screen 2" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </section>
 
-          {/* ── 3. Key Metric Stat Counters (692K+ / 88%) ── */}
-          <section className="eterna-stats-section">
-            <div className="eterna-stat-box">
-              <div className="eterna-stat-value amber">692K+</div>
-              <div className="eterna-stat-title">
-                {isEs ? 'polimorfismos analizados' : 'polymorphisms analyzed'}
-              </div>
-              <div className="eterna-stat-sub">
-                {isEs ? 'en cada test genético' : 'in each genetic test'}
-              </div>
-            </div>
+                  {/* Center Web App Desktop Screen */}
+                  <div 
+                    className="eterna-floating-device-center"
+                    onClick={() => handleOpenModal('/images/products/eterna/img_hero_eterna2.png', 'Eterna DX Web Platform')}
+                    style={{ cursor: 'pointer' }}
+                    title={isEs ? 'Ampliar plataforma web' : 'Inspect web platform'}
+                  >
+                    <img 
+                      src="/images/products/eterna/img_hero_eterna2.png" 
+                      alt="Eterna DX Web App Interface" 
+                    />
+                  </div>
 
-            <div className="eterna-stat-box">
-              <div className="eterna-stat-value mint">88%</div>
-              <div className="eterna-stat-title">
-                {isEs ? 'desconoce su perfil genético' : 'unaware of their genetic profile'}
+                  {/* Right Mobile (+13deg) */}
+                  <div 
+                    className="eterna-floating-device-right"
+                    onClick={() => handleOpenModal('/images/products/eterna/img_hero_movil.png', 'Eterna Mobile App - Right View')}
+                    style={{ cursor: 'pointer' }}
+                    title={isEs ? 'Ampliar pantalla móvil' : 'Inspect mobile screen'}
+                  >
+                    <div className="device-shell">
+                      <img 
+                        src="/images/products/eterna/img_hero_movil.png" 
+                        alt="Eterna Mobile App Screen 1" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hero Main Copy */}
+                <h1 className="eterna-hero-h1">
+                  {isEs ? (
+                    <>Tu ADN es el mapa. <span className="mint-accent">Tu reloj, tu brújula.</span></>
+                  ) : (
+                    <>Your DNA is the map. <span className="mint-accent">Your watch, your compass.</span></>
+                  )}
+                </h1>
+
+                <p className="eterna-hero-desc">
+                  {isEs 
+                    ? 'La única plataforma que reúne tu genética, proteínas, analíticas y wearable para mostrarte tus datos biológicos de forma clara y organizada.' 
+                    : 'The only platform that brings together your genetics, proteins, analytics and wearable to show you your biological data clearly and in an organized way.'}
+                </p>
+
+                {/* CTAs (Strictly No Prices - Google Cloud UX) */}
+                <div className="eterna-hero-cta-group">
+                  <button
+                    type="button"
+                    className="gcp-btn-primary"
+                    onClick={() => setIsInquiryDrawerOpen(true)}
+                  >
+                    <span>{isEs ? 'Solicitar test genético' : 'Request your genetic test'}</span>
+                    <ArrowRight size={15} />
+                  </button>
+                  
+                  <button
+                    type="button"
+                    className="gcp-btn-secondary"
+                    onClick={() => scrollToSection('como-funciona')}
+                  >
+                    <span>{isEs ? 'Cómo funciona' : 'How it works'}</span>
+                    <ChevronRight size={15} />
+                  </button>
+                </div>
+
+                <div className="eterna-social-proof">
+                  <span>{isEs ? '+74.500 personas midiendo su biología' : '+74,500 people measuring their biology'}</span>
+                </div>
+              </section>
+
+              {/* ── 2. Infinite Compatible Wearables Marquee ── */}
+              <section className="eterna-wearables-section">
+                <div className="eterna-wearables-label">
+                  {isEs ? 'Compatible con' : 'Compatible with'}
+                </div>
+                
+                <div className="eterna-marquee-wrapper">
+                  <div className="eterna-marquee-track">
+                    {/* Render twice for seamless continuous loop */}
+                    {[...wearableLogos, ...wearableLogos, ...wearableLogos].map((item, idx) => (
+                      <div key={idx} className="eterna-wearable-item" title={item.name}>
+                        <img src={item.src} alt={item.name} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* ── 3. Key Metric Stat Counters (692K+ / 88%) ── */}
+              <section className="eterna-stats-section">
+                <div className="eterna-stat-box">
+                  <div className="eterna-stat-value amber">692K+</div>
+                  <div className="eterna-stat-title">
+                    {isEs ? 'polimorfismos analizados' : 'polymorphisms analyzed'}
+                  </div>
+                  <div className="eterna-stat-sub">
+                    {isEs ? 'en cada test genético' : 'in each genetic test'}
+                  </div>
+                </div>
+
+                <div className="eterna-stat-box">
+                  <div className="eterna-stat-value mint">88%</div>
+                  <div className="eterna-stat-title">
+                    {isEs ? 'desconoce su perfil genético' : 'unaware of their genetic profile'}
+                  </div>
+                  <div className="eterna-stat-sub">
+                    {isEs ? 'de salud personal' : 'personal health'}
+                  </div>
+                </div>
+              </section>
+
+              {/* ── Executive Summary & Direct Jump Directory (Google Cloud UX) ── */}
+              <div className="eterna-sidebar-card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Layers size={18} color="var(--gcp-blue-light)" />
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--gcp-blue-light)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                      {isEs ? 'Directorio de Secciones de la Plataforma' : 'Platform Clinical Directory'}
+                    </span>
+                  </div>
+                  <span className="gcp-badge green" style={{ fontSize: '0.72rem' }}>
+                    CE-IVDR Accredited
+                  </span>
+                </div>
+
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff', margin: '0 0 0.5rem 0' }}>
+                  {isEs ? 'Arquitectura de Datos Genómicos & Monografías ETERNA DX' : 'Genomic Data Architecture & ETERNA DX Monograph'}
+                </h3>
+                <p style={{ fontSize: '0.82rem', color: 'var(--gcp-text-secondary)', lineHeight: 1.55, margin: '0 0 1.25rem 0' }}>
+                  {isEs 
+                    ? 'Haz clic en cualquiera de las secciones técnicas a continuación para visualizarla en pantalla completa o utiliza la barra de pestañas superior y el menú lateral.' 
+                    : 'Click any of the technical sections below to inspect it in isolated view, or use the top tabs and right sidebar navigation.'}
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  {eternaSections.filter(s => s.id !== 'overview').map((sec, idx) => {
+                    const IconComp = sec.icon || Sparkles;
+                    return (
+                      <div
+                        key={sec.id}
+                        onClick={() => scrollToSection(sec.id)}
+                        role="button"
+                        tabIndex={0}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.85rem 1.15rem',
+                          background: 'var(--gcp-surface)',
+                          border: '1px solid var(--gcp-border)',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = 'var(--gcp-blue-light)';
+                          e.currentTarget.style.backgroundColor = 'var(--gcp-surface-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = 'var(--gcp-border)';
+                          e.currentTarget.style.backgroundColor = 'var(--gcp-surface)';
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 24,
+                            height: 24,
+                            borderRadius: '4px',
+                            background: 'rgba(255,255,255,0.05)',
+                            color: 'var(--gcp-text-muted)',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            fontFamily: 'monospace'
+                          }}>
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 28,
+                            height: 28,
+                            borderRadius: '4px',
+                            background: 'var(--gcp-blue-surface)',
+                            color: 'var(--gcp-blue-light)'
+                          }}>
+                            <IconComp size={15} />
+                          </span>
+                          <div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ffffff' }}>
+                              {sec.label}
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--gcp-text-secondary)', marginTop: '2px' }}>
+                              {sec.id === 'biometrics' && (isEs ? 'Telemetría de smartwatch, ritmo de envejecimiento y biomarcadores' : 'Smartwatch telemetry, pace of aging, and live biomarker clocks')}
+                              {sec.id === 'pilares' && (isEs ? 'Deporte, Nutrición, Prevención, Longevidad y Bienestar celular' : 'Sport, Nutrition, Prevention, Longevity, and Emotional wellbeing')}
+                              {sec.id === 'snp-table' && (isEs ? 'Base de datos de polimorfismos y marcadores genéticos clave' : 'Actionable SNP database, dbSNP loci, and Illumina assay data')}
+                              {sec.id === 'como-funciona' && (isEs ? 'Proceso clínico en 4 etapas desde la toma de saliva al informe' : '4-step clinical methodology from saliva collection to actionable app')}
+                              {sec.id === 'investigacion' && (isEs ? 'Algoritmo epigenético patentado, calidad ISO y laboratorios Eurofins' : 'Proprietary epigenetic algorithm, ISO quality standards, and Eurofins lab')}
+                              {sec.id === 'integracion' && (isEs ? 'Conexión directa con protocolos terapéuticos y péptidos regenerativos' : 'Direct synergy with personalized peptide and regenerative longevity stacks')}
+                              {sec.id === 'productos' && (isEs ? 'Formatos individual, pack dúo y suite Eterna Pro para clínicas' : 'Individual kits, duo packs, and Eterna Pro B2B clinical allocation')}
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--gcp-blue-light)', fontSize: '0.76rem', fontWeight: 600 }}>
+                          <span>{isEs ? 'Inspeccionar' : 'Inspect'}</span>
+                          <ExternalLink size={13} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="eterna-stat-sub">
-                {isEs ? 'de salud personal' : 'personal health'}
-              </div>
-            </div>
-          </section>
+            </>
+          )}
 
-          {/* ── 4. Section: Your Wearable Gives Data. Eterna Gives Answers ── */}
-          <section id="biometrics" className="eterna-biometrics-section">
-            <div className="eterna-section-heading">
-              <h2 className="eterna-section-h2">
-                {isEs ? (
-                  <>Tu wearable te da datos. <span className="mint">Eterna te da respuestas.</span></>
-                ) : (
-                  <>Your wearable gives you data. <span className="mint">Eterna gives you answers.</span></>
-                )}
-              </h2>
-              <p className="eterna-section-p">
-                {isEs 
-                  ? 'Las apps de wearables muestran pasos, sueño y frecuencia cardíaca. Datos aislados sin contexto biológico. Eterna integra toda tu información con tu genética y analíticas en una vista comprensiva y accionable.' 
-                  : 'Wearable apps show steps, sleep and heart rate. Random data points with no biological context. Eterna brings all your data together with your genetics and lab tests into an organized, actionable view.'}
-              </p>
-            </div>
-
-            {/* 3 Physical Phones with Real Biometric Telemetry */}
-            <div className="eterna-phones-showcase">
-              <div 
-                className="eterna-phone-card"
-                onClick={() => handleOpenModal('/images/products/eterna/biometrica1.jpeg', 'Eterna App - Pace of Aging')}
-                title={isEs ? 'Ampliar pantalla' : 'Inspect screen'}
-                style={{ cursor: 'pointer' }}
-              >
-                <img src="/images/products/eterna/biometrica1.jpeg" alt="Biometric Telemetry 1" />
+          {/* ── Section: Biometrics & Wearables ── */}
+          {effectiveActiveTab === 'biometrics' && (
+            <section id="biometrics" className="eterna-biometrics-section">
+              <div className="eterna-section-heading">
+                <h2 className="eterna-section-h2">
+                  {isEs ? (
+                    <>Tu wearable te da datos. <span className="mint">Eterna te da respuestas.</span></>
+                  ) : (
+                    <>Your wearable gives you data. <span className="mint">Eterna gives you answers.</span></>
+                  )}
+                </h2>
+                <p className="eterna-section-p">
+                  {isEs 
+                    ? 'Las apps de wearables muestran pasos, sueño y frecuencia cardíaca. Datos aislados sin contexto biológico. Eterna integra toda tu información con tu genética y analíticas en una vista comprensiva y accionable.' 
+                    : 'Wearable apps show steps, sleep and heart rate. Random data points with no biological context. Eterna brings all your data together with your genetics and lab tests into an organized, actionable view.'}
+                </p>
               </div>
 
-              <div 
-                className="eterna-phone-card"
-                onClick={() => handleOpenModal('/images/products/eterna/biometrica2.jpeg', 'Eterna App - Longitudinal Clocks')}
-                title={isEs ? 'Ampliar pantalla' : 'Inspect screen'}
-                style={{ cursor: 'pointer' }}
-              >
-                <img src="/images/products/eterna/biometrica2.jpeg" alt="Biometric Telemetry 2" />
+              {/* 3 Physical Phones with Real Biometric Telemetry */}
+              <div className="eterna-phones-showcase">
+                <div 
+                  className="eterna-phone-card"
+                  onClick={() => handleOpenModal('/images/products/eterna/biometrica1.jpeg', 'Eterna App - Pace of Aging')}
+                  title={isEs ? 'Ampliar pantalla' : 'Inspect screen'}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <img src="/images/products/eterna/biometrica1.jpeg" alt="Biometric Telemetry 1" />
+                </div>
+
+                <div 
+                  className="eterna-phone-card"
+                  onClick={() => handleOpenModal('/images/products/eterna/biometrica2.jpeg', 'Eterna App - Longitudinal Clocks')}
+                  title={isEs ? 'Ampliar pantalla' : 'Inspect screen'}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <img src="/images/products/eterna/biometrica2.jpeg" alt="Biometric Telemetry 2" />
+                </div>
+
+                <div 
+                  className="eterna-phone-card featured"
+                  onClick={() => handleOpenModal('/images/products/eterna/biometrica5.jpeg', 'Eterna App - Biomarker Dashboard')}
+                  title={isEs ? 'Ampliar pantalla destacada' : 'Inspect featured screen'}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <img src="/images/products/eterna/biometrica5.jpeg" alt="Biometric Telemetry 5" />
+                </div>
               </div>
 
-              <div 
-                className="eterna-phone-card featured"
-                onClick={() => handleOpenModal('/images/products/eterna/biometrica5.jpeg', 'Eterna App - Biomarker Dashboard')}
-                title={isEs ? 'Ampliar pantalla destacada' : 'Inspect featured screen'}
-                style={{ cursor: 'pointer' }}
-              >
-                <img src="/images/products/eterna/biometrica5.jpeg" alt="Biometric Telemetry 5" />
+              <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                <button
+                  type="button"
+                  className="gcp-btn-secondary"
+                  onClick={() => setIsB2BPortalModalOpen(true)}
+                >
+                  <span>{isEs ? 'Explorar la app Eterna Diagnostics' : 'Discover the Eterna Diagnostics app'}</span>
+                  <ExternalLink size={14} />
+                </button>
               </div>
-            </div>
+            </section>
+          )}
 
-            <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-              <button
-                type="button"
-                className="gcp-btn-secondary"
-                onClick={() => setIsB2BPortalModalOpen(true)}
-              >
-                <span>{isEs ? 'Explorar la app Eterna Diagnostics' : 'Discover the Eterna Diagnostics app'}</span>
-                <ExternalLink size={14} />
-              </button>
-            </div>
-
-            {/* ── 5. Visualize Your Genetics & 5 Pillars ── */}
-            <div id="pilares" className="eterna-genetics-showcase">
+          {/* ── Section: 5 Genomic Pillars ── */}
+          {effectiveActiveTab === 'pilares' && (
+            <section id="pilares" className="eterna-genetics-showcase">
               <div className="eterna-genetics-header">
                 <div className="eterna-badge-kicker">
                   <Dna size={16} />
@@ -968,455 +1122,588 @@ export default function EternaGenomicsDetail({
                 </div>
 
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
-          {/* ── 5.1 Technical SNP Data Table (Google Cloud UX - Golden Rule #3) ── */}
-          <section id="snp-table" className="eterna-snp-section" style={{ marginTop: '2rem', marginBottom: '3.5rem' }}>
-            <div className="eterna-snp-table-card">
-              <div className="eterna-snp-table-header">
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <BarChart3 size={16} color="var(--gcp-blue-light)" />
-                    <strong style={{ fontSize: '0.95rem', color: '#ffffff' }}>
-                      {isEs ? 'Registro de Variantes Genómicas & SNPs Clave' : 'Key Genomic Variants & dbSNP Registry'}
-                    </strong>
-                    <span style={{ fontSize: '0.72rem', background: 'var(--gcp-blue-surface)', color: 'var(--gcp-blue-light)', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
-                      {filteredSnps.length} SNPs
-                    </span>
+          {/* ── Section: Key Genomic Variants & dbSNP Registry ── */}
+          {effectiveActiveTab === 'snp-table' && (
+            <section id="snp-table" className="eterna-snp-section" style={{ marginTop: '1rem', marginBottom: '2.5rem' }}>
+              <div className="eterna-snp-table-card">
+                <div className="eterna-snp-table-header">
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <BarChart3 size={16} color="var(--gcp-blue-light)" />
+                      <strong style={{ fontSize: '0.95rem', color: '#ffffff' }}>
+                        {isEs ? 'Registro de Variantes Genómicas & SNPs Clave' : 'Key Genomic Variants & dbSNP Registry'}
+                      </strong>
+                      <span style={{ fontSize: '0.72rem', background: 'var(--gcp-blue-surface)', color: 'var(--gcp-blue-light)', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                        {filteredSnps.length} SNPs
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.76rem', color: 'var(--gcp-text-muted)', marginTop: '4px' }}>
+                      {isEs 
+                        ? 'Polimorfismos clínicamente accionables analizados en la secuenciación Illumina Infinium GSA' 
+                        : 'Clinically actionable polymorphisms genotyped via Illumina Infinium GSA assay'}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.76rem', color: 'var(--gcp-text-muted)', marginTop: '4px' }}>
-                    {isEs 
-                      ? 'Polimorfismos clínicamente accionables analizados en la secuenciación Illumina Infinium GSA' 
-                      : 'Clinically actionable polymorphisms genotyped via Illumina Infinium GSA assay'}
-                  </div>
-                </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                  {/* Pillar filter */}
-                  <select
-                    value={selectedPillarFilter}
-                    onChange={(e) => setSelectedPillarFilter(e.target.value)}
-                    style={{
-                      background: 'var(--gcp-surface)',
-                      border: '1px solid var(--gcp-border)',
-                      color: 'var(--gcp-text-primary)',
-                      borderRadius: '4px',
-                      padding: '6px 10px',
-                      fontSize: '0.78rem',
-                      fontFamily: 'inherit',
-                      outline: 'none',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <option value="all">{isEs ? 'Todos los Dominios (5)' : 'All Domains (5)'}</option>
-                    <option value="sport">{isEs ? 'Deporte & Fuerza' : 'Sport & Performance'}</option>
-                    <option value="nutrition">{isEs ? 'Nutrición & Metabolismo' : 'Nutrition & Metabolism'}</option>
-                    <option value="prevention">{isEs ? 'Prevención Cardiovascular' : 'Cardiovascular Prevention'}</option>
-                    <option value="longevity">{isEs ? 'Longevidad & Senescencia' : 'Longevity & Autophagy'}</option>
-                    <option value="social">{isEs ? 'Bienestar & Sueño' : 'Wellbeing & Sleep'}</option>
-                  </select>
-
-                  {/* Search input */}
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <Search size={14} style={{ position: 'absolute', left: '10px', color: 'var(--gcp-text-muted)' }} />
-                    <input
-                      type="text"
-                      value={snpSearch}
-                      onChange={(e) => setSnpSearch(e.target.value)}
-                      placeholder={isEs ? 'Buscar gen o rsID...' : 'Search gene or rsID...'}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    {/* Pillar filter */}
+                    <select
+                      value={selectedPillarFilter}
+                      onChange={(e) => setSelectedPillarFilter(e.target.value)}
                       style={{
                         background: 'var(--gcp-surface)',
                         border: '1px solid var(--gcp-border)',
                         color: 'var(--gcp-text-primary)',
                         borderRadius: '4px',
-                        padding: '6px 10px 6px 30px',
+                        padding: '6px 10px',
                         fontSize: '0.78rem',
                         fontFamily: 'inherit',
                         outline: 'none',
-                        width: '180px'
+                        cursor: 'pointer'
                       }}
-                    />
+                    >
+                      <option value="all">{isEs ? 'Todos los Dominios (5)' : 'All Domains (5)'}</option>
+                      <option value="sport">{isEs ? 'Deporte & Fuerza' : 'Sport & Performance'}</option>
+                      <option value="nutrition">{isEs ? 'Nutrición & Metabolismo' : 'Nutrition & Metabolism'}</option>
+                      <option value="prevention">{isEs ? 'Prevención Cardiovascular' : 'Cardiovascular Prevention'}</option>
+                      <option value="longevity">{isEs ? 'Longevidad & Senescencia' : 'Longevity & Autophagy'}</option>
+                      <option value="social">{isEs ? 'Bienestar & Sueño' : 'Wellbeing & Sleep'}</option>
+                    </select>
+
+                    {/* Search input */}
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                      <Search size={14} style={{ position: 'absolute', left: '10px', color: 'var(--gcp-text-muted)' }} />
+                      <input
+                        type="text"
+                        value={snpSearch}
+                        onChange={(e) => setSnpSearch(e.target.value)}
+                        placeholder={isEs ? 'Buscar gen o rsID...' : 'Search gene or rsID...'}
+                        style={{
+                          background: 'var(--gcp-surface)',
+                          border: '1px solid var(--gcp-border)',
+                          color: 'var(--gcp-text-primary)',
+                          borderRadius: '4px',
+                          padding: '6px 10px 6px 30px',
+                          fontSize: '0.78rem',
+                          fontFamily: 'inherit',
+                          outline: 'none',
+                          width: '180px'
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="eterna-table-container">
+                  <DataTable
+                    columns={snpColumns}
+                    data={filteredSnps}
+                    keyField="id"
+                    emptyMessage={isEs ? 'No se encontraron variantes que coincidan con la búsqueda.' : 'No genetic variants matching filter criteria.'}
+                  />
+                </div>
+
+                <div style={{ padding: '8px 14px', background: 'var(--gcp-surface-card)', borderTop: '1px solid var(--gcp-border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: 'var(--gcp-text-muted)' }}>
+                  <span>{isEs ? 'Base de Referencia: GRCh38 / Ensembl dbSNP 155' : 'Reference Genome: GRCh38 / Ensembl dbSNP 155'}</span>
+                  <span style={{ fontFamily: 'ui-monospace, monospace' }}>Illumina Infinium Global Screening Array v3.0</span>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ── Section: How It Works (4-Step Process) ── */}
+          {effectiveActiveTab === 'como-funciona' && (
+            <section id="como-funciona" className="eterna-process-section">
+              <div className="eterna-section-heading">
+                <div className="eterna-badge-kicker">
+                  <Clock size={15} />
+                  <span>{isEs ? 'Metodología' : 'Process'}</span>
+                </div>
+                <h2 className="eterna-section-h2">
+                  {isEs ? 'Cómo funciona' : 'How it works'}
+                </h2>
+                <p className="eterna-section-p">
+                  {isEs 
+                    ? 'Desde una toma de saliva no invasiva hasta decisiones que transforman tu salud celular y longevidad.' 
+                    : 'From a non-invasive saliva sample to decisions that change your health and biological age trajectory.'}
+                </p>
+              </div>
+
+              <div className="eterna-process-grid">
+                {processSteps.map((stepItem, idx) => (
+                  <div key={idx} className="eterna-process-card">
+                    <div className="eterna-process-icon-box">
+                      <img src={stepItem.icon} alt={stepItem.title} />
+                    </div>
+                    <div className="eterna-process-step-num">{stepItem.step}</div>
+                    <h3 className="eterna-process-card-h3">{stepItem.title}</h3>
+                    <p className="eterna-process-card-p">{stepItem.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+                <button
+                  type="button"
+                  className="gcp-btn-primary"
+                  onClick={() => setIsInquiryDrawerOpen(true)}
+                >
+                  <span>{isEs ? 'Solicitar Kit · Envío Incluido' : 'Request Kit · Shipping Included'}</span>
+                  <ArrowRight size={15} />
+                </button>
+              </div>
+            </section>
+          )}
+
+          {/* ── Section: Scientific Quality & Backing ── */}
+          {effectiveActiveTab === 'investigacion' && (
+            <section id="investigacion" className="eterna-science-section">
+              <div className="eterna-section-heading">
+                <div className="eterna-badge-kicker">
+                  <ShieldCheck size={16} />
+                  <span>{isEs ? 'Respaldo Científico' : 'Scientific Backing'}</span>
+                </div>
+                <h2 className="eterna-section-h2">
+                  {isEs ? 'Investigación propia y rigor molecular' : 'In-house research'}
+                </h2>
+                <p className="eterna-section-p">
+                  {isEs 
+                    ? 'Desarrollamos ciencia traslacional avanzada para ofrecerte respuestas reproducibles, validadas y clínicamente contrastadas.' 
+                    : 'We develop advanced multi-omics science to give you reliable, reproducible and actionable clinical answers.'}
+                </p>
+              </div>
+
+              {/* Stacked lines instead of cards for 3 items (Golden Rule) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginTop: '1.5rem', marginBottom: '1.75rem' }}>
+                <div style={{
+                  background: 'var(--gcp-surface)',
+                  border: '1px solid var(--gcp-border)',
+                  borderRadius: '6px',
+                  padding: '1.15rem 1.25rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '1rem'
+                }}>
+                  <div className="eterna-science-card-icon" style={{ flexShrink: 0, marginTop: '2px' }}>
+                    <Activity size={20} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                      <h3 className="eterna-science-card-title" style={{ margin: 0, fontSize: '0.95rem' }}>
+                        {isEs ? 'Fundamento Científico' : 'Scientific foundation'}
+                      </h3>
+                      <span className="gcp-badge blue" style={{ fontSize: '0.72rem' }}>PATENTED ALGORITHM</span>
+                    </div>
+                    <p className="eterna-science-card-text" style={{ margin: 0, fontSize: '0.82rem', lineHeight: 1.55 }}>
+                      {isEs 
+                        ? 'Algoritmo proteómico y epigenético propietario patentado. Desarrollado en colaboración directa con departamentos de genética de universidades europeas líderes.' 
+                        : 'Proprietary patented proteomic and epigenetic algorithms developed in direct collaboration with European university genomics faculties.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{
+                  background: 'var(--gcp-surface)',
+                  border: '1px solid var(--gcp-border)',
+                  borderRadius: '6px',
+                  padding: '1.15rem 1.25rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '1rem'
+                }}>
+                  <div className="eterna-science-card-icon" style={{ flexShrink: 0, marginTop: '2px' }}>
+                    <Dna size={20} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                      <h3 className="eterna-science-card-title" style={{ margin: 0, fontSize: '0.95rem' }}>
+                        {isEs ? 'Trayectoria e I+D' : 'Scientific track record'}
+                      </h3>
+                      <span className="gcp-badge amber" style={{ fontSize: '0.72rem' }}>MULTIDISCIPLINARY R&D</span>
+                    </div>
+                    <p className="eterna-science-card-text" style={{ margin: 0, fontSize: '0.82rem', lineHeight: 1.55 }}>
+                      {isEs 
+                        ? 'Equipo multidisciplinar de biólogos moleculares, bioinformáticos y clínicos especializados en biomarcadores de senescencia celular y medicina de precisión.' 
+                        : 'Multidisciplinary research consortium of molecular biologists, bioinformaticians and clinicians specialized in senescence biomarkers.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{
+                  background: 'var(--gcp-surface)',
+                  border: '1px solid var(--gcp-border)',
+                  borderRadius: '6px',
+                  padding: '1.15rem 1.25rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '1rem'
+                }}>
+                  <div className="eterna-science-card-icon" style={{ flexShrink: 0, marginTop: '2px' }}>
+                    <Layers size={20} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                      <h3 className="eterna-science-card-title" style={{ margin: 0, fontSize: '0.95rem' }}>
+                        {isEs ? 'Kit Certificado CE-IVD' : 'Certified collection kit'}
+                      </h3>
+                      <span className="gcp-badge green" style={{ fontSize: '0.72rem' }}>CE-IVD BUFFER 24M</span>
+                    </div>
+                    <p className="eterna-science-card-text" style={{ margin: 0, fontSize: '0.82rem', lineHeight: 1.55 }}>
+                      {isEs 
+                        ? 'Dispositivo de recolección de saliva certificado CE-IVD con buffer estabilizador a temperatura ambiente (estable hasta 24 meses sin degradación).' 
+                        : 'CE-IVD marked sample collection kit with room-temperature preservative buffer preserving nucleic acid integrity up to 24 months.'}
+                    </p>
                   </div>
                 </div>
               </div>
 
-              <div className="eterna-table-container">
-                <DataTable
-                  columns={snpColumns}
-                  data={filteredSnps}
-                  keyField="id"
-                  emptyMessage={isEs ? 'No se encontraron variantes que coincidan con la búsqueda.' : 'No genetic variants matching filter criteria.'}
-                />
+              {/* Quality Standard Badges */}
+              <div className="eterna-cert-badges-row">
+                <div className="eterna-cert-pill">
+                  <ShieldCheck size={14} color="#81c995" />
+                  <span>ISO 13485:2016 {isEs ? 'Dispositivos de Diagnóstico' : 'Medical Devices'}</span>
+                </div>
+                <div className="eterna-cert-pill">
+                  <ShieldCheck size={14} color="#81c995" />
+                  <span>ISO 9001:2015 {isEs ? 'Gestión de Calidad' : 'Quality Management'}</span>
+                </div>
+                <div className="eterna-cert-pill">
+                  <CheckCircle2 size={14} color="#8ab4f8" />
+                  <span>Illumina Infinium GSA {isEs ? 'Tecnología de Secuenciación' : 'Genotyping Array'}</span>
+                </div>
+                <div className="eterna-cert-pill">
+                  <CheckCircle2 size={14} color="#8ab4f8" />
+                  <span>{isEs ? '100% Conforme GDPR · Datos Encriptados' : '100% GDPR Compliant · Encrypted'}</span>
+                </div>
               </div>
 
-              <div style={{ padding: '8px 14px', background: 'var(--gcp-surface-card)', borderTop: '1px solid var(--gcp-border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: 'var(--gcp-text-muted)' }}>
-                <span>{isEs ? 'Base de Referencia: GRCh38 / Ensembl dbSNP 155' : 'Reference Genome: GRCh38 / Ensembl dbSNP 155'}</span>
-                <span style={{ fontFamily: 'ui-monospace, monospace' }}>Illumina Infinium Global Screening Array v3.0</span>
-              </div>
-            </div>
-          </section>
-
-          {/* ── 6. Section: How It Works (4-Step Process with Official Icons) ── */}
-          <section id="como-funciona" className="eterna-process-section">
-            <div className="eterna-section-heading">
-              <div className="eterna-badge-kicker">
-                <Clock size={15} />
-                <span>{isEs ? 'Metodología' : 'Process'}</span>
-              </div>
-              <h2 className="eterna-section-h2">
-                {isEs ? 'Cómo funciona' : 'How it works'}
-              </h2>
-              <p className="eterna-section-p">
+              {/* Medical Disclaimer Note */}
+              <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.76rem', color: 'var(--gcp-text-muted)', maxWidth: '780px', margin: '1.5rem auto 0' }}>
                 {isEs 
-                  ? 'Desde una toma de saliva no invasiva hasta decisiones que transforman tu salud celular y longevidad.' 
-                  : 'From a non-invasive saliva sample to decisions that change your health and biological age trajectory.'}
-              </p>
-            </div>
+                  ? 'Información importante: Esta prueba proporciona información de bienestar genético y no constituye un diagnóstico médico sustitutivo de la valoración de un profesional de la salud colegiado.' 
+                  : 'Important notice: This test provides personalized genetic wellness intelligence and does not replace medical diagnosis by a licensed healthcare professional.'}
+              </div>
+            </section>
+          )}
 
-            <div className="eterna-process-grid">
-              {processSteps.map((stepItem, idx) => (
-                <div key={idx} className="eterna-process-card">
-                  <div className="eterna-process-icon-box">
-                    <img src={stepItem.icon} alt={stepItem.title} />
+          {/* ── Section: Clinical Protocol Integration ── */}
+          {effectiveActiveTab === 'integracion' && (
+            <section id="integracion" className="eterna-integration-section" style={{ marginTop: '1rem', marginBottom: '2.5rem' }}>
+              <div className="eterna-section-heading">
+                <div className="eterna-badge-kicker">
+                  <Activity size={15} />
+                  <span>{isEs ? 'Medicina Traslacional' : 'Translational Medicine'}</span>
+                </div>
+                <h2 className="eterna-section-h2">
+                  {isEs ? 'Integración Directa con Protocolos Clínicos' : 'Direct Integration with Clinical Protocols'}
+                </h2>
+                <p className="eterna-section-p">
+                  {isEs 
+                    ? 'Los hallazgos del test Eterna no se quedan en datos teóricos. Se conectan directamente con protocolos peptídicos y de medicina regenerativa validados en la plataforma Atlas Health.' 
+                    : 'Eterna DNA findings do not remain abstract data. They directly bridge to clinically validated peptide and longevity protocols within the Atlas Health ecosystem.'}
+                </p>
+              </div>
+
+              {/* Stacked lines instead of cards for 3 items (Golden Rule) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginTop: '1.5rem' }}>
+                <div style={{
+                  background: 'var(--gcp-surface)',
+                  border: '1px solid var(--gcp-border)',
+                  borderRadius: '6px',
+                  padding: '1.15rem 1.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1.25rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <div style={{ flex: '1 1 340px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <span className="eterna-gene-tag">FOXO3 / SIRT1</span>
+                      <StatusBadge status="active" />
+                    </div>
+                    <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '2px 0 4px', fontWeight: 600 }}>
+                      {isEs ? 'Protocolo de Senescencia & Autofagia' : 'Senescence & Autophagy Protocol'}
+                    </h4>
+                    <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
+                      {isEs 
+                        ? 'Activación de telomerasa y reparación celular vía Epitalon + NAD+ bi-semanal con monitorización de longitud telomérica.' 
+                        : 'Telomerase upregulation and DNA repair via bi-weekly Epitalon + NAD+ protocol guided by baseline senescence metrics.'}
+                    </p>
                   </div>
-                  <div className="eterna-process-step-num">{stepItem.step}</div>
-                  <h3 className="eterna-process-card-h3">{stepItem.title}</h3>
-                  <p className="eterna-process-card-p">{stepItem.desc}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span className="gcp-badge blue" style={{ fontSize: '0.74rem' }}>Epitalon + NAD+</span>
+                    <button
+                      type="button"
+                      className="gcp-btn-secondary"
+                      style={{ padding: '6px 12px', fontSize: '0.76rem' }}
+                      onClick={() => setIsInquiryDrawerOpen(true)}
+                    >
+                      <span>{isEs ? 'Consultar Protocolo' : 'Inquire Protocol'}</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
-              <button
-                type="button"
-                className="gcp-btn-primary"
-                onClick={() => setIsInquiryDrawerOpen(true)}
-              >
-                <span>{isEs ? 'Solicitar Kit · Envío Incluido' : 'Request Kit · Shipping Included'}</span>
-                <ArrowRight size={15} />
-              </button>
-            </div>
-          </section>
-
-          {/* ── 7. In-House Research & Scientific Quality ── */}
-          <section id="investigacion" className="eterna-science-section">
-            <div className="eterna-section-heading">
-              <div className="eterna-badge-kicker">
-                <ShieldCheck size={16} />
-                <span>{isEs ? 'Respaldo Científico' : 'Scientific Backing'}</span>
-              </div>
-              <h2 className="eterna-section-h2">
-                {isEs ? 'Investigación propia y rigor molecular' : 'In-house research'}
-              </h2>
-              <p className="eterna-section-p">
-                {isEs 
-                  ? 'Desarrollamos ciencia traslacional avanzada para ofrecerte respuestas reproducibles, validadas y clínicamente contrastadas.' 
-                  : 'We develop advanced multi-omics science to give you reliable, reproducible and actionable clinical answers.'}
-              </p>
-            </div>
-
-            <div className="eterna-science-cards-grid">
-              <div className="eterna-science-card">
-                <div className="eterna-science-card-icon">
-                  <Activity size={22} />
+                <div style={{
+                  background: 'var(--gcp-surface)',
+                  border: '1px solid var(--gcp-border)',
+                  borderRadius: '6px',
+                  padding: '1.15rem 1.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1.25rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <div style={{ flex: '1 1 340px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <span className="eterna-gene-tag">ACTN3 / MSTN</span>
+                      <StatusBadge status="active" />
+                    </div>
+                    <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '2px 0 4px', fontWeight: 600 }}>
+                      {isEs ? 'Protocolo Musculoesquelético & Cargas' : 'Musculoskeletal Load Protocol'}
+                    </h4>
+                    <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
+                      {isEs 
+                        ? 'Sinergia de reparación tisular con BPC-157 + TB-500 adaptada a la tasa intrínseca de daño muscular según alelo R577X.' 
+                        : 'Targeted tissue repair synergy combining BPC-157 + TB-500 calibrated to individual mechanical muscle strain risk.'}
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span className="gcp-badge green" style={{ fontSize: '0.74rem' }}>BPC-157 + TB-500</span>
+                    <button
+                      type="button"
+                      className="gcp-btn-secondary"
+                      style={{ padding: '6px 12px', fontSize: '0.76rem' }}
+                      onClick={() => setIsInquiryDrawerOpen(true)}
+                    >
+                      <span>{isEs ? 'Consultar Protocolo' : 'Inquire Protocol'}</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
                 </div>
-                <h3 className="eterna-science-card-title">
-                  {isEs ? 'Fundamento Científico' : 'Scientific foundation'}
-                </h3>
-                <p className="eterna-science-card-text">
-                  {isEs 
-                    ? 'Algoritmo proteómico y epigenético propietario patentado. Desarrollado en colaboración directa con departamentos de genética de universidades europeas líderes.' 
-                    : 'Proprietary patented proteomic and epigenetic algorithms developed in direct collaboration with European university genomics faculties.'}
-                </p>
-              </div>
 
-              <div className="eterna-science-card">
-                <div className="eterna-science-card-icon">
-                  <Dna size={22} />
+                <div style={{
+                  background: 'var(--gcp-surface)',
+                  border: '1px solid var(--gcp-border)',
+                  borderRadius: '6px',
+                  padding: '1.15rem 1.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1.25rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <div style={{ flex: '1 1 340px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <span className="eterna-gene-tag">CLOCK / PER2</span>
+                      <StatusBadge status="active" />
+                    </div>
+                    <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '2px 0 4px', fontWeight: 600 }}>
+                      {isEs ? 'Protocolo Circadiano & Pineal' : 'Circadian & Pineal Optimization'}
+                    </h4>
+                    <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
+                      {isEs 
+                        ? 'Regulación del eje hipotálamo-pineal mediante péptido inductor del sueño profundo (DSIP) y modulación de cronotipo.' 
+                        : 'Hypothalamic-pineal regulation utilizing Deep Sleep Inducing Peptide (DSIP) aligned with circadian gene expression.'}
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span className="gcp-badge amber" style={{ fontSize: '0.74rem' }}>DSIP Peptide</span>
+                    <button
+                      type="button"
+                      className="gcp-btn-secondary"
+                      style={{ padding: '6px 12px', fontSize: '0.76rem' }}
+                      onClick={() => setIsInquiryDrawerOpen(true)}
+                    >
+                      <span>{isEs ? 'Consultar Protocolo' : 'Inquire Protocol'}</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
                 </div>
-                <h3 className="eterna-science-card-title">
-                  {isEs ? 'Trayectoria e I+D' : 'Scientific track record'}
-                </h3>
-                <p className="eterna-science-card-text">
-                  {isEs 
-                    ? 'Equipo multidisciplinar de biólogos moleculares, bioinformáticos y clínicos especializados en biomarcadores de senescencia celular y medicina de precisión.' 
-                    : 'Multidisciplinary research consortium of molecular biologists, bioinformaticians and clinicians specialized in senescence biomarkers.'}
-                </p>
               </div>
+            </section>
+          )}
 
-              <div className="eterna-science-card">
-                <div className="eterna-science-card-icon">
-                  <Layers size={22} />
-                </div>
-                <h3 className="eterna-science-card-title">
-                  {isEs ? 'Kit Certificado CE-IVD' : 'Certified collection kit'}
-                </h3>
-                <p className="eterna-science-card-text">
-                  {isEs 
-                    ? 'Dispositivo de recolección de saliva certificado CE-IVD con buffer estabilizador a temperatura ambiente (estable hasta 24 meses sin degradación).' 
-                    : 'CE-IVD marked sample collection kit with room-temperature preservative buffer preserving nucleic acid integrity up to 24 months.'}
-                </p>
-              </div>
-            </div>
-
-            {/* Quality Standard Badges */}
-            <div className="eterna-cert-badges-row">
-              <div className="eterna-cert-pill">
-                <ShieldCheck size={14} color="#81c995" />
-                <span>ISO 13485:2016 {isEs ? 'Dispositivos de Diagnóstico' : 'Medical Devices'}</span>
-              </div>
-              <div className="eterna-cert-pill">
-                <ShieldCheck size={14} color="#81c995" />
-                <span>ISO 9001:2015 {isEs ? 'Gestión de Calidad' : 'Quality Management'}</span>
-              </div>
-              <div className="eterna-cert-pill">
-                <CheckCircle2 size={14} color="#8ab4f8" />
-                <span>Illumina Infinium GSA {isEs ? 'Tecnología de Secuenciación' : 'Genotyping Array'}</span>
-              </div>
-              <div className="eterna-cert-pill">
-                <CheckCircle2 size={14} color="#8ab4f8" />
-                <span>{isEs ? '100% Conforme GDPR · Datos Encriptados' : '100% GDPR Compliant · Encrypted'}</span>
-              </div>
-            </div>
-
-            {/* Medical Disclaimer Note */}
-            <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.76rem', color: 'var(--gcp-text-muted)', maxWidth: '780px', margin: '1.5rem auto 0' }}>
-              {isEs 
-                ? 'Información importante: Esta prueba proporciona información de bienestar genético y no constituye un diagnóstico médico sustitutivo de la valoración de un profesional de la salud colegiado.' 
-                : 'Important notice: This test provides personalized genetic wellness intelligence and does not replace medical diagnosis by a licensed healthcare professional.'}
-            </div>
-          </section>
-
-          {/* ── 7.1 Clinical Protocol Integration Section ── */}
-          <section id="integracion" className="eterna-integration-section" style={{ marginTop: '2.5rem', marginBottom: '3.5rem' }}>
-            <div className="eterna-section-heading">
-              <div className="eterna-badge-kicker">
-                <Activity size={15} />
-                <span>{isEs ? 'Medicina Traslacional' : 'Translational Medicine'}</span>
-              </div>
-              <h2 className="eterna-section-h2">
-                {isEs ? 'Integración Directa con Protocolos Clínicos' : 'Direct Integration with Clinical Protocols'}
-              </h2>
-              <p className="eterna-section-p">
-                {isEs 
-                  ? 'Los hallazgos del test Eterna no se quedan en datos teóricos. Se conectan directamente con protocolos peptídicos y de medicina regenerativa validados en la plataforma Atlas Health.' 
-                  : 'Eterna DNA findings do not remain abstract data. They directly bridge to clinically validated peptide and longevity protocols within the Atlas Health ecosystem.'}
-              </p>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
-              <div style={{ background: 'var(--gcp-surface)', border: '1px solid var(--gcp-border)', borderRadius: '6px', padding: '1.25rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span className="eterna-gene-tag">FOXO3 / SIRT1</span>
-                  <StatusBadge status="active" />
-                </div>
-                <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '4px 0 6px' }}>
-                  {isEs ? 'Protocolo de Senescencia & Autofagia' : 'Senescence & Autophagy Protocol'}
-                </h4>
-                <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
-                  {isEs 
-                    ? 'Activación de telomerasa y reparación celular vía Epitalon + NAD+ bi-semanal con monitorización de longitud telomérica.' 
-                    : 'Telomerase upregulation and DNA repair via bi-weekly Epitalon + NAD+ protocol guided by baseline senescence metrics.'}
-                </p>
-              </div>
-
-              <div style={{ background: 'var(--gcp-surface)', border: '1px solid var(--gcp-border)', borderRadius: '6px', padding: '1.25rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span className="eterna-gene-tag">ACTN3 / MSTN</span>
-                  <StatusBadge status="active" />
-                </div>
-                <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '4px 0 6px' }}>
-                  {isEs ? 'Protocolo Musculoesquelético & Cargas' : 'Musculoskeletal Load Protocol'}
-                </h4>
-                <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
-                  {isEs 
-                    ? 'Sinergia de reparación tisular con BPC-157 + TB-500 adaptada a la tasa intrínseca de daño muscular según alelo R577X.' 
-                    : 'Targeted tissue repair synergy combining BPC-157 + TB-500 calibrated to individual mechanical muscle strain risk.'}
-                </p>
-              </div>
-
-              <div style={{ background: 'var(--gcp-surface)', border: '1px solid var(--gcp-border)', borderRadius: '6px', padding: '1.25rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span className="eterna-gene-tag">CLOCK / PER2</span>
-                  <StatusBadge status="active" />
-                </div>
-                <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '4px 0 6px' }}>
-                  {isEs ? 'Protocolo Circadiano & Pineal' : 'Circadian & Pineal Optimization'}
-                </h4>
-                <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
-                  {isEs 
-                    ? 'Regulación del eje hipotálamo-pineal mediante péptido inductor del sueño profundo (DSIP) y modulación de cronotipo.' 
-                    : 'Hypothalamic-pineal regulation utilizing Deep Sleep Inducing Peptide (DSIP) aligned with circadian gene expression.'}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* ── 8. Product Suite Catalog (STRICTLY NO PRICES) ── */}
-          <section id="productos" className="eterna-catalog-section">
-            <div className="eterna-section-heading">
-              <div className="eterna-badge-kicker">
-                <Package size={15} />
-                <span>{isEs ? 'Gama Eterna DX' : 'Product Suite'}</span>
-              </div>
-              <h2 className="eterna-section-h2">
-                {isEs ? 'Elige cómo quieres comprender tu biología' : 'Choose how you want to understand your biology'}
-              </h2>
-              <p className="eterna-section-p">
-                {isEs 
-                  ? 'Soluciones integrales de genómica y monitorización longitudinal para pacientes individuales, parejas y clínicas médicas.' 
-                  : 'Comprehensive genomics and longitudinal monitoring solutions for individuals, families, and clinical practices.'}
-              </p>
-            </div>
-
-            {/* 3 Tier Cards (Strictly No Prices - Google Cloud UX) */}
-            <div className="eterna-tiers-grid">
-              
-              {/* Tier 1: Individual Kit */}
-              <div className="eterna-tier-card">
-                <h3 className="eterna-tier-title">{isEs ? 'Test Genético Individual' : 'Individual Genetic Test'}</h3>
-                <div className="eterna-tier-subtitle">
-                  {isEs ? 'Analiza tu ADN una sola vez en la vida con acceso continuo a la plataforma.' : 'Analyze your DNA once in a lifetime with continuous telemetry access.'}
-                </div>
-                <ul className="eterna-tier-features">
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? '1 Kit de toma de saliva CE-IVD' : '1 CE-IVD Saliva collection kit'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? '+700.000 variantes genéticas analizadas' : '+700,000 genetic SNPs analyzed'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Informe interactivo en app de por vida' : 'Lifetime interactive report in app'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Descarga de datos brutos (.raw / .txt)' : 'Downloadable raw data (.raw / .txt)'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Envío y recogida a domicilio incluidos' : 'Home delivery and pickup included'}</span>
-                  </li>
-                </ul>
-                <button
-                  type="button"
-                  className="gcp-btn-primary"
-                  style={{ width: '100%' }}
-                  onClick={() => setIsInquiryDrawerOpen(true)}
-                >
+          {/* ── Section: Product Suite Catalog (STRICTLY NO PRICES) ── */}
+          {effectiveActiveTab === 'productos' && (
+            <section id="productos" className="eterna-catalog-section">
+              <div className="eterna-section-heading">
+                <div className="eterna-badge-kicker">
                   <Package size={15} />
-                  <span>{isEs ? 'Solicitar Kit Individual' : 'Request Individual Kit'}</span>
-                </button>
-              </div>
-
-              {/* Tier 2: Pack Dúo (Featured) */}
-              <div className="eterna-tier-card featured">
-                <span className="eterna-tier-badge">{isEs ? 'Más Solicitado' : 'Most Popular'}</span>
-                <h3 className="eterna-tier-title">{isEs ? 'Pack Dúo' : 'Duo Pack'}</h3>
-                <div className="eterna-tier-subtitle">
-                  {isEs ? '2 kits completos de toma de saliva con analítica independiente para cada usuario.' : '2 complete saliva kits with separate independent genomic reports for each person.'}
+                  <span>{isEs ? 'Gama Eterna DX' : 'Product Suite'}</span>
                 </div>
-                <ul className="eterna-tier-features">
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? '2 Kits de recolección de saliva' : '2 Saliva collection kits included'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Cuentas independientes en App Eterna' : 'Independent accounts in Eterna App'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Sincronización simultánea de wearables' : 'Simultaneous wearable smartwatch syncing'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Secuenciación Illumina Eurofins completa' : 'Full Illumina Eurofins sequencing'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Soporte prioritario de interpretación' : 'Priority clinical support'}</span>
-                  </li>
-                </ul>
-                <button
-                  type="button"
-                  className="gcp-btn-primary"
-                  style={{ width: '100%' }}
-                  onClick={() => setIsInquiryDrawerOpen(true)}
-                >
-                  <Package size={15} />
-                  <span>{isEs ? 'Solicitar Pack Dúo' : 'Request Duo Pack'}</span>
-                </button>
+                <h2 className="eterna-section-h2">
+                  {isEs ? 'Elige cómo quieres comprender tu biología' : 'Choose how you want to understand your biology'}
+                </h2>
+                <p className="eterna-section-p">
+                  {isEs 
+                    ? 'Soluciones integrales de genómica y monitorización longitudinal para pacientes individuales, parejas y clínicas médicas.' 
+                    : 'Comprehensive genomics and longitudinal monitoring solutions for individuals, families, and clinical practices.'}
+                </p>
               </div>
 
-              {/* Tier 3: Eterna Pro Longitudinal */}
-              <div className="eterna-tier-card">
-                <h3 className="eterna-tier-title">{isEs ? 'Eterna Pro (Clínicas & Médicos)' : 'Eterna Pro (Clinical Practice)'}</h3>
-                <div className="eterna-tier-subtitle">
-                  {isEs ? 'Monitorización longitudinal de edad biológica y telemetría médica en el tiempo.' : 'Longitudinal biological age tracking & multi-omics telemetry over time.'}
+              {/* 3 Tier Cards (Strictly No Prices - Google Cloud UX) */}
+              <div className="eterna-tiers-grid">
+                
+                {/* Tier 1: Individual Kit */}
+                <div className="eterna-tier-card">
+                  <h3 className="eterna-tier-title">{isEs ? 'Test Genético Individual' : 'Individual Genetic Test'}</h3>
+                  <div className="eterna-tier-subtitle">
+                    {isEs ? 'Analiza tu ADN una sola vez en la vida con acceso continuo a la plataforma.' : 'Analyze your DNA once in a lifetime with continuous telemetry access.'}
+                  </div>
+                  <ul className="eterna-tier-features">
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? '1 Kit de toma de saliva CE-IVD' : '1 CE-IVD Saliva collection kit'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? '+700.000 variantes genéticas analizadas' : '+700,000 genetic SNPs analyzed'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Informe interactivo en app de por vida' : 'Lifetime interactive report in app'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Descarga de datos brutos (.raw / .txt)' : 'Downloadable raw data (.raw / .txt)'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Envío y recogida a domicilio incluidos' : 'Home delivery and pickup included'}</span>
+                    </li>
+                  </ul>
+                  <button
+                    type="button"
+                    className="gcp-btn-primary"
+                    style={{ width: '100%' }}
+                    onClick={() => setIsInquiryDrawerOpen(true)}
+                  >
+                    <Package size={15} />
+                    <span>{isEs ? 'Solicitar Kit Individual' : 'Request Individual Kit'}</span>
+                  </button>
                 </div>
-                <ul className="eterna-tier-features">
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Re-tests periódicos de tasa de envejecimiento' : 'Periodic pace of aging re-testing'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Panel proteómico de órganos vitales' : 'Vital organ proteomics panel'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Portal B2B de gestión de pacientes' : 'B2B physician patient portal'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Protocolos de longevidad personalizados' : 'Personalized longevity protocols'}</span>
-                  </li>
-                  <li className="eterna-tier-feature-item">
-                    <Check size={14} />
-                    <span>{isEs ? 'Asignación institucional por lote' : 'Institutional volume batch pricing'}</span>
-                  </li>
-                </ul>
-                <button
-                  type="button"
-                  className="gcp-btn-secondary"
-                  style={{ width: '100%' }}
-                  onClick={() => setIsInquiryDrawerOpen(true)}
-                >
-                  <ExternalLink size={15} />
-                  <span>{isEs ? 'Consultar Asignación B2B' : 'Consult B2B Allocation'}</span>
-                </button>
+
+                {/* Tier 2: Pack Dúo (Featured) */}
+                <div className="eterna-tier-card featured">
+                  <span className="eterna-tier-badge">{isEs ? 'Más Solicitado' : 'Most Popular'}</span>
+                  <h3 className="eterna-tier-title">{isEs ? 'Pack Dúo' : 'Duo Pack'}</h3>
+                  <div className="eterna-tier-subtitle">
+                    {isEs ? '2 kits completos de toma de saliva con analítica independiente para cada usuario.' : '2 complete saliva kits with separate independent genomic reports for each person.'}
+                  </div>
+                  <ul className="eterna-tier-features">
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? '2 Kits de recolección de saliva' : '2 Saliva collection kits included'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Cuentas independientes en App Eterna' : 'Independent accounts in Eterna App'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Sincronización simultánea de wearables' : 'Simultaneous wearable smartwatch syncing'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Secuenciación Illumina Eurofins completa' : 'Full Illumina Eurofins sequencing'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Soporte prioritario de interpretación' : 'Priority clinical support'}</span>
+                    </li>
+                  </ul>
+                  <button
+                    type="button"
+                    className="gcp-btn-primary"
+                    style={{ width: '100%' }}
+                    onClick={() => setIsInquiryDrawerOpen(true)}
+                  >
+                    <Package size={15} />
+                    <span>{isEs ? 'Solicitar Pack Dúo' : 'Request Duo Pack'}</span>
+                  </button>
+                </div>
+
+                {/* Tier 3: Eterna Pro Longitudinal */}
+                <div className="eterna-tier-card">
+                  <h3 className="eterna-tier-title">{isEs ? 'Eterna Pro (Clínicas & Médicos)' : 'Eterna Pro (Clinical Practice)'}</h3>
+                  <div className="eterna-tier-subtitle">
+                    {isEs ? 'Monitorización longitudinal de edad biológica y telemetría médica en el tiempo.' : 'Longitudinal biological age tracking & multi-omics telemetry over time.'}
+                  </div>
+                  <ul className="eterna-tier-features">
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Re-tests periódicos de tasa de envejecimiento' : 'Periodic pace of aging re-testing'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Panel proteómico de órganos vitales' : 'Vital organ proteomics panel'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Portal B2B de gestión de pacientes' : 'B2B physician patient portal'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Protocolos de longevidad personalizados' : 'Personalized longevity protocols'}</span>
+                    </li>
+                    <li className="eterna-tier-feature-item">
+                      <Check size={14} />
+                      <span>{isEs ? 'Asignación institucional por lote' : 'Institutional volume batch pricing'}</span>
+                    </li>
+                  </ul>
+                  <button
+                    type="button"
+                    className="gcp-btn-secondary"
+                    style={{ width: '100%' }}
+                    onClick={() => setIsInquiryDrawerOpen(true)}
+                  >
+                    <ExternalLink size={15} />
+                    <span>{isEs ? 'Consultar Asignación B2B' : 'Consult B2B Allocation'}</span>
+                  </button>
+                </div>
+
               </div>
 
-            </div>
+              {/* Institutional Backing / Partner Seals */}
+              <div className="eterna-partners-section">
+                <div className="eterna-partners-label">
+                  {isEs ? 'Con el respaldo institucional y financiación de' : 'Institutional Backing & Funding'}
+                </div>
+                <div className="eterna-partners-row">
+                  <img 
+                    src="/images/products/eterna/gijon_impulsa.jpg" 
+                    alt="Gijón Impulsa" 
+                    className="eterna-partner-badge" 
+                  />
+                  <img 
+                    src="/images/products/eterna/gijon_futuro.jpg" 
+                    alt="Gijón Futuro" 
+                    className="eterna-partner-badge" 
+                  />
+                  <img 
+                    src="/images/products/eterna/enisa_logo.jpg" 
+                    alt="Empresa Innovadora ENISA - Gobierno de España" 
+                    className="eterna-partner-badge" 
+                  />
+                </div>
+              </div>
+            </section>
+          )}
 
-            {/* Institutional Backing / Partner Seals */}
-            <div className="eterna-partners-section">
-              <div className="eterna-partners-label">
-                {isEs ? 'Con el respaldo institucional y financiación de' : 'Institutional Backing & Funding'}
-              </div>
-              <div className="eterna-partners-row">
-                <img 
-                  src="/images/products/eterna/gijon_impulsa.jpg" 
-                  alt="Gijón Impulsa" 
-                  className="eterna-partner-badge" 
-                />
-                <img 
-                  src="/images/products/eterna/gijon_futuro.jpg" 
-                  alt="Gijón Futuro" 
-                  className="eterna-partner-badge" 
-                />
-                <img 
-                  src="/images/products/eterna/enisa_logo.jpg" 
-                  alt="Empresa Innovadora ENISA - Gobierno de España" 
-                  className="eterna-partner-badge" 
-                />
-              </div>
-            </div>
-          </section>
+          {/* Product Section Footer Navigation (Golden Rule) */}
+          {effectiveActiveTab !== 'overview' && (
+            <ProductSectionFooterNav
+              activeSection={effectiveActiveTab}
+              sections={eternaSections}
+              onSelectSection={scrollToSection}
+              lang={lang}
+            />
+          )}
 
         </main>
 
@@ -1510,82 +1797,39 @@ export default function EternaGenomicsDetail({
 
           {/* Card 2: Quick Jump Navigation */}
           <div className="eterna-sidebar-card" style={{ padding: '1.25rem 1.25rem' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ffffff', marginBottom: '0.5rem' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ffffff', marginBottom: '0.75rem' }}>
               {isEs ? 'Navegación Rápida' : 'Quick Navigation'}
             </div>
-            <div className="eterna-sidebar-nav-list">
-              <button 
-                type="button" 
-                className="eterna-sidebar-nav-link"
-                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
-                onClick={() => scrollToSection('inicio')}
-              >
-                <ChevronRight size={14} color="var(--gcp-blue-light)" />
-                <span>{isEs ? 'Visión General & Mockup 3D' : 'Overview & 3D Mockup'}</span>
-              </button>
-              <button 
-                type="button" 
-                className="eterna-sidebar-nav-link"
-                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
-                onClick={() => scrollToSection('biometrics')}
-              >
-                <ChevronRight size={14} color="var(--gcp-blue-light)" />
-                <span>{isEs ? 'Biometría & Smartwatches' : 'Biometrics & Wearables'}</span>
-              </button>
-              <button 
-                type="button" 
-                className="eterna-sidebar-nav-link"
-                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
-                onClick={() => scrollToSection('pilares')}
-              >
-                <ChevronRight size={14} color="var(--gcp-blue-light)" />
-                <span>{isEs ? '5 Pilares Genómicos' : '5 Genomic Pillars'}</span>
-              </button>
-              <button 
-                type="button" 
-                className="eterna-sidebar-nav-link"
-                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
-                onClick={() => scrollToSection('snp-table')}
-              >
-                <ChevronRight size={14} color="var(--gcp-blue-light)" />
-                <span>{isEs ? 'SNPs & Registro Técnico' : 'SNPs & Technical Data'}</span>
-              </button>
-              <button 
-                type="button" 
-                className="eterna-sidebar-nav-link"
-                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
-                onClick={() => scrollToSection('como-funciona')}
-              >
-                <ChevronRight size={14} color="var(--gcp-blue-light)" />
-                <span>{isEs ? 'Proceso en 4 Pasos' : 'How It Works (4 Steps)'}</span>
-              </button>
-              <button 
-                type="button" 
-                className="eterna-sidebar-nav-link"
-                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
-                onClick={() => scrollToSection('integracion')}
-              >
-                <ChevronRight size={14} color="var(--gcp-blue-light)" />
-                <span>{isEs ? 'Protocolos Clínicos Integrados' : 'Clinical Protocols'}</span>
-              </button>
-              <button 
-                type="button" 
-                className="eterna-sidebar-nav-link"
-                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
-                onClick={() => scrollToSection('investigacion')}
-              >
-                <ChevronRight size={14} color="var(--gcp-blue-light)" />
-                <span>{isEs ? 'I+D Propio & Calidad ISO' : 'In-House Research & Quality'}</span>
-              </button>
-              <button 
-                type="button" 
-                className="eterna-sidebar-nav-link"
-                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
-                onClick={() => scrollToSection('productos')}
-              >
-                <ChevronRight size={14} color="var(--gcp-blue-light)" />
-                <span>{isEs ? 'Gama de Tests & Asignación B2B' : 'Test Suite & B2B Allocation'}</span>
-              </button>
+            <div className="eterna-sidebar-nav-list" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {eternaSections.map((sec) => {
+                const isActive = effectiveActiveTab === sec.id;
+                return (
+                  <button
+                    key={sec.id}
+                    type="button"
+                    className={`eterna-sidebar-nav-link ${isActive ? 'active' : ''}`}
+                    style={{
+                      background: isActive ? 'var(--gcp-blue-surface)' : 'transparent',
+                      border: isActive ? '1px solid rgba(138, 180, 248, 0.4)' : '1px solid transparent',
+                      borderRadius: '6px',
+                      padding: '8px 10px',
+                      color: isActive ? 'var(--gcp-blue-light)' : 'var(--gcp-text-secondary)',
+                      fontWeight: isActive ? 600 : 400,
+                      width: '100%',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      transition: 'all 0.15s ease'
+                    }}
+                    onClick={() => scrollToSection(sec.id)}
+                  >
+                    <ChevronRight size={14} color={isActive ? 'var(--gcp-blue-light)' : 'var(--gcp-text-muted)'} />
+                    <span style={{ fontSize: '0.78rem' }}>{sec.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

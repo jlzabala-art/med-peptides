@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import ProductPresentationIcon from '@/components/ui/ProductPresentationIcon';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 import SharedCatalogProductCard from './SharedCatalogProductCard';
@@ -20,7 +20,7 @@ export default function SharedCatalogProductListRow({
   protocols,
   setSelectedPublicProtocol,
   catalogMeta,
-  isPeptideCatalog = true,
+  isPeptideCatalog: _IS_PEPTIDE_CATALOG = true,
   t,
 }) {
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
@@ -212,7 +212,7 @@ export default function SharedCatalogProductListRow({
               className="catalog-row-monograph-btn"
               title={isProductPeptide ? "Official Clinical Monograph" : isProductDiagnostic ? "Validated Diagnostic Biomarker Sheet" : "Product Dossier & Formulation Details"}
             >
-              <FileText size={13} />
+              <ExternalLink size={13} />
               <span className="monograph-btn-label">
                 {isProductPeptide ? (t ? t('product.monograph', 'Monograph') : 'Monograph') : isProductDiagnostic ? 'Diagnostic' : 'Product Sheet'}
               </span>

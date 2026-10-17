@@ -396,7 +396,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
   const normalizedSlug = cleanSlug.replace(/^dr[-.]?/, '');
   
   // Find doctor matching: opaqueCode, docId, nameSlug, or alias
-  let matchedDoc = doctors.find(doc => {
+  const matchedDoc = doctors.find(doc => {
     const docSlugNoDr = (doc.nameSlug || '').replace(/^dr[-.]?/, '');
     const isSezginMatch = (cleanSlug.includes('sezgin') || cleanSlug.includes('cagatay')) && (doc.id === 'z3aUIMaYsPViG1JgM95r' || (doc.nameSlug || '').includes('sezgin'));
     return isSezginMatch ||
@@ -594,7 +594,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         ? d.treatmentTitle
         : (d.regimenShortTitle || catData.regimenShortTitle || baseTitle);
       const finalTreatmentTitle = sanitizeEnglishText(rawTitle);
-      const isProposal = !!d.isTreatmentProposal || d.status === 'proposal_pending' || d.orderStatus === 'Offer Not Accepted' || String(d.treatmentProgram || '').toLowerCase().includes('proposal') || String(d.invoiceRef || '').toLowerCase().includes('proposal');
+      const isProposal = Boolean(d.isTreatmentProposal) || d.status === 'proposal_pending' || d.orderStatus === 'Offer Not Accepted' || String(d.treatmentProgram || '').toLowerCase().includes('proposal') || String(d.invoiceRef || '').toLowerCase().includes('proposal');
       const normalizedStatus = isProposal ? 'proposal_pending' : (d.status || d.state || 'active');
 
       rawPrescriptionsList.push({
@@ -624,7 +624,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         sessionId: d.sessionId || null,
         groupSessionId: d.groupSessionId || null,
         partNumber: d.partNumber != null ? Number(d.partNumber) : null,
-        isMultiPart: !!d.isMultiPart || resolvedParts.length > 1,
+        isMultiPart: Boolean(d.isMultiPart) || resolvedParts.length > 1,
         totalParts: d.totalParts || (resolvedParts.length > 1 ? resolvedParts.length : null),
         clinic: d.clinic || d.clinicName || doctorDoc.clinicName || doctorDoc.clinic || 'Clinical Dispensary',
         invoiceRef: d.invoiceRef || d.invoiceNumber || (d.fileNumber ? `# INV ${d.fileNumber}` : null),
@@ -740,7 +740,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       seenPatientTasks.add(proposalKey);
       const treatmentName = rx.treatmentTitle || rx.regimenShortTitle || 'Compounded Protocol';
       const patientPhone = rx.patient?.phone || rx.phone || '';
-      const doctorDisplayName = cleanDoctorName || 'Treating Physician';
+      const rawDocName = (cleanDoctorName || 'Khalid Shukri').replace(/^Dr\.?\s*/i, '').trim();
       const effectiveAgeDays = rx.dateIssued || rx.date ? Math.max(1, Math.floor((now - new Date(rx.dateIssued || rx.date).getTime()) / (1000 * 60 * 60 * 24))) : rxAgeDays;
 
       clinicalTasks.push({
@@ -761,7 +761,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         dueDate: effectiveAgeDays > 7 ? 'Re-engagement' : 'Decision Due',
         actionLabel: 'WhatsApp Reminder',
         actionUrl: `/rx/${rx.code}`,
-        whatsappMessage: `Hello ${rx.patientName}, this is Dr. ${doctorDisplayName}'s clinical practice following up on your personalized ${treatmentName} regimen. You can access your clinical proposal here: https://atlashealth-services.com/rx/${rx.code}. Please let us know if you have any questions or would like to proceed with dispensing.`
+        whatsappMessage: `Hello ${rx.patientName}, this is Dr. ${rawDocName}'s clinical practice following up on your personalized ${treatmentName} regimen. You can access your clinical proposal here: https://atlashealth-services.com/rx/${rx.code}. Please let us know if you have any questions or would like to proceed with dispensing.`
       });
     }
   });
@@ -830,7 +830,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
   };
 
     // 5. Fetch Curated Compounding Active Pharmaceutical Ingredients (APIs - CAT-MUWWS6JL)
-    let formulary = [];
+    const formulary = [];
     try {
       const [snap1, snap2] = await Promise.all([
         adminDb.collection('products')
@@ -947,7 +947,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     }
 
     // 6. Fetch Certified Bloodo™ Diagnostic Panels (All 6 CE-IVDR products)
-    let bloodoPanels = [];
+    const bloodoPanels = [];
     try {
       const bloodoSnap = await adminDb.collection('products')
         .where('supplierId', '==', 'supplier-bloodo')
@@ -1010,7 +1010,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     }
 
     // 7. Fetch Evidence-Based Clinical Protocols Directory (protocols collection)
-    let protocols = [];
+    const protocols = [];
     try {
       const pSnap = await adminDb.collection('protocols')
         .where('status', 'in', ['active', 'published'])
@@ -1045,7 +1045,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     }
 
     // 7.5 Fetch Laboratory Diagnostic Results (Bloodo / LifeLab1 tests)
-    let labResults = [];
+    const labResults = [];
     try {
       const labSnap = await adminDb.collection('lab_results').limit(100).get();
       labSnap.forEach(doc => {
@@ -1189,7 +1189,7 @@ export function computeServerAnalytics(prescriptions = []) {
   // 1. Monthly Volume Timeline
   const monthMap = {};
   prescriptions.forEach(rx => {
-    let d = rx.dateIssued || rx.createdAt || rx.date;
+    const d = rx.dateIssued || rx.createdAt || rx.date;
     let dt = new Date(d);
     if (isNaN(dt.getTime())) {
       if (typeof d === 'string' && d.includes('/')) {
@@ -1832,7 +1832,9 @@ export async function updateDoctorProfile(slug, updates = {}) {
     // Also update doctors collection if present
     try {
       await adminDb.collection('doctors').doc(docId).set(payload, { merge: true });
-    } catch (_) {}
+    } catch {
+      // Non-critical if doctors collection doc doesn't exist
+    }
 
     // Invalidate caches
     invalidateDoctorCache();

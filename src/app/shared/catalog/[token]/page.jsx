@@ -760,8 +760,17 @@ export default async function SharedCatalogPage({ params }) {
 
   const hasPeptides = products.some(p => {
     const cat = String(p.category || '').toLowerCase();
-    const type = String(p.type || '').toLowerCase();
-    return cat.includes('peptide') || type.includes('peptide');
+    const type = String(p.productType || p.type || '').toLowerCase();
+    const slug = String(p.slug || p.id || '').toLowerCase();
+    const name = String(p.canonicalName || p.name || '').toLowerCase();
+    const isCosm = (
+      slug.startsWith('colway-') ||
+      cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('trichology') ||
+      type.includes('cosmetic') || name.includes('shampoo') || name.includes('conditioner') ||
+      name.includes('blue diamond') || name.includes('peeling')
+    );
+    const isDiag = slug.includes('eterna') || slug.includes('bloodo') || cat.includes('diagnostic');
+    return !isCosm && !isDiag;
   });
 
   const normCatFilter = String(catalogueFilter || '').toLowerCase().trim();
