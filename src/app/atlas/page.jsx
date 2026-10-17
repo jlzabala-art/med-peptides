@@ -13,7 +13,7 @@ export const metadata = {
   openGraph: {
     title: 'Atlas Health Services — Advanced Compounding & Precision Medicine OS',
     description:
-      'GMP sterile compounding, 580+ peptide & bioidentical hormone formulations, 200+ clinical protocols, and end-to-end digital Rx infrastructure across UAE (HQ), EU, US & HK.',
+      'GMP sterile compounding, 580+ peptide & bioidentical hormone formulations, 200+ clinical protocols, and end-to-end digital Rx infrastructure across EU, GCC, US & APAC.',
     url: 'https://www.atlashealth-services.com/atlas',
     siteName: 'Atlas Health Services',
     images: [
@@ -31,7 +31,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Atlas Health Services — Advanced Compounding & Precision Medicine OS',
     description:
-      'GMP sterile compounding, 580+ peptide & BHRT formulations, 200+ clinical protocols, and digital Rx workflows across UAE, EU, US & HK.',
+      'GMP sterile compounding, 580+ peptide & BHRT formulations, 200+ clinical protocols, and digital Rx workflows across EU, GCC, US & APAC.',
     images: ['https://www.atlashealth-services.com/og-preview.png'],
   },
 };

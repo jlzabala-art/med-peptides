@@ -34,13 +34,19 @@ export default function DoctorPracticeSearchModal({
     }
   }, [isOpen, onClose]);
 
-  // 1. Extract Unique Patients
+  // 1. Extract Unique Patients (Strictly isolated to this doctor's prescriptions, Sold first)
   const patientsList = useMemo(() => {
     const map = new Map();
     prescriptions.forEach(rx => {
       const name = (rx.patientName || rx.patient?.name || rx.patientId || '').trim();
       if (!name) return;
       const key = name.toLowerCase();
+      const s = (rx.status || rx.state || '').toLowerCase();
+      const isProp = Boolean(s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted');
+      const rawInv = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
+      const hasInv = rawInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInv);
+      const isSold = !isProp && Boolean(hasInv || rx.orderStatus === 'Ordered' || ['active', 'approved', 'dispensed'].includes(s));
+
       if (!map.has(key)) {
         map.set(key, {
           name,
@@ -48,13 +54,23 @@ export default function DoctorPracticeSearchModal({
           prescriptionsCount: 0,
           latestRx: rx,
           latestDate: rx.startDate || rx.createdAt || rx.dateIssued || 'Recent',
-          status: rx.status || 'active'
+          status: isSold ? 'approved' : (isProp ? 'proposal_pending' : (rx.status || 'active')),
+          hasSold: isSold,
+          invoiceRef: hasInv ? rawInv : null
         });
       }
       const entry = map.get(key);
       entry.prescriptionsCount += 1;
+      if (isSold) {
+        entry.hasSold = true;
+        entry.status = 'approved';
+        if (hasInv && !entry.invoiceRef) entry.invoiceRef = rawInv;
+      }
     });
-    return Array.from(map.values()).sort((a, b) => b.prescriptionsCount - a.prescriptionsCount);
+    return Array.from(map.values()).sort((a, b) => {
+      if (a.hasSold !== b.hasSold) return a.hasSold ? -1 : 1;
+      return b.prescriptionsCount - a.prescriptionsCount;
+    });
   }, [prescriptions]);
 
   // 2. Curated Clinical Synergies & Recommendations
@@ -113,12 +129,12 @@ export default function DoctorPracticeSearchModal({
   const cleanQ = query.trim().toLowerCase();
 
   const matchingPatients = useMemo(() => {
-    if (!cleanQ) return patientsList.slice(0, 5);
-    return patientsList.filter(p => p.name.toLowerCase().includes(cleanQ) || String(p.id).toLowerCase().includes(cleanQ));
+    if (!cleanQ) return patientsList.slice(0, 8);
+    return patientsList.filter(p => p.name.toLowerCase().includes(cleanQ) || String(p.id).toLowerCase().includes(cleanQ) || String(p.invoiceRef || '').toLowerCase().includes(cleanQ));
   }, [cleanQ, patientsList]);
 
   const matchingPrescriptions = useMemo(() => {
-    if (!cleanQ) return prescriptions.slice(0, 5);
+    if (!cleanQ) return prescriptions.slice(0, 6);
     return prescriptions.filter(rx => {
       const code = String(rx.code || rx.prescriptionNumber || rx.id || '').toLowerCase();
       const patient = String(rx.patientName || rx.patient?.name || '').toLowerCase();
@@ -148,6 +164,9 @@ export default function DoctorPracticeSearchModal({
       return t.includes(cleanQ) || s.includes(cleanQ) || syn.includes(cleanQ);
     });
   }, [cleanQ, curatedRecommendations]);
+
+  const soldPatientsCount = useMemo(() => patientsList.filter(p => p.hasSold).length, [patientsList]);
+  const unacceptedPatientsCount = useMemo(() => patientsList.filter(p => !p.hasSold).length, [patientsList]);
 
   if (!isOpen) return null;
 
@@ -181,8 +200,41 @@ export default function DoctorPracticeSearchModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Top Isolation Banner — Explicitly proves only this doctor's patients are shown */}
+        <div style={{
+          padding: '8px 20px',
+          background: '#f0fdf4',
+          borderBottom: '1px solid #bbf7d0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px',
+          fontSize: '11.5px',
+          color: '#166534',
+          fontWeight: 600
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ShieldCheck size={14} style={{ color: '#16a34a', flexShrink: 0 }} />
+            <span>
+              <strong>Private Practice Scope:</strong> Exclusively showing <strong>{doctor.name || 'Treating Physician'}</strong>&apos;s patients &amp; prescriptions
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
+            <span style={{ background: '#dcfce7', color: '#15803d', padding: '1px 7px', borderRadius: '999px', fontWeight: 700 }}>
+              {soldPatientsCount} Sold
+            </span>
+            <span style={{ background: '#fef3c7', color: '#b45309', padding: '1px 7px', borderRadius: '999px', fontWeight: 700 }}>
+              {unacceptedPatientsCount} Unaccepted
+            </span>
+            <span style={{ color: '#15803d', fontWeight: 700 }}>
+              Total: {patientsList.length} Patients
+            </span>
+          </div>
+        </div>
+
         {/* Search Header */}
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', background: '#fafbfc' }}>
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid #e2e8f0', background: '#fafbfc' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Search size={20} style={{ color: '#1a73e8', flexShrink: 0 }} />
             <input 
@@ -190,7 +242,7 @@ export default function DoctorPracticeSearchModal({
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search patients, prescriptions, formulations, or recommendations..."
+              placeholder={`Search ${doctor.name || 'doctor'}'s patients, invoice numbers, prescriptions, or formulas...`}
               style={{
                 width: '100%',
                 border: 'none',
@@ -261,15 +313,14 @@ export default function DoctorPracticeSearchModal({
             </div>
           </div>
 
-          {/* Scope Indicator & Filter Tabs */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '14px', flexWrap: 'wrap', gap: '8px' }}>
+          {/* Filter Tabs */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', flexWrap: 'wrap', gap: '8px' }}>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               {[
-                { id: 'all', label: 'All Results' },
-                { id: 'patients', label: `Patients (${matchingPatients.length})` },
-                { id: 'prescriptions', label: `Prescriptions (${matchingPrescriptions.length})` },
-                { id: 'products', label: `My Formulations (${matchingFormulations.length})` },
-                { id: 'recommendations', label: 'Recommendations' }
+                { id: 'all', label: 'Patients & Rx' },
+                { id: 'patients', label: `All Patients (${patientsList.length})` },
+                { id: 'prescriptions', label: `Prescriptions (${prescriptions.length})` },
+                { id: 'products', label: `Practice APIs (${matchingFormulations.length})` }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -294,11 +345,6 @@ export default function DoctorPracticeSearchModal({
                 </button>
               ))}
             </div>
-
-            <div style={{ fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <ShieldCheck size={13} style={{ color: '#16a34a' }} />
-              <span>Scope: {doctor.name || 'Treating Physician'}</span>
-            </div>
           </div>
         </div>
 
@@ -311,13 +357,13 @@ export default function DoctorPracticeSearchModal({
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <User size={13} style={{ color: '#0284c7' }} />
-                  Matching Patients
+                  {cleanQ ? `Matching Patients (${matchingPatients.length})` : `Patients in ${doctor.name || 'Practice'} (Sold First)`}
                 </span>
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>{matchingPatients.length} records</span>
+                <span style={{ fontSize: '11px', color: '#94a3b8' }}>Showing { (activeTab === 'patients' ? patientsList : matchingPatients).length } of {patientsList.length}</span>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {matchingPatients.map((pat) => (
+                {(activeTab === 'patients' && !cleanQ ? patientsList : matchingPatients).map((pat) => (
                   <div
                     key={pat.name}
                     onClick={() => {
@@ -345,7 +391,7 @@ export default function DoctorPracticeSearchModal({
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e0f2fe', color: '#0369a1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '13px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: pat.hasSold ? '#dcfce7' : '#fef3c7', color: pat.hasSold ? '#15803d' : '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '13px' }}>
                         {pat.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -353,13 +399,16 @@ export default function DoctorPracticeSearchModal({
                           {pat.name}
                         </div>
                         <div style={{ fontSize: '11px', color: '#64748b' }}>
-                          {pat.prescriptionsCount} prescribed {pat.prescriptionsCount === 1 ? 'treatment' : 'treatments'} · ID: {pat.id}
+                          {pat.prescriptionsCount} prescribed {pat.prescriptionsCount === 1 ? 'treatment' : 'treatments'} {pat.invoiceRef ? `· ${pat.invoiceRef}` : `· ID: ${pat.id}`}
                         </div>
                       </div>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <StatusBadge status={pat.status || 'active'} />
+                      <StatusBadge
+                        status={pat.hasSold ? 'approved' : 'proposal_pending'}
+                        customLabel={pat.hasSold ? 'Sold Customer' : 'Offer Unaccepted'}
+                      />
                       <ChevronRight size={15} style={{ color: '#94a3b8' }} />
                     </div>
                   </div>

@@ -440,7 +440,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
   if (!opaqueCode) opaqueCode = getDoctorOpaqueCode(doctorId, doctorDoc);
 
   // 2. Fetch prescriptions for this doctor
-  const rxSnap = await adminDb.collection('prescriptions').limit(300).get();
+  const rxSnap = await adminDb.collection('prescriptions').limit(500).get();
   const rawPrescriptionsList = [];
   const patientMap = new Map();
 
@@ -661,8 +661,13 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
   // Consolidate multi-part prescriptions sharing a session or patient group
   const prescriptions = consolidateMultiPartPrescriptions(rawPrescriptionsList);
 
-  // Sort: prescriptions grouped by patient, then date descending
+  // Sort: Confirmed / Sold & Active prescriptions FIRST, then unaccepted proposals, then by date descending
   prescriptions.sort((a, b) => {
+    const isPropA = Boolean(a.isTreatmentProposal) || a.status === 'proposal_pending' || a.orderStatus === 'Offer Not Accepted';
+    const isPropB = Boolean(b.isTreatmentProposal) || b.status === 'proposal_pending' || b.orderStatus === 'Offer Not Accepted';
+    if (isPropA !== isPropB) {
+      return isPropA ? 1 : -1;
+    }
     const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
     const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
     return tB - tA;

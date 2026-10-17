@@ -27,11 +27,11 @@ export default function DoctorFloatingGlassDock({
           type="button"
           className="doctor-dock-btn doctor-dock-btn-secondary"
           onClick={onOpenSearch}
-          title="Search patients, prescriptions, formulations, and recommendations (⌘K)"
+          title="Quickly find any patient or prescription in this doctor's private practice (⌘K)"
           style={{ background: '#f8fafc', borderColor: '#cbd5e1' }}
         >
           <Search size={14} style={{ color: '#1a73e8' }} />
-          <span style={{ color: '#1a73e8', fontWeight: 600 }}>Search Practice</span>
+          <span style={{ color: '#1a73e8', fontWeight: 600 }}>Find Patient / Rx (⌘K)</span>
         </button>
 
         <button

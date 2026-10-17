@@ -49,7 +49,7 @@ const SECTIONS = [
   { id: 'ecosystem', label: 'Atlas Digital OS & Demo' },
   { id: 'workflow', label: 'Clinical-to-Pharmacy Loop' },
   { id: 'portals', label: 'Role-Based Portals' },
-  { id: 'logistics', label: 'Global Hubs & Licensing' },
+  { id: 'logistics', label: 'Global Network & QA' },
   { id: 'contact', label: 'Executive Contact & QR' },
 ];
 
@@ -348,15 +348,14 @@ export default function AtlasExecutiveOverview() {
     const vcard = `BEGIN:VCARD
 VERSION:3.0
 N:Zabala;Jose;Luis;;
-FN:Jose Luis Zabala - Mediluxe & Atlas Health Services
-ORG:Mediluxe Health Solutions / Atlas Health Services
+FN:Jose Luis Zabala - Atlas Health Services
+ORG:Atlas Health Services
 TITLE:Managing Partner
 TEL;TYPE=WORK,VOICE:+971564179256
 TEL;TYPE=CELL,VOICE:+34654314490
 EMAIL;TYPE=PREF,INTERNET:jose@mediluxeme.com
 URL:https://www.atlashealth-services.com/atlas
-ADR;TYPE=WORK:;;Abu Dhabi & Dubai;UAE;;;
-NOTE:Biotech · Longevity · Advanced Compounding · International Distribution (UAE · EU · US · HK)
+NOTE:Biotech · Longevity · Advanced Compounding · Distributed International Network (EU · GCC · US · APAC)
 END:VCARD`;
 
     const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8;' });
@@ -390,7 +389,7 @@ END:VCARD`;
             </span>
             <div className="mediluxe-topbar-badge">
               <span className="atlas-status-dot" />
-              <span>All 4 Global Hubs Operational (UAE · EU · US · HK)</span>
+              <span>Distributed Multi-Node Network Operational (EU · GCC · US · APAC)</span>
             </div>
           </div>
 
@@ -452,10 +451,10 @@ END:VCARD`;
               The Integrated Global Operating System for Personalized Therapeutics &amp; Longevity Care
             </p>
             <p className="mediluxe-hero-desc">
-              <strong>Atlas Health Services</strong> connects European GMP-certified compounding laboratories, 
-              high-purity peptide formulations, and AI-assisted clinical workflows into a unified infrastructure. 
+              <strong>Atlas Health Services</strong> connects accredited GMP-certified compounding laboratories, 
+              high-purity peptide formulations, and AI-assisted clinical workflows into a unified decentralized infrastructure. 
               From digital physician prescribing and custom sterile compounding to cryptographic batch verification 
-              and cold-chain fulfillment across the <strong>UAE, Europe, the US, and Hong Kong</strong>.
+              and coordinated cold-chain fulfillment across <strong>Europe, the Middle East, North America, and Asia-Pacific</strong>.
             </p>
 
             <div className="mediluxe-hero-actions">
@@ -493,12 +492,12 @@ END:VCARD`;
                 <div className="mediluxe-cred-val">GMP Compounding &amp; Peptides</div>
               </div>
               <div className="mediluxe-cred-item">
-                <div className="mediluxe-cred-label">Headquarters</div>
-                <div className="mediluxe-cred-val">Abu Dhabi &amp; Dubai, UAE</div>
+                <div className="mediluxe-cred-label">Architecture</div>
+                <div className="mediluxe-cred-val">Decentralized Partner Network</div>
               </div>
               <div className="mediluxe-cred-item">
-                <div className="mediluxe-cred-label">Fulfillment Nodes</div>
-                <div className="mediluxe-cred-val">UAE · EU · US · Hong Kong</div>
+                <div className="mediluxe-cred-label">Active Corridors</div>
+                <div className="mediluxe-cred-val">EU · GCC · US · APAC</div>
               </div>
               <div className="mediluxe-cred-item">
                 <div className="mediluxe-cred-label">Analytical QA</div>
@@ -526,10 +525,10 @@ END:VCARD`;
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.76rem', color: 'var(--ml-slate-600)', paddingTop: '0.25rem' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
                 <CheckCircle2 size={14} style={{ color: 'var(--ml-teal)' }} />
-                EU GMP &amp; Cleanroom Standards
+                GMP &amp; ISO Cleanroom Partner Standards
               </span>
-              <Link href="/mediluxe" style={{ color: 'var(--ml-navy)', fontWeight: 700, textDecoration: 'none' }}>
-                GCC Corporate Profile →
+              <Link href="/verify" style={{ color: 'var(--ml-navy)', fontWeight: 700, textDecoration: 'none' }}>
+                Batch CoA Verification →
               </Link>
             </div>
           </div>
@@ -574,8 +573,8 @@ END:VCARD`;
               <Globe size={22} />
             </div>
             <div>
-              <div className="mediluxe-kpi-number">4 Hubs</div>
-              <div className="mediluxe-kpi-label">UAE · EU · US · HK Logistics</div>
+              <div className="mediluxe-kpi-number">Multi-Node</div>
+              <div className="mediluxe-kpi-label">Global Cold-Chain Corridors</div>
             </div>
           </div>
         </div>
@@ -766,7 +765,7 @@ END:VCARD`;
                   {
                     dimension: 'Global Fulfillment',
                     legacy: 'Single-country dispatch vulnerable to customs bottlenecks and stockouts.',
-                    atlas: 'Multi-node cold-chain fulfillment coordinated across UAE (HQ), European Union, US & Hong Kong.'
+                    atlas: 'Decentralized multi-region cold-chain fulfillment coordinated across partner compounding and logistics nodes worldwide.'
                   }
                 ].map((row, idx) => (
                   <div key={idx} className="atlas-comparison-row">
@@ -1155,7 +1154,7 @@ END:VCARD`;
                       Global Cold-Chain Dispatch
                     </div>
                     <p style={{ fontSize: '0.76rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                      Coordinated regional fulfillment from UAE, EU, US, or HK hubs directly to the prescribing clinic, pharmacy, or patient.
+                      Coordinated multi-node cold-chain dispatch from partner compounding and logistics corridors directly to the clinic, pharmacy, or patient.
                     </p>
                   </div>
                 </div>
@@ -1239,110 +1238,95 @@ END:VCARD`;
               </div>
             </section>
 
-            {/* ── Section 5 + PHASE 5: Global Logistics & Regulatory Licensing Vault ── */}
+            {/* ── Section 5: Decentralized Global Network & Pharmaceutical Quality Governance ── */}
             <section id="logistics" className="mediluxe-section">
               <span className="mediluxe-section-badge">
-                <Globe size={13} /> Global Supply Chain &amp; Regulatory Governance
+                <Globe size={13} /> Decentralized Partner Network &amp; Quality Governance
               </span>
-              <h2 className="mediluxe-section-title">Globally Coordinated Fulfillment &amp; Institutional Licensing</h2>
+              <h2 className="mediluxe-section-title">Distributed Multi-Node Fulfillment &amp; Analytical Quality Governance</h2>
               <p className="mediluxe-section-subtitle">
-                Headquartered in the <strong>United Arab Emirates</strong> and backed by over 14 years of licensed medical 
-                supply operations in Abu Dhabi and Dubai through <strong>MediLuxe Health Solutions / Medical Supplies L.L.C.</strong>, 
-                Atlas operates four strategic fulfillment hubs for resilient international distribution.
+                <strong>Atlas Health Services</strong> operates as a borderless, decentralized clinical technology and 
+                pharmaceutical partner ecosystem—coordinating accredited compounding facilities, independent analytical 
+                testing laboratories, and temperature-controlled logistics corridors across four strategic international regions.
               </p>
 
               <div className="mediluxe-geo-grid">
                 <div className="mediluxe-geo-card">
-                  <div className="mediluxe-geo-flag">🇦🇪</div>
-                  <div className="mediluxe-geo-country">UAE (HQ &amp; GCC Hub)</div>
+                  <div className="mediluxe-geo-flag" style={{ fontSize: '0.82rem', fontWeight: 800, color: '#003666', background: '#eff6ff', display: 'inline-block', padding: '2px 8px', borderRadius: '6px' }}>EU</div>
+                  <div className="mediluxe-geo-country">European Corridor</div>
                   <div className="mediluxe-geo-role">
-                    Executive headquarters in Abu Dhabi &amp; Dubai serving clinics and pharmacies across UAE, Saudi Arabia, Qatar &amp; Kuwait.
+                    Strategic GMP compounding partnerships, pharmacopeial API synthesis, and European clinical dispatch nodes.
                   </div>
                 </div>
 
                 <div className="mediluxe-geo-card">
-                  <div className="mediluxe-geo-flag">🇪🇺</div>
-                  <div className="mediluxe-geo-country">European Union</div>
+                  <div className="mediluxe-geo-flag" style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0d9488', background: '#f0fdfa', display: 'inline-block', padding: '2px 8px', borderRadius: '6px' }}>GCC</div>
+                  <div className="mediluxe-geo-country">Middle East Corridor</div>
                   <div className="mediluxe-geo-role">
-                    Strategic GMP compounding partnerships, pharmaceutical API synthesis, and European clinical distribution node.
+                    Regional clinical onboarding, longevity &amp; regenerative medicine partner network, and priority cold-chain transit.
                   </div>
                 </div>
 
                 <div className="mediluxe-geo-card">
-                  <div className="mediluxe-geo-flag">🇺🇸</div>
-                  <div className="mediluxe-geo-country">United States</div>
+                  <div className="mediluxe-geo-flag" style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0284c7', background: '#f0f9ff', display: 'inline-block', padding: '2px 8px', borderRadius: '6px' }}>NA</div>
+                  <div className="mediluxe-geo-country">North American Corridor</div>
                   <div className="mediluxe-geo-role">
-                    North American analytical testing coordination, research peptide fulfillment, and clinical protocol telemetry.
+                    Independent analytical testing coordination, peptide research collaboration, and clinical protocol telemetry.
                   </div>
                 </div>
 
                 <div className="mediluxe-geo-card">
-                  <div className="mediluxe-geo-flag">🇭🇰</div>
-                  <div className="mediluxe-geo-country">Hong Kong (APAC)</div>
+                  <div className="mediluxe-geo-flag" style={{ fontSize: '0.82rem', fontWeight: 800, color: '#7c3aed', background: '#f5f3ff', display: 'inline-block', padding: '2px 8px', borderRadius: '6px' }}>APAC</div>
+                  <div className="mediluxe-geo-country">Asia-Pacific Corridor</div>
                   <div className="mediluxe-geo-role">
-                    Asia-Pacific cold-chain transit hub and international customs-cleared logistics gateway.
+                    International cold-chain transit coordination and cross-border pharmaceutical logistics gateway.
                   </div>
                 </div>
               </div>
 
-              {/* ── PHASE 5: Official Regulatory & Corporate Licensing Vault ── */}
+              {/* ── Pharmaceutical Quality & Analytical Standards Governance ── */}
               <div style={{ marginTop: '1.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <Award size={18} style={{ color: '#003666' }} />
                   <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                    Institutional Regulatory &amp; Licensing Vault
+                    Pharmaceutical Quality &amp; Analytical Verification Standards
                   </h3>
                 </div>
                 <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 0.85rem 0' }}>
-                  Verified corporate credentials and compliance documentation available for hospital procurement and institutional due diligence.
+                  Every formulation distributed through the Atlas partner network undergoes multi-stage analytical verification prior to clinical release.
                 </p>
 
                 <div className="atlas-vault-grid">
                   <div className="atlas-vault-card">
                     <div>
-                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#0d9488', textTransform: 'uppercase' }}>UAE Commercial License</div>
-                      <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>Mediluxe Health Solutions FZE (2026–2027)</div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#0d9488', textTransform: 'uppercase' }}>ISO/IEC 17025 Analytical QA</div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>RP-HPLC &amp; Mass Spectrometry Batch CoA (&gt;99%)</div>
                     </div>
-                    <a
-                      href="/documents/corporate/Mediluxe_Health_Solutions_FZE_Business_License_2026_2027.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      href="/verify"
                       className="mediluxe-btn mediluxe-btn-outline"
                       style={{ minHeight: '32px', padding: '0.3rem 0.65rem', fontSize: '0.74rem' }}
                     >
-                      <FileText size={13} />
-                      <span>View PDF</span>
-                    </a>
+                      <ShieldCheck size={13} />
+                      <span>Verify Batch</span>
+                    </Link>
                   </div>
 
                   <div className="atlas-vault-card">
                     <div>
-                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#003666', textTransform: 'uppercase' }}>UAE Federal Tax Authority</div>
-                      <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>Official VAT Registration Certificate</div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#003666', textTransform: 'uppercase' }}>Pharmacopeial Cleanroom Standards</div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>USP &lt;71&gt; Sterility &amp; USP &lt;85&gt; Endotoxin Compliance</div>
                     </div>
-                    <a
-                      href="/documents/corporate/Mediluxe_Health_Solutions_FZE_VAT_Certificate.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      href="/catalog"
                       className="mediluxe-btn mediluxe-btn-outline"
                       style={{ minHeight: '32px', padding: '0.3rem 0.65rem', fontSize: '0.74rem' }}
                     >
-                      <FileText size={13} />
-                      <span>View PDF</span>
-                    </a>
+                      <FlaskConical size={13} />
+                      <span>Formulary Specs</span>
+                    </Link>
                   </div>
                 </div>
-              </div>
-
-              <div className="mediluxe-bridge-box">
-                <div className="mediluxe-bridge-text">
-                  <h4>Institutional Synergy: MediLuxe Medical Supplies L.L.C. (Est. 2011)</h4>
-                  <p>Inspect our complete GCC corporate history, regional presence map, and healthcare leadership dossier.</p>
-                </div>
-                <Link href="/mediluxe" className="mediluxe-btn mediluxe-btn-outline">
-                  <span>View MediLuxe Corporate Dossier</span>
-                  <ArrowRight size={14} />
-                </Link>
               </div>
             </section>
 

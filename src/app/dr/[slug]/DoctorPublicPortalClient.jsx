@@ -306,10 +306,11 @@ export function isProposalPrescription(rx) {
 export function isSoldPrescription(rx) {
   if (!rx) return false;
   const isProp = isProposalPrescription(rx);
+  if (isProp) return false;
   const rawInv = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
   const hasInv = rawInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInv);
   const s = (rx.status || rx.state || '').toLowerCase();
-  return Boolean(hasInv || rx.orderStatus === 'Ordered' || (!isProp && ['active', 'approved', 'dispensed'].includes(s)));
+  return Boolean(hasInv || rx.orderStatus === 'Ordered' || ['active', 'approved', 'dispensed'].includes(s));
 }
 
 export function resolvePrescriptionParts(rx) {
@@ -916,7 +917,17 @@ export default function DoctorPublicPortalClient({
   };
   const globalKpis = data?.kpis || { activePrescriptions: 0, monitoredPatients: 0, pendingTasksCount: 0, refillsDueCount: 0 };
   const allTasks = data?.tasks || [];
-  const allPrescriptions = useMemo(() => consolidateMultiPartPrescriptions(data?.prescriptions || []), [data?.prescriptions]);
+  const allPrescriptions = useMemo(() => {
+    const consolidated = consolidateMultiPartPrescriptions(data?.prescriptions || []);
+    return [...consolidated].sort((a, b) => {
+      const aSold = isSoldPrescription(a);
+      const bSold = isSoldPrescription(b);
+      if (aSold !== bSold) return aSold ? -1 : 1;
+      const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return tB - tA;
+    });
+  }, [data?.prescriptions]);
   const allProtocols = data?.protocols || [];
   const allLabResults = data?.labResults || [];
 
@@ -941,13 +952,10 @@ export default function DoctorPublicPortalClient({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ── Global ⌘K / Ctrl+K & Escape Key Listener (GCP UX Standard) ─────────────
+  // ── Global Escape Key Listener for Modals ──────────────────────────────────
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setIsDiscoveryDrawerOpen((prev) => !prev);
-      } else if (e.key === 'Escape') {
+      if (e.key === 'Escape') {
         if (isDiscoveryDrawerOpen) setIsDiscoveryDrawerOpen(false);
         if (isCredentialsModalOpen) setIsCredentialsModalOpen(false);
         if (isServicesModalOpen) setIsServicesModalOpen(false);
@@ -2846,7 +2854,10 @@ export default function DoctorPublicPortalClient({
       }
     });
 
-    return Array.from(pMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(pMap.values()).sort((a, b) => {
+      if (a.hasSold !== b.hasSold) return a.hasSold ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
   }, [allPrescriptions]);
 
   const filteredDoctorPatients = useMemo(() => {
@@ -3394,9 +3405,8 @@ export default function DoctorPublicPortalClient({
           label: 'Patient Prescriptions',
           icon: Layers,
           badge: allPrescriptions.length > 0 ? allPrescriptions.length : null,
-          actionBadge: quickCounts.pending > 0 ? quickCounts.pending : null,
-          actionBadgeTooltip: quickCounts.pending > 0
-            ? `${quickCounts.pending} prescription(s) awaiting action (${quickCounts.drafts} draft/sign-off, ${quickCounts.proposals} unaccepted offer)`
+          actionBadgeTooltip: quickCounts.active > 0
+            ? `${allPrescriptions.length} total prescriptions (${quickCounts.active} sold & invoiced, ${quickCounts.proposals} unaccepted proposals)`
             : undefined
         },
         {
@@ -3411,7 +3421,7 @@ export default function DoctorPublicPortalClient({
           icon: Clock,
           actionBadge: filteredTasks.length > 0 ? filteredTasks.length : null,
           actionBadgeTooltip: filteredTasks.length > 0
-            ? `${filteredTasks.length} pending clinical task(s) requiring physician review`
+            ? `${filteredTasks.length} pending clinical task(s) requiring follow-up or review`
             : undefined
         }
       ]
@@ -3431,12 +3441,6 @@ export default function DoctorPublicPortalClient({
           label: 'Clinical Synergies',
           icon: Sparkles,
           badge: null
-        },
-        {
-          id: 'search',
-          label: 'Spotlight Search',
-          icon: Search,
-          badge: '⌘K'
         }
       ]
     },
@@ -3464,7 +3468,7 @@ export default function DoctorPublicPortalClient({
         }
       ]
     }
-  ], [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, allLabResults.length, quickCounts.pending, quickCounts.drafts, quickCounts.proposals]);
+  ], [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, allLabResults.length, quickCounts.active, quickCounts.pending, quickCounts.drafts, quickCounts.proposals]);
 
   const handleSidebarNavigate = (itemOrId) => {
     triggerHaptic('light');
@@ -5057,13 +5061,38 @@ export default function DoctorPublicPortalClient({
                   }}
                 >
                   <div>
-                    <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <Clock size={18} style={{ color: '#1a73e8' }} />
-                      <span>Patient Care To-Do List & Pending Clinical Actions</span>
+                      <span>Action Queue · Pending Follow-ups &amp; Unaccepted Offers</span>
                     </h2>
-                    <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
-                      Automated clinical vigilance based on treatment schedules, phase titrations, and intake submissions.
-                    </p>
+                    <div style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span>This queue only lists pending proposals awaiting patient checkout. Confirmed orders do not require follow-up tasks.</span>
+                      {quickCounts.active > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic('selection');
+                            setQuickRxFilter('active');
+                            setActiveAnchor('prescriptions');
+                          }}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '2px 10px',
+                            borderRadius: '999px',
+                            background: '#f0fdf4',
+                            border: '1px solid #86efac',
+                            color: '#15803d',
+                            fontSize: '0.73rem',
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <span>🟢 View {quickCounts.active} Sold &amp; Invoiced Prescriptions →</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
