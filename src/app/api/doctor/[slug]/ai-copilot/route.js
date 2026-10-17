@@ -12,6 +12,22 @@ function getGeminiApiKey() {
   );
 }
 
+function getCodifiedPatientId(patientName, rxCode) {
+  if (rxCode) {
+    const clean = String(rxCode).replace(/[^a-zA-Z0-9]/g, '');
+    const suffix = clean.length >= 4 ? clean.slice(-4).toUpperCase() : clean.toUpperCase();
+    return `PT-${suffix}`;
+  }
+  if (!patientName) return 'PT-8800';
+  let hash = 0;
+  for (let i = 0; i < patientName.length; i++) {
+    hash = (hash << 5) - hash + patientName.charCodeAt(i);
+    hash |= 0;
+  }
+  const positive = (Math.abs(hash) % 9000) + 1000;
+  return `PT-${positive}`;
+}
+
 function buildDeterministicResponse(query, context) {
   const q = String(query || '').toLowerCase().trim();
   const docName = context.doctorName || 'Doctor';
@@ -250,7 +266,7 @@ export async function POST(request, { params }) {
     const resolvedParams = await params;
     const slug = resolvedParams?.slug || '';
     const body = await request.json();
-    const { query, practiceContext } = body || {};
+    const { query, practiceContext, isPublicUnverified = false } = body || {};
 
     if (!query || !String(query).trim()) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 });
@@ -316,6 +332,34 @@ export async function POST(request, { params }) {
       ctx.labResults = [];
     }
 
+    // Strict anonymization for public or unregistered portals (DHA/HIPAA compliance)
+    if (isPublicUnverified) {
+      ctx.patients = (ctx.patients || []).map((p) => {
+        const cod = getCodifiedPatientId(p.name, p.latestRxCode);
+        return {
+          ...p,
+          name: p.name?.startsWith('Patient PT-') ? p.name : `Patient ${cod}`,
+          phone: ''
+        };
+      });
+      ctx.soldPrescriptions = (ctx.soldPrescriptions || []).map((p) => {
+        const cod = getCodifiedPatientId(p.patientName, p.code);
+        return {
+          ...p,
+          patientName: p.patientName?.startsWith('Patient PT-') ? p.patientName : `Patient ${cod}`,
+          phone: ''
+        };
+      });
+      ctx.unacceptedProposals = (ctx.unacceptedProposals || []).map((p) => {
+        const cod = getCodifiedPatientId(p.patientName, p.code);
+        return {
+          ...p,
+          patientName: p.patientName?.startsWith('Patient PT-') ? p.patientName : `Patient ${cod}`,
+          phone: ''
+        };
+      });
+    }
+
     // Deterministic baseline + actions (always accurate, 0 hallucination)
     const deterministic = buildDeterministicResponse(query, ctx);
 
@@ -338,6 +382,11 @@ STRICT PRIVACY & REASONING RULES:
 2. BEST PATIENT QUERY: When asked who is the best patient, evaluate highest confirmed/sold prescriptions, active treatment adherence, and continuity of care. Cite their exact name, number of confirmed prescriptions, active formulas, and suggest a 1-click renewal action.
 3. CLEAR COMMERCIAL SEGREGATION: Strictly distinguish between SOLD & INVOICED orders (${(ctx.soldPrescriptions || []).length} confirmed orders across ${ctx.soldPatientsCount || 0} sold patients) and UNACCEPTED TREATMENT OFFERS (${(ctx.unacceptedProposals || []).length} pending proposals across ${ctx.unacceptedPatientsCount || 0} patients). Total unique monitored patients: ${ctx.totalPatients || 0}. Total consolidated prescriptions: ${ctx.totalPrescriptions || 0}.
 4. FORMATTING: Format cleanly with bold headings, bullet points, and concise medical English (max 180 words). Do NOT invent data. Always use the provided JSON facts.
+${isPublicUnverified ? `5. STRICT PATIENT PRIVACY & ANONYMIZATION:
+This portal is accessed in Public / Unregistered Mode. All patient identities are strictly codified tokens (e.g. "Patient PT-XXXX").
+Under NO circumstances should you output, guess, or reference real nominal human names or private contact numbers.
+Always reference patients strictly by their codified token or prescription code (e.g. "Patient PT-8472").
+If asked for real nominal names, state: "Patient identities are codified for clinical privacy (DHA/HIPAA compliance). Please sign in or verify your practice to access nominal records."` : ''}`;
 
 DOCTOR PRACTICE CONTEXT JSON:
 ${JSON.stringify({

@@ -7637,17 +7637,21 @@ export default function DoctorPublicPortalClient({
             {/* Privacy Guarantee Banner */}
             <div style={{
               padding: '8px 16px',
-              background: '#f8fafc',
+              background: !isAuthorizedViewer ? '#eff6ff' : '#f8fafc',
               borderBottom: '1px solid #e2e8f0',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
               fontSize: '0.72rem',
-              color: '#475569'
+              color: !isAuthorizedViewer ? '#1e40af' : '#475569'
             }}>
-              <ShieldCheck size={14} color="#6366f1" />
+              <ShieldCheck size={14} color={!isAuthorizedViewer ? '#2563eb' : '#6366f1'} />
               <span>
-                <strong>Isolated Practice Graph:</strong> Dedicated to {doctor.name} ({doctor.clinic || doctor.specialty || 'Clinical Practice'}). Full global practice context remains active regardless of table filters.
+                {!isAuthorizedViewer ? (
+                  <><strong>Patient Privacy Active (DHA/HIPAA):</strong> Patient records are codified as clinical tokens (<code>PT-XXXX</code>). Register or sign in to practice portal for nominal files.</>
+                ) : (
+                  <><strong>Isolated Practice Graph:</strong> Dedicated to {doctor.name} ({doctor.clinic || doctor.specialty || 'Clinical Practice'}). Full global practice context remains active regardless of table filters.</>
+                )}
               </span>
             </div>
 
@@ -7740,7 +7744,7 @@ export default function DoctorPublicPortalClient({
                   <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
                     How I can assist your practice right now ({aiUsesRemaining} session credits):
                   </div>
-                  <div>• <strong>Patient & Rx Lookup:</strong> Ask about any patient by name or Rx code to inspect their exact formula, invoice status, and phone.</div>
+                  <div>• <strong>Patient & Rx Lookup:</strong> {!isAuthorizedViewer ? 'Ask about any patient by Rx code to inspect active compounding formulas and clinical posology.' : 'Ask about any patient by name or Rx code to inspect their exact formula, invoice status, and phone.'}</div>
                   <div>• <strong>Commercial Conversion:</strong> Identify which of your <strong>{quickCounts.proposals} Unaccepted Offers</strong> ({unacceptedPatientsCount} patients) to follow up via WhatsApp.</div>
                   <div>• <strong>30/90-Day Renewal Radar:</strong> Detect which of your <strong>{soldPatientsCount} Sold Customers</strong> are due for regimen refills or 1-click cloning.</div>
                   <div>• <strong>Formulation & Clinical Synergies:</strong> Cross-check dosages, vehicles, and peptide/diagnostic pairings tailored to your top APIs.</div>

@@ -248,7 +248,8 @@ export default function DoctorRecommendationsTab({
       protocolUrl: '/p/ultraperson-sleep-quality-restoration'
     },
 
-    // ─── Precision Genomics & Pharmacogenetics (ETERNA® Diagnostics) ───
+    // ─── Precision Genomics & Pharmacogenetics (ETERNA® Diagnostics) — Temporarily suspended until fully refined ───
+    /*
     {
       id: 'eterna-longevity-pharmacogenomics-test',
       category: 'eterna',
@@ -265,6 +266,7 @@ export default function DoctorRecommendationsTab({
       protocolTitle: 'Request ETERNA® DX Diagnostic Kit',
       protocolUrl: '/p/eterna-epigenetic-age-test'
     },
+    */
 
     // ─── Barrier & Cuticular ECM (Colway Clinical Care) ───
     {

@@ -11,6 +11,7 @@ export default function DoctorAtlasAiModal({
   prescriptions = [],
   tasks = [],
   aiUsesRemaining = 5,
+  isAuthorizedViewer = false,
   onDecrementUses,
   onContactWhatsApp
 }) {
@@ -42,14 +43,18 @@ export default function DoctorAtlasAiModal({
     setAiLoading(true);
 
     setTimeout(() => {
-      let response = '';
+      let response;
       const lower = text.toLowerCase();
       const patientCount = doctor?.patients?.length || new Set(prescriptions.map(p => p.patientName || p.patientId)).size;
       const rxCount = prescriptions.length;
       const pendingCount = tasks.length;
 
       if (lower.includes('patient') || lower.includes('paciente') || lower.includes('summarize') || lower.includes('resumen')) {
-        const topPatients = prescriptions.slice(0, 5).map(p => `• **${p.patientName || 'Patient'}** (${p.id}): ${p.treatmentTitle || 'Compounded Treatment'} — Status: *${p.status || 'Active'}*`).join('\n');
+        const topPatients = prescriptions.slice(0, 5).map(p => {
+          const suffix = String(p.code || p.prescriptionNumber || p.id || '').replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase();
+          const displayName = isAuthorizedViewer ? (p.patientName || 'Patient') : `Patient PT-${suffix || 'ANON'}`;
+          return `• **${displayName}** (#${p.code || p.id}): ${p.treatmentTitle || 'Compounded Treatment'} — Status: *${p.status || 'Active'}*`;
+        }).join('\n');
         response = `**Clinical Summary for ${doctor?.name || 'Physician'}:**\n\nYou currently have **${patientCount} registered patients** and **${rxCount} active prescription records** in your dispensary view.\n\n**Recent Patient Regimens:**\n${topPatients}\n\n*All formulas are compounded in accordance with EU GMP standards.*`;
       } else if (lower.includes('dose') || lower.includes('dosis') || lower.includes('api') || lower.includes('active') || lower.includes('formula') || lower.includes('part') || lower.includes('ingrediente')) {
         const apiMap = new Map();
