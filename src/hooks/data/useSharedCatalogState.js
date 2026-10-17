@@ -111,6 +111,8 @@ export function resolveProductCanonicalGoals(product) {
       else if (norm.includes('cognit') || norm.includes('neuro') || norm.includes('focus') || norm.includes('sleep') || norm.includes('mood')) goals.add(GOAL_TYPES.COGNITIVE);
       else if (norm.includes('muscle') || norm.includes('growth') || norm.includes('hypertrophy') || norm.includes('gh')) goals.add(GOAL_TYPES.MUSCLE_GROWTH);
       else if (norm.includes('libido') || norm.includes('sexual') || norm.includes('hormon')) goals.add(GOAL_TYPES.LIBIDO_WELLNESS);
+      else if (norm.includes('hair') || norm.includes('tricho') || norm.includes('scalp') || norm.includes('follic')) goals.add(GOAL_TYPES.HAIR_RESTORATION);
+      else if (norm.includes('skin') || norm.includes('dermal') || norm.includes('cosmet') || norm.includes('collagen')) goals.add(GOAL_TYPES.SKIN_REGENERATION);
       else if (norm.includes('immune') || norm.includes('health') || norm.includes('wellness') || norm.includes('suppl')) goals.add(GOAL_TYPES.GENERAL_HEALTH);
     });
   }
@@ -123,14 +125,31 @@ export function resolveProductCanonicalGoals(product) {
     else if (norm.includes('cognit') || norm.includes('neuro') || norm.includes('sleep')) goals.add(GOAL_TYPES.COGNITIVE);
     else if (norm.includes('muscle') || norm.includes('growth')) goals.add(GOAL_TYPES.MUSCLE_GROWTH);
     else if (norm.includes('libido') || norm.includes('sexual')) goals.add(GOAL_TYPES.LIBIDO_WELLNESS);
+    else if (norm.includes('hair') || norm.includes('tricho') || norm.includes('scalp')) goals.add(GOAL_TYPES.HAIR_RESTORATION);
+    else if (norm.includes('skin') || norm.includes('dermal') || norm.includes('cosmet') || norm.includes('collagen')) goals.add(GOAL_TYPES.SKIN_REGENERATION);
     else if (norm.includes('immune') || norm.includes('health')) goals.add(GOAL_TYPES.GENERAL_HEALTH);
   }
   if (goals.size === 0) {
     const cat = String(product.category || '').toLowerCase();
     const name = String(product.canonicalName || product.name || product.title || '').toLowerCase();
-    if (cat.includes('weight') || name.includes('semaglutide') || name.includes('tirzepatide') || name.includes('retatrutide') || name.includes('aod') || name.includes('5-amino')) {
+    const slug = String(product.slug || product.id || '').toLowerCase();
+
+    if (
+      cat.includes('trichology') || cat.includes('hair') ||
+      name.includes('shampoo') || name.includes('conditioner') || name.includes('hair') ||
+      name.includes('scalp') || slug.includes('shampoo') || slug.includes('conditioner')
+    ) {
+      goals.add(GOAL_TYPES.HAIR_RESTORATION);
+    } else if (
+      cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('nutricosmetic') ||
+      name.includes('collagen') || name.includes('colway') || name.includes('serum') ||
+      name.includes('cream') || name.includes('peeling') || name.includes('colvita') ||
+      slug.includes('collagen') || slug.includes('cream') || slug.includes('serum')
+    ) {
+      goals.add(GOAL_TYPES.SKIN_REGENERATION);
+    } else if (cat.includes('weight') || name.includes('semaglutide') || name.includes('tirzepatide') || name.includes('retatrutide') || name.includes('aod') || name.includes('5-amino')) {
       goals.add(GOAL_TYPES.FAT_LOSS);
-    } else if (cat.includes('longevity') || cat.includes('nutricosmetic') || name.includes('epitalon') || name.includes('nad') || name.includes('ghk')) {
+    } else if (cat.includes('longevity') || name.includes('epitalon') || name.includes('nad') || name.includes('ghk')) {
       goals.add(GOAL_TYPES.ANTI_AGING);
     } else if (name.includes('bpc') || name.includes('tb-500') || name.includes('tb4') || name.includes('kpv')) {
       goals.add(GOAL_TYPES.TISSUE_REPAIR);
@@ -171,6 +190,30 @@ export function useSharedCatalogState({
     (products.length === 0 && protocols.length > 0)
   );
 
+  const isPeptideCatalog = useMemo(() => {
+    const cat = String(catalogMeta?.catalogueFilter || catalogMeta?.category || '').toLowerCase();
+    const title = String(catalogMeta?.title || catalogMeta?.name || '').toLowerCase();
+    const supplier = String(catalogMeta?.supplierId || '').toLowerCase();
+
+    if (
+      cat.includes('cosmetic') || cat.includes('colway') || cat.includes('skincare') ||
+      supplier.includes('lotusland') || title.includes('colway') || title.includes('cosmetic')
+    ) {
+      return false;
+    }
+
+    if (products && products.length > 0) {
+      const hasOnlyCosmetics = products.every(p => {
+        const pCat = String(p.category || '').toLowerCase();
+        const pSlug = String(p.slug || p.id || '').toLowerCase();
+        return pCat.includes('cosmetic') || pCat.includes('skincare') || pCat.includes('trichology') || pCat.includes('nutricosmetic') || pSlug.startsWith('colway-');
+      });
+      if (hasOnlyCosmetics) return false;
+    }
+
+    return true;
+  }, [catalogMeta, products]);
+
   const catalogId = catalogMeta?.catalogId || 'default';
 
   // ── Filters — initialized from URL params if present ──────────────────────
@@ -204,16 +247,18 @@ export function useSharedCatalogState({
   useEffect(() => {
     const q = searchQuery.trim();
     if (q.length < 2) {
-      setAlgoliaMatchProductIds(null);
-      setAlgoliaMatchProtoIds(null);
-      setIsSearchingAlgolia(false);
-      return;
+      const resetTimer = setTimeout(() => {
+        setAlgoliaMatchProductIds(null);
+        setAlgoliaMatchProtoIds(null);
+        setIsSearchingAlgolia(false);
+      }, 0);
+      return () => clearTimeout(resetTimer);
     }
 
     let active = true;
-    setIsSearchingAlgolia(true);
     const timer = setTimeout(async () => {
       try {
+        setIsSearchingAlgolia(true);
         const res = await searchAlgolia(q, { distinct: false, hitsPerPage: 40 });
         if (!active) return;
         if (res?.products?.length > 0 || res?.protocols?.length > 0) {
@@ -630,7 +675,7 @@ export function useSharedCatalogState({
         }
 
         let matchFda = true;
-        if (fdaFilter && fdaFilter !== 'all') {
+        if (isPeptideCatalog && fdaFilter && fdaFilter !== 'all') {
           const statusObj = getFdaPeptideStatus(p);
           matchFda = statusObj?.status === fdaFilter;
         }
@@ -706,7 +751,7 @@ export function useSharedCatalogState({
         };
       })
       .filter(p => (p.variants && p.variants.length > 0));
-  }, [enrichedProducts, selectedGoals, searchQuery, dosageFilter, packagingMode, routeFilter, fdaFilter, algoliaMatchProductIds]);
+  }, [enrichedProducts, selectedGoals, searchQuery, dosageFilter, packagingMode, routeFilter, fdaFilter, algoliaMatchProductIds, isPeptideCatalog]);
 
   const filteredProtocols = useMemo(() => {
     return protocols.filter(proto => {
@@ -857,6 +902,7 @@ export function useSharedCatalogState({
     handleCopyOrderSummary,
     handleConfirmWhatsApp,
     isProtocolCatalog,
+    isPeptideCatalog,
 
     // PDF generation state setters (kept in view to avoid dynamic import coupling)
     setIsGeneratingPdf,

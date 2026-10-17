@@ -354,11 +354,7 @@ async function fetchCatalogData(supplierId, category, catalogueFilter, productId
   return result;
 }
 
-// ── Page Component ─────────────────────────────────────────────────────────────
-
-export default async function SharedCatalogPage({ params }) {
-  const resolvedParams = await params;
-  const token = resolvedParams?.token;
+async function resolveTokenVerification(token) {
   let verification = verifySignedQuoteToken(token);
   let resolvedDoc = null;
 
@@ -378,7 +374,6 @@ export default async function SharedCatalogPage({ params }) {
             if (v.valid) {
               verification = v;
             } else {
-              // Valid Firestore document fallback
               verification = { valid: true, payload: resolvedDoc };
             }
           } else {
@@ -390,6 +385,65 @@ export default async function SharedCatalogPage({ params }) {
       console.warn('[SharedCatalogPage] Error loading short link document:', docErr);
     }
   }
+
+  return { verification, resolvedDoc };
+}
+
+async function verifyRevocationAndRecordVisit(catalogId, resolvedDoc) {
+  let linkData = resolvedDoc || {};
+  let isRevoked = false;
+  if (catalogId) {
+    try {
+      const linkDocRef = adminDb.collection('shared_catalog_links').doc(catalogId);
+      const linkSnap = resolvedDoc ? { exists: true, data: () => resolvedDoc } : await linkDocRef.get();
+      if (linkSnap.exists) {
+        linkData = linkSnap.data() || {};
+        if (linkData.status === 'revoked') {
+          isRevoked = true;
+        } else {
+          linkDocRef.set({
+            visitsCount: (linkData.visitsCount || 0) + 1,
+            lastVisitedAt: new Date().toISOString()
+          }, { merge: true }).catch(() => {});
+        }
+      }
+    } catch {
+      // Non-blocking fallback
+    }
+  }
+  return { linkData, isRevoked };
+}
+
+async function fetchCatalogAndFacets(supplierId, category, catalogueFilter, productIds) {
+  try {
+    const [catalogDataResult, facetsDoc] = await Promise.all([
+      fetchCatalogData(
+        supplierId || 'all',
+        category || 'all',
+        catalogueFilter || 'all',
+        productIds || []
+      ),
+      adminDb.collection('_meta').doc('catalog_facets').get().catch(() => null)
+    ]);
+    const metaFacets = (facetsDoc && facetsDoc.exists) ? facetsDoc.data() : null;
+    return {
+      productDocs: catalogDataResult.productDocs || [],
+      variantsByProduct: catalogDataResult.variantsByProduct || {},
+      protoDocs: catalogDataResult.protoDocs || [],
+      metaFacets
+    };
+  } catch (err) {
+    console.error('[SharedCatalogPage] fetchCatalogData failed:', err);
+    return { productDocs: [], variantsByProduct: {}, protoDocs: [], metaFacets: null };
+  }
+}
+
+// ── Page Component ─────────────────────────────────────────────────────────────
+
+export default async function SharedCatalogPage({ params }) {
+  const resolvedParams = await params;
+  const token = resolvedParams?.token;
+  const { verification, resolvedDoc } = await resolveTokenVerification(token);
 
   if (!verification.valid) {
     return (
@@ -429,59 +483,43 @@ export default async function SharedCatalogPage({ params }) {
 
   const payload = verification.payload || resolvedDoc || {};
 
-  // F-B: Guarantee catalogId is always defined — derive from token if missing
+  // F-B: Guarantee catalogId is always defined — derive deterministically if missing
   const catalogId = payload.catalogId || (resolvedDoc?.catalogId) ||
-    `CAT-${(payload.supplierId || 'ATL').toUpperCase().slice(0, 6)}-${Date.now().toString(36).toUpperCase()}`;
+    `CAT-${(payload.supplierId || 'ATL').toUpperCase().slice(0, 6)}-${String(token || 'SHARED').slice(0, 10).toUpperCase()}`;
 
   // Check Firestore for remote revocation & update visit analytics
-  let linkData = resolvedDoc || {};
-  if (catalogId) {
-    try {
-      const linkDocRef = adminDb.collection('shared_catalog_links').doc(catalogId);
-      const linkSnap = resolvedDoc ? { exists: true, data: () => resolvedDoc } : await linkDocRef.get();
-      if (linkSnap.exists) {
-        linkData = linkSnap.data() || {};
-        if (linkData.status === 'revoked') {
-          return (
-            <div style={{
-              minHeight: '100vh', backgroundColor: '#f8fafc',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '24px', fontFamily: 'Inter, system-ui, sans-serif'
-            }}>
-              <div style={{
-                backgroundColor: '#ffffff', borderRadius: '16px',
-                border: '1px solid #fee2e2', padding: '40px',
-                maxWidth: '520px', width: '100%', textAlign: 'center',
-                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)'
-              }}>
-                <div style={{
-                  width: '64px', height: '64px', borderRadius: '50%',
-                  backgroundColor: '#fef2f2', color: '#dc2626',
-                  display: 'inline-flex', alignItems: 'center',
-                  justifyContent: 'center', marginBottom: '20px'
-                }}>
-                  <AlertTriangle size={32} />
-                </div>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
-                  Catalog Link Access Revoked
-                </h1>
-                <p style={{ color: '#64748b', fontSize: '0.925rem', lineHeight: '1.5', marginBottom: '24px' }}>
-                  This shared price list has been revoked or updated by the account manager. Please request a new access link.
-                </p>
-              </div>
-            </div>
-          );
-        }
+  const { linkData, isRevoked } = await verifyRevocationAndRecordVisit(catalogId, resolvedDoc);
 
-        // Record visit count asynchronously
-        linkDocRef.set({
-          visitsCount: (linkData.visitsCount || 0) + 1,
-          lastVisitedAt: new Date().toISOString()
-        }, { merge: true }).catch(() => {});
-      }
-    } catch (err) {
-      // Non-blocking fallback
-    }
+  if (isRevoked) {
+    return (
+      <div style={{
+        minHeight: '100vh', backgroundColor: '#f8fafc',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '24px', fontFamily: 'Inter, system-ui, sans-serif'
+      }}>
+        <div style={{
+          backgroundColor: '#ffffff', borderRadius: '16px',
+          border: '1px solid #fee2e2', padding: '40px',
+          maxWidth: '520px', width: '100%', textAlign: 'center',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)'
+        }}>
+          <div style={{
+            width: '64px', height: '64px', borderRadius: '50%',
+            backgroundColor: '#fef2f2', color: '#dc2626',
+            display: 'inline-flex', alignItems: 'center',
+            justifyContent: 'center', marginBottom: '20px'
+          }}>
+            <AlertTriangle size={32} />
+          </div>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+            Catalog Link Access Revoked
+          </h1>
+          <p style={{ color: '#64748b', fontSize: '0.925rem', lineHeight: '1.5', marginBottom: '24px' }}>
+            This shared price list has been revoked or updated by the account manager. Please request a new access link.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const catalogMeta = { ...linkData, ...payload, catalogId };
@@ -503,27 +541,13 @@ export default async function SharedCatalogPage({ params }) {
     : PRICING_TIER.WHOLESALE;
 
   // F-D: Use cached Firestore fetch + pre-aggregated _meta/catalog_facets for Golden Rule #22 Server-side KPIs
-  let productDocs, variantsByProduct, protoDocs, metaFacets = null;
   const hasSpecificProductIds = Array.isArray(catalogMeta.productIds) && catalogMeta.productIds.length > 0;
-
-  try {
-    const [catalogDataResult, facetsDoc] = await Promise.all([
-      fetchCatalogData(
-        supplierId || 'all',
-        category || 'all',
-        catalogueFilter || 'all',
-        hasSpecificProductIds ? catalogMeta.productIds : []
-      ),
-      adminDb.collection('_meta').doc('catalog_facets').get().catch(() => null)
-    ]);
-    ({ productDocs, variantsByProduct, protoDocs } = catalogDataResult);
-    if (facetsDoc && facetsDoc.exists) {
-      metaFacets = facetsDoc.data();
-    }
-  } catch (err) {
-    console.error('[SharedCatalogPage] fetchCatalogData failed:', err);
-    productDocs = []; variantsByProduct = {}; protoDocs = [];
-  }
+  const { productDocs, variantsByProduct, protoDocs, metaFacets } = await fetchCatalogAndFacets(
+    supplierId,
+    category,
+    catalogueFilter,
+    hasSpecificProductIds ? catalogMeta.productIds : []
+  );
 
   // ── Build Products ───────────────────────────────────────────────────────────
   const products = [];
@@ -586,6 +610,17 @@ export default async function SharedCatalogPage({ params }) {
 
     if (variants.length === 0) continue;
 
+    const catLower = String(data.categoryId || data.category || '').toLowerCase();
+    const slugLower = String(data.slug || data.id || '').toLowerCase();
+    const suppLower = String(data.supplierId || '').toLowerCase();
+    const nameLower = String(data.canonicalName || data.name || '').toLowerCase();
+    const isCosmeticOrHair =
+      catLower.includes('cosmetic') || catLower.includes('skincare') ||
+      catLower.includes('trichology') || catLower.includes('nutricosmetic') ||
+      catLower.includes('hair') || slugLower.startsWith('colway-') ||
+      suppLower.includes('lotusland') || nameLower.includes('shampoo') ||
+      nameLower.includes('conditioner') || nameLower.includes('collagen');
+
     // F-A: Resolve prices using canonical schema
     const resolvedVariants = variants.map(v => {
       const { unitPrice, tier10UnitPrice, kitTotalPrice } = resolveCanonicalPrice(v, {
@@ -606,7 +641,7 @@ export default async function SharedCatalogPage({ params }) {
         dosage:          v.dosage || data.dosage || 'Standard Dose',
         presentation:    v.presentation || v.format || 'Vial',
         route:           v.route || null, // Phase 3 route filter support
-        purity:          v.purity || data.purity || '≥ 99.0% (HPLC Verified)',
+        purity:          isCosmeticOrHair ? (v.purity || null) : (v.purity || data.purity || '≥ 99.0% (HPLC Verified)'),
         stock:           inStock ? stockQty : 0,
         coaUrl:          v.coaUrl || data.coaUrl || null,
         price:           unitPrice > 0 ? Number(unitPrice.toFixed(2)) : 0,
@@ -632,7 +667,9 @@ export default async function SharedCatalogPage({ params }) {
       canonicalName:    data.canonicalName || data.name || 'Product',
       description:      data.aiDescription || data.description || '',
       category:         data.categoryId || data.category || 'Peptides',
-      purity:           data.purity || '≥ 99.0% HPLC',
+      purity:           isCosmeticOrHair ? (data.purity || null) : (data.purity || '≥ 99.0% HPLC'),
+      supplierId:       data.supplierId || null,
+      productType:      data.productType || null,
       hasCOA:           Boolean(data.hasCOA),
       coaUrl:           data.coaUrl || null,
       requiresColdChain: Boolean(data.requiresColdChain),

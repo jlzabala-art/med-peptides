@@ -66,6 +66,7 @@ export default function CatalogRightSidebar({
   displayedCount = 0,
   isOpenMobile = false,
   onCloseMobile = () => {},
+  isPeptideCatalog = true,
   t = (k) => k
 }) {
   const activeGoalsCount = selectedGoals.length;
@@ -263,134 +264,228 @@ export default function CatalogRightSidebar({
         </div>
       </div>
 
-      {/* ── CARD 2: FDA & REGULATORY STATUSES ── */}
-      <div style={{
-        background: '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '12px',
-        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
-        overflow: 'hidden'
-      }}>
-        {/* Header */}
+      {/* ── CARD 2: FDA & REGULATORY STATUSES (PEPTIDES ONLY) OR EU COSMETIC STANDARDS ── */}
+      {isPeptideCatalog ? (
         <div style={{
-          padding: '0.85rem 1rem',
-          borderBottom: '1px solid #f1f5f9',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: '#f8fafc'
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+          overflow: 'hidden'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-            <Landmark size={16} style={{ color: '#003666' }} />
-            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.04em' }}>
-              FDA REGULATORY STATUS
+          {/* Header */}
+          <div style={{
+            padding: '0.85rem 1rem',
+            borderBottom: '1px solid #f1f5f9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: '#f8fafc'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <Landmark size={16} style={{ color: '#003666' }} />
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.04em' }}>
+                FDA REGULATORY STATUS
+              </span>
+            </div>
+
+            {isFdaActive && (
+              <button
+                type="button"
+                onClick={() => setFdaFilter('all')}
+                title="Reset FDA filter"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  fontSize: '0.66rem',
+                  fontWeight: 700,
+                  color: '#64748b',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '2px 4px'
+                }}
+              >
+                <RotateCcw size={10} /> Reset
+              </button>
+            )}
+          </div>
+
+          {/* FDA Status List */}
+          <div style={{
+            padding: '0.6rem 0.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px'
+          }}>
+            {FDA_STATUS_CONFIG.map((status) => {
+              const isSelected = fdaFilter === status.id;
+              const count = status.id === 'all'
+                ? (totalProductsCount || availableGoals.reduce((acc, g) => acc + g.count, 0) || 0)
+                : (fdaStatusCounts[status.id] || 0);
+
+              return (
+                <button
+                  key={status.id}
+                  type="button"
+                  onClick={() => setFdaFilter(status.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: isSelected ? `1.5px solid ${status.color}` : '1px solid #f1f5f9',
+                    background: isSelected ? status.bg : '#ffffff',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = '#f8fafc';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = '#ffffff';
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', minWidth: 0, flex: 1 }}>
+                    {/* Radio indicator */}
+                    <div style={{
+                      width: 14,
+                      height: 14,
+                      borderRadius: '50%',
+                      border: isSelected ? `4px solid ${status.color}` : '1.5px solid #cbd5e1',
+                      background: '#ffffff',
+                      flexShrink: 0,
+                      marginTop: '2px'
+                    }} />
+
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.78rem', color: isSelected ? status.color : '#0f172a', fontWeight: isSelected ? 800 : 600 }}>
+                          {status.label}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '1px', lineHeight: 1.35 }}>
+                        {status.description}
+                      </div>
+                    </div>
+                  </div>
+
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    color: isSelected ? status.color : '#64748b',
+                    background: isSelected ? '#ffffff' : '#f1f5f9',
+                    border: `1px solid ${isSelected ? status.borderColor : '#e2e8f0'}`,
+                    padding: '1px 7px',
+                    borderRadius: '99px',
+                    flexShrink: 0,
+                    fontFamily: 'monospace',
+                    marginLeft: '6px'
+                  }}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+          overflow: 'hidden'
+        }}>
+          {/* Header */}
+          <div style={{
+            padding: '0.85rem 1rem',
+            borderBottom: '1px solid #f1f5f9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: '#f8fafc'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <ShieldCheck size={16} style={{ color: '#003666' }} />
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.04em' }}>
+                EU REGULATORY STANDARDS
+              </span>
+            </div>
+            <span style={{
+              fontSize: '0.66rem',
+              fontWeight: 700,
+              color: '#16a34a',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              padding: '2px 6px',
+              borderRadius: '4px'
+            }}>
+              COMPLIANT
             </span>
           </div>
 
-          {isFdaActive && (
-            <button
-              type="button"
-              onClick={() => setFdaFilter('all')}
-              title="Reset FDA filter"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px',
-                fontSize: '0.66rem',
-                fontWeight: 700,
-                color: '#64748b',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '2px 4px'
-              }}
-            >
-              <RotateCcw size={10} /> Reset
-            </button>
-          )}
-        </div>
-
-        {/* FDA Status List */}
-        <div style={{
-          padding: '0.6rem 0.5rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px'
-        }}>
-          {FDA_STATUS_CONFIG.map((status) => {
-            const isSelected = fdaFilter === status.id;
-            const count = status.id === 'all'
-              ? (totalProductsCount || availableGoals.reduce((acc, g) => acc + g.count, 0) || 0)
-              : (fdaStatusCounts[status.id] || 0);
-
-            return (
-              <button
-                key={status.id}
-                type="button"
-                onClick={() => setFdaFilter(status.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  padding: '8px 10px',
-                  borderRadius: '8px',
-                  border: isSelected ? `1.5px solid ${status.color}` : '1px solid #f1f5f9',
-                  background: isSelected ? status.bg : '#ffffff',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) e.currentTarget.style.background = '#f8fafc';
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) e.currentTarget.style.background = '#ffffff';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', minWidth: 0, flex: 1 }}>
-                  {/* Radio indicator */}
-                  <div style={{
-                    width: 14,
-                    height: 14,
-                    borderRadius: '50%',
-                    border: isSelected ? `4px solid ${status.color}` : '1.5px solid #cbd5e1',
-                    background: '#ffffff',
-                    flexShrink: 0,
-                    marginTop: '2px'
-                  }} />
-
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.78rem', color: isSelected ? status.color : '#0f172a', fontWeight: isSelected ? 800 : 600 }}>
-                        {status.label}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '1px', lineHeight: 1.35 }}>
-                      {status.description}
-                    </div>
-                  </div>
+          {/* Standards List */}
+          <div style={{
+            padding: '0.85rem 1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  EU CPNP Registered
                 </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Formally registered on the EU Cosmetic Products Notification Portal (Regulation EC No 1223/2009).
+                </div>
+              </div>
+            </div>
 
-                <span style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 800,
-                  color: isSelected ? status.color : '#64748b',
-                  background: isSelected ? '#ffffff' : '#f1f5f9',
-                  border: `1px solid ${isSelected ? status.borderColor : '#e2e8f0'}`,
-                  padding: '1px 7px',
-                  borderRadius: '99px',
-                  flexShrink: 0,
-                  fontFamily: 'monospace',
-                  marginLeft: '6px'
-                }}>
-                  {count}
-                </span>
-              </button>
-            );
-          })}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  Native Tropocollagen Triple Helix
+                </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Bioactive tertiary protein conformation preserved via low-temperature extraction.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  Clinically & Dermatologically Tested
+                </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Hypoallergenic tolerance tested and verified for professional application routines.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <Check size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                  EU Safety Assessment (CPSR)
+                </div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.35 }}>
+                  Full Cosmetic Product Safety Reports and certified microbiological batch analytics.
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── CARD 3: SHARE CATALOG LINK (Option A: Streamlined without redundant QR) ── */}
       <div style={{

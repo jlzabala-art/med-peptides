@@ -20,11 +20,23 @@ export default function SharedCatalogProductListRow({
   protocols,
   setSelectedPublicProtocol,
   catalogMeta,
+  isPeptideCatalog = true,
   t,
 }) {
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
 
-  const fdaStatus = React.useMemo(() => getFdaPeptideStatus(prod), [prod]);
+  const isProductPeptide = React.useMemo(() => {
+    if (!isPeptideCatalog) return false;
+    const cat = String(prod?.category || '').toLowerCase();
+    const type = String(prod?.productType || prod?.type || '').toLowerCase();
+    const slug = String(prod?.slug || '').toLowerCase();
+    if (cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('trichology') || cat.includes('nutricosmetic') || slug.startsWith('colway-') || prod?.supplierId === 'supplier-lotusland') {
+      return false;
+    }
+    return cat.includes('peptide') || type.includes('peptide') || prod?.isPeptide;
+  }, [prod, isPeptideCatalog]);
+
+  const fdaStatus = React.useMemo(() => isProductPeptide ? getFdaPeptideStatus(prod) : null, [prod, isProductPeptide]);
 
   const resolvedSupplier = React.useMemo(() => {
     const rawProdSupp = prod?.supplierId || prod?.variants?.[0]?.supplierId || prod?.supplier || prod?.variants?.[0]?.supplier;
@@ -62,7 +74,7 @@ export default function SharedCatalogProductListRow({
                   .trim()}
               </span>
 
-              {fdaStatus && (
+              {isProductPeptide && fdaStatus && (
                 <span
                   className="catalog-row-fda-badge"
                   title={`${fdaStatus.badgeLabel} (${fdaStatus.rulingDate || 'FDA'}): ${fdaStatus.summary || ''}`}
@@ -87,7 +99,32 @@ export default function SharedCatalogProductListRow({
                 </span>
               )}
 
-              {prod.purity && (
+              {!isProductPeptide && (
+                <span
+                  className="catalog-row-fda-badge"
+                  title="Formally registered on the EU Cosmetic Products Notification Portal (EC No 1223/2009)"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    padding: '1.5px 6px',
+                    borderRadius: '4px',
+                    backgroundColor: '#f0fdf4',
+                    color: '#16a34a',
+                    border: '1px solid #bbf7d0',
+                    lineHeight: 1.2,
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  <span style={{ fontSize: '0.74rem', lineHeight: 1 }}>✓</span>
+                  <span className="fda-badge-text">EU CPNP</span>
+                </span>
+              )}
+
+              {isProductPeptide && prod.purity && (
                 <span className="catalog-row-purity">
                   {prod.purity}
                 </span>
@@ -116,10 +153,10 @@ export default function SharedCatalogProductListRow({
               target="_blank"
               rel="noopener noreferrer"
               className="catalog-row-monograph-btn"
-              title="Official Monograph"
+              title={isProductPeptide ? "Official Clinical Monograph" : "Product Dossier & Formulation Details"}
             >
               <FileText size={13} />
-              <span className="monograph-btn-label">Monograph</span>
+              <span className="monograph-btn-label">{isProductPeptide ? 'Monograph' : 'Product Sheet'}</span>
             </a>
 
             <button

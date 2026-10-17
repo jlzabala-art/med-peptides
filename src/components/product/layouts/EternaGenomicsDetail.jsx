@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Dna,
@@ -32,14 +32,17 @@ import {
   Star,
   Microscope,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  Search
 } from '@/lib/icons';
 import ImageModal from '@/snippets/ImageModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import ShareProductMonographDrawer from '@/components/admin/catalog/drawers/ShareProductMonographDrawer';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import toast from 'react-hot-toast';
+import StatusBadge from '@/components/ui/StatusBadge';
+import CopyableId from '@/components/ui/CopyableId';
+import DataTable from '@/components/ui/DataTable';
 import './EternaGenomicsDetail.css';
 
 export default function EternaGenomicsDetail({
@@ -55,7 +58,6 @@ export default function EternaGenomicsDetail({
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
   const [isB2BPortalModalOpen, setIsB2BPortalModalOpen] = useState(false);
-  const [copiedBatch, setCopiedBatch] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState({ src: '', title: '' });
 
@@ -65,26 +67,158 @@ export default function EternaGenomicsDetail({
   const name = product.name || 'ETERNA® DNA & Epigenetic Longevity Platform';
   const effectiveBatchCode = initialBatch || product.batch || 'AS-ETR-EUR01-2610';
 
-  const handleCopyBatch = () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(effectiveBatchCode);
-      setCopiedBatch(true);
-      toast.success(isEs ? `Lote ${effectiveBatchCode} copiado ✓` : `Batch ${effectiveBatchCode} copied ✓`);
-      setTimeout(() => setCopiedBatch(false), 2500);
-    }
-  };
-
   const handleOpenModal = (src, title) => {
     setModalImage({ src, title });
     setIsImageModalOpen(true);
   };
 
+  const [activeTab, setActiveTab] = useState('inicio');
+  const [snpSearch, setSnpSearch] = useState('');
+  const [selectedPillarFilter, setSelectedPillarFilter] = useState('all');
+
   const scrollToSection = (id) => {
+    setActiveTab(id);
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  // Structured High-Impact Genomic SNPs Analyzed
+  const snpData = [
+    {
+      id: 'actn3',
+      gene: 'ACTN3',
+      rsid: 'rs1815739',
+      pillar: isEs ? 'Deporte' : 'Sport',
+      pillarId: 'sport',
+      effect: isEs 
+        ? 'Genotipo R577X. Determina proporción de alfa-actinina-3 en fibras musculares rápidas tipo II.' 
+        : 'R577X polymorphism modulating alpha-actinin-3 in fast-twitch Type IIx muscle fibers.',
+      intervention: isEs 
+        ? 'Protocolo de fuerza explosiva / Adaptación de cargas pliométricas + BPC-157 / TB-500' 
+        : 'High-velocity power resistance training + BPC-157 / TB-500 recovery protocol'
+    },
+    {
+      id: 'cyp1a2',
+      gene: 'CYP1A2',
+      rsid: 'rs762551',
+      pillar: isEs ? 'Nutrición' : 'Nutrition',
+      pillarId: 'nutrition',
+      effect: isEs 
+        ? 'Metabolizador hepático de cafeína (alelo A rápido vs C lento). Tasa de aclaramiento citocromo P450.' 
+        : 'Hepatic caffeine metabolism (A allele rapid vs C allele slow metabolizer). CYP450 clearance rate.',
+      intervention: isEs 
+        ? 'Ajuste de ventana pre-entrenamiento (>8h antes del descanso para metabolizadores lentos)' 
+        : 'Pre-workout timing adjustment (>8h pre-bedtime cutoff for slow metabolizers)'
+    },
+    {
+      id: 'apoe',
+      gene: 'APOE',
+      rsid: 'rs429358',
+      pillar: isEs ? 'Prevención' : 'Prevention',
+      pillarId: 'prevention',
+      effect: isEs 
+        ? 'Isoformas ε2/ε3/ε4. Modula aclaramiento lipídico endotelial y riesgo cardiovascular / aterosclerosis.' 
+        : 'ApoE ε2/ε3/ε4 isoforms regulating vascular lipid clearance and atherogenic LDL particle residence.',
+      intervention: isEs 
+        ? 'Restricción de grasas saturadas, ratio EPA/DHA >2:1 y monitorización trimestral de ApoB / Lp(a)' 
+        : 'Saturated fat restriction, EPA/DHA >2:1 protocol and quarterly ApoB / Lp(a) surveillance'
+    },
+    {
+      id: 'foxo3',
+      gene: 'FOXO3',
+      rsid: 'rs2802292',
+      pillar: isEs ? 'Longevidad' : 'Longevity',
+      pillarId: 'longevity',
+      effect: isEs 
+        ? 'Alelo G de longevidad excepcional. Estimula autofagia celular, resistencia a estrés oxidativo y SIRT1.' 
+        : 'G-allele promoter associated with exceptional human lifespan, autophagy activation and SIRT1 synergy.',
+      intervention: isEs 
+        ? 'Activación de sirtuinas, restricción calórica intermitente y protocolo Epitalon / NAD+ infusión' 
+        : 'Sirtuin upregulation, intermittent fasting cycles and Epitalon / NAD+ cellular longevity protocol'
+    },
+    {
+      id: 'clock',
+      gene: 'CLOCK',
+      rsid: 'rs1801260',
+      pillar: isEs ? 'Bienestar' : 'Social',
+      pillarId: 'social',
+      effect: isEs 
+        ? 'Polimorfismo 3111T/C. Regula amplitud del oscilador circadiano del núcleo supraquiasmático.' 
+        : '3111T/C circadian master clock variant modulating chronotype and phase delay tendency.',
+      intervention: isEs 
+        ? 'Terapia de fotobiomodulación matutina (>10.000 lux) y magnesio bisglicinato + DSIP nocturno' 
+        : 'Morning blue light exposure (>10,000 lux) and evening magnesium glycinate + DSIP sleep protocol'
+    },
+    {
+      id: 'mthfr',
+      gene: 'MTHFR',
+      rsid: 'rs1801133',
+      pillar: isEs ? 'Nutrición' : 'Nutrition',
+      pillarId: 'nutrition',
+      effect: isEs 
+        ? 'Variante C677T. Reducción de hasta un 65% en la actividad de transmetilación del folato y homocisteína.' 
+        : 'C677T variant. Up to 65% reduction in enzymatic methylation efficiency of folate to 5-MTHF.',
+      intervention: isEs 
+        ? 'Sustitución estricta de ácido fólico sintético por L-Metilfolato activo + Metilcobalamina B12' 
+        : 'Strict avoidance of synthetic folic acid; therapeutic L-Methylfolate + Methyl-B12 clinical stack'
+    }
+  ];
+
+  const filteredSnps = snpData.filter((snp) => {
+    const matchesFilter = selectedPillarFilter === 'all' || snp.pillarId === selectedPillarFilter;
+    const matchesSearch = !snpSearch || 
+      snp.gene.toLowerCase().includes(snpSearch.toLowerCase()) ||
+      snp.rsid.toLowerCase().includes(snpSearch.toLowerCase()) ||
+      snp.effect.toLowerCase().includes(snpSearch.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  const snpColumns = useMemo(() => [
+    {
+      key: 'gene',
+      label: isEs ? 'Gen' : 'Gene Symbol',
+      width: '14%',
+      render: (row) => <span className="eterna-gene-tag">{row.gene}</span>
+    },
+    {
+      key: 'rsid',
+      label: 'dbSNP / Locus',
+      width: '18%',
+      render: (row) => <CopyableId value={row.rsid} />
+    },
+    {
+      key: 'pillar',
+      label: isEs ? 'Dominio' : 'Clinical Domain',
+      width: '18%',
+      render: (row) => (
+        <span style={{ fontSize: '0.78rem', color: 'var(--gcp-text-primary)', fontWeight: 500 }}>
+          {row.pillar}
+        </span>
+      )
+    },
+    {
+      key: 'effect',
+      label: isEs ? 'Impacto Fenotípico' : 'Phenotypic Impact',
+      width: '25%',
+      render: (row) => (
+        <span style={{ fontSize: '0.79rem', lineHeight: 1.45 }}>
+          {row.effect}
+        </span>
+      )
+    },
+    {
+      key: 'intervention',
+      label: isEs ? 'Intervención Protocolo' : 'Protocol Action',
+      width: '25%',
+      render: (row) => (
+        <span style={{ fontSize: '0.79rem', color: 'var(--gcp-blue-light)', lineHeight: 1.45 }}>
+          {row.intervention}
+        </span>
+      )
+    }
+  ], [isEs]);
 
   // 5 Genetic Pillars definitions (Original Eterna)
   const pillars = [
@@ -222,6 +356,243 @@ export default function EternaGenomicsDetail({
           { label: name }
         ]}
       />
+
+      {/* ── 1. Google Cloud Console Command Header ── */}
+      <div className="eterna-gcp-header-wrapper">
+        <div className="eterna-gcp-header-inner">
+          <div className="eterna-gcp-breadcrumb-bar">
+            <Link href="/catalog">{isEs ? 'Consola Atlas Health' : 'Atlas Health Console'}</Link>
+            <span>/</span>
+            <Link href="/collection/diagnostics">{isEs ? 'Diagnóstico & Genómica' : 'Genomics & Precision Diagnostics'}</Link>
+            <span>/</span>
+            <span style={{ color: 'var(--gcp-text-primary)' }}>ETERNA® Platform</span>
+          </div>
+
+          <div className="eterna-gcp-title-row">
+            <div className="eterna-gcp-title-left">
+              <div className="eterna-gcp-icon-box">
+                <Dna size={22} />
+              </div>
+              <div>
+                <h1 className="eterna-gcp-h1">{name}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
+                  <StatusBadge status="active" />
+                  <span className="gcp-badge green" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <span className="gcp-badge-dot" /> CE-IVDR Certified
+                  </span>
+                  <span className="gcp-badge blue" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <Microscope size={12} /> Illumina Infinium GSA
+                  </span>
+                  <span className="gcp-badge amber" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <ShieldCheck size={12} /> ISO 15189 / 17025
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="eterna-gcp-actions-toolbar">
+              <button
+                type="button"
+                className="gcp-btn-primary"
+                onClick={() => setIsInquiryDrawerOpen(true)}
+              >
+                <span>{isEs ? 'Solicitar Kit / Consulta' : 'Request Kit / Inquiry'}</span>
+                <ArrowRight size={14} />
+              </button>
+
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={() => window.open('/documents/ETERNA_Genetic_Risk_Analysis_Sample_Report.pdf', '_blank')}
+                title={isEs ? 'Descargar muestra de informe' : 'Download sample PDF report'}
+              >
+                <FileText size={14} />
+                <span>{isEs ? 'Informe Muestra' : 'Sample Report'}</span>
+              </button>
+
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={() => setIsB2BPortalModalOpen(true)}
+              >
+                <Activity size={14} />
+                <span>{isEs ? 'Portal Clínico B2B' : 'B2B Clinical Console'}</span>
+              </button>
+
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={() => setIsShareDrawerOpen(true)}
+                title={isEs ? 'Compartir ficha' : 'Share monograph'}
+              >
+                <Share2 size={14} />
+              </button>
+
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={() => setLang(lang === 'es' ? 'en' : 'es')}
+                style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 600, minWidth: '42px' }}
+                title={isEs ? 'Switch to English' : 'Cambiar a Español'}
+              >
+                {lang === 'es' ? 'EN' : 'ES'}
+              </button>
+            </div>
+          </div>
+
+          <div className="eterna-gcp-meta-bar">
+            <div className="eterna-gcp-meta-item">
+              <span className="eterna-gcp-meta-label">RESOURCE ID:</span>
+              <CopyableId value={slug} />
+            </div>
+            <div className="eterna-gcp-meta-item">
+              <span className="eterna-gcp-meta-label">ASSAY BATCH:</span>
+              <CopyableId value={effectiveBatchCode} />
+            </div>
+            <div className="eterna-gcp-meta-item">
+              <span className="eterna-gcp-meta-label">ARRAY SPEC:</span>
+              <span className="eterna-gcp-meta-value">Illumina Infinium GSA (+700k SNPs)</span>
+            </div>
+            <div className="eterna-gcp-meta-item">
+              <span className="eterna-gcp-meta-label">CENTRAL LAB:</span>
+              <span className="eterna-gcp-meta-value">Eurofins Genomics DE/FR</span>
+            </div>
+            <div className="eterna-gcp-meta-item">
+              <span className="eterna-gcp-meta-label">TAT:</span>
+              <span className="eterna-gcp-meta-value">14–21 Business Days</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 2. Top 4 GCP KPI Metrics Cards (Golden Rule #22) ── */}
+      <div className="eterna-kpis-container">
+        <div className="eterna-kpi-grid">
+          <div className="eterna-kpi-card" style={{ '--card-accent': '#8ab4f8' }}>
+            <div className="eterna-kpi-header">
+              <span>{isEs ? 'Cobertura Genómica' : 'Genomic Coverage'}</span>
+              <Dna size={15} style={{ color: '#8ab4f8' }} />
+            </div>
+            <div className="eterna-kpi-value">692K+</div>
+            <div className="eterna-kpi-sub">
+              {isEs ? 'Polimorfismos analizados (Illumina Infinium)' : 'High-density SNPs analyzed (Illumina GSA)'}
+            </div>
+          </div>
+
+          <div className="eterna-kpi-card" style={{ '--card-accent': '#81c995' }}>
+            <div className="eterna-kpi-header">
+              <span>{isEs ? 'Conformidad Regulatoria' : 'Regulatory Approval'}</span>
+              <ShieldCheck size={15} style={{ color: '#81c995' }} />
+            </div>
+            <div className="eterna-kpi-value" style={{ fontSize: '1.45rem' }}>CE-IVDR</div>
+            <div className="eterna-kpi-sub">
+              {isEs ? 'Tubo estabilizador 24m temp. ambiente' : 'Room-temp 24 mo preservation buffer'}
+            </div>
+          </div>
+
+          <div className="eterna-kpi-card" style={{ '--card-accent': '#c58af9' }}>
+            <div className="eterna-kpi-header">
+              <span>{isEs ? 'Dominios Clínicos' : 'Clinical Domains'}</span>
+              <Layers size={15} style={{ color: '#c58af9' }} />
+            </div>
+            <div className="eterna-kpi-value">5 Pillars</div>
+            <div className="eterna-kpi-sub">
+              {isEs ? 'Deporte, Nutrición, Prevención, Longevidad, Bienestar' : 'Sport, Nutrition, Prevention, Longevity, Social'}
+            </div>
+          </div>
+
+          <div className="eterna-kpi-card" style={{ '--card-accent': '#fdd663' }}>
+            <div className="eterna-kpi-header">
+              <span>{isEs ? 'Tiempo de Respuesta (TAT)' : 'Turnaround Time'}</span>
+              <Clock size={15} style={{ color: '#fdd663' }} />
+            </div>
+            <div className="eterna-kpi-value">14–21 d</div>
+            <div className="eterna-kpi-sub">
+              {isEs ? 'Recepción de muestra a informe digital' : 'Courier sample intake to verified report'}
+            </div>
+          </div>
+        </div>
+
+        <div className="eterna-kpi-scope-bar">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: '#81c995' }} />
+            <span>
+              {isEs 
+                ? 'Alcance: Activo de Laboratorio Certificado · Eurofins Genomics Central Laboratory · Encriptación RGPD' 
+                : 'Scope: Certified Laboratory Asset · Eurofins Genomics Central Laboratory · GDPR Encrypted'}
+            </span>
+          </div>
+          <span style={{ fontFamily: 'ui-monospace, monospace' }}>VERIFIED ASSAY v2.4</span>
+        </div>
+      </div>
+
+      {/* ── 3. GCP Sticky Navigation Ribbon (Tabs) ── */}
+      <nav className="eterna-gcp-tab-ribbon" aria-label="Page Sections">
+        <div className="eterna-gcp-tab-ribbon-inner">
+          <button 
+            type="button" 
+            className={`eterna-gcp-tab-btn ${activeTab === 'inicio' ? 'active' : ''}`}
+            onClick={() => scrollToSection('inicio')}
+          >
+            <Sparkles size={14} />
+            <span>{isEs ? 'Visión General' : 'Overview'}</span>
+          </button>
+
+          <button 
+            type="button" 
+            className={`eterna-gcp-tab-btn ${activeTab === 'biometrics' ? 'active' : ''}`}
+            onClick={() => scrollToSection('biometrics')}
+          >
+            <Smartphone size={14} />
+            <span>{isEs ? 'Biometría & Wearables' : 'Biometrics & Wearables'}</span>
+          </button>
+
+          <button 
+            type="button" 
+            className={`eterna-gcp-tab-btn ${activeTab === 'pilares' ? 'active' : ''}`}
+            onClick={() => scrollToSection('pilares')}
+          >
+            <Layers size={14} />
+            <span>{isEs ? '5 Pilares Genómicos' : '5 Genomic Pillars'}</span>
+          </button>
+
+          <button 
+            type="button" 
+            className={`eterna-gcp-tab-btn ${activeTab === 'snp-table' ? 'active' : ''}`}
+            onClick={() => scrollToSection('snp-table')}
+          >
+            <BarChart3 size={14} />
+            <span>{isEs ? 'SNPs & Datos Técnicos' : 'SNPs & Technical Data'}</span>
+          </button>
+
+          <button 
+            type="button" 
+            className={`eterna-gcp-tab-btn ${activeTab === 'como-funciona' ? 'active' : ''}`}
+            onClick={() => scrollToSection('como-funciona')}
+          >
+            <Clock size={14} />
+            <span>{isEs ? 'Cómo Funciona' : 'How It Works'}</span>
+          </button>
+
+          <button 
+            type="button" 
+            className={`eterna-gcp-tab-btn ${activeTab === 'integracion' ? 'active' : ''}`}
+            onClick={() => scrollToSection('integracion')}
+          >
+            <Activity size={14} />
+            <span>{isEs ? 'Protocolos Clínicos' : 'Clinical Protocols'}</span>
+          </button>
+
+          <button 
+            type="button" 
+            className={`eterna-gcp-tab-btn ${activeTab === 'investigacion' ? 'active' : ''}`}
+            onClick={() => scrollToSection('investigacion')}
+          >
+            <ShieldCheck size={14} />
+            <span>{isEs ? 'Rigor Científico' : 'Scientific Backing'}</span>
+          </button>
+        </div>
+      </nav>
 
       {/* Master 2-Column Responsive Layout with Sticky Right Sidebar */}
       <div className="eterna-master-layout">
@@ -369,7 +740,7 @@ export default function EternaGenomicsDetail({
           </section>
 
           {/* ── 4. Section: Your Wearable Gives Data. Eterna Gives Answers ── */}
-          <section className="eterna-biometrics-section">
+          <section id="biometrics" className="eterna-biometrics-section">
             <div className="eterna-section-heading">
               <h2 className="eterna-section-h2">
                 {isEs ? (
@@ -427,7 +798,7 @@ export default function EternaGenomicsDetail({
             </div>
 
             {/* ── 5. Visualize Your Genetics & 5 Pillars ── */}
-            <div className="eterna-genetics-showcase">
+            <div id="pilares" className="eterna-genetics-showcase">
               <div className="eterna-genetics-header">
                 <div className="eterna-badge-kicker">
                   <Dna size={16} />
@@ -585,6 +956,92 @@ export default function EternaGenomicsDetail({
             </div>
           </section>
 
+          {/* ── 5.1 Technical SNP Data Table (Google Cloud UX - Golden Rule #3) ── */}
+          <section id="snp-table" className="eterna-snp-section" style={{ marginTop: '2rem', marginBottom: '3.5rem' }}>
+            <div className="eterna-snp-table-card">
+              <div className="eterna-snp-table-header">
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <BarChart3 size={16} color="var(--gcp-blue-light)" />
+                    <strong style={{ fontSize: '0.95rem', color: '#ffffff' }}>
+                      {isEs ? 'Registro de Variantes Genómicas & SNPs Clave' : 'Key Genomic Variants & dbSNP Registry'}
+                    </strong>
+                    <span style={{ fontSize: '0.72rem', background: 'var(--gcp-blue-surface)', color: 'var(--gcp-blue-light)', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                      {filteredSnps.length} SNPs
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.76rem', color: 'var(--gcp-text-muted)', marginTop: '4px' }}>
+                    {isEs 
+                      ? 'Polimorfismos clínicamente accionables analizados en la secuenciación Illumina Infinium GSA' 
+                      : 'Clinically actionable polymorphisms genotyped via Illumina Infinium GSA assay'}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  {/* Pillar filter */}
+                  <select
+                    value={selectedPillarFilter}
+                    onChange={(e) => setSelectedPillarFilter(e.target.value)}
+                    style={{
+                      background: 'var(--gcp-surface)',
+                      border: '1px solid var(--gcp-border)',
+                      color: 'var(--gcp-text-primary)',
+                      borderRadius: '4px',
+                      padding: '6px 10px',
+                      fontSize: '0.78rem',
+                      fontFamily: 'inherit',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="all">{isEs ? 'Todos los Dominios (5)' : 'All Domains (5)'}</option>
+                    <option value="sport">{isEs ? 'Deporte & Fuerza' : 'Sport & Performance'}</option>
+                    <option value="nutrition">{isEs ? 'Nutrición & Metabolismo' : 'Nutrition & Metabolism'}</option>
+                    <option value="prevention">{isEs ? 'Prevención Cardiovascular' : 'Cardiovascular Prevention'}</option>
+                    <option value="longevity">{isEs ? 'Longevidad & Senescencia' : 'Longevity & Autophagy'}</option>
+                    <option value="social">{isEs ? 'Bienestar & Sueño' : 'Wellbeing & Sleep'}</option>
+                  </select>
+
+                  {/* Search input */}
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Search size={14} style={{ position: 'absolute', left: '10px', color: 'var(--gcp-text-muted)' }} />
+                    <input
+                      type="text"
+                      value={snpSearch}
+                      onChange={(e) => setSnpSearch(e.target.value)}
+                      placeholder={isEs ? 'Buscar gen o rsID...' : 'Search gene or rsID...'}
+                      style={{
+                        background: 'var(--gcp-surface)',
+                        border: '1px solid var(--gcp-border)',
+                        color: 'var(--gcp-text-primary)',
+                        borderRadius: '4px',
+                        padding: '6px 10px 6px 30px',
+                        fontSize: '0.78rem',
+                        fontFamily: 'inherit',
+                        outline: 'none',
+                        width: '180px'
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="eterna-table-container">
+                <DataTable
+                  columns={snpColumns}
+                  data={filteredSnps}
+                  keyField="id"
+                  emptyMessage={isEs ? 'No se encontraron variantes que coincidan con la búsqueda.' : 'No genetic variants matching filter criteria.'}
+                />
+              </div>
+
+              <div style={{ padding: '8px 14px', background: 'var(--gcp-surface-card)', borderTop: '1px solid var(--gcp-border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: 'var(--gcp-text-muted)' }}>
+                <span>{isEs ? 'Base de Referencia: GRCh38 / Ensembl dbSNP 155' : 'Reference Genome: GRCh38 / Ensembl dbSNP 155'}</span>
+                <span style={{ fontFamily: 'ui-monospace, monospace' }}>Illumina Infinium Global Screening Array v3.0</span>
+              </div>
+            </div>
+          </section>
+
           {/* ── 6. Section: How It Works (4-Step Process with Official Icons) ── */}
           <section id="como-funciona" className="eterna-process-section">
             <div className="eterna-section-heading">
@@ -713,6 +1170,71 @@ export default function EternaGenomicsDetail({
               {isEs 
                 ? 'Información importante: Esta prueba proporciona información de bienestar genético y no constituye un diagnóstico médico sustitutivo de la valoración de un profesional de la salud colegiado.' 
                 : 'Important notice: This test provides personalized genetic wellness intelligence and does not replace medical diagnosis by a licensed healthcare professional.'}
+            </div>
+          </section>
+
+          {/* ── 7.1 Clinical Protocol Integration Section ── */}
+          <section id="integracion" className="eterna-integration-section" style={{ marginTop: '2.5rem', marginBottom: '3.5rem' }}>
+            <div className="eterna-section-heading">
+              <div className="eterna-badge-kicker">
+                <Activity size={15} />
+                <span>{isEs ? 'Medicina Traslacional' : 'Translational Medicine'}</span>
+              </div>
+              <h2 className="eterna-section-h2">
+                {isEs ? 'Integración Directa con Protocolos Clínicos' : 'Direct Integration with Clinical Protocols'}
+              </h2>
+              <p className="eterna-section-p">
+                {isEs 
+                  ? 'Los hallazgos del test Eterna no se quedan en datos teóricos. Se conectan directamente con protocolos peptídicos y de medicina regenerativa validados en la plataforma Atlas Health.' 
+                  : 'Eterna DNA findings do not remain abstract data. They directly bridge to clinically validated peptide and longevity protocols within the Atlas Health ecosystem.'}
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
+              <div style={{ background: 'var(--gcp-surface)', border: '1px solid var(--gcp-border)', borderRadius: '6px', padding: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span className="eterna-gene-tag">FOXO3 / SIRT1</span>
+                  <StatusBadge status="active" />
+                </div>
+                <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '4px 0 6px' }}>
+                  {isEs ? 'Protocolo de Senescencia & Autofagia' : 'Senescence & Autophagy Protocol'}
+                </h4>
+                <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
+                  {isEs 
+                    ? 'Activación de telomerasa y reparación celular vía Epitalon + NAD+ bi-semanal con monitorización de longitud telomérica.' 
+                    : 'Telomerase upregulation and DNA repair via bi-weekly Epitalon + NAD+ protocol guided by baseline senescence metrics.'}
+                </p>
+              </div>
+
+              <div style={{ background: 'var(--gcp-surface)', border: '1px solid var(--gcp-border)', borderRadius: '6px', padding: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span className="eterna-gene-tag">ACTN3 / MSTN</span>
+                  <StatusBadge status="active" />
+                </div>
+                <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '4px 0 6px' }}>
+                  {isEs ? 'Protocolo Musculoesquelético & Cargas' : 'Musculoskeletal Load Protocol'}
+                </h4>
+                <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
+                  {isEs 
+                    ? 'Sinergia de reparación tisular con BPC-157 + TB-500 adaptada a la tasa intrínseca de daño muscular según alelo R577X.' 
+                    : 'Targeted tissue repair synergy combining BPC-157 + TB-500 calibrated to individual mechanical muscle strain risk.'}
+                </p>
+              </div>
+
+              <div style={{ background: 'var(--gcp-surface)', border: '1px solid var(--gcp-border)', borderRadius: '6px', padding: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span className="eterna-gene-tag">CLOCK / PER2</span>
+                  <StatusBadge status="active" />
+                </div>
+                <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '4px 0 6px' }}>
+                  {isEs ? 'Protocolo Circadiano & Pineal' : 'Circadian & Pineal Optimization'}
+                </h4>
+                <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
+                  {isEs 
+                    ? 'Regulación del eje hipotálamo-pineal mediante péptido inductor del sueño profundo (DSIP) y modulación de cronotipo.' 
+                    : 'Hypothalamic-pineal regulation utilizing Deep Sleep Inducing Peptide (DSIP) aligned with circadian gene expression.'}
+                </p>
+              </div>
             </div>
           </section>
 
@@ -906,18 +1428,10 @@ export default function EternaGenomicsDetail({
                 : 'Official precision genomics, wearable telemetry, and epigenetic longevity platform.'}
             </div>
 
-            {/* Active Batch Box (Copy-on-Click) */}
+            {/* Active Batch Box (Copy-on-Click - Golden Rule #11) */}
             <div className="eterna-sidebar-batch-box">
               <span className="eterna-batch-label">{isEs ? 'Lote de Laboratorio:' : 'Lab Batch:'}</span>
-              <button 
-                type="button"
-                className="eterna-batch-code-btn"
-                onClick={handleCopyBatch}
-                title={isEs ? 'Copiar código de lote' : 'Copy batch code'}
-              >
-                <span>{effectiveBatchCode}</span>
-                {copiedBatch ? <Check size={12} color="#81c995" /> : <Copy size={12} />}
-              </button>
+              <CopyableId value={effectiveBatchCode} />
             </div>
 
             {/* Sidebar CTAs (NO PRICES - Google Cloud UX) */}
@@ -998,10 +1512,46 @@ export default function EternaGenomicsDetail({
                 type="button" 
                 className="eterna-sidebar-nav-link"
                 style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
+                onClick={() => scrollToSection('biometrics')}
+              >
+                <ChevronRight size={14} color="var(--gcp-blue-light)" />
+                <span>{isEs ? 'Biometría & Smartwatches' : 'Biometrics & Wearables'}</span>
+              </button>
+              <button 
+                type="button" 
+                className="eterna-sidebar-nav-link"
+                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
+                onClick={() => scrollToSection('pilares')}
+              >
+                <ChevronRight size={14} color="var(--gcp-blue-light)" />
+                <span>{isEs ? '5 Pilares Genómicos' : '5 Genomic Pillars'}</span>
+              </button>
+              <button 
+                type="button" 
+                className="eterna-sidebar-nav-link"
+                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
+                onClick={() => scrollToSection('snp-table')}
+              >
+                <ChevronRight size={14} color="var(--gcp-blue-light)" />
+                <span>{isEs ? 'SNPs & Registro Técnico' : 'SNPs & Technical Data'}</span>
+              </button>
+              <button 
+                type="button" 
+                className="eterna-sidebar-nav-link"
+                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
                 onClick={() => scrollToSection('como-funciona')}
               >
                 <ChevronRight size={14} color="var(--gcp-blue-light)" />
                 <span>{isEs ? 'Proceso en 4 Pasos' : 'How It Works (4 Steps)'}</span>
+              </button>
+              <button 
+                type="button" 
+                className="eterna-sidebar-nav-link"
+                style={{ background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
+                onClick={() => scrollToSection('integracion')}
+              >
+                <ChevronRight size={14} color="var(--gcp-blue-light)" />
+                <span>{isEs ? 'Protocolos Clínicos Integrados' : 'Clinical Protocols'}</span>
               </button>
               <button 
                 type="button" 

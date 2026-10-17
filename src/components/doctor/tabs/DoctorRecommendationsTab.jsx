@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Sparkles, Users, ArrowUpRight, Search } from 'lucide-react';
+import { Sparkles, Users, ArrowUpRight, Search, X } from 'lucide-react';
 import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
 
 /**
@@ -290,34 +290,25 @@ export default function DoctorRecommendationsTab({
     .filter(sol => Array.isArray(sol.matchingItems) && sol.matchingItems.length > 0)
     .sort((a, b) => b.matchingItems.length - a.matchingItems.length);
 
-  const peptideSolutions = masterSolutions.filter(sol => sol.category === 'peptide');
-  const supplementSolutions = masterSolutions.filter(sol => sol.category === 'supplement');
-  const eternaSolutions = masterSolutions.filter(sol => sol.category === 'eterna');
-  const colwaySolutions = masterSolutions.filter(sol => sol.category === 'colway');
-
-  const effectiveCategoryFilter = 
-    (recCategoryFilter === 'peptides' && peptideSolutions.length === 0) ||
-    (recCategoryFilter === 'supplements' && supplementSolutions.length === 0) ||
-    (recCategoryFilter === 'eterna' && eternaSolutions.length === 0) ||
-    (recCategoryFilter === 'colway' && colwaySolutions.length === 0)
-      ? 'all'
-      : recCategoryFilter;
-
   const filteredSolutions = masterSolutions.filter(sol => {
-    if (effectiveCategoryFilter === 'peptides' && sol.category !== 'peptide') return false;
-    if (effectiveCategoryFilter === 'supplements' && sol.category !== 'supplement') return false;
-    if (effectiveCategoryFilter === 'eterna' && sol.category !== 'eterna') return false;
-    if (effectiveCategoryFilter === 'colway' && sol.category !== 'colway') return false;
+    if (recCategoryFilter && recCategoryFilter !== 'all') {
+      if (recCategoryFilter === 'peptides' && sol.category !== 'peptide') return false;
+      if (recCategoryFilter === 'supplements' && sol.category !== 'supplement') return false;
+      if (recCategoryFilter === 'eterna' && sol.category !== 'eterna') return false;
+      if (recCategoryFilter === 'colway' && sol.category !== 'colway') return false;
+    }
     if (recSearchQuery.trim()) {
       const q = recSearchQuery.toLowerCase().trim();
-      const matchTitle = sol.title.toLowerCase().includes(q);
-      const matchTarget = sol.target.toLowerCase().includes(q);
+      const matchTitle = (sol.title || '').toLowerCase().includes(q);
+      const matchTarget = (sol.target || '').toLowerCase().includes(q);
+      const matchBadge = (sol.badge || '').toLowerCase().includes(q);
+      const matchSummary = (sol.summary || '').toLowerCase().includes(q);
       const matchApis = sol.synergisticApis.some(api => api.toLowerCase().includes(q));
       const matchPatients = sol.matchingItems.some(item =>
         (item.rx.patientName || '').toLowerCase().includes(q) ||
         (item.rx.code || item.rx.id || '').toLowerCase().includes(q)
       );
-      return matchTitle || matchTarget || matchApis || matchPatients;
+      return matchTitle || matchTarget || matchBadge || matchSummary || matchApis || matchPatients;
     }
     return true;
   });
@@ -377,82 +368,67 @@ export default function DoctorRecommendationsTab({
         </div>
       </div>
 
-      {/* Filter Tabs & Patient Search Controls (Google Cloud Segmented Bar) */}
+      {/* Google Cloud Unified Search Toolbar (Rule #7 & Golden Standard) */}
       <div style={{
+        position: 'relative',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px',
-        padding: '10px 14px',
+        width: '100%',
+        marginBottom: '20px',
         background: '#ffffff',
         border: '1px solid #dadce0',
         borderRadius: '8px',
-        marginBottom: '20px'
+        padding: '2px 10px 2px 14px',
+        boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+        transition: 'border-color 0.15s, box-shadow 0.15s'
       }}>
-        {/* Category Pills */}
-        <div
+        <Search size={16} style={{ color: '#5f6368', flexShrink: 0, marginRight: '10px' }} />
+        <input
+          type="text"
+          value={recSearchQuery}
+          onChange={(e) => setRecSearchQuery(e.target.value)}
+          placeholder="Search formulations by clinical target, API synergy, or patient name... (e.g. Minoxidil, GHK-Cu, Sleep, FUE)"
           style={{
-            display: 'flex',
-            gap: '6px',
-            flexWrap: 'nowrap',
-            overflowX: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            paddingBottom: '2px',
-            maxWidth: '100%'
+            flex: 1,
+            height: '38px',
+            fontSize: '0.84rem',
+            border: 'none',
+            outline: 'none',
+            background: 'transparent',
+            color: '#202124'
           }}
-        >
-          {[
-            { id: 'all', label: `All Categories (${masterSolutions.length})` },
-            { id: 'peptides', label: `Bioactive Peptides (${peptideSolutions.length})` },
-            { id: 'supplements', label: `UltraPerson Nutraceuticals (${supplementSolutions.length})` },
-            { id: 'eterna', label: `ETERNA® Genomics (${eternaSolutions.length})` },
-            { id: 'colway', label: `Colway Cuticular ECM (${colwaySolutions.length})` }
-          ].map(cat => (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => {
-                if (triggerHaptic) triggerHaptic('selection');
-                setRecCategoryFilter(cat.id);
-              }}
-              style={{
-                fontSize: '0.74rem',
-                fontWeight: effectiveCategoryFilter === cat.id ? 600 : 500,
-                color: effectiveCategoryFilter === cat.id ? '#1a73e8' : '#5f6368',
-                background: effectiveCategoryFilter === cat.id ? '#e8f0fe' : '#ffffff',
-                border: effectiveCategoryFilter === cat.id ? '1px solid #1a73e8' : '1px solid #dadce0',
-                padding: '5px 12px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.12s'
-              }}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Search input for recommendations */}
-        <div style={{ position: 'relative', width: '260px', maxWidth: '100%' }}>
-          <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#5f6368' }} />
-          <input
-            type="text"
-            value={recSearchQuery}
-            onChange={(e) => setRecSearchQuery(e.target.value)}
-            placeholder="Filter by active API or patient..."
+        />
+        {recSearchQuery && (
+          <button
+            type="button"
+            onClick={() => setRecSearchQuery('')}
             style={{
-              width: '100%',
-              fontSize: '0.76rem',
-              padding: '6px 10px 6px 30px',
-              border: '1px solid #dadce0',
-              borderRadius: '4px',
-              outline: 'none',
-              background: '#ffffff',
-              color: '#202124'
+              background: 'transparent',
+              border: 'none',
+              padding: '6px',
+              cursor: 'pointer',
+              color: '#5f6368',
+              display: 'flex',
+              alignItems: 'center'
             }}
-          />
+            title="Clear search query"
+            aria-label="Clear search query"
+          >
+            <X size={15} />
+          </button>
+        )}
+        <div style={{
+          marginLeft: '8px',
+          padding: '3px 8px',
+          background: '#f1f3f4',
+          borderRadius: '4px',
+          fontSize: '0.72rem',
+          fontWeight: 600,
+          color: '#5f6368',
+          whiteSpace: 'nowrap',
+          border: '1px solid #dadce0'
+        }}>
+          {filteredSolutions.length} {filteredSolutions.length === 1 ? 'Solution Card' : 'Solution Cards'}
         </div>
       </div>
 

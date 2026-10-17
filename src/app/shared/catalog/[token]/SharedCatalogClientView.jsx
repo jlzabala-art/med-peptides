@@ -181,6 +181,7 @@ export default function SharedCatalogClientView({
     handleCopyOrderSummary,
     handleConfirmWhatsApp,
     isProtocolCatalog,
+    isPeptideCatalog,
   } = useSharedCatalogState({
     catalogMeta,
     products,
@@ -194,27 +195,21 @@ export default function SharedCatalogClientView({
   const isAuthenticated = Boolean(user && user.uid && activeRole !== 'guest');
 
   const catalogId = catalogMeta?.catalogId || 'catalog';
-  const [shareUrl, setShareUrl] = React.useState('');
+
+  const shareUrl = React.useMemo(() => {
+    if (typeof window === 'undefined') return '';
+    const origin = window.location.origin;
+    const cleanPath = catalogMeta?.catalogId ? `/c/${catalogMeta.catalogId}` : window.location.pathname;
+    return `${origin}${cleanPath}`;
+  }, [catalogMeta?.catalogId]);
 
   // ── Language toggle (EN by default, ES optional) ──────────────────────────
-  const [lang, setLang] = React.useState('en');
-  React.useEffect(() => {
-    const persisted = getPersistedLang();
-    setLang(persisted);
-  }, []);
+  const [lang, setLang] = React.useState(getPersistedLang);
   const t = buildTranslator(lang);
   const handleLangToggle = (newLang) => {
     setLang(newLang);
     persistLang(newLang);
   };
-
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const origin = window.location.origin;
-      const cleanPath = catalogMeta?.catalogId ? `/c/${catalogMeta.catalogId}` : window.location.pathname;
-      setShareUrl(`${origin}${cleanPath}`);
-    }
-  }, [catalogMeta?.catalogId]);
 
   const catalogCode = React.useMemo(() => {
     return catalogMeta?.catalogCode || catalogMeta?.batchCode || generatePharmaCatalogCode({
@@ -262,6 +257,7 @@ export default function SharedCatalogClientView({
   }, []);
 
   const fdaStatusCounts = React.useMemo(() => {
+    if (!isPeptideCatalog) return null;
     const counts = {
       all: (products || []).length,
       fda_approved: 0,
@@ -276,18 +272,18 @@ export default function SharedCatalogClientView({
       }
     });
     return counts;
-  }, [products]);
+  }, [products, isPeptideCatalog]);
 
   const activeFiltersCount = React.useMemo(() => {
     let count = 0;
     if (selectedGoals && selectedGoals.length > 0) count += selectedGoals.length;
-    if (fdaFilter && fdaFilter !== 'all') count += 1;
+    if (isPeptideCatalog && fdaFilter && fdaFilter !== 'all') count += 1;
     if (dosageFilter && dosageFilter !== 'all') count += 1;
     if (packagingMode && packagingMode !== 'all') count += 1;
     if (routeFilter && routeFilter !== 'all') count += 1;
     if (searchQuery?.trim()) count += 1;
     return count;
-  }, [selectedGoals, fdaFilter, dosageFilter, packagingMode, routeFilter, searchQuery]);
+  }, [selectedGoals, isPeptideCatalog, fdaFilter, dosageFilter, packagingMode, routeFilter, searchQuery]);
 
   const groupedProducts = React.useMemo(() => {
     if (!displayedProducts || displayedProducts.length === 0) return [];
@@ -759,7 +755,7 @@ export default function SharedCatalogClientView({
           totalUnits: cartTotalUnits,
           catalogId: catalogMeta?.catalogId || '',
           catalogCode: catalogCode || '',
-          catalogToken: token || '',
+          catalogToken: catalogMeta?.token || '',
           catalogTitle: catalogMeta?.title || (catalogMeta?.recipientName ? `Catalog for ${catalogMeta.recipientName}` : 'Shared Catalog'),
           priceTier: catalogMeta?.priceTier || priceSource || 'wholesale',
           priceTierLabel: pharmaMarginTheme?.tierLabel || 'Institutional Direct',
@@ -882,6 +878,7 @@ export default function SharedCatalogClientView({
           setRouteFilter={setRouteFilter}
           fdaFilter={fdaFilter}
           setFdaFilter={setFdaFilter}
+          isPeptideCatalog={isPeptideCatalog}
           onOpenMobileFilters={() => setIsMobileSidebarOpen(true)}
           protocols={protocols}
           productsWithProtocolsCount={productsWithProtocolsCount}
@@ -1160,7 +1157,7 @@ export default function SharedCatalogClientView({
                             marginBottom: '1px'
                           }}
                         >
-                          Clinical Goal • Portfolio Group
+                          {isPeptideCatalog ? 'Clinical Goal • Portfolio Group' : 'Treatment Goal • Portfolio Group'}
                         </span>
                         <h3
                           style={{
@@ -1226,6 +1223,7 @@ export default function SharedCatalogClientView({
                           protocols={protocols}
                           setSelectedPublicProtocol={setSelectedPublicProtocol}
                           catalogMeta={catalogMeta}
+                          isPeptideCatalog={isPeptideCatalog}
                           t={t}
                         />
                       ))}
@@ -1247,6 +1245,7 @@ export default function SharedCatalogClientView({
                           protocols={protocols}
                           setSelectedPublicProtocol={setSelectedPublicProtocol}
                           catalogMeta={catalogMeta}
+                          isPeptideCatalog={isPeptideCatalog}
                           t={t}
                         />
                       ))}
@@ -1286,6 +1285,7 @@ export default function SharedCatalogClientView({
             displayedCount={displayedProducts?.length || 0}
             isOpenMobile={isMobileSidebarOpen}
             onCloseMobile={() => setIsMobileSidebarOpen(false)}
+            isPeptideCatalog={isPeptideCatalog}
             t={t}
           />
         </div> {/* end .catalog-content-with-sidebar */}
@@ -1310,6 +1310,7 @@ export default function SharedCatalogClientView({
         onOpenFilters={() => setIsMobileSidebarOpen(true)}
         onInquire={() => setIsInquiryDrawerOpen(true)}
         onSubmitOrder={handleOpenWhatsAppCheckout}
+        isPeptideCatalog={isPeptideCatalog}
         lang={lang}
         t={t}
       />

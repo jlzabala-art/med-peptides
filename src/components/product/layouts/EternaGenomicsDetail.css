@@ -1403,3 +1403,315 @@
   border: none;
   background: var(--gcp-bg);
 }
+
+/* ==========================================================================
+   GOOGLE CLOUD CONSOLE ENHANCEMENTS: COMMAND HEADER, KPIS, TABS, DATA TABLE
+   ========================================================================== */
+
+/* 1. GCP Command Header */
+.eterna-gcp-header-wrapper {
+  background: var(--gcp-surface);
+  border-bottom: 1px solid var(--gcp-border);
+  padding: 1.15rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.eterna-gcp-header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.eterna-gcp-breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: var(--gcp-text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  flex-wrap: wrap;
+}
+
+.eterna-gcp-breadcrumb-bar a {
+  color: var(--gcp-blue-light);
+  text-decoration: none;
+}
+
+.eterna-gcp-breadcrumb-bar a:hover {
+  text-decoration: underline;
+}
+
+.eterna-gcp-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.eterna-gcp-title-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.eterna-gcp-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: var(--gcp-blue-surface);
+  border: 1px solid rgba(138, 180, 248, 0.4);
+  color: var(--gcp-blue-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.eterna-gcp-h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--gcp-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.eterna-gcp-actions-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.eterna-gcp-meta-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--gcp-border-subtle);
+  font-size: 0.78rem;
+  color: var(--gcp-text-secondary);
+}
+
+.eterna-gcp-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.eterna-gcp-meta-label {
+  color: var(--gcp-text-muted);
+  font-weight: 500;
+}
+
+.eterna-gcp-meta-value {
+  color: var(--gcp-text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* 2. Top 4 KPI Metrics Grid (Golden Rule #22) */
+.eterna-kpis-container {
+  max-width: 1440px;
+  margin: 0 auto 1.5rem;
+  padding: 0 1rem;
+}
+
+@media (min-width: 1100px) {
+  .eterna-kpis-container {
+    padding: 0 2rem;
+  }
+}
+
+.eterna-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.eterna-kpi-card {
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  border-radius: var(--gcp-radius-card);
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--gcp-shadow-card);
+}
+
+.eterna-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--card-accent, var(--gcp-blue-light));
+}
+
+.eterna-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gcp-text-muted);
+}
+
+.eterna-kpi-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--card-accent, var(--gcp-text-primary));
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 4px 0 2px;
+}
+
+.eterna-kpi-sub {
+  font-size: 0.76rem;
+  color: var(--gcp-text-secondary);
+}
+
+.eterna-kpi-scope-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--gcp-text-muted);
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--gcp-border-subtle);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+/* 3. GCP Sticky Tab Ribbon */
+.eterna-gcp-tab-ribbon {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: var(--gcp-surface);
+  border-bottom: 1px solid var(--gcp-border);
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.eterna-gcp-tab-ribbon-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+@media (min-width: 1100px) {
+  .eterna-gcp-tab-ribbon-inner {
+    padding: 0 2rem;
+  }
+}
+
+.eterna-gcp-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.85rem 1.15rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--gcp-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.eterna-gcp-tab-btn:hover {
+  color: var(--gcp-text-primary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.eterna-gcp-tab-btn.active {
+  color: var(--gcp-blue-light);
+  border-bottom-color: var(--gcp-blue-primary);
+  font-weight: 600;
+}
+
+/* 4. Technical SNP Data Table (Golden Rule #3) */
+.eterna-snp-table-card {
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  border-radius: var(--gcp-radius-card);
+  overflow: hidden;
+  margin-top: 2rem;
+}
+
+.eterna-snp-table-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--gcp-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--gcp-surface-card);
+}
+
+.eterna-table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.eterna-gcp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.eterna-gcp-table th {
+  background: var(--gcp-surface);
+  color: var(--gcp-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--gcp-border);
+}
+
+.eterna-gcp-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--gcp-border-subtle);
+  color: var(--gcp-text-secondary);
+  vertical-align: middle;
+}
+
+.eterna-gcp-table tr:hover td {
+  background: var(--gcp-surface-hover);
+}
+
+.eterna-gene-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--gcp-blue-surface);
+  color: var(--gcp-blue-light);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid rgba(138, 180, 248, 0.25);
+}

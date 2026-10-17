@@ -778,10 +778,16 @@ export default function DoctorPublicPortalClient({
     const q = params.get('q');
     const s = params.get('status');
     const t = params.get('task');
+    const tab = params.get('tab');
     const time = params.get('time');
     if (q) setSearchQuery(q);
     if (s) setStatusFilter(s);
-    if (t) setTaskFilter(t);
+    if (t) {
+      setTaskFilter(t);
+      setActiveAnchor('tasks');
+    } else if (tab) {
+      setActiveAnchor(tab);
+    }
     if (time) setTemporalFilter(time);
   }, []);
 
@@ -792,11 +798,12 @@ export default function DoctorPublicPortalClient({
     if (statusFilter !== 'all') params.set('status', statusFilter);
     if (taskFilter !== 'all') params.set('task', taskFilter);
     if (temporalFilter !== 'all') params.set('time', temporalFilter);
+    if (activeAnchor !== 'overview') params.set('tab', activeAnchor);
     const newSearch = params.toString() ? `?${params.toString()}` : '';
     if (window.location.search !== newSearch) {
       window.history.replaceState(null, '', `${window.location.pathname}${newSearch}`);
     }
-  }, [searchQuery, statusFilter, taskFilter, temporalFilter]);
+  }, [searchQuery, statusFilter, taskFilter, temporalFilter, activeAnchor]);
 
   useEffect(() => {
     // If initialData is already hydrated from server, do NOT flash loading screen or re-fetch on mount
@@ -1770,7 +1777,7 @@ export default function DoctorPublicPortalClient({
     {
       key: 'actions',
       header: 'Action',
-      width: '20%',
+      width: '16%',
       align: 'right',
       isAction: true,
       mobilePriority: 'always',
@@ -1795,24 +1802,22 @@ export default function DoctorPublicPortalClient({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '5px',
-                  height: '30px',
-                  padding: '0 10px',
+                  justifyContent: 'center',
+                  width: '28px',
+                  height: '28px',
                   borderRadius: '4px',
-                  background: '#16a34a',
-                  border: '1px solid #15803d',
-                  color: '#ffffff',
-                  fontSize: '0.74rem',
-                  fontWeight: 650,
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  color: '#16a34a',
                   textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                  boxShadow: '0 1px 2px rgba(22,163,74,0.2)',
-                  transition: 'all 0.12s'
+                  flexShrink: 0,
+                  transition: 'all 0.12s',
+                  boxShadow: '0 1px 2px rgba(22,163,74,0.1)'
                 }}
                 title="Send personalized clinical reminder via WhatsApp"
+                aria-label="Send WhatsApp reminder"
               >
-                <MessageCircle size={13} style={{ color: '#ffffff' }} />
-                <span>WhatsApp</span>
+                <MessageCircle size={15} />
               </a>
 
               <Link
@@ -1821,21 +1826,21 @@ export default function DoctorPublicPortalClient({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  height: '30px',
+                  gap: '3px',
+                  height: '28px',
                   padding: '0 8px',
                   borderRadius: '4px',
                   background: '#ffffff',
                   border: '1px solid #dadce0',
                   color: '#1a73e8',
-                  fontSize: '0.74rem',
+                  fontSize: '0.72rem',
                   fontWeight: 600,
                   textDecoration: 'none',
                   whiteSpace: 'nowrap'
                 }}
                 title="Review treatment proposal dossier"
               >
-                <span>Review Offer</span>
+                <span>Review</span>
                 <ArrowUpRight size={12} />
               </Link>
             </div>
@@ -3059,7 +3064,7 @@ export default function DoctorPublicPortalClient({
         datasheetUrl: '/p/vitamin-d-test'
       }
     ];
-  }, [data?.bloodoPanels]);
+  }, [data]);
 
   const uniquePatientsCount = useMemo(() => {
     const set = new Set();

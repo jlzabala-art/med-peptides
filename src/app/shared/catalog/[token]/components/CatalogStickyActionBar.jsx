@@ -31,6 +31,7 @@ export default function CatalogStickyActionBar({
   onOpenFilters = () => {},
   onInquire = () => {},
   onSubmitOrder = () => {},
+  isPeptideCatalog = true,
   lang = 'en',
   t = (k) => k
 }) {
@@ -164,12 +165,12 @@ export default function CatalogStickyActionBar({
             type="button"
             onClick={onOpenFilters}
             className="public-sticky-action-bar__sections-btn"
-            title={lang === 'es' ? 'Filtrar por Objetivos y Estado FDA' : 'Filter by Goals & FDA Status'}
-            aria-label="Goals & FDA Filters"
+            title={lang === 'es' ? 'Filtrar por Objetivos y Parámetros' : isPeptideCatalog ? 'Filter by Goals & FDA Status' : 'Filter by Treatment Goals & Quality Standards'}
+            aria-label={isPeptideCatalog ? "Goals & FDA Filters" : "Goals & Standards Filters"}
           >
             <Filter size={15} className="public-sticky-action-bar__sections-icon" />
             <span className="public-sticky-action-bar__sections-label">
-              {lang === 'es' ? 'Filtros' : 'Goals & FDA'}
+              {lang === 'es' ? 'Filtros' : isPeptideCatalog ? 'Goals & FDA' : 'Goals & Standards'}
             </span>
             {activeFiltersCount > 0 && (
               <span className="public-sticky-action-bar__sections-pill">

@@ -12,6 +12,8 @@ export const GOAL_TYPES = {
   COGNITIVE:         'cognitive',          // Neuroprotection, focus, mood, sleep
   MUSCLE_GROWTH:     'muscle_growth',      // Hypertrophy, GH secretagogues, muscle mass
   LIBIDO_WELLNESS:   'libido_wellness',    // Sexual wellness, hormonal balance, vitality
+  HAIR_RESTORATION:  'hair_restoration',   // Trichology, follicle stimulation, hair density & scalp health
+  SKIN_REGENERATION: 'skin_regeneration',  // Dermal matrix renewal, collagen synthesis, cosmetic skin care
   GENERAL_HEALTH:    'general_health',     // Baseline wellness, vitamins, diagnostics, general research
 };
 
@@ -24,5 +26,7 @@ export const GOAL_LABELS = {
   cognitive:         'Cognitive & Neuro-Wellness',
   muscle_growth:     'Muscle Growth & Performance',
   libido_wellness:   'Hormonal & Sexual Wellness',
+  hair_restoration:  'Trichology & Hair Restoration',
+  skin_regeneration: 'Dermal Care & Skin Regeneration',
   general_health:    'General Health & Diagnostics',
 };

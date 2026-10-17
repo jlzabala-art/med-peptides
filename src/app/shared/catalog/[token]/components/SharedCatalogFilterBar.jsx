@@ -35,6 +35,7 @@ export default function SharedCatalogFilterBar({
   displayedProducts = [],
   viewMode = 'list',
   setViewMode,
+  isPeptideCatalog = true,
   lang = 'en'
 }) {
   const ROUTE_LABELS = {
@@ -197,7 +198,7 @@ export default function SharedCatalogFilterBar({
                   Filter by Format
                 </div>
 
-                {[
+                {(isPeptideCatalog ? [
                   { id: 'all', label: 'All Formats', action: () => { setPackagingMode('all'); setDosageFilter('all'); setRouteFilter('all'); } },
                   { id: 'high_dose', label: 'High Dose (≥10mg)', action: () => setDosageFilter(dosageFilter === 'high_dose' ? 'all' : 'high_dose') },
                   { id: 'vials', label: '💉 Lyophilized Vials', action: () => setPackagingMode(packagingMode === 'vials' ? 'all' : 'vials') },
@@ -207,7 +208,11 @@ export default function SharedCatalogFilterBar({
                   { id: 'topical', label: '🧴 Topical / Dermocosmetic', action: () => setRouteFilter(routeFilter === 'topical' ? 'all' : 'topical') },
                   { id: 'sublingual', label: '💧 Sublingual Droppers', action: () => setPackagingMode(packagingMode === 'sublingual' ? 'all' : 'sublingual') },
                   { id: 'kits', label: '📦 10-Unit Kits', action: () => setPackagingMode(packagingMode === 'kits' ? 'all' : 'kits') },
-                ].map(item => (
+                ] : [
+                  { id: 'all', label: 'All Formats', action: () => { setPackagingMode('all'); setDosageFilter('all'); setRouteFilter('all'); } },
+                  { id: 'topical', label: '🧴 Topical Creams & Emulsions', action: () => setRouteFilter(routeFilter === 'topical' ? 'all' : 'topical') },
+                  { id: 'oral', label: '💊 Bioactive Oral Capsules', action: () => setPackagingMode(packagingMode === 'oral' ? 'all' : 'oral') },
+                ]).map(item => (
                   <button
                     key={item.id}
                     type="button"
@@ -257,10 +262,10 @@ export default function SharedCatalogFilterBar({
             cursor: 'pointer',
             boxShadow: '0 1px 2px rgba(15, 23, 42, 0.03)'
           }}
-          title="Open Clinical Goals and FDA Regulatory Status filters"
+          title={isPeptideCatalog ? "Open Clinical Goals and FDA Regulatory Status filters" : "Open Treatment Goals and Quality Standards"}
         >
           <Filter size={14} color="#003666" />
-          <span>Goals & FDA</span>
+          <span>{isPeptideCatalog ? 'Goals & FDA' : 'Goals & Standards'}</span>
           {activeFacetsCount > 0 && (
             <span style={{
               background: '#003666',

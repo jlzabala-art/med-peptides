@@ -671,6 +671,33 @@ export const FDA_REGISTRY = {
 export function getFdaPeptideStatus(productOrSlug) {
   if (!productOrSlug) return null;
 
+  // 0. Cosmetics, Skincare, Trichology & Non-Peptides are exempt from FDA/Analytical peptide classifications
+  if (typeof productOrSlug === 'object') {
+    const cat = String(productOrSlug.category || productOrSlug.categoryId || '').toLowerCase();
+    const type = String(productOrSlug.productType || productOrSlug.type || '').toLowerCase();
+    const slug = String(productOrSlug.slug || productOrSlug.id || '').toLowerCase();
+    const supp = String(productOrSlug.supplierId || '').toLowerCase();
+    const name = String(productOrSlug.canonicalName || productOrSlug.name || productOrSlug.title || '').toLowerCase();
+
+    if (
+      cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('trichology') ||
+      cat.includes('nutricosmetic') || cat.includes('hair') ||
+      slug.startsWith('colway-') || supp.includes('lotusland') ||
+      type.includes('cosmetic') || type.includes('shampoo') || type.includes('cream') ||
+      name.includes('shampoo') || name.includes('conditioner') || name.includes('collagen')
+    ) {
+      return null;
+    }
+  } else if (typeof productOrSlug === 'string') {
+    const s = productOrSlug.toLowerCase();
+    if (
+      s.startsWith('colway-') || s.includes('shampoo') || s.includes('conditioner') ||
+      s.includes('cream') || s.includes('serum') || s.includes('cosmetic') || s.includes('trichology')
+    ) {
+      return null;
+    }
+  }
+
   // 1. Direct explicit schema property
   if (typeof productOrSlug === 'object' && productOrSlug.fdaRegulatory?.status) {
     const custom = productOrSlug.fdaRegulatory;

@@ -64,6 +64,28 @@ const GOAL_SYNONYMS = {
   'hormones': GOAL_TYPES.LIBIDO_WELLNESS,
   'vitality': GOAL_TYPES.LIBIDO_WELLNESS,
 
+  // Trichology & Hair
+  'hair': GOAL_TYPES.HAIR_RESTORATION,
+  'hair restoration': GOAL_TYPES.HAIR_RESTORATION,
+  'trichology': GOAL_TYPES.HAIR_RESTORATION,
+  'hair loss': GOAL_TYPES.HAIR_RESTORATION,
+  'alopecia': GOAL_TYPES.HAIR_RESTORATION,
+  'hair density': GOAL_TYPES.HAIR_RESTORATION,
+  'scalp': GOAL_TYPES.HAIR_RESTORATION,
+  'scalp care': GOAL_TYPES.HAIR_RESTORATION,
+  'follicle': GOAL_TYPES.HAIR_RESTORATION,
+
+  // Dermal Care & Skin Regeneration
+  'skin': GOAL_TYPES.SKIN_REGENERATION,
+  'skin regeneration': GOAL_TYPES.SKIN_REGENERATION,
+  'dermal care': GOAL_TYPES.SKIN_REGENERATION,
+  'skincare': GOAL_TYPES.SKIN_REGENERATION,
+  'collagen': GOAL_TYPES.SKIN_REGENERATION,
+  'collagen synthesis': GOAL_TYPES.SKIN_REGENERATION,
+  'dermal matrix': GOAL_TYPES.SKIN_REGENERATION,
+  'cosmetic': GOAL_TYPES.SKIN_REGENERATION,
+  'cosmeceutical': GOAL_TYPES.SKIN_REGENERATION,
+
   // General Health
   'general health': GOAL_TYPES.GENERAL_HEALTH,
   'wellness': GOAL_TYPES.GENERAL_HEALTH,

@@ -22,18 +22,29 @@ export default function SharedCatalogProductCard({
   updateQuantity,
   showProtocolsUnderProducts,
   protocols,
-  setSelectedPublicProtocol,
   catalogMeta,
   hideMasterImage = false,
+  isPeptideCatalog = true,
   t,
 }) {
   const cleanVariants = React.useMemo(() => {
     return sortVariantsAscending(prod?.variants || [], true);
-  }, [prod?.variants]);
+  }, [prod.variants]);
 
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (cleanVariants[0]?.price || 0)) * fxMultiplier;
 
-  const fdaStatus = React.useMemo(() => getFdaPeptideStatus(prod), [prod]);
+  const isProductPeptide = React.useMemo(() => {
+    if (!isPeptideCatalog) return false;
+    const cat = String(prod?.category || '').toLowerCase();
+    const type = String(prod?.productType || prod?.type || '').toLowerCase();
+    const slug = String(prod?.slug || '').toLowerCase();
+    if (cat.includes('cosmetic') || cat.includes('skincare') || cat.includes('trichology') || cat.includes('nutricosmetic') || slug.startsWith('colway-') || prod?.supplierId === 'supplier-lotusland') {
+      return false;
+    }
+    return cat.includes('peptide') || type.includes('peptide') || prod?.isPeptide;
+  }, [prod, isPeptideCatalog]);
+
+  const fdaStatus = React.useMemo(() => isProductPeptide ? getFdaPeptideStatus(prod) : null, [prod, isProductPeptide]);
 
   const resolvedSupplier = React.useMemo(() => {
     const rawProdSupp = prod?.supplierId || prod?.variants?.[0]?.supplierId || prod?.supplier || prod?.variants?.[0]?.supplier;
@@ -48,11 +59,14 @@ export default function SharedCatalogProductCard({
   }, [prod, catalogMeta]);
 
   const monographLabel = React.useMemo(() => {
+    if (!isProductPeptide) {
+      return 'Product Sheet ↗';
+    }
     if (resolvedSupplier.includes('magenta')) {
       return t ? t('product.officialMonographMagenta', 'Monograph (Magenta) ↗') : 'Monograph (Magenta) ↗';
     }
     return t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗';
-  }, [resolvedSupplier, t]);
+  }, [resolvedSupplier, isProductPeptide, t]);
 
   function getRelatedProtocols(product, allProtocols) {
     if (!allProtocols || allProtocols.length === 0 || !product) return [];
@@ -113,7 +127,7 @@ export default function SharedCatalogProductCard({
                     .replace(/\s+(?:Blend|Stack)$/i, '')
                     .trim()}
                 </span>
-                {fdaStatus && (
+                {isProductPeptide && fdaStatus && (
                   <span
                     className="catalog-card-fda-badge"
                     title={`${fdaStatus.badgeLabel} (${fdaStatus.rulingDate || 'FDA'}): ${fdaStatus.summary || ''}`}
@@ -135,17 +149,41 @@ export default function SharedCatalogProductCard({
                     <span>{fdaStatus.shortBadge}</span>
                   </span>
                 )}
-                <span style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  backgroundColor: '#f0fdf4',
-                  color: '#16a34a',
-                  padding: '3px 8px',
-                  borderRadius: '5px',
-                  border: '1px solid #bbf7d0'
-                }}>
-                  {prod.purity}
-                </span>
+                {!isProductPeptide && (
+                  <span
+                    className="catalog-card-fda-badge"
+                    title="Formally registered on the EU Cosmetic Products Notification Portal (EC No 1223/2009)"
+                    style={{
+                      fontSize: '0.70rem',
+                      fontWeight: 700,
+                      backgroundColor: '#f0fdf4',
+                      color: '#16a34a',
+                      padding: '2.5px 7px',
+                      borderRadius: '5px',
+                      border: '1px solid #bbf7d0',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      lineHeight: 1.2
+                    }}
+                  >
+                    <span>✓</span>
+                    <span>EU CPNP</span>
+                  </span>
+                )}
+                {isProductPeptide && prod.purity && (
+                  <span style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    backgroundColor: '#f0fdf4',
+                    color: '#16a34a',
+                    padding: '3px 8px',
+                    borderRadius: '5px',
+                    border: '1px solid #bbf7d0'
+                  }}>
+                    {prod.purity}
+                  </span>
+                )}
                 <span style={{
                   fontSize: '0.72rem',
                   fontWeight: 600,
