@@ -143,16 +143,20 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
     initialPageSize: 50,
   });
 
-  // Sync searchParams from URL (e.g. /doctor/patients?search=Carlos%20M%C3%A9ndez or ?status=Active or ?ids=pat-1,pat-2)
+  // Sync searchParams from URL (e.g. /doctor/patients?search=Carlos%20M%C3%A9ndez or ?doctor=Dr.+Nahla or ?physicianId=...)
   useEffect(() => {
-    const urlSearch = searchParams.get('search') || searchParams.get('ids');
+    const urlSearch = searchParams.get('search') || searchParams.get('ids') || searchParams.get('doctor') || searchParams.get('doctorName');
     const urlStatus = searchParams.get('status');
+    const urlPhysicianId = searchParams.get('physicianId') || searchParams.get('doctorId');
 
     if (urlSearch && urlSearch !== searchTerm) {
       setSearchTerm(urlSearch);
     }
     if (urlStatus && urlStatus !== filters.status) {
       setFilters(prev => ({ ...prev, status: urlStatus }));
+    }
+    if (urlPhysicianId && urlPhysicianId !== filters.physicianId) {
+      setFilters(prev => ({ ...prev, physicianId: urlPhysicianId }));
     }
 
     const patientId = searchParams.get('patientId');
@@ -226,8 +230,8 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
           const id = cleanStr(p.id || p.objectID);
           const name = cleanStr(p.name || `${p.firstName || ''} ${p.lastName || ''}`);
           const email = cleanStr(p.email);
-          const physician = cleanStr(p.physician);
-          const clinic = cleanStr(p.clinic);
+          const physician = cleanStr(p.physician || p.physicianName || p.doctorName || p.prescribingDoctor || p.doctor?.name || '');
+          const clinic = cleanStr(p.clinic || p.clinicName || '');
           return queries.some(q => id.includes(q) || name.includes(q) || email.includes(q) || physician.includes(q) || clinic.includes(q));
         });
       }
@@ -732,7 +736,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
         );
       }}
       emptyState={
-        Boolean(searchTerm || filters.status || filters.physicianId || filters.productCategory || filters.algoliaDoctor || filters.commercialStage !== 'all' || (filters.timeRange && filters.timeRange !== 'all'))
+        (searchTerm || filters.status || filters.physicianId || filters.productCategory || filters.algoliaDoctor || filters.commercialStage !== 'all' || (filters.timeRange && filters.timeRange !== 'all'))
           ? {
               title: "No patients match active filters",
               description: `No patient records found matching ${searchTerm ? `"${searchTerm}"` : 'the current filter criteria'}. Try clearing your search or resetting active filters.`,

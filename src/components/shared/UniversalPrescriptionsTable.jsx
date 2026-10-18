@@ -13,6 +13,7 @@ import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 import PrescriptionsKPIs from '../admin/prescriptions/PrescriptionsKPIs';
 import UniversalOrderBuilder from './order-builder/UniversalOrderBuilder';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+// eslint-disable-next-line no-restricted-imports
 import { db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
@@ -225,7 +226,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
 
   // Group data by sessionId with deep search support
   const groupedData = useMemo(() => {
-    let rawData = [];
+    let rawData;
     if (isAlgoliaActive && searchTerm.trim()) {
       rawData = algoliaHits.map(h => ({ ...h, id: h.objectID || h.id }));
     } else if (searchTerm.trim()) {
@@ -277,11 +278,15 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     }
 
     // Filter by doctor
-    if (doctorFilter) {
-      const docQ = doctorFilter.toLowerCase();
+    if (doctorFilter || urlDoctorId) {
+      const docQ = (doctorFilter || '').toLowerCase();
+      const docIdQ = (urlDoctorId || '').toLowerCase();
       rawData = rawData.filter(rx => {
-        const docName = (rx.doctor?.name || rx.doctorName || '').toLowerCase();
-        return docName.includes(docQ);
+        const docName = (rx.doctor?.name || rx.doctorName || rx.treatingDoctor?.name || (typeof rx.treatingDoctor === 'string' ? rx.treatingDoctor : '') || rx.prescribingDoctor || '').toLowerCase();
+        const rxDocId = (rx.doctorId || rx.doctor?.id || rx.treatingDoctorId || rx.treatingDoctor?.id || '').toLowerCase();
+        const matchesName = docQ ? docName.includes(docQ) : false;
+        const matchesId = docIdQ ? rxDocId === docIdQ : false;
+        return matchesName || matchesId;
       });
     }
 

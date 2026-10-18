@@ -245,30 +245,32 @@ export default function AdminToolsTab() {
   ], []);
 
   // ── Master-Detail Expandable Row for Doctors (Golden Rule #4 & #11) ──────────
+  // ── Master-Detail Expandable Row for Doctors (Golden Rule #4, #11, #23) ──────────
   const doctorExpandableRender = (doc) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const fullPortalUrl = `${origin}/dr/${doc.slug}`;
+    const cleanName = (doc.name || '').replace(/^(Dr\.|Dra\.|Prof\.|Doctor|Doctora)\s*/i, '').trim();
 
     return (
       <div
         style={{
-          padding: '1.25rem 1.5rem',
+          padding: '1.1rem 1.25rem',
           backgroundColor: '#f8fafc',
           borderTop: '1px solid #e2e8f0',
           borderBottom: '1px solid #e2e8f0',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
           gap: '1.25rem',
           fontSize: '0.84rem'
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Section 1: Public Portal Endpoint & Link */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: 0 }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
             Public Portal & Endpoint
           </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '0.78rem', fontFamily: 'monospace', color: '#0284c7', background: '#e0f2fe', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
               /dr/{doc.slug}
             </span>
@@ -283,24 +285,25 @@ export default function AdminToolsTab() {
                 textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '3px'
+                gap: '3px',
+                padding: '2px 4px'
               }}
             >
               <span>Open</span>
               <ExternalLink size={12} />
             </a>
           </div>
-          <div style={{ marginTop: '2px' }}>
+          <div style={{ marginTop: '2px', wordBreak: 'break-all' }}>
             <CopyableId value={fullPortalUrl} label="Copy URL" />
           </div>
         </div>
 
         {/* Section 2: Medical License & Territory */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: 0 }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
             Medical Licensing & Territory
           </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>Official License:</span>
             {doc.license ? (
               <CopyableId value={doc.license} />
@@ -308,7 +311,7 @@ export default function AdminToolsTab() {
               <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.78rem' }}>In review / Pending</span>
             )}
           </div>
-          <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+          <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px', flexWrap: 'wrap' }}>
             <span>{doc.countryFlag}</span>
             <span style={{ fontWeight: 600, color: '#1e293b' }}>{doc.clinicName}</span>
             <span>·</span>
@@ -316,29 +319,116 @@ export default function AdminToolsTab() {
           </div>
         </div>
 
-        {/* Section 3: Clinical Activity Metrics */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        {/* Section 3: Clinical Activity Metrics (GCP Deep-Link Cards) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: 0 }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
             Clinical Metrics
           </span>
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 14px', textAlign: 'center', minWidth: '80px' }}>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#059669' }}>{doc.activePrescriptionsCount || 0}</div>
-              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Prescriptions</div>
-            </div>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px 14px', textAlign: 'center', minWidth: '80px' }}>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0284c7' }}>{doc.patientsCount || 0}</div>
-              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Patients</div>
-            </div>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* Prescriptions Filter Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerHaptic();
+                router.push(`/admin/prescriptions?doctor=${encodeURIComponent(cleanName)}&doctorId=${encodeURIComponent(doc.id)}`);
+              }}
+              title={`View all prescriptions for ${doc.name}`}
+              style={{
+                background: '#ffffff',
+                border: '1px solid #a7f3d0',
+                borderRadius: '8px',
+                padding: '8px 14px',
+                textAlign: 'left',
+                minWidth: '100px',
+                cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '2px',
+                outline: 'none',
+                minHeight: '44px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#059669';
+                e.currentTarget.style.boxShadow = '0 3px 8px rgba(5,150,105,0.18)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#a7f3d0';
+                e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#059669', lineHeight: 1.1 }}>
+                  {doc.activePrescriptionsCount ?? doc.prescriptionsCount ?? doc.rxCount ?? 0}
+                </span>
+                <span style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                  <span>Rx</span>
+                  <ArrowRight size={10} />
+                </span>
+              </div>
+              <div style={{ fontSize: '0.68rem', color: '#065f46', fontWeight: 650 }}>Prescriptions</div>
+            </button>
+
+            {/* Patients Filter Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerHaptic();
+                router.push(`/admin/patients?search=${encodeURIComponent(cleanName)}&physicianId=${encodeURIComponent(doc.id)}&doctor=${encodeURIComponent(doc.name || '')}`);
+              }}
+              title={`View all patients for ${doc.name}`}
+              style={{
+                background: '#ffffff',
+                border: '1px solid #bae6fd',
+                borderRadius: '8px',
+                padding: '8px 14px',
+                textAlign: 'left',
+                minWidth: '100px',
+                cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '2px',
+                outline: 'none',
+                minHeight: '44px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#0284c7';
+                e.currentTarget.style.boxShadow = '0 3px 8px rgba(2,132,199,0.18)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#bae6fd';
+                e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0284c7', lineHeight: 1.1 }}>
+                  {doc.patientsCount ?? doc.patientCount ?? 0}
+                </span>
+                <span style={{ fontSize: '0.68rem', color: '#0284c7', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                  <span>Pts</span>
+                  <ArrowRight size={10} />
+                </span>
+              </div>
+              <div style={{ fontSize: '0.68rem', color: '#0369a1', fontWeight: 650 }}>Patients</div>
+            </button>
           </div>
         </div>
 
         {/* Section 4: Operations & Impersonation Actions */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', justifyContent: 'center', minWidth: 0 }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
             Operations & Context Actions
           </span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
             <button
               type="button"
               onClick={() => {
@@ -346,20 +436,28 @@ export default function AdminToolsTab() {
                 toast.success(`Dr. ${doc.name?.replace(/^(Dr\.|Dra\.)\s*/, '') || doc.name} set as active doctor`);
               }}
               style={{
-                padding: '6px 10px',
+                minHeight: '44px',
+                padding: '8px 12px',
                 borderRadius: '6px',
                 background: '#ecfdf5',
                 border: '1px solid #a7f3d0',
                 color: '#065f46',
-                fontSize: '0.76rem',
+                fontSize: '0.78rem',
                 fontWeight: 650,
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px'
+                gap: '6px',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#d1fae5';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#ecfdf5';
               }}
             >
-              <Play size={12} fill="#059669" color="#059669" />
+              <Play size={13} fill="#059669" color="#059669" />
               <span>Set as Active Doctor</span>
             </button>
 
@@ -367,20 +465,30 @@ export default function AdminToolsTab() {
               type="button"
               onClick={() => openDrawer(doc, 'doctor')}
               style={{
-                padding: '6px 10px',
+                minHeight: '44px',
+                padding: '8px 12px',
                 borderRadius: '6px',
                 background: '#ffffff',
                 border: '1px solid #cbd5e1',
                 color: '#334155',
-                fontSize: '0.76rem',
+                fontSize: '0.78rem',
                 fontWeight: 600,
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px'
+                gap: '6px',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#94a3b8';
+                e.currentTarget.style.background = '#f8fafc';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#cbd5e1';
+                e.currentTarget.style.background = '#ffffff';
               }}
             >
-              <Eye size={12} />
+              <Eye size={13} />
               <span>View Full Traceability</span>
             </button>
           </div>
@@ -621,8 +729,8 @@ export default function AdminToolsTab() {
       countryCode: d.countryCode || 'AE',
       countryFlag: d.countryCode === 'QA' ? '🇶🇦' : d.countryCode === 'ES' ? '🇪🇸' : d.countryCode === 'GB' ? '🇬🇧' : '🇦🇪',
       license: d.license || 'COL-MED-VERIFIED',
-      activePrescriptionsCount: d.activePrescriptionsCount || d.prescriptionsCount || 1,
-      patientsCount: d.patientsCount || 1,
+      activePrescriptionsCount: d.activePrescriptionsCount || d.prescriptionsCount || d.rxCount || 1,
+      patientsCount: d.patientsCount || d.patientCount || d.rxCount || 1,
       verified: true
     }));
 

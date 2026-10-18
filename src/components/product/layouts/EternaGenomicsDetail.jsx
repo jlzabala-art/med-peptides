@@ -521,6 +521,67 @@ export default function EternaGenomicsDetail({
     { name: 'Apple Health', src: '/images/products/eterna/apple_health_logo.jpg' },
   ];
 
+  // Single source for the ETERNA ecosystem video card (used in Overview and the dedicated Video tab)
+  const renderVideoShowcase = () => (
+          <section className="eterna-video-showcase-section">
+            <div className="eterna-video-card">
+              <div className="eterna-video-card-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="eterna-video-icon-wrap">
+                    <Video size={18} />
+                  </div>
+                  <div>
+                    <h3 className="eterna-video-card-title">
+                      {isEs ? 'Video Monográfico: Ecosistema ETERNA Precision Health' : 'Video Monograph: ETERNA Precision Health Ecosystem'}
+                    </h3>
+                    <p className="eterna-video-card-subtitle">
+                      {isEs 
+                        ? 'Presentación audiovisual de la plataforma: flujo clínico, microarray Illumina GSA y prescripción traslacional' 
+                        : 'Audiovisual walkthrough of the platform: clinical loop, Illumina GSA microarray, and translational prescribing'}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="gcp-badge blue">
+                    <span className="gcp-badge-dot" /> Cloud Hosted (GCS)
+                  </span>
+                  <span className="gcp-badge green">1080p HD</span>
+                </div>
+              </div>
+              <div className="eterna-video-player-wrapper">
+                <video
+                  controls
+                  preload="metadata"
+                  className="eterna-video-element"
+                  poster="/images/products/eterna/img_hero_eterna2_en.png"
+                >
+                  <source src={ETERNA_VIDEO_CLOUD_URL} type="video/mp4" />
+                  <source src={ETERNA_VIDEO_LOCAL_FALLBACK} type="video/mp4" />
+                  {isEs ? 'Su navegador no soporta reproducción de vídeo HTML5.' : 'Your browser does not support HTML5 video playback.'}
+                </video>
+              </div>
+              <div className="eterna-video-card-footer">
+                <div className="eterna-video-feature-pill">
+                  <Dna size={13} />
+                  <span>{isEs ? 'Microarray Illumina GSA (>692k SNPs)' : 'Illumina GSA (>692k SNPs)'}</span>
+                </div>
+                <div className="eterna-video-feature-pill">
+                  <ShieldCheck size={13} />
+                  <span>{isEs ? 'Tubo saliva CE-IVDR (Buffer 24m)' : 'CE-IVDR Saliva Tube (24m buffer)'}</span>
+                </div>
+                <div className="eterna-video-feature-pill">
+                  <Activity size={13} />
+                  <span>{isEs ? 'Prescripción de Péptidos Atlas' : 'Atlas Peptide Prescriptions'}</span>
+                </div>
+                <div className="eterna-video-feature-pill">
+                  <Smartphone size={13} />
+                  <span>{isEs ? 'Reloj Biológico ActivAge' : 'ActivAge Biological Clock'}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+  );
+
   return (
     <div className="eterna-page-root">
       {/* Background Ambience */}
@@ -976,63 +1037,7 @@ export default function EternaGenomicsDetail({
               </section>
 
               {/* ── Video Monograph Showcase ── */}
-              <section className="eterna-video-showcase-section">
-                <div className="eterna-video-card">
-                  <div className="eterna-video-card-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div className="eterna-video-icon-wrap">
-                        <Video size={18} />
-                      </div>
-                      <div>
-                        <h3 className="eterna-video-card-title">
-                          {isEs ? 'Video Monográfico: Ecosistema ETERNA Precision Health' : 'Video Monograph: ETERNA Precision Health Ecosystem'}
-                        </h3>
-                        <p className="eterna-video-card-subtitle">
-                          {isEs 
-                            ? 'Presentación audiovisual de la plataforma: flujo clínico, microarray Illumina GSA y prescripción traslacional' 
-                            : 'Audiovisual walkthrough of the platform: clinical loop, Illumina GSA microarray, and translational prescribing'}
-                        </p>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span className="gcp-badge blue">
-                        <span className="gcp-badge-dot" /> Cloud Hosted (GCS)
-                      </span>
-                      <span className="gcp-badge green">1080p HD</span>
-                    </div>
-                  </div>
-                  <div className="eterna-video-player-wrapper">
-                    <video
-                      controls
-                      preload="metadata"
-                      className="eterna-video-element"
-                      poster="/images/products/eterna/img_hero_eterna2_en.png"
-                    >
-                      <source src={ETERNA_VIDEO_CLOUD_URL} type="video/mp4" />
-                      <source src={ETERNA_VIDEO_LOCAL_FALLBACK} type="video/mp4" />
-                      {isEs ? 'Su navegador no soporta reproducción de vídeo HTML5.' : 'Your browser does not support HTML5 video playback.'}
-                    </video>
-                  </div>
-                  <div className="eterna-video-card-footer">
-                    <div className="eterna-video-feature-pill">
-                      <Dna size={13} />
-                      <span>{isEs ? 'Microarray Illumina GSA (>692k SNPs)' : 'Illumina GSA (>692k SNPs)'}</span>
-                    </div>
-                    <div className="eterna-video-feature-pill">
-                      <ShieldCheck size={13} />
-                      <span>{isEs ? 'Tubo saliva CE-IVDR (Buffer 24m)' : 'CE-IVDR Saliva Tube (24m buffer)'}</span>
-                    </div>
-                    <div className="eterna-video-feature-pill">
-                      <Activity size={13} />
-                      <span>{isEs ? 'Prescripción de Péptidos Atlas' : 'Atlas Peptide Prescriptions'}</span>
-                    </div>
-                    <div className="eterna-video-feature-pill">
-                      <Smartphone size={13} />
-                      <span>{isEs ? 'Reloj Biológico ActivAge' : 'ActivAge Biological Clock'}</span>
-                    </div>
-                  </div>
-                </div>
-              </section>
+              {renderVideoShowcase()}
 
               {/* ── Executive Summary & Direct Jump Directory (Google Cloud UX) ── */}
               <div className="eterna-sidebar-card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
@@ -1119,6 +1124,7 @@ export default function EternaGenomicsDetail({
                               {sec.label}
                             </div>
                             <div style={{ fontSize: '0.72rem', color: 'var(--gcp-text-secondary)', marginTop: '2px' }}>
+                              {sec.id === 'video' && (isEs ? 'Presentación audiovisual del ecosistema ETERNA: flujo clínico, laboratorio y prescripción' : 'Audiovisual walkthrough of the ETERNA ecosystem: clinical loop, lab and prescribing')}
                               {sec.id === 'flujo-clinico' && (isEs ? 'El ciclo clínico completo para médicos: toma de saliva, Eurofins, monografía y prescripción' : 'Full 5-step clinical prescribing workflow from saliva sampling to Atlas formulas')}
                               {sec.id === 'pilares' && (isEs ? 'Deporte, Nutrición, Prevención, Longevidad y Cronobiología con dianas moleculares' : 'Sport, Nutrition, Prevention, Longevity, and Chronobiology with gene targets')}
                               {sec.id === 'snp-table' && (isEs ? 'Directorio interactivo con 11 polimorfismos clave (ACTN3, MTHFR, APOE, FOXO3, etc.)' : 'Interactive searchable directory of 11 actionable SNPs and clinical indications')}
@@ -1139,6 +1145,13 @@ export default function EternaGenomicsDetail({
                 </div>
               </div>
             </>
+          )}
+
+          {/* ── Section: Ecosystem Video Walkthrough ── */}
+          {effectiveActiveTab === 'video' && (
+            <section id="video">
+              {renderVideoShowcase()}
+            </section>
           )}
 
           {/* ── Section 2: Physician Clinical Prescribing Workflow (5 Steps) ── */}
