@@ -2,6 +2,7 @@ import { adminDb } from '@/lib/firebaseAdmin';
 import { KNOWN_DOCTORS_DIRECTORY } from '@/services/doctorDirectoryService';
 import { classifyPrescriptionRegimen } from '@/utils/prescriptionRegimenTaxonomy';
 import { resolveDoctorSpecialtyIntelligence } from '@/services/specialtyBlueprintsEngine';
+import { sanitizePrescriptionCode } from '@/lib/prescriptionSanitizer';
 
 // ── In-Memory RAM Cache (Golden Rule #2) ─────────────────────────────────────
 // Layer 1: 0ms RAM cache with 10-minute TTL
@@ -628,10 +629,14 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       const isProposal = Boolean(d.isTreatmentProposal) || d.status === 'proposal_pending' || d.orderStatus === 'Offer Not Accepted' || String(d.treatmentProgram || '').toLowerCase().includes('proposal') || String(d.invoiceRef || '').toLowerCase().includes('proposal');
       const normalizedStatus = isProposal ? 'proposal_pending' : (d.status || d.state || 'active');
 
+      const rawPrescriptionCode = d.prescriptionNumber || d.code || doc.id;
+      const cleanPrescriptionCode = sanitizePrescriptionCode(rawPrescriptionCode, patName);
+
       rawPrescriptionsList.push({
         id: doc.id,
-        prescriptionNumber: d.prescriptionNumber || d.code || doc.id,
-        code: d.code || d.prescriptionNumber || doc.id,
+        prescriptionNumber: cleanPrescriptionCode,
+        code: cleanPrescriptionCode,
+        rawDocId: doc.id,
         patientName: patName,
         patientId: patId,
         patient: d.patient || null,

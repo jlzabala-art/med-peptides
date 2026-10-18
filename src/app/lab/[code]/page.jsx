@@ -51,7 +51,7 @@ export async function generateMetadata({ params }) {
   const testName = labData.testName || 'NAD+ Quantitative Test';
   const val = labData.value != null ? `${labData.value} ${labData.unit || 'µM'}` : (labData.result || 'Quantified');
   const maskedSubject = `Subject #${labData.patientCode || labData.code || code}`;
-  const doctor = labData.doctorName || 'Attending Physician';
+  const doctor = 'Attending Physician';
 
   const shareTitle = `${testName} (${val}) · ${maskedSubject} | Atlas Health Services`;
   const shareDesc = `Official diagnostic biomarker report. Result: ${val} (${labData.zoneLabel || 'Quantified'}). Prescribed under ${doctor}. Accredited ISO 15189 / EU IVDR.`;

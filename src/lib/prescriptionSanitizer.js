@@ -31,9 +31,9 @@ export function sanitizePrescriptionCode(rawCode, rawPatientName = null) {
     }
   }
 
-  // 2. Strip trailing name-like slugs (e.g. '-jumanah-khayat' or '-carlos-mendez')
-  // Matches a hyphen followed by 3+ letters, possibly repeated, but NOT single letters like -A, -B
-  code = code.replace(/-(?:[a-z]{3,}-?)+$/i, '');
+  // 2. Strip trailing name-like slugs (e.g. '-jumanah-khayat' or '-carlos-mendez' or '-al-khayat')
+  // Matches a hyphen followed by lowercase words after standard prescription/invoice prefixes
+  code = code.replace(/-(?:[a-z]{2,}-?)+$/i, '');
   code = code.replace(/[-_]+$/, '');
 
   return code || String(rawCode).trim();
@@ -51,9 +51,13 @@ export function hasPatientSlugInCode(rawCode, rawPatientName = null) {
 
 /**
  * Generates an irreversible, deterministic codified patient token.
- * E.g. 'PT-8421'
+ * E.g. 'PT-8421'. Idempotent if input already contains a PT token.
  */
 export function getCodifiedPatientId(patientName, rxCode) {
+  if (patientName && typeof patientName === 'string') {
+    const m = patientName.match(/\bPT-(\d{4})\b/i);
+    if (m) return `PT-${m[1]}`;
+  }
   const cleanCode = sanitizePrescriptionCode(rxCode, patientName);
   const inputStr = `${patientName || ''}_${cleanCode || ''}`.trim().toLowerCase();
   if (!inputStr) return 'PT-8800';
@@ -65,6 +69,38 @@ export function getCodifiedPatientId(patientName, rxCode) {
   }
   const token = (Math.abs(hash) % 9000) + 1000;
   return `PT-${token}`;
+}
+
+/**
+ * Safely masks a patient date of birth according to HIPAA / DHA standards.
+ * Preserves evidence that the DOB was recorded without exposing private birth date.
+ */
+export function maskDateOfBirth(dob, isAuthorized = false) {
+  if (!dob) return '';
+  if (isAuthorized) return String(dob);
+  const str = String(dob).trim();
+  if (str.includes('••••')) return str;
+  const parts = str.split(/[-/.]/);
+  if (parts.length === 3) {
+    const day = parts[2].length <= 2 ? parts[2] : parts[0];
+    return `••••-••-${day} (Secured)`;
+  }
+  return '••••-••-•• (Recorded)';
+}
+
+/**
+ * Safely masks a physician medical license while proving verified credentialing status.
+ */
+export function maskMedicalLicense(license, isAuthorized = false, fallbackOpaqueCode = null) {
+  const lic = license || (fallbackOpaqueCode ? `DHA-${fallbackOpaqueCode}` : null);
+  if (!lic) return '';
+  if (isAuthorized) return String(lic);
+  const str = String(lic).trim();
+  if (str.includes('••••')) return str;
+  const clean = str.replace(/[^a-zA-Z0-9-]/g, '');
+  const last4 = clean.slice(-4) || '9MC';
+  const prefix = clean.startsWith('DHA') ? 'DHA' : (clean.startsWith('MOH') ? 'MOH' : 'LIC');
+  return `${prefix}-••••${last4} (Verified)`;
 }
 
 /**

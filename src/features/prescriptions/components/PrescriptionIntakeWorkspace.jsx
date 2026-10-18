@@ -7,7 +7,7 @@ import {
   Beaker, Sparkles, ExternalLink, RefreshCw, ShieldAlert,
   Stethoscope, Dna, Info, Copy, Check, ArrowRight, ArrowLeft, Phone,
   FileSpreadsheet, Eye, Clock, ChevronDown, ChevronUp,
-  MessageCircle, RotateCcw, ShieldCheck, Send
+  MessageCircle, RotateCcw, ShieldCheck, Send, UserCheck, UserPlus, Lock
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import StandardDrawer from '../../../components/ui/StandardDrawer';
@@ -23,6 +23,12 @@ import {
   validatePrescriptionClinicalRules
 } from '../../../services/prescriptionAiService';
 import { exportPrescriptionToXlsx } from '../../../utils/exportPrescriptionToXlsx';
+import {
+  sanitizePrescriptionCode,
+  getCodifiedPatientId,
+  maskDateOfBirth,
+  maskMedicalLicense
+} from '@/lib/prescriptionSanitizer';
 
 export default function PrescriptionIntakeWorkspace({
   isOpen,
@@ -31,7 +37,7 @@ export default function PrescriptionIntakeWorkspace({
   doctorContext = null
 }) {
   const { openDrawer } = useDrawer();
-  const { user } = useAuth();
+  const { user, activeRole, isAdmin } = useAuth();
 
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
@@ -41,6 +47,12 @@ export default function PrescriptionIntakeWorkspace({
   const [error, setError] = useState(null);
 
   const [rawAiData, setRawAiData] = useState(null);
+  const isAuthorizedViewer = Boolean(
+    doctorContext?.isAuthorizedViewer ||
+    (user && (isAdmin || ['doctor', 'admin', 'clinic', 'clinic_admin', 'medical_director', 'fagron_doctor'].includes(activeRole || user?.role)))
+  );
+  const [renewalTarget, setRenewalTarget] = useState('same'); // 'same' | 'new'
+
   const [normalizedRxList, setNormalizedRxList] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -65,17 +77,27 @@ export default function PrescriptionIntakeWorkspace({
             status: 'Ready',
             _isPlaceholder: false
           }));
+
+          const cleanClonedCode = sanitizePrescriptionCode(parsed.sourceRx, parsed.patientName);
+          const safePatientName = isAuthorizedViewer ? (parsed.patientName || '') : '';
+          const safePatientPhone = isAuthorizedViewer ? (parsed.patientPhone || '') : '';
+          const safeDob = isAuthorizedViewer ? (parsed.patientDob || '') : '';
+          const safeDoctorLicense = isAuthorizedViewer
+            ? (parsed.doctorLicense || doctorContext?.doctorLicense || '')
+            : maskMedicalLicense(parsed.doctorLicense || doctorContext?.doctorLicense, false, doctorContext?.opaqueCode || doctorContext?.doctorSlug);
+
           return [{
             id: `cloned_${Date.now()}`,
-            patientName: parsed.patientName || '',
-            patientPhone: parsed.patientPhone || '',
+            patientName: safePatientName,
+            patientPhone: safePatientPhone,
             patient: {
-              name: parsed.patientName || '',
-              dob: parsed.patientDob || '',
-              phone: parsed.patientPhone || ''
+              name: safePatientName,
+              dob: safeDob,
+              phone: safePatientPhone
             },
             doctorName: doctorContext?.doctorName || parsed.doctorName || 'Prescribing Physician',
             doctorId: doctorContext?.doctorId || parsed.doctorId || null,
+            doctorLicense: safeDoctorLicense,
             clinic: doctorContext?.clinicName || parsed.clinic || 'Clinical Practice',
             treatmentTitle: parsed.treatmentTitle || 'Compounded Formulation',
             treatmentType: parsed.treatmentTitle || 'Compounded Formulation',
@@ -85,7 +107,8 @@ export default function PrescriptionIntakeWorkspace({
             prescriptionLines: lines,
             items: lines,
             validationStatus: 'Ready',
-            _clonedFromCode: parsed.sourceRx || null
+            _clonedFromCode: cleanClonedCode || null,
+            _clonedSourcePatient: isAuthorizedViewer ? (parsed.patientName || '') : ''
           }];
         }
       } catch (e) {
@@ -97,6 +120,7 @@ export default function PrescriptionIntakeWorkspace({
   // Default to false so we never silently select or merge similarly named patients without physician opt-in
   const [alsoCreatePatient, setAlsoCreatePatient] = useState(false);
   const [savedPrescriptionsResult, setSavedPrescriptionsResult] = useState(null);
+  const isSubmittedResult = savedPrescriptionsResult?.[0]?.status === 'pending' || savingActionType === 'pending';
   const [copiedUrl, setCopiedUrl] = useState(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
@@ -109,6 +133,19 @@ export default function PrescriptionIntakeWorkspace({
     if (file || normalizedRxList.length > 0) return 2;
     return 1;
   }, [file, normalizedRxList.length, savedPrescriptionsResult]);
+
+  // Clone / Renewal mode determination: formula prefilled from existing record without file upload
+  const isCloneMode = useMemo(() => {
+    return Boolean(normalizedRxList[0]?._clonedFromCode && !file);
+  }, [normalizedRxList, file]);
+
+  const cleanClonedCode = useMemo(() => {
+    return sanitizePrescriptionCode(normalizedRxList[0]?._clonedFromCode || 'RX');
+  }, [normalizedRxList]);
+
+  const sourcePatientName = useMemo(() => {
+    return isAuthorizedViewer ? (normalizedRxList[0]?._clonedSourcePatient || normalizedRxList[0]?.patientName || '') : '';
+  }, [isAuthorizedViewer, normalizedRxList]);
 
   const hasUnsavedChanges = useMemo(() => {
     return (Boolean(file) || normalizedRxList.length > 0) && !savedPrescriptionsResult;
@@ -420,8 +457,10 @@ export default function PrescriptionIntakeWorkspace({
   const isFagron = rawAiData?.documentType === 'FagronGenomics' || rawAiData?.fagronDetails?.isFagron;
   const hasDuplicates = normalizedRxList.some(r => r._dupStatus === 'duplicate');
   const duplicateItem = normalizedRxList.find(r => r._dupStatus === 'duplicate');
-  const existingCode = duplicateItem?._existingData?.prescriptionNumber || duplicateItem?._existingData?.code || duplicateItem?._existingId;
-  const existingPatient = duplicateItem?._existingData?.patientName || duplicateItem?._existingData?.patient?.name;
+  const rawExistingCode = duplicateItem?._existingData?.prescriptionNumber || duplicateItem?._existingData?.code || duplicateItem?._existingId;
+  const existingCode = sanitizePrescriptionCode(rawExistingCode);
+  const rawExistingPatient = duplicateItem?._existingData?.patientName || duplicateItem?._existingData?.patient?.name;
+  const existingPatient = isAuthorizedViewer ? rawExistingPatient : (rawExistingPatient ? `Patient ${getCodifiedPatientId(rawExistingPatient, existingCode)}` : null);
   const existingDate = duplicateItem?._existingData?.reportDate || duplicateItem?._existingData?.prescriptionDate;
   const existingBox = duplicateItem?._existingData?.fagron?.boxId || duplicateItem?._existingData?.boxId;
   const dupReason = duplicateItem?._duplicateReason;
@@ -464,6 +503,75 @@ export default function PrescriptionIntakeWorkspace({
           <button type="button" className="gcp-btn-secondary" onClick={handleSafeClose}>
             Cancel
           </button>
+        </div>
+      );
+    }
+
+    // Clone / Renewal mode footer: 3 streamlined actions without clutter (no Back, no Excel, no Regimen Builder)
+    if (isCloneMode) {
+      return (
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
+          <button type="button" className="gcp-btn-secondary" onClick={handleSafeClose} disabled={isSaving}>
+            Cancel
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+            {disabledReason && (
+              <span style={{ fontSize: '0.76rem', color: '#64748b' }}>
+                {disabledReason}
+              </span>
+            )}
+
+            <button
+              type="button"
+              className="gcp-btn-secondary"
+              onClick={() => handleConfirmSave(false, 'draft')}
+              disabled={!isDraftValid || isSaving || isProcessing}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}
+              title="Save this prescription as a draft in your practice repository"
+            >
+              {isSaving && savingActionType === 'draft' ? (
+                <>
+                  <RefreshCw size={14} className="spin-slow" />
+                  <span>Saving draft...</span>
+                </>
+              ) : (
+                <>
+                  <Save size={14} />
+                  <span>Save draft</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              className="gcp-btn-primary"
+              onClick={() => handleConfirmSave(false, 'pending')}
+              disabled={!isDraftValid || isSaving || isProcessing}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                minWidth: '160px',
+                justifyContent: 'center',
+                backgroundColor: '#003666',
+                fontWeight: 650
+              }}
+              title="Submit prescription for compounding and pharmacist verification"
+            >
+              {isSaving && savingActionType === 'pending' ? (
+                <>
+                  <RefreshCw size={15} className="spin-slow" />
+                  <span>Issuing prescription...</span>
+                </>
+              ) : (
+                <>
+                  <Send size={15} />
+                  <span>Issue prescription</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       );
     }
@@ -579,49 +687,71 @@ export default function PrescriptionIntakeWorkspace({
 
   // Adaptive drawer width compliant with Google Cloud UX standards:
   // - Step 1 (Upload): 580px (focused, zero wasted whitespace, dashboard/sidebar remains contextual)
-  // - Step 2 (Review): min(1160px, calc(100vw - 280px)) (spacious side-by-side workspace without masking navigation)
+  // - Step 2 (Review - File Upload): min(1160px, calc(100vw - 280px)) (spacious side-by-side workspace)
+  // - Step 2 (Review - Clone / Renew): min(880px, calc(100vw - 120px)) (focused single-column workspace)
   // - Step 3 (Saved): 620px (clean summary card)
   const resolvedDrawerWidth = useMemo(() => {
     if (currentStep === 1) return '580px';
     if (currentStep === 3) return '620px';
+    if (isCloneMode) return 'min(880px, calc(100vw - 120px))';
     return 'min(1160px, calc(100vw - 280px))';
-  }, [currentStep]);
+  }, [currentStep, isCloneMode]);
+
+  const drawerTitle = isCloneMode ? "Renew or Duplicate Prescription" : "New prescription";
+  const drawerSubtitle = isCloneMode
+    ? (isAuthorizedViewer && sourcePatientName
+        ? `Pre-populated from #${cleanClonedCode}. Confirm recipient patient and issue prescription.`
+        : `Pre-populated clinical formula from #${cleanClonedCode}. Confirm patient and issue prescription.`)
+    : (
+        currentStep === 1
+          ? "Upload a prescription or clinical report to begin AI extraction."
+          : currentStep === 2
+          ? "Review and verify extracted active ingredients, dosages, and posology."
+          : "Prescription successfully saved."
+      );
 
   return (
     <>
       <StandardDrawer
         isOpen={isOpen}
         onClose={handleSafeClose}
-        title="New prescription"
-        subtitle={
-          currentStep === 1
-            ? "Upload a prescription or clinical report to begin AI extraction."
-            : currentStep === 2
-            ? "Review and verify extracted active ingredients, dosages, and posology."
-            : "Prescription successfully saved."
-        }
+        title={drawerTitle}
+        subtitle={drawerSubtitle}
         width={resolvedDrawerWidth}
         preserveSidebar={true}
         footer={renderFooter()}
       >
         <div className="prescription-intake-body">
-          {/* ── Compact Progress Indicator ── */}
-          <div className="workflow-stepper-strip" aria-label="Prescription intake steps">
-            <div className={`step-node ${currentStep >= 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
-              <div className="step-circle">{currentStep > 1 ? <Check size={12} /> : '1'}</div>
-              <span className="step-title">Upload</span>
+          {/* ── Progress Indicator / Renewal Badge ── */}
+          {isCloneMode ? (
+            <div className="clone-mode-header-badge">
+              <div className="clone-mode-badge-left">
+                <RefreshCw size={15} className="text-emerald-600" />
+                <span>Prescription Renewal & Regimen Clone</span>
+                <span className="clone-source-pill">Source: #{cleanClonedCode}</span>
+              </div>
+              <span className="clone-formula-type">
+                {normalizedRxList[0]?.treatmentType || 'Compounded Formula'}
+              </span>
             </div>
-            <div className={`step-line ${currentStep >= 2 ? 'active' : ''}`} />
-            <div className={`step-node ${currentStep >= 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
-              <div className="step-circle">{currentStep > 2 ? <Check size={12} /> : '2'}</div>
-              <span className="step-title">Review</span>
+          ) : (
+            <div className="workflow-stepper-strip" aria-label="Prescription intake steps">
+              <div className={`step-node ${currentStep >= 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
+                <div className="step-circle">{currentStep > 1 ? <Check size={12} /> : '1'}</div>
+                <span className="step-title">Upload</span>
+              </div>
+              <div className={`step-line ${currentStep >= 2 ? 'active' : ''}`} />
+              <div className={`step-node ${currentStep >= 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
+                <div className="step-circle">{currentStep > 2 ? <Check size={12} /> : '2'}</div>
+                <span className="step-title">Review</span>
+              </div>
+              <div className={`step-line ${currentStep >= 3 ? 'active' : ''}`} />
+              <div className={`step-node ${currentStep >= 3 ? 'active' : ''}`}>
+                <div className="step-circle">{currentStep >= 3 ? <Check size={12} /> : '3'}</div>
+                <span className="step-title">Save draft</span>
+              </div>
             </div>
-            <div className={`step-line ${currentStep >= 3 ? 'active' : ''}`} />
-            <div className={`step-node ${currentStep >= 3 ? 'active' : ''}`}>
-              <div className="step-circle">{currentStep >= 3 ? <Check size={12} /> : '3'}</div>
-              <span className="step-title">Save draft</span>
-            </div>
-          </div>
+          )}
 
           {/* ── SAVED SUCCESS CONFIRMATION VIEW ── */}
           {savedPrescriptionsResult ? (
@@ -830,37 +960,37 @@ export default function PrescriptionIntakeWorkspace({
               </div>
             </div>
           ) : (
-            /* ── REVIEW STATE: TWO-COLUMN WORKSPACE (FILE ON LEFT, EXTRACTED ON RIGHT) ── */
-            <div className="review-workspace-split">
-              {/* LEFT PANE: Document Preview or Cloned Regimen Reference */}
-              <div className="review-document-pane">
-                <div className="document-pane-header">
-                  <div className="document-file-identity">
-                    <FileText size={15} className="text-slate-500" />
-                    <span className="document-filename font-medium" title={file?.name || 'Cloned Clinical Regimen'}>
-                      {file?.name || `Renewal / Clone (${normalizedRxList[0]?._clonedFromCode ? `#${normalizedRxList[0]._clonedFromCode}` : 'Formula Template'})`}
-                    </span>
-                    {file?.size && (
-                      <span className="document-filesize text-xs text-slate-400">
-                        ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+            /* ── REVIEW STATE: SPLIT (FILE UPLOAD) OR FOCUSED SINGLE COLUMN (CLONE/RENEW) ── */
+            <div className={isCloneMode ? "review-workspace-focused" : "review-workspace-split"}>
+              {/* LEFT PANE: Document Preview (Only for file upload) */}
+              {!isCloneMode && (
+                <div className="review-document-pane">
+                  <div className="document-pane-header">
+                    <div className="document-file-identity">
+                      <FileText size={15} className="text-slate-500" />
+                      <span className="document-filename font-medium" title={file?.name || 'Uploaded Document'}>
+                        {file?.name || 'Document'}
                       </span>
-                    )}
+                      {file?.size && (
+                        <span className="document-filesize text-xs text-slate-400">
+                          ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleSafeChangeFile}
+                      className="change-file-btn"
+                      title="Upload a different document"
+                    >
+                      <X size={13} />
+                      <span>Change file</span>
+                    </button>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleSafeChangeFile}
-                    className="change-file-btn"
-                    title="Upload a document instead"
-                  >
-                    <X size={13} />
-                    <span>{file ? 'Change file' : 'Switch to Upload'}</span>
-                  </button>
-                </div>
-
-                <div className="document-preview-viewport">
-                  {file ? (
-                    file?.type === 'application/pdf' ? (
+                  <div className="document-preview-viewport">
+                    {file?.type === 'application/pdf' ? (
                       <iframe
                         src={`${filePreview}#toolbar=0`}
                         className="pdf-preview-frame"
@@ -872,43 +1002,23 @@ export default function PrescriptionIntakeWorkspace({
                         alt="Prescription Document Preview"
                         className="image-preview-frame"
                       />
-                    )
-                  ) : (
-                    <div style={{ padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: '14px', background: '#f8fafc', height: '100%' }}>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d', padding: '6px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, alignSelf: 'flex-start' }}>
-                        <RefreshCw size={13} />
-                        <span>1-Click Regimen Renewal / Clone Mode</span>
-                      </div>
-                      <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>
-                        {normalizedRxList[0]?.treatmentTitle || 'Compounded Regimen'}
-                      </h4>
-                      <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.5 }}>
-                        Pre-populated from existing clinical record <strong>#{normalizedRxList[0]?._clonedFromCode || 'RX'}</strong>. You can keep the current patient name for a cycle renewal, or change the patient name on the right to prescribe this exact formula to a new patient.
-                      </p>
-                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-                          Cloned Active Ingredients ({normalizedRxList[0]?.prescriptionLines?.length || 0})
-                        </div>
-                        {(normalizedRxList[0]?.prescriptionLines || []).map((l, idx) => (
-                          <div key={idx} style={{ fontSize: '0.8rem', color: '#1e293b', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '4px' }}>
-                            <strong>{l.productName}</strong>
-                            <span style={{ color: '#0369a1', fontWeight: 600 }}>{l.dose}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* RIGHT PANE: Extracted Information & Physician Review */}
-              <div className="review-extracted-pane">
+              {/* RIGHT / MAIN PANE: Extracted Information & Physician Review */}
+              <div className={`review-extracted-pane ${isCloneMode ? 'review-extracted-pane-full' : ''}`}>
                 {/* Extraction Header */}
                 <div className="extracted-pane-header">
                   <div className="extracted-title-cluster">
-                    <h3 className="extracted-pane-title">Review extracted details</h3>
+                    <h3 className="extracted-pane-title">
+                      {isCloneMode ? "Formula & Patient Details" : "Review extracted details"}
+                    </h3>
                     <span className="extracted-pane-subtitle">
-                      Verify patient information, active ingredients, and posology instructions.
+                      {isCloneMode
+                        ? "Verify recipient patient, active doses, and dispensing posology before issuing."
+                        : "Verify patient information, active ingredients, and posology instructions."}
                     </span>
                   </div>
 
@@ -1031,6 +1141,48 @@ export default function PrescriptionIntakeWorkspace({
 
                       {/* Patient & Prescribing Physician Card (Editable Fields) */}
                       <div className="patient-physician-card">
+                        {isCloneMode && (
+                          isAuthorizedViewer && sourcePatientName ? (
+                            <div className="renewal-target-selector">
+                              <label className={`renewal-target-chip ${renewalTarget === 'same' ? 'active' : ''}`}>
+                                <input
+                                  type="radio"
+                                  name="renewalTarget"
+                                  value="same"
+                                  checked={renewalTarget === 'same'}
+                                  onChange={() => {
+                                    setRenewalTarget('same');
+                                    handleUpdateSharedHeaderField('patientName', sourcePatientName);
+                                  }}
+                                  className="sr-only"
+                                />
+                                <UserCheck size={15} />
+                                <span>Renew for {sourcePatientName} (Repeat Cycle)</span>
+                              </label>
+                              <label className={`renewal-target-chip ${renewalTarget === 'new' ? 'active' : ''}`}>
+                                <input
+                                  type="radio"
+                                  name="renewalTarget"
+                                  value="new"
+                                  checked={renewalTarget === 'new'}
+                                  onChange={() => {
+                                    setRenewalTarget('new');
+                                    handleUpdateSharedHeaderField('patientName', '');
+                                  }}
+                                  className="sr-only"
+                                />
+                                <UserPlus size={15} />
+                                <span>Prescribe to a New Patient</span>
+                              </label>
+                            </div>
+                          ) : (
+                            <div className="renewal-privacy-notice">
+                              <Lock size={15} className="flex-shrink-0 text-amber-600" />
+                              <span>Clinician sign-in required to view original patient records. Enter recipient patient name below to prescribe this formulation.</span>
+                            </div>
+                          )
+                        )}
+
                         <div className="patient-physician-grid">
                           <div>
                             <label className="card-section-label" htmlFor="intake-patient-name">
@@ -1042,16 +1194,24 @@ export default function PrescriptionIntakeWorkspace({
                               className="review-inline-input font-semibold"
                               value={normalizedRxList[0]?.patientName || ''}
                               onChange={(e) => handleUpdateSharedHeaderField('patientName', e.target.value)}
-                              placeholder="Enter patient full name"
+                              placeholder={isAuthorizedViewer ? "Enter patient full name" : "Enter recipient patient name"}
                             />
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
                               <span className="patient-dob-text">DOB:</span>
                               <input
                                 type="text"
                                 className="review-inline-input-sm"
-                                value={normalizedRxList[0]?.patient?.dob || rawAiData?.patient?.dob || ''}
-                                onChange={(e) => handleUpdateSharedHeaderField('patientDob', e.target.value)}
-                                placeholder="YYYY-MM-DD (optional)"
+                                value={isAuthorizedViewer
+                                  ? (normalizedRxList[0]?.patient?.dob || rawAiData?.patient?.dob || '')
+                                  : maskDateOfBirth(normalizedRxList[0]?.patient?.dob || rawAiData?.patient?.dob || '', false)
+                                }
+                                onChange={(e) => {
+                                  if (isAuthorizedViewer) {
+                                    handleUpdateSharedHeaderField('patientDob', e.target.value);
+                                  }
+                                }}
+                                readOnly={!isAuthorizedViewer}
+                                placeholder={isAuthorizedViewer ? "YYYY-MM-DD (optional)" : "••••-••-•• (Secured)"}
                                 aria-label="Patient date of birth"
                               />
                             </div>
@@ -1068,7 +1228,12 @@ export default function PrescriptionIntakeWorkspace({
                                 type="text"
                                 className="review-inline-input"
                                 value={normalizedRxList[0]?.doctorName || ''}
-                                onChange={(e) => handleUpdateSharedHeaderField('doctorName', e.target.value)}
+                                onChange={(e) => {
+                                  if (isAuthorizedViewer) {
+                                    handleUpdateSharedHeaderField('doctorName', e.target.value);
+                                  }
+                                }}
+                                readOnly={!isAuthorizedViewer}
                                 placeholder="Prescribing physician name"
                               />
                             </div>
@@ -1077,28 +1242,38 @@ export default function PrescriptionIntakeWorkspace({
                               <input
                                 type="text"
                                 className="review-inline-input-sm"
-                                value={normalizedRxList[0]?.doctorLicense || ''}
-                                onChange={(e) => handleUpdateSharedHeaderField('doctorLicense', e.target.value)}
-                                placeholder="Medical license (optional)"
+                                value={isAuthorizedViewer
+                                  ? (normalizedRxList[0]?.doctorLicense || doctorContext?.doctorLicense || '')
+                                  : maskMedicalLicense(normalizedRxList[0]?.doctorLicense || doctorContext?.doctorLicense, false, doctorContext?.opaqueCode || doctorContext?.doctorSlug)
+                                }
+                                onChange={(e) => {
+                                  if (isAuthorizedViewer) {
+                                    handleUpdateSharedHeaderField('doctorLicense', e.target.value);
+                                  }
+                                }}
+                                readOnly={!isAuthorizedViewer}
+                                placeholder={isAuthorizedViewer ? "Medical license (optional)" : "DHA-•••••• (Verified)"}
                                 aria-label="Physician medical license"
                               />
                             </div>
                           </div>
                         </div>
 
-                        {/* Explicit opt-in patient linking checkbox (never silently merges similarly named patients) */}
-                        <div className="patient-linking-strip">
-                          <input
-                            type="checkbox"
-                            id="autoCreatePatient"
-                            checked={alsoCreatePatient}
-                            onChange={(e) => setAlsoCreatePatient(e.target.checked)}
-                            className="cursor-pointer"
-                          />
-                          <label htmlFor="autoCreatePatient" className="patient-linking-label">
-                            Create a new patient record in the clinical repository from these details (leave unchecked to link manually later)
-                          </label>
-                        </div>
+                        {/* Explicit opt-in patient linking checkbox (hidden in clone mode to eliminate physician friction) */}
+                        {!isCloneMode && (
+                          <div className="patient-linking-strip">
+                            <input
+                              type="checkbox"
+                              id="autoCreatePatient"
+                              checked={alsoCreatePatient}
+                              onChange={(e) => setAlsoCreatePatient(e.target.checked)}
+                              className="cursor-pointer"
+                            />
+                            <label htmlFor="autoCreatePatient" className="patient-linking-label">
+                              Create a new patient record in the clinical repository from these details (leave unchecked to link manually later)
+                            </label>
+                          </div>
+                        )}
                       </div>
 
                       {/* Fagron Genetics Summary Card */}
@@ -1603,6 +1778,109 @@ export default function PrescriptionIntakeWorkspace({
           font-size: 0.68rem;
           flex-shrink: 0;
           margin-top: 1px;
+        }
+
+        /* ── Focused Single-Column Layout (For Clone / Renewal Mode) ── */
+        .review-workspace-focused {
+          display: flex;
+          flex: 1;
+          justify-content: center;
+          padding: 1rem 1.25rem;
+          overflow-y: auto;
+          width: 100%;
+        }
+        .review-extracted-pane-full {
+          max-width: 860px;
+          width: 100%;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          background: #ffffff;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        /* ── Clone Mode Header Badge ── */
+        .clone-mode-header-badge {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 16px;
+          background: #f0fdf4;
+          border: 1px solid #bbf7d0;
+          border-radius: 8px;
+          margin: 0.75rem 1rem 0;
+          font-size: 0.84rem;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .clone-mode-badge-left {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #166534;
+          font-weight: 650;
+        }
+        .clone-source-pill {
+          font-family: monospace;
+          background: #dcfce7;
+          color: #15803d;
+          padding: 2px 7px;
+          border-radius: 6px;
+          font-size: 0.76rem;
+          border: 1px solid #bbf7d0;
+        }
+        .clone-formula-type {
+          font-size: 0.78rem;
+          color: #15803d;
+          font-weight: 600;
+          background: #ffffff;
+          padding: 3px 9px;
+          border-radius: 12px;
+          border: 1px solid #bbf7d0;
+        }
+
+        /* ── Renewal Target Selector Chips ── */
+        .renewal-target-selector {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 14px;
+          flex-wrap: wrap;
+        }
+        .renewal-target-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 8px 14px;
+          border-radius: 8px;
+          border: 1.5px solid #cbd5e1;
+          background: #ffffff;
+          color: #475569;
+          font-size: 0.84rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .renewal-target-chip:hover {
+          border-color: #94a3b8;
+          background: #f8fafc;
+        }
+        .renewal-target-chip.active {
+          border-color: #003666;
+          background: #eff6ff;
+          color: #003666;
+          box-shadow: 0 0 0 1px #003666;
+        }
+        .renewal-privacy-notice {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 9px 13px;
+          background: #fffbeb;
+          border: 1px solid #fde68a;
+          border-radius: 8px;
+          margin-bottom: 12px;
+          font-size: 0.81rem;
+          color: #92400e;
+          line-height: 1.4;
         }
 
         /* ── Review Workspace Split Layout ── */

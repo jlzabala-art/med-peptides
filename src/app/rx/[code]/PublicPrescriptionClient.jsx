@@ -278,19 +278,29 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     try {
       const docRef = doc(db, 'prescriptions', String(currentRx.id || rx?.id || rxId));
       const unsubscribe = onSnapshot(docRef, (docSnap) => {
-        if (docSnap.exists()) {
+        if (docSnap && docSnap.exists()) {
           const data = docSnap.data();
-          setCurrentRx(prev => ({
-            ...prev,
-            ...data,
-            id: docSnap.id
-          }));
-          const newStatus = data.status || data.state || data.orderStatus || data.fagronStatus;
+          const newStatus = String(data.status || data.state || data.orderStatus || data.fagronStatus || '').toLowerCase().trim();
+          
+          setCurrentRx(prev => {
+            const prevStatus = String(prev.status || prev.state || prev.orderStatus || '').toLowerCase().trim();
+            const isStatusChanged = newStatus && newStatus !== prevStatus;
+            const isTrackingChanged = data.trackingNumber && data.trackingNumber !== prev.trackingNumber;
+            const isUpdatedChanged = data.updatedAt && data.updatedAt !== prev.updatedAt;
+            if (!isStatusChanged && !isTrackingChanged && !isUpdatedChanged && prev.id === docSnap.id) {
+              return prev; // Identical state: preserve reference, eliminate hydration flicker
+            }
+            return {
+              ...prev,
+              ...data,
+              id: docSnap.id
+            };
+          });
+
           if (newStatus) {
-            setCurrentStatus(String(newStatus).toLowerCase().trim());
+            setCurrentStatus(prevStatus => prevStatus === newStatus ? prevStatus : newStatus);
           }
         }
-      }, () => {
         // Silently catch permission error in unauthenticated public view
       });
       return () => unsubscribe();

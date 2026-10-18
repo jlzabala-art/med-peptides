@@ -843,20 +843,6 @@ export default function BrandCollectionPage({
                               type="button"
                               onClick={() => handleProductClick(product)}
                               style={{
-                                padding: '6px 12px',
-                                borderRadius: '6px',
-                                border: '1px solid #cbd5e1',
-                                background: '#ffffff',
-                                color: '#0f172a',
-                                fontSize: '0.75rem',
-                                fontWeight: 700,
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                              <button
-                              type="button"
-                              onClick={() => handleProductClick(product)}
-                              style={{
                                 padding: '6px 14px',
                                 borderRadius: '6px',
                                 border: '1px solid #cbd5e1',

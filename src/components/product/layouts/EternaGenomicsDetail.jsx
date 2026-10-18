@@ -688,13 +688,13 @@ export default function EternaGenomicsDetail({
                   {/* Center Web App Desktop Screen */}
                   <div 
                     className="eterna-floating-device-center"
-                    onClick={() => handleOpenModal('/images/products/eterna/img_hero_eterna2.png', 'Eterna DX Web Platform')}
+                    onClick={() => handleOpenModal('/images/products/eterna/img_hero_eterna2_en.png', 'Eterna DX Web Platform (English)')}
                     style={{ cursor: 'pointer' }}
                     title={isEs ? 'Ampliar plataforma web' : 'Inspect web platform'}
                   >
                     <img 
-                      src="/images/products/eterna/img_hero_eterna2.png" 
-                      alt="Eterna DX Web App Interface" 
+                      src="/images/products/eterna/img_hero_eterna2_en.png" 
+                      alt="Eterna DX Web App Interface (English)" 
                     />
                   </div>
 
@@ -811,7 +811,7 @@ export default function EternaGenomicsDetail({
                   </span>
                 </div>
 
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff', margin: '0 0 0.5rem 0' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--gcp-text-primary)', margin: '0 0 0.5rem 0' }}>
                   {isEs ? 'Arquitectura de Datos Genómicos & Monografías ETERNA DX' : 'Genomic Data Architecture & ETERNA DX Monograph'}
                 </h3>
                 <p style={{ fontSize: '0.82rem', color: 'var(--gcp-text-secondary)', lineHeight: 1.55, margin: '0 0 1.25rem 0' }}>
@@ -878,7 +878,7 @@ export default function EternaGenomicsDetail({
                             <IconComp size={15} />
                           </span>
                           <div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ffffff' }}>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--gcp-text-primary)' }}>
                               {sec.label}
                             </div>
                             <div style={{ fontSize: '0.72rem', color: 'var(--gcp-text-secondary)', marginTop: '2px' }}>
@@ -926,29 +926,29 @@ export default function EternaGenomicsDetail({
               <div className="eterna-phones-showcase">
                 <div 
                   className="eterna-phone-card"
-                  onClick={() => handleOpenModal('/images/products/eterna/biometrica1.jpeg', 'Eterna App - Pace of Aging')}
+                  onClick={() => handleOpenModal('/images/products/eterna/biometrica1_en.jpg', 'Eterna App - Heart Rate & Pace of Aging')}
                   title={isEs ? 'Ampliar pantalla' : 'Inspect screen'}
                   style={{ cursor: 'pointer' }}
                 >
-                  <img src="/images/products/eterna/biometrica1.jpeg" alt="Biometric Telemetry 1" />
+                  <img src="/images/products/eterna/biometrica1_en.jpg" alt="Eterna Telemetry - Heart Rate & Pace of Aging" />
                 </div>
 
                 <div 
                   className="eterna-phone-card"
-                  onClick={() => handleOpenModal('/images/products/eterna/biometrica2.jpeg', 'Eterna App - Longitudinal Clocks')}
+                  onClick={() => handleOpenModal('/images/products/eterna/biometrica2_en.jpg', 'Eterna App - Longitudinal Heart Rate Clocks')}
                   title={isEs ? 'Ampliar pantalla' : 'Inspect screen'}
                   style={{ cursor: 'pointer' }}
                 >
-                  <img src="/images/products/eterna/biometrica2.jpeg" alt="Biometric Telemetry 2" />
+                  <img src="/images/products/eterna/biometrica2_en.jpg" alt="Eterna Telemetry - Longitudinal Clocks" />
                 </div>
 
                 <div 
                   className="eterna-phone-card featured"
-                  onClick={() => handleOpenModal('/images/products/eterna/biometrica5.jpeg', 'Eterna App - Biomarker Dashboard')}
+                  onClick={() => handleOpenModal('/images/products/eterna/biometrica5_en.jpg', 'Eterna App - Habits & Longevity Dashboard')}
                   title={isEs ? 'Ampliar pantalla destacada' : 'Inspect featured screen'}
                   style={{ cursor: 'pointer' }}
                 >
-                  <img src="/images/products/eterna/biometrica5.jpeg" alt="Biometric Telemetry 5" />
+                  <img src="/images/products/eterna/biometrica5_en.jpg" alt="Eterna Telemetry - Habits & Longevity Dashboard" />
                 </div>
               </div>
 
@@ -1133,7 +1133,7 @@ export default function EternaGenomicsDetail({
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <BarChart3 size={16} color="var(--gcp-blue-light)" />
-                      <strong style={{ fontSize: '0.95rem', color: '#ffffff' }}>
+                      <strong style={{ fontSize: '0.95rem', color: 'var(--gcp-text-primary)' }}>
                         {isEs ? 'Registro de Variantes Genómicas & SNPs Clave' : 'Key Genomic Variants & dbSNP Registry'}
                       </strong>
                       <span style={{ fontSize: '0.72rem', background: 'var(--gcp-blue-surface)', color: 'var(--gcp-blue-light)', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
@@ -1424,7 +1424,7 @@ export default function EternaGenomicsDetail({
                       <span className="eterna-gene-tag">FOXO3 / SIRT1</span>
                       <StatusBadge status="active" />
                     </div>
-                    <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '2px 0 4px', fontWeight: 600 }}>
+                    <h4 style={{ color: 'var(--gcp-text-primary)', fontSize: '0.95rem', margin: '2px 0 4px', fontWeight: 600 }}>
                       {isEs ? 'Protocolo de Senescencia & Autofagia' : 'Senescence & Autophagy Protocol'}
                     </h4>
                     <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
@@ -1463,7 +1463,7 @@ export default function EternaGenomicsDetail({
                       <span className="eterna-gene-tag">ACTN3 / MSTN</span>
                       <StatusBadge status="active" />
                     </div>
-                    <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '2px 0 4px', fontWeight: 600 }}>
+                    <h4 style={{ color: 'var(--gcp-text-primary)', fontSize: '0.95rem', margin: '2px 0 4px', fontWeight: 600 }}>
                       {isEs ? 'Protocolo Musculoesquelético & Cargas' : 'Musculoskeletal Load Protocol'}
                     </h4>
                     <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
@@ -1502,7 +1502,7 @@ export default function EternaGenomicsDetail({
                       <span className="eterna-gene-tag">CLOCK / PER2</span>
                       <StatusBadge status="active" />
                     </div>
-                    <h4 style={{ color: '#ffffff', fontSize: '0.95rem', margin: '2px 0 4px', fontWeight: 600 }}>
+                    <h4 style={{ color: 'var(--gcp-text-primary)', fontSize: '0.95rem', margin: '2px 0 4px', fontWeight: 600 }}>
                       {isEs ? 'Protocolo Circadiano & Pineal' : 'Circadian & Pineal Optimization'}
                     </h4>
                     <p style={{ color: 'var(--gcp-text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
@@ -1797,7 +1797,7 @@ export default function EternaGenomicsDetail({
 
           {/* Card 2: Quick Jump Navigation */}
           <div className="eterna-sidebar-card" style={{ padding: '1.25rem 1.25rem' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ffffff', marginBottom: '0.75rem' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--gcp-text-primary)', marginBottom: '0.75rem' }}>
               {isEs ? 'Navegación Rápida' : 'Quick Navigation'}
             </div>
             <div className="eterna-sidebar-nav-list" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -1885,7 +1885,7 @@ export default function EternaGenomicsDetail({
             <div className="eterna-b2b-modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--gcp-blue-light)' }} />
-                <strong style={{ color: '#ffffff', fontSize: '0.9rem' }}>
+                <strong style={{ color: 'var(--gcp-text-primary)', fontSize: '0.9rem' }}>
                   {isEs ? 'Eterna · Portal de Salud Preventiva (Demo B2B)' : 'Eterna · Preventive Health Clinic Portal (Live B2B Demo)'}
                 </strong>
                 <span style={{ fontSize: '0.72rem', background: 'var(--gcp-blue-surface)', color: 'var(--gcp-blue-light)', padding: '2px 8px', borderRadius: '4px', fontWeight: 500 }}>

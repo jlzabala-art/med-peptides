@@ -9,36 +9,36 @@
    ========================================================================== */
 
 :root {
-  --gcp-bg: #18191c;
-  --gcp-surface: #202124;
-  --gcp-surface-card: #28292d;
-  --gcp-surface-hover: #303136;
-  --gcp-border: #3c4043;
-  --gcp-border-subtle: rgba(255, 255, 255, 0.08);
-  --gcp-border-focus: #8ab4f8;
+  --gcp-bg: #f8fafc;
+  --gcp-surface: #ffffff;
+  --gcp-surface-card: #ffffff;
+  --gcp-surface-hover: #f1f5f9;
+  --gcp-border: #e2e8f0;
+  --gcp-border-subtle: #f1f5f9;
+  --gcp-border-focus: #1a73e8;
   
   /* Google Cloud Semantic Palette */
   --gcp-blue-primary: #1a73e8;
   --gcp-blue-hover: #1557b0;
   --gcp-blue-active: #174ea6;
-  --gcp-blue-light: #8ab4f8;
-  --gcp-blue-surface: rgba(138, 180, 248, 0.08);
+  --gcp-blue-light: #1a73e8;
+  --gcp-blue-surface: rgba(26, 115, 232, 0.08);
   
-  --gcp-green: #81c995;
-  --gcp-green-surface: rgba(129, 201, 149, 0.12);
-  --gcp-amber: #fdd663;
-  --gcp-amber-surface: rgba(253, 214, 99, 0.12);
-  --gcp-mint: #4FC5BB;
+  --gcp-green: #15803d;
+  --gcp-green-surface: rgba(21, 128, 61, 0.08);
+  --gcp-amber: #b45309;
+  --gcp-amber-surface: rgba(180, 83, 9, 0.08);
+  --gcp-mint: #0d9488;
   
-  --gcp-text-primary: #ffffff;
-  --gcp-text-secondary: #bdc1c6;
-  --gcp-text-muted: #9aa0a6;
-  --gcp-text-disabled: #80868b;
+  --gcp-text-primary: #0f172a;
+  --gcp-text-secondary: #334155;
+  --gcp-text-muted: #64748b;
+  --gcp-text-disabled: #94a3b8;
   
   --gcp-radius-btn: 4px;
   --gcp-radius-card: 8px;
-  --gcp-shadow-btn: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
-  --gcp-shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.37), 0 2px 6px 2px rgba(0, 0, 0, 0.18);
+  --gcp-shadow-btn: 0 1px 2px 0 rgba(60, 64, 67, 0.15), 0 1px 3px 1px rgba(60, 64, 67, 0.1);
+  --gcp-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 2px 6px 0 rgba(0, 0, 0, 0.04);
 }
 
 .eterna-page-root {
@@ -88,8 +88,8 @@
   background-image: url('/images/products/eterna/hero_bg_epigenetic.webp');
   background-size: cover;
   background-position: center;
-  opacity: 0.06;
-  mix-blend-mode: luminosity;
+  opacity: 0.03;
+  mix-blend-mode: multiply;
   pointer-events: none;
   z-index: 0;
 }
@@ -101,7 +101,7 @@
   transform: translateX(-50%);
   width: min(1100px, 92vw);
   height: 480px;
-  background: radial-gradient(ellipse at 50% 15%, rgba(26, 115, 232, 0.12) 0%, rgba(79, 197, 187, 0.04) 50%, transparent 75%);
+  background: radial-gradient(ellipse at 50% 15%, rgba(26, 115, 232, 0.06) 0%, rgba(79, 197, 187, 0.02) 50%, transparent 75%);
   pointer-events: none;
   z-index: 0;
 }
@@ -176,24 +176,26 @@
   height: 40px;
   padding: 0 18px;
   border-radius: var(--gcp-radius-btn);
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: #ffffff;
   border: 1px solid var(--gcp-border);
-  color: var(--gcp-blue-light);
+  color: var(--gcp-text-secondary);
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.25px;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
   white-space: nowrap;
   text-decoration: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .gcp-btn-secondary:hover:not(:disabled),
 .gcp-btn-outlined:hover:not(:disabled) {
-  background-color: var(--gcp-blue-surface);
-  border-color: var(--gcp-blue-light);
-  color: #a8c7fa;
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: var(--gcp-blue-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .gcp-btn-text {
@@ -405,9 +407,9 @@
 /* Hero Typography */
 .eterna-hero-h1 {
   font-size: clamp(2rem, 4.2vw, 3.4rem);
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.14;
-  color: #ffffff;
+  color: var(--gcp-text-primary);
   letter-spacing: -0.015em;
   margin: 0 auto 1.25rem;
   max-width: 820px;
@@ -595,9 +597,9 @@
 
 .eterna-section-h2 {
   font-size: clamp(1.6rem, 3.2vw, 2.4rem);
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.2;
-  color: #ffffff;
+  color: var(--gcp-text-primary);
   letter-spacing: -0.01em;
   margin-bottom: 0.85rem;
 }
@@ -644,9 +646,9 @@
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--gcp-border);
-  background: var(--gcp-surface-card);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
-  transition: transform 0.25s ease, border-color 0.25s ease;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 @media (min-width: 640px) {
@@ -657,8 +659,8 @@
 }
 
 .eterna-phone-card.featured {
-  border-color: var(--gcp-blue-light);
-  box-shadow: 0 0 30px rgba(26, 115, 232, 0.2), 0 20px 40px rgba(0, 0, 0, 0.6);
+  border-color: var(--gcp-blue-primary);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2), 0 12px 32px rgba(0, 0, 0, 0.12);
   transform: translateY(-6px);
 }
 
@@ -671,7 +673,8 @@
 
 .eterna-phone-card:hover {
   transform: translateY(-10px);
-  border-color: var(--gcp-blue-light);
+  border-color: var(--gcp-blue-primary);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.12);
 }
 
 /* ==========================================================================
@@ -755,9 +758,9 @@
 }
 
 .eterna-pillar-title {
-  color: #ffffff;
+  color: var(--gcp-text-primary);
   font-size: 0.92rem;
-  font-weight: 500;
+  font-weight: 600;
   margin: 0 0 0.4rem 0;
 }
 
@@ -812,9 +815,9 @@
 }
 
 .eterna-box-title {
-  color: #ffffff;
+  color: var(--gcp-text-primary);
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   margin: 0;
 }
 
@@ -877,8 +880,8 @@
 
 .eterna-marker-h5 {
   font-size: 0.9rem;
-  color: #ffffff;
-  font-weight: 500;
+  color: var(--gcp-text-primary);
+  font-weight: 600;
   margin: 0 0 0.4rem 0;
 }
 
@@ -987,8 +990,8 @@
 
 .eterna-process-card-h3 {
   font-size: 1rem;
-  color: #ffffff;
-  font-weight: 500;
+  color: var(--gcp-text-primary);
+  font-weight: 600;
   margin: 0 0 0.65rem 0;
 }
 
@@ -1046,8 +1049,8 @@
 
 .eterna-science-card-title {
   font-size: 1rem;
-  color: #ffffff;
-  font-weight: 500;
+  color: var(--gcp-text-primary);
+  font-weight: 600;
   margin: 0 0 0.5rem 0;
 }
 
@@ -1140,8 +1143,8 @@
 
 .eterna-tier-title {
   font-size: 1.15rem;
-  color: #ffffff;
-  font-weight: 500;
+  color: var(--gcp-text-primary);
+  font-weight: 600;
   margin: 0 0 0.4rem 0;
 }
 
@@ -1254,7 +1257,7 @@
 .eterna-sidebar-brand {
   font-size: 1rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--gcp-text-primary);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1332,7 +1335,7 @@
 }
 
 .eterna-sidebar-spec-row span.value {
-  color: #ffffff;
+  color: var(--gcp-text-primary);
   font-weight: 500;
 }
 

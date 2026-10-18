@@ -17,8 +17,6 @@ export async function generateMetadata({ params, searchParams }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const rawCode = resolvedParams?.code || '';
   const cleanCode = sanitizePrescriptionCode(rawCode);
-  const rx = await getPrescriptionData(cleanCode || rawCode);
-
   const rxCode = cleanCode || rawCode;
   const isEditing = resolvedSearchParams?.edit === 'true' || resolvedSearchParams?.edit === '1';
   const lang = resolvedSearchParams?.lang || 'en';
@@ -67,15 +65,22 @@ export default async function RxLabelsStandalonePage({ params, searchParams }) {
   }
 
   const sanitizedRx = sanitizePrescriptionPayload(rx, { isAuthorized: false });
+  const finalCode = cleanCode || rawCode;
 
   // Derive compounding labels for this prescription
-  const labels = getPharmapolisLabelsForPrescription(sanitizedRx);
+  const rawLabels = getPharmapolisLabelsForPrescription(sanitizedRx);
+  const labels = (rawLabels || []).map((l) => ({
+    ...l,
+    patientName: sanitizedRx.patientName || 'Patient',
+    doctorName: 'Licensed Clinical Practice',
+    physician: 'Licensed Clinical Practice'
+  }));
 
   return (
     <RxLabelsStandaloneClient
-      rx={rx}
+      rx={sanitizedRx}
       labels={labels}
-      code={code}
+      code={finalCode}
       initialEditMode={initialEditMode}
       initialLabelIndex={initialPhaseIdx}
       initialLang={initialLang}

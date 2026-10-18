@@ -86,8 +86,12 @@ import DoctorFloatingGlassDock from '@/components/doctor/docks/DoctorFloatingGla
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
 import PrescriptionProtocolAlignmentCard from '@/components/doctor/PrescriptionProtocolAlignmentCard';
 import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
-import { useAuth } from '@/context/AuthContext';
-import { sanitizePrescriptionCode } from '@/lib/prescriptionSanitizer';
+import {
+  sanitizePrescriptionCode,
+  getCodifiedPatientId,
+  maskDateOfBirth,
+  maskMedicalLicense
+} from '@/lib/prescriptionSanitizer';
 
 const PrescriptionIntakeWorkspace = dynamic(
   () => import('@/features/prescriptions/components/PrescriptionIntakeWorkspace'),
@@ -319,25 +323,6 @@ export function isSoldPrescription(rx) {
   const hasInv = rawInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInv);
   const s = (rx.status || rx.state || '').toLowerCase();
   return Boolean(hasInv || rx.orderStatus === 'Ordered' || ['active', 'approved', 'dispensed'].includes(s));
-}
-
-/**
- * Codified patient identifier for public/unregistered clinical views (DHA/HIPAA compliance)
- */
-export function getCodifiedPatientId(patientName, rxCode) {
-  if (rxCode) {
-    const clean = String(rxCode).replace(/[^a-zA-Z0-9]/g, '');
-    const suffix = clean.length >= 4 ? clean.slice(-4).toUpperCase() : clean.toUpperCase();
-    return `PT-${suffix}`;
-  }
-  if (!patientName) return 'PT-8800';
-  let hash = 0;
-  for (let i = 0; i < patientName.length; i++) {
-    hash = (hash << 5) - hash + patientName.charCodeAt(i);
-    hash |= 0;
-  }
-  const positive = (Math.abs(hash) % 9000) + 1000;
-  return `PT-${positive}`;
 }
 
 export function resolvePrescriptionParts(rx) {
@@ -1015,10 +1000,36 @@ export default function DoctorPublicPortalClient({
     }
   };
   const globalKpis = data?.kpis || { activePrescriptions: 0, monitoredPatients: 0, pendingTasksCount: 0, refillsDueCount: 0 };
-  const allTasks = data?.tasks || [];
+  const allTasks = useMemo(() => {
+    const raw = data?.tasks || [];
+    if (isAuthorizedViewer) return raw;
+    return raw.map((t) => {
+      const cleanCode = sanitizePrescriptionCode(t.code || t.id, t.patientName);
+      const codifiedPt = getCodifiedPatientId(t.patientName, cleanCode);
+      return {
+        ...t,
+        code: cleanCode,
+        prescriptionNumber: cleanCode,
+        patientName: `Patient ${codifiedPt}`,
+        patient: {
+          ...(t.patient || {}),
+          name: `Patient ${codifiedPt}`,
+          phone: '',
+          mobile: '',
+          dob: maskDateOfBirth(t.patient?.dob || t.patientDob, false)
+        },
+        patientPhone: '',
+        phone: '',
+        mobile: '',
+        whatsappMessage: `Hello Patient ${codifiedPt}, your clinical follow-up for ${t.treatmentTitle || 'treatment plan'} is on file (Ref #${cleanCode}).`,
+        description: (t.description || '').replace(new RegExp(t.patientName || 'XYZPATIENT', 'gi'), `Patient ${codifiedPt}`)
+      };
+    });
+  }, [data?.tasks, isAuthorizedViewer, opaqueCode]);
+
   const allPrescriptions = useMemo(() => {
     const consolidated = consolidateMultiPartPrescriptions(data?.prescriptions || []);
-    return [...consolidated].sort((a, b) => {
+    const sorted = [...consolidated].sort((a, b) => {
       const aSold = isSoldPrescription(a);
       const bSold = isSoldPrescription(b);
       if (aSold !== bSold) return aSold ? -1 : 1;
@@ -1026,9 +1037,58 @@ export default function DoctorPublicPortalClient({
       const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return tB - tA;
     });
-  }, [data?.prescriptions]);
+
+    if (isAuthorizedViewer) return sorted;
+
+    return sorted.map((p) => {
+      const cleanCode = sanitizePrescriptionCode(p.code || p.prescriptionNumber || p.id, p.patientName);
+      const codifiedPt = getCodifiedPatientId(p.patientName, cleanCode);
+      return {
+        ...p,
+        id: cleanCode,
+        code: cleanCode,
+        prescriptionNumber: cleanCode,
+        patientName: `Patient ${codifiedPt}`,
+        patient: {
+          ...(p.patient || {}),
+          name: `Patient ${codifiedPt}`,
+          phone: '',
+          mobile: '',
+          email: '',
+          dob: maskDateOfBirth(p.patient?.dob || p.dob, false)
+        },
+        patientPhone: '',
+        patientEmail: '',
+        phone: '',
+        mobile: '',
+        email: '',
+        doctorLicense: maskMedicalLicense(p.doctorLicense || doctor?.license, false, opaqueCode)
+      };
+    });
+  }, [data?.prescriptions, isAuthorizedViewer, opaqueCode, doctor?.license]);
+
   const allProtocols = data?.protocols || [];
-  const allLabResults = data?.labResults || [];
+  const allLabResults = useMemo(() => {
+    const raw = data?.labResults || [];
+    if (isAuthorizedViewer) return raw;
+    return raw.map((l) => {
+      const cleanCode = sanitizePrescriptionCode(l.code || l.id, l.patientName);
+      const codifiedPt = getCodifiedPatientId(l.patientName, cleanCode);
+      return {
+        ...l,
+        code: cleanCode,
+        patientName: `Patient ${codifiedPt}`,
+        patient: {
+          ...(l.patient || {}),
+          name: `Patient ${codifiedPt}`,
+          phone: '',
+          dob: maskDateOfBirth(l.patient?.dob, false)
+        },
+        patientPhone: '',
+        doctorName: `Physician (${opaqueCode})`
+      };
+    });
+  }, [data?.labResults, isAuthorizedViewer, opaqueCode]);
 
   const [activeSection, setActiveSection] = useState('overview');
 
@@ -1506,23 +1566,34 @@ export default function DoctorPublicPortalClient({
         }))
       );
     }
+    const cleanCode = sanitizePrescriptionCode(rx.code || rx.prescriptionNumber || rx.id, rx.patientName || rx.patient?.name);
+    const codifiedPatient = getCodifiedPatientId(rx.patientName, cleanCode);
     const formulaSummary = {
       treatmentTitle: rx.treatmentTitle || 'Compounded Formulation',
       dispensingForm: rx.dispensingForm || resolvedParts[0]?.vehicle || 'Magistral Solution',
       items: extractedItems,
       volume: rx.volume || resolvedParts[0]?.volume || '60 mL',
       posology: rx.posology || resolvedParts[0]?.posology || '',
-      patientName: rx.patientName || rx.patient?.name || '',
-      patientPhone: rx.patientPhone || rx.patient?.phone || '',
-      patientDob: rx.patient?.dob || '',
-      sourceRx: rx.code || rx.id
+      patientName: isAuthorizedViewer ? (rx.patientName || rx.patient?.name || '') : `Patient ${codifiedPatient}`,
+      patientPhone: isAuthorizedViewer ? (rx.patientPhone || rx.patient?.phone || '') : '',
+      patientDob: maskDateOfBirth(rx.patient?.dob || rx.dob, isAuthorizedViewer),
+      doctorLicense: maskMedicalLicense(doctor?.license || doctor?.medicalLicense, isAuthorizedViewer, opaqueCode),
+      sourceRx: cleanCode
     };
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('atlas_represcribe_prefill', JSON.stringify(formulaSummary));
     }
-    toast.success(`Regimen #${rx.code || rx.id} cloned into Prescription Builder ✓`);
+    toast.success(`Regimen #${cleanCode} cloned into Prescription Builder ✓`);
     setIsIntakeOpen(true);
   };
+
+  const handleOpenNewPrescriptionIntake = useCallback(() => {
+    triggerHaptic('selection');
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('atlas_represcribe_prefill');
+    }
+    setIsIntakeOpen(true);
+  }, []);
 
   const handleExecuteAiAction = (action) => {
     if (!action) return;
@@ -1575,7 +1646,7 @@ export default function DoctorPublicPortalClient({
       if (doctorSpecialtyIntel.primaryBlueprints?.[0]) {
         handlePrescribeSpecialtyBlueprint(doctorSpecialtyIntel.primaryBlueprints[0]);
       } else {
-        setIsIntakeOpen(true);
+        handleOpenNewPrescriptionIntake();
       }
     } else if (action.type === 'open_discovery') {
       setIsAtlasAiOpen(false);
@@ -4074,7 +4145,7 @@ export default function DoctorPublicPortalClient({
     const id = typeof itemOrId === 'string' ? itemOrId : itemOrId?.id;
 
     if (id === 'intake') {
-      setIsIntakeOpen(true);
+      handleOpenNewPrescriptionIntake();
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
       return;
     }
@@ -4569,7 +4640,7 @@ export default function DoctorPublicPortalClient({
         hideSwitchRx={true}
         hideSearchButton={true}
         isDoctorView={true}
-        onImportRx={() => setIsIntakeOpen(true)}
+        onImportRx={handleOpenNewPrescriptionIntake}
         onSwitchRx={() => handleSidebarNavigate('prescriptions')}
         rxSwitcherCount={quickCounts.pending}
       />
@@ -5141,10 +5212,7 @@ export default function DoctorPublicPortalClient({
               {/* Single Unified Primary Action: New Prescription / Upload Rx */}
               <button
                 type="button"
-                onClick={() => {
-                  triggerHaptic('selection');
-                  setIsIntakeOpen(true);
-                }}
+                onClick={handleOpenNewPrescriptionIntake}
                 style={{
                   height: '34px',
                   padding: '0 14px',
@@ -5227,7 +5295,7 @@ export default function DoctorPublicPortalClient({
                         key: 'quick_new_rx',
                         label: '+ Create First Prescription',
                         active: false,
-                        onClick: () => setIsIntakeOpen(true)
+                        onClick: handleOpenNewPrescriptionIntake
                       }
                     ]
                   }
@@ -5333,7 +5401,7 @@ export default function DoctorPublicPortalClient({
 
                   <div
                     className="gcp-kpi-card"
-                    onClick={() => setIsIntakeOpen(true)}
+                    onClick={handleOpenNewPrescriptionIntake}
                     style={{ cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
@@ -7996,7 +8064,7 @@ export default function DoctorPublicPortalClient({
 
       {/* ── Fixed Bottom Actions Dock ("Sticker" Footer for Laptop & Mobile) ── */}
       <DoctorFloatingGlassDock
-        onOpenIntake={() => setIsIntakeOpen(true)}
+        onOpenIntake={handleOpenNewPrescriptionIntake}
         onOpenSearch={() => {
           triggerHaptic('selection');
           setIsPracticeSearchOpen(true);
@@ -8132,7 +8200,10 @@ export default function DoctorPublicPortalClient({
             doctorId: doctor.id,
             doctorName: isAuthorizedViewer ? doctor.name : `Physician (${opaqueCode})`,
             doctorSlug: doctor.slug || opaqueCode,
-            clinicName: isAuthorizedViewer ? doctor.clinic : 'Verified Medical Practice'
+            clinicName: isAuthorizedViewer ? doctor.clinic : 'Verified Medical Practice',
+            isAuthorizedViewer: Boolean(isAuthorizedViewer),
+            doctorLicense: doctor.license || doctor.dhaLicense || doctor.medicalLicense || null,
+            opaqueCode: opaqueCode
           }}
           onClose={() => {
             setIsIntakeOpen(false);
@@ -8378,7 +8449,7 @@ export default function DoctorPublicPortalClient({
                   type="button"
                   onClick={() => {
                     setIsInquiryOpen(false);
-                    setIsIntakeOpen(true);
+                    handleOpenNewPrescriptionIntake();
                   }}
                   style={{
                     height: '40px',
@@ -9795,7 +9866,7 @@ export default function DoctorPublicPortalClient({
                 type="button"
                 onClick={() => {
                   setIsMobileSidebarOpen(false);
-                  setIsIntakeOpen(true);
+                  handleOpenNewPrescriptionIntake();
                 }}
                 style={{
                   width: '100%',
