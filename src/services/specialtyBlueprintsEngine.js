@@ -170,7 +170,7 @@ export const CURATED_DOCTOR_WEB_PROFILES = {
     clinicalFocusSummary:
       'Genomic Medicine & Anti-Aging Specialist focused on DNA-guided pharmacogenetics, cellular senescence, telomere preservation, and metabolic longevity protocols.',
     detectedProcedures: [
-      'Pharmacogenomic & Epigenetic Longevity Profiling (ETERNA®)',
+      'Fagron TrichoTest™ & Pharmacogenomic Profiling',
       'Telomere & Pineal Bioregulation (Epithalon / NAD+ Cycles)',
       'Cardiometabolic & Mitochondrial Optimization',
       'Bioidentical Endocrine & Androgen Optimization'
@@ -236,7 +236,7 @@ export const SPECIALTY_BLUEPRINTS_CATALOG = {
         role: 'Systemic mitochondrial ATP support and oxidative stress protection during follicular re-implantation.'
       },
       diagnosticSynergy: {
-        name: 'ETERNA® Pharmacogenomics & Tricho-Genetics DNA Test',
+        name: 'Fagron TrichoTest™ Pharmacogenomics & Tricho-Genetics DNA Test',
         role: 'Screens SULT1A1 sulfotransferase activity and SRD5A2 sensitivity to personalize post-transplant maintenance.'
       },
       protocolUrl: '/proto/bpc-157-tb-500-protocol'
@@ -403,7 +403,7 @@ export const SPECIALTY_BLUEPRINTS_CATALOG = {
         role: 'Internal glutathione and ubiquinol photo-oxidative shield against UV-triggered melanocyte relapse.'
       },
       diagnosticSynergy: {
-        name: 'ETERNA® Skin Genomics & Oxidative Stress DNA Panel',
+        name: 'Fagron Genomics™ Skin & Oxidative Stress DNA Panel',
         role: 'Evaluates SOD2, GPX1, and MC1R genetic polymorphisms governing pigmentation and photoaging.'
       },
       protocolUrl: '/proto/melanogenesis-density-protocol-zt-ghk-cu'
@@ -616,8 +616,8 @@ export const SPECIALTY_BLUEPRINTS_CATALOG = {
         role: 'Synergistic senolytic, sirtuin, and deep-sleep neuro-endocrine recovery.'
       },
       diagnosticSynergy: {
-        name: 'Bloodo™ Complete 6-Panel Baseline + ETERNA® Longevity DNA Test',
-        role: 'Full quantitative baseline of Testosterone+, Vitamin D, HbA1c, Lipid Profile, Omega Ratio, and genomic methylation.'
+        name: 'Bloodo™ Complete 6-Panel Longevity Biomarker Baseline',
+        role: 'Full quantitative baseline of Testosterone+, Vitamin D, HbA1c, Lipid Profile, and Omega-3 Index.'
       },
       protocolUrl: '/proto/lxv-neuro-restoration-12w'
     }

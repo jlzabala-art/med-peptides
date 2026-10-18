@@ -153,6 +153,10 @@ const DoctorPracticeClaimModal = dynamic(
   () => import('@/components/doctor/modals/DoctorPracticeClaimModal'),
   { ssr: false }
 );
+const DoctorBlueprintDossierModal = dynamic(
+  () => import('@/components/doctor/modals/DoctorBlueprintDossierModal'),
+  { ssr: false }
+);
 
 function safeRenderText(val, fallback = '') {
   if (!val) return fallback;
@@ -700,6 +704,7 @@ export default function DoctorPublicPortalClient({
   const [isCredentialsModalOpen, setIsCredentialsModalOpen] = useState(false);
   const [isPracticeSearchOpen, setIsPracticeSearchOpen] = useState(false);
   const [isServicesModalOpen, setIsServicesModalOpen] = useState(false);
+  const [activeBlueprintDossier, setActiveBlueprintDossier] = useState(null);
 
   // Keyboard shortcut (⌘K or /) for Practice Search
   useEffect(() => {
@@ -5366,6 +5371,45 @@ export default function DoctorPublicPortalClient({
                   </button>
                 </div>
 
+                {/* ── Quick-Start Onboarding Guide for New Physicians (Zero-Rx State) ── */}
+                {allPrescriptions.length === 0 && (
+                  <div
+                    style={{
+                      background: 'rgba(15, 23, 42, 0.6)',
+                      border: '1px solid rgba(56, 189, 248, 0.3)',
+                      borderRadius: '10px',
+                      padding: '14px 18px',
+                      marginBottom: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#38bdf8' }}>
+                        👋 Guía de Inicio para Nuevos Facultativos
+                      </span>
+                      <span style={{ fontSize: '0.66rem', fontWeight: 700, background: 'rgba(56, 189, 248, 0.2)', color: '#bae6fd', padding: '1px 6px', borderRadius: '4px' }}>
+                        Flujo Clínico en 3 Pasos
+                      </span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px', marginTop: '4px' }}>
+                      <div style={{ background: 'rgba(30, 41, 59, 0.8)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.74rem', color: '#cbd5e1' }}>
+                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>1. Explora la Ficha Técnica:</strong>
+                        Pulsa en <em>"Ficha Técnica y Evidencia"</em> para revisar activos, concentraciones, vehículos y pauta de cada fórmula.
+                      </div>
+                      <div style={{ background: 'rgba(30, 41, 59, 0.8)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.74rem', color: '#cbd5e1' }}>
+                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>2. Personaliza la Prescripción:</strong>
+                        Pulsa <em>"Personalizar y Prescribir"</em> para cargar la fórmula en el constructor, asignar tu paciente y ajustar dosis.
+                      </div>
+                      <div style={{ background: 'rgba(30, 41, 59, 0.8)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.74rem', color: '#cbd5e1' }}>
+                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>3. Elaboración Magistral:</strong>
+                        La farmacia autorizada (PharmapolisLab) prepara la fórmula y gestiona la entrega a tu clínica o paciente con trazabilidad.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Detected Clinical Procedures Pills */}
                 {Array.isArray(doctorSpecialtyIntel.webPracticeProfile?.detectedProcedures) && doctorSpecialtyIntel.webPracticeProfile.detectedProcedures.length > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
@@ -5427,16 +5471,43 @@ export default function DoctorPublicPortalClient({
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '6px', borderTop: allPrescriptions.length === 0 ? '1px solid rgba(255,255,255,0.08)' : '1px solid #e2e8f0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '8px', borderTop: allPrescriptions.length === 0 ? '1px solid rgba(255,255,255,0.08)' : '1px solid #e2e8f0' }}>
+                        {/* Clinical Monograph / Dossier (On-Screen Modal Dialog, NO WhatsApp!) */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic('light');
+                            setActiveBlueprintDossier(bp);
+                          }}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '5px',
+                            border: allPrescriptions.length === 0 ? '1px solid #475569' : '1px solid #cbd5e1',
+                            background: allPrescriptions.length === 0 ? 'rgba(255,255,255,0.06)' : '#ffffff',
+                            color: allPrescriptions.length === 0 ? '#e2e8f0' : '#1e293b',
+                            fontSize: '0.72rem',
+                            fontWeight: 650,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                          title="Ver composición detallada, mecanismo de acción y pauta posológica"
+                        >
+                          <FileText size={12} style={{ color: '#0284c7' }} />
+                          <span>Ficha Técnica y Evidencia</span>
+                        </button>
+
+                        {/* Customize & Prescribe (Clear, safe, and controlled flow) */}
                         <button
                           type="button"
                           onClick={() => handlePrescribeSpecialtyBlueprint(bp)}
                           style={{
                             flex: 1,
-                            padding: '6px 10px',
+                            padding: '6px 12px',
                             borderRadius: '5px',
                             border: 'none',
-                            background: '#16a34a',
+                            background: '#003666',
                             color: '#ffffff',
                             fontSize: '0.72rem',
                             fontWeight: 700,
@@ -5444,27 +5515,13 @@ export default function DoctorPublicPortalClient({
                             display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            gap: '5px'
+                            gap: '5px',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.08)'
                           }}
+                          title="Cargar fórmula en el constructor para asignar paciente, ajustar dosis y firmar"
                         >
                           <Plus size={12} />
-                          <span>Prescribe Formula (1-Click)</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRequestBlueprintWhatsApp(bp)}
-                          style={{
-                            padding: '6px 10px',
-                            borderRadius: '5px',
-                            border: allPrescriptions.length === 0 ? '1px solid #475569' : '1px solid #cbd5e1',
-                            background: 'transparent',
-                            color: allPrescriptions.length === 0 ? '#e2e8f0' : '#334155',
-                            fontSize: '0.72rem',
-                            fontWeight: 600,
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Sample / Dossier
+                          <span>Personalizar y Prescribir</span>
                         </button>
                       </div>
                     </div>
@@ -10531,6 +10588,21 @@ export default function DoctorPublicPortalClient({
         onAuthorized={() => {
           setWorkstationAuthorized(true);
           setIsClaimModalOpen(false);
+        }}
+      />
+
+      {/* ── Specialty Blueprint Clinical Monograph Dossier Modal (On-Screen, Zero WhatsApp) ── */}
+      <DoctorBlueprintDossierModal
+        isOpen={Boolean(activeBlueprintDossier)}
+        onClose={() => setActiveBlueprintDossier(null)}
+        blueprint={activeBlueprintDossier}
+        onCustomizePrescribe={(bp) => {
+          setActiveBlueprintDossier(null);
+          handlePrescribeSpecialtyBlueprint(bp);
+        }}
+        onRequestSample={(bp) => {
+          setActiveBlueprintDossier(null);
+          handleRequestBlueprintWhatsApp(bp);
         }}
       />
     </div>

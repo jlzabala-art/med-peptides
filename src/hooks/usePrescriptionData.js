@@ -6,7 +6,7 @@ import { classifyPrescription } from '@/data/prescriptionTypeClassifier';
 import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
 import { getPharmapolisLabelsForPrescription, getAuthoritativeClinicalData } from '@/data/pharmapolisLabelsMap';
 import { resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
-import { sanitizePrescriptionCode, getCodifiedPatientId } from '@/lib/prescriptionSanitizer';
+import { sanitizePrescriptionCode, getCodifiedPatientId, getDoctorOpaqueCode } from '@/lib/prescriptionSanitizer';
 
 export function slugify(text) {
   return String(text || '')
@@ -45,7 +45,9 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
   const isCodified = rx.isCodifiedView || !isAuthorizedViewer;
   const rawPatientName = rx.pharmacyLabels?.[0]?.patientName || patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
   const patientName = isCodified
-    ? (rawPatientName.startsWith('Patient PT-') ? rawPatientName : `Patient ${getCodifiedPatientId(rawPatientName, rx.id || rx.code)}`)
+    ? (rawPatientName.startsWith('Patient PT-') || rawPatientName.startsWith('Paciente PT-')
+        ? rawPatientName
+        : `${isEs ? 'Paciente' : 'Patient'} ${getCodifiedPatientId(rawPatientName, rx.id || rx.code)}`)
     : rawPatientName;
   const rawRxId = rx.id || rx.prescriptionNumber || rx.code || 'RX-PRESCRIPTION';
   const rxId = isCodified ? sanitizePrescriptionCode(rawRxId, rawPatientName) : rawRxId;
@@ -104,7 +106,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
   const isSezgin = String(rawDoctorName).toLowerCase().includes('sezgin') || String(rawDoctorName).toLowerCase().includes('cagatay');
   const isHaytham = !isSezgin && (String(rawDoctorName).toLowerCase().includes('haytham') || String(rawDoctorName).toLowerCase().includes('heytham'));
 
-  const doctorName = isHaytham ? 'Dr. Haytham Salem' : (isSezgin ? (authClinical.doctorName || rawDoctorName) : rawDoctorName);
+  const nominalDoctorName = isHaytham ? 'Dr. Haytham Salem' : (isSezgin ? (authClinical.doctorName || rawDoctorName) : rawDoctorName);
   const clinic = isHaytham ? 'Arthregen Clinic' : (authClinical.clinicName || treatingDoc.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : (isEs ? 'Centro Médico Prescriptor' : 'Licensed Clinical Practice')));
   const doctorClinic = clinic;
   const doctorSpecialty = isHaytham 
@@ -128,13 +130,42 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     if (rx.doctorSlug) return rx.doctorSlug;
     if (rx.doctor?.slug) return rx.doctor.slug;
     if (treatingDoc?.slug) return treatingDoc.slug;
-    return slugify(doctorName || (isSezgin ? 'cagatay-sezgin' : 'haytham-salem'));
-  }, [rx.doctorSlug, rx.doctor, treatingDoc, doctorName, isSezgin]);
+    return slugify(nominalDoctorName || (isSezgin ? 'cagatay-sezgin' : 'haytham-salem'));
+  }, [rx.doctorSlug, rx.doctor, treatingDoc, nominalDoctorName, isSezgin]);
+
+  const doctorTargetId = rx.doctorId || treatingDoc?.id || treatingDoc?.docId || doctorSlug || 'atlas-clinical';
+
+  const doctorOpaqueCode = useMemo(() => {
+    return getDoctorOpaqueCode(doctorTargetId, treatingDoc);
+  }, [doctorTargetId, treatingDoc]);
+
+  const displayDoctorNameShort = useMemo(() => {
+    if (isAuthorizedViewer) {
+      if (!nominalDoctorName) return isEs ? 'Portal del Médico' : 'Doctor Portal';
+      return nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`;
+    }
+    return isEs ? 'Práctica Médica Verificada' : 'Verified Medical Practice';
+  }, [isAuthorizedViewer, nominalDoctorName, isEs]);
+
+  const displayDoctorName = useMemo(() => {
+    if (isAuthorizedViewer) {
+      if (!nominalDoctorName) return isEs ? 'Médico Prescriptor' : 'Prescribing Physician';
+      return nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`;
+    }
+    return isEs ? `Práctica Médica Verificada (${doctorOpaqueCode})` : `Verified DHA Practice (${doctorOpaqueCode})`;
+  }, [isAuthorizedViewer, nominalDoctorName, isEs, doctorOpaqueCode]);
+
+  // Strict HIPAA / DHA compliance: When unauthenticated, doctorName MUST be de-identified
+  const doctorName = isAuthorizedViewer ? nominalDoctorName : displayDoctorNameShort;
+  const safeDoctorPhone = isAuthorizedViewer ? doctorPhone : '';
 
   const doctorPublicUrl = useMemo(() => {
-    const raw = doctorSlug || 'atlas-clinical';
-    return isCodified ? `/dr/${getDoctorOpaqueCode(raw)}` : `/dr/${raw}`;
-  }, [doctorSlug, isCodified]);
+    if (!isCodified) {
+      const raw = doctorSlug || 'atlas-clinical';
+      return `/dr/${raw}`;
+    }
+    return `/dr/${doctorOpaqueCode}`;
+  }, [doctorSlug, isCodified, doctorOpaqueCode]);
 
   // Pharmacogenomics & Prescription Classification
   const genomicsData = useMemo(() => detectFagronGenomicsTest(rx), [rx]);
@@ -977,11 +1008,16 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     patientAlias,
     treatingDoc,
     doctorName,
+    nominalDoctorName,
+    displayDoctorName,
+    displayDoctorNameShort,
+    doctorOpaqueCode,
     doctorClinic,
     clinic: doctorClinic,
     doctorSpecialty,
     doctorAddress,
     doctorPhone,
+    safeDoctorPhone,
     doctorLicense,
     formattedDoctorLicense,
     isDhaLicensed,

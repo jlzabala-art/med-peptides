@@ -345,7 +345,7 @@ function forceCanonicalDomain(urlOrPath) {
                 <Link
                   href={doctorHomeHref}
                   className="puh-doctor-home-btn"
-                  title={isSpanish ? `Volver al portal clínico de ${doctorName || 'Médico'}` : `Return to clinical portal of ${doctorName || 'Doctor'}`}
+                  title={isSpanish ? `Volver al portal de ${doctorName || 'Médico'}` : `Return to portal of ${doctorName || 'Doctor'}`}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -363,7 +363,7 @@ function forceCanonicalDomain(urlOrPath) {
                   }}
                 >
                   <ArrowLeft size={13} color="#ffffff" strokeWidth={2.5} />
-                  <span>{doctorName ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`) : (isSpanish ? 'Portal del Médico' : "Doctor's Portal")}</span>
+                  <span>{doctorName ? (/práctica|practice|portal|verified|verificada/i.test(doctorName) || doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`) : (isSpanish ? 'Portal del Médico' : "Doctor's Portal")}</span>
                 </Link>
               )}
             </div>

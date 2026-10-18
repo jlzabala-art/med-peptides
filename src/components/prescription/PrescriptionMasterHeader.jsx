@@ -108,7 +108,7 @@ export default function PrescriptionMasterHeader({
                     <Link
                       href={doctorPublicUrl}
                       className="rx-header-action-btn"
-                      title={isEs ? `Volver al portal clínico de ${doctorName || 'Médico'}` : `Return to clinical portal of ${doctorName || 'Doctor'}`}
+                      title={isEs ? `Volver al portal de ${doctorName || 'Médico'}` : `Return to portal of ${doctorName || 'Doctor'}`}
                       style={{
                         height: 32,
                         padding: '0 10px',
@@ -127,7 +127,7 @@ export default function PrescriptionMasterHeader({
                       }}
                     >
                       <ArrowLeft size={13} color="#003666" strokeWidth={2.5} />
-                      <span>{doctorName ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`) : (isEs ? 'Portal Médico' : 'Doctor Portal')}</span>
+                      <span>{doctorName ? (/práctica|practice|portal|verified|verificada/i.test(doctorName) || doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`) : (isEs ? 'Portal Médico' : 'Doctor Portal')}</span>
                     </Link>
                   )}
                 </div>

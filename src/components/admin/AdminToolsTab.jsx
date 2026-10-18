@@ -776,6 +776,25 @@ export default function AdminToolsTab() {
       status: 'approved',
       pdfName: 'Fagron_TrichoTest_Sara_Khalid_Al_Meadadi_BOX02566AATRI.pdf'
     },
+    {
+      id: 'pt-fatima-almohannadi',
+      name: 'Fatima Yousef Al-mohannadi',
+      sampleCode: 'BOX03088AATRI',
+      rxCode: 'RX-BOX03088AATRI',
+      doctorName: 'Dr. Raffanie Lucenio',
+      doctorSlug: 'raffanie-lucenio',
+      clinicName: 'The Masters Medical Center (Doha)',
+      country: 'Qatar',
+      countryCode: 'QA',
+      countryFlag: '🇶🇦',
+      testEndDate: '23-07-2026',
+      testType: 'Fagron TrichoTest™ & Compounding Refill',
+      status: 'refilled',
+      refillCount: 1,
+      formulation: 'Shampoo TrichoWash 250ml + Oral Trichology Capsules (60 caps)',
+      pharmacy: 'PharmapolisLab (Bulgaria)',
+      pdfName: 'Fagron_TrichoTest_Fatima_Yousef_Al_mohannadi_BOX03088AATRI.pdf'
+    },
     // YDL Dubai TrichoTests (Dr. M Jay Alkhatib)
     {
       id: 'pt-saadat-valiyeva',

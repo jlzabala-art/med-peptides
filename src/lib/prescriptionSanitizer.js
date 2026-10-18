@@ -106,8 +106,7 @@ export function getDoctorOpaqueCode(docId, doctorData = {}) {
   const isFirestoreUid = typeof docId === 'string' && docId.length >= 16 && !docId.includes('-') && !docId.includes(' ') && !/^[a-z]+$/i.test(docId);
   if (isFirestoreUid) {
     const cleanId = String(docId).replace(/[^a-zA-Z0-9]/g, '');
-    const token = cleanId.length >= 8 ? cleanId.slice(-8).toUpperCase() : cleanId.toUpperCase();
-    return `DR-${token}`;
+    return `DR-${cleanId.slice(0, 8).toUpperCase()}`;
   }
 
   const hash = deterministicOpaqueHash(docId, 8);
@@ -115,7 +114,7 @@ export function getDoctorOpaqueCode(docId, doctorData = {}) {
 }
 
 /**
- * Zero-Trust Server Sanitizer: Removes all nominal PII from a prescription object
+ * Zero-Trust Server Sanitizer: Removes all nominal PII (patient and doctor) from a prescription object
  * before passing to unauthenticated or public viewers.
  */
 export function sanitizePrescriptionPayload(rx, { isAuthorized = false } = {}) {
@@ -153,12 +152,24 @@ export function sanitizePrescriptionPayload(rx, { isAuthorized = false } = {}) {
     shippingAddress: null,
     notes: '',
     patientNotes: '',
-    treatingDoctor: typeof rx.treatingDoctor === 'string' 
-      ? rx.treatingDoctor 
-      : (rx.treatingDoctor?.name || rx.doctorName || 'Attending Physician'),
+    // Strict HIPAA / DHA Physician De-identification:
+    // Never expose doctor nominal identity or personal direct phone to unauthenticated viewers.
+    treatingDoctor: 'Licensed Clinical Practice',
+    doctorName: 'Licensed Clinical Practice',
+    prescribingDoctor: 'Licensed Clinical Practice',
+    doctor: {
+      name: 'Licensed Clinical Practice',
+      clinic: rx.clinic || rx.clinicName || 'Atlas Partner Practice',
+      isCodified: true
+    },
+    doctorPhone: '',
+    doctorEmail: '',
+    doctorAddress: '',
     pharmacyLabels: (rx.pharmacyLabels || []).map((l) => ({
       ...l,
-      patientName: codifiedName
+      patientName: codifiedName,
+      doctorName: 'Licensed Clinical Practice',
+      physician: 'Licensed Clinical Practice'
     })),
     timeline: (rx.timeline || []).map((t) => {
       let note = String(t.note || '');
