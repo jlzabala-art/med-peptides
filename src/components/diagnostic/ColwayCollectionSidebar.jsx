@@ -35,12 +35,17 @@ export default function ColwayCollectionSidebar({
   selectedCategory = 'all',
   onSelectCategory = null,
   onSearchKeyword = null,
-  products = []
+  products = [],
+  activeProtocolId: externalActiveProtocolId = null,
+  onSelectProtocol = null,
+  activeSection = 'catalog',
+  onSelectSection = null
 }) {
   const isEs = false; // Force English — Spanish translations preserved for future i18n
   const [copied, setCopied] = useState(false);
   const [calcDuration, setCalcDuration] = useState('3m'); // '1m' | '3m'
-  const [activeProtocolId, setActiveProtocolId] = useState(null);
+  const [internalActiveProtocolId, setInternalActiveProtocolId] = useState(null);
+  const activeProtocolId = externalActiveProtocolId !== null ? externalActiveProtocolId : internalActiveProtocolId;
 
   const canonicalUrl = 'https://atlashealth-services.com/collection/colway';
 
@@ -149,12 +154,16 @@ export default function ColwayCollectionSidebar({
 
   const handleSelectProtocol = (proto) => {
     triggerHaptic('selection');
-    setActiveProtocolId(proto.id);
-    if (onSelectCategory && proto.category) {
-      onSelectCategory(proto.category);
-    }
-    if (onSearchKeyword && proto.search) {
-      onSearchKeyword(proto.search);
+    setInternalActiveProtocolId(proto.id);
+    if (onSelectProtocol) {
+      onSelectProtocol(proto);
+    } else {
+      if (onSelectCategory && proto.category) {
+        onSelectCategory(proto.category);
+      }
+      if (onSearchKeyword && proto.search) {
+        onSearchKeyword(proto.search);
+      }
     }
     toast.success(isEs ? `Filtro aplicado: ${proto.title}` : `Filter applied: ${proto.title}`);
   };
@@ -165,9 +174,11 @@ export default function ColwayCollectionSidebar({
       flexDirection: 'column',
       gap: '1.25rem',
       position: 'sticky',
-      top: '90px'
+      top: '90px',
+      gridColumn: '1',
+      order: 1
     }}>
-      {/* ── 1. CATEGORÍAS & FORMULACIONES (Google Cloud Console Navigation Tree) ── */}
+      {/* -- 1. CATEGORIAS & FORMULACIONES (Google Cloud Console Navigation Tree) -- */}
       <div style={{
         background: '#ffffff',
         borderRadius: '14px',
@@ -186,7 +197,7 @@ export default function ColwayCollectionSidebar({
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
           {categories.map((cat) => {
-            const isActive = selectedCategory === cat.id;
+            const isActive = activeSection === 'catalog' && selectedCategory === cat.id;
             const CatIcon = cat.icon || Layers;
             return (
               <button
@@ -194,6 +205,7 @@ export default function ColwayCollectionSidebar({
                 type="button"
                 onClick={() => {
                   triggerHaptic('selection');
+                  if (onSelectSection) onSelectSection('catalog');
                   if (onSelectCategory) onSelectCategory(cat.id);
                 }}
                 style={{
@@ -250,97 +262,239 @@ export default function ColwayCollectionSidebar({
         </nav>
       </div>
 
-      {/* ── 2. ¿POR QUÉ EL COLÁGENO COLWAY ES DIFERENCIAL? (Biotecnología de Gdańsk & Calidad Clínica) ── */}
+      {/* -- 2. SECCIONES CLINICAS (Exclusive Section Switcher) -- */}
       <div style={{
         background: '#ffffff',
         borderRadius: '14px',
         border: '1px solid #e2e8f0',
-        padding: '1.25rem',
+        padding: '1rem',
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.85rem' }}>
-          <div style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '10px',
-            background: 'rgba(13, 148, 136, 0.1)',
-            color: '#0d9488',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0
-          }}>
-            <Sparkles size={20} />
-          </div>
-          <div>
-            <h4 style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.2 }}>
-              {isEs ? 'Colágeno Diferencial Colway®' : 'The Colway® Bio-Collagen Advantage'}
-            </h4>
-            <span style={{ fontSize: '0.70rem', color: '#0d9488', fontWeight: 600 }}>
-              {isEs ? 'Pioneros en Tropocolágeno Nativo (Gdańsk)' : 'Native Tropocollagen Pioneers (Gdańsk)'}
-            </span>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+          <h5 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            {isEs ? 'Vistas del Módulo' : 'Module Views'}
+          </h5>
+          <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 600 }}>1 view at a time</span>
         </div>
 
-        <p style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.5, margin: '0 0 0.85rem 0' }}>
-          {isEs
-            ? 'A diferencia del 95% del colágeno comercial —que es gelatina desnaturalizada por calor y ácidos—, Colway aísla en frío tropocolágeno biológicamente activo conservando su triple hélice 3D intacta.'
-            : 'Unlike 95% of commercial collagen —which is gelatin denatured by heat and acids—, Colway cold-extracts biologically active tropocollagen preserving its intact 3D triple-helix conformation.'}
-        </p>
-
-        {/* 4 Differential Value Anchors */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-            <Dna size={14} color="#0d9488" style={{ marginTop: '2px', flexShrink: 0 }} />
-            <div>
-              <strong style={{ fontSize: '0.74rem', color: '#0f172a', display: 'block' }}>
-                {isEs ? 'Triple Hélice 3D Preservada' : 'Intact 3D Triple Helix'}
-              </strong>
-              <span style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.35, display: 'block' }}>
-                {isEs ? 'Estructura terciaria molecular viva idéntica al pro-colágeno humano.' : 'Live molecular tertiary structure recognized as native human pro-collagen.'}
-              </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              if (onSelectSection) onSelectSection('catalog');
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 10px',
+              borderRadius: '7px',
+              border: activeSection === 'catalog' ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
+              background: activeSection === 'catalog' ? '#f0fdfa' : '#f8fafc',
+              color: activeSection === 'catalog' ? '#0d9488' : '#0f172a',
+              cursor: 'pointer',
+              fontSize: '0.76rem',
+              fontWeight: activeSection === 'catalog' ? 750 : 600,
+              textAlign: 'left',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Layers size={14} color={activeSection === 'catalog' ? '#0d9488' : '#64748b'} />
+              <span>{isEs ? 'Catálogo de Formulaciones' : 'Product Catalog (9)'}</span>
             </div>
-          </div>
+            {activeSection === 'catalog' && <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488' }}>Active</span>}
+          </button>
 
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-            <Award size={14} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />
-            <div>
-              <strong style={{ fontSize: '0.74rem', color: '#0f172a', display: 'block' }}>
-                {isEs ? 'Neocollagénesis Celular Real' : 'Real Cellular Neocollagenesis'}
-              </strong>
-              <span style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.35, display: 'block' }}>
-                {isEs ? 'Estimula a los fibroblastos a sintetizar colágeno nuevo endógeno.' : 'Directly triggers dermal fibroblasts to synthesize new endogenous collagen.'}
-              </span>
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              if (onSelectSection) onSelectSection('advantage');
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 10px',
+              borderRadius: '7px',
+              border: activeSection === 'advantage' ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
+              background: activeSection === 'advantage' ? '#f0fdfa' : '#f8fafc',
+              color: activeSection === 'advantage' ? '#0d9488' : '#0f172a',
+              cursor: 'pointer',
+              fontSize: '0.76rem',
+              fontWeight: activeSection === 'advantage' ? 750 : 600,
+              textAlign: 'left',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Sparkles size={14} color={activeSection === 'advantage' ? '#0d9488' : '#64748b'} />
+              <span>{isEs ? 'Ventaja Bio-Colágeno' : 'Bio-Collagen Advantage'}</span>
             </div>
-          </div>
+            {activeSection === 'advantage' && <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488' }}>Active</span>}
+          </button>
 
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-            <FlaskConical size={14} color="#7c3aed" style={{ marginTop: '2px', flexShrink: 0 }} />
-            <div>
-              <strong style={{ fontSize: '0.74rem', color: '#0f172a', display: 'block' }}>
-                {isEs ? 'Liofilización en Frío (Colvita)' : 'Cold Sublimation Freeze-Drying'}
-              </strong>
-              <span style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.35, display: 'block' }}>
-                {isEs ? 'Secado al vacío bajo cero con microalgas Fucus y Vitamina E natural.' : 'Sub-zero vacuum sublimation retaining live bioactive peptides & Baltic Fucus.'}
-              </span>
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              if (onSelectSection) onSelectSection('protocols');
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 10px',
+              borderRadius: '7px',
+              border: activeSection === 'protocols' ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
+              background: activeSection === 'protocols' ? '#f0fdfa' : '#f8fafc',
+              color: activeSection === 'protocols' ? '#0d9488' : '#0f172a',
+              cursor: 'pointer',
+              fontSize: '0.76rem',
+              fontWeight: activeSection === 'protocols' ? 750 : 600,
+              textAlign: 'left',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FlaskConical size={14} color={activeSection === 'protocols' ? '#0d9488' : '#7c3aed'} />
+              <span>{isEs ? 'Protocolos Clínicos (4)' : 'Clinical Protocols (4)'}</span>
             </div>
-          </div>
+            {activeSection === 'protocols' && <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488' }}>Active</span>}
+          </button>
 
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
-            <ShieldCheck size={14} color="#16a34a" style={{ marginTop: '2px', flexShrink: 0 }} />
-            <div>
-              <strong style={{ fontSize: '0.74rem', color: '#0f172a', display: 'block' }}>
-                {isEs ? 'Estándar Farmacéutico CPNP / EU 1223' : 'EU CPNP & ISO 22716 Certified'}
-              </strong>
-              <span style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.35, display: 'block' }}>
-                {isEs ? 'Registro cosmético europeo, testado en humanos, 0% metales pesados.' : 'Official European cosmetic registration, human dermatologically tested.'}
-              </span>
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              if (onSelectSection) onSelectSection('calculator');
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 10px',
+              borderRadius: '7px',
+              border: activeSection === 'calculator' ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
+              background: activeSection === 'calculator' ? '#f0fdfa' : '#f8fafc',
+              color: activeSection === 'calculator' ? '#0d9488' : '#0f172a',
+              cursor: 'pointer',
+              fontSize: '0.76rem',
+              fontWeight: activeSection === 'calculator' ? 750 : 600,
+              textAlign: 'left',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Calculator size={14} color={activeSection === 'calculator' ? '#0d9488' : '#0284c7'} />
+              <span>{isEs ? 'Calculadora de Ciclos' : 'Cycle Calculator & Dosing'}</span>
             </div>
-          </div>
+            {activeSection === 'calculator' && <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488' }}>Active</span>}
+          </button>
         </div>
       </div>
 
-      {/* ── 3. FICHA TÉCNICA DINÁMICA SEGÚN LÍNEA SELECCIONADA (100% Verídica y Contextual) ── */}
+      {/* -- 3. PROTOCOLOS CLINICOS A NIVEL DE ITEM (Compact Item-Level Reference) -- */}
+      <div style={{
+        background: '#ffffff',
+        borderRadius: '14px',
+        border: '1px solid #e2e8f0',
+        padding: '1.15rem',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <h5 style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            {isEs ? 'Protocolos Clínicos' : 'Clinical Protocols'}
+          </h5>
+          {activeProtocolId ? (
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                setInternalActiveProtocolId(null);
+                if (onSelectCategory) onSelectCategory('all');
+                if (onSearchKeyword) onSearchKeyword('');
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#0d9488',
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                padding: 0
+              }}
+            >
+              {isEs ? 'Limpiar' : 'Reset'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                if (onSelectSection) onSelectSection('protocols');
+              }}
+              style={{ background: 'none', border: 'none', fontSize: '0.68rem', color: '#0d9488', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+            >
+              {isEs ? 'Ver Todos (4)' : 'View All (4) →'}
+            </button>
+          )}
+        </div>
+
+        <p style={{ fontSize: '0.72rem', color: '#64748b', lineHeight: 1.35, margin: '0 0 8px 0' }}>
+          {isEs ? 'Filtra el catálogo por pauta clínica del paciente:' : 'Filter catalog by patient treatment pathway:'}
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {protocols.map((proto) => {
+            const isSelected = activeProtocolId === proto.id;
+            return (
+              <button
+                key={proto.id}
+                type="button"
+                onClick={() => {
+                  if (onSelectSection) onSelectSection('protocols');
+                  handleSelectProtocol(proto);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '7px 9px',
+                  borderRadius: '7px',
+                  border: isSelected ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
+                  background: isSelected ? '#f0fdfa' : '#f8fafc',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div style={{ minWidth: 0, paddingRight: '4px' }}>
+                  <div style={{ fontSize: '0.74rem', fontWeight: isSelected ? 750 : 600, color: isSelected ? '#0d9488' : '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {proto.title}
+                  </div>
+                </div>
+                <span style={{
+                  fontSize: '0.60rem',
+                  fontWeight: 700,
+                  color: isSelected ? '#0d9488' : '#64748b',
+                  background: '#ffffff',
+                  border: isSelected ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                  borderRadius: '4px',
+                  padding: '1px 5px',
+                  flexShrink: 0
+                }}>
+                  {proto.badge}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* -- 4. FICHA TECNICA DINAMICA SEGUN LINEA SELECCIONADA -- */}
       <div style={{
         background: '#ffffff',
         borderRadius: '14px',
@@ -442,108 +596,8 @@ export default function ColwayCollectionSidebar({
         )}
       </div>
 
-      {/* ── 4. PROTOCOLOS CLÍNICOS COLWAY (Interactive Protocol Selector) ── */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1.25rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <h5 style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            {isEs ? 'Protocolos Clínicos Colway' : 'Clinical Protocols'}
-          </h5>
-          {activeProtocolId && (
-            <button
-              type="button"
-              onClick={() => {
-                setActiveProtocolId(null);
-                if (onSelectCategory) onSelectCategory('all');
-                if (onSearchKeyword) onSearchKeyword('');
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#0d9488',
-                fontSize: '0.70rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                padding: 0
-              }}
-            >
-              {isEs ? 'Restablecer' : 'Reset'}
-            </button>
-          )}
-        </div>
 
-        <p style={{ fontSize: '0.73rem', color: '#64748b', lineHeight: 1.4, margin: '0 0 10px 0' }}>
-          {isEs ? 'Haz clic para filtrar el catálogo según el objetivo de tu paciente:' : 'Click to filter catalog by patient treatment objective:'}
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {protocols.map((proto) => {
-            const isSelected = activeProtocolId === proto.id;
-            return (
-              <div
-                key={proto.id}
-                onClick={() => handleSelectProtocol(proto)}
-                style={{
-                  padding: '9px 11px',
-                  borderRadius: '10px',
-                  border: isSelected ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
-                  background: isSelected ? '#f0fdfa' : '#f8fafc',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
-                  <div style={{ fontSize: '0.76rem', fontWeight: 700, color: isSelected ? '#0d9488' : '#0f172a' }}>
-                    {proto.title}
-                  </div>
-                  <span style={{
-                    fontSize: '0.62rem',
-                    fontWeight: 700,
-                    color: '#64748b',
-                    background: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '4px',
-                    padding: '1px 5px'
-                  }}>
-                    {proto.badge}
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.69rem', color: '#64748b', lineHeight: 1.3, marginBottom: '6px' }}>
-                  {proto.desc}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingTop: '4px', borderTop: '1px dashed #e2e8f0' }}>
-                  <Link
-                    href={`/proto/${proto.slug}`}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                      color: '#0d9488',
-                      textDecoration: 'none',
-                      background: 'rgba(13, 148, 136, 0.08)',
-                      padding: '2px 8px',
-                      borderRadius: '5px'
-                    }}
-                  >
-                    <span>{isEs ? 'Ver Protocolo Clínico' : 'Open Protocol Dossier'}</span>
-                    <ArrowRight size={11} />
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── 5. CALCULADORA DE DISPENSACIÓN (1 Mes vs 3 Meses) ── */}
+      {/* -- 5. CALCULADORA DE DISPENSACION (1 Mes vs 3 Meses) -- */}
       <div style={{
         background: '#ffffff',
         borderRadius: '14px',
@@ -630,7 +684,7 @@ export default function ColwayCollectionSidebar({
         </div>
       </div>
 
-      {/* ── 6. ACCESO B2B & BAREMO MAYORISTA ── */}
+      {/* -- 6. ACCESO B2B & BAREMO MAYORISTA -- */}
       <div style={{
         background: '#ffffff',
         borderRadius: '14px',
@@ -694,7 +748,7 @@ export default function ColwayCollectionSidebar({
         )}
       </div>
 
-      {/* ── 7. COMPARTIR ENLACE OFICIAL ── */}
+      {/* -- 7. COMPARTIR ENLACE OFICIAL -- */}
       <button
         type="button"
         onClick={handleCopyLink}

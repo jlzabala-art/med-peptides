@@ -12,6 +12,7 @@ import BloodoCollectionSidebar from '../components/diagnostic/BloodoCollectionSi
 import EternaCollectionSidebar from '../components/diagnostic/EternaCollectionSidebar';
 import UltraPersonCollectionSidebar from '../components/diagnostic/UltraPersonCollectionSidebar';
 import ColwayCollectionSidebar from '../components/diagnostic/ColwayCollectionSidebar';
+import ColwayMainSections from '../components/collection/ColwayMainSections';
 import PublicInstitutionalInquiryDrawer from '../components/shared/PublicInstitutionalInquiryDrawer';
 import ColwayTrichologyStemCellShowcase from '../components/product/ColwayTrichologyStemCellShowcase';
 import CopyableId from '../components/ui/CopyableId';
@@ -214,6 +215,8 @@ export default function BrandCollectionPage({
   const [scopeMode, setScopeMode] = useState('filtered'); // 'filtered' | 'global'
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+  const [activeColwaySection, setActiveColwaySection] = useState('catalog'); // 'catalog' | 'advantage' | 'protocols' | 'calculator'
+  const [activeProtocolId, setActiveProtocolId] = useState(null);
 
   const isEs = false; // Force English — Spanish translations preserved for future i18n
   const canonicalUrl = `https://www.atlashealth-services.com/collection/${brandSlug}`;
@@ -395,8 +398,8 @@ export default function BrandCollectionPage({
 
       {/* ── 3. Google Cloud Hero Header ── */}
       <header style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', marginTop: '0.75rem', padding: '2.5rem 0 2rem' }}>
-        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: '900px' }}>
+        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem', width: '100%' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', width: '100%' }}>
             <div style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -407,7 +410,7 @@ export default function BrandCollectionPage({
               color: config.badgeColor,
               padding: '4px 12px',
               borderRadius: '16px',
-              fontSize: '0.75rem',
+              fontSize: '0.74rem',
               fontWeight: 700,
               letterSpacing: '0.04em',
               textTransform: 'uppercase'
@@ -415,12 +418,44 @@ export default function BrandCollectionPage({
               <Sparkles size={13} />
               <span>{config.badge}</span>
             </div>
-            <h1 style={{ fontSize: 'clamp(2rem, 3.6vw, 2.85rem)', fontWeight: 850, color: '#0f172a', letterSpacing: '-0.03em', margin: 0, lineHeight: 1.15 }}>
+            <h1 style={{
+              fontSize: 'clamp(1.9rem, 4.2vw, 3.35rem)',
+              fontWeight: 850,
+              color: '#0f172a',
+              letterSpacing: '-0.035em',
+              margin: 0,
+              lineHeight: 1.12,
+              textWrap: 'balance',
+              width: '100%'
+            }}>
               {config.title}
             </h1>
-            <p style={{ fontSize: '1.02rem', color: '#475569', lineHeight: 1.6, margin: 0, fontWeight: 450 }}>
+            <p style={{
+              fontSize: 'clamp(0.96rem, 1.35vw, 1.12rem)',
+              color: '#475569',
+              lineHeight: 1.6,
+              margin: 0,
+              fontWeight: 450,
+              maxWidth: '1280px'
+            }}>
               {config.subtitle}
             </p>
+
+            {/* Architecture Metadata Badges (GCP Standard) */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '0.35rem' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 650, color: '#334155', background: '#f1f5f9', border: '1px solid #e2e8f0', padding: '4px 10px', borderRadius: '6px' }}>
+                🧬 {filteredProducts.length} {brandSlug === 'colway' ? 'Formulations' : 'Items'}
+              </span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 650, color: config.accentColor, background: `${config.accentColor}10`, border: `1px solid ${config.accentColor}30`, padding: '4px 10px', borderRadius: '6px' }}>
+                {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : '🏛️ LifeLab1 Diagnostics'}
+              </span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 650, color: '#0284c7', background: '#f0f9ff', border: '1px solid #e0f2fe', padding: '4px 10px', borderRadius: '6px' }}>
+                {brandSlug === 'colway' ? '🛡️ ISO 22716 & CPNP Compliant' : '🛡️ CE-IVDR & ISO 15189'}
+              </span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 650, color: '#16a34a', background: '#f0fdf4', border: '1px solid #dcfce7', padding: '4px 10px', borderRadius: '6px' }}>
+                ⚡ 24–48h Direct Clinic Dispatch
+              </span>
+            </div>
           </div>
           {brandSlug === 'colway' && (
             <div style={{ marginTop: '1.5rem', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 6px 24px rgba(15, 23, 42, 0.08)', border: '1px solid #e2e8f0' }}>
@@ -575,13 +610,27 @@ export default function BrandCollectionPage({
               selectedCategory={selectedCategory}
               onSelectCategory={(catId) => {
                 setSelectedCategory(catId);
+                setActiveColwaySection('catalog');
                 const el = document.getElementById('catalog-search-input');
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }}
               onSearchKeyword={(kw) => {
                 setSearchQuery(kw);
+                setActiveColwaySection('catalog');
                 const el = document.getElementById('catalog-search-input');
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+              activeSection={activeColwaySection}
+              onSelectSection={(sec) => {
+                setActiveColwaySection(sec);
+                window.scrollTo({ top: 380, behavior: 'smooth' });
+              }}
+              activeProtocolId={activeProtocolId}
+              onSelectProtocol={(proto) => {
+                setActiveProtocolId(proto.id);
+                if (proto.category) setSelectedCategory(proto.category);
+                if (proto.search) setSearchQuery(proto.search);
+                setActiveColwaySection('protocols');
               }}
             />
           ) : (
@@ -592,8 +641,32 @@ export default function BrandCollectionPage({
             </aside>
           )}
 
-          {/* ── RIGHT COLUMN: MAIN PRODUCTS & FILTERS ── */}
-          <main style={{ minWidth: 0 }}>
+          {/* ── RIGHT COLUMN: MAIN CONTENT (EXCLUSIVELY ONE SECTION AT A TIME) ── */}
+          <main style={{ minWidth: 0, gridColumn: '2', order: 2 }}>
+            {brandSlug === 'colway' && activeColwaySection !== 'catalog' ? (
+              <ColwayMainSections
+                activeSection={activeColwaySection}
+                isEs={isEs}
+                activeProtocolId={activeProtocolId}
+                onSelectProtocol={(proto) => {
+                  setActiveProtocolId(proto.id);
+                  if (proto.category) setSelectedCategory(proto.category);
+                  if (proto.search) setSearchQuery(proto.search);
+                  setActiveColwaySection('catalog');
+                  setTimeout(() => {
+                    const el = document.getElementById('catalog-search-input');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 100);
+                }}
+                onResetProtocolFilter={() => {
+                  setActiveProtocolId(null);
+                  setSelectedCategory('all');
+                  setSearchQuery('');
+                }}
+                onBackToCatalog={() => setActiveColwaySection('catalog')}
+              />
+            ) : (
+              <>
             {/* Google Cloud Filter Bar */}
             <div style={{
               background: '#ffffff',
@@ -1237,6 +1310,8 @@ export default function BrandCollectionPage({
                   );
                 })}
               </div>
+            )}
+              </>
             )}
           </main>
         </div>

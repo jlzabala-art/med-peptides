@@ -1405,13 +1405,25 @@
    ───────────────────────────────────────────────────────────── */
 .gcp-collection-workspace {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
-  gap: 2rem;
+  grid-template-columns: 310px minmax(0, 1fr);
+  gap: 2.25rem;
   align-items: start;
   width: 100%;
+  direction: ltr;
 }
 
-@media (max-width: 1024px) {
+.gcp-collection-sidebar {
+  grid-column: 1;
+  order: 1;
+}
+
+.gcp-collection-workspace > main {
+  grid-column: 2;
+  order: 2;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
   .gcp-collection-workspace {
     grid-template-columns: 1fr !important;
     gap: 1.5rem !important;
@@ -1419,18 +1431,17 @@
     flex-direction: column !important;
   }
 
-  .gcp-collection-workspace > main {
-    width: 100% !important;
-    max-width: 100% !important;
-    order: 1;
-  }
-
   .gcp-collection-sidebar {
     position: static !important;
     top: auto !important;
     width: 100% !important;
-    margin-top: 1rem !important;
-    order: 2;
+    order: 1 !important;
+  }
+
+  .gcp-collection-workspace > main {
+    width: 100% !important;
+    max-width: 100% !important;
+    order: 2 !important;
   }
 }
 
