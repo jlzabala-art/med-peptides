@@ -80,13 +80,16 @@ export function invalidateAiModelConfigCache() {
  * Non-blocking and safe if Firestore Admin is not initialized in the current context.
  */
 async function getDynamicFirestoreModelConfig() {
+  if (typeof window !== 'undefined') {
+    return null;
+  }
   const now = Date.now();
   if (cachedFirestoreConfig && now - cachedFirestoreConfigAt < FIRESTORE_CONFIG_TTL_MS) {
     return cachedFirestoreConfig;
   }
 
   try {
-    const { adminDb } = await import('@/lib/firebaseAdmin');
+    const { adminDb } = await import(/* webpackIgnore: true */ '@/lib/firebaseAdmin');
     if (!adminDb) return null;
     const snap = await adminDb.collection('_config').doc('ai_models').get();
     if (snap.exists) {
