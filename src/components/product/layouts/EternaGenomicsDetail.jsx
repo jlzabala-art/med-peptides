@@ -108,10 +108,11 @@ export default function EternaGenomicsDetail({
   const [snpSearch, setSnpSearch] = useState('');
   const [selectedPillarFilter, setSelectedPillarFilter] = useState('all');
 
-  // Interactive B2B Clinical Console Demo State
+  // Interactive B2B Clinical Console & B2C Patient Mobile Demo State
   const demoIframeRef = useRef(null);
   const [demoTheme, setDemoTheme] = useState('light');
   const [demoIframeKey, setDemoIframeKey] = useState(0);
+  const [demoViewMode, setDemoViewMode] = useState('b2b'); // 'b2b' | 'b2c_mobile' | 'b2c_web'
 
   const handleToggleDemoTheme = useCallback(() => {
     const nextTheme = demoTheme === 'light' ? 'dark' : 'light';
@@ -1712,9 +1713,45 @@ export default function EternaGenomicsDetail({
                 </h2>
                 <p className="eterna-section-p">
                   {isEs
-                    ? 'Explore la interfaz clínica interactiva para médicos y centros de longevidad. Navegue entre los perfiles genéticos de pacientes de muestra, analice percentiles de riesgo longitudinales y prescriba protocolos de intervención preventiva sincronizados con Atlas.'
-                    : 'Explore the live interactive clinical interface for physicians and longevity clinics. Inspect sample patient multiomic profiles, analyze calibrated percentile risk scores, and evaluate translational protocols synchronized with the Atlas engine.'}
+                    ? 'Explore las interfaces interactivas de ETERNA®. Alterne entre la consola clínica de alta resolución para médicos y la aplicación móvil compañera con la que sus pacientes monitorizan su edad biológica, velocidad de envejecimiento y cumplimiento terapéutico.'
+                    : 'Explore the live interactive environments of ETERNA®. Toggle seamlessly between the clinical physician console for medical teams and the companion mobile app where patients track biological age, pace of aging, and longevity habits.'}
                 </p>
+
+                {/* Perspective Mode Switcher */}
+                <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div className="eterna-console-mode-tabs">
+                    <button
+                      type="button"
+                      className={`eterna-console-mode-tab ${demoViewMode === 'b2b' ? 'active' : ''}`}
+                      onClick={() => setDemoViewMode('b2b')}
+                    >
+                      <Monitor size={15} />
+                      <span>{isEs ? '🩺 Consola Médica B2B (Desktop)' : '🩺 Clinical Console (Doctor B2B)'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`eterna-console-mode-tab ${demoViewMode === 'b2c_mobile' ? 'active' : ''}`}
+                      onClick={() => setDemoViewMode('b2c_mobile')}
+                    >
+                      <Smartphone size={15} />
+                      <span>{isEs ? '📱 Companion App B2C (Móvil Paciente)' : '📱 Patient Companion (Mobile B2C)'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`eterna-console-mode-tab ${demoViewMode === 'b2c_web' ? 'active' : ''}`}
+                      onClick={() => setDemoViewMode('b2c_web')}
+                    >
+                      <Layers size={15} />
+                      <span>{isEs ? '💻 Portal Paciente B2C (WebApp)' : '💻 Patient Portal (WebApp B2C)'}</span>
+                    </button>
+                  </div>
+
+                  <span style={{ fontSize: '0.75rem', color: 'var(--gcp-text-muted)' }}>
+                    {demoViewMode === 'b2b' && (isEs ? 'Vista de prescripción clínica y percentiles genéticos' : 'Clinical prescription & genetic percentile view')}
+                    {demoViewMode === 'b2c_mobile' && (isEs ? 'Vista interactiva en smartphone iOS / Android para pacientes' : 'Interactive smartphone iOS/Android experience for patients')}
+                    {demoViewMode === 'b2c_web' && (isEs ? 'Vista de portal de autoservicio y seguimiento para pacientes' : 'Patient self-service portal & biomarkers view')}
+                  </span>
+                </div>
               </div>
 
               {/* Console Action Bar / Controls */}
@@ -1722,26 +1759,32 @@ export default function EternaGenomicsDetail({
                 <div className="eterna-console-toolbar-left">
                   <span className="eterna-console-pill">
                     <span className="eterna-console-pulse-dot" />
-                    <span>{isEs ? 'Entorno Demostrativo Activo' : 'Live Interactive Environment'}</span>
+                    <span>
+                      {demoViewMode === 'b2b' 
+                        ? (isEs ? 'Consola Médica Activa' : 'Doctor Console Active')
+                        : (demoViewMode === 'b2c_mobile' ? (isEs ? 'App Móvil Paciente Activa' : 'Patient Mobile App Active') : (isEs ? 'Portal Web Paciente Activo' : 'Patient WebApp Active'))}
+                    </span>
                   </span>
                   <span className="eterna-console-patient-meta">
-                    <span>{isEs ? 'Paciente:' : 'Patient:'}</span>
+                    <span>{isEs ? 'Perfil de Muestra:' : 'Sample Profile:'}</span>
                     <strong style={{ color: 'var(--gcp-text-primary)' }}>Carlos Méndez (42y) · ID: ETR-7829-DX</strong>
                   </span>
                 </div>
 
                 <div className="eterna-console-toolbar-right">
-                  {/* Theme Switcher */}
-                  <button
-                    type="button"
-                    className="gcp-btn-secondary"
-                    onClick={handleToggleDemoTheme}
-                    title={demoTheme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light GCP Mode'}
-                    style={{ height: '32px', padding: '0 10px', fontSize: '0.78rem', gap: '6px' }}
-                  >
-                    {demoTheme === 'light' ? <Moon size={13} /> : <Sun size={13} />}
-                    <span>{demoTheme === 'light' ? 'Dark View' : 'Light GCP View'}</span>
-                  </button>
+                  {/* Theme Switcher (for desktop portals) */}
+                  {demoViewMode !== 'b2c_mobile' && (
+                    <button
+                      type="button"
+                      className="gcp-btn-secondary"
+                      onClick={handleToggleDemoTheme}
+                      title={demoTheme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light GCP Mode'}
+                      style={{ height: '32px', padding: '0 10px', fontSize: '0.78rem', gap: '6px' }}
+                    >
+                      {demoTheme === 'light' ? <Moon size={13} /> : <Sun size={13} />}
+                      <span>{demoTheme === 'light' ? 'Dark View' : 'Light GCP View'}</span>
+                    </button>
+                  )}
 
                   {/* Reset Demo Button */}
                   <button
@@ -1769,7 +1812,11 @@ export default function EternaGenomicsDetail({
 
                   {/* Open Standalone in New Tab */}
                   <a
-                    href="/eterna/eterna-b2b-portal.html"
+                    href={
+                      demoViewMode === 'b2b'
+                        ? '/eterna/eterna-b2b-portal.html'
+                        : (demoViewMode === 'b2c_mobile' ? '/eterna/eterna-b2c-app.html' : '/eterna/eterna-b2c-webapp.html')
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="gcp-btn-primary"
@@ -1781,18 +1828,117 @@ export default function EternaGenomicsDetail({
                 </div>
               </div>
 
-              {/* Viewport Frame */}
-              <div className="eterna-console-viewport-wrap">
-                <iframe
-                  key={demoIframeKey}
-                  ref={demoIframeRef}
-                  src={`/eterna/eterna-b2b-portal.html?theme=${demoTheme}`}
-                  title="Eterna B2B Preventive Clinic Console Demo"
-                  className="eterna-console-iframe"
-                  loading="lazy"
-                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-                />
-              </div>
+              {/* Viewport Frame: Doctor Desktop B2B vs. Patient Mobile iPhone Mockup */}
+              {demoViewMode === 'b2b' && (
+                <div className="eterna-console-viewport-wrap">
+                  <iframe
+                    key={`b2b-${demoIframeKey}`}
+                    ref={demoIframeRef}
+                    src={`/eterna/eterna-b2b-portal.html?theme=${demoTheme}`}
+                    title="Eterna B2B Preventive Clinic Console Demo"
+                    className="eterna-console-iframe"
+                    loading="lazy"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                  />
+                </div>
+              )}
+
+              {demoViewMode === 'b2c_web' && (
+                <div className="eterna-console-viewport-wrap">
+                  <iframe
+                    key={`b2c-web-${demoIframeKey}`}
+                    src={`/eterna/eterna-b2c-webapp.html?theme=${demoTheme}`}
+                    title="Eterna B2C Patient WebApp Demo"
+                    className="eterna-console-iframe"
+                    loading="lazy"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                  />
+                </div>
+              )}
+
+              {demoViewMode === 'b2c_mobile' && (
+                <div className="eterna-b2c-mobile-showcase">
+                  {/* Realistic Smartphone Mockup */}
+                  <div className="eterna-phone-mockup-wrapper">
+                    <div className="eterna-phone-island">
+                      <div className="eterna-phone-island-camera" />
+                      <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#10b981' }} />
+                    </div>
+                    <div className="eterna-phone-screen">
+                      <iframe
+                        key={`b2c-mobile-${demoIframeKey}`}
+                        src="/eterna/eterna-b2c-app.html"
+                        title="Eterna B2C Patient Mobile App Interactive Preview"
+                        className="eterna-phone-iframe"
+                        loading="lazy"
+                        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Feature Highlights Sidebar for Clinics */}
+                  <div className="eterna-b2c-companion-sidebar">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ padding: '3px 8px', borderRadius: '6px', background: 'rgba(60, 182, 169, 0.2)', color: '#3CB6A9', fontSize: '0.72rem', fontWeight: 800 }}>
+                        PATIENT RETENTION ENGINE
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>iOS & Android Ready</span>
+                    </div>
+
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0.25rem 0', color: '#ffffff', letterSpacing: '-0.01em' }}>
+                      {isEs ? 'El Acompañante de Longevidad en el Bolsillo de su Paciente' : 'The Longevity Companion in Your Patient’s Pocket'}
+                    </h3>
+
+                    <p style={{ fontSize: '0.86rem', color: '#cbd5e1', lineHeight: 1.55, margin: 0 }}>
+                      {isEs
+                        ? 'Eterna no termina con un informe en PDF. Sus pacientes interactúan diariamente con su edad biológica, registran sus protocolos prescritos y sincronizan sus métricas vitales.'
+                        : 'Eterna does not end with a static PDF report. Your patients engage daily with their biological age, log prescribed peptide protocols, and synchronize continuous biometric data.'}
+                    </p>
+
+                    <div className="eterna-b2c-card">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                        <Clock size={18} color="#DDB45A" />
+                        <strong style={{ fontSize: '0.9rem', color: '#ffffff' }}>
+                          {isEs ? 'Relojes Epigenéticos (Horvath & GrimAge)' : 'Epigenetic Clocks (Horvath & GrimAge)'}
+                        </strong>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.45 }}>
+                        {isEs
+                          ? 'Diferencial visual entre edad cronológica y edad celular. Los pacientes comprueban en tiempo real el rejuvenecimiento biológico logrado tras sus tratamientos.'
+                          : 'Clear visualization of chronological vs biological age delta. Patients celebrate measurable biological age reductions following physician interventions.'}
+                      </p>
+                    </div>
+
+                    <div className="eterna-b2c-card">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                        <Activity size={18} color="#3CB6A9" />
+                        <strong style={{ fontSize: '0.9rem', color: '#ffffff' }}>
+                          {isEs ? 'Velocímetro DunedinPACE' : 'DunedinPACE Speedometer'}
+                        </strong>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.45 }}>
+                        {isEs
+                          ? 'Indicador dinámico del ritmo de envejecimiento biológico por año calendario. Tasas inferiores a 1.0x demuestran la eficacia de la medicina preventiva.'
+                          : 'Dynamic measurement of biological wear per calendar year. Values below 1.0x quantify slowed senescence and validate clinical therapeutic efficacy.'}
+                      </p>
+                    </div>
+
+                    <div className="eterna-b2c-card">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                        <HeartPulse size={18} color="#38bdf8" />
+                        <strong style={{ fontSize: '0.9rem', color: '#ffffff' }}>
+                          {isEs ? 'Seguimiento de Dosis & Wearables' : 'Daily Regimen & Wearable Sync'}
+                        </strong>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.45 }}>
+                        {isEs
+                          ? 'Registro diario de tomas de péptidos o suplementación, recordatorio de refrigeración y sincronización con Oura, Whoop y Apple Health.'
+                          : 'Direct daily dosing logs for peptides and nutraceuticals, vial cold-chain reminders, and native sync with Apple Health, Oura, and CGM sensors.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Native Atlas Integration & Risk Percentile Demonstration */}
               <div className="eterna-console-atlas-bridge">
@@ -2404,23 +2550,33 @@ export default function EternaGenomicsDetail({
         />
       )}
 
-      {/* ── Live Eterna B2B Portal Demo Modal ── */}
+      {/* ── Live Eterna Portal / Companion Demo Modal ── */}
       {isB2BPortalModalOpen && (
         <div className="eterna-b2b-modal-overlay" onClick={() => setIsB2BPortalModalOpen(false)}>
-          <div className="eterna-b2b-modal-container" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="eterna-b2b-modal-container"
+            onClick={(e) => e.stopPropagation()}
+            style={demoViewMode === 'b2c_mobile' ? { maxWidth: '440px', height: '92vh', borderRadius: '36px', overflow: 'hidden' } : {}}
+          >
             <div className="eterna-b2b-modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--gcp-blue-primary)' }} />
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: demoViewMode === 'b2c_mobile' ? '#3CB6A9' : 'var(--gcp-blue-primary)' }} />
                 <strong style={{ color: 'var(--gcp-text-primary)', fontSize: '0.9rem' }}>
-                  {isEs ? 'Eterna · Portal de Salud Preventiva (Demo B2B)' : 'Eterna · Preventive Health Clinic Portal (Live B2B Demo)'}
+                  {demoViewMode === 'b2b' && (isEs ? 'Eterna · Consola Médica Clínica (Demo B2B)' : 'Eterna · Preventive Health Clinic Portal (Live B2B Demo)')}
+                  {demoViewMode === 'b2c_mobile' && (isEs ? 'Eterna · App Móvil Paciente (Demo B2C iOS/Android)' : 'Eterna · Patient Mobile Companion (Live B2C App Demo)')}
+                  {demoViewMode === 'b2c_web' && (isEs ? 'Eterna · Portal Web Paciente (Demo B2C WebApp)' : 'Eterna · Patient Self-Service Portal (Live B2C WebApp)')}
                 </strong>
                 <span style={{ fontSize: '0.72rem', background: 'var(--gcp-blue-surface)', color: 'var(--gcp-blue-primary)', padding: '2px 8px', borderRadius: '4px', fontWeight: 500 }}>
-                  INTERACTIVE B2B DEMO
+                  {demoViewMode === 'b2c_mobile' ? 'MOBILE B2C DEMO' : 'INTERACTIVE DEMO'}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <a
-                  href="/eterna/eterna-b2b-portal.html"
+                  href={
+                    demoViewMode === 'b2b'
+                      ? '/eterna/eterna-b2b-portal.html'
+                      : (demoViewMode === 'b2c_mobile' ? '/eterna/eterna-b2c-app.html' : '/eterna/eterna-b2c-webapp.html')
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="gcp-btn-secondary"
@@ -2439,8 +2595,12 @@ export default function EternaGenomicsDetail({
               </div>
             </div>
             <iframe
-              src={`/eterna/eterna-b2b-portal.html?theme=${demoTheme}`}
-              title="Eterna B2B Preventive Clinic Portal Demo"
+              src={
+                demoViewMode === 'b2b'
+                  ? `/eterna/eterna-b2b-portal.html?theme=${demoTheme}`
+                  : (demoViewMode === 'b2c_mobile' ? '/eterna/eterna-b2c-app.html' : `/eterna/eterna-b2c-webapp.html?theme=${demoTheme}`)
+              }
+              title="Eterna Interactive Demo"
               className="eterna-b2b-modal-iframe"
             />
           </div>
