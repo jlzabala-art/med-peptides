@@ -72,45 +72,21 @@ export async function POST(request) {
 ${JSON.stringify(fields, null, 2)}`;
 
       try {
-        const { GoogleGenAI } = await import('@google/genai');
-        const ai = new GoogleGenAI({ apiKey });
-
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
+        const { generateWithResilientGemini, AI_TIER } = await import('@/lib/ai/geminiModelRouter');
+        const { text } = await generateWithResilientGemini({
+          tier: AI_TIER.FAST,
+          apiKey,
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
           },
-        }).catch(async () => {
-          return ai.models.generateContent({
-            model: 'gemini-3.5-flash',
-            contents: prompt,
-            config: { responseMimeType: 'application/json' },
-          });
         });
 
-        if (response.text) {
-          translatedFields = JSON.parse(response.text);
+        if (text) {
+          translatedFields = JSON.parse(text);
         }
       } catch (aiErr) {
-        console.warn('Gemini SDK on-demand translation failed, trying REST fallback:', aiErr.message);
-        try {
-          const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { responseMimeType: 'application/json' }
-            })
-          });
-          if (restRes.ok) {
-            const restData = await restRes.json();
-            const text = restData.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) translatedFields = JSON.parse(text);
-          }
-        } catch (restErr) {
-          console.warn('Gemini REST fallback failed:', restErr.message);
-        }
+        console.warn('Gemini resilient translation warning:', aiErr.message);
       }
     }
 

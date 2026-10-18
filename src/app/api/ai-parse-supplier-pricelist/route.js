@@ -107,8 +107,10 @@ Extraction Guidelines:
    - Retail: Cost * 1.90
 4. Standardize peptide names to match international nomenclature.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+    const { generateWithResilientGemini, AI_TIER } = await import('@/lib/ai/geminiModelRouter');
+    const { response } = await generateWithResilientGemini({
+      tier: AI_TIER.REASONING,
+      aiClient: ai,
       contents: [
         {
           role: 'user',

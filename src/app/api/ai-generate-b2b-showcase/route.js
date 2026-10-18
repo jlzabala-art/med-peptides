@@ -114,8 +114,10 @@ Strict Editorial Requirements:
 2. Synergies: Identify genuine physiological or receptor-level synergies among the provided compounds.
 3. Logistics: Provide clear pharmaceutical handling guidelines for cold-chain storage.`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+        const { generateWithResilientGemini, AI_TIER } = await import('@/lib/ai/geminiModelRouter');
+        const { response } = await generateWithResilientGemini({
+          tier: AI_TIER.FAST,
+          aiClient: ai,
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
           config: {
             responseMimeType: 'application/json',

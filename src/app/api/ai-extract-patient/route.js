@@ -3,6 +3,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
 import { sanitizeText } from '@/utils/apiValidator';
+import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -103,8 +104,9 @@ Rules:
 - If clinic is mentioned (e.g., "Roya Medical Center", "Hortman Clinics", "My London Skin Clinic"), capture it in clinicName.
 - Clean up email and phone numbers.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+    const { response } = await generateWithResilientGemini({
+      tier: AI_TIER.FAST,
+      aiClient: ai,
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       config: {
         responseMimeType: 'application/json',

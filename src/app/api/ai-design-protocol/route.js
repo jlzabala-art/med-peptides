@@ -131,8 +131,10 @@ Architecture Rules:
 4. Include reconstitution solvent and injection supplies in accessoriesNeeded.
 5. Provide relevant clinical blood biomarkers for monitoring.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+    const { generateWithResilientGemini, AI_TIER } = await import('@/lib/ai/geminiModelRouter');
+    const { response } = await generateWithResilientGemini({
+      tier: AI_TIER.REASONING,
+      aiClient: ai,
       contents: [
         {
           role: 'user',

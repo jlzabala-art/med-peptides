@@ -167,8 +167,10 @@ Rules:
 4. Flag any safety alerts (e.g. GH secretagogues in active neoplasia, insulin interactions with GLP-1/GIP agonists, or excess cumulative volume).
 5. Provide a simple patient-facing weekly administration calendar.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+    const { generateWithResilientGemini, AI_TIER } = await import('@/lib/ai/geminiModelRouter');
+    const { response } = await generateWithResilientGemini({
+      tier: AI_TIER.REASONING,
+      aiClient: ai,
       contents: [
         {
           role: 'user',

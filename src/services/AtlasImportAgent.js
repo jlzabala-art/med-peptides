@@ -65,8 +65,10 @@ Return a JSON object strictly matching this schema:
 }
       `;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
+      const { generateWithResilientGemini, AI_TIER } = await import('@/lib/ai/geminiModelRouter');
+      const { response } = await generateWithResilientGemini({
+        tier: AI_TIER.FAST,
+        aiClient: ai,
         contents: prompt,
         config: {
           responseMimeType: "application/json",

@@ -3,6 +3,7 @@ import { checkRateLimit, peekRateLimit, rateLimitExceededResponse, applyRateLimi
 import { sanitizeText } from '@/utils/apiValidator';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { getPublicPlatformKnowledgeContext } from '@/services/publicKnowledgeService';
+import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 
   process.env.NEXT_PUBLIC_GEMINI_API_KEY || 
@@ -609,11 +610,9 @@ GUIDELINES:
       });
 
       try {
-        const { GoogleGenAI } = await import('@google/genai');
-        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
+        const { text: replyText, modelUsed } = await generateWithResilientGemini({
+          tier: AI_TIER.FAST,
+          apiKey: GEMINI_API_KEY,
           contents: validHistoryTurns,
           config: {
             systemInstruction: systemPrompt,
@@ -622,12 +621,11 @@ GUIDELINES:
           }
         });
 
-        const replyText = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text;
         if (replyText) {
           const res = NextResponse.json({
             reply: replyText,
             goal,
-            model: 'gemini-3.6-flash',
+            model: modelUsed || 'gemini-resilient-router',
             timestamp: new Date().toISOString(),
             remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
             limit: isPublicSandbox ? 5 : undefined,
@@ -636,42 +634,7 @@ GUIDELINES:
           return applyRateLimitHeaders(res, rateInfo);
         }
       } catch (sdkErr) {
-        console.warn('[Atlas AI API] GoogleGenAI SDK error, attempting REST fallback:', sdkErr.message);
-        try {
-          const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              systemInstruction: {
-                parts: [{ text: systemPrompt }]
-              },
-              contents: validHistoryTurns,
-              generationConfig: {
-                temperature: 0.3,
-                maxOutputTokens: 900,
-              }
-            })
-          });
-
-          if (restRes.ok) {
-            const data = await restRes.json();
-            const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (replyText) {
-              const res = NextResponse.json({
-                reply: replyText,
-                goal,
-                model: 'gemini-3.5-flash',
-                timestamp: new Date().toISOString(),
-                remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
-                limit: isPublicSandbox ? 5 : undefined,
-                sources: isPublicSandbox ? clinicalEvidenceArticles : undefined,
-              });
-              return applyRateLimitHeaders(res, rateInfo);
-            }
-          }
-        } catch (restErr) {
-          console.warn('[Atlas AI API] Gemini REST fallback error:', restErr);
-        }
+        console.warn('[Atlas AI API] Resilient Gemini router exhausted:', sdkErr.message);
       }
     }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
 import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
+import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
 
 function getGeminiApiKey() {
   return (
@@ -369,54 +370,32 @@ CRITICAL CLINICAL EXTRACTION RULES LEARNED FROM REAL-WORLD CLINICAL AUDITS:
     - NEVER put an anonymized barcode or sample code (like "DBUQEWDT2449" or "Patient #DBUQEWDT2449") into 'patient.name' if a real human name is visible anywhere on the document.
     - Store barcodes, sample codes, accession IDs, and protocol numbers into 'labResult.patientCode', 'fileNumber', or 'fagronDetails.boxId'.`;
 
-    // Verified Google GenAI models for multimodal extraction
-    const CANDIDATE_MODELS = [
-      'gemini-3.5-flash',
-      'gemini-3.1-flash-lite',
-      'gemini-3.6-flash',
-      'gemini-flash-latest'
-    ];
-    let response = null;
-    let lastError = null;
-
-    for (const modelName of CANDIDATE_MODELS) {
-      try {
-        response = await ai.models.generateContent({
-          model: modelName,
-          contents: [
+    // Resilient multi-model extraction via Atlas AI Model Router
+    const { text } = await generateWithResilientGemini({
+      tier: AI_TIER.REASONING,
+      aiClient: ai,
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { text: systemPrompt },
             {
-              role: 'user',
-              parts: [
-                { text: systemPrompt },
-                {
-                  inlineData: {
-                    mimeType,
-                    data: buffer.toString('base64'),
-                  },
-                },
-              ],
+              inlineData: {
+                mimeType,
+                data: buffer.toString('base64'),
+              },
             },
           ],
-          config: {
-            responseMimeType: 'application/json',
-            responseSchema: schema,
-            temperature: 0.1,
-          },
-        });
-
-        if (response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-          break;
-        }
-      } catch (err) {
-        lastError = err;
-        console.warn(`[ai-extract-prescription] Model ${modelName} failed, falling back:`, err?.message || err);
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      }
-    }
-
-    const text = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
+        },
+      ],
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: schema,
+        temperature: 0.1,
+      },
+    });
     if (!text) {
-      throw lastError || new Error('All Atlas AI models were temporarily unable to process this document.');
+      throw new Error('All Atlas AI models were temporarily unable to process this document.');
     }
 
     let parsedData;

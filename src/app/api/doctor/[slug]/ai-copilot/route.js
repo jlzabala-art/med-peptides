@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { getDoctorPortalData } from '@/lib/doctorCache';
 import { resolveDoctorSpecialtyIntelligence } from '@/services/specialtyBlueprintsEngine';
+import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
 
 function getGeminiApiKey() {
   return (
@@ -453,8 +454,10 @@ ${JSON.stringify({
   unacceptedProposals: (ctx.unacceptedProposals || []).slice(0, 25)
 })}`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+      const { text: aiText, modelUsed } = await generateWithResilientGemini({
+        tier: AI_TIER.FAST,
+        apiKey,
+        aiClient: ai,
         contents: [
           {
             role: 'user',
@@ -466,13 +469,12 @@ ${JSON.stringify({
         }
       });
 
-      const aiText = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (aiText && aiText.trim().length > 20) {
         return NextResponse.json({
           success: true,
           reply: aiText.trim(),
           actions: deterministic.actions,
-          engine: 'gemini-2.5-flash'
+          engine: modelUsed || 'gemini-resilient-router'
         });
       }
     } catch (geminiErr) {

@@ -55,8 +55,10 @@ Analyze the compound against official US regulatory frameworks:
 
 Be factually accurate, clinical, and precise. Format review date in English (e.g., "September 2026").`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+    const { generateWithResilientGemini, AI_TIER } = await import('@/lib/ai/geminiModelRouter');
+    const { response } = await generateWithResilientGemini({
+      tier: AI_TIER.FAST,
+      aiClient: ai,
       contents: `Provide the current FDA regulatory classification and advisory standing for "${productName}" (CAS: ${casNumber || 'N/A'}).`,
       config: {
         systemInstruction: systemPrompt,

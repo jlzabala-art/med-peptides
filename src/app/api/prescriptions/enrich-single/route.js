@@ -4,6 +4,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { getFagronClinicalMonograph } from '@/data/fagronClinicalMonographs';
 import { calculatePrescriptionCompleteness } from '@/utils/calculatePrescriptionCompleteness';
 import logger from '@/utils/logger';
+import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,35 +76,27 @@ All output terms and descriptions MUST BE IN ENGLISH:
 6. Standard Dosages (e.g. "0.5% - 2% Topical · 50 mg - 100 mg Oral")
 7. Compatible Galenic Vehicles (e.g. ["TrichoSol™", "TrichoFoam™", "Micronized Oral Capsules"])`;
 
-          const candidateModels = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.6-flash'];
-          let response = null;
-          for (const m of candidateModels) {
-            try {
-              response = await ai.models.generateContent({
-                model: m,
-                contents: prompt,
-                config: {
-                  responseMimeType: 'application/json',
-                  responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                      canonicalName: { type: Type.STRING },
-                      pharmacologicalClass: { type: Type.STRING },
-                      clinicalIndication: { type: Type.STRING },
-                      mechanismOfAction: { type: Type.STRING },
-                      geneTargets: { type: Type.ARRAY, items: { type: Type.STRING } },
-                      standardDosages: { type: Type.STRING },
-                      compatibleVehicles: { type: Type.ARRAY, items: { type: Type.STRING } }
-                    },
-                    required: ['canonicalName', 'pharmacologicalClass', 'clinicalIndication', 'mechanismOfAction', 'geneTargets']
-                  }
-                }
-              });
-              if (response?.text) break;
-            } catch (mErr) {
-              logger.warn(`[enrich-single] Model ${m} failed, trying next:`, mErr.message);
+          const { response } = await generateWithResilientGemini({
+            tier: AI_TIER.FAST,
+            aiClient: ai,
+            contents: prompt,
+            config: {
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  canonicalName: { type: Type.STRING },
+                  pharmacologicalClass: { type: Type.STRING },
+                  clinicalIndication: { type: Type.STRING },
+                  mechanismOfAction: { type: Type.STRING },
+                  geneTargets: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  standardDosages: { type: Type.STRING },
+                  compatibleVehicles: { type: Type.ARRAY, items: { type: Type.STRING } }
+                },
+                required: ['canonicalName', 'pharmacologicalClass', 'clinicalIndication', 'mechanismOfAction', 'geneTargets']
+              }
             }
-          }
+          });
 
           const aiData = JSON.parse(response.text || '{}');
           if (aiData.canonicalName && aiData.mechanismOfAction) {

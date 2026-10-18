@@ -7,6 +7,7 @@ import {
   SPECIALTY_BLUEPRINTS_CATALOG,
   SPECIALTY_VERTICALS
 } from '@/services/specialtyBlueprintsEngine';
+import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,8 +61,10 @@ Return ONLY valid JSON with this exact structure (in English):
   "verifiedSources": ["Clinic Profile", "Medical Specialist Registry"]
 }`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+        const { response } = await generateWithResilientGemini({
+          tier: AI_TIER.FAST,
+          apiKey,
+          aiClient: ai,
           contents: prompt,
           config: {
             temperature: 0.2,

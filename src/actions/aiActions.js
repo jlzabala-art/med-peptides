@@ -2,6 +2,7 @@
 
 import { GoogleGenAI, Type } from '@google/genai';
 import logger from '../utils/logger';
+import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
 
 function getGenAIClient() {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -34,8 +35,9 @@ Include:
 2. Operational Observations (bullet points)
 3. Actionable Clinical & Inventory Recommendations (bullet points)`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
+      const { response } = await generateWithResilientGemini({
+        tier: AI_TIER.FAST,
+        aiClient: ai,
         contents: prompt,
         config: {
           temperature: 0.3,
@@ -87,8 +89,9 @@ export async function extractApiPeptidesAction(imageBase64, mimeType = 'image/jp
       };
 
       const prompt = `Extract all peptide names and their price per gram from this document image. ${instructions}`;
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
+      const { response } = await generateWithResilientGemini({
+        tier: AI_TIER.REASONING,
+        aiClient: ai,
         contents: [
           prompt,
           { inlineData: { data: imageBase64, mimeType } }
@@ -146,8 +149,9 @@ export async function parsePrescriptionPdfAction(base64Data, mimeType = 'applica
       };
 
       const prompt = `Extract all prescribed peptide medications from this prescription document with dosage, quantity/amount, form, and administration duration.`;
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
+      const { response } = await generateWithResilientGemini({
+        tier: AI_TIER.REASONING,
+        aiClient: ai,
         contents: [
           prompt,
           { inlineData: { data: base64Data, mimeType } }
