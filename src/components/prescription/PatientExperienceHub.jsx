@@ -34,7 +34,10 @@ export default function PatientExperienceHub({
   lang = 'en',
   doctorPhone = '',
   patientPublicUrl = '',
-  onOpenQuotation = null
+  onOpenQuotation = null,
+  patientName: propPatientName = null,
+  doctorName: propDoctorName = null,
+  isAuthorizedViewer = false
 }) {
   const isEs = lang === 'es';
   const [showAdvantageDetails, setShowAdvantageDetails] = useState(false);
@@ -91,9 +94,10 @@ export default function PatientExperienceHub({
     }
   };
 
-  const patientName = rx?.patient?.name || rx?.patientName || (isEs ? 'Paciente' : 'Patient');
+  const patientName = propPatientName || rx?.patient?.name || rx?.patientName || (isEs ? 'Paciente' : 'Patient');
   const treatingDocName = typeof rx?.treatingDoctor === 'string' ? rx.treatingDoctor : rx?.treatingDoctor?.name;
-  const doctorName = treatingDocName || rx?.doctor?.name || rx?.doctorName || rx?.prescribingDoctor || (isEs ? 'Médico Prescriptor' : 'Prescribing Physician');
+  const rawDocName = treatingDocName || rx?.doctor?.name || rx?.doctorName || rx?.prescribingDoctor || (isEs ? 'Médico Prescriptor' : 'Prescribing Physician');
+  const doctorName = propDoctorName || (isAuthorizedViewer ? rawDocName : (isEs ? 'Práctica Médica Verificada' : 'Verified Medical Practice'));
   const treatingDocClinic = typeof rx?.treatingDoctor === 'object' ? rx?.treatingDoctor?.clinic : null;
   const clinicName = treatingDocClinic || rx?.doctor?.clinic || rx?.clinic || rx?.clinicName || 'Atlas Clinical Practice';
   const normalizedStatus = normalizeRxStatus(rx?.status) || 'approved';
@@ -108,20 +112,22 @@ export default function PatientExperienceHub({
   // Clinical inquiry WhatsApp URL
   const clinicalInquiryUrl = useMemo(() => {
     const cleanPhone = String(doctorPhone || '+97143498800').replace(/[^0-9]/g, '');
+    const patientDoctorIntro = isAuthorizedViewer ? (isEs ? `, paciente del ${doctorName}` : `, patient of ${doctorName}`) : '';
     const msg = isEs
-      ? `Estimado equipo médico de ${clinicName},\nSoy ${patientName}, paciente del ${doctorName}. Me comunico en relación a mi prescripción #${rxCode}.\nTengo la siguiente consulta sobre mi pauta de administración:\n\n[Escriba su consulta aquí]\n\n🔗 Enlace de mi prescripción: ${patientPublicUrl}`
-      : `Dear ${clinicName} clinical team,\nI am ${patientName}, patient of ${doctorName}. I am contacting you regarding my prescription #${rxCode}.\nI have the following question regarding my administration protocol:\n\n[Type your clinical question here]\n\n🔗 My prescription link: ${patientPublicUrl}`;
+      ? `Estimado equipo médico de ${clinicName},\nSoy ${patientName}${patientDoctorIntro}. Me comunico en relación a mi prescripción #${rxCode}.\nTengo la siguiente consulta sobre mi pauta de administración:\n\n[Escriba su consulta aquí]\n\n🔗 Enlace de mi prescripción: ${patientPublicUrl}`
+      : `Dear ${clinicName} clinical team,\nI am ${patientName}${patientDoctorIntro}. I am contacting you regarding my prescription #${rxCode}.\nI have the following question regarding my administration protocol:\n\n[Type your clinical question here]\n\n🔗 My prescription link: ${patientPublicUrl}`;
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-  }, [doctorPhone, clinicName, patientName, doctorName, rxCode, isEs, patientPublicUrl]);
+  }, [doctorPhone, clinicName, patientName, doctorName, rxCode, isEs, patientPublicUrl, isAuthorizedViewer]);
 
   // Refill WhatsApp / Action URL
   const refillRequestUrl = useMemo(() => {
     const cleanPhone = String(doctorPhone || '+97143498800').replace(/[^0-9]/g, '');
+    const docPrescribedIntro = isAuthorizedViewer ? (isEs ? ` prescrita por el ${doctorName}` : ` prescribed by ${doctorName}`) : '';
     const msg = isEs
-      ? `Estimado equipo de ${clinicName},\nSoy ${patientName}. Mi prescripción #${rxCode} prescrita por el ${doctorName} está finalizando su ciclo y deseo solicitar un refill / continuación del tratamiento magistral.\n🔗 Expediente: ${patientPublicUrl}`
-      : `Dear ${clinicName} team,\nI am ${patientName}. My prescription #${rxCode} prescribed by ${doctorName} is completing its cycle and I would like to request a refill / continuation of my compounded therapy.\n🔗 Dossier: ${patientPublicUrl}`;
+      ? `Estimado equipo de ${clinicName},\nSoy ${patientName}. Mi prescripción #${rxCode}${docPrescribedIntro} está finalizando su ciclo y deseo solicitar un refill / continuación del tratamiento magistral.\n🔗 Expediente: ${patientPublicUrl}`
+      : `Dear ${clinicName} team,\nI am ${patientName}. My prescription #${rxCode}${docPrescribedIntro} is completing its cycle and I would like to request a refill / continuation of my compounded therapy.\n🔗 Dossier: ${patientPublicUrl}`;
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-  }, [doctorPhone, clinicName, patientName, doctorName, rxCode, isEs, patientPublicUrl]);
+  }, [doctorPhone, clinicName, patientName, doctorName, rxCode, isEs, patientPublicUrl, isAuthorizedViewer]);
 
   // ────────────────────────────────────────────────────────────────────────────
   // RENDER A: DOCTOR / CLINIC ADMIN VIEW (Disclosure of The Patient View)
@@ -819,8 +825,8 @@ export default function PatientExperienceHub({
           </div>
           <p style={{ margin: 0, fontSize: '0.72rem', color: '#3c4043', lineHeight: 1.5 }}>
             {isEs
-              ? `Por la presente se certifica que ${patientName} transporta medicación prescrita legalmente bajo supervisión médica de ${doctorName} (#${rxCode}) para uso personal intransferible. Medicamento autorizado para transporte en equipaje de mano.`
-              : `This certifies that ${patientName} is legally carrying prescribed compounded medication under clinical supervision of ${doctorName} (#${rxCode}) for personal use. Authorized for airline hand-luggage carry-on.`}
+              ? `Por la presente se certifica que ${patientName} transporta medicación prescrita legalmente bajo supervisión médica de ${isAuthorizedViewer ? doctorName : 'la práctica médica autorizada'} (#${rxCode}) para uso personal intransferible. Medicamento autorizado para transporte en equipaje de mano.`
+              : `This certifies that ${patientName} is legally carrying prescribed compounded medication under clinical supervision of ${isAuthorizedViewer ? doctorName : 'authorized clinical practice'} (#${rxCode}) for personal use. Authorized for airline hand-luggage carry-on.`}
           </p>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
             <button

@@ -173,11 +173,16 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     patientAlias,
     treatingDoc,
     doctorName,
+    nominalDoctorName,
+    displayDoctorName,
+    displayDoctorNameShort,
+    doctorOpaqueCode,
     doctorClinic,
     clinic,
     doctorSpecialty,
     doctorAddress,
     doctorPhone,
+    safeDoctorPhone,
     doctorLicense,
     formattedDoctorLicense,
     doctorPublicUrl,
@@ -430,9 +435,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           loginRedirect={isPatientView ? patientPublicUrl : publicUrl}
           hideTier2={true}
           brandHref={doctorPublicUrl}
-          brandTitle={isEs ? `Volver a la página pública del Dr/a. ${doctorName}` : `Return to Dr. ${doctorName}'s Public Portal`}
+          brandTitle={isAuthorizedViewer ? (isEs ? `Volver al portal del Dr/a. ${nominalDoctorName}` : `Return to Dr. ${nominalDoctorName}'s Portal`) : (isEs ? 'Portal de Práctica Médica Verificada' : 'Verified Medical Practice Portal')}
           doctorHomeHref={doctorPublicUrl}
-          doctorName={doctorName}
+          doctorName={displayDoctorNameShort}
           hideAccountManager={true}
           hideImportRx={isPatientView || !isAuthorizedViewer}
           hideSwitchRx={isPatientView || !isAuthorizedViewer}
@@ -443,7 +448,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             rxId,
             code: rxId,
             patientName,
-            doctorName: doctorName || 'Dr. Haytham Salem',
+            doctorName: isAuthorizedViewer ? (nominalDoctorName || 'Dr. Haytham Salem') : displayDoctorNameShort,
             clinic: clinic || 'Arthregen Clinic',
             formula: resolvedFormulaSummary,
             dosage: resolvedDosageSummary,
@@ -456,8 +461,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             priceFormatted: resolvedPrice?.formatted || 'AED 1,450.00'
           }}
           breadcrumb={[
-            { label: doctorName ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`) : (isEs ? 'Portal del Médico' : 'Doctor Portal'), href: doctorPublicUrl },
-            { label: isEs ? 'Pacientes' : 'Patients', href: `${doctorPublicUrl}#patients` },
+            { label: displayDoctorNameShort, href: doctorPublicUrl },
+            { label: isEs ? 'Pacientes' : 'Patients', href: isAuthorizedViewer ? `${doctorPublicUrl}#patients` : undefined },
             { label: patientName || (isEs ? 'Expediente Paciente' : 'Patient Dossier') },
             { label: `#${rxId}` }
           ]}
@@ -510,10 +515,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       gap: 5,
                       transition: 'background 0.15s'
                     }}
-                    title={isEs ? `Volver al portal de ${doctorName}` : `Return to ${doctorName}'s Portal`}
+                    title={isAuthorizedViewer ? (isEs ? `Volver al portal de ${nominalDoctorName}` : `Return to ${nominalDoctorName}'s Portal`) : (isEs ? 'Volver al portal médico' : 'Return to medical portal')}
                   >
                     <ArrowLeft size={12} color="#ffffff" />
-                    <span>{isEs ? `Volver a ${doctorName || 'Portal'}` : `Back to ${doctorName || 'Portal'}`}</span>
+                    <span>{isAuthorizedViewer ? (isEs ? `Volver a ${nominalDoctorName || 'Portal'}` : `Back to ${nominalDoctorName || 'Portal'}`) : (isEs ? 'Portal Médico' : 'Medical Portal')}</span>
                   </Link>
 
                   <a
@@ -607,7 +612,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     }}
                   >
                     <ArrowLeft size={12} color="#ffffff" />
-                    <span>{isEs ? `Portal Dr. ${doctorName || ''}` : `${doctorName || ''} Portal`}</span>
+                    <span>{isAuthorizedViewer ? (isEs ? `Portal Dr. ${nominalDoctorName || ''}` : `${nominalDoctorName || ''} Portal`) : (isEs ? 'Portal Médico' : 'Doctor Portal')}</span>
                   </Link>
                 </div>
               </div>
@@ -650,7 +655,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               currentStatus={currentStatus}
               currentStatusMeta={currentStatusMeta}
               setCurrentStatus={setCurrentStatus}
-              doctorName={doctorName}
+              doctorName={displayDoctorNameShort}
               doctorPublicUrl={doctorPublicUrl}
               handleCopyLink={handleCopyLink}
               copied={copied}
@@ -854,16 +859,22 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         <div style={{ fontSize: '1rem', fontWeight: 700, color: '#202124' }}>
                           <Link
                             href={doctorPublicUrl}
-                            title={isEs ? `Ir al portal clínico público del Dr/a. ${doctorName}` : `Go to Dr. ${doctorName}'s Public Clinical Portal`}
+                            title={isAuthorizedViewer ? (isEs ? `Ir al portal clínico del Dr/a. ${nominalDoctorName}` : `Go to Dr. ${nominalDoctorName}'s Clinical Portal`) : (isEs ? 'Ir al portal de la práctica médica' : 'Go to medical practice portal')}
                             style={{ color: '#1a73e8', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                           >
-                            <span>{doctorName}</span>
+                            <span>{displayDoctorNameShort}</span>
                             <ExternalLink size={13} color="#1a73e8" />
                           </Link>
                         </div>
-                        {doctorLicense && (
-                          <div style={{ marginTop: '4px' }}>
-                            <CopyableId value={doctorLicense} displayValue={`Lic. ${doctorLicense}`} />
+                        {isAuthorizedViewer ? (
+                          doctorLicense && (
+                            <div style={{ marginTop: '4px' }}>
+                              <CopyableId value={doctorLicense} displayValue={`Lic. ${doctorLicense}`} />
+                            </div>
+                          )
+                        ) : (
+                          <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#16a34a', fontWeight: 650 }}>
+                            ✓ {isEs ? 'Acreditado DHA' : 'DHA Accredited Practice'}
                           </div>
                         )}
                       </div>
@@ -1269,9 +1280,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     rx={rx}
                     isPatientView={true}
                     lang={lang}
-                    doctorPhone={doctorPhone}
+                    doctorPhone={safeDoctorPhone}
                     patientPublicUrl={patientPublicUrl}
                     onOpenQuotation={() => setShowAtlasQuotationModal(true)}
+                    patientName={patientName}
+                    doctorName={displayDoctorNameShort}
+                    isAuthorizedViewer={isAuthorizedViewer}
                   />
 
                   <div style={{
@@ -1306,14 +1320,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         </div>
                         <div>
                           <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
-                            {doctorName}
+                            {displayDoctorNameShort}
                           </div>
                           <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                            {doctorSpecialty || (isEs ? 'Médico Prescriptor Titular' : 'Prescribing Physician')}
+                            {isAuthorizedViewer ? (doctorSpecialty || (isEs ? 'Médico Prescriptor Titular' : 'Prescribing Physician')) : (isEs ? 'Práctica Médica Colaboradora' : 'Collaborating Medical Practice')}
                           </div>
-                          {doctorLicense && (
+                          {isAuthorizedViewer && doctorLicense ? (
                             <div style={{ fontSize: '0.70rem', color: '#0369a1', fontWeight: 600, marginTop: 2 }}>
                               {formattedDoctorLicense || `Lic. ${doctorLicense}`}
+                            </div>
+                          ) : (
+                            <div style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 650, marginTop: 2 }}>
+                              ✓ {isEs ? 'Acreditación Oficial DHA' : 'Official DHA Accreditation'}
                             </div>
                           )}
                         </div>
@@ -1327,7 +1345,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                             {doctorAddress && <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 1 }}>{doctorAddress}</div>}
                           </div>
                         </div>
-                        {doctorPhone && (
+                        {isAuthorizedViewer && doctorPhone && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#334155' }}>
                             <Phone size={15} style={{ color: '#64748b', flexShrink: 0 }} />
                             <a href={`tel:${doctorPhone}`} style={{ color: '#0284c7', fontWeight: 600, textDecoration: 'none' }}>
@@ -1363,10 +1381,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {/* WhatsApp Action */}
                         <a
-                          href={`https://wa.me/${String(doctorPhone || '+97143498800').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                          href={`https://wa.me/${String(safeDoctorPhone || '+97143498800').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
                             isEs
-                              ? `Estimado equipo médico de ${doctorClinic},\nSoy ${patientName}, paciente del ${doctorName}. Me pongo en contacto en relación a mi prescripción médica #${rxId}.\n🔗 Consulta de seguimiento: ${patientPublicUrl}`
-                              : `Dear ${doctorClinic} clinical team,\nI am ${patientName}, patient of ${doctorName}. I am contacting you regarding my prescription #${rxId}.\n🔗 Clinical follow-up inquiry: ${patientPublicUrl}`
+                              ? `Estimado equipo médico de ${doctorClinic},\nSoy ${patientName}${isAuthorizedViewer ? `, paciente del ${nominalDoctorName}` : ''}. Me pongo en contacto en relación a mi prescripción médica #${rxId}.\n🔗 Consulta de seguimiento: ${patientPublicUrl}`
+                              : `Dear ${doctorClinic} clinical team,\nI am ${patientName}${isAuthorizedViewer ? `, patient of ${nominalDoctorName}` : ''}. I am contacting you regarding my prescription #${rxId}.\n🔗 Clinical follow-up inquiry: ${patientPublicUrl}`
                           )}`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -1450,8 +1468,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     rx={rx}
                     isPatientView={false}
                     lang={lang}
-                    doctorPhone={doctorPhone}
+                    doctorPhone={safeDoctorPhone}
                     patientPublicUrl={patientPublicUrl}
+                    patientName={patientName}
+                    doctorName={displayDoctorNameShort}
+                    isAuthorizedViewer={isAuthorizedViewer}
                   />
 
                   <div style={{
@@ -1587,8 +1608,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         <a
                           href={`https://wa.me/?text=${encodeURIComponent(
                             isEs
-                              ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por ${doctorName}:\n🔗 ${patientPublicUrl}`
-                              : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by ${doctorName}:\n🔗 ${patientPublicUrl}`
+                              ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por ${isAuthorizedViewer ? (nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`) : (isEs ? 'su práctica médica' : 'your medical practice')}:\n🔗 ${patientPublicUrl}`
+                              : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by ${isAuthorizedViewer ? (nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`) : 'your medical practice'}:\n🔗 ${patientPublicUrl}`
                           )}`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -2099,13 +2120,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     const cleanPhone = String(rawPhone).replace(/[^\d+]/g, '').replace(/^00/, '+');
                     const isProposal = currentStatus === 'proposal_pending' || rx?.isTreatmentProposal || rx?.orderStatus === 'Offer Not Accepted';
                     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+                    const docSignature = isAuthorizedViewer ? (nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`) : (isEs ? 'Su práctica médica' : 'Your medical practice');
                     const text = isProposal
                       ? (isEs
-                          ? `Estimado/a ${patientName},\n\nEl Dr/a. ${doctorName} le remite su Propuesta de Tratamiento Personalizada:\n\n📋 Pauta: ${resolvedFormulaSummary}\n🆔 Ref: #${rxId}\n\nPuede revisar su formulación y confirmar la dispensación aquí:\n🔗 ${origin}/rx/${rxId}`
-                          : `Dear ${patientName},\n\nDr. ${doctorName} has prepared your personalized Clinical Treatment Proposal:\n\n📋 Regimen: ${resolvedFormulaSummary}\n🆔 Proposal Ref: #${rxId}\n\nYou can review your formulation and activate your order here:\n🔗 ${origin}/rx/${rxId}`)
+                          ? `Estimado/a ${patientName},\n\n${docSignature} le remite su Propuesta de Tratamiento Personalizada:\n\n📋 Pauta: ${resolvedFormulaSummary}\n🆔 Ref: #${rxId}\n\nPuede revisar su formulación y confirmar la dispensación aquí:\n🔗 ${origin}/rx/${rxId}`
+                          : `Dear ${patientName},\n\n${docSignature} has prepared your personalized Clinical Treatment Proposal:\n\n📋 Regimen: ${resolvedFormulaSummary}\n🆔 Proposal Ref: #${rxId}\n\nYou can review your formulation and activate your order here:\n🔗 ${origin}/rx/${rxId}`)
                       : (isEs
-                          ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por Dr/a. ${doctorName}:\n🔗 ${patientPublicUrl}`
-                          : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by Dr. ${doctorName}:\n🔗 ${patientPublicUrl}`);
+                          ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por ${docSignature}:\n🔗 ${patientPublicUrl}`
+                          : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by ${docSignature}:\n🔗 ${patientPublicUrl}`);
                     const waBase = cleanPhone ? `https://wa.me/${cleanPhone.replace('+', '')}` : 'https://wa.me/';
                     window.open(`${waBase}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
                   }}
@@ -2131,7 +2153,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   href={doctorPublicUrl}
                   className="rx-dock-btn rx-dock-btn-secondary"
                   style={{ textDecoration: 'none' }}
-                  title={isEs ? `Volver al portal clínico de ${doctorName}` : `Return to ${doctorName}'s Clinical Portal`}
+                  title={isAuthorizedViewer ? (isEs ? `Volver al portal clínico de ${nominalDoctorName}` : `Return to ${nominalDoctorName}'s Clinical Portal`) : (isEs ? 'Volver al portal de la práctica' : 'Return to practice portal')}
                 >
                   <ArrowLeft size={14} color="#003666" strokeWidth={2.5} />
                   <span className="rx-dock-btn-label-desktop">{isEs ? 'Mi Portal' : 'My Portal'}</span>

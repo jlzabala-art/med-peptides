@@ -306,21 +306,21 @@ export default function PrescriptionDetailSidebar({
           }}>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isEs ? 'Médico Prescriptor' : 'Prescribing Physician'}
+                {isAuthorizedViewer ? (isEs ? 'Médico Prescriptor' : 'Prescribing Physician') : (isEs ? 'Práctica Médica' : 'Medical Practice')}
               </div>
               <div style={{ fontSize: '0.86rem', fontWeight: 750, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '1px' }}>
-                {doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`}
+                {isAuthorizedViewer 
+                  ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`)
+                  : (isEs ? 'Práctica Médica Verificada' : 'Verified Clinical Practice')}
               </div>
-              {doctorTitle && (
-                <div style={{ fontSize: '0.70rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {doctorTitle}
-                </div>
-              )}
+              <div style={{ fontSize: '0.70rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {isAuthorizedViewer ? (doctorTitle || (isEs ? 'Facultativo Colegiado' : 'Licensed Physician')) : (isEs ? 'Acreditación Oficial DHA' : 'Official DHA Accreditation')}
+              </div>
             </div>
             {doctorPublicUrl && (
               <Link
                 href={doctorPublicUrl}
-                title={isEs ? `Ir al portal de ${doctorName}` : `Go to ${doctorName}'s Portal`}
+                title={isAuthorizedViewer ? (isEs ? `Ir al portal de ${doctorName}` : `Go to ${doctorName}'s Portal`) : (isEs ? 'Ir al portal de la práctica' : 'Go to practice portal')}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
