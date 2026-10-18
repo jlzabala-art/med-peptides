@@ -129,9 +129,13 @@ export function sanitizePrescriptionPayload(rx, { isAuthorized = false } = {}) {
   const clean = {
     ...rx,
     id: cleanCode,
+    prescriptionId: cleanCode,
+    rxId: cleanCode,
     code: cleanCode,
     prescriptionCode: cleanCode,
     prescriptionNumber: cleanCode,
+    originalPrescriptionId: cleanCode,
+    documentId: cleanCode,
     fileNumber: sanitizePrescriptionCode(rx.fileNumber || cleanCode, rawName),
     patientName: codifiedName,
     patient: {
@@ -184,6 +188,26 @@ export function sanitizePrescriptionPayload(rx, { isAuthorized = false } = {}) {
     orderId: String(rx.orderId || '').replace(new RegExp(rx.id || rx.code || 'UNKNOWN', 'gi'), cleanCode),
     isCodifiedView: true
   };
+
+  // Final deep scrub: Ensure no raw patient name or un-sanitized rx ID leaks anywhere in serialized payload
+  const rawId = rx.id || rx.code || '';
+  if ((rawName && rawName.length > 2 && rawName !== 'Patient') || (rawId && rawId !== cleanCode)) {
+    try {
+      let serialized = JSON.stringify(clean);
+      if (rawId && rawId !== cleanCode) {
+        serialized = serialized.replace(new RegExp(rawId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), cleanCode);
+      }
+      if (rawName && rawName.length > 2 && rawName !== 'Patient') {
+        const parts = rawName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().split(/\s+/).filter(p => p.length >= 3);
+        for (const part of parts) {
+          serialized = serialized.replace(new RegExp(part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), codifiedToken);
+        }
+      }
+      return JSON.parse(serialized);
+    } catch {
+      return clean;
+    }
+  }
 
   return clean;
 }
