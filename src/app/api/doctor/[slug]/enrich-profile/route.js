@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { fetchAndCacheDoctorPortal, invalidateDoctorCache } from '@/lib/doctorCache';
+import { getDoctorPortalData, invalidateDoctorCache } from '@/lib/doctorCache';
 import {
   resolveDoctorSpecialtyIntelligence,
   SPECIALTY_BLUEPRINTS_CATALOG,
@@ -16,7 +16,7 @@ export async function POST(request, { params }) {
     const slug = decodeURIComponent(resolvedParams?.slug || '');
     const body = await request.json().catch(() => ({}));
 
-    const portalData = await fetchAndCacheDoctorPortal(slug, false).catch(() => null);
+    const portalData = await getDoctorPortalData(slug, { forceRefresh: false }).catch(() => null);
     const doctor = {
       ...(portalData?.doctor || {}),
       ...(body?.doctor || {})

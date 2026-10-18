@@ -905,10 +905,16 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               badges={<>
                 <span className="pds-cat-tag">{category}</span>
                 <CollectionBadgePill product={product} />
+                {(product?.routine_badge || colwayData?.routine_badge) && (
+                  <span className="pds-purity-tag" style={{ background: '#f0fdfa', color: '#0d9488', borderColor: '#99f6e4', fontWeight: 800 }}>
+                    <Sparkles size={12} />
+                    <span>{product?.routine_badge || colwayData?.routine_badge}</span>
+                  </span>
+                )}
                 <span className="pds-cgmp-tag">{brand}</span>
-                <span className="pds-purity-tag"><ShieldCheck size={12} /><span>EU Reg. 1223/2009</span></span>
+                <span className="pds-purity-tag"><ShieldCheck size={12} /><span>{isNutricosmetic ? 'EU Reg. 1169/2011' : 'EU Reg. 1223/2009'}</span></span>
                 <span className="pds-purity-tag" style={{ background: '#fdf2f8', color: '#db2777', borderColor: '#fbcfe8' }}><Leaf size={12} /><span>Dermatologically Tested</span></span>
-                <span className="pds-purity-tag" style={{ background: '#eff6ff', color: '#2563eb', borderColor: '#bfdbfe' }}><CheckCircle2 size={12} /><span>Sulphate-Free</span></span>
+                <span className="pds-purity-tag" style={{ background: '#eff6ff', color: '#2563eb', borderColor: '#bfdbfe' }}><CheckCircle2 size={12} /><span>{isHairProduct ? 'Sulphate-Free' : 'Paraben-Free'}</span></span>
               </>}
               title={name}
               description={<>
@@ -1811,30 +1817,120 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                     </div>
                   );
                 })}
-                <div style={{ marginTop: '0.75rem', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: '12px', padding: '1.1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', marginBottom: '0.3rem', letterSpacing: '0.05em' }}>
-                      {isHairProduct ? 'COMPLETE THE COLWAY TRICHOLOGY SYSTEM' : 'COMPLETE THE COLWAY DERMO-RENEWAL RITUAL'}
+                {/* Clinical Routine Companion & Inside-Out Dual Action System */}
+                <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  {/* Card 1: Immediate Topical Sequence Companion */}
+                  <div style={{
+                    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+                    borderRadius: '12px',
+                    padding: '1.15rem 1.25rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    flexWrap: 'wrap'
+                  }}>
+                    <div style={{ flex: '1 1 260px' }}>
+                      <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#38bdf8', marginBottom: '0.3rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                        {isHairProduct
+                          ? 'Step 1 + 2 • Clinical Trichology Sequence'
+                          : isNutricosmetic
+                          ? 'Topical Cell Signaler Pair'
+                          : (slug.includes('diamond') ? 'Epigenetic Step 1 + 2 Duo' : 'Dermal Barrier Duo')}
+                      </div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.25rem' }}>
+                        {isHairProduct
+                          ? (isShampoo ? 'Colway Strengthening Hair Conditioner (200 mL)' : 'Colway Strengthening Hair Shampoo (250 mL)')
+                          : isNutricosmetic
+                          ? 'Colway Blue Diamond Cellular Rejuvenation Cream (50 mL)'
+                          : (slug.includes('cream')
+                              ? 'Colway Blue Diamond Peeling (75 mL)'
+                              : (slug.includes('peeling')
+                                  ? 'Colway Blue Diamond Cream (50 mL)'
+                                  : (slug.includes('wash') ? 'Colway Collagen Vege Airless (45 mL)' : 'Colway Collagen Hydrolipid Wash Gel (250 mL)')))}
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#94a3b8', lineHeight: 1.5 }}>
+                        {isHairProduct
+                          ? (isShampoo
+                              ? 'Apply conditioner immediately after shampoo to seal cuticles and anchor hair shafts (+24% tensile strength).'
+                              : 'Pre-cleanse with shampoo to clear follicular ostia and activate microcirculation with Baicapil™ 2%.')
+                          : isNutricosmetic
+                          ? 'Topical VEP-carrier peptide agonist sending the cellular trigger to fibroblasts while Colvita supplies the substrate.'
+                          : (slug.includes('cream')
+                              ? 'Use peeling 1–2× weekly prior to cream: diamond dust exfoliation triples peptide bioavailability.'
+                              : (slug.includes('peeling')
+                                  ? 'Apply cream immediately post-peeling to deliver FGF-1 and ceramides into unoccluded dermal receptors.'
+                                  : 'Complement cleansing with bioactive collagen replenishment on damp skin.'))}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.93rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.25rem' }}>
-                      {isHairProduct
-                        ? (isShampoo ? 'Strengthening Conditioner' : 'Strengthening Shampoo')
-                        : (slug.includes('cream') ? 'Blue Diamond Peeling' : 'Blue Diamond Cream')}
-                    </div>
-                    <div style={{ fontSize: '0.73rem', color: '#94a3b8' }}>
-                      {isHairProduct
-                        ? 'Use both 3–4×/week for maximum follicular synergy'
-                        : (slug.includes('cream')
-                            ? 'Enzymatic & diamond micro-exfoliation to maximize VEP-peptide cream penetration'
-                            : 'Bioactive tropocollagen & VEP-peptide cream to restore extracellular matrix density')}
-                    </div>
+                    <Link
+                      href={`/p/${isHairProduct ? (isShampoo ? 'colway-strengthening-conditioner' : 'colway-strengthening-shampoo') : isNutricosmetic ? 'colway-blue-diamond-cream' : (slug.includes('cream') ? 'colway-blue-diamond-peeling' : (slug.includes('peeling') ? 'colway-blue-diamond-cream' : (slug.includes('wash') ? 'colway-collagen-vege' : 'colway-collagen-wash-gel')))}`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '9px 18px',
+                        borderRadius: '8px',
+                        background: '#0d9488',
+                        color: '#fff',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        textDecoration: 'none',
+                        flexShrink: 0
+                      }}
+                    >
+                      <span>Explore Step</span>
+                      <ChevronRight size={14} />
+                    </Link>
                   </div>
-                  <Link
-                    href={`/p/${isHairProduct ? (isShampoo ? 'colway-strengthening-conditioner' : 'colway-strengthening-shampoo') : (slug.includes('cream') ? 'colway-blue-diamond-peeling' : 'colway-blue-diamond-cream')}`}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', background: '#0d9488', color: '#fff', fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}
-                  >
-                    View Product <ChevronRight size={13} />
-                  </Link>
+
+                  {/* Card 2: Inside-Out Systemic Synergy (Colvita Foundation) */}
+                  {!isNutricosmetic && (
+                    <div style={{
+                      background: '#f0fdfa',
+                      border: '1px solid #99f6e4',
+                      borderRadius: '12px',
+                      padding: '1.15rem 1.25rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '1rem',
+                      flexWrap: 'wrap'
+                    }}>
+                      <div style={{ flex: '1 1 260px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.3rem' }}>
+                          <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0d9488', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                            Inside-Out Clinical Synergy • Systemic Substrate
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.25rem' }}>
+                          Colvita Bioactive Native Tropocollagen Capsules (60 / 120 Caps)
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#334155', lineHeight: 1.5 }}>
+                          Topical formulations provide signaling peptides to cell receptors; oral Colvita delivers the circulating glycine, proline, and hydroxyproline pool required by fibroblasts and dermal papillae to actually synthesize new collagen.
+                        </div>
+                      </div>
+                      <Link
+                        href="/p/colway-colvita"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '9px 18px',
+                          borderRadius: '8px',
+                          background: '#0f172a',
+                          color: '#ffffff',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          textDecoration: 'none',
+                          flexShrink: 0
+                        }}
+                      >
+                        <span>Inspect Colvita</span>
+                        <ChevronRight size={14} />
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </PublicSectionCard>
             )}

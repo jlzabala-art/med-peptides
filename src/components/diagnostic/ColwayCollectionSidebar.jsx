@@ -64,12 +64,12 @@ export default function ColwayCollectionSidebar({
   // Protocols available in Colway
   const protocols = [
     {
-      id: 'dermo-renewal',
+      id: 'epigenetic-ritual',
       slug: 'colway-dermo-renewal',
-      title: isEs ? 'Ritual Dermo-Renovación' : 'Dermo-Renewal Ritual',
-      badge: isEs ? 'Facial & Escote' : 'Facial & Neck',
-      desc: isEs ? 'Blue Diamond Cream + Peeling + Gel Colágeno' : 'Blue Diamond Cream + Peeling + Wash Gel',
-      category: 'facial',
+      title: isEs ? 'Ritual Epigenético Diamante Azul' : 'Blue Diamond Epigenetic Ritual',
+      badge: isEs ? 'Epigenética Celular' : 'Epigenetic Cellular',
+      desc: isEs ? 'Blue Diamond Peeling + Blue Diamond Cream + Colvita' : 'Blue Diamond Peeling + Cream + Colvita',
+      category: 'epigenetic',
       search: 'Blue Diamond'
     },
     {
@@ -77,17 +77,26 @@ export default function ColwayCollectionSidebar({
       slug: 'colway-hair-restoration',
       title: isEs ? 'Restauración Folicular Anti-DHT' : 'Anti-DHT Hair Restoration',
       badge: isEs ? 'Tricología Médica' : 'Trichology',
-      desc: isEs ? 'Champú Fortalecedor + Acondicionador + Colvita (60/120 cap)' : 'Strengthening Shampoo + Conditioner + Colvita',
+      desc: isEs ? 'Champú Fortalecedor + Acondicionador + Colvita' : 'Strengthening Shampoo + Conditioner + Colvita',
       category: 'trichology',
       search: 'Strengthening'
     },
     {
+      id: 'native-dermal',
+      slug: 'colway-native-dermal',
+      title: isEs ? 'Restauración Dérmica & Barrera' : 'Native Dermal & Barrier Recovery',
+      badge: isEs ? 'Colágeno Nativo' : 'Native Collagen',
+      desc: isEs ? 'Gel Limpiador Colágeno + Colágeno Vege + Bálsamo Labial' : 'Collagen Wash Gel + Collagen Vege + Lip Care',
+      category: 'native-dermal',
+      search: 'Vege'
+    },
+    {
       id: 'nutricosmetic-deep',
       slug: 'colway-nutricosmetic',
-      title: isEs ? 'Matriz Extracelular & Longevidad' : 'Extracellular Matrix & Longevity',
-      badge: isEs ? 'Nutricosmética' : 'Nutricosmetic',
-      desc: isEs ? 'Colvita Colágeno Liofilizado + Colágeno Vege' : 'Colvita Lyophilized Collagen + Vege Collagen',
-      category: 'nutraceutical',
+      title: isEs ? 'Matriz Extracelular Sistémica "Inside-Out"' : 'Inside-Out Systemic ECM Matrix',
+      badge: isEs ? 'Nutricosmética Oral' : 'Oral Nutricosmetics',
+      desc: isEs ? 'Colvita Tropocolágeno Liofilizado (60/120 caps)' : 'Colvita Lyophilized Tropocollagen (60/120 caps)',
+      category: 'nutricosmetics',
       search: 'Colvita'
     }
   ];

@@ -783,6 +783,19 @@ export default function BrandCollectionPage({
                                 <span style={{ fontSize: '0.70rem', color: '#0d9488', fontWeight: 650 }}>
                                   {sampleType}
                                 </span>
+                                {brandSlug === 'colway' && (product.routine_badge || product.step_number != null) && (
+                                  <span style={{
+                                    fontSize: '0.66rem',
+                                    fontWeight: 700,
+                                    padding: '2px 7px',
+                                    borderRadius: '4px',
+                                    background: '#f0fdfa',
+                                    color: '#0d9488',
+                                    border: '1px solid #99f6e4'
+                                  }}>
+                                    {product.routine_badge || `Step ${product.step_number}`}
+                                  </span>
+                                )}
                               </div>
                               <h3
                                 onClick={() => handleProductClick(product)}
@@ -1059,6 +1072,26 @@ export default function BrandCollectionPage({
                         >
                           {displayName}
                         </h3>
+
+                        {brandSlug === 'colway' && (product.routine_badge || product.step_number != null) && (
+                          <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            background: '#f0fdfa',
+                            border: '1px solid #99f6e4',
+                            color: '#0d9488',
+                            fontSize: '0.69rem',
+                            fontWeight: 700,
+                            marginBottom: '6px',
+                            width: 'fit-content'
+                          }}>
+                            <Sparkles size={11} />
+                            <span>{product.routine_badge || `Step ${product.step_number}`}</span>
+                          </div>
+                        )}
 
                         <div style={{
                           fontSize: '0.75rem',
