@@ -3984,83 +3984,90 @@ export default function DoctorPublicPortalClient({
 
   const uniquePatientsCount = doctorPatientsList.length;
 
-  const sidebarNavGroups = useMemo(() => [
-    {
-      group: 'PRACTICE WORKSPACE',
-      groupTitle: 'PRACTICE WORKSPACE',
-      items: [
-        {
-          id: 'overview',
-          label: 'Practice Dashboard',
-          icon: BarChart3,
-          badge: null
-        },
-        {
-          id: 'prescriptions',
-          label: 'Patient Prescriptions',
-          icon: Layers,
-          badge: allPrescriptions.length > 0 ? allPrescriptions.length : null,
-          actionBadgeTooltip: quickCounts.active > 0
-            ? `${allPrescriptions.length} total prescriptions (${quickCounts.active} sold & invoiced, ${quickCounts.proposals} unaccepted proposals)`
-            : undefined
-        },
-        {
-          id: 'patients',
-          label: 'Monitored Patients',
-          icon: Users,
-          badge: uniquePatientsCount > 0 ? uniquePatientsCount : null,
-          actionBadgeTooltip: uniquePatientsCount > 0
-            ? `${uniquePatientsCount} unique patients (${soldPatientsCount} sold customers, ${unacceptedPatientsCount} unaccepted proposals)`
-            : undefined
-        },
-        {
-          id: 'tasks',
-          label: 'Action Queue',
-          icon: Clock,
-          actionBadge: filteredTasks.length > 0 ? filteredTasks.length : null,
-          actionBadgeTooltip: filteredTasks.length > 0
-            ? `${filteredTasks.length} pending clinical task(s) requiring follow-up or review`
-            : undefined
-        }
-      ]
-    },
-    {
-      group: 'CLINICAL INTELLIGENCE',
-      groupTitle: 'CLINICAL INTELLIGENCE',
-      items: [
-        {
-          id: 'lab_results',
-          label: 'Lab Diagnostics',
-          icon: FlaskConical,
-          badge: allLabResults.length > 0 ? allLabResults.length : null
-        },
-        {
-          id: 'recommendations',
-          label: 'Specialty & Rx Synergies',
-          icon: Sparkles,
-          badge: doctorSpecialtyIntel.primaryBlueprints.length > 0 ? doctorSpecialtyIntel.primaryBlueprints.length : null
-        }
-      ]
-    },
-    {
-      group: 'PRACTICE SETTINGS & CREDENTIALS',
-      groupTitle: 'PRACTICE SETTINGS & CREDENTIALS',
-      items: [
-        {
-          id: 'credentials',
-          label: 'Physician Credentials',
-          icon: ShieldCheck,
-          badge: null
-        },
-        {
-          id: 'services_tiers',
-          label: 'Platform & Services',
-          icon: Award,
-          badge: null
-        }
-      ]
+  const sidebarNavGroups = useMemo(() => {
+    const workspaceItems = [
+      {
+        id: 'overview',
+        label: 'Overview',
+        icon: BarChart3,
+        badge: null
+      },
+      {
+        id: 'prescriptions',
+        label: 'Prescriptions',
+        icon: Layers,
+        badge: allPrescriptions.length > 0 ? allPrescriptions.length : null,
+        actionBadgeTooltip: quickCounts.active > 0
+          ? `${allPrescriptions.length} total prescriptions (${quickCounts.active} sold & invoiced, ${quickCounts.proposals} unaccepted proposals)`
+          : undefined
+      },
+      {
+        id: 'patients',
+        label: 'Patients',
+        icon: Users,
+        badge: uniquePatientsCount > 0 ? uniquePatientsCount : null,
+        actionBadgeTooltip: uniquePatientsCount > 0
+          ? `${uniquePatientsCount} unique patients (${soldPatientsCount} sold customers, ${unacceptedPatientsCount} unaccepted proposals)`
+          : undefined
+      }
+    ];
+
+    if (filteredTasks.length > 0 || allPrescriptions.length > 0) {
+      workspaceItems.push({
+        id: 'tasks',
+        label: 'Pending Actions',
+        icon: Clock,
+        actionBadge: filteredTasks.length > 0 ? filteredTasks.length : null,
+        actionBadgeTooltip: filteredTasks.length > 0
+          ? `${filteredTasks.length} pending clinical task(s) requiring follow-up or review`
+          : undefined
+      });
     }
-  ], [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, allLabResults.length, quickCounts.active, quickCounts.pending, quickCounts.drafts, quickCounts.proposals, doctorSpecialtyIntel.primaryBlueprints.length]);
+
+    return [
+      {
+        group: 'CLINICAL WORKSPACE',
+        groupTitle: 'CLINICAL WORKSPACE',
+        items: workspaceItems
+      },
+      {
+        group: 'SPECIALTY & DIAGNOSTICS',
+        groupTitle: 'SPECIALTY & DIAGNOSTICS',
+        items: [
+          {
+            id: 'recommendations',
+            label: 'Specialty Blueprints',
+            icon: Sparkles,
+            badge: doctorSpecialtyIntel.primaryBlueprints.length > 0 ? doctorSpecialtyIntel.primaryBlueprints.length : null
+          },
+          {
+            id: 'lab_results',
+            label: 'Lab Diagnostics',
+            icon: FlaskConical,
+            badge: allLabResults.length > 0 ? allLabResults.length : null
+          }
+        ]
+      },
+      {
+        group: 'CLINIC PROFILE',
+        groupTitle: 'CLINIC PROFILE',
+        items: [
+          {
+            id: 'credentials',
+            label: 'Clinic Credentials',
+            icon: ShieldCheck,
+            badge: null
+          },
+          {
+            id: 'services_tiers',
+            label: 'Platform Services',
+            icon: Award,
+            badge: null
+          }
+        ]
+      }
+    ];
+  }, [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, allLabResults.length, quickCounts.active, quickCounts.pending, quickCounts.drafts, quickCounts.proposals, doctorSpecialtyIntel.primaryBlueprints.length, soldPatientsCount, unacceptedPatientsCount]);
 
   const handleSidebarNavigate = (itemOrId) => {
     triggerHaptic('light');
@@ -4976,44 +4983,102 @@ export default function DoctorPublicPortalClient({
             </div>
           </div>
 
-          {/* ── Google Cloud Console Command Bar (GCP Standard Page Header) ── */}
+          {/* ── Simplified Clinical Command Bar (Page Header) ── */}
           <header
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              paddingBottom: '16px',
-              marginBottom: '20px',
+              paddingBottom: '14px',
+              marginBottom: '18px',
               borderBottom: '1px solid #dadce0',
               flexWrap: 'wrap',
               gap: '12px'
             }}
           >
-            {/* Section Breadcrumb & Title */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            {/* Section Breadcrumb, Clean Title & 1-Click Workspace Switcher */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.74rem', color: '#5f6368', fontWeight: 500 }}>
-                  {isAuthorizedViewer ? `Doctor Portal > ${doctor.name}` : `Clinical Practice Portal > Practice ${opaqueCode}`}
+                  {isAuthorizedViewer ? `Dr. Portal · ${doctor.name}` : `Clinical Portal · Practice ${opaqueCode}`}
                 </span>
                 <span style={{ fontSize: '0.64rem', background: '#e8f0fe', color: '#1a73e8', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                  {isAuthorizedViewer ? (doctor.license || 'DHA Verified') : 'DHA Verified Practice'}
+                  {isAuthorizedViewer ? (doctor.license || 'DHA Verified') : 'DHA Verified'}
                 </span>
+                {doctorSpecialtyIntel.primaryMeta?.label && (
+                  <span style={{ fontSize: '0.64rem', background: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd', padding: '1px 7px', borderRadius: '999px', fontWeight: 600 }}>
+                    {doctorSpecialtyIntel.primaryMeta.badgeIcon} {doctorSpecialtyIntel.primaryMeta.shortLabel || doctorSpecialtyIntel.primaryMeta.label}
+                  </span>
+                )}
               </div>
-              <h1 style={{ fontSize: '1.24rem', fontWeight: 600, color: '#202124', margin: 0 }}>
-                {activeAnchor === 'overview' && 'Practice Overview & Clinical KPIs'}
-                {activeAnchor === 'search' && 'Clinical Registry Search & Multi-Table Query'}
-                {activeAnchor === 'tasks' && `Pending To-Do Queue (${filteredTasks.length} Action Items)`}
-                {activeAnchor === 'prescriptions' && `Compounded Prescriptions Dossier (${filteredPrescriptions.length} Records)`}
-                {activeAnchor === 'patients' && `Monitored Patients Directory (${doctorPatientsList.length} Patient Dossiers)`}
-                {activeAnchor === 'recommendations' && 'Atlas Recommendations & Peptide Clinical Synergy'}
-              </h1>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                <h1 style={{ fontSize: '1.22rem', fontWeight: 700, color: '#202124', margin: 0 }}>
+                  {activeAnchor === 'overview' && 'Practice Overview'}
+                  {activeAnchor === 'search' && 'Practice Search'}
+                  {activeAnchor === 'tasks' && `Pending Actions (${filteredTasks.length})`}
+                  {activeAnchor === 'prescriptions' && `Prescriptions (${filteredPrescriptions.length})`}
+                  {activeAnchor === 'patients' && `Patients (${doctorPatientsList.length})`}
+                  {activeAnchor === 'recommendations' && 'Specialty Blueprints & Rx Synergies'}
+                  {activeAnchor === 'lab_results' && `Lab Diagnostics (${allLabResults.length})`}
+                  {activeAnchor === 'credentials' && 'Clinic Credentials & Verification'}
+                  {activeAnchor === 'services_tiers' && 'Platform Services & Compounding Access'}
+                </h1>
+
+                {/* Unified 1-Click Segmented Switcher for Prescriptions / Patients / Pending Actions */}
+                {(['prescriptions', 'patients', 'tasks'].includes(activeAnchor)) && (
+                  <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '3px', borderRadius: '8px', gap: '2px', border: '1px solid #e2e8f0' }}>
+                    {[
+                      { id: 'prescriptions', label: 'Prescriptions', count: allPrescriptions.length },
+                      { id: 'patients', label: 'Patients', count: uniquePatientsCount },
+                      ...(filteredTasks.length > 0 ? [{ id: 'tasks', label: 'Pending Actions', count: filteredTasks.length }] : [])
+                    ].map((tab) => {
+                      const isTabActive = activeAnchor === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => handleSidebarNavigate(tab.id)}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: isTabActive ? '#ffffff' : 'transparent',
+                            color: isTabActive ? '#0f172a' : '#64748b',
+                            fontSize: '0.74rem',
+                            fontWeight: isTabActive ? 700 : 600,
+                            cursor: 'pointer',
+                            boxShadow: isTabActive ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            transition: 'all 0.12s ease'
+                          }}
+                        >
+                          <span>{tab.label}</span>
+                          <span style={{
+                            fontSize: '0.66rem',
+                            padding: '0 5px',
+                            borderRadius: '999px',
+                            background: isTabActive ? '#eff6ff' : '#e2e8f0',
+                            color: isTabActive ? '#1d4ed8' : '#475569',
+                            fontWeight: 700
+                          }}>
+                            {tab.count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Actions Area: GCP Consolidated Command Bar */}
+            {/* Consolidated Header Actions (De-duplicated & Clean) */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              {/* Google Cloud Live Status Indicator (Rule #25 / Non-blocking) */}
+              {/* Live Sync Badge */}
               <div
-                title="Continuous background synchronization active. Clinical registry is automatically updated every 60s and on window focus."
+                title="Continuous background synchronization active."
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -5025,7 +5090,6 @@ export default function DoctorPublicPortalClient({
                   fontSize: '0.72rem',
                   color: isBackgroundSyncing ? '#1d4ed8' : '#64748b',
                   fontWeight: 500,
-                  transition: 'all 0.2s ease',
                   userSelect: 'none'
                 }}
               >
@@ -5035,22 +5099,22 @@ export default function DoctorPublicPortalClient({
                     height: '6px',
                     borderRadius: '50%',
                     background: isBackgroundSyncing ? '#2563eb' : '#16a34a',
-                    boxShadow: isBackgroundSyncing ? '0 0 0 2px rgba(37,99,235,0.2)' : '0 0 0 2px rgba(22,163,74,0.18)',
                     display: 'inline-block'
                   }}
                 />
                 <span>
                   {isBackgroundSyncing
-                    ? 'Updating...'
-                    : `Live · ${lastRefreshed ? lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Auto-synced'}`}
+                    ? 'Syncing...'
+                    : `Live · ${lastRefreshed ? lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Synced'}`}
                 </span>
               </div>
 
+              {/* Quick Search Trigger (⌘K) */}
               <button
                 type="button"
                 onClick={() => {
                   triggerHaptic('light');
-                  setIsIntakeOpen(true);
+                  setIsPracticeSearchOpen(true);
                 }}
                 style={{
                   height: '34px',
@@ -5065,15 +5129,16 @@ export default function DoctorPublicPortalClient({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  transition: 'all 0.15s ease',
                   boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
                 }}
-                title="Import medical records, PDF lab results, or clinical data"
+                title="Quick search across patients, prescriptions, and specialty blueprints (⌘K)"
               >
-                <Upload size={14} style={{ color: '#5f6368' }} />
-                <span>Import EHR / Data</span>
+                <Search size={14} style={{ color: '#5f6368' }} />
+                <span>Search</span>
+                <kbd style={{ fontSize: '0.66rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '1px 5px', color: '#64748b' }}>⌘K</kbd>
               </button>
 
+              {/* Single Unified Primary Action: New Prescription / Upload Rx */}
               <button
                 type="button"
                 onClick={() => {
@@ -5093,207 +5158,467 @@ export default function DoctorPublicPortalClient({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  transition: 'all 0.15s ease',
                   boxShadow: '0 1px 2px rgba(26,115,232,0.3)'
                 }}
-                title="Create a new compounded prescription or treatment proposal"
+                title="Create a new compounded prescription, customize a blueprint, or upload a clinical PDF/image"
               >
                 <Plus size={15} />
-                <span>New Prescription</span>
+                <span>New Prescription / Upload Rx</span>
               </button>
             </div>
           </header>
 
-          {/* ── View 1: Practice Overview & Core Operational KPIs (Google Cloud Rule #22) ─ */}
+          {/* ── View 1: Practice Overview (Adaptive for Zero-Rx vs Active Prescribers) ─ */}
           {activeAnchor === 'overview' && (
             <div id="overview" style={{ marginBottom: '24px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b' }}>
-                    Operational Metrics
-                  </span>
-                  <span
-                    style={{
-                      fontSize: '0.72rem',
-                      background: scopeMode === 'filtered' ? '#f0fdf4' : '#eff6ff',
-                      color: scopeMode === 'filtered' ? '#16a34a' : '#1d4ed8',
-                      border: `1px solid ${scopeMode === 'filtered' ? '#bbf7d0' : '#bfdbfe'}`,
-                      borderRadius: '4px',
-                      padding: '2px 8px',
-                      fontWeight: 600
-                    }}
-                  >
-                    {scopeMode === 'filtered'
-                      ? `Active Filters View (${filteredPrescriptions.length} matching rx)`
-                      : `Global Practice View (${allPrescriptions.length} total rx)`}
-                  </span>
-                </div>
-
-                {/* Scope Switcher (Rule #22) */}
-                <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '2px', gap: '2px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setScopeMode('global')}
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '4px',
-                      border: 'none',
-                      fontSize: '0.74rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      background: scopeMode === 'global' ? '#ffffff' : 'transparent',
-                      color: scopeMode === 'global' ? '#0f172a' : '#64748b',
-                      boxShadow: scopeMode === 'global' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
-                      transition: 'all 0.12s'
-                    }}
-                  >
-                    Global Database
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setScopeMode('filtered')}
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '4px',
-                      border: 'none',
-                      fontSize: '0.74rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      background: scopeMode === 'filtered' ? '#ffffff' : 'transparent',
-                      color: scopeMode === 'filtered' ? '#0f172a' : '#64748b',
-                      boxShadow: scopeMode === 'filtered' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
-                      transition: 'all 0.12s'
-                    }}
-                  >
-                    Matching Filters
-                  </button>
-                </div>
+              {/* 1. Prominent Global Search Bar First (Golden Rule #7) */}
+              <div style={{ marginBottom: '16px' }}>
+                <GlobalSearchBar
+                  value={searchQuery}
+                  onChange={(val) => {
+                    setSearchQuery(val);
+                    if (val && val.trim().length >= 2 && allPrescriptions.length > 0) {
+                      setScopeMode('filtered');
+                    }
+                  }}
+                  placeholder={
+                    allPrescriptions.length === 0
+                      ? 'Search specialty formulas, active ingredients (Minoxidil, Dutasteride, GHK-Cu), or open ⌘K...'
+                      : 'Search patient name, Rx code (#RX), invoice, or active ingredient...'
+                  }
+                  resultCount={allPrescriptions.length > 0 ? filteredPrescriptions.length : doctorSpecialtyIntel.primaryBlueprints.length}
+                  totalCount={allPrescriptions.length > 0 ? allPrescriptions.length : doctorSpecialtyIntel.primaryBlueprints.length}
+                  size="md"
+                  namespace={`dr_overview_${slug}`}
+                  filters={
+                    allPrescriptions.length > 0 ? [
+                      {
+                        key: 'quick_sold',
+                        label: `Sold & Invoiced (${quickCounts.active})`,
+                        active: quickRxFilter === 'active',
+                        onClick: () => {
+                          setQuickRxFilter(quickRxFilter === 'active' ? 'all' : 'active');
+                          handleSidebarNavigate('prescriptions');
+                        }
+                      },
+                      {
+                        key: 'quick_offers',
+                        label: `Unaccepted Offers (${quickCounts.proposals})`,
+                        active: quickRxFilter === 'proposals',
+                        onClick: () => {
+                          setQuickRxFilter(quickRxFilter === 'proposals' ? 'all' : 'proposals');
+                          handleSidebarNavigate('prescriptions');
+                        }
+                      },
+                      {
+                        key: 'quick_blueprints',
+                        label: `Specialty Blueprints (${doctorSpecialtyIntel.primaryBlueprints.length})`,
+                        active: false,
+                        onClick: () => handleSidebarNavigate('recommendations')
+                      }
+                    ] : [
+                      {
+                        key: 'quick_blueprints',
+                        label: `${doctorSpecialtyIntel.primaryMeta?.shortLabel || 'Specialty'} Blueprints (${doctorSpecialtyIntel.primaryBlueprints.length})`,
+                        active: true,
+                        onClick: () => handleSidebarNavigate('recommendations')
+                      },
+                      {
+                        key: 'quick_new_rx',
+                        label: '+ Create First Prescription',
+                        active: false,
+                        onClick: () => setIsIntakeOpen(true)
+                      }
+                    ]
+                  }
+                />
               </div>
 
-              <div className="gcp-kpi-grid">
-                {/* KPI 1: Sold & Invoiced Orders (Golden Rule: Clear distinction) */}
-                <div
-                  className="gcp-kpi-card"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setQuickRxFilter('active');
-                    setStatusFilter('all');
-                    setPatientFilter('all');
-                    setTemporalFilter('all');
-                    setSearchQuery('');
-                    setActiveAnchor('prescriptions');
-                    toast.success(`Filtered table: Showing ${quickCounts.active} sold & invoiced prescriptions`, { id: 'kpi-filter' });
-                  }}
-                  style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
-                  title="Click to view Sold & Invoiced orders in table"
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Sold & Invoiced</span>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <CheckCircle2 size={16} style={{ color: '#16a34a' }} />
-                    </div>
+              {/* 2. KPI Header & Scope Indicator (Only show filter toggle when doctor has Rx records and filters apply) */}
+              {(allPrescriptions.length > 0 && (scopeMode === 'filtered' || searchQuery || statusFilter !== 'all' || quickRxFilter !== 'all' || apiFilter)) && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        background: scopeMode === 'filtered' ? '#f0fdf4' : '#eff6ff',
+                        color: scopeMode === 'filtered' ? '#16a34a' : '#1d4ed8',
+                        border: `1px solid ${scopeMode === 'filtered' ? '#bbf7d0' : '#bfdbfe'}`,
+                        borderRadius: '4px',
+                        padding: '2px 8px',
+                        fontWeight: 600
+                      }}
+                    >
+                      {scopeMode === 'filtered'
+                        ? `Filtered View (${filteredPrescriptions.length} matching records)`
+                        : `All Practice Records (${allPrescriptions.length} total)`}
+                    </span>
                   </div>
-                  <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#15803d', lineHeight: 1.1 }}>
-                    {quickCounts.active}
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Confirmed & invoiced orders</span>
-                    <span style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 600 }}>Filter sold →</span>
+
+                  <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '2px', gap: '2px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setScopeMode('global')}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        fontSize: '0.73rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        background: scopeMode === 'global' ? '#ffffff' : 'transparent',
+                        color: scopeMode === 'global' ? '#0f172a' : '#64748b'
+                      }}
+                    >
+                      All Records
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setScopeMode('filtered')}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        fontSize: '0.73rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        background: scopeMode === 'filtered' ? '#ffffff' : 'transparent',
+                        color: scopeMode === 'filtered' ? '#0f172a' : '#64748b'
+                      }}
+                    >
+                      Filtered View
+                    </button>
                   </div>
                 </div>
+              )}
 
-                {/* KPI 2: Monitored Patients */}
-                <div
-                  className="gcp-kpi-card"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    handleSidebarNavigate('patients');
-                    toast.success(`Displaying all ${doctorPatientsList.length} monitored patient dossiers`, { id: 'kpi-filter' });
-                  }}
-                  style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
-                  title="Click to view Monitored Patients directory"
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Monitored Patients</span>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Users size={16} style={{ color: '#1a73e8' }} />
+              {/* 3. Adaptive 4-KPI Row (Rule #22): Specialty Readiness KPIs for Zero-Rx vs Operational KPIs for Active Doctors */}
+              {allPrescriptions.length === 0 ? (
+                <div className="gcp-kpi-grid" style={{ marginBottom: '18px' }}>
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => handleSidebarNavigate('recommendations')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase' }}>Specialty Blueprints</span>
+                      <Sparkles size={16} style={{ color: '#0284c7' }} />
+                    </div>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>
+                      {doctorSpecialtyIntel.primaryBlueprints.length}
+                    </div>
+                    <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Ready-to-prescribe protocols</span>
+                      <span style={{ color: '#0284c7', fontWeight: 600 }}>Explore →</span>
                     </div>
                   </div>
-                  <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
-                    {doctorPatientsList.length}
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Unique patient dossiers managed</span>
-                    <span style={{ fontSize: '0.70rem', color: '#1a73e8', fontWeight: 600 }}>View patients →</span>
-                  </div>
-                </div>
 
-                {/* KPI 3: Unaccepted Treatment Offers (Golden Rule: Clear distinction) */}
-                <div
-                  className="gcp-kpi-card"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setQuickRxFilter('proposals');
-                    setStatusFilter('all');
-                    setPatientFilter('all');
-                    setTemporalFilter('all');
-                    setSearchQuery('');
-                    setActiveAnchor('prescriptions');
-                    toast.success(`Showing ${quickCounts.proposals} unaccepted proposals awaiting checkout`, { id: 'kpi-filter' });
-                  }}
-                  style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
-                  title="Click to view Unaccepted Offers in table"
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Unaccepted Offers</span>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Clock size={16} style={{ color: '#d97706' }} />
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => handleSidebarNavigate('recommendations')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase' }}>Clinical Procedures</span>
+                      <Stethoscope size={16} style={{ color: '#16a34a' }} />
+                    </div>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#15803d' }}>
+                      {doctorSpecialtyIntel.webPracticeProfile?.detectedProcedures?.length || 4}
+                    </div>
+                    <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Mapped to your specialty</span>
+                      <span style={{ color: '#15803d', fontWeight: 600 }}>View match →</span>
                     </div>
                   </div>
-                  <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#d97706', lineHeight: 1.1 }}>
-                    {quickCounts.proposals}
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Proposals pending checkout</span>
-                    <span style={{ fontSize: '0.70rem', color: '#d97706', fontWeight: 600 }}>Filter offers →</span>
-                  </div>
-                </div>
 
-                {/* KPI 4: Pending Clinical Tasks */}
-                <div
-                  className="gcp-kpi-card"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setTaskFilter('all');
-                    setSearchQuery('');
-                    handleSidebarNavigate('tasks');
-                    toast.success(`Showing all ${activeKpis.pendingTasksCount} actionable clinical tasks`, { id: 'kpi-filter' });
-                  }}
-                  style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
-                  title="Click to view Action Tasks in to-do list"
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Action Tasks</span>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Sparkles size={16} style={{ color: '#7c3aed' }} />
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => setIsIntakeOpen(true)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#4f46e5', textTransform: 'uppercase' }}>Magistral APIs Ready</span>
+                      <FlaskConical size={16} style={{ color: '#4f46e5' }} />
+                    </div>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#4f46e5' }}>
+                      25+
+                    </div>
+                    <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Pharmaceutical-grade actives</span>
+                      <span style={{ color: '#4f46e5', fontWeight: 600 }}>Prescribe →</span>
                     </div>
                   </div>
-                  <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#7c3aed', lineHeight: 1.1 }}>
-                    {activeKpis.pendingTasksCount}
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Actionable reviews & titrations</span>
-                    <span style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 600 }}>View tasks →</span>
+
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => handleSidebarNavigate('lab_results')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#b45309', textTransform: 'uppercase' }}>Diagnostic Panels</span>
+                      <Activity size={16} style={{ color: '#d97706' }} />
+                    </div>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#d97706' }}>
+                      {allLabResults.length || 3}
+                    </div>
+                    <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Genetic & biomarker screening</span>
+                      <span style={{ color: '#d97706', fontWeight: 600 }}>Open labs →</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="gcp-kpi-grid">
+                  {/* KPI 1: Sold & Invoiced Orders */}
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => {
+                      triggerHaptic('light');
+                      setQuickRxFilter('active');
+                      setStatusFilter('all');
+                      setPatientFilter('all');
+                      setTemporalFilter('all');
+                      setSearchQuery('');
+                      setActiveAnchor('prescriptions');
+                      toast.success(`Showing ${quickCounts.active} sold & invoiced prescriptions`, { id: 'kpi-filter' });
+                    }}
+                    style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
+                    title="Click to view Sold & Invoiced orders"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Sold & Invoiced</span>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckCircle2 size={16} style={{ color: '#16a34a' }} />
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#15803d', lineHeight: 1.1 }}>
+                      {quickCounts.active}
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span>Confirmed & invoiced orders</span>
+                      <span style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 600 }}>View sold →</span>
+                    </div>
+                  </div>
 
+                  {/* KPI 2: Patients */}
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => {
+                      triggerHaptic('light');
+                      handleSidebarNavigate('patients');
+                      toast.success(`Displaying ${doctorPatientsList.length} patients`, { id: 'kpi-filter' });
+                    }}
+                    style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
+                    title="Click to view Patients directory"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Patients</span>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Users size={16} style={{ color: '#1a73e8' }} />
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
+                      {doctorPatientsList.length}
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span>{soldPatientsCount} active · {unacceptedPatientsCount} pending offer</span>
+                      <span style={{ fontSize: '0.70rem', color: '#1a73e8', fontWeight: 600 }}>View patients →</span>
+                    </div>
+                  </div>
 
+                  {/* KPI 3: Unaccepted Offers */}
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => {
+                      triggerHaptic('light');
+                      setQuickRxFilter('proposals');
+                      setStatusFilter('all');
+                      setPatientFilter('all');
+                      setTemporalFilter('all');
+                      setSearchQuery('');
+                      setActiveAnchor('prescriptions');
+                      toast.success(`Showing ${quickCounts.proposals} unaccepted proposals awaiting checkout`, { id: 'kpi-filter' });
+                    }}
+                    style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
+                    title="Click to view Unaccepted Offers"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Unaccepted Offers</span>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Clock size={16} style={{ color: '#d97706' }} />
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#d97706', lineHeight: 1.1 }}>
+                      {quickCounts.proposals}
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span>Proposals awaiting checkout</span>
+                      <span style={{ fontSize: '0.70rem', color: '#d97706', fontWeight: 600 }}>Follow up →</span>
+                    </div>
+                  </div>
 
-              {/* ── Specialty Practice Blueprints & Web Footprint Showcase (Zero-Rx & Active Doctors) ── */}
+                  {/* KPI 4: Pending Actions */}
+                  <div
+                    className="gcp-kpi-card"
+                    onClick={() => {
+                      triggerHaptic('light');
+                      setTaskFilter('all');
+                      setSearchQuery('');
+                      handleSidebarNavigate('tasks');
+                      toast.success(`Showing ${activeKpis.pendingTasksCount} pending actions`, { id: 'kpi-filter' });
+                    }}
+                    style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
+                    title="Click to view Pending Actions"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Pending Actions</span>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Sparkles size={16} style={{ color: '#7c3aed' }} />
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#7c3aed', lineHeight: 1.1 }}>
+                      {activeKpis.pendingTasksCount}
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span>Sign-offs & patient follow-ups</span>
+                      <span style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 600 }}>Resolve →</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 4. 1-Click Priority Patient Actions Strip (For Active Doctors with Pending Tasks) */}
+              {allPrescriptions.length > 0 && filteredTasks.length > 0 && (
+                <div
+                  style={{
+                    marginTop: '16px',
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderLeft: '4px solid #f59e0b',
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                        ⚡ Priority Patient Actions ({filteredTasks.length})
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                        Resolve pending sign-offs or remind patients with unaccepted treatment offers in 1 click
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleSidebarNavigate('tasks')}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#1a73e8',
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      View all {filteredTasks.length} actions →
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
+                    {filteredTasks.slice(0, 3).map((t) => {
+                      const isProposalTask = t.type === 'proposal_followup';
+                      const codifiedId = getCodifiedPatientId(t.patientName, t.code);
+                      const displayPatient = isAuthorizedViewer ? t.patientName : codifiedId;
+                      const patientPhone = (t.patientPhone || t.patient?.phone || '').replace(/[^0-9+]/g, '');
+                      const cleanDocTitle = (doctor?.name || 'Khalid Shukri').replace(/^Dr\.?\s*/i, '').trim();
+                      const rawMsg = (t.whatsappMessage || `Hello ${t.patientName}, this is Dr. ${cleanDocTitle}'s clinical practice following up on your personalized ${t.treatmentTitle || 'treatment plan'}. You can review your medical protocol here: https://atlashealth-services.com/rx/${t.code}.`)
+                        .replace(/Dr\.\s+Dr\.\s+/gi, 'Dr. ');
+                      const waUrl = patientPhone
+                        ? `https://wa.me/${patientPhone}?text=${encodeURIComponent(rawMsg)}`
+                        : `https://wa.me/?text=${encodeURIComponent(rawMsg)}`;
+
+                      return (
+                        <div
+                          key={t.id || t.code}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '10px',
+                            padding: '8px 12px',
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '6px'
+                          }}
+                        >
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {displayPatient}
+                            </div>
+                            <div style={{ fontSize: '0.71rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {isProposalTask ? '⏳ Offer awaiting checkout' : '✍️ Pending Rx authorization'} · {t.treatmentTitle || t.code}
+                            </div>
+                          </div>
+
+                          {isProposalTask ? (
+                            <a
+                              href={waUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                padding: '5px 10px',
+                                borderRadius: '5px',
+                                background: '#f0fdf4',
+                                border: '1px solid #bbf7d0',
+                                color: '#15803d',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                textDecoration: 'none',
+                                whiteSpace: 'nowrap'
+                              }}
+                              title="Send 1-click WhatsApp follow-up reminder to patient"
+                            >
+                              <MessageCircle size={13} />
+                              <span>Remind</span>
+                            </a>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => handleSignOffPrescription(t, e)}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                padding: '5px 10px',
+                                borderRadius: '5px',
+                                background: '#1a73e8',
+                                border: 'none',
+                                color: '#ffffff',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              <CheckCircle2 size={12} />
+                              <span>Sign-off</span>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* 5. Specialty Practice Blueprints & Web Footprint Showcase (Zero-Rx & Active Doctors) */}
               <div
                 style={{
-                  marginTop: '20px',
+                  marginTop: '18px',
                   background: allPrescriptions.length === 0
                     ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
                     : '#ffffff',
@@ -5332,12 +5657,12 @@ export default function DoctorPublicPortalClient({
                         }}
                       >
                         {allPrescriptions.length === 0
-                          ? 'Zero-Rx Onboarding · Ready-to-Prescribe Clinical Blueprints'
+                          ? 'Ready-to-Prescribe Clinical Blueprints'
                           : `${doctorSpecialtyIntel.primaryBlueprints.length} Specialty Blueprints + ${allPrescriptions.length} Active Rx Synergies`}
                       </span>
                     </div>
                     <h3 style={{ margin: 0, fontSize: allPrescriptions.length === 0 ? '1.08rem' : '0.96rem', fontWeight: 700, color: allPrescriptions.length === 0 ? '#ffffff' : '#0f172a' }}>
-                      {isAuthorizedViewer ? `${doctor.name} — ` : ''}Researched Specialty Focus & Ready-to-Prescribe Formulations
+                      {isAuthorizedViewer ? `${doctor.name} — ` : ''}Specialty Focus & Ready-to-Prescribe Formulations
                     </h3>
                     <p style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: allPrescriptions.length === 0 ? '#cbd5e1' : '#475569', lineHeight: 1.45, maxWidth: '860px' }}>
                       {doctorSpecialtyIntel.webPracticeProfile?.summary}
@@ -5366,7 +5691,7 @@ export default function DoctorPublicPortalClient({
                     }}
                   >
                     <Sparkles size={14} />
-                    <span>Explore All Specialty & Rx Blueprints</span>
+                    <span>Explore All Specialty Blueprints</span>
                     <ArrowUpRight size={13} />
                   </button>
                 </div>
@@ -5387,24 +5712,24 @@ export default function DoctorPublicPortalClient({
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#38bdf8' }}>
-                        👋 Guía de Inicio para Nuevos Facultativos
+                        👋 Quick-Start Clinical Guide
                       </span>
                       <span style={{ fontSize: '0.66rem', fontWeight: 700, background: 'rgba(56, 189, 248, 0.2)', color: '#bae6fd', padding: '1px 6px', borderRadius: '4px' }}>
-                        Flujo Clínico en 3 Pasos
+                        3 Simple Steps
                       </span>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px', marginTop: '4px' }}>
                       <div style={{ background: 'rgba(30, 41, 59, 0.8)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.74rem', color: '#cbd5e1' }}>
-                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>1. Explora la Ficha Técnica:</strong>
-                        Pulsa en <em>"Ficha Técnica y Evidencia"</em> para revisar activos, concentraciones, vehículos y pauta de cada fórmula.
+                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>1. Review Clinical Monograph:</strong>
+                        Click <em>"Clinical Monograph & Evidence"</em> to inspect active ingredients, concentrations, vehicles, and posology.
                       </div>
                       <div style={{ background: 'rgba(30, 41, 59, 0.8)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.74rem', color: '#cbd5e1' }}>
-                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>2. Personaliza la Prescripción:</strong>
-                        Pulsa <em>"Personalizar y Prescribir"</em> para cargar la fórmula en el constructor, asignar tu paciente y ajustar dosis.
+                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>2. Customize & Prescribe:</strong>
+                        Click <em>"Customize & Prescribe"</em> to load the formula into the Rx builder, assign your patient, and adjust doses.
                       </div>
                       <div style={{ background: 'rgba(30, 41, 59, 0.8)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.74rem', color: '#cbd5e1' }}>
-                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>3. Elaboración Magistral:</strong>
-                        La farmacia autorizada (PharmapolisLab) prepara la fórmula y gestiona la entrega a tu clínica o paciente con trazabilidad.
+                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>3. Pharmacy Compounding:</strong>
+                        Authorized compounding pharmacy prepares the formulation and delivers directly to your clinic or patient.
                       </div>
                     </div>
                   </div>
@@ -5414,7 +5739,7 @@ export default function DoctorPublicPortalClient({
                 {Array.isArray(doctorSpecialtyIntel.webPracticeProfile?.detectedProcedures) && doctorSpecialtyIntel.webPracticeProfile.detectedProcedures.length > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                     <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', color: allPrescriptions.length === 0 ? '#94a3b8' : '#64748b' }}>
-                      Detected Clinical Activity:
+                      Detected Clinical Focus:
                     </span>
                     {doctorSpecialtyIntel.webPracticeProfile.detectedProcedures.map((proc, idx) => (
                       <span
@@ -5472,7 +5797,6 @@ export default function DoctorPublicPortalClient({
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '8px', borderTop: allPrescriptions.length === 0 ? '1px solid rgba(255,255,255,0.08)' : '1px solid #e2e8f0' }}>
-                        {/* Clinical Monograph / Dossier (On-Screen Modal Dialog, NO WhatsApp!) */}
                         <button
                           type="button"
                           onClick={() => {
@@ -5492,13 +5816,12 @@ export default function DoctorPublicPortalClient({
                             alignItems: 'center',
                             gap: '5px'
                           }}
-                          title="Ver composición detallada, mecanismo de acción y pauta posológica"
+                          title="View detailed composition, mechanism of action, and posology"
                         >
                           <FileText size={12} style={{ color: '#0284c7' }} />
-                          <span>Ficha Técnica y Evidencia</span>
+                          <span>Clinical Monograph & Evidence</span>
                         </button>
 
-                        {/* Customize & Prescribe (Clear, safe, and controlled flow) */}
                         <button
                           type="button"
                           onClick={() => handlePrescribeSpecialtyBlueprint(bp)}
@@ -5518,10 +5841,10 @@ export default function DoctorPublicPortalClient({
                             gap: '5px',
                             boxShadow: '0 1px 2px rgba(0,0,0,0.08)'
                           }}
-                          title="Cargar fórmula en el constructor para asignar paciente, ajustar dosis y firmar"
+                          title="Load formula into prescription builder to assign patient, titrate doses, and sign"
                         >
                           <Plus size={12} />
-                          <span>Personalizar y Prescribir</span>
+                          <span>Customize & Prescribe</span>
                         </button>
                       </div>
                     </div>
@@ -5529,29 +5852,31 @@ export default function DoctorPublicPortalClient({
                 </div>
               </div>
 
-              {/* ── Deep Clinical Analytics & Prescribing Intelligence (Rule #22) ── */}
-              <div style={{ marginTop: '24px' }}>
-                <DoctorClinicalAnalytics
-                  prescriptions={scopeMode === 'filtered' ? filteredPrescriptions : allPrescriptions}
-                  serverAnalytics={data?.serverAnalytics}
-                  onSelectApi={(apiName) => {
-                    if (apiFilter && apiFilter.toLowerCase() === apiName.toLowerCase()) {
+              {/* 6. Deep Clinical Analytics (Only shown when doctor has prescriptions so Zero-Rx doctors don't see empty charts) */}
+              {allPrescriptions.length > 0 && (
+                <div style={{ marginTop: '24px' }}>
+                  <DoctorClinicalAnalytics
+                    prescriptions={scopeMode === 'filtered' ? filteredPrescriptions : allPrescriptions}
+                    serverAnalytics={data?.serverAnalytics}
+                    onSelectApi={(apiName) => {
+                      if (apiFilter && apiFilter.toLowerCase() === apiName.toLowerCase()) {
+                        setApiFilter(null);
+                        toast('Cleared active API filter', { id: 'api-filter' });
+                      } else {
+                        setApiFilter(apiName);
+                        handleSidebarNavigate('prescriptions');
+                        toast.success(`Filtered table: showing ${apiName} formulations`, { id: 'api-filter' });
+                      }
+                    }}
+                    selectedApiFilter={apiFilter}
+                    onClearApiFilter={() => {
                       setApiFilter(null);
                       toast('Cleared active API filter', { id: 'api-filter' });
-                    } else {
-                      setApiFilter(apiName);
-                      handleSidebarNavigate('prescriptions');
-                      toast.success(`Filtered table: showing ${apiName} formulations`, { id: 'api-filter' });
-                    }
-                  }}
-                  selectedApiFilter={apiFilter}
-                  onClearApiFilter={() => {
-                    setApiFilter(null);
-                    toast('Cleared active API filter', { id: 'api-filter' });
-                  }}
-                  isFiltered={scopeMode === 'filtered' || !!apiFilter}
-                />
-              </div>
+                    }}
+                    isFiltered={scopeMode === 'filtered' || !!apiFilter}
+                  />
+                </div>
+              )}
             </div>
           )}
 
@@ -7686,6 +8011,8 @@ export default function DoctorPublicPortalClient({
         isOpen={isPracticeSearchOpen}
         onClose={() => setIsPracticeSearchOpen(false)}
         doctor={doctor}
+        isAuthorizedViewer={isAuthorizedViewer}
+        opaqueDoctorCode={opaqueCode}
         prescriptions={allPrescriptions}
         topFormulations={data?.serverAnalytics?.topApis || []}
         onSelectPatient={(pName) => {
@@ -10585,6 +10912,7 @@ export default function DoctorPublicPortalClient({
         onClose={() => setIsClaimModalOpen(false)}
         doctor={doctor}
         opaqueCode={opaqueCode}
+        isAuthorizedViewer={isAuthorizedViewer}
         onAuthorized={() => {
           setWorkstationAuthorized(true);
           setIsClaimModalOpen(false);

@@ -20,6 +20,7 @@ export default function DoctorPracticeClaimModal({
   onClose,
   doctor = {},
   opaqueCode = '',
+  isAuthorizedViewer = false,
   onAuthorized = null
 }) {
   const [licenseInput, setLicenseInput] = useState('');
@@ -43,6 +44,16 @@ export default function DoctorPracticeClaimModal({
     return '••••••••' + clean.slice(-visibleEnd);
   };
 
+  const maskDoctorName = (name) => {
+    if (!name || typeof name !== 'string') return 'Accredited Treating Physician';
+    const parts = name.trim().split(/\s+/);
+    return parts.map(p => {
+      if (p.toLowerCase() === 'dr.' || p.toLowerCase() === 'dr') return p;
+      if (p.length <= 2) return p[0] + '•';
+      return p[0] + '•'.repeat(Math.min(p.length - 1, 4));
+    }).join(' ');
+  };
+
   const maskedLicense = doctor.licenseNumber || doctor.license
     ? maskString(doctor.licenseNumber || doctor.license, 4)
     : 'On file with Atlas Health';
@@ -50,11 +61,16 @@ export default function DoctorPracticeClaimModal({
     ? maskString(doctor.phone, 4)
     : 'On file with Atlas Health';
   const maskedEmail = doctor.email
-    ? `••••@${doctor.email.split('@')[1] || 'domain.com'}`
+    ? `••••@${doctor.email.split('@')[1] ? (doctor.email.split('@')[1].length > 7 ? doctor.email.split('@')[1].slice(0, 3) + '•••.ae' : doctor.email.split('@')[1]) : 'domain.ae'}`
     : 'On file with Atlas Health';
 
-  const doctorDisplayName = doctor.name || `Treating Physician (${opaqueCode || 'Practice'})`;
-  const clinicDisplayName = doctor.clinic || 'Accredited Medical Practice';
+  const doctorDisplayName = isAuthorizedViewer
+    ? (doctor.name || `Treating Physician (${opaqueCode || 'Practice'})`)
+    : (doctor.name ? `${maskDoctorName(doctor.name)} (Treating Physician)` : `Accredited Treating Physician`);
+
+  const clinicDisplayName = isAuthorizedViewer
+    ? (doctor.clinic || 'Accredited Medical Practice')
+    : 'Accredited Medical Practice · DHA / MOH Registered';
 
   const handleClaimSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -485,7 +501,7 @@ export default function DoctorPracticeClaimModal({
                         <Smartphone size={14} style={{ position: 'absolute', left: '10px', top: '11px', color: '#94a3b8' }} />
                         <input
                           type="tel"
-                          placeholder="+971 52 425 1519"
+                          placeholder="+971 50 000 0000"
                           value={phoneInput}
                           onChange={(e) => setPhoneInput(e.target.value)}
                           style={{
@@ -575,7 +591,7 @@ export default function DoctorPracticeClaimModal({
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. +971 52 425 1519 or doctor@clinic.ae"
+                      placeholder="e.g. +971 50 000 0000 or doctor@clinic.ae"
                       value={phoneInput || emailInput}
                       onChange={(e) => {
                         const val = e.target.value;

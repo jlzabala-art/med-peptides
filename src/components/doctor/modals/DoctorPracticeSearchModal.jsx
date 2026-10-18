@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Search, X, User, FileText, Pill, Sparkles, ArrowRight, 
-  ExternalLink, CheckCircle2, ShieldCheck, ChevronRight 
+  ExternalLink, CheckCircle2, ShieldCheck, ChevronRight, Lock
 } from 'lucide-react';
 import StatusBadge from '@/components/ui/StatusBadge';
 
@@ -11,6 +11,8 @@ export default function DoctorPracticeSearchModal({
   isOpen,
   onClose,
   doctor = {},
+  isAuthorizedViewer = false,
+  opaqueDoctorCode = '',
   prescriptions = [],
   topFormulations = [],
   onSelectPatient,
@@ -34,19 +36,54 @@ export default function DoctorPracticeSearchModal({
     }
   }, [isOpen, onClose]);
 
+  // DHA / HIPAA Patient Privacy Helpers
+  const getCodifiedPatientId = (patientName, code) => {
+    const rawCode = String(code || '');
+    const cleanSuffix = rawCode.replace(/[^a-zA-Z0-9]/g, '');
+    if (cleanSuffix.length >= 4) {
+      return `PT-${cleanSuffix.slice(-4).toUpperCase()}`;
+    }
+    const cleanName = String(patientName || '').replace(/[^a-zA-Z0-9]/g, '');
+    if (cleanName.length >= 4) {
+      return `PT-${cleanName.slice(-4).toUpperCase()}`;
+    }
+    return 'PT-XXXX';
+  };
+
+  const maskCode = (code, rawName) => {
+    if (!code || code === 'N/A') return 'N/A';
+    if (isAuthorizedViewer) return code;
+    let clean = String(code);
+    if (rawName && rawName !== 'Anonymous Patient') {
+      const parts = rawName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(/\s+/).filter(p => p.length >= 2);
+      for (const part of parts) {
+        clean = clean.replace(new RegExp(`[-_]?${part}`, 'gi'), '');
+      }
+      clean = clean.replace(/[-_]+$/, '');
+    }
+    clean = clean.replace(/-(?:[a-z]{3,}-?)+$/i, '');
+    return clean || 'RX-PT-XXXX';
+  };
+
   // 1. Extract Unique Patients (Strictly isolated to this doctor's prescriptions, Sold first)
   const patientsList = useMemo(() => {
     const map = new Map();
     prescriptions.forEach(rx => {
       const name = (rx.patientName || rx.patient?.name || rx.patientId || '').trim();
       if (!name) return;
-      const key = String(name)
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/^(mr\.?|mrs\.?|ms\.?|miss|dr\.?|prof\.?|patient:?|paciente:?)\s+/i, '')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .toLowerCase() || String(rx.patientId || rx.id || '').toLowerCase();
+      const codifiedId = getCodifiedPatientId(name, rx.prescriptionNumber || rx.code);
+      const displayName = isAuthorizedViewer ? name : `Patient ${codifiedId}`;
+      const safeRxCode = maskCode(rx.prescriptionNumber || rx.code, name);
+      const key = isAuthorizedViewer 
+        ? (String(name)
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/^(mr\.?|mrs\.?|ms\.?|miss|dr\.?|prof\.?|patient:?|paciente:?)\s+/i, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase() || String(rx.patientId || rx.id || '').toLowerCase())
+        : codifiedId;
+
       const s = (rx.status || rx.state || '').toLowerCase();
       const isProp = Boolean(
         s === 'proposal_pending' ||
@@ -62,6 +99,9 @@ export default function DoctorPracticeSearchModal({
       if (!map.has(key)) {
         map.set(key, {
           name,
+          displayName,
+          codifiedId,
+          safeRxCode,
           id: rx.patientId || rx.code || 'PAT-01',
           prescriptionsCount: 0,
           latestRx: rx,
@@ -83,7 +123,7 @@ export default function DoctorPracticeSearchModal({
       if (a.hasSold !== b.hasSold) return a.hasSold ? -1 : 1;
       return b.prescriptionsCount - a.prescriptionsCount;
     });
-  }, [prescriptions]);
+  }, [prescriptions, isAuthorizedViewer]);
 
   // 2. Curated Clinical Synergies & Recommendations
   const curatedRecommendations = useMemo(() => [
@@ -142,20 +182,45 @@ export default function DoctorPracticeSearchModal({
 
   const matchingPatients = useMemo(() => {
     if (!cleanQ) return patientsList.slice(0, 8);
-    return patientsList.filter(p => p.name.toLowerCase().includes(cleanQ) || String(p.id).toLowerCase().includes(cleanQ) || String(p.invoiceRef || '').toLowerCase().includes(cleanQ));
-  }, [cleanQ, patientsList]);
+    return patientsList.filter(p => {
+      if (isAuthorizedViewer) {
+        return p.name.toLowerCase().includes(cleanQ) || String(p.id).toLowerCase().includes(cleanQ) || String(p.invoiceRef || '').toLowerCase().includes(cleanQ);
+      }
+      // Strictly prevent matching by raw nominal names for unregistered/unauthenticated users
+      return (
+        p.displayName.toLowerCase().includes(cleanQ) ||
+        p.codifiedId.toLowerCase().includes(cleanQ) ||
+        p.safeRxCode.toLowerCase().includes(cleanQ) ||
+        String(p.invoiceRef || '').toLowerCase().includes(cleanQ)
+      );
+    });
+  }, [cleanQ, patientsList, isAuthorizedViewer]);
 
   const matchingPrescriptions = useMemo(() => {
     if (!cleanQ) return prescriptions.slice(0, 6);
     return prescriptions.filter(rx => {
-      const code = String(rx.code || rx.prescriptionNumber || rx.id || '').toLowerCase();
-      const patient = String(rx.patientName || rx.patient?.name || '').toLowerCase();
+      const rawCode = String(rx.code || rx.prescriptionNumber || rx.id || '');
+      const safeCode = maskCode(rawCode, rx.patientName).toLowerCase();
       const title = String(rx.treatmentTitle || rx.title || '').toLowerCase();
       const posology = String(rx.posology || '').toLowerCase();
       const items = (rx.items || []).map(i => (i.name || i.drugName || '').toLowerCase()).join(' ');
-      return code.includes(cleanQ) || patient.includes(cleanQ) || title.includes(cleanQ) || posology.includes(cleanQ) || items.includes(cleanQ);
+
+      if (isAuthorizedViewer) {
+        const patient = String(rx.patientName || rx.patient?.name || '').toLowerCase();
+        return rawCode.toLowerCase().includes(cleanQ) || patient.includes(cleanQ) || title.includes(cleanQ) || posology.includes(cleanQ) || items.includes(cleanQ);
+      }
+
+      // For unregistered users, strictly match by de-identified code, codified patient ID, title, or ingredients
+      const codifiedId = getCodifiedPatientId(rx.patientName, rawCode).toLowerCase();
+      return (
+        safeCode.includes(cleanQ) ||
+        codifiedId.includes(cleanQ) ||
+        title.includes(cleanQ) ||
+        posology.includes(cleanQ) ||
+        items.includes(cleanQ)
+      );
     });
-  }, [cleanQ, prescriptions]);
+  }, [cleanQ, prescriptions, isAuthorizedViewer]);
 
   const matchingFormulations = useMemo(() => {
     if (!cleanQ) return topFormulations;
@@ -215,21 +280,29 @@ export default function DoctorPracticeSearchModal({
         {/* Top Isolation Banner — Explicitly proves only this doctor's patients are shown */}
         <div style={{
           padding: '8px 20px',
-          background: '#f0fdf4',
-          borderBottom: '1px solid #bbf7d0',
+          background: isAuthorizedViewer ? '#f0fdf4' : '#fffbeb',
+          borderBottom: `1px solid ${isAuthorizedViewer ? '#bbf7d0' : '#fde68a'}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: '8px',
           fontSize: '11.5px',
-          color: '#166534',
+          color: isAuthorizedViewer ? '#166534' : '#92400e',
           fontWeight: 600
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <ShieldCheck size={14} style={{ color: '#16a34a', flexShrink: 0 }} />
+            <ShieldCheck size={14} style={{ color: isAuthorizedViewer ? '#16a34a' : '#d97706', flexShrink: 0 }} />
             <span>
-              <strong>Private Practice Scope:</strong> Exclusively showing <strong>{doctor.name || 'Treating Physician'}</strong>&apos;s patients &amp; prescriptions
+              {isAuthorizedViewer ? (
+                <>
+                  <strong>Private Practice Scope:</strong> Exclusively showing <strong>{doctor.name || 'Treating Physician'}</strong>&apos;s patients &amp; prescriptions
+                </>
+              ) : (
+                <>
+                  <strong>Accredited Practice Scope ({opaqueDoctorCode || 'DR-CLINICAL'}):</strong> Patient identities protected under DHA/HIPAA standards
+                </>
+              )}
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
@@ -239,7 +312,7 @@ export default function DoctorPracticeSearchModal({
             <span style={{ background: '#fef3c7', color: '#b45309', padding: '1px 7px', borderRadius: '999px', fontWeight: 700 }}>
               {unacceptedPatientsCount} Unaccepted
             </span>
-            <span style={{ color: '#15803d', fontWeight: 700 }}>
+            <span style={{ color: isAuthorizedViewer ? '#15803d' : '#92400e', fontWeight: 700 }}>
               Total: {patientsList.length} Patients
             </span>
           </div>
@@ -254,7 +327,9 @@ export default function DoctorPracticeSearchModal({
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={`Search ${doctor.name || 'doctor'}'s patients, invoice numbers, prescriptions, or formulas...`}
+              placeholder={isAuthorizedViewer 
+                ? `Search ${doctor.name || 'doctor'}'s patients, invoice numbers, prescriptions, or formulas...`
+                : "Search practice formulations, prescription codes, invoice refs, or clinical protocols..."}
               style={{
                 width: '100%',
                 border: 'none',
@@ -369,7 +444,9 @@ export default function DoctorPracticeSearchModal({
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <User size={13} style={{ color: '#0284c7' }} />
-                  {cleanQ ? `Matching Patients (${matchingPatients.length})` : `Patients in ${doctor.name || 'Practice'} (Sold First)`}
+                  {cleanQ 
+                    ? `Matching Patients (${matchingPatients.length})` 
+                    : (isAuthorizedViewer ? `Patients in ${doctor.name || 'Practice'} (Sold First)` : 'Cohort Patients (Codified Registry)')}
                 </span>
                 <span style={{ fontSize: '11px', color: '#94a3b8' }}>Showing { (activeTab === 'patients' ? patientsList : matchingPatients).length } of {patientsList.length}</span>
               </div>
@@ -377,9 +454,9 @@ export default function DoctorPracticeSearchModal({
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {(activeTab === 'patients' && !cleanQ ? patientsList : matchingPatients).map((pat) => (
                   <div
-                    key={pat.name}
+                    key={pat.codifiedId || pat.name}
                     onClick={() => {
-                      if (onSelectPatient) onSelectPatient(pat.name);
+                      if (onSelectPatient) onSelectPatient(isAuthorizedViewer ? pat.name : pat.codifiedId);
                       onClose();
                     }}
                     style={{
@@ -403,15 +480,49 @@ export default function DoctorPracticeSearchModal({
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: pat.hasSold ? '#dcfce7' : '#fef3c7', color: pat.hasSold ? '#15803d' : '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '13px' }}>
-                        {pat.name.charAt(0).toUpperCase()}
+                      <div style={{ 
+                        width: '32px', 
+                        height: '32px', 
+                        borderRadius: '50%', 
+                        background: pat.hasSold ? '#dcfce7' : '#fef3c7', 
+                        color: pat.hasSold ? '#15803d' : '#b45309', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontWeight: 700, 
+                        fontSize: isAuthorizedViewer ? '13px' : '11px' 
+                      }}>
+                        {isAuthorizedViewer ? pat.name.charAt(0).toUpperCase() : <Lock size={13} style={{ color: pat.hasSold ? '#15803d' : '#b45309' }} />}
                       </div>
                       <div>
-                        <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>
-                          {pat.name}
-                        </div>
+                        {isAuthorizedViewer ? (
+                          <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>
+                            {pat.name}
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', fontFamily: 'monospace' }}>
+                              {pat.codifiedId}
+                            </span>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              fontSize: '10px',
+                              fontWeight: 650,
+                              color: '#b45309',
+                              background: '#fffbeb',
+                              border: '1px solid #fde68a',
+                              padding: '1px 6px',
+                              borderRadius: '12px'
+                            }}>
+                              <Lock size={9} />
+                              <span>Protected</span>
+                            </span>
+                          </div>
+                        )}
                         <div style={{ fontSize: '11px', color: '#64748b' }}>
-                          {pat.prescriptionsCount} prescribed {pat.prescriptionsCount === 1 ? 'treatment' : 'treatments'} {pat.invoiceRef ? `· ${pat.invoiceRef}` : `· ID: ${pat.id}`}
+                          {pat.prescriptionsCount} prescribed {pat.prescriptionsCount === 1 ? 'treatment' : 'treatments'} {pat.invoiceRef ? `· ${pat.invoiceRef}` : (isAuthorizedViewer ? `· ID: ${pat.id}` : '· Verified')}
                         </div>
                       </div>
                     </div>
@@ -602,53 +713,77 @@ export default function DoctorPracticeSearchModal({
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {matchingPrescriptions.map((rx) => (
-                  <div
-                    key={rx.id || rx.code}
-                    onClick={() => {
-                      if (onSelectPrescription) onSelectPrescription(rx);
-                      onClose();
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '10px 14px',
-                      borderRadius: '8px',
-                      border: '1px solid #f1f5f9',
-                      background: '#ffffff',
-                      cursor: 'pointer',
-                      transition: 'all 0.12s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#fff7ed';
-                      e.currentTarget.style.borderColor = '#fed7aa';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#ffffff';
-                      e.currentTarget.style.borderColor = '#f1f5f9';
-                    }}
-                  >
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#0369a1', fontFamily: 'monospace' }}>
-                          #{rx.code || rx.prescriptionNumber || rx.id}
-                        </span>
-                        <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
-                          {rx.patientName || rx.patient?.name || 'Patient'}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px' }}>
-                        {rx.treatmentTitle || (rx.items || []).map(i => i.name).join(', ') || 'Prescribed Regimen'}
-                      </div>
-                    </div>
+                {matchingPrescriptions.map((rx) => {
+                  const rawCode = rx.code || rx.prescriptionNumber || rx.id;
+                  const safeCode = maskCode(rawCode, rx.patientName);
+                  const codifiedPatId = getCodifiedPatientId(rx.patientName, rawCode);
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <StatusBadge status={rx.status || 'active'} />
-                      <ChevronRight size={15} style={{ color: '#94a3b8' }} />
+                  return (
+                    <div
+                      key={rx.id || rx.code}
+                      onClick={() => {
+                        if (onSelectPrescription) onSelectPrescription(rx);
+                        onClose();
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid #f1f5f9',
+                        background: '#ffffff',
+                        cursor: 'pointer',
+                        transition: 'all 0.12s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#fff7ed';
+                        e.currentTarget.style.borderColor = '#fed7aa';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                        e.currentTarget.style.borderColor = '#f1f5f9';
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#0369a1', fontFamily: 'monospace' }}>
+                            #{safeCode}
+                          </span>
+                          {isAuthorizedViewer ? (
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+                              {rx.patientName || rx.patient?.name || 'Patient'}
+                            </span>
+                          ) : (
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '11px',
+                              fontWeight: 650,
+                              color: '#b45309',
+                              background: '#fffbeb',
+                              border: '1px solid #fde68a',
+                              padding: '1px 6px',
+                              borderRadius: '10px'
+                            }}>
+                              <Lock size={9} />
+                              <span>Patient {codifiedPatId}</span>
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px' }}>
+                          {rx.treatmentTitle || (rx.items || []).map(i => i.name).join(', ') || 'Prescribed Regimen'}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <StatusBadge status={rx.status || 'active'} />
+                        <ChevronRight size={15} style={{ color: '#94a3b8' }} />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

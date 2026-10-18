@@ -131,10 +131,10 @@ export default function DoctorBlueprintDossierModal({
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase', marginBottom: '4px' }}>
               <Stethoscope size={14} />
-              <span>Indicación Clínica y Pacientes Diana</span>
+              <span>Clinical Indication & Target Patients</span>
             </div>
             <div style={{ fontSize: '0.84rem', color: '#1e293b', fontWeight: 600 }}>
-              {blueprint.targetPatients || 'Pacientes evaluados para tratamiento personalizado'}
+              {blueprint.targetPatients || 'Patients evaluated for personalized compounded therapy'}
             </div>
             {blueprint.summary && (
               <p style={{ margin: '6px 0 0 0', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.45 }}>
@@ -148,10 +148,10 @@ export default function DoctorBlueprintDossierModal({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
                 <FlaskConical size={14} style={{ color: '#0d9488' }} />
-                <span>Composición y Principios Activos Farmacéuticos (APIs)</span>
+                <span>Composition & Active Pharmaceutical Ingredients (APIs)</span>
               </div>
               <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>
-                Vehículo: {cf.dispensingForm || 'Magistral'} ({cf.volume || '100 mL'})
+                Vehicle: {cf.dispensingForm || 'Compounded'} ({cf.volume || '100 mL'})
               </span>
             </div>
 
@@ -209,7 +209,7 @@ export default function DoctorBlueprintDossierModal({
               }}
             >
               <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#166534', textTransform: 'uppercase', marginBottom: '4px' }}>
-                Pauta Posológica Recomendada de Referencia
+                Recommended Reference Posology & Regimen
               </div>
               <div style={{ fontSize: '0.82rem', color: '#14532d', lineHeight: 1.4 }}>
                 {cf.posology}
@@ -220,7 +220,7 @@ export default function DoctorBlueprintDossierModal({
           {/* Synergies */}
           <div style={{ marginBottom: '16px' }}>
             <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
-              Sinergias Clínicas y Diagnósticas Validadas
+              Validated Clinical & Diagnostic Synergies
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' }}>
               {blueprint.peptideSynergy && (
@@ -290,7 +290,7 @@ export default function DoctorBlueprintDossierModal({
             }}
           >
             <Package size={14} />
-            <span>Solicitar Muestra para Clínica</span>
+            <span>Request Clinic Sample</span>
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -308,7 +308,7 @@ export default function DoctorBlueprintDossierModal({
                 cursor: 'pointer'
               }}
             >
-              Cerrar
+              Close
             </button>
 
             <button
@@ -333,7 +333,7 @@ export default function DoctorBlueprintDossierModal({
                 boxShadow: '0 2px 4px rgba(0, 54, 102, 0.2)'
               }}
             >
-              <span>Personalizar y Prescribir para Paciente</span>
+              <span>Customize & Prescribe for Patient</span>
               <ArrowRight size={14} />
             </button>
           </div>
