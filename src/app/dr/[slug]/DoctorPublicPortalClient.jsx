@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { rememberDoctorSection } from '@/components/doctor/DoctorContinueBanner';
 import {
   Stethoscope,
   Share2,
@@ -159,6 +160,14 @@ const DoctorPracticeClaimModal = dynamic(
 );
 const DoctorBlueprintDossierModal = dynamic(
   () => import('@/components/doctor/modals/DoctorBlueprintDossierModal'),
+  { ssr: false }
+);
+const DoctorCommandPalette = dynamic(
+  () => import('@/components/doctor/DoctorCommandPalette'),
+  { ssr: false }
+);
+const DoctorContinueBanner = dynamic(
+  () => import('@/components/doctor/DoctorContinueBanner'),
   { ssr: false }
 );
 
@@ -4200,6 +4209,23 @@ export default function DoctorPublicPortalClient({
     }
   };
 
+  // Remember the last visited section so the doctor can resume in one tap.
+  useEffect(() => {
+    if (isAuthorizedViewer) rememberDoctorSection(slug, activeAnchor);
+  }, [slug, activeAnchor, isAuthorizedViewer]);
+
+  // Quick-actions palette entries (Cmd/Ctrl + /). Reuses existing navigation handlers.
+  const quickActionCommands = [
+    { id: 'new-rx', label: 'New prescription', hint: 'Open the prescription builder', icon: Plus, run: () => handleSidebarNavigate('intake') },
+    { id: 'rx-list', label: 'Go to prescriptions', hint: 'Review and filter your prescriptions', icon: FileText, run: () => handleSidebarNavigate('prescriptions') },
+    { id: 'patients', label: 'Go to patients', hint: 'Your patients only', icon: Users, run: () => handleSidebarNavigate('patients') },
+    { id: 'tasks', label: 'Go to pending tasks', hint: 'Signatures and follow-ups', icon: Clock, run: () => handleSidebarNavigate('tasks') },
+    { id: 'recs', label: 'Specialty blueprints & recommendations', hint: 'Evidence-based formulas for your specialty', icon: Sparkles, run: () => handleSidebarNavigate('recommendations') },
+    { id: 'discovery', label: 'Browse product collection', hint: 'Atlas and Colway catalog', icon: FlaskConical, run: () => handleSidebarNavigate('discovery') },
+    { id: 'search', label: 'Search practice records', hint: 'Find a prescription or patient', icon: Search, run: () => handleSidebarNavigate('search') },
+    { id: 'creds', label: 'Clinic credentials', hint: 'Verification and licensing', icon: ShieldCheck, run: () => handleSidebarNavigate('credentials') }
+  ];
+
   if (loading) {
     return (
       <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
@@ -5301,6 +5327,10 @@ export default function DoctorPublicPortalClient({
                   }
                 />
               </div>
+
+              {isAuthorizedViewer && (
+                <DoctorContinueBanner slug={slug} onResume={handleSidebarNavigate} />
+              )}
 
               {/* 2. KPI Header & Scope Indicator (Only show filter toggle when doctor has Rx records and filters apply) */}
               {(allPrescriptions.length > 0 && (scopeMode === 'filtered' || searchQuery || statusFilter !== 'all' || quickRxFilter !== 'all' || apiFilter)) && (
@@ -10989,6 +11019,9 @@ export default function DoctorPublicPortalClient({
           setIsClaimModalOpen(false);
         }}
       />
+
+      {/* ── Quick Actions Palette (GCP-style, Cmd/Ctrl + /) ── */}
+      <DoctorCommandPalette commands={quickActionCommands} />
 
       {/* ── Specialty Blueprint Clinical Monograph Dossier Modal (On-Screen, Zero WhatsApp) ── */}
       <DoctorBlueprintDossierModal
