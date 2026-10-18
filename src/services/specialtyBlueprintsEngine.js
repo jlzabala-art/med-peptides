@@ -108,18 +108,23 @@ export const CURATED_DOCTOR_WEB_PROFILES = {
     signatureApproach: 'Combines surgical follicular transplantation with personalized multi-part galenic scalp solutions (Part 1 Morning + Part 2 Evening).'
   },
   khalid: {
-    specialtyCategory: 'trichology',
-    lastResearchedAt: '2026-10-17',
-    verifiedSources: ['UAE Clinical Registry', 'Precision Trichology & Aesthetic Practice'],
-    clinicalFocusSummary:
-      'Specialist in medical trichology, follicular regeneration, and personalized topical/oral magistral formulations for androgenetic alopecia, diffuse thinning, and scalp barrier restoration.',
-    detectedProcedures: [
-      'Personalized Topical & Sublingual Alopecia Compounding',
-      '5α-Reductase Modulation (Finasteride / Dutasteride Titrations)',
-      'Follicular Microcirculation & Prostaglandin Analog Therapy',
-      'Scalp Microbiome & Seborrheic Inflammation Control'
+    specialtyCategory: 'longevity_bhrt',
+    lastResearchedAt: '2026-10-18',
+    verifiedSources: [
+      'Medi-Gyn Hormone Health & Longevity Dubai',
+      'American Board Certified in Anti-Aging Medicine (ABAARM / FCCM)',
+      'Wellth & Bioscalar Energy Centre Dubai',
+      'LinkedIn: Dr. Khalid Shukri'
     ],
-    signatureApproach: 'High-precision titration of topical antiandrogens, Minoxidil, Latanoprost, and Melatonin in hydrophilic/lipophilic vehicles.'
+    clinicalFocusSummary:
+      'MD, FCCM, ABAARM and American Board-Certified Specialist in Anti-Aging, Regenerative, Functional and Bio-Intelligent Medicine at Medi-Gyn and Wellth Dubai. Renowned expert in bioidentical hormone replacement (BHRT), cellular peptide therapy, and mitochondrial longevity.',
+    detectedProcedures: [
+      'Bioidentical Hormone Replacement Therapy (BHRT & Androgen Restoration)',
+      'Intracellular Peptide Bioregulation (Epithalon / Thymosin / BPC-157)',
+      'Cellular NAD+ Infusions & Mitochondrial Senolytic Protocols',
+      'Advanced Trichology & Dual-Phase Alopecia Formulations'
+    ],
+    signatureApproach: 'Pioneers bio-intelligent medicine and systemic peptide therapies integrated with high-precision hormone optimization.'
   },
   haytham: {
     specialtyCategory: 'regenerative_orthopedics',
@@ -190,6 +195,120 @@ export const CURATED_DOCTOR_WEB_PROFILES = {
       'Transdermal Dermo-Aesthetic Compounding'
     ],
     signatureApproach: 'Enhances aesthetic procedures and surgical recovery at NOVA Clinic with extracellular matrix peptides and clinical dermocosmetics.'
+  },
+  soudah: {
+    specialtyCategory: 'longevity_bhrt',
+    lastResearchedAt: '2026-10-18',
+    verifiedSources: [
+      'Dr. Leila Soudah Clinic Dubai (dlsclinic.com)',
+      'A4M American Board Certified in Anti-Aging Medicine (ABAARM / FAAFM)',
+      'Hannover University Facharzt Ob/Gyn (Germany)',
+      'LinkedIn: Dr. Leila Soudah'
+    ],
+    clinicalFocusSummary:
+      'German Board-certified Facharzt in Obstetrics & Gynecology and American Board Certified in Anti-Aging & Regenerative Medicine (ABAARM/FAAFM). Founder of Dr. Leila Soudah Clinic (Dubai, est. 1998) with in-house ISO-accredited laboratory, specialized in BHRT, metabolic longevity, and preventative medicine.',
+    detectedProcedures: [
+      'Precision Bioidentical Hormone Replacement Therapy (BHRT: Progesterone, Bi-Est, DHEA)',
+      'DLS Metabolic Optimization & GLP-1/GIP Incretin Body Composition Protocols',
+      'Cellular Senescence, Intracellular NAD+ & Mitochondrial Longevity Cycles',
+      'Preventative Multiomic Screening (Breast & Cardiovascular Genomic Profiling)'
+    ],
+    signatureApproach: 'Combines rigorous German academic gynecology with A4M metabolic longevity and custom transdermal BHRT formulations.'
+  },
+  sobia: {
+    specialtyCategory: 'longevity_bhrt',
+    lastResearchedAt: '2026-10-18',
+    verifiedSources: [
+      'My London Skin Clinic DIFC Dubai (mylondonskinclinic.ae)',
+      'Institute for Functional Medicine (AFMCP)',
+      'Royal College of General Practitioners UK (MRCGP)',
+      'Emirates Lifestyle & Longevity Medical Society (ELLMS)',
+      'LinkedIn: Dr. Sobia Mirza'
+    ],
+    clinicalFocusSummary:
+      'Head of Functional & Longevity Medicine at My London Skin Clinic (DIFC, Dubai). Over 15 years NHS/UK clinical experience (MRCGP, AFMCP). Practicing "Medicine 3.0" precision healthcare integrating epigenetic clocks (ETERNA DX), gut-brain axis, hormone balance, and cellular peptide therapies.',
+    detectedProcedures: [
+      'Medicine 3.0 Epigenetic Longevity Risk Stratification & Horvath Biological Age',
+      'Intestinal Barrier Integrity, Gut-Brain Permeability & Peptide Repair (BPC-157 / KPV)',
+      'Targeted Cellular Mitochondrial Co-Factors (NAD+ & Epithalon Telomeric Cycles)',
+      'Comprehensive Functional Hormone Balancing & Transdermal Bioidentical Support'
+    ],
+    signatureApproach: 'Deploys UK functional medicine and Medicine 3.0 multiomics to reverse biological aging and restore systemic homeostasis.'
+  },
+  camacho: {
+    specialtyCategory: 'longevity_bhrt',
+    lastResearchedAt: '2026-10-18',
+    verifiedSources: [
+      'Clínica Dra. Camacho Barcelona (dracamacho.com)',
+      'Col·legi Oficial de Metges de Barcelona (COMB Col. 46759)',
+      'Práctica Avanzada en BHRT y Antienvejecimiento',
+      'LinkedIn: Dra. Haydee Camacho Gamboa'
+    ],
+    clinicalFocusSummary:
+      'Directora médica de la Clínica Dra. Camacho en Barcelona (Carrer d’Aribau). Especialista en Terapia de Reemplazo Hormonal Bioidéntico (BHRT), equilibrio endocrino femenino (perimenopausia/menopausia), longevidad celular y medicina funcional antienvejecimiento.',
+    detectedProcedures: [
+      'Terapia Hormonal Bioidéntica Personalizada en Formulación Magistral (BHRT)',
+      'Optimización de la Transición Menopáusica, Función Tiroidea y Eje Adrenal',
+      'Modulación de la Composición Corporal, Metabolismo Lipídico y Vitalidad Celular',
+      'Prevención Antienvejecimiento Basada en Perfiles Hormonales y Estrés Oxidativo'
+    ],
+    signatureApproach: 'Prescripción magistral de formulaciones bioidénticas transdérmicas calibradas con biomarcadores hormonales longitudinales.'
+  },
+  aranda: {
+    specialtyCategory: 'trichology',
+    lastResearchedAt: '2026-10-18',
+    verifiedSources: [
+      'Colegio Oficial de Médicos (Col. 282869584)',
+      'Especialista en Producción Magistral y Cirugía Capilar',
+      'Formulación Magistral de Alta Precisión Atlas'
+    ],
+    clinicalFocusSummary:
+      'Médico prescriptor y especialista en tricología quirúrgica y médica en Madrid. Enfoque prioritario en formulación magistral personalizada en vehículos tricológicos avanzados (TrichoSol™/TrichoOil™) y preservación folicular pre y post-quirúrgica.',
+    detectedProcedures: [
+      'Formulaciones Magistrales Tópicas y Sublinguales Personalizadas',
+      'Bloqueo Tópico de 5α-Reductasa Tipo I/II (Finasterida / Dutasterida en Dosis Graduadas)',
+      'Estimulación Microvascular con Péptidos de Cobre (GHK-Cu) y Vasodilatadores',
+      'Regeneración Tisular de la Matriz Extracelular en el Cuero Cabelludo'
+    ],
+    signatureApproach: 'Diseño de protocolos magistrales multifásicos a medida, combinando activos hidrófilos y lipófilos según tolerancia dérmica.'
+  },
+  mutawah: {
+    specialtyCategory: 'dermatology',
+    lastResearchedAt: '2026-10-18',
+    verifiedSources: [
+      'My Skin Clinic Kuwait (myskinkw.com)',
+      'American Board of Dermatology & Canadian Board Certified',
+      'Former Assistant Professor at Kuwait University',
+      'Fellowship in Cosmetic Laser Technologies',
+      'LinkedIn: Dr. Fahad Al-Mutawa'
+    ],
+    clinicalFocusSummary:
+      'Board-certified Consultant Dermatologist (USA & Canada) and Founder of My Skin Clinic (Kuwait City). Former Faculty at Kuwait University with specialized fellowship training in medical lasers, aesthetic dermatology, and clinical trichology.',
+    detectedProcedures: [
+      'Advanced Fractional Laser Resurfacing & Post-Procedure ECM Recovery',
+      'Melasma, Post-Inflammatory Hyperpigmentation (PIH) & Vascular Lesions',
+      'Medical Trichology, Scalp Biostimulation & Non-Surgical Hair Regrowth',
+      'Targeted Transdermal Peptide Delivery for Dermal Barrier Reconstruction'
+    ],
+    signatureApproach: 'Merges North American board dermatologic rigor with customized bioactive peptides (GHK-Cu, BPC-157) and medical lasers.'
+  },
+  lucenio: {
+    specialtyCategory: 'trichology',
+    lastResearchedAt: '2026-10-18',
+    verifiedSources: [
+      'The Masters Medical Center Doha (themasters.qa)',
+      'Qatar Council for Healthcare Practitioners (QCHP)',
+      'Aesthetic Medicine & Trichology Practice Qatar'
+    ],
+    clinicalFocusSummary:
+      'Aesthetic Medicine & Trichology Specialist at The Masters Medical Center in Doha (Qatar), focusing on follicular regeneration, scalp biostimulation, and clinical dermocosmetic regimens.',
+    detectedProcedures: [
+      'Scalp Mesotherapy & Autologous Follicular Rejuvenation',
+      'Personalized Compounding for Diffuse Thinning & Alopecia Areata',
+      'Transdermal Native Collagen Barrier Therapy',
+      'Copper Tripeptide ECM Remodeling Protocols'
+    ],
+    signatureApproach: 'Combines in-clinic mesotherapy and micro-needling with evidence-based home-use liposomal trichology and collagen topicals.'
   }
 };
 
@@ -620,6 +739,88 @@ export const SPECIALTY_BLUEPRINTS_CATALOG = {
         role: 'Full quantitative baseline of Testosterone+, Vitamin D, HbA1c, Lipid Profile, and Omega-3 Index.'
       },
       protocolUrl: '/proto/lxv-neuro-restoration-12w'
+    },
+    {
+      id: 'bp-longevity-eterna-epigenetic',
+      specialtyKey: 'longevity_bhrt',
+      specialtyLabel: 'Longevity, Genomics & BHRT',
+      badge: 'EPIGENETIC HORVATH & NAD+ CO-FACTORS',
+      clinicalProcedure: 'Epigenetic Clock Deceleration, Telomere Activation & Intracellular NAD+ Rescue',
+      targetPatients: 'Patients with biological age acceleration (> +2.0 yrs vs chronological), high DunedinPACE, or chronic cellular senescence',
+      clinicalRationale:
+        'Synergizes multiomic DNA methylation tracking (ETERNA® Horvath & GrimAge clocks) with high-potency telomerase peptide activation (Epithalon) and intracellular NAD+ co-factor delivery to slow biological aging velocity.',
+      compoundingFormula: {
+        treatmentTitle: 'Liposomal Intracellular NAD+ & Sirtuin Co-Factor Sublingual Emulsion',
+        dispensingForm: 'Liposomal Hydrophilic Sublingual Dropper',
+        volume: '60 mL',
+        posology: 'Take 1 mL (2 droppers) sublingually in the morning on an empty stomach. Hold 60s before swallowing.',
+        items: [
+          { name: 'Nicotinamide Adenine Dinucleotide (NAD+)', concentration: '100 mg/mL', dose: '100 mg', role: 'Mitochondrial Sirtuin 1/3 Activator & DNA Repair Co-Factor' },
+          { name: 'Trans-Resveratrol (Micronized)', concentration: '50 mg/mL', dose: '50 mg', role: 'STAC Sirtuin Allosteric Activator' },
+          { name: 'Methylcobalamin (Active B12)', concentration: '1 mg/mL', dose: '1 mg', role: 'One-Carbon Transmethylation Support' }
+        ]
+      },
+      peptideSynergy: {
+        code: 'atlas-epithalon-10mg',
+        name: 'Epithalon (10 mg) + GHK-Cu (50 mg) Multiomic Longevity Stack',
+        role: 'Stimulates human telomerase reverse transcriptase (hTERT), reduces epigenetic senescence markers, and reprograms skin/vascular fibroblasts.'
+      },
+      dermocosmeticSynergy: {
+        name: 'Colway Native Transdermal Collagen Platinum',
+        role: 'Topical transdermal tropocollagen triple helix countering chronological dermal elastosis and glycation.'
+      },
+      nutraceuticalSynergy: {
+        name: 'UltraPerson™ Longevity & Cellular Renewal (Spermidine + Fisetin)',
+        slug: 'ultraperson-longevity-cellular-renewal',
+        role: 'Induces targeted senolysis and activates cellular chaperone-mediated autophagy.'
+      },
+      diagnosticSynergy: {
+        name: 'ETERNA® DNA & Epigenetic Longevity Platform (Horvath Clock & DunedinPACE)',
+        role: 'Calibrates patient biological age vs chronological baseline and tracks cellular senescence slowdown with each treatment cycle.',
+        slug: 'eterna-genetic-longevity-risk-dna-test'
+      },
+      protocolUrl: '/proto/lxv-neuro-restoration-12w'
+    },
+    {
+      id: 'bp-longevity-metabolic-glp',
+      specialtyKey: 'longevity_bhrt',
+      specialtyLabel: 'Longevity, Genomics & BHRT',
+      badge: 'METABOLIC GLP-1 & LEAN MASS SHIELD',
+      clinicalProcedure: 'Precision Incretin Weight Optimization, Visceral Adiposity Loss & Sarcopenia Shield',
+      targetPatients: 'Overweight or metabolic syndrome patients undergoing incretin (GLP-1/GIP) therapy who require lean mass preservation and gut protection',
+      clinicalRationale:
+        'Mitigates the common 25–40% lean muscle mass loss associated with GLP-1/GIP monotherapy by combining incretin agonism with growth hormone secretagogues (CJC/Ipamorelin), visceral lipolytic signaling (AOD-9604), and gastro-protective peptide BPC-157.',
+      compoundingFormula: {
+        treatmentTitle: 'Metabolic Incretin & Lean Muscle Preservation Dual Formula',
+        dispensingForm: 'Sublingual Micro-Tab / Transdermal Gel',
+        volume: '30 doses',
+        posology: 'Take 1 micro-tablet sublingually 30 minutes before first meal of the day.',
+        items: [
+          { name: 'AOD-9604 (Advanced Obesity Drug)', concentration: '500 mcg', dose: '500 mcg', role: 'Beta-3 Adrenergic Lipolysis Without Hyperglycemia' },
+          { name: 'L-Carnitine L-Tartrate', concentration: '500 mg', dose: '500 mg', role: 'Mitochondrial Long-Chain Fatty Acid Translocation' },
+          { name: 'Chromium Picolinate', concentration: '200 mcg', dose: '200 mcg', role: 'Insulin Receptor Tyrosine Kinase Sensitizer' }
+        ]
+      },
+      peptideSynergy: {
+        code: 'atlas-bpc-157-5mg',
+        name: 'BPC-157 (5 mg) + CJC-1295 / Ipamorelin Secretagogue Blend',
+        role: 'Shields gastric mucosa from GLP-1 gastroparesis/nausea while preserving type II skeletal muscle myofibrils.'
+      },
+      dermocosmeticSynergy: {
+        name: 'Colway Collagen Slimming & Body Firming Serum',
+        role: 'Tightens cutaneous skin laxity and preserves dermal elasticity during rapid subcutaneous volume reduction.'
+      },
+      nutraceuticalSynergy: {
+        name: 'UltraPerson™ Metabolic Vitality & Berberine Phytosome',
+        slug: 'ultraperson-energy-metabolic-vitality',
+        role: 'Activates AMPK (adenosine monophosphate-activated protein kinase) and stabilizes post-prandial glycemic excursions.'
+      },
+      diagnosticSynergy: {
+        name: 'ETERNA® Cardiometabolic & Incretin Response Genomic Panel (TCF7L2 / FTO / PPARG)',
+        role: 'Screens genetic GLP-1 sensitivity and personalized macronutrient partition propensity.',
+        slug: 'eterna-genetic-longevity-risk-dna-test'
+      },
+      protocolUrl: '/proto/u0b4lq4Ol664bfv2BscE'
     }
   ]
 };
