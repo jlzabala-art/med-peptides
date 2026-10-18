@@ -14,9 +14,33 @@ import UploadCloud from 'lucide-react/dist/esm/icons/upload-cloud';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
+import SlidersHorizontal from 'lucide-react/dist/esm/icons/sliders-horizontal';
+import Dna from 'lucide-react/dist/esm/icons/dna';
+import Clock from 'lucide-react/dist/esm/icons/clock';
+import Flame from 'lucide-react/dist/esm/icons/flame';
+import Moon from 'lucide-react/dist/esm/icons/moon';
+import Scale from 'lucide-react/dist/esm/icons/scale';
+import Activity from 'lucide-react/dist/esm/icons/activity';
 
 import notifier from '../../services/NotificationService';
 import { fetchPortalDashboardDataAction } from '../../actions/portalDashboardActions';
+import { usePatientKpis } from '../../hooks/usePatientKpis';
+import PatientKpiCustomizerPopover from './PatientKpiCustomizerPopover';
+
+const ICON_MAP = {
+  Pill,
+  Activity,
+  RefreshCw,
+  Truck,
+  Dna,
+  Clock,
+  Flame,
+  HeartPulse,
+  Moon,
+  Scale,
+  Calendar,
+  Sparkles,
+};
 
 export default function PatientCommandHub({ userId = null, initialData = null }) {
   const [data, setData] = useState(initialData);
@@ -24,6 +48,18 @@ export default function PatientCommandHub({ userId = null, initialData = null })
   const [doseTaken, setDoseTaken] = useState(false);
   const [refillRequested, setRefillRequested] = useState(false);
   const [showMonograph, setShowMonograph] = useState(false);
+  const [isKpiCustomizerOpen, setIsKpiCustomizerOpen] = useState(false);
+
+  // Dynamic Patient KPI hook
+  const {
+    selectedIds,
+    activeKpis,
+    activePreset,
+    toggleKpi,
+    applyPreset,
+    resetToDefault,
+    maxAllowed,
+  } = usePatientKpis(userId);
 
   useEffect(() => {
     if (initialData) return;
@@ -104,28 +140,68 @@ export default function PatientCommandHub({ userId = null, initialData = null })
           </div>
         </div>
 
-        {/* Today's Dose Badge Action */}
-        <button
-          onClick={handleMarkDose}
-          disabled={doseTaken}
-          style={{
-            padding: '8px 14px',
-            borderRadius: '10px',
-            border: 'none',
-            backgroundColor: doseTaken ? '#10b981' : '#ffffff',
-            color: doseTaken ? '#ffffff' : '#003666',
-            fontSize: '0.82rem',
-            fontWeight: 800,
-            cursor: doseTaken ? 'default' : 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-          }}
-        >
-          <CheckCircle2 size={16} />
-          <span>{doseTaken ? 'Dose Logged ✓' : 'Mark Today’s Dose Taken'}</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {/* KPI Personalizer Button */}
+          <button
+            type="button"
+            onClick={() => setIsKpiCustomizerOpen(true)}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '10px',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              backgroundColor: 'rgba(255, 255, 255, 0.12)',
+              color: '#ffffff',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backdropFilter: 'blur(4px)',
+              transition: 'all 0.15s ease',
+            }}
+            title="Personalizar métricas clave en tu panel"
+          >
+            <SlidersHorizontal size={14} color="#38bdf8" />
+            <span>Personalizar KPIs</span>
+            <span
+              style={{
+                fontSize: '0.7rem',
+                backgroundColor: '#38bdf8',
+                color: '#003666',
+                fontWeight: 900,
+                padding: '1px 6px',
+                borderRadius: '8px',
+                marginLeft: '2px',
+              }}
+            >
+              {selectedIds.length}/{maxAllowed}
+            </span>
+          </button>
+
+          {/* Today's Dose Badge Action */}
+          <button
+            onClick={handleMarkDose}
+            disabled={doseTaken}
+            style={{
+              padding: '8px 14px',
+              borderRadius: '10px',
+              border: 'none',
+              backgroundColor: doseTaken ? '#10b981' : '#ffffff',
+              color: doseTaken ? '#ffffff' : '#003666',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              cursor: doseTaken ? 'default' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+            }}
+          >
+            <CheckCircle2 size={16} />
+            <span>{doseTaken ? 'Dose Logged ✓' : 'Mark Today’s Dose Taken'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Quick Launch Mobile Action Bar */}
@@ -257,120 +333,231 @@ export default function PatientCommandHub({ userId = null, initialData = null })
         </div>
       )}
 
-      {/* Main Grid: Active Treatment & Order Tracking Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.85rem' }}>
-        {/* Active Regimen Card */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            color: '#0f172a',
-            padding: '1rem',
-            borderRadius: '12px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
-              Current Regimen (Week {regimen.currentWeek} of {regimen.totalWeeks})
-            </span>
-            <span style={{ padding: '2px 8px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#0369a1', fontSize: '0.7rem', fontWeight: 800 }}>
-              Active
-            </span>
-          </div>
-          <h4 style={{ margin: '0 0 0.25rem', fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
-            {regimen.peptideName}
-          </h4>
-          <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-            Dose: <strong>{regimen.dosage}</strong>
-          </p>
+      {/* Dynamic 4-Card KPI Grid (Customized by Patient) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.85rem' }}>
+        {activeKpis.map((kpi) => {
+          const IconComponent = ICON_MAP[kpi.icon] || Activity;
 
-          {/* Progress Bar */}
-          <div style={{ marginTop: '0.75rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#0369a1', marginBottom: '0.25rem' }}>
-              <span>Cycle Progress</span>
-              <span>50% Complete</span>
+          // Special rich view for adherence / cycle_progress
+          if (kpi.id === 'cycle_progress') {
+            return (
+              <div
+                key={kpi.id}
+                style={{
+                  backgroundColor: '#ffffff',
+                  color: '#0f172a',
+                  padding: '1rem',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
+                      Current Regimen (Week {regimen.currentWeek} of {regimen.totalWeeks})
+                    </span>
+                    <span style={{ padding: '2px 8px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#0369a1', fontSize: '0.7rem', fontWeight: 800 }}>
+                      Active
+                    </span>
+                  </div>
+                  <h4 style={{ margin: '0 0 0.25rem', fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                    {regimen.peptideName}
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
+                    Dose: <strong>{regimen.dosage}</strong>
+                  </p>
+                </div>
+                <div style={{ marginTop: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#0369a1', marginBottom: '0.25rem' }}>
+                    <span>Cycle Progress</span>
+                    <span>50% Complete</span>
+                  </div>
+                  <div style={{ height: '6px', backgroundColor: '#e0f2fe', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ width: '50%', height: '100%', backgroundColor: '#0284c7' }} />
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          // Special rich view for refill_alert
+          if (kpi.id === 'refill_alert') {
+            return (
+              <div
+                key={kpi.id}
+                style={{
+                  backgroundColor: '#ffffff',
+                  color: '#0f172a',
+                  padding: '1rem',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#c2410c', textTransform: 'uppercase' }}>
+                      Refill Reminder
+                    </span>
+                    <span style={{ padding: '2px 8px', borderRadius: '10px', backgroundColor: '#ffedd5', color: '#c2410c', fontSize: '0.7rem', fontWeight: 800 }}>
+                      5 Days Supply
+                    </span>
+                  </div>
+                  <p style={{ margin: '0 0 0.75rem', fontSize: '0.78rem', color: '#475569', lineHeight: 1.3 }}>
+                    Current vial has 5 days remaining. Request a doctor refill to prevent gaps.
+                  </p>
+                </div>
+                <button
+                  onClick={handleRequestRefill}
+                  disabled={refillRequested}
+                  style={{
+                    width: '100%',
+                    padding: '0.45rem',
+                    borderRadius: '7px',
+                    backgroundColor: refillRequested ? '#10b981' : '#ea580c',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    cursor: refillRequested ? 'default' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem',
+                  }}
+                >
+                  <RefreshCw size={14} />
+                  <span>{refillRequested ? 'Refill Requested ✓' : 'Request Doctor Refill'}</span>
+                </button>
+              </div>
+            );
+          }
+
+          // Special rich view for order_delivery
+          if (kpi.id === 'order_delivery') {
+            return (
+              <div
+                key={kpi.id}
+                style={{
+                  backgroundColor: '#ffffff',
+                  color: '#0f172a',
+                  padding: '1rem',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
+                      Live Order Delivery
+                    </span>
+                    <span style={{ padding: '2px 8px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#0369a1', fontSize: '0.7rem', fontWeight: 800 }}>
+                      {delivery.status}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <Truck size={17} color="#0284c7" />
+                    <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>{delivery.orderId}</strong>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569' }}>
+                    Courier: <strong>{delivery.courier}</strong> ({delivery.trackingCode})
+                  </p>
+                </div>
+                <p style={{ margin: '0.5rem 0 0', fontSize: '0.74rem', color: '#0284c7', fontWeight: 700 }}>
+                  ETA: {delivery.estimatedDelivery}
+                </p>
+              </div>
+            );
+          }
+
+          // General rich biomarker / longevity / wearable KPI card
+          return (
+            <div
+              key={kpi.id}
+              style={{
+                backgroundColor: '#ffffff',
+                color: '#0f172a',
+                padding: '1rem',
+                borderRadius: '12px',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <span
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 800,
+                      color: kpi.color,
+                      textTransform: 'uppercase',
+                      backgroundColor: `${kpi.color}15`,
+                      padding: '2px 6px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    {kpi.category}
+                  </span>
+                  <div
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '6px',
+                      backgroundColor: `${kpi.color}15`,
+                      color: kpi.color,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <IconComponent size={14} />
+                  </div>
+                </div>
+
+                <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                  {kpi.title}
+                </div>
+
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', marginTop: '2px' }}>
+                  {kpi.value}{' '}
+                  <span style={{ fontSize: '0.74rem', fontWeight: 500, color: '#64748b' }}>
+                    {kpi.unit}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem' }}>
+                <span style={{ color: kpi.color, fontWeight: 700 }}>
+                  {kpi.trend}
+                </span>
+                <span style={{ color: '#94a3b8' }}>Atlas Live</span>
+              </div>
             </div>
-            <div style={{ height: '6px', backgroundColor: '#e0f2fe', borderRadius: '3px', overflow: 'hidden' }}>
-              <div style={{ width: '50%', height: '100%', backgroundColor: '#0284c7' }} />
-            </div>
-          </div>
-        </div>
-
-        {/* Prescription Refill Alert Card */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            color: '#0f172a',
-            padding: '1rem',
-            borderRadius: '12px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#c2410c', textTransform: 'uppercase' }}>
-              Refill Reminder
-            </span>
-            <span style={{ padding: '2px 8px', borderRadius: '10px', backgroundColor: '#ffedd5', color: '#c2410c', fontSize: '0.7rem', fontWeight: 800 }}>
-              5 Days Supply Remaining
-            </span>
-          </div>
-          <p style={{ margin: '0 0 0.75rem', fontSize: '0.78rem', color: '#475569', lineHeight: 1.3 }}>
-            Your current vial has 5 days of medication left. Request a doctor refill to prevent gaps.
-          </p>
-          <button
-            onClick={handleRequestRefill}
-            disabled={refillRequested}
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              borderRadius: '7px',
-              backgroundColor: refillRequested ? '#10b981' : '#ea580c',
-              color: '#ffffff',
-              border: 'none',
-              fontSize: '0.78rem',
-              fontWeight: 800,
-              cursor: refillRequested ? 'default' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.35rem',
-            }}
-          >
-            <RefreshCw size={14} />
-            <span>{refillRequested ? 'Refill Requested ✓' : 'Request Doctor Refill'}</span>
-          </button>
-        </div>
-
-        {/* Live Delivery Status Card */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            color: '#0f172a',
-            padding: '1rem',
-            borderRadius: '12px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
-              Live Order Delivery
-            </span>
-            <span style={{ padding: '2px 8px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#0369a1', fontSize: '0.7rem', fontWeight: 800 }}>
-              {delivery.status}
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <Truck size={17} color="#0284c7" />
-            <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>{delivery.orderId}</strong>
-          </div>
-          <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569' }}>
-            Courier: <strong>{delivery.courier}</strong> ({delivery.trackingCode})
-          </p>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.74rem', color: '#0284c7', fontWeight: 700 }}>
-            ETA: {delivery.estimatedDelivery}
-          </p>
-        </div>
+          );
+        })}
       </div>
+
+      {/* Popover Customizer Modal */}
+      <PatientKpiCustomizerPopover
+        isOpen={isKpiCustomizerOpen}
+        onClose={() => setIsKpiCustomizerOpen(false)}
+        selectedIds={selectedIds}
+        onToggle={toggleKpi}
+        onApplyPreset={applyPreset}
+        onReset={resetToDefault}
+        activePreset={activePreset}
+        maxAllowed={maxAllowed}
+      />
     </div>
   );
 }
