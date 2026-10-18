@@ -159,6 +159,10 @@ const DoctorPracticeClaimModal = dynamic(
   () => import('@/components/doctor/modals/DoctorPracticeClaimModal'),
   { ssr: false }
 );
+const DoctorAuthNoticeModal = dynamic(
+  () => import('@/components/doctor/modals/DoctorAuthNoticeModal'),
+  { ssr: false }
+);
 const DoctorBlueprintDossierModal = dynamic(
   () => import('@/components/doctor/modals/DoctorBlueprintDossierModal'),
   { ssr: false }
@@ -536,6 +540,8 @@ export default function DoctorPublicPortalClient({
   const [error, setError] = useState(null);
   const [agentDoctors, setAgentDoctors] = useState(availableDoctors || []);
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [isAuthNoticeModalOpen, setIsAuthNoticeModalOpen] = useState(false);
+  const [authNoticeResource, setAuthNoticeResource] = useState('');
   const [workstationAuthorized, setWorkstationAuthorized] = useState(false);
 
   const { user, activeRole, isAdmin } = useAuth();
@@ -2148,6 +2154,12 @@ export default function DoctorPublicPortalClient({
                   {codifiedId}
                 </span>
                 <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic('light');
+                    setAuthNoticeResource('Nominal patient clinical task records');
+                    setIsAuthNoticeModalOpen(true);
+                  }}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -2158,9 +2170,11 @@ export default function DoctorPublicPortalClient({
                     background: '#fffbeb',
                     border: '1px solid #fde68a',
                     padding: '1px 6px',
-                    borderRadius: '12px'
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
                   }}
-                  title="Patient identity protected under DHA/HIPAA standards. Sign in to view nominal records."
+                  title="Patient identity protected under DHA/HIPAA standards. Click to sign in or register."
                 >
                   <Lock size={10} />
                   <span>Protected</span>
@@ -2548,6 +2562,12 @@ export default function DoctorPublicPortalClient({
                     {codifiedId}
                   </span>
                   <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      triggerHaptic('light');
+                      setAuthNoticeResource('Prescription patient records & nominal clinical dossiers');
+                      setIsAuthNoticeModalOpen(true);
+                    }}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -2559,9 +2579,10 @@ export default function DoctorPublicPortalClient({
                       border: '1px solid #fde68a',
                       padding: '1px 6px',
                       borderRadius: '12px',
-                      cursor: 'help'
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
                     }}
-                    title="Patient identity protected under DHA/HIPAA standards. Sign in or claim this medical practice portal to view nominal medical records."
+                    title="Patient identity protected under DHA/HIPAA standards. Click to sign in or register."
                   >
                     <Lock size={10} />
                     <span>Protected</span>
@@ -2599,9 +2620,26 @@ export default function DoctorPublicPortalClient({
                 <span>{patientPhone}</span>
               </div>
             ) : !isAuthorizedViewer ? (
-              <div style={{ fontSize: '0.70rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
-                <Lock size={10} style={{ color: '#94a3b8', flexShrink: 0 }} />
-                <span>Contact verified on file</span>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerHaptic('light');
+                  setAuthNoticeResource('Patient direct contact information');
+                  setIsAuthNoticeModalOpen(true);
+                }}
+                style={{
+                  fontSize: '0.70rem',
+                  color: '#94a3b8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  marginTop: '1px',
+                  cursor: 'pointer'
+                }}
+                title="Protected contact details. Click to sign in or register."
+              >
+                <Lock size={10} style={{ color: '#0284c7', flexShrink: 0 }} />
+                <span style={{ color: '#0284c7', textDecoration: 'underline' }}>Contact verified on file</span>
               </div>
             ) : isProposal ? (
               <div style={{ fontSize: '0.70rem', color: '#94a3b8', fontStyle: 'italic', marginTop: '1px' }}>
@@ -3512,6 +3550,12 @@ export default function DoctorPublicPortalClient({
                   {codifiedId}
                 </span>
                 <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic('light');
+                    setAuthNoticeResource('Nominal patient clinical dossiers');
+                    setIsAuthNoticeModalOpen(true);
+                  }}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -3522,9 +3566,11 @@ export default function DoctorPublicPortalClient({
                     background: '#fffbeb',
                     border: '1px solid #fde68a',
                     padding: '1px 6px',
-                    borderRadius: '12px'
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
                   }}
-                  title="Patient identity protected under DHA/HIPAA standards. Sign in to view nominal records."
+                  title="Patient identity protected under DHA/HIPAA standards. Click to sign in or register."
                 >
                   <Lock size={10} />
                   <span>Protected</span>
@@ -3541,9 +3587,25 @@ export default function DoctorPublicPortalClient({
                 <CopyableId value={pat.phone} />
               </div>
             ) : !isAuthorizedViewer ? (
-              <div style={{ fontSize: '0.70rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Lock size={10} style={{ color: '#94a3b8', flexShrink: 0 }} />
-                <span>Contact verified on file</span>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerHaptic('light');
+                  setAuthNoticeResource('Patient direct contact information');
+                  setIsAuthNoticeModalOpen(true);
+                }}
+                style={{
+                  fontSize: '0.70rem',
+                  color: '#94a3b8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  cursor: 'pointer'
+                }}
+                title="Protected contact details. Click to sign in or register."
+              >
+                <Lock size={10} style={{ color: '#0284c7', flexShrink: 0 }} />
+                <span style={{ color: '#0284c7', textDecoration: 'underline' }}>Contact verified on file</span>
               </div>
             ) : (
               <div style={{ fontSize: '0.70rem', color: '#94a3b8', fontStyle: 'italic' }}>
@@ -4077,6 +4139,7 @@ export default function DoctorPublicPortalClient({
         id: 'prescriptions',
         label: 'Prescriptions',
         icon: Layers,
+        isLocked: !isAuthorizedViewer,
         badge: allPrescriptions.length > 0 ? allPrescriptions.length : null,
         actionBadgeTooltip: quickCounts.active > 0
           ? `${allPrescriptions.length} total prescriptions (${quickCounts.active} sold & invoiced, ${quickCounts.proposals} unaccepted proposals)`
@@ -4086,6 +4149,7 @@ export default function DoctorPublicPortalClient({
         id: 'patients',
         label: 'Patients',
         icon: Users,
+        isLocked: !isAuthorizedViewer,
         badge: uniquePatientsCount > 0 ? uniquePatientsCount : null,
         actionBadgeTooltip: uniquePatientsCount > 0
           ? `${uniquePatientsCount} unique patients (${soldPatientsCount} sold customers, ${unacceptedPatientsCount} unaccepted proposals)`
@@ -4098,6 +4162,7 @@ export default function DoctorPublicPortalClient({
         id: 'tasks',
         label: 'Pending Actions',
         icon: Clock,
+        isLocked: !isAuthorizedViewer,
         actionBadge: filteredTasks.length > 0 ? filteredTasks.length : null,
         actionBadgeTooltip: filteredTasks.length > 0
           ? `${filteredTasks.length} pending clinical task(s) requiring follow-up or review`
@@ -4137,6 +4202,7 @@ export default function DoctorPublicPortalClient({
             id: 'credentials',
             label: 'Clinic Credentials',
             icon: ShieldCheck,
+            isLocked: !isAuthorizedViewer,
             badge: null
           },
           {
@@ -4148,7 +4214,7 @@ export default function DoctorPublicPortalClient({
         ]
       }
     ];
-  }, [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, allLabResults.length, quickCounts.active, quickCounts.pending, quickCounts.drafts, quickCounts.proposals, doctorSpecialtyIntel.primaryBlueprints.length, soldPatientsCount, unacceptedPatientsCount]);
+  }, [allPrescriptions.length, uniquePatientsCount, filteredTasks.length, allLabResults.length, quickCounts.active, quickCounts.pending, quickCounts.drafts, quickCounts.proposals, doctorSpecialtyIntel.primaryBlueprints.length, soldPatientsCount, unacceptedPatientsCount, isAuthorizedViewer]);
 
   const handleSidebarNavigate = (itemOrId) => {
     triggerHaptic('light');
@@ -4175,6 +4241,12 @@ export default function DoctorPublicPortalClient({
       return;
     }
     if (id === 'credentials') {
+      if (!isAuthorizedViewer) {
+        setAuthNoticeResource('Clinic licensing credentials & official practice verification files');
+        setIsAuthNoticeModalOpen(true);
+        if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+        return;
+      }
       setIsCredentialsModalOpen(true);
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
       return;
@@ -4775,8 +4847,41 @@ export default function DoctorPublicPortalClient({
                           </span>
                         )}
                       </div>
-                      {!isSidebarCollapsed && (item.actionBadge !== null && item.actionBadge !== undefined || item.badge !== null && item.badge !== undefined) && (
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                      {!isSidebarCollapsed && (item.actionBadge !== null && item.actionBadge !== undefined || item.badge !== null && item.badge !== undefined || item.isLocked) && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+                          {item.isLocked && (
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                triggerHaptic('light');
+                                setAuthNoticeResource(item.label);
+                                setIsAuthNoticeModalOpen(true);
+                              }}
+                              title="Protected by healthcare privacy regulations. Click to sign in or register."
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '4px',
+                                background: '#e0f2fe',
+                                color: '#0284c7',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#0284c7';
+                                e.currentTarget.style.color = '#ffffff';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#e0f2fe';
+                                e.currentTarget.style.color = '#0284c7';
+                              }}
+                            >
+                              <Lock size={11} />
+                            </span>
+                          )}
                           {item.actionBadge !== null && item.actionBadge !== undefined && (
                             <span
                               title={item.actionBadgeTooltip}
@@ -4813,6 +4918,22 @@ export default function DoctorPublicPortalClient({
                           )}
                         </div>
                       )}
+                      {isSidebarCollapsed && item.isLocked && (
+                        <span
+                          title="Protected by security"
+                          style={{
+                            position: 'absolute',
+                            top: '4px',
+                            right: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#0284c7'
+                          }}
+                        >
+                          <Lock size={10} />
+                        </span>
+                      )}
                       {isSidebarCollapsed && item.actionBadge > 0 && (
                         <span
                           style={{
@@ -4843,7 +4964,8 @@ export default function DoctorPublicPortalClient({
                 if (isAuthorizedViewer) {
                   setIsCredentialsModalOpen(true);
                 } else {
-                  setIsClaimModalOpen(true);
+                  setAuthNoticeResource('Physician practice records & credentials');
+                  setIsAuthNoticeModalOpen(true);
                 }
               }}
               title={isAuthorizedViewer ? `View and manage physician profile: ${doctor.name || 'Treating Physician'}` : 'Sign in or claim practice to unlock nominal dossiers'}
@@ -9825,20 +9947,59 @@ export default function DoctorPublicPortalClient({
                           <Icon size={18} style={{ color: isActive ? '#1a73e8' : '#5f6368' }} />
                           <span>{item.label}</span>
                         </div>
-                        {typeof item.badge === 'number' && (
-                          <span
-                            style={{
-                              fontSize: '0.72rem',
-                              fontWeight: 600,
-                              padding: '2px 8px',
-                              borderRadius: '10px',
-                              background: isActive ? '#1a73e8' : '#e8eaed',
-                              color: isActive ? '#ffffff' : '#3c4043'
-                            }}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {item.isLocked && (
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsMobileSidebarOpen(false);
+                                setAuthNoticeResource(item.label);
+                                setIsAuthNoticeModalOpen(true);
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '22px',
+                                height: '22px',
+                                borderRadius: '4px',
+                                background: '#e0f2fe',
+                                color: '#0284c7'
+                              }}
+                              title="Protected. Tap to sign in or register."
+                            >
+                              <Lock size={12} />
+                            </span>
+                          )}
+                          {item.badge !== null && item.badge !== undefined && (
+                            <span
+                              style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 600,
+                                padding: '2px 8px',
+                                borderRadius: '10px',
+                                background: isActive ? '#1a73e8' : '#e8eaed',
+                                color: isActive ? '#ffffff' : '#3c4043'
+                              }}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                          {item.actionBadge > 0 && (
+                            <span
+                              style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '10px',
+                                background: '#dc2626',
+                                color: '#ffffff'
+                              }}
+                            >
+                              {item.actionBadge}
+                            </span>
+                          )}
+                        </div>
                       </button>
                     );
                   })}
@@ -9862,20 +10023,24 @@ export default function DoctorPublicPortalClient({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <ShieldCheck size={14} style={{ color: '#0d9488' }} />
                   <span style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600 }}>DHA:</span>
-                  <span style={{ fontSize: '0.72rem', color: '#0f172a', fontWeight: 600, fontFamily: 'monospace' }}>{doctor.license}</span>
+                  <span style={{ fontSize: '0.72rem', color: '#0f172a', fontWeight: 600, fontFamily: 'monospace' }}>
+                    {isAuthorizedViewer ? (doctor.license || 'Active') : (doctor.license ? `DHA-••••${String(doctor.license).slice(-3)}` : 'Verified on file')}
+                  </span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('selection');
-                    navigator.clipboard?.writeText(doctor.license);
-                    toast.success('DHA License copied ✓');
-                  }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: '#64748b' }}
-                  title="Copy DHA license"
-                >
-                  <Copy size={13} />
-                </button>
+                {isAuthorizedViewer && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      navigator.clipboard?.writeText(doctor.license);
+                      toast.success('DHA License copied ✓');
+                    }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: '#64748b' }}
+                    title="Copy DHA license"
+                  >
+                    <Copy size={13} />
+                  </button>
+                )}
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
@@ -9883,7 +10048,12 @@ export default function DoctorPublicPortalClient({
                   type="button"
                   onClick={() => {
                     setIsMobileSidebarOpen(false);
-                    setIsCredentialsModalOpen(true);
+                    if (isAuthorizedViewer) {
+                      setIsCredentialsModalOpen(true);
+                    } else {
+                      setAuthNoticeResource('Clinic licensing credentials & official practice verification files');
+                      setIsAuthNoticeModalOpen(true);
+                    }
                   }}
                   style={{
                     height: '32px',
@@ -9901,7 +10071,7 @@ export default function DoctorPublicPortalClient({
                   }}
                 >
                   <Eye size={13} />
-                  <span>Full Profile</span>
+                  <span>{isAuthorizedViewer ? 'Full Profile' : 'Verify Practice'}</span>
                 </button>
                 <button
                   type="button"
@@ -10230,26 +10400,43 @@ export default function DoctorPublicPortalClient({
                             background: '#fffbeb',
                             border: '1px solid #fde68a',
                             padding: '2px 7px',
-                            borderRadius: '12px'
-                          }}>
-                            <Lock size={10} />
-                            <span>Protected</span>
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: '0.94rem', fontWeight: 700, color: '#0f172a' }}>
-                        {patientName}
-                      </div>
-                      {isAuthorizedViewer && rx?.patient?.dob && (
-                        <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
-                          DOB: {rx.patient.dob} {rx.patient?.gender ? `· ${rx.patient.gender}` : ''}
-                        </div>
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                          onClick={() => {
+                            triggerHaptic('light');
+                            setAuthNoticeResource('Patient demographics & clinical dossier');
+                            setIsAuthNoticeModalOpen(true);
+                          }}
+                          title="Protected under DHA/HIPAA standards. Click to sign in or register."
+                        >
+                          <Lock size={10} />
+                          <span>Protected</span>
+                        </span>
                       )}
-                      {!isAuthorizedViewer && (
-                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '3px' }}>
-                          DHA/HIPAA Protected Clinical Dossier · Contact verified on file
-                        </div>
-                      )}
+                    </div>
+                    <div style={{ fontSize: '0.94rem', fontWeight: 700, color: '#0f172a' }}>
+                      {patientName}
+                    </div>
+                    {isAuthorizedViewer && rx?.patient?.dob && (
+                      <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
+                        DOB: {rx.patient.dob} {rx.patient?.gender ? `· ${rx.patient.gender}` : ''}
+                      </div>
+                    )}
+                    {!isAuthorizedViewer && (
+                      <div
+                        onClick={() => {
+                          triggerHaptic('light');
+                          setAuthNoticeResource('Patient contact info & clinical dossier');
+                          setIsAuthNoticeModalOpen(true);
+                        }}
+                        style={{ fontSize: '0.74rem', color: '#0284c7', marginTop: '3px', cursor: 'pointer', textDecoration: 'underline' }}
+                        title="Protected contact details. Click to sign in or register."
+                      >
+                        DHA/HIPAA Protected Clinical Dossier · Contact verified on file
+                      </div>
+                    )}
                       <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Canonical Ref:</span>
                         <CopyableId value={safeRxCode} />
@@ -11042,6 +11229,19 @@ export default function DoctorPublicPortalClient({
         doctorName={isAuthorizedViewer ? (doctor.name || 'Doctor') : `Doctor ${opaqueCode}`}
         clinicName={isAuthorizedViewer ? (doctor.clinic || 'Medical Practice') : 'Verified Medical Practice'}
         currentTier={doctor.tier || doctor.membershipTier || doctor.subscriptionTier || 'basic'}
+      />
+
+      {/* ── Frictionless Auth & Clinical Data Protection Notice Modal ── */}
+      <DoctorAuthNoticeModal
+        isOpen={isAuthNoticeModalOpen}
+        onClose={() => setIsAuthNoticeModalOpen(false)}
+        doctor={doctor}
+        opaqueCode={opaqueCode}
+        resourceName={authNoticeResource}
+        onOpenClaimModal={() => {
+          setIsAuthNoticeModalOpen(false);
+          setIsClaimModalOpen(true);
+        }}
       />
 
       {/* ── Doctor Practice Claim & Workstation Verification Modal (Zero-Knowledge) ── */}

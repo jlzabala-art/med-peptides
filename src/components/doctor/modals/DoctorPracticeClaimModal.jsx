@@ -394,6 +394,62 @@ export default function DoctorPracticeClaimModal({
                 </div>
               </div>
 
+              {/* Frictionless Physician Sign-In & Practice Registration */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '9px 12px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  marginBottom: '16px',
+                  fontSize: '0.78rem'
+                }}
+              >
+                <span style={{ color: '#64748b' }}>Have an existing login?</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      window.location.href = `/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}`;
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#003666',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      padding: 0,
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    Sign In
+                  </button>
+                  <span style={{ color: '#cbd5e1' }}>•</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      window.location.href = `/login?tab=register&role=doctor&redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}`;
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#0d9488',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      padding: 0,
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    Register Practice
+                  </button>
+                </div>
+              </div>
+
               {/* Tab Navigation */}
               <div
                 style={{
