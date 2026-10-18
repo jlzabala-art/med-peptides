@@ -2,13 +2,15 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import Lock from 'lucide-react/dist/esm/icons/lock';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import LogIn from 'lucide-react/dist/esm/icons/log-in';
-import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
-import Smartphone from 'lucide-react/dist/esm/icons/smartphone';
-import X from 'lucide-react/dist/esm/icons/x';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import {
+  Lock,
+  ShieldCheck,
+  LogIn,
+  UserPlus,
+  Smartphone,
+  X,
+  ArrowRight
+} from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 
 /**

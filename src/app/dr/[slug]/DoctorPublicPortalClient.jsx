@@ -543,6 +543,7 @@ export default function DoctorPublicPortalClient({
   const [isAuthNoticeModalOpen, setIsAuthNoticeModalOpen] = useState(false);
   const [authNoticeResource, setAuthNoticeResource] = useState('');
   const [workstationAuthorized, setWorkstationAuthorized] = useState(false);
+  const [isSwitchingDoctor, setIsSwitchingDoctor] = useState(false);
 
   const { user, activeRole, isAdmin } = useAuth();
 
@@ -955,6 +956,8 @@ export default function DoctorPublicPortalClient({
   }, [slug, initialData]);
 
   const doctor = data?.doctor || {};
+  // Opaque Doctor Slug (Protects Doctor Identity in URL)
+  const opaqueCode = doctor.opaqueCode || doctor.slug || slug;
 
   // Physician Profile Editing State
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -1139,9 +1142,6 @@ export default function DoctorPublicPortalClient({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDiscoveryDrawerOpen, isCredentialsModalOpen, isServicesModalOpen]);
-
-  // Opaque Doctor Slug (Protects Doctor Identity in URL)
-  const opaqueCode = doctor.opaqueCode || doctor.slug || slug;
 
   // Filter Tasks
   const filteredTasks = useMemo(() => {
@@ -1642,7 +1642,7 @@ export default function DoctorPublicPortalClient({
         (p) => (p.code || p.id) === action.payload?.rxCode || p.patientName === action.payload?.patientName
       );
       if (targetRx) {
-        handleRemindPatientProposal(targetRx);
+        handleShareProposalWhatsApp(targetRx);
       } else {
         setIsAtlasAiOpen(false);
         setActiveAnchor('prescriptions');

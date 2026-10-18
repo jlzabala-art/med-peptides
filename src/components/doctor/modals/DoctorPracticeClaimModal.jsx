@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useState } from 'react';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import Lock from 'lucide-react/dist/esm/icons/lock';
-import Key from 'lucide-react/dist/esm/icons/key';
-import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
-import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
-import Smartphone from 'lucide-react/dist/esm/icons/smartphone';
-import Mail from 'lucide-react/dist/esm/icons/mail';
-import Laptop from 'lucide-react/dist/esm/icons/laptop';
-import Send from 'lucide-react/dist/esm/icons/send';
-import X from 'lucide-react/dist/esm/icons/x';
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
+import {
+  ShieldCheck,
+  Lock,
+  Key,
+  CheckCircle2,
+  AlertCircle,
+  Smartphone,
+  Mail,
+  Laptop,
+  Send,
+  X,
+  Loader2
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { triggerHaptic } from '@/utils/haptics';
 
