@@ -48,7 +48,9 @@ export default function ProtocolDetailSidebar({
   onOpenQrModal = null,
   onCopyLabRequisition = null,
   hideFloatingTrigger = true,
-  publicUrl = null
+  publicUrl = null,
+  activeSection = null,
+  onSelectSection = null
 }) {
   const isEs = lang === 'es';
   const [activeId, setActiveId] = useState(sections[0]?.id || '');
@@ -81,9 +83,9 @@ export default function ProtocolDetailSidebar({
     return () => window.removeEventListener('open-datasheet-toc', handleExternalOpen);
   }, []);
 
-  // Real-time ScrollSpy via IntersectionObserver
+  // Real-time ScrollSpy via IntersectionObserver (only when not in controlled single-section mode)
   useEffect(() => {
-    if (typeof window === 'undefined' || !availableSections.length) return;
+    if (onSelectSection || typeof window === 'undefined' || !availableSections.length) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -108,13 +110,22 @@ export default function ProtocolDetailSidebar({
     });
 
     return () => observer.disconnect();
-  }, [availableSections]);
+  }, [availableSections, onSelectSection]);
+
+  const currentActiveId = activeSection || activeId || availableSections[0]?.id || '';
 
   const scrollToSection = (e, targetId) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!targetId) return;
 
     triggerHaptic('light');
+
+    if (onSelectSection) {
+      onSelectSection(targetId);
+      setIsMobileDrawerOpen(false);
+      return;
+    }
+
     const el = document.getElementById(targetId);
     if (el) {
       setActiveId(targetId);
@@ -200,9 +211,9 @@ export default function ProtocolDetailSidebar({
     }
   };
 
-  const activeIndex = availableSections.findIndex(s => s.id === activeId);
+  const activeIndex = availableSections.findIndex(s => s.id === currentActiveId);
   const currentProgress = activeIndex >= 0 ? activeIndex + 1 : 1;
-  const activeLabel = availableSections.find(s => s.id === activeId)?.label || '';
+  const activeLabel = availableSections.find(s => s.id === currentActiveId)?.label || '';
 
   // Broadcast progress
   useEffect(() => {
@@ -211,12 +222,12 @@ export default function ProtocolDetailSidebar({
         detail: {
           currentProgress,
           totalSections: availableSections.length,
-          activeId,
+          activeId: currentActiveId,
           activeLabel
         }
       }));
     }
-  }, [currentProgress, availableSections.length, activeId, activeLabel]);
+  }, [currentProgress, availableSections.length, currentActiveId, activeLabel]);
 
   if (!availableSections.length) return null;
 
@@ -239,7 +250,7 @@ export default function ProtocolDetailSidebar({
       <nav className="pds-toc-nav" role="navigation">
         <ul className="pds-toc-list">
           {availableSections.map((sec, idx) => {
-            const isActive = activeId === sec.id;
+            const isActive = currentActiveId === sec.id;
             const IconComponent = sec.icon;
 
             return (
@@ -545,7 +556,7 @@ export default function ProtocolDetailSidebar({
               {/* Section Buttons */}
               <ul className="pds-drawer-list">
                 {availableSections.map((sec, idx) => {
-                  const isActive = activeId === sec.id;
+                  const isActive = currentActiveId === sec.id;
                   const IconComponent = sec.icon;
 
                   return (

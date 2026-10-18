@@ -1719,21 +1719,23 @@ Date Issued:    ${new Date().toISOString().split('T')[0]}                       
         </div>
       )}
 
-      {/* 5. Safety Sentinel Banner */}
-      <div style={{
-        backgroundColor: '#fffbeb',
-        border: '1px solid #fde68a',
-        borderRadius: '12px',
-        padding: '0.75rem 1rem',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.6rem'
-      }}>
-        <ShieldAlert size={18} style={{ color: '#d97706', flexShrink: 0 }} />
-        <div style={{ fontSize: '0.75rem', color: '#92400e', fontWeight: 600, lineHeight: 1.3 }}>
-          <strong>Safety Sentinel:</strong> All GLP-1 and GHRH titrations must strictly adhere to the 4-week adaptation window before increasing dosages. Maintain cold chain (2°C – 8°C) for all reconstituted vials and opened pen cartridges.
+      {/* 5. Safety Sentinel Banner (Peptide & Incretin Protocols only) */}
+      {!isCosmeticProtocol && (
+        <div style={{
+          backgroundColor: '#fffbeb',
+          border: '1px solid #fde68a',
+          borderRadius: '12px',
+          padding: '0.75rem 1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.6rem'
+        }}>
+          <ShieldAlert size={18} style={{ color: '#d97706', flexShrink: 0 }} />
+          <div style={{ fontSize: '0.75rem', color: '#92400e', fontWeight: 600, lineHeight: 1.3 }}>
+            <strong>Safety Sentinel:</strong> All GLP-1 and GHRH titrations must strictly adhere to the 4-week adaptation window before increasing dosages. Maintain cold chain (2°C – 8°C) for all reconstituted vials and opened pen cartridges.
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

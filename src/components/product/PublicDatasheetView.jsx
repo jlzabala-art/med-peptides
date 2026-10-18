@@ -2569,7 +2569,9 @@ export default function PublicDatasheetView({
       </div>
     )}
 
-    {/* ── Block 8: Product Regulatory Warnings & Safety Governance ── */}
+    {/* ── Block 8: Product Regulatory Warnings & Safety Governance (Overview or Safety Section) ── */}
+    {(effectiveActiveSection === 'overview' || effectiveActiveSection === 'regulatory-warnings' || effectiveActiveSection === 'safety-governance') && (
+      <>
         <ProductRegulatoryWarningsSection
           product={product}
           lang={lang}
@@ -2585,6 +2587,8 @@ export default function PublicDatasheetView({
         <div style={{ marginTop: '2rem', marginBottom: '1.5rem' }}>
           <CollectionCompanionBanner product={product} />
         </div>
+      </>
+    )}
 
         {/* Institutional Regulatory Footnote */}
         <footer className="pds-page-footer">

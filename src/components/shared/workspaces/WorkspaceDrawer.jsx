@@ -114,9 +114,12 @@ export default function WorkspaceDrawer() {
   const wsList = Object.values(workspaces || {});
   const activeWs = workspaces[activeWorkspaceId] || wsList[0] || null;
 
+  const pathname = usePathname() || '';
+  const isDoctorRoute = pathname.startsWith('/dr/') || pathname.startsWith('/doctor');
+
   const { is, can, role } = useRoleAccess();
   const isAdmin = role === 'admin' || is('admin') || can('view:cost_pricing');
-  const isDoctor = !isAdmin && (role === 'doctor' || is('doctor') || role === 'medical_director' || role === 'clinic');
+  const isDoctor = !isAdmin && (role === 'doctor' || is('doctor') || role === 'medical_director' || role === 'clinic' || isDoctorRoute);
   const isWholesaler = !isAdmin && (role === 'wholesaler' || role === 'wholeseller' || is('wholesaler') || is('wholeseller'));
   const isPatient = !isAdmin && (role === 'patient' || is('patient'));
   const [isStickerModalOpen, setIsStickerModalOpen] = useState(false);
@@ -320,7 +323,6 @@ export default function WorkspaceDrawer() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDrawerOpen, items.length, isDoctor, activeWs?.intent]);
 
-  const pathname = usePathname() || '';
   const isPublicRoute = 
     pathname === '/' ||
     pathname.startsWith('/rx/') ||
@@ -367,7 +369,7 @@ export default function WorkspaceDrawer() {
 
   return createPortal(
     <>
-      {/* 1. Backdrop */}
+      {/* 1. Backdrop (Google Cloud Master-Detail Scrim: Transparent & Clear, Zero Heavy Blur) */}
       <div
         style={{
           position: 'fixed',
@@ -376,8 +378,8 @@ export default function WorkspaceDrawer() {
           right: 0,
           bottom: 0,
           zIndex: 999998,
-          backgroundColor: 'rgba(15, 23, 42, 0.55)',
-          backdropFilter: 'blur(4px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.16)',
+          backdropFilter: 'none',
           animation: 'fadeIn 0.2s ease',
         }}
         onClick={() => setDrawerOpen(false)}
@@ -415,7 +417,7 @@ export default function WorkspaceDrawer() {
           .workspace-responsive-panel {
             top: 0;
             right: 0;
-            width: ${isWideDrawer ? 'min(720px, 95vw)' : 'min(480px, 100vw)'};
+            width: ${isWideDrawer ? 'min(780px, 96vw)' : 'min(560px, 95vw)'};
             height: 100dvh;
             max-height: 100vh;
             animation: slideLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1);

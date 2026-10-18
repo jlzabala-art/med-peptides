@@ -269,23 +269,23 @@ export default function WorkspaceItemCard({
           </div>
         </div>
 
-        {/* Controls: Quantity Buttons with Touch Target >= 40px */}
+        {/* Controls: Quantity Buttons & Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, marginLeft: 'auto' }} onClick={(e) => e.stopPropagation()}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '2px', backgroundColor: '#f1f5f9', borderRadius: '8px', padding: '2px' }}>
             <button
               type="button"
               onClick={() => onUpdateItemQuantity && onUpdateItemQuantity(item.id, Math.max(1, (item.quantity || 1) - 1))}
               style={{
-                width: '40px',
-                height: '40px',
-                minWidth: '40px',
-                minHeight: '40px',
+                width: '32px',
+                height: '32px',
+                minWidth: '32px',
+                minHeight: '32px',
                 border: '1px solid #cbd5e1',
                 borderRadius: '6px',
                 background: '#ffffff',
                 cursor: 'pointer',
                 fontWeight: 900,
-                fontSize: '1.05rem',
+                fontSize: '0.95rem',
                 color: '#334155',
                 display: 'flex',
                 alignItems: 'center',
@@ -296,23 +296,23 @@ export default function WorkspaceItemCard({
             >
               -
             </button>
-            <span style={{ fontSize: '0.88rem', fontWeight: 800, minWidth: '26px', textAlign: 'center' }}>
+            <span style={{ fontSize: '0.84rem', fontWeight: 800, minWidth: '24px', textAlign: 'center' }}>
               {item.quantity || 1}
             </span>
             <button
               type="button"
               onClick={() => onUpdateItemQuantity && onUpdateItemQuantity(item.id, (item.quantity || 1) + 1)}
               style={{
-                width: '40px',
-                height: '40px',
-                minWidth: '40px',
-                minHeight: '40px',
+                width: '32px',
+                height: '32px',
+                minWidth: '32px',
+                minHeight: '32px',
                 border: '1px solid #cbd5e1',
                 borderRadius: '6px',
                 background: '#ffffff',
                 cursor: 'pointer',
                 fontWeight: 900,
-                fontSize: '1.05rem',
+                fontSize: '0.95rem',
                 color: '#334155',
                 display: 'flex',
                 alignItems: 'center',

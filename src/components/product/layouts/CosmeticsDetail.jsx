@@ -1270,12 +1270,6 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                   </span>
                 </div>
               </PublicSectionCard>
-              {/* Active Ingredients & Clinical Showcase (embedded in overview for immediate deep exploration) */}
-              {isHairProduct ? (
-                <ColwayTrichologyStemCellShowcase lang={lang} />
-              ) : colwayData ? (
-                <ColwayActiveIngredientsShowcase product={product} slug={slug} lang={lang} />
-              ) : null}
             </>
             )}
 

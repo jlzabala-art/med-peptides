@@ -66,6 +66,8 @@ import ProtocolBiomarkersSafetyCard from '@/components/protocol/ProtocolBiomarke
 import ProtocolSafetyExclusionsCard from '@/components/protocol/ProtocolSafetyExclusionsCard';
 import ProtocolQrModal from '@/components/protocol/ProtocolQrModal';
 import ProtocolCosmeticsAdjunctsCard from '@/components/protocol/ProtocolCosmeticsAdjunctsCard';
+import ColwayProtocolStreamlinedView from '@/components/protocol/ColwayProtocolStreamlinedView';
+import ProductSectionFooterNav from '@/components/product/ProductSectionFooterNav';
 
 export default function PublicProtocolPage({ protocol, slug, baseUrl, similarProtocols = [] }) {
   const [lang, setLang] = useState(() => {
@@ -99,6 +101,15 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
   const [dynamicTranslations, setDynamicTranslations] = useState({});
   const requestedLangs = useRef(new Set());
   const [, startTransition] = useTransition();
+
+  // ── Active section state (Single-section display rule) ──
+  const [activeSection, setActiveSection] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash) return hash;
+    }
+    return '';
+  });
 
   // ── Biomarker Calibration State (Precision Diagnostic Integration) ──
   const [biomarkerCalibration, setBiomarkerCalibration] = useState(() => {
@@ -229,13 +240,18 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
     return !allNonVial;
   }, [protocol, items]);
 
-  // Check if protocol is Colway or purely cosmeceutical/nutricosmetic
-  const isColwayOrCosmetic = useMemo(() => {
+  // Strict check if protocol is Colway or purely cosmeceutical/nutricosmetic
+  const isColwayProtocol = useMemo(() => {
     const s = String(slug || protocol?.slug || protocol?.id || '').toLowerCase();
     const title = String(protocol?.protocol_title || protocol?.title || protocol?.name || '').toLowerCase();
     const pClass = String(protocol?.clinical_metadata?.protocol_class || '').toLowerCase();
-    return s.includes('colway') || title.includes('colway') || pClass.includes('cosmeceutical') || !hasVials;
-  }, [slug, protocol, hasVials]);
+    return s.includes('colway') || title.includes('colway') || pClass.includes('cosmeceutical');
+  }, [slug, protocol]);
+
+  // Check if protocol is Colway or purely cosmeceutical/nutricosmetic
+  const isColwayOrCosmetic = useMemo(() => {
+    return isColwayProtocol || !hasVials;
+  }, [isColwayProtocol, hasVials]);
 
   const hasOral = useMemo(() => {
     return (items || []).some(it => {
@@ -601,6 +617,36 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
   // ── Protocol Sections for Sticky Sidebar Table of Contents & Mobile QuickNav ──
   const tocSections = useMemo(() => {
     const isEs = lang === 'es';
+
+    if (isColwayProtocol) {
+      return [
+        { 
+          id: 'colway-regimen', 
+          label: isEs ? 'Régimen de Productos & Modo de Uso' : 'Included Products & Regimen', 
+          href: '#colway-regimen',
+          icon: Sparkles 
+        },
+        { 
+          id: 'colway-weekly-schedule', 
+          label: isEs ? 'Rutina Semanal de Cuidados' : 'Weekly Routine & Schedule', 
+          href: '#colway-weekly-schedule',
+          icon: CalendarDays 
+        },
+        { 
+          id: 'colway-tips', 
+          label: isEs ? 'Consejos Clave & Conservación' : 'Essential Tips & Preservation', 
+          href: '#colway-tips',
+          icon: Thermometer 
+        },
+        { 
+          id: 'colway-safety', 
+          label: isEs ? 'Seguridad y Tolerabilidad' : 'Safety & Tolerability', 
+          href: '#colway-safety',
+          icon: ShieldCheck 
+        }
+      ];
+    }
+
     return [
       { 
         id: 'included-compounds', 
@@ -719,6 +765,26 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
       }
     ];
   }, [lang, protocol, hasVials, isColwayOrCosmetic, isTirzepatideProtocol, isLongevityProtocol, isImmuneProtocol, isRecoveryProtocol]);
+
+  // Guaranteed valid active section (Single-section display rule)
+  const effectiveActiveSection = useMemo(() => {
+    if (activeSection === 'all') return 'all';
+    if (activeSection && tocSections.some(s => s.id === activeSection)) {
+      return activeSection;
+    }
+    return tocSections[0]?.id || (isColwayProtocol ? 'colway-regimen' : 'included-compounds');
+  }, [activeSection, tocSections, isColwayProtocol]);
+
+  const handleSelectSection = useCallback((targetId) => {
+    if (!targetId) return;
+    setActiveSection(targetId);
+    if (typeof window !== 'undefined') {
+      if (window.history?.replaceState) {
+        window.history.replaceState(null, '', `#${targetId}`);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
 
   return (
     <div className="public-datasheet-root">
@@ -1079,218 +1145,299 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               />
             )}
 
-            {/* ── STEP 1: Biomarker-Driven Calibration Banner ──
-                 Always first — personalises all downstream sections (Suppressed for non-invasive cosmetic protocols) */}
-            {!isColwayOrCosmetic && (
-              <BiomarkerCalibrationBanner
-                calibrationDisplay={calibrationDisplay}
-                biomarkerCalibration={biomarkerCalibration}
-                onCalibrate={(newCal) => {
-                  setBiomarkerCalibration(newCal);
-                  toast.success(lang === 'es' ? 'Pauta recalibrada con éxito' : 'Protocol recalibrated successfully');
-                }}
-                onClearCalibration={handleClearCalibration}
-                slug={slug}
-                protocolCategory={protocol?.category}
-                protocolTitle={protocol?.title || protocol?.name}
-                lang={lang}
-              />
-            )}
-
-            {/* ── STEP 1: Included Therapeutic Compounds & Formulations (Primary Clinical Presentation) ── */}
-            <ProtocolCompoundsSection 
-              items={items} 
-              lang={lang} 
-              hasVials={hasVials} 
-              isColwayOrCosmetic={isColwayOrCosmetic} 
-            />
-
-            {/* ── STEP 1B: Topical Cosmeceutical & Nutraceutical Adjuncts (Colway Clinical Systems) ── */}
-            {!isColwayOrCosmetic && (protocol?.topical_adjuncts?.length > 0 || 
-              (protocol?.goal && (
-                protocol.goal.toLowerCase().includes('hair') ||
-                protocol.goal.toLowerCase().includes('skin') ||
-                protocol.goal.toLowerCase().includes('aging') ||
-                protocol.goal.toLowerCase().includes('aesthetic') ||
-                protocol.goal.toLowerCase().includes('recovery') ||
-                protocol.goal.toLowerCase().includes('joint') ||
-                protocol.goal.toLowerCase().includes('longevity')
-              )) ||
-              (protocol?.category && (
-                protocol.category.toLowerCase().includes('hair') ||
-                protocol.category.toLowerCase().includes('skin') ||
-                protocol.category.toLowerCase().includes('aesthetic') ||
-                protocol.category.toLowerCase().includes('recovery') ||
-                protocol.category.toLowerCase().includes('longevity')
-              ))
-            ) && (
-              <ProtocolCosmeticsAdjunctsCard
-                products={protocol?.topical_adjuncts}
+            {isColwayProtocol ? (
+              <ColwayProtocolStreamlinedView
                 protocol={protocol}
-                protocolGoal={protocol?.goal || protocol?.category || 'Clinical Protocol'}
+                items={items}
                 lang={lang}
-              />
-            )}
-
-            {/* ── STEP 2: Clinical Evidence & Endpoints ── */}
-            <ProtocolClinicalOutcomesCard protocol={protocol} lang={lang} />
-
-            {/* ── STEP 3: Pharmacokinetics, Companion Diagnostics & Methylation ── */}
-            <ProtocolClinicalCompanionCard
-              protocol={protocol}
-              lang={lang}
-              biomarkerCalibration={biomarkerCalibration}
-            />
-
-            {/* ── STEP 4: Personalisation Engines & Anatomical Targeting (Patient Calibration) ── */}
-            {(isTirzepatideProtocol || isLongevityProtocol || isImmuneProtocol || isRecoveryProtocol) && (
-              <div id="personalisation-engine" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', scrollMarginTop: '100px' }}>
-                {isTirzepatideProtocol && (
-                  <ProtocolPersonalizationEngine protocol={protocol} lang={lang} />
-                )}
-                {isLongevityProtocol && (
-                  <LongevityEpigeneticCalculator lang={lang} />
-                )}
-                {isImmuneProtocol && !isTirzepatideProtocol && (
-                  <ImmuneResilienceCalculator lang={lang} />
-                )}
-                {isRecoveryProtocol && (
-                  <RecoveryLoadCalculator lang={lang} />
-                )}
-              </div>
-            )}
-
-            {/* Anatomical Targeting with real-time reactive kinetic bridge */}
-            <ProtocolAnatomicalTargetingCard 
-              protocol={protocol} 
-              lang={lang} 
-              onCalibrationChange={setAnatomicalCalibration}
-              initialCalibration={anatomicalCalibration}
-            />
-
-            <ProtocolIncretinSafetyCard protocol={protocol} lang={lang} />
-            <ProtocolSomatotropicAxisCard protocol={protocol} lang={lang} />
-            <ProtocolImmuneModulationCard protocol={protocol} lang={lang} />
-
-            {/* ── STEP 5: Phased Gantt Timeline & Clinical Pathway Engine ── */}
-            <div id="pathway-timeline" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', scrollMarginTop: '100px' }}>
-              <PublicSectionCard
-                icon={Layers}
-                category={lang === 'es' ? 'CRONOGRAMA DE TITULACIÓN' : 'CLINICAL PATHWAY ENGINE'}
-                title={isTirzepatideProtocol
-                  ? (lang === 'es' ? 'Cronograma Clínico y Fases de Titulación' : 'Clinical Titration Timeline & Phase Distribution')
-                  : t.sec2Title}
-                subtitle={
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <Activity size={14} style={{ flexShrink: 0 }} />
-                    <span>{t.sec2Subtitle}</span>
-                  </div>
-                }
-                badge={phases.length ? `${phases.length} ${lang === 'es' ? 'Fases' : 'Phases'}` : null}
-                badgeVariant="green"
-              >
-                <ClinicalGanttTimeline 
-                  protocol={protocol} 
-                  calibratedDoses={anatomicalCalibration}
-                  onCalibrationUpdate={setAnatomicalCalibration}
-                />
-              </PublicSectionCard>
-            </div>
-
-            {/* ── STEP 11: Reconstitution Console OR Posology Console (Non-Injectables) ── */}
-            {hasVials ? (
-              <ProtocolReconstitutionConsole
-                reconData={reconData}
-                activeReconTab={activeReconTab}
-                setActiveReconTab={setActiveReconTab}
-                currentRecon={currentRecon}
-                lang={lang}
+                slug={slug}
+                activeSection={effectiveActiveSection}
+                onSelectSection={handleSelectSection}
+                tocSections={tocSections}
               />
             ) : (
-              <ProtocolPosologyConsole
-                items={items}
-                phases={phases}
-                protocol={protocol}
-                lang={lang}
-              />
+              <div className="pds-single-section-view" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+                {/* ── STEP 1: Included Therapeutic Compounds & Formulations (Primary Clinical Presentation) ── */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'included-compounds') && (
+                  <div id="included-compounds" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+                    {!isColwayOrCosmetic && (
+                      <BiomarkerCalibrationBanner
+                        calibrationDisplay={calibrationDisplay}
+                        biomarkerCalibration={biomarkerCalibration}
+                        onCalibrate={(newCal) => {
+                          setBiomarkerCalibration(newCal);
+                          toast.success(lang === 'es' ? 'Pauta recalibrada con éxito' : 'Protocol recalibrated successfully');
+                        }}
+                        onClearCalibration={handleClearCalibration}
+                        slug={slug}
+                        protocolCategory={protocol?.category}
+                        protocolTitle={protocol?.title || protocol?.name}
+                        lang={lang}
+                      />
+                    )}
+                    <ProtocolCompoundsSection 
+                      items={items} 
+                      lang={lang} 
+                      hasVials={hasVials} 
+                      isColwayOrCosmetic={isColwayOrCosmetic} 
+                    />
+                  </div>
+                )}
+
+                {/* ── STEP 1B: Topical Cosmeceutical & Nutraceutical Adjuncts (Colway Clinical Systems) ── */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'cosmeceutical-adjuncts') && (
+                  !isColwayOrCosmetic && (protocol?.topical_adjuncts?.length > 0 || 
+                    (protocol?.goal && (
+                      protocol.goal.toLowerCase().includes('hair') ||
+                      protocol.goal.toLowerCase().includes('skin') ||
+                      protocol.goal.toLowerCase().includes('aging') ||
+                      protocol.goal.toLowerCase().includes('aesthetic') ||
+                      protocol.goal.toLowerCase().includes('recovery') ||
+                      protocol.goal.toLowerCase().includes('joint') ||
+                      protocol.goal.toLowerCase().includes('longevity')
+                    )) ||
+                    (protocol?.category && (
+                      protocol.category.toLowerCase().includes('hair') ||
+                      protocol.category.toLowerCase().includes('skin') ||
+                      protocol.category.toLowerCase().includes('aesthetic') ||
+                      protocol.category.toLowerCase().includes('recovery') ||
+                      protocol.category.toLowerCase().includes('longevity')
+                    ))
+                  ) && (
+                    <div id="cosmeceutical-adjuncts">
+                      <ProtocolCosmeticsAdjunctsCard
+                        products={protocol?.topical_adjuncts}
+                        protocol={protocol}
+                        protocolGoal={protocol?.goal || protocol?.category || 'Clinical Protocol'}
+                        lang={lang}
+                      />
+                    </div>
+                  )
+                )}
+
+                {/* ── STEP 2: Clinical Evidence & Endpoints ── */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'clinical-outcomes') && (
+                  <div id="clinical-outcomes">
+                    <ProtocolClinicalOutcomesCard protocol={protocol} lang={lang} />
+                  </div>
+                )}
+
+                {/* ── STEP 3: Pharmacokinetics, Companion Diagnostics & Methylation ── */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'protocol-clinical-companion') && (
+                  <div id="protocol-clinical-companion">
+                    <ProtocolClinicalCompanionCard
+                      protocol={protocol}
+                      lang={lang}
+                      biomarkerCalibration={biomarkerCalibration}
+                    />
+                  </div>
+                )}
+
+                {/* ── Anatomical Targeting with real-time reactive kinetic bridge ── */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'anatomical-targeting') && (
+                  <div id="anatomical-targeting">
+                    <ProtocolAnatomicalTargetingCard 
+                      protocol={protocol} 
+                      lang={lang} 
+                      onCalibrationChange={setAnatomicalCalibration}
+                      initialCalibration={anatomicalCalibration}
+                    />
+                  </div>
+                )}
+
+                {/* Specialized Axis Guard Cards */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'incretin-safety') && (
+                  <div id="incretin-safety">
+                    <ProtocolIncretinSafetyCard protocol={protocol} lang={lang} />
+                  </div>
+                )}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'somatotropic-axis') && (
+                  <div id="somatotropic-axis">
+                    <ProtocolSomatotropicAxisCard protocol={protocol} lang={lang} />
+                  </div>
+                )}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'immune-modulation') && (
+                  <div id="immune-modulation">
+                    <ProtocolImmuneModulationCard protocol={protocol} lang={lang} />
+                  </div>
+                )}
+
+                {/* ── STEP 5: Phased Gantt Timeline & Clinical Pathway Engine ── */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'pathway-timeline') && (
+                  <div id="pathway-timeline" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', scrollMarginTop: '100px' }}>
+                    {(isTirzepatideProtocol || isLongevityProtocol || isImmuneProtocol || isRecoveryProtocol) && (
+                      <div id="personalisation-engine" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {isTirzepatideProtocol && (
+                          <ProtocolPersonalizationEngine protocol={protocol} lang={lang} />
+                        )}
+                        {isLongevityProtocol && (
+                          <LongevityEpigeneticCalculator lang={lang} />
+                        )}
+                        {isImmuneProtocol && !isTirzepatideProtocol && (
+                          <ImmuneResilienceCalculator lang={lang} />
+                        )}
+                        {isRecoveryProtocol && (
+                          <RecoveryLoadCalculator lang={lang} />
+                        )}
+                      </div>
+                    )}
+
+                    <PublicSectionCard
+                      icon={Layers}
+                      category={lang === 'es' ? 'CRONOGRAMA DE TITULACIÓN' : 'CLINICAL PATHWAY ENGINE'}
+                      title={isTirzepatideProtocol
+                        ? (lang === 'es' ? 'Cronograma Clínico y Fases de Titulación' : 'Clinical Titration Timeline & Phase Distribution')
+                        : t.sec2Title}
+                      subtitle={
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <Activity size={14} style={{ flexShrink: 0 }} />
+                          <span>{t.sec2Subtitle}</span>
+                        </div>
+                      }
+                      badge={phases.length ? `${phases.length} ${lang === 'es' ? 'Fases' : 'Phases'}` : null}
+                      badgeVariant="green"
+                    >
+                      <ClinicalGanttTimeline 
+                        protocol={protocol} 
+                        calibratedDoses={anatomicalCalibration}
+                        onCalibrationUpdate={setAnatomicalCalibration}
+                      />
+                    </PublicSectionCard>
+                  </div>
+                )}
+
+                {/* ── STEP 11: Reconstitution Console OR Posology Console (Non-Injectables) ── */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'reconstitution-console' || effectiveActiveSection === 'posology-console') && (
+                  <div id={hasVials ? "reconstitution-console" : "posology-console"}>
+                    {hasVials ? (
+                      <ProtocolReconstitutionConsole
+                        reconData={reconData}
+                        activeReconTab={activeReconTab}
+                        setActiveReconTab={setActiveReconTab}
+                        currentRecon={currentRecon}
+                        lang={lang}
+                      />
+                    ) : (
+                      <ProtocolPosologyConsole
+                        items={items}
+                        phases={phases}
+                        protocol={protocol}
+                        lang={lang}
+                      />
+                    )}
+                  </div>
+                )}
+
+                {/* ── STEP 12: Cycle Supply & Logistics Blueprint ── */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'cycle-supplies') && (
+                  <div id="cycle-supplies">
+                    <ProtocolSupplyLogisticsCard
+                      supplySummary={supplySummary}
+                      displayDuration={displayDuration}
+                      t={t}
+                      hasVials={hasVials}
+                      items={items}
+                      lang={lang}
+                    />
+                  </div>
+                )}
+
+                {/* ── STEP 13: Weekly Administration Roadmap ── */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'weekly-calendar') && (
+                  <div id="weekly-calendar">
+                    <ProtocolWeeklyRoadmapCard
+                      weeklySchedule={weeklySchedule}
+                      phases={phases}
+                      activeRoadmapPhase={activeRoadmapPhase}
+                      setActiveRoadmapPhase={setActiveRoadmapPhase}
+                      lang={lang}
+                    />
+                  </div>
+                )}
+
+                {/* ── STEP 14: Biomarker & Laboratory Surveillance ── */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'biomarkers-safety') && (
+                  <div id="biomarkers-safety">
+                    <ProtocolBiomarkersSafetyCard
+                      biomarkers={biomarkers}
+                      onCopyLabRequisition={handleCopyLabRequisition}
+                      t={t}
+                      lang={lang}
+                    />
+                  </div>
+                )}
+
+                {/* ── STEP 15: Safety Governance & Clinical Exclusions ── */}
+                {(effectiveActiveSection === 'all' || effectiveActiveSection === 'safety-governance') && (
+                  <div id="safety-governance">
+                    <ProtocolSafetyExclusionsCard
+                      protocol={protocol}
+                      t={t}
+                      lang={lang}
+                    />
+                  </div>
+                )}
+
+                {/* Single Section Footer Navigation Strip */}
+                {effectiveActiveSection !== 'all' && (
+                  <ProductSectionFooterNav
+                    activeSection={effectiveActiveSection}
+                    sections={tocSections}
+                    onSelectSection={handleSelectSection}
+                    lang={lang}
+                  />
+                )}
+              </div>
             )}
 
-            {/* ── STEP 12: Cycle Supply & Logistics Blueprint ── */}
-            <ProtocolSupplyLogisticsCard
-              supplySummary={supplySummary}
-              displayDuration={displayDuration}
-              t={t}
-              hasVials={hasVials}
-              items={items}
-              lang={lang}
-            />
-
-            {/* ── STEP 13: Weekly Administration Roadmap ── */}
-            <ProtocolWeeklyRoadmapCard
-              weeklySchedule={weeklySchedule}
-              phases={phases}
-              activeRoadmapPhase={activeRoadmapPhase}
-              setActiveRoadmapPhase={setActiveRoadmapPhase}
-              lang={lang}
-            />
-
-            {/* ── STEP 14: Biomarker & Laboratory Surveillance ── */}
-            <ProtocolBiomarkersSafetyCard
-              biomarkers={biomarkers}
-              onCopyLabRequisition={handleCopyLabRequisition}
-              t={t}
-              lang={lang}
-            />
-
-            {/* ── STEP 15: Safety Governance & Clinical Exclusions ── */}
-            <ProtocolSafetyExclusionsCard
-              protocol={protocol}
-              t={t}
-              lang={lang}
-            />
-
-            {/* Standardized Institutional Disclaimer & Versioning Footer */}
-            <footer className="pds-disclaimer-footer" style={{ marginTop: '2.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem', marginBottom: '1.5rem' }}>
-              <p className="pds-disclaimer-text" style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 0.75rem 0' }}>
-                {lang === 'es'
-                  ? 'Aviso Médico Institucional: Este protocolo describe pautas de investigación clínica y formulación magistral bajo supervisión facultativa. Los compuestos descritos requieren prescripción y control analítico previo.'
-                  : 'Institutional Medical Disclaimer: This protocol outlines clinical research blueprints and compounding specifications under authorized medical supervision. Described compounds require prescription and preliminary diagnostic evaluation.'}
-              </p>
-              <div className="pds-footer-metadata" style={{ fontSize: '0.70rem', color: '#94a3b8', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                <span>
-                  Document Ref: PROTO-{slug.toUpperCase()}-2026 • Rev {versionInfo.version} • {lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate} • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Clinical Portal
-                </span>
-              </div>
-            </footer>
+        {/* Standardized Institutional Disclaimer & Versioning Footer */}
+        <footer className="pds-disclaimer-footer" style={{ marginTop: '2.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem', marginBottom: '1.5rem' }}>
+          <p className="pds-disclaimer-text" style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 0.75rem 0' }}>
+            {lang === 'es'
+              ? (isColwayProtocol 
+                  ? 'Aviso Institucional: Este protocolo describe pautas de cuidado dérmico y nutricosmética celular avanzada no invasiva. No sustituye la consulta médica en caso de patologías dermatológicas activas.'
+                  : 'Aviso Médico Institucional: Este protocolo describe pautas de investigación clínica y formulación magistral bajo supervisión facultativa. Los compuestos descritos requieren prescripción y control analítico previo.')
+              : (isColwayProtocol
+                  ? 'Institutional Disclaimer: This protocol outlines advanced non-invasive cellular cosmeceutical and nutricosmetic regimens. Does not substitute medical consultation for active dermatological pathologies.'
+                  : 'Institutional Medical Disclaimer: This protocol outlines clinical research blueprints and compounding specifications under authorized medical supervision. Described compounds require prescription and preliminary diagnostic evaluation.')}
+          </p>
+          <div className="pds-footer-metadata" style={{ fontSize: '0.70rem', color: '#94a3b8', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <span>
+              Document Ref: PROTO-{slug.toUpperCase()}-2026 • Rev {versionInfo.version} • {lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate} • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Clinical Portal
+            </span>
           </div>
+        </footer>
+      </div>
 
-          {/* Persistent Google Cloud Console Protocol Sidebar (Desktop Sticky + Mobile Drawer) */}
-          <ProtocolDetailSidebar 
-            sections={tocSections} 
-            lang={lang} 
-            title={lang === 'es' ? 'Secciones del Protocolo' : 'Protocol Navigation'}
-            protocol={protocol}
-            slug={slug}
-            hideFloatingTrigger={true}
-            similarProtocols={similarProtocols}
-            topicalAdjuncts={protocol?.topical_adjuncts?.length > 0 ? protocol.topical_adjuncts : (isHairProtocol ? [
-              {
-                product_slug: 'colway-strengthening-shampoo',
-                product_name: 'Colway Strengthening Hair Shampoo',
-                step: 'Step 1 — Scalp Prep',
-                key_mechanisms: ['DHT clearance (Zinc PCA)', 'pH 4.5–5.5 optimization']
-              },
-              {
-                product_slug: 'colway-strengthening-conditioner',
-                product_name: 'Colway Strengthening Conditioner',
-                step: 'Step 2 — Cortex Repair',
-                key_mechanisms: ['Native collagen & Keratin shield', 'Anti-breakage']
-              }
-            ] : null)}
-            onOpenQrModal={() => setIsQrModalOpen(true)}
-            onCopyLabRequisition={handleCopyLabRequisition}
-          />
-        </div>
+      {/* Persistent Google Cloud Console Protocol Sidebar (Desktop Sticky + Mobile Drawer) */}
+      <ProtocolDetailSidebar 
+        sections={tocSections} 
+        lang={lang} 
+        title={lang === 'es' ? 'Secciones del Protocolo' : 'Protocol Navigation'}
+        protocol={protocol}
+        slug={slug}
+        activeSection={effectiveActiveSection}
+        onSelectSection={handleSelectSection}
+        hideFloatingTrigger={true}
+        similarProtocols={similarProtocols}
+        topicalAdjuncts={!isColwayProtocol ? (protocol?.topical_adjuncts?.length > 0 ? protocol.topical_adjuncts : (isHairProtocol ? [
+          {
+            product_slug: 'colway-strengthening-shampoo',
+            product_name: 'Colway Strengthening Hair Shampoo',
+            step: 'Step 1 — Scalp Prep',
+            key_mechanisms: ['DHT clearance (Zinc PCA)', 'pH 4.5–5.5 optimization']
+          },
+          {
+            product_slug: 'colway-strengthening-conditioner',
+            product_name: 'Colway Strengthening Conditioner',
+            step: 'Step 2 — Cortex Repair',
+            key_mechanisms: ['Native collagen & Keratin shield', 'Anti-breakage']
+          }
+        ] : null)) : null}
+        onOpenQrModal={() => setIsQrModalOpen(true)}
+        onCopyLabRequisition={handleCopyLabRequisition}
+      />
+    </div>
 
         {/* ── Modal QR Code Dialog ── */}
         <ProtocolQrModal
@@ -1316,6 +1463,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         showClinicalAI={true}
         showSections={true}
         sectionsCount={tocSections.length}
+        activeSectionIndex={tocSections.findIndex(s => s.id === effectiveActiveSection) + 1}
         onOpenSections={() => {
           if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('open-datasheet-toc'));

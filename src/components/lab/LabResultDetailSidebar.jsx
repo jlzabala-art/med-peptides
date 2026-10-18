@@ -63,6 +63,7 @@ export default function LabResultDetailSidebar({
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [activeId, setActiveId] = useState(activeSection || 'overview');
+  const currentActiveId = activeSection || activeId || 'overview';
 
   const sampleCode = code || data.code || data.protocolNumber || 'LAB-RESULT';
   const patientName = patientDisplayName || (isDoctorUnlocked ? (data.patientName || data.patient?.name || 'Verified Patient') : (data.patientMaskedCode || `Subject #${sampleCode}`));
@@ -92,9 +93,9 @@ export default function LabResultDetailSidebar({
     }
   }, [activeSection]);
 
-  // Real-time ScrollSpy via IntersectionObserver
+  // Real-time ScrollSpy via IntersectionObserver (disabled when controlled via onSelectSection)
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || onSelectSection) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -293,7 +294,7 @@ export default function LabResultDetailSidebar({
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {availableSections.map((sec) => {
-            const isCurrent = activeId === sec.id;
+            const isCurrent = currentActiveId === sec.id;
             const IconComponent = sec.icon || FileText;
 
             return (

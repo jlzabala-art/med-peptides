@@ -96,7 +96,7 @@ export default function WorkspaceMiniSummaryStrip({
         ) : (
           <User size={13} style={{ color: recipientName ? '#16a34a' : '#94a3b8' }} />
         )}
-        <span style={{ maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <span style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {recipientName || (isDoctor ? 'No Patient' : 'No Recipient')}
         </span>
       </button>
@@ -126,6 +126,7 @@ export default function WorkspaceMiniSummaryStrip({
           borderColor: '#bfdbfe',
           color: '#1e3a8a',
           fontWeight: 800,
+          flexShrink: 0,
         }}
       >
         <DollarSign size={13} style={{ color: '#2563eb' }} />
@@ -139,24 +140,25 @@ export default function WorkspaceMiniSummaryStrip({
           onClick={onQuickConvert}
           style={{
             marginLeft: '6px',
-            padding: '4px 10px',
+            padding: '5px 12px',
             borderRadius: '6px',
             backgroundColor: isDoctor || recipient?.type === 'patient' ? '#0d9488' : '#0b57d0',
             color: '#ffffff',
             border: 'none',
-            fontSize: '0.72rem',
+            fontSize: '0.74rem',
             fontWeight: 700,
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '4px',
+            gap: '5px',
             whiteSpace: 'nowrap',
+            flexShrink: 0,
             boxShadow: '0 1px 2px rgba(11, 87, 208, 0.2)',
             transition: 'background-color 0.15s ease',
           }}
           title={isDoctor || recipient?.type === 'patient' ? 'Create Prescription directly in Rx Builder (1-click)' : 'Generate B2B Order / Quote (1-click)'}
         >
-          <Zap size={12} />
+          <Zap size={13} style={{ flexShrink: 0 }} />
           <span>{isDoctor || recipient?.type === 'patient' ? 'Prescribe (Rx)' : 'Create Order / Quote'}</span>
         </button>
       )}

@@ -557,12 +557,6 @@ export default function BrandCollectionPage({
         </section>
       )}
 
-      {brandSlug === 'colway' && (
-        <section style={{ maxWidth: '1440px', margin: '0 auto 2.5rem', padding: '0 2rem' }}>
-          <ColwayTrichologyStemCellShowcase lang={lang} />
-        </section>
-      )}
-
 
       {/* ── 6. MAIN WORKSPACE (70% Main Products Grid + 30% Sticky Sidebar) ── */}
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem 5rem' }}>
@@ -859,68 +853,35 @@ export default function BrandCollectionPage({
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '4px'
+                              <button
+                              type="button"
+                              onClick={() => handleProductClick(product)}
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: '6px',
+                                border: '1px solid #cbd5e1',
+                                background: '#ffffff',
+                                color: '#0f172a',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                transition: 'all 0.15s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f8fafc';
+                                e.currentTarget.style.borderColor = '#94a3b8';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#ffffff';
+                                e.currentTarget.style.borderColor = '#cbd5e1';
                               }}
                             >
-                              <Eye size={13} />
-                              <span>{isEs ? 'Ficha' : 'View'}</span>
+                              <Eye size={13} style={{ color: '#0284c7' }} />
+                              <span>{isEs ? 'Ver Producto' : 'View Product'}</span>
                             </button>
-
-                            {!user ? (
-                              <button
-                                type="button"
-                                onClick={() => setIsAuthModalOpen(true)}
-                                style={{
-                                  padding: '6px 12px',
-                                  borderRadius: '6px',
-                                  border: `1px solid ${config.accentColor}`,
-                                  background: 'rgba(255, 255, 255, 0.95)',
-                                  color: config.accentColor,
-                                  fontSize: '0.75rem',
-                                  fontWeight: 700,
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px'
-                                }}
-                              >
-                                <Lock size={12} />
-                                <span>{isEs ? 'Acceso Requerido' : 'Sign In to Order'}</span>
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={(e) => handleQuickAdd(product, e)}
-                                style={{
-                                  padding: '6px 12px',
-                                  borderRadius: '6px',
-                                  border: 'none',
-                                  background: isAdded ? '#16a34a' : config.accentColor,
-                                  color: '#ffffff',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 700,
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px'
-                                }}
-                              >
-                                {isAdded ? (
-                                  <>
-                                    <Check size={13} /> {isEs ? 'Añadido' : 'Added'}
-                                  </>
-                                ) : (
-                                  <>
-                                    <span>
-                                      {isEs
-                                        ? (brandSlug === 'bloodo' ? 'Pedir Kit' : 'Ver Formulación')
-                                        : (brandSlug === 'bloodo' ? 'Order Kit' : 'View Formulation')}
-                                    </span>
-                                    <ArrowRight size={13} />
-                                  </>
-                                )}
-                              </button>
-                            )}
                           </div>
                         </div>
 
@@ -1187,7 +1148,7 @@ export default function BrandCollectionPage({
                               type="button"
                               onClick={() => handleProductClick(product)}
                               style={{
-                                padding: '6px 12px',
+                                padding: '6px 14px',
                                 borderRadius: '6px',
                                 border: '1px solid #cbd5e1',
                                 background: '#ffffff',
@@ -1197,72 +1158,21 @@ export default function BrandCollectionPage({
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '4px'
+                                gap: '5px',
+                                transition: 'all 0.15s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f8fafc';
+                                e.currentTarget.style.borderColor = '#94a3b8';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#ffffff';
+                                e.currentTarget.style.borderColor = '#cbd5e1';
                               }}
                             >
-                              <Eye size={13} />
-                              <span>{isEs ? 'Ficha' : 'View'}</span>
+                              <Eye size={13} style={{ color: '#0284c7' }} />
+                              <span>{isEs ? 'Ver Producto' : 'View Product'}</span>
                             </button>
-
-                            {!user ? (
-                              /* Non-registered visitors cannot place clinical orders directly (Regla de Oro Usuario) */
-                              <button
-                                type="button"
-                                onClick={() => setIsAuthModalOpen(true)}
-                                style={{
-                                  padding: '6px 12px',
-                                  borderRadius: '6px',
-                                  border: `1px solid ${config.accentColor}`,
-                                  background: 'rgba(255, 255, 255, 0.95)',
-                                  color: config.accentColor,
-                                  fontSize: '0.75rem',
-                                  fontWeight: 700,
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  transition: 'all 0.15s ease'
-                                }}
-                                title={isEs ? 'Registro obligatorio para tramitar pedidos clínicos' : 'Registered professional account required to order'}
-                              >
-                                <Lock size={12} />
-                                <span>{isEs ? 'Acceso Requerido' : 'Sign In to Order'}</span>
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={(e) => handleQuickAdd(product, e)}
-                                style={{
-                                  padding: '6px 12px',
-                                  borderRadius: '6px',
-                                  border: 'none',
-                                  background: isAdded ? '#16a34a' : config.accentColor,
-                                  color: '#ffffff',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 700,
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  transition: 'background 0.15s ease'
-                                }}
-                              >
-                                {isAdded ? (
-                                  <>
-                                    <Check size={13} /> {isEs ? 'Añadido' : 'Added'}
-                                  </>
-                                ) : (
-                                  <>
-                                    <span>
-                                      {isEs
-                                        ? (brandSlug === 'bloodo' ? 'Pedir Kit' : 'Ver Formulación')
-                                        : (brandSlug === 'bloodo' ? 'Order Kit' : 'View Formulation')}
-                                    </span>
-                                    <ArrowRight size={13} />
-                                  </>
-                                )}
-                              </button>
-                            )}
                           </div>
                         </div>
                       </div>
