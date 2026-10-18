@@ -41,6 +41,7 @@ export function getPosologyText(pos) {
  * 5. Table of contents sections & share message resolution
  */
 export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPatientView = false, atlasRecs = null, isAuthorizedViewer = false } = {}) {
+  const posology = rx.structuredPosology || {};
   const patient = rx.patient || {};
   const isCodified = rx.isCodifiedView || !isAuthorizedViewer;
   const rawPatientName = rx.pharmacyLabels?.[0]?.patientName || patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
