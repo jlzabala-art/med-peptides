@@ -15,7 +15,7 @@ import {
   Clock,
   ShieldCheck
 } from '@/lib/icons';
-import { Home } from 'lucide-react';
+import { Home, ArrowLeft } from 'lucide-react';
 import PrescriptionStatusQuickAction from './PrescriptionStatusQuickAction';
 
 /**
@@ -93,7 +93,7 @@ export default function PrescriptionMasterHeader({
                   <span style={{ color: '#5f6368', fontWeight: 400, fontSize: '0.92rem' }}>#{rxId}</span>
                 </h1>
 
-                {/* Right: Quick Utilities Pinned to Top-Right */}
+                {/* Right: Quick Utilities Pinned to Top-Right (Google Cloud UX) */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                   <button
                     type="button"
@@ -104,14 +104,32 @@ export default function PrescriptionMasterHeader({
                   >
                     {copied ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} color="#5f6368" />}
                   </button>
-                  <Link
-                    href={doctorPublicUrl || `/dr/haytham-salem`}
-                    className="rx-header-action-btn rx-btn-icon"
-                    title={isEs ? `Ir al portal clínico público del Dr/a. ${doctorName}` : `Go to Dr. ${doctorName}'s Public Clinical Portal`}
-                    style={{ minWidth: 32, height: 32, borderRadius: '6px', border: '1px solid #dadce0', background: '#ffffff', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
-                  >
-                    <Home size={14} color="#5f6368" />
-                  </Link>
+                  {doctorPublicUrl && (
+                    <Link
+                      href={doctorPublicUrl}
+                      className="rx-header-action-btn"
+                      title={isEs ? `Volver al portal clínico de ${doctorName || 'Médico'}` : `Return to clinical portal of ${doctorName || 'Doctor'}`}
+                      style={{
+                        height: 32,
+                        padding: '0 10px',
+                        borderRadius: '6px',
+                        border: '1px solid #dadce0',
+                        background: '#ffffff',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        textDecoration: 'none',
+                        color: '#003666',
+                        fontSize: '0.74rem',
+                        fontWeight: 650,
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <ArrowLeft size={13} color="#003666" strokeWidth={2.5} />
+                      <span>{doctorName ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`) : (isEs ? 'Portal Médico' : 'Doctor Portal')}</span>
+                    </Link>
+                  )}
                 </div>
               </div>
 

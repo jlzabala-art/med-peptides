@@ -14,7 +14,7 @@ import {
   FileText,
   Search
 } from '@/lib/icons';
-import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, User, LogOut, FileInput, LayoutList, Home, Sliders } from 'lucide-react';
+import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, User, LogOut, FileInput, LayoutList, Home, Sliders, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
@@ -70,6 +70,8 @@ export default function PublicUnifiedHeader({
   hideContactButton = false,
   // Hide global catalog search button (⌘K) in Tier 1
   hideSearchButton = false,
+  // Hide Account Manager multi-portal hub button in Tier 1
+  hideAccountManager = false,
   // Doctor-only: enables Import Rx and Prescriptions Switcher buttons
   isDoctorView = false,
   hideImportRx = false,
@@ -165,7 +167,9 @@ export default function PublicUnifiedHeader({
       try {
         localStorage.setItem('atlas_portal_lang', nextLang);
         localStorage.setItem('atlas_catalog_lang', nextLang);
-      } catch {}
+      } catch (_e) {
+        // Ignore localStorage error
+      }
       const url = new URL(window.location.href);
       url.searchParams.set('lang', nextLang);
       window.history.replaceState({}, '', url.toString());
@@ -341,25 +345,25 @@ function forceCanonicalDomain(urlOrPath) {
                 <Link
                   href={doctorHomeHref}
                   className="puh-doctor-home-btn"
-                  title={isSpanish ? `Página pública de ${doctorName || 'Médico'}` : `Public page of ${doctorName || 'Doctor'}`}
+                  title={isSpanish ? `Volver al portal clínico de ${doctorName || 'Médico'}` : `Return to clinical portal of ${doctorName || 'Doctor'}`}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '5px',
-                    padding: '4px 10px',
+                    gap: '6px',
+                    padding: '5px 12px',
                     borderRadius: '6px',
-                    background: 'rgba(255, 255, 255, 0.12)',
-                    border: '1px solid rgba(255, 255, 255, 0.22)',
+                    background: 'rgba(255, 255, 255, 0.16)',
+                    border: '1px solid rgba(255, 255, 255, 0.30)',
                     color: '#ffffff',
-                    fontSize: '0.74rem',
-                    fontWeight: 600,
+                    fontSize: '0.76rem',
+                    fontWeight: 650,
                     textDecoration: 'none',
                     transition: 'all 0.15s ease',
                     backdropFilter: 'blur(4px)'
                   }}
                 >
-                  <Home size={13} color="#ffffff" />
-                  <span className="hide-on-extra-narrow">{doctorName ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`) : (isSpanish ? 'Portal del Médico' : "Doctor's Portal")}</span>
+                  <ArrowLeft size={13} color="#ffffff" strokeWidth={2.5} />
+                  <span>{doctorName ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`) : (isSpanish ? 'Portal del Médico' : "Doctor's Portal")}</span>
                 </Link>
               )}
             </div>
@@ -383,16 +387,18 @@ function forceCanonicalDomain(urlOrPath) {
                 </button>
               )}
 
-              {/* Account Manager Multi-Portal Hub */}
-              <Link
-                href="/account-manager"
-                className="puh-btn puh-btn-ghost hide-on-extra-narrow"
-                title={isSpanish ? 'Consola de Account Manager (/account-manager)' : 'Account Manager Hub (/account-manager)'}
-                style={{ textDecoration: 'none' }}
-              >
-                <Sliders size={14} />
-                <span className="puh-btn-label">{isSpanish ? 'Account Manager' : 'Account Mgr'}</span>
-              </Link>
+              {/* Account Manager Multi-Portal Hub (Only shown when not explicitly hidden) */}
+              {!hideAccountManager && (
+                <Link
+                  href="/account-manager"
+                  className="puh-btn puh-btn-ghost hide-on-extra-narrow"
+                  title={isSpanish ? 'Consola de Account Manager (/account-manager)' : 'Account Manager Hub (/account-manager)'}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Sliders size={14} />
+                  <span className="puh-btn-label">{isSpanish ? 'Account Manager' : 'Account Mgr'}</span>
+                </Link>
+              )}
 
               {/* Language Selector */}
               <select
@@ -559,7 +565,7 @@ function forceCanonicalDomain(urlOrPath) {
                         className="puh-auth-dropdown-item puh-auth-dropdown-item--danger"
                         onClick={async () => {
                           setAuthDropdownOpen(false);
-                          try { const { getAuth, signOut } = await import('firebase/auth'); await signOut(getAuth()); } catch {}
+                          try { const { getAuth, signOut } = await import('firebase/auth'); await signOut(getAuth()); } catch (_err) { /* ignore signout error */ }
                         }}
                         role="menuitem"
                       >

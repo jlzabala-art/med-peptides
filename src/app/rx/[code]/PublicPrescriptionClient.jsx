@@ -90,7 +90,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
   const searchParams = useSearchParams();
   const viewParam = initialView || searchParams?.get('view') || searchParams?.get('mode');
-  const isPatientView = viewParam === 'patient';
+  const isPatientView = viewParam === 'patient' || (!isAuthorizedViewer && viewParam !== 'doctor');
 
   const [lang, setLang] = useState('en');
   const [copied, setCopied] = useState(false);
@@ -433,6 +433,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           brandTitle={isEs ? `Volver a la página pública del Dr/a. ${doctorName}` : `Return to Dr. ${doctorName}'s Public Portal`}
           doctorHomeHref={doctorPublicUrl}
           doctorName={doctorName}
+          hideAccountManager={true}
+          hideImportRx={isPatientView || !isAuthorizedViewer}
+          hideSwitchRx={isPatientView || !isAuthorizedViewer}
+          isDoctorView={!isPatientView && isAuthorizedViewer}
           inquiryContextType="prescription"
           inquiryEntity={{
             name: `Prescription ${rxId} — ${patientName}`,
@@ -452,99 +456,179 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             priceFormatted: resolvedPrice?.formatted || 'AED 1,450.00'
           }}
           breadcrumb={[
-            { label: 'Clinical Intelligence', href: '/c/CAT-MU9L9GBN' },
-            { label: isEs ? 'Prescripciones Médicas' : 'Prescription Dossier' },
-            { label: rxId }
+            { label: doctorName ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`) : (isEs ? 'Portal del Médico' : 'Doctor Portal'), href: doctorPublicUrl },
+            { label: isEs ? 'Pacientes' : 'Patients', href: `${doctorPublicUrl}#patients` },
+            { label: patientName || (isEs ? 'Expediente Paciente' : 'Patient Dossier') },
+            { label: `#${rxId}` }
           ]}
-          isDoctorView={!isPatientView}
           onImportRx={() => { window.location.href = `/rx/intake?from=${rxId}&fromRole=doctor`; }}
           onSwitchRx={() => setShowRxSwitcherModal(true)}
           banner={
-            <div className="rx-mode-subbanner" style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 10,
-              padding: '6px 20px',
-              background: isPatientView
-                ? 'linear-gradient(90deg, #0d9488 0%, #0284c7 100%)'
-                : 'linear-gradient(90deg, #003666 0%, #1a73e8 100%)',
-              borderBottom: '1px solid rgba(255,255,255,0.12)',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.18)'
-            }}>
-              {/* Mode icon */}
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                width: 22, height: 22, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.18)',
-                flexShrink: 0
+            !isPatientView && isAuthorizedViewer ? (
+              <div className="rx-mode-subbanner" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 10,
+                padding: '6px 20px',
+                background: 'linear-gradient(90deg, #003666 0%, #1a73e8 100%)',
+                borderBottom: '1px solid rgba(255,255,255,0.12)',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.18)'
               }}>
-                {isPatientView
-                  ? <User size={12} color="#ffffff" />
-                  : <Stethoscope size={12} color="#ffffff" />}
-              </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.18)',
+                    flexShrink: 0
+                  }}>
+                    <Stethoscope size={12} color="#ffffff" />
+                  </span>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    {isEs ? 'Vista Médico — Panel Clínico' : 'Doctor View — Clinical Panel'}
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.85)', fontWeight: 400 }} className="rx-banner-desc">
+                    {isEs ? `· Paciente: ${patientName}` : `· Patient: ${patientName}`}
+                  </span>
+                </div>
 
-              {/* Label */}
-              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#ffffff', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                {isPatientView
-                  ? (isEs ? 'Vista Paciente' : 'Patient View')
-                  : (isEs ? 'Vista Médico — Panel Clínico' : 'Doctor View — Clinical Panel')}
-              </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+                  <Link
+                    href={doctorPublicUrl}
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 650,
+                      color: '#ffffff',
+                      background: 'rgba(255,255,255,0.20)',
+                      border: '1px solid rgba(255,255,255,0.35)',
+                      padding: '3px 10px',
+                      borderRadius: '4px',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      transition: 'background 0.15s'
+                    }}
+                    title={isEs ? `Volver al portal de ${doctorName}` : `Return to ${doctorName}'s Portal`}
+                  >
+                    <ArrowLeft size={12} color="#ffffff" />
+                    <span>{isEs ? `Volver a ${doctorName || 'Portal'}` : `Back to ${doctorName || 'Portal'}`}</span>
+                  </Link>
 
-              {/* Description */}
-              <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.75)', fontWeight: 400, display: 'none' }}
-                className="rx-banner-desc"
-              >
-                {isPatientView
-                  ? (isEs ? 'Dossier simplificado para el paciente' : 'Simplified dossier for patient use')
-                  : (isEs ? 'Acceso completo · Solo visible por el médico' : 'Full clinical access · Visible to doctor only')}
-              </span>
+                  <a
+                    href={`/rx/${rxId}?view=patient`}
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      padding: '3px 10px',
+                      borderRadius: '4px',
+                      background: 'rgba(255,255,255,0.14)',
+                      border: '1px solid rgba(255,255,255,0.25)',
+                      transition: 'background 0.15s'
+                    }}
+                    title={isEs ? 'Ver cómo lo verá el paciente' : 'Preview the patient view'}
+                  >
+                    <Eye size={12} />
+                    <span>{isEs ? 'Vista Paciente' : 'Patient Preview'}</span>
+                  </a>
+                </div>
+              </div>
+            ) : isAuthorizedViewer ? (
+              <div className="rx-mode-subbanner" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 10,
+                padding: '6px 20px',
+                background: 'linear-gradient(90deg, #0d9488 0%, #0284c7 100%)',
+                borderBottom: '1px solid rgba(255,255,255,0.12)',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.18)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.18)',
+                    flexShrink: 0
+                  }}>
+                    <User size={12} color="#ffffff" />
+                  </span>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    {isEs ? 'Modo Previsualización Paciente' : 'Patient Preview Mode'}
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.85)', fontWeight: 400 }} className="rx-banner-desc">
+                    {isEs ? 'Dossier simplificado tal como lo visualiza el paciente' : 'Simplified dossier as seen by patient'}
+                  </span>
+                </div>
 
-              {/* Switch view link or patient prescriptions modal button */}
-              {!isPatientView ? (
-                <a
-                  href={`/rx/${rxId}?view=patient`}
-                  style={{
-                    marginLeft: 'auto',
-                    fontSize: '0.72rem', fontWeight: 500,
-                    color: 'rgba(255,255,255,0.85)',
-                    textDecoration: 'none',
-                    display: 'inline-flex', alignItems: 'center', gap: 4,
-                    padding: '3px 9px', borderRadius: '4px',
-                    background: 'rgba(255,255,255,0.15)',
-                    border: '1px solid rgba(255,255,255,0.25)',
-                    transition: 'background 0.15s'
-                  }}
-                  title={isEs ? 'Ver cómo lo verá el paciente' : 'Preview the patient view'}
-                >
-                  <Eye size={11} />
-                  {isEs ? 'Vista Paciente' : 'Patient Preview'}
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => { triggerHaptic('selection'); setShowPatientRxModal(true); }}
-                  style={{
-                    marginLeft: 'auto',
-                    fontSize: '0.72rem', fontWeight: 600,
-                    color: '#ffffff',
-                    background: 'rgba(255,255,255,0.20)',
-                    border: '1px solid rgba(255,255,255,0.35)',
-                    borderRadius: '4px',
-                    padding: '3px 10px',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    transition: 'background 0.15s'
-                  }}
-                  title={isEs ? 'Ver todas las prescripciones de este paciente' : 'View all prescriptions for this patient across all doctors'}
-                >
-                  <Layers size={12} color="#ffffff" />
-                  <span>{isEs ? 'Todas Mis Recetas' : 'All My Prescriptions'}</span>
-                </button>
-              )}
-            </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+                  <a
+                    href={`/rx/${rxId}`}
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 650,
+                      color: '#ffffff',
+                      background: 'rgba(255,255,255,0.22)',
+                      border: '1px solid rgba(255,255,255,0.38)',
+                      padding: '3px 10px',
+                      borderRadius: '4px',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5
+                    }}
+                    title={isEs ? 'Volver al panel clínico del médico' : 'Switch back to doctor clinical view'}
+                  >
+                    <Stethoscope size={12} color="#ffffff" />
+                    <span>{isEs ? 'Volver a Vista Médico' : 'Return to Doctor View'}</span>
+                  </a>
+
+                  <Link
+                    href={doctorPublicUrl}
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: '#ffffff',
+                      background: 'rgba(255,255,255,0.14)',
+                      border: '1px solid rgba(255,255,255,0.25)',
+                      padding: '3px 10px',
+                      borderRadius: '4px',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5
+                    }}
+                  >
+                    <ArrowLeft size={12} color="#ffffff" />
+                    <span>{isEs ? `Portal Dr. ${doctorName || ''}` : `${doctorName || ''} Portal`}</span>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="rx-mode-subbanner" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '6px 20px',
+                background: '#003666',
+                borderBottom: '1px solid rgba(255,255,255,0.12)'
+              }}>
+                <ShieldCheck size={14} color="#4ade80" />
+                <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#ffffff', letterSpacing: '0.02em' }}>
+                  {isEs
+                    ? 'Expediente Clínico Oficial · Formulación Magistral Certificada · Estándares EU GMP / DHA'
+                    : 'Official Clinical Dossier · Verified Compounded Prescription · EU GMP / DHA Quality Standards'}
+                </span>
+              </div>
+            )
           }
         />
       )}
@@ -1823,6 +1907,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             doctorLicense={doctorLicense}
             doctorOffice={doctorAddress}
             doctorPhone={doctorPhone}
+            doctorPublicUrl={doctorPublicUrl}
             publicUrl={publicUrl}
             onOpenPdf={() => setShowBrochureModal(true)}
             onExportExcel={handleExportExcel}
@@ -2041,7 +2126,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   </span>
                 </button>
 
-                {/* 4. QR Verification */}
+                {/* 4. Quick Return to Doctor Portal */}
+                <Link
+                  href={doctorPublicUrl}
+                  className="rx-dock-btn rx-dock-btn-secondary"
+                  style={{ textDecoration: 'none' }}
+                  title={isEs ? `Volver al portal clínico de ${doctorName}` : `Return to ${doctorName}'s Clinical Portal`}
+                >
+                  <ArrowLeft size={14} color="#003666" strokeWidth={2.5} />
+                  <span className="rx-dock-btn-label-desktop">{isEs ? 'Mi Portal' : 'My Portal'}</span>
+                </Link>
+
+                {/* 5. QR Verification */}
                 <button
                   type="button"
                   onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
@@ -2053,49 +2149,39 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </button>
               </>
             ) : (
-              /* Patient View CTAs */
+              /* Patient View CTAs (Strictly Patient-Centered) */
               <>
-                {/* 1. Treatment Guide */}
+                {/* 1. Treatment Guide & PDF */}
                 <button
                   type="button"
                   onClick={() => { triggerHaptic('selection'); setShowBrochureModal(true); }}
                   className="rx-dock-btn rx-dock-btn-primary"
-                  title={isEs ? 'Ver guía de tratamiento y PDF' : 'View treatment guide & PDF'}
+                  title={isEs ? 'Ver guía de tratamiento y descargar PDF' : 'View treatment guide & download PDF'}
                 >
                   <FileText size={14} color="#ffffff" />
                   <span>{isEs ? 'Guía de Tratamiento' : 'Treatment Guide'}</span>
                 </button>
 
-                {/* 2. All My Prescriptions */}
-                <button
-                  type="button"
-                  onClick={() => { triggerHaptic('selection'); setShowPatientRxModal(true); }}
-                  className="rx-dock-btn rx-dock-btn-secondary"
-                  title={isEs ? 'Ver todas mis recetas' : 'View all my prescriptions'}
-                >
-                  <Layers size={14} color="#1a73e8" />
-                  <span>{isEs ? 'Mis Recetas' : 'My Prescriptions'}</span>
-                </button>
-
-                {/* 3. Inquire / Renew */}
+                {/* 2. Direct Clinical Care / Inquire */}
                 <button
                   type="button"
                   onClick={() => setIsInquiryDrawerOpen(true)}
                   className="rx-dock-btn rx-dock-btn-quote"
-                  title={isEs ? 'Consultar con Atlas' : 'Inquire with Atlas'}
+                  title={isEs ? 'Contactar con la clínica o consultar dudas' : 'Contact clinic or submit inquiry'}
                 >
                   <MessageSquare size={14} color="#ffffff" />
-                  <span>{isDispensed ? (isEs ? 'Renovar' : 'Refill') : (isEs ? 'Pedir Cotización' : 'Request Quote')}</span>
+                  <span>{isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Contactar Clínica' : 'Contact Clinic')}</span>
                 </button>
 
-                {/* 4. QR */}
+                {/* 3. Official QR Authenticity Badge */}
                 <button
                   type="button"
                   onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
                   className="rx-dock-btn rx-dock-btn-secondary"
-                  title={isEs ? 'Ver QR de mi receta' : 'View my prescription QR'}
+                  title={isEs ? 'Verificar autenticidad digital con código QR' : 'Verify authenticity QR code'}
                 >
                   <QrCode size={14} color="#1a73e8" />
+                  <span className="rx-dock-btn-label-desktop">{isEs ? 'Autenticidad QR' : 'Verify QR'}</span>
                 </button>
               </>
             )}

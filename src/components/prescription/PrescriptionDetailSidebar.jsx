@@ -56,6 +56,7 @@ export default function PrescriptionDetailSidebar({
   doctorLicense = '',
   doctorOffice = '',
   doctorPhone = '',
+  doctorPublicUrl = '',
   publicUrl = '',
   onOpenPdf = null,
   onExportExcel = null,
@@ -289,6 +290,58 @@ export default function PrescriptionDetailSidebar({
             )}
           </div>
         </div>
+
+        {/* Treating Physician Card (Google Cloud Parent Context) */}
+        {doctorName && (
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            padding: '12px 14px',
+            boxShadow: '0 2px 8px rgba(0, 54, 102, 0.04)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px'
+          }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? 'Médico Prescriptor' : 'Prescribing Physician'}
+              </div>
+              <div style={{ fontSize: '0.86rem', fontWeight: 750, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '1px' }}>
+                {doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`}
+              </div>
+              {doctorTitle && (
+                <div style={{ fontSize: '0.70rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {doctorTitle}
+                </div>
+              )}
+            </div>
+            {doctorPublicUrl && (
+              <Link
+                href={doctorPublicUrl}
+                title={isEs ? `Ir al portal de ${doctorName}` : `Go to ${doctorName}'s Portal`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  background: '#f8fafc',
+                  border: '1px solid #dadce0',
+                  color: '#003666',
+                  fontSize: '0.72rem',
+                  fontWeight: 650,
+                  textDecoration: 'none',
+                  flexShrink: 0
+                }}
+              >
+                <span>{isEs ? 'Portal' : 'Portal'}</span>
+                <ChevronRight size={13} />
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Widget 1: On This Dossier (TOC) */}
         <div style={{
