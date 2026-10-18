@@ -1,6 +1,7 @@
 import { adminDb } from '@/lib/firebaseAdmin';
 import { KNOWN_DOCTORS_DIRECTORY } from '@/services/doctorDirectoryService';
 import { classifyPrescriptionRegimen } from '@/utils/prescriptionRegimenTaxonomy';
+import { resolveDoctorSpecialtyIntelligence } from '@/services/specialtyBlueprintsEngine';
 
 // ── In-Memory RAM Cache (Golden Rule #2) ─────────────────────────────────────
 // Layer 1: 0ms RAM cache with 10-minute TTL
@@ -1182,9 +1183,18 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     // 9. Compute Server-Side Clinical Analytics & Practice-Wide Lotusland Peptide Synergy
     const serverAnalytics = computeServerAnalytics(enrichedPrescriptions);
 
+    // 9.5 Resolve Physician Specialty Category, Web Footprint Profile & Specialty Practice Blueprints
+    const specialtyIntel = resolveDoctorSpecialtyIntelligence(doctorProfile, enrichedPrescriptions);
+    doctorProfile.specialtyCategory = specialtyIntel.specialtyCategory;
+    doctorProfile.webPracticeProfile = specialtyIntel.webPracticeProfile;
+    doctorProfile.specialtyBlueprints = specialtyIntel.primaryBlueprints;
+
     const payload = {
       success: true,
       doctor: doctorProfile,
+      specialtyCategory: specialtyIntel.specialtyCategory,
+      webPracticeProfile: specialtyIntel.webPracticeProfile,
+      specialtyBlueprints: specialtyIntel.primaryBlueprints,
       kpis: {
         activePrescriptions,
         proposalsCount,

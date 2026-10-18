@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { getDoctorPortalData } from '@/lib/doctorCache';
+import { resolveDoctorSpecialtyIntelligence } from '@/services/specialtyBlueprintsEngine';
 
 function getGeminiApiKey() {
   return (
@@ -38,6 +39,8 @@ function buildDeterministicResponse(query, context) {
   const topApis = context.topApis || [];
   const patients = context.patients || [];
   const labResults = context.labResults || [];
+  const webProfile = context.webPracticeProfile || {};
+  const blueprints = Array.isArray(context.specialtyBlueprints) ? context.specialtyBlueprints : [];
 
   // 0. Strict Multi-Tenant Isolation Safeguard
   if (/(other\s+doctor|other\s+patient|another\s+doctor|another\s+clinic|competitor|external\s+patient|leak)/i.test(q)) {
@@ -210,8 +213,12 @@ function buildDeterministicResponse(query, context) {
     };
   }
 
-  // 6. APIs / Dosages / Synergies / Formulations
+  // 6. Specialty Practice Blueprints / Procedures / APIs / Synergies
   if (
+    q.includes('blueprint') ||
+    q.includes('specialty') ||
+    q.includes('procedure') ||
+    q.includes('especialidad') ||
     q.includes('api') ||
     q.includes('dose') ||
     q.includes('dosage') ||
@@ -228,14 +235,22 @@ function buildDeterministicResponse(query, context) {
     q.includes('collagen')
   ) {
     const apiLines = topApis
-      .slice(0, 6)
+      .slice(0, 5)
       .map((a) => `• **${a.name}** (${a.commonDose || 'Custom concentration'}) — Prescribed in **${a.count}** regimen(s)`)
       .join('\n');
 
+    const blueprintLines = blueprints
+      .slice(0, 3)
+      .map(
+        (bp) =>
+          `• **${bp.clinicalProcedure}:** *${bp.compoundingFormula?.treatmentTitle || 'Custom Compounding'}* + **${bp.peptideSynergy?.name || 'Bioactive Peptide'}** + **${bp.dermocosmeticSynergy?.name || 'Colway Native Collagen'}**`
+      )
+      .join('\n');
+
     return {
-      reply: `**Formulation & Synergy Intelligence for ${docName} (${specialty})**\n\n**Your Top Prescribed Active Ingredients:**\n${apiLines || '• Minoxidil, Finasteride, Dutasteride, Tretinoin, Melatonin in TrichoSol™ / TrichoOil™'}\n\n**Personalized Clinical Synergies for Your Cohort:**\n1. **Follicular & Cellular Peptides (GHK-Cu + PTD-DBM / Thymosin Beta-4):** Ideal adjunct for patients on topical 5α-reductase inhibitors + Minoxidil to accelerate dermal papilla vascularization.\n2. **Systemic Extracellular Matrix Support (Colway Native Collagen + Liposomal Micronutrients):** Supports follicular anchoring and dermal density alongside your topical regimens.\n3. **Galenic Vehicles (TrichoSol™ vs TrichoOil™):** Use TrichoSol™ for non-greasy aquatic absorption without propylene glycol irritation; switch to TrichoOil™ if patient reports scalp desquamation.`,
+      reply: `**Specialty Blueprints & Formulation Synergies — ${docName} (${specialty})**\n\n**1. Specialty Practice Blueprints (Matched to Your Clinical Procedures):**\n${blueprintLines || '• Multi-pillar protocols tailored to Trichology, Dermatology, and Aesthetic Surgery.'}\n\n${apiLines ? `**2. Your Top Prescribed Active Ingredients:**\n${apiLines}\n\n` : ''}**How to Prescribe in 1 Click:**\nOpen **Specialty & Rx Synergies** and click **⚡ Prescribe This Blueprint (1-Click)** to pre-load the complete magistral formula, vehicle, and posology directly into your Prescription Builder.`,
       actions: [
-        { type: 'open_synergies', label: `✨ Explore Clinical Synergies Tab` },
+        { type: 'open_synergies', label: `✨ Open Specialty Blueprints & Synergies` },
         { type: 'open_discovery', label: `🔬 Browse 77 Protocols & APIs` }
       ]
     };
@@ -244,19 +259,34 @@ function buildDeterministicResponse(query, context) {
   // 7. Lab Diagnostics
   if (q.includes('lab') || q.includes('blood') || q.includes('biomarker') || q.includes('diagnostic')) {
     return {
-      reply: `**Diagnostic Laboratory Intelligence — ${docName}**\n\nYou have **${labResults.length} laboratory diagnostic report(s)** linked to your practice. Capillary Dried Blood Spot (DBS) panels (Vitamin D, Testosterone+, Cortisol, HbA1c, Omega Ratio, NAD+) help personalize compounding concentrations before initiating or titrating therapy.`,
+      reply: `**Diagnostic Laboratory Intelligence — ${docName}**\n\nYou have **${labResults.length} laboratory diagnostic report(s)** linked to your practice. Capillary Dried Blood Spot (DBS) panels (Vitamin D, Testosterone+, Cortisol, HbA1c, Omega Ratio, NAD+) and **ETERNA® DNA Pharmacogenomics** help personalize compounding concentrations before initiating or titrating therapy.`,
       actions: [{ type: 'open_labs', label: `🧪 Open Lab Diagnostics (${labResults.length})` }]
     };
   }
 
-  // Default comprehensive practice executive summary
+  // Default comprehensive practice executive summary (adapts to 0-Rx vs Active Prescriber)
+  if ((context.totalPrescriptions || 0) === 0) {
+    const procList = (webProfile.detectedProcedures || []).map((p) => `• ${p}`).join('\n');
+    const bpList = blueprints
+      .slice(0, 3)
+      .map((bp) => `• **${bp.clinicalProcedure}** → *${bp.compoundingFormula?.treatmentTitle}* + *${bp.peptideSynergy?.name}*`)
+      .join('\n');
+    return {
+      reply: `**Specialty Practice Intelligence — ${docName}** (${clinic})\n\n${webProfile.clinicalFocusSummary || `Your portal is pre-configured for **${specialty}**.`}\n\n**Detected Clinical Focus & Procedures:**\n${procList}\n\n**Curated Specialty Practice Blueprints Ready to Prescribe:**\n${bpList}\n\nClick below to explore your **Specialty Practice Blueprints** and launch any formula in 1 click.`,
+      actions: [
+        { type: 'open_synergies', label: `✨ Explore Specialty Practice Blueprints` },
+        { type: 'open_discovery', label: `🔬 Browse 77 Protocols & APIs` }
+      ]
+    };
+  }
+
   const topApiStr = topApis.slice(0, 4).map((a) => `${a.name} (${a.count})`).join(', ') || 'Minoxidil, Dutasteride, Finasteride';
   return {
-    reply: `**Executive Practice Intelligence — ${docName}** (${clinic})\n\n• **Monitored Patients:** **${context.totalPatients}** unique patient dossiers (**${context.soldPatientsCount}** Sold Customers · **${context.unacceptedPatientsCount}** Unaccepted Proposal Patients)\n• **Total Prescriptions:** **${context.totalPrescriptions}** consolidated regimens (**${soldRx.length}** Sold & Invoiced · **${proposalRx.length}** Unaccepted Proposals)\n• **Signature Prescribed APIs:** ${topApiStr}\n\nYou can ask me about **any specific patient by name**, ask **"who is my best patient?"**, request a **conversion plan for your ${proposalRx.length} unaccepted proposals**, or explore **clinical peptide synergies** tailored to your specialty.`,
+    reply: `**Executive Practice & Specialty Intelligence — ${docName}** (${clinic})\n\n• **Monitored Patients:** **${context.totalPatients}** unique patient dossiers (**${context.soldPatientsCount}** Sold Customers · **${context.unacceptedPatientsCount}** Unaccepted Proposal Patients)\n• **Total Prescriptions:** **${context.totalPrescriptions}** consolidated regimens (**${soldRx.length}** Sold & Invoiced · **${proposalRx.length}** Unaccepted Proposals)\n• **Signature Prescribed APIs:** ${topApiStr}\n• **Specialty Blueprints Available:** **${blueprints.length}** ready-to-prescribe protocols matched to **${webProfile.specialtyLabel || specialty}**\n\nYou can ask me about **any specific patient by name**, ask **"who is my best patient?"**, request a **conversion plan for your ${proposalRx.length} unaccepted proposals**, or explore **Specialty Practice Blueprints** for your clinic.`,
     actions: [
       { type: 'filter_sold', label: `🟢 View ${soldRx.length} Sold & Invoiced` },
       { type: 'open_tasks', label: `⏳ Convert ${proposalRx.length} Unaccepted Offers` },
-      { type: 'open_synergies', label: `✨ Clinical Synergies` }
+      { type: 'open_synergies', label: `✨ Specialty Blueprints & Synergies` }
     ]
   };
 }
@@ -277,10 +307,13 @@ export async function POST(request, { params }) {
     if (!ctx || !ctx.doctor || !ctx.doctor.name) {
       const portalData = await getDoctorPortalData(slug);
       if (portalData) {
+        const specIntel = resolveDoctorSpecialtyIntelligence(portalData.doctor, portalData.prescriptions || []);
         ctx = {
           doctorName: portalData.doctor?.name,
           specialty: portalData.doctor?.specialty,
           clinic: portalData.doctor?.clinic,
+          webPracticeProfile: portalData.webPracticeProfile || specIntel.webPracticeProfile,
+          specialtyBlueprints: portalData.specialtyBlueprints || specIntel.primaryBlueprints,
           totalPatients: portalData.kpis?.monitoredPatients || portalData.patients?.length || 0,
           soldPatientsCount: portalData.kpis?.soldPatientsCount || 0,
           unacceptedPatientsCount: portalData.kpis?.unacceptedPatientsCount || 0,
@@ -318,9 +351,12 @@ export async function POST(request, { params }) {
       }
     } else {
       // Normalize client-sent practiceContext
+      const specIntel = resolveDoctorSpecialtyIntelligence(ctx.doctor || {}, ctx.prescriptions || []);
       ctx.doctorName = ctx.doctor?.name;
       ctx.specialty = ctx.doctor?.specialty;
       ctx.clinic = ctx.doctor?.clinic;
+      ctx.webPracticeProfile = ctx.webPracticeProfile || specIntel.webPracticeProfile;
+      ctx.specialtyBlueprints = ctx.specialtyBlueprints || specIntel.primaryBlueprints;
       ctx.totalPatients = ctx.counts?.totalPatients;
       ctx.soldPatientsCount = ctx.counts?.soldPatients;
       ctx.unacceptedPatientsCount = ctx.counts?.unacceptedPatients;
@@ -378,21 +414,31 @@ export async function POST(request, { params }) {
       const ai = new GoogleGenAI({ apiKey });
       const systemInstruction = `You are Atlas AI — the private, dedicated Clinical & Practice Copilot exclusively serving Dr. ${ctx.doctorName || 'the Physician'} (${ctx.specialty || 'Specialist'} at ${ctx.clinic || 'Partner Clinic'}).
 STRICT PRIVACY & REASONING RULES:
-1. PRIVACY BOUNDARY (NON-NEGOTIABLE): You ONLY have access to Dr. ${ctx.doctorName}'s own private practice registry and general Atlas platform pharmacopoeia. You have ZERO access to other doctors, other clinics, or external patients. If asked about external practices or other doctors, strictly decline and cite HIPAA/GDPR clinical privacy standards.
-2. BEST PATIENT QUERY: When asked who is the best patient, evaluate highest confirmed/sold prescriptions, active treatment adherence, and continuity of care. Cite their exact name, number of confirmed prescriptions, active formulas, and suggest a 1-click renewal action.
+1. PRIVACY BOUNDARY (NON-NEGOTIABLE): You ONLY have access to Dr. ${ctx.doctorName}'s own private practice registry, researched clinical specialty footprint, and Atlas platform pharmacopoeia. You have ZERO access to other doctors, other clinics, or external patients.
+2. DUAL INTELLIGENCE (SPECIALTY BLUEPRINTS + ACTIVE PRESCRIPTIONS):
+   - You know Dr. ${ctx.doctorName}'s researched online clinical procedures (${(ctx.webPracticeProfile?.detectedProcedures || []).join(', ')}) and curated Specialty Practice Blueprints.
+   - Even if Dr. ${ctx.doctorName} has 0 prescriptions, proactively recommend the exact Specialty Practice Blueprints (magistral compounding formulas + Lotusland peptides + Colway native collagen + UltraPerson nutraceuticals + ETERNA/Bloodo diagnostics) tailored to their procedures.
 3. CLEAR COMMERCIAL SEGREGATION: Strictly distinguish between SOLD & INVOICED orders (${(ctx.soldPrescriptions || []).length} confirmed orders across ${ctx.soldPatientsCount || 0} sold patients) and UNACCEPTED TREATMENT OFFERS (${(ctx.unacceptedProposals || []).length} pending proposals across ${ctx.unacceptedPatientsCount || 0} patients). Total unique monitored patients: ${ctx.totalPatients || 0}. Total consolidated prescriptions: ${ctx.totalPrescriptions || 0}.
 4. FORMATTING: Format cleanly with bold headings, bullet points, and concise medical English (max 180 words). Do NOT invent data. Always use the provided JSON facts.
 ${isPublicUnverified ? `5. STRICT PATIENT PRIVACY & ANONYMIZATION:
 This portal is accessed in Public / Unregistered Mode. All patient identities are strictly codified tokens (e.g. "Patient PT-XXXX").
-Under NO circumstances should you output, guess, or reference real nominal human names or private contact numbers.
-Always reference patients strictly by their codified token or prescription code (e.g. "Patient PT-8472").
-If asked for real nominal names, state: "Patient identities are codified for clinical privacy (DHA/HIPAA compliance). Please sign in or verify your practice to access nominal records."` : ''}`;
+Under NO circumstances should you output, guess, or reference real nominal human names or private contact numbers.` : ''}
 
-DOCTOR PRACTICE CONTEXT JSON:
+DOCTOR PRACTICE & SPECIALTY CONTEXT JSON:
 ${JSON.stringify({
   doctorName: ctx.doctorName,
   specialty: ctx.specialty,
   clinic: ctx.clinic,
+  webPracticeProfile: ctx.webPracticeProfile,
+  specialtyBlueprints: (ctx.specialtyBlueprints || []).map((bp) => ({
+    clinicalProcedure: bp.clinicalProcedure,
+    compoundingFormula: bp.compoundingFormula?.treatmentTitle,
+    vehicle: bp.compoundingFormula?.dispensingForm,
+    peptideSynergy: bp.peptideSynergy?.name,
+    dermocosmeticSynergy: bp.dermocosmeticSynergy?.name,
+    nutraceuticalSynergy: bp.nutraceuticalSynergy?.name,
+    diagnosticSynergy: bp.diagnosticSynergy?.name
+  })),
   metrics: {
     totalUniquePatients: ctx.totalPatients,
     soldCustomersCount: ctx.soldPatientsCount,

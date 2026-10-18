@@ -43,9 +43,11 @@ const BRAND_CONFIGS = {
     ],
     categories: [
       { id: 'all', label: 'All Formulations (8)' },
-      { id: 'facial', label: 'Facial Cosmeceuticals & Blue Diamond (5)' },
+      { id: 'epigenetic', label: 'Epigenetic & Blue Diamond (2)' },
+      { id: 'native-dermal', label: 'Native Dermal & Barrier (3)' },
       { id: 'trichology', label: 'Trichology & Scalp System (2)' },
-      { id: 'nutraceutical', label: 'Oral Nutricosmetics & Colvita (1)' }
+      { id: 'nutricosmetics', label: 'Inside-Out Nutricosmetics (1)' },
+      { id: 'bundles', label: 'Clinical Protocol Bundles (3)' }
     ]
   },
   bloodo: {
@@ -249,9 +251,59 @@ export default function BrandCollectionPage({
   const filteredProducts = useMemo(() => {
     let list = [...products];
 
-    // Colway collection: bundle 'colway-trichology' is represented by individual shampoo and conditioner formulations
+    // Colway collection: individual formulations vs bundles
     if (brandSlug === 'colway') {
-      list = list.filter(p => p.id !== 'colway-trichology' && p.slug !== 'colway-trichology');
+      if (selectedCategory === 'bundles') {
+        list = [
+          {
+            id: 'colway-trichology',
+            slug: 'colway-strengthening-shampoo',
+            name: 'Colway Trichology Hair Strengthening System (2-Step Duo)',
+            category: 'trichology',
+            presentation: '2-Step System (250 mL Shampoo + 200 mL Conditioner)',
+            overview_summary: 'Dual-action medical trichology protocol: ostium cleansing with Baicapil™ 2% + Diosmin followed by cuticular sealing and keratin reinforcement.',
+            image: '/images/products/colway/colway-trichology-banner.jpg',
+            routine_badge: 'Complete 2-Step Trichological System',
+            step_number: 99,
+            price: 92.00,
+            landedCostAed: 200,
+            wholesalePriceAed: 230,
+            retailPriceAed: 340
+          },
+          {
+            id: 'bundle-blue-diamond-ritual',
+            slug: 'colway-blue-diamond-cream',
+            name: 'Blue Diamond Complete Cellular Epigenetic Ritual',
+            category: 'epigenetic-cellular',
+            presentation: '2-Step Cellular Ritual (75 mL Peeling + 50 mL Cream)',
+            overview_summary: 'Enzymatic diamond pre-exfoliation to triple skin permeability, followed by VEP-carrier diamond peptide cream for deep neocollagenesis.',
+            image: '/images/products/colway/blue-diamond-cream.png',
+            routine_badge: 'Complete Epigenetic Rejuvenation Kit',
+            step_number: 99,
+            price: 155.00,
+            landedCostAed: 335,
+            wholesalePriceAed: 385.25,
+            retailPriceAed: 580
+          },
+          {
+            id: 'bundle-inside-out-collagen',
+            slug: 'colway-colvita',
+            name: 'Inside-Out Complete Neocollagenesis Protocol',
+            category: 'nutricosmetics',
+            presentation: 'Dual-Action Protocol (Colvita 60 Caps + Blue Diamond Cream 50 mL)',
+            overview_summary: 'The ultimate dual-action protocol: oral freeze-dried tropocollagen supplying building amino acids from the bloodstream, combined with topical diamond peptides.',
+            image: '/images/products/colway/colvita.png',
+            routine_badge: 'Inside-Out Clinical Protocol',
+            step_number: 99,
+            price: 150.00,
+            landedCostAed: 325,
+            wholesalePriceAed: 373.75,
+            retailPriceAed: 560
+          }
+        ];
+      } else {
+        list = list.filter(p => p.id !== 'colway-trichology' && p.slug !== 'colway-trichology');
+      }
     }
 
     // Search query
@@ -264,14 +316,15 @@ export default function BrandCollectionPage({
     }
 
     // Category filter
-    if (selectedCategory !== 'all') {
+    if (selectedCategory !== 'all' && selectedCategory !== 'bundles') {
       const cat = selectedCategory.toLowerCase();
       list = list.filter(p => {
-        const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''}`.toLowerCase();
+        const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''}`.toLowerCase();
         if (brandSlug === 'colway') {
-          if (cat === 'nutraceutical' || cat === 'anti-aging') return str.includes('colvita') || str.includes('supplement') || str.includes('capsule') || str.includes('suplement');
-          if (cat === 'facial' || cat === 'skincare') return str.includes('diamond') || str.includes('diament') || str.includes('peeling') || str.includes('vege') || str.includes('wash') || str.includes('lip') || str.includes('cream');
+          if (cat === 'epigenetic') return str.includes('diamond') || str.includes('diament') || str.includes('peeling') || str.includes('epigenetic');
+          if (cat === 'native-dermal') return (str.includes('vege') || str.includes('wash') || str.includes('lip') || str.includes('dermal')) && !str.includes('diamond');
           if (cat === 'trichology' || cat === 'hair') return str.includes('hair') || str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('szampon') || str.includes('odzywka');
+          if (cat === 'nutricosmetics' || cat === 'nutraceutical') return str.includes('colvita') || str.includes('supplement') || str.includes('capsule') || str.includes('suplement');
         }
         return str.includes(cat);
       });

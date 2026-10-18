@@ -7,6 +7,7 @@ import XCircle from "lucide-react/dist/esm/icons/x-circle";
 import Bot from "lucide-react/dist/esm/icons/bot";
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+// eslint-disable-next-line no-restricted-imports
 import { db } from '../../firebase';
 import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
@@ -17,6 +18,7 @@ import AppActionGroup from '../ui/AppActionGroup';
 import { Card } from '../ui/Card';
 import toast from 'react-hot-toast';
 import notifier from '../../services/NotificationService';
+import AdminDoctorClaimsSection from './claims/AdminDoctorClaimsSection';
 
 export default function AdminApprovalsTab({ isSubTab }) {
   const [pendingDocs, setPendingDocs] = useState([]);
@@ -230,10 +232,13 @@ export default function AdminApprovalsTab({ isSubTab }) {
       {!isSubTab && (
         <PageHeader
           title="Centro de Aprobaciones"
-          subtitle="Aprueba transacciones de alto valor antes de que sean procesadas."
+          subtitle="Aprueba transacciones de alto valor y acreditaciones de médicos antes de que sean procesadas."
           icon={ShieldCheck}
         />
       )}
+
+      {/* Pending Physician Verification Requests */}
+      <AdminDoctorClaimsSection />
 
       <div style={{ marginBottom: '1.5rem' }}>
         <GlobalSearchBar
