@@ -11,8 +11,8 @@ import { isTrichoTestPrescription } from '../../../data/fagronGenomicsTests';
 const TOP_DOCTORS = [
   { name: 'Dr. Anitathurasini Rajoo', title: 'Trichology & Peptide Therapy' },
   { name: 'Dr. Çağatay Sezgin, MD, FISHRS', title: 'Hair Transplant Surgeon / Novomed' },
-  { name: 'Dr. Vibhor Devendra', title: 'Genomic Medicine' },
-  { name: 'Dr. Maria Santos', title: 'Anti-Aging Medicine' },
+  { name: 'Dr. Nahla ElAwady', title: 'Genomics & Regenerative Medicine' },
+  { name: 'Dr. Hanieh Erdmann', title: 'Aesthetic Dermatology & Trichology' },
   { name: 'Dr. Ahmed Al-Mansoori', title: 'Clinical Director' }
 ];
 

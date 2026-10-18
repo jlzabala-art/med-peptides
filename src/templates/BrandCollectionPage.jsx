@@ -42,12 +42,12 @@ const BRAND_CONFIGS = {
       { label: 'Regulatory Compliance', value: 'EU Reg. & GMP', sub: 'CPNP Registered & Dermatologically Tested', icon: ShieldCheck, color: '#16a34a' }
     ],
     categories: [
-      { id: 'all', label: 'All Formulations (8)' },
-      { id: 'epigenetic', label: 'Epigenetic & Blue Diamond (2)' },
-      { id: 'native-dermal', label: 'Native Dermal & Barrier (3)' },
-      { id: 'trichology', label: 'Trichology & Scalp System (2)' },
-      { id: 'nutricosmetics', label: 'Inside-Out Nutricosmetics (1)' },
-      { id: 'bundles', label: 'Clinical Protocol Bundles (3)' }
+      { id: 'all', label: 'All Formulations' },
+      { id: 'epigenetic', label: 'Epigenetic & Blue Diamond' },
+      { id: 'native-dermal', label: 'Native Dermal & Barrier' },
+      { id: 'trichology', label: 'Trichology & Scalp System' },
+      { id: 'nutricosmetics', label: 'Inside-Out Nutricosmetics' },
+      { id: 'bundles', label: 'Clinical Protocol Bundles' }
     ]
   },
   bloodo: {
@@ -215,7 +215,7 @@ export default function BrandCollectionPage({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
 
-  const isEs = lang === 'es';
+  const isEs = false; // Force English — Spanish translations preserved for future i18n
   const canonicalUrl = `https://www.atlashealth-services.com/collection/${brandSlug}`;
 
   // SEO & structured data
@@ -461,8 +461,8 @@ export default function BrandCollectionPage({
             }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: scopeMode === 'filtered' ? '#0284c7' : '#94a3b8' }} />
               {scopeMode === 'filtered' 
-                ? (isEs ? `Resultados Filtrados (${filteredProducts.length} pruebas)` : `Matching Active Filters (${filteredProducts.length} items)`)
-                : (isEs ? `Colección Completa (${products.length} pruebas)` : `Entire Collection (${products.length} items)`)}
+                ? (isEs ? `Resultados Filtrados (${filteredProducts.length} ${brandSlug === 'colway' ? 'formulaciones' : 'pruebas'})` : `Matching Active Filters (${filteredProducts.length} items)`)
+                : (isEs ? `Colección Completa (${products.length} ${brandSlug === 'colway' ? 'formulaciones' : 'pruebas'})` : `Entire Collection (${products.length} items)`)}
             </span>
           </div>
 
@@ -558,10 +558,41 @@ export default function BrandCollectionPage({
       )}
 
 
-      {/* ── 6. MAIN WORKSPACE (70% Main Products Grid + 30% Sticky Sidebar) ── */}
+      {/* ── 6. MAIN WORKSPACE (Left Sidebar 320px + Right Main Content) ── */}
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem 5rem' }}>
         <div className="gcp-collection-workspace">
-          {/* ── LEFT COLUMN: MAIN PRODUCTS & FILTERS ── */}
+          {/* ── LEFT COLUMN: STICKY DEDICATED SIDEBAR PER BRAND ── */}
+          {brandSlug === 'bloodo' ? (
+            <BloodoCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
+          ) : brandSlug === 'eterna' ? (
+            <EternaCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
+          ) : brandSlug === 'ultraperson' ? (
+            <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
+          ) : brandSlug === 'colway' ? (
+            <ColwayCollectionSidebar
+              lang={lang}
+              onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+              selectedCategory={selectedCategory}
+              onSelectCategory={(catId) => {
+                setSelectedCategory(catId);
+                const el = document.getElementById('catalog-search-input');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+              onSearchKeyword={(kw) => {
+                setSearchQuery(kw);
+                const el = document.getElementById('catalog-search-input');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+            />
+          ) : (
+            <aside className="gcp-collection-sidebar" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.5rem', position: 'sticky', top: '90px' }}>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>{config.name}</h4>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 1rem 0' }}>{config.subtitle}</p>
+              <div style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>{filteredProducts.length} items in catalog</div>
+            </aside>
+          )}
+
+          {/* ── RIGHT COLUMN: MAIN PRODUCTS & FILTERS ── */}
           <main style={{ minWidth: 0 }}>
             {/* Google Cloud Filter Bar */}
             <div style={{
@@ -646,32 +677,42 @@ export default function BrandCollectionPage({
                 </div>
               </div>
 
-              {/* Row 2: Category Chips */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', alignItems: 'center' }}>
-                {config.categories.map(cat => {
-                  const isActive = selectedCategory === cat.id;
-                  return (
+              {/* Row 2: Active Filter Chip (categories now live in the sidebar) */}
+              {selectedCategory !== 'all' && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', alignItems: 'center' }}>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '4px 12px',
+                    borderRadius: '16px',
+                    background: `${config.accentColor}12`,
+                    border: `1px solid ${config.accentColor}40`,
+                    color: config.accentColor,
+                    fontSize: '0.78rem',
+                    fontWeight: 600
+                  }}>
+                    {config.categories.find(c => c.id === selectedCategory)?.label || selectedCategory}
                     <button
-                      key={cat.id}
-                      onClick={() => setSelectedCategory(cat.id)}
+                      type="button"
+                      onClick={() => setSelectedCategory('all')}
                       style={{
-                        padding: '5px 12px',
-                        borderRadius: '16px',
-                        border: '1px solid',
-                        borderColor: isActive ? config.accentColor : '#e2e8f0',
-                        background: isActive ? `${config.accentColor}15` : '#ffffff',
-                        color: isActive ? config.accentColor : '#475569',
-                        fontSize: '0.78rem',
-                        fontWeight: isActive ? 700 : 500,
+                        background: 'none',
+                        border: 'none',
+                        color: config.accentColor,
                         cursor: 'pointer',
-                        transition: 'all 0.15s ease'
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        padding: '0 2px',
+                        lineHeight: 1
                       }}
+                      aria-label="Clear category filter"
                     >
-                      {cat.label}
+                      ✕
                     </button>
-                  );
-                })}
-              </div>
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Empty State */}
@@ -884,26 +925,41 @@ export default function BrandCollectionPage({
                             gap: '8px'
                           }}>
                             <div>
-                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Laboratorio de Referencia:' : 'Reference Lab:'}</strong> {
+                              <strong style={{ color: '#0f172a' }}>
+                                {brandSlug === 'colway' 
+                                  ? (isEs ? 'Fabricación & Estándar:' : 'Quality & Compliance:')
+                                  : (isEs ? 'Laboratorio de Referencia:' : 'Reference Lab:')
+                                }
+                              </strong> {
                                 brandSlug === 'eterna' ? 'Eurofins Genomics (Munich/Ebersberg) · CAP / CLIA / ISO 17025' :
                                 brandSlug === 'ultraperson' ? 'PharmaPolis Compounding Labs · EU GMP / cGMP' :
-                                brandSlug === 'colway' ? 'Colway Biological Collagen & Dermocosmetics · EU Reg. 1223/2009' :
+                                brandSlug === 'colway' ? 'Colway sp.j. (Poland / EU) · ISO 22716 / CPNP Compliant' :
                                 'LifeLab1 Central Lab (Vilnius) · ISO 15189'
                               }
                             </div>
                             <div>
-                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Tecnología / Metodología:' : 'Analytical Method:'}</strong> {
+                              <strong style={{ color: '#0f172a' }}>
+                                {brandSlug === 'colway'
+                                  ? (isEs ? 'Tecnología Bioactiva:' : 'Bioactive Technology:')
+                                  : (isEs ? 'Tecnología / Metodología:' : 'Analytical Method:')
+                                }
+                              </strong> {
                                 brandSlug === 'eterna' ? 'Illumina Infinium +700k SNPs & High-Density Proteomics' :
                                 brandSlug === 'ultraperson' ? 'Vegan HPMC Delayed-Release Capsule Standardization' :
-                                brandSlug === 'colway' ? 'Native Tropocollagen Triple Helix & Baicapil™ 2%' :
+                                brandSlug === 'colway' ? 'Intact 3D Triple-Helix Tropocollagen & Cold Freeze-Drying' :
                                 'LC-MS/MS & UHPLC Tandem MS'
                               }
                             </div>
                             <div>
-                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:'}</strong> {
+                              <strong style={{ color: '#0f172a' }}>
+                                {brandSlug === 'colway'
+                                  ? (isEs ? 'Logística / Envío:' : 'Clinical Dispatch:')
+                                  : (isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:')
+                                }
+                              </strong> {
                                 brandSlug === 'eterna' ? '15 – 20 Business Days' :
                                 brandSlug === 'ultraperson' ? '48 – 72h Compounding Dispatch' :
-                                brandSlug === 'colway' ? '24 – 48h Direct Clinic Dispatch' :
+                                brandSlug === 'colway' ? '24 – 48h Direct Clinic / B2B Dispatch' :
                                 '48 – 72h post-receipt'
                               }
                             </div>
@@ -1081,26 +1137,41 @@ export default function BrandCollectionPage({
                             gap: '6px'
                           }}>
                             <div>
-                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Laboratorio de Referencia:' : 'Reference Lab:'}</strong> {
+                              <strong style={{ color: '#0f172a' }}>
+                                {brandSlug === 'colway' 
+                                  ? (isEs ? 'Fabricación & Estándar:' : 'Quality & Compliance:')
+                                  : (isEs ? 'Laboratorio de Referencia:' : 'Reference Lab:')
+                                }
+                              </strong> {
                                 brandSlug === 'eterna' ? 'Eurofins Genomics (Munich/Ebersberg) · CAP / CLIA / ISO 17025' :
                                 brandSlug === 'ultraperson' ? 'PharmaPolis Compounding Labs · EU GMP / cGMP' :
-                                brandSlug === 'colway' ? 'Colway Biological Collagen & Dermocosmetics · EU Reg. 1223/2009' :
+                                brandSlug === 'colway' ? 'Colway sp.j. (Poland / EU) · ISO 22716 / CPNP Compliant' :
                                 'LifeLab1 Central Lab (Vilnius) · ISO 15189'
                               }
                             </div>
                             <div>
-                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Tecnología / Metodología:' : 'Analytical Method:'}</strong> {
+                              <strong style={{ color: '#0f172a' }}>
+                                {brandSlug === 'colway'
+                                  ? (isEs ? 'Tecnología Bioactiva:' : 'Bioactive Technology:')
+                                  : (isEs ? 'Tecnología / Metodología:' : 'Analytical Method:')
+                                }
+                              </strong> {
                                 brandSlug === 'eterna' ? 'Illumina Infinium +700k SNPs & High-Density Proteomics' :
                                 brandSlug === 'ultraperson' ? 'Vegan HPMC Delayed-Release Capsule Standardization' :
-                                brandSlug === 'colway' ? 'Native Tropocollagen Triple Helix & Baicapil™ 2%' :
+                                brandSlug === 'colway' ? 'Intact 3D Triple-Helix Tropocollagen & Cold Freeze-Drying' :
                                 'LC-MS/MS & UHPLC Tandem MS'
                               }
                             </div>
                             <div>
-                              <strong style={{ color: '#0f172a' }}>{isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:'}</strong> {
+                              <strong style={{ color: '#0f172a' }}>
+                                {brandSlug === 'colway'
+                                  ? (isEs ? 'Logística / Envío:' : 'Clinical Dispatch:')
+                                  : (isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:')
+                                }
+                              </strong> {
                                 brandSlug === 'eterna' ? '15 – 20 Business Days' :
                                 brandSlug === 'ultraperson' ? '48 – 72h Compounding Dispatch' :
-                                brandSlug === 'colway' ? '24 – 48h Direct Clinic Dispatch' :
+                                brandSlug === 'colway' ? '24 – 48h Direct Clinic / B2B Dispatch' :
                                 '48 – 72h post-receipt'
                               }
                             </div>
@@ -1125,7 +1196,7 @@ export default function BrandCollectionPage({
                               padding: '4px 0'
                             }}
                           >
-                            <span>{isExpanded ? (isEs ? 'Ocultar' : 'Hide Specs') : (isEs ? 'Master-Detail' : 'Specs & Lab')}</span>
+                            <span>{isExpanded ? (isEs ? 'Ocultar' : 'Hide Specs') : (isEs ? 'Master-Detail' : (brandSlug === 'colway' ? 'Clinical Specs' : 'Specs & Lab'))}</span>
                             <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
                           </button>
 
@@ -1168,37 +1239,6 @@ export default function BrandCollectionPage({
               </div>
             )}
           </main>
-
-          {/* ── RIGHT COLUMN: STICKY DEDICATED SIDEBAR PER BRAND ── */}
-          {brandSlug === 'bloodo' ? (
-            <BloodoCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
-          ) : brandSlug === 'eterna' ? (
-            <EternaCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
-          ) : brandSlug === 'ultraperson' ? (
-            <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
-          ) : brandSlug === 'colway' ? (
-            <ColwayCollectionSidebar
-              lang={lang}
-              onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
-              selectedCategory={selectedCategory}
-              onSelectCategory={(catId) => {
-                setSelectedCategory(catId);
-                const el = document.getElementById('catalog-search-input');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }}
-              onSearchKeyword={(kw) => {
-                setSearchQuery(kw);
-                const el = document.getElementById('catalog-search-input');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }}
-            />
-          ) : (
-            <aside className="gcp-collection-sidebar" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.5rem', position: 'sticky', top: '90px' }}>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>{config.name}</h4>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 1rem 0' }}>{config.subtitle}</p>
-              <div style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>{filteredProducts.length} items in catalog</div>
-            </aside>
-          )}
         </div>
       </section>
 

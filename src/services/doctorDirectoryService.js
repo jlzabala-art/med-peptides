@@ -91,21 +91,6 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     license: 'DHA Registered'
   },
   {
-    id: 'dr-vibhor-devendra',
-    name: 'Dr. Vibhor Devendra',
-    aliases: ['dr. vibhor devendra', 'vibhor devendra', 'dr vibhor'],
-    title: 'Dr.',
-    specialty: 'Genomic Medicine & Anti-Aging Specialist',
-    clinic: 'Mediluxe Longevity Center',
-    clinicName: 'Mediluxe Longevity Center',
-    address: 'Jumeirah, Dubai, UAE',
-    city: 'Dubai',
-    country: 'United Arab Emirates',
-    phone: '+971 4 395 5599',
-    email: 'dr.vibhor@mediluxeme.com',
-    license: 'DHA Registered'
-  },
-  {
     id: 'dr-marina-cordeiro',
     name: 'Dr. Marina Cordeiro Fernandes',
     aliases: ['dr. marina cordeiro', 'dr. marina cordeiro fernandes', 'marina cordeiro', 'dr. marina', 'dr marina', 'marina'],

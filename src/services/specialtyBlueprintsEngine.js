@@ -168,20 +168,6 @@ export const CURATED_DOCTOR_WEB_PROFILES = {
     ],
     signatureApproach: 'Pairs topical magistral trichology with systemic bioactive peptides and stress/sleep neuro-endocrine optimization.'
   },
-  vibhor: {
-    specialtyCategory: 'longevity_bhrt',
-    lastResearchedAt: '2026-10-17',
-    verifiedSources: ['Longevity & Genomic Medicine Registry', 'Preventive Anti-Aging Practice'],
-    clinicalFocusSummary:
-      'Genomic Medicine & Anti-Aging Specialist focused on DNA-guided pharmacogenetics, cellular senescence, telomere preservation, and metabolic longevity protocols.',
-    detectedProcedures: [
-      'Fagron TrichoTest™ & Pharmacogenomic Profiling',
-      'Telomere & Pineal Bioregulation (Epithalon / NAD+ Cycles)',
-      'Cardiometabolic & Mitochondrial Optimization',
-      'Bioidentical Endocrine & Androgen Optimization'
-    ],
-    signatureApproach: 'Data-driven precision medicine anchored in capillary blood biomarkers (Bloodo™) and saliva DNA pharmacogenomics.'
-  },
   marina: {
     specialtyCategory: 'plastic_surgery',
     lastResearchedAt: '2026-10-17',

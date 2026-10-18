@@ -21,7 +21,7 @@ import BrandLogo from '../common/BrandLogo';
  * Features automatic safe-area clearance for persistent bottom action bars.
  */
 export default function PublicUnifiedFooter({ lang = 'en' }) {
-  const isEs = lang === 'es';
+  const isEs = false; // Force English — Spanish translations preserved for future i18n
 
   return (
     <footer
