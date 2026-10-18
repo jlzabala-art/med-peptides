@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { useAuth } from '@/context/AuthContext';
 import { rememberDoctorSection } from '@/components/doctor/DoctorContinueBanner';
 import {
   Stethoscope,
