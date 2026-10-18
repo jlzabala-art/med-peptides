@@ -23,7 +23,8 @@ import {
   CheckCircle2,
   Dna,
   ShieldCheck,
-  Package
+  Package,
+  Building2
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
@@ -168,6 +169,17 @@ export default function ColwayCollectionSidebar({
     toast.success(isEs ? `Filtro aplicado: ${proto.title}` : `Filter applied: ${proto.title}`);
   };
 
+  const scrollToSectionTop = () => {
+    if (typeof window !== 'undefined') {
+      const el = document.getElementById('colway-main-content');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 200, behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
     <aside className="gcp-collection-sidebar" style={{
       display: 'flex',
@@ -207,6 +219,7 @@ export default function ColwayCollectionSidebar({
                   triggerHaptic('selection');
                   if (onSelectSection) onSelectSection('catalog');
                   if (onSelectCategory) onSelectCategory(cat.id);
+                  scrollToSectionTop();
                 }}
                 style={{
                   display: 'flex',
@@ -282,7 +295,38 @@ export default function ColwayCollectionSidebar({
             type="button"
             onClick={() => {
               triggerHaptic('selection');
+              if (onSelectSection) onSelectSection('overview');
+              scrollToSectionTop();
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 10px',
+              borderRadius: '7px',
+              border: activeSection === 'overview' ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
+              background: activeSection === 'overview' ? '#f0fdfa' : '#f8fafc',
+              color: activeSection === 'overview' ? '#0d9488' : '#0f172a',
+              cursor: 'pointer',
+              fontSize: '0.76rem',
+              fontWeight: activeSection === 'overview' ? 750 : 600,
+              textAlign: 'left',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Building2 size={14} color={activeSection === 'overview' ? '#0d9488' : '#64748b'} />
+              <span>{isEs ? 'Visión General (Overview)' : 'Clinical Overview'}</span>
+            </div>
+            {activeSection === 'overview' && <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488' }}>Active</span>}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
               if (onSelectSection) onSelectSection('catalog');
+              scrollToSectionTop();
             }}
             style={{
               display: 'flex',
@@ -312,6 +356,7 @@ export default function ColwayCollectionSidebar({
             onClick={() => {
               triggerHaptic('selection');
               if (onSelectSection) onSelectSection('advantage');
+              scrollToSectionTop();
             }}
             style={{
               display: 'flex',
@@ -341,6 +386,7 @@ export default function ColwayCollectionSidebar({
             onClick={() => {
               triggerHaptic('selection');
               if (onSelectSection) onSelectSection('protocols');
+              scrollToSectionTop();
             }}
             style={{
               display: 'flex',
@@ -370,6 +416,7 @@ export default function ColwayCollectionSidebar({
             onClick={() => {
               triggerHaptic('selection');
               if (onSelectSection) onSelectSection('calculator');
+              scrollToSectionTop();
             }}
             style={{
               display: 'flex',
@@ -389,7 +436,7 @@ export default function ColwayCollectionSidebar({
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Calculator size={14} color={activeSection === 'calculator' ? '#0d9488' : '#0284c7'} />
-              <span>{isEs ? 'Calculadora de Ciclos' : 'Cycle Calculator & Dosing'}</span>
+              <span>{isEs ? 'Calculadora de Ciclos & Dosis' : 'Cycle Calculator & Dosing'}</span>
             </div>
             {activeSection === 'calculator' && <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488' }}>Active</span>}
           </button>

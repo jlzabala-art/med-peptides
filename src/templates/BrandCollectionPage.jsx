@@ -215,7 +215,7 @@ export default function BrandCollectionPage({
   const [scopeMode, setScopeMode] = useState('filtered'); // 'filtered' | 'global'
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
-  const [activeColwaySection, setActiveColwaySection] = useState('catalog'); // 'catalog' | 'advantage' | 'protocols' | 'calculator'
+  const [activeColwaySection, setActiveColwaySection] = useState('overview'); // 'overview' | 'catalog' | 'advantage' | 'protocols' | 'calculator'
   const [activeProtocolId, setActiveProtocolId] = useState(null);
 
   const isEs = false; // Force English — Spanish translations preserved for future i18n
@@ -457,19 +457,11 @@ export default function BrandCollectionPage({
               </span>
             </div>
           </div>
-          {brandSlug === 'colway' && (
-            <div style={{ marginTop: '1.5rem', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 6px 24px rgba(15, 23, 42, 0.08)', border: '1px solid #e2e8f0' }}>
-              <img
-                src="/images/products/colway/colway-dermatology-clinic-hero-v2.jpg"
-                alt="Colway Complete Cellular Dermocosmetics & Nutricosmetics Collection"
-                style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '440px', objectFit: 'cover' }}
-              />
-            </div>
-          )}
         </div>
       </header>
 
       {/* ── 4. 4 KPIs Grid + Scope Switcher (Regla Golden #22) ── */}
+      {brandSlug !== 'colway' && (
       <section style={{ maxWidth: '1440px', margin: '-1.25rem auto 2.5rem', padding: '0 2rem' }}>
         {/* Scope Indicator Bar */}
         <div style={{
@@ -584,6 +576,7 @@ export default function BrandCollectionPage({
           })}
         </div>
       </section>
+      )}
 
       {/* ── 5. GRAPHIC OVERVIEW: HOW RESULTS ARE OBTAINED & LAB REPORT MOCKUP ── */}
       {brandSlug === 'bloodo' && (
@@ -611,19 +604,20 @@ export default function BrandCollectionPage({
               onSelectCategory={(catId) => {
                 setSelectedCategory(catId);
                 setActiveColwaySection('catalog');
-                const el = document.getElementById('catalog-search-input');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const el = document.getElementById('colway-main-content');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
               onSearchKeyword={(kw) => {
                 setSearchQuery(kw);
                 setActiveColwaySection('catalog');
-                const el = document.getElementById('catalog-search-input');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const el = document.getElementById('colway-main-content');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
               activeSection={activeColwaySection}
               onSelectSection={(sec) => {
                 setActiveColwaySection(sec);
-                window.scrollTo({ top: 380, behavior: 'smooth' });
+                const el = document.getElementById('colway-main-content');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
               activeProtocolId={activeProtocolId}
               onSelectProtocol={(proto) => {
@@ -631,6 +625,8 @@ export default function BrandCollectionPage({
                 if (proto.category) setSelectedCategory(proto.category);
                 if (proto.search) setSearchQuery(proto.search);
                 setActiveColwaySection('protocols');
+                const el = document.getElementById('colway-main-content');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
             />
           ) : (
@@ -642,28 +638,36 @@ export default function BrandCollectionPage({
           )}
 
           {/* ── RIGHT COLUMN: MAIN CONTENT (EXCLUSIVELY ONE SECTION AT A TIME) ── */}
-          <main style={{ minWidth: 0, gridColumn: '2', order: 2 }}>
+          <main id="colway-main-content" style={{ minWidth: 0, gridColumn: '2', order: 2 }}>
             {brandSlug === 'colway' && activeColwaySection !== 'catalog' ? (
               <ColwayMainSections
                 activeSection={activeColwaySection}
                 isEs={isEs}
                 activeProtocolId={activeProtocolId}
+                products={products}
+                filteredProducts={filteredProducts}
+                scopeMode={scopeMode}
+                setScopeMode={setScopeMode}
                 onSelectProtocol={(proto) => {
                   setActiveProtocolId(proto.id);
                   if (proto.category) setSelectedCategory(proto.category);
                   if (proto.search) setSearchQuery(proto.search);
                   setActiveColwaySection('catalog');
                   setTimeout(() => {
-                    const el = document.getElementById('catalog-search-input');
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }, 100);
+                    const el = document.getElementById('colway-main-content');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 50);
                 }}
                 onResetProtocolFilter={() => {
                   setActiveProtocolId(null);
                   setSelectedCategory('all');
                   setSearchQuery('');
                 }}
-                onBackToCatalog={() => setActiveColwaySection('catalog')}
+                onBackToCatalog={() => {
+                  setActiveColwaySection('catalog');
+                  const el = document.getElementById('colway-main-content');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
               />
             ) : (
               <>
@@ -679,40 +683,57 @@ export default function BrandCollectionPage({
               gap: '1rem',
               boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
             }}>
-              {/* Row 1: Search + View Toggle */}
+              {/* Row 1: Search / Category Heading + View Toggle */}
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-                <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '480px' }}>
-                  <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-                  <input
-                    id="catalog-search-input"
-                    type="text"
-                    placeholder={
-                      brandSlug === 'colway'
-                        ? (isEs ? 'Buscar en Colway (ej. Colvita, Blue Diamond, Champú, Vege)... ⌘K' : 'Search Colway (e.g. Colvita, Blue Diamond, Shampoo, Tropocollagen)... ⌘K')
-                        : (isEs ? `Buscar en ${config.name} (ej. NAD+, cortisol, DBS)... ⌘K` : `Search in ${config.name} (e.g. NAD+, cortisol)... ⌘K`)
-                    }
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 2.2rem 0.65rem 2.5rem',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '8px',
-                      fontSize: '0.88rem',
-                      color: '#0f172a',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem' }}
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
+                {brandSlug === 'colway' ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
+                      {isEs ? 'Catálogo de Formulaciones Colway®' : 'Colway® Formulations Catalog'}
+                    </span>
+                    <span style={{
+                      fontSize: '0.74rem',
+                      fontWeight: 650,
+                      color: '#0d9488',
+                      background: '#f0fdfa',
+                      border: '1px solid #a7f3d0',
+                      padding: '3px 10px',
+                      borderRadius: '9999px'
+                    }}>
+                      {selectedCategory === 'all'
+                        ? (isEs ? 'Todas las Categorías' : 'All Formulations')
+                        : selectedCategory}
+                    </span>
+                  </div>
+                ) : (
+                  <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '480px' }}>
+                    <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                    <input
+                      id="catalog-search-input"
+                      type="text"
+                      placeholder={isEs ? `Buscar en ${config.name} (ej. NAD+, cortisol, DBS)... ⌘K` : `Search in ${config.name} (e.g. NAD+, cortisol)... ⌘K`}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.65rem 2.2rem 0.65rem 2.5rem',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '8px',
+                        fontSize: '0.88rem',
+                        color: '#0f172a',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem' }}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
@@ -808,11 +829,11 @@ export default function BrandCollectionPage({
                 </button>
               </div>
             ) : (
-              /* Diagnostic Products Grid / Master-Detail */
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(310px, 1fr))' : '1fr',
-                gap: viewMode === 'grid' ? '1.25rem' : '0.75rem'
+                gridTemplateColumns: '1fr',
+                gap: viewMode === 'grid' ? '1.25rem' : '0.75rem',
+                width: '100%'
               }}>
                 {filteredProducts.map(product => {
                   const imageSrc = resolveBrandProductImage(product, brandSlug);
@@ -1045,49 +1066,16 @@ export default function BrandCollectionPage({
                   return (
                     <div
                       key={product.id}
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '14px',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = '#cbd5e1';
-                        e.currentTarget.style.boxShadow = '0 8px 20px -6px rgba(0,0,0,0.08)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = '#e2e8f0';
-                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
-                      }}
+                      className="gcp-collection-card"
                     >
-                      {/* Card Visual Header */}
+                      {/* Card Visual / Showcase (Left Column on Desktop) */}
                       <div
+                        className="gcp-collection-card-visual"
                         onClick={() => handleProductClick(product)}
-                        style={{
-                          height: '180px',
-                          background: 'radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%)',
-                          borderBottom: '1px solid #f1f5f9',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          position: 'relative',
-                          cursor: 'pointer',
-                          padding: '1rem'
-                        }}
                       >
                         <img
                           src={imageSrc}
                           alt={displayName}
-                          style={{
-                            maxHeight: '140px',
-                            maxWidth: '85%',
-                            objectFit: 'contain',
-                            filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.08))'
-                          }}
                         />
 
                         {/* Top Badges */}
@@ -1124,8 +1112,8 @@ export default function BrandCollectionPage({
                         </div>
                       </div>
 
-                      {/* Card Content Area */}
-                      <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                      {/* Card Content Area (Right Column on Desktop) */}
+                      <div className="gcp-collection-card-body">
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' }}>
                           <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             ID: <CopyableId value={product.id} maxLength={18} />
