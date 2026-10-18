@@ -4242,8 +4242,8 @@ export default function DoctorPublicPortalClient({
     { id: 'patients', label: 'Go to patients', hint: 'Your patients only', icon: Users, run: () => handleSidebarNavigate('patients') },
     { id: 'tasks', label: 'Go to pending tasks', hint: 'Signatures and follow-ups', icon: Clock, run: () => handleSidebarNavigate('tasks') },
     { id: 'recs', label: 'Specialty blueprints & recommendations', hint: 'Evidence-based formulas for your specialty', icon: Sparkles, run: () => handleSidebarNavigate('recommendations') },
-    { id: 'discovery', label: 'Browse product collection', hint: 'Atlas and Colway catalog', icon: FlaskConical, run: () => handleSidebarNavigate('discovery') },
-    { id: 'colway', label: 'Colway collection', hint: 'Opens the Colway dermocosmetics & trichology catalog', icon: Layers, run: () => window.open('/collection/colway', '_blank', 'noopener') },
+    { id: 'discovery', label: 'Browse product collection', hint: 'Atlas catalog, blueprints and synergies', icon: FlaskConical, run: () => { setRecCategoryFilter('all'); setRecSearchQuery(''); handleSidebarNavigate('recommendations'); } },
+    { id: 'colway', label: 'Colway collection', hint: 'Dermocosmetics & trichology, filtered inside your portal', icon: Layers, run: () => { setRecCategoryFilter('colway'); setRecSearchQuery(''); handleSidebarNavigate('recommendations'); } },
     { id: 'search', label: 'Search practice records', hint: 'Find a prescription or patient', icon: Search, run: () => handleSidebarNavigate('search') },
     { id: 'creds', label: 'Clinic credentials', hint: 'Verification and licensing', icon: ShieldCheck, run: () => handleSidebarNavigate('credentials') },
     {
