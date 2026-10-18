@@ -143,3 +143,21 @@ export async function POST(request) {
     );
   }
 }
+
+/**
+ * DELETE — "Forget this device": clears the trusted-workstation cookie so the
+ * next visit requires a fresh magic link / sign-in.
+ */
+export async function DELETE() {
+  const response = NextResponse.json({
+    success: true,
+    message: 'This device is no longer trusted.'
+  });
+  response.cookies.set('atlas_workstation_session', '', {
+    path: '/',
+    maxAge: 0,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production'
+  });
+  return response;
+}

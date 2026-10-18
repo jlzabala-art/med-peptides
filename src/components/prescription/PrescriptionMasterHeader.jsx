@@ -15,8 +15,9 @@ import {
   Clock,
   ShieldCheck
 } from '@/lib/icons';
-import { Home, ArrowLeft } from 'lucide-react';
+import { Home, ArrowLeft, RotateCw } from 'lucide-react';
 import PrescriptionStatusQuickAction from './PrescriptionStatusQuickAction';
+import CopyableId from '@/components/ui/CopyableId';
 
 /**
  * PrescriptionMasterHeader
@@ -90,7 +91,9 @@ export default function PrescriptionMasterHeader({
                   wordBreak: 'break-word'
                 }}>
                   {isEs ? 'Prescripción Médica' : 'Medical Prescription'}{' '}
-                  <span style={{ color: '#5f6368', fontWeight: 400, fontSize: '0.92rem' }}>#{rxId}</span>
+                  <span style={{ color: '#5f6368', fontWeight: 400, fontSize: '0.92rem' }}>
+                    #<CopyableId value={String(rxId || '')} maxLength={40} />
+                  </span>
                 </h1>
 
                 {/* Right: Quick Utilities Pinned to Top-Right (Google Cloud UX) */}
@@ -104,6 +107,17 @@ export default function PrescriptionMasterHeader({
                   >
                     {copied ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} color="#5f6368" />}
                   </button>
+                  {!isPatientView && doctorPublicUrl && rxId && (
+                    <Link
+                      href={`${doctorPublicUrl}${String(doctorPublicUrl).includes('?') ? '&' : '?'}represcribe=${encodeURIComponent(String(rxId))}`}
+                      className="rx-header-action-btn"
+                      title={isEs ? 'Renovar esta pauta en el constructor de prescripciones' : 'Renew this regimen in the prescription builder'}
+                      style={{ height: 32, padding: '0 10px', borderRadius: '6px', border: '1px solid #003666', background: '#003666', display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: '#ffffff', fontSize: '0.74rem', fontWeight: 650 }}
+                    >
+                      <RotateCw size={13} />
+                      <span>{isEs ? 'Renovar' : 'Renew'}</span>
+                    </Link>
+                  )}
                   {doctorPublicUrl && (
                     <Link
                       href={doctorPublicUrl}

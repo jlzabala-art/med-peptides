@@ -16,19 +16,59 @@ export default function DoctorCommandPalette({ commands = [], showLauncher = tru
   const inputRef = useRef(null);
 
   useEffect(() => {
+    let pendingG = false;
+    let gTimer = null;
+    const isTyping = (el) =>
+      el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
+    const byId = (id) => commands.find((c) => c.id === id);
+
     const onKey = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === '/') {
         e.preventDefault();
         setQuery('');
         setCursor(0);
         setOpen((v) => !v);
-      } else if (e.key === 'Escape') {
+        return;
+      }
+      if (e.key === 'Escape') {
         setOpen(false);
+        return;
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return;
+      if (document.querySelector('[aria-modal="true"]')) return;
+
+      const k = e.key.toLowerCase();
+      if (pendingG) {
+        pendingG = false;
+        clearTimeout(gTimer);
+        const map = { p: 'patients', r: 'rx-list', t: 'tasks', c: 'discovery' };
+        if (map[k]) {
+          e.preventDefault();
+          byId(map[k])?.run();
+        }
+        return;
+      }
+      if (k === 'g') {
+        pendingG = true;
+        gTimer = setTimeout(() => {
+          pendingG = false;
+        }, 1200);
+      } else if (k === 'n') {
+        e.preventDefault();
+        byId('new-rx')?.run();
+      } else if (e.key === '?') {
+        e.preventDefault();
+        setQuery('');
+        setCursor(0);
+        setOpen(true);
       }
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+    return () => {
+      clearTimeout(gTimer);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [commands]);
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
@@ -202,6 +242,26 @@ export default function DoctorCommandPalette({ commands = [], showLauncher = tru
                   </button>
                 );
               })}
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '4px 14px',
+                padding: '10px 16px',
+                borderTop: '1px solid #e8eaed',
+                background: '#f8f9fa',
+                fontSize: 12,
+                color: '#5f6368'
+              }}
+            >
+              <span><kbd>N</kbd> New prescription</span>
+              <span><kbd>G</kbd> then <kbd>P</kbd> Patients</span>
+              <span><kbd>G</kbd> then <kbd>R</kbd> Prescriptions</span>
+              <span><kbd>G</kbd> then <kbd>T</kbd> Tasks</span>
+              <span><kbd>G</kbd> then <kbd>C</kbd> Products</span>
+              <span><kbd>?</kbd> This help</span>
             </div>
           </div>
         </div>

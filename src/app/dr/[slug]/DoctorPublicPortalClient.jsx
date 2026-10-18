@@ -4214,6 +4214,27 @@ export default function DoctorPublicPortalClient({
     if (isAuthorizedViewer) rememberDoctorSection(slug, activeAnchor);
   }, [slug, activeAnchor, isAuthorizedViewer]);
 
+  // Deep link: /dr/[slug]?represcribe=<rx code> → open the builder with that regimen cloned.
+  const represcribeHandledRef = useRef(false);
+  useEffect(() => {
+    if (represcribeHandledRef.current || !isAuthorizedViewer || typeof window === 'undefined') return;
+    const target = new URLSearchParams(window.location.search).get('represcribe');
+    if (!target || allPrescriptions.length === 0) return;
+    const wanted = target.trim().toLowerCase();
+    const match = allPrescriptions.find((p) =>
+      [p.code, p.id, p.prescriptionNumber].some((v) => v && String(v).toLowerCase() === wanted)
+    );
+    represcribeHandledRef.current = true;
+    if (match) {
+      handleReprescribeFormula(match);
+    } else {
+      toast.error(`Prescription ${target} was not found in your practice.`);
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.delete('represcribe');
+    window.history.replaceState({}, '', url.toString());
+  });
+
   // Quick-actions palette entries (Cmd/Ctrl + /). Reuses existing navigation handlers.
   const quickActionCommands = [
     { id: 'new-rx', label: 'New prescription', hint: 'Open the prescription builder', icon: Plus, run: () => handleSidebarNavigate('intake') },
@@ -4222,8 +4243,23 @@ export default function DoctorPublicPortalClient({
     { id: 'tasks', label: 'Go to pending tasks', hint: 'Signatures and follow-ups', icon: Clock, run: () => handleSidebarNavigate('tasks') },
     { id: 'recs', label: 'Specialty blueprints & recommendations', hint: 'Evidence-based formulas for your specialty', icon: Sparkles, run: () => handleSidebarNavigate('recommendations') },
     { id: 'discovery', label: 'Browse product collection', hint: 'Atlas and Colway catalog', icon: FlaskConical, run: () => handleSidebarNavigate('discovery') },
+    { id: 'colway', label: 'Colway collection', hint: 'Opens the Colway dermocosmetics & trichology catalog', icon: Layers, run: () => window.open('/collection/colway', '_blank', 'noopener') },
     { id: 'search', label: 'Search practice records', hint: 'Find a prescription or patient', icon: Search, run: () => handleSidebarNavigate('search') },
-    { id: 'creds', label: 'Clinic credentials', hint: 'Verification and licensing', icon: ShieldCheck, run: () => handleSidebarNavigate('credentials') }
+    { id: 'creds', label: 'Clinic credentials', hint: 'Verification and licensing', icon: ShieldCheck, run: () => handleSidebarNavigate('credentials') },
+    {
+      id: 'forget-device',
+      label: 'Forget this device',
+      hint: 'Stop trusting this computer; sign-in will be required next time',
+      icon: Lock,
+      run: async () => {
+        try {
+          await fetch('/api/doctor/verify-workstation', { method: 'DELETE' });
+          toast.success('This device is no longer trusted. You will be asked to verify next time.');
+        } catch {
+          toast.error('Could not forget this device. Please try again.');
+        }
+      }
+    }
   ];
 
   if (loading) {
@@ -11021,7 +11057,7 @@ export default function DoctorPublicPortalClient({
       />
 
       {/* ── Quick Actions Palette (GCP-style, Cmd/Ctrl + /) ── */}
-      <DoctorCommandPalette commands={quickActionCommands} />
+      {isAuthorizedViewer && <DoctorCommandPalette commands={quickActionCommands} />}
 
       {/* ── Specialty Blueprint Clinical Monograph Dossier Modal (On-Screen, Zero WhatsApp) ── */}
       <DoctorBlueprintDossierModal
