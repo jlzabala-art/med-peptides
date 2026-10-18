@@ -5,11 +5,7 @@ import Link from 'next/link';
 import {
   ShieldCheck,
   Award,
-  Stethoscope,
-  FlaskConical,
-  Truck,
-  Activity,
-  FileText
+  ExternalLink
 } from '@/lib/icons';
 import BrandLogo from '../common/BrandLogo';
 
@@ -17,8 +13,8 @@ import BrandLogo from '../common/BrandLogo';
  * PublicUnifiedFooter
  * ─────────────────────────────────────────────────────────────────────────────
  * Google Cloud Console compliant clinical and institutional footer.
- * Balanced 4-column layout on desktop, 2x2 on tablet, and single column on mobile.
- * Features automatic safe-area clearance for persistent bottom action bars.
+ * Clean, lightweight, zero-underline modern UX with minimal information density.
+ * Features automatic safe-area clearance for persistent bottom action docks.
  */
 export default function PublicUnifiedFooter({ lang = 'en' }) {
   const isEs = false; // Force English — Spanish translations preserved for future i18n
@@ -30,10 +26,10 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
       style={{
         background: '#f8f9fa',
         color: '#5f6368',
-        borderTop: '1px solid #dadce0',
+        borderTop: '1px solid #e8eaed',
         fontFamily: 'Inter, Roboto, system-ui, -apple-system, sans-serif',
-        fontSize: '0.84rem',
-        lineHeight: 1.6,
+        fontSize: '0.8125rem',
+        lineHeight: 1.5,
         position: 'relative',
         zIndex: 10,
         paddingBottom: 'calc(2rem + var(--atlas-sticky-bar-height, 0px))'
@@ -43,22 +39,22 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
         .public-footer-container {
           max-width: 1280px;
           margin: 0 auto;
-          padding: 2.5rem 1.5rem 1.75rem;
+          padding: 2.25rem 1.5rem 1.5rem;
         }
 
         .public-footer-grid {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
+          grid-template-columns: 1.25fr 1fr 1fr 1fr;
           gap: 2.5rem;
-          margin-bottom: 2.25rem;
+          margin-bottom: 2rem;
         }
 
         .public-footer-title {
           color: #202124;
-          font-size: 0.78rem;
-          font-weight: 750;
+          font-size: 0.72rem;
+          font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.04em;
+          letter-spacing: 0.05em;
           margin-bottom: 0.85rem;
         }
 
@@ -68,72 +64,138 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
           margin: 0;
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
-          font-size: 0.8125rem;
+          gap: 0.55rem;
+          font-size: 0.80rem;
         }
 
         .public-footer-links a {
-          color: #5f6368;
-          text-decoration: none;
+          color: #5f6368 !important;
+          text-decoration: none !important;
           transition: color 0.15s ease;
+          display: inline-block;
+          line-height: 1.35;
         }
 
         .public-footer-links a:hover {
-          color: #003666;
+          color: #1a73e8 !important;
+          text-decoration: none !important;
+        }
+
+        .gcp-status-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 3px 9px;
+          border-radius: 9999px;
+          background: #e6f4ea;
+          border: 1px solid #ceead6;
+          color: #137333;
+          font-size: 0.70rem;
+          font-weight: 600;
+          letter-spacing: 0.01em;
+          margin-top: 0.75rem;
+        }
+
+        .gcp-status-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #188038;
+          box-shadow: 0 0 0 2px rgba(24, 128, 56, 0.2);
+        }
+
+        .public-footer-bottom {
+          border-top: 1px solid #e8eaed;
+          padding-top: 1.25rem;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+          font-size: 0.75rem;
+          color: #70757a;
+        }
+
+        .public-footer-bottom a {
+          color: #5f6368 !important;
+          text-decoration: none !important;
+          transition: color 0.15s ease;
+        }
+
+        .public-footer-bottom a:hover {
+          color: #1a73e8 !important;
+          text-decoration: none !important;
+        }
+
+        .gcp-compliance-strip {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 0.65rem 1rem;
+          background: #ffffff;
+          border: 1px solid #e8eaed;
+          border-radius: 6px;
+          font-size: 0.72rem;
+          color: #5f6368;
+          line-height: 1.45;
+          margin-bottom: 1.5rem;
         }
 
         @media (max-width: 1023px) {
           .public-footer-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 2rem 1.75rem;
+            gap: 2rem 1.5rem;
           }
         }
 
         @media (max-width: 639px) {
           .public-footer-grid {
             grid-template-columns: 1fr;
-            gap: 1.75rem;
+            gap: 1.5rem;
+          }
+          .gcp-compliance-strip {
+            flex-direction: column;
+            align-items: flex-start;
           }
         }
       `}</style>
 
       <div className="public-footer-container">
         
-        {/* ── Balanced 4-Column Clinical & Operational Grid ── */}
+        {/* ── 4-Column GCP Curated Directory (Zero Underlines, Concise Links) ── */}
         <div className="public-footer-grid">
           
-          {/* Column 1: Brand Identity & Certified Laboratory Accreditations */}
+          {/* Column 1: Institutional Identity & Live Operational Status */}
           <div>
-            <div style={{ marginBottom: '0.85rem' }}>
+            <div style={{ marginBottom: '0.65rem' }}>
               <BrandLogo variant="dark" showText={true} />
             </div>
-            <p style={{ color: '#5f6368', fontSize: '0.80rem', margin: 0, lineHeight: 1.55, maxWidth: '290px' }}>
+            <p style={{ color: '#5f6368', fontSize: '0.78rem', margin: '0 0 0.5rem 0', lineHeight: 1.5, maxWidth: '280px' }}>
               {isEs 
-                ? 'Infraestructura clínica integral de formulación magistral, diagnóstico multi-ómico cuantitativo, terapias bioactivas y logística médica especializada en cadena de frío.'
-                : 'Integrated clinical infrastructure delivering compounding pharmacy APIs, quantitative capillary blood diagnostics (DBS), multi-omics telemetry, and cold-chain medical freight.'}
+                ? 'Plataforma clínica de formulación magistral, diagnóstico multi-ómico cuantitativo y logística médica.'
+                : 'Clinical platform delivering pharmaceutical compounding, multi-omics telemetry, and cold-chain logistics.'}
             </p>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.73rem', color: '#137333', fontWeight: 650 }}>
-                <ShieldCheck size={14} color="#137333" style={{ flexShrink: 0 }} />
-                <span>LifeLab1 &amp; TeleTest · ISO 15189 / 17025 · CE-IVDR</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.73rem', color: '#1a73e8', fontWeight: 650 }}>
-                <Award size={14} color="#1a73e8" style={{ flexShrink: 0 }} />
-                <span>EU GMP Compounding &amp; Fagron Iberia Alliance</span>
-              </div>
+            <div className="gcp-status-pill">
+              <span className="gcp-status-dot" />
+              <span>{isEs ? 'Sistemas Operativos 100%' : 'All Systems Operational'}</span>
             </div>
           </div>
 
-          {/* Column 2: Soluciones Terapéuticas & Formulación */}
+          {/* Column 2: Therapeutics & Formulations */}
           <div>
             <div className="public-footer-title">
-              {isEs ? 'Soluciones Terapéuticas' : 'Therapeutic Solutions'}
+              {isEs ? 'Terapéutica' : 'Therapeutics'}
             </div>
             <ul className="public-footer-links">
               <li>
                 <Link href="/collection/peptides">
-                  {isEs ? 'Terapia Peptídica & Análogos GLP-1' : 'Peptide Therapeutics & GLP-1'}
+                  {isEs ? 'Terapia Peptídica & GLP-1' : 'Peptide Therapeutics & GLP-1'}
+                </Link>
+              </li>
+              <li>
+                <Link href="/collection/colway">
+                  {isEs ? 'Colway® Tropocolágeno Nativo' : 'Colway® Native Bio-Collagen'}
                 </Link>
               </li>
               <li>
@@ -142,27 +204,17 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
                 </Link>
               </li>
               <li>
-                <Link href="/catalog?type=aesthetic_injectables">
-                  {isEs ? 'Medicina Estética & Bioestimuladores' : 'Aesthetic Medicine & Fillers'}
-                </Link>
-              </li>
-              <li>
                 <Link href="/collection/supplements">
-                  {isEs ? 'Nutracéutica Clínica & Terapias BHRT' : 'Clinical Nutraceuticals & BHRT'}
-                </Link>
-              </li>
-              <li>
-                <Link href="/collection/colway">
-                  {isEs ? 'Colway® Tropocolágeno & Tricología' : 'Colway® Native Collagen & Trichology'}
+                  {isEs ? 'Nutracéutica Clínica & BHRT' : 'Clinical Nutraceuticals & BHRT'}
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Diagnóstico Avanzado & Vías Clínicas */}
+          {/* Column 3: Diagnostics & Protocols */}
           <div>
             <div className="public-footer-title">
-              {isEs ? 'Diagnóstico & Vías Clínicas' : 'Diagnostics & Pathways'}
+              {isEs ? 'Diagnóstico & Vías' : 'Diagnostics & Pathways'}
             </div>
             <ul className="public-footer-links">
               <li>
@@ -172,61 +224,46 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
               </li>
               <li>
                 <Link href="/collection/teletest">
-                  {isEs ? 'TeleTest HTMA Metales & Genómica' : 'TeleTest HTMA & Clinical Genomics'}
-                </Link>
-              </li>
-              <li>
-                <Link href="/catalog?category=iv_drips">
-                  {isEs ? 'Terapia Intravenosa & Infusión IVNT' : 'IV Infusion Therapy & Micronutrients'}
+                  {isEs ? 'TeleTest HTMA & Genómica' : 'TeleTest HTMA & Genomics'}
                 </Link>
               </li>
               <li>
                 <Link href="/proto">
-                  {isEs ? 'Directorio de Protocolos (87)' : 'Clinical Protocols Directory (87)'}
+                  {isEs ? 'Directorio de Protocolos Clínicos' : 'Clinical Protocols Directory'}
                 </Link>
               </li>
               <li>
                 <Link href="/collection/ultraperson">
-                  {isEs ? 'Personalización UltraPerson™' : 'UltraPerson™ Precision Protocols'}
+                  {isEs ? 'Medicina de Precisión UltraPerson™' : 'UltraPerson™ Precision Medicine'}
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 4: Portal Médico & Operaciones Clínicas */}
+          {/* Column 4: Practitioner & Clinical Ops */}
           <div>
             <div className="public-footer-title">
-              {isEs ? 'Portal Médico & Operaciones' : 'Practitioner Portal & Ops'}
+              {isEs ? 'Portal Médico & B2B' : 'Practitioner & Ops'}
             </div>
             <ul className="public-footer-links">
               <li>
-                <Link href="/dr" style={{ fontWeight: 650, color: '#003666' }}>
-                  {isEs ? 'Portales Clínicos Facultativos (/dr)' : 'Physician & Clinic Portals (/dr)'}
+                <Link href="/dr" style={{ fontWeight: 650, color: '#1a73e8' }}>
+                  {isEs ? 'Portal Médico Facultativo (/dr)' : 'Physician & Clinic Portal (/dr)'}
                 </Link>
               </li>
               <li>
                 <Link href="/rx/intake">
-                  {isEs ? 'Prescripción Electrónica Magistral (E-Rx)' : 'Digital Compounding E-Rx Portal'}
+                  {isEs ? 'Prescripción Electrónica (E-Rx)' : 'Digital Compounding E-Rx'}
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing/colway">
+                  {isEs ? 'Tarifario Mayorista B2B' : 'B2B Wholesale Pricing'}
                 </Link>
               </li>
               <li>
                 <Link href="/verify">
-                  {isEs ? 'Verificación de Lotes, COAs y Reportes' : 'Specimen & COA Verification'}
-                </Link>
-              </li>
-              <li>
-                <Link href="/calculator">
-                  {isEs ? 'Calculadora de Reconstitución' : 'Reconstitution Calculator'}
-                </Link>
-              </li>
-              <li>
-                <a href="mailto:logistics@atlashealth-services.com?subject=Cold-Chain%20Medical%20Courier%20Inquiry">
-                  {isEs ? 'Logística Médica en Cadena de Frío' : 'Cold-Chain Medical Logistics'}
-                </a>
-              </li>
-              <li>
-                <Link href="/faq">
-                  {isEs ? 'Base de Conocimiento Clínico & FAQ' : 'Clinical Knowledgebase & FAQ'}
+                  {isEs ? 'Verificación de Lotes & COAs' : 'Specimen & COA Verification'}
                 </Link>
               </li>
             </ul>
@@ -234,58 +271,43 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
 
         </div>
 
-        {/* ── Compact Institutional & Regulatory Compliance Notice ── */}
-        <div style={{
-          padding: '0.85rem 1.15rem',
-          background: '#ffffff',
-          border: '1px solid #dadce0',
-          borderRadius: '8px',
-          fontSize: '0.72rem',
-          color: '#5f6368',
-          lineHeight: 1.5,
-          marginBottom: '1.25rem',
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: '10px',
-          boxShadow: '0 1px 2px rgba(60, 64, 67, 0.04)'
-        }}>
-          <ShieldCheck size={16} color="#003666" style={{ flexShrink: 0, marginTop: '2px' }} />
-          <div>
+        {/* ── Minimalist GCP Compliance Strip (Replaces the bulky disclaimer box) ── */}
+        <div className="gcp-compliance-strip">
+          <ShieldCheck size={15} color="#188038" style={{ flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
             <strong style={{ color: '#202124' }}>
-              {isEs ? 'Aviso Regulatorio e Institucional: ' : 'Regulatory & Institutional Notice: '}
+              {isEs ? 'Cumplimiento Regulatorio: ' : 'Regulatory Compliance: '}
             </strong>
-            {isEs 
-              ? 'Los dispositivos y procedimientos diagnósticos in vitro distribuidos por Atlas Health Services cumplen con el Reglamento (UE) 2017/746 (CE-IVDR) y normas analíticas ISO 15189 / ISO 17025. Las materias primas farmacéuticas, APIs y formulaciones magistrales se elaboran conforme a especificaciones de Farmacopea y normativas EU GMP en instalaciones autorizadas por Fagron Iberia y entidades colaboradoras. Plataforma destinada exclusivamente a profesionales médicos colegiados, clínicas y centros de investigación acreditados.'
-              : 'In vitro diagnostic devices and procedures supplied by Atlas Health Services comply with Regulation (EU) 2017/746 (CE-IVDR) and ISO 15189 / ISO 17025 laboratory standards. Pharmaceutical raw materials, APIs, and magistral compounding formulations are manufactured under Pharmacopeia monographs and EU GMP guidelines in accredited facilities (including Fagron Iberia). Platform intended strictly for licensed healthcare practitioners, hospitals, and verified research institutions.'}
+            {isEs
+              ? 'Dispositivos CE-IVDR (UE 2017/746) e ISO 15189/17025. Fabricación bajo normativas EU GMP. Acceso exclusivo para profesionales sanitarios acreditados.'
+              : 'CE-IVDR (EU 2017/746) & ISO 15189/17025 compliant diagnostics. Formulations compounded under EU GMP monographs. Intended strictly for accredited healthcare professionals.'}
+          </div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.70rem', color: '#1a73e8', fontWeight: 600, flexShrink: 0 }}>
+            <Award size={13} color="#1a73e8" />
+            <span>ISO 15189 · EU GMP</span>
           </div>
         </div>
 
-        {/* ── Bottom Bar: Clean, Minimalist & Legal ── */}
-        <div style={{
-          borderTop: '1px solid #dadce0',
-          paddingTop: '1rem',
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.75rem',
-          fontSize: '0.75rem',
-          color: '#70757a'
-        }}>
+        {/* ── Bottom Utility Bar: Clean, Minimalist & Legal ── */}
+        <div className="public-footer-bottom">
           <div>
             © 2026 <strong style={{ color: '#202124' }}>Atlas Health Services</strong>. {isEs ? 'Todos los derechos reservados.' : 'All rights reserved.'}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <Link href="/privacy" style={{ color: '#5f6368', textDecoration: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+            <Link href="/privacy">
               {isEs ? 'Privacidad' : 'Privacy'}
             </Link>
-            <span>•</span>
-            <Link href="/terms" style={{ color: '#5f6368', textDecoration: 'none' }}>
+            <span style={{ color: '#dadce0' }}>•</span>
+            <Link href="/terms">
               {isEs ? 'Términos' : 'Terms'}
             </Link>
-            <span>•</span>
-            <a href="mailto:clinical@atlashealth-services.com" style={{ color: '#003666', textDecoration: 'none', fontWeight: 600 }}>
+            <span style={{ color: '#dadce0' }}>•</span>
+            <Link href="/faq">
+              {isEs ? 'Ayuda & FAQ' : 'Help & FAQ'}
+            </Link>
+            <span style={{ color: '#dadce0' }}>•</span>
+            <a href="mailto:clinical@atlashealth-services.com" style={{ fontWeight: 600, color: '#1a73e8' }}>
               clinical@atlashealth-services.com
             </a>
           </div>
