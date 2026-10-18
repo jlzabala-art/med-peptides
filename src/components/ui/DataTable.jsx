@@ -1244,11 +1244,32 @@ export default function DataTable({
                           let cellValue;
                           if (col.render) {
                             const rawVal = col.key ? row[col.key] : undefined;
-                            cellValue = col.render.length >= 2 && rawVal !== undefined
-                              ? col.render(rawVal, row, idx)
-                              : col.render(row, row, idx);
+                            try {
+                              if (col.render.length >= 2 && rawVal !== undefined) {
+                                cellValue = col.render(rawVal, row, idx);
+                              } else if (rawVal !== undefined) {
+                                const res = col.render(rawVal, row, idx);
+                                if (res !== null && typeof res === 'object' && !React.isValidElement(res)) {
+                                  cellValue = col.render(row, row, idx);
+                                } else {
+                                  cellValue = res;
+                                }
+                              } else {
+                                cellValue = col.render(row, row, idx);
+                              }
+                            } catch {
+                              cellValue = col.render(row, row, idx);
+                            }
+
+                            // Safety net: ensure cellValue is never a raw plain object that crashes React (Error #31)
+                            if (cellValue !== null && typeof cellValue === 'object' && !React.isValidElement(cellValue)) {
+                              cellValue = rawVal !== undefined ? String(rawVal) : (cellValue.label || cellValue.name || cellValue.title || '—');
+                            }
                           } else {
                             cellValue = row[col.key];
+                            if (cellValue !== null && typeof cellValue === 'object' && !React.isValidElement(cellValue)) {
+                              cellValue = cellValue.label || cellValue.name || cellValue.title || '—';
+                            }
                           }
                           const isProductColumn =
                             col.key === 'name' ||

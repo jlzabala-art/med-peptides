@@ -137,7 +137,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       label: '#',
       width: '5%',
       sortable: true,
-      render: (val) => <span className="font-mono text-xs text-slate-500">{val}</span>
+      render: (val, row) => <span className="font-mono text-xs text-slate-500">{val ?? row?.itemNumber}</span>
     },
     {
       key: 'sku',
@@ -146,8 +146,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       sortable: true,
       render: (val, row) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-          <CopyableId value={val} />
-          <span className="product-category-tag">{row.category}</span>
+          <CopyableId value={val ?? row?.sku} />
+          <span className="product-category-tag">{row?.category}</span>
         </div>
       )
     },
@@ -158,7 +158,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       sortable: true,
       render: (_, row) => (
         <div className="product-identity-cell">
-          {row.image && (
+          {row?.image && (
             <img
               src={row.image}
               alt={row.name}
@@ -167,9 +167,9 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
             />
           )}
           <div>
-            <div className="product-name font-bold">{row.name}</div>
-            <div className="product-subtitle text-xs text-slate-500">{row.subtitle}</div>
-            {row.keyActives && (
+            <div className="product-name font-bold">{row?.name}</div>
+            <div className="product-subtitle text-xs text-slate-500">{row?.subtitle}</div>
+            {row?.keyActives && (
               <div className="product-actives text-xs text-sky-700 mt-0.5">
                 <span className="font-semibold">Actives:</span> {row.keyActives}
               </div>
@@ -185,8 +185,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       sortable: true,
       render: (val, row) => (
         <div>
-          <span className="volume-badge">{val}</span>
-          <div className="text-xs text-slate-400 mt-0.5">{row.presentation}</div>
+          <span className="volume-badge">{val ?? row?.volume}</span>
+          <div className="text-xs text-slate-400 mt-0.5">{row?.presentation}</div>
         </div>
       )
     },
@@ -195,8 +195,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       label: 'Landed Cost',
       width: '10%',
       sortable: true,
-      render: (val) => (
-        <span className="font-mono font-semibold text-slate-700">{formatPrice(val)}</span>
+      render: (val, row) => (
+        <span className="font-mono font-semibold text-slate-700">{formatPrice(val ?? row?.calculatedLanded)}</span>
       )
     },
     {
@@ -204,8 +204,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       label: `Wholesale (+${markupPct}%)`,
       width: '11%',
       sortable: true,
-      render: (val) => (
-        <span className="font-mono font-bold text-sky-700">{formatPrice(val)}</span>
+      render: (val, row) => (
+        <span className="font-mono font-bold text-sky-700">{formatPrice(val ?? row?.calculatedWholesale)}</span>
       )
     },
     {
@@ -215,8 +215,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       sortable: true,
       render: (val, row) => (
         <div className="font-mono text-emerald-600">
-          <div>+{formatPrice(val)}</div>
-          <div className="text-xs text-emerald-500 font-sans">({row.calculatedMarginPct}%)</div>
+          <div>+{formatPrice(val ?? row?.calculatedMarginAed)}</div>
+          <div className="text-xs text-emerald-500 font-sans">({row?.calculatedMarginPct}%)</div>
         </div>
       )
     },
@@ -227,8 +227,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       sortable: true,
       render: (val, row) => (
         <div className="font-mono text-xs">
-          <div className="font-bold text-slate-800" title="Recommended Retail Price">{formatPrice(val)}</div>
-          <div className="text-slate-500" title="Recommended Clinic Price">Clinic: {formatPrice(row.clinicPriceAed)}</div>
+          <div className="font-bold text-slate-800" title="Recommended Retail Price">{formatPrice(val ?? row?.retailPriceAed)}</div>
+          <div className="text-slate-500" title="Recommended Clinic Price">Clinic: {formatPrice(row?.clinicPriceAed)}</div>
         </div>
       )
     }

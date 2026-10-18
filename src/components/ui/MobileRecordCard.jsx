@@ -50,18 +50,37 @@ export default function MobileRecordCard({
 
   const renderValue = (col, row) => {
     const colKey = col.key || col.id || col.accessor;
+    const rawValue = colKey ? row[colKey] : undefined;
     if (col.render) {
       try {
-        return col.render(row);
+        let res;
+        if (col.render.length >= 2 && rawValue !== undefined) {
+          res = col.render(rawValue, row);
+        } else if (rawValue !== undefined) {
+          res = col.render(rawValue, row);
+          if (res !== null && typeof res === 'object' && !React.isValidElement(res)) {
+            res = col.render(row, row);
+          }
+        } else {
+          res = col.render(row, row);
+        }
+
+        if (res !== null && typeof res === 'object' && !React.isValidElement(res)) {
+          return rawValue !== null && rawValue !== undefined && rawValue !== ''
+            ? String(rawValue)
+            : '—';
+        }
+        return res;
       } catch {
-        const rawValue = colKey ? row[colKey] : undefined;
         return rawValue !== null && rawValue !== undefined && rawValue !== ''
           ? String(rawValue)
           : '—';
       }
     }
-    const rawValue = colKey ? row[colKey] : undefined;
     if (rawValue === null || rawValue === undefined || rawValue === '') return '—';
+    if (typeof rawValue === 'object') {
+      return rawValue.label || rawValue.name || rawValue.title || '—';
+    }
     return String(rawValue);
   };
 
