@@ -23,7 +23,7 @@ import {
   CheckCircle2,
   Dna,
   ShieldCheck,
-  Boxes
+  Package
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
@@ -103,7 +103,7 @@ export default function ColwayCollectionSidebar({
       id: 'bundles',
       label: isEs ? 'Kits & Protocolos Clínicos' : 'Clinical Protocol Bundles',
       count: 3,
-      icon: Boxes
+      icon: Package
     }
   ], [isEs]);
 
