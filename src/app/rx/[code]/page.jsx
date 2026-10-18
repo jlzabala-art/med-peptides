@@ -8,27 +8,23 @@ export const dynamicParams = true;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
-import { getPrescriptionData, invalidateRxCache } from '@/lib/prescriptionFetcher';
+import { 
+  getPrescriptionData, 
+  invalidateRxCache,
+  sanitizePrescriptionCode,
+  hasPatientSlugInCode,
+  sanitizePrescriptionPayload
+} from '@/lib/prescriptionFetcher';
 import { getAuthoritativeClinicalData } from '@/data/pharmapolisLabelsMap';
 export { invalidateRxCache };
 
-
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const code = resolvedParams?.code || '';
-  const rx = await getPrescriptionData(code);
+  const rawCode = resolvedParams?.code || '';
+  const cleanCode = sanitizePrescriptionCode(rawCode);
+  const rx = await getPrescriptionData(cleanCode || rawCode);
 
-  const auth = rx ? getAuthoritativeClinicalData(rx) : {};
-  const patientName = auth.patientName || rx?.patient?.name || rx?.patientName || 'Patient';
-  const treatingDocName = typeof rx?.treatingDoctor === 'string' ? rx.treatingDoctor : rx?.treatingDoctor?.name;
-  const doctor = auth.doctorName || treatingDocName || rx?.doctor?.name || rx?.doctorName || rx?.prescribingDoctor || null;
-  const treatingDocClinic = typeof rx?.treatingDoctor === 'object' ? rx?.treatingDoctor?.clinic : null;
-  let clinic = auth.clinicName || treatingDocClinic || rx?.doctor?.clinic || rx?.clinic || 'Atlas Health Services';
-  if (clinic.toLowerCase().includes('mediluxe') || clinic.toLowerCase().includes('bedaya')) {
-    clinic = 'Atlas Health Services';
-  }
-
-  // 1. Build dynamic quick explanation for WhatsApp
+  // 1. Build formula summary without any personal or doctor PII
   let formulaSummary = '';
   const rawItems = rx?.items || rx?.compounds || [];
   if (rawItems.length > 0) {
@@ -55,25 +51,20 @@ export async function generateMetadata({ params }) {
   const posologySummary = typeof rawPos === 'object' ? (rawPos.regimen || rawPos.summary || rawPos.timing || rawPos.notes || '') : String(rawPos || '');
   const packSummary = rx?.structuredPosology?.packLabel || '';
 
-  let description = '';
+  let description = 'Verified clinical formulation monograph and pharmaceutical posology protocol. Authorized medical verification • Atlas Health Services.';
   if (formulaSummary) {
     description = `Formula: ${formulaSummary}${packSummary ? ` (${packSummary})` : ''}. `;
     if (posologySummary) {
       description += `Posology: ${posologySummary}. `;
     }
-    description += doctor ? `Prescribed by ${doctor} • Atlas Health Services.` : `Atlas Health Services.`;
-  } else {
-    description = doctor 
-      ? `Official datasheet and posology protocol for ${patientName}. Prescribed by ${doctor} (${clinic}). Atlas Health Services.`
-      : `Official datasheet and posology protocol for ${patientName}. Atlas Health Services.`;
+    description += 'Atlas Health Services · Medical Practice Care.';
   }
 
-  // Clamped to WhatsApp's optimal preview length
   if (description.length > 200) {
     description = description.slice(0, 197).trim() + '...';
   }
 
-  const title = `Medical Prescription #${code} • Atlas Health Services`;
+  const title = `Clinical Prescription Dossier #${cleanCode} • Atlas Health Services`;
   const ogLogoUrl = `${BASE_URL}/atlas-health-logo-wa.png`;
 
   return {
@@ -82,8 +73,8 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title,
       description,
-      url: `${BASE_URL}/rx/${code}`,
-      siteName: 'Atlas Health Services',
+      url: `${BASE_URL}/rx/${encodeURIComponent(cleanCode)}`,
+      siteName: 'Atlas Health Services · Clinical Formulary',
       type: 'article',
       images: [
         {
@@ -112,25 +103,35 @@ export async function generateMetadata({ params }) {
       'whatsapp:description': description,
       'whatsapp:image': ogLogoUrl
     },
-    robots: { index: false, follow: true }
+    robots: { index: false, follow: false, noarchive: true, nocache: true }
   };
 }
 
 export default async function PublicPrescriptionPage({ params, searchParams }) {
   const resolvedParams = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const code = resolvedParams?.code;
+  const rawCode = resolvedParams?.code;
   const initialView = resolvedSearchParams?.view || resolvedSearchParams?.mode || null;
 
-  if (code?.toLowerCase() === 'intake') {
+  if (rawCode?.toLowerCase() === 'intake') {
     redirect('/rx/intake');
   }
 
-  const rx = await getPrescriptionData(code);
+  // 1. Strict HIPAA/DHA De-identification: Detect trailing patient names in URL
+  const cleanCode = sanitizePrescriptionCode(rawCode);
+  if (rawCode && cleanCode && rawCode.toLowerCase() !== cleanCode.toLowerCase()) {
+    const qs = initialView ? `?view=${encodeURIComponent(initialView)}` : '';
+    redirect(`/rx/${encodeURIComponent(cleanCode)}${qs}`);
+  }
+
+  const rx = await getPrescriptionData(cleanCode || rawCode);
 
   if (!rx) {
     notFound();
   }
 
-  return <PublicPrescriptionClient rx={rx} initialView={initialView} />;
+  // 2. Zero-Trust Server Sanitization: Strip nominal PII from initial SSR payload
+  const sanitizedRx = sanitizePrescriptionPayload(rx, { isAuthorized: false });
+
+  return <PublicPrescriptionClient rx={sanitizedRx} initialView={initialView} />;
 }

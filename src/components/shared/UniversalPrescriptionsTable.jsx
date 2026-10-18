@@ -38,6 +38,7 @@ import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import PatientAdministrationGuideModal from '../doctor/PatientAdministrationGuideModal';
 import { usePharmacyLabels } from '../../hooks/usePharmacyLabels';
 import ZohoApiMatcherModal from '../admin/prescriptions/ZohoApiMatcherModal';
+import { sanitizePrescriptionCode } from '@/lib/prescriptionSanitizer';
 
 export default function UniversalPrescriptionsTable({ doctorId, patientId, readOnly = false, hideHeader = false, title = 'Prescriptions', subtitle = 'System of record for all patient prescriptions and recommendations.', serverKPIs, enableAskAtlas = false, initialData }) {
   const { openDrawer } = useDrawer();
@@ -1495,7 +1496,8 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
               label: 'Open Public Dossier (/rx)',
               icon: ExternalLink,
               onClick: () => {
-                const code = mobileActionRx?.code || mobileActionRx?.prescriptionNumber || mobileActionRx?.id;
+                const raw = mobileActionRx?.code || mobileActionRx?.prescriptionNumber || mobileActionRx?.id;
+                const code = sanitizePrescriptionCode(raw, mobileActionRx?.patientName);
                 setMobileActionRx(null);
                 window.open(`/rx/${code}`, '_blank');
               },

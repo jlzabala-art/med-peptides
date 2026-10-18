@@ -16,7 +16,8 @@ import {
   FileText,
   Loader2,
   ArrowUpRight,
-  MessageCircle
+  MessageCircle,
+  Lock
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -26,6 +27,8 @@ export default function DoctorResourceInspectorDrawer({
   selectedInspectorItem,
   onClose,
   doctor,
+  isAuthorizedViewer = false,
+  opaqueCode = '',
   signingTaskId,
   onSignOffPrescription,
   onOpenLabelsModal,
@@ -40,7 +43,28 @@ export default function DoctorResourceInspectorDrawer({
   const item = selectedInspectorItem.data;
   const rx = isTask ? selectedInspectorItem.prescription : item;
   const rxCode = rx?.code || rx?.prescriptionNumber || item?.code || 'N/A';
-  const patientName = rx?.patientName || item?.patientName || 'Anonymous Patient';
+  const rawPatientName = rx?.patientName || item?.patientName || 'Anonymous Patient';
+  const cleanSuffix = String(rxCode).replace(/[^a-zA-Z0-9]/g, '');
+  const codifiedPatientId = `PT-${cleanSuffix.length >= 4 ? cleanSuffix.slice(-4).toUpperCase() : '4512'}`;
+  const patientName = isAuthorizedViewer ? rawPatientName : `Patient ${codifiedPatientId}`;
+
+  // De-identify any prescription codes that contain patient name slugs
+  const maskCode = (code, rawName) => {
+    if (!code || code === 'N/A') return 'N/A';
+    if (isAuthorizedViewer) return code;
+    let clean = String(code);
+    if (rawName && rawName !== 'Anonymous Patient') {
+      const parts = rawName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(/\s+/).filter(p => p.length >= 2);
+      for (const part of parts) {
+        clean = clean.replace(new RegExp(`[-_]?${part}`, 'gi'), '');
+      }
+      clean = clean.replace(/[-_]+$/, '');
+    }
+    clean = clean.replace(/-(?:[a-z]{3,}-?)+$/i, '');
+    return clean || `RX-${codifiedPatientId}`;
+  };
+  const safeRxCode = maskCode(rxCode, rawPatientName);
+
   const rawTitle = rx?.treatmentTitle || item?.title || 'Personalized Clinical Protocol';
   const treatmentTitle = String(rawTitle).replace(/\s*\(Propuesta de Tratamiento\)/gi, '').replace(/\s*\(Sin Pedido\)/gi, '').replace(/\s*\(Propuesta\)/gi, '').trim();
   const itemsList = rx?.items && rx.items.length > 0 ? rx.items : (rx?.prescriptionLines || []);
@@ -96,9 +120,9 @@ export default function DoctorResourceInspectorDrawer({
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>
-                {isTask ? `Task: ${item.title}` : `Prescription #${rxCode}`}
+                {isTask ? `Task: ${item.title}` : `Prescription #${safeRxCode}`}
               </h3>
-              <CopyableId value={rxCode} iconOnly={true} />
+              <CopyableId value={safeRxCode} iconOnly={true} />
             </div>
             <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <StatusBadge status={status} />
@@ -113,7 +137,7 @@ export default function DoctorResourceInspectorDrawer({
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             {rx && (
               <Link
-                href={`/rx/${rxCode}`}
+                href={`/rx/${safeRxCode}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Open full monograph dossier in new tab"
@@ -246,20 +270,44 @@ export default function DoctorResourceInspectorDrawer({
 
               {/* Patient Information Card */}
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '14px 16px' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  Patient Demographics & Record
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+                    Patient Demographics & Record
+                  </span>
+                  {!isAuthorizedViewer && (
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.66rem',
+                      fontWeight: 700,
+                      color: '#b45309',
+                      background: '#fffbeb',
+                      border: '1px solid #fde68a',
+                      padding: '2px 7px',
+                      borderRadius: '12px'
+                    }}>
+                      <Lock size={10} />
+                      <span>Protected</span>
+                    </span>
+                  )}
                 </div>
                 <div style={{ fontSize: '0.94rem', fontWeight: 700, color: '#0f172a' }}>
                   {patientName}
                 </div>
-                {rx?.patient?.dob && (
+                {isAuthorizedViewer && rx?.patient?.dob && (
                   <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
                     DOB: {rx.patient.dob} {rx.patient?.gender ? `· ${rx.patient.gender}` : ''}
                   </div>
                 )}
+                {!isAuthorizedViewer && (
+                  <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '3px' }}>
+                    DHA/HIPAA Protected Clinical Dossier · Contact verified on file
+                  </div>
+                )}
                 <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Canonical Ref:</span>
-                  <CopyableId value={rxCode} />
+                  <CopyableId value={safeRxCode} />
                 </div>
               </div>
 
@@ -489,7 +537,7 @@ export default function DoctorResourceInspectorDrawer({
                           <CheckCircle2 size={14} /> Signed & Approved
                         </span>
                         <Link
-                          href={`/rx/${rxCode}`}
+                          href={`/rx/${safeRxCode}`}
                           target="_blank"
                           style={{
                             display: 'inline-flex',
@@ -566,7 +614,7 @@ export default function DoctorResourceInspectorDrawer({
                 <button
                   type="button"
                   onClick={() => {
-                    const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/rx/${rxCode}?view=patient`;
+                    const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/rx/${safeRxCode}?view=patient`;
                     navigator.clipboard?.writeText(url);
                     toast.success('Patient direct link copied ✓');
                   }}
@@ -657,7 +705,7 @@ export default function DoctorResourceInspectorDrawer({
 
           {rx && (
             <Link
-              href={`/rx/${rxCode}`}
+              href={`/rx/${safeRxCode}`}
               style={{
                 height: '34px',
                 padding: '0 16px',

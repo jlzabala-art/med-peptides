@@ -3,6 +3,12 @@ import { adminDb } from '@/lib/firebaseAdmin';
 import { RX_RAM_CACHE, CACHE_TTL_MS, invalidateRxCache } from '@/lib/rxCache';
 
 export { invalidateRxCache };
+export {
+  sanitizePrescriptionCode,
+  hasPatientSlugInCode,
+  getCodifiedPatientId,
+  sanitizePrescriptionPayload
+} from '@/lib/prescriptionSanitizer';
 
 // ⚡ Per-Request React Server Component memoization
 export const getPrescriptionData = cache(async (code) => {
@@ -97,20 +103,47 @@ export const getPrescriptionData = cache(async (code) => {
     }
   }
 
-  // 6. Fallback search by document ID prefix (e.g. #RX-6F8QZC or 6F8QZC from 20-char Firestore IDs)
-  if (!rxDoc && cleanCodeNoPrefix.length >= 5) {
+  // 6. Fallback search by document ID prefix (e.g. RX-KSA-INV112 matching RX-KSA-INV112-jumanah-khayat or #RX-6F8QZC)
+  if (!rxDoc && (upperCode.length >= 4 || cleanCodeNoPrefix.length >= 4)) {
     try {
-      const lower = cleanCodeNoPrefix.toLowerCase();
-      const end = lower.slice(0, -1) + String.fromCharCode(lower.charCodeAt(lower.length - 1) + 1);
       const { FieldPath } = await import('firebase-admin/firestore');
-      const prefixSnap = await adminDb.collection('prescriptions')
-        .where(FieldPath.documentId(), '>=', lower)
-        .where(FieldPath.documentId(), '<', end)
+      
+      // Try exact uppercase prefix first (e.g. RX-KSA-INV112)
+      let prefixSnap = await adminDb.collection('prescriptions')
+        .where(FieldPath.documentId(), '>=', upperCode)
+        .where(FieldPath.documentId(), '<=', upperCode + '\uf8ff')
         .limit(1)
         .get()
         .catch(() => null);
       if (prefixSnap && !prefixSnap.empty) {
         rxDoc = { id: prefixSnap.docs[0].id, ...prefixSnap.docs[0].data() };
+      }
+
+      // Try rawCode prefix if different
+      if (!rxDoc && rawCode !== upperCode) {
+        prefixSnap = await adminDb.collection('prescriptions')
+          .where(FieldPath.documentId(), '>=', rawCode)
+          .where(FieldPath.documentId(), '<=', rawCode + '\uf8ff')
+          .limit(1)
+          .get()
+          .catch(() => null);
+        if (prefixSnap && !prefixSnap.empty) {
+          rxDoc = { id: prefixSnap.docs[0].id, ...prefixSnap.docs[0].data() };
+        }
+      }
+
+      // Try lower-case prefix
+      if (!rxDoc && cleanCodeNoPrefix.length >= 5) {
+        const lower = cleanCodeNoPrefix.toLowerCase();
+        prefixSnap = await adminDb.collection('prescriptions')
+          .where(FieldPath.documentId(), '>=', lower)
+          .where(FieldPath.documentId(), '<=', lower + '\uf8ff')
+          .limit(1)
+          .get()
+          .catch(() => null);
+        if (prefixSnap && !prefixSnap.empty) {
+          rxDoc = { id: prefixSnap.docs[0].id, ...prefixSnap.docs[0].data() };
+        }
       }
     } catch (e) {
       console.warn('Prefix match fallback failed:', e.message);

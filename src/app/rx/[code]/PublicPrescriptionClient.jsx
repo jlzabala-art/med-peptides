@@ -75,8 +75,12 @@ import QualityTraceabilitySection from '@/components/prescription/QualityTraceab
 import PrescriptionModalsContainer from '@/components/prescription/PrescriptionModalsContainer';
 import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
 import { usePrescriptionData, getPosologyText } from '@/hooks/usePrescriptionData';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
 
 export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake: _onBackToIntake = null, initialView = null }) {
+  const { can, is } = useRoleAccess();
+  const isAuthorizedViewer = Boolean(can('view:patients') || is('doctor') || is('medical_director') || is('admin') || is('clinic'));
+
   const [currentRx, setCurrentRx] = useState(rx || {});
   const [prevRx, setPrevRx] = useState(rx);
   if (rx !== prevRx) {
@@ -187,7 +191,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     resolvedDosageSummary,
     resolvedPrice,
     timeline
-  } = usePrescriptionData(currentRx, { lang, isEs, isPatientView, atlasRecs });
+  } = usePrescriptionData(currentRx, { lang, isEs, isPatientView, atlasRecs, isAuthorizedViewer });
 
   const baseUrl = 'https://www.atlashealth-services.com';
   const publicUrl = `${baseUrl}/rx/${rxId}`;
@@ -885,13 +889,63 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     gap: '16px 24px',
                     alignItems: 'start'
                   }}>
+                    {!isAuthorizedViewer && (
+                      <div style={{
+                        gridColumn: '1 / -1',
+                        padding: '12px 14px',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '12px',
+                        flexWrap: 'wrap'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '1.05rem' }}>🔒</span>
+                          <div>
+                            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                              DHA & HIPAA Protected Health Information (PHI)
+                            </div>
+                            <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                              Patient demographic identities and private contact channels are codified for unauthenticated access.
+                            </div>
+                          </div>
+                        </div>
+                        <Link
+                          href={`/login?redirect=/rx/${rxId}`}
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '4px',
+                            background: '#003666',
+                            color: '#ffffff',
+                            fontSize: '0.74rem',
+                            fontWeight: 600,
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <span>Doctor Sign In</span>
+                          <ArrowUpRight size={12} />
+                        </Link>
+                      </div>
+                    )}
+
                     {/* Patient Name */}
                     <div>
-                      <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                        {isEs ? 'Nombre Completo' : 'Full Name'}
+                      <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>{isEs ? 'Nombre Completo' : 'Full Name'}</span>
+                        {!isAuthorizedViewer && (
+                          <span style={{ fontSize: '0.58rem', background: '#e2e8f0', color: '#475569', padding: '1px 4px', borderRadius: '3px', fontWeight: 700 }}>
+                            CODIFIED
+                          </span>
+                        )}
                       </div>
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#202124', wordBreak: 'break-word', lineHeight: 1.3 }}>
-                        {patientName} {patientAlias}
+                        {patientName} {isAuthorizedViewer ? patientAlias : ''}
                       </div>
                     </div>
 
@@ -901,19 +955,27 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         {isEs ? 'Filiación & Demografía' : 'Demographics'}
                       </div>
                       <div style={{ fontSize: '0.86rem', color: '#3c4043', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
-                        {patient.dob && (
-                          <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong>{patient.dob}</strong></span>
-                        )}
-                        {patient.age && (
+                        {!isAuthorizedViewer ? (
+                          <span style={{ color: '#64748b', fontSize: '0.80rem' }}>
+                            {patient.gender ? `${patient.gender} · ` : ''}Protected Medical Record
+                          </span>
+                        ) : (
                           <>
-                            <span style={{ color: '#dadce0' }}>·</span>
-                            <span><strong>{patient.age}</strong> {isEs ? 'años' : 'yrs'}{patient.gender ? ` (${patient.gender})` : ''}</span>
-                          </>
-                        )}
-                        {patient.nationality && (
-                          <>
-                            <span style={{ color: '#dadce0' }}>·</span>
-                            <span><strong>{patient.nationality}</strong></span>
+                            {patient.dob && (
+                              <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong>{patient.dob}</strong></span>
+                            )}
+                            {patient.age && (
+                              <>
+                                <span style={{ color: '#dadce0' }}>·</span>
+                                <span><strong>{patient.age}</strong> {isEs ? 'años' : 'yrs'}{patient.gender ? ` (${patient.gender})` : ''}</span>
+                              </>
+                            )}
+                            {patient.nationality && (
+                              <>
+                                <span style={{ color: '#dadce0' }}>·</span>
+                                <span><strong>{patient.nationality}</strong></span>
+                              </>
+                            )}
                           </>
                         )}
                       </div>
@@ -925,7 +987,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         {isEs ? 'Identificación / Expediente' : 'National ID / Record'}
                       </div>
                       <div style={{ fontSize: '0.85rem', color: '#3c4043' }}>
-                        {patient.emiratesId ? (
+                        {!isAuthorizedViewer ? (
+                          <span style={{ color: '#64748b', fontSize: '0.80rem' }}>Confidential (Physician Access Only)</span>
+                        ) : patient.emiratesId ? (
                           <span>National ID: <strong>{patient.emiratesId}</strong></span>
                         ) : (
                           <span style={{ color: '#5f6368' }}>{isEs ? 'Expediente Clínico Digital' : 'Digital Clinical File'}</span>
@@ -1765,6 +1829,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             activeGcpTab={activeGcpTab}
             onSelectTab={setActiveGcpTab}
             lang={lang}
+            isAuthorizedViewer={isAuthorizedViewer}
           />
         </div>
       </div>

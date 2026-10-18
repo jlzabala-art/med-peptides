@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { X, Printer, Download, QrCode, FileText, User, ShieldCheck, Stethoscope, Check, ExternalLink, Calendar, MapPin, Pill, Share2, Clock, Sparkles } from '@/lib/icons';
 import { QRCodeSVG } from 'qrcode.react';
+import { sanitizePrescriptionCode } from '@/lib/prescriptionSanitizer';
 
 // Clean Doctor Name & Credentials to Professional Standards
 const formatDoctorName = (name) => {
@@ -478,7 +479,7 @@ export default function PrescriptionBrochureModal({
   // Target URLs for QR codes
   const doctorQrUrl = publicUrl || `https://www.atlashealth-services.com/rx/${rxId}`;
   const patientQrUrl = patientPublicUrl || `https://www.atlashealth-services.com/rx/${rxId}?view=patient`;
-  const cleanDisplayUrl = `atlashealth-services.com/rx/${rx.prescriptionCode || rx.prescriptionNumber || rxId}`;
+  const cleanDisplayUrl = `atlashealth-services.com/rx/${sanitizePrescriptionCode(rx.prescriptionCode || rx.prescriptionNumber || rxId, rx.patientName)}`;
 
   // Formulations fallback
   const formulations = compoundedFormulations && compoundedFormulations.length > 0 

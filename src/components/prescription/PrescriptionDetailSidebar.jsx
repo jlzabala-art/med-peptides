@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { 
   FlaskConical,
   List, 
@@ -61,7 +62,8 @@ export default function PrescriptionDetailSidebar({
   onAssignDoctor = null,
   activeGcpTab = '',
   onSelectTab = null,
-  lang = 'en'
+  lang = 'en',
+  isAuthorizedViewer = false
 }) {
   const isEs = lang === 'es';
   const prescriptionCode = rxId || 'RX';
@@ -252,8 +254,13 @@ export default function PrescriptionDetailSidebar({
             {patientName?.charAt(0) || 'P'}
           </div>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? 'Paciente Registrado' : 'Registered Patient'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <span>{isEs ? 'Paciente' : 'Patient'}</span>
+              {!isAuthorizedViewer && (
+                <span style={{ fontSize: '0.60rem', background: '#f1f5f9', color: '#475569', padding: '1px 5px', borderRadius: '3px', fontWeight: 700, letterSpacing: '0.02em' }}>
+                  🔒 DHA/HIPAA
+                </span>
+              )}
             </div>
             <div 
               title={patientName || 'Patient'}
@@ -272,6 +279,14 @@ export default function PrescriptionDetailSidebar({
             <div style={{ fontSize: '0.70rem', color: '#0284c7', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
               <span>Ref: {prescriptionCode}</span>
             </div>
+            {!isAuthorizedViewer && (
+              <div style={{ marginTop: '6px', fontSize: '0.66rem', color: '#64748b', lineHeight: 1.3, background: '#f8fafc', padding: '5px 7px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                <span style={{ color: '#003666', fontWeight: 600 }}>Privacy Protected:</span> Nominal record restricted.{' '}
+                <Link href={`/login?redirect=/rx/${prescriptionCode}`} style={{ color: '#003666', fontWeight: 700, textDecoration: 'underline' }}>
+                  Doctor Sign in
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 
@@ -593,8 +608,13 @@ export default function PrescriptionDetailSidebar({
                 {patientName?.charAt(0) || 'P'}
               </div>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
-                  {isEs ? 'PACIENTE REGISTRADO' : 'REGISTERED PATIENT'}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.66rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
+                  <span>{isEs ? 'PACIENTE' : 'PATIENT'}</span>
+                  {!isAuthorizedViewer && (
+                    <span style={{ fontSize: '0.58rem', background: '#f1f5f9', color: '#475569', padding: '1px 4px', borderRadius: '3px', fontWeight: 700 }}>
+                      🔒 DHA/HIPAA
+                    </span>
+                  )}
                 </div>
                 <div 
                   title={patientName || 'Patient'}
@@ -613,6 +633,14 @@ export default function PrescriptionDetailSidebar({
                 <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '1px' }}>
                   Ref: {prescriptionCode}
                 </div>
+                {!isAuthorizedViewer && (
+                  <div style={{ marginTop: '5px', fontSize: '0.66rem', color: '#64748b', lineHeight: 1.3, background: '#f8fafc', padding: '4px 6px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                    <Link href={`/login?redirect=/rx/${prescriptionCode}`} style={{ color: '#003666', fontWeight: 700, textDecoration: 'underline' }}>
+                      Sign in as Doctor
+                    </Link>{' '}
+                    to view nominal details.
+                  </div>
+                )}
               </div>
             </div>
           </div>

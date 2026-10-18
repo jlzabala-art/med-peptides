@@ -6,6 +6,7 @@ import { classifyPrescription } from '@/data/prescriptionTypeClassifier';
 import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
 import { getPharmapolisLabelsForPrescription, getAuthoritativeClinicalData } from '@/data/pharmapolisLabelsMap';
 import { resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
+import { sanitizePrescriptionCode, getCodifiedPatientId } from '@/lib/prescriptionSanitizer';
 
 export function slugify(text) {
   return String(text || '')
@@ -39,12 +40,16 @@ export function getPosologyText(pos) {
  * 4. Labels & APIs extraction
  * 5. Table of contents sections & share message resolution
  */
-export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPatientView = false, atlasRecs = null } = {}) {
-  const rxId = rx.id || rx.prescriptionNumber || 'RX-PRESCRIPTION';
-  const posology = rx.structuredPosology || {};
+export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPatientView = false, atlasRecs = null, isAuthorizedViewer = false } = {}) {
   const patient = rx.patient || {};
-  const patientName = rx.pharmacyLabels?.[0]?.patientName || patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
-  const patientAlias = rx.patientAlias || patient.alias ? ` (${rx.patientAlias || patient.alias})` : '';
+  const isCodified = rx.isCodifiedView || !isAuthorizedViewer;
+  const rawPatientName = rx.pharmacyLabels?.[0]?.patientName || patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
+  const patientName = isCodified
+    ? (rawPatientName.startsWith('Patient PT-') ? rawPatientName : `Patient ${getCodifiedPatientId(rawPatientName, rx.id || rx.code)}`)
+    : rawPatientName;
+  const rawRxId = rx.id || rx.prescriptionNumber || rx.code || 'RX-PRESCRIPTION';
+  const rxId = isCodified ? sanitizePrescriptionCode(rawRxId, rawPatientName) : rawRxId;
+  const patientAlias = (isCodified ? '' : (rx.patientAlias || patient.alias ? ` (${rx.patientAlias || patient.alias})` : ''));
 
   // ── Two-Doctor Clinical Architecture (Strict Segregation) ───────────────────
   const isInternalProdDoc = (name) => {
@@ -126,7 +131,10 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
     return slugify(doctorName || (isSezgin ? 'cagatay-sezgin' : 'haytham-salem'));
   }, [rx.doctorSlug, rx.doctor, treatingDoc, doctorName, isSezgin]);
 
-  const doctorPublicUrl = `/dr/${doctorSlug}`;
+  const doctorPublicUrl = useMemo(() => {
+    const raw = doctorSlug || 'atlas-clinical';
+    return isCodified ? `/dr/${getDoctorOpaqueCode(raw)}` : `/dr/${raw}`;
+  }, [doctorSlug, isCodified]);
 
   // Pharmacogenomics & Prescription Classification
   const genomicsData = useMemo(() => detectFagronGenomicsTest(rx), [rx]);

@@ -23,6 +23,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-ser
 
 import { resolveSocialImage, resolveSocialContent } from '@/utils/socialImageResolver';
 import { KNOWN_DOCTORS_DIRECTORY } from '@/services/doctorDirectoryService';
+import { sanitizePrescriptionCode } from '@/lib/prescriptionSanitizer';
 
 /**
  * Dynamic OpenGraph & Twitter Metadata for WhatsApp / Telegram / Social Previews.
@@ -49,39 +50,15 @@ export async function generateMetadata({ params }) {
 
         if (isDoctorLink) {
           ogType = 'profile';
-          let doctorName = linkData.doctorName || '';
-          let clinic = linkData.clinicName || linkData.clinic || '';
-          let specialty = linkData.specialty || '';
-          const doctorSlugMatch = targetUrl.match(/\/dr\/([^/?#]+)/);
-          const cleanSlug = doctorSlugMatch ? decodeURIComponent(doctorSlugMatch[1]).trim().toLowerCase() : '';
-
-          if ((!doctorName || !clinic) && cleanSlug) {
-            const known = KNOWN_DOCTORS_DIRECTORY.find(d => {
-              const s = cleanSlug.replace(/^dr[-.]?/, '');
-              const idMatch = d.id.toLowerCase() === cleanSlug || d.id.toLowerCase().replace(/^dr[-.]?/, '') === s;
-              const nameSlug = (d.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-              const cleanNoHyphens = cleanSlug.replace(/[^a-z0-9]/g, '');
-              const nameMatch = nameSlug.includes(cleanNoHyphens) || cleanNoHyphens.includes(nameSlug.replace('dr', ''));
-              const aliasMatch = (d.aliases || []).some(a => a.toLowerCase() === cleanSlug || a.toLowerCase().replace(/^dr[-.]?/, '') === s);
-              return idMatch || nameMatch || aliasMatch;
-            });
-            if (known) {
-              doctorName = doctorName || known.name;
-              clinic = clinic || known.clinic || known.clinicName || '';
-              specialty = specialty || known.specialty || '';
-            }
-          }
-
-          title = linkData.title || (doctorName ? `${doctorName} · Clinical Practice Portal` : 'Physician Clinical Practice Portal');
-          description = linkData.description || (doctorName
-            ? `Official digital clinical prescription & medical portal for ${doctorName}${specialty ? ` (${specialty}${clinic ? ` at ${clinic}` : ''})` : clinic ? ` (${clinic})` : ''}. View prescribed therapies, compounding formulations, and patient care dossiers.`
-            : 'Official digital clinical practice portal. View personalized treatments, formulations, and patient care dossiers.');
+          title = 'Physician Clinical Practice Portal · Atlas Health Services';
+          description = 'Official digital clinical practice portal. Authorized medical practitioners can sign in to view dossiers and compounding formulations.';
           previewImage = linkData.clinicLogo || linkData.logoUrl || `${BASE_URL}/og-card.png`;
-          siteName = doctorName ? `${doctorName} · Practice Portal` : 'Atlas Health Platform';
+          siteName = 'Atlas Health Platform';
         } else if (isRxLink) {
-          const rxCode = targetUrl.match(/\/rx\/([^/?#]+)/)?.[1] || code;
-          title = `Medical Prescription #${rxCode} · Clinical Treatment Dossier`;
-          description = `Official patient therapy protocol, dosing schedule, and reconstitution guide. Confidential medical reference.`;
+          const rawRxCode = targetUrl.match(/\/rx\/([^/?#]+)/)?.[1] || code;
+          const cleanRxCode = sanitizePrescriptionCode(rawRxCode);
+          title = `Medical Prescription #${cleanRxCode} · Clinical Treatment Dossier`;
+          description = `Verified clinical formulation monograph and pharmaceutical posology protocol. Authorized medical practice access.`;
           previewImage = `${BASE_URL}/og-card.png`;
           siteName = 'Atlas Health Clinical Prescriptions';
         } else {
@@ -336,9 +313,17 @@ export default async function ShortDatasheetPage({ params }) {
   }
 
   let effectiveRedirectUrl = targetUrl;
-  if (code && targetUrl) {
-    const sep = targetUrl.includes('?') ? '&' : '?';
-    effectiveRedirectUrl = `${targetUrl}${sep}tc=${encodeURIComponent(code)}`;
+  if (targetUrl.includes('/rx/')) {
+    const rxMatch = targetUrl.match(/\/rx\/([^/?#]+)/);
+    if (rxMatch && rxMatch[1]) {
+      const clean = sanitizePrescriptionCode(rxMatch[1]);
+      effectiveRedirectUrl = targetUrl.replace(`/rx/${rxMatch[1]}`, `/rx/${clean}`);
+    }
+  }
+
+  if (code && effectiveRedirectUrl) {
+    const sep = effectiveRedirectUrl.includes('?') ? '&' : '?';
+    effectiveRedirectUrl = `${effectiveRedirectUrl}${sep}tc=${encodeURIComponent(code)}`;
   }
 
   // Redirect instantly to the complete target URL for regular browser visitors

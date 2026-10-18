@@ -1,6 +1,9 @@
-import React from 'react';
-import { notFound } from 'next/navigation';
-import { getPrescriptionData } from '@/lib/prescriptionFetcher';
+import { notFound, redirect } from 'next/navigation';
+import { 
+  getPrescriptionData, 
+  sanitizePrescriptionCode, 
+  sanitizePrescriptionPayload 
+} from '@/lib/prescriptionFetcher';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
 import RxLabelsStandaloneClient from './RxLabelsStandaloneClient';
 
@@ -12,18 +15,18 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-ser
 export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const code = resolvedParams?.code || '';
-  const rx = await getPrescriptionData(code);
+  const rawCode = resolvedParams?.code || '';
+  const cleanCode = sanitizePrescriptionCode(rawCode);
+  const rx = await getPrescriptionData(cleanCode || rawCode);
 
-  const patientName = rx?.patient?.name || rx?.patientName || 'Patient';
-  const rxCode = rx?.fileNumber || rx?.code || code;
+  const rxCode = cleanCode || rawCode;
   const isEditing = resolvedSearchParams?.edit === 'true' || resolvedSearchParams?.edit === '1';
   const lang = resolvedSearchParams?.lang || 'en';
   const isEs = lang === 'es';
 
   const title = isEs 
-    ? `${isEditing ? 'Editor de Etiquetas' : 'Etiquetas Oficiales'} • #${rxCode} (${patientName}) • Pharmapolis Compounding`
-    : `${isEditing ? 'Label Editor' : 'Official Labels'} • #${rxCode} (${patientName}) • Pharmapolis Compounding`;
+    ? `${isEditing ? 'Editor de Etiquetas' : 'Etiquetas Oficiales'} • #${rxCode} • Pharmapolis Compounding`
+    : `${isEditing ? 'Label Editor' : 'Official Labels'} • #${rxCode} • Pharmapolis Compounding`;
   const description = isEs
     ? `Editor interactivo y generador de etiquetas de formulación magistral EU GMP para la prescripción #${rxCode}.`
     : `Interactive vector editor and EU GMP compounding label generator for prescription #${rxCode}.`;
@@ -34,30 +37,39 @@ export async function generateMetadata({ params, searchParams }) {
     openGraph: {
       title,
       description,
-      url: `${BASE_URL}/rx/${code}/labels`,
+      url: `${BASE_URL}/rx/${encodeURIComponent(rxCode)}/labels`,
       siteName: 'Pharmapolis Compounding Pharmacy',
       type: 'website'
     },
-    robots: { index: false, follow: false }
+    robots: { index: false, follow: false, noarchive: true, nocache: true }
   };
 }
 
 export default async function RxLabelsStandalonePage({ params, searchParams }) {
   const resolvedParams = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const code = resolvedParams?.code;
+  const rawCode = resolvedParams?.code;
+  const cleanCode = sanitizePrescriptionCode(rawCode);
+
+  if (rawCode && cleanCode && rawCode.toLowerCase() !== cleanCode.toLowerCase()) {
+    const editQ = resolvedSearchParams?.edit ? `?edit=${encodeURIComponent(resolvedSearchParams.edit)}` : '';
+    redirect(`/rx/${encodeURIComponent(cleanCode)}/labels${editQ}`);
+  }
+
   const initialEditMode = resolvedSearchParams?.edit === 'true' || resolvedSearchParams?.edit === '1';
   const initialPhaseIdx = Number(resolvedSearchParams?.phase) ? Math.max(0, Number(resolvedSearchParams.phase) - 1) : 0;
   const initialLang = resolvedSearchParams?.lang || 'en';
 
-  const rx = await getPrescriptionData(code);
+  const rx = await getPrescriptionData(cleanCode || rawCode);
 
   if (!rx) {
     notFound();
   }
 
+  const sanitizedRx = sanitizePrescriptionPayload(rx, { isAuthorized: false });
+
   // Derive compounding labels for this prescription
-  const labels = getPharmapolisLabelsForPrescription(rx);
+  const labels = getPharmapolisLabelsForPrescription(sanitizedRx);
 
   return (
     <RxLabelsStandaloneClient
