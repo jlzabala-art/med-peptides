@@ -9849,7 +9849,7 @@ export default function DoctorPublicPortalClient({
                           lineHeight: 1.45,
                           marginBottom: '12px'
                         }}>
-                          This personalized formulation was recommended by Dr. {doctor?.name || 'treating physician'}, but the patient has not yet confirmed or purchased the treatment order.
+                          This personalized formulation was recommended by {isAuthorizedViewer ? `Dr. ${doctor?.name || 'treating physician'}` : `an Accredited Physician (${opaqueCode})`}, but the patient has not yet confirmed or purchased the treatment order.
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           <button
@@ -10181,7 +10181,7 @@ export default function DoctorPublicPortalClient({
                         </span>
                       </div>
                       <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: '#64748b', wordBreak: 'break-all' }}>
-                        HASH: SHA256:{Math.abs(String(rxCode).split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 12345678)).toString(16).padStart(16, '0')}f8a9e01c
+                        HASH: SHA256:{Math.abs(String(safeRxCode).split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 12345678)).toString(16).padStart(16, '0')}f8a9e01c
                       </div>
                     </div>
 
@@ -10191,7 +10191,7 @@ export default function DoctorPublicPortalClient({
                         {
                           step: 1,
                           title: 'Physician Electronic Authorization',
-                          actor: doctor?.name || 'Treating Physician',
+                          actor: isAuthorizedViewer ? (doctor?.name || 'Treating Physician') : `Accredited Physician (${opaqueCode})`,
                           time: createdDate,
                           status: 'COMPLETED',
                           color: '#16a34a',
@@ -10219,7 +10219,7 @@ export default function DoctorPublicPortalClient({
                           step: 4,
                           title: 'Cleanroom Sterile Compounding Batching',
                           actor: 'Pharmapolis / Fagron Compounding Lab',
-                          time: `LOT-${String(rxCode).replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase()}-2026`,
+                          time: `LOT-${String(safeRxCode).replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase()}-2026`,
                           status: isProposal ? 'QUEUED' : 'ACTIVE',
                           color: isProposal ? '#94a3b8' : '#0284c7',
                           desc: 'Formulation prepared in Class A/ISO 5 laminar airflow workstation with HPLC purity verification (>99.0%).'
@@ -10335,11 +10335,11 @@ export default function DoctorPublicPortalClient({
                         type="button"
                         onClick={() => {
                           const auditLog = {
-                            prescriptionCode: rxCode,
+                            prescriptionCode: safeRxCode,
                             patient: patientName,
-                            doctor: doctor?.name,
+                            doctor: isAuthorizedViewer ? (doctor?.name || 'Treating Physician') : `Accredited Physician (${opaqueCode})`,
                             timestamp: new Date().toISOString(),
-                            integrityHash: `SHA256:${Math.abs(String(rxCode).split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 12345678)).toString(16)}`,
+                            integrityHash: `SHA256:${Math.abs(String(safeRxCode).split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 12345678)).toString(16)}`,
                             standard: 'EU GMP Annex 11 / FDA 21 CFR Part 11',
                             stages: ['AUTH_COMPLETED', 'QP_VALIDATED', 'FIN_SETTLED', 'BATCH_DISPENSED', 'COLD_CHAIN_LOGGED']
                           };

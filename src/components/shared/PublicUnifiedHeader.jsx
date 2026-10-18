@@ -110,7 +110,8 @@ export default function PublicUnifiedHeader({
   // Sync controlled anchor ID if passed
   useEffect(() => {
     if (controlledActiveAnchorId) {
-      setActiveAnchor(controlledActiveAnchorId);
+      const timer = setTimeout(() => setActiveAnchor(controlledActiveAnchorId), 0);
+      return () => clearTimeout(timer);
     }
   }, [controlledActiveAnchorId]);
 

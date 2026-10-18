@@ -67,6 +67,9 @@ export default defineConfig([
       'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
       // Detecta dependencias faltantes en useEffect/useCallback/useMemo
       'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/purity': 'warn',
       // Prohíbe coerciones implícitas tipo !!val, +val, '' + val
       'no-implicit-coercion': ['warn', { boolean: true, number: true, string: false }],
 

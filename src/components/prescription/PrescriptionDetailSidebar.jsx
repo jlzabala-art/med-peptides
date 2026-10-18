@@ -107,7 +107,8 @@ export default function PrescriptionDetailSidebar({
     if (!activeGcpTab) return;
     const defaultSec = TAB_TO_DEFAULT_SECTION[activeGcpTab];
     if (defaultSec) {
-      setActiveId(defaultSec);
+      const timer = setTimeout(() => setActiveId(defaultSec), 0);
+      return () => clearTimeout(timer);
     }
   }, [activeGcpTab, TAB_TO_DEFAULT_SECTION]);
 

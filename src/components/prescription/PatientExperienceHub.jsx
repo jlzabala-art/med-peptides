@@ -52,22 +52,29 @@ export default function PatientExperienceHub({
   const rxCode = rx?.prescriptionNumber || rx?.code || rx?.id?.slice(0, 8) || 'RX';
   const storageKey = `atlas_rx_adherence_${rxCode}_${todayKey}`;
 
-  const [hasTakenDoseToday, setHasTakenDoseToday] = useState(false);
-  const [doseTimestamp, setDoseTimestamp] = useState(null);
-  const [streakDays, setStreakDays] = useState(4); // Default positive encouragement streak
-
-  useEffect(() => {
+  const [hasTakenDoseToday, setHasTakenDoseToday] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const saved = localStorage.getItem(storageKey);
+      return Boolean(saved);
+    } catch (_e) {
+      return false;
+    }
+  });
+  const [doseTimestamp, setDoseTimestamp] = useState(() => {
+    if (typeof window === 'undefined') return null;
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
-        setHasTakenDoseToday(true);
-        setDoseTimestamp(parsed.time || null);
+        return parsed.time || null;
       }
-    } catch {
-      // safe fallback
+    } catch (_e) {
+      return null;
     }
-  }, [storageKey]);
+    return null;
+  });
+  const [streakDays, setStreakDays] = useState(4); // Default positive encouragement streak
 
   const handleToggleDose = () => {
     triggerHaptic('selection');
@@ -78,7 +85,9 @@ export default function PatientExperienceHub({
       setDoseTimestamp(nowStr);
       try {
         localStorage.setItem(storageKey, JSON.stringify({ taken: true, time: nowStr }));
-      } catch {}
+      } catch (_e) {
+        /* storage disabled */
+      }
       setStreakDays(prev => prev + 1);
       toast.success(
         isEs ? `¡Dosis de hoy registrada a las ${nowStr}! Cumplimiento al día ✓` : `Today's dose logged at ${nowStr}! Adherence on track ✓`,
@@ -88,7 +97,9 @@ export default function PatientExperienceHub({
       setDoseTimestamp(null);
       try {
         localStorage.removeItem(storageKey);
-      } catch {}
+      } catch (_e) {
+        /* storage disabled */
+      }
       setStreakDays(prev => Math.max(1, prev - 1));
       toast(isEs ? 'Registro de dosis desmarcado' : 'Dose log removed');
     }

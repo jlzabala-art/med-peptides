@@ -2224,7 +2224,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           rxId,
           code: rxId,
           patientName,
-          doctorName: doctorName || rx.treatingDoctor?.name || 'Treating Physician',
+          doctorName: isAuthorizedViewer ? (nominalDoctorName || rx.treatingDoctor?.name || 'Treating Physician') : displayDoctorNameShort,
           clinic: clinic || rx.treatingDoctor?.clinic || rx.clinicName || 'Compounding Medical Center',
           formula: resolvedFormulaSummary,
           dosage: resolvedDosageSummary,
@@ -2248,7 +2248,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           name: `Prescription ${rxId}`,
           rxId,
           code: rxId,
-          doctorName,
+          doctorName: isAuthorizedViewer ? nominalDoctorName : displayDoctorNameShort,
           clinic,
           patientName,
           formula: rx.formula || compoundedFormulations.map(f => f.formula || f.apis.map(a => `${a.name} ${a.dosage || ''}`.trim()).join(' + ')).filter(Boolean).join(' // ') || rx.treatmentType || 'Custom Compounded Formulation',
@@ -2271,7 +2271,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         isPatientView={isPatientView}
         patient={patient}
         patientName={patientName}
-        doctorName={doctorName}
+        doctorName={displayDoctorNameShort}
         compoundedFormulations={compoundedFormulations}
         genomicsData={genomicsData}
         currentStatus={currentStatus}
