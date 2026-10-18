@@ -2087,3 +2087,108 @@
   border-color: var(--gcp-blue-primary);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
+
+/* ==========================================================================
+   VIDEO MONOGRAPH SHOWCASE (GCP LIGHT CONSOLE)
+   ========================================================================== */
+.eterna-video-showcase-section {
+  margin: 2rem 0;
+}
+
+.eterna-video-card {
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  border-radius: var(--gcp-radius-card);
+  overflow: hidden;
+  box-shadow: var(--gcp-shadow-card);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.eterna-video-card:hover {
+  border-color: rgba(26, 115, 232, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.eterna-video-card-header {
+  padding: 1.15rem 1.35rem;
+  background: var(--gcp-surface-card);
+  border-bottom: 1px solid var(--gcp-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.eterna-video-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  background: var(--gcp-blue-surface);
+  border: 1px solid rgba(26, 115, 232, 0.25);
+  color: var(--gcp-blue-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.eterna-video-card-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--gcp-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.eterna-video-card-subtitle {
+  margin: 3px 0 0;
+  font-size: 0.78rem;
+  color: var(--gcp-text-secondary);
+}
+
+.eterna-video-player-wrapper {
+  position: relative;
+  width: 100%;
+  background: #000000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.eterna-video-element {
+  width: 100%;
+  max-height: 540px;
+  background: #000000;
+  display: block;
+  outline: none;
+}
+
+.eterna-video-card-footer {
+  padding: 0.85rem 1.35rem;
+  background: var(--gcp-surface);
+  border-top: 1px solid var(--gcp-border);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.eterna-video-feature-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--gcp-surface-card);
+  border: 1px solid var(--gcp-border);
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--gcp-text-secondary);
+}
+
+.eterna-video-feature-pill svg {
+  color: var(--gcp-blue-primary);
+}
+

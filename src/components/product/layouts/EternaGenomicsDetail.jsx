@@ -40,7 +40,9 @@ import {
   Minimize2,
   RotateCcw,
   Sun,
-  Moon
+  Moon,
+  Video,
+  Play
 } from '@/lib/icons';
 import ImageModal from '@/snippets/ImageModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
@@ -53,6 +55,10 @@ import CopyableId from '@/components/ui/CopyableId';
 import DataTable from '@/components/ui/DataTable';
 import EternaRiskScoreBar from '@/components/diagnostic/eterna/EternaRiskScoreBar';
 import './EternaGenomicsDetail.css';
+
+// Master ETERNA Video Assets (Cloud Hosted via Firebase / Google Cloud Storage + Local Fallback)
+const ETERNA_VIDEO_CLOUD_URL = "https://firebasestorage.googleapis.com/v0/b/med-peptides-app.firebasestorage.app/o/videos%2Feterna%2FETERNA_Precision_Health.mp4?alt=media&token=13a95c19-4d8b-4890-a692-93faf49e6ea2";
+const ETERNA_VIDEO_LOCAL_FALLBACK = "/videos/eterna/ETERNA_Precision_Health.mp4";
 
 export default function EternaGenomicsDetail({
   product = {},
@@ -84,6 +90,7 @@ export default function EternaGenomicsDetail({
   // Reorganized Physician-Directed Sections
   const eternaSections = useMemo(() => [
     { id: 'overview', label: isEs ? 'Visión General' : 'Overview & Diagnostic Stage', icon: Sparkles },
+    { id: 'video', label: isEs ? 'Video del Ecosistema' : 'Ecosystem Video Walkthrough', icon: Video, badge: 'HD' },
     { id: 'flujo-clinico', label: isEs ? 'Flujo de Prescripción (5 Pasos)' : 'Clinical Prescribing Flow', icon: Clock },
     { id: 'pilares', label: isEs ? '5 Pilares Genómicos' : '5 Clinical Pillars', icon: Layers },
     { id: 'snp-table', label: isEs ? 'Directorio SNPs & dbSNP' : 'Actionable SNPs Directory', icon: BarChart3 },
@@ -98,6 +105,7 @@ export default function EternaGenomicsDetail({
     if (typeof window !== 'undefined' && window.location.hash) {
       const hash = window.location.hash.replace('#', '').trim();
       if (hash === 'inicio' || hash === 'overview') return 'overview';
+      if (hash === 'video' || hash === 'ecosystem-video') return 'video';
       if (hash === 'como-funciona') return 'flujo-clinico';
       if (hash === 'demo' || hash === 'b2b-portal' || hash === 'portal-demo') return 'portal-demo';
       if (hash) return hash;
@@ -146,7 +154,7 @@ export default function EternaGenomicsDetail({
 
   const scrollToSection = useCallback((id) => {
     if (!id) return;
-    const targetId = id === 'inicio' ? 'overview' : (id === 'como-funciona' ? 'flujo-clinico' : (id === 'demo' || id === 'b2b-portal' ? 'portal-demo' : id));
+    const targetId = id === 'inicio' ? 'overview' : (id === 'video' || id === 'ecosystem-video' ? 'video' : (id === 'como-funciona' ? 'flujo-clinico' : (id === 'demo' || id === 'b2b-portal' ? 'portal-demo' : id)));
     setActiveTab(targetId);
     if (typeof window !== 'undefined') {
       if (window.history?.replaceState) {
@@ -162,6 +170,8 @@ export default function EternaGenomicsDetail({
       const hash = window.location.hash.replace('#', '').trim();
       if (hash === 'inicio' || hash === 'overview') {
         setActiveTab('overview');
+      } else if (hash === 'video' || hash === 'ecosystem-video') {
+        setActiveTab('video');
       } else if (hash === 'como-funciona') {
         setActiveTab('flujo-clinico');
       } else if (hash === 'demo' || hash === 'b2b-portal' || hash === 'portal-demo') {
@@ -178,6 +188,7 @@ export default function EternaGenomicsDetail({
 
   const effectiveActiveTab = useMemo(() => {
     if (!activeTab || activeTab === 'overview' || activeTab === 'inicio') return 'overview';
+    if (activeTab === 'video' || activeTab === 'ecosystem-video') return 'video';
     if (activeTab === 'como-funciona') return 'flujo-clinico';
     if (activeTab === 'demo' || activeTab === 'b2b-portal') return 'portal-demo';
     const exists = eternaSections.some(s => s.id === activeTab);
@@ -597,6 +608,16 @@ export default function EternaGenomicsDetail({
               <button
                 type="button"
                 className="gcp-btn-secondary"
+                onClick={() => scrollToSection('video')}
+                title={isEs ? 'Ver video del ecosistema' : 'Watch ecosystem walkthrough video'}
+              >
+                <Video size={14} />
+                <span>{isEs ? 'Video Ecosistema' : 'Ecosystem Video'}</span>
+              </button>
+
+              <button
+                type="button"
+                className="gcp-btn-secondary"
                 onClick={() => scrollToSection('portal-demo')}
               >
                 <Monitor size={14} />
@@ -950,6 +971,65 @@ export default function EternaGenomicsDetail({
                   </div>
                   <div className="eterna-stat-sub">
                     {isEs ? 'deporte, nutrición, cardiovascular, longevidad y cronobiología' : 'sport, nutrition, cardiovascular, longevity, and chronobiology'}
+                  </div>
+                </div>
+              </section>
+
+              {/* ── Video Monograph Showcase ── */}
+              <section className="eterna-video-showcase-section">
+                <div className="eterna-video-card">
+                  <div className="eterna-video-card-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div className="eterna-video-icon-wrap">
+                        <Video size={18} />
+                      </div>
+                      <div>
+                        <h3 className="eterna-video-card-title">
+                          {isEs ? 'Video Monográfico: Ecosistema ETERNA Precision Health' : 'Video Monograph: ETERNA Precision Health Ecosystem'}
+                        </h3>
+                        <p className="eterna-video-card-subtitle">
+                          {isEs 
+                            ? 'Presentación audiovisual de la plataforma: flujo clínico, microarray Illumina GSA y prescripción traslacional' 
+                            : 'Audiovisual walkthrough of the platform: clinical loop, Illumina GSA microarray, and translational prescribing'}
+                        </p>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className="gcp-badge blue">
+                        <span className="gcp-badge-dot" /> Cloud Hosted (GCS)
+                      </span>
+                      <span className="gcp-badge green">1080p HD</span>
+                    </div>
+                  </div>
+                  <div className="eterna-video-player-wrapper">
+                    <video
+                      controls
+                      preload="metadata"
+                      className="eterna-video-element"
+                      poster="/images/products/eterna/img_hero_eterna2_en.png"
+                    >
+                      <source src={ETERNA_VIDEO_CLOUD_URL} type="video/mp4" />
+                      <source src={ETERNA_VIDEO_LOCAL_FALLBACK} type="video/mp4" />
+                      {isEs ? 'Su navegador no soporta reproducción de vídeo HTML5.' : 'Your browser does not support HTML5 video playback.'}
+                    </video>
+                  </div>
+                  <div className="eterna-video-card-footer">
+                    <div className="eterna-video-feature-pill">
+                      <Dna size={13} />
+                      <span>{isEs ? 'Microarray Illumina GSA (>692k SNPs)' : 'Illumina GSA (>692k SNPs)'}</span>
+                    </div>
+                    <div className="eterna-video-feature-pill">
+                      <ShieldCheck size={13} />
+                      <span>{isEs ? 'Tubo saliva CE-IVDR (Buffer 24m)' : 'CE-IVDR Saliva Tube (24m buffer)'}</span>
+                    </div>
+                    <div className="eterna-video-feature-pill">
+                      <Activity size={13} />
+                      <span>{isEs ? 'Prescripción de Péptidos Atlas' : 'Atlas Peptide Prescriptions'}</span>
+                    </div>
+                    <div className="eterna-video-feature-pill">
+                      <Smartphone size={13} />
+                      <span>{isEs ? 'Reloj Biológico ActivAge' : 'ActivAge Biological Clock'}</span>
+                    </div>
                   </div>
                 </div>
               </section>

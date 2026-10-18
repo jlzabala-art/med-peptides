@@ -31,6 +31,8 @@ serviceAccount*.json
 firebase-export/
 cypress/videos/
 cypress/screenshots/
+public/videos/
+*.mp4
 node_modules_bad/
 
 # Ignore bad node_modules backup
