@@ -1,0 +1,1320 @@
+{
+  "supplierId": "supplier-inverion",
+  "supplierName": "Inverion Healthcare",
+  "catalogTitle": "2026 API STANDARD CATALOG",
+  "sourceUrl": "https://www.inverion.net",
+  "contactEmail": "engage@inverion.net",
+  "totalItems": 123,
+  "items": [
+    {
+      "srNo": 1,
+      "category": "Alpha blockers",
+      "name": "Tamsulosin HCl",
+      "grades": [
+        "IH",
+        "IP",
+        "USP",
+        "BP",
+        "EP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 2,
+      "category": "Anaesthetic",
+      "name": "Benzocaine",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 3,
+      "category": "Analgesics",
+      "name": "Paracetamol",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 4,
+      "category": "Antacid",
+      "name": "Dried Aluminium Hydroxide Gel",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 4,
+      "category": "Antacid",
+      "name": "Magnesium Hydroxide",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 4,
+      "category": "Antacid",
+      "name": "Magnesium Oxide (Light/Heavy/DC)",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material",
+      "physicalForms": [
+        "Light",
+        "Heavy",
+        "DC"
+      ]
+    },
+    {
+      "srNo": 4,
+      "category": "Antacid",
+      "name": "Magnesium Trisilicate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 5,
+      "category": "Anthelmintic",
+      "name": "Albendazole",
+      "grades": [
+        "IP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material",
+      "physicalForms": [
+        "Plain",
+        "Micronized"
+      ]
+    },
+    {
+      "srNo": 5,
+      "category": "Anthelmintic",
+      "name": "Mebendazole",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material",
+      "physicalForms": [
+        "Polymorphs",
+        "Micronized"
+      ]
+    },
+    {
+      "srNo": 6,
+      "category": "Anti diarrhoea",
+      "name": "Kaolin",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "raw_material",
+      "physicalForms": [
+        "Light",
+        "Heavy"
+      ]
+    },
+    {
+      "srNo": 7,
+      "category": "Anti inflammatory",
+      "name": "Oxaceprol",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 8,
+      "category": "Anti-acne",
+      "name": "Adapalene",
+      "grades": [
+        "IH",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 9,
+      "category": "Antiameobics",
+      "name": "Ornidazole",
+      "grades": [
+        "IP",
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 10,
+      "category": "Antiarrhythmic / Anaesthetic",
+      "name": "Lidocaine Base/HCl",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 10,
+      "category": "Respiratory",
+      "name": "Levosalbutamol Sulphate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 10,
+      "category": "Respiratory",
+      "name": "Montelukast Sodium",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 10,
+      "category": "Respiratory",
+      "name": "Salbutamol Sulphate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 11,
+      "category": "Antibiotic",
+      "name": "Azithromycin Dihydrate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 11,
+      "category": "Antibiotic",
+      "name": "Cefixime Trihydrate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 11,
+      "category": "Antibiotic",
+      "name": "Chloramphenicol",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 11,
+      "category": "Antibiotic",
+      "name": "Chloramphenicol Palmitate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 11,
+      "category": "Antibiotic",
+      "name": "Clarithromycin",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 11,
+      "category": "Antibiotic",
+      "name": "Erythromycin",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 11,
+      "category": "Antibiotic",
+      "name": "Levofloxacin Hemihydrate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 11,
+      "category": "Antibiotic",
+      "name": "Ofloxacin",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 11,
+      "category": "Antibiotic",
+      "name": "Tigecycline",
+      "grades": [
+        "I.H.S"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 12,
+      "category": "Penicillin Antibiotic",
+      "name": "Amoxicillin Trihydrate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 12,
+      "category": "Penicillin Antibiotic",
+      "name": "Ampicillin Trihydrate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 12,
+      "category": "Penicillin Antibiotic",
+      "name": "Cloxacillin Sodium",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 12,
+      "category": "Penicillin Antibiotic",
+      "name": "Dicloxacillin Sodium",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 12,
+      "category": "Penicillin Antibiotic",
+      "name": "Flucloxacillin Sodium",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 12,
+      "category": "Penicillin Antibiotic",
+      "name": "Oxacillin Sodium",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 13,
+      "category": "Anticonvulsant",
+      "name": "Pregabalin",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 14,
+      "category": "Antidiabetic",
+      "name": "Metformin HCl",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 14,
+      "category": "Antidiabetic",
+      "name": "Dapagliflozin Propanediol Monohydrate",
+      "grades": [
+        "IH",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 14,
+      "category": "Antidiabetic",
+      "name": "Empagliflozin",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 15,
+      "category": "Antiemetic",
+      "name": "Ondansetron HCl",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 16,
+      "category": "Anti-epileptic/Anticonvulsant",
+      "name": "Carbamazepine",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material",
+      "physicalForms": [
+        "Plain",
+        "Micronized"
+      ]
+    },
+    {
+      "srNo": 16,
+      "category": "Anti-epileptic/Anticonvulsant",
+      "name": "Oxcarbazepine",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 16,
+      "category": "Anti-epileptic/Anticonvulsant",
+      "name": "Brivaracetam",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 16,
+      "category": "Anti-epileptic/Anticonvulsant",
+      "name": "Lacosamide",
+      "grades": [
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 17,
+      "category": "Antifungal",
+      "name": "Fluconazole",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 17,
+      "category": "Antifungal",
+      "name": "Luliconazole",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 17,
+      "category": "Antifungal",
+      "name": "Itraconazole",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 17,
+      "category": "Antifungal",
+      "name": "Clotrimazole",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 17,
+      "category": "Antifungal",
+      "name": "Voriconazole",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 17,
+      "category": "Antifungal",
+      "name": "Terbinafine HCl",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 18,
+      "category": "Antigout",
+      "name": "Febuxostat",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 19,
+      "category": "Antihistamine",
+      "name": "Cetirizine HCl",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 19,
+      "category": "Antihistamine",
+      "name": "Levocetirizine Dihydrochloride",
+      "grades": [
+        "IP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 19,
+      "category": "Antihistamine",
+      "name": "Hydroxyzine Hydrochloride",
+      "grades": [
+        "IP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 20,
+      "category": "Antimalarial",
+      "name": "Arteether",
+      "grades": [
+        "Int Ph"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 20,
+      "category": "Antimalarial",
+      "name": "Artemether",
+      "grades": [
+        "Int Ph"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 20,
+      "category": "Antimalarial",
+      "name": "Lumefantrine",
+      "grades": [
+        "Int Ph"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 21,
+      "category": "Antioxidants/Excipient",
+      "name": "Citric Acid Monohydrate/Anhydrous",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle",
+      "physicalForms": [
+        "Monohydrate",
+        "Anhydrous"
+      ]
+    },
+    {
+      "srNo": 22,
+      "category": "Antipsychotic / Nootropic",
+      "name": "Amisulpride",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 22,
+      "category": "Antipsychotic / Nootropic",
+      "name": "Levosulpiride",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 22,
+      "category": "Antipsychotic / Nootropic",
+      "name": "Phosphatidyl Choline",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 22,
+      "category": "Antipsychotic / Nootropic",
+      "name": "Quetiapine Fumarate",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 23,
+      "category": "Antiulcerative",
+      "name": "Esomeprazole",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 23,
+      "category": "Antiulcerative",
+      "name": "Lansoprazole",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 23,
+      "category": "Antiulcerative",
+      "name": "Rabeprazole Sodium",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 24,
+      "category": "Cardiovascular",
+      "name": "Bisoprolol Fumarate",
+      "grades": [
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 24,
+      "category": "Cardiovascular",
+      "name": "Metoprolol Tartrate/Succinate",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 24,
+      "category": "Cardiovascular",
+      "name": "Nebivolol HCl",
+      "grades": [
+        "I.H.S"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 24,
+      "category": "Cardiovascular",
+      "name": "Benidipine HCl",
+      "grades": [
+        "I.H.S"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 24,
+      "category": "Cardiovascular",
+      "name": "Cilnidipine",
+      "grades": [
+        "I.H.S"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 24,
+      "category": "Cardiovascular",
+      "name": "Atorvastatin Calcium",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 24,
+      "category": "Cardiovascular",
+      "name": "Rosuvastatin Calcium",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 25,
+      "category": "Corticosteroid",
+      "name": "Betamethasone",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 25,
+      "category": "Corticosteroid",
+      "name": "Dexamethasone",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 26,
+      "category": "Gastrointestinal",
+      "name": "Itopride",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 27,
+      "category": "Erectile Dysfunction",
+      "name": "Sildenafil Citrate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 27,
+      "category": "Erectile Dysfunction",
+      "name": "Tadalafil",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Bentonite",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Calcium Carbonate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Dextrose Anhydrous",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Dextrose Monohydrate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Di Calcium Phosphate Anhydrous",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Di Calcium Phosphate Dihydrate",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Lactose",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Liquid Glucose",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Magnesium Stearate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Maize Starch",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Micro Crystalline Cellulose",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Purified Talc",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Simethicone 30%/100% USP",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Sorbitol 70% Liquid",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Tri Calcium Phosphate",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 28,
+      "category": "Excipients",
+      "name": "Zinc Oxide",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 29,
+      "category": "Expectorants",
+      "name": "Guaifenesin",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 30,
+      "category": "Flavour",
+      "name": "Caramel Liquid/Powder",
+      "grades": [
+        "Food"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 31,
+      "category": "Iron deficiency",
+      "name": "Iron (III) Hydroxide Polymaltose Complex (Min 30%)",
+      "grades": [
+        "IH"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 32,
+      "category": "Laxative",
+      "name": "Bisacodyl",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 33,
+      "category": "Mucolytic agent",
+      "name": "Bromhexine HCl",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 34,
+      "category": "Muscle Relaxant",
+      "name": "Tizanidine HCl",
+      "grades": [
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 35,
+      "category": "NSAID",
+      "name": "Aspirin",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 35,
+      "category": "NSAID",
+      "name": "Aceclofenac",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 35,
+      "category": "NSAID",
+      "name": "Diclofenac Sodium",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 35,
+      "category": "NSAID",
+      "name": "Lornoxicam",
+      "grades": [
+        "I.H.S"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 35,
+      "category": "NSAID",
+      "name": "Mefenamic Acid",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 35,
+      "category": "NSAID",
+      "name": "Meloxicam",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 35,
+      "category": "NSAID",
+      "name": "Phenylbutazone Calcium",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 35,
+      "category": "NSAID",
+      "name": "Piroxicam",
+      "grades": [
+        "IP",
+        "BP",
+        "EP",
+        "USP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 35,
+      "category": "NSAID",
+      "name": "Piroxicam Betacyclodextrin",
+      "grades": [
+        "I.H.S"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 35,
+      "category": "NSAID",
+      "name": "Bumadizone Calcium",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 36,
+      "category": "Nutritional Supplement",
+      "name": "Benfotiamine",
+      "grades": [
+        "I.H.S"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 36,
+      "category": "Nutritional Supplement",
+      "name": "Evening Primrose Oil",
+      "grades": [
+        "I.H.S"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 36,
+      "category": "Nutritional Supplement",
+      "name": "Ferrous Ascorbate Granules",
+      "grades": [
+        "DC"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 36,
+      "category": "Nutritional Supplement",
+      "name": "Ferrous Ascorbate Powder",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 36,
+      "category": "Nutritional Supplement",
+      "name": "Sodium Ascorbate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 36,
+      "category": "Nutritional Supplement",
+      "name": "L Methyl Folate (Calcium L-5 Methyltetrahydro Folate)",
+      "grades": [
+        "I.H.S"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 37,
+      "category": "Other",
+      "name": "Dutasteride",
+      "grades": [
+        "IP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 38,
+      "category": "Quaternary ammonium compound",
+      "name": "Benzalkonium Chloride 50% / 80%",
+      "grades": [
+        "IP",
+        "Technical"
+      ],
+      "canonicalCategory": "excipient_vehicle"
+    },
+    {
+      "srNo": 39,
+      "category": "Respiratory",
+      "name": "Ambroxol HCl",
+      "grades": [
+        "IP",
+        "BP"
+      ],
+      "canonicalCategory": "raw_material"
+    },
+    {
+      "srNo": 40,
+      "category": "Vitamins",
+      "name": "Ascorbic Acid Coated",
+      "grades": [
+        "NA"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 40,
+      "category": "Vitamins",
+      "name": "Ascorbic Acid Plain",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 40,
+      "category": "Vitamins",
+      "name": "Folic Acid",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 40,
+      "category": "Vitamins",
+      "name": "Methylcobalamin (Vitamin B12)",
+      "grades": [
+        "IP",
+        "JP"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 40,
+      "category": "Vitamins",
+      "name": "Niacin / Nicotinic Acid",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 40,
+      "category": "Vitamins",
+      "name": "Niacinamide / Nicotinamide (Vitamin B3)",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 40,
+      "category": "Vitamins",
+      "name": "Thiamin (Vitamin B1) HCl / Mono Nitrate",
+      "grades": [
+        "IP",
+        "BP",
+        "USP"
+      ],
+      "canonicalCategory": "supplement"
+    },
+    {
+      "srNo": 40,
+      "category": "Vitamins",
+      "name": "Vitamin E 50% Dry Powder",
+      "grades": [
+        "IP"
+      ],
+      "canonicalCategory": "supplement"
+    }
+  ]
+}

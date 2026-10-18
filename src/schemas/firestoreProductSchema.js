@@ -85,6 +85,46 @@ export const PEN_TYPES = Object.freeze([
 ]);
 
 /**
+ * Canonical pharmaceutical and regulatory grades for APIs and Raw Materials:
+ * @readonly
+ */
+export const VALID_GRADES = Object.freeze([
+  'USP',       // United States Pharmacopeia
+  'BP',        // British Pharmacopoeia
+  'EP',        // European Pharmacopoeia (Ph. Eur.)
+  'IP',        // Indian Pharmacopoeia
+  'IH',        // In-House specification
+  'I.H.S',     // In-House Standard alias
+  'Int Ph',    // International Pharmacopoeia (WHO)
+  'JP',        // Japanese Pharmacopoeia
+  'Food',      // Food Grade / FCC
+  'Technical', // Technical / Industrial Grade
+  'DC',        // Directly Compressible
+  'NA',        // Not Applicable
+]);
+
+/**
+ * Canonical physical forms / particle processing for APIs & raw materials:
+ * @readonly
+ */
+export const VALID_PHYSICAL_FORMS = Object.freeze([
+  'plain',
+  'micronized',
+  'powder',
+  'liquid',
+  'dc_granules',
+  'light',
+  'heavy',
+  'anhydrous',
+  'monohydrate',
+  'dihydrate',
+  'trihydrate',
+  'coated',
+  'crystals',
+  'polymorphs',
+]);
+
+/**
  * Canonical product types (Phase 2 & Phase 3 dynamic normalization)
  * - finished_product : predominantly patient-ready presentations
  * - raw_material     : bulk API or compounding substances
@@ -249,6 +289,12 @@ export const PRODUCT_FIELD_CONTRACT = Object.freeze({
   objective:       { type: 'string',  required: false, default: '' },
   desc:            { type: 'string',  required: false, default: '' },
   scientificName:  { type: 'string',  required: false, default: '' },
+  cas:             { type: 'string',  required: false, default: '' },
+  casNumber:       { type: 'string',  required: false, default: '' },
+  grades:          { type: 'string[]', required: false, default: [] },
+  primaryGrade:    { type: 'string',  required: false, default: '' },
+  pharmacopoeias:  { type: 'string[]', required: false, default: [] },
+  regulatoryDossier: { type: 'object', required: false, default: null },
 
   // ── AI-generated content ──
   aiContent:    { type: 'object',  required: false, default: null },
@@ -312,6 +358,18 @@ export const VARIANT_FIELD_CONTRACT = Object.freeze({
   batchNumber:    { type: 'string', required: false, default: '' },
   expirationDate: { type: 'string', required: false, default: '' },
   coaUrl:         { type: 'string', required: false, default: '' },
+
+  // ── API & Raw Material Standards (Pharma Grades & Regulatory) ──
+  grade:          { type: 'string',   required: false, default: '' },
+  grades:         { type: 'string[]', required: false, default: [] },
+  physicalForm:   { type: 'string',   required: false, default: '' },
+  assayPurity:    { type: 'string',   required: false, default: '' },
+  hasDmf:         { type: 'boolean',  required: false, default: false },
+  dmfNumber:      { type: 'string',   required: false, default: '' },
+  hasCep:         { type: 'boolean',  required: false, default: false },
+  cepNumber:      { type: 'string',   required: false, default: '' },
+  bulkPackaging:  { type: 'string',   required: false, default: '' },
+  moq:            { type: 'object',   required: false, default: null },
 
   // ── Price Intelligence & Margin History ──
   priceHistory:   { type: 'array',  required: false, default: [] },

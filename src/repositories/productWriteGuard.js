@@ -147,7 +147,7 @@ export function validateProductWrite(data, opts = {}) {
   // Ensure array fields are arrays
   const arrayFields = [
     'goals', 'tags', 'mechanisms', 'semanticKeywords',
-    'synonyms', 'searchAliases', 'supplierIds',
+    'synonyms', 'searchAliases', 'supplierIds', 'grades', 'pharmacopoeias',
   ];
   for (const field of arrayFields) {
     if (cleaned[field] !== undefined) {
