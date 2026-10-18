@@ -1408,6 +1408,132 @@
 }
 
 /* ==========================================================================
+   ETERNA B2B CLINICAL CONSOLE EMBEDDED SECTION & TOOLBAR
+   ========================================================================== */
+
+.eterna-console-section {
+  width: 100%;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.eterna-console-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.85rem 1.15rem;
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  border-bottom: none;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.eterna-console-toolbar-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.eterna-console-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 2px 9px;
+  border-radius: 9999px;
+}
+
+.eterna-console-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  animation: eternaConsolePulse 2s infinite;
+}
+
+@keyframes eternaConsolePulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(22, 163, 74, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+  }
+}
+
+.eterna-console-patient-meta {
+  font-size: 0.78rem;
+  color: var(--gcp-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.eterna-console-toolbar-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.eterna-console-viewport-wrap {
+  position: relative;
+  width: 100%;
+  height: 840px;
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.eterna-console-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  background: #f8fafc;
+}
+
+.eterna-console-atlas-bridge {
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .eterna-console-viewport-wrap {
+    height: 720px;
+  }
+}
+
+@media (max-width: 640px) {
+  .eterna-console-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .eterna-console-toolbar-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .eterna-console-viewport-wrap {
+    height: 580px;
+  }
+}
+
+/* ==========================================================================
    GOOGLE CLOUD CONSOLE ENHANCEMENTS: COMMAND HEADER, KPIS, TABS, DATA TABLE
    ========================================================================== */
 
@@ -1712,9 +1838,110 @@
   padding: 2px 6px;
   border-radius: 4px;
   background: var(--gcp-blue-surface);
-  color: var(--gcp-blue-light);
+  color: var(--gcp-blue-primary);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.78rem;
   font-weight: 600;
-  border: 1px solid rgba(138, 180, 248, 0.25);
+  border: 1px solid rgba(26, 115, 232, 0.25);
+}
+
+/* ==========================================================================
+   PHYSICIAN CLINICAL TIMELINE (5 STEPS) & PRESCRIBING MATRIX
+   ========================================================================== */
+.eterna-clinical-timeline-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.15rem;
+  padding: 0 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .eterna-clinical-timeline-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .eterna-clinical-timeline-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.eterna-clinical-step-card {
+  border-radius: var(--gcp-radius-card);
+  padding: 1.35rem 1.15rem;
+  background: var(--gcp-surface-card);
+  border: 1px solid var(--gcp-border);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.eterna-clinical-step-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--gcp-blue-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.eterna-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.eterna-step-number {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--gcp-blue-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.eterna-step-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gcp-text-primary);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.35;
+}
+
+.eterna-step-desc {
+  font-size: 0.78rem;
+  color: var(--gcp-text-secondary);
+  line-height: 1.55;
+  margin: 0 0 1rem 0;
+  flex-grow: 1;
+}
+
+.eterna-step-footer {
+  border-top: 1px dashed var(--gcp-border);
+  padding-top: 0.65rem;
+  margin-top: auto;
+}
+
+.eterna-step-metric {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gcp-blue-primary);
+  display: inline-block;
+}
+
+/* Translational Prescribing Matrix Card */
+.eterna-matrix-card {
+  background: var(--gcp-surface);
+  border: 1px solid var(--gcp-border);
+  border-radius: var(--gcp-radius-card);
+  padding: 1.15rem 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.eterna-matrix-card:hover {
+  border-color: var(--gcp-blue-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }

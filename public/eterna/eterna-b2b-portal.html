@@ -156,6 +156,40 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (window.Babel && typeof window.Babel.transformScriptTags === 'function') {
       window.Babel.transformScriptTags();
     }
+
+    // Apply URL query parameters and bind Atlas parent communication
+    try {
+      var qs = new URLSearchParams(window.location.search);
+      var isLight = qs.get('theme') === 'light';
+      if (isLight) {
+        document.body.classList.add('light-mode');
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+      window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'eterna-theme') {
+          var toLight = e.data.theme === 'light';
+          document.body.classList.toggle('light-mode', toLight);
+          document.documentElement.setAttribute('data-theme', toLight ? 'light' : 'dark');
+        }
+      });
+      document.addEventListener('click', function(e) {
+        var btn = e.target.closest('button, a');
+        if (!btn) return;
+        var txt = (btn.textContent || '').trim().toLowerCase();
+        if (txt.includes('pdf') || txt.includes('descargar') || txt.includes('download') || txt.includes('informe')) {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'eterna-download-pdf' }, '*');
+          }
+        }
+        if (txt.includes('importar') || txt.includes('import') || txt.includes('subir') || txt.includes('upload')) {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'eterna-import-test' }, '*');
+          }
+        }
+      }, true);
+    } catch (e) {
+      console.warn('[eterna-bridge] Parent communication listener error:', e);
+    }
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
     console.error('Bundle unpack error:', err);
