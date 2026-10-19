@@ -1423,25 +1423,39 @@
   min-width: 0;
 }
 
+.gcp-mobile-categories-strip {
+  display: none;
+}
+
+.collection-dock-mobile-only {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .gcp-collection-workspace {
     grid-template-columns: 1fr !important;
-    gap: 1.5rem !important;
+    gap: 1.25rem !important;
     display: flex !important;
     flex-direction: column !important;
   }
 
+  /* Golden Rule #23: On mobile, collapse sidebar into drawer rather than occupying top of screen */
   .gcp-collection-sidebar {
-    position: static !important;
-    top: auto !important;
-    width: 100% !important;
-    order: 1 !important;
+    display: none !important;
   }
 
   .gcp-collection-workspace > main {
     width: 100% !important;
     max-width: 100% !important;
-    order: 2 !important;
+    order: 1 !important;
+  }
+
+  .gcp-mobile-categories-strip {
+    display: flex !important;
+  }
+
+  .collection-dock-mobile-only {
+    display: inline-flex !important;
   }
 }
 

@@ -201,7 +201,17 @@ export default function BrandCollectionPage({
 }) {
   const router = useRouter();
   const config = BRAND_CONFIGS[brandSlug] || BRAND_CONFIGS.bloodo;
-  const { user, isProfessional } = useAuth();
+  const { user, isProfessional, loginWithGoogle } = useAuth();
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  const colwayCategories = useMemo(() => [
+    { id: 'all', label: isEs ? 'Todas las Formulaciones' : 'All Formulations', count: 9 },
+    { id: 'epigenetic', label: isEs ? 'Diamante Azul & Epigenética' : 'Epigenetic & Blue Diamond', count: 2 },
+    { id: 'native-dermal', label: isEs ? 'Tropocolágeno Dérmico & Barrera' : 'Native Dermal & Barrier', count: 3 },
+    { id: 'trichology', label: isEs ? 'Tricología Folicular Anti-DHT' : 'Trichology & Scalp System', count: 3 },
+    { id: 'nutricosmetics', label: isEs ? 'Nutricosmética Celular Oral' : 'Inside-Out Nutricosmetics', count: 1 },
+    { id: 'bundles', label: isEs ? 'Kits & Protocolos Clínicos' : 'Clinical Protocol Bundles', count: 3 },
+  ], [isEs]);
 
   const [lang, setLang] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -628,6 +638,112 @@ export default function BrandCollectionPage({
 
           {/* ── RIGHT COLUMN: MAIN CONTENT (DIRECT UNIFIED CATALOG & TREATMENT LINES) ── */}
           <main id="colway-main-content" style={{ minWidth: 0, gridColumn: '2', order: 2 }}>
+            {/* Mobile Categories Navigation Strip (Golden Rule #23) */}
+            <div className="gcp-mobile-categories-strip" style={{
+              flexDirection: 'column',
+              gap: '10px',
+              marginBottom: '1rem',
+              width: '100%'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileSidebarOpen(true)}
+                  style={{
+                    height: '36px',
+                    padding: '0 14px',
+                    borderRadius: '8px',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    color: '#0f172a',
+                    fontSize: '0.80rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '7px',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+                  }}
+                >
+                  <SlidersHorizontal size={14} color="#0d9488" />
+                  <span>{isEs ? 'Filtros & Categorías' : 'Categories & Filters'}</span>
+                  <span style={{
+                    fontSize: '0.70rem',
+                    background: '#f1f5f9',
+                    color: '#475569',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    fontWeight: 800
+                  }}>
+                    {colwayCategories.length}
+                  </span>
+                </button>
+
+                <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
+                  {filteredProducts.length} {isEs ? 'formulaciones' : 'formulations'}
+                </span>
+              </div>
+
+              {/* Swipeable Category Pills */}
+              {brandSlug === 'colway' && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  overflowX: 'auto',
+                  WebkitOverflowScrolling: 'touch',
+                  paddingBottom: '4px',
+                  msOverflowStyle: 'none',
+                  scrollbarWidth: 'none'
+                }}>
+                  {colwayCategories.map((cat) => {
+                    const isSelected = selectedCategory === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat.id)}
+                        style={{
+                          flexShrink: 0,
+                          height: '32px',
+                          padding: '0 12px',
+                          borderRadius: '9999px',
+                          background: isSelected ? '#0d9488' : '#ffffff',
+                          color: isSelected ? '#ffffff' : '#334155',
+                          border: isSelected ? '1px solid #0d9488' : '1px solid #cbd5e1',
+                          fontSize: '0.74rem',
+                          fontWeight: isSelected ? 700 : 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: isSelected ? '0 2px 6px rgba(13, 148, 136, 0.25)' : 'none',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <span>{cat.label}</span>
+                        <span style={{
+                          fontSize: '0.66rem',
+                          padding: '1px 5px',
+                          borderRadius: '9999px',
+                          background: isSelected ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+                          color: isSelected ? '#ffffff' : '#64748b',
+                          fontWeight: 700
+                        }}>
+                          {cat.count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             {/* Colway Scientific & Biotechnology Pillar Strip */}
             {brandSlug === 'colway' && (
               <div style={{
@@ -645,43 +761,139 @@ export default function BrandCollectionPage({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Sparkles size={16} color="#0d9488" />
                     <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {isEs ? 'Los 3 Pilares Científicos de Colway® (Biotecnología de Gdańsk)' : 'The 3 Colway® Scientific Pillars (Gdańsk Biotechnology)'}
+                      {isEs ? 'Los 3 Pilares Científicos del Tropocolágeno Nativo Colway®' : 'The 3 Scientific Pillars of Colway® Native Tropocollagen'}
                     </h4>
                   </div>
                   <span style={{ fontSize: '0.70rem', color: '#0d9488', fontWeight: 700, background: '#f0fdfa', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '4px' }}>
-                    ISO 22716 GMP & EU CPNP
+                    Biotecnología de Gdańsk · ISO 22716 & CPNP
                   </span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.85rem' }}>
-                  <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px 12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                      <Dna size={14} color="#0d9488" />
-                      <strong style={{ fontSize: '0.80rem', color: '#0f172a' }}>Intact 3D Triple Helix</strong>
+                {/* Numbered Lines / GCP Architecture Feature Rows (Golden Rule UX) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+                  {/* Pillar 01 */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '12px',
+                    padding: '10px 0',
+                    borderBottom: '1px solid #f1f5f9'
+                  }}>
+                    <span style={{
+                      flexShrink: 0,
+                      width: '26px',
+                      height: '26px',
+                      borderRadius: '6px',
+                      background: 'rgba(13, 148, 136, 0.1)',
+                      color: '#0d9488',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '2px'
+                    }}>
+                      01
+                    </span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
+                        <strong style={{ fontSize: '0.82rem', color: '#0f172a' }}>
+                          {isEs ? 'Tropocolágeno Nativo en Triple Hélice 3D Intacta' : 'Intact 3D Triple-Helix Tropocollagen'}
+                        </strong>
+                        <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', padding: '1px 6px', borderRadius: '4px' }}>
+                          {isEs ? 'Bioafinidad 100%' : '100% Bioaffinity'}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                        {isEs
+                          ? 'Extracción molecular en frío que preserva telopéptidos y estructura terciaria biológicamente activa con afinidad celular 100% homóloga al procolágeno humano.'
+                          : 'Cold freshwater extraction preserving native telopeptides & tertiary structure with 100% human pro-collagen cellular affinity.'
+                        }
+                      </p>
                     </div>
-                    <p style={{ fontSize: '0.74rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
-                      Cold freshwater extraction preserving native telopeptides & tertiary structure with 100% human pro-collagen affinity.
-                    </p>
                   </div>
 
-                  <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px 12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                      <Award size={14} color="#0284c7" />
-                      <strong style={{ fontSize: '0.80rem', color: '#0f172a' }}>110-Day Real Neocollagenesis</strong>
+                  {/* Pillar 02 */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '12px',
+                    padding: '10px 0',
+                    borderBottom: '1px solid #f1f5f9'
+                  }}>
+                    <span style={{
+                      flexShrink: 0,
+                      width: '26px',
+                      height: '26px',
+                      borderRadius: '6px',
+                      background: 'rgba(2, 132, 199, 0.1)',
+                      color: '#0284c7',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '2px'
+                    }}>
+                      02
+                    </span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
+                        <strong style={{ fontSize: '0.82rem', color: '#0f172a' }}>
+                          {isEs ? 'Estimulación de Neocolagénesis Real a 110 Días' : '110-Day Real Neocollagenesis Induction'}
+                        </strong>
+                        <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', padding: '1px 6px', borderRadius: '4px' }}>
+                          {isEs ? 'Estudio ITA-TEST #B-89146' : 'ITA-TEST Study #B-89146'}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                        {isEs
+                          ? 'Estudio clínico de laboratorio ITA-TEST Varsovia: estimula los fibroblastos dérmicos para reactivar la síntesis endógena de colágeno (+90% firmeza y densidad confirmada en ciclo).'
+                          : 'ITA-TEST Warsaw Lab study #B-89146: stimulates dermal fibroblasts to reactivate endogenous collagen synthesis (90% confirmed firming & density across the cycle).'
+                        }
+                      </p>
                     </div>
-                    <p style={{ fontSize: '0.74rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
-                      ITA-TEST Warsaw Lab study #B-89146: stimulates fibroblasts for 90% confirmed firming & density across the cycle.
-                    </p>
                   </div>
 
-                  <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px 12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                      <FlaskConical size={14} color="#7c3aed" />
-                      <strong style={{ fontSize: '0.80rem', color: '#0f172a' }}>Cryogenic Freeze-Drying (-40°C)</strong>
+                  {/* Pillar 03 */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '12px',
+                    padding: '10px 0 2px 0'
+                  }}>
+                    <span style={{
+                      flexShrink: 0,
+                      width: '26px',
+                      height: '26px',
+                      borderRadius: '6px',
+                      background: 'rgba(124, 58, 237, 0.1)',
+                      color: '#7c3aed',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '2px'
+                    }}>
+                      03
+                    </span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
+                        <strong style={{ fontSize: '0.82rem', color: '#0f172a' }}>
+                          {isEs ? 'Liofilización Criogénica al Vacío (-40°C)' : 'Cryogenic Vacuum Freeze-Drying (-40°C)'}
+                        </strong>
+                        <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#7c3aed', background: '#faf5ff', padding: '1px 6px', borderRadius: '4px' }}>
+                          {isEs ? 'Péptidos Señal Vivos' : 'Living Signal Peptides'}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                        {isEs
+                          ? 'Sublimación térmica que preserva intactos los péptidos señal del tropocolágeno en Colvita, sin desnaturalización proteica, potenciados con Fucus vesiculosus del Báltico y Vitamina E natural.'
+                          : 'Sub-zero vacuum sublimation retaining intact signal peptides in Colvita without protein denaturation, synergized with Baltic Fucus & natural Vitamin E.'
+                        }
+                      </p>
                     </div>
-                    <p style={{ fontSize: '0.74rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
-                      Sub-zero vacuum sublimation retaining signal peptides in Colvita, synergized with Baltic Fucus & natural Vitamin E.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -1372,10 +1584,33 @@ export default function BrandCollectionPage({
         </div>
       </section>
 
-      {/* ── FLOATING ACTION DOCK / STICKED FOOT (Regla Golden: Centrado en pantalla principal sin tapar sidebar) ── */}
+      {/* ── FLOATING ACTION DOCK / STICKED FOOT (Regla Golden User Idea) ── */}
       <div className="collection-bottom-dock">
-        {/* Brand Chip Indicator */}
+        {/* Left: Brand Chip / Mobile Categories Trigger */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            onClick={() => setIsMobileSidebarOpen(true)}
+            className="collection-dock-mobile-only"
+            style={{
+              height: '32px',
+              padding: '0 10px',
+              borderRadius: '9999px',
+              background: '#f1f5f9',
+              border: '1px solid #cbd5e1',
+              color: '#334155',
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            <SlidersHorizontal size={12} color="#0d9488" />
+            <span>{isEs ? 'Categorías' : 'Categories'}</span>
+          </button>
+
           <span style={{
             width: '8px',
             height: '8px',
@@ -1390,32 +1625,9 @@ export default function BrandCollectionPage({
           </span>
         </div>
 
-        {/* Dock Actions */}
+        {/* Dock Actions: No "Sign in to Order"! Clean & friction-free */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {!user ? (
-            <button
-              type="button"
-              onClick={() => setIsAuthModalOpen(true)}
-              style={{
-                height: '36px',
-                padding: '0 14px',
-                borderRadius: '9999px',
-                background: config.accentColor,
-                color: '#ffffff',
-                border: 'none',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}
-            >
-              <Lock size={13} />
-              <span>{isEs ? 'Iniciar Sesión para Pedir' : 'Sign In to Order'}</span>
-            </button>
-          ) : (
+          {user ? (
             <button
               type="button"
               onClick={() => router.push('/checkout')}
@@ -1437,6 +1649,28 @@ export default function BrandCollectionPage({
               <Sparkles size={13} />
               <span>{isEs ? 'Ver Carrito' : 'View Cart'}</span>
             </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsAuthModalOpen(true)}
+              style={{
+                height: '36px',
+                padding: '0 12px',
+                borderRadius: '9999px',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#334155',
+                fontSize: '0.76rem',
+                fontWeight: 650,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <User size={13} color="#64748b" />
+              <span>{isEs ? 'Área Profesional' : 'Professional Access'}</span>
+            </button>
           )}
 
           <button
@@ -1444,26 +1678,126 @@ export default function BrandCollectionPage({
             onClick={() => setIsInquiryDrawerOpen(true)}
             style={{
               height: '36px',
-              padding: '0 12px',
+              padding: '0 14px',
               borderRadius: '9999px',
-              background: '#ffffff',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
+              background: config.accentColor,
+              color: '#ffffff',
+              border: 'none',
               fontSize: '0.78rem',
-              fontWeight: 650,
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '6px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
             }}
           >
-            <FileText size={13} color="#0284c7" />
-            <span className="collection-dock-hide-mobile">{isEs ? 'Consultar' : 'Inquire'}</span>
+            <FileText size={13} />
+            <span>{isEs ? 'Consulta Clínica' : 'Clinical Desk'}</span>
           </button>
         </div>
       </div>
 
-      {/* ── Auth Notice Modal for Unregistered Visitors (Regla Golden Usuario) ── */}
+      {/* ── MOBILE SIDEBAR DRAWER (Golden Rule #23) ── */}
+      {isMobileSidebarOpen && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(15, 23, 42, 0.6)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+          zIndex: 1000,
+          display: 'flex',
+          justifyContent: 'flex-start'
+        }}
+        onClick={() => setIsMobileSidebarOpen(false)}
+        >
+          <div
+            style={{
+              width: '85%',
+              maxWidth: '360px',
+              height: '100%',
+              background: '#ffffff',
+              boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflowY: 'auto'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '1rem 1.25rem',
+              borderBottom: '1px solid #e2e8f0',
+              position: 'sticky',
+              top: 0,
+              background: '#ffffff',
+              zIndex: 10
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <SlidersHorizontal size={16} color={config.accentColor} />
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  {isEs ? 'Departamentos & Filtros' : 'Departments & Filters'}
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileSidebarOpen(false)}
+                style={{
+                  background: '#f1f5f9',
+                  border: 'none',
+                  borderRadius: '6px',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#64748b',
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Drawer Body: Sidebar per brand */}
+            <div style={{ padding: '1rem' }}>
+              {brandSlug === 'bloodo' ? (
+                <BloodoCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
+              ) : brandSlug === 'eterna' ? (
+                <EternaCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
+              ) : brandSlug === 'ultraperson' ? (
+                <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
+              ) : (
+                <ColwayCollectionSidebar
+                  lang={lang}
+                  onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }}
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={(catId) => {
+                    setSelectedCategory(catId);
+                    setIsMobileSidebarOpen(false);
+                    const el = document.getElementById('colway-main-content');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  onSearchKeyword={(kw) => {
+                    setSearchQuery(kw);
+                    setIsMobileSidebarOpen(false);
+                    const el = document.getElementById('colway-main-content');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Friction-Free Professional Access Modal ── */}
       {isAuthModalOpen && (
         <div style={{
           position: 'fixed',
@@ -1479,7 +1813,7 @@ export default function BrandCollectionPage({
           <div style={{
             background: '#ffffff',
             borderRadius: '16px',
-            maxWidth: '460px',
+            maxWidth: '440px',
             width: '100%',
             padding: '2rem',
             boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
@@ -1516,44 +1850,60 @@ export default function BrandCollectionPage({
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <Lock size={24} />
+              <ShieldCheck size={26} />
             </div>
 
             <div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
-                {isEs ? 'Acceso Profesional Requerido' : 'Professional Account Required'}
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
+                {isEs ? 'Acceso Profesional & Clínicas' : 'Professional & Clinical Access'}
               </h3>
               <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
                 {isEs
-                  ? `Para solicitar formulaciones o kits clínicos de ${config.name}, es obligatorio disponer de una cuenta registrada como profesional sanitario, clínica o paciente autorizado.`
-                  : `Ordering clinical test kits and formulations from ${config.name} requires an authorized registered professional, clinic, or verified patient account.`}
+                  ? `Consulta baremos mayoristas, protocolos CPNP y expedición directa para centros médicos y especialistas de ${config.name}.`
+                  : `Access wholesale tiers, official CPNP clinical monographs, and direct clinic dispatch for ${config.name}.`}
               </p>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '0.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '0.25rem' }}>
+              {/* Option 1: 1-Click Google Sign-In */}
               <button
                 type="button"
-                onClick={() => router.push(`/auth/login?redirect=/collection/${brandSlug}`)}
+                onClick={async () => {
+                  try {
+                    await loginWithGoogle();
+                    setIsAuthModalOpen(false);
+                  } catch (err) {
+                    console.error('Google Sign In error:', err);
+                  }
+                }}
                 style={{
                   width: '100%',
-                  padding: '10px 16px',
+                  padding: '11px 16px',
                   borderRadius: '8px',
-                  background: config.accentColor,
-                  color: '#ffffff',
-                  border: 'none',
-                  fontSize: '0.84rem',
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  color: '#0f172a',
+                  fontSize: '0.86rem',
                   fontWeight: 700,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
+                  gap: '10px',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                <LogIn size={15} />
-                <span>{isEs ? 'Iniciar Sesión / Acceso' : 'Sign In to My Account'}</span>
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.14z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                </svg>
+                <span>{isEs ? 'Acceder con Google (1 clic directo)' : 'Continue with Google (1-Click)'}</span>
               </button>
 
+              {/* Option 2: Direct Consultation without Account */}
               <button
                 type="button"
                 onClick={() => {
@@ -1564,11 +1914,11 @@ export default function BrandCollectionPage({
                   width: '100%',
                   padding: '10px 16px',
                   borderRadius: '8px',
-                  background: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  color: '#334155',
+                  background: 'rgba(13, 148, 136, 0.08)',
+                  border: '1px solid rgba(13, 148, 136, 0.25)',
+                  color: '#0d9488',
                   fontSize: '0.84rem',
-                  fontWeight: 650,
+                  fontWeight: 700,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -1576,9 +1926,27 @@ export default function BrandCollectionPage({
                   gap: '8px'
                 }}
               >
-                <FileText size={15} color="#0284c7" />
-                <span>{isEs ? 'Solicitar Información / Consulta' : 'Request Clinical Consultation'}</span>
+                <FileText size={15} />
+                <span>{isEs ? '💬 Consultar sin Registro (Mesa Clínica)' : '💬 Inquire without Account (Clinical Desk)'}</span>
               </button>
+
+              {/* Option 3: Traditional Email/Password Link */}
+              <div style={{ textAlign: 'center', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => router.push(`/auth/login?redirect=/collection/${brandSlug}`)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748b',
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  {isEs ? 'O acceder con email y contraseña' : 'Or sign in with email & password'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
