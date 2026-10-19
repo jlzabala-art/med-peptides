@@ -603,28 +603,11 @@ export default function BrandCollectionPage({
               selectedCategory={selectedCategory}
               onSelectCategory={(catId) => {
                 setSelectedCategory(catId);
-                setActiveColwaySection('catalog');
                 const el = document.getElementById('colway-main-content');
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
               onSearchKeyword={(kw) => {
                 setSearchQuery(kw);
-                setActiveColwaySection('catalog');
-                const el = document.getElementById('colway-main-content');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}
-              activeSection={activeColwaySection}
-              onSelectSection={(sec) => {
-                setActiveColwaySection(sec);
-                const el = document.getElementById('colway-main-content');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}
-              activeProtocolId={activeProtocolId}
-              onSelectProtocol={(proto) => {
-                setActiveProtocolId(proto.id);
-                if (proto.category) setSelectedCategory(proto.category);
-                if (proto.search) setSearchQuery(proto.search);
-                setActiveColwaySection('protocols');
                 const el = document.getElementById('colway-main-content');
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
@@ -637,40 +620,124 @@ export default function BrandCollectionPage({
             </aside>
           )}
 
-          {/* ── RIGHT COLUMN: MAIN CONTENT (EXCLUSIVELY ONE SECTION AT A TIME) ── */}
+          {/* ── RIGHT COLUMN: MAIN CONTENT (DIRECT UNIFIED CATALOG & TREATMENT LINES) ── */}
           <main id="colway-main-content" style={{ minWidth: 0, gridColumn: '2', order: 2 }}>
-            {brandSlug === 'colway' && activeColwaySection !== 'catalog' ? (
-              <ColwayMainSections
-                activeSection={activeColwaySection}
-                isEs={isEs}
-                activeProtocolId={activeProtocolId}
-                products={products}
-                filteredProducts={filteredProducts}
-                scopeMode={scopeMode}
-                setScopeMode={setScopeMode}
-                onSelectProtocol={(proto) => {
-                  setActiveProtocolId(proto.id);
-                  if (proto.category) setSelectedCategory(proto.category);
-                  if (proto.search) setSearchQuery(proto.search);
-                  setActiveColwaySection('catalog');
-                  setTimeout(() => {
-                    const el = document.getElementById('colway-main-content');
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }, 50);
-                }}
-                onResetProtocolFilter={() => {
-                  setActiveProtocolId(null);
-                  setSelectedCategory('all');
-                  setSearchQuery('');
-                }}
-                onBackToCatalog={() => {
-                  setActiveColwaySection('catalog');
-                  const el = document.getElementById('colway-main-content');
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
-              />
-            ) : (
-              <>
+            {/* Colway Scientific & Biotechnology Pillar Strip */}
+            {brandSlug === 'colway' && (
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                padding: '1.25rem 1.5rem',
+                marginBottom: '1.25rem',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.85rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Sparkles size={16} color="#0d9488" />
+                    <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? 'Los 3 Pilares Científicos de Colway® (Biotecnología de Gdańsk)' : 'The 3 Colway® Scientific Pillars (Gdańsk Biotechnology)'}
+                    </h4>
+                  </div>
+                  <span style={{ fontSize: '0.70rem', color: '#0d9488', fontWeight: 700, background: '#f0fdfa', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '4px' }}>
+                    ISO 22716 GMP & EU CPNP
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.85rem' }}>
+                  <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px 12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <Dna size={14} color="#0d9488" />
+                      <strong style={{ fontSize: '0.80rem', color: '#0f172a' }}>Intact 3D Triple Helix</strong>
+                    </div>
+                    <p style={{ fontSize: '0.74rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                      Cold freshwater extraction preserving native telopeptides & tertiary structure with 100% human pro-collagen affinity.
+                    </p>
+                  </div>
+
+                  <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px 12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <Award size={14} color="#0284c7" />
+                      <strong style={{ fontSize: '0.80rem', color: '#0f172a' }}>110-Day Real Neocollagenesis</strong>
+                    </div>
+                    <p style={{ fontSize: '0.74rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                      ITA-TEST Warsaw Lab study #B-89146: stimulates fibroblasts for 90% confirmed firming & density across the cycle.
+                    </p>
+                  </div>
+
+                  <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px 12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <FlaskConical size={14} color="#7c3aed" />
+                      <strong style={{ fontSize: '0.80rem', color: '#0f172a' }}>Cryogenic Freeze-Drying (-40°C)</strong>
+                    </div>
+                    <p style={{ fontSize: '0.74rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                      Sub-zero vacuum sublimation retaining signal peptides in Colvita, synergized with Baltic Fucus & natural Vitamin E.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Colway Active Treatment Line Protocol Banner */}
+            {brandSlug === 'colway' && selectedCategory !== 'all' && (
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                borderRadius: '10px',
+                padding: '12px 16px',
+                marginBottom: '1.25rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '10px'
+              }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', color: '#0d9488', letterSpacing: '0.04em' }}>
+                      {selectedCategory === 'epigenetic' ? '💎 Blue Diamond Epigenetic Line' :
+                       selectedCategory === 'trichology' ? '🌿 Anti-DHT Trichology System' :
+                       selectedCategory === 'native-dermal' ? '💧 Dermo-Native & Barrier Recovery' :
+                       selectedCategory === 'nutricosmetics' ? '💊 Inside-Out Systemic Nutricosmetics' :
+                       '📦 Clinical Protocol Bundles'}
+                    </span>
+                    <span style={{ fontSize: '0.68rem', color: '#64748b' }}>· Official Monograph Protocol</span>
+                  </div>
+                  <p style={{ fontSize: '0.78rem', color: '#334155', margin: 0, lineHeight: 1.45 }}>
+                    {selectedCategory === 'epigenetic'
+                      ? 'Reversal of the facial "Triangle of Beauty" inversion via Matrigenics 14G & VEP peptides. Pauta: Apply enzymatic peeling 15 min on dry skin 1–2x/week, follow with warming cream between fingertips before upward facial massage. Complement with oral Colvita.'
+                      : selectedCategory === 'trichology'
+                      ? '5α-reductase inhibition, follicular stem cell activation (Baicapil™ 2%), and Collagen XVII anchorage (Kerascalp™). Pauta: Wash scalp 3–4x/week leaving foam for 3 minutes before rinsing; apply cuticular conditioner from mid-lengths to ends; take 2 Colvita capsules daily.'
+                      : selectedCategory === 'native-dermal'
+                      ? '110-day physiological neocollagenesis & Zero-Tightness barrier repair via biologically active tropocollagen & Noni fruit. Pauta: Cleanse with pea-sized wash gel emulsion, tap Vege collagen into damp skin until absorbed, seal lips with protective compress.'
+                      : selectedCategory === 'nutricosmetics'
+                      ? 'Deep systemic fibroblast neocollagenesis (skin, cartilage, vascular walls) via sub-zero lyophilized tropocollagen & Baltic Fucus. Pauta: Take 2 capsules daily during or immediately after meals with water. Continuous 3-month cycle.'
+                      : 'Dual-action kits combining oral signal peptides with topical regimens for comprehensive cellular results.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory('all')}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '5px 10px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    color: '#475569',
+                    cursor: 'pointer',
+                    flexShrink: 0
+                  }}
+                >
+                  Show All Formulations (8)
+                </button>
+              </div>
+            )}
+
             {/* Google Cloud Filter Bar */}
             <div style={{
               background: '#ffffff',
@@ -1298,8 +1365,6 @@ export default function BrandCollectionPage({
                   );
                 })}
               </div>
-            )}
-              </>
             )}
           </main>
         </div>

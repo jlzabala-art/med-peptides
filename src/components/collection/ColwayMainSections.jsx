@@ -161,102 +161,158 @@ export function ColwayAdvantageSection({ isEs = false, onBackToCatalog = null })
           : 'Unlike 95% of commercial collagen —which is gelatin denatured by heat and acids—, Colway cold-extracts biologically active tropocollagen preserving its intact 3D triple-helix conformation, delivering tissue affinity identical to native human pro-collagen.'}
       </p>
 
-      {/* 4 Differential Value Anchors (Responsive 4 Columns) */}
+      {/* 4 Differential Value Lines (Horizontal Linear Rows with Rich Scientific & Catalogue Specifications) */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-        gap: '1.25rem'
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem'
       }}>
-        {/* Card 1 */}
+        {/* Line 1: Intact 3D Triple Helix */}
         <div style={{
           background: '#f8fafc',
           border: '1px solid #e2e8f0',
           borderRadius: '12px',
-          padding: '1.25rem',
+          padding: '1.25rem 1.5rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px'
+          gap: '10px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(13, 148, 136, 0.1)', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Dna size={18} />
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(13, 148, 136, 0.1)', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Dna size={20} />
+              </div>
+              <strong style={{ fontSize: '0.94rem', color: '#0f172a', fontWeight: 800 }}>
+                {isEs ? 'Triple Hélice 3D Intacta (Biotecnología de Extracción en Frío en Gdańsk)' : 'Native 3D Triple-Helix Tropocollagen (Gdańsk Cold-Extraction Biotechnology)'}
+              </strong>
             </div>
-            <strong style={{ fontSize: '0.88rem', color: '#0f172a' }}>
-              {isEs ? 'Triple Hélice 3D Preservada' : 'Intact 3D Triple Helix'}
-            </strong>
+            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '4px' }}>
+              {isEs ? 'Arquitectura Proteica Cuaternaria' : 'Quaternary Protein Architecture'}
+            </span>
           </div>
-          <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
-            {isEs ? 'Estructura terciaria molecular viva reconocida como pro-colágeno nativo humano.' : 'Live molecular tertiary structure recognized as native human pro-collagen.'}
+          <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>
+            {isEs
+              ? 'A diferencia del 95% del colágeno cosmético y dietético comercial que utiliza hidrólisis ácida, alcalina o térmica (obteniendo gelatina desnaturalizada sin capacidad de señalización biológica), Colway aísla tropocolágeno vivo a partir de la hidratación de pieles de carpa plateada de agua dulce (Hypophthalmichthys molitrix). El proceso mantiene intactos los telopéptidos y los puentes de hidrógeno terciarios con una afinidad idéntica al pro-colágeno tisular humano, conservando su capacidad de señalización a temperatura fisiológica de la piel.'
+              : 'Unlike 95% of commercial cosmetic and dietary collagens that use acid, alkali, or high-temperature hydrolysis (yielding denatured gelatin fragments incapable of conformational signaling), Colway isolates live, native tropocollagen directly from freshwater silver carp (Hypophthalmichthys molitrix) skin hydration. The process preserves intact telopeptides and tertiary helical hydrogen bonds with 100% biological affinity to human pro-collagen, maintaining structural signaling fidelity at physiological skin temperature.'}
           </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', paddingTop: '4px' }}>
+            {['Gdańsk Cold-Extraction', 'Zero Acid/Thermal Hydrolysis', 'Intact Native Telopeptides', 'Freshwater Fish Bio-Hydration', '100% Human Pro-Collagen Tissue Affinity'].map((chip, i) => (
+              <span key={i} style={{ fontSize: '0.68rem', fontWeight: 650, color: '#334155', background: '#ffffff', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: '4px' }}>
+                ✓ {chip}
+              </span>
+            ))}
+          </div>
         </div>
 
-        {/* Card 2 */}
+        {/* Line 2: Real Cellular Neocollagenesis & 110-Day Cycle */}
         <div style={{
           background: '#f8fafc',
           border: '1px solid #e2e8f0',
           borderRadius: '12px',
-          padding: '1.25rem',
+          padding: '1.25rem 1.5rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px'
+          gap: '10px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Award size={18} />
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Award size={20} />
+              </div>
+              <strong style={{ fontSize: '0.94rem', color: '#0f172a', fontWeight: 800 }}>
+                {isEs ? 'Neocollagénesis Celular Real & Ciclo Fisiológico de 110 Días' : 'Documented Cellular Neocollagenesis & 110-Day Physiological Turnover Cycle'}
+              </strong>
             </div>
-            <strong style={{ fontSize: '0.88rem', color: '#0f172a' }}>
-              {isEs ? 'Neocollagénesis Celular Real' : 'Real Cellular Neocollagenesis'}
-            </strong>
+            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
+              {isEs ? 'Estudio Clínico ITA-TEST Varsovia' : 'ITA-TEST Warsaw Lab Validated'}
+            </span>
           </div>
-          <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
-            {isEs ? 'Estimula directamente a los fibroblastos dérmicos para sintetizar colágeno endógeno.' : 'Directly triggers dermal fibroblasts to synthesize new endogenous collagen.'}
+          <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>
+            {isEs
+              ? 'Aplicado tópicamente, el tropocolágeno nativo no actúa como un mero oclusivo superficial: oligopéptidos señalizadores de bajo peso molecular atraviesan la unión dermoepidérmica para estimular directamente a los fibroblastos dérmicos humanos, reactivando la biosíntesis endógena de Colágeno Tipo I, III y VII. En ensayos especializados del Laboratorio ITA-TEST de Varsovia (Ensayo B-89146-89147/12214/24/S, edad media 51 años), se constató un 90% de aumento en firmeza, 85% en densidad cutánea y 85% en retención hídrica profunda tras el ciclo de recambio celular de 110 días.'
+              : 'Topically applied native tropocollagen does not act merely as a surface occlusive: low-molecular signal oligopeptides cross the epidermal barrier to directly stimulate human dermal fibroblasts (FGF receptor pathway), upregulating de novo biosynthesis of Collagen Types I, III, and VII. In specialized laboratory trials conducted at ITA-TEST Warsaw (Test B-89146-89147/12214/24/S, proband average age 51), systematic application for the 110-day physiological collagen replacement cycle yielded 90% confirmed skin firming, 85% density increase, and 85% deep moisture retention with reversal of sagging.'}
           </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', paddingTop: '4px' }}>
+            {['ITA-TEST Warsaw Study #B-89146', '90% Confirmed Skin Firming', '85% Skin Density Improvement', '110-Day Physiological Cellular Replacement', 'Upregulation of Collagen I, III & VII'].map((chip, i) => (
+              <span key={i} style={{ fontSize: '0.68rem', fontWeight: 650, color: '#334155', background: '#ffffff', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: '4px' }}>
+                ✓ {chip}
+              </span>
+            ))}
+          </div>
         </div>
 
-        {/* Card 3 */}
+        {/* Line 3: Cold Sublimation Freeze-Drying */}
         <div style={{
           background: '#f8fafc',
           border: '1px solid #e2e8f0',
           borderRadius: '12px',
-          padding: '1.25rem',
+          padding: '1.25rem 1.5rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px'
+          gap: '10px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(124, 58, 237, 0.1)', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <FlaskConical size={18} />
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(124, 58, 237, 0.1)', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <FlaskConical size={20} />
+              </div>
+              <strong style={{ fontSize: '0.94rem', color: '#0f172a', fontWeight: 800 }}>
+                {isEs ? 'Sublimación Criogénica en Frío (Liofilización) & Micronización Marina' : 'Cryogenic Cold Sublimation (Freeze-Drying) & Marine Micronization'}
+              </strong>
             </div>
-            <strong style={{ fontSize: '0.88rem', color: '#0f172a' }}>
-              {isEs ? 'Liofilización en Frío' : 'Cold Sublimation Freeze-Drying'}
-            </strong>
+            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#7c3aed', background: '#faf5ff', border: '1px solid #e9d5ff', padding: '2px 8px', borderRadius: '4px' }}>
+              {isEs ? 'Liofilización Bajo Cero (-40°C)' : 'Sub-Zero Vacuum Lyophilization'}
+            </span>
           </div>
-          <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
-            {isEs ? 'Sublimación al vacío bajo cero conservando péptidos activos y microalgas Fucus.' : 'Sub-zero vacuum sublimation retaining live bioactive peptides & Baltic Fucus.'}
+          <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>
+            {isEs
+              ? 'Para la nutricosmética celular oral (Colvita), Colway utiliza sublimación al vacío a -40°C, eliminando la humedad sin degradar la conformación cuaternaria de las cadenas peptídicas. Cada cápsula aporta tropocolágeno liofilizado bioactivo combinado con microalgas Fucus vesiculosus del Mar Báltico micronizadas, que aportan yodo orgánico biodisponible y polisacáridos fucoidanos cofactores de la prolil y lisil hidroxilasa, junto con D-alfa-tocoferol natural como protector contra la peroxidación lipídica de membranas.'
+              : 'For systemic cellular nutrition, Colway employs sub-zero vacuum sublimation (lyophilization at -40°C), eliminating moisture without breaking sensitive peptide bonds. Each capsule delivers biologically intact tropocollagen signal peptides combined with Baltic Fucus vesiculosus algae micronized to optimal cellular bioavailability. This marine synergy provides essential organic iodine, fucoidans, and alginates that act as co-factors for lysyl hydroxylase, while natural D-alpha-tocopherol prevents cellular membrane lipid peroxidation.'}
           </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', paddingTop: '4px' }}>
+            {['Sub-Zero Cryogenic Freeze-Drying (-40°C)', 'Baltic Fucus vesiculosus Synergy', 'Bioavailable Organic Iodine', 'Natural D-Alpha-Tocopherol', 'Full Hydroxyproline/Proline Signal Profile'].map((chip, i) => (
+              <span key={i} style={{ fontSize: '0.68rem', fontWeight: 650, color: '#334155', background: '#ffffff', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: '4px' }}>
+                ✓ {chip}
+              </span>
+            ))}
+          </div>
         </div>
 
-        {/* Card 4 */}
+        {/* Line 4: Clean European GMP & CPNP Registration */}
         <div style={{
           background: '#f8fafc',
           border: '1px solid #e2e8f0',
           borderRadius: '12px',
-          padding: '1.25rem',
+          padding: '1.25rem 1.5rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px'
+          gap: '10px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ShieldCheck size={18} />
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <ShieldCheck size={20} />
+              </div>
+              <strong style={{ fontSize: '0.94rem', color: '#0f172a', fontWeight: 800 }}>
+                {isEs ? 'Estándares Farmacéuticos Europeos GMP & Garantía de Formulación Limpia' : 'European Pharmaceutical GMP Standards & Clean Formulation Guarantee'}
+              </strong>
             </div>
-            <strong style={{ fontSize: '0.88rem', color: '#0f172a' }}>
-              {isEs ? 'EU CPNP & ISO 22716' : 'EU CPNP & ISO 22716 Certified'}
-            </strong>
+            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '4px' }}>
+              {isEs ? 'ISO 22716 & Notificación CPNP' : 'ISO 22716 & EU CPNP Registered'}
+            </span>
           </div>
-          <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
-            {isEs ? 'Registro cosmético europeo formal, testado dermatológicamente en humanos.' : 'Official European cosmetic registration, human dermatologically tested.'}
+          <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>
+            {isEs
+              ? 'Formuladas y producidas bajo estrictas normas ISO 22716 (Buenas Prácticas de Fabricación cosmético-médica), todas las fórmulas cuentan con registro oficial en el Portal Europeo CPNP de la Comisión Europea. Son 100% hipoalergénicas, testadas dermatológicamente en humanos, formuladas sin parabenos, siliconas ni colorantes sintéticos, e incorporan la garantía Colway de hidratación dermo-compatible con "Efecto Cero Tirantez" (Zero Tightness).'
+              : 'Formulated and manufactured strictly under ISO 22716 Good Manufacturing Practice (GMP) for cosmetic compounding, every Colway formulation holds official European Commission CPNP (Cosmetic Products Notification Portal) compliance. The formulations are 100% hypoallergenic, dermatologically tested on human subjects, formulated without parabens, silicones, synthetic colorants, or PEG compounds, and guaranteed with the Colway "Zero Tightness" physiological hydration mantle.'}
           </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', paddingTop: '4px' }}>
+            {['ISO 22716 Certified GMP Facility', 'EU CPNP Notification Portal Verified', '100% Dermatologically Tested in Humans', '0% Parabens, PEGs & Silicones', 'Zero Tightness Hydrolipid Protection'].map((chip, i) => (
+              <span key={i} style={{ fontSize: '0.68rem', fontWeight: 650, color: '#334155', background: '#ffffff', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: '4px' }}>
+                ✓ {chip}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </section>

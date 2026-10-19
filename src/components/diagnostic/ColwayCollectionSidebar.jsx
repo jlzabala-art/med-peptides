@@ -275,376 +275,7 @@ export default function ColwayCollectionSidebar({
         </nav>
       </div>
 
-      {/* -- 2. SECCIONES CLINICAS (Exclusive Section Switcher) -- */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-          <h5 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            {isEs ? 'Vistas del Módulo' : 'Module Views'}
-          </h5>
-          <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 600 }}>1 view at a time</span>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('selection');
-              if (onSelectSection) onSelectSection('overview');
-              scrollToSectionTop();
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '8px 10px',
-              borderRadius: '7px',
-              border: activeSection === 'overview' ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
-              background: activeSection === 'overview' ? '#f0fdfa' : '#f8fafc',
-              color: activeSection === 'overview' ? '#0d9488' : '#0f172a',
-              cursor: 'pointer',
-              fontSize: '0.76rem',
-              fontWeight: activeSection === 'overview' ? 750 : 600,
-              textAlign: 'left',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Building2 size={14} color={activeSection === 'overview' ? '#0d9488' : '#64748b'} />
-              <span>{isEs ? 'Visión General (Overview)' : 'Clinical Overview'}</span>
-            </div>
-            {activeSection === 'overview' && <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488' }}>Active</span>}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('selection');
-              if (onSelectSection) onSelectSection('catalog');
-              scrollToSectionTop();
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '8px 10px',
-              borderRadius: '7px',
-              border: activeSection === 'catalog' ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
-              background: activeSection === 'catalog' ? '#f0fdfa' : '#f8fafc',
-              color: activeSection === 'catalog' ? '#0d9488' : '#0f172a',
-              cursor: 'pointer',
-              fontSize: '0.76rem',
-              fontWeight: activeSection === 'catalog' ? 750 : 600,
-              textAlign: 'left',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Layers size={14} color={activeSection === 'catalog' ? '#0d9488' : '#64748b'} />
-              <span>{isEs ? 'Catálogo de Formulaciones' : 'Product Catalog (9)'}</span>
-            </div>
-            {activeSection === 'catalog' && <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488' }}>Active</span>}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('selection');
-              if (onSelectSection) onSelectSection('advantage');
-              scrollToSectionTop();
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '8px 10px',
-              borderRadius: '7px',
-              border: activeSection === 'advantage' ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
-              background: activeSection === 'advantage' ? '#f0fdfa' : '#f8fafc',
-              color: activeSection === 'advantage' ? '#0d9488' : '#0f172a',
-              cursor: 'pointer',
-              fontSize: '0.76rem',
-              fontWeight: activeSection === 'advantage' ? 750 : 600,
-              textAlign: 'left',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Sparkles size={14} color={activeSection === 'advantage' ? '#0d9488' : '#64748b'} />
-              <span>{isEs ? 'Ventaja Bio-Colágeno' : 'Bio-Collagen Advantage'}</span>
-            </div>
-            {activeSection === 'advantage' && <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488' }}>Active</span>}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('selection');
-              if (onSelectSection) onSelectSection('protocols');
-              scrollToSectionTop();
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '8px 10px',
-              borderRadius: '7px',
-              border: activeSection === 'protocols' ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
-              background: activeSection === 'protocols' ? '#f0fdfa' : '#f8fafc',
-              color: activeSection === 'protocols' ? '#0d9488' : '#0f172a',
-              cursor: 'pointer',
-              fontSize: '0.76rem',
-              fontWeight: activeSection === 'protocols' ? 750 : 600,
-              textAlign: 'left',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FlaskConical size={14} color={activeSection === 'protocols' ? '#0d9488' : '#7c3aed'} />
-              <span>{isEs ? 'Protocolos Clínicos (4)' : 'Clinical Protocols (4)'}</span>
-            </div>
-            {activeSection === 'protocols' && <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488' }}>Active</span>}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('selection');
-              if (onSelectSection) onSelectSection('calculator');
-              scrollToSectionTop();
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '8px 10px',
-              borderRadius: '7px',
-              border: activeSection === 'calculator' ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
-              background: activeSection === 'calculator' ? '#f0fdfa' : '#f8fafc',
-              color: activeSection === 'calculator' ? '#0d9488' : '#0f172a',
-              cursor: 'pointer',
-              fontSize: '0.76rem',
-              fontWeight: activeSection === 'calculator' ? 750 : 600,
-              textAlign: 'left',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Calculator size={14} color={activeSection === 'calculator' ? '#0d9488' : '#0284c7'} />
-              <span>{isEs ? 'Calculadora de Ciclos & Dosis' : 'Cycle Calculator & Dosing'}</span>
-            </div>
-            {activeSection === 'calculator' && <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488' }}>Active</span>}
-          </button>
-        </div>
-      </div>
-
-      {/* -- 3. PROTOCOLOS CLINICOS A NIVEL DE ITEM (Compact Item-Level Reference) -- */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1.15rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <h5 style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            {isEs ? 'Protocolos Clínicos' : 'Clinical Protocols'}
-          </h5>
-          {activeProtocolId ? (
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                setInternalActiveProtocolId(null);
-                if (onSelectCategory) onSelectCategory('all');
-                if (onSearchKeyword) onSearchKeyword('');
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#0d9488',
-                fontSize: '0.68rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                padding: 0
-              }}
-            >
-              {isEs ? 'Limpiar' : 'Reset'}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                if (onSelectSection) onSelectSection('protocols');
-              }}
-              style={{ background: 'none', border: 'none', fontSize: '0.68rem', color: '#0d9488', fontWeight: 700, cursor: 'pointer', padding: 0 }}
-            >
-              {isEs ? 'Ver Todos (4)' : 'View All (4) →'}
-            </button>
-          )}
-        </div>
-
-        <p style={{ fontSize: '0.72rem', color: '#64748b', lineHeight: 1.35, margin: '0 0 8px 0' }}>
-          {isEs ? 'Filtra el catálogo por pauta clínica del paciente:' : 'Filter catalog by patient treatment pathway:'}
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {protocols.map((proto) => {
-            const isSelected = activeProtocolId === proto.id;
-            return (
-              <button
-                key={proto.id}
-                type="button"
-                onClick={() => {
-                  if (onSelectSection) onSelectSection('protocols');
-                  handleSelectProtocol(proto);
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '7px 9px',
-                  borderRadius: '7px',
-                  border: isSelected ? '1.5px solid #0d9488' : '1px solid #f1f5f9',
-                  background: isSelected ? '#f0fdfa' : '#f8fafc',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <div style={{ minWidth: 0, paddingRight: '4px' }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: isSelected ? 750 : 600, color: isSelected ? '#0d9488' : '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {proto.title}
-                  </div>
-                </div>
-                <span style={{
-                  fontSize: '0.60rem',
-                  fontWeight: 700,
-                  color: isSelected ? '#0d9488' : '#64748b',
-                  background: '#ffffff',
-                  border: isSelected ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
-                  borderRadius: '4px',
-                  padding: '1px 5px',
-                  flexShrink: 0
-                }}>
-                  {proto.badge}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* -- 4. FICHA TECNICA DINAMICA SEGUN LINEA SELECCIONADA -- */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1.15rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <h5 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            {isEs ? 'Ficha Técnica de la Línea' : 'Line Technical Specifications'}
-          </h5>
-          <span style={{ fontSize: '0.65rem', color: '#0284c7', fontWeight: 700 }}>
-            {selectedCategory === 'trichology'
-              ? (isEs ? 'Tricología Capilar' : 'Trichology')
-              : selectedCategory === 'epigenetic'
-              ? (isEs ? 'Diamante Azul' : 'Blue Diamond')
-              : selectedCategory === 'nutricosmetics'
-              ? (isEs ? 'Nutricosmética' : 'Nutricosmetics')
-              : (isEs ? 'Dermo-Nativo' : 'Native Dermal')}
-          </span>
-        </div>
-
-        {selectedCategory === 'trichology' ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', background: '#f8fafc', borderRadius: '10px', padding: '10px', border: '1px solid #f1f5f9' }}>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Activo Folicular' : 'Active Follicular'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0d9488' }}>Baicapil™ 2%</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Inhibición DHT' : 'DHT Block'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0284c7' }}>{isEs ? 'Zinc PCA + Diosmina' : 'Zinc PCA + Diosmin'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Anclaje Matriz' : 'Matrix Anchorage'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#16a34a' }}>{isEs ? 'Colágeno XVII' : 'Collagen XVII'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Aplicación' : 'Application'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>{isEs ? '3-4x / semana' : '3–4x / week'}</div>
-            </div>
-          </div>
-        ) : selectedCategory === 'epigenetic' ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', background: '#f8fafc', borderRadius: '10px', padding: '10px', border: '1px solid #f1f5f9' }}>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Tecnología' : 'Technology'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0d9488' }}>{isEs ? 'Péptidos VEP' : 'VEP Peptides'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Vectorización' : 'Vectorization'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0284c7' }}>{isEs ? 'Diamante Coloidal' : 'Colloidal Diamond'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Objetivo' : 'Target'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#16a34a' }}>{isEs ? 'Remodelación 3D' : '3D Remodeling'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Penetración' : 'Penetration'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>{isEs ? 'Transdérmica 3x' : '3x Transdermal'}</div>
-            </div>
-          </div>
-        ) : selectedCategory === 'nutricosmetics' ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', background: '#f8fafc', borderRadius: '10px', padding: '10px', border: '1px solid #f1f5f9' }}>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Forma Oral' : 'Oral Form'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0d9488' }}>{isEs ? 'Liofilizado 100%' : '100% Freeze-Dried'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Sinergia Marina' : 'Marine Synergy'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0284c7' }}>Fucus vesiculosus</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Antioxidante' : 'Antioxidant'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#16a34a' }}>{isEs ? 'D-alfa-tocoferol' : 'D-alpha-tocopherol'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Posología' : 'Dosage'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>{isEs ? '2 caps / día' : '2 caps / day'}</div>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', background: '#f8fafc', borderRadius: '10px', padding: '10px', border: '1px solid #f1f5f9' }}>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Tropocolágeno' : 'Tropocollagen'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0d9488' }}>{isEs ? 'Peces Agua Dulce' : 'Freshwater Fish'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Estructura' : 'Structure'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0284c7' }}>{isEs ? 'Triple Hélice Nativa' : 'Native Triple-Helix'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Barrera Cutánea' : 'Skin Barrier'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#16a34a' }}>{isEs ? 'Lípidos Fisiológicos' : 'Physiological Lipids'}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{isEs ? 'Pureza' : 'Purity'}</div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>{isEs ? '0% Parabenos' : '0% Parabens'}</div>
-            </div>
-          </div>
-        )}
-      </div>
-
-
-      {/* -- 5. CALCULADORA DE DISPENSACION (1 Mes vs 3 Meses) -- */}
+      {/* -- 2. ACREDITACION & CALIDAD EUROPEA (Laboratory / Biotech Standard) -- */}
       <div style={{
         background: '#ffffff',
         borderRadius: '14px',
@@ -652,86 +283,50 @@ export default function ColwayCollectionSidebar({
         padding: '1.25rem',
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-          <Calculator size={16} color="#0d9488" />
-          <h5 style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            {isEs ? 'Calculadora de Ciclo Clínico' : 'Clinical Cycle Calculator'}
-          </h5>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.75rem' }}>
+          <div style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '8px',
+            background: 'rgba(13, 148, 136, 0.1)',
+            color: '#0d9488',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <Award size={18} />
+          </div>
+          <div>
+            <h5 style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+              Colway® Biotechnology
+            </h5>
+            <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+              Gdańsk, Poland · European Pioneers
+            </span>
+          </div>
         </div>
 
-        {/* Duration Segmented Toggle */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '4px',
-          background: '#f1f5f9',
-          padding: '3px',
-          borderRadius: '8px',
-          marginBottom: '10px'
-        }}>
-          <button
-            type="button"
-            onClick={() => setCalcDuration('1m')}
-            style={{
-              padding: '6px',
-              borderRadius: '6px',
-              border: 'none',
-              background: calcDuration === '1m' ? '#ffffff' : 'transparent',
-              color: calcDuration === '1m' ? '#0f172a' : '#64748b',
-              fontSize: '0.74rem',
-              fontWeight: calcDuration === '1m' ? 700 : 500,
-              cursor: 'pointer',
-              boxShadow: calcDuration === '1m' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none'
-            }}
-          >
-            {isEs ? '1 Mes (Inducción)' : '1 Month (Induction)'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setCalcDuration('3m')}
-            style={{
-              padding: '6px',
-              borderRadius: '6px',
-              border: 'none',
-              background: calcDuration === '3m' ? '#ffffff' : 'transparent',
-              color: calcDuration === '3m' ? '#0f172a' : '#64748b',
-              fontSize: '0.74rem',
-              fontWeight: calcDuration === '3m' ? 700 : 500,
-              cursor: 'pointer',
-              boxShadow: calcDuration === '3m' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none'
-            }}
-          >
-            {isEs ? '3 Meses (Consolidación)' : '3 Months (Clinical Cycle)'}
-          </button>
-        </div>
+        <p style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.5, margin: '0 0 0.85rem 0' }}>
+          {isEs
+            ? 'Extracción en frío de tropocolágeno nativo biológicamente activo con triple hélice 3D preservada. Certificación europea ISO 22716 y registro CPNP.'
+            : 'Cold-extraction of biologically active native tropocollagen with intact 3D triple-helix conformation. Certified under ISO 22716 GMP & EU CPNP registered.'}
+        </p>
 
-        {/* Calculated Units breakdown */}
-        <div style={{
-          background: '#f8fafc',
-          borderRadius: '8px',
-          padding: '10px',
-          border: '1px solid #e2e8f0',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '6px',
-          fontSize: '0.74rem'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
-            <span>{isEs ? 'Colvita (Cápsulas Orales):' : 'Colvita (Oral Capsules):'}</span>
-            <strong style={{ color: '#0f172a' }}>{calcDuration === '1m' ? (isEs ? '1x 60 cápsulas' : '1x 60 capsules') : (isEs ? '1x 120 + 1x 60 cápsulas' : '1x 120 + 1x 60 capsules')}</strong>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
-            <span>{isEs ? 'Tópico Folicular / Facial:' : 'Topical Facial/Follicular:'}</span>
-            <strong style={{ color: '#0f172a' }}>{calcDuration === '1m' ? (isEs ? '1 Frasco (200 mL / 50 mL)' : '1 Bottle (200 mL / 50 mL)') : (isEs ? '2 Frascos (Ciclo Completo)' : '2 Bottles (Full Cycle)')}</strong>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', borderTop: '1px dashed #cbd5e1', paddingTop: '6px', marginTop: '2px' }}>
-            <span style={{ fontWeight: 700, color: '#0d9488' }}>{isEs ? 'Posología Recomendada:' : 'Recommended Posology:'}</span>
-            <strong style={{ color: '#0d9488' }}>{calcDuration === '1m' ? (isEs ? '2 caps/día + 1 apl/noche' : '2 caps/day + 1 app/night') : (isEs ? '2 caps/día continuas' : '2 caps/day continuous')}</strong>
-          </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+          <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>
+            ISO 22716 GMP
+          </span>
+          <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: '#f0f9ff', color: '#0284c7', border: '1px solid #bae6fd' }}>
+            EU CPNP Verified
+          </span>
+          <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: '#faf5ff', color: '#7c3aed', border: '1px solid #e9d5ff' }}>
+            100% Bioactive
+          </span>
         </div>
       </div>
 
-      {/* -- 6. ACCESO B2B & BAREMO MAYORISTA -- */}
+      {/* -- 3. ACCESO A PRECIOS Y TARIFA B2B MAYORISTA -- */}
       <div style={{
         background: '#ffffff',
         borderRadius: '14px',
@@ -742,8 +337,8 @@ export default function ColwayCollectionSidebar({
         flexDirection: 'column',
         gap: '8px'
       }}>
-        <h5 style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          {isEs ? 'Acceso B2B & Documentación' : 'B2B & Medical Documents'}
+        <h5 style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', margin: '0 0 2px 0', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          {isEs ? 'Tarifas & Documentación B2B' : 'B2B Wholesale & Pricing'}
         </h5>
 
         <Link
@@ -763,7 +358,7 @@ export default function ColwayCollectionSidebar({
             transition: 'all 0.15s ease'
           }}
         >
-          <span>{isEs ? 'Ver Baremo y Tarifas B2B' : 'View B2B Wholesale Pricing'}</span>
+          <span>{isEs ? 'Ver Baremo y Tarifas B2B' : 'View B2B Wholesale Schedule'}</span>
           <ArrowRight size={13} />
         </Link>
 
@@ -788,14 +383,14 @@ export default function ColwayCollectionSidebar({
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
               <MessageSquare size={13} color="#64748b" />
-              {isEs ? 'Consulta Médica de Clínica' : 'Clinic Inquiry Desk'}
+              {isEs ? 'Mesa de Consulta Clínica' : 'Clinic Inquiry Desk'}
             </span>
             <ChevronRight size={13} color="#94a3b8" />
           </button>
         )}
       </div>
 
-      {/* -- 7. COMPARTIR ENLACE OFICIAL -- */}
+      {/* -- 4. COMPARTIR ENLACE OFICIAL -- */}
       <button
         type="button"
         onClick={handleCopyLink}
@@ -831,3 +426,5 @@ export default function ColwayCollectionSidebar({
     </aside>
   );
 }
+
+
