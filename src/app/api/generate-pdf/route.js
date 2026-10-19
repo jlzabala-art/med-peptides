@@ -385,7 +385,7 @@ export async function POST(request) {
     return anonymousSupplierMap.get(rawSupplier);
   };
 
-  const effectiveIncoterm = (incoterm && incoterm !== 'NONE') ? incoterm : (isExWorks ? 'EXW' : null);
+  const effectiveIncoterm = (incoterm && incoterm !== 'NONE') ? incoterm : (isExWorks !== false ? 'EXW' : 'EXW');
 
   const allSearchIds = Array.from(new Set([...(productIds || []), ...(variantIds || [])]));
   // When supplierFilter or catalogueFilter is provided, we can fetch all products server-side and filter.

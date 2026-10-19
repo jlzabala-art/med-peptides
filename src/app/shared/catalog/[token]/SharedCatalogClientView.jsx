@@ -470,8 +470,8 @@ export default function SharedCatalogClientView({
           catalogSubtitle: isFilteredExport 
             ? `Curated Clinical Selection (${targetProducts.length} Formulations${activeFilterLabel ? ` • ${activeFilterLabel}` : ''})` 
             : null,
-          isExWorks: false,
-          incoterm: 'DAP',
+          isExWorks: true,
+          incoterm: 'EXW',
           showKitPrice: true,
           kitSize: 10,
           showPricePerMg: false,
@@ -481,7 +481,7 @@ export default function SharedCatalogClientView({
           showDosage: true,
           showPresentation: true,
           showPurity: true,
-          shippingNote: `Delivered Priority Freight ([${activeShipping.code}] ${(activeShipping.label || '').replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E0}-\u{1F1FF}]/gu, '').trim()}): +${currencySymbol}${shippingCost.toFixed(2)} ${currentCurrency}`,
+          shippingNote: 'Commercial Terms: Ex-Works (EXW). Cold-chain packaging included; international freight, transit insurance, import duties, and destination taxes are excluded.',
           supplierFilter: catalogMeta?.supplierId || null,
           category: catalogMeta?.category || null,
           accountManagerName: catalogMeta?.accountManagerName && catalogMeta.accountManagerName !== 'Atlas Commercial Desk' ? catalogMeta.accountManagerName : null,

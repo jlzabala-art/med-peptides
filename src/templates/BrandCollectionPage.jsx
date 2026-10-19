@@ -203,6 +203,7 @@ export default function BrandCollectionPage({
   const config = BRAND_CONFIGS[brandSlug] || BRAND_CONFIGS.bloodo;
   const { user, isProfessional, loginWithGoogle } = useAuth();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const isEs = false; // Force English — Spanish translations preserved for future i18n
 
   const colwayCategories = useMemo(() => [
     { id: 'all', label: isEs ? 'Todas las Formulaciones' : 'All Formulations', count: 9 },
@@ -231,7 +232,6 @@ export default function BrandCollectionPage({
   const [activeColwaySection, setActiveColwaySection] = useState('overview'); // 'overview' | 'catalog' | 'advantage' | 'protocols' | 'calculator'
   const [activeProtocolId, setActiveProtocolId] = useState(null);
 
-  const isEs = false; // Force English — Spanish translations preserved for future i18n
   const canonicalUrl = `https://www.atlashealth-services.com/collection/${brandSlug}`;
 
   // SEO & structured data

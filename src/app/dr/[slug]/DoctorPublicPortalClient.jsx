@@ -2533,13 +2533,15 @@ export default function DoctorPublicPortalClient({
       width: '22%',
       align: 'left',
       sortable: true,
-      render: (rx) => {
+      render: (val, row) => {
+        const rx = row || val || {};
         const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
         const rawInvoice = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
         const isLegitInvoice = rawInvoice && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInvoice);
         const patientPhone = rx.patientPhone || rx.phone || rx.mobile || rx.patient?.phone || rx.patient?.mobile;
 
-        const codifiedId = getCodifiedPatientId(rx.patientName, rx.prescriptionNumber || rx.code);
+        // Resolve codified patient token uniquely per patient
+        const codifiedId = getCodifiedPatientId(rx.patientName || rx.patient?.name, rx.prescriptionNumber || rx.code || rx.id);
 
         return (
           <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -2661,7 +2663,8 @@ export default function DoctorPublicPortalClient({
       width: '32%',
       align: 'left',
       sortable: true,
-      render: (rx) => {
+      render: (val, row) => {
+        const rx = row || val || {};
         const parts = resolvePrescriptionParts(rx);
         const totalParts = rx.totalParts || parts.length || 1;
         const categoryLabel = rx.regimenCategoryShort || rx.regimenCategory || 'Follicular';
@@ -2738,7 +2741,8 @@ export default function DoctorPublicPortalClient({
       width: '16%',
       align: 'left',
       sortable: true,
-      render: (rx) => {
+      render: (val, row) => {
+        const rx = row || val || {};
         const isProposal = isProposalPrescription(rx);
         const isSold = isSoldPrescription(rx);
         const rawInvoice = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
@@ -2819,7 +2823,8 @@ export default function DoctorPublicPortalClient({
       width: '17%',
       align: 'left',
       sortable: true,
-      render: (rx) => {
+      render: (val, row) => {
+        const rx = row || val || {};
         const dates = calculateTreatmentDates(rx);
         const endShort = String(dates.endFormatted || '').replace(/,\s*\d{4}$/, '');
 
@@ -2899,7 +2904,8 @@ export default function DoctorPublicPortalClient({
       header: 'Actions',
       width: '15%',
       align: 'right',
-      render: (rx) => {
+      render: (val, row) => {
+        const rx = row || val || {};
         const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
         const isPending = !isProposal && ['pending', 'draft'].includes((rx.status || rx.state || '').toLowerCase());
         const isSigning = signingTaskId === (rx.code || rx.id);
@@ -3057,43 +3063,6 @@ export default function DoctorPublicPortalClient({
                 <FileText size={14} />
               </button>
             )}
-
-            {/* QUICK ACTION 3: Official Bottle Labels (Direct 1-Click Access) */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleOpenLabelsModal(rx);
-              }}
-              style={{
-                height: '28px',
-                width: '28px',
-                borderRadius: '4px',
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                color: '#5f6368',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                transition: 'all 0.12s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#fffbeb';
-                e.currentTarget.style.borderColor = '#d97706';
-                e.currentTarget.style.color = '#d97706';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#ffffff';
-                e.currentTarget.style.borderColor = '#dadce0';
-                e.currentTarget.style.color = '#5f6368';
-              }}
-              title="Official Bottle Labels"
-              aria-label="Official Bottle Labels"
-            >
-              <Tag size={14} />
-            </button>
 
             {/* QUICK ACTION 4: 1-Click Renew / Clone Prescription Regimen */}
             <button

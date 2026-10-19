@@ -4,7 +4,7 @@ import { verifySignedQuoteToken } from '@/services/dynamicPricingEngine';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { FieldPath } from 'firebase-admin/firestore';
 import { sanitizeForClient } from '@/utils/sanitizeForClient';
-import { filterProductVariantsStrictly } from '@/utils/strictFilterEngine';
+import { filterProductVariantsStrictly, isApiOrRawMaterialVariant } from '@/utils/strictFilterEngine';
 import { resolveVariantPrice } from '@/utils/resolvePrice';
 import { PRICING_TIER } from '@/constants/productEnums';
 import { sortVariantsAscending, deduplicateVariants } from '@/utils/variantSorter';
@@ -38,14 +38,20 @@ export async function generateMetadata({ params, searchParams }) {
   }
 
   const recipientName = catalogData.recipientName;
-  const supplierId = catalogData.supplierId || '';
-  const catalogueFilter = catalogData.catalogueFilter || '';
   const currency = catalogData.currency || 'USD';
-  const validityDays = catalogData.validityDays || 30;
-  const supplierTitle = 'Atlas Services Formulations';
+  const supplierTitle = 'Clinical Directory';
 
-  const hasRecipient = Boolean(recipientName && recipientName !== 'Valued Partner');
-  const isWholesaler = catalogData.recipientType === 'wholeseller';
+  const cleanBrandText = (txt) => {
+    if (!txt) return '';
+    return String(txt)
+      .replace(/\b(?:lotusland|lotus\s*land|nplabs|np\s*labs|regenpept|psathas|nikolaos)\b/gi, '')
+      .replace(/\s*[•\-–]\s*Medical\b/gi, '')
+      .replace(/\bMedical\s*[•\-–]\s*/gi, '')
+      .replace(/\s*[•\-–]\s*$/g, '')
+      .replace(/^\s*[•\-–]\s*/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  };
 
   // ── Dynamic Filter Metadata for WhatsApp / Social Unfurling ────────────────
   const goal = resolvedSearch?.g || resolvedSearch?.goals;
@@ -83,29 +89,29 @@ export async function generateMetadata({ params, searchParams }) {
     String(catalogData.title || '').toLowerCase().includes('colway') ||
     (hasSpecificProductIds && catalogData.productIds.every(id => String(id).toLowerCase().includes('colway')));
 
-  const defaultCatalogTitle = isColwayOrCosmeticMeta
-    ? 'Dermocosmetic & Nutricosmetic Portfolio'
-    : (hasSpecificProductIds ? 'Curated Formulations Catalog' : 'Clinical Peptide Catalog');
+  // Generic metadata definition — never leaks partner, wholesaler, or supplier brand names
+  let title = '';
+  let description = '';
+  let ogSiteName = '';
 
-  const baseTitle = catalogData.title || (
-    hasRecipient
-      ? (isWholesaler ? `Wholesale Portfolio • ${recipientName}` : `${defaultCatalogTitle} • ${recipientName}`)
-      : `${defaultCatalogTitle} • ${supplierTitle}`
-  );
+  if (isColwayOrCosmeticMeta) {
+    ogSiteName = 'Colway Clinical Portfolio';
+    title = hasFilter
+      ? `Curated Dermocosmetics: ${filterSummary} • Formulations Directory`
+      : 'Dermocosmetic & Nutricosmetic Portfolio • Formulations Directory';
+    description = `Biologically active tropocollagen, botanical complexes and specialized dermocosmetic systems in ${currency}. Verified institutional delivery terms. Live synchronized stock and registered safety dossiers.`;
+  } else {
+    // Standard generic peptide catalog metadata
+    ogSiteName = 'Clinical Peptide Catalog';
+    title = hasFilter
+      ? `Clinical Peptide Catalog: ${filterSummary} • Formulations Directory`
+      : 'Clinical Peptide Formulations • Specialized Portfolio';
+    description = `Clinical peptide portfolio and analytical-grade lyophilized formulations in ${currency}. Verified institutional delivery terms. Live synchronized stock, batch traceability & verified analytical assays.`;
+  }
 
-  const title = hasFilter
-    ? `Curated Catalog: ${filterSummary} • ${hasRecipient ? recipientName : supplierTitle}`
-    : baseTitle;
-
-  const defaultDescription = isColwayOrCosmeticMeta
-    ? `Biologically active tropocollagen, botanical complexes and specialized dermocosmetic systems in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock and registered safety dossiers.`
-    : (hasSpecificProductIds
-      ? `Curated clinical formulations portfolio in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock and batch traceability.`
-      : `Clinical peptide portfolio and analytical-grade lyophilized formulations in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch traceability & verified analytical assays.`);
-
-  const description = hasFilter
-    ? `Curated selection matching ${filterSummary} in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}.`
-    : defaultDescription;
+  // Ensure strict brand sanitization across all metadata strings
+  title = cleanBrandText(title);
+  description = cleanBrandText(description);
 
   const appUrl = 'https://www.atlashealth-services.com';
   const catalogCode = catalogData.catalogId || token || '';
@@ -119,10 +125,6 @@ export async function generateMetadata({ params, searchParams }) {
   if (dose && dose !== 'all') queryParts.push(`dose=${encodeURIComponent(dose)}`);
   const qs = queryParts.join('&');
   const canonicalUrl = `${appUrl}/c/${catalogCode}${qs ? `?${qs}` : ''}`;
-
-  const ogSiteName = isColwayOrCosmeticMeta 
-    ? 'Colway Clinical Portfolio' 
-    : (hasSpecificProductIds ? 'Atlas Formulations Directory' : 'Clinical Peptide Catalog');
 
   return {
     title,
@@ -608,7 +610,9 @@ export default async function SharedCatalogPage({ params }) {
           }
         );
 
-    if (variants.length === 0) continue;
+    const isExplicitApiCatalog = catalogueFilter === 'raw_material' || catalogueFilter === 'api' || category === 'raw_material';
+    const cleanVariants = isExplicitApiCatalog ? variants : variants.filter(v => !isApiOrRawMaterialVariant(v, data));
+    if (cleanVariants.length === 0) continue;
 
     const catLower = String(data.categoryId || data.category || '').toLowerCase();
     const slugLower = String(data.slug || data.id || '').toLowerCase();
@@ -622,7 +626,7 @@ export default async function SharedCatalogPage({ params }) {
       nameLower.includes('conditioner') || nameLower.includes('collagen');
 
     // F-A: Resolve prices using canonical schema
-    const resolvedVariants = variants.map(v => {
+    const resolvedVariants = cleanVariants.map(v => {
       const { unitPrice, tier10UnitPrice, kitTotalPrice } = resolveCanonicalPrice(v, {
         canonicalTier,
         markupFactor,

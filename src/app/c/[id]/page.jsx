@@ -24,9 +24,15 @@ export async function generateMetadata({ params, searchParams }) {
         const isProto = d.catalogType === 'protocols' || d.assetType === 'protocols_catalog' || String(id).startsWith('PR-');
         
         if (isProto) {
-          const recipientName = d.recipientName && d.recipientName !== 'Valued Partner' ? d.recipientName : null;
-          const title = recipientName
-            ? `Clinical Protocol Directory • ${recipientName}`
+          const cleanRecipientName = d.recipientName && d.recipientName !== 'Valued Partner'
+            ? String(d.recipientName)
+                .replace(/\b(?:lotusland|lotus\s*land|nplabs|np\s*labs|regenpept|psathas|nikolaos)\b/gi, '')
+                .replace(/\s*[•\-–]\s*$/g, '')
+                .replace(/^\s*[•\-–]\s*/g, '')
+                .trim()
+            : null;
+          const title = cleanRecipientName
+            ? `Clinical Protocol Directory • ${cleanRecipientName}`
             : 'Clinical Protocol Directory • Evidence-Based Pathways';
           const description = 'Standardized clinical protocol guidelines, dosing schedules, and titration timelines for certified medical practitioners.';
           const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';

@@ -120,12 +120,16 @@ export async function POST(request) {
 
     // 2. Also register in universal `shared_records` for 360 User CRM tracking
     try {
+      const rawSupplierTag = catalogueFilter || (supplierId ? supplierId.replace(/^supplier-/, '') : 'General');
+      const cleanSupplierTag = String(rawSupplierTag)
+        .replace(/\b(?:lotusland|lotus\s*land|nplabs|np\s*labs|regenpept)\b/gi, 'Peptides')
+        .trim();
+
       await adminDb.collection('shared_records').add({
         shareCode: linkId,
         assetType: 'shared_catalog',
-        assetTitle: `Catalog • ${catalogueFilter || (supplierId ? supplierId.replace(/^supplier-/, '') : 'General')}`,
+        assetTitle: `Catalog • ${cleanSupplierTag || 'Peptides'}`,
         assetMeta: {
-          catalogId: linkId,
           supplierId,
           catalogueFilter,
           currency,

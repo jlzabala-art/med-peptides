@@ -8,10 +8,39 @@
 // Known supplier manufacturing profiles & constraints
 export const SUPPLIER_CONSTRAINTS = {
   lotusland: {
-    allowedPresentations: ['vial', 'lyophilized vial', 'powder', 'bottle', 'bulk powder', 'tablet'],
-    disallowedPresentations: ['pen', 'pre-filled pen', 'cartridge', 'refill cartridge', 'spray', 'nasal spray']
+    allowedPresentations: ['vial', 'lyophilized vial', 'powder', 'bottle', 'tablet'],
+    disallowedPresentations: ['pen', 'pre-filled pen', 'cartridge', 'refill cartridge', 'spray', 'nasal spray', 'bulk api', 'bulk api powder', 'api']
   }
 };
+
+/**
+ * Detects whether a variant or product represents Bulk API / Raw Material powder.
+ */
+export function isApiOrRawMaterialVariant(variant = {}, product = {}) {
+  const v = variant || {};
+  const p = product || {};
+  const vName = String(v.name || v.dosage || v.dose || '').toLowerCase();
+  const vPres = String(v.presentation || v.format || '').toLowerCase();
+  const vType = String(v.type || v.productType || '').toLowerCase();
+  const pName = String(p.canonicalName || p.name || '').toLowerCase();
+  const pType = String(p.productType || p.primaryType || p.type || p.category || '').toLowerCase();
+
+  return (
+    v.isApi === true ||
+    vType === 'raw_material' ||
+    vType === 'api_raw_material' ||
+    vType === 'api' ||
+    pType === 'raw_material' ||
+    pType === 'api_raw_material' ||
+    vPres.includes('bulk api') ||
+    vPres.includes('bulk powder') ||
+    vPres === 'api' ||
+    vPres.includes('bulk api powder') ||
+    vName.includes('bulk api') ||
+    vName.includes('(bulk api)') ||
+    pName.includes('(bulk api)')
+  );
+}
 
 /**
  * Normalizes supplier identifier/slug
@@ -42,6 +71,21 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
   const v = variant || {};
   const p = product || {};
 
+  // Global Check: Exclude Bulk APIs unless explicitly requesting an API or raw material catalog
+  const isExplicitApiCatalog = 
+    filters.catalogueFilter === 'raw_material' ||
+    filters.catalogueFilter === 'api' ||
+    filters.categoryFilter === 'raw_material' ||
+    filters.category === 'raw_material' ||
+    filters.productTypeFilter === 'raw_material' ||
+    filters.productType === 'raw_material' ||
+    filters.includeRawMaterials === true ||
+    filters.includeApis === true;
+
+  if (!isExplicitApiCatalog && isApiOrRawMaterialVariant(v, p)) {
+    return false;
+  }
+
   // 1. ── SOURCING & SUPPLIER FILTER (STRICT VARIANT LEVEL) ───────────────────
   const targetSupplier = filters.supplierFilter || filters.supplierId || filters.supplier || filters.supplierIds;
   if (targetSupplier && targetSupplier !== 'all' && targetSupplier !== 'All') {
@@ -65,8 +109,8 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
           const isLotusVariant = vSupplierText.includes('lotus') || v.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
           const isLotusProduct = pSupplierText.includes('lotus') || p.supplierId === 'OLlBbQjgrj6tY7GmM2Jo' || (Array.isArray(p.supplierIds) && p.supplierIds.some(s => String(s).toLowerCase().includes('lotus')));
 
-          // Lotus Land strictly provides Vials / Lyophilized Powder / Bottles / Boxes / Kits — never Pre-filled Pens or Cartridges
-          if (pres.includes('pen') || vName.includes('pen') || pres.includes('cartridge')) {
+          // Lotus Land strictly provides Vials / Lyophilized Powder / Bottles / Boxes / Kits — never Pre-filled Pens, Cartridges, or Bulk APIs
+          if (pres.includes('pen') || vName.includes('pen') || pres.includes('cartridge') || pres.includes('bulk api') || vName.includes('bulk api')) {
             return false;
           }
           if (v.supplier || v.supplierName || v.supplierId) {
