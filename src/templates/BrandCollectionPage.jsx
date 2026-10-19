@@ -745,217 +745,7 @@ export default function BrandCollectionPage({
               )}
             </div>
 
-            {/* Colway Scientific & Biotechnology Pillar Strip */}
-            {brandSlug === 'colway' && (
-              <div style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '1.25rem 1.5rem',
-                marginBottom: '1.25rem',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.85rem'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Sparkles size={16} color="#0d9488" />
-                    <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {isEs ? 'Los 3 Pilares Científicos del Tropocolágeno Nativo Colway®' : 'The 3 Scientific Pillars of Colway® Native Tropocollagen'}
-                    </h4>
-                  </div>
-                  <span style={{ fontSize: '0.70rem', color: '#0d9488', fontWeight: 700, background: '#f0fdfa', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '4px' }}>
-                    Biotecnología de Gdańsk · ISO 22716 & CPNP
-                  </span>
-                </div>
 
-                {/* Numbered Lines / GCP Architecture Feature Rows (Golden Rule UX) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-                  {/* Pillar 01 */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '12px',
-                    padding: '10px 0',
-                    borderBottom: '1px solid #f1f5f9'
-                  }}>
-                    <span style={{
-                      flexShrink: 0,
-                      width: '26px',
-                      height: '26px',
-                      borderRadius: '6px',
-                      background: 'rgba(13, 148, 136, 0.1)',
-                      color: '#0d9488',
-                      fontSize: '0.72rem',
-                      fontWeight: 800,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: '2px'
-                    }}>
-                      01
-                    </span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                        <strong style={{ fontSize: '0.82rem', color: '#0f172a' }}>
-                          {isEs ? 'Tropocolágeno Nativo en Triple Hélice 3D Intacta' : 'Intact 3D Triple-Helix Tropocollagen'}
-                        </strong>
-                        <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', padding: '1px 6px', borderRadius: '4px' }}>
-                          {isEs ? 'Bioafinidad 100%' : '100% Bioaffinity'}
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
-                        {isEs
-                          ? 'Extracción molecular en frío que preserva telopéptidos y estructura terciaria biológicamente activa con afinidad celular 100% homóloga al procolágeno humano.'
-                          : 'Cold freshwater extraction preserving native telopeptides & tertiary structure with 100% human pro-collagen cellular affinity.'
-                        }
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Pillar 02 */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '12px',
-                    padding: '10px 0',
-                    borderBottom: '1px solid #f1f5f9'
-                  }}>
-                    <span style={{
-                      flexShrink: 0,
-                      width: '26px',
-                      height: '26px',
-                      borderRadius: '6px',
-                      background: 'rgba(2, 132, 199, 0.1)',
-                      color: '#0284c7',
-                      fontSize: '0.72rem',
-                      fontWeight: 800,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: '2px'
-                    }}>
-                      02
-                    </span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                        <strong style={{ fontSize: '0.82rem', color: '#0f172a' }}>
-                          {isEs ? 'Estimulación de Neocolagénesis Real a 110 Días' : '110-Day Real Neocollagenesis Induction'}
-                        </strong>
-                        <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', padding: '1px 6px', borderRadius: '4px' }}>
-                          {isEs ? 'Estudio ITA-TEST #B-89146' : 'ITA-TEST Study #B-89146'}
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
-                        {isEs
-                          ? 'Estudio clínico de laboratorio ITA-TEST Varsovia: estimula los fibroblastos dérmicos para reactivar la síntesis endógena de colágeno (+90% firmeza y densidad confirmada en ciclo).'
-                          : 'ITA-TEST Warsaw Lab study #B-89146: stimulates dermal fibroblasts to reactivate endogenous collagen synthesis (90% confirmed firming & density across the cycle).'
-                        }
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Pillar 03 */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '12px',
-                    padding: '10px 0 2px 0'
-                  }}>
-                    <span style={{
-                      flexShrink: 0,
-                      width: '26px',
-                      height: '26px',
-                      borderRadius: '6px',
-                      background: 'rgba(124, 58, 237, 0.1)',
-                      color: '#7c3aed',
-                      fontSize: '0.72rem',
-                      fontWeight: 800,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: '2px'
-                    }}>
-                      03
-                    </span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                        <strong style={{ fontSize: '0.82rem', color: '#0f172a' }}>
-                          {isEs ? 'Liofilización Criogénica al Vacío (-40°C)' : 'Cryogenic Vacuum Freeze-Drying (-40°C)'}
-                        </strong>
-                        <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#7c3aed', background: '#faf5ff', padding: '1px 6px', borderRadius: '4px' }}>
-                          {isEs ? 'Péptidos Señal Vivos' : 'Living Signal Peptides'}
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
-                        {isEs
-                          ? 'Sublimación térmica que preserva intactos los péptidos señal del tropocolágeno en Colvita, sin desnaturalización proteica, potenciados con Fucus vesiculosus del Báltico y Vitamina E natural.'
-                          : 'Sub-zero vacuum sublimation retaining intact signal peptides in Colvita without protein denaturation, synergized with Baltic Fucus & natural Vitamin E.'
-                        }
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Colway Active Treatment Line Protocol Banner */}
-            {brandSlug === 'colway' && selectedCategory !== 'all' && (
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #cbd5e1',
-                borderRadius: '10px',
-                padding: '12px 16px',
-                marginBottom: '1.25rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '10px'
-              }}>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-                    <span style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', color: '#0d9488', letterSpacing: '0.04em' }}>
-                      {selectedCategory === 'epigenetic' ? '💎 Blue Diamond Epigenetic Line' :
-                       selectedCategory === 'trichology' ? '🌿 Anti-DHT Trichology System' :
-                       selectedCategory === 'native-dermal' ? '💧 Dermo-Native & Barrier Recovery' :
-                       selectedCategory === 'nutricosmetics' ? '💊 Inside-Out Systemic Nutricosmetics' :
-                       '📦 Clinical Protocol Bundles'}
-                    </span>
-                    <span style={{ fontSize: '0.68rem', color: '#64748b' }}>· Official Monograph Protocol</span>
-                  </div>
-                  <p style={{ fontSize: '0.78rem', color: '#334155', margin: 0, lineHeight: 1.45 }}>
-                    {selectedCategory === 'epigenetic'
-                      ? 'Reversal of the facial "Triangle of Beauty" inversion via Matrigenics 14G & VEP peptides. Pauta: Apply enzymatic peeling 15 min on dry skin 1–2x/week, follow with warming cream between fingertips before upward facial massage. Complement with oral Colvita.'
-                      : selectedCategory === 'trichology'
-                      ? '5α-reductase inhibition, follicular stem cell activation (Baicapil™ 2%), and Collagen XVII anchorage (Kerascalp™). Pauta: Wash scalp 3–4x/week leaving foam for 3 minutes before rinsing; apply cuticular conditioner from mid-lengths to ends; take 2 Colvita capsules daily.'
-                      : selectedCategory === 'native-dermal'
-                      ? '110-day physiological neocollagenesis & Zero-Tightness barrier repair via biologically active tropocollagen & Noni fruit. Pauta: Cleanse with pea-sized wash gel emulsion, tap Vege collagen into damp skin until absorbed, seal lips with protective compress.'
-                      : selectedCategory === 'nutricosmetics'
-                      ? 'Deep systemic fibroblast neocollagenesis (skin, cartilage, vascular walls) via sub-zero lyophilized tropocollagen & Baltic Fucus. Pauta: Take 2 capsules daily during or immediately after meals with water. Continuous 3-month cycle.'
-                      : 'Dual-action kits combining oral signal peptides with topical regimens for comprehensive cellular results.'}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedCategory('all')}
-                  style={{
-                    background: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    padding: '5px 10px',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    color: '#475569',
-                    cursor: 'pointer',
-                    flexShrink: 0
-                  }}
-                >
-                  Show All Formulations (8)
-                </button>
-              </div>
-            )}
 
             {/* Google Cloud Filter Bar */}
             <div style={{
@@ -1377,22 +1167,28 @@ export default function BrandCollectionPage({
                           </span>
                         </div>
 
-                        {/* Professional Clinical Badge (No Prices on Public Pages) */}
+                        {/* Formulation Line Badge (Below image, aligned to left) */}
                         <div style={{
                           position: 'absolute',
                           bottom: '10px',
-                          right: '10px',
+                          left: '10px',
                           background: 'rgba(15, 23, 42, 0.85)',
                           backdropFilter: 'blur(4px)',
                           color: '#ffffff',
                           padding: '3px 8px',
                           borderRadius: '4px',
-                          fontSize: '0.68rem',
+                          fontSize: '0.67rem',
                           fontWeight: 700,
                           letterSpacing: '0.03em',
                           textTransform: 'uppercase'
                         }}>
-                          Clinical Formulary
+                          {brandSlug === 'colway' ? (
+                            product.category?.toLowerCase().includes('trichology') || product.slug?.includes('shampoo') || product.slug?.includes('conditioner')
+                              ? 'Bio-Collagen Trichology'
+                              : product.category?.toLowerCase().includes('nutricosmetic') || product.slug?.includes('colvita')
+                              ? 'Bioactive Nutricosmetic'
+                              : 'Native Bio-Collagen'
+                          ) : brandSlug === 'eterna' ? 'Genomic Multi-Omics' : brandSlug === 'ultraperson' ? 'Longevity Formula' : 'Laboratory Diagnostic'}
                         </div>
                       </div>
 
@@ -1626,44 +1422,9 @@ export default function BrandCollectionPage({
           </span>
         </div>
 
-        {/* Dock Actions: Contextual AI, Professional Access / Cart, Clinical Desk */}
+        {/* Dock Actions: Inquire Info (Institutional/Clinical Documentation) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Contextual Atlas AI Trigger */}
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('selection');
-              window.dispatchEvent(new CustomEvent('open-public-atlas-ai', {
-                detail: {
-                  initialQuery: brandSlug === 'colway'
-                    ? 'Can you provide the clinical pharmacology, native tropocollagen mechanism, and application guidelines for Colway® dermocosmetics & trichology?'
-                    : `Can you analyze the clinical indications, protocols, and formulation details for ${config.name}?`
-                }
-              }));
-            }}
-            title={isEs ? 'Abrir Asistente Clínico Atlas AI' : 'Open Atlas AI Research Assistant'}
-            style={{
-              height: '36px',
-              padding: '0 13px',
-              borderRadius: '9999px',
-              background: '#0f172a',
-              color: '#ffffff',
-              border: 'none',
-              fontSize: '0.76rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 8px rgba(15, 23, 42, 0.25)',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <Sparkles size={13} color="#38bdf8" />
-            <span>Atlas AI</span>
-          </button>
-
-          {user ? (
+          {user && (
             <button
               type="button"
               onClick={() => router.push('/checkout')}
@@ -1685,33 +1446,12 @@ export default function BrandCollectionPage({
               <Sparkles size={13} />
               <span>{isEs ? 'Ver Carrito' : 'View Cart'}</span>
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setIsAuthModalOpen(true)}
-              style={{
-                height: '36px',
-                padding: '0 12px',
-                borderRadius: '9999px',
-                background: '#f8fafc',
-                border: '1px solid #cbd5e1',
-                color: '#334155',
-                fontSize: '0.76rem',
-                fontWeight: 650,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
-            >
-              <User size={13} color="#64748b" />
-              <span>{isEs ? 'Área Profesional' : 'Professional Access'}</span>
-            </button>
           )}
 
           <button
             type="button"
             onClick={() => setIsInquiryDrawerOpen(true)}
+            title={isEs ? 'Solicitar información del producto, ficha técnica y precios institucionales' : 'Inquire product information, technical dossiers and institutional pricing'}
             style={{
               height: '36px',
               padding: '0 14px',
@@ -1729,7 +1469,7 @@ export default function BrandCollectionPage({
             }}
           >
             <FileText size={13} />
-            <span>{isEs ? 'Consulta Clínica' : 'Clinical Desk'}</span>
+            <span>{isEs ? 'Consultar Info' : 'Inquire Info'}</span>
           </button>
         </div>
       </div>

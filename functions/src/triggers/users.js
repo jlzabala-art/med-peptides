@@ -30,17 +30,18 @@ module.exports = (gmailUser, gmailAppPass) => onDocumentCreated(
       },
     });
 
-    const fromAddress = `"Atlas Health" <${gmailUser.value()}>`;
+    const { sanitizeTestEmail } = require("../lib/safetyEmailGuard");
     const { subject, html } = buildWelcomeEmail(userData);
+    const safeMail = sanitizeTestEmail({
+      from: fromAddress,
+      to: customerEmail,
+      subject,
+      html,
+    }, 'new-user');
 
     try {
-      await transporter.sendMail({
-        from: fromAddress,
-        to: customerEmail,
-        subject,
-        html,
-      });
-      console.log(`📧 Welcome email sent to: ${customerEmail}`);
+      await transporter.sendMail(safeMail);
+      console.log(`📧 Safe welcome email processed (originally for: ${customerEmail})`);
     } catch (err) {
       console.error("Failed to send welcome email:", err);
     }

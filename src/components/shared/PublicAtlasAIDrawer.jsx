@@ -838,7 +838,7 @@ export default function PublicAtlasAIDrawer({
           type="button"
           onClick={() => setIsOpen(true)}
           className="atlas-ai-public-fab"
-          title="Open Atlas AI"
+          title={`Atlas AI · Maximum ${limit} inquiries per session (${remaining} remaining)`}
           style={{
             position: 'fixed',
             bottom: '24px',
@@ -876,7 +876,7 @@ export default function PublicAtlasAIDrawer({
               borderRadius: '10px',
             }}
           >
-            {isBlocked ? 'Limit Reached' : `${remaining}/${limit}`}
+            {isBlocked ? 'Limit 5/5' : `${remaining}/${limit} Max`}
           </span>
         </button>
       )}
