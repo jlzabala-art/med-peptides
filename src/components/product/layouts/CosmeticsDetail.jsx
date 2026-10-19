@@ -1144,7 +1144,6 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                 </div>
               }
             />
-            <CollectionCompanionBanner product={product} />
             <PublicKpiGrid items={kpis} />
           </div>
         )}

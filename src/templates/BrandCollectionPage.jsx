@@ -14,6 +14,7 @@ import UltraPersonCollectionSidebar from '../components/diagnostic/UltraPersonCo
 import ColwayCollectionSidebar from '../components/diagnostic/ColwayCollectionSidebar';
 import ColwayMainSections from '../components/collection/ColwayMainSections';
 import PublicInstitutionalInquiryDrawer from '../components/shared/PublicInstitutionalInquiryDrawer';
+import PublicAtlasAIDrawer from '../components/shared/PublicAtlasAIDrawer';
 import ColwayTrichologyStemCellShowcase from '../components/product/ColwayTrichologyStemCellShowcase';
 import CopyableId from '../components/ui/CopyableId';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -1625,8 +1626,43 @@ export default function BrandCollectionPage({
           </span>
         </div>
 
-        {/* Dock Actions: No "Sign in to Order"! Clean & friction-free */}
+        {/* Dock Actions: Contextual AI, Professional Access / Cart, Clinical Desk */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Contextual Atlas AI Trigger */}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              window.dispatchEvent(new CustomEvent('open-public-atlas-ai', {
+                detail: {
+                  initialQuery: brandSlug === 'colway'
+                    ? 'Can you provide the clinical pharmacology, native tropocollagen mechanism, and application guidelines for Colway® dermocosmetics & trichology?'
+                    : `Can you analyze the clinical indications, protocols, and formulation details for ${config.name}?`
+                }
+              }));
+            }}
+            title={isEs ? 'Abrir Asistente Clínico Atlas AI' : 'Open Atlas AI Research Assistant'}
+            style={{
+              height: '36px',
+              padding: '0 13px',
+              borderRadius: '9999px',
+              background: '#0f172a',
+              color: '#ffffff',
+              border: 'none',
+              fontSize: '0.76rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 8px rgba(15, 23, 42, 0.25)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Sparkles size={13} color="#38bdf8" />
+            <span>Atlas AI</span>
+          </button>
+
           {user ? (
             <button
               type="button"
@@ -1964,6 +2000,9 @@ export default function BrandCollectionPage({
           catalogCount: filteredProducts.length
         }}
       />
+
+      {/* ── Public Atlas AI Copilot Drawer ── */}
+      <PublicAtlasAIDrawer />
 
       {/* ── 7. Unified Public Institutional Footer (Bottom) ── */}
       <PublicUnifiedFooter lang={lang} />

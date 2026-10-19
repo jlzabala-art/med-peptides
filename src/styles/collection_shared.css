@@ -1508,6 +1508,16 @@
   }
 }
 
+.collection-dock-mobile-only {
+  display: inline-flex !important;
+}
+
+@media (min-width: 1024px) {
+  .collection-dock-mobile-only {
+    display: none !important;
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────
    FULL-WIDTH COLLECTION CARD LAYOUT (100% of Main Workspace)
    ───────────────────────────────────────────────────────────── */

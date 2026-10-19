@@ -532,7 +532,9 @@ export default function DoctorPublicPortalClient({
   initialData = null,
   isCustomerAgent = false,
   agentName = 'Atlas Concierge Care',
-  availableDoctors = []
+  availableDoctors = [],
+  initialTab = 'overview',
+  initialSearchParams = {}
 }) {
   const [slug, setSlug] = useState(propSlug);
   const [data, setData] = useState(initialData || null);
@@ -677,16 +679,22 @@ export default function DoctorPublicPortalClient({
   };
 
   // Search & Filter State (Google Cloud UX Golden Rules #7, #24, #29)
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState(initialSearchParams?.q || '');
+  const [statusFilter, setStatusFilter] = useState(initialSearchParams?.status || 'all');
   const [patientFilter, setPatientFilter] = useState('all');
-  const [taskFilter, setTaskFilter] = useState('all');
-  const [temporalFilter, setTemporalFilter] = useState('all'); // 'all' | 'active' | '30d' | '90d'
+  const [taskFilter, setTaskFilter] = useState(initialSearchParams?.task || 'all');
+  const [temporalFilter, setTemporalFilter] = useState(initialSearchParams?.time || 'all'); // 'all' | 'active' | '30d' | '90d'
   const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22 Scope Switcher)
 
   // Table Density & Synchronization (GCP Table Standard)
   const [tableDensity, setTableDensity] = useState('comfortable'); // 'comfortable' | 'compact'
-  const [lastRefreshed, setLastRefreshed] = useState(new Date());
+  const [lastRefreshed, setLastRefreshed] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    setLastRefreshed(new Date());
+  }, []);
 
   // UI Actions State
   const [copiedLink, setCopiedLink] = useState(false);
@@ -698,7 +706,9 @@ export default function DoctorPublicPortalClient({
   const [lang, setLang] = useState('en');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [activeAnchor, setActiveAnchor] = useState('overview');
+  const [activeAnchor, setActiveAnchor] = useState(
+    initialTab || (initialSearchParams?.task ? 'tasks' : initialSearchParams?.tab) || 'overview'
+  );
 
   // Modal for Viewing Pharmacy Labels Directly from Doctor Portal
   const [activeLabelRx, setActiveLabelRx] = useState(null);
@@ -791,7 +801,7 @@ export default function DoctorPublicPortalClient({
 
   const [isHandoutOpen, setIsHandoutOpen] = useState(false);
   const [handoutRx, setHandoutRx] = useState(null);
-  const [quickRxFilter, setQuickRxFilter] = useState('all'); // 'all' | 'active' (Sold & Invoiced) | 'proposals' (Unaccepted Offers) | 'multipart'
+  const [quickRxFilter, setQuickRxFilter] = useState(initialSearchParams?.filter || 'all'); // 'all' | 'active' (Sold & Invoiced) | 'proposals' (Unaccepted Offers) | 'multipart'
   const [apiFilter, setApiFilter] = useState(null); // Active pharmaceutical ingredient filter from Analytics
 
   // Atlas Recommendations UI State (Consolidated Master Catalog)
@@ -800,7 +810,7 @@ export default function DoctorPublicPortalClient({
   const [expandedRecId, setExpandedRecId] = useState(null);
   const [recFilter, setRecFilter] = useState(null); // { id: string, title: string, rxIds: string[] }
   const [patientSearchQuery, setPatientSearchQuery] = useState('');
-  const [patientFilterMode, setPatientFilterMode] = useState('all'); // 'all' | 'sold' | 'unaccepted'
+  const [patientFilterMode, setPatientFilterMode] = useState(initialSearchParams?.pmode || 'all'); // 'all' | 'sold' | 'unaccepted'
 
   // ── Treatment Timeline Pop-up Modal State (Mobile & Laptop UX - Golden Rule #5) ──
   const [timelineModalRx, setTimelineModalRx] = useState(null);
@@ -890,31 +900,43 @@ export default function DoctorPublicPortalClient({
   }, [slug]);
 
   // ── URL Search Params Sync (Golden Rule #24: Sincronización de URL) ───────
+  const isFirstSyncRef = useRef(true);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('q');
-    const s = params.get('status');
-    const f = params.get('filter');
-    const pmode = params.get('pmode');
-    const t = params.get('task');
-    const tab = params.get('tab');
-    const time = params.get('time');
-    if (q) setSearchQuery(q);
-    if (s) setStatusFilter(s);
-    if (f) setQuickRxFilter(f);
-    if (pmode) setPatientFilterMode(pmode);
-    if (t) {
-      setTaskFilter(t);
-      setActiveAnchor('tasks');
-    } else if (tab) {
-      setActiveAnchor(tab);
-    }
-    if (time) setTemporalFilter(time);
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('q');
+      const s = params.get('status');
+      const f = params.get('filter');
+      const pmode = params.get('pmode');
+      const t = params.get('task');
+      const tab = params.get('tab');
+      const time = params.get('time');
+      if (q !== null) setSearchQuery(q);
+      if (s !== null) setStatusFilter(s);
+      if (f !== null) setQuickRxFilter(f);
+      if (pmode !== null) setPatientFilterMode(pmode);
+      if (t) {
+        setTaskFilter(t);
+        setActiveAnchor('tasks');
+      } else if (tab) {
+        setActiveAnchor(tab);
+      } else {
+        setActiveAnchor('overview');
+      }
+      if (time !== null) setTemporalFilter(time);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (isFirstSyncRef.current) {
+      isFirstSyncRef.current = false;
+      return;
+    }
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.set('q', searchQuery.trim());
     if (statusFilter !== 'all') params.set('status', statusFilter);
@@ -5327,10 +5349,12 @@ export default function DoctorPublicPortalClient({
                     display: 'inline-block'
                   }}
                 />
-                <span>
+                <span suppressHydrationWarning>
                   {isBackgroundSyncing
                     ? 'Syncing...'
-                    : `Live · ${lastRefreshed ? lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Synced'}`}
+                    : isMounted && lastRefreshed
+                    ? `Live · ${lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                    : 'Live · Synced'}
                 </span>
               </div>
 
@@ -6601,10 +6625,12 @@ export default function DoctorPublicPortalClient({
                           background: isBackgroundSyncing ? '#1a73e8' : '#16a34a'
                         }}
                       />
-                      <span>
+                      <span suppressHydrationWarning>
                         {isBackgroundSyncing
                           ? 'Updating registry...'
-                          : `Live registry · ${lastRefreshed ? lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Auto-synced'}`}
+                          : isMounted && lastRefreshed
+                          ? `Live registry · ${lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                          : 'Live registry · Auto-synced'}
                       </span>
                     </span>
                   </div>

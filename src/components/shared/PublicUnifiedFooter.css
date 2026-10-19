@@ -1,0 +1,217 @@
+/* Google Cloud Platform (GCP) Console Compliant Unified Footer */
+
+.public-unified-footer {
+  background: #f8f9fa;
+  color: #5f6368;
+  border-top: 1px solid #dadce0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Google Sans", Inter, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.public-footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 1.75rem;
+  box-sizing: border-box;
+}
+
+.public-footer-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr 1fr;
+  gap: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.public-footer-brand-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.public-footer-desc {
+  color: #5f6368;
+  font-size: 12.5px;
+  margin: 0.65rem 0 0.85rem;
+  line-height: 1.55;
+  max-width: 300px;
+}
+
+.gcp-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 11px;
+  border-radius: 9999px;
+  background: #e6f4ea;
+  border: 1px solid #ceead6;
+  color: #137333;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin-top: 0.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.gcp-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #188038;
+  box-shadow: 0 0 0 2px rgba(24, 128, 56, 0.25);
+  animation: gcp-pulse 2.5s infinite;
+}
+
+@keyframes gcp-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(24, 128, 56, 0.4); }
+  70% { box-shadow: 0 0 0 5px rgba(24, 128, 56, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(24, 128, 56, 0); }
+}
+
+.public-footer-title {
+  color: #202124;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.9rem;
+}
+
+.public-footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 13px;
+}
+
+.public-footer-links li {
+  margin: 0;
+  padding: 0;
+}
+
+.public-footer-links a {
+  color: #5f6368 !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease, transform 0.15s ease;
+  display: inline-block;
+  line-height: 1.4;
+  font-weight: 450;
+}
+
+.public-footer-links a:hover {
+  color: #1a73e8 !important;
+  text-decoration: none !important;
+}
+
+.public-footer-links a.primary-link {
+  color: #1a73e8 !important;
+  font-weight: 600;
+}
+
+.public-footer-links a.primary-link:hover {
+  color: #1557b0 !important;
+}
+
+/* Compliance Strip - GCP Console Trust Center Style */
+.gcp-compliance-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0.75rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #3c4043;
+  line-height: 1.45;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.05);
+}
+
+.gcp-compliance-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.gcp-compliance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: #1a73e8;
+  font-weight: 600;
+  flex-shrink: 0;
+  background: #e8f0fe;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid #d2e3fc;
+}
+
+/* Bottom Bar */
+.public-footer-bottom {
+  border-top: 1px solid #dadce0;
+  padding-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 12px;
+  color: #70757a;
+}
+
+.public-footer-legal-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.public-footer-legal-links a {
+  color: #5f6368 !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease;
+  font-size: 12px;
+}
+
+.public-footer-legal-links a:hover {
+  color: #1a73e8 !important;
+  text-decoration: none !important;
+}
+
+.public-footer-divider {
+  color: #dadce0;
+  user-select: none;
+}
+
+@media (max-width: 1023px) {
+  .public-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .public-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+  .gcp-compliance-strip {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .public-footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

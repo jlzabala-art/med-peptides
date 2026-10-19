@@ -2583,10 +2583,6 @@ export default function PublicDatasheetView({
           supplierName={supplierName}
         />
 
-        {/* Brand Collection Discovery Banner (Moved to End as requested) */}
-        <div style={{ marginTop: '2rem', marginBottom: '1.5rem' }}>
-          <CollectionCompanionBanner product={product} />
-        </div>
       </>
     )}
 

@@ -78,8 +78,9 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function DoctorPublicPage({ params }) {
+export default async function DoctorPublicPage({ params, searchParams }) {
   const { slug } = await params;
+  const sParams = await searchParams;
   const cleanSlug = decodeURIComponent(slug || '').trim();
 
   // ⚡ Preload data on server with Layer 1 RAM cache (0ms delay for instant FCP)
@@ -97,9 +98,19 @@ export default async function DoctorPublicPage({ params }) {
     const targetCode = initialData.doctor.opaqueCode;
     const isAlreadyOpaque = cleanSlug.toUpperCase() === targetCode.toUpperCase();
     if (!isAlreadyOpaque) {
-      redirect(`/dr/${targetCode}`);
+      const qs = sParams ? new URLSearchParams(sParams).toString() : '';
+      redirect(`/dr/${targetCode}${qs ? `?${qs}` : ''}`);
     }
   }
 
-  return <DoctorPublicPortalClient slug={cleanSlug} initialData={initialData} />;
+  const initialTab = sParams?.tab || (sParams?.task ? 'tasks' : 'overview');
+
+  return (
+    <DoctorPublicPortalClient
+      slug={cleanSlug}
+      initialData={initialData}
+      initialTab={initialTab}
+      initialSearchParams={sParams || {}}
+    />
+  );
 }

@@ -1,10 +1,10 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck, Sparkles, CheckCircle2, ChevronRight,
-  Leaf, Award, Mail
+  Leaf, Award, Mail, Layers, LayoutGrid, FileText
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 
@@ -32,6 +32,39 @@ export default function CosmeticsSidebarWidget({
   const isColvita = slugLower.includes('colvita');
   // If not hair, not vege, and not colvita, it belongs to the Blue Diamond cellular line
   const isBlueDiamond = !isHair && !isVege && !isColvita;
+
+  const associatedProtocol = useMemo(() => {
+    if (isBlueDiamond) {
+      return {
+        title: isEs ? 'Protocolo Blue Diamond Neo-Colagénesis' : 'Blue Diamond Neo-Collagenesis Protocol',
+        subtitle: isEs ? 'Pauta clínica de 2 pasos AM/PM' : '2-Step Clinical AM/PM Protocol',
+        url: '/collection/colway?cat=epigenetic',
+        color: '#2563eb'
+      };
+    }
+    if (isHair) {
+      return {
+        title: isEs ? 'Protocolo Folicular Anticaída' : 'Follicular Hair Restoration Protocol',
+        subtitle: isEs ? 'Anclaje capilar Baicapil™ + Diosmina' : 'Baicapil™ + Diosmin Root Anchorage',
+        url: '/collection/colway?cat=trichology',
+        color: '#0d9488'
+      };
+    }
+    if (isColvita) {
+      return {
+        title: isEs ? 'Protocolo Inside-Out Neo-Colagénesis' : 'Inside-Out Neocollagenesis Protocol',
+        subtitle: isEs ? 'Sinergia oral Colvita + colágeno tópico' : 'Oral Colvita + Topical Tropocollagen Synergy',
+        url: '/collection/colway?cat=nutricosmetics',
+        color: '#16a34a'
+      };
+    }
+    return {
+      title: isEs ? 'Protocolo Barrera Hidrolipídica' : 'Native Dermal Barrier Shield Protocol',
+      subtitle: isEs ? 'Regeneración y protección celular CPNP' : 'CPNP Cellular Barrier Restoration',
+      url: '/collection/colway?cat=native-dermal',
+      color: '#0284c7'
+    };
+  }, [isBlueDiamond, isHair, isColvita, isEs]);
 
   // Configuration according to active product ecosystem
   let systemConfig;
@@ -549,6 +582,128 @@ export default function CosmeticsSidebarWidget({
             );
           })}
         </div>
+      </div>
+
+      {/* ── CARD 3: COLLECTION & PROTOCOLS NAVIGATION (GCP CONSOLE STANDARD) ── */}
+      <div style={{
+        background: '#ffffff',
+        borderRadius: '10px',
+        border: '1px solid #e2e8f0',
+        padding: '0.75rem 0.85rem',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.65rem'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingBottom: '0.45rem',
+          borderBottom: '1px solid #f1f5f9'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Layers size={13} style={{ color: '#0d9488' }} />
+            <span style={{ fontSize: '0.64rem', fontWeight: 800, color: '#334155', letterSpacing: '0.06em' }}>
+              {isEs ? 'NAVEGACIÓN & PROTOCOLOS' : 'COLLECTION & PROTOCOLS'}
+            </span>
+          </div>
+          <span style={{
+            fontSize: '0.60rem',
+            fontWeight: 700,
+            color: '#0d9488',
+            background: '#f0fdfa',
+            padding: '1px 6px',
+            borderRadius: '4px',
+            border: '1px solid #ccfbf1'
+          }}>
+            Colway®
+          </span>
+        </div>
+
+        {/* 1. Link to Colway Collection */}
+        <Link
+          href="/collection/colway"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '8px 10px',
+            borderRadius: '8px',
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            textDecoration: 'none',
+            color: '#0f172a',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+            <div style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '6px',
+              background: '#0d948815',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <LayoutGrid size={12} style={{ color: '#0d9488' }} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
+                {isEs ? 'Colección Colway®' : 'Colway® Collection'}
+              </div>
+              <div style={{ fontSize: '0.62rem', color: '#64748b', lineHeight: 1.2, marginTop: '2px' }}>
+                {isEs ? 'Explorar las 9 formulaciones' : 'Explore all 9 formulations'}
+              </div>
+            </div>
+          </div>
+          <ChevronRight size={13} style={{ color: '#0d9488', flexShrink: 0 }} />
+        </Link>
+
+        {/* 2. Associated Clinical Protocol Link */}
+        {associatedProtocol && (
+          <Link
+            href={associatedProtocol.url}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 10px',
+              borderRadius: '8px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              textDecoration: 'none',
+              color: '#0f172a',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '6px',
+                background: `${associatedProtocol.color || '#2563eb'}15`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <FileText size={12} style={{ color: associatedProtocol.color || '#2563eb' }} />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
+                  {associatedProtocol.title}
+                </div>
+                <div style={{ fontSize: '0.62rem', color: '#64748b', lineHeight: 1.2, marginTop: '2px' }}>
+                  {associatedProtocol.subtitle}
+                </div>
+              </div>
+            </div>
+            <ChevronRight size={13} style={{ color: associatedProtocol.color || '#2563eb', flexShrink: 0 }} />
+          </Link>
+        )}
       </div>
 
     </div>

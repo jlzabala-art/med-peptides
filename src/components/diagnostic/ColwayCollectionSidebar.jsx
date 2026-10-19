@@ -322,41 +322,6 @@ export default function ColwayCollectionSidebar({
           </span>
         </div>
       </div>
-
-
-      {/* -- 4. COMPARTIR ENLACE OFICIAL -- */}
-      <button
-        type="button"
-        onClick={handleCopyLink}
-        style={{
-          width: '100%',
-          padding: '8px 12px',
-          borderRadius: '8px',
-          background: '#ffffff',
-          border: '1px solid #cbd5e1',
-          color: '#334155',
-          fontSize: '0.74rem',
-          fontWeight: 650,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6px',
-          transition: 'all 0.15s ease'
-        }}
-      >
-        {copied ? (
-          <>
-            <Check size={13} color="#16a34a" />
-            <span style={{ color: '#16a34a' }}>{isEs ? 'Enlace Copiado' : 'Link Copied'}</span>
-          </>
-        ) : (
-          <>
-            <Copy size={13} />
-            <span>{isEs ? 'Copiar Enlace Oficial Colway®' : 'Share Canonical Colway® Link'}</span>
-          </>
-        )}
-      </button>
     </aside>
   );
 }
