@@ -68,26 +68,18 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
             <div className="public-footer-title">
               {isEs ? 'Terapéutica' : 'Therapeutics'}
             </div>
-            <ul className="public-footer-links">
-              <li>
-                <Link href="/collection/peptides" style={linkStyle}>
-                  {isEs ? 'Terapia Peptídica & GLP-1' : 'Peptide Therapeutics & GLP-1'}
-                </Link>
+            <ul className="public-footer-links" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'Terapia Peptídica & GLP-1' : 'Peptide Therapeutics & GLP-1'}
               </li>
-              <li>
-                <Link href="/collection/colway" style={linkStyle}>
-                  {isEs ? 'Colway® Tropocolágeno Nativo' : 'Colway® Native Bio-Collagen'}
-                </Link>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'Colway® Tropocolágeno Nativo' : 'Colway® Native Bio-Collagen'}
               </li>
-              <li>
-                <Link href="/catalog?type=raw_material" style={linkStyle}>
-                  {isEs ? 'Materia Prima Farmacéutica & APIs' : 'Pharmaceutical APIs & Compounding'}
-                </Link>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'Materia Prima Farmacéutica & APIs' : 'Pharmaceutical APIs & Compounding'}
               </li>
-              <li>
-                <Link href="/collection/supplements" style={linkStyle}>
-                  {isEs ? 'Nutracéutica Clínica & BHRT' : 'Clinical Nutraceuticals & BHRT'}
-                </Link>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'Nutracéutica Clínica & BHRT' : 'Clinical Nutraceuticals & BHRT'}
               </li>
             </ul>
           </div>
@@ -97,26 +89,18 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
             <div className="public-footer-title">
               {isEs ? 'Diagnóstico & Vías' : 'Diagnostics & Pathways'}
             </div>
-            <ul className="public-footer-links">
-              <li>
-                <Link href="/collection/bloodo" style={linkStyle}>
-                  {isEs ? 'Diagnóstico Capilar DBS Bloodo™' : 'Bloodo™ Capillary Diagnostics (DBS)'}
-                </Link>
+            <ul className="public-footer-links" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'Diagnóstico Capilar DBS Bloodo™' : 'Bloodo™ Capillary Diagnostics (DBS)'}
               </li>
-              <li>
-                <Link href="/collection/teletest" style={linkStyle}>
-                  {isEs ? 'TeleTest HTMA & Genómica' : 'TeleTest HTMA & Genomics'}
-                </Link>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'TeleTest HTMA & Genómica' : 'TeleTest HTMA & Genomics'}
               </li>
-              <li>
-                <Link href="/proto" style={linkStyle}>
-                  {isEs ? 'Directorio de Protocolos Clínicos' : 'Clinical Protocols Directory'}
-                </Link>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'Directorio de Protocolos Clínicos' : 'Clinical Protocols Directory'}
               </li>
-              <li>
-                <Link href="/collection/ultraperson" style={linkStyle}>
-                  {isEs ? 'Medicina de Precisión UltraPerson™' : 'UltraPerson™ Precision Medicine'}
-                </Link>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'Medicina de Precisión UltraPerson™' : 'UltraPerson™ Precision Medicine'}
               </li>
             </ul>
           </div>
@@ -126,26 +110,18 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
             <div className="public-footer-title">
               {isEs ? 'Portal Médico & B2B' : 'Practitioner & Ops'}
             </div>
-            <ul className="public-footer-links">
-              <li>
-                <Link href="/dr" style={primaryLinkStyle}>
-                  {isEs ? 'Portal Médico Facultativo (/dr)' : 'Physician & Clinic Portal (/dr)'}
-                </Link>
+            <ul className="public-footer-links" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'Portal Médico Facultativo (/dr)' : 'Physician & Clinic Portal (/dr)'}
               </li>
-              <li>
-                <Link href="/rx/intake" style={linkStyle}>
-                  {isEs ? 'Prescripción Electrónica (E-Rx)' : 'Digital Compounding E-Rx'}
-                </Link>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'Prescripción Electrónica (E-Rx)' : 'Digital Compounding E-Rx'}
               </li>
-              <li>
-                <Link href="/pricing/colway" style={linkStyle}>
-                  {isEs ? 'Tarifario Mayorista B2B' : 'B2B Wholesale Pricing'}
-                </Link>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'Tarifario Mayorista B2B' : 'B2B Wholesale Pricing'}
               </li>
-              <li>
-                <Link href="/verify" style={linkStyle}>
-                  {isEs ? 'Verificación de Lotes & COAs' : 'Specimen & COA Verification'}
-                </Link>
+              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
+                {isEs ? 'Verificación de Lotes & COAs' : 'Specimen & COA Verification'}
               </li>
             </ul>
           </div>

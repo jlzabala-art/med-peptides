@@ -1487,12 +1487,10 @@
 
 @media (min-width: 1025px) {
   .collection-bottom-dock {
-    /* Offset by half the sidebar width (340px / 2 = 170px) so the dock is centered
-       directly over the main catalog column and NEVER overlaps the right sidebar */
-    left: calc(50% - 170px);
+    left: 50%;
     transform: translateX(-50%);
     width: auto;
-    max-width: min(760px, calc(100vw - 420px));
+    max-width: 860px;
   }
 }
 

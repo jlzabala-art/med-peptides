@@ -473,6 +473,30 @@ export default function BrandCollectionPage({
                 {brandSlug === 'colway' ? '🛡️ ISO 22716 & CPNP Compliant' : '🛡️ CE-IVDR & ISO 15189'}
               </span>
             </div>
+
+            {/* Official Complete Collection Showcase Hero Banner */}
+            {brandSlug === 'colway' && (
+              <div style={{
+                marginTop: '1.5rem',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                boxShadow: '0 8px 30px rgba(15, 23, 42, 0.08)',
+                border: '1px solid #e2e8f0',
+                background: '#f8fafc'
+              }}>
+                <img
+                  src="/images/products/colway/colway-dermatology-clinic-hero-v2.jpg"
+                  alt="Colway® Complete Cellular Dermocosmetics & Nutricosmetics Collection"
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block',
+                    maxHeight: '440px',
+                    objectFit: 'cover'
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -1422,7 +1446,7 @@ export default function BrandCollectionPage({
           </span>
         </div>
 
-        {/* Dock Actions: Inquire Info (Institutional/Clinical Documentation) */}
+        {/* Dock Actions: Inquire Info + Atlas AI 5/5 (All Unified in One Single Footer) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {user && (
             <button
@@ -1470,6 +1494,40 @@ export default function BrandCollectionPage({
           >
             <FileText size={13} />
             <span>{isEs ? 'Consultar Info' : 'Inquire Info'}</span>
+          </button>
+
+          {/* Simple Atlas AI 5/5 trigger button integrated in the single footer dock */}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              window.dispatchEvent(new CustomEvent('open-public-atlas-ai', {
+                detail: {
+                  initialQuery: brandSlug === 'colway'
+                    ? 'Can you provide the clinical pharmacology, native tropocollagen mechanism, and application guidelines for Colway® dermocosmetics & trichology?'
+                    : `Can you analyze the clinical indications, protocols, and formulation details for ${config.name}?`
+                }
+              }));
+            }}
+            title={isEs ? 'Atlas AI (Tope máximo de 5 consultas por sesión)' : 'Atlas AI (Maximum 5 inquiries per session)'}
+            style={{
+              height: '36px',
+              padding: '0 14px',
+              borderRadius: '9999px',
+              background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
+              color: '#ffffff',
+              border: '1px solid rgba(56, 189, 248, 0.45)',
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 10px rgba(0, 54, 102, 0.3)'
+            }}
+          >
+            <Sparkles size={14} color="#38bdf8" />
+            <span>Atlas AI 5/5</span>
           </button>
         </div>
       </div>
@@ -1741,8 +1799,8 @@ export default function BrandCollectionPage({
         }}
       />
 
-      {/* ── Public Atlas AI Copilot Drawer ── */}
-      <PublicAtlasAIDrawer />
+      {/* ── Public Atlas AI Copilot Drawer (Unified in single footer dock) ── */}
+      <PublicAtlasAIDrawer hideFloatingTrigger={true} />
 
       {/* ── 7. Unified Public Institutional Footer (Bottom) ── */}
       <PublicUnifiedFooter lang={lang} />
