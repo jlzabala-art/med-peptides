@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import Link from 'next/link';
 import {
   Award,
   Sparkles,
@@ -11,14 +10,12 @@ import {
   Check,
   ExternalLink,
   ChevronRight,
-  ArrowRight,
   Calculator,
   Calendar,
   Layers,
   FileText,
   Clock,
   FlaskConical,
-  MessageSquare,
   Zap,
   CheckCircle2,
   Dna,
@@ -326,69 +323,6 @@ export default function ColwayCollectionSidebar({
         </div>
       </div>
 
-      {/* -- 3. ACCESO A PRECIOS Y TARIFA B2B MAYORISTA -- */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1.15rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px'
-      }}>
-        <h5 style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', margin: '0 0 2px 0', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          {isEs ? 'Tarifas & Documentación B2B' : 'B2B Wholesale & Pricing'}
-        </h5>
-
-        <Link
-          href="/pricing/colway"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '8px 12px',
-            borderRadius: '8px',
-            background: 'rgba(13, 148, 136, 0.08)',
-            border: '1px solid rgba(13, 148, 136, 0.25)',
-            color: '#0d9488',
-            fontSize: '0.76rem',
-            fontWeight: 700,
-            textDecoration: 'none',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <span>{isEs ? 'Ver Baremo y Tarifas B2B' : 'View B2B Wholesale Schedule'}</span>
-          <ArrowRight size={13} />
-        </Link>
-
-        {onOpenInquiry && (
-          <button
-            type="button"
-            onClick={onOpenInquiry}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              background: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              fontSize: '0.76rem',
-              fontWeight: 650,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <MessageSquare size={13} color="#64748b" />
-              {isEs ? 'Mesa de Consulta Clínica' : 'Clinic Inquiry Desk'}
-            </span>
-            <ChevronRight size={13} color="#94a3b8" />
-          </button>
-        )}
-      </div>
 
       {/* -- 4. COMPARTIR ENLACE OFICIAL -- */}
       <button

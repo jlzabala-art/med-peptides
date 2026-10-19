@@ -308,7 +308,13 @@ export default function BrandCollectionPage({
           }
         ];
       } else {
-        list = list.filter(p => p.id !== 'colway-trichology' && p.slug !== 'colway-trichology');
+        // Exclude all bundle/protocol products from individual formulations view
+        list = list.filter(p => {
+          const pid = p.id || '';
+          return pid !== 'colway-trichology' &&
+                 !pid.startsWith('bundle-') &&
+                 p.slug !== 'colway-trichology';
+        });
       }
     }
 
@@ -454,9 +460,6 @@ export default function BrandCollectionPage({
               </span>
               <span style={{ fontSize: '0.75rem', fontWeight: 650, color: '#0284c7', background: '#f0f9ff', border: '1px solid #e0f2fe', padding: '4px 10px', borderRadius: '6px' }}>
                 {brandSlug === 'colway' ? '🛡️ ISO 22716 & CPNP Compliant' : '🛡️ CE-IVDR & ISO 15189'}
-              </span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 650, color: '#16a34a', background: '#f0fdf4', border: '1px solid #dcfce7', padding: '4px 10px', borderRadius: '6px' }}>
-                ⚡ 24–48h Direct Clinic Dispatch
               </span>
             </div>
           </div>
@@ -1114,19 +1117,17 @@ export default function BrandCollectionPage({
                                 'LC-MS/MS & UHPLC Tandem MS'
                               }
                             </div>
-                            <div>
-                              <strong style={{ color: '#0f172a' }}>
-                                {brandSlug === 'colway'
-                                  ? (isEs ? 'Logística / Envío:' : 'Clinical Dispatch:')
-                                  : (isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:')
+                            {brandSlug !== 'colway' && (
+                              <div>
+                                <strong style={{ color: '#0f172a' }}>
+                                  {isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:'}
+                                </strong> {
+                                  brandSlug === 'eterna' ? '15 – 20 Business Days' :
+                                  brandSlug === 'ultraperson' ? '48 – 72h Compounding Dispatch' :
+                                  '48 – 72h post-receipt'
                                 }
-                              </strong> {
-                                brandSlug === 'eterna' ? '15 – 20 Business Days' :
-                                brandSlug === 'ultraperson' ? '48 – 72h Compounding Dispatch' :
-                                brandSlug === 'colway' ? '24 – 48h Direct Clinic / B2B Dispatch' :
-                                '48 – 72h post-receipt'
-                              }
-                            </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1293,19 +1294,17 @@ export default function BrandCollectionPage({
                                 'LC-MS/MS & UHPLC Tandem MS'
                               }
                             </div>
-                            <div>
-                              <strong style={{ color: '#0f172a' }}>
-                                {brandSlug === 'colway'
-                                  ? (isEs ? 'Logística / Envío:' : 'Clinical Dispatch:')
-                                  : (isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:')
+                            {brandSlug !== 'colway' && (
+                              <div>
+                                <strong style={{ color: '#0f172a' }}>
+                                  {isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:'}
+                                </strong> {
+                                  brandSlug === 'eterna' ? '15 – 20 Business Days' :
+                                  brandSlug === 'ultraperson' ? '48 – 72h Compounding Dispatch' :
+                                  '48 – 72h post-receipt'
                                 }
-                              </strong> {
-                                brandSlug === 'eterna' ? '15 – 20 Business Days' :
-                                brandSlug === 'ultraperson' ? '48 – 72h Compounding Dispatch' :
-                                brandSlug === 'colway' ? '24 – 48h Direct Clinic / B2B Dispatch' :
-                                '48 – 72h post-receipt'
-                              }
-                            </div>
+                              </div>
+                            )}
                           </div>
                         )}
 

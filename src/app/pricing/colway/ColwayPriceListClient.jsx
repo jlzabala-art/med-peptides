@@ -85,6 +85,10 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       const wholesale = Number((landed * (1 + markupPct / 100)).toFixed(2));
       const marginAed = Number((wholesale - landed).toFixed(2));
       const marginPctVal = wholesale > 0 ? Number(((marginAed / wholesale) * 100).toFixed(1)) : 0;
+      // Recommended Clinic Price: 25% over Wholesaler Price
+      const recommendedClinic = Number((wholesale * 1.25).toFixed(2));
+      // Recommended Retail MSRP: 30% over Clinic Price
+      const recommendedRetail = Number((recommendedClinic * 1.30).toFixed(2));
 
       return {
         ...p,
@@ -92,7 +96,9 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
         calculatedLanded: landed,
         calculatedWholesale: wholesale,
         calculatedMarginAed: marginAed,
-        calculatedMarginPct: marginPctVal
+        calculatedMarginPct: marginPctVal,
+        recommendedClinic,
+        recommendedRetail
       };
     });
   }, [initialProducts, markupPct]);
@@ -135,7 +141,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
     {
       key: 'itemNumber',
       label: '#',
-      width: '4%',
+      width: '3%',
       sortable: true,
       render: (val, row) => (
         <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
@@ -145,32 +151,37 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
     },
     {
       key: 'sku',
-      label: 'SKU Code',
-      width: '14%',
+      label: 'SKU',
+      width: '12%',
       sortable: true,
-      render: (val, row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
-          <CopyableId value={val ?? row?.sku} />
-          <span style={{
-            fontSize: '0.68rem',
-            fontWeight: 650,
-            color: '#0d9488',
-            background: '#f0fdfa',
-            border: '1px solid #a7f3d0',
-            padding: '1px 6px',
-            borderRadius: '4px',
-            letterSpacing: '0.02em',
-            textTransform: 'lowercase'
-          }}>
-            {row?.category}
-          </span>
-        </div>
-      )
+      render: (val, row) => {
+        // Simplify SKU: remove the 'SKU-COLWAY-' prefix to keep it compact
+        const rawSku = val ?? row?.sku ?? '';
+        const simpleSku = rawSku.replace(/^SKU-COLWAY-/i, '');
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
+            <CopyableId value={simpleSku} />
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 650,
+              color: '#0d9488',
+              background: '#f0fdfa',
+              border: '1px solid #a7f3d0',
+              padding: '1px 6px',
+              borderRadius: '4px',
+              letterSpacing: '0.02em',
+              textTransform: 'lowercase'
+            }}>
+              {row?.category}
+            </span>
+          </div>
+        );
+      }
     },
     {
       key: 'name',
       label: 'Product & Clinical Indication',
-      width: '32%',
+      width: '35%',
       sortable: true,
       render: (_, row) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
@@ -179,17 +190,17 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
               src={row.image}
               alt={row.name}
               style={{
-                width: '38px',
-                height: '38px',
-                minWidth: '38px',
-                maxWidth: '38px',
-                minHeight: '38px',
-                maxHeight: '38px',
+                width: '54px',
+                height: '54px',
+                minWidth: '54px',
+                maxWidth: '54px',
+                minHeight: '54px',
+                maxHeight: '54px',
                 objectFit: 'contain',
                 borderRadius: '6px',
                 background: '#ffffff',
                 border: '1px solid #e2e8f0',
-                padding: '2px',
+                padding: '3px',
                 flexShrink: 0
               }}
               loading="lazy"
@@ -202,11 +213,6 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
             <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.3 }}>
               {row?.subtitle}
             </div>
-            {row?.keyActives && (
-              <div style={{ fontSize: '0.70rem', color: '#0369a1', marginTop: '2px', lineHeight: 1.25 }}>
-                <span style={{ fontWeight: 650 }}>Actives:</span> {row.keyActives}
-              </div>
-            )}
           </div>
         </div>
       )
@@ -237,20 +243,9 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       )
     },
     {
-      key: 'calculatedLanded',
-      label: 'Landed Cost',
-      width: '10%',
-      sortable: true,
-      render: (val, row) => (
-        <span style={{ fontFamily: 'monospace', fontSize: '0.84rem', fontWeight: 600, color: '#334155' }}>
-          {formatPrice(val ?? row?.calculatedLanded)}
-        </span>
-      )
-    },
-    {
       key: 'calculatedWholesale',
-      label: `Wholesale (+${markupPct}%)`,
-      width: '11%',
+      label: 'Wholesaler Price',
+      width: '13%',
       sortable: true,
       render: (val, row) => (
         <span style={{
@@ -268,33 +263,33 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       )
     },
     {
-      key: 'calculatedMarginAed',
-      label: 'Margin',
-      width: '9%',
+      key: 'recommendedClinic',
+      label: 'Recommended Clinic',
+      width: '13%',
       sortable: true,
       render: (val, row) => (
         <div style={{ fontFamily: 'monospace' }}>
-          <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#16a34a' }}>
-            +{formatPrice(val ?? row?.calculatedMarginAed)}
+          <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1d4ed8' }}>
+            {formatPrice(val ?? row?.recommendedClinic)}
           </div>
-          <div style={{ fontSize: '0.68rem', color: '#15803d', fontFamily: 'sans-serif', fontWeight: 600 }}>
-            ({row?.calculatedMarginPct}%)
+          <div style={{ fontSize: '0.64rem', color: '#64748b', fontFamily: 'sans-serif', fontWeight: 500, marginTop: '1px' }}>
+            Recommended
           </div>
         </div>
       )
     },
     {
-      key: 'retailPriceAed',
-      label: 'MSRP / Clinic',
-      width: '9%',
+      key: 'recommendedRetail',
+      label: 'Retail MSRP',
+      width: '12%',
       sortable: true,
       render: (val, row) => (
-        <div style={{ fontFamily: 'monospace', fontSize: '0.76rem' }}>
-          <div style={{ fontWeight: 750, color: '#0f172a' }} title="Recommended Retail Price">
-            {formatPrice(val ?? row?.retailPriceAed)}
+        <div style={{ fontFamily: 'monospace' }}>
+          <div style={{ fontSize: '0.84rem', fontWeight: 750, color: '#0f172a' }}>
+            {formatPrice(val ?? row?.recommendedRetail)}
           </div>
-          <div style={{ color: '#64748b', fontSize: '0.70rem' }} title="Recommended Clinic Price">
-            Clinic: {formatPrice(row?.clinicPriceAed)}
+          <div style={{ fontSize: '0.64rem', color: '#64748b', fontFamily: 'sans-serif', fontWeight: 500, marginTop: '1px' }}>
+            Recommended
           </div>
         </div>
       )
@@ -774,23 +769,17 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
               <thead>
                 <tr>
                   <th style={{ width: '4%' }} className="text-center">#</th>
-                  <th style={{ width: '12%' }}>SKU Code</th>
-                  <th style={{ width: '28%' }}>Product & Clinical Indication</th>
-                  <th style={{ width: '10%' }}>Presentation</th>
-                  <th style={{ width: '11%' }} className="text-right">
-                    Landed Cost <span className="th-sub">(Excl. VAT)</span>
+                  <th style={{ width: '12%' }}>SKU</th>
+                  <th style={{ width: '32%' }}>Product & Clinical Indication</th>
+                  <th style={{ width: '12%' }}>Presentation</th>
+                  <th style={{ width: '14%' }} className="text-right th-highlight">
+                    Wholesaler Price <span className="th-sub">(B2B Net)</span>
                   </th>
-                  <th style={{ width: '12%' }} className="text-right th-highlight">
-                    Wholesale (+{markupPct}%) <span className="th-sub">(B2B Net)</span>
+                  <th style={{ width: '13%' }} className="text-right">
+                    Recommended Clinic
                   </th>
-                  <th style={{ width: '10%' }} className="text-right">
-                    Margin <span className="th-sub">(AED / %)</span>
-                  </th>
-                  <th style={{ width: '11%' }} className="text-right">
-                    Clinic Price <span className="th-sub">(Rec.)</span>
-                  </th>
-                  <th style={{ width: '12%' }} className="text-right">
-                    MSRP / Retail <span className="th-sub">(Rec.)</span>
+                  <th style={{ width: '13%' }} className="text-right">
+                    Retail MSRP <span className="th-sub">(Rec.)</span>
                   </th>
                 </tr>
               </thead>
@@ -801,7 +790,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                     
                     <td>
                       <div className="sku-badge">
-                        <span className="font-mono text-xs">{p.sku}</span>
+                        <span className="font-mono text-xs">{(p.sku || '').replace(/^SKU-COLWAY-/i, '')}</span>
                       </div>
                       <div className="product-category-tag">{p.category}</div>
                     </td>
@@ -813,17 +802,17 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                             src={p.image}
                             alt={p.name}
                             style={{
-                              width: '38px',
-                              height: '38px',
-                              minWidth: '38px',
-                              maxWidth: '38px',
-                              minHeight: '38px',
-                              maxHeight: '38px',
+                              width: '54px',
+                              height: '54px',
+                              minWidth: '54px',
+                              maxWidth: '54px',
+                              minHeight: '54px',
+                              maxHeight: '54px',
                               objectFit: 'contain',
                               borderRadius: '6px',
                               background: '#ffffff',
                               border: '1px solid #e2e8f0',
-                              padding: '2px',
+                              padding: '3px',
                               flexShrink: 0
                             }}
                             className="product-thumb"
@@ -833,11 +822,6 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                         <div>
                           <div className="product-name font-bold">{p.name}</div>
                           <div className="product-subtitle text-xs text-slate-500">{p.subtitle}</div>
-                          {p.keyActives && (
-                            <div className="product-actives text-xs text-sky-700 dark:text-sky-400 mt-0.5">
-                              <span className="font-semibold">Actives:</span> {p.keyActives}
-                            </div>
-                          )}
                         </div>
                       </div>
                     </td>
@@ -847,30 +831,19 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                       <div className="text-xs text-slate-400 mt-0.5">{p.presentation}</div>
                     </td>
 
-                    {/* Landed Cost (Input from user) */}
-                    <td className="text-right font-mono landed-cost-cell">
-                      {formatPrice(p.calculatedLanded)}
-                    </td>
-
-                    {/* Wholesaler Price (+15%) */}
+                    {/* Wholesaler Price */}
                     <td className="text-right font-mono font-bold wholesale-cell">
                       {formatPrice(p.calculatedWholesale)}
                     </td>
 
-                    {/* Wholesaler Margin */}
-                    <td className="text-right font-mono text-emerald-600">
-                      <div>+{formatPrice(p.calculatedMarginAed)}</div>
-                      <div className="text-xs text-emerald-500 font-sans">({p.calculatedMarginPct}%)</div>
-                    </td>
-
-                    {/* Clinic Price */}
+                    {/* Recommended Clinic Price (25% over wholesale) */}
                     <td className="text-right font-mono text-slate-600">
-                      {formatPrice(p.clinicPriceAed)}
+                      {formatPrice(p.recommendedClinic)}
                     </td>
 
-                    {/* Retail / MSRP */}
+                    {/* Retail / MSRP (30% over clinic) */}
                     <td className="text-right font-mono font-semibold text-slate-800">
-                      {formatPrice(p.retailPriceAed)}
+                      {formatPrice(p.recommendedRetail)}
                     </td>
                   </tr>
                 ))}
@@ -915,30 +888,26 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                 </div>
 
                 <div className="card-body">
-                  <div className="card-sku font-mono">{p.sku}</div>
+                  <div className="card-sku font-mono">{(p.sku || '').replace(/^SKU-COLWAY-/i, '')}</div>
                   <h3 className="card-title">{p.name}</h3>
                   <p className="card-subtitle">{p.subtitle}</p>
-
-                  <div className="card-actives">
-                    <strong>Actives:</strong> {p.keyActives}
-                  </div>
 
                   <div className="card-clinical-focus">
                     <strong>Clinical Role:</strong> {p.clinicalFocus}
                   </div>
 
                   <div className="card-pricing-strip">
-                    <div className="price-item">
-                      <span className="price-item-label">Landed CIF</span>
-                      <span className="price-item-val font-mono">{formatPrice(p.calculatedLanded)}</span>
-                    </div>
                     <div className="price-item highlight">
-                      <span className="price-item-label">Wholesale (+{markupPct}%)</span>
+                      <span className="price-item-label">Wholesaler Price</span>
                       <span className="price-item-val font-mono text-sky-600 font-bold">{formatPrice(p.calculatedWholesale)}</span>
                     </div>
                     <div className="price-item">
-                      <span className="price-item-label">MSRP (Rec.)</span>
-                      <span className="price-item-val font-mono">{formatPrice(p.retailPriceAed)}</span>
+                      <span className="price-item-label">Recommended Clinic</span>
+                      <span className="price-item-val font-mono">{formatPrice(p.recommendedClinic)}</span>
+                    </div>
+                    <div className="price-item">
+                      <span className="price-item-label">Retail MSRP</span>
+                      <span className="price-item-val font-mono">{formatPrice(p.recommendedRetail)}</span>
                     </div>
                   </div>
                 </div>
