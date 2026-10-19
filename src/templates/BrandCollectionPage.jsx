@@ -161,8 +161,11 @@ function resolveBrandProductImage(product, brandSlug) {
   }
 
   if (brandSlug === 'colway') {
+    if (id.includes('colway-trichology') || id === 'colway-trichology') return '/images/products/colway/bundle-colway-trichology.jpg';
+    if (id.includes('bundle-blue-diamond') || id.includes('blue-diamond-ritual')) return '/images/products/colway/bundle-blue-diamond-ritual.jpg';
+    if (id.includes('bundle-inside-out') || id.includes('inside-out-collagen')) return '/images/products/colway/bundle-inside-out-collagen.jpg';
     if (id.includes('colvita') || name.includes('colvita')) return '/images/products/colway/colvita.png';
-    if (id.includes('trichology') || name.includes('trichology')) return '/images/products/colway/colway-trichology-banner.jpg';
+    if (id.includes('trichology') || name.includes('trichology')) return '/images/products/colway/bundle-colway-trichology.jpg';
     if (id.includes('vege') || name.includes('vege') || name.includes('vegan')) return '/images/products/colway/vege-collagen.png';
     if (id.includes('peeling') || name.includes('peeling')) return '/images/products/colway/blue-diamond-peeling.png';
     if (id.includes('blue-diamond') || id.includes('diamond') || name.includes('diamond') || name.includes('diament')) return '/images/products/colway/blue-diamond-cream.png';
@@ -265,7 +268,7 @@ export default function BrandCollectionPage({
             category: 'trichology',
             presentation: '2-Step System (250 mL Shampoo + 200 mL Conditioner)',
             overview_summary: 'Dual-action medical trichology protocol: ostium cleansing with Baicapil™ 2% + Diosmin followed by cuticular sealing and keratin reinforcement.',
-            image: '/images/products/colway/colway-trichology-banner.jpg',
+            image: '/images/products/colway/bundle-colway-trichology.jpg',
             routine_badge: 'Complete 2-Step Trichological System',
             step_number: 99,
             price: 92.00,
@@ -280,7 +283,7 @@ export default function BrandCollectionPage({
             category: 'epigenetic-cellular',
             presentation: '2-Step Cellular Ritual (75 mL Peeling + 50 mL Cream)',
             overview_summary: 'Enzymatic diamond pre-exfoliation to triple skin permeability, followed by VEP-carrier diamond peptide cream for deep neocollagenesis.',
-            image: '/images/products/colway/blue-diamond-cream.png',
+            image: '/images/products/colway/bundle-blue-diamond-ritual.jpg',
             routine_badge: 'Complete Epigenetic Rejuvenation Kit',
             step_number: 99,
             price: 155.00,
@@ -295,7 +298,7 @@ export default function BrandCollectionPage({
             category: 'nutricosmetics',
             presentation: 'Dual-Action Protocol (Colvita 60 Caps + Blue Diamond Cream 50 mL)',
             overview_summary: 'The ultimate dual-action protocol: oral freeze-dried tropocollagen supplying building amino acids from the bloodstream, combined with topical diamond peptides.',
-            image: '/images/products/colway/colvita.png',
+            image: '/images/products/colway/bundle-inside-out-collagen.jpg',
             routine_badge: 'Inside-Out Clinical Protocol',
             step_number: 99,
             price: 150.00,
