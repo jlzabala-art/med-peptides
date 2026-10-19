@@ -193,6 +193,76 @@ function resolveBrandProductImage(product, brandSlug) {
   return '/images/longevity_supps.png';
 }
 
+function resolveProductDatasheet(product, brandSlug) {
+  if (brandSlug !== 'colway') return null;
+  const id = (product.id || product.slug || '').toLowerCase();
+  const name = (product.name || product.title || '').toLowerCase();
+
+  if (id.includes('wash') || name.includes('wash') || id.includes('zel') || name.includes('cleansing')) {
+    return {
+      title: 'Collagen Wash Gel Datasheet',
+      url: '/docs/colway/colway-collagen-wash-gel-datasheet.pdf',
+      filename: 'Colway-Collagen-Wash-Gel-Datasheet.pdf',
+      badge: 'Wash Gel Monograph (PDF)',
+      size: '362 KB'
+    };
+  }
+
+  if (id.includes('shampoo') || name.includes('shampoo') || id.includes('conditioner') || name.includes('conditioner') || id === 'colway-trichology') {
+    return {
+      title: 'Trichology Duo Protocol & Datasheet',
+      url: '/docs/colway/colway-shampoo-conditioner-trichology-datasheet.pdf',
+      filename: 'Colway-Trichology-Shampoo-Conditioner-Dossier.pdf',
+      badge: 'Trichology Dossier (PDF)',
+      size: '1.1 MB'
+    };
+  }
+
+  if (id.includes('vege') || name.includes('vege') || name.includes('vegan')) {
+    return {
+      title: 'Vege Collagen 100% Fitocosmetic Datasheet',
+      url: '/docs/colway/colway-vege-collagen-datasheet.pdf',
+      filename: 'Colway-Vege-Collagen-100-Fitocosmetic-Datasheet.pdf',
+      badge: 'Fitocosmetic Monograph (PDF)',
+      size: '4.3 MB'
+    };
+  }
+
+  return null;
+}
+
+function resolveProductRegulatoryBadges(product, brandSlug) {
+  if (brandSlug !== 'colway') {
+    return [
+      { label: brandSlug === 'eterna' ? 'CAP / CLIA' : brandSlug === 'ultraperson' ? 'EU GMP' : 'CE-IVDR', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'Laboratory Accreditation' }
+    ];
+  }
+
+  const id = (product.id || product.slug || '').toLowerCase();
+  const name = (product.name || product.title || '').toLowerCase();
+
+  // All Colway products registered in European Union (Regulation EC No 1223/2009 & CPNP)
+  const badges = [
+    { label: '🇪🇺 EU CPNP Reg.', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'European Union CPNP & Regulation (EC) No 1223/2009 Registered' }
+  ];
+
+  const isShampooOrConditioner = id.includes('shampoo') || name.includes('shampoo') || id.includes('conditioner') || name.includes('conditioner') || id === 'colway-trichology';
+  const isLipBalmOrWashGel = id.includes('lip') || name.includes('lip') || id.includes('balm') || name.includes('pomadka') || id.includes('wash') || name.includes('wash') || id.includes('gel');
+
+  if (isShampooOrConditioner) {
+    badges.push(
+      { label: '🇦🇪 UAE MoHAP / Montaji', color: '#0369a1', bg: 'rgba(3, 105, 161, 0.12)', border: 'rgba(3, 105, 161, 0.25)', title: 'Registered in the United Arab Emirates (MoHAP / Dubai Montaji)' },
+      { label: '🇶🇦 Qatar MoPH', color: '#831843', bg: 'rgba(131, 24, 67, 0.12)', border: 'rgba(131, 24, 67, 0.25)', title: 'Registered in Qatar (Ministry of Public Health)' }
+    );
+  } else if (isLipBalmOrWashGel) {
+    badges.push(
+      { label: '🇦🇪 UAE MoHAP / Montaji', color: '#0369a1', bg: 'rgba(3, 105, 161, 0.12)', border: 'rgba(3, 105, 161, 0.25)', title: 'Registered in the United Arab Emirates (MoHAP / Dubai Montaji)' }
+    );
+  }
+
+  return badges;
+}
+
 export default function BrandCollectionPage({
   brandSlug = 'bloodo',
   products = [],
@@ -998,17 +1068,24 @@ export default function BrandCollectionPage({
                                 <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
                                   <CopyableId value={product.id} maxLength={18} />
                                 </span>
-                                <span style={{
-                                  fontSize: '0.66rem',
-                                  fontWeight: 800,
-                                  padding: '2px 7px',
-                                  borderRadius: '4px',
-                                  background: 'rgba(22, 163, 74, 0.12)',
-                                  color: '#15803d',
-                                  border: '1px solid rgba(22, 163, 74, 0.25)'
-                                }}>
-                                  {brandSlug === 'colway' ? 'EU 1223/2009' : brandSlug === 'eterna' ? 'CAP / CLIA' : 'CE-IVDR'}
-                                </span>
+                                {resolveProductRegulatoryBadges(product, brandSlug).map((rb, idx) => (
+                                  <span
+                                    key={idx}
+                                    title={rb.title}
+                                    style={{
+                                      fontSize: '0.64rem',
+                                      fontWeight: 800,
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      background: rb.bg,
+                                      color: rb.color,
+                                      border: `1px solid ${rb.border}`,
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {rb.label}
+                                  </span>
+                                ))}
                                 <span style={{ fontSize: '0.70rem', color: '#0d9488', fontWeight: 650 }}>
                                   {sampleType}
                                 </span>
@@ -1074,6 +1151,35 @@ export default function BrandCollectionPage({
                               <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                             </button>
 
+                            {(() => {
+                              const doc = resolveProductDatasheet(product, brandSlug);
+                              if (!doc) return null;
+                              return (
+                                <a
+                                  href={doc.url}
+                                  download={doc.filename}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title={`Download official datasheet: ${doc.title}`}
+                                  style={{
+                                    padding: '6px 10px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #fed7aa',
+                                    background: '#fff7ed',
+                                    color: '#ea580c',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 700,
+                                    textDecoration: 'none',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                  }}
+                                >
+                                  <FileText size={13} color="#ea580c" />
+                                  <span>PDF ↓</span>
+                                </a>
+                              );
+                            })()}
                             <button
                               type="button"
                               onClick={() => handleProductClick(product)}
@@ -1176,19 +1282,27 @@ export default function BrandCollectionPage({
                           alt={displayName}
                         />
 
-                        {/* Top Badges */}
-                        <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', gap: '6px' }}>
-                          <span style={{
-                            fontSize: '0.68rem',
-                            fontWeight: 800,
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            background: 'rgba(22, 163, 74, 0.12)',
-                            color: '#15803d',
-                            border: '1px solid rgba(22, 163, 74, 0.25)'
-                          }}>
-                            {brandSlug === 'eterna' ? 'CAP / CLIA' : brandSlug === 'ultraperson' ? 'EU GMP' : brandSlug === 'colway' ? 'EU 1223/2009' : 'CE-IVDR'}
-                          </span>
+                        {/* Top Badges: Multi-country Regulatory Registration */}
+                        <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', flexWrap: 'wrap', gap: '4px', maxWidth: '85%' }}>
+                          {resolveProductRegulatoryBadges(product, brandSlug).map((rb, idx) => (
+                            <span
+                              key={idx}
+                              title={rb.title}
+                              style={{
+                                fontSize: '0.64rem',
+                                fontWeight: 800,
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                background: rb.bg,
+                                color: rb.color,
+                                border: `1px solid ${rb.border}`,
+                                backdropFilter: 'blur(4px)',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {rb.label}
+                            </span>
+                          ))}
                         </div>
 
                         {/* Formulation Line Badge (Below image, aligned to left) */}
@@ -1338,6 +1452,47 @@ export default function BrandCollectionPage({
                                 }
                               </div>
                             )}
+                            {(() => {
+                              const doc = resolveProductDatasheet(product, brandSlug);
+                              if (!doc) return null;
+                              return (
+                                <div style={{
+                                  marginTop: '4px',
+                                  padding: '8px 10px',
+                                  borderRadius: '6px',
+                                  background: '#fff7ed',
+                                  border: '1px solid #fed7aa',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  gap: '8px'
+                                }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <FileText size={14} color="#ea580c" />
+                                    <span style={{ fontSize: '0.74rem', color: '#9a3412', fontWeight: 650 }}>
+                                      {doc.title} ({doc.size})
+                                    </span>
+                                  </div>
+                                  <a
+                                    href={doc.url}
+                                    download={doc.filename}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      fontSize: '0.70rem',
+                                      fontWeight: 800,
+                                      color: '#ffffff',
+                                      background: '#ea580c',
+                                      padding: '3px 8px',
+                                      borderRadius: '4px',
+                                      textDecoration: 'none'
+                                    }}
+                                  >
+                                    Download PDF ↓
+                                  </a>
+                                </div>
+                              );
+                            })()}
                           </div>
                         )}
 
@@ -1364,6 +1519,35 @@ export default function BrandCollectionPage({
                           </button>
 
                           <div style={{ display: 'flex', gap: '6px' }}>
+                            {(() => {
+                              const doc = resolveProductDatasheet(product, brandSlug);
+                              if (!doc) return null;
+                              return (
+                                <a
+                                  href={doc.url}
+                                  download={doc.filename}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title={`Download official datasheet: ${doc.title}`}
+                                  style={{
+                                    padding: '6px 10px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #fed7aa',
+                                    background: '#fff7ed',
+                                    color: '#ea580c',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 700,
+                                    textDecoration: 'none',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                  }}
+                                >
+                                  <FileText size={13} color="#ea580c" />
+                                  <span>PDF ↓</span>
+                                </a>
+                              );
+                            })()}
                             <button
                               type="button"
                               onClick={() => handleProductClick(product)}

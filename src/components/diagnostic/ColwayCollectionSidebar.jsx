@@ -328,7 +328,132 @@ export default function ColwayCollectionSidebar({
         </nav>
       </div>
 
-      {/* -- 2. ACREDITACION & CALIDAD EUROPEA (Laboratory / Biotech Standard) -- */}
+      {/* ── 3. OFFICIAL TECHNICAL DATASHEETS (PDF DOWNLOADS) ── */}
+      <div style={{
+        background: '#ffffff',
+        borderRadius: '14px',
+        border: '1px solid #e2e8f0',
+        padding: '1.15rem',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+            <FileText size={14} color="#ea580c" />
+            <h5 style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isEs ? 'Dossiers Técnicos (PDF)' : 'Technical Dossiers (PDF)'}
+            </h5>
+          </div>
+          <span style={{ fontSize: '0.66rem', color: '#c2410c', fontWeight: 700, background: '#fff7ed', border: '1px solid #fed7aa', padding: '1px 6px', borderRadius: '4px' }}>
+            Official
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {/* PDF 1: Collagen Wash Gel */}
+          <a
+            href="/docs/colway/colway-collagen-wash-gel-datasheet.pdf"
+            download="Colway-Collagen-Wash-Gel-Datasheet.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Download Collagen Wash Gel Datasheet (PDF)"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 10px',
+              borderRadius: '8px',
+              background: '#fff7ed',
+              border: '1px solid #ffedd5',
+              textDecoration: 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <FileText size={15} color="#ea580c" style={{ flexShrink: 0 }} />
+              <div style={{ minWidth: 0 }}>
+                <strong style={{ fontSize: '0.74rem', color: '#9a3412', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  Collagen Wash Gel (250 mL)
+                </strong>
+                <span style={{ fontSize: '0.68rem', color: '#c2410c' }}>
+                  Hydrolipid Barrier Monograph
+                </span>
+              </div>
+            </div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#ea580c', background: '#ffffff', border: '1px solid #fed7aa', padding: '2px 7px', borderRadius: '4px', flexShrink: 0 }}>
+              PDF ↓
+            </span>
+          </a>
+
+          {/* PDF 2: Trichology Shampoo & Conditioner */}
+          <a
+            href="/docs/colway/colway-shampoo-conditioner-trichology-datasheet.pdf"
+            download="Colway-Trichology-Shampoo-Conditioner-Dossier.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Download Trichology Duo Dossier (PDF)"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 10px',
+              borderRadius: '8px',
+              background: '#f0fdfa',
+              border: '1px solid #ccfbf1',
+              textDecoration: 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <FileText size={15} color="#0d9488" style={{ flexShrink: 0 }} />
+              <div style={{ minWidth: 0 }}>
+                <strong style={{ fontSize: '0.74rem', color: '#115e59', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  Trichology Duo (200 mL)
+                </strong>
+                <span style={{ fontSize: '0.68rem', color: '#0f766e' }}>
+                  Baicapil™ 2% & Kerascalp™
+                </span>
+              </div>
+            </div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0d9488', background: '#ffffff', border: '1px solid #99f6e4', padding: '2px 7px', borderRadius: '4px', flexShrink: 0 }}>
+              PDF ↓
+            </span>
+          </a>
+
+          {/* PDF 3: Vege Collagen */}
+          <a
+            href="/docs/colway/colway-vege-collagen-datasheet.pdf"
+            download="Colway-Vege-Collagen-100-Fitocosmetic-Datasheet.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Download Vege Collagen Datasheet (PDF)"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 10px',
+              borderRadius: '8px',
+              background: '#f0fdf4',
+              border: '1px solid #dcfce7',
+              textDecoration: 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <FileText size={15} color="#16a34a" style={{ flexShrink: 0 }} />
+              <div style={{ minWidth: 0 }}>
+                <strong style={{ fontSize: '0.74rem', color: '#166534', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  Vege Collagen (45 mL)
+                </strong>
+                <span style={{ fontSize: '0.68rem', color: '#15803d' }}>
+                  100% Fitocosmetic Monograph
+                </span>
+              </div>
+            </div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#16a34a', background: '#ffffff', border: '1px solid #bbf7d0', padding: '2px 7px', borderRadius: '4px', flexShrink: 0 }}>
+              PDF ↓
+            </span>
+          </a>
+        </div>
+      </div>
+
+      {/* -- 4. ACREDITACION & REGISTROS INTERNACIONALES (EU, UAE & Qatar) -- */}
       <div style={{
         background: '#ffffff',
         borderRadius: '14px',
@@ -362,20 +487,23 @@ export default function ColwayCollectionSidebar({
 
         <p style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.5, margin: '0 0 0.85rem 0' }}>
           {isEs
-            ? 'Extracción en frío de tropocolágeno nativo biológicamente activo con triple hélice 3D preservada. Certificación europea ISO 22716 y registro CPNP.'
-            : 'Cold-extraction of biologically active native tropocollagen with intact 3D triple-helix conformation. Certified under ISO 22716 GMP & EU CPNP registered.'}
+            ? 'Formulaciones bajo normativa europea ISO 22716 y CPNP (1223/2009). Registros oficiales aprobados en Unión Europea, EAU (MoHAP / Dubai Montaji) y Qatar (MoPH).'
+            : 'European formulation under ISO 22716 GMP & CPNP (1223/2009). Official sanitary registrations active in European Union, UAE (MoHAP / Dubai Montaji) & Qatar (MoPH).'}
         </p>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-          <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>
-            ISO 22716 GMP
-          </span>
-          <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: '#f0f9ff', color: '#0284c7', border: '1px solid #bae6fd' }}>
-            EU CPNP Verified
-          </span>
-          <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: '#faf5ff', color: '#7c3aed', border: '1px solid #e9d5ff' }}>
-            100% Bioactive
-          </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', borderRadius: '6px', background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#16a34a' }}>🇪🇺 European Union (All 8 Items)</span>
+            <span style={{ fontSize: '0.64rem', fontWeight: 800, color: '#15803d' }}>EU CPNP Reg.</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', borderRadius: '6px', background: '#f0f9ff', border: '1px solid #bae6fd' }}>
+            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0284c7' }}>🇦🇪 UAE (Shampoo, Cond., Wash Gel, Lip)</span>
+            <span style={{ fontSize: '0.64rem', fontWeight: 800, color: '#0369a1' }}>MoHAP / Montaji</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', borderRadius: '6px', background: '#fdf2f8', border: '1px solid #fbcfe8' }}>
+            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#be185d' }}>🇶🇦 Qatar (Shampoo & Conditioner)</span>
+            <span style={{ fontSize: '0.64rem', fontWeight: 800, color: '#9d174d' }}>MoPH Reg.</span>
+          </div>
         </div>
       </div>
     </aside>
