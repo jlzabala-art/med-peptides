@@ -130,14 +130,18 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
     return ['all', ...Array.from(cats)];
   }, [initialProducts]);
 
-  // DataTable column definitions (Rules #3, #11, #30: explicit percentage widths, zero horizontal scroll)
+  // DataTable column definitions (Rules #3, #8, #11, #30: Google Cloud UX standard)
   const colwayColumns = useMemo(() => [
     {
       key: 'itemNumber',
       label: '#',
-      width: '5%',
+      width: '4%',
       sortable: true,
-      render: (val, row) => <span className="font-mono text-xs text-slate-500">{val ?? row?.itemNumber}</span>
+      render: (val, row) => (
+        <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+          {val ?? row?.itemNumber}
+        </span>
+      )
     },
     {
       key: 'sku',
@@ -145,33 +149,62 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       width: '14%',
       sortable: true,
       render: (val, row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
           <CopyableId value={val ?? row?.sku} />
-          <span className="product-category-tag">{row?.category}</span>
+          <span style={{
+            fontSize: '0.68rem',
+            fontWeight: 650,
+            color: '#0d9488',
+            background: '#f0fdfa',
+            border: '1px solid #a7f3d0',
+            padding: '1px 6px',
+            borderRadius: '4px',
+            letterSpacing: '0.02em',
+            textTransform: 'lowercase'
+          }}>
+            {row?.category}
+          </span>
         </div>
       )
     },
     {
       key: 'name',
       label: 'Product & Clinical Indication',
-      width: '31%',
+      width: '32%',
       sortable: true,
       render: (_, row) => (
-        <div className="product-identity-cell">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
           {row?.image && (
             <img
               src={row.image}
               alt={row.name}
-              className="product-thumb"
+              style={{
+                width: '38px',
+                height: '38px',
+                minWidth: '38px',
+                maxWidth: '38px',
+                minHeight: '38px',
+                maxHeight: '38px',
+                objectFit: 'contain',
+                borderRadius: '6px',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                padding: '2px',
+                flexShrink: 0
+              }}
               loading="lazy"
             />
           )}
-          <div>
-            <div className="product-name font-bold">{row?.name}</div>
-            <div className="product-subtitle text-xs text-slate-500">{row?.subtitle}</div>
+          <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '1px' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a', lineHeight: 1.25 }}>
+              {row?.name}
+            </div>
+            <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.3 }}>
+              {row?.subtitle}
+            </div>
             {row?.keyActives && (
-              <div className="product-actives text-xs text-sky-700 mt-0.5">
-                <span className="font-semibold">Actives:</span> {row.keyActives}
+              <div style={{ fontSize: '0.70rem', color: '#0369a1', marginTop: '2px', lineHeight: 1.25 }}>
+                <span style={{ fontWeight: 650 }}>Actives:</span> {row.keyActives}
               </div>
             )}
           </div>
@@ -181,12 +214,25 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
     {
       key: 'volume',
       label: 'Presentation',
-      width: '11%',
+      width: '12%',
       sortable: true,
       render: (val, row) => (
-        <div>
-          <span className="volume-badge">{val ?? row?.volume}</span>
-          <div className="text-xs text-slate-400 mt-0.5">{row?.presentation}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
+          <span style={{
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            color: '#0369a1',
+            background: '#f0f9ff',
+            border: '1px solid #bae6fd',
+            padding: '2px 7px',
+            borderRadius: '4px',
+            whiteSpace: 'nowrap'
+          }}>
+            {val ?? row?.volume}
+          </span>
+          <div style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.25 }}>
+            {row?.presentation}
+          </div>
         </div>
       )
     },
@@ -196,7 +242,9 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       width: '10%',
       sortable: true,
       render: (val, row) => (
-        <span className="font-mono font-semibold text-slate-700">{formatPrice(val ?? row?.calculatedLanded)}</span>
+        <span style={{ fontFamily: 'monospace', fontSize: '0.84rem', fontWeight: 600, color: '#334155' }}>
+          {formatPrice(val ?? row?.calculatedLanded)}
+        </span>
       )
     },
     {
@@ -205,7 +253,18 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       width: '11%',
       sortable: true,
       render: (val, row) => (
-        <span className="font-mono font-bold text-sky-700">{formatPrice(val ?? row?.calculatedWholesale)}</span>
+        <span style={{
+          fontFamily: 'monospace',
+          fontSize: '0.86rem',
+          fontWeight: 750,
+          color: '#0f766e',
+          background: '#f0fdfa',
+          padding: '2px 6px',
+          borderRadius: '4px',
+          border: '1px solid #ccfbf1'
+        }}>
+          {formatPrice(val ?? row?.calculatedWholesale)}
+        </span>
       )
     },
     {
@@ -214,9 +273,13 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       width: '9%',
       sortable: true,
       render: (val, row) => (
-        <div className="font-mono text-emerald-600">
-          <div>+{formatPrice(val ?? row?.calculatedMarginAed)}</div>
-          <div className="text-xs text-emerald-500 font-sans">({row?.calculatedMarginPct}%)</div>
+        <div style={{ fontFamily: 'monospace' }}>
+          <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#16a34a' }}>
+            +{formatPrice(val ?? row?.calculatedMarginAed)}
+          </div>
+          <div style={{ fontSize: '0.68rem', color: '#15803d', fontFamily: 'sans-serif', fontWeight: 600 }}>
+            ({row?.calculatedMarginPct}%)
+          </div>
         </div>
       )
     },
@@ -226,9 +289,13 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       width: '9%',
       sortable: true,
       render: (val, row) => (
-        <div className="font-mono text-xs">
-          <div className="font-bold text-slate-800" title="Recommended Retail Price">{formatPrice(val ?? row?.retailPriceAed)}</div>
-          <div className="text-slate-500" title="Recommended Clinic Price">Clinic: {formatPrice(row?.clinicPriceAed)}</div>
+        <div style={{ fontFamily: 'monospace', fontSize: '0.76rem' }}>
+          <div style={{ fontWeight: 750, color: '#0f172a' }} title="Recommended Retail Price">
+            {formatPrice(val ?? row?.retailPriceAed)}
+          </div>
+          <div style={{ color: '#64748b', fontSize: '0.70rem' }} title="Recommended Clinic Price">
+            Clinic: {formatPrice(row?.clinicPriceAed)}
+          </div>
         </div>
       )
     }
@@ -645,19 +712,53 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
               data={filteredProducts}
               emptyMessage="No Colway formulations match the current filter criteria."
               expandableRender={(row) => (
-                <div style={{ padding: '0.85rem 1.25rem', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', fontSize: '0.8rem' }}>
+                <div style={{ padding: '1rem 1.25rem', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', fontSize: '0.8rem' }}>
                   <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>Key Bioactive Compounds</div>
-                    <div style={{ color: '#475569' }}>{row.keyActives || 'Native Tropocollagen & Clinical Actives'}</div>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Sparkles size={14} style={{ color: '#0d9488' }} />
+                      <span>Official Bioactive Actives & Complexes</span>
+                    </div>
+                    <div style={{ color: '#475569', lineHeight: 1.45 }}>{row.keyActives || 'Native Tropocollagen & Clinical Actives'}</div>
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>Clinical Role & Protocol</div>
-                    <div style={{ color: '#475569' }}>{row.clinicalFocus || row.subtitle}</div>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Activity size={14} style={{ color: '#2563eb' }} />
+                      <span>Clinical Indication & Mechanism</span>
+                    </div>
+                    <div style={{ color: '#475569', lineHeight: 1.45 }}>{row.clinicalFocus || row.subtitle}</div>
+                    {row.applicationTip && (
+                      <div style={{ marginTop: '6px', padding: '6px 8px', background: '#eff6ff', borderRadius: '6px', border: '1px solid #bfdbfe', fontSize: '0.74rem', color: '#1e40af', lineHeight: 1.35 }}>
+                        <strong>Professional Protocol Tip:</strong> {row.applicationTip}
+                      </div>
+                    )}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>Commercial Tier Breakdown</div>
-                    <div style={{ color: '#475569' }}>
-                      Landed CIF: <strong>{formatPrice(row.calculatedLanded)}</strong> · Wholesale (+{markupPct}%): <strong>{formatPrice(row.calculatedWholesale)}</strong> · Clinic: <strong>{formatPrice(row.clinicPriceAed)}</strong> · MSRP: <strong>{formatPrice(row.retailPriceAed)}</strong>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <TrendingUp size={14} style={{ color: '#16a34a' }} />
+                      <span>Commercial Tier Breakdown</span>
+                    </div>
+                    <div style={{ color: '#475569', lineHeight: 1.6, fontFamily: 'monospace', fontSize: '0.78rem' }}>
+                      <div>Landed CIF: <strong>{formatPrice(row.calculatedLanded)}</strong></div>
+                      <div>Wholesale (+{markupPct}%): <strong style={{ color: '#0f766e' }}>{formatPrice(row.calculatedWholesale)}</strong></div>
+                      <div>Clinic Rec: <strong>{formatPrice(row.clinicPriceAed)}</strong></div>
+                      <div>MSRP / Retail: <strong>{formatPrice(row.retailPriceAed)}</strong></div>
+                    </div>
+                    <div style={{ marginTop: '8px' }}>
+                      <Link
+                        href={`/product/${row.id}`}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '0.74rem',
+                          fontWeight: 650,
+                          color: '#0284c7',
+                          textDecoration: 'none'
+                        }}
+                      >
+                        <span>Open Complete Product Dossier</span>
+                        <ChevronRight size={13} />
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -711,6 +812,20 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                           <img
                             src={p.image}
                             alt={p.name}
+                            style={{
+                              width: '38px',
+                              height: '38px',
+                              minWidth: '38px',
+                              maxWidth: '38px',
+                              minHeight: '38px',
+                              maxHeight: '38px',
+                              objectFit: 'contain',
+                              borderRadius: '6px',
+                              background: '#ffffff',
+                              border: '1px solid #e2e8f0',
+                              padding: '2px',
+                              flexShrink: 0
+                            }}
                             className="product-thumb"
                             loading="lazy"
                           />
@@ -1545,15 +1660,18 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           align-items: center;
           gap: 12px;
         }
-        .product-thumb {
-          width: 44px;
-          height: 44px;
-          object-fit: contain;
-          border-radius: 6px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          padding: 2px;
-          flex-shrink: 0;
+        .product-thumb,
+        :global(.product-thumb) {
+          width: 38px !important;
+          height: 38px !important;
+          max-width: 38px !important;
+          max-height: 38px !important;
+          object-fit: contain !important;
+          border-radius: 6px !important;
+          background: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          padding: 2px !important;
+          flex-shrink: 0 !important;
         }
         .product-name {
           color: #0f172a;

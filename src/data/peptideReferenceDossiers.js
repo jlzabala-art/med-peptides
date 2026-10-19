@@ -333,9 +333,9 @@ export const PEPTIDE_REFERENCE_DOSSIERS = {
       brand: 'BPC-157 / PL 14736 (Body Protection Compound)',
       brandUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/108182224',
       appNumber: 'Investigational Reference Standard (CAS 137525-51-0)',
-      approvalDate: 'Investigational Cytoprotective Peptide',
+      approvalDate: 'FDA PCAC 503A Recommended (July 23, 2026: 8-6-1)',
       holder: 'Diagen d.o.o. / Academic Research Registries',
-      guidance: 'BPC-157 is a 15-amino-acid synthetic peptide derived from human gastric juice protein BPC. Studied extensively for cytoprotection, tendon-to-bone healing, gastrointestinal mucosal repair, and VEGFR2-mediated angiogenic modulation.',
+      guidance: 'BPC-157 is a 15-amino-acid synthetic peptide derived from human gastric juice protein BPC. On July 23, 2026, the FDA Pharmacy Compounding Advisory Committee (PCAC) voted 8 in favor, 6 against, and 1 abstention to recommend BPC-157 (evaluated in free-base and acetate forms for ulcerative colitis) for inclusion on the Section 503A Bulks List for patient-specific compounding by eligible physicians and pharmacists.',
       officialLinks: [
         { label: 'PubChem Compound (CID: 108182224)', url: 'https://pubchem.ncbi.nlm.nih.gov/compound/108182224', type: 'pubchem' },
         { label: 'PubMed Literature Search (BPC-157)', url: 'https://pubmed.ncbi.nlm.nih.gov/?term=BPC-157+gastric+pentadecapeptide', type: 'pubmed' }
@@ -380,6 +380,53 @@ export const PEPTIDE_REFERENCE_DOSSIERS = {
       'Pregnancy and nursing.'
     ],
     adverseReactions: 'Remarkably high safety profile in preclinical and early clinical evaluations. Rare mild injection-site erythema.'
+  },
+
+  'tb-500': {
+    canonicalName: 'TB-500 (Thymosin β4 Active Fragment)',
+    casNumber: '77591-33-4 / 885340-08-9',
+    pubChemCid: '16132341',
+    pubChemUrl: 'https://pubchem.ncbi.nlm.nih.gov/#query=TB-500+thymosin+beta-4',
+    regulatory: {
+      brand: 'TB-500 / Thymosin Beta-4 (Active G-Actin Binding Fragment)',
+      brandUrl: 'https://pubchem.ncbi.nlm.nih.gov/#query=thymosin+beta-4',
+      appNumber: 'Investigational Compounding Standard (CAS 77591-33-4)',
+      approvalDate: 'FDA PCAC 503A Recommended (July 23, 2026: 8-6-1)',
+      holder: 'Regitene / Academic Research Registries',
+      guidance: 'TB-500 is the synthetic 17-43 active fragment of Thymosin Beta-4. Studied for actin sequestration, cell migration, tissue regeneration, and wound repair. On July 23, 2026, the FDA Pharmacy Compounding Advisory Committee (PCAC) voted 8 in favor, 6 against, and 1 abstention to recommend TB-500 (evaluated in free-base and acetate forms specifically for wound healing) for inclusion on the Section 503A Bulks List.',
+      officialLinks: [
+        { label: 'PubChem Reference (Thymosin β4)', url: 'https://pubchem.ncbi.nlm.nih.gov/#query=thymosin+beta-4', type: 'pubchem' },
+        { label: 'PubMed Literature Search (TB-500 / Tβ4)', url: 'https://pubmed.ncbi.nlm.nih.gov/?term=thymosin+beta-4+wound+healing+actin', type: 'pubmed' }
+      ]
+    },
+    pharmacology: {
+      title: 'Actin Sequestration & Cell Migration Profile',
+      affinities: [
+        { name: 'G-Actin Binding Domain:', desc: 'Binds globular actin (G-actin) to regulate cytoskeletal polymerization and accelerate lamellipodia formation' },
+        { name: 'Endothelial Cell Motility:', desc: 'Stimulates directional keratinocyte and endothelial migration into wounded tissue beds' },
+        { name: 'Angiogenesis & Matrix Remodeling:', desc: 'Upregulates VEGF and reduces inflammatory tissue fibrosis during repair' }
+      ],
+      moa: 'Sequesters monomeric G-actin, accelerating directional cell migration, tissue re-epithelialization, and physiological angiogenesis.'
+    },
+    literature: [
+      {
+        id: 'tb-goldstein-2012',
+        title: 'Thymosin beta4: a multi-functional regenerative peptide',
+        authors: 'Goldstein AL, Hannappel E, Kleinman HK.',
+        journal: 'Annals of the New York Academy of Sciences',
+        year: 2012,
+        volume: '1270: 1–8',
+        pmid: '23050810',
+        doi: '10.1111/j.1749-6632.2012.06746.x',
+        summary: 'Pivotal review covering the wound healing, cardioprotective, and anti-inflammatory properties of Thymosin beta-4 and its active fragments.'
+      }
+    ],
+    contraindications: [
+      'Active proliferative oncological conditions.',
+      'Known hypersensitivity to thymosin sequences.',
+      'Pregnancy and breastfeeding.'
+    ],
+    adverseReactions: 'Generally well tolerated in clinical wound-healing studies. Transient mild injection-site redness.'
   }
 };
 

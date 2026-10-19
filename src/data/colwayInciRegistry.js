@@ -19,44 +19,71 @@ export const COLWAY_PRODUCTS_INCI_REGISTRY = {
   // ─── 1. BLUE DIAMOND CREAM ──────────────────────────────────────────────────
   'colway-blue-diamond-cream': {
     slug: 'colway-blue-diamond-cream',
-    title: 'Blue Diamond Cellular Rejuvenation Cream — FGF-1 & Bioactive Peptides',
-    key_actives_summary: 'Recombinant FGF-1 (sh-Polypeptide-1), Native Marine Tropocollagen, Liposomal Ceramides NP/AP/EOP, CoQ10, Kinetin, and Jojoba/Macadamia Esters',
+    title: 'Blue Diamond Cellular Rejuvenation Cream — Matrigenics 14G, FGF-1 & Bioactive Peptides',
+    key_actives_summary: 'MATRIGENICS 14 G (14 Youth Genes Reactivator), Recombinant FGF-1 (sh-Polypeptide-1), Native Tropocollagen, RONAFLAIR® FLAWLESS Soft-Look Silica, SUPEROX-C™ Kakadu Plum (100× Natural Vitamin C), Liposomal Ceramides NP/AP/EOP, CoQ10, and Amino-Glyco Kaviar',
     hero_stats: [
-      { stat: 'FGF-1', label: 'Polypeptide Factor', sub: 'Mitogenic stem cell activation' },
-      { stat: '+38%', label: 'Neocollagenesis', sub: 'Dermal procollagen synthesis' },
-      { stat: '3:1:1:1', label: 'Lipid Ratio', sub: 'Bio-identical ceramide matrix' },
-      { stat: '−28%', label: 'Wrinkle Depth', sub: 'Clinical volumetric profile' }
+      { stat: '14 Youth Genes', label: 'Matrigenics 14G', sub: 'Wakame stipes cellular activator' },
+      { stat: 'FGF-1 + Peptides', label: 'Polypeptide Vector', sub: 'Mitogenic stem cell renewal' },
+      { stat: 'Soft-Look 4D', label: 'RonaFlair® Flawless', sub: 'Optical spherical micro-blurring' },
+      { stat: '100× Vitamin C', label: 'Superox-C™ Plum', sub: 'Capillary sealing & anti-erythema' }
     ],
+    application_tip: 'Warming Protocol: Before application, gently warm a small pearl-sized amount between fingertips. This immediately liquefies the rich lamellar lipid base, allowing ultra-fast transdermal absorption without any greasy residue.',
+    clinical_focus_dossier: 'Reversal of the "Triangle of Beauty" inversion: Specifically formulated for mature and perimenopausal skin to combat cheek deflation, deep nasolabial furrows, drooping oral commissures, and loss of mandibular contour, while strengthening fragile capillaries against persistent erythema.',
     mechanisms: [
       {
         id: 'MEC-01',
+        title: 'Matrigenics 14G Extracellular Matrix Reactivation',
+        pathway: '14 Structural Youth Genes Transcription',
+        target: 'Dermal Fibroblast Genomic Matrix',
+        endpoint: 'Reversal of "Triangle of Beauty" Inversion',
+        tag: 'Genomic Rejuvenation',
+        description: 'Bioactive concentrate obtained from the fertile stipes of Undaria pinnatifida algae. Clinically proven to reactivate 14 structural genes involved in extracellular matrix redensification (collagen synthesis, maturation, and cross-linking, elastin assembly, and hyaluronic acid production), restoring facial V-contour and cheekbone fullness.'
+      },
+      {
+        id: 'MEC-02',
         title: 'FGF-1 Basal Membrane Mitogenesis',
-        pathway: 'FGFR1 / FGFR2 Activation',
+        pathway: 'FGFR1 / FGFR2 Receptor Tyrosine Kinase Activation',
         target: 'Basal Fibroblast Stem Cells',
-        endpoint: '+38% Procollagen I/III',
+        endpoint: '+38% Procollagen I/III Induction',
         tag: 'Dermal Regeneration',
         description: 'Recombinant basic fibroblast growth factor (bFGF / FGF-1) encapsulated in lipid vesicles penetrates the stratum corneum to bind FGFR1 receptors, triggering cellular proliferation and accelerating extracellular matrix remodeling.'
       },
       {
-        id: 'MEC-02',
+        id: 'MEC-03',
+        title: 'Superox-C™ Vascular Protection & Anti-Erythema',
+        pathway: 'Kakadu Plum Ascorbic Acid / Capillary Wall Tightening',
+        target: 'Endothelial Micro-Capillaries & Dermal Fibroblasts',
+        endpoint: 'Erythema Reduction & Couperose Calming',
+        tag: 'Vascular Integrity',
+        description: 'Extracted from Australian Kakadu Plum (Terminalia ferdinandiana), the world’s richest botanical source of bioavailable Vitamin C (up to 100× higher than oranges). Synergizes with native collagen to strengthen fragile vascular endothelium, suppress inflammatory cytokine release, and fade diffuse facial redness.'
+      },
+      {
+        id: 'MEC-04',
+        title: 'RonaFlair® Flawless Optical Soft-Focus Diffraction',
+        pathway: 'Spherical Functional Silica Light Refraction',
+        target: 'Stratum Corneum Micro-Relief',
+        endpoint: 'Instant Optical Wrinkle Blurring ("Soft Look")',
+        tag: 'Instant Photonic Glow',
+        description: 'Intelligent spherical silica platelets fill epidermal micro-crevices and diffract ambient light, instantly blurring the optical visibility of fine lines, pores, and superficial imperfections upon first application.'
+      },
+      {
+        id: 'MEC-05',
         title: 'Ceramide Lamellar Sheet Reconstruction',
-        pathway: 'Sphingolipid Bilayer Assembly',
+        pathway: 'Sphingolipid Bilayer Assembly (3:1:1:1 Ratio)',
         target: 'Intercellular Lipid Cement',
         endpoint: '−54% TEWL Reduction',
         tag: 'Hydrolipid Barrier',
         description: 'Bio-identical ceramides (NP, AP, EOP) combined with phytosphingosine and plant cholesterol replenish depleted stratum corneum lamellae, halting trans-epidermal moisture dissipation and sealing environmental toxins out.'
-      },
-      {
-        id: 'MEC-03',
-        title: 'Mitochondrial Bio-Energetics & Anti-Senescence',
-        pathway: 'ATP Synthesis & Telomere Defense',
-        target: 'Mitochondrial Respiratory Chain',
-        endpoint: 'Oxidative Shielding',
-        tag: 'Cellular Longevity',
-        description: 'Liposomal Coenzyme Q10 enhances electron transport in respiratory complexes I and III, while kinetin delays cellular senescence, preventing DNA damage and keeping dermal fibroblasts biologically active.'
       }
     ],
     clinical_evidence: [
+      {
+        target: '14 Structural ECM Genes',
+        compound: 'Matrigenics 14G (Undaria Pinnatifida Extract)',
+        mechanism: 'Gene Transcription Stimulation of Collagen, Elastin & Hyaluronan',
+        outcome: 'Visibly restructures facial volume, diminishes nasal-labial fold depth, and redensifies collapsing cheek tissues in mature skin.',
+        stat: '14 Genes Activated'
+      },
       {
         target: 'Fibroblast Proliferation',
         compound: 'sh-Polypeptide-1 (FGF-1 Micro-Encapsulated)',
@@ -65,25 +92,25 @@ export const COLWAY_PRODUCTS_INCI_REGISTRY = {
         stat: '+38% Procollagen'
       },
       {
+        target: 'Immediate Optical Blurring',
+        compound: 'RonaFlair® Flawless (Spherical Silica Matrix)',
+        mechanism: 'Photonic Multi-Angle Light Diffraction',
+        outcome: 'Instant optical reduction in the depth and sharpness of facial lines with a soft-focus, matte-radiant skin finish.',
+        stat: 'Instant Soft-Look'
+      },
+      {
+        target: 'Capillary Fragility & Erythema',
+        compound: 'Superox-C™ (Kakadu Plum Natural Vitamin C Extract)',
+        mechanism: 'Endothelial Collagen Cross-Linking & ROS Neutralization',
+        outcome: 'Protects hyperreactive menopausal skin against vascular rupture, reduces red couperose patches, and evens out skin complexion.',
+        stat: '100× Natural Vit C'
+      },
+      {
         target: 'Matrix Hydration & Scaffold',
         compound: 'Native Freshwater Tropocollagen (Cold Extraction)',
         mechanism: 'Intact Triple-Helix Hydrogen Bonding Matrix',
         outcome: 'Forms a biomimetic water-binding macromolecular mesh over damaged epidermal layers, preventing micro-collapsing of skin turgor.',
         stat: '+42% Elasticity'
-      },
-      {
-        target: 'Lamellar Barrier Repair',
-        compound: 'Liposomal Ceramides NP, AP, EOP & Phytosphingosine',
-        mechanism: 'Multilamellar Lipid Bilayer Integration',
-        outcome: 'Directly substitutes lost ceramides in the stratum corneum, restoring membrane fluidity and moisture retention capacity.',
-        stat: '−54% TEWL'
-      },
-      {
-        target: 'Anti-Senescence & Energy',
-        compound: 'Ubiquinone (CoQ10) & Kinetin (Plant Cytokinin)',
-        mechanism: 'Mitochondrial Free Radical Scavenging & Cytokinesis',
-        outcome: 'Neutralizes reactive oxygen species (ROS) in lipid bilayers and preserves human dermal fibroblast replicative lifespan.',
-        stat: '3.4× Bioavailability'
       }
     ],
     ingredients: [
@@ -374,41 +401,52 @@ export const COLWAY_PRODUCTS_INCI_REGISTRY = {
   // ─── 2. BLUE DIAMOND PEELING ────────────────────────────────────────────────
   'colway-blue-diamond-peeling': {
     slug: 'colway-blue-diamond-peeling',
-    title: 'Blue Diamond Exfoliating & Micro-Resurfacing Cream — Diamond Dust & Enzymes',
-    key_actives_summary: 'Calibrated Natural Diamond Dust, Proteolytic Papain & Bromelain Bio-Enzymes, Subtilisin, Native Tropocollagen, and Sweet Almond & Jojoba Esters',
+    title: 'Blue Diamond Exfoliating & Micro-Resurfacing Cream — Diamond Dust, Dual Enzymes & Neuro-Calming Hyssop',
+    key_actives_summary: 'Calibrated Natural Diamond Dust, Proteolytic Papain & Subtilisin Enzymes, Mexican Giant Hyssop (Agastache Mexicana), Glyacide ECO & Glycosaminoglycans (GAGs), Native Tropocollagen, Squalane, Avocado & Jojoba Oils',
     hero_stats: [
-      { stat: 'Diamond Dust', label: 'Micro-Exfoliant', sub: 'Calibrated rounded facets' },
-      { stat: '300%', label: 'Absorption Boost', sub: 'Transdermal peptide channel intake' },
-      { stat: 'Papain + Bromelain', label: 'Proteolytic Enzymes', sub: 'Selective keratolysis' },
-      { stat: '0%', label: 'Micro-Tears', sub: 'Non-scratching crystal geometry' }
+      { stat: 'Diamond Dust', label: 'Micro-Exfoliant', sub: 'Precious non-scratching abrasive' },
+      { stat: 'Dual Enzymes', label: 'Papain + Subtilisin', sub: 'Selective corneodesmosome lysis' },
+      { stat: 'Neuro-Calm', label: 'Mexican Hyssop', sub: 'Calms stress-induced redness' },
+      { stat: 'Diagnostic', label: 'Barrier Test Cream', sub: 'Reveals compromised barrier zones' }
     ],
+    application_tip: 'Dry Skin Application Rule: Thoroughly dry the skin before applying the peeling. Apply an even layer and allow the enzymatic phase to digest dead keratin bonds for 5–10 minutes while the rich anti-aging cream base absorbs. Then gently massage with slightly moistened fingertips to activate the diamond abrasive polishing phase, and rinse with lukewarm water.',
+    clinical_focus_dossier: 'Dual-action mechanical + enzymatic resurfacing in a rich anti-aging cream vehicle. Functions as an interactive diagnostic tool: As the cream base absorbs, zones with compromised hydrolipid integrity absorb the vehicle much faster, signaling localized dehydration to the practitioner. Restores stratum corneum permeability prior to peptide therapy.',
     mechanisms: [
       {
         id: 'MEC-01',
         title: 'Calibrated Faceted Diamond Micro-Polishing',
         pathway: 'Frictionless Mechanical Corneocyte Shedding',
         target: 'Stratum Corneum Desquamation',
-        endpoint: 'Instant Optical Glow',
+        endpoint: 'Instant Optical Glow & Skin Softening',
         tag: 'Physical Resurfacing',
         description: 'Micro-crystalline natural diamond dust with microscopic rounded facets glides across the skin surface, detaching keratinized cellular debris without scratching the live viable epidermis.'
       },
       {
         id: 'MEC-02',
-        title: 'Enzymatic Desmosomal Cleavage',
-        pathway: 'Papain / Bromelain / Subtilisin Proteolysis',
+        title: 'Dual Enzymatic Desmosomal Cleavage',
+        pathway: 'Papain & Subtilisin Proteolytic Keratolysis',
         target: 'Corneodesmosomal Protein Bridges',
-        endpoint: 'Follicular Decongestion',
+        endpoint: 'Follicular Decongestion & Smooth Texture',
         tag: 'Biological Peeling',
-        description: 'Bioactive plant proteases selectively break down peptide linkages in corneodesmosomes, dissolving sticky oxidized sebum and dull keratin plugs without acid-induced pH burning.'
+        description: 'Bioactive plant and bacterial proteases selectively break down peptide linkages in corneodesmosomes, dissolving sticky oxidized sebum and dull keratin plugs without acid-induced pH burning.'
       },
       {
         id: 'MEC-03',
-        title: 'Collagen-Buffered Barrier Cushioning',
-        pathway: 'Hydrophilic Native Tropocollagen Sheath',
-        target: 'Hydrolipid Mantle Preservation',
-        endpoint: 'Zero Erythema / Zero Tightness',
-        tag: 'ECM Shield',
-        description: 'Cold-extracted freshwater fish tropocollagen and cold-pressed sweet almond lipids lubricate the peeling action, maintaining hydration and preventing post-treatment erythema.'
+        title: 'Mexican Giant Hyssop Neuro-Cosmetic Calming',
+        pathway: 'NF-κB Inhibition & Vasodilation Suppression',
+        target: 'Cutaneous Stress Receptors & Micro-Vessels',
+        endpoint: 'Zero Erythema / Rapid Redness Neutralization',
+        tag: 'Neuro-Calming Shield',
+        description: 'Extract of Agastache mexicana rich in acacetin and tilianin blocks stress-induced inflammatory cascades, counteracting thermal flushing and preventing mechanical peeling redness.'
+      },
+      {
+        id: 'MEC-04',
+        title: 'Glyacide ECO & GAGs Transdermal Delivery Vector',
+        pathway: 'Stratum Corneum Fluidization & Hydro-Lipid Repair',
+        target: 'Intercellular Lipid Cement',
+        endpoint: 'Interactive Hydrolipid Diagnostic & Permeability Boost',
+        tag: 'Barrier Diagnostic',
+        description: 'Bio-fermented Glyacide ECO and glycosaminoglycans wrap skin in a rich restorative emulsion. Acts as a diagnostic indicator of barrier health as compromised areas absorb the cream rapidly, while priming the epidermis for 300% greater transdermal peptide intake.'
       }
     ],
     clinical_evidence: [
@@ -421,21 +459,21 @@ export const COLWAY_PRODUCTS_INCI_REGISTRY = {
       },
       {
         target: 'Desmosome Digestion',
-        compound: 'Papain & Bromelain Proteolytic Complex',
+        compound: 'Papain & Subtilisin Proteolytic Complex',
         mechanism: 'Endopeptidase Cleavage of Keratin Bridges',
         outcome: 'Selectively dissolves expired protein scaffolding between dead cells, clearing clogged follicular ostia.',
         stat: '−31% Sebum Congestion'
       },
       {
-        target: 'Active Permeability Gateway',
-        compound: 'Subtilisin Bacterial Endopeptidase',
-        mechanism: 'Permeation Pathway Optimization',
-        outcome: 'Clears transfollicular transport channels, increasing subsequent peptide and retinol absorption by up to 300%.',
-        stat: '300% Bioavailability'
+        target: 'Neuro-Calming & Redness Relief',
+        compound: 'Agastache Mexicana (Mexican Giant Hyssop Extract)',
+        mechanism: 'Stress-Induced Neuropeptide & Vasomotor Modulation',
+        outcome: 'Prevents vascular flare-up and post-exfoliation erythema, making it safe for rosacea and fragile capillaries.',
+        stat: 'Clinical Anti-Redness'
       },
       {
         target: 'Barrier Protection & Cushioning',
-        compound: 'Native Fish Tropocollagen & Jojoba Esters',
+        compound: 'Native Fish Tropocollagen, Squalane & Jojoba Esters',
         mechanism: 'Hydrophilic Bio-Buffer & Emollient Cushion',
         outcome: 'Prevents friction-induced inflammation and delivers immediate post-exfoliation soothing and suppleness.',
         stat: '+34% Immediate Moisture'
