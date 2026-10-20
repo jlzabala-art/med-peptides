@@ -48,11 +48,16 @@ export default function PublicAtlasAIDrawer({
   lang = 'en',
   isOpenControlled = null,
   onCloseControlled = null,
+  isOpen: isOpenProp = null,
+  onClose: onCloseProp = null,
 }) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
-  const isOpen = isOpenControlled !== null ? isOpenControlled : internalIsOpen;
+  const isOpen = isOpenControlled !== null 
+    ? isOpenControlled 
+    : (isOpenProp !== null && isOpenProp !== undefined ? isOpenProp : internalIsOpen);
   const handleClose = () => {
     if (onCloseControlled) onCloseControlled();
+    else if (onCloseProp) onCloseProp();
     else setInternalIsOpen(false);
   };
   const handleOpenDrawer = () => {

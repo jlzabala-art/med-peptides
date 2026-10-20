@@ -543,67 +543,6 @@ export default function ColwayCollectionSidebar({
           </div>
         </div>
       </div>
-
-      {/* ── 5. DIRECT CLINICAL WHATSAPP DESK (Fase 1) ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
-        borderRadius: '14px',
-        border: '1px solid #86efac',
-        padding: '1.15rem',
-        boxShadow: '0 2px 8px rgba(34, 197, 94, 0.08)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-          <div style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '6px',
-            background: '#22c55e',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0
-          }}>
-            <MessageSquare size={15} />
-          </div>
-          <div>
-            <h5 style={{ fontSize: '0.84rem', fontWeight: 800, color: '#14532d', margin: 0 }}>
-              Clinical WhatsApp Desk
-            </h5>
-            <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 650 }}>
-              Direct Physician & B2B Channel
-            </span>
-          </div>
-        </div>
-        <p style={{ fontSize: '0.74rem', color: '#166534', margin: '0 0 10px 0', lineHeight: 1.45 }}>
-          {isEs
-            ? 'Consulte disponibilidad de lotes, literatura de ensayos clínicos y precios mayoristas para clínicas.'
-            : 'Inquire instantly about batch availability, clinical trial literature, and practitioner wholesale pricing.'}
-        </p>
-        <a
-          href="https://api.whatsapp.com/send?phone=971564179256&text=Hello%20Atlas%20Health%20Services%2C%20I%20am%20reviewing%20the%20Colway%C2%AE%20Clinical%20Collection.%20Please%20connect%20me%20with%20Medical%20Affairs."
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            width: '100%',
-            padding: '8px 12px',
-            borderRadius: '8px',
-            background: '#22c55e',
-            color: '#ffffff',
-            textDecoration: 'none',
-            fontSize: '0.76rem',
-            fontWeight: 750,
-            boxShadow: '0 2px 6px rgba(34, 197, 94, 0.25)'
-          }}
-        >
-          <MessageSquare size={14} />
-          <span>Chat on WhatsApp (+971 56 417 9256)</span>
-        </a>
-      </div>
     </aside>
   );
 }

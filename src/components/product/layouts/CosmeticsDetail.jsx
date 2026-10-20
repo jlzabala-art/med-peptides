@@ -1164,92 +1164,9 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               >
                 <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.25rem' }}>
                   {isHairProduct
-                    ? 'Standardized trichological formulation engineered for follicular rejuvenation, microvascular stimulation, and stem cell protection. Explore the in-depth sections below or select from the navigation menu on the right to inspect biological mechanisms, full INCI breakdown, or clinical integration.'
-                    : 'Standardized dermocosmetic formulation engineered for extracellular matrix reinforcement, native collagen bioavailability, and epidermal barrier protection. Explore the in-depth sections below or select from the navigation menu on the right to inspect biological mechanisms, full INCI breakdown, or clinical integration.'}
+                    ? 'Standardized trichological formulation engineered for follicular rejuvenation, microvascular stimulation, and stem cell protection. Explore the in-depth sections using the navigation menu on the right to inspect biological mechanisms, full INCI breakdown, or clinical integration.'
+                    : 'Standardized dermocosmetic formulation engineered for extracellular matrix reinforcement, native collagen bioavailability, and epidermal barrier protection. Explore the in-depth sections using the navigation menu on the right to inspect biological mechanisms, full INCI breakdown, or clinical integration.'}
                 </p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '1.25rem' }}>
-                  {tocSections.filter(s => s.id !== 'overview').map((sec, idx) => {
-                    const IconComp = sec.icon || Sparkles;
-                    return (
-                      <div
-                        key={sec.id}
-                        onClick={() => handleSelectSection(sec.id)}
-                        role="button"
-                        tabIndex={0}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '0.9rem 1.15rem',
-                          background: '#ffffff',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = '#003666';
-                          e.currentTarget.style.backgroundColor = '#f8fafc';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = '#e2e8f0';
-                          e.currentTarget.style.backgroundColor = '#ffffff';
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <span style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: 26,
-                            height: 26,
-                            borderRadius: '6px',
-                            background: '#f1f5f9',
-                            color: '#475569',
-                            fontSize: '0.72rem',
-                            fontWeight: 800,
-                            fontFamily: 'monospace'
-                          }}>
-                            {String(idx + 1).padStart(2, '0')}
-                          </span>
-                          <span style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: 30,
-                            height: 30,
-                            borderRadius: '6px',
-                            background: '#f0fdfa',
-                            color: '#0d9488'
-                          }}>
-                            <IconComp size={15} />
-                          </span>
-                          <div>
-                            <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
-                              {sec.label}
-                            </div>
-                            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-                              {sec.id === 'stem-cell-monograph' && 'Baicapil™ 2% hair follicle stem cell activation & shedding reduction.'}
-                              {sec.id === 'active-ingredients-showcase' && 'Biological mechanisms of action, molecular targets, and clinical properties.'}
-                              {sec.id === 'clinical-evidence' && 'Peer-reviewed evidence, molecular mechanisms, and cellular endpoints.'}
-                              {sec.id === 'inci-dossier' && `Full declared pharmacopoeial breakdown (${ingredients.length} ingredients) per EU 1223/2009.`}
-                              {sec.id === 'application-protocol' && 'Standardized clinical application protocol, contact times, and biological infogram.'}
-                              {sec.id === 'technical-specs' && 'Physicochemical parameters, pH range, and stability profile.'}
-                              {sec.id === 'clinical-protocols' && 'Synergistic protocol integration and adjunct recommendations.'}
-                              {sec.id === 'safety' && 'Clinical safety, contraindications, and ICDRG patch test protocol.'}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.76rem', fontWeight: 700, color: '#003666', flexShrink: 0 }}>
-                          <span>{lang === 'es' ? 'Explorar' : 'Explore'}</span>
-                          <ChevronRight size={14} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
 
                 <div style={{
                   padding: '0.75rem 1rem',

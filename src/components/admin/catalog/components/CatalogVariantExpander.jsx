@@ -810,16 +810,34 @@ export default function CatalogVariantExpander({
         const isLipCare = String(row.canonicalName || row.name || '').toLowerCase().includes('lip') ||
                           String(row.canonicalName || row.name || '').toLowerCase().includes('pomadka') ||
                           String(row.canonicalName || row.name || '').toLowerCase().includes('balm');
+        const formatSafeIngredientList = (val, fallback = '') => {
+          if (!val) return fallback;
+          if (typeof val === 'string') return val;
+          if (Array.isArray(val)) {
+            const list = val.map(item => {
+              if (!item) return '';
+              if (typeof item === 'string') return item;
+              if (typeof item === 'object') return item.inci_name || item.name || item.common_name || '';
+              return '';
+            }).filter(Boolean);
+            return list.length > 0 ? list.slice(0, 10).join(' • ') : fallback;
+          }
+          if (typeof val === 'object') {
+            return val.inci_name || val.name || val.common_name || fallback;
+          }
+          return String(val);
+        };
+
         const activeMatrixTitle = isLipCare 
           ? 'Bioactive Tropocollagen & Botanical Lipids' 
-          : (row.activeComplex || 'Bioactive Tropocollagen Triple Helix & Peptides');
+          : formatSafeIngredientList(row.activeComplex, 'Bioactive Tropocollagen Triple Helix & Peptides');
         const activeMatrixSub = isLipCare
           ? 'Simmondsia Chinensis (Jojoba) Oil • Butyrospermum Parkii (Shea) Butter • Tocopherol (Vit E)'
-          : (row.ingredients || 'Native Fish Collagen Oligopeptides • Matrixyl Synthe’6 • Hyaluronic Acid');
-        const indicationsTitle = goalsList || (isLipCare ? 'Mucosal Lip Repair & Barrier Defense' : 'Cellular Dermal Matrix & Anti-Photoaging');
+          : formatSafeIngredientList(row.ingredients, 'Native Fish Collagen Oligopeptides • Matrixyl Synthe’6 • Hyaluronic Acid');
+        const indicationsTitle = typeof goalsList === 'string' ? goalsList : (isLipCare ? 'Mucosal Lip Repair & Barrier Defense' : 'Cellular Dermal Matrix & Anti-Photoaging');
         const indicationsSub = isLipCare
           ? 'Shields delicate vermilion border against environmental fissures, UV oxidative stress & trans-epidermal dehydration'
-          : (targetMechanism || 'Stimulates pro-collagen synthesis, fibroblast proliferation & dermal firmness');
+          : (typeof targetMechanism === 'string' ? targetMechanism : 'Stimulates pro-collagen synthesis, fibroblast proliferation & dermal firmness');
 
         return (
           <>
@@ -968,7 +986,9 @@ export default function CatalogVariantExpander({
          4c. ORAL DIETARY SUPPLEMENTS & NUTRACEUTICALS (Colvita, Longevity Caps...)
          ───────────────────────────────────────────────────────────── */
       case 'nutraceutical': {
-        const activesTitle = row.activeIngredients || 'Freeze-Dried Native Collagen Matrix & Nutrients';
+        const activesTitle = typeof row.activeIngredients === 'string'
+          ? row.activeIngredients
+          : (Array.isArray(row.activeIngredients) ? row.activeIngredients.map(i => (typeof i === 'object' ? i.inci_name || i.name : i)).filter(Boolean).join(' • ') : 'Freeze-Dried Native Collagen Matrix & Nutrients');
         const activesSub = 'Synergistic Vitamin E (D-alpha-tocopherol) & Fucus Vesiculosus Micronized Algae';
         const dosageTitle = row.dosage || '2 Capsules Daily with Meals';
 

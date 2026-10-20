@@ -25,6 +25,7 @@ import {
   Droplets, Microscope, FileText, FlaskConical, Award, ShieldCheck, CheckCircle2, ChevronRight,
   ChevronDown, Layers, Eye, Lock, LogIn, User, MessageSquare
 } from '@/lib/icons';
+import { triggerHaptic } from '@/utils/haptics';
 import '../styles/collection_shared.css';
 
 // Brand configurations with clinical metadata and 4 KPIs (Regla Golden #22)
@@ -303,45 +304,6 @@ export default function BrandCollectionPage({
   const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
   const [activeColwaySection, setActiveColwaySection] = useState('overview'); // 'overview' | 'catalog' | 'advantage' | 'protocols' | 'calculator'
   const [activeProtocolId, setActiveProtocolId] = useState(null);
-
-  // Multi-Currency Selector & Incoterm Engine (Fase 3)
-  const [activeCurrency, setActiveCurrency] = useState('EUR'); // 'EUR' | 'USD' | 'AED'
-
-  const CURRENCY_RATES = useMemo(() => ({
-    EUR: { symbol: '€', rate: 1.0, label: 'EUR (€)' },
-    USD: { symbol: '$', rate: 1.08, label: 'USD ($)' },
-    AED: { symbol: 'AED', rate: 3.97, label: 'AED (د.إ)' }
-  }), []);
-
-  const resolveProductBasePrice = (product) => {
-    if (typeof product.price === 'number' && product.price > 0) return product.price;
-    if (typeof product.wholesalePriceAed === 'number' && product.wholesalePriceAed > 0) {
-      return Math.round((product.wholesalePriceAed / 3.97) * 100) / 100;
-    }
-    const id = (product.id || product.slug || '').toLowerCase();
-    if (id.includes('diamond-cream')) return 64.00;
-    if (id.includes('diamond-peeling') || id.includes('diamond-exfoliat')) return 34.00;
-    if (id.includes('colvita')) return 31.00;
-    if (id.includes('vege')) return 25.00;
-    if (id.includes('shampoo')) return 29.00;
-    if (id.includes('conditioner')) return 29.00;
-    if (id.includes('wash')) return 29.00;
-    if (id.includes('lip')) return 4.50;
-    return null;
-  };
-
-  const formatCurrencyPrice = (eurAmount) => {
-    if (!eurAmount && eurAmount !== 0) return null;
-    const cfg = CURRENCY_RATES[activeCurrency] || CURRENCY_RATES.EUR;
-    const converted = eurAmount * cfg.rate;
-    if (activeCurrency === 'AED') {
-      return `${Math.round(converted).toLocaleString()} AED`;
-    }
-    if (activeCurrency === 'USD') {
-      return `$${converted.toFixed(2)}`;
-    }
-    return `€${converted.toFixed(2)}`;
-  };
 
   const canonicalUrl = `https://www.atlashealth-services.com/collection/${brandSlug}`;
 
@@ -1070,45 +1032,6 @@ export default function BrandCollectionPage({
                       : (brandSlug === 'colway' ? (isEs ? 'formulaciones' : 'formulations') : (isEs ? 'tests' : 'tests'))}
                   </span>
 
-                  {/* Incoterm Badge (Fase 3) */}
-                  <span style={{
-                    fontSize: '0.70rem',
-                    fontWeight: 700,
-                    color: '#475569',
-                    background: '#f1f5f9',
-                    border: '1px solid #e2e8f0',
-                    padding: '3px 8px',
-                    borderRadius: '5px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    📦 Terms: <strong>Ex-Works (EXW)</strong>
-                  </span>
-
-                  {/* Currency Selector (Fase 3) */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <select
-                      value={activeCurrency}
-                      onChange={(e) => setActiveCurrency(e.target.value)}
-                      style={{
-                        padding: '4px 8px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.78rem',
-                        fontWeight: 700,
-                        color: '#003666',
-                        background: '#fff',
-                        cursor: 'pointer'
-                      }}
-                      title="Select display currency for practitioner pricing"
-                    >
-                      <option value="EUR">EUR (€)</option>
-                      <option value="USD">USD ($)</option>
-                      <option value="AED">AED (د.إ)</option>
-                    </select>
-                  </div>
-
                   <select
                     value={sortOption}
                     onChange={(e) => setSortOption(e.target.value)}
@@ -1328,16 +1251,6 @@ export default function BrandCollectionPage({
 
                           {/* Right: Actions */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                            {(() => {
-                              const basePrice = resolveProductBasePrice(product);
-                              if (!basePrice) return null;
-                              return (
-                                <div style={{ textAlign: 'right', marginRight: '6px' }}>
-                                  <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 700, display: 'block' }}>EXW</span>
-                                  <strong style={{ fontSize: '0.92rem', color: '#0f172a' }}>{formatCurrencyPrice(basePrice)}</strong>
-                                </div>
-                              );
-                            })()}
                             <button
                               type="button"
                               onClick={(e) => toggleExpand(product.id, e)}
@@ -1702,36 +1615,6 @@ export default function BrandCollectionPage({
                             })()}
                           </div>
                         )}
-
-                        {/* Clinical Wholesale Pricing & EXW Incoterm (Fase 3) */}
-                        {(() => {
-                          const basePrice = resolveProductBasePrice(product);
-                          if (!basePrice) return null;
-                          return (
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'baseline',
-                              justifyContent: 'space-between',
-                              marginBottom: '0.65rem',
-                              padding: '6px 10px',
-                              borderRadius: '6px',
-                              background: '#f8fafc',
-                              border: '1px solid #e2e8f0'
-                            }}>
-                              <div>
-                                <span style={{ fontSize: '0.67rem', color: '#64748b', fontWeight: 650, display: 'block', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                                  Practitioner B2B (EXW)
-                                </span>
-                                <span style={{ fontSize: '1.05rem', fontWeight: 850, color: '#0f172a' }}>
-                                  {formatCurrencyPrice(basePrice)}
-                                </span>
-                              </div>
-                              <span style={{ fontSize: '0.66rem', color: '#0d9488', fontWeight: 750, background: '#f0fdfa', padding: '2px 6px', borderRadius: '4px', border: '1px solid #ccfbf1' }}>
-                                Ex-Works (EXW)
-                              </span>
-                            </div>
-                          );
-                        })()}
 
                         {/* Card Action Strip */}
                         <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
@@ -2269,6 +2152,8 @@ export default function BrandCollectionPage({
       <PublicAtlasAIDrawer
         isOpenControlled={isAtlasAiOpen}
         onCloseControlled={() => setIsAtlasAiOpen(false)}
+        isOpen={isAtlasAiOpen}
+        onClose={() => setIsAtlasAiOpen(false)}
         hideFloatingTrigger={true}
         contextType="brand_collection"
         contextAnchor={activeSectionContext}
