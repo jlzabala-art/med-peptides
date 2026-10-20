@@ -225,12 +225,86 @@ function formatProductClinicalBadge(item, isSpanish) {
   };
 }
 
+function getColwayCategoryMeta(product) {
+  const cat = (product.category || '').toLowerCase();
+  const id = (product.id || product.slug || '').toLowerCase();
+  const name = (product.name || '').toLowerCase();
+
+  if (id.includes('bundle') || id.includes('ritual') || id.includes('trichology') || cat.includes('bundle') || cat.includes('protocol')) {
+    return {
+      id: 'bundles',
+      label: 'Clinical Protocol Bundles',
+      labelEs: 'Kits y Protocolos Clínicos',
+      icon: Layers,
+      iconColor: '#7c3aed',
+      badgeBg: '#faf5ff',
+      badgeBorder: '#e9d5ff',
+      badgeColor: '#6d28d9',
+      order: 1,
+    };
+  }
+  if (id.includes('diamond') || name.includes('diamond') || cat.includes('epigenetic')) {
+    return {
+      id: 'epigenetic',
+      label: 'Epigenetic & Blue Diamond',
+      labelEs: 'Diamante Azul y Epigenética',
+      icon: Sparkles,
+      iconColor: '#0284c7',
+      badgeBg: '#f0f9ff',
+      badgeBorder: '#bae6fd',
+      badgeColor: '#0369a1',
+      order: 2,
+    };
+  }
+  if (id.includes('shampoo') || id.includes('conditioner') || cat.includes('trichology')) {
+    return {
+      id: 'trichology',
+      label: 'Trichology & Scalp System',
+      labelEs: 'Tricología Folicular Anti-DHT',
+      icon: FlaskConical,
+      iconColor: '#0d9488',
+      badgeBg: '#f0fdfa',
+      badgeBorder: '#99f6e4',
+      badgeColor: '#0f766e',
+      order: 3,
+    };
+  }
+  if (id.includes('colvita') || cat.includes('nutricosmetic')) {
+    return {
+      id: 'nutricosmetics',
+      label: 'Inside-Out Nutricosmetics',
+      labelEs: 'Nutricosmética Celular Oral',
+      icon: ShieldCheck,
+      iconColor: '#16a34a',
+      badgeBg: '#f0fdf4',
+      badgeBorder: '#bbf7d0',
+      badgeColor: '#15803d',
+      order: 4,
+    };
+  }
+  return {
+    id: 'native-dermal',
+    label: 'Native Dermal & Barrier',
+    labelEs: 'Tropocolágeno Dérmico y Barrera',
+    icon: Droplet,
+    iconColor: '#ea580c',
+    badgeBg: '#fff7ed',
+    badgeBorder: '#fed7aa',
+    badgeColor: '#c2410c',
+    order: 5,
+  };
+}
+
 export default function DatasheetQuickSearchModal({
   isOpen,
   onClose,
   currentSupplier = 'Lotusland',
   currentSlug = '',
   lang = 'en',
+  collectionScope = null,
+  collectionProducts = null,
+  collectionTitle = null,
+  onSelectCollectionProduct = null,
 }) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
@@ -272,6 +346,25 @@ export default function DatasheetQuickSearchModal({
       setLoading(true);
       try {
         const term = (queryText || '').trim();
+
+        // If collectionProducts are supplied, search strictly within the active collection!
+        if (collectionProducts && collectionProducts.length > 0) {
+          const lower = term.toLowerCase();
+          const matched = term.length === 0
+            ? collectionProducts
+            : collectionProducts.filter((p) => {
+                const name = (p.name || p.canonicalName || p.displayName || '').toLowerCase();
+                const cat = (p.category || '').toLowerCase();
+                const desc = (p.description || '').toLowerCase();
+                const id = (p.id || '').toLowerCase();
+                return name.includes(lower) || cat.includes(lower) || desc.includes(lower) || id.includes(lower);
+              });
+          setResults(matched);
+          setSelectedIndex(0);
+          setLoading(false);
+          return;
+        }
+
         let rawProducts = [];
 
         if (term.length >= 2) {
@@ -379,7 +472,7 @@ export default function DatasheetQuickSearchModal({
     const map = new Map();
 
     results.forEach((item) => {
-      const meta = getProductCategoryMeta(item);
+      const meta = collectionScope === 'colway' ? getColwayCategoryMeta(item) : getProductCategoryMeta(item);
       if (!map.has(meta.id)) {
         map.set(meta.id, {
           ...meta,
@@ -465,6 +558,11 @@ export default function DatasheetQuickSearchModal({
 
   const handleSelectProduct = (product) => {
     triggerHaptic('selection');
+    if (onSelectCollectionProduct) {
+      onSelectCollectionProduct(product);
+      onClose();
+      return;
+    }
     const targetSlug = product.slug || product.id;
     if (targetSlug) {
       onClose();
@@ -533,9 +631,11 @@ export default function DatasheetQuickSearchModal({
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder={
-              isSpanish
-                ? 'Buscar ficha técnica de péptido... (ej. BPC-157, Tirzepatide, NAD+)'
-                : 'Search peptide datasheets... (e.g. BPC-157, Tirzepatide, NAD+)'
+              collectionTitle
+                ? (isSpanish ? `Buscar en ${collectionTitle} (ej. Diamante Azul, Colvita, Champú)...` : `Search ${collectionTitle} (e.g. Blue Diamond, Colvita, Shampoo, Vege)...`)
+                : (isSpanish
+                  ? 'Buscar ficha técnica de péptido... (ej. BPC-157, Tirzepatide, NAD+)'
+                  : 'Search peptide datasheets... (e.g. BPC-157, Tirzepatide, NAD+)')
             }
             style={{
               flex: 1,
@@ -906,7 +1006,7 @@ export default function DatasheetQuickSearchModal({
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#003666', fontWeight: 800 }}>
             <Sparkles size={11} />
-            <span>Atlas Algolia Engine</span>
+            <span>{collectionTitle ? `${collectionTitle} · Collection Search` : 'Atlas Algolia Engine'}</span>
           </div>
         </div>
       </div>

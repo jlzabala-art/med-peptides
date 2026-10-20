@@ -72,6 +72,13 @@ export default function PublicUnifiedHeader({
   hideSearchButton = false,
   // Hide Account Manager multi-portal hub button in Tier 1
   hideAccountManager = false,
+  // Hide Atlas AI copilot button in Tier 1 (e.g. when present in floating bottom dock)
+  hideAiButton = false,
+  // Collection-aware search parameters
+  collectionScope = null,
+  collectionProducts = null,
+  collectionTitle = null,
+  onSelectCollectionProduct = null,
   // Doctor-only: enables Import Rx and Prescriptions Switcher buttons
   isDoctorView = false,
   hideImportRx = false,
@@ -495,8 +502,8 @@ function forceCanonicalDomain(urlOrPath) {
                 </button>
               )}
 
-              {/* Clinical AI Copilot (hidden when in doctor view to avoid clutter) */}
-              {!isDoctorView && (
+              {/* Clinical AI Copilot (hidden when in doctor view or when hideAiButton is true) */}
+              {!isDoctorView && !hideAiButton && (
                 <button
                   type="button"
                   className="puh-btn puh-btn-ai hide-on-extra-narrow hide-on-mobile-header"
@@ -702,13 +709,17 @@ function forceCanonicalDomain(urlOrPath) {
         />
       )}
 
-      {/* Quick Datasheet Search Spotlight Modal (Algolia Federated Search) */}
+      {/* Quick Datasheet Search Spotlight Modal (Collection-Aware) */}
       <DatasheetQuickSearchModal
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
         currentSupplier={supplierName}
         currentSlug={currentSlug}
         lang={lang}
+        collectionScope={collectionScope}
+        collectionProducts={collectionProducts}
+        collectionTitle={collectionTitle}
+        onSelectCollectionProduct={onSelectCollectionProduct}
       />
     </>
   );

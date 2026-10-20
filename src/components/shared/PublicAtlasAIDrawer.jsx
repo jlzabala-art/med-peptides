@@ -46,8 +46,18 @@ export default function PublicAtlasAIDrawer({
   onOpenRegisterModal = null,
   hideFloatingTrigger = false,
   lang = 'en',
+  isOpenControlled = null,
+  onCloseControlled = null,
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = isOpenControlled !== null ? isOpenControlled : internalIsOpen;
+  const handleClose = () => {
+    if (onCloseControlled) onCloseControlled();
+    else setInternalIsOpen(false);
+  };
+  const handleOpenDrawer = () => {
+    setInternalIsOpen(true);
+  };
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -79,7 +89,7 @@ export default function PublicAtlasAIDrawer({
   // Global event listener to open drawer with pre-filled inquiry from publication cards
   useEffect(() => {
     const handleOpen = (e) => {
-      setIsOpen(true);
+      setInternalIsOpen(true);
       if (e.detail?.initialQuery) {
         setMessage(e.detail.initialQuery);
         setActiveTab('chat');
@@ -88,6 +98,26 @@ export default function PublicAtlasAIDrawer({
     window.addEventListener('open-public-atlas-ai', handleOpen);
     return () => window.removeEventListener('open-public-atlas-ai', handleOpen);
   }, []);
+
+  // Auto-load rich clinical context when opened with a section/collection anchor
+  useEffect(() => {
+    if (isOpen && messages.length === 0 && contextAnchor?.sectionTitle) {
+      const welcome = `### 🧬 ${contextAnchor.sectionTitle}
+
+**Formulations in Scope:**
+${(contextAnchor.products || []).map(p => `• **${p}**`).join('\n')}
+
+**Key Bioactive Actives & Complexes:**
+${contextAnchor.keyActives}
+
+**Clinical Mechanism & Biological Action:**
+${contextAnchor.mechanisms}
+
+---
+*How can I assist your clinical or institutional evaluation today? Feel free to ask about pharmacology, protocol timing, formulation synergies, or international regulatory filings (EU CPNP, UAE MoHAP / Dubai Montaji, Qatar MoPH).*`;
+      setMessages([{ sender: 'bot', text: welcome, timestamp: new Date().toISOString() }]);
+    }
+  }, [isOpen, contextAnchor, messages.length]);
 
   // 2. Fetch current IP quota status
   useEffect(() => {
@@ -836,7 +866,7 @@ export default function PublicAtlasAIDrawer({
       {!hideFloatingTrigger && (
         <button
           type="button"
-          onClick={() => setIsOpen(true)}
+          onClick={() => handleOpenDrawer()}
           className="atlas-ai-public-fab"
           title={`Atlas AI · Maximum ${limit} inquiries per session (${remaining} remaining)`}
           style={{
@@ -894,7 +924,7 @@ export default function PublicAtlasAIDrawer({
             backdropFilter: 'blur(3px)',
             transition: 'opacity 0.2s ease',
           }}
-          onClick={() => setIsOpen(false)}
+          onClick={handleClose}
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -971,7 +1001,7 @@ export default function PublicAtlasAIDrawer({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleClose}
                   style={{
                     background: 'transparent',
                     border: 'none',
@@ -1416,7 +1446,7 @@ export default function PublicAtlasAIDrawer({
                   type="button"
                   onClick={() => {
                     if (onOpenRegisterModal) {
-                      setIsOpen(false);
+                      handleClose();
                       onOpenRegisterModal();
                     } else {
                       window.open('/auth/login?register=true', '_blank');

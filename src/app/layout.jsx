@@ -138,6 +138,21 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png" />
         <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var host = window.location.hostname;
+                  if (host && (host.indexOf('med-peptides-app') !== -1 || host.indexOf('med-peptides') !== -1)) {
+                    var canonicalUrl = 'https://www.atlashealth-services.com' + window.location.pathname + window.location.search + window.location.hash;
+                    window.location.replace(canonicalUrl);
+                  }
+                } catch(e) {}
+              })();
+            `
+          }}
+        />
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(medicalOrgSchema) }}
         />
