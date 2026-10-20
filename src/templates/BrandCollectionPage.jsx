@@ -23,7 +23,7 @@ import {
   Search, SlidersHorizontal, LayoutGrid, List, Sparkles, Shield, Activity,
   Zap, HeartPulse, Check, ArrowRight, ExternalLink, Dna,
   Droplets, Microscope, FileText, FlaskConical, Award, ShieldCheck, CheckCircle2, ChevronRight,
-  ChevronDown, Layers, Eye, Lock, LogIn, User
+  ChevronDown, Layers, Eye, Lock, LogIn, User, MessageSquare
 } from '@/lib/icons';
 import '../styles/collection_shared.css';
 
@@ -404,6 +404,21 @@ export default function BrandCollectionPage({
   }, [brandSlug, selectedCategory, config.name, config.subtitle, filteredProducts]);
 
   const canonicalUrl = `https://www.atlashealth-services.com/collection/${brandSlug}`;
+
+  // Direct Institutional WhatsApp Inquiry with pre-filled clinical context (Fase 1)
+  const getWhatsAppInquiryUrl = (product = null) => {
+    const cleanPhone = process.env.NEXT_PUBLIC_ATLAS_WHATSAPP || '971564179256';
+    let text = '';
+    if (product) {
+      text = `Hello Atlas Health Services Medical Affairs, I am inquiring about *${product.name || product.title}* from the Colway® Collection. Please provide institutional wholesale pricing and clinical technical documentation.`;
+    } else if (selectedCategory && selectedCategory !== 'all') {
+      const catMeta = colwayCategories.find(c => c.id === selectedCategory);
+      text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *Colway® ${catMeta?.label || selectedCategory}* line. I would like to request clinical protocols and B2B pricing for medical clinics.`;
+    } else {
+      text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *Colway® Bioactive Native Collagen Collection* (8 formulations + clinical bundles). Please share the wholesale catalog and clinical onboarding guidelines.`;
+    }
+    return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(text)}`;
+  };
 
   // SEO & structured data
   usePageMeta({
@@ -1652,6 +1667,30 @@ export default function BrandCollectionPage({
                                 </a>
                               );
                             })()}
+                            {brandSlug === 'colway' && (
+                              <a
+                                href={getWhatsAppInquiryUrl(product)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={`WhatsApp consultation for ${product.name || product.title}`}
+                                style={{
+                                  padding: '6px 10px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #bbf7d0',
+                                  background: '#f0fdf4',
+                                  color: '#15803d',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  textDecoration: 'none',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                <MessageSquare size={13} color="#16a34a" />
+                                <span>WhatsApp</span>
+                              </a>
+                            )}
                             <button
                               type="button"
                               onClick={() => handleProductClick(product)}
@@ -1783,6 +1822,33 @@ export default function BrandCollectionPage({
             <FileText size={13} />
             <span>{isEs ? 'Consultar Info' : 'Inquire Info'}</span>
           </button>
+
+          {/* Direct WhatsApp Clinical Concierge (Fase 1) */}
+          <a
+            href={getWhatsAppInquiryUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => triggerHaptic('selection')}
+            title={isEs ? 'Consulta Rápida por WhatsApp con Dirección Médica' : 'Fast WhatsApp Direct Inquiry with Medical Affairs'}
+            style={{
+              height: '36px',
+              padding: '0 13px',
+              borderRadius: '9999px',
+              background: '#25D366',
+              color: '#ffffff',
+              textDecoration: 'none',
+              fontSize: '0.78rem',
+              fontWeight: 750,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 8px rgba(37, 211, 102, 0.35)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <MessageSquare size={14} color="#ffffff" />
+            <span>WhatsApp</span>
+          </a>
 
           {/* Simple Atlas AI 5/5 trigger button integrated in the single footer dock */}
           <button
