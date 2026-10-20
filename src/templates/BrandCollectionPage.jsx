@@ -343,105 +343,6 @@ export default function BrandCollectionPage({
     return `€${converted.toFixed(2)}`;
   };
 
-  const activeSectionContext = useMemo(() => {
-    if (brandSlug !== 'colway') {
-      return {
-        sectionId: selectedCategory,
-        sectionTitle: `${config.name} Clinical Portfolio`,
-        products: filteredProducts.map(p => p.name || p.title),
-        keyActives: config.subtitle,
-        mechanisms: 'Analytical clinical specifications and verified standard parameters.',
-      };
-    }
-
-    if (selectedCategory === 'epigenetic') {
-      return {
-        sectionId: 'epigenetic',
-        sectionTitle: 'Epigenetic Rejuvenation & Blue Diamond Line',
-        products: [
-          'Colway Blue Diamond Cellular Rejuvenation Cream (50 mL)',
-          'Colway Blue Diamond Exfoliating & Micro-Resurfacing Peeling (75 mL)',
-          'Blue Diamond Cellular Rejuvenation Protocol Duo'
-        ],
-        keyActives: 'MATRIGENICS 14G (Undaria pinnatifida stipes extract), VEP-Endorphin Peptides, Acetyl Hexapeptide-8, Diamond Micro-Crystals, Intact Fish Tropocollagen',
-        mechanisms: 'Epigenetic reactivation of 14 youth genes regulating synthesis of Collagen I, III, IV, VII and Hyaluronic Acid. Reverses the "Triangle of Beauty" inversion in perimenopausal skin.',
-      };
-    }
-
-    if (selectedCategory === 'trichology') {
-      return {
-        sectionId: 'trichology',
-        sectionTitle: 'Follicular Trichology & Scalp Anti-DHT System',
-        products: [
-          'Colway Hair Strengthening Bio-Collagen Shampoo (200 mL)',
-          'Colway Hair Strengthening Bio-Collagen Conditioner (200 mL)',
-          'Colway Complete Trichology Follicular System Duo'
-        ],
-        keyActives: 'Baicapil™ 2% (Scutellaria baicalensis, Glycine soja & Triticum vulgare germ), Kerascalp™ (Phyllanthus emblica / Amla), Hydrafeel® (Pantotrophin 3 / Vit B5), Horsetail Extract (natural organic silica), Cottonseed & Sweet Almond oils',
-        mechanisms: 'Stimulates hair follicle stem cells, activates Wnt/β-catenin signaling pathway, prolongs anagen (growth) phase while shortening telogen (shedding) phase. Protects scalp microcirculation and inhibits follicular miniaturization.',
-      };
-    }
-
-    if (selectedCategory === 'native-dermal') {
-      return {
-        sectionId: 'native-dermal',
-        sectionTitle: 'Native Tropocollagen Dermal Regeneration & Barrier Support',
-        products: [
-          'Colway Collagen Wash Gel (250 mL)',
-          'Colway Vege Collagen 100% Fitocosmetic (45 mL)',
-          'Colway Bioactive Collagen Lip Care Balm (4.2 g)'
-        ],
-        keyActives: 'Intact 3D Triple-Helix Freshwater Fish Tropocollagen, 100% Plant-Derived Collagen Amino Acids in Young Coconut Water, Aosain, Niacinamide, D-Panthenol, Aloe Vera, Noni Extract',
-        mechanisms: 'Biologically active hydration and transdermal signal peptides stimulating dermal fibroblast neocollagenesis. SLS/SLES-free barrier preservation of skin hydrolipidic film.',
-      };
-    }
-
-    if (selectedCategory === 'nutricosmetics') {
-      return {
-        sectionId: 'nutricosmetics',
-        sectionTitle: 'Inside-Out Cellular Nutricosmetics',
-        products: [
-          'Colvita Freeze-Dried Bioactive Collagen Capsules (60/120 Caps)',
-          'Inside-Out Dual-Phase Collagen Protocol'
-        ],
-        keyActives: 'Cryogenically freeze-dried fish tropocollagen (-40°C), Bladderwrack (Fucus vesiculosus algae, rich in organic iodine, selenium & zinc), Natural D-alpha-tocopheryl acetate (Vitamin E from cold-pressed grains)',
-        mechanisms: 'Systemic neocollagenesis activating dermal fibroblasts and chondrocytes from within. Clinical ITA-TEST #B-89146 confirms +90% skin elasticity and cellular regeneration in 110 days.',
-      };
-    }
-
-    if (selectedCategory === 'bundles') {
-      return {
-        sectionId: 'bundles',
-        sectionTitle: 'Clinical Protocol Bundles & Dual-Phase Kits',
-        products: [
-          'Blue Diamond Cellular Rejuvenation Protocol',
-          'Inside-Out Dual-Phase Collagen Protocol',
-          'Colway Complete Trichology Follicular System'
-        ],
-        keyActives: 'Integrated topical + oral multi-target formulations combining cellular exfoliation, dermal replenishment, and oral chondro-dermal support.',
-        mechanisms: 'Synergistic protocol combinations designed for clinical practitioners and aesthetic medicine doctors.',
-      };
-    }
-
-    // Default 'all' collection context:
-    return {
-      sectionId: 'all',
-      sectionTitle: 'Colway® European Biotechnology Collection (Complete Portfolio)',
-      products: [
-        'Colway Blue Diamond Cellular Rejuvenation Cream (50 mL)',
-        'Colway Blue Diamond Exfoliating & Micro-Resurfacing Peeling (75 mL)',
-        'Colvita Freeze-Dried Bioactive Collagen Capsules (60/120 Caps)',
-        'Colway Vege Collagen 100% Fitocosmetic (45 mL)',
-        'Colway Hair Strengthening Bio-Collagen Shampoo (200 mL)',
-        'Colway Hair Strengthening Bio-Collagen Conditioner (200 mL)',
-        'Colway Collagen Wash Gel (250 mL)',
-        'Colway Bioactive Collagen Lip Care Balm (4.2 g)'
-      ],
-      keyActives: 'Intact 3D Triple Helix Freshwater Tropocollagen, Baicapil™ 2%, Kerascalp™, MATRIGENICS 14G, VEP-Endorphin Peptides, Cryogenic Freeze-Drying (-40°C)',
-      mechanisms: 'Patented European biotechnology preserving native biological activity without thermal denaturation. Certified under ISO 22716 GMP, EU CPNP (1223/2009), UAE MoHAP / Dubai Montaji, and Qatar MoPH.',
-    };
-  }, [brandSlug, selectedCategory, config.name, config.subtitle, filteredProducts]);
-
   const canonicalUrl = `https://www.atlashealth-services.com/collection/${brandSlug}`;
 
   // Direct Institutional WhatsApp Inquiry with pre-filled clinical context (Fase 1)
@@ -586,6 +487,105 @@ export default function BrandCollectionPage({
 
     return list;
   }, [products, searchQuery, selectedCategory, sortOption]);
+
+  const activeSectionContext = useMemo(() => {
+    if (brandSlug !== 'colway') {
+      return {
+        sectionId: selectedCategory,
+        sectionTitle: `${config.name} Clinical Portfolio`,
+        products: filteredProducts.map(p => p.name || p.title),
+        keyActives: config.subtitle,
+        mechanisms: 'Analytical clinical specifications and verified standard parameters.',
+      };
+    }
+
+    if (selectedCategory === 'epigenetic') {
+      return {
+        sectionId: 'epigenetic',
+        sectionTitle: 'Epigenetic Rejuvenation & Blue Diamond Line',
+        products: [
+          'Colway Blue Diamond Cellular Rejuvenation Cream (50 mL)',
+          'Colway Blue Diamond Exfoliating & Micro-Resurfacing Peeling (75 mL)',
+          'Blue Diamond Cellular Rejuvenation Protocol Duo'
+        ],
+        keyActives: 'MATRIGENICS 14G (Undaria pinnatifida stipes extract), VEP-Endorphin Peptides, Acetyl Hexapeptide-8, Diamond Micro-Crystals, Intact Fish Tropocollagen',
+        mechanisms: 'Epigenetic reactivation of 14 youth genes regulating synthesis of Collagen I, III, IV, VII and Hyaluronic Acid. Reverses the "Triangle of Beauty" inversion in perimenopausal skin.',
+      };
+    }
+
+    if (selectedCategory === 'trichology') {
+      return {
+        sectionId: 'trichology',
+        sectionTitle: 'Follicular Trichology & Scalp Anti-DHT System',
+        products: [
+          'Colway Hair Strengthening Bio-Collagen Shampoo (200 mL)',
+          'Colway Hair Strengthening Bio-Collagen Conditioner (200 mL)',
+          'Colway Complete Trichology Follicular System Duo'
+        ],
+        keyActives: 'Baicapil™ 2% (Scutellaria baicalensis, Glycine soja & Triticum vulgare germ), Kerascalp™ (Phyllanthus emblica / Amla), Hydrafeel® (Pantotrophin 3 / Vit B5), Horsetail Extract (natural organic silica), Cottonseed & Sweet Almond oils',
+        mechanisms: 'Stimulates hair follicle stem cells, activates Wnt/β-catenin signaling pathway, prolongs anagen (growth) phase while shortening telogen (shedding) phase. Protects scalp microcirculation and inhibits follicular miniaturization.',
+      };
+    }
+
+    if (selectedCategory === 'native-dermal') {
+      return {
+        sectionId: 'native-dermal',
+        sectionTitle: 'Native Tropocollagen Dermal Regeneration & Barrier Support',
+        products: [
+          'Colway Collagen Wash Gel (250 mL)',
+          'Colway Vege Collagen 100% Fitocosmetic (45 mL)',
+          'Colway Bioactive Collagen Lip Care Balm (4.2 g)'
+        ],
+        keyActives: 'Intact 3D Triple-Helix Freshwater Fish Tropocollagen, 100% Plant-Derived Collagen Amino Acids in Young Coconut Water, Aosain, Niacinamide, D-Panthenol, Aloe Vera, Noni Extract',
+        mechanisms: 'Biologically active hydration and transdermal signal peptides stimulating dermal fibroblast neocollagenesis. SLS/SLES-free barrier preservation of skin hydrolipidic film.',
+      };
+    }
+
+    if (selectedCategory === 'nutricosmetics') {
+      return {
+        sectionId: 'nutricosmetics',
+        sectionTitle: 'Inside-Out Cellular Nutricosmetics',
+        products: [
+          'Colvita Freeze-Dried Bioactive Collagen Capsules (60/120 Caps)',
+          'Inside-Out Dual-Phase Collagen Protocol'
+        ],
+        keyActives: 'Cryogenically freeze-dried fish tropocollagen (-40°C), Bladderwrack (Fucus vesiculosus algae, rich in organic iodine, selenium & zinc), Natural D-alpha-tocopheryl acetate (Vitamin E from cold-pressed grains)',
+        mechanisms: 'Systemic neocollagenesis activating dermal fibroblasts and chondrocytes from within. Clinical ITA-TEST #B-89146 confirms +90% skin elasticity and cellular regeneration in 110 days.',
+      };
+    }
+
+    if (selectedCategory === 'bundles') {
+      return {
+        sectionId: 'bundles',
+        sectionTitle: 'Clinical Protocol Bundles & Dual-Phase Kits',
+        products: [
+          'Blue Diamond Cellular Rejuvenation Protocol',
+          'Inside-Out Dual-Phase Collagen Protocol',
+          'Colway Complete Trichology Follicular System'
+        ],
+        keyActives: 'Integrated topical + oral multi-target formulations combining cellular exfoliation, dermal replenishment, and oral chondro-dermal support.',
+        mechanisms: 'Synergistic protocol combinations designed for clinical practitioners and aesthetic medicine doctors.',
+      };
+    }
+
+    // Default 'all' collection context:
+    return {
+      sectionId: 'all',
+      sectionTitle: 'Colway® European Biotechnology Collection (Complete Portfolio)',
+      products: [
+        'Colway Blue Diamond Cellular Rejuvenation Cream (50 mL)',
+        'Colway Blue Diamond Exfoliating & Micro-Resurfacing Peeling (75 mL)',
+        'Colvita Freeze-Dried Bioactive Collagen Capsules (60/120 Caps)',
+        'Colway Vege Collagen 100% Fitocosmetic (45 mL)',
+        'Colway Hair Strengthening Bio-Collagen Shampoo (200 mL)',
+        'Colway Hair Strengthening Bio-Collagen Conditioner (200 mL)',
+        'Colway Collagen Wash Gel (250 mL)',
+        'Colway Bioactive Collagen Lip Care Balm (4.2 g)'
+      ],
+      keyActives: 'Intact 3D Triple Helix Freshwater Tropocollagen, Baicapil™ 2%, Kerascalp™, MATRIGENICS 14G, VEP-Endorphin Peptides, Cryogenic Freeze-Drying (-40°C)',
+      mechanisms: 'Patented European biotechnology preserving native biological activity without thermal denaturation. Certified under ISO 22716 GMP, EU CPNP (1223/2009), UAE MoHAP / Dubai Montaji, and Qatar MoPH.',
+    };
+  }, [brandSlug, selectedCategory, config.name, config.subtitle, filteredProducts]);
 
   const toggleExpand = (productId, e) => {
     e?.stopPropagation();
