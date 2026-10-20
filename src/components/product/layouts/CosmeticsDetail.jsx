@@ -27,7 +27,7 @@ import CosmeticsSidebarWidget from '@/components/product/CosmeticsSidebarWidget'
 import ColwayProtocolInfogram from '@/components/product/ColwayProtocolInfogram';
 import ColwayTrichologyStemCellShowcase from '@/components/product/ColwayTrichologyStemCellShowcase';
 import ColwayActiveIngredientsShowcase from '@/components/product/ColwayActiveIngredientsShowcase';
-import { getColwayProductData } from '@/data/colwayInciRegistry';
+import { getColwayProductData, getColwayProductSafety } from '@/data/colwayInciRegistry';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import ImageModal from '@/snippets/ImageModal';
 import { CollectionBadgePill, CollectionCompanionBanner } from '@/components/product/CollectionBannerWidget';
@@ -865,11 +865,142 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const isHairProduct = slug?.includes('shampoo') || slug?.includes('conditioner') || slug?.includes('trichology') || name?.toLowerCase().includes('shampoo') || name?.toLowerCase().includes('conditioner') || name?.toLowerCase().includes('trichology') || category?.toLowerCase().includes('hair') || category?.toLowerCase().includes('trichology');
   const isShampoo = slug?.includes('shampoo') || name?.toLowerCase().includes('shampoo');
   const isNutricosmetic = slug?.includes('colvita') || name?.toLowerCase().includes('colvita') || category?.toLowerCase().includes('nutricosmetic') || category?.toLowerCase().includes('supplement');
-  const isLip = slug?.includes('lip') || slug?.includes('labial') || name?.toLowerCase().includes('lip') || name?.toLowerCase().includes('labial');
+  const isLip = slug?.includes('lip') || slug?.includes('labial') || slug?.includes('pomadka') || name?.toLowerCase().includes('lip') || name?.toLowerCase().includes('labial') || name?.toLowerCase().includes('pomadka');
   const isWashGel = (slug?.includes('wash-gel') || slug?.includes('washing-gel') || slug?.includes('cleanser') || name?.toLowerCase().includes('wash gel')) && !slug?.includes('vege');
   const isPeeling = slug?.includes('peeling') || name?.toLowerCase().includes('peeling');
   const isVege = (slug?.includes('vege') || name?.toLowerCase().includes('vege')) && !isWashGel;
-  const isBlueDiamond = !isHairProduct && !isLip && !isWashGel && !isNutricosmetic && !isVege;
+  const isBlueDiamond = !isHairProduct && !isLip && !isWashGel && !isNutricosmetic && !isVege && !isPeeling;
+
+  const productSafety = useMemo(() => {
+    return colwayData?.safety_precautions || getColwayProductSafety(slug) || getColwayProductSafety(name) || getColwayProductSafety(product?.id) || null;
+  }, [colwayData, slug, name, product]);
+
+  const effectiveWarnings = useMemo(() => {
+    if (productSafety?.warnings?.length > 0) return productSafety.warnings;
+    if (warnings.length > 0) {
+      const hasScalpMismatch = !isHairProduct && warnings.some(w => {
+        const text = (typeof w === 'string' ? w : w?.text || '').toLowerCase();
+        return text.includes('scalp') || text.includes('cuero cabelludo');
+      });
+      if (!hasScalpMismatch) return warnings;
+    }
+    if (isLip) {
+      return [
+        'For external labial and perioral use only. Do not ingest in excessive quantities.',
+        'Thermal stability safeguard: Store in a cool, dry place (15°C – 25°C). Protect from direct heat or vehicle interiors to prevent melting of the natural lipid stick.',
+        'In case of infectious angular cheilitis, bacterial superinfection, or active herpes simplex flares, consult a dermatologist prior to application.',
+        'Safe for post-procedure mucosal barrier hydration (dermal lip fillers, perioral microneedling) after initial 24h healing.',
+        'Discontinue use if persistent perioral erythema, pruritus, or contact sensitivity develops.',
+        'Keep out of reach of young children under 3 years.'
+      ];
+    }
+    if (isNutricosmetic) {
+      return [
+        'Food supplement for adult oral administration only. Do not exceed the recommended daily dose of 2 capsules daily.',
+        'Do not use as a substitute for a varied, balanced diet and a healthy lifestyle.',
+        'Contains marine fish collagen and Baltic marine algae (Fucus vesiculosus). Strictly contraindicated in individuals with known hypersensitivity to fish, seafood, or iodine.',
+        'Individuals with thyroid disorders or pregnant/lactating women should consult an endocrinologist or physician prior to use.',
+        'Store in a cool, dry place (<25°C) in original blister packaging away from direct sunlight. Keep out of reach of children.'
+      ];
+    }
+    if (isWashGel) {
+      return [
+        'For external cutaneous cleansing only. Suitable for facial, neck, décolleté, and delicate periocular skin.',
+        'Ophthalmologically tested: Ultra-mild non-ionic formulation. In case of accidental excess eye contact, rinse thoroughly with fresh water.',
+        'Do not apply over bleeding wounds, open ulcerative lesions, or acute weeping eczema without prior medical consultation.',
+        'Store between 15°C and 25°C. Protect from freezing (<0°C) and excessive heat (>30°C) to preserve native collagen bioactivity.',
+        '100% free from harsh sodium lauryl/laureth sulfates (SLS/SLES), synthetic dyes, and aggressive parabens.',
+        'Keep out of reach of children under 3 years.'
+      ];
+    }
+    if (isPeeling) {
+      return [
+        'For external facial and cutaneous exfoliation only. Strictly avoid direct contact with conjunctiva and orbital eye socket.',
+        'Contraindications: Do not use on active acne pustules, open cuts, active rosacea flares, or within 7 days of clinical chemical peels/lasers.',
+        'Do not combine on the same day with prescription topical tretinoin, adapalene, or high-concentration AHA/BHA peels.',
+        'Mandatory sun precaution: Apply broad-spectrum SPF 50+ daytime protection following treatment due to accelerated stratum corneum renewal.',
+        'Perform a 24-hour patch test on the inner forearm prior to first use in patients with sensitive or couperose-prone dermis.',
+        'Discontinue use immediately if intense stinging or persistent erythema develops.'
+      ];
+    }
+    if (isShampoo) {
+      return [
+        'For external topical scalp and hair cleansing only. Avoid contact with eyes; rinse immediately with water if contact occurs.',
+        'Do not apply onto scalps with open bleeding lesions, acute exudative dermatitis, or infected scalp psoriasis plaques without prior dermatological consultation.',
+        'Contains active botanical extracts (Baicapil™), Caffeine, and Zinc PCA. Individuals with known sensitivity should perform an epicutaneous patch test.',
+        'Keep out of reach of children under 3 years.',
+        'Discontinue use if persistent scalp erythema, burning sensation, or contact dermatitis develops.'
+      ];
+    }
+    if (isHairProduct) {
+      return [
+        'For external topical hair fiber conditioning only. Apply strictly from mid-lengths down to tips.',
+        'Scalp precaution: Avoid heavy mass application directly onto scalp roots to prevent sebum accumulation or pore occlusion.',
+        'Avoid contact with eyes; rinse immediately with fresh water if contact occurs.',
+        'Safe for color-treated, chemically straightened, or keratin-treated hair: Free from harsh sulfates and parabens.',
+        'Keep out of reach of children. Store between 15°C and 25°C away from heat sources.',
+        'Discontinue use if allergic contact sensitivity develops.'
+      ];
+    }
+    if (isVege) {
+      return [
+        'For external cutaneous application only. Avoid direct eye contact; in case of contact, rinse thoroughly with fresh water.',
+        '100% vegan formulation: Contains Chlorella vulgaris micro-algae, young coconut water, and botanical amino acid aminograms.',
+        'Individuals with documented severe botanical or tree nut/coconut hypersensitivity should perform a 24h forearm patch test prior to facial use.',
+        'Do not apply directly onto actively bleeding wounds, infected dermatitis, or acute bacterial skin lesions.',
+        'Storage: Store at controlled room temperature (15°C – 25°C). Does not require sub-26°C refrigeration.',
+        'Keep container tightly sealed and out of direct sunlight.'
+      ];
+    }
+    return [
+      'For external cosmetic use only. Avoid direct contact with ocular conjunctiva.',
+      'Perform a 48-hour patch test on the inner forearm prior to first application in patients with atopic, reactive, or couperose skin.',
+      'Do not apply to open wounds, infected acne cysts, or acute weeping cutaneous eczema.',
+      'High active concentration: Transient microvascular warmth may occur upon initial application as cellular renewal activates.',
+      'Store at room temperature (15°C – 25°C) in a dry place protected from direct heat and UV radiation.',
+      'Keep jar tightly closed with protective seal in place. Keep out of reach of children under 3 years.'
+    ];
+  }, [warnings, productSafety, isLip, isNutricosmetic, isWashGel, isPeeling, isShampoo, isHairProduct, isVege]);
+
+  const effectiveSafetyProtocol = useMemo(() => {
+    if (productSafety?.protocolSteps?.length > 0) {
+      return {
+        title: productSafety.protocolTitle || 'CLINICAL TOLERANCE & APPLICATION PROTOCOL',
+        steps: productSafety.protocolSteps
+      };
+    }
+    if (isNutricosmetic) {
+      return {
+        title: 'ORAL BIOAVAILABILITY & SYNERGISTIC ABSORPTION PROTOCOL',
+        steps: [
+          'Dosage: Take 2 capsules daily, preferably 1 in the morning and 1 in the evening during or immediately following meals.',
+          'Fluid intake: Swallow whole with a minimum of 200–250 mL of room-temperature water or natural non-carbonated juice.',
+          'Lipophilic synergy: Natural Vitamin E (D-alpha-tocopheryl acetate) absorption is maximized alongside healthy dietary lipids.',
+          'Chronobiology: A sustained 90–120 day protocol is clinically advised to synchronize with the human fibroblast neocollagenesis cycle.'
+        ]
+      };
+    }
+    if (isLip) {
+      return {
+        title: 'LABIAL TOLERANCE & BARRIER COMPRESS PROTOCOL',
+        steps: [
+          'Initial application: Apply a small test amount to the vermilion border or inner wrist 24h prior to intensive use in atopic individuals.',
+          'Daily protective barrier: Glide smoothly over clean, dry lips 2–4 times daily, especially before sun, wind, or dry AC exposure.',
+          'Nocturnal lip compress: Apply a generous layer before sleep to serve as a restorative occlusive matrix during nocturnal cellular turnover.',
+          'Non-comedogenic formulation: Safe for surrounding perioral cutaneous zones without risk of follicular comedone formation.'
+        ]
+      };
+    }
+    return {
+      title: 'DERMATOLOGICAL PATCH TEST PROTOCOL (ICDRG)',
+      steps: [
+        'Apply 0.05 mL to Finn Chamber or inner forearm (2×2 cm area).',
+        'Occlude for 48 hours. Do not wash test area.',
+        'Read results at 48h and 72h (or 96h if delayed reaction suspected).',
+        'Score per ICDRG scale: 0 (negative) → 3+ (strong positive). ICDRG ≥1+: contraindicated.'
+      ]
+    };
+  }, [productSafety, isNutricosmetic, isLip]);
 
   const effectiveProtocol = useMemo(() => {
     if (applicationProtocol?.steps?.length > 0) {
@@ -2015,15 +2146,14 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
             {/* SAFETY */}
             {effectiveActiveSection === 'safety' && (
-              <PublicSectionCard id="safety" icon={AlertTriangle} category="SAFETY & PRECAUTIONS" title="Clinical Safety, Contraindications & Patch Testing">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  {(warnings.length > 0 ? warnings : [
-                    'For external use only. Avoid contact with eyes; rinse immediately with water if contact occurs.',
-                    'Perform a 48-hour patch test prior to first use: apply to inner forearm, leave 24h, read at 48h and 72h.',
-                    'Not recommended on damaged scalp with open lesions, active dermatitis, or psoriatic plaques without prior dermatological consultation.',
-                    'Keep out of reach of children under 3 years.',
-                    'Individuals with known sensitivity to any listed INCI component should consult a dermatologist before use.',
-                  ]).map((w, i) => (
+              <PublicSectionCard 
+                id="safety" 
+                icon={AlertTriangle} 
+                category={productSafety?.categoryBadge || (isNutricosmetic ? 'SYSTEMIC SAFETY & CONTRAINDICATIONS' : isLip ? 'LABIAL SAFETY & PRECAUTIONS' : 'SAFETY & PRECAUTIONS')} 
+                title={productSafety?.title || (isNutricosmetic ? 'Clinical Safety, Dietary Contraindications & Oral Dosing Protocol' : isLip ? 'Labial Mucosal Safety, Thermal Care & Tolerance Guide' : 'Clinical Safety, Contraindications & Patch Testing')}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  {effectiveWarnings.map((w, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                       <AlertTriangle size={13} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
                       <span style={{ fontSize: '0.78rem', color: '#374151', lineHeight: 1.55 }}>{typeof w === 'string' ? w : w.text}</span>
@@ -2031,14 +2161,22 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                   ))}
                 </div>
                 <div style={{ marginTop: '1rem', padding: '0.85rem 1rem', background: '#fffbeb', borderRadius: '8px', border: '1px solid #fde68a' }}>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#d97706', marginBottom: '0.4rem', letterSpacing: '0.04em' }}>DERMATOLOGICAL PATCH TEST PROTOCOL (ICDRG)</div>
-                  {['Apply 0.05 mL to Finn Chamber or inner forearm (2×2 cm area).', 'Occlude for 48 hours. Do not wash test area.', 'Read results at 48h and 72h (or 96h if delayed reaction suspected).', 'Score per ICDRG scale: 0 (negative) → 3+ (strong positive). ICDRG ≥1+: contraindicated.'].map((pt, i) => (
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#d97706', marginBottom: '0.4rem', letterSpacing: '0.04em' }}>
+                    {effectiveSafetyProtocol.title}
+                  </div>
+                  {effectiveSafetyProtocol.steps.map((pt, i) => (
                     <div key={i} style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', marginBottom: '3px' }}>
                       <span style={{ fontSize: '0.67rem', fontWeight: 800, color: '#d97706', flexShrink: 0 }}>{i + 1}.</span>
                       <span style={{ fontSize: '0.72rem', color: '#92400e', lineHeight: 1.5 }}>{pt}</span>
                     </div>
                   ))}
                 </div>
+                {productSafety?.disclaimer && (
+                  <div style={{ marginTop: '0.85rem', padding: '0.65rem 0.85rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.72rem', color: '#64748b', lineHeight: 1.5 }}>
+                    <span style={{ fontWeight: 700, color: '#475569' }}>Regulatory Disclaimer: </span>
+                    {productSafety.disclaimer}
+                  </div>
+                )}
               </PublicSectionCard>
             )}
 

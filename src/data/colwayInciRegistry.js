@@ -1955,6 +1955,202 @@ export const COLWAY_PRODUCTS_INCI_REGISTRY = {
 };
 
 /**
+ * Authoritative Clinical Safety, Contraindications & Usage Protocols
+ * for all 8 Colway formulations.
+ * Strictly differentiated per product category (Lip Balm vs Shampoo vs Dietary Supplement vs Facial Peeling).
+ */
+export const COLWAY_SAFETY_REGISTRY = {
+  'colway-collagen-lip-care': {
+    categoryBadge: 'LABIAL SAFETY & PRECAUTIONS',
+    title: 'Labial Mucosal Safety, Thermal Care & Tolerance Guide',
+    warnings: [
+      'For external labial and perioral use only. Do not ingest in excessive quantities.',
+      'Thermal stability safeguard: Store in a cool, dry environment (15°C – 25°C). Protect from direct solar radiation, vehicle dashboards, and pocket heat sources to prevent melting of the natural botanical lipid and wax matrix.',
+      'In the presence of infectious angular cheilitis, bacterial superinfection, or active herpes simplex vesicular lesions, consult a physician or dermatologist prior to topical application.',
+      'Post-aesthetic procedures: Safe for mucosal barrier hydration following dermal lip fillers or perioral microneedling after full re-epithelialization (minimum 24 hours post-procedure).',
+      'Discontinue use if persistent perioral erythema, edema, or signs of allergic contact cheilitis develop.',
+      'Keep out of reach of young children under 3 years.'
+    ],
+    protocolTitle: 'LABIAL TOLERANCE & BARRIER COMPRESS PROTOCOL',
+    protocolSteps: [
+      'Initial application: Apply a small test amount to the vermilion border or inner wrist 24h prior to intensive use in atopic individuals.',
+      'Daily protective barrier: Glide smoothly over clean, dry lips 2–4 times daily, especially before sun, wind, or dry AC exposure.',
+      'Nocturnal lip compress: Apply a generous layer before sleep to serve as a restorative occlusive matrix during nocturnal cellular turnover.',
+      'Non-comedogenic formulation: Safe for surrounding perioral cutaneous zones without risk of follicular comedone formation.'
+    ],
+    disclaimer: 'Professional-grade cosmeceutical for labial mucosal barrier defense. Not a medicinal drug. Certified under EU Cosmetic Regulation (EC) 1223/2009 and dermatologically evaluated for sensitive perioral tissue.'
+  },
+  'colway-colvita': {
+    categoryBadge: 'SYSTEMIC SAFETY & CONTRAINDICATIONS',
+    title: 'Clinical Safety, Dietary Contraindications & Oral Dosing Protocol',
+    warnings: [
+      'Food supplement for adult oral administration only. Do not exceed the recommended daily portion of 2 capsules daily.',
+      'Do not use as a substitute for a varied, balanced diet and a healthy, active lifestyle.',
+      'Allergen warning: Contains freeze-dried marine fish collagen and Baltic marine algae (Fucus vesiculosus). Strictly contraindicated in individuals with known hypersensitivity or allergy to fish, crustacea, seafood, or iodine.',
+      'Thyroid disorders precaution: Due to natural iodine content in Fucus vesiculosus algae, patients with hyperthyroidism, Graves\' disease, Hashimoto\'s thyroiditis, or undergoing thyroid medication should consult an endocrinologist prior to use.',
+      'Pregnancy & lactation: Pregnant or breastfeeding women should seek medical clearance before commencing supplementation.',
+      'Storage: Store in a cool, dry place (<25°C) in the original packaging, protected from moisture and direct sunlight. Keep out of reach of children.'
+    ],
+    protocolTitle: 'ORAL BIOAVAILABILITY & SYNERGISTIC ABSORPTION PROTOCOL',
+    protocolSteps: [
+      'Dosage: Take 2 capsules daily, preferably 1 capsule in the morning and 1 in the evening during or immediately following meals.',
+      'Fluid intake: Swallow whole with a minimum of 200–250 mL of room-temperature water or natural non-carbonated juice.',
+      'Lipophilic synergy: Natural Vitamin E (D-alpha-tocopheryl acetate) absorption is maximized when ingested alongside healthy dietary lipids.',
+      'Chronobiology: A sustained 90–120 day protocol is clinically advised to synchronize with the human fibroblast neocollagenesis cycle.'
+    ],
+    disclaimer: 'Nutritional food supplement manufactured in Poland under ISO 22716 GMP and EU Food Safety Authority regulations. Not intended to diagnose, treat, cure, or prevent any systemic medical disease.'
+  },
+  'colway-collagen-wash-gel': {
+    categoryBadge: 'CUTANEOUS & OCULAR SAFETY',
+    title: 'Cellular Cleansing Safety, Physiological pH 5.5 & Ocular Tolerance',
+    warnings: [
+      'For external cutaneous cleansing only. Clinically suitable for face, neck, décolleté, and delicate periocular skin.',
+      'Ophthalmologically and dermatologically tested: Ultra-mild non-ionic formulation. In case of accidental direct eye splash with concentrated gel, rinse thoroughly with clean running water.',
+      'Do not apply over bleeding wounds, open ulcerative lesions, or acute weeping eczema without prior dermatological consultation.',
+      'Temperature conservation: Store between 15°C and 25°C. Strictly protect from freezing (<0°C) and excessive heat (>30°C) to preserve native collagen triple-helix bioactivity.',
+      'Hypoallergenic standard: 100% free from harsh sodium lauryl/laureth sulfates (SLS/SLES), synthetic colorants, and aggressive preservatives.',
+      'Keep out of reach of children under 3 years.'
+    ],
+    protocolTitle: 'PHYSIOLOGICAL CLEANSING & PRE-TREATMENT PROTOCOL',
+    protocolSteps: [
+      'Dermal wetting: Pre-dampen face and neck with lukewarm water (32°C – 35°C). Avoid hot water to preserve intercellular lipid cement.',
+      'Emulsification: Dispense 1–2 pumps (approx. 1.5 mL) onto clean palms. Rub hands to activate the micro-lather emulsion.',
+      'Gentle cleansing: Distribute in gentle circular motions for 45–60 seconds, paying attention to T-zone and eye contour.',
+      'Rinse & pat dry: Rinse thoroughly with cool water and gently pat dry with a clean towel; leave skin slightly damp before applying native tropocollagen.'
+    ],
+    disclaimer: 'Professional dermatological cleansing gel formulated at physiological skin pH 5.5. CPNP registered under EU Regulation (EC) 1223/2009 for all skin types including reactive, sensitive, and couperose-prone dermis.'
+  },
+  'colway-blue-diamond-peeling': {
+    categoryBadge: 'EXFOLIATION SAFETY & PRECAUTIONS',
+    title: 'Enzymatic & Mechanical Safety, Barrier Precautions & Patch Testing',
+    warnings: [
+      'For external facial and cutaneous exfoliation only. Strictly avoid direct contact with conjunctiva, orbital eye socket, and mucous membranes.',
+      'Contraindications: Do not use on active inflammatory acne (papulopustular lesions), open cuts, sunburned skin, active rosacea flare-ups, or within 7 days of clinical chemical peels or ablative laser treatments.',
+      'Do not combine on the same day with prescription topical tretinoin, adapalene, high-concentration AHA/BHA peels, or harsh abrasive pads.',
+      'Photoprotection safeguard: Stratum corneum renewal temporarily increases UV susceptibility. Daily broad-spectrum SPF 50+ is mandatory following treatment.',
+      'Perform a 24-hour patch test on the inner forearm prior to first use in patients with sensitive, reactive, or thin couperose skin.',
+      'Discontinue immediately if intense stinging, persistent erythema, or edema develops.'
+    ],
+    protocolTitle: 'DUAL-ACTION MICRODERMABRASION PROTOCOL',
+    protocolSteps: [
+      'Frequency: Apply 1× weekly for normal/mature skin; 1× every 10–14 days for thin, fragile, or couperose-prone dermis.',
+      'Mechanical phase: Apply a thin layer to clean, damp skin. Perform ultra-light circular micro-massage for 1–2 minutes; let volcanic diamond dust glide without pressing.',
+      'Enzymatic phase: Leave on skin untouched for 3–5 minutes. Subtilisin enzymes biologically digest dead corneocyte desmosomes.',
+      'Neutralization: Rinse thoroughly with cool to lukewarm water. Follow immediately with native bioactive collagen or soothing barrier moisturizer.'
+    ],
+    disclaimer: 'Advanced mechanical and enzymatic micro-peeling cosmeceutical complying with EU Regulation 1223/2009. Dermatologically tested. Not recommended for broken skin or acute dermatoses.'
+  },
+  'colway-collagen-vege': {
+    categoryBadge: 'PHYTO-COLLAGEN SAFETY',
+    title: 'Botanical Safety, Osmotic Absorption & Cutaneous Tolerance',
+    warnings: [
+      'For external cutaneous application only. Avoid direct eye contact; in case of contact, rinse thoroughly with fresh water.',
+      '100% vegan formulation: Free from animal derivatives. Contains Chlorella vulgaris micro-algae, young coconut water, and botanical amino acid aminograms.',
+      'Individuals with documented severe botanical or tree nut / coconut hypersensitivity should perform a 24h forearm patch test prior to facial use.',
+      'Do not apply directly onto actively bleeding wounds, infected dermatitis, or acute bacterial skin infections.',
+      'Storage: Store at controlled room temperature (15°C – 25°C). Unlike animal-derived tropocollagen, botanical aminogram matrices do not require strict sub-26°C refrigeration.',
+      'Keep container tightly sealed and out of direct sunlight.'
+    ],
+    protocolTitle: 'PHYTO-AMINO OSMOTIC PENETRATION PROTOCOL',
+    protocolSteps: [
+      'Substrate preparation: Thoroughly cleanse face with Collagen Wash Gel. Skin MUST remain slightly damp with cellular mist or thermal water.',
+      'Dispensing: Pump 1–2 doses onto fingertips. Rapidly pat into face, neck, and décolleté along Langer\'s tension lines.',
+      'Osmotic diffusion: Allow 3–5 minutes for the plant polypeptide matrix to fully penetrate before layering creams or makeup.',
+      'Biorhythm: Optimal for twice-daily application (morning barrier shield and nocturnal cellular repair).'
+    ],
+    disclaimer: 'Clean-label 100% vegan bio-fermented cosmeceutical registered under EU Regulation (EC) 1223/2009. Hypoallergenic, non-comedogenic, and clinically tested across sensitive phototypes.'
+  },
+  'colway-strengthening-shampoo': {
+    categoryBadge: 'TRICHOLOGICAL SCALP SAFETY',
+    title: 'Scalp Safety, Follicular Dwell Precautions & Patch Testing',
+    warnings: [
+      'For external topical scalp and hair cleansing only. Avoid contact with eyes; rinse immediately with copious water if contact occurs.',
+      'Do not apply onto scalps with open bleeding lesions, acute exudative dermatitis, or infected scalp psoriasis plaques without prior dermatological consultation.',
+      'Active botanical concentration: Contains Baicapil™ (Scutellaria baicalensis, soy & wheat sprouts), Caffeine, and Zinc PCA. Individuals with known sensitivity should perform an epicutaneous patch test.',
+      'Keep out of reach of young children under 3 years.',
+      'Discontinue use if persistent scalp erythema, burning sensation, or contact dermatitis develops.',
+      'Store in a cool, dry place away from direct sunlight.'
+    ],
+    protocolTitle: 'CLINICAL TRICHOLOGY DWELL & FOLLICULAR MASSAGE PROTOCOL',
+    protocolSteps: [
+      'Preparation: Thoroughly saturate hair and scalp with lukewarm water (36°C – 38°C) for 60 seconds to open follicular ostia.',
+      'Targeted application: Dispense 5–10 mL into palms, emulsify, and apply directly to the scalp crown and thinning areas first.',
+      'Essential follicular dwell: Leave lather on the scalp for 3–5 minutes without rinsing. This contact window allows Caffeine and Baicalin absorption into the hair bulb.',
+      'Rinse: Rinse thoroughly with lukewarm water (≤38°C). Follow with Colway Strengthening Conditioner applied strictly to hair fiber lengths.'
+    ],
+    disclaimer: 'Professional trichological cosmeceutical registered under EU Cosmetic Regulation (EC) 1223/2009. Clinically tested for androgenetic alopecia, telogen effluvium, and postpartum scalp rehabilitation.'
+  },
+  'colway-strengthening-conditioner': {
+    categoryBadge: 'HAIR FIBER & CUTICLE SAFETY',
+    title: 'Hair Fiber Safety, Scalp Root Precautions & Cuticle Sealing Protocol',
+    warnings: [
+      'For external topical hair fiber conditioning only. Formulated specifically for hair shafts, mid-lengths, and ends.',
+      'Scalp precaution: Avoid heavy mass application directly onto the scalp roots and follicular openings to prevent sebum accumulation or pore occlusion.',
+      'Avoid contact with eyes; in case of accidental eye contact, rinse thoroughly with fresh running water.',
+      'Safe for color-treated, chemically straightened, or keratin-treated hair: Free from harsh salts, parabens, and stripping sulfates.',
+      'Keep out of reach of children. Store between 15°C and 25°C away from heat sources.',
+      'Discontinue use if allergic contact sensitivity develops.'
+    ],
+    protocolTitle: 'HAIR FIBER LIPID SEALING PROTOCOL',
+    protocolSteps: [
+      'Post-wash preparation: After rinsing Colway Strengthening Shampoo, gently squeeze excess water from hair with a microfiber towel.',
+      'Fiber application: Dispense 5–8 mL into palms. Distribute evenly strictly from mid-lengths down to tips using fingers or a wide-tooth comb.',
+      'Contact duration: Leave on for 2–3 minutes to allow Kerascalp™ amla extract and argan triglycerides to neutralize negative electrostatic charges.',
+      'Cool rinse: Rinse thoroughly with cool water (approx. 25°C – 28°C) to lock in active conditioning lipids and seal cuticle scales.'
+    ],
+    disclaimer: 'Professional trichological hair fiber conditioner registered under EU Regulation (EC) 1223/2009. Dermatologically evaluated for brittle, damaged, thinning, and chemically processed hair.'
+  },
+  'colway-blue-diamond-cream': {
+    categoryBadge: 'CELLULAR DERMAL SAFETY',
+    title: 'Epigenetic Dermal Safety, Vascular Tolerance & Patch Testing',
+    warnings: [
+      'For external topical facial, neck, and décolleté application only. Avoid direct contact with ocular conjunctiva.',
+      'Perform a 48-hour patch test on the inner forearm prior to first application in patients with ultra-reactive, atopic, or active couperose skin.',
+      'Do not apply to open wounds, infected acne pustules, or acute weeping cutaneous eczema.',
+      'High active concentration: Contains Matrigenics 14G, recombinant FGF-1, and Superox-C™ (Kakadu Plum). A transient tingling sensation may occur upon initial use as microcirculation activates.',
+      'Storage: Store at controlled room temperature (15°C – 25°C) in a dry place. Protect from extreme heat and direct UV radiation.',
+      'Keep jar tightly closed with protective seal in place. Keep out of reach of young children.'
+    ],
+    protocolTitle: 'EPIGENETIC MATRIX APPLICATION PROTOCOL',
+    protocolSteps: [
+      'Preparation: Apply to thoroughly cleansed, toned skin (ideally pre-hydrated with native tropocollagen gel for peptide synergy).',
+      'Thermal liquefaction: Dispense a pea-sized amount (approx. 0.5 mL); warm between fingertips for 3 seconds to melt the lamellar ceramide base.',
+      'Lymphatic press: Press gently into facial skin using upward strokes along the jawline, cheekbones, and forehead without aggressive pulling.',
+      'Chronobiology: Apply morning (as an environmental soft-blur shield) and evening (for nocturnal FGF-1 genomic rejuvenation).'
+    ],
+    disclaimer: 'Advanced cellular epigenetic cosmeceutical registered under EU Cosmetics Regulation (EC) 1223/2009. Dermatologically evaluated for mature, perimenopausal, and photoaged facial dermis.'
+  }
+};
+
+/**
+ * Resolves the canonical key for any Colway product identifier or slug.
+ */
+function resolveColwayCanonicalKey(slug = '') {
+  if (!slug) return null;
+  const clean = String(slug).toLowerCase().trim();
+  if (COLWAY_PRODUCTS_INCI_REGISTRY[clean]) return clean;
+  if (clean.includes('peeling') || clean.includes('scrub')) return 'colway-blue-diamond-peeling';
+  if (clean.includes('cream') || clean.includes('krem') || clean.includes('blue-diamond') || clean.includes('diament')) return 'colway-blue-diamond-cream';
+  if (clean.includes('vege') || clean.includes('phyto')) return 'colway-collagen-vege';
+  if (clean.includes('colvita')) return 'colway-colvita';
+  if (clean.includes('lip') || clean.includes('pomadka') || clean.includes('labial') || clean.includes('usta')) return 'colway-collagen-lip-care';
+  if (clean.includes('wash') || clean.includes('cleanser') || clean.includes('mycia') || clean.includes('zel') || clean.includes('żel')) return 'colway-collagen-wash-gel';
+  if (clean.includes('shampoo') || clean.includes('szampon')) return 'colway-strengthening-shampoo';
+  if (clean.includes('conditioner') || clean.includes('odzywka') || clean.includes('odżywka')) return 'colway-strengthening-conditioner';
+  return null;
+}
+
+/**
+ * Returns tailored clinical safety data for any Colway product slug.
+ * @param {string} slug
+ * @returns {object|null}
+ */
+export function getColwayProductSafety(slug = '') {
+  const key = resolveColwayCanonicalKey(slug);
+  return key ? COLWAY_SAFETY_REGISTRY[key] : null;
+}
+
+/**
  * Returns complete Colway INCI and active ingredients data for any product slug.
  * Handles canonical slugs, short slugs, and common alias variations.
  * 
@@ -1963,38 +2159,11 @@ export const COLWAY_PRODUCTS_INCI_REGISTRY = {
  */
 export function getColwayProductData(slug = '') {
   if (!slug) return null;
-  const clean = String(slug).toLowerCase().trim();
-
-  // Direct match
-  if (COLWAY_PRODUCTS_INCI_REGISTRY[clean]) {
-    return COLWAY_PRODUCTS_INCI_REGISTRY[clean];
+  const key = resolveColwayCanonicalKey(slug);
+  if (key && COLWAY_PRODUCTS_INCI_REGISTRY[key]) {
+    const data = { ...COLWAY_PRODUCTS_INCI_REGISTRY[key] };
+    data.safety_precautions = COLWAY_SAFETY_REGISTRY[key] || null;
+    return data;
   }
-
-  // Alias resolution
-  if (clean.includes('blue-diamond-cream') || clean.includes('niebieski-diament-krem') || clean.includes('blue-cream')) {
-    return COLWAY_PRODUCTS_INCI_REGISTRY['colway-blue-diamond-cream'];
-  }
-  if (clean.includes('blue-diamond-peeling') || clean.includes('niebieski-diament-peeling') || clean.includes('blue-peeling')) {
-    return COLWAY_PRODUCTS_INCI_REGISTRY['colway-blue-diamond-peeling'];
-  }
-  if (clean.includes('vege') || clean.includes('collagen-vege') || clean.includes('kolagen-vege')) {
-    return COLWAY_PRODUCTS_INCI_REGISTRY['colway-collagen-vege'];
-  }
-  if (clean.includes('colvita')) {
-    return COLWAY_PRODUCTS_INCI_REGISTRY['colway-colvita'];
-  }
-  if (clean.includes('lip-care') || clean.includes('lip') || clean.includes('usta')) {
-    return COLWAY_PRODUCTS_INCI_REGISTRY['colway-collagen-lip-care'];
-  }
-  if (clean.includes('wash-gel') || clean.includes('washing-gel') || clean.includes('mycia') || clean.includes('cleanser')) {
-    return COLWAY_PRODUCTS_INCI_REGISTRY['colway-collagen-wash-gel'];
-  }
-  if (clean.includes('shampoo') || clean.includes('szampon')) {
-    return COLWAY_PRODUCTS_INCI_REGISTRY['colway-strengthening-shampoo'];
-  }
-  if (clean.includes('conditioner') || clean.includes('odzywka') || clean.includes('odżywka')) {
-    return COLWAY_PRODUCTS_INCI_REGISTRY['colway-strengthening-conditioner'];
-  }
-
   return null;
 }

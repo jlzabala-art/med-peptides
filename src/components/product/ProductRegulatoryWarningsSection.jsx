@@ -195,6 +195,23 @@ export default function ProductRegulatoryWarningsSection({
   // 2. COSMETIC / TOPICAL CARE (Colway, Shampoos, Conditioners)
   // ─────────────────────────────────────────────────────────────
   if (isCosmeticProduct && !effectiveIsSupplement) {
+    const slugLower = (p?.slug || p?.id || '').toLowerCase();
+    const nameLower = (p?.name || p?.title || '').toLowerCase();
+    const isHair = slugLower.includes('shampoo') || slugLower.includes('conditioner') || slugLower.includes('trichology') || nameLower.includes('shampoo') || nameLower.includes('conditioner');
+    const isLip = slugLower.includes('lip') || slugLower.includes('pomadka') || slugLower.includes('labial') || nameLower.includes('lip');
+
+    const indicationSummary = isLip
+      ? (isEs ? 'Formulado y envasado bajo estándares europeos de buenas prácticas de fabricación cosmética (ISO 22716). Producto para el cuidado biomimético, hidratación profunda y defensa de la barrera labial y peribucal, sin principios medicamentosos ni esteroides.' : 'Formulated and packaged in compliance with European Cosmetic Good Manufacturing Practices (ISO 22716). Indicated for biomimetic labial barrier defense and perioral lipid hydration, free from prescription drug agents and corticosteroids.')
+      : isHair
+      ? (isEs ? 'Formulado y envasado bajo estándares europeos de buenas prácticas de fabricación cosmética (ISO 22716). Producto para el cuidado y revitalización del cuero cabelludo y tallo capilar sin principios medicamentosos de prescripción ni esteroides.' : 'Formulated and packaged in compliance with European Cosmetic Good Manufacturing Practices (ISO 22716). Indicated for scalp and hair shaft revitalization, free from prescription drug agents and hormonal corticosteroids.')
+      : (isEs ? 'Formulado y envasado bajo estándares europeos de buenas prácticas de fabricación cosmética (ISO 22716). Producto para la revitalización celular, regeneración de la matriz dérmica y soporte epidérmico facial, sin principios medicamentosos de prescripción.' : 'Formulated and packaged in compliance with European Cosmetic Good Manufacturing Practices (ISO 22716). Indicated for dermal cellular revitalization and facial epidermal matrix support, free from prescription drug agents.');
+
+    const topicalInstruction = isLip
+      ? (isEs ? 'Aplicar suavemente sobre labios limpios y zona peribucal. Evitar ingerir en grandes cantidades. Conservar entre 15°C y 25°C protegido de fuentes de calor directo.' : 'Apply gently to clean, dry lips and perioral zones. Do not ingest in excessive quantities. Store between 15°C and 25°C protected from direct heat sources.')
+      : isHair
+      ? (isEs ? 'Aplicar únicamente sobre piel intacta y cuero cabelludo. Evitar el contacto directo con ojos y mucosas. En caso de contacto accidental, aclarar inmediatamente con abundante agua templada.' : 'Apply solely to intact scalp and hair surfaces. Avoid direct contact with eyes and mucous membranes. If accidental contact occurs, rinse thoroughly with copious warm water.')
+      : (isEs ? 'Aplicar sobre la piel limpia y seca de rostro, cuello o escote. Evitar el contacto directo con la conjuntiva ocular. En caso de contacto accidental, aclarar con abundante agua fresca.' : 'Apply to clean, dry facial, neck, or décolleté skin. Avoid direct contact with ocular conjunctiva. If accidental contact occurs, rinse thoroughly with fresh water.');
+
     return (
       <section 
         id="regulatory-warnings" 
@@ -262,9 +279,7 @@ export default function ProductRegulatoryWarningsSection({
 
         <div style={{ background: '#ffffff' }}>
           <p style={{ margin: 0, padding: '0.875rem 1.5rem', fontSize: '0.84rem', color: '#134e4a', lineHeight: 1.6, fontWeight: 500, borderBottom: '1px solid #ccfbf1', background: '#f0fdfa' }}>
-            {isEs 
-              ? 'Formulado y envasado bajo estándares europeos de buenas prácticas de fabricación cosmética (ISO 22716). Producto para el cuidado y revitalización del cuero cabelludo y tallo capilar sin principios medicamentosos de prescripción ni esteroides.'
-              : 'Formulated and packaged in compliance with European Cosmetic Good Manufacturing Practices (ISO 22716). Indicated for scalp and hair shaft revitalization, free from prescription drug agents and hormonal corticosteroids.'}
+            {indicationSummary}
           </p>
 
           <div className="gcp-detail-rows-list">
@@ -279,9 +294,7 @@ export default function ProductRegulatoryWarningsSection({
                 </h4>
               </div>
               <div className="gcp-detail-value">
-                {isEs 
-                  ? 'Aplicar únicamente sobre piel intacta y cuero cabelludo. Evitar el contacto directo con ojos y mucosas. En caso de contacto accidental, aclarar inmediatamente con abundante agua templada.'
-                  : 'Apply solely to intact scalp and hair surfaces. Avoid direct contact with eyes and mucous membranes. If accidental contact occurs, rinse thoroughly with copious warm water.'}
+                {topicalInstruction}
               </div>
             </div>
 

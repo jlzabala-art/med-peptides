@@ -10,6 +10,7 @@ import {
   TestTube, Thermometer, Clock, BarChart2,
   RefreshCcw, Layers, Mail, Check, ExternalLink
 } from '@/lib/icons';
+import { getColwayProductSafety } from '@/data/colwayInciRegistry';
 
 const INCI_GROUP_META = {
   base:              { labelEn: 'Aqueous Base',         labelEs: 'Base Acuosa Purificada',    color: '#64748b', bg: '#f1f5f9' },
@@ -331,6 +332,76 @@ export default function CosmeticTechnicalSpecs({ product, lang = 'en', onOpenInq
   } : null);
   const hairProtocols = product?.associated_protocols || [];
   const warnings = product?.warnings || [];
+
+  const colwaySafety = useMemo(() => {
+    return getColwayProductSafety(slug) || getColwayProductSafety(name) || null;
+  }, [slug, name]);
+
+  const effectiveWarnings = useMemo(() => {
+    if (colwaySafety?.warnings?.length > 0) return colwaySafety.warnings;
+    if (warnings.length > 0) {
+      const hasScalpMismatch = !isHairProduct && warnings.some(w => {
+        const text = (typeof w === 'string' ? w : w?.text || '').toLowerCase();
+        return text.includes('scalp') || text.includes('cuero cabelludo');
+      });
+      if (!hasScalpMismatch) return warnings;
+    }
+    if (isLipProduct) {
+      return [
+        isEs ? 'Uso exclusivo labial y peribucal. No ingerir en grandes cantidades.' : 'For external labial and perioral use only. Do not ingest in excessive quantities.',
+        isEs ? 'Conservar en lugar fresco y seco (15°C – 25°C). Proteger de la radiación solar directa, guanteras o vehículos cerrados para evitar la fusión de la barra lipídica.' : 'Store in a cool dry place (15°C – 25°C). Protect from direct heat or vehicle interiors to prevent melting of the lipid stick.',
+        isEs ? 'En caso de queilitis angular infecciosa o brote de herpes simple activo, consulte con su médico antes de la aplicación.' : 'In case of infectious angular cheilitis or active herpes simplex flares, consult a physician prior to application.',
+        isEs ? 'Apto para hidratación de barrera post-rellenos labiales tras el periodo inicial de 24 horas.' : 'Safe for mucosal barrier hydration following lip fillers after initial 24h recovery.',
+        isEs ? 'Suspender su uso si observa eritema peribucal persistente o signos de hipersensibilidad de contacto.' : 'Discontinue use if persistent perioral redness or contact sensitivity develops.',
+        isEs ? 'Mantener fuera del alcance de niños menores de 3 años.' : 'Keep out of reach of children under 3 years.'
+      ];
+    }
+    if (isHairProduct) {
+      return [
+        isEs ? 'Uso exclusivo externo/tópico para cuero cabelludo y cabello. Evitar contacto directo con los ojos; aclarar inmediatamente con abundante agua.' : 'For external topical scalp and hair use only. Avoid contact with eyes; rinse immediately with water if contact occurs.',
+        isEs ? 'Se aconseja realizar un test epicutáneo de parche 48 horas antes de la primera aplicación en cuero cabelludo reactivo.' : 'Perform an occlusive 48-hour patch test prior to first application in patients with sensitive scalp.',
+        isEs ? 'No aplicar sobre cuero cabelludo con heridas abiertas sangrantes o dermatitis exudativa aguda sin supervisión dermatológica.' : 'Do not apply to scalps with open bleeding lesions or acute exudative dermatitis without dermatological clearance.',
+        isEs ? 'Mantener fuera del alcance de niños menores de 3 años. Conservar en lugar fresco protegido del calor.' : 'Keep out of reach of children under 3 years. Store in a cool place away from heat.',
+        isEs ? 'Suspender la aplicación si se manifiesta eritema persistente o prurito severo.' : 'Discontinue use if persistent erythema or severe pruritus develops.'
+      ];
+    }
+    return [
+      isEs ? 'Uso cosmético cutáneo externo. Evitar el contacto directo con los ojos; en caso accidental, aclarar con abundante agua.' : 'For external cosmetic cutaneous use only. Avoid contact with eyes; rinse immediately if contact occurs.',
+      isEs ? 'Se recomienda realizar un test de tolerancia en el antebrazo 24–48 h antes del primer uso en dermis sensible o reactiva.' : 'Perform a 24–48h inner forearm patch test prior to first use in patients with sensitive or reactive skin.',
+      isEs ? 'No aplicar sobre heridas abiertas, lesiones exudativas activas o eccemas agudos.' : 'Do not apply to open wounds, active weeping lesions, or acute eczema.',
+      isEs ? 'Conservar a temperatura ambiente controlada (15°C – 25°C) protegido de la radiación directa.' : 'Store at controlled room temperature (15°C – 25°C) protected from direct radiation.',
+      isEs ? 'Mantener fuera del alcance de niños menores de 3 años.' : 'Keep out of reach of children under 3 years.'
+    ];
+  }, [colwaySafety, warnings, isHairProduct, isLipProduct, isEs]);
+
+  const effectiveProtocolData = useMemo(() => {
+    if (colwaySafety?.protocolSteps?.length > 0) {
+      return {
+        title: colwaySafety.protocolTitle || (isEs ? 'PROTOCOLO DE APLICACIÓN Y TOLERANCIA CLÍNICA' : 'CLINICAL TOLERANCE & APPLICATION PROTOCOL'),
+        steps: colwaySafety.protocolSteps
+      };
+    }
+    if (isLipProduct) {
+      return {
+        title: isEs ? 'PROTOCOLO DE TOLERANCIA LABIAL Y COMPRESA NOCTURNA' : 'LABIAL TOLERANCE & BARRIER COMPRESS PROTOCOL',
+        steps: [
+          isEs ? 'Aplicación inicial: aplicar una pequeña cantidad sobre el borde bermellón o muñeca 24h antes del uso intensivo.' : 'Initial application: Apply a small test amount to the vermilion border or inner wrist 24h prior to intensive use.',
+          isEs ? 'Barrera protectora diurna: deslizar suavemente sobre labios limpios 2–4 veces al día, especialmente antes de la exposición al viento o aire acondicionado.' : 'Daily protective barrier: Glide smoothly over clean, dry lips 2–4 times daily, especially before sun, wind, or dry AC exposure.',
+          isEs ? 'Compresa nocturna labial: aplicar una capa generosa antes de dormir como matriz oclusiva durante la regeneración celular nocturna.' : 'Nocturnal lip compress: Apply a generous layer before sleep to serve as a restorative occlusive matrix during nocturnal cellular turnover.',
+          isEs ? 'Fórmula no comedogénica: segura para la zona peribucal sin riesgo de oclusión folicular.' : 'Non-comedogenic formulation: Safe for surrounding perioral zones without risk of follicular comedones.'
+        ]
+      };
+    }
+    return {
+      title: isEs ? 'PROTOCOLO DE TEST DE PARCHE EPICUTÁNEO (ICDRG)' : 'DERMATOLOGICAL EPICUTANEOUS PATCH TEST PROTOCOL (ICDRG)',
+      steps: [
+        isEs ? 'Aplicar 0.05 mL del producto sobre piel sana del antebrazo interno (área de 2×2 cm).' : 'Apply 0.05 mL of product to healthy inner forearm skin (2×2 cm test site).',
+        isEs ? 'Mantener bajo oclusión durante 48 horas sin mojar el área de prueba.' : 'Keep under occlusion for 48 hours without washing the test area.',
+        isEs ? 'Efectuar lecturas a las 48 horas y 72 horas (o 96h si se sospecha reacción retardada).' : 'Read reaction at 48 hours and 72 hours (or 96 hours if delayed sensitivity suspected).',
+        isEs ? 'Graduación según escala ICDRG: 0 (negativo) → 3+ (reacción ampollar/positiva fuerte). Contraindicado si ≥1+.' : 'Score per ICDRG scale: 0 (negative) → 3+ (vesicular strong positive). Contraindicated if score ≥1+.'
+      ]
+    };
+  }, [colwaySafety, isLipProduct, isEs]);
 
   const keyActives = useMemo(() => {
     return ingredients.filter(i => i.inci_group === 'key_active' || i.inci_group === 'functional_active');
@@ -982,22 +1053,11 @@ export default function CosmeticTechnicalSpecs({ product, lang = 'en', onOpenInq
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.85rem' }}>
           <AlertTriangle size={18} style={{ color: '#d97706' }} />
           <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-            {isEs ? 'Seguridad Clínica, Precauciones y Test de Parche' : 'Clinical Safety, Precautions & Patch Testing'}
+            {colwaySafety?.title || (isEs ? 'Seguridad Clínica, Precauciones y Test de Parche' : 'Clinical Safety, Precautions & Patch Testing')}
           </h3>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-          {(warnings.length > 0 ? warnings : (isLipProduct ? [
-            isEs ? 'Uso exclusivo labial y peribucal. No ingerir en grandes cantidades.' : 'For external labial and perioral use only. Do not ingest.',
-            isEs ? 'Conservar en lugar fresco y seco (15°C – 25°C). Proteger de la luz solar directa, calefactores o vehículos cerrados para evitar la fusión de la barra.' : 'Store in a cool dry place (15°C – 25°C). Protect from direct heat or car interiors to prevent stick melting.',
-            isEs ? 'En caso de queilitis angular con infección bacteriana o brote de herpes simple activo, consulte con su médico antes de aplicar el producto.' : 'In case of infectious angular cheilitis or active herpes simplex flare, consult a physician prior to application.',
-            isEs ? 'Suspender su uso si observa eritema peribucal persistente o signos de hipersensibilidad alérgica de contacto.' : 'Discontinue use if persistent perioral redness or contact sensitivity develops.'
-          ] : [
-            isEs ? 'Uso exclusivo externo/tópico. Evitar contacto directo con los ojos; en caso de contacto accidental, aclarar inmediatamente con abundante agua.' : 'For external topical use only. Avoid contact with eyes; rinse immediately with copious water if contact occurs.',
-            isEs ? 'Se aconseja realizar un test epicutáneo de parche (patch test) 48 horas antes de la primera aplicación en pacientes con terreno atópico o cuero cabelludo sensible.' : 'Perform an occlusive 48-hour patch test prior to first application in patients with sensitive scalp or history of contact allergy.',
-            isEs ? 'No aplicar sobre cuero cabelludo con heridas abiertas, dermatitis seborreica en fase exudativa aguda o placas psoriásicas no controladas.' : 'Do not apply to scalps with open lesions, active acute eczema, or severe uncontrolled psoriatic plaques without dermatologist clearance.',
-            isEs ? 'Mantener fuera del alcance de niños menores de 3 años. Conservar en lugar fresco protegido de la luz solar directa.' : 'Keep out of reach of children under 3 years. Store in a cool dry place protected from direct heat.',
-            isEs ? 'Suspender la aplicación si se manifiesta eritema persistente, prurito severo o signos de dermatitis de contacto.' : 'Discontinue use if persistent erythema, severe pruritus, or signs of allergic contact dermatitis develop.'
-          ])).map((w, i) => (
+          {effectiveWarnings.map((w, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
               <AlertTriangle size={14} style={{ color: '#d97706', flexShrink: 0, marginTop: '2px' }} />
               <span style={{ fontSize: '0.80rem', color: '#374151', lineHeight: 1.55 }}>
@@ -1007,23 +1067,25 @@ export default function CosmeticTechnicalSpecs({ product, lang = 'en', onOpenInq
           ))}
         </div>
 
-        {/* Dermatological Patch Test Protocol (ICDRG) */}
+        {/* Clinical Tolerance & Application Protocol */}
         <div style={{ marginTop: '1.25rem', padding: '0.9rem 1.15rem', background: '#fffbeb', borderRadius: '8px', border: '1px solid #fde68a' }}>
           <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#d97706', marginBottom: '0.45rem', letterSpacing: '0.04em' }}>
-            {isEs ? 'PROTOCOLO DE TEST DE PARCHE EPICUTÁNEO (ICDRG)' : 'DERMATOLOGICAL EPICUTANEOUS PATCH TEST PROTOCOL (ICDRG)'}
+            {effectiveProtocolData.title}
           </div>
-          {[
-            isEs ? 'Aplicar 0.05 mL del producto sobre piel sana del antebrazo interno (área de 2×2 cm).' : 'Apply 0.05 mL of product to healthy inner forearm skin (2×2 cm test site).',
-            isEs ? 'Mantener bajo oclusión durante 48 horas sin mojar el área de prueba.' : 'Keep under occlusion for 48 hours without washing the test area.',
-            isEs ? 'Efectuar lecturas a las 48 horas y 72 horas (o 96h si se sospecha reacción retardada).' : 'Read reaction at 48 hours and 72 hours (or 96 hours if delayed sensitivity suspected).',
-            isEs ? 'Graduación según escala ICDRG: 0 (negativo) → 3+ (reacción ampollar/positiva fuerte). Contraindicado si ≥1+.' : 'Score per ICDRG scale: 0 (negative) → 3+ (vesicular strong positive). Contraindicated if score ≥1+.'
-          ].map((pt, i) => (
+          {effectiveProtocolData.steps.map((pt, i) => (
             <div key={i} style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', marginBottom: '4px' }}>
               <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#d97706', flexShrink: 0 }}>{i + 1}.</span>
               <span style={{ fontSize: '0.74rem', color: '#92400e', lineHeight: 1.5 }}>{pt}</span>
             </div>
           ))}
         </div>
+
+        {colwaySafety?.disclaimer && (
+          <div style={{ marginTop: '0.85rem', padding: '0.65rem 0.85rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.72rem', color: '#64748b', lineHeight: 1.5 }}>
+            <span style={{ fontWeight: 700, color: '#475569' }}>{isEs ? 'Aviso Regulatorio: ' : 'Regulatory Disclaimer: '}</span>
+            {colwaySafety.disclaimer}
+          </div>
+        )}
       </div>
 
     </div>
