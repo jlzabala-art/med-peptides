@@ -2,8 +2,7 @@ import React from 'react';
 import { adminDb } from '@/lib/firebaseAdmin';
 import ColwayPriceListClient from './ColwayPriceListClient';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateMetadata() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';

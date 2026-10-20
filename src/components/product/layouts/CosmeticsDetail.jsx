@@ -788,6 +788,13 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
+  // Sync with global custom event dispatched by PublicStickyActionBar or search bars
+  useEffect(() => {
+    const handleOpenAi = () => setIsAIDrawerOpen(true);
+    window.addEventListener('open-public-atlas-ai', handleOpenAi);
+    return () => window.removeEventListener('open-public-atlas-ai', handleOpenAi);
+  }, []);
+
   // Active section management (Single-section display rule)
   const [activeSection, setActiveSection] = useState(() => {
     if (typeof window !== 'undefined' && window.location.hash) {
@@ -1065,7 +1072,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
       { id: 'application-protocol', label: isNutricosmetic ? 'Oral Administration Protocol' : isHairProduct ? 'Application Protocol & Infogram' : 'Clinical Application Protocol', icon: ClipboardList },
       { id: 'technical-specs', label: 'Technical Specifications', icon: Beaker },
       { id: 'clinical-protocols', label: isNutricosmetic ? 'Nutricosmetic Protocols Integration' : isHairProduct ? 'Hair Protocols Integration' : 'Clinical Protocols Integration', icon: isHairProduct ? Scissors : Sparkles },
-      { id: 'safety', label: isNutricosmetic ? 'Safety & Contraindications' : 'Clinical Safety & Patch Test', icon: AlertTriangle }
+      { id: 'safety', label: isNutricosmetic ? 'Safety & Contraindications' : 'Clinical Safety & Patch Test', icon: ShieldCheck }
     );
     return list;
   }, [isHairProduct, isNutricosmetic, colwayData]);
@@ -1194,7 +1201,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: '5rem' }}>
-      <PublicUnifiedHeader track="products" lang={lang} copyUrl={productUrl} inquiryContextType="product" inquiryEntity={{ name, slug, category }} hideTier2={true}
+      <PublicUnifiedHeader track="products" lang={lang} copyUrl={productUrl} inquiryContextType="product" inquiryEntity={{ name, slug, category }} hideTier2={true} hideAiButton={true} hideContactButton={true}
         breadcrumb={[{ label: 'Catalog', href: '/catalog' }, { label: isHairProduct ? 'Colway® Trichology' : isNutricosmetic ? 'Colway® Nutricosmetics' : 'Colway® Clinical Skincare', href: '/collection/colway' }, { label: name }]} />
 
       <PublicPageShell>
@@ -2148,7 +2155,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             {effectiveActiveSection === 'safety' && (
               <PublicSectionCard 
                 id="safety" 
-                icon={AlertTriangle} 
+                icon={ShieldCheck} 
                 category={productSafety?.categoryBadge || (isNutricosmetic ? 'SYSTEMIC SAFETY & CONTRAINDICATIONS' : isLip ? 'LABIAL SAFETY & PRECAUTIONS' : 'SAFETY & PRECAUTIONS')} 
                 title={productSafety?.title || (isNutricosmetic ? 'Clinical Safety, Dietary Contraindications & Oral Dosing Protocol' : isLip ? 'Labial Mucosal Safety, Thermal Care & Tolerance Guide' : 'Clinical Safety, Contraindications & Patch Testing')}
               >
@@ -2247,6 +2254,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
       <PublicAtlasAIDrawer
         isOpen={isAIDrawerOpen}
         onClose={() => setIsAIDrawerOpen(false)}
+        hideFloatingTrigger={true}
         contextType="cosmetic_product"
         contextAnchor={{
           name,
@@ -2255,7 +2263,9 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             ? 'Hair Care · Trichology Monograph'
             : isNutricosmetic
               ? 'Nutricosmetics · Bioactive Supplement'
-              : 'Skincare · Cosmeceutical Monograph',
+              : isLip
+                ? 'Labial Care · Vermilion Restorative Serum'
+                : 'Skincare · Cosmeceutical Monograph',
           supplier: brand,
           description,
           inciCount: ingredients.length,
@@ -2264,12 +2274,16 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             ? 'Follicular DHT, hair fiber strength, anagen phase support'
             : isNutricosmetic
               ? 'Endogenous pro-collagen transcription, systemic connective tissue & joint cartilage support'
-              : 'Extracellular matrix (ECM) remodeling, barrier repair, epidermal hydration and cellular turnover',
+              : isLip
+                ? 'Vermilion border integrity, mucosal hydration (+40%), labial lipid barrier restoration'
+                : 'Extracellular matrix (ECM) remodeling, barrier repair, epidermal hydration and cellular turnover',
           associatedProtocols: isHairProduct
             ? 'Colway Hair Restoration System · GHK-Cu Scalp Protocol'
             : isNutricosmetic
               ? 'Systemic Longevity Protocol · BPC-157 Tissue Repair Adjunct'
-              : 'Colway Dermo-Renewal Ritual · GHK-Cu Skin Rejuvenation Protocol',
+              : isLip
+                ? 'Colway Labial Restoration System · Post-Filler Vermilion Protocol'
+                : 'Colway Dermo-Renewal Ritual · GHK-Cu Skin Rejuvenation Protocol',
           suggestedQuestions: isHairProduct ? [
             'What is the clinical evidence for Caffeine in androgenetic alopecia?',
             'How does Zinc PCA inhibit 5-alpha reductase at the scalp?',
@@ -2280,6 +2294,11 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             'What role does Fucus vesiculosus algae play in thyroid and ECM synergy?',
             'What is the recommended course duration for optimal connective tissue synthesis?',
             'Can Colvita be combined with injectable GHK-Cu or BPC-157 protocols?'
+          ] : isLip ? [
+            'How does Palmitoyl Oligopeptide restore vermilion border collagen and hydration?',
+            'What is the role of intact fish tropocollagen in protecting against severe dry cheilitis?',
+            'Is Bioactive Lip Care safe for hydration 24h following dermal lip filler injections?',
+            'How does the nocturnal lip compress protocol accelerate mucosal cellular recovery?'
           ] : [
             'How does encapsulated FGF-1 trigger fibroblast neocollagenesis?',
             'What is the role of biomimetic ceramides in epidermal barrier restoration?',
@@ -2300,6 +2319,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
         inquireLabel="Inquire Product"
         onInquire={() => setIsInquiryDrawerOpen(true)}
         showClinicalAI={true}
+        onOpenClinicalAI={() => setIsAIDrawerOpen(true)}
         showSections={true}
         sectionsCount={tocSections.length}
         onOpenSections={() => {

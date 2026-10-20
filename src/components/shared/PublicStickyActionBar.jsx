@@ -25,6 +25,7 @@ export default function PublicStickyActionBar({
   inquireLabel = 'Inquire',
   onInquire,
   showClinicalAI = true,
+  onOpenClinicalAI = null,
   lang = 'en',
   onOpenSections = null,
   showSections = false,
@@ -97,6 +98,9 @@ export default function PublicStickyActionBar({
   }, []);
 
   const handleOpenAI = () => {
+    if (onOpenClinicalAI) {
+      onOpenClinicalAI();
+    }
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
     }

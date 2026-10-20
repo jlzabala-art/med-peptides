@@ -4,7 +4,8 @@ import React, { useMemo } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck, Sparkles, CheckCircle2, ChevronRight,
-  Leaf, Award, Mail, Layers, LayoutGrid, FileText
+  Leaf, Award, Mail, Layers, LayoutGrid, FileText,
+  Droplets, Zap, FlaskConical, Pill
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 
@@ -91,11 +92,11 @@ export default function CosmeticsSidebarWidget({
       title: isEs ? 'LÍNEA LABIAL TROPOCOLÁGENO COLWAY' : 'COLWAY BIOACTIVE LABIAL SYSTEM',
       subtitle: isEs ? 'Protección y voluminización labial con Palmitoyl Oligopéptido' : 'Palmitoyl Oligopeptide + Native Tropocollagen mucosal barrier shield',
       badge: 'LABIAL BARRIER & RECOVERY',
-      headerGradient: 'linear-gradient(135deg, #4a044e 0%, #831843 100%)',
-      accentColor: '#db2777',
-      badgeBg: 'rgba(219, 39, 119, 0.25)',
-      badgeBorder: 'rgba(219, 39, 119, 0.4)',
-      badgeColor: '#fbcfe8',
+      headerGradient: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
+      accentColor: '#0d9488',
+      badgeBg: 'rgba(13, 148, 136, 0.2)',
+      badgeBorder: 'rgba(13, 148, 136, 0.4)',
+      badgeColor: '#99f6e4',
       products: [
         {
           slug: 'colway-collagen-lip-care',
@@ -105,8 +106,8 @@ export default function CosmeticsSidebarWidget({
           actives: 'Palmitoyl Oligopeptide · Tropocolágeno · Argán & Karité',
           volume: '4.5 g',
           dwell: isEs ? 'Reaplicar según necesidad · Mascarilla nocturna' : 'Reapply as needed · Night sleeping compress',
-          icon: '💄',
-          stepColor: '#db2777'
+          iconComp: Sparkles,
+          stepColor: '#0d9488'
         },
         {
           slug: 'colway-colvita',
@@ -116,8 +117,8 @@ export default function CosmeticsSidebarWidget({
           actives: 'Tropocolágeno Nativo Liofilizado · Algas Fucus · Vitamina E',
           volume: '60 / 120 Caps',
           dwell: isEs ? '2 cápsulas al día con comidas' : '2 capsules daily with meals',
-          icon: '💊',
-          stepColor: '#6366f1'
+          iconComp: Pill,
+          stepColor: '#0284c7'
         }
       ],
       protocolTitle: isEs ? 'Pauta Restauradora Labial & Post-Filler' : 'Labial Barrier & Post-Filler Protocol',
@@ -129,7 +130,7 @@ export default function CosmeticsSidebarWidget({
           label: isEs ? 'Bio-Péptido CL & Tropocolágeno' : 'Bio-Peptide CL & Tropocollagen',
           detail: isEs ? '+40% volumen vermilion y atenuación de fisuras verticales' : '+40% vermilion volume and vertical fissure smoothing',
           icon: Sparkles,
-          badgeColor: '#db2777'
+          badgeColor: '#0d9488'
         },
         {
           label: isEs ? 'Registro CPNP Europeo' : 'EU CPNP Registered',
@@ -528,9 +529,19 @@ export default function CosmeticsSidebarWidget({
                     borderBottom: '1px solid #f1f5f9'
                   }}
                 >
-                  <span style={{ fontSize: '1.25rem', lineHeight: 1, marginTop: '2px', flexShrink: 0 }}>
-                    {p.icon}
-                  </span>
+                  <div style={{
+                    width: '26px',
+                    height: '26px',
+                    borderRadius: '6px',
+                    background: `${p.stepColor}15`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    marginTop: '2px'
+                  }}>
+                    {React.createElement(p.iconComp || Sparkles, { size: 14, style: { color: p.stepColor } })}
+                  </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                       <span style={{
@@ -565,8 +576,9 @@ export default function CosmeticsSidebarWidget({
                     <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '1px' }}>
                       {p.action}
                     </div>
-                    <div style={{ fontSize: '0.62rem', color: systemConfig.accentColor, fontWeight: 600, marginTop: '2px' }}>
-                      ⏱️ {p.dwell}
+                    <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 500, marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Clock size={11} style={{ color: '#0d9488' }} />
+                      <span>{p.dwell}</span>
                     </div>
                   </div>
                 </div>
@@ -590,9 +602,19 @@ export default function CosmeticsSidebarWidget({
                 }}
                 className="hsw-link-hover"
               >
-                <span style={{ fontSize: '1.25rem', lineHeight: 1, marginTop: '2px', flexShrink: 0 }}>
-                  {p.icon}
-                </span>
+                <div style={{
+                  width: '26px',
+                  height: '26px',
+                  borderRadius: '6px',
+                  background: `${p.stepColor}15`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  marginTop: '2px'
+                }}>
+                  {React.createElement(p.iconComp || Sparkles, { size: 14, style: { color: p.stepColor } })}
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{
@@ -654,12 +676,12 @@ export default function CosmeticsSidebarWidget({
               }}
               style={{
                 width: '100%',
-                padding: '6px 12px',
+                padding: '7px 12px',
                 borderRadius: '6px',
-                border: `1px solid ${systemConfig.accentColor}30`,
-                background: `${systemConfig.accentColor}0a`,
-                color: systemConfig.accentColor,
-                fontSize: '0.67rem',
+                border: '1px solid #99f6e4',
+                background: '#f0fdfa',
+                color: '#0d9488',
+                fontSize: '0.70rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 display: 'flex',

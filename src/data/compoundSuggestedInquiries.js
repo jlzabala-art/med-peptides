@@ -472,6 +472,150 @@ export const COMPOUND_INQUIRIES_REGISTRY = {
       '¿Cómo se articula la entrega directa a clínica frente al dropshipping refrigerado al paciente?',
       '¿Qué documentación analítica (RP-HPLC, LC-MS) se entrega con cada partida suministrada?'
     ]
+  },
+
+  // ── Colway Bioactive Collagen Lip Care ──
+  'colway-lip-care': {
+    en: [
+      'How does Palmitoyl Oligopeptide (Bio-Peptide CL) stimulate vermilion border neocollagenesis?',
+      'What is the role of intact native fish tropocollagen in halting labial TEWL moisture loss?',
+      'Is Bioactive Lip Care safe for mucosal hydration 24 hours following dermal lip filler injections?',
+      'How should the nocturnal lip compress protocol be sequenced for chronic dry cheilitis?',
+      'What thermal storage precautions (15°C–25°C) protect the natural plant lipid and wax matrix?'
+    ],
+    es: [
+      '¿Cómo estimula el Palmitoil Oligopéptido (Bio-Péptido CL) la síntesis de colágeno en el borde bermellón?',
+      '¿Qué papel desempeña el tropocolágeno nativo intacto para frenar la pérdida de agua (TEWL) en los labios?',
+      '¿Es seguro aplicar el Cuidado Labial Bioactivo 24 horas después de infiltraciones de ácido hialurónico?',
+      '¿Cómo debe aplicarse la compresa labial nocturna para regenerar labios con queilitis severa?',
+      '¿Qué precauciones térmicas (15°C–25°C) preservan la estabilidad de la matriz lipídica y ceras naturales?'
+    ]
+  },
+
+  // ── Colway Colvita Bioactive Collagen Capsules ──
+  'colway-colvita': {
+    en: [
+      'How does lyophilized freshwater fish tropocollagen differ from hydrolyzed collagen peptides?',
+      'What is the clinical role of Baltic Fucus vesiculosus algae in connective tissue extracellular matrix synthesis?',
+      'What is the recommended 90–120 day dosing protocol to match the fibroblast neocollagenesis cycle?',
+      'Why is Colvita contraindicated in individuals with known seafood, fish, or iodine hypersensitivity?',
+      'How can Colvita be combined with topical tropocollagen or injectable peptide regimens?'
+    ],
+    es: [
+      '¿En qué se diferencia el tropocolágeno nativo liofilizado de pescado frente al colágeno hidrolizado común?',
+      '¿Qué papel clínico desempeña el alga Fucus vesiculosus en la síntesis de la matriz extracelular dérmica?',
+      '¿Cuál es la pauta recomendada de 90–120 días para sincronizar con el ciclo de neocologénesis celular?',
+      '¿Por qué está contraindicada Colvita en personas con alergia al pescado, marisco o sensibilidad al yodo?',
+      '¿Cómo se complementa la toma oral de Colvita con tropocolágeno tópico o protocolos con péptidos?'
+    ]
+  },
+
+  // ── Colway Trichology Hair Strengthening Shampoo ──
+  'colway-shampoo': {
+    en: [
+      'What is the clinical evidence for Baicapil™ 2% in reducing telogen hair shedding (-60.6%)?',
+      'How does Zinc PCA inhibit local 5-alpha reductase at the follicular infundibulum?',
+      'What is the recommended 3–5 minute contact time on damp scalp for active penetration?',
+      'Is this sulphate-free formula suitable for post-FUE hair transplant maintenance (Day 10+)?',
+      'Which clinical peptide protocols (e.g. GHK-Cu, TrichoTest™) synergize with this shampoo?'
+    ],
+    es: [
+      '¿Qué evidencia clínica avala a Baicapil™ 2% en la reducción de la caída telógena del cabello (-60.6%)?',
+      '¿Cómo inhibe el Zinc PCA la 5-alfa reductasa local en el infundíbulo folicular?',
+      '¿Por qué se requiere un tiempo de contacto de 3 a 5 minutos en el cuero cabelludo húmedo?',
+      '¿Es adecuada esta fórmula sin sulfatos para el mantenimiento post-injerto capilar FUE (día 10+)?',
+      '¿Qué protocolos con péptidos capilares (GHK-Cu, TrichoTest™) se combinan con este champú?'
+    ]
+  },
+
+  // ── Colway Trichology Hair Strengthening Conditioner ──
+  'colway-conditioner': {
+    en: [
+      'How does micronized native tropocollagen seal the hair cuticle without weighing down the root?',
+      'Why should this conditioning treatment be applied strictly from mid-lengths to ends?',
+      'What tensile strength improvements (+24%) are documented against mechanical breakage?',
+      'Is this conditioner safe for keratin-treated, bleached, or chemically straightened hair?',
+      'How does D-Panthenol and Argan oil replenish the intercellular cuticular lipid cement?'
+    ],
+    es: [
+      '¿Cómo sella la cutícula el tropocolágeno nativo micronizado sin aportar peso a la raíz capilar?',
+      '¿Por qué debe aplicarse este acondicionador exclusivamente de medios a puntas?',
+      '¿Qué mejoras de resistencia a la tracción (+24%) se documentan frente a la rotura mecánica?',
+      '¿Es seguro este acondicionador para cabellos teñidos, decolorados o con alisado de keratina?',
+      '¿Cómo repara el D-Pantenol y el aceite de argán el cemento lipídico intercuticular?'
+    ]
+  },
+
+  // ── Colway Blue Diamond Cellular Cream ──
+  'colway-blue-diamond-cream': {
+    en: [
+      'How does micro-encapsulated FGF-1 trigger basal membrane fibroblast mitogenesis (+38% procollagen)?',
+      'What is the clinical mechanism of Matrigenics 14G in reactivating the 14 youth ECM genes?',
+      'How does RonaFlair® Flawless optical silica diffuse ambient light to blur fine wrinkles?',
+      'Why should the cream be warmed between fingertips before applying to the face and neck?',
+      'How does Superox-C™ Kakadu plum natural Vitamin C strengthen fragile facial micro-capillaries?'
+    ],
+    es: [
+      '¿Cómo activa el FGF-1 microencapsulado la mitogénesis en fibroblastos basales (+38% procolágeno)?',
+      '¿Cuál es el mecanismo de Matrigenics 14G en la reactivación de los 14 genes estructurales de la juventud?',
+      '¿Cómo difracta la luz la sílice funcional RonaFlair® Flawless para atenuar ópticamente arrugas?',
+      '¿Por qué debe atemperarse la emulsión entre las yemas de los dedos antes de extenderla?',
+      '¿Cómo refuerza la microcirculación facial la vitamina C natural de Ciruela Kakadu Superox-C™?'
+    ]
+  },
+
+  // ── Colway Blue Diamond Micro-Resurfacing Peeling ──
+  'colway-blue-diamond-peeling': {
+    en: [
+      'How does natural diamond dust micro-resurface the stratum corneum without abrasive scratching?',
+      'What is the dual exfoliating action of proteolytic papain enzymes combined with mineral crystals?',
+      'Why must Blue Diamond Peeling be followed by daily broad-spectrum SPF 50+ photoprotection?',
+      'What is the recommended application protocol (1–2 minutes massage, 3–5 minutes leave-on)?',
+      'How does this peeling enhance transdermal absorption of subsequent peptide and collagen serums?'
+    ],
+    es: [
+      '¿Cómo pule el estrato córneo el polvo natural de diamante sin rayar la superficie dérmica?',
+      '¿En qué consiste la doble acción exfoliante de las enzimas proteolíticas de papaína y microcristales?',
+      '¿Por qué es obligatorio aplicar fotoprotección SPF 50+ tras el peeling de diamante?',
+      '¿Cuál es el protocolo de aplicación (1–2 min de masaje suave y 3–5 min de acción enzimática)?',
+      '¿Cómo optimiza este peeling la absorción transdérmica de sérums de colágeno y péptidos posteriores?'
+    ]
+  },
+
+  // ── Colway Collagen Vege 100% Plant-Based ──
+  'colway-vege': {
+    en: [
+      'How does the Chlorella vulgaris micro-algae aminogram bio-replicate human Type I tropocollagen?',
+      'Why is Collagen Vege suitable for hyperreactive, rosacea-prone, and post-laser skin?',
+      'What are the soothing and barrier-repair properties of young coconut water and Centella asiatica?',
+      'Does Collagen Vege require sub-26°C refrigeration like traditional fish native collagen gels?',
+      'How does this 100% plant-based formulation reduce redness and trans-epidermal water loss (TEWL)?'
+    ],
+    es: [
+      '¿Cómo bio-replica el aminograma de microalgas Chlorella vulgaris al tropocolágeno humano Tipo I?',
+      '¿Por qué está indicado Colway Collagen Vege para pieles hiperreactivas, con rosácea o post-láser?',
+      '¿Qué propiedades calmantes y de barrera aportan el agua de coco joven y la Centella asiática?',
+      '¿Requiere Collagen Vege refrigeración a menos de 26°C a diferencia de los geles de pescado nativo?',
+      '¿Cómo reduce esta fórmula 100% botánica el eritema y la pérdida transepidérmica de agua (TEWL)?'
+    ]
+  },
+
+  // ── Colway Collagen Wash Gel pH 5.5 ──
+  'colway-wash-gel': {
+    en: [
+      'Why is the physiological pH 5.5 of Collagen Wash Gel essential for preserving the epidermal acid mantle?',
+      'How do ultra-mild non-ionic surfactants cleanse without stripping intercellular ceramides?',
+      'Is Collagen Wash Gel ophthalmologically safe for direct periocular and eye makeup removal?',
+      'What role do Aloe Vera and Noni extracts play in calming sensitive, irritated cutaneous tissue?',
+      'Why is this sulfate-free formula free from harsh SLS, SLES, parabens, and aggressive foaming agents?'
+    ],
+    es: [
+      '¿Por qué es fundamental el pH fisiológico 5.5 del Gel de Colágeno para preservar el manto ácido dérmico?',
+      '¿Cómo limpian los tensioactivos no iónicos ultra suaves sin deslipidar el cemento intercelular?',
+      '¿Es seguro oftalmológicamente este gel para la higiene periocular y el desmaquillado de ojos?',
+      '¿Qué función calmante desempeñan los extractos de Aloe Vera y Noni en pieles irritadas o atópicas?',
+      '¿Por qué está formulado sin sulfatos irritantes (SLS/SLES), colorantes sintéticos ni parabenos?'
+    ]
   }
 };
 
@@ -482,6 +626,16 @@ function resolveRegistryKey(slug, name = '', category = '') {
   const s = String(slug || '').toLowerCase();
   const n = String(name || '').toLowerCase();
   const c = String(category || '').toLowerCase();
+
+  // Colway Products
+  if (s.includes('lip-care') || s.includes('lip') || n.includes('lip care') || n.includes('labial')) return 'colway-lip-care';
+  if (s.includes('colvita') || n.includes('colvita')) return 'colway-colvita';
+  if (s.includes('shampoo') || n.includes('shampoo') || n.includes('champú')) return 'colway-shampoo';
+  if (s.includes('conditioner') || n.includes('conditioner') || n.includes('acondicionador')) return 'colway-conditioner';
+  if ((s.includes('blue-diamond-cream') || (s.includes('diamond') && s.includes('cream'))) || (n.includes('blue diamond') && n.includes('cream'))) return 'colway-blue-diamond-cream';
+  if (s.includes('peeling') || n.includes('peeling')) return 'colway-blue-diamond-peeling';
+  if (s.includes('vege') || n.includes('vege')) return 'colway-vege';
+  if (s.includes('wash-gel') || s.includes('wash') || n.includes('wash gel')) return 'colway-wash-gel';
 
   if (s.includes('spain-company') || s.includes('spain-residency') || n.includes('spanish corporate')) return 'spain-residency';
   if (s.includes('compounding') || n.includes('compounding')) return 'compounding-service';
@@ -519,22 +673,64 @@ function generateDynamicCosmeticInquiries(contextAnchor, lang = 'en') {
   const isEs = lang === 'es';
   const name = contextAnchor?.name || (isEs ? 'esta formulación cosmecéutica' : 'this cosmeceutical formulation');
   const clinicalTarget = contextAnchor?.clinicalTarget || (isEs ? 'regeneración tisular y fortalecimiento celular' : 'tissue regeneration and cellular strengthening');
+  const cat = String(contextAnchor?.category || '').toLowerCase();
+  const slug = String(contextAnchor?.slug || '').toLowerCase();
+  const isHair = cat.includes('hair') || cat.includes('trichology') || slug.includes('shampoo') || slug.includes('conditioner');
+  const isLip = slug.includes('lip') || name.toLowerCase().includes('lip');
+
+  if (isLip) {
+    if (isEs) {
+      return [
+        `¿Cómo estimula el Palmitoil Oligopéptido el colágeno en el borde bermellón de ${name}?`,
+        `¿Qué función barrera aporta el tropocolágeno nativo frente a la deshidratación labial?`,
+        `¿Cómo se aplica como compresa reparadora nocturna para labios con grietas o queilitis?`,
+        `¿Es seguro aplicar este bálsamo tras procedimientos estéticos como rellenos labiales?`,
+        `¿Qué estándares europeos de seguridad dermatológica (Reg. 1223/2009) avalan esta fórmula?`
+      ];
+    }
+    return [
+      `How does Palmitoyl Oligopeptide restore vermilion border collagen and hydration in ${name}?`,
+      `What is the role of intact fish tropocollagen in shielding against labial moisture loss?`,
+      `How should the nocturnal lip compress protocol be sequenced for severely chapped lips?`,
+      `Is this formulation safe for hydration 24h following dermal lip filler injections?`,
+      `What European cosmetic safety standards (EU Reg. 1223/2009) verify this labial monograph?`
+    ];
+  }
+
+  if (isHair) {
+    if (isEs) {
+      return [
+        `¿Cuál es el mecanismo molecular de los activos estimulantes en ${name}?`,
+        `¿Cuál es el tiempo de contacto y frecuencia de aplicación en el cuero cabelludo?`,
+        `¿Cómo interactúa esta fórmula con la fisiología folicular para frenar la caída?`,
+        `¿Cómo se combina con protocolos clínicos capilares (LED, microneedling, péptidos)?`,
+        `¿Qué datos de seguridad y cumplimiento europeo (Reg. 1223/2009) certifican esta fórmula?`
+      ];
+    }
+    return [
+      `What is the molecular mechanism and cellular action of the active INCI complex in ${name}?`,
+      `What is the recommended contact time and scalp application cadence for this formula?`,
+      `How does this formulation biologically target and support follicular anchoring?`,
+      `Which clinical protocols (e.g. microneedling, trichology LED, hair peptides) pair with this product?`,
+      `What European dermocosmetic safety and compliance standards (EU Reg. 1223/2009) verify this monograph?`
+    ];
+  }
 
   if (isEs) {
     return [
       `¿Cuál es el mecanismo molecular del complejo activo INCI en ${name}?`,
-      `¿Cuál es el tiempo de contacto y frecuencia de aplicación recomendada para ${name}?`,
+      `¿Cuál es la frecuencia y técnica de aplicación dérmica recomendada para ${name}?`,
       `¿Cómo interactúa esta fórmula con la fisiología de ${clinicalTarget}?`,
-      `¿Cómo se combina esta fórmula dermocosmética con protocolos clínicos de aparatología o microneedling?`,
+      `¿Cómo se combina esta fórmula dermocosmética con protocolos clínicos de regeneración o microneedling?`,
       `¿Qué datos de seguridad clínica y cumplimiento europeo (Reg. CE 1223/2009) certifican esta fórmula?`
     ];
   }
 
   return [
     `What is the molecular mechanism and cellular action of the active INCI complex in ${name}?`,
-    `What is the recommended contact time, scalp/skin application cadence, and leave-on protocol?`,
+    `What is the recommended application cadence and dermal leave-on protocol?`,
     `How does this formulation biologically target and support ${clinicalTarget}?`,
-    `Which clinical protocols (e.g. microneedling, trichology LED, peptide mesotherapy) pair with this product?`,
+    `Which clinical protocols (e.g. microneedling, dermal ultrasound, peptide mesotherapy) pair with this product?`,
     `What European dermocosmetic safety and compliance standards (EU Reg. 1223/2009) verify this monograph?`
   ];
 }

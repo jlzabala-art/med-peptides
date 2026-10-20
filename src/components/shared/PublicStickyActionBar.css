@@ -391,3 +391,8 @@ body.has-sticky-bottom-bar footer.public-unified-footer {
   }
 }
 
+/* Suppress floating launcher FAB when unified persistent sticky bar is active (avoids duplication under footer) */
+body.has-sticky-bottom-bar .atlas-ai-public-fab {
+  display: none !important;
+}
+

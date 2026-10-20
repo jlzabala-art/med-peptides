@@ -30,14 +30,25 @@ import {
   Sliders,
   DollarSign,
   Coins,
-  X
+  X,
+  Eye,
+  EyeOff,
+  RotateCcw,
+  LogIn,
+  User
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 import DataTable from '@/components/ui/DataTable';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
+import InlineEditableCell from '@/components/ui/InlineEditableCell';
+import './ColwayPriceList.css';
 
 export default function ColwayPriceListClient({ initialProducts = [] }) {
+  const { user, isAdmin, isProfessional } = useAuth();
+  const canViewLanded = Boolean(isAdmin);
+
   const [markupPct, setMarkupPct] = useState(15); // Default 15% requested by user
   const [currency, setCurrency] = useState('AED'); // AED, USD, EUR
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'cards'
@@ -47,14 +58,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
   const [copied, setCopied] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [exportTier, setExportTier] = useState('master'); // 'master' | 'clinic'
-
-  // Automatically default to card view on mobile screens (Golden Rule #23)
-  React.useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setViewMode('cards');
-    }
-  }, []);
+  const [itemOverrides, setItemOverrides] = useState({}); // Per-product custom margin/price overrides
+  const [showLandedCost, setShowLandedCost] = useState(false); // Toggle Landed Cost CIF visibility (restricted to admins)
 
   // FX peg rates for UAE: 1 USD = 3.6725 AED, 1 EUR ~ 3.98 AED
   const fxRate = useMemo(() => {
@@ -78,7 +83,75 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
     })}`;
   }, [currencySymbol, fxRate]);
 
-  // Filtered and calculated products based on fixed 15% wholesale markup (Strictly no combos)
+  // Handler for bidirectional price & margin updates (Golden Rule #5)
+  const handleUpdateProductPrice = useCallback((productId, tier, newPrice) => {
+    const numPrice = Number(newPrice);
+    if (isNaN(numPrice) || numPrice < 0) return;
+    // convert from active display currency back to AED base
+    const priceInAed = numPrice / fxRate;
+
+    setItemOverrides((prev) => {
+      const existing = prev[productId] || {};
+      const prod = initialProducts.find((p) => p.id === productId);
+      const landed = prod?.landedCostAed || 1;
+
+      if (tier === 'wholesale') {
+        const markup = Number((((priceInAed - landed) / landed) * 100).toFixed(1));
+        return { ...prev, [productId]: { ...existing, wholesalePrice: priceInAed, wholesaleMarkupPct: markup } };
+      }
+      if (tier === 'clinic') {
+        const wholesale = existing.wholesalePrice ?? Number((landed * (1 + (existing.wholesaleMarkupPct ?? markupPct) / 100)).toFixed(2));
+        const margin = wholesale > 0 ? Number((((priceInAed - wholesale) / wholesale) * 100).toFixed(1)) : 25;
+        return { ...prev, [productId]: { ...existing, clinicPrice: priceInAed, clinicMarginPct: margin } };
+      }
+      if (tier === 'retail') {
+        const wholesale = existing.wholesalePrice ?? Number((landed * (1 + (existing.wholesaleMarkupPct ?? markupPct) / 100)).toFixed(2));
+        const clinic = existing.clinicPrice ?? Number((wholesale * 1.25).toFixed(2));
+        const margin = clinic > 0 ? Number((((priceInAed - clinic) / clinic) * 100).toFixed(1)) : 30;
+        return { ...prev, [productId]: { ...existing, retailPrice: priceInAed, retailMarginPct: margin } };
+      }
+      return prev;
+    });
+    toast.success('Price updated & margins recalculated ✓');
+  }, [fxRate, initialProducts, markupPct]);
+
+  const handleUpdateProductMargin = useCallback((productId, tier, newMargin) => {
+    const numMargin = Number(newMargin);
+    if (isNaN(numMargin) || numMargin < 0) return;
+
+    setItemOverrides((prev) => {
+      const existing = prev[productId] || {};
+      const prod = initialProducts.find((p) => p.id === productId);
+      const landed = prod?.landedCostAed || 0;
+
+      if (tier === 'wholesale') {
+        const price = Number((landed * (1 + numMargin / 100)).toFixed(2));
+        return { ...prev, [productId]: { ...existing, wholesaleMarkupPct: numMargin, wholesalePrice: price } };
+      }
+      if (tier === 'clinic') {
+        const wholesale = existing.wholesalePrice ?? Number((landed * (1 + (existing.wholesaleMarkupPct ?? markupPct) / 100)).toFixed(2));
+        const price = Number((wholesale * (1 + numMargin / 100)).toFixed(2));
+        return { ...prev, [productId]: { ...existing, clinicMarginPct: numMargin, clinicPrice: price } };
+      }
+      if (tier === 'retail') {
+        const wholesale = existing.wholesalePrice ?? Number((landed * (1 + (existing.wholesaleMarkupPct ?? markupPct) / 100)).toFixed(2));
+        const clinic = existing.clinicPrice ?? Number((wholesale * 1.25).toFixed(2));
+        const price = Number((clinic * (1 + numMargin / 100)).toFixed(2));
+        return { ...prev, [productId]: { ...existing, retailMarginPct: numMargin, retailPrice: price } };
+      }
+      return prev;
+    });
+    toast.success('Margin updated & price recalculated ✓');
+  }, [initialProducts, markupPct]);
+
+  const handleResetOverrides = useCallback(() => {
+    setItemOverrides({});
+    toast.success('Pricing reset to default standard schedule ✓');
+  }, []);
+
+  const hasCustomOverrides = Object.keys(itemOverrides).length > 0;
+
+  // Filtered and calculated products based on fixed wholesale markup + itemOverrides (Strictly no combos)
   const processedProducts = useMemo(() => {
     const standaloneOnly = initialProducts.filter((p) => {
       const id = (p.id || '').toLowerCase();
@@ -100,27 +173,53 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
 
     return standaloneOnly.map((p, index) => {
       const landed = p.landedCostAed || 0;
-      // Fixed wholesale calculation: Landed Cost * (1 + markupPct / 100), default 15%
-      const wholesale = Number((landed * (1 + markupPct / 100)).toFixed(2));
+      const overrides = itemOverrides[p.id] || {};
+
+      // 1. Wholesaler Level
+      let wholesaleMarkupPct = overrides.wholesaleMarkupPct !== undefined ? overrides.wholesaleMarkupPct : markupPct;
+      let wholesale = overrides.wholesalePrice !== undefined
+        ? overrides.wholesalePrice
+        : Number((landed * (1 + wholesaleMarkupPct / 100)).toFixed(2));
+      if (overrides.wholesalePrice !== undefined && landed > 0) {
+        wholesaleMarkupPct = Number((((wholesale - landed) / landed) * 100).toFixed(1));
+      }
       const marginAed = Number((wholesale - landed).toFixed(2));
       const marginPctVal = wholesale > 0 ? Number(((marginAed / wholesale) * 100).toFixed(1)) : 0;
-      // Recommended Clinic Price: 25% over Wholesaler Price
-      const recommendedClinic = Number((wholesale * 1.25).toFixed(2));
-      // Recommended Retail MSRP: 30% over Clinic Price
-      const recommendedRetail = Number((recommendedClinic * 1.30).toFixed(2));
+
+      // 2. Recommended Clinic Price (default +25% over Wholesaler Price)
+      let clinicMarginPct = overrides.clinicMarginPct !== undefined ? overrides.clinicMarginPct : 25;
+      let recommendedClinic = overrides.clinicPrice !== undefined
+        ? overrides.clinicPrice
+        : Number((wholesale * (1 + clinicMarginPct / 100)).toFixed(2));
+      if (overrides.clinicPrice !== undefined && wholesale > 0) {
+        clinicMarginPct = Number((((recommendedClinic - wholesale) / wholesale) * 100).toFixed(1));
+      }
+
+      // 3. Recommended Retail MSRP (default +30% over Clinic Price)
+      let retailMarginPct = overrides.retailMarginPct !== undefined ? overrides.retailMarginPct : 30;
+      let recommendedRetail = overrides.retailPrice !== undefined
+        ? overrides.retailPrice
+        : Number((recommendedClinic * (1 + retailMarginPct / 100)).toFixed(2));
+      if (overrides.retailPrice !== undefined && recommendedClinic > 0) {
+        retailMarginPct = Number((((recommendedRetail - recommendedClinic) / recommendedClinic) * 100).toFixed(1));
+      }
 
       return {
         ...p,
         itemNumber: index + 1,
         calculatedLanded: landed,
         calculatedWholesale: wholesale,
+        calculatedWholesaleMarkupPct: wholesaleMarkupPct,
         calculatedMarginAed: marginAed,
         calculatedMarginPct: marginPctVal,
         recommendedClinic,
-        recommendedRetail
+        calculatedClinicMarginPct: clinicMarginPct,
+        recommendedRetail,
+        calculatedRetailMarginPct: retailMarginPct,
+        hasCustomOverride: Boolean(itemOverrides[p.id])
       };
     });
-  }, [initialProducts, markupPct]);
+  }, [initialProducts, markupPct, itemOverrides]);
 
   const filteredProducts = useMemo(() => {
     return processedProducts.filter((p) => {
@@ -155,169 +254,238 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
     return ['all', ...Array.from(cats)];
   }, [initialProducts]);
 
-  // DataTable column definitions (Rules #3, #8, #11, #30: Google Cloud UX standard)
-  const colwayColumns = useMemo(() => [
-    {
-      key: 'itemNumber',
-      label: '#',
-      width: '3%',
-      sortable: true,
-      render: (val, row) => (
-        <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
-          {val ?? row?.itemNumber}
-        </span>
-      )
-    },
-    {
-      key: 'sku',
-      label: 'SKU',
-      width: '12%',
-      sortable: true,
-      render: (val, row) => {
-        // Simplify SKU: remove the 'SKU-COLWAY-' prefix to keep it compact
-        const rawSku = val ?? row?.sku ?? '';
-        const simpleSku = rawSku.replace(/^SKU-COLWAY-/i, '');
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
-            <CopyableId value={simpleSku} />
+  // DataTable column definitions (Rules #3, #5, #8, #11, #30: Google Cloud UX standard)
+  const colwayColumns = useMemo(() => {
+    const cols = [
+      {
+        key: 'itemNumber',
+        label: '#',
+        width: '3%',
+        sortable: true,
+        render: (val, row) => (
+          <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+            {val ?? row?.itemNumber}
+          </span>
+        )
+      },
+      {
+        key: 'sku',
+        label: 'SKU',
+        width: '11%',
+        sortable: true,
+        render: (val, row) => {
+          // Simplify SKU: remove the 'SKU-COLWAY-' prefix to keep it compact
+          const rawSku = val ?? row?.sku ?? '';
+          const simpleSku = rawSku.replace(/^SKU-COLWAY-/i, '');
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
+              <CopyableId value={simpleSku} />
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 650,
+                color: '#0d9488',
+                background: '#f0fdfa',
+                border: '1px solid #a7f3d0',
+                padding: '1px 6px',
+                borderRadius: '4px',
+                letterSpacing: '0.02em',
+                textTransform: 'lowercase'
+              }}>
+                {row?.category}
+              </span>
+            </div>
+          );
+        }
+      },
+      {
+        key: 'name',
+        label: 'Product & Clinical Indication',
+        width: (canViewLanded && showLandedCost) ? '28%' : '34%',
+        sortable: true,
+        render: (_, row) => (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+            {row?.image && (
+              <img
+                src={row.image}
+                alt={row.name}
+                style={{
+                  width: '52px',
+                  height: '52px',
+                  minWidth: '52px',
+                  maxWidth: '52px',
+                  minHeight: '52px',
+                  maxHeight: '52px',
+                  objectFit: 'contain',
+                  borderRadius: '6px',
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  padding: '3px',
+                  flexShrink: 0
+                }}
+                loading="lazy"
+              />
+            )}
+            <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '1px' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a', lineHeight: 1.25 }}>
+                {row?.name}
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.3 }}>
+                {row?.subtitle}
+              </div>
+            </div>
+          </div>
+        )
+      },
+      {
+        key: 'volume',
+        label: 'Presentation',
+        width: '10%',
+        sortable: true,
+        render: (val, row) => (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
             <span style={{
-              fontSize: '0.68rem',
-              fontWeight: 650,
-              color: '#0d9488',
-              background: '#f0fdfa',
-              border: '1px solid #a7f3d0',
-              padding: '1px 6px',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              color: '#0369a1',
+              background: '#f0f9ff',
+              border: '1px solid #bae6fd',
+              padding: '2px 7px',
               borderRadius: '4px',
-              letterSpacing: '0.02em',
-              textTransform: 'lowercase'
+              whiteSpace: 'nowrap'
             }}>
-              {row?.category}
+              {val ?? row?.volume}
+            </span>
+            <div style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.25 }}>
+              {row?.presentation}
+            </div>
+          </div>
+        )
+      }
+    ];
+
+    if (canViewLanded && showLandedCost) {
+      cols.push({
+        key: 'calculatedLanded',
+        label: 'CIF Landed (Dubai)',
+        width: '12%',
+        sortable: true,
+        render: (val, row) => (
+          <div style={{ fontFamily: 'monospace' }}>
+            <span style={{
+              fontSize: '0.82rem',
+              fontWeight: 650,
+              color: '#475569',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              padding: '2px 6px',
+              borderRadius: '4px'
+            }}>
+              {formatPrice(val ?? row?.calculatedLanded)}
+            </span>
+            <div style={{ fontSize: '0.62rem', color: '#94a3b8', marginTop: '2px' }}>Cost Basis</div>
+          </div>
+        )
+      });
+    }
+
+    cols.push(
+      {
+        key: 'calculatedWholesale',
+        label: canViewLanded ? `Wholesaler (+${markupPct}% Net)` : 'Wholesaler Price',
+        width: (canViewLanded && showLandedCost) ? '15%' : '16%',
+        sortable: true,
+        render: (val, row) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <InlineEditableCell
+              value={Number(((val ?? row?.calculatedWholesale) * fxRate).toFixed(2))}
+              type="number"
+              prefix={currencySymbol}
+              onSave={async (newVal) => handleUpdateProductPrice(row.id, 'wholesale', newVal)}
+              format={(v) => formatPrice(v / fxRate)}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+              {canViewLanded && (
+                <span style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 700,
+                  color: '#047857',
+                  background: '#ecfdf5',
+                  border: '1px solid #a7f3d0',
+                  padding: '1px 5px',
+                  borderRadius: '4px'
+                }}>
+                  +{row?.calculatedWholesaleMarkupPct}% Net
+                </span>
+              )}
+              {row?.hasCustomOverride && (
+                <span style={{ fontSize: '0.60rem', fontWeight: 600, color: '#b45309', background: '#fef3c7', padding: '1px 4px', borderRadius: '3px' }}>custom</span>
+              )}
+            </div>
+          </div>
+        )
+      },
+      {
+        key: 'recommendedClinic',
+        label: 'Recommended Clinic',
+        width: (canViewLanded && showLandedCost) ? '14%' : '14%',
+        sortable: true,
+        render: (val, row) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <InlineEditableCell
+              value={Number(((val ?? row?.recommendedClinic) * fxRate).toFixed(2))}
+              type="number"
+              prefix={currencySymbol}
+              onSave={async (newVal) => handleUpdateProductPrice(row.id, 'clinic', newVal)}
+              format={(v) => formatPrice(v / fxRate)}
+            />
+            <span style={{
+              fontSize: '0.66rem',
+              fontWeight: 650,
+              color: '#1d4ed8',
+              background: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              padding: '1px 5px',
+              borderRadius: '4px',
+              width: 'fit-content'
+            }}>
+              +{row?.calculatedClinicMarginPct}% Clinic
             </span>
           </div>
-        );
-      }
-    },
-    {
-      key: 'name',
-      label: 'Product & Clinical Indication',
-      width: '35%',
-      sortable: true,
-      render: (_, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-          {row?.image && (
-            <img
-              src={row.image}
-              alt={row.name}
-              style={{
-                width: '54px',
-                height: '54px',
-                minWidth: '54px',
-                maxWidth: '54px',
-                minHeight: '54px',
-                maxHeight: '54px',
-                objectFit: 'contain',
-                borderRadius: '6px',
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                padding: '3px',
-                flexShrink: 0
-              }}
-              loading="lazy"
+        )
+      },
+      {
+        key: 'recommendedRetail',
+        label: 'Retail MSRP',
+        width: showLandedCost ? '14%' : '14%',
+        sortable: true,
+        render: (val, row) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <InlineEditableCell
+              value={Number(((val ?? row?.recommendedRetail) * fxRate).toFixed(2))}
+              type="number"
+              prefix={currencySymbol}
+              onSave={async (newVal) => handleUpdateProductPrice(row.id, 'retail', newVal)}
+              format={(v) => formatPrice(v / fxRate)}
             />
-          )}
-          <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '1px' }}>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a', lineHeight: 1.25 }}>
-              {row?.name}
-            </div>
-            <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.3 }}>
-              {row?.subtitle}
-            </div>
+            <span style={{
+              fontSize: '0.66rem',
+              fontWeight: 650,
+              color: '#475569',
+              background: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              padding: '1px 5px',
+              borderRadius: '4px',
+              width: 'fit-content'
+            }}>
+              +{row?.calculatedRetailMarginPct}% Retail
+            </span>
           </div>
-        </div>
-      )
-    },
-    {
-      key: 'volume',
-      label: 'Presentation',
-      width: '12%',
-      sortable: true,
-      render: (val, row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
-          <span style={{
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            color: '#0369a1',
-            background: '#f0f9ff',
-            border: '1px solid #bae6fd',
-            padding: '2px 7px',
-            borderRadius: '4px',
-            whiteSpace: 'nowrap'
-          }}>
-            {val ?? row?.volume}
-          </span>
-          <div style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.25 }}>
-            {row?.presentation}
-          </div>
-        </div>
-      )
-    },
-    {
-      key: 'calculatedWholesale',
-      label: 'Wholesaler (+15% Net)',
-      width: '13%',
-      sortable: true,
-      render: (val, row) => (
-        <span style={{
-          fontFamily: 'monospace',
-          fontSize: '0.86rem',
-          fontWeight: 750,
-          color: '#0f766e',
-          background: '#f0fdfa',
-          padding: '2px 6px',
-          borderRadius: '4px',
-          border: '1px solid #ccfbf1',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '4px'
-        }}>
-          {formatPrice(val ?? row?.calculatedWholesale)}
-          <span style={{ fontSize: '0.64rem', fontWeight: 650, color: '#047857' }}>(+15%)</span>
-        </span>
-      )
-    },
-    {
-      key: 'recommendedClinic',
-      label: 'Recommended Clinic',
-      width: '13%',
-      sortable: true,
-      render: (val, row) => (
-        <div style={{ fontFamily: 'monospace' }}>
-          <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1d4ed8' }}>
-            {formatPrice(val ?? row?.recommendedClinic)}
-          </div>
-          <div style={{ fontSize: '0.64rem', color: '#64748b', fontFamily: 'sans-serif', fontWeight: 500, marginTop: '1px' }}>
-            Recommended
-          </div>
-        </div>
-      )
-    },
-    {
-      key: 'recommendedRetail',
-      label: 'Retail MSRP',
-      width: '12%',
-      sortable: true,
-      render: (val, row) => (
-        <div style={{ fontFamily: 'monospace' }}>
-          <div style={{ fontSize: '0.84rem', fontWeight: 750, color: '#0f172a' }}>
-            {formatPrice(val ?? row?.recommendedRetail)}
-          </div>
-          <div style={{ fontSize: '0.64rem', color: '#64748b', fontFamily: 'sans-serif', fontWeight: 500, marginTop: '1px' }}>
-            Recommended
-          </div>
-        </div>
-      )
-    }
-  ], [formatPrice, markupPct]);
+        )
+      }
+    );
+
+    return cols;
+  }, [showLandedCost, formatPrice, fxRate, currencySymbol, handleUpdateProductPrice]);
 
   const handlePrint = () => {
     setIsExportModalOpen(false);
@@ -432,10 +600,10 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
 
   const handleWhatsAppShare = () => {
     const text = encodeURIComponent(
-      `*COLWAY MEDICAL & CELLULAR COSMECEUTICALS — UAE PRICE SCHEDULE*\n` +
-      `Official Landed Costs & 15% Wholesaler Pricing Schedule (Dubai CIF):\n\n` +
-      processedProducts.map(p => `• ${p.name} (${p.volume}): AED ${p.calculatedWholesale.toFixed(2)} [Landed: AED ${p.calculatedLanded}]`).join('\n') +
-      `\n\nFull official datasheet & print-ready schedule:\n${typeof window !== 'undefined' ? window.location.href : 'https://www.atlashealth-services.com/pricing/colway'}`
+      `*COLWAY CLINICAL DERMA — OFFICIAL UAE B2B WHOLESALE SCHEDULE*\n` +
+      `Authorized Clinic & Wholesaler Pricing (Dubai Warehouse):\n\n` +
+      processedProducts.map(p => `• ${p.name} (${p.volume}): AED ${p.calculatedWholesale.toFixed(2)}`).join('\n') +
+      `\n\nFull official datasheet & verified catalog:\n${typeof window !== 'undefined' ? window.location.href : 'https://www.atlashealth-services.com/pricing/colway'}`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
@@ -447,8 +615,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
         <div className="nav-container">
           <div className="nav-left">
             <Link href="/" className="nav-brand">
-              <FlaskConical size={18} className="text-cyan-400" />
-              <span>ATLAS BIOPHARMA</span>
+              <Building2 size={18} className="text-teal-400" />
+              <span>Atlas Health Services</span>
             </Link>
             <span className="nav-divider">/</span>
             <span className="nav-section">B2B Wholesale</span>
@@ -495,6 +663,27 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
               <Printer size={16} />
               <span>Print</span>
             </button>
+
+            {/* Login / Portal CTA Button (GCP Standard) */}
+            {user ? (
+              <Link
+                href={isAdmin ? '/admin' : isProfessional ? '/doctor' : '/dashboard'}
+                className="action-btn action-login"
+                title={isAdmin ? 'Admin Console' : 'Workspace Portal'}
+              >
+                <User size={15} />
+                <span>{isAdmin ? 'Admin' : 'Portal'}</span>
+              </Link>
+            ) : (
+              <Link
+                href="/login?redirect=/pricing/colway"
+                className="action-btn action-login"
+                title="Sign in to your verified clinical or wholesale account"
+              >
+                <LogIn size={15} />
+                <span>Login</span>
+              </Link>
+            )}
           </div>
         </div>
       </nav>
@@ -513,7 +702,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                 COLWAY CLINICAL CELLULAR & TRICHOLOGY PORTFOLIO
               </h1>
               <p className="document-subtitle">
-                Official UAE Landed Cost & Wholesaler Price Schedule · Biologically Active Collagen & Peptides
+                Official UAE B2B Wholesaler Price Schedule · Biologically Active Collagen & Peptides
               </p>
             </div>
 
@@ -528,11 +717,11 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
               </div>
               <div className="stamp-item">
                 <span className="stamp-label">PRICING BASIS:</span>
-                <span className="stamp-value">Landed Cost CIF Dubai (excl. 5% VAT)</span>
+                <span className="stamp-value">Official B2B Wholesale Ex-Warehouse Dubai (excl. 5% VAT)</span>
               </div>
               <div className="stamp-item">
-                <span className="stamp-label">CONFIGURED MARKUP:</span>
-                <span className="stamp-value text-emerald-600 font-bold">+{markupPct}% Wholesaler Tier</span>
+                <span className="stamp-label">SCHEDULE TIER:</span>
+                <span className="stamp-value text-emerald-600 font-bold">Authorized Clinic & Wholesaler</span>
               </div>
               <div className="stamp-item">
                 <span className="stamp-label">EFFECTIVE DATE:</span>
@@ -621,34 +810,34 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
 
           <div className="kpi-card">
             <div className="kpi-icon-wrap bg-emerald-500/10 text-emerald-500">
-              <TrendingUp size={20} />
+              <ShieldCheck size={20} />
             </div>
             <div className="kpi-info">
-              <div className="kpi-label">Wholesaler Markup</div>
-              <div className="kpi-value text-emerald-600">+{markupPct}.0%</div>
-              <div className="kpi-sub">Average Margin: {totals.avgMarginPct}% on gross revenue</div>
+              <div className="kpi-label">Purity Standard</div>
+              <div className="kpi-value text-emerald-600">Native Tropocollagen</div>
+              <div className="kpi-sub">Preserved triple-helix conformation (&lt;26°C)</div>
             </div>
           </div>
 
           <div className="kpi-card">
             <div className="kpi-icon-wrap bg-indigo-500/10 text-indigo-500">
-              <Coins size={20} />
+              <Building2 size={20} />
             </div>
             <div className="kpi-info">
-              <div className="kpi-label">Portfolio Landed Value</div>
-              <div className="kpi-value">{formatPrice(totals.totalLanded)}</div>
-              <div className="kpi-sub">Total CIF Dubai landed acquisition cost</div>
+              <div className="kpi-label">Wholesale Delivery</div>
+              <div className="kpi-value">Dubai Warehouse</div>
+              <div className="kpi-sub">Immediate GCC cold-chain distribution</div>
             </div>
           </div>
 
           <div className="kpi-card">
             <div className="kpi-icon-wrap bg-sky-500/10 text-sky-500">
-              <Percent size={20} />
+              <BadgeCheck size={20} />
             </div>
             <div className="kpi-info">
-              <div className="kpi-label">Portfolio Wholesale Value</div>
-              <div className="kpi-value text-sky-600">{formatPrice(totals.totalWholesale)}</div>
-              <div className="kpi-sub">Net Profit / Unit Basket: {formatPrice(totals.totalMargin)}</div>
+              <div className="kpi-label">Compliance &amp; Quality</div>
+              <div className="kpi-value text-sky-600">EU / ISO 22716</div>
+              <div className="kpi-sub">cGMP Certified · UAE FTA VAT Compliant</div>
             </div>
           </div>
         </section>
@@ -663,12 +852,12 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
             totalCount={processedProducts.length}
             size="lg"
             storageNamespace="colway_uae_pricing"
-            filters={categories.filter(c => c !== 'all').map(cat => ({
-              key: cat,
-              label: cat,
-              active: selectedCategory === cat,
-              onToggle: () => setSelectedCategory(prev => prev === cat ? 'all' : cat)
-            }))}
+            filters={selectedCategory !== 'all' ? [{
+              key: 'category',
+              label: 'Category',
+              value: selectedCategory,
+              onRemove: () => setSelectedCategory('all')
+            }] : []}
           />
         </div>
 
@@ -688,6 +877,57 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           </div>
 
           <div className="controls-right">
+            {/* Show/Hide CIF Landed Cost Toggle (Admin Only - Confidential) */}
+            {canViewLanded && (
+              <button
+                type="button"
+                onClick={() => setShowLandedCost((prev) => !prev)}
+                className={`action-btn ${showLandedCost ? 'action-active' : 'action-ghost'}`}
+                style={{
+                  fontSize: '0.74rem',
+                  padding: '6px 12px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  borderRadius: '6px',
+                  border: showLandedCost ? '1px solid #0d9488' : '1px solid #e2e8f0',
+                  background: showLandedCost ? '#f0fdfa' : '#ffffff',
+                  color: showLandedCost ? '#0d9488' : '#64748b',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+                title="Toggle Landed Cost CIF Dubai column (Admin View Only)"
+              >
+                {showLandedCost ? <EyeOff size={14} /> : <Eye size={14} />}
+                <span>{showLandedCost ? 'Hide Landed CIF' : 'Show Landed CIF'}</span>
+              </button>
+            )}
+
+            {/* Reset Overrides Button if any override exists */}
+            {hasCustomOverrides && (
+              <button
+                type="button"
+                onClick={handleResetOverrides}
+                style={{
+                  fontSize: '0.74rem',
+                  padding: '6px 12px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  borderRadius: '6px',
+                  border: '1px solid #fde68a',
+                  background: '#fffbeb',
+                  color: '#b45309',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+                title="Reset custom price overrides to default standard schedule"
+              >
+                <RotateCcw size={14} />
+                <span>Reset Overrides</span>
+              </button>
+            )}
+
             {/* Fixed Wholesaler Markup Tier (+15% over Landed Cost per Agreement) */}
             <div className="markup-simulator" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#f0fdf4', padding: '6px 14px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
               <span className="slider-label" style={{ color: '#166534', fontWeight: 700, margin: 0 }}>
@@ -750,14 +990,14 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                   </div>
                   <div>
                     <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <TrendingUp size={14} style={{ color: '#16a34a' }} />
-                      <span>Commercial Tier Breakdown</span>
+                      <Package size={14} style={{ color: '#0d9488' }} />
+                      <span>Packaging &amp; Storage Specifications</span>
                     </div>
-                    <div style={{ color: '#475569', lineHeight: 1.6, fontFamily: 'monospace', fontSize: '0.78rem' }}>
-                      <div>Landed CIF: <strong>{formatPrice(row.calculatedLanded)}</strong></div>
-                      <div>Wholesale (+{markupPct}%): <strong style={{ color: '#0f766e' }}>{formatPrice(row.calculatedWholesale)}</strong></div>
-                      <div>Clinic Rec: <strong>{formatPrice(row.clinicPriceAed)}</strong></div>
-                      <div>MSRP / Retail: <strong>{formatPrice(row.retailPriceAed)}</strong></div>
+                    <div style={{ color: '#475569', lineHeight: 1.55, fontSize: '0.78rem' }}>
+                      <div><strong>Volume / Unit:</strong> {row.volume}</div>
+                      <div><strong>Presentation:</strong> {row.presentation}</div>
+                      <div><strong>Storage Spec:</strong> &lt;26°C Cold-Chain (Preserves Native Tropocollagen)</div>
+                      <div><strong>Stock Status:</strong> <span style={{ color: '#16a34a', fontWeight: 600 }}>{row.stockStatus || 'In Stock (Dubai Warehouse)'}</span></div>
                     </div>
                     <div style={{ marginTop: '8px' }}>
                       <Link
@@ -872,20 +1112,13 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
               <tfoot>
                 <tr className="totals-row">
                   <td colSpan="4" className="text-right font-bold uppercase tracking-wider text-xs">
-                    Portfolio Aggregate Basket (1 Unit of Each SKU):
-                  </td>
-                  <td className="text-right font-mono font-bold">
-                    {formatPrice(totals.totalLanded)}
+                    Portfolio Aggregate Wholesale Basket:
                   </td>
                   <td className="text-right font-mono font-bold text-sky-600">
                     {formatPrice(totals.totalWholesale)}
                   </td>
-                  <td className="text-right font-mono font-bold text-emerald-600">
-                    <div>+{formatPrice(totals.totalMargin)}</div>
-                    <div className="text-xs font-normal">({totals.avgMarginPct}% avg)</div>
-                  </td>
-                  <td colSpan="2" className="text-right text-xs text-slate-500">
-                    UAE Mainland & Free Zone Distribution
+                  <td colSpan="3" className="text-right text-xs text-slate-500">
+                    UAE Mainland &amp; Free Zone Wholesale Schedule (Net of 5% VAT)
                   </td>
                 </tr>
               </tfoot>
@@ -1148,1297 +1381,6 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           </div>
         </div>
       </div>
-
-      {/* ── Scoped Styling with High-End Screen Aesthetics & Print Isolation ── */}
-      <style jsx>{`
-        .colway-price-root {
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-          background: #f8fafc;
-          color: #0f172a;
-          min-height: 100vh;
-        }
-
-        /* ── Screen Navigation Bar ── */
-        .screen-nav-bar {
-          background: rgba(15, 23, 42, 0.95);
-          backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          color: #f1f5f9;
-          position: sticky;
-          top: 0;
-          z-index: 100;
-        }
-        .nav-container {
-          max-width: 1280px;
-          margin: 0 auto;
-          padding: 0.75rem 1.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 1rem;
-          flex-wrap: wrap;
-        }
-        .nav-left {
-          display: flex;
-          align-items: center;
-          gap: 0.6rem;
-          font-size: 0.85rem;
-        }
-        .nav-brand {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-weight: 800;
-          color: #ffffff;
-          letter-spacing: 0.05em;
-          text-decoration: none;
-        }
-        .nav-divider {
-          color: #475569;
-        }
-        .nav-section {
-          color: #94a3b8;
-        }
-        .nav-current {
-          color: #38bdf8;
-          font-weight: 600;
-        }
-        .nav-actions {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-
-        .currency-selector {
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-          font-size: 0.75rem;
-          color: #94a3b8;
-        }
-        .pill-group {
-          display: flex;
-          background: rgba(255, 255, 255, 0.08);
-          border-radius: 6px;
-          padding: 2px;
-        }
-        .pill-btn {
-          border: none;
-          background: transparent;
-          color: #94a3b8;
-          font-size: 0.72rem;
-          font-weight: 600;
-          padding: 3px 8px;
-          border-radius: 4px;
-          cursor: pointer;
-          transition: all 0.15s ease;
-        }
-        .pill-btn.pill-active {
-          background: #38bdf8;
-          color: #0f172a;
-          box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-
-        .action-btn {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          padding: 6px 14px;
-          border-radius: 6px;
-          font-size: 0.8rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.15s ease;
-          border: none;
-        }
-        .action-ghost {
-          background: rgba(255, 255, 255, 0.08);
-          color: #f1f5f9;
-        }
-        .action-ghost:hover {
-          background: rgba(255, 255, 255, 0.16);
-        }
-        .action-whatsapp {
-          background: #059669;
-          color: #ffffff;
-        }
-        .action-whatsapp:hover {
-          background: #047857;
-        }
-        .action-export {
-          background: #0d9488;
-          color: #ffffff;
-          box-shadow: 0 2px 4px rgba(13, 148, 136, 0.25);
-        }
-        .action-export:hover {
-          background: #0f766e;
-        }
-        .action-primary {
-          background: #0284c7;
-          color: #ffffff;
-          box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3);
-        }
-        .action-primary:hover {
-          background: #0369a1;
-        }
-
-        /* ── Main Sheet Container ── */
-        .price-sheet-container {
-          max-width: 1280px;
-          margin: 1.5rem auto 3rem auto;
-          padding: 0 1.5rem;
-        }
-
-        /* ── Institutional Header ── */
-        .document-header {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 1.75rem 2rem;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-          margin-bottom: 1.5rem;
-        }
-        .header-meta-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 2rem;
-          flex-wrap: wrap;
-        }
-        .brand-pairing {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 0.75rem;
-        }
-        .brand-pill-atlas {
-          background: #0f172a;
-          color: #ffffff;
-          font-size: 0.7rem;
-          font-weight: 800;
-          padding: 4px 10px;
-          border-radius: 4px;
-          letter-spacing: 0.08em;
-        }
-        .partner-cross {
-          color: #94a3b8;
-          font-weight: 700;
-          font-size: 0.85rem;
-        }
-        .brand-pill-colway {
-          background: #0284c7;
-          color: #ffffff;
-          font-size: 0.7rem;
-          font-weight: 800;
-          padding: 4px 10px;
-          border-radius: 4px;
-          letter-spacing: 0.08em;
-        }
-        .document-title {
-          font-size: 1.5rem;
-          font-weight: 850;
-          color: #0f172a;
-          margin: 0 0 0.35rem 0;
-          letter-spacing: -0.01em;
-        }
-        .document-subtitle {
-          font-size: 0.88rem;
-          color: #64748b;
-          margin: 0;
-        }
-
-        .document-stamp-box {
-          background: #f8fafc;
-          border: 1px solid #cbd5e1;
-          border-radius: 8px;
-          padding: 0.9rem 1.25rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.35rem;
-          min-width: 290px;
-        }
-        .stamp-item {
-          display: flex;
-          justify-content: space-between;
-          font-size: 0.72rem;
-          gap: 1rem;
-        }
-        .stamp-label {
-          color: #64748b;
-          font-weight: 600;
-        }
-        .stamp-value {
-          color: #0f172a;
-          font-weight: 600;
-        }
-
-        .regulatory-banner {
-          margin-top: 1.25rem;
-          padding-top: 1rem;
-          border-top: 1px dashed #e2e8f0;
-          display: flex;
-          gap: 1.5rem;
-          flex-wrap: wrap;
-        }
-        .regulatory-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 0.75rem;
-          color: #475569;
-        }
-
-        /* ── KPI Grid ── */
-        .kpi-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 1rem;
-          margin-bottom: 1.5rem;
-        }
-        .kpi-card {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          padding: 1.1rem 1.25rem;
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-        }
-        .kpi-icon-wrap {
-          width: 44px;
-          height: 44px;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-        .kpi-label {
-          font-size: 0.72rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: #64748b;
-        }
-        .kpi-value {
-          font-size: 1.35rem;
-          font-weight: 800;
-          color: #0f172a;
-          line-height: 1.2;
-          margin: 2px 0;
-        }
-        .kpi-sub {
-          font-size: 0.72rem;
-          color: #94a3b8;
-        }
-
-        /* ── Controls Strip ── */
-        .controls-strip {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          padding: 0.75rem 1rem;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 1rem;
-          flex-wrap: wrap;
-          margin-bottom: 1rem;
-        }
-        .controls-left {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          flex-wrap: wrap;
-          flex: 1;
-        }
-        .search-box {
-          position: relative;
-          min-width: 260px;
-        }
-        :global(.search-icon) {
-          position: absolute;
-          left: 10px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #94a3b8;
-        }
-        .search-input {
-          width: 100%;
-          padding: 6px 28px 6px 32px;
-          font-size: 0.8rem;
-          border: 1px solid #cbd5e1;
-          border-radius: 6px;
-          outline: none;
-          transition: border-color 0.15s ease;
-        }
-        .search-input:focus {
-          border-color: #0284c7;
-        }
-        .clear-btn {
-          position: absolute;
-          right: 8px;
-          top: 50%;
-          transform: translateY(-50%);
-          border: none;
-          background: transparent;
-          color: #94a3b8;
-          cursor: pointer;
-          font-size: 1rem;
-        }
-        .category-chips {
-          display: flex;
-          gap: 4px;
-          flex-wrap: wrap;
-        }
-        .category-chip {
-          border: 1px solid #e2e8f0;
-          background: #f8fafc;
-          color: #64748b;
-          font-size: 0.72rem;
-          font-weight: 600;
-          padding: 4px 10px;
-          border-radius: 20px;
-          cursor: pointer;
-          transition: all 0.15s ease;
-        }
-        .category-chip:hover {
-          background: #f1f5f9;
-        }
-        .category-chip.active {
-          background: #0f172a;
-          color: #ffffff;
-          border-color: #0f172a;
-        }
-
-        .controls-right {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-        .markup-simulator {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 0.75rem;
-        }
-        .slider-label {
-          color: #64748b;
-          font-weight: 600;
-        }
-        .markup-presets {
-          display: flex;
-          gap: 2px;
-          background: #f1f5f9;
-          padding: 2px;
-          border-radius: 6px;
-        }
-        .preset-btn {
-          border: none;
-          background: transparent;
-          font-size: 0.72rem;
-          font-weight: 700;
-          color: #64748b;
-          padding: 3px 8px;
-          border-radius: 4px;
-          cursor: pointer;
-        }
-        .preset-btn.active {
-          background: #16a34a;
-          color: #ffffff;
-        }
-
-        .view-switcher {
-          display: flex;
-          background: #f1f5f9;
-          padding: 2px;
-          border-radius: 6px;
-        }
-        .view-btn {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          border: none;
-          background: transparent;
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: #64748b;
-          padding: 4px 10px;
-          border-radius: 4px;
-          cursor: pointer;
-        }
-        .view-btn.active {
-          background: #ffffff;
-          color: #0f172a;
-          box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-        }
-
-        /* ── Table Styling ── */
-        .table-responsive-wrapper {
-          background: #ffffff;
-          border: 1px solid #cbd5e1;
-          border-radius: 10px;
-          overflow: hidden;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-          margin-bottom: 2rem;
-        }
-        .colway-price-table {
-          width: 100%;
-          border-collapse: collapse;
-          text-align: left;
-        }
-        .colway-price-table thead tr {
-          background: #0f172a;
-          color: #f8fafc;
-        }
-        .colway-price-table th {
-          padding: 12px 14px;
-          font-size: 0.72rem;
-          font-weight: 750;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          border-bottom: 1px solid #334155;
-          vertical-align: middle;
-        }
-        .th-sub {
-          display: block;
-          font-size: 0.62rem;
-          font-weight: normal;
-          color: #94a3b8;
-          text-transform: none;
-        }
-        .th-highlight {
-          background: #0369a1;
-          color: #ffffff;
-        }
-        .th-highlight .th-sub {
-          color: #bae6fd;
-        }
-
-        .colway-price-table tbody tr {
-          border-bottom: 1px solid #e2e8f0;
-          transition: background 0.1s ease;
-        }
-        .colway-price-table tbody tr:hover {
-          background: #f8fafc;
-        }
-        .colway-price-table td {
-          padding: 12px 14px;
-          font-size: 0.82rem;
-          vertical-align: middle;
-        }
-
-        .sku-badge {
-          display: inline-flex;
-          align-items: center;
-          background: #f1f5f9;
-          border: 1px solid #e2e8f0;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-weight: 600;
-          color: #334155;
-        }
-        .product-category-tag {
-          font-size: 0.68rem;
-          color: #64748b;
-          margin-top: 3px;
-        }
-
-        .product-identity-cell {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .product-thumb,
-        :global(.product-thumb) {
-          width: 38px !important;
-          height: 38px !important;
-          max-width: 38px !important;
-          max-height: 38px !important;
-          object-fit: contain !important;
-          border-radius: 6px !important;
-          background: #ffffff !important;
-          border: 1px solid #e2e8f0 !important;
-          padding: 2px !important;
-          flex-shrink: 0 !important;
-        }
-        .product-name {
-          color: #0f172a;
-          line-height: 1.25;
-        }
-        .volume-badge {
-          display: inline-block;
-          font-size: 0.72rem;
-          font-weight: 700;
-          background: #e0f2fe;
-          color: #0369a1;
-          padding: 2px 8px;
-          border-radius: 12px;
-        }
-
-        .landed-cost-cell {
-          color: #475569;
-          font-weight: 600;
-        }
-        .wholesale-cell {
-          background: #f0fdf4;
-          color: #065f46;
-          font-size: 0.9rem;
-        }
-
-        .totals-row {
-          background: #f8fafc;
-          border-top: 2px solid #cbd5e1;
-        }
-        .totals-row td {
-          padding: 14px;
-        }
-
-        /* ── Cards Grid ── */
-        .product-cards-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: 1.25rem;
-          margin-bottom: 2rem;
-        }
-        .product-card {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          overflow: hidden;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-          display: flex;
-          flex-direction: column;
-        }
-        .card-image-wrap {
-          height: 160px;
-          background: #f1f5f9;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 1rem;
-        }
-        .card-product-img {
-          max-height: 100%;
-          max-width: 100%;
-          object-fit: contain;
-        }
-        .card-category-badge {
-          position: absolute;
-          top: 10px;
-          left: 10px;
-          background: rgba(15, 23, 42, 0.85);
-          color: #ffffff;
-          font-size: 0.65rem;
-          font-weight: 700;
-          padding: 3px 8px;
-          border-radius: 4px;
-        }
-        .card-body {
-          padding: 1.25rem;
-          display: flex;
-          flex-direction: column;
-          flex: 1;
-        }
-        .card-sku {
-          font-size: 0.7rem;
-          color: #64748b;
-          margin-bottom: 4px;
-        }
-        .card-title {
-          font-size: 1rem;
-          font-weight: 800;
-          color: #0f172a;
-          margin: 0 0 4px 0;
-        }
-        .card-subtitle {
-          font-size: 0.78rem;
-          color: #64748b;
-          margin: 0 0 0.75rem 0;
-        }
-        .card-actives, .card-clinical-focus {
-          font-size: 0.74rem;
-          color: #475569;
-          margin-bottom: 0.5rem;
-          line-height: 1.35;
-        }
-        .card-pricing-strip {
-          margin-top: auto;
-          display: flex;
-          border-top: 1px solid #e2e8f0;
-          padding-top: 0.75rem;
-          justify-content: space-between;
-        }
-        .price-item {
-          display: flex;
-          flex-direction: column;
-          font-size: 0.72rem;
-        }
-        .price-item-label {
-          color: #64748b;
-          font-size: 0.65rem;
-        }
-        .price-item-val {
-          font-weight: 700;
-          font-size: 0.85rem;
-          color: #0f172a;
-        }
-        .price-item.highlight .price-item-val {
-          font-size: 0.95rem;
-        }
-
-        /* ── Commercial Terms ── */
-        .terms-block {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          padding: 1.5rem 1.75rem;
-          margin-top: 1.5rem;
-        }
-        .terms-title {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.95rem;
-          font-weight: 800;
-          color: #0f172a;
-          margin: 0 0 1rem 0;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-        }
-        .terms-columns {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-          gap: 1.5rem;
-        }
-        .terms-col p {
-          font-size: 0.75rem;
-          line-height: 1.5;
-          color: #475569;
-          margin: 0;
-        }
-        .terms-subheading {
-          font-size: 0.78rem;
-          font-weight: 750;
-          color: #0f172a;
-          margin: 0 0 0.35rem 0;
-        }
-
-        .print-footer-signature {
-          display: none;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           EXPORT MODAL STYLING (2 Distinct Formats: PDF vs CSV/Excel)
-           ═══════════════════════════════════════════════════════════════ */
-        .export-modal-backdrop {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(15, 23, 42, 0.7);
-          backdrop-filter: blur(6px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 1rem;
-          z-index: 1000;
-          animation: modalFadeIn 0.2s ease-out;
-        }
-        @keyframes modalFadeIn {
-          from { opacity: 0; transform: scale(0.98); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .export-modal-box {
-          background: #ffffff;
-          border-radius: 16px;
-          border: 1px solid #cbd5e1;
-          box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.3);
-          max-width: 820px;
-          width: 100%;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-        }
-        .export-modal-header {
-          padding: 1.5rem 1.75rem 1.25rem 1.75rem;
-          border-bottom: 1px solid #e2e8f0;
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 1rem;
-          background: #f8fafc;
-        }
-        .export-badge {
-          display: inline-block;
-          font-size: 0.68rem;
-          font-weight: 750;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          padding: 3px 8px;
-          border-radius: 4px;
-          background: #0284c7;
-          color: #ffffff;
-          margin-bottom: 6px;
-        }
-        .export-modal-title {
-          font-size: 1.3rem;
-          font-weight: 850;
-          color: #0f172a;
-          margin: 0 0 4px 0;
-        }
-        .export-modal-subtitle {
-          font-size: 0.82rem;
-          color: #64748b;
-          margin: 0;
-        }
-        .export-close-btn {
-          border: none;
-          background: #e2e8f0;
-          color: #475569;
-          width: 32px;
-          height: 32px;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.15s ease;
-        }
-        .export-close-btn:hover {
-          background: #cbd5e1;
-          color: #0f172a;
-        }
-
-        .export-options-grid {
-          padding: 1.5rem 1.75rem;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1.25rem;
-        }
-        .export-card {
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 1.25rem;
-          background: #ffffff;
-          display: flex;
-          flex-direction: column;
-          transition: all 0.2s ease;
-        }
-        .export-card:hover {
-          border-color: #0284c7;
-          box-shadow: 0 6px 16px -4px rgba(2, 132, 199, 0.12);
-        }
-        .export-card-icon-wrap {
-          width: 44px;
-          height: 44px;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 0.85rem;
-        }
-        .pdf-icon-wrap {
-          background: #ffe4e6;
-        }
-        .excel-icon-wrap {
-          background: #d1fae5;
-        }
-        .export-card-tag {
-          display: inline-block;
-          font-size: 0.68rem;
-          font-weight: 700;
-          padding: 2px 6px;
-          border-radius: 4px;
-          margin-bottom: 6px;
-        }
-        .export-card-title {
-          font-size: 1.05rem;
-          font-weight: 800;
-          color: #0f172a;
-          margin: 0 0 6px 0;
-        }
-        .export-card-desc {
-          font-size: 0.76rem;
-          color: #64748b;
-          line-height: 1.45;
-          margin: 0 0 1rem 0;
-          flex: 1;
-        }
-        .export-features-list {
-          list-style: none;
-          padding: 0;
-          margin: 0 0 1.25rem 0;
-          font-size: 0.72rem;
-          color: #334155;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-        .export-primary-btn {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          padding: 10px 14px;
-          border-radius: 8px;
-          font-size: 0.82rem;
-          font-weight: 750;
-          cursor: pointer;
-          border: none;
-          transition: all 0.15s ease;
-        }
-        .pdf-btn {
-          background: #e11d48;
-          color: #ffffff;
-        }
-        .pdf-btn:hover {
-          background: #be123c;
-        }
-        .excel-btn {
-          background: #059669;
-          color: #ffffff;
-        }
-        .excel-btn:hover {
-          background: #047857;
-        }
-
-        .export-tier-selector {
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          padding: 8px 10px;
-          margin-bottom: 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-        .tier-radio-option {
-          display: flex;
-          align-items: flex-start;
-          gap: 6px;
-          font-size: 0.72rem;
-          color: #334155;
-          cursor: pointer;
-        }
-        .tier-radio-option input {
-          margin-top: 2px;
-        }
-
-        .export-modal-footer {
-          padding: 1rem 1.75rem;
-          background: #f8fafc;
-          border-top: 1px solid #e2e8f0;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 1rem;
-          flex-wrap: wrap;
-        }
-        .export-footer-note {
-          font-size: 0.72rem;
-          color: #64748b;
-          flex: 1;
-        }
-        .export-dismiss-btn {
-          padding: 6px 14px;
-          border-radius: 6px;
-          font-size: 0.78rem;
-          font-weight: 600;
-          border: 1px solid #cbd5e1;
-          background: #ffffff;
-          color: #475569;
-          cursor: pointer;
-        }
-        .export-dismiss-btn:hover {
-          background: #f1f5f9;
-        }
-
-        /* ── Mobile Floating Bar ── */
-        .mobile-floating-bar {
-          display: none;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           RESPONSIVE ADAPTATIONS (Laptop & Mobile UX - Golden Rule #23)
-           ═══════════════════════════════════════════════════════════════ */
-        @media (max-width: 1024px) {
-          .price-sheet-container {
-            padding: 1rem 1rem 6rem;
-          }
-          .kpi-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          .document-header {
-            padding: 1.25rem;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .screen-nav-bar {
-            position: relative;
-          }
-          .nav-container {
-            padding: 0.75rem 1rem;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 0.75rem;
-          }
-          .nav-left {
-            justify-content: space-between;
-            font-size: 0.8rem;
-          }
-          .nav-actions {
-            width: 100%;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-          }
-          .header-meta-row {
-            flex-direction: column;
-            gap: 1.25rem;
-          }
-          .document-stamp-box {
-            width: 100%;
-            min-width: unset;
-          }
-          .document-title {
-            font-size: 1.2rem;
-          }
-          .regulatory-banner {
-            flex-direction: column;
-            gap: 0.5rem;
-          }
-          .kpi-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 0.65rem;
-          }
-          .kpi-card {
-            padding: 0.75rem 0.85rem;
-            gap: 0.65rem;
-          }
-          .kpi-value {
-            font-size: 1.15rem;
-          }
-          .controls-strip {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 0.75rem;
-            padding: 0.75rem;
-          }
-          .controls-left {
-            width: 100%;
-          }
-          .category-chips {
-            overflow-x: auto;
-            flex-wrap: nowrap;
-            padding-bottom: 4px;
-            -webkit-overflow-scrolling: touch;
-            width: 100%;
-          }
-          .category-chip {
-            white-space: nowrap;
-            flex-shrink: 0;
-            padding: 6px 12px;
-            font-size: 0.75rem;
-          }
-          .controls-right {
-            width: 100%;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 0.75rem;
-          }
-          .markup-simulator {
-            width: 100%;
-            justify-content: space-between;
-          }
-          .markup-presets {
-            flex: 1;
-            justify-content: flex-end;
-          }
-          .preset-btn {
-            padding: 6px 10px;
-            font-size: 0.75rem;
-          }
-          .view-switcher {
-            width: 100%;
-          }
-          .view-btn {
-            flex: 1;
-            justify-content: center;
-            padding: 8px 12px;
-          }
-          .product-cards-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-          }
-          .terms-columns {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-          }
-          .price-sheet-container {
-            padding: 0.75rem 0.85rem 6.5rem 0.85rem;
-          }
-          .export-options-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            padding: 1.25rem;
-          }
-          .export-modal-box {
-            max-height: 90vh;
-            overflow-y: auto;
-          }
-
-          /* Mobile Floating Bottom Bar */
-          .mobile-floating-bar {
-            display: block;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(15, 23, 42, 0.96);
-            backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 0.6rem 0.85rem;
-            z-index: 100;
-            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
-          }
-          .mobile-floating-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.6rem;
-            max-width: 600px;
-            margin: 0 auto;
-          }
-          .mobile-currency-pills {
-            display: flex;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            padding: 2px;
-          }
-          .mobile-pill {
-            border: none;
-            background: transparent;
-            color: #94a3b8;
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 5px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-          }
-          .mobile-pill.active {
-            background: #38bdf8;
-            color: #0f172a;
-          }
-          .mobile-action-buttons {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-          }
-          .mobile-btn {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 7px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            cursor: pointer;
-            border: none;
-            min-height: 38px;
-          }
-          .mobile-btn-ghost {
-            background: rgba(255, 255, 255, 0.12);
-            color: #ffffff;
-          }
-          .mobile-btn-accent {
-            background: #0d9488;
-            color: #ffffff;
-          }
-          .mobile-btn-primary {
-            background: #0284c7;
-            color: #ffffff;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .kpi-grid {
-            grid-template-columns: 1fr;
-          }
-          .nav-actions {
-            flex-direction: column;
-            align-items: stretch;
-          }
-          .action-btn {
-            justify-content: center;
-            padding: 8px 12px;
-          }
-          .header-meta-row {
-            gap: 1rem;
-          }
-          .document-title {
-            font-size: 1.15rem;
-          }
-        }
-
-        .print-only-schedule {
-          display: none;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           PRINT OPTIMIZATION ENGINE (@media print)
-           ═══════════════════════════════════════════════════════════════ */
-        @media print {
-          @page {
-            size: A4 landscape;
-            margin: 8mm 10mm;
-          }
-          body, html {
-            background: #ffffff !important;
-            color: #000000 !important;
-            font-size: 11pt !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-          .print-only-schedule {
-            display: block !important;
-          }
-          .colway-price-root {
-            background: #ffffff !important;
-            padding: 0 !important;
-          }
-          .price-sheet-container {
-            max-width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          .document-header {
-            border: 1px solid #000000 !important;
-            box-shadow: none !important;
-            padding: 10px 14px !important;
-            margin-bottom: 10px !important;
-            border-radius: 4px !important;
-          }
-          .document-title {
-            font-size: 1.25rem !important;
-            color: #000000 !important;
-          }
-          .brand-pill-atlas {
-            background: #000000 !important;
-            color: #ffffff !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          .brand-pill-colway {
-            background: #0284c7 !important;
-            color: #ffffff !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          .document-stamp-box {
-            border: 1px solid #94a3b8 !important;
-            background: #f8fafc !important;
-            padding: 6px 10px !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          .kpi-grid {
-            gap: 8px !important;
-            margin-bottom: 10px !important;
-          }
-          .kpi-card {
-            border: 1px solid #cbd5e1 !important;
-            padding: 6px 10px !important;
-            box-shadow: none !important;
-          }
-          .kpi-value {
-            font-size: 1.1rem !important;
-          }
-          .table-responsive-wrapper {
-            border: 1px solid #000000 !important;
-            box-shadow: none !important;
-            border-radius: 4px !important;
-            margin-bottom: 10px !important;
-          }
-          .colway-price-table th {
-            background: #1e293b !important;
-            color: #ffffff !important;
-            font-size: 7.5pt !important;
-            padding: 6px 8px !important;
-            border-bottom: 1px solid #000000 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          .th-highlight {
-            background: #0369a1 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          .colway-price-table td {
-            font-size: 7.5pt !important;
-            padding: 6px 8px !important;
-            border-bottom: 1px solid #cbd5e1 !important;
-            color: #000000 !important;
-          }
-          .product-thumb {
-            width: 30px !important;
-            height: 30px !important;
-          }
-          .wholesale-cell {
-            background: #e2f2e6 !important;
-            font-weight: bold !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          .totals-row td {
-            background: #f1f5f9 !important;
-            font-size: 8pt !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          .terms-block {
-            border: 1px solid #94a3b8 !important;
-            box-shadow: none !important;
-            padding: 8px 12px !important;
-            margin-top: 10px !important;
-            page-break-inside: avoid !important;
-          }
-          .terms-columns {
-            gap: 12px !important;
-          }
-          .terms-col p {
-            font-size: 6.5pt !important;
-            line-height: 1.3 !important;
-          }
-          .terms-subheading {
-            font-size: 7pt !important;
-          }
-          .print-footer-signature {
-            display: flex !important;
-            justify-content: space-around !important;
-            margin-top: 25px !important;
-            padding-top: 10px !important;
-          }
-          .sig-block {
-            width: 40% !important;
-            text-align: center !important;
-          }
-          .sig-line {
-            border-top: 1px solid #000000 !important;
-            margin-bottom: 4px !important;
-          }
-          .sig-text {
-            font-size: 7pt !important;
-            color: #334155 !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }
