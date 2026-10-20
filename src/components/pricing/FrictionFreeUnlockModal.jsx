@@ -83,7 +83,9 @@ export default function FrictionFreeUnlockModal({
           organization: organizationInput.trim(),
           timestamp: Date.now()
         }));
-      } catch (e) {}
+      } catch (_e) {
+        // Ignore localStorage quota or private mode errors
+      }
 
       setTimeout(() => {
         if (onSuccess) onSuccess();
@@ -99,7 +101,9 @@ export default function FrictionFreeUnlockModal({
           organization: organizationInput.trim(),
           timestamp: Date.now()
         }));
-      } catch (e) {}
+      } catch (_e) {
+        // Ignore localStorage quota or private mode errors
+      }
       setMagicSent(true);
       toast.success(isEs ? 'Acceso B2B verificado en este dispositivo' : 'Practitioner access unlocked on this device');
       setTimeout(() => {

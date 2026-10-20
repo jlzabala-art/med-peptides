@@ -317,7 +317,7 @@ export default function BrandCollectionPage({
   // Direct Institutional WhatsApp Inquiry with pre-filled clinical context (Fase 1)
   const getWhatsAppInquiryUrl = (product = null) => {
     const cleanPhone = process.env.NEXT_PUBLIC_ATLAS_WHATSAPP || '971564179256';
-    let text = '';
+    let text;
     if (product) {
       text = `Hello Atlas Health Services Medical Affairs, I am inquiring about *${product.name || product.title}* from the Colway® Collection. Please provide institutional wholesale pricing and clinical technical documentation.`;
     } else if (selectedCategory && selectedCategory !== 'all') {

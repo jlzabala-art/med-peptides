@@ -7,6 +7,7 @@ import {
   Share2,
   Copy,
   Check,
+  Activity,
   Download,
   Building2,
   ShieldCheck,
