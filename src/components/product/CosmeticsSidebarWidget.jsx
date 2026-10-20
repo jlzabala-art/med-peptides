@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   ShieldCheck, Sparkles, CheckCircle2, ChevronRight,
   Leaf, Award, Mail, Layers, LayoutGrid, FileText,
-  Droplets, Zap, FlaskConical, Pill
+  Droplets, Zap, FlaskConical, Pill, Clock
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 

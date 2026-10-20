@@ -35,10 +35,12 @@ import {
   EyeOff,
   RotateCcw,
   LogIn,
-  User
+  User,
+  Lock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
 import DataTable from '@/components/ui/DataTable';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
@@ -46,7 +48,13 @@ import InlineEditableCell from '@/components/ui/InlineEditableCell';
 import './ColwayPriceList.css';
 
 export default function ColwayPriceListClient({ initialProducts = [] }) {
-  const { user, isAdmin, isProfessional } = useAuth();
+  const { user } = useAuth();
+  const { is, effectiveRole } = useRoleAccess();
+
+  const isAdmin = is('admin');
+  const isWholesaler = is('wholesaler') || isAdmin;
+  const isClinicOrDoctor = is('doctor') || is('clinic') || is('fagron_clinic') || is('medical_director') || isWholesaler;
+  const isGuest = !user || effectiveRole === 'guest';
   const canViewLanded = Boolean(isAdmin);
 
   const [markupPct, setMarkupPct] = useState(15); // Default 15% requested by user
@@ -388,85 +396,130 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       });
     }
 
-    cols.push(
-      {
-        key: 'calculatedWholesale',
+    cols.push({
+      key: 'calculatedWholesale',
         label: canViewLanded ? `Wholesaler (+${markupPct}% Net)` : 'Wholesaler Price',
         width: (canViewLanded && showLandedCost) ? '15%' : '16%',
         sortable: true,
-        render: (val, row) => (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <InlineEditableCell
-              value={Number(((val ?? row?.calculatedWholesale) * fxRate).toFixed(2))}
-              type="number"
-              prefix={currencySymbol}
-              onSave={async (newVal) => handleUpdateProductPrice(row.id, 'wholesale', newVal)}
-              format={(v) => formatPrice(v / fxRate)}
-            />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-              {canViewLanded && (
-                <span style={{
-                  fontSize: '0.66rem',
-                  fontWeight: 700,
-                  color: '#047857',
-                  background: '#ecfdf5',
-                  border: '1px solid #a7f3d0',
-                  padding: '1px 5px',
-                  borderRadius: '4px'
-                }}>
-                  +{row?.calculatedWholesaleMarkupPct}% Net
+        render: (val, row) => {
+          if (!isWholesaler) {
+            return (
+              <Link
+                href="/login?redirect=/pricing/colway&tier=wholesale"
+                className="b2b-lock-pill"
+                title="Sign in with verified wholesale credentials to view volume pricing"
+              >
+                <Lock size={12} className="text-slate-400" />
+                <span>B2B Rate Protected</span>
+              </Link>
+            );
+          }
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              {isAdmin ? (
+                <InlineEditableCell
+                  value={Number(((val ?? row?.calculatedWholesale) * fxRate).toFixed(2))}
+                  type="number"
+                  prefix={currencySymbol}
+                  onSave={async (newVal) => handleUpdateProductPrice(row.id, 'wholesale', newVal)}
+                  format={(v) => formatPrice(v / fxRate)}
+                />
+              ) : (
+                <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0f766e', fontSize: '0.88rem' }}>
+                  {formatPrice(val ?? row?.calculatedWholesale)}
                 </span>
               )}
-              {row?.hasCustomOverride && (
-                <span style={{ fontSize: '0.60rem', fontWeight: 600, color: '#b45309', background: '#fef3c7', padding: '1px 4px', borderRadius: '3px' }}>custom</span>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                {canViewLanded && (
+                  <span style={{
+                    fontSize: '0.66rem',
+                    fontWeight: 700,
+                    color: '#047857',
+                    background: '#ecfdf5',
+                    border: '1px solid #a7f3d0',
+                    padding: '1px 5px',
+                    borderRadius: '4px'
+                  }}>
+                    +{row?.calculatedWholesaleMarkupPct}% Net
+                  </span>
+                )}
+                {row?.hasCustomOverride && canViewLanded && (
+                  <span style={{ fontSize: '0.60rem', fontWeight: 600, color: '#b45309', background: '#fef3c7', padding: '1px 4px', borderRadius: '3px' }}>custom</span>
+                )}
+              </div>
             </div>
-          </div>
-        )
+          );
+        }
       },
       {
         key: 'recommendedClinic',
         label: 'Recommended Clinic',
         width: (canViewLanded && showLandedCost) ? '14%' : '14%',
         sortable: true,
-        render: (val, row) => (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <InlineEditableCell
-              value={Number(((val ?? row?.recommendedClinic) * fxRate).toFixed(2))}
-              type="number"
-              prefix={currencySymbol}
-              onSave={async (newVal) => handleUpdateProductPrice(row.id, 'clinic', newVal)}
-              format={(v) => formatPrice(v / fxRate)}
-            />
-            <span style={{
-              fontSize: '0.66rem',
-              fontWeight: 650,
-              color: '#1d4ed8',
-              background: '#eff6ff',
-              border: '1px solid #bfdbfe',
-              padding: '1px 5px',
-              borderRadius: '4px',
-              width: 'fit-content'
-            }}>
-              +{row?.calculatedClinicMarginPct}% Clinic
-            </span>
-          </div>
-        )
+        render: (val, row) => {
+          if (!isClinicOrDoctor) {
+            return (
+              <Link
+                href="/login?redirect=/pricing/colway&tier=clinic"
+                className="b2b-lock-pill"
+                title="Sign in with verified clinic or doctor credentials to view professional pricing"
+              >
+                <Lock size={12} className="text-slate-400" />
+                <span>Clinic Rate Protected</span>
+              </Link>
+            );
+          }
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              {isAdmin ? (
+                <InlineEditableCell
+                  value={Number(((val ?? row?.recommendedClinic) * fxRate).toFixed(2))}
+                  type="number"
+                  prefix={currencySymbol}
+                  onSave={async (newVal) => handleUpdateProductPrice(row.id, 'clinic', newVal)}
+                  format={(v) => formatPrice(v / fxRate)}
+                />
+              ) : (
+                <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#1d4ed8', fontSize: '0.88rem' }}>
+                  {formatPrice(val ?? row?.recommendedClinic)}
+                </span>
+              )}
+              <span style={{
+                fontSize: '0.66rem',
+                fontWeight: 650,
+                color: '#1d4ed8',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                padding: '1px 5px',
+                borderRadius: '4px',
+                width: 'fit-content'
+              }}>
+                +{row?.calculatedClinicMarginPct}% Clinic
+              </span>
+            </div>
+          );
+        }
       },
       {
         key: 'recommendedRetail',
         label: 'Retail MSRP',
-        width: showLandedCost ? '14%' : '14%',
+        width: (canViewLanded && showLandedCost) ? '14%' : '14%',
         sortable: true,
         render: (val, row) => (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <InlineEditableCell
-              value={Number(((val ?? row?.recommendedRetail) * fxRate).toFixed(2))}
-              type="number"
-              prefix={currencySymbol}
-              onSave={async (newVal) => handleUpdateProductPrice(row.id, 'retail', newVal)}
-              format={(v) => formatPrice(v / fxRate)}
-            />
+            {isAdmin ? (
+              <InlineEditableCell
+                value={Number(((val ?? row?.recommendedRetail) * fxRate).toFixed(2))}
+                type="number"
+                prefix={currencySymbol}
+                onSave={async (newVal) => handleUpdateProductPrice(row.id, 'retail', newVal)}
+                format={(v) => formatPrice(v / fxRate)}
+              />
+            ) : (
+              <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0f172a', fontSize: '0.90rem' }}>
+                {formatPrice(val ?? row?.recommendedRetail)}
+              </span>
+            )}
             <span style={{
               fontSize: '0.66rem',
               fontWeight: 650,
@@ -477,15 +530,23 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
               borderRadius: '4px',
               width: 'fit-content'
             }}>
-              +{row?.calculatedRetailMarginPct}% Retail
+              MSRP / Retail
             </span>
           </div>
         )
       }
     );
-
     return cols;
-  }, [showLandedCost, formatPrice, fxRate, currencySymbol, handleUpdateProductPrice]);
+  }, [
+    isWholesaler,
+    isClinicOrDoctor,
+    isAdmin,
+    canViewLanded,
+    showLandedCost,
+    formatPrice,
+    fxRate,
+    currencySymbol,
+  ]);
 
   const handlePrint = () => {
     setIsExportModalOpen(false);
@@ -795,51 +856,187 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           )}
         </div>
 
-        {/* ── KPI Summary Cards (GCP Style — Rule #22) ── */}
+        {/* ── KPI Summary Cards (Role-Adaptive — Rule #22) ── */}
         <section className="kpi-grid">
-          <div className="kpi-card">
-            <div className="kpi-icon-wrap bg-blue-500/10 text-blue-500">
-              <Package size={20} />
-            </div>
-            <div className="kpi-info">
-              <div className="kpi-label">Active Formulations</div>
-              <div className="kpi-value">{totals.count} Clinical SKUs</div>
-              <div className="kpi-sub">Trichology, Anti-Aging & Barrier Care</div>
-            </div>
-          </div>
+          {isGuest && (
+            <>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-blue-500/10 text-blue-500">
+                  <Package size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Curated Formulations</div>
+                  <div className="kpi-value">{totals.count} Active Systems</div>
+                  <div className="kpi-sub">Trichology, Vege Collagen &amp; Derma</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-emerald-500/10 text-emerald-500">
+                  <ShieldCheck size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Bioactive Conformation</div>
+                  <div className="kpi-value text-emerald-600">Native Tropocollagen</div>
+                  <div className="kpi-sub">Preserved triple-helix &lt;26°C</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-indigo-500/10 text-indigo-500">
+                  <Building2 size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Dispatch Hub</div>
+                  <div className="kpi-value">Dubai Warehouse</div>
+                  <div className="kpi-sub">Immediate GCC cold-chain delivery</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-sky-500/10 text-sky-500">
+                  <BadgeCheck size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Regulatory Standard</div>
+                  <div className="kpi-value text-sky-600">EU / ISO 22716</div>
+                  <div className="kpi-sub">cGMP Certified · UAE FTA VAT Compliant</div>
+                </div>
+              </div>
+            </>
+          )}
 
-          <div className="kpi-card">
-            <div className="kpi-icon-wrap bg-emerald-500/10 text-emerald-500">
-              <ShieldCheck size={20} />
-            </div>
-            <div className="kpi-info">
-              <div className="kpi-label">Purity Standard</div>
-              <div className="kpi-value text-emerald-600">Native Tropocollagen</div>
-              <div className="kpi-sub">Preserved triple-helix conformation (&lt;26°C)</div>
-            </div>
-          </div>
+          {isClinicOrDoctor && !isWholesaler && (
+            <>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-emerald-500/10 text-emerald-500">
+                  <TrendingUp size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Clinic Margin on MSRP</div>
+                  <div className="kpi-value text-emerald-600">~25% – 30% Net</div>
+                  <div className="kpi-sub">Recommended clinic markup over wholesale</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-blue-500/10 text-blue-500">
+                  <Package size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Stock Availability</div>
+                  <div className="kpi-value">100% In Stock</div>
+                  <div className="kpi-sub">Guaranteed Dubai cold-chain allocation</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-indigo-500/10 text-indigo-500">
+                  <FileText size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Professional Protocols</div>
+                  <div className="kpi-value text-indigo-600">{totals.count} Dossiers</div>
+                  <div className="kpi-sub">In-clinic and homecare regimens</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-teal-500/10 text-teal-500">
+                  <ShieldCheck size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Order Minimum (MOQ)</div>
+                  <div className="kpi-value text-teal-600">No Clinic MOQ</div>
+                  <div className="kpi-sub">Unitary clinical dispensing enabled</div>
+                </div>
+              </div>
+            </>
+          )}
 
-          <div className="kpi-card">
-            <div className="kpi-icon-wrap bg-indigo-500/10 text-indigo-500">
-              <Building2 size={20} />
-            </div>
-            <div className="kpi-info">
-              <div className="kpi-label">Wholesale Delivery</div>
-              <div className="kpi-value">Dubai Warehouse</div>
-              <div className="kpi-sub">Immediate GCC cold-chain distribution</div>
-            </div>
-          </div>
+          {isWholesaler && !isAdmin && (
+            <>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-sky-500/10 text-sky-500">
+                  <Coins size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Wholesale Portfolio Basket</div>
+                  <div className="kpi-value text-sky-600">{formatPrice(totals.totalWholesale)}</div>
+                  <div className="kpi-sub">Total 1-unit basket of {totals.count} SKUs</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-emerald-500/10 text-emerald-500">
+                  <TrendingUp size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Gross Margin vs Clinic</div>
+                  <div className="kpi-value text-emerald-600">~25% Spread</div>
+                  <div className="kpi-sub">Wholesale to clinic distribution spread</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-indigo-500/10 text-indigo-500">
+                  <Percent size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Active Volume Tier</div>
+                  <div className="kpi-value">+{markupPct}% Net Tier</div>
+                  <div className="kpi-sub">Configured partner wholesale rate</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-blue-500/10 text-blue-500">
+                  <Building2 size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Logistics Basis</div>
+                  <div className="kpi-value">Ex-Warehouse Dubai</div>
+                  <div className="kpi-sub">Refrigerated pallet &amp; carton dispatch</div>
+                </div>
+              </div>
+            </>
+          )}
 
-          <div className="kpi-card">
-            <div className="kpi-icon-wrap bg-sky-500/10 text-sky-500">
-              <BadgeCheck size={20} />
-            </div>
-            <div className="kpi-info">
-              <div className="kpi-label">Compliance &amp; Quality</div>
-              <div className="kpi-value text-sky-600">EU / ISO 22716</div>
-              <div className="kpi-sub">cGMP Certified · UAE FTA VAT Compliant</div>
-            </div>
-          </div>
+          {isAdmin && (
+            <>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-indigo-500/10 text-indigo-500">
+                  <Coins size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Portfolio Landed Cost</div>
+                  <div className="kpi-value">{formatPrice(totals.totalLanded)}</div>
+                  <div className="kpi-sub">Total CIF Dubai acquisition cost</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-sky-500/10 text-sky-500">
+                  <Percent size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Portfolio Wholesale Revenue</div>
+                  <div className="kpi-value text-sky-600">{formatPrice(totals.totalWholesale)}</div>
+                  <div className="kpi-sub">Total wholesale unit basket</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-emerald-500/10 text-emerald-500">
+                  <TrendingUp size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Aggregate Net Margin</div>
+                  <div className="kpi-value text-emerald-600">+{formatPrice(totals.totalMargin)}</div>
+                  <div className="kpi-sub">{totals.avgMarginPct}% avg margin on wholesale</div>
+                </div>
+              </div>
+              <div className="kpi-card">
+                <div className="kpi-icon-wrap bg-amber-500/10 text-amber-500">
+                  <Sliders size={20} />
+                </div>
+                <div className="kpi-info">
+                  <div className="kpi-label">Formula Overrides</div>
+                  <div className="kpi-value text-amber-600">{hasCustomOverrides ? 'Custom Rates Active' : 'Standard Formula'}</div>
+                  <div className="kpi-sub">+{markupPct}% base wholesale markup</div>
+                </div>
+              </div>
+            </>
+          )}
         </section>
 
         {/* ── Unified GlobalSearchBar + Category Chips & Controls (Rules #7 & #24) ── */}
@@ -1151,17 +1348,35 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                   </div>
 
                   <div className="card-pricing-strip">
-                    <div className="price-item highlight">
-                      <span className="price-item-label">Wholesaler (+15%)</span>
-                      <span className="price-item-val font-mono text-emerald-700 font-bold">{formatPrice(p.calculatedWholesale)}</span>
-                    </div>
-                    <div className="price-item">
-                      <span className="price-item-label">Recommended Clinic</span>
-                      <span className="price-item-val font-mono">{formatPrice(p.recommendedClinic)}</span>
-                    </div>
+                    {isWholesaler ? (
+                      <div className="price-item highlight">
+                        <span className="price-item-label">Wholesaler (+15%)</span>
+                        <span className="price-item-val font-mono text-emerald-700 font-bold">{formatPrice(p.calculatedWholesale)}</span>
+                      </div>
+                    ) : (
+                      <div className="price-item">
+                        <span className="price-item-label">Wholesale Rate</span>
+                        <Link href="/login?redirect=/pricing/colway&tier=wholesale" className="b2b-lock-pill">
+                          <Lock size={11} /> <span>Sign In</span>
+                        </Link>
+                      </div>
+                    )}
+                    {isClinicOrDoctor ? (
+                      <div className="price-item">
+                        <span className="price-item-label">Recommended Clinic</span>
+                        <span className="price-item-val font-mono">{formatPrice(p.recommendedClinic)}</span>
+                      </div>
+                    ) : (
+                      <div className="price-item">
+                        <span className="price-item-label">Clinic Rate</span>
+                        <Link href="/login?redirect=/pricing/colway&tier=clinic" className="b2b-lock-pill">
+                          <Lock size={11} /> <span>Sign In</span>
+                        </Link>
+                      </div>
+                    )}
                     <div className="price-item">
                       <span className="price-item-label">Retail MSRP</span>
-                      <span className="price-item-val font-mono">{formatPrice(p.recommendedRetail)}</span>
+                      <span className="price-item-val font-mono font-bold text-slate-800">{formatPrice(p.recommendedRetail)}</span>
                     </div>
                   </div>
                 </div>

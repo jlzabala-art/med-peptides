@@ -796,13 +796,8 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   }, []);
 
   // Active section management (Single-section display rule)
-  const [activeSection, setActiveSection] = useState(() => {
-    if (typeof window !== 'undefined' && window.location.hash) {
-      const hash = window.location.hash.replace('#', '').trim();
-      if (hash) return hash;
-    }
-    return 'overview';
-  });
+  // Always initialize to 'overview' to avoid SSR hydration mismatches with URL hash
+  const [activeSection, setActiveSection] = useState('overview');
 
   const handleSelectSection = useCallback((targetId) => {
     if (!targetId) return;
@@ -817,13 +812,13 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    const initialHash = window.location.hash.replace('#', '').trim();
+    if (initialHash) {
+      setActiveSection(initialHash);
+    }
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '').trim();
-      if (hash) {
-        setActiveSection(hash);
-      } else {
-        setActiveSection('overview');
-      }
+      setActiveSection(hash || 'overview');
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
@@ -2160,21 +2155,25 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                 title={productSafety?.title || (isNutricosmetic ? 'Clinical Safety, Dietary Contraindications & Oral Dosing Protocol' : isLip ? 'Labial Mucosal Safety, Thermal Care & Tolerance Guide' : 'Clinical Safety, Contraindications & Patch Testing')}
               >
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                  {effectiveWarnings.map((w, i) => (
+                  {(effectiveWarnings || []).map((w, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                       <AlertTriangle size={13} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
-                      <span style={{ fontSize: '0.78rem', color: '#374151', lineHeight: 1.55 }}>{typeof w === 'string' ? w : w.text}</span>
+                      <span style={{ fontSize: '0.78rem', color: '#374151', lineHeight: 1.55 }}>
+                        {typeof w === 'string' ? w : (w?.text || w?.warning || '')}
+                      </span>
                     </div>
                   ))}
                 </div>
                 <div style={{ marginTop: '1rem', padding: '0.85rem 1rem', background: '#fffbeb', borderRadius: '8px', border: '1px solid #fde68a' }}>
                   <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#d97706', marginBottom: '0.4rem', letterSpacing: '0.04em' }}>
-                    {effectiveSafetyProtocol.title}
+                    {effectiveSafetyProtocol?.title || 'SAFETY & TOLERANCE PROTOCOL'}
                   </div>
-                  {effectiveSafetyProtocol.steps.map((pt, i) => (
+                  {(effectiveSafetyProtocol?.steps || []).map((pt, i) => (
                     <div key={i} style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', marginBottom: '3px' }}>
                       <span style={{ fontSize: '0.67rem', fontWeight: 800, color: '#d97706', flexShrink: 0 }}>{i + 1}.</span>
-                      <span style={{ fontSize: '0.72rem', color: '#92400e', lineHeight: 1.5 }}>{pt}</span>
+                      <span style={{ fontSize: '0.72rem', color: '#92400e', lineHeight: 1.5 }}>
+                        {typeof pt === 'string' ? pt : (pt?.step || pt?.text || '')}
+                      </span>
                     </div>
                   ))}
                 </div>
