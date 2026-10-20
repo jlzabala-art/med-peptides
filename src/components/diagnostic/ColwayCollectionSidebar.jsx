@@ -451,6 +451,42 @@ export default function ColwayCollectionSidebar({
               PDF ↓
             </span>
           </a>
+
+          {/* Unified ZIP Pack: All 3 Official Clinical Dossiers (Fase 2) */}
+          <a
+            href="/docs/colway/Colway-Complete-Clinical-Dossiers-Compendium.zip"
+            download="Colway-Complete-Clinical-Dossiers-Compendium.zip"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Download Complete Clinical Dossiers Compendium (All 3 Dossiers in ZIP)"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '9px 12px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
+              color: '#ffffff',
+              textDecoration: 'none',
+              boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)',
+              marginTop: '6px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Package size={16} color="#38bdf8" />
+              <div>
+                <strong style={{ fontSize: '0.74rem', color: '#ffffff', display: 'block' }}>
+                  Complete Clinical Pack
+                </strong>
+                <span style={{ fontSize: '0.66rem', color: '#93c5fd' }}>
+                  All 3 Technical Dossiers (ZIP 5.9 MB)
+                </span>
+              </div>
+            </div>
+            <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.35)', padding: '2px 7px', borderRadius: '4px', flexShrink: 0 }}>
+              ZIP ↓
+            </span>
+          </a>
         </div>
       </div>
 
