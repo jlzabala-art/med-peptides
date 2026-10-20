@@ -18,6 +18,8 @@ import PublicAtlasAIDrawer from '../components/shared/PublicAtlasAIDrawer';
 import ColwayTrichologyStemCellShowcase from '../components/product/ColwayTrichologyStemCellShowcase';
 import CopyableId from '../components/ui/CopyableId';
 import StatusBadge from '../components/ui/StatusBadge';
+import TieredPriceShield from '../components/pricing/TieredPriceShield';
+import FrictionFreeUnlockModal from '../components/pricing/FrictionFreeUnlockModal';
 import { useAuth } from '../context/AuthContext';
 import {
   Search, SlidersHorizontal, LayoutGrid, List, Sparkles, Shield, Activity,
@@ -304,6 +306,11 @@ export default function BrandCollectionPage({
   const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
   const [activeColwaySection, setActiveColwaySection] = useState('overview'); // 'overview' | 'catalog' | 'advantage' | 'protocols' | 'calculator'
   const [activeProtocolId, setActiveProtocolId] = useState(null);
+
+  // Dynamic Tiered Pricing & Unlock Modal (Golden Rule #14 & #22)
+  const [activeCurrency, setActiveCurrency] = useState('EUR'); // 'EUR' | 'USD' | 'AED'
+  const [adminSimulationTier, setAdminSimulationTier] = useState('clinic'); // 'cost' | 'wholesaler' | 'clinic' | 'retail'
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
 
   const canonicalUrl = `https://www.atlashealth-services.com/collection/${brandSlug}`;
 
@@ -1025,12 +1032,92 @@ export default function BrandCollectionPage({
                   </div>
                 )}
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
                     {filteredProducts.length} {filteredProducts.length === 1 
                       ? (brandSlug === 'colway' ? (isEs ? 'formulación' : 'formulation') : (isEs ? 'test' : 'test')) 
                       : (brandSlug === 'colway' ? (isEs ? 'formulaciones' : 'formulations') : (isEs ? 'tests' : 'tests'))}
                   </span>
+
+                  {/* Incoterm EXW Badge */}
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: '#0d9488',
+                    background: '#f0fdfa',
+                    border: '1px solid #ccfbf1',
+                    padding: '3px 7px',
+                    borderRadius: '5px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    📦 Terms: <strong>EXW</strong>
+                  </span>
+
+                  {/* Multi-Currency Selector */}
+                  <select
+                    value={activeCurrency}
+                    onChange={(e) => setActiveCurrency(e.target.value)}
+                    style={{
+                      padding: '5px 8px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      color: '#003666',
+                      background: '#fff',
+                      cursor: 'pointer'
+                    }}
+                    title="Select display currency"
+                  >
+                    <option value="EUR">EUR (€)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="AED">AED (د.إ)</option>
+                  </select>
+
+                  {/* B2B Pricing Access Pill */}
+                  {!user ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setIsUnlockModalOpen(true);
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 9px',
+                        borderRadius: '6px',
+                        background: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        color: '#0d9488',
+                        fontSize: '0.74rem',
+                        fontWeight: 750,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Lock size={12} />
+                      <span>{isEs ? 'Tarifas B2B' : 'Unlock B2B'}</span>
+                    </button>
+                  ) : (
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '3px 8px',
+                      borderRadius: '5px',
+                      background: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      color: '#16a34a',
+                      fontSize: '0.70rem',
+                      fontWeight: 750
+                    }}>
+                      <ShieldCheck size={12} />
+                      <span>{isEs ? 'Tarifas Activas' : 'B2B Active'}</span>
+                    </span>
+                  )}
 
                   <select
                     value={sortOption}
@@ -1249,8 +1336,17 @@ export default function BrandCollectionPage({
                             </div>
                           </div>
 
-                          {/* Right: Actions */}
+                          {/* Right: Actions & Tiered Pricing */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                            <TieredPriceShield
+                              product={product}
+                              currency={activeCurrency}
+                              compact={true}
+                              isEs={isEs}
+                              onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                              adminSimulationTier={adminSimulationTier}
+                              onSelectAdminSimulationTier={setAdminSimulationTier}
+                            />
                             <button
                               type="button"
                               onClick={(e) => toggleExpand(product.id, e)}
@@ -1615,6 +1711,17 @@ export default function BrandCollectionPage({
                             })()}
                           </div>
                         )}
+
+                        {/* Tiered Pricing Shield with Lock & Role Authorization (Golden Rule #14 & #22) */}
+                        <TieredPriceShield
+                          product={product}
+                          currency={activeCurrency}
+                          compact={false}
+                          isEs={isEs}
+                          onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                          adminSimulationTier={adminSimulationTier}
+                          onSelectAdminSimulationTier={setAdminSimulationTier}
+                        />
 
                         {/* Card Action Strip */}
                         <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
@@ -2159,6 +2266,14 @@ export default function BrandCollectionPage({
         contextAnchor={activeSectionContext}
         collectionProducts={filteredProducts}
         storageKey={`colway_${selectedCategory}`}
+      />
+
+      {/* ── Friction-Free B2B Unlock Modal (Golden Rule #14 & #22) ── */}
+      <FrictionFreeUnlockModal
+        isOpen={isUnlockModalOpen}
+        onClose={() => setIsUnlockModalOpen(false)}
+        isEs={isEs}
+        brandName={config.name}
       />
 
       {/* ── 7. Unified Public Institutional Footer (Bottom) ── */}
