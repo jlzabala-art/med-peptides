@@ -27,13 +27,30 @@ export default function CosmeticsSidebarWidget({
   const isEs = lang === 'es';
   const slugLower = (currentSlug || '').toLowerCase();
 
-  const isHair = slugLower.includes('shampoo') || slugLower.includes('conditioner') || slugLower.includes('hair');
-  const isVege = slugLower.includes('vege') || slugLower.includes('wash-gel');
+  const isHair = slugLower.includes('shampoo') || slugLower.includes('conditioner') || slugLower.includes('hair') || slugLower.includes('trichology');
+  const isLip = slugLower.includes('lip') || slugLower.includes('labial') || slugLower.includes('usta');
+  const isWashGel = (slugLower.includes('wash-gel') || slugLower.includes('washing-gel') || slugLower.includes('cleanser')) && !slugLower.includes('vege');
+  const isVege = (slugLower.includes('vege') || slugLower.includes('plant')) && !isWashGel;
   const isColvita = slugLower.includes('colvita');
-  // If not hair, not vege, and not colvita, it belongs to the Blue Diamond cellular line
-  const isBlueDiamond = !isHair && !isVege && !isColvita;
+  const isBlueDiamond = !isHair && !isLip && !isWashGel && !isVege && !isColvita;
 
   const associatedProtocol = useMemo(() => {
+    if (isLip) {
+      return {
+        title: isEs ? 'Protocolo Restaurador Labial & Perioral' : 'Perioral & Labial Restorative Protocol',
+        subtitle: isEs ? 'Bio-Peptide CL + Matriz Tropocolágeno' : 'Bio-Peptide CL + Tropocollagen Matrix',
+        url: '/collection/colway?cat=native-dermal',
+        color: '#db2777'
+      };
+    }
+    if (isWashGel) {
+      return {
+        title: isEs ? 'Protocolo Higiene Celular Fisiológica' : 'Physiological Cellular Cleansing Protocol',
+        subtitle: isEs ? 'Preservación de manto ácido pH 5.5' : 'Acid Mantle Preservation (pH 5.5)',
+        url: '/collection/colway?cat=cellular-cleansing',
+        color: '#0284c7'
+      };
+    }
     if (isBlueDiamond) {
       return {
         title: isEs ? 'Protocolo Blue Diamond Neo-Colagénesis' : 'Blue Diamond Neo-Collagenesis Protocol',
@@ -64,12 +81,142 @@ export default function CosmeticsSidebarWidget({
       url: '/collection/colway?cat=native-dermal',
       color: '#0284c7'
     };
-  }, [isBlueDiamond, isHair, isColvita, isEs]);
+  }, [isLip, isWashGel, isBlueDiamond, isHair, isColvita, isEs]);
 
   // Configuration according to active product ecosystem
   let systemConfig;
 
-  if (isBlueDiamond) {
+  if (isLip) {
+    systemConfig = {
+      title: isEs ? 'LÍNEA LABIAL TROPOCOLÁGENO COLWAY' : 'COLWAY BIOACTIVE LABIAL SYSTEM',
+      subtitle: isEs ? 'Protección y voluminización labial con Palmitoyl Oligopéptido' : 'Palmitoyl Oligopeptide + Native Tropocollagen mucosal barrier shield',
+      badge: 'LABIAL BARRIER & RECOVERY',
+      headerGradient: 'linear-gradient(135deg, #4a044e 0%, #831843 100%)',
+      accentColor: '#db2777',
+      badgeBg: 'rgba(219, 39, 119, 0.25)',
+      badgeBorder: 'rgba(219, 39, 119, 0.4)',
+      badgeColor: '#fbcfe8',
+      products: [
+        {
+          slug: 'colway-collagen-lip-care',
+          step: isEs ? 'Tratamiento Tópico' : 'Labial Barrier',
+          name: isEs ? 'Cuidado Labial Bioactivo' : 'Bioactive Collagen Lip Care',
+          action: isEs ? 'Bio-Péptido CL & Manto Hidrolipídico' : 'Bio-Peptide CL & Hydro-Lipid Compress',
+          actives: 'Palmitoyl Oligopeptide · Tropocolágeno · Argán & Karité',
+          volume: '4.5 g',
+          dwell: isEs ? 'Reaplicar según necesidad · Mascarilla nocturna' : 'Reapply as needed · Night sleeping compress',
+          icon: '💄',
+          stepColor: '#db2777'
+        },
+        {
+          slug: 'colway-colvita',
+          step: isEs ? 'Sinergia Oral' : 'Systemic Substrate',
+          name: isEs ? 'Colvita Colágeno Liofilizado' : 'Colvita Native Collagen',
+          action: isEs ? 'Aporte sistémico de sustrato para mucosa y bermellón' : 'Systemic amino-acid substrate for mucosal neocollagenesis',
+          actives: 'Tropocolágeno Nativo Liofilizado · Algas Fucus · Vitamina E',
+          volume: '60 / 120 Caps',
+          dwell: isEs ? '2 cápsulas al día con comidas' : '2 capsules daily with meals',
+          icon: '💊',
+          stepColor: '#6366f1'
+        }
+      ],
+      protocolTitle: isEs ? 'Pauta Restauradora Labial & Post-Filler' : 'Labial Barrier & Post-Filler Protocol',
+      protocolDesc: isEs
+        ? 'Forma un apósito hidrolipídico transpirable que protege contra el viento y calor árido, reduce fisuras verticales (+40% hidratación) y acelera la reepitelización post-rellenos de ácido hialurónico.'
+        : 'Forms a breathable hydro-lipid compress shielding delicate vermilion tissue against extreme arid climate, smoothing vertical fissures (+40% hydration) and accelerating recovery post-filler injections.',
+      complianceBadges: [
+        {
+          label: isEs ? 'Bio-Péptido CL & Tropocolágeno' : 'Bio-Peptide CL & Tropocollagen',
+          detail: isEs ? '+40% volumen vermilion y atenuación de fisuras verticales' : '+40% vermilion volume and vertical fissure smoothing',
+          icon: Sparkles,
+          badgeColor: '#db2777'
+        },
+        {
+          label: isEs ? 'Registro CPNP Europeo' : 'EU CPNP Registered',
+          detail: isEs ? 'Conforme Reglamento UE 1223/2009 (Dossier de Seguridad PIF)' : 'Compliant with EU Reg. 1223/2009 (PIF Safety Dossier)',
+          icon: ShieldCheck,
+          badgeColor: '#16a34a'
+        },
+        {
+          label: isEs ? '0% Sensación Cerosa Pegajosa' : '0% Heavy Wax Drag',
+          detail: isEs ? 'Base biomimética de argán, jojoba y manteca de karité' : 'Biomimetic cold-pressed argan, jojoba and shea butter base',
+          icon: Leaf,
+          badgeColor: '#0d9488'
+        },
+        {
+          label: isEs ? 'Fabricación UE · GMP ISO 22716' : 'Made in EU · GMP ISO 22716',
+          detail: isEs ? 'Colway Laboratories · Testado dermatológicamente para tolerancia en mucosas' : 'Colway Laboratories · Dermatologically tested for mucosal tolerance',
+          icon: Award,
+          badgeColor: '#6366f1'
+        }
+      ]
+    };
+  } else if (isWashGel) {
+    systemConfig = {
+      title: isEs ? 'SISTEMA HIGIENE FISIOLÓGICA COLWAY' : 'COLWAY CELLULAR CLEANSING SYSTEM',
+      subtitle: isEs ? 'Limpiador cutáneo pH 5.5 sin sulfatos para rostro y cuerpo' : 'Sulphate-free physiological pH 5.5 cutaneous cleanser for face & body',
+      badge: 'PHYSIOLOGIC pH 5.5',
+      headerGradient: 'linear-gradient(135deg, #082f49 0%, #0369a1 100%)',
+      accentColor: '#0284c7',
+      badgeBg: 'rgba(2, 132, 199, 0.25)',
+      badgeBorder: 'rgba(2, 132, 199, 0.4)',
+      badgeColor: '#bae6fd',
+      products: [
+        {
+          slug: 'colway-cellular-collagen-wash-gel',
+          step: isEs ? 'Paso 1' : 'Step 1',
+          name: isEs ? 'Gel Limpiador Hidrolipídico' : 'Cellular Hydrolipid Wash Gel',
+          action: isEs ? 'Higiene Celular Hipoalergénica pH 5.5' : 'Hypoallergenic Cellular Hygiene pH 5.5',
+          actives: 'Tropocolágeno Nativo · Aloe Vera · Extracto de Noni · D-Pantenol',
+          volume: '250 mL',
+          dwell: isEs ? 'Diario AM / PM con agua tibia' : 'Daily AM / PM with lukewarm water',
+          icon: '🧼',
+          stepColor: '#0284c7'
+        },
+        {
+          slug: 'colway-collagen-vege',
+          step: isEs ? 'Paso 2' : 'Step 2',
+          name: isEs ? 'Colágeno Vege / Blue Diamond' : 'Collagen Vege / Blue Diamond',
+          action: isEs ? 'Regeneración Dérmica sobre Piel Limpia' : 'Dermal Bio-Restoration on Prepped Skin',
+          actives: 'Fitocolágeno o Tropocolágeno + Péptidos',
+          volume: '45 mL / 50 mL',
+          dwell: isEs ? 'Aplicar tras la higiene sobre piel ligeramente húmeda' : 'Apply immediately post-cleansing on damp skin',
+          icon: '✨',
+          stepColor: '#059669'
+        }
+      ],
+      protocolTitle: isEs ? 'Pauta de Preparación Fisiológica' : 'Physiological Skin Preparation Protocol',
+      protocolDesc: isEs
+        ? 'Limpia profundamente impurezas y secreciones sebáceas sin alterar la barrera lipídica ni el manto ácido (pH 5.5), desobstruyendo receptores para una penetración óptima del colágeno y péptidos.'
+        : 'Cleanses deeply without disrupting the cutaneous acid mantle or lipid barrier (pH 5.5), unoccluding cellular receptors for optimal absorption of topical collagen and peptides.',
+      complianceBadges: [
+        {
+          label: isEs ? 'pH Fisiológico 5.5 Neutro' : 'Physiological pH 5.5',
+          detail: isEs ? 'Respeta el manto ácido y el microbioma cutáneo' : 'Preserves the protective acid mantle and skin microbiome',
+          icon: ShieldCheck,
+          badgeColor: '#0284c7'
+        },
+        {
+          label: isEs ? '100% Sin Sulfatos (0% SLS/SLES)' : '0% Sulphates (SLS / SLES Free)',
+          detail: isEs ? 'Tensioactivos suaves de origen vegetal no deslipidizantes' : 'Ultra-gentle plant surfactants preventing barrier stripping',
+          icon: Leaf,
+          badgeColor: '#059669'
+        },
+        {
+          label: isEs ? 'Aloe Barbadensis & Noni' : 'Aloe & Noni Phyto-Complex',
+          detail: isEs ? 'Acción calmante y reepitelizante para pieles reactivas y post-procedimiento' : 'Soothing and anti-erythema botanical complex for post-procedure skin',
+          icon: Sparkles,
+          badgeColor: '#0d9488'
+        },
+        {
+          label: isEs ? 'Fabricación UE · GMP ISO 22716' : 'Made in EU · GMP ISO 22716',
+          detail: isEs ? 'Colway Laboratories · Control por lote con trazabilidad' : 'Colway Laboratories · Batch traceability & stability verified',
+          icon: Award,
+          badgeColor: '#6366f1'
+        }
+      ]
+    };
+  } else if (isBlueDiamond) {
     systemConfig = {
       title: isEs ? 'LÍNEA BLUE DIAMOND REGENERACIÓN' : 'BLUE DIAMOND SYSTEM',
       subtitle: isEs ? 'Protocolo epigenético y de renovación dérmica en 2 pasos' : '2-step synergistic cellular & ECM renewal protocol',

@@ -93,6 +93,17 @@ export default function PublicUnifiedHeader({
   banner = null
 }) {
   const pathname = usePathname();
+  const isPublicProductOrCatalogPage =
+    pathname?.startsWith('/p/') ||
+    pathname?.startsWith('/product/') ||
+    pathname?.startsWith('/collection/') ||
+    pathname?.startsWith('/catalog') ||
+    pathname?.startsWith('/c/') ||
+    pathname?.startsWith('/shared/') ||
+    pathname?.startsWith('/rx/') ||
+    pathname?.startsWith('/proto');
+  const effectiveHideAccountManager = hideAccountManager || isPublicProductOrCatalogPage;
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [internalInquiryOpen, setInternalInquiryOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -396,7 +407,7 @@ function forceCanonicalDomain(urlOrPath) {
               )}
 
               {/* Account Manager Multi-Portal Hub (Only shown when not explicitly hidden) */}
-              {!hideAccountManager && (
+              {!effectiveHideAccountManager && (
                 <Link
                   href="/account-manager"
                   className="puh-btn puh-btn-ghost hide-on-extra-narrow"

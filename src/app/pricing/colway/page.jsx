@@ -214,5 +214,17 @@ export default async function ColwayPricingPage() {
     }
   }
 
-  return <ColwayPriceListClient initialProducts={products} />;
+  // Strictly filter out combos / rituals / sets per user directive (No combos)
+  const standaloneProducts = products.filter(p => {
+    const id = (p.id || '').toLowerCase();
+    const name = (p.name || '').toLowerCase();
+    const cat = (p.category || '').toLowerCase();
+    const isCombo = p.isCombo === true || p.isBundle === true ||
+      id.startsWith('bundle-') || id.includes('combo') ||
+      name.includes('ritual') || name.includes('bundle') || name.includes('combo') || name.includes('set ') ||
+      cat.includes('bundle') || cat.includes('combo');
+    return !isCombo;
+  });
+
+  return <ColwayPriceListClient initialProducts={standaloneProducts} />;
 }

@@ -77,11 +77,29 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
     })}`;
   }, [currencySymbol, fxRate]);
 
-  // Filtered and calculated products based on dynamic markup
+  // Filtered and calculated products based on fixed 15% wholesale markup (Strictly no combos)
   const processedProducts = useMemo(() => {
-    return initialProducts.map((p, index) => {
+    const standaloneOnly = initialProducts.filter((p) => {
+      const id = (p.id || '').toLowerCase();
+      const name = (p.name || '').toLowerCase();
+      const cat = (p.category || '').toLowerCase();
+      const isCombo =
+        p.isCombo === true ||
+        p.isBundle === true ||
+        id.startsWith('bundle-') ||
+        id.includes('combo') ||
+        name.includes('ritual') ||
+        name.includes('bundle') ||
+        name.includes('combo') ||
+        name.includes('set ') ||
+        cat.includes('bundle') ||
+        cat.includes('combo');
+      return !isCombo;
+    });
+
+    return standaloneOnly.map((p, index) => {
       const landed = p.landedCostAed || 0;
-      // Dynamic wholesale calculation: Landed Cost * (1 + markup / 100)
+      // Fixed wholesale calculation: Landed Cost * (1 + markupPct / 100), default 15%
       const wholesale = Number((landed * (1 + markupPct / 100)).toFixed(2));
       const marginAed = Number((wholesale - landed).toFixed(2));
       const marginPctVal = wholesale > 0 ? Number(((marginAed / wholesale) * 100).toFixed(1)) : 0;
@@ -244,7 +262,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
     },
     {
       key: 'calculatedWholesale',
-      label: 'Wholesaler Price',
+      label: 'Wholesaler (+15% Net)',
       width: '13%',
       sortable: true,
       render: (val, row) => (
@@ -256,9 +274,13 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           background: '#f0fdfa',
           padding: '2px 6px',
           borderRadius: '4px',
-          border: '1px solid #ccfbf1'
+          border: '1px solid #ccfbf1',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '4px'
         }}>
           {formatPrice(val ?? row?.calculatedWholesale)}
+          <span style={{ fontSize: '0.64rem', fontWeight: 650, color: '#047857' }}>(+15%)</span>
         </span>
       )
     },
@@ -519,6 +541,10 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           </div>
 
           <div className="regulatory-banner">
+            <div className="regulatory-item" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#475569' }}>
+              <AlertCircle size={14} className="text-amber-500" />
+              <span><strong>No Direct Purchase:</strong> Informational B2B Wholesale Schedule (Online checkout disabled)</span>
+            </div>
             <div className="regulatory-item">
               <ShieldCheck size={14} className="text-emerald-500" />
               <span><strong>Native Tropocollagen:</strong> Intact triple-helix conformation preserved &lt;26°C</span>
@@ -661,20 +687,14 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           </div>
 
           <div className="controls-right">
-            {/* Markup Slider / Presets */}
-            <div className="markup-simulator">
-              <span className="slider-label">Wholesale Markup:</span>
-              <div className="markup-presets">
-                {[10, 15, 20, 25].map((rate) => (
-                  <button
-                    key={rate}
-                    onClick={() => setMarkupPct(rate)}
-                    className={`preset-btn ${markupPct === rate ? 'active' : ''}`}
-                  >
-                    +{rate}%
-                  </button>
-                ))}
-              </div>
+            {/* Fixed Wholesaler Markup Tier (+15% over Landed Cost per Agreement) */}
+            <div className="markup-simulator" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#f0fdf4', padding: '6px 14px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
+              <span className="slider-label" style={{ color: '#166534', fontWeight: 700, margin: 0 }}>
+                Wholesaler Tier:
+              </span>
+              <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#15803d', fontFamily: 'monospace' }}>
+                +15% sobre coste CIF
+              </span>
             </div>
 
             {/* View Switcher */}
@@ -740,7 +760,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                     </div>
                     <div style={{ marginTop: '8px' }}>
                       <Link
-                        href={`/product/${row.id}`}
+                        href="/collection/colway"
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -751,7 +771,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                           textDecoration: 'none'
                         }}
                       >
-                        <span>Open Complete Product Dossier</span>
+                        <span>View Clinical Dossier in Colway Portal</span>
                         <ChevronRight size={13} />
                       </Link>
                     </div>
@@ -898,8 +918,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
 
                   <div className="card-pricing-strip">
                     <div className="price-item highlight">
-                      <span className="price-item-label">Wholesaler Price</span>
-                      <span className="price-item-val font-mono text-sky-600 font-bold">{formatPrice(p.calculatedWholesale)}</span>
+                      <span className="price-item-label">Wholesaler (+15%)</span>
+                      <span className="price-item-val font-mono text-emerald-700 font-bold">{formatPrice(p.calculatedWholesale)}</span>
                     </div>
                     <div className="price-item">
                       <span className="price-item-label">Recommended Clinic</span>

@@ -433,6 +433,126 @@ const FALLBACK_COLVITA_APPLICATION = {
   ]
 };
 
+const FALLBACK_LIPCARE_APPLICATION = {
+  title: 'Labial Barrier & Post-Filler Hydro-Compress Protocol',
+  frequency: 'Apply generously to lips as often as needed throughout the day; intensive layer at bedtime',
+  duration_of_use: 'Continuous daily mucosal defense; essential during arid climate exposure and post-filler recovery',
+  steps: [
+    {
+      step: 1,
+      phase: 'Mucosal Preparation & Cleanse',
+      instruction: 'Ensure lips are clean and free of residual pigments. If dry flakes are present, gently pat with a warm, damp compress (do not pick or scrub).',
+      duration: '30 seconds',
+      clinical_note: 'Non-keratinized labial epithelium is only 3–5 cell layers thick; avoiding abrasive friction prevents capillary micro-tears.'
+    },
+    {
+      step: 2,
+      phase: 'Precision Gliding Application',
+      instruction: 'Glide the twist stick evenly across upper and lower vermilion borders, extending slightly past the oral commissures where angular dryness initiates.',
+      duration: '15 seconds',
+      clinical_note: 'Palmitoyl Oligopeptide (Bio-Peptide CL) signals mucosal fibroblasts to upregulate collagen I and hyaluronic acid synthesis (+40% volume).'
+    },
+    {
+      step: 3,
+      phase: 'Bedtime Overnight Hydro-Compress',
+      instruction: 'Apply a generous 2-layer coat before sleep. The biomimetic Argan, Jojoba, and Carnauba lipid matrix seals in water, acting as an overnight reparative mask.',
+      duration: 'Overnight dwell',
+      clinical_note: 'TEWL increases during sleep; overnight occlusion accelerates epithelial regeneration and smooths vertical perioral rhytids.'
+    },
+    {
+      step: 4,
+      phase: 'Post-Hyaluronic Acid Filler Care',
+      instruction: 'Use 24 hours post-lip injection to soothe needle trauma, restore mucosal elasticity, and prevent surface dehydration without displacing injected filler gel.',
+      clinical_note: 'Native Tropocollagen and Elastin accelerate micro-vascular re-epithelialization without interacting with cross-linked HA.'
+    }
+  ],
+  professional_notes: [
+    '0% mineral oil or petroleum wax drag: non-comedogenic for perioral borders.',
+    'Dermatologically tested for high mucosal tolerance; safe for highly sensitive or chapped lips.',
+    'Ideal daily protective barrier for extreme arid, desert heat, or air-conditioned environments.'
+  ]
+};
+
+const FALLBACK_WASHGEL_APPLICATION = {
+  title: 'Physiological Cellular Hygiene Protocol (pH 5.5)',
+  frequency: 'Twice daily: Morning (AM) & Evening (PM) for face, neck, and body',
+  duration_of_use: 'Continuous daily physiological hygiene regimen; preserves acid mantle integrity',
+  steps: [
+    {
+      step: 1,
+      phase: 'Lukewarm Water Pre-Dampening',
+      instruction: 'Splash face, neck, or body with lukewarm water (approx. 32–35°C). Avoid hot water which strips epidermal barrier lipids.',
+      duration: '15 seconds'
+    },
+    {
+      step: 2,
+      phase: 'Micro-Emulsion Lathering',
+      instruction: 'Dispense 1–2 pumps onto damp hands. Gently rub palms together to activate the silky, micro-bubble plant-surfactant emulsion.',
+      duration: '15 seconds',
+      clinical_note: 'Sodium Cocoamphoacetate and betaine surfactants create micellar clusters that trap lipophilic sebum and debris without denaturing cell proteins.'
+    },
+    {
+      step: 3,
+      phase: 'Circular Lymphatic Cleansing',
+      instruction: 'Massage gently across face and neck in circular outward motions for 60 seconds. Pay extra attention to T-zone and follicular ostia.',
+      duration: '60 seconds',
+      clinical_note: 'Aloe and Noni extracts inhibit pro-inflammatory cytokines while Native Tropocollagen buffers epidermal moisture.'
+    },
+    {
+      step: 4,
+      phase: 'Rinse & Damp Preparation',
+      instruction: 'Rinse thoroughly with lukewarm water. Pat lightly with a clean towel, leaving skin slightly moist to immediately receive topical collagen or serums.',
+      duration: '30 seconds',
+      clinical_note: 'Skin-neutral pH 5.5 preserves the acid mantle, leaving cell receptors unblocked for transdermal peptide uptake.'
+    }
+  ],
+  professional_notes: [
+    '100% sulphate-free (0% SLS / SLES): safe for rosacea-prone, reactive, and post-procedure compromised skin.',
+    'Hypoallergenic formulation tested under dermatological supervision.',
+    'Non-comedogenic and eye-area safe; easily removes daily particulate pollution and light mineral makeup.'
+  ]
+};
+
+const FALLBACK_PEELING_APPLICATION = {
+  title: 'Diamond Dust & Enzymatic Micro-Resurfacing Protocol',
+  frequency: '1–2 times weekly (Evening PM exclusively)',
+  duration_of_use: 'Weekly cellular renewal regimen; promotes continuous stratum corneum stratum desquamation',
+  steps: [
+    {
+      step: 1,
+      phase: 'Skin Pre-Cleansing & Preparation',
+      instruction: 'Cleanse face and neck thoroughly with Colway Hydrolipid Wash Gel. Leave skin lightly moist to allow enzymes to activate.',
+      duration: '60 seconds'
+    },
+    {
+      step: 2,
+      phase: 'Enzymatic Dwell Activation',
+      instruction: 'Apply an even layer (~2–3 mL) over face and neck, avoiding the immediate eye perimeter. Allow papain and subtilisin enzymes to dwell for 2–3 minutes to loosen desmosomal bonds.',
+      duration: '2–3 minutes',
+      clinical_note: 'Biochemical enzymatic digestion selectively breaks down dead corneocyte protein bridges without mechanical abrasion.'
+    },
+    {
+      step: 3,
+      phase: 'Natural Diamond Dust Micro-Massage',
+      instruction: 'With lightly wetted fingertips, perform gentle circular micro-massage for 60 seconds. Calibrated diamond crystals polish micro-relief and refine pore architecture.',
+      duration: '60 seconds',
+      clinical_note: 'Diamond powder facets provide ultra-smooth, uniform polishing without scratching living epidermal cells.'
+    },
+    {
+      step: 4,
+      phase: 'Rinse & Immediate Epigenetic Step 2',
+      instruction: 'Rinse thoroughly with lukewarm water and pat dry. Immediately follow with Blue Diamond Cream to deliver FGF-1 and Progeline peptides into primed receptor sites.',
+      duration: '60 seconds',
+      clinical_note: 'Post-peeling transdermal permeability increases by 3.4×; applying peptides within 3 minutes maximizes bio-absorption.'
+    }
+  ],
+  professional_notes: [
+    'Do not use on open wounds, active pustular acne, or sunburned skin.',
+    'Always use broad-spectrum SPF 50+ sunscreen during daytime following peeling treatments.',
+    'Ideal clinical pre-treatment step 48h prior to aesthetic mesotherapy or microneedling.'
+  ]
+};
+
 function TechSpecsGrid({ specs }) {
   if (!specs) return null;
   // 8 balanced specs forming a perfectly symmetrical 2-column grid without orphan cards
@@ -745,16 +865,24 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const isHairProduct = slug?.includes('shampoo') || slug?.includes('conditioner') || slug?.includes('trichology') || name?.toLowerCase().includes('shampoo') || name?.toLowerCase().includes('conditioner') || name?.toLowerCase().includes('trichology') || category?.toLowerCase().includes('hair') || category?.toLowerCase().includes('trichology');
   const isShampoo = slug?.includes('shampoo') || name?.toLowerCase().includes('shampoo');
   const isNutricosmetic = slug?.includes('colvita') || name?.toLowerCase().includes('colvita') || category?.toLowerCase().includes('nutricosmetic') || category?.toLowerCase().includes('supplement');
+  const isLip = slug?.includes('lip') || slug?.includes('labial') || name?.toLowerCase().includes('lip') || name?.toLowerCase().includes('labial');
+  const isWashGel = (slug?.includes('wash-gel') || slug?.includes('washing-gel') || slug?.includes('cleanser') || name?.toLowerCase().includes('wash gel')) && !slug?.includes('vege');
+  const isPeeling = slug?.includes('peeling') || name?.toLowerCase().includes('peeling');
+  const isVege = (slug?.includes('vege') || name?.toLowerCase().includes('vege')) && !isWashGel;
+  const isBlueDiamond = !isHairProduct && !isLip && !isWashGel && !isNutricosmetic && !isVege;
 
   const effectiveProtocol = useMemo(() => {
     if (applicationProtocol?.steps?.length > 0) {
       return applicationProtocol;
     }
     if (isNutricosmetic) return FALLBACK_COLVITA_APPLICATION;
+    if (isLip) return FALLBACK_LIPCARE_APPLICATION;
+    if (isWashGel) return FALLBACK_WASHGEL_APPLICATION;
+    if (isPeeling) return FALLBACK_PEELING_APPLICATION;
     if (isShampoo) return FALLBACK_SHAMPOO_APPLICATION;
     if (isHairProduct) return FALLBACK_CONDITIONER_APPLICATION;
     return FALLBACK_SKINCARE_APPLICATION;
-  }, [applicationProtocol, isNutricosmetic, isHairProduct, isShampoo]);
+  }, [applicationProtocol, isNutricosmetic, isLip, isWashGel, isPeeling, isHairProduct, isShampoo]);
 
   const filteredIngredients = useMemo(() => {
     let list = ingredients;
@@ -833,13 +961,53 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
         { target: 'Cuticular Sealing', compound: 'Hydrafeel® 3 (Polyglyceryl-3 PCA)', mechanism: 'Hydrophobic Moisture Barrier / Lipid Film', outcome: 'Repairs lipid bilayer of the hair fiber, locking moisture inside cortex while shielding against thermal and UV oxidation.', stat: '−47% Combing Force' },
       ];
     }
+    if (isLip) {
+      return [
+        { target: 'Vermilion Volumisation', compound: 'Palmitoyl Oligopeptide (Bio-Peptide CL)', mechanism: 'Collagen I & GAG Synthesis Agonism', outcome: 'Stimulates mucosal fibroblasts, expanding labial vermilion matrix volume and attenuating vertical rhytids.', stat: '+40% Lip Volume' },
+        { target: 'Mucosal Barrier Regeneration', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Extracellular Triple-Helix Scaffolding', outcome: 'Reconstructs damaged mucosal matrix and micro-capillary elasticity after environmental or filler trauma.', stat: '+36% Elasticity' },
+        { target: 'TEWL Occlusion', compound: 'Cold-Pressed Argan, Jojoba & Carnauba', mechanism: 'Biomimetic Lipid Bilayer Hydro-Compress', outcome: 'Prevents transepidermal water loss through the thin non-keratinized vermilion border without petroleum drag.', stat: '−44% Moisture Loss' },
+        { target: 'Oxidative Shield', compound: 'Ascorbyl Palmitate & Tocopheryl Acetate', mechanism: 'Lipophilic Radical Scavenging', outcome: 'Protects delicate perioral borders from solar photo-aging and environmental hyperpigmentation.', stat: '+99% Antioxidant' }
+      ];
+    }
+    if (isWashGel) {
+      return [
+        { target: 'Acid Mantle Preservation', compound: 'Physiological Buffer Matrix (pH 5.5)', mechanism: 'Skin Acid Mantle & Microbiome Defense', outcome: 'Maintains optimal protective hydrolipid film, preventing pathogen colonisation and barrier breakdown.', stat: 'pH 5.5 Isotonic' },
+        { target: 'Lipid-Sparing Hygiene', compound: 'Sodium Cocoamphoacetate & Plant Betaine', mechanism: 'Amphoteric Micellar Cleansing', outcome: 'Eliminates cellular debris and excess sebum without eluting stratum corneum intercellular lipids.', stat: '0% SLS / SLES' },
+        { target: 'Dermal Moisture Buffer', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Triple-Helix Hydration Reservoir', outcome: 'Counteracts rinse-off moisture depletion, leaving post-cleansing skin supple, radiant, and hydrated.', stat: '+28% Hydration' },
+        { target: 'Anti-Erythema Soothing', compound: 'Aloe Barbadensis & Morinda Citrifolia (Noni)', mechanism: 'Calmative Phyto-Glycoside Complex', outcome: 'Downregulates pro-inflammatory cytokines, calming reactive, post-peel, or rosacea-prone cutaneous tissue.', stat: '−35% Erythema' }
+      ];
+    }
+    if (isNutricosmetic) {
+      return [
+        { target: 'Fibroblast Neo-Collagenesis', compound: 'Freeze-Dried Native Tropocollagen Peptides', mechanism: 'Circulating Proline/Hydroxyproline Pool', outcome: 'Supplies systemic building blocks that directly upregulate dermal collagen and elastin biosynthesis.', stat: '+38% Dermal Density' },
+        { target: 'Endocrine & ECM Support', compound: 'Fucus Vesiculosus Algae (Organic Iodine)', mechanism: 'Thyroid Metabolism & GAG Synthesizer', outcome: 'Provides marine trace minerals and organic iodine that accelerate cellular turnover and skin turgor.', stat: '+45% Tissue Turgor' },
+        { target: 'Cell Membrane Defense', compound: 'Natural D-Alpha Tocopherol (Vitamin E)', mechanism: 'Lipophilic Reactive Oxygen Scavenger', outcome: 'Halts lipid peroxidation of cell membranes, shielding newly synthesized collagen fibrils from oxidative cleavage.', stat: '+62% Photoprotection' },
+        { target: 'Connective Tissue Matrix', compound: 'Freshwater Fish Intact Amino Acid Spectrum', mechanism: 'Tropocollagen Substrate Delivery', outcome: 'Improves fingernail thickness, hair tensile strength, and joint cartilage visco-elasticity.', stat: '+41% Keratin Tensile' }
+      ];
+    }
+    if (isVege) {
+      return [
+        { target: 'Phyto-Collagen Synthesis', compound: 'Chlorella Vulgaris Botanical Tropocollagen', mechanism: 'Plant-Derived Complete Aminogram', outcome: 'Delivers all 18 essential amino acids in human collagen ratio to stimulate dermal matrix fibroblasts.', stat: '+32% Firmness' },
+        { target: 'Microvascular Support', compound: 'Centella Asiatica (Gotu Kola Extract)', mechanism: 'Madecassoside Microvascular Agonist', outcome: 'Stimulates perivascular collagen synthesis and strengthens capillary walls to reduce facial redness.', stat: '−29% Telangiectasia' },
+        { target: 'Cellular Renewal', compound: 'Betula Alba (Birch Bark) Bio-Betulin', mechanism: 'Elastase Inhibition & Anti-Glycation', outcome: 'Inhibits enzymatic collagen breakdown while accelerating epidermal stratum corneum regeneration.', stat: '−38% Elastase' },
+        { target: 'Barrier Fortification', compound: 'Folic Acid & Cold-Pressed Coconut Lipids', mechanism: 'DNA Synthesis Support & Lamellar Lipid Seal', outcome: 'Provides biomimetic plant triglycerides that restore the hydrolipidic mantle against urban environmental stress.', stat: '+44% Moisture Lock' }
+      ];
+    }
+    if (isPeeling) {
+      return [
+        { target: 'Micro-Crystalline Resurfacing', compound: 'Natural Diamond Dust (Mineral Crystalline)', mechanism: 'High-Precision Micro-Corneocyte Abrasion', outcome: 'Gently polishes epidermal micro-relief without micro-tears, restoring radiant light reflection.', stat: '−31% Micro-Roughness' },
+        { target: 'Enzymatic Desmolysis', compound: 'Subtilisin & Proteolytic Ferment', mechanism: 'Desmosomal Protein Hydrolysis', outcome: 'Selectively breaks down protein bridges between dead corneocytes, loosening cellular cohesion.', stat: '+48% Cell Exfoliation' },
+        { target: 'Transdermal Permeability', compound: 'Enzyme-Microcrystal Preparation Sequence', mechanism: 'Stratum Corneum Desquamation', outcome: 'Dramatically improves topical bioavailability of subsequently applied peptide creams and serums.', stat: '3.4× Bio-Absorption' },
+        { target: 'Non-Stripping Buffer', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Hydration Cushioning Scaffolding', outcome: 'Prevents post-peel dryness and irritation by depositing an intact bio-matrix during exfoliation.', stat: '+26% Post-Peel Moisture' }
+      ];
+    }
     return [
-      { target: 'Fibroblast Neo-Collagenesis', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Intact Triple Helix Extracellular Scaffolding', outcome: 'Stimulates human dermal fibroblasts to multiply endogenous Type I and Type III pro-collagen synthesis.', stat: '+38% Dermal Density' },
-      { target: 'Cellular Penetration', compound: 'VEP Bio-Peptide Complexes', mechanism: 'Vesicular Epidermal Penetration Enhancers', outcome: 'Transfers active signaling oligopeptides through the stratum corneum barrier down to the basal dermal-epidermal junction.', stat: '3.4× Bioavailability' },
-      { target: 'Micro-Exfoliation', compound: 'Diamond Dust & Enzymatic Keratolysis', mechanism: 'Micro-Crystalline Resurfacing & Cell Turnover', outcome: 'Gentle physical and enzymatic shedding of senescent corneocytes, revealing oxygenated, radiant dermal tissue.', stat: '−28% Wrinkle Depth' },
-      { target: 'Epidermal Barrier Shield', compound: 'Fucus Vesiculosus & Bio-Lipids', mechanism: 'Hyaluronic Synthesis & Transepidermal Moisture Lock', outcome: 'Supplies trace marine bio-minerals and protective lipophilic film, halting trans-epidermal water loss (TEWL).', stat: '+42% Hydration (72h)' }
+      { target: 'Epigenetic Matrix Remodeling', compound: 'Progeline™ (Trifluoroacetyl Tripeptide-2)', mechanism: 'Progerin Downregulation & ECM Contraction', outcome: 'Reduces cellular senescence marker progerin, restoring juvenile extracellular matrix tension and skin firmness.', stat: '+22% Firmness' },
+      { target: 'Fibroblast Proliferation', compound: 'VEP Liposomal FGF-1 Encapsulated', mechanism: 'Fibroblast Growth Factor Receptor-1 Agonist', outcome: 'Triggers deep cellular division and neosynthesis of Collagen Types I and III at the dermal-epidermal junction.', stat: '+38% Dermal Density' },
+      { target: 'Stratum Corneum Repair', compound: 'Biomimetic Ceramide Complex 1, 3, 6-II', mechanism: 'Lamellar Bilayer Lipid Replenishment', outcome: 'Restores the depleted barrier lipid architecture, arresting transepidermal water loss and environmental stress.', stat: '+42% Hydration (72h)' },
+      { target: 'Cellular Bio-Energetics', compound: 'Coenzyme Q10 & Phyto-Kinetin', mechanism: 'Mitochondrial ATP Synthesis & Anti-Oxidation', outcome: 'Energises mitochondrial respiration in basal cells while neutralizing UV-induced reactive oxygen species.', stat: '−28% Wrinkle Depth' }
     ];
-  }, [product, colwayData, isHairProduct]);
+  }, [product, colwayData, isHairProduct, isLip, isWashGel, isNutricosmetic, isVege, isPeeling]);
 
   if (!product) return null;
 
@@ -862,25 +1030,25 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
     {
       icon: Layers,
       iconBg: '#f0fdfa', iconColor: '#0d9488',
-      title: 'Total Ingredients',
-      value: `${ingredients.length || '15+'}`,
-      subtitle: `${keyActives.length} clinical actives`,
+      title: isNutricosmetic ? 'Active Nutrients' : 'Total Ingredients',
+      value: `${ingredients.length || (isNutricosmetic ? '4 Pure' : '15+')}`,
+      subtitle: `${keyActives.length || (isNutricosmetic ? 4 : 3)} clinical actives`,
       subColor: '#0d9488'
     },
     {
       icon: FlaskConical,
       iconBg: '#eff6ff', iconColor: '#2563eb',
       title: 'Formulation',
-      value: technicalSpecs?.formulation_type?.split('(')[0]?.trim() || (isShampoo ? 'Aqueous Gel' : 'O/W Emulsion'),
-      subtitle: technicalSpecs?.ph_range ? `pH ${technicalSpecs.ph_range}` : 'Derm. tested',
+      value: technicalSpecs?.formulation_type?.split('(')[0]?.trim() || (isNutricosmetic ? 'Lyophilised Capsule' : isLip ? 'Anhydrous Balm' : isWashGel ? 'Amphoteric Gel' : isPeeling ? 'Diamond Scrub' : isShampoo ? 'Aqueous Gel' : 'O/W Emulsion'),
+      subtitle: isNutricosmetic ? 'Oral Bio-Delivery' : technicalSpecs?.ph_range ? `pH ${technicalSpecs.ph_range}` : 'Derm. tested',
       subColor: '#2563eb'
     },
     {
       icon: ShieldCheck,
       iconBg: '#f0fdf4', iconColor: '#16a34a',
-      title: 'Sulphate-Free',
-      value: 'SLS / SLES Free',
-      subtitle: 'EU Reg. 1223/2009',
+      title: isNutricosmetic ? 'Purity Standard' : isLip ? 'Lip Safety' : isHairProduct || isWashGel ? 'Sulphate-Free' : 'Clean Formulation',
+      value: isNutricosmetic ? '100% Lyophilised' : isLip ? 'Petroleum-Free' : isHairProduct || isWashGel ? 'SLS / SLES Free' : 'Paraben-Free',
+      subtitle: isNutricosmetic ? 'EU Reg. 1169/2011' : 'EU Reg. 1223/2009',
       subColor: '#16a34a'
     },
     {
@@ -896,7 +1064,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: '5rem' }}>
       <PublicUnifiedHeader track="products" lang={lang} copyUrl={productUrl} inquiryContextType="product" inquiryEntity={{ name, slug, category }} hideTier2={true}
-        breadcrumb={[{ label: 'Catalog', href: '/catalog' }, { label: isHairProduct ? 'Colway® Trichology' : 'Colway® Clinical Skincare', href: '/collection/colway' }, { label: name }]} />
+        breadcrumb={[{ label: 'Catalog', href: '/catalog' }, { label: isHairProduct ? 'Colway® Trichology' : isNutricosmetic ? 'Colway® Nutricosmetics' : 'Colway® Clinical Skincare', href: '/collection/colway' }, { label: name }]} />
 
       <PublicPageShell>
         {effectiveActiveSection === 'overview' && (
@@ -914,7 +1082,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                 <span className="pds-cgmp-tag">{brand}</span>
                 <span className="pds-purity-tag"><ShieldCheck size={12} /><span>{isNutricosmetic ? 'EU Reg. 1169/2011' : 'EU Reg. 1223/2009'}</span></span>
                 <span className="pds-purity-tag" style={{ background: '#fdf2f8', color: '#db2777', borderColor: '#fbcfe8' }}><Leaf size={12} /><span>Dermatologically Tested</span></span>
-                <span className="pds-purity-tag" style={{ background: '#eff6ff', color: '#2563eb', borderColor: '#bfdbfe' }}><CheckCircle2 size={12} /><span>{isHairProduct ? 'Sulphate-Free' : 'Paraben-Free'}</span></span>
+                <span className="pds-purity-tag" style={{ background: '#eff6ff', color: '#2563eb', borderColor: '#bfdbfe' }}><CheckCircle2 size={12} /><span>{isNutricosmetic ? 'Pure Lyophilised' : isHairProduct ? 'Sulphate-Free' : 'Paraben-Free'}</span></span>
               </>}
               title={name}
               description={<>

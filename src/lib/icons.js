@@ -100,6 +100,7 @@ export { default as List } from 'lucide-react/dist/esm/icons/list';
 export { default as ListTodo } from 'lucide-react/dist/esm/icons/list-todo';
 export { default as Loader2 } from 'lucide-react/dist/esm/icons/loader-2';
 export { default as Lock } from 'lucide-react/dist/esm/icons/lock';
+export { default as Unlock } from 'lucide-react/dist/esm/icons/unlock';
 export { default as LogOut } from 'lucide-react/dist/esm/icons/log-out';
 export { default as Mail } from 'lucide-react/dist/esm/icons/mail';
 export { default as Map } from 'lucide-react/dist/esm/icons/map';
