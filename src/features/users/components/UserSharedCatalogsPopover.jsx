@@ -187,6 +187,21 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '3px',
+                          fontSize: '0.62rem',
+                          fontWeight: 700,
+                          padding: '1px 5px',
+                          borderRadius: '4px',
+                          background: item.sourceType === 'pdf' ? '#f0f9ff' : item.linkMode === 'pricelist' ? '#eff6ff' : '#f0fdf4',
+                          color: item.sourceType === 'pdf' ? '#0284c7' : item.linkMode === 'pricelist' ? '#003666' : '#166534',
+                          border: item.sourceType === 'pdf' ? '1px solid #bae6fd' : item.linkMode === 'pricelist' ? '1px solid #bfdbfe' : '1px solid #bbf7d0',
+                        }}>
+                          <span>{item.sourceType === 'pdf' ? '📄 PDF' : item.linkMode === 'pricelist' ? '📋 Price List' : '🛒 Order List'}</span>
+                        </span>
+
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
                           fontSize: '0.65rem',
                           fontWeight: 700,
                           padding: '1px 5px',

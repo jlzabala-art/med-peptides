@@ -21,6 +21,7 @@ export default function SharedCatalogProductListRow({
   setSelectedPublicProtocol,
   catalogMeta,
   isPeptideCatalog: _IS_PEPTIDE_CATALOG = true,
+  isPriceListOnly = false,
   t,
 }) {
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
@@ -249,6 +250,7 @@ export default function SharedCatalogProductListRow({
             setSelectedPublicProtocol={setSelectedPublicProtocol}
             catalogMeta={catalogMeta}
             hideMasterImage={true}
+            isPriceListOnly={isPriceListOnly}
             t={t}
           />
         </div>

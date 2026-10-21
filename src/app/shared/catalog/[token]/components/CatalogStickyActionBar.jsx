@@ -32,6 +32,7 @@ export default function CatalogStickyActionBar({
   onInquire = () => {},
   onSubmitOrder = () => {},
   isPeptideCatalog = true,
+  isPriceListOnly = false,
   lang = 'en',
   t = (k) => k
 }) {
@@ -99,8 +100,8 @@ export default function CatalogStickyActionBar({
               {catalogCode ? ` • ${catalogCode}` : ''}
             </div>
 
-            {/* Active Cart Quick Pill */}
-            {cartTotalUnits > 0 && (
+            {/* Active Cart Quick Pill (only in order mode) */}
+            {!isPriceListOnly && cartTotalUnits > 0 && (
               <div
                 style={{
                   display: 'inline-flex',
@@ -196,7 +197,7 @@ export default function CatalogStickyActionBar({
           </button>
 
           {/* Primary CTA: Adaptive between Cart Checkout vs Institutional Inquiry */}
-          {cartTotalUnits > 0 ? (
+          {!isPriceListOnly && cartTotalUnits > 0 ? (
             <button
               type="button"
               onClick={onSubmitOrder}

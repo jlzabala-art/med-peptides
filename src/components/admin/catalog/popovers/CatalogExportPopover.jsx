@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Download, Globe, ChevronDown, ChevronUp, Loader,
-  Search, Plus, X, Building, User, Users, ShieldCheck, CheckCircle, Layers, FileText
+  Search, Plus, X, Building, User, Users, ShieldCheck, CheckCircle, Layers, FileText, ShoppingBag
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import StandardDrawer from '@/components/ui/StandardDrawer';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Scope & Supplier Definitions ─────────────────────────────────────────────
 
 const BASE_SUPPLIER_SCOPES = [
   { id: 'all',          label: 'Global Catalog (All Suppliers)', badge: '580+ products', currency: 'USD', filter: null },
@@ -22,28 +22,88 @@ const BASE_SUPPLIER_SCOPES = [
   { id: 'colway',       label: 'Colway',                         badge: 'Native Collagen',  currency: 'EUR', filter: 'supplier-colway' },
 ];
 
-const CATEGORY_OPTIONS = [
-  { id: 'all',                  label: 'Todas las Categorías / All Categories' },
-  { id: 'peptides',             label: 'Péptidos y Biorreguladores (Peptides)' },
-  { id: 'cosmetics',            label: 'Cosmecéutica y Cuidado Facial (Skincare)' },
-  { id: 'aesthetic_injectables',label: 'Inyectables Estéticos (Aesthetic Injectables)' },
-  { id: 'raw_material',         label: 'Materia Prima y APIs (Raw Materials)' },
-  { id: 'iv_drip',              label: 'Sueroterapia (IV Drip Formulations)' },
-  { id: 'supplements',          label: 'Nutracéuticos y Suplementos (Supplements)' },
-  { id: 'diagnostic_test',      label: 'Genómica y Tests Diagnósticos (Genomics)' },
+// ─── Supplier-Specific Categories (100% English GCP Standards) ────────────────
+
+const SUPPLIER_CATEGORY_MAP = {
+  colway: [
+    { id: 'all',                            label: 'All Colway Categories' },
+    { id: 'Advanced Cellular Anti-Aging',   label: 'Advanced Cellular Anti-Aging' },
+    { id: 'Bioactive Barrier Care',         label: 'Bioactive Barrier Care' },
+    { id: 'Exfoliation & Cellular Renewal', label: 'Exfoliation & Cellular Renewal' },
+    { id: 'Cellular Cleansing',             label: 'Cellular Cleansing' },
+    { id: 'Systemic Nutraceutical',         label: 'Systemic Nutraceuticals' },
+    { id: 'cosmetics',                      label: 'Cosmeceuticals & Skincare' },
+  ],
+  lotusland: [
+    { id: 'all',                  label: 'All Lotusland Categories' },
+    { id: 'peptide',              label: 'Peptides & Bioregulators' },
+    { id: 'raw_material',         label: 'Raw Materials & APIs' },
+    { id: 'skin_anti_aging',      label: 'Skin & Anti-Aging' },
+    { id: 'compounding_material', label: 'Compounding Vehicles & Bases' },
+    { id: 'supplement',           label: 'Nutraceuticals & Supplements' },
+    { id: 'clinical_supplies',    label: 'Clinical Supplies & Consumables' },
+  ],
+  magenta: [
+    { id: 'all',                          label: 'All Magenta Categories' },
+    { id: 'peptide',                      label: 'Peptides & Bioregulators' },
+    { id: 'Trichology & Hair Care',       label: 'Trichology & Hair Care' },
+    { id: 'Dermatology & Cosmeceuticals', label: 'Dermatology & Cosmeceuticals' },
+    { id: 'BHRT & Endocrinology',         label: 'BHRT & Endocrinology' },
+    { id: 'Clinical Supplies & Topicals', label: 'Clinical Supplies & Topicals' },
+    { id: 'iv_drips',                     label: 'IV Drip Formulations & Infusions' },
+    { id: 'corporate_services',           label: 'Corporate & Logistics Services' },
+  ],
+  europeptides: [
+    { id: 'all',     label: 'All EuroPeptides Categories' },
+    { id: 'peptide', label: 'Peptides & Bioregulators' },
+  ],
+  larimedical: [
+    { id: 'all',       label: 'All LARIMEDICAL Categories' },
+    { id: 'cosmetics', label: 'Clinical Sterile & Cosmeceuticals' },
+  ],
+  fagron: [
+    { id: 'all',                 label: 'All Fagron Categories' },
+    { id: 'raw_material',        label: 'Raw Materials & APIs' },
+    { id: 'supplement',          label: 'Nutraceuticals & Supplements' },
+    { id: 'peptide',             label: 'Peptides & Bioregulators' },
+    { id: 'hormone',             label: 'BHRT & Endocrinology' },
+    { id: 'cosmetics',           label: 'Cosmeceuticals & Skincare' },
+    { id: 'diagnostic_test',     label: 'Genomics & Diagnostic Tests' },
+    { id: 'genomics_biomarkers', label: 'Genomics & Biomarkers' },
+    { id: 'consumable',          label: 'Consumables & Lab Supplies' },
+  ],
+  dermadry: [
+    { id: 'all',               label: 'All Dermadry Categories' },
+    { id: 'clinical_supplies', label: 'Medical Devices & Clinical Supplies' },
+  ],
+};
+
+const GLOBAL_CATEGORY_OPTIONS = [
+  { id: 'all',                  label: 'All Categories' },
+  { id: 'peptide',              label: 'Peptides & Bioregulators' },
+  { id: 'cosmetics',            label: 'Cosmeceuticals & Skincare' },
+  { id: 'aesthetic_injectables',label: 'Aesthetic Injectables' },
+  { id: 'raw_material',         label: 'Raw Materials & APIs' },
+  { id: 'iv_drip',              label: 'IV Drip Formulations' },
+  { id: 'supplement',           label: 'Nutraceuticals & Supplements' },
+  { id: 'diagnostic_test',      label: 'Genomics & Diagnostic Tests' },
+  { id: 'hormone',              label: 'BHRT & Endocrinology' },
+  { id: 'clinical_supplies',    label: 'Clinical Supplies & Consumables' },
+  { id: 'compounding_material', label: 'Compounding Vehicles & Bases' },
 ];
 
 const MARGIN_PRESETS = [0, 10, 15, 20, 25, 30, 40, 50];
 
 const RECIPIENT_TYPES = [
-  { id: 'doctor',     label: 'Médico (Doctor)',        icon: User     },
-  { id: 'wholeseller',label: 'Wholesaler (Mayorista)',  icon: Building },
-  { id: 'patient',    label: 'Paciente (Patient)',      icon: User     },
-  { id: 'clinic',     label: 'Clínica (Clinic)',        icon: Building },
-  { id: 'general',    label: 'General (Sin asignar)',   icon: Users    },
+  { id: 'doctor',     label: 'Doctor',     icon: User     },
+  { id: 'wholeseller',label: 'Wholesaler', icon: Building },
+  { id: 'patient',    label: 'Patient',    icon: User     },
+  { id: 'clinic',     label: 'Clinic',     icon: Building },
+  { id: 'general',    label: 'General',    icon: Users    },
 ];
 
-// ─── Shared input style ────────────────────────────────────────────────────────
+// ─── Shared Input Style ────────────────────────────────────────────────────────
+
 const INPUT_STYLE = {
   width: '100%',
   padding: '0.45rem 0.65rem',
@@ -69,10 +129,11 @@ export default function CatalogExportPopover({
   filteredProductIds = [],
 }) {
   // ── Scope & Dynamic Suppliers ───────────────────────────────────────────────
-  const [supplierScopes, setSupplierScopes] = useState(BASE_SUPPLIER_SCOPES);
-  const [selectedScope,  setSelectedScope]  = useState('lotusland');
+  const [supplierScopes,   setSupplierScopes]   = useState(BASE_SUPPLIER_SCOPES);
+  const [selectedScope,    setSelectedScope]    = useState('lotusland');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [isCustomMargin, setIsCustomMargin] = useState(!MARGIN_PRESETS.includes(markupPercent));
+  const [linkMode,         setLinkMode]         = useState('order'); // 'order' (Shopping/Buy) | 'pricelist' (Price list only)
+  const [isCustomMargin,   setIsCustomMargin]   = useState(!MARGIN_PRESETS.includes(markupPercent));
 
   // ── Recipient state ─────────────────────────────────────────────────────────
   const [recipientType,    setRecipientType]    = useState('doctor');
@@ -88,6 +149,26 @@ export default function CatalogExportPopover({
   const [newName,  setNewName]  = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPhone, setNewPhone] = useState('');
+
+  // ── Compute Categories of Selected Supplier ─────────────────────────────────
+  const availableCategories = useMemo(() => {
+    const rawKey = String(selectedScope || '').toLowerCase().replace('supplier-', '').trim();
+    if (SUPPLIER_CATEGORY_MAP[rawKey]) {
+      return SUPPLIER_CATEGORY_MAP[rawKey];
+    }
+    for (const [key, list] of Object.entries(SUPPLIER_CATEGORY_MAP)) {
+      if (rawKey.includes(key)) return list;
+    }
+    return GLOBAL_CATEGORY_OPTIONS;
+  }, [selectedScope]);
+
+  // ── Reset Category if Not in Supplier Scope ─────────────────────────────────
+  useEffect(() => {
+    const exists = availableCategories.some(c => c.id === selectedCategory);
+    if (!exists) {
+      setSelectedCategory('all');
+    }
+  }, [selectedScope, availableCategories, selectedCategory]);
 
   // ── Fetch dynamic suppliers from database ──────────────────────────────────
   useEffect(() => {
@@ -173,17 +254,17 @@ export default function CatalogExportPopover({
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Error creando destinatario');
+        throw new Error(err.error || 'Error creating recipient');
       }
       const data = await res.json();
       if (data.item) {
         setSelectedClient(data.item);
-        toast.success(`"${data.item.name}" guardado y asignado`);
+        toast.success(`"${data.item.name}" registered and assigned`);
         setShowQuickAdd(false);
         setNewName(''); setNewEmail(''); setNewPhone('');
       }
     } catch (err) {
-      toast.error(err.message || 'Error saving client');
+      toast.error(err.message || 'Error saving recipient');
     } finally {
       setIsCreatingClient(false);
     }
@@ -195,6 +276,8 @@ export default function CatalogExportPopover({
       supplierId: scopeObj.id === 'filtered' ? null : (scopeObj.filter || scopeObj.id),
       catalogueFilter: scopeObj.catalogueFilter || null,
       category: selectedCategory || 'all',
+      linkMode: linkMode, // 'order' or 'pricelist'
+      allowPurchasing: linkMode === 'order',
       recipientType: recipientType === 'general' ? 'clinic' : recipientType,
       recipientName:  selectedClient ? selectedClient.name  : (recipientType === 'general' ? 'General' : `All ${recipientType}s`),
       recipientEmail: selectedClient?.email  || null,
@@ -249,7 +332,7 @@ export default function CatalogExportPopover({
   // ── Derived ─────────────────────────────────────────────────────────────────
   const currentScopeObj = supplierScopes.find(s => s.id === selectedScope) || supplierScopes[0];
 
-  // ── Section label style ─────────────────────────────────────────────────────
+  // ── Section Label Style ─────────────────────────────────────────────────────
   const sectionLabel = {
     display: 'block',
     fontSize: '0.7rem',
@@ -279,12 +362,12 @@ export default function CatalogExportPopover({
           whiteSpace: 'nowrap',
           transition: 'all 0.12s ease',
         }}
-        title={`Generar Catálogo PDF (+${markupPercent}%) con registro de asignación`}
+        title={`Generate PDF Catalog (+${markupPercent}%) with tracking`}
       >
         {actionLoading?.includes('pdf')
           ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} />
           : <span>📄</span>}
-        <span>{actionLoading?.includes('pdf') ? 'Generando PDF…' : `PDF (+${markupPercent}%)`}</span>
+        <span>{actionLoading?.includes('pdf') ? 'Generating PDF…' : `PDF (+${markupPercent}%)`}</span>
       </button>
 
       {/* Web Share Button */}
@@ -296,19 +379,24 @@ export default function CatalogExportPopover({
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           gap: '0.4rem', padding: '0.65rem 0.5rem',
           border: 'none', borderRadius: '8px', cursor: actionLoading ? 'not-allowed' : 'pointer',
-          backgroundColor: '#16a34a', color: '#ffffff',
+          backgroundColor: linkMode === 'order' ? '#16a34a' : '#003666',
+          color: '#ffffff',
           fontSize: '0.8rem', fontWeight: 700,
           opacity: actionLoading ? 0.7 : 1,
-          boxShadow: '0 2px 6px rgba(22,163,74,0.28)',
+          boxShadow: linkMode === 'order' ? '0 2px 6px rgba(22,163,74,0.28)' : '0 2px 6px rgba(0,54,102,0.28)',
           whiteSpace: 'nowrap',
           transition: 'all 0.12s ease',
         }}
-        title={`Generar Enlace Web Único Rastreado (+${markupPercent}%)`}
+        title={`Generate Unique Tracked Web Link (+${markupPercent}%) [${linkMode === 'order' ? 'Order List' : 'Price List'}]`}
       >
         {actionLoading?.includes('web')
           ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} />
-          : <span>🔗</span>}
-        <span>{actionLoading?.includes('web') ? 'Generando Enlace…' : `Web Link (+${markupPercent}%)`}</span>
+          : <span>{linkMode === 'order' ? '🛒' : '🔗'}</span>}
+        <span>
+          {actionLoading?.includes('web')
+            ? 'Generating Link…'
+            : `${linkMode === 'order' ? 'Order Link' : 'Price Link'} (+${markupPercent}%)`}
+        </span>
       </button>
     </div>
   );
@@ -319,7 +407,7 @@ export default function CatalogExportPopover({
       onClose={onClose}
       title="Export & Share Catalog"
       subtitle={`${currentScopeObj.label} · +${markupPercent}%`}
-      width="450px"
+      width="460px"
       bodyPadding="1.25rem"
       footer={drawerFooter}
       expandable={false}
@@ -329,7 +417,7 @@ export default function CatalogExportPopover({
 
         {/* ── 1. SUPPLIER / SCOPE ─────────────────────────────────────────── */}
         <div>
-          <label style={sectionLabel}>1 · Supplier / Proveedor</label>
+          <label style={sectionLabel}>1 · Supplier / Scope</label>
           <div style={{ position: 'relative' }}>
             <select
               value={selectedScope}
@@ -360,9 +448,14 @@ export default function CatalogExportPopover({
           </div>
         </div>
 
-        {/* ── 2. CATEGORY ─────────────────────────────────────────────────── */}
+        {/* ── 2. PRODUCT CATEGORY (STRICTLY FILTERED BY SUPPLIER) ─────────── */}
         <div>
-          <label style={sectionLabel}>2 · Categoría de Productos</label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <label style={{ ...sectionLabel, marginBottom: 0 }}>2 · Product Category</label>
+            <span style={{ fontSize: '0.67rem', color: '#64748b', fontWeight: 600 }}>
+              {availableCategories.length - 1} categories for {currentScopeObj.label.split(' ')[0]}
+            </span>
+          </div>
           <div style={{ position: 'relative' }}>
             <select
               value={selectedCategory}
@@ -376,7 +469,7 @@ export default function CatalogExportPopover({
                 boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
               }}
             >
-              {CATEGORY_OPTIONS.map(cat => (
+              {availableCategories.map(cat => (
                 <option key={cat.id} value={cat.id}>
                   {cat.label}
                 </option>
@@ -391,7 +484,7 @@ export default function CatalogExportPopover({
         {/* ── 3. MARGIN ON COST ───────────────────────────────────────────── */}
         <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <label style={{ ...sectionLabel, marginBottom: 0 }}>3 · Margen Comercial (Margin on Cost)</label>
+            <label style={{ ...sectionLabel, marginBottom: 0 }}>3 · Margin on Cost</label>
             <span style={{
               fontSize: '0.75rem', fontWeight: 800, color: '#0369a1',
               backgroundColor: '#e0f2fe', padding: '2px 10px', borderRadius: '9999px',
@@ -415,9 +508,9 @@ export default function CatalogExportPopover({
                 style={{ ...INPUT_STYLE, appearance: 'none', padding: '0.45rem 1.8rem 0.45rem 0.65rem', fontWeight: 600, cursor: 'pointer' }}
               >
                 {MARGIN_PRESETS.map(pct => (
-                  <option key={pct} value={pct}>{pct === 0 ? '0% — Precio Base Proveedor (EXW)' : `+${pct}% Margen Comercial`}</option>
+                  <option key={pct} value={pct}>{pct === 0 ? '0% — Base Supplier Cost (EXW)' : `+${pct}% Commercial Margin`}</option>
                 ))}
-                <option value="custom">✏️ Margen Personalizado %…</option>
+                <option value="custom">✏️ Custom Margin %…</option>
               </select>
               <div style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#64748b' }}>
                 <ChevronDown size={13} />
@@ -438,17 +531,79 @@ export default function CatalogExportPopover({
           </div>
         </div>
 
-        {/* ── 4. ASSIGN RECIPIENT / CLIENT ─────────────────────────────────── */}
+        {/* ── 4. LINK CAPABILITY & EXPERIENCE (ORDER LIST VS PRICE LIST) ───── */}
+        <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.75rem', backgroundColor: '#ffffff' }}>
+          <label style={sectionLabel}>4 · Link Experience &amp; Capability</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            {/* Interactive Order List */}
+            <button
+              type="button"
+              onClick={() => setLinkMode('order')}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                padding: '9px 10px',
+                borderRadius: '8px',
+                border: linkMode === 'order' ? '1.5px solid #16a34a' : '1px solid #e2e8f0',
+                backgroundColor: linkMode === 'order' ? '#f0fdf4' : '#f8fafc',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.12s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '1rem' }}>🛒</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: linkMode === 'order' ? '#166534' : '#1e293b' }}>
+                  Order List
+                </span>
+              </div>
+              <div style={{ fontSize: '0.67rem', color: linkMode === 'order' ? '#15803d' : '#64748b', lineHeight: 1.25 }}>
+                Enables cart, quantity selector &amp; purchase order checkout.
+              </div>
+            </button>
+
+            {/* Price List Only */}
+            <button
+              type="button"
+              onClick={() => setLinkMode('pricelist')}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                padding: '9px 10px',
+                borderRadius: '8px',
+                border: linkMode === 'pricelist' ? '1.5px solid #003666' : '1px solid #e2e8f0',
+                backgroundColor: linkMode === 'pricelist' ? '#eff6ff' : '#f8fafc',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.12s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '1rem' }}>📋</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: linkMode === 'pricelist' ? '#003666' : '#1e293b' }}>
+                  Price List Only
+                </span>
+              </div>
+              <div style={{ fontSize: '0.67rem', color: linkMode === 'pricelist' ? '#1e40af' : '#64748b', lineHeight: 1.25 }}>
+                Reference catalog with specs and prices. Hides cart &amp; checkout.
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* ── 5. ASSIGN RECIPIENT / CLIENT ─────────────────────────────────── */}
         <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.75rem', backgroundColor: '#ffffff' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <label style={{ ...sectionLabel, marginBottom: 0 }}>4 · Asignar a Médico, Wholesaler o Paciente</label>
+            <label style={{ ...sectionLabel, marginBottom: 0 }}>5 · Assign to Doctor, Wholesaler or Patient</label>
             {selectedClient && (
               <button
                 type="button"
                 onClick={() => setSelectedClient(null)}
                 style={{ border: 'none', background: 'none', fontSize: '0.68rem', fontWeight: 700, color: '#dc2626', cursor: 'pointer', padding: 0 }}
               >
-                Desasignar
+                Unassign
               </button>
             )}
           </div>
@@ -471,17 +626,17 @@ export default function CatalogExportPopover({
                     gap: '3px',
                     padding: '6px 2px',
                     borderRadius: '6px',
-                    border: isSelected ? '1.5px solid #0284c7' : '1px solid #e2e8f0',
-                    background: isSelected ? '#f0f9ff' : '#f8fafc',
-                    color: isSelected ? '#0369a1' : '#64748b',
+                    border: isSelected ? '1.5px solid #003666' : '1px solid #e2e8f0',
+                    background: isSelected ? '#eff6ff' : '#f8fafc',
+                    color: isSelected ? '#003666' : '#64748b',
                     fontSize: '0.65rem',
                     fontWeight: isSelected ? 800 : 600,
                     cursor: 'pointer',
                     transition: 'all 0.12s ease',
                   }}
                 >
-                  <Icon size={13} color={isSelected ? '#0284c7' : '#64748b'} />
-                  <span>{r.label.split(' ')[0]}</span>
+                  <Icon size={13} color={isSelected ? '#003666' : '#64748b'} />
+                  <span>{r.label}</span>
                 </button>
               );
             })}
@@ -491,13 +646,13 @@ export default function CatalogExportPopover({
           {recipientType === 'general' ? (
             <div style={{ padding: '8px', background: '#f8fafc', borderRadius: '6px', fontSize: '0.74rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <ShieldCheck size={14} color="#0d9488" />
-              <span>Enlace general no asociado a un usuario individual.</span>
+              <span>General link not bound to a specific registered client.</span>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Seleccionar {RECIPIENT_TYPES.find(r => r.id === recipientType)?.label}
+                  Select {RECIPIENT_TYPES.find(r => r.id === recipientType)?.label}
                 </span>
                 {!showQuickAdd && (
                   <button
@@ -506,7 +661,7 @@ export default function CatalogExportPopover({
                     style={{ background: 'none', border: 'none', padding: 0, fontSize: '0.7rem', fontWeight: 700, color: '#0284c7', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
                   >
                     <Plus size={11} />
-                    <span>Crear nuevo</span>
+                    <span>Create new</span>
                   </button>
                 )}
               </div>
@@ -515,7 +670,7 @@ export default function CatalogExportPopover({
               <div style={{ position: 'relative' }}>
                 <input
                   type="text"
-                  placeholder={`Buscar ${recipientType} por nombre o email...`}
+                  placeholder={`Search ${recipientType} by name or email...`}
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   style={{
@@ -568,8 +723,8 @@ export default function CatalogExportPopover({
                 >
                   <option value="">
                     {isLoadingClients
-                      ? `Cargando ${recipientType}s…`
-                      : `-- Elegir ${RECIPIENT_TYPES.find(r => r.id === recipientType)?.label} registrado --`}
+                      ? `Loading ${recipientType}s…`
+                      : `-- Choose registered ${RECIPIENT_TYPES.find(r => r.id === recipientType)?.label} --`}
                   </option>
                   {clientsList.map(item => (
                     <option key={item.id} value={item.id}>
@@ -577,7 +732,7 @@ export default function CatalogExportPopover({
                     </option>
                   ))}
                   <option value="__add_new__">
-                    ➕ Registrar nuevo {RECIPIENT_TYPES.find(r => r.id === recipientType)?.label}…
+                    ➕ Register new {RECIPIENT_TYPES.find(r => r.id === recipientType)?.label}…
                   </option>
                 </select>
                 <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#64748b' }}>
@@ -597,7 +752,7 @@ export default function CatalogExportPopover({
                     <div>
                       <div style={{ fontWeight: 800 }}>{selectedClient.name}</div>
                       <div style={{ opacity: 0.8, fontSize: '0.68rem' }}>
-                        {selectedClient.email || selectedClient.phone || 'ID: ' + selectedClient.id} · Asignado para enlace único
+                        {selectedClient.email || selectedClient.phone || 'ID: ' + selectedClient.id} · Assigned for tracking
                       </div>
                     </div>
                   </div>
@@ -605,7 +760,7 @@ export default function CatalogExportPopover({
                     type="button"
                     onClick={() => setSelectedClient(null)}
                     style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#166534', display: 'flex', alignItems: 'center' }}
-                    title="Quitar asignación"
+                    title="Remove assignment"
                   >
                     <X size={14} />
                   </button>
@@ -620,21 +775,21 @@ export default function CatalogExportPopover({
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#334155' }}>
-                      Nuevo {RECIPIENT_TYPES.find(r => r.id === recipientType)?.label}
+                      New {RECIPIENT_TYPES.find(r => r.id === recipientType)?.label}
                     </span>
                     <button type="button" onClick={() => setShowQuickAdd(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0, color: '#94a3b8' }}>
                       <X size={12} />
                     </button>
                   </div>
-                  <input type="text" required autoFocus placeholder="Nombre / Razón Social *" value={newName} onChange={e => setNewName(e.target.value)} style={{ ...INPUT_STYLE }} />
-                  <input type="email" placeholder="Email de contacto" value={newEmail} onChange={e => setNewEmail(e.target.value)} style={{ ...INPUT_STYLE }} />
+                  <input type="text" required autoFocus placeholder="Full Name / Company Name *" value={newName} onChange={e => setNewName(e.target.value)} style={{ ...INPUT_STYLE }} />
+                  <input type="email" placeholder="Contact Email" value={newEmail} onChange={e => setNewEmail(e.target.value)} style={{ ...INPUT_STYLE }} />
                   <div style={{ display: 'flex', gap: '6px' }}>
-                    <input type="text" placeholder="Teléfono / WhatsApp" value={newPhone} onChange={e => setNewPhone(e.target.value)} style={{ ...INPUT_STYLE, flex: 1 }} />
+                    <input type="text" placeholder="Phone / WhatsApp" value={newPhone} onChange={e => setNewPhone(e.target.value)} style={{ ...INPUT_STYLE, flex: 1 }} />
                     <button
                       type="submit" disabled={isCreatingClient}
-                      style={{ padding: '4px 12px', backgroundColor: '#0284c7', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 700, cursor: isCreatingClient ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap' }}
+                      style={{ padding: '4px 12px', backgroundColor: '#003666', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 700, cursor: isCreatingClient ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap' }}
                     >
-                      {isCreatingClient ? 'Guardando…' : 'Guardar'}
+                      {isCreatingClient ? 'Saving…' : 'Save & Assign'}
                     </button>
                   </div>
                 </form>
@@ -656,14 +811,14 @@ export default function CatalogExportPopover({
           gap: '3px'
         }}>
           <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <span>🔒</span> Enlace Único con Auditoría &amp; Tracking
+            <span>🔒</span> Unique Link with Audit &amp; Tracking
           </div>
           <div style={{ color: '#3b82f6', lineHeight: 1.35 }}>
-            Al generar el Web Link o PDF, se creará un enlace firmado único. Quedará registrado en la ficha del usuario en la tabla de usuarios, notificando en tiempo real cada vez que lo abra o descargue.
+            Generating a Web Link or PDF creates a signed unique URL recorded on the user profile in the users table, with real-time tracking whenever opened or downloaded.
           </div>
         </div>
 
-        {/* ── 5. ADVANCED TOOLS (COLLAPSIBLE) ─────────────────────────────── */}
+        {/* ── 6. ADVANCED TOOLS (COLLAPSIBLE) ─────────────────────────────── */}
         <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
           <button
             type="button"
@@ -675,7 +830,7 @@ export default function CatalogExportPopover({
               textTransform: 'uppercase', letterSpacing: '0.05em',
             }}
           >
-            <span>Raw Data &amp; Herramientas Avanzadas</span>
+            <span>Raw Data &amp; Advanced Tools</span>
             {showRawTools ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
           </button>
 

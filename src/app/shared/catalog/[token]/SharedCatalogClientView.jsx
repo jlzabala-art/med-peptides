@@ -191,6 +191,8 @@ export default function SharedCatalogClientView({
     includePrices,
   });
 
+  const isPriceListOnly = catalogMeta?.linkMode === 'pricelist' || catalogMeta?.allowPurchasing === false;
+
   const { user, activeRole, logout } = useAuth();
   const isAuthenticated = Boolean(user && user.uid && activeRole !== 'guest');
 
@@ -1224,6 +1226,7 @@ export default function SharedCatalogClientView({
                           setSelectedPublicProtocol={setSelectedPublicProtocol}
                           catalogMeta={catalogMeta}
                           isPeptideCatalog={isPeptideCatalog}
+                          isPriceListOnly={isPriceListOnly}
                           t={t}
                         />
                       ))}
@@ -1246,6 +1249,7 @@ export default function SharedCatalogClientView({
                           setSelectedPublicProtocol={setSelectedPublicProtocol}
                           catalogMeta={catalogMeta}
                           isPeptideCatalog={isPeptideCatalog}
+                          isPriceListOnly={isPriceListOnly}
                           t={t}
                         />
                       ))}
@@ -1257,8 +1261,8 @@ export default function SharedCatalogClientView({
           </div>
         )}
 
-        {/* Algolia Cross-sell (optional) */}
-        {cartItems.length > 0 && !isProtocolCatalog && (
+        {/* Algolia Cross-sell (optional, only in order mode) */}
+        {!isPriceListOnly && cartItems.length > 0 && !isProtocolCatalog && (
           <div style={{ marginTop: '24px' }}>
             <AlgoliaRecommendCrossSell
               cartItems={cartItems}
@@ -1294,12 +1298,12 @@ export default function SharedCatalogClientView({
 
       {/* ── Fixed Bottom Footer Action Bar (Google Cloud UX Standards from /p/[slug] & /proto/[slug]) ── */}
       <CatalogStickyActionBar
-        catalogTitle={catalogMeta?.title || 'Institutional Formulations Portfolio'}
+        catalogTitle={catalogMeta?.title || (isPriceListOnly ? 'Institutional Price List' : 'Institutional Formulations Portfolio')}
         catalogCode={catalogCode}
-        badgeText={pharmaMarginTheme?.tierCode || 'INSTITUTIONAL TERMS'}
+        badgeText={isPriceListOnly ? 'REFERENCE PRICE LIST' : (pharmaMarginTheme?.tierCode || 'INSTITUTIONAL TERMS')}
         displayedCount={displayedProducts?.length || 0}
         totalCount={products?.length || 0}
-        cartTotalUnits={cartTotalUnits}
+        cartTotalUnits={isPriceListOnly ? 0 : cartTotalUnits}
         grandTotal={grandTotal}
         currencySymbol={currencySymbol}
         currentCurrency={currentCurrency}
@@ -1311,12 +1315,13 @@ export default function SharedCatalogClientView({
         onInquire={() => setIsInquiryDrawerOpen(true)}
         onSubmitOrder={handleOpenWhatsAppCheckout}
         isPeptideCatalog={isPeptideCatalog}
+        isPriceListOnly={isPriceListOnly}
         lang={lang}
         t={t}
       />
 
-      {/* ── Cart Review Drawer ── */}
-      {isCartOpen && (
+      {/* ── Cart Review Drawer (only in order mode) ── */}
+      {!isPriceListOnly && isCartOpen && (
         <>
           <div className="cart-mobile-backdrop" onClick={() => setIsCartOpen(false)} />
           <div className="cart-drawer-wrapper">

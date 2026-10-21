@@ -25,6 +25,7 @@ export default function SharedCatalogProductCard({
   catalogMeta,
   hideMasterImage = false,
   isPeptideCatalog: _IS_PEPTIDE_CATALOG = true,
+  isPriceListOnly = false,
   t,
 }) {
   const cleanVariants = React.useMemo(() => {
@@ -463,28 +464,30 @@ export default function SharedCatalogProductCard({
                           </div>
                         </div>
 
-                        <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '1px', flexShrink: 0, height: '34px', boxSizing: 'border-box' }}>
-                          <button
-                            type="button"
-                            onClick={() => updateQuantity(v, prod, -1)}
-                            disabled={!cart[v.id]?.quantity}
-                            style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: cart[v.id]?.quantity ? 'pointer' : 'default', fontWeight: 800, fontSize: '1rem', color: cart[v.id]?.quantity ? '#0f172a' : '#cbd5e1' }}
-                            title="Decrease 1 Unit"
-                          >
-                            -
-                          </button>
-                          <span style={{ minWidth: '32px', textAlign: 'center', fontWeight: 800, fontSize: '0.84rem', color: cart[v.id]?.quantity ? '#003666' : '#64748b' }}>
-                            {cart[v.id]?.quantity || 0}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => updateQuantity(v, prod, 1)}
-                            style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#003666', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 800, fontSize: '1rem' }}
-                            title="Add 1 Unit"
-                          >
-                            +
-                          </button>
-                        </div>
+                        {!isPriceListOnly && typeof updateQuantity === 'function' && (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '1px', flexShrink: 0, height: '34px', boxSizing: 'border-box' }}>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(v, prod, -1)}
+                              disabled={!cart[v.id]?.quantity}
+                              style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: cart[v.id]?.quantity ? 'pointer' : 'default', fontWeight: 800, fontSize: '1rem', color: cart[v.id]?.quantity ? '#0f172a' : '#cbd5e1' }}
+                              title="Decrease 1 Unit"
+                            >
+                              -
+                            </button>
+                            <span style={{ minWidth: '32px', textAlign: 'center', fontWeight: 800, fontSize: '0.84rem', color: cart[v.id]?.quantity ? '#003666' : '#64748b' }}>
+                              {cart[v.id]?.quantity || 0}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(v, prod, 1)}
+                              style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#003666', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 800, fontSize: '1rem' }}
+                              title="Add 1 Unit"
+                            >
+                              +
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -513,40 +516,42 @@ export default function SharedCatalogProductCard({
                           </div>
                         </div>
 
-                        <div style={{ flexShrink: 0 }}>
-                          {kitsInCart >= 1 ? (
-                            <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #86efac', padding: '1px', height: '34px', boxSizing: 'border-box' }}>
-                              <button
-                                type="button"
-                                onClick={() => updateQuantity(v, prod, -10)}
-                                style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 800, color: '#166534', fontSize: '1rem' }}
-                                title="Remove 1 Kit (-10)"
-                              >
-                                -
-                              </button>
-                              <span style={{ minWidth: '42px', textAlign: 'center', fontWeight: 800, fontSize: '0.78rem', color: '#15803d' }}>
-                                {kitsInCart} Kit{kitsInCart > 1 ? 's' : ''}
-                              </span>
+                        {!isPriceListOnly && typeof updateQuantity === 'function' && (
+                          <div style={{ flexShrink: 0 }}>
+                            {kitsInCart >= 1 ? (
+                              <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #86efac', padding: '1px', height: '34px', boxSizing: 'border-box' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => updateQuantity(v, prod, -10)}
+                                  style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 800, color: '#166534', fontSize: '1rem' }}
+                                  title="Remove 1 Kit (-10)"
+                                >
+                                  -
+                                </button>
+                                <span style={{ minWidth: '42px', textAlign: 'center', fontWeight: 800, fontSize: '0.78rem', color: '#15803d' }}>
+                                  {kitsInCart} Kit{kitsInCart > 1 ? 's' : ''}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => updateQuantity(v, prod, 10)}
+                                  style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 800, fontSize: '1rem' }}
+                                  title="Add 1 Kit (+10)"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            ) : (
                               <button
                                 type="button"
                                 onClick={() => updateQuantity(v, prod, 10)}
-                                style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 800, fontSize: '1rem' }}
-                                title="Add 1 Kit (+10)"
+                                className="add-kit-btn"
+                                style={{ height: '34px', minWidth: '104px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '5px', borderRadius: '6px', boxSizing: 'border-box' }}
                               >
-                                +
+                                + Add Kit (10)
                               </button>
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => updateQuantity(v, prod, 10)}
-                              className="add-kit-btn"
-                              style={{ height: '34px', minWidth: '104px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '5px', borderRadius: '6px', boxSizing: 'border-box' }}
-                            >
-                              + Add Kit (10)
-                            </button>
-                          )}
-                        </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
