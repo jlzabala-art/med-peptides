@@ -32,6 +32,7 @@ const PORTAL_PREFIXES = [
   '/shared',
   '/quotation',
   '/p',
+  '/raw',
   '/proto',
   '/catalog',
   '/verify',

@@ -536,9 +536,9 @@ export default function OverviewTab({
           }));
 
   const hasBulkApi = useMemo(() => {
-    return (availableFormats || []).some(f => String(f.id || f.name || '').toLowerCase().includes('bulk')) ||
-           (presentationData || []).some(r => String(r.formatId || r.strengthMg || '').toLowerCase().includes('bulk'));
-  }, [availableFormats, presentationData]);
+    if (isDiagnostic) return false;
+    return true; // Active peptide substances always provide the cross-navigation B2B bridge to their Bulk API Raw Monograph
+  }, [isDiagnostic]);
 
   const clinicalAvailableFormats = useMemo(() => {
     return (availableFormats || []).filter(f => {

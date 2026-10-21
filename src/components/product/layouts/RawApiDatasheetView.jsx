@@ -30,6 +30,7 @@ import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
 import { CURATED_CAS_REGISTRY } from '@/utils/casResolver';
 import { deriveCanonicalIdentity } from '@/utils/canonicalProductRegistry';
@@ -614,6 +615,7 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
 
       {/* ── Public Clinical Research Copilot Drawer ── */}
       <PublicAtlasAIDrawer
+        hideFloatingTrigger={true}
         contextType="product"
         contextAnchor={{
           name: productName,
@@ -633,9 +635,19 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
         inquireLabel="Inquire Raw API"
         onInquire={() => setIsInquiryOpen(true)}
         showClinicalAI={true}
-        showSections={false}
+        showSections={true}
+        sectionsCount={3}
+        sectionsLabel="Sections"
+        activeSectionIndex={activeTab === 'identification' ? 1 : activeTab === 'compounding' ? 2 : 3}
+        onOpenSections={() => {
+          const el = document.getElementById('raw-api-tabs');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }}
         lang="en"
       />
+
+      {/* ── Institutional Unified Public Footer ── */}
+      <PublicUnifiedFooter lang="en" />
     </div>
   );
 }
