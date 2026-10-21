@@ -16,6 +16,8 @@ import ColwayMainSections from '../components/collection/ColwayMainSections';
 import PublicInstitutionalInquiryDrawer from '../components/shared/PublicInstitutionalInquiryDrawer';
 import PublicAtlasAIDrawer from '../components/shared/PublicAtlasAIDrawer';
 import ColwayTrichologyStemCellShowcase from '../components/product/ColwayTrichologyStemCellShowcase';
+import ClinicalPortfolioSuiteSwitcher from '../components/navigation/ClinicalPortfolioSuiteSwitcher';
+import ProductTechnicalDetailsPanel from '../components/collection/ProductTechnicalDetailsPanel';
 import CopyableId from '../components/ui/CopyableId';
 import StatusBadge from '../components/ui/StatusBadge';
 import TieredPriceShield from '../components/pricing/TieredPriceShield';
@@ -282,14 +284,28 @@ export default function BrandCollectionPage({
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const isEs = false; // Force English — Spanish translations preserved for future i18n
 
-  const colwayCategories = useMemo(() => [
-    { id: 'all', label: isEs ? 'Todas las Formulaciones' : 'All Formulations', count: 9 },
-    { id: 'epigenetic', label: isEs ? 'Diamante Azul & Epigenética' : 'Epigenetic & Blue Diamond', count: 2 },
-    { id: 'native-dermal', label: isEs ? 'Tropocolágeno Dérmico & Barrera' : 'Native Dermal & Barrier', count: 3 },
-    { id: 'trichology', label: isEs ? 'Tricología Folicular Anti-DHT' : 'Trichology & Scalp System', count: 3 },
-    { id: 'nutricosmetics', label: isEs ? 'Nutricosmética Celular Oral' : 'Inside-Out Nutricosmetics', count: 1 },
-    { id: 'bundles', label: isEs ? 'Kits & Protocolos Clínicos' : 'Clinical Protocol Bundles', count: 3 },
-  ], [isEs]);
+  const brandCategories = useMemo(() => {
+    return (config.categories || []).map((cat) => {
+      const isAll = cat.id === 'all';
+      let count = 0;
+      if (isAll) {
+        count = products.length;
+      } else {
+        const catId = cat.id.toLowerCase();
+        count = products.filter(p => {
+          const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''} ${p.description || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
+          return str.includes(catId);
+        }).length;
+      }
+      return {
+        id: cat.id,
+        label: cat.label,
+        count
+      };
+    });
+  }, [config.categories, products]);
+
+  const colwayCategories = brandCategories;
 
   const [lang, setLang] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -620,8 +636,11 @@ export default function BrandCollectionPage({
         onSelectCollectionProduct={handleProductClick}
       />
 
-      {/* ── 2. Breadcrumbs Bar ── */}
-      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '1rem 2rem 0' }}>
+      {/* ── 2. Atlas Clinical Portfolio Suites Navigation Bar ── */}
+      <ClinicalPortfolioSuiteSwitcher currentSlug={brandSlug} />
+
+      {/* ── 3. Breadcrumbs Bar ── */}
+      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0.85rem clamp(1rem, 3vw, 2rem) 0' }}>
         <Breadcrumbs items={breadcrumbs} />
       </div>
 
@@ -752,8 +771,7 @@ export default function BrandCollectionPage({
       </header>
 
       {/* ── 4. 4 KPIs Grid + Scope Switcher (Regla Golden #22) ── */}
-      {brandSlug !== 'colway' && (
-      <section style={{ maxWidth: '1440px', margin: '-1.25rem auto 2.5rem', padding: '0 2rem' }}>
+      <section style={{ maxWidth: '1440px', margin: '-1.25rem auto 2.5rem', padding: '0 clamp(1rem, 3vw, 2rem)' }}>
         {/* Scope Indicator Bar */}
         <div style={{
           display: 'flex',
@@ -832,7 +850,6 @@ export default function BrandCollectionPage({
           })}
         </div>
       </section>
-      )}
 
       {/* ── 5. GRAPHIC OVERVIEW: HOW RESULTS ARE OBTAINED & LAB REPORT MOCKUP ── */}
       {brandSlug === 'bloodo' && (
@@ -843,20 +860,16 @@ export default function BrandCollectionPage({
 
 
       {/* ── 6. MAIN WORKSPACE (Left Sidebar 320px + Right Main Content) ── */}
-      <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem 5rem' }}>
-        <div
-          className="gcp-collection-workspace"
-          style={{
-            gridTemplateColumns: (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '1fr' : undefined,
-            display: (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? 'block' : undefined
-          }}
-        >
+      <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(1rem, 3vw, 2rem) 5rem' }}>
+        <div className="gcp-collection-workspace">
           {/* ── LEFT COLUMN: STICKY DEDICATED SIDEBAR PER BRAND ── */}
           {brandSlug === 'bloodo' ? (
             <BloodoCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
           ) : brandSlug === 'eterna' ? (
             <EternaCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
-          ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? null : brandSlug === 'colway' ? (
+          ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? (
+            <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
+          ) : brandSlug === 'colway' ? (
             <ColwayCollectionSidebar
               lang={lang}
               onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
@@ -885,7 +898,7 @@ export default function BrandCollectionPage({
             id="colway-main-content"
             style={{
               minWidth: 0,
-              gridColumn: (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '1' : '2',
+              gridColumn: '2',
               order: 2,
               width: '100%'
             }}
@@ -941,8 +954,8 @@ export default function BrandCollectionPage({
                 </span>
               </div>
 
-              {/* Swipeable Category Pills */}
-              {brandSlug === 'colway' && (
+              {/* Swipeable Category Pills (Universal Across All Collections) */}
+              {brandCategories && brandCategories.length > 0 && (
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -953,8 +966,9 @@ export default function BrandCollectionPage({
                   msOverflowStyle: 'none',
                   scrollbarWidth: 'none'
                 }}>
-                  {colwayCategories.map((cat) => {
+                  {brandCategories.map((cat) => {
                     const isSelected = selectedCategory === cat.id;
+                    const accent = config.accentColor || '#0d9488';
                     return (
                       <button
                         key={cat.id}
@@ -965,30 +979,32 @@ export default function BrandCollectionPage({
                           height: '32px',
                           padding: '0 12px',
                           borderRadius: '9999px',
-                          background: isSelected ? '#0d9488' : '#ffffff',
+                          background: isSelected ? accent : '#ffffff',
                           color: isSelected ? '#ffffff' : '#334155',
-                          border: isSelected ? '1px solid #0d9488' : '1px solid #cbd5e1',
+                          border: isSelected ? `1px solid ${accent}` : '1px solid #cbd5e1',
                           fontSize: '0.74rem',
                           fontWeight: isSelected ? 700 : 600,
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '6px',
-                          boxShadow: isSelected ? '0 2px 6px rgba(13, 148, 136, 0.25)' : 'none',
+                          boxShadow: isSelected ? `0 2px 6px ${accent}40` : 'none',
                           transition: 'all 0.15s ease'
                         }}
                       >
                         <span>{cat.label}</span>
-                        <span style={{
-                          fontSize: '0.66rem',
-                          padding: '1px 5px',
-                          borderRadius: '9999px',
-                          background: isSelected ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
-                          color: isSelected ? '#ffffff' : '#64748b',
-                          fontWeight: 700
-                        }}>
-                          {cat.count}
-                        </span>
+                        {cat.count > 0 && (
+                          <span style={{
+                            fontSize: '0.66rem',
+                            padding: '1px 5px',
+                            borderRadius: '9999px',
+                            background: isSelected ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+                            color: isSelected ? '#ffffff' : '#64748b',
+                            fontWeight: 700
+                          }}>
+                            {cat.count}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -1379,27 +1395,25 @@ export default function BrandCollectionPage({
                               adminSimulationTier={adminSimulationTier}
                               onSelectAdminSimulationTier={setAdminSimulationTier}
                             />
-                            {brandSlug !== 'ultraperson' && brandSlug !== 'ultraman' && (
-                              <button
-                                type="button"
-                                onClick={(e) => toggleExpand(product.id, e)}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  color: '#64748b',
-                                  fontSize: '0.74rem',
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px',
-                                  padding: '6px 8px'
-                                }}
-                              >
-                                <span>{isExpanded ? (isEs ? 'Menos' : 'Less') : (isEs ? 'Detalles' : 'Details')}</span>
-                                <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => toggleExpand(product.id, e)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#64748b',
+                                fontSize: '0.74rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                padding: '6px 8px'
+                              }}
+                            >
+                              <span>{isExpanded ? (isEs ? 'Menos' : 'Less') : (isEs ? 'Detalles' : 'Details')}</span>
+                              <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                            </button>
 
                             {(() => {
                               const doc = resolveProductDatasheet(product, brandSlug);
@@ -1463,55 +1477,12 @@ export default function BrandCollectionPage({
                         </div>
 
                         {/* Inline Expandable Details in Table mode */}
-                        {isExpanded && brandSlug !== 'ultraperson' && brandSlug !== 'ultraman' && (
-                          <div style={{
-                            background: '#f8fafc',
-                            borderTop: '1px solid #e2e8f0',
-                            padding: '10px 14px',
-                            fontSize: '0.76rem',
-                            color: '#334155',
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                            gap: '8px'
-                          }}>
-                            <div>
-                              <strong style={{ color: '#0f172a' }}>
-                                {brandSlug === 'colway' 
-                                  ? (isEs ? 'Fabricación & Estándar:' : 'Quality & Compliance:')
-                                  : (isEs ? 'Laboratorio de Referencia:' : 'Reference Lab:')
-                                }
-                              </strong> {
-                                brandSlug === 'eterna' ? 'Eurofins Genomics (Munich/Ebersberg) · CAP / CLIA / ISO 17025' :
-                                brandSlug === 'ultraperson' ? 'PharmaPolis Compounding Labs · EU GMP / cGMP' :
-                                brandSlug === 'colway' ? 'Colway sp.j. (Poland / EU) · ISO 22716 / CPNP Compliant' :
-                                'LifeLab1 Central Lab (Vilnius) · ISO 15189'
-                              }
-                            </div>
-                            <div>
-                              <strong style={{ color: '#0f172a' }}>
-                                {brandSlug === 'colway'
-                                  ? (isEs ? 'Tecnología Bioactiva:' : 'Bioactive Technology:')
-                                  : (isEs ? 'Tecnología / Metodología:' : 'Analytical Method:')
-                                }
-                              </strong> {
-                                brandSlug === 'eterna' ? 'Illumina Infinium +700k SNPs & High-Density Proteomics' :
-                                brandSlug === 'ultraperson' ? 'Vegan HPMC Delayed-Release Capsule Standardization' :
-                                brandSlug === 'colway' ? 'Intact 3D Triple-Helix Tropocollagen & Cold Freeze-Drying' :
-                                'LC-MS/MS & UHPLC Tandem MS'
-                              }
-                            </div>
-                            {brandSlug !== 'colway' && (
-                              <div>
-                                <strong style={{ color: '#0f172a' }}>
-                                  {isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:'}
-                                </strong> {
-                                  brandSlug === 'eterna' ? '15 – 20 Business Days' :
-                                  brandSlug === 'ultraperson' ? '48 – 72h Compounding Dispatch' :
-                                  '48 – 72h post-receipt'
-                                }
-                              </div>
-                            )}
-                          </div>
+                        {isExpanded && (
+                          <ProductTechnicalDetailsPanel
+                            product={product}
+                            brandSlug={brandSlug}
+                            isEs={isEs}
+                          />
                         )}
                       </div>
                     );
@@ -1652,98 +1623,12 @@ export default function BrandCollectionPage({
                         </p>
 
                         {/* Master-Detail Expandable Drawer (Regla #4) */}
-                        {isExpanded && brandSlug !== 'ultraperson' && brandSlug !== 'ultraman' && (
-                          <div style={{
-                            background: '#f8fafc',
-                            borderRadius: '8px',
-                            border: '1px solid #e2e8f0',
-                            padding: '10px 12px',
-                            fontSize: '0.76rem',
-                            color: '#334155',
-                            marginBottom: '1rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '6px'
-                          }}>
-                            <div>
-                              <strong style={{ color: '#0f172a' }}>
-                                {brandSlug === 'colway' 
-                                  ? (isEs ? 'Fabricación & Estándar:' : 'Quality & Compliance:')
-                                  : (isEs ? 'Laboratorio de Referencia:' : 'Reference Lab:')
-                                }
-                              </strong> {
-                                brandSlug === 'eterna' ? 'Eurofins Genomics (Munich/Ebersberg) · CAP / CLIA / ISO 17025' :
-                                brandSlug === 'ultraperson' ? 'PharmaPolis Compounding Labs · EU GMP / cGMP' :
-                                brandSlug === 'colway' ? 'Colway sp.j. (Poland / EU) · ISO 22716 / CPNP Compliant' :
-                                'LifeLab1 Central Lab (Vilnius) · ISO 15189'
-                              }
-                            </div>
-                            <div>
-                              <strong style={{ color: '#0f172a' }}>
-                                {brandSlug === 'colway'
-                                  ? (isEs ? 'Tecnología Bioactiva:' : 'Bioactive Technology:')
-                                  : (isEs ? 'Tecnología / Metodología:' : 'Analytical Method:')
-                                }
-                              </strong> {
-                                brandSlug === 'eterna' ? 'Illumina Infinium +700k SNPs & High-Density Proteomics' :
-                                brandSlug === 'ultraperson' ? 'Vegan HPMC Delayed-Release Capsule Standardization' :
-                                brandSlug === 'colway' ? 'Intact 3D Triple-Helix Tropocollagen & Cold Freeze-Drying' :
-                                'LC-MS/MS & UHPLC Tandem MS'
-                              }
-                            </div>
-                            {brandSlug !== 'colway' && (
-                              <div>
-                                <strong style={{ color: '#0f172a' }}>
-                                  {isEs ? 'Tiempo de Respuesta / Logística:' : 'Turnaround / Logistics:'}
-                                </strong> {
-                                  brandSlug === 'eterna' ? '15 – 20 Business Days' :
-                                  brandSlug === 'ultraperson' ? '48 – 72h Compounding Dispatch' :
-                                  '48 – 72h post-receipt'
-                                }
-                              </div>
-                            )}
-                            {(() => {
-                              const doc = resolveProductDatasheet(product, brandSlug);
-                              if (!doc) return null;
-                              return (
-                                <div style={{
-                                  marginTop: '4px',
-                                  padding: '8px 10px',
-                                  borderRadius: '6px',
-                                  background: '#fff7ed',
-                                  border: '1px solid #fed7aa',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'space-between',
-                                  gap: '8px'
-                                }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <FileText size={14} color="#ea580c" />
-                                    <span style={{ fontSize: '0.74rem', color: '#9a3412', fontWeight: 650 }}>
-                                      {doc.title} ({doc.size})
-                                    </span>
-                                  </div>
-                                  <a
-                                    href={doc.url}
-                                    download={doc.filename}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{
-                                      fontSize: '0.70rem',
-                                      fontWeight: 800,
-                                      color: '#ffffff',
-                                      background: '#ea580c',
-                                      padding: '3px 8px',
-                                      borderRadius: '4px',
-                                      textDecoration: 'none'
-                                    }}
-                                  >
-                                    Download PDF ↓
-                                  </a>
-                                </div>
-                              );
-                            })()}
-                          </div>
+                        {isExpanded && (
+                          <ProductTechnicalDetailsPanel
+                            product={product}
+                            brandSlug={brandSlug}
+                            isEs={isEs}
+                          />
                         )}
 
                         {/* Tiered Pricing Shield with Lock & Role Authorization (Golden Rule #14 & #22) */}
@@ -1758,28 +1643,32 @@ export default function BrandCollectionPage({
                         />
 
                         {/* Card Action Strip */}
-                        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? 'flex-end' : 'space-between', gap: '8px', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
-                          {brandSlug !== 'ultraperson' && brandSlug !== 'ultraman' && (
-                            <button
-                              type="button"
-                              onClick={(e) => toggleExpand(product.id, e)}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                color: '#64748b',
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '4px 0'
-                              }}
-                            >
-                              <span>{isExpanded ? (isEs ? 'Ocultar' : 'Hide Specs') : (isEs ? 'Master-Detail' : (brandSlug === 'colway' ? 'Clinical Specs' : 'Specs & Lab'))}</span>
-                              <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
-                            </button>
-                          )}
+                        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
+                          <button
+                            type="button"
+                            onClick={(e) => toggleExpand(product.id, e)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#64748b',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '4px 0'
+                            }}
+                          >
+                            <span>
+                              {isExpanded
+                                ? (isEs ? 'Ocultar' : 'Hide Specs')
+                                : (isEs
+                                    ? (brandSlug === 'colway' ? 'INCI & Bioactivos' : (brandSlug === 'ultraman' || brandSlug === 'ultraperson') ? 'Compuestos Activos' : 'Especificaciones Lab')
+                                    : (brandSlug === 'colway' ? 'INCI & Bioactives' : (brandSlug === 'ultraman' || brandSlug === 'ultraperson') ? 'Active Compounds' : 'Diagnostic Specs'))}
+                            </span>
+                            <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                          </button>
 
                           <div style={{ display: 'flex', gap: '6px' }}>
                             {(() => {
@@ -1949,7 +1838,9 @@ export default function BrandCollectionPage({
                 <BloodoCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
               ) : brandSlug === 'eterna' ? (
                 <EternaCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
-              ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? null : (
+              ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? (
+                <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
+              ) : (
                 <ColwayCollectionSidebar
                   lang={lang}
                   onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }}
@@ -2163,7 +2054,9 @@ export default function BrandCollectionPage({
       />
 
       {/* ── 7. Unified Public Institutional Footer (Bottom) ── */}
-      <PublicUnifiedFooter lang={lang} />
+      <div style={{ clear: 'both', width: '100%', marginTop: '3.5rem' }}>
+        <PublicUnifiedFooter lang={lang} />
+      </div>
     </div>
   );
 }
