@@ -1,24 +1,72 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
   Award,
+  ChevronDown,
   ExternalLink
 } from '@/lib/icons';
 import BrandLogo from '../common/BrandLogo';
 import './PublicUnifiedFooter.css';
 
+const FOOTER_SECTIONS = [
+  {
+    id: 'therapeutics',
+    title: 'Therapeutics',
+    titleMobile: 'Therapeutics & Formulations',
+    titleEs: 'Terapéutica',
+    links: [
+      { label: 'Peptide Therapeutics & GLP-1', labelEs: 'Terapia Peptídica & GLP-1', href: '/collection/peptides' },
+      { label: 'Colway® Native Bio-Collagen', labelEs: 'Colway® Tropocolágeno Nativo', href: '/collection/colway' },
+      { label: 'Pharmaceutical APIs & Compounding', labelEs: 'Materia Prima Farmacéutica & APIs', href: '/collection/research-supplies' },
+      { label: 'Clinical Nutraceuticals & BHRT', labelEs: 'Nutracéutica Clínica & BHRT', href: '/collection/ultraperson' },
+    ]
+  },
+  {
+    id: 'diagnostics',
+    title: 'Diagnostics & Pathways',
+    titleMobile: 'Diagnostics & Clinical Pathways',
+    titleEs: 'Diagnóstico & Vías',
+    links: [
+      { label: 'Bloodo™ Capillary Diagnostics (DBS)', labelEs: 'Diagnóstico Capilar DBS Bloodo™', href: '/collection/bloodo' },
+      { label: 'TeleTest HTMA & Genomics', labelEs: 'TeleTest HTMA & Genómica', href: '/collection/teletest' },
+      { label: 'Clinical Protocols Directory', labelEs: 'Directorio de Protocolos Clínicos', href: '/protocols' },
+      { label: 'UltraPerson™ Precision Medicine', labelEs: 'Medicina de Precisión UltraPerson™', href: '/collection/ultraperson' },
+    ]
+  },
+  {
+    id: 'practitioner',
+    title: 'Practitioner & Ops',
+    titleMobile: 'Practitioner & Clinical Ops',
+    titleEs: 'Portal Médico & B2B',
+    links: [
+      { label: 'Physician & Clinic Portal (/dr)', labelEs: 'Portal Médico Facultativo (/dr)', href: '/login' },
+      { label: 'Digital Compounding E-Rx', labelEs: 'Prescripción Electrónica (E-Rx)', href: '/rx/intake' },
+      { label: 'B2B Wholesale Pricing', labelEs: 'Tarifario Mayorista B2B', href: '/b2b/colway-prices' },
+      { label: 'Specimen & COA Verification', labelEs: 'Verificación de Lotes & COAs', href: '/verify' },
+    ]
+  }
+];
+
 /**
  * PublicUnifiedFooter
  * ─────────────────────────────────────────────────────────────────────────────
  * Google Cloud Console compliant clinical and institutional footer.
- * Clean, lightweight, zero-underline modern UX with minimal information density.
- * Features automatic safe-area clearance for persistent bottom action docks.
+ * Features an adaptive, progressive-disclosure mobile accordion layout
+ * to eliminate mobile scroll fatigue and prevent overlap with bottom action docks.
  */
 export default function PublicUnifiedFooter({ lang = 'en' }) {
-  const isEs = false; // Force English — Spanish translations preserved for future i18n
+  const isEs = false; // Force English — translations preserved for i18n
+  const [openMobileSections, setOpenMobileSections] = useState({});
+
+  const toggleMobileSection = (id) => {
+    setOpenMobileSections(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
 
   const linkStyle = {
     color: '#5f6368',
@@ -37,14 +85,11 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
     <footer
       id="public-unified-footer"
       className="public-unified-footer"
-      style={{
-        paddingBottom: 'calc(2.5rem + var(--atlas-sticky-bar-height, 0px))'
-      }}
     >
       <div className="public-footer-container">
         
-        {/* ── 4-Column GCP Curated Directory (Zero Underlines, Concise Links) ── */}
-        <div className="public-footer-grid">
+        {/* ── DESKTOP & TABLET VIEW (Clean 4-Column GCP Grid) ── */}
+        <div className="public-footer-desktop-grid">
           
           {/* Column 1: Institutional Identity & Live Operational Status */}
           <div className="public-footer-brand-col">
@@ -63,72 +108,83 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
             </div>
           </div>
 
-          {/* Column 2: Therapeutics & Formulations */}
-          <div>
-            <div className="public-footer-title">
-              {isEs ? 'Terapéutica' : 'Therapeutics'}
+          {/* Columns 2-4: Curated Directories */}
+          {FOOTER_SECTIONS.map((section) => (
+            <div key={section.id}>
+              <div className="public-footer-title">
+                {isEs ? section.titleEs : section.title}
+              </div>
+              <ul className="public-footer-links">
+                {section.links.map((link, idx) => (
+                  <li key={idx}>
+                    <Link href={link.href} style={linkStyle}>
+                      {isEs ? link.labelEs : link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="public-footer-links" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'Terapia Peptídica & GLP-1' : 'Peptide Therapeutics & GLP-1'}
-              </li>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'Colway® Tropocolágeno Nativo' : 'Colway® Native Bio-Collagen'}
-              </li>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'Materia Prima Farmacéutica & APIs' : 'Pharmaceutical APIs & Compounding'}
-              </li>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'Nutracéutica Clínica & BHRT' : 'Clinical Nutraceuticals & BHRT'}
-              </li>
-            </ul>
+          ))}
+
+        </div>
+
+        {/* ── MOBILE VIEW (Progressive Disclosure Accordions - GCP UX) ── */}
+        <div className="public-footer-mobile-view">
+          
+          {/* Compact Mobile Brand & Status Header */}
+          <div className="public-footer-mobile-header">
+            <BrandLogo variant="dark" showText={true} />
+            <div className="gcp-status-pill gcp-status-pill-mobile">
+              <span className="gcp-status-dot" />
+              <span>{isEs ? 'Sistemas OK' : 'Operational'}</span>
+            </div>
           </div>
 
-          {/* Column 3: Diagnostics & Protocols */}
-          <div>
-            <div className="public-footer-title">
-              {isEs ? 'Diagnóstico & Vías' : 'Diagnostics & Pathways'}
-            </div>
-            <ul className="public-footer-links" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'Diagnóstico Capilar DBS Bloodo™' : 'Bloodo™ Capillary Diagnostics (DBS)'}
-              </li>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'TeleTest HTMA & Genómica' : 'TeleTest HTMA & Genomics'}
-              </li>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'Directorio de Protocolos Clínicos' : 'Clinical Protocols Directory'}
-              </li>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'Medicina de Precisión UltraPerson™' : 'UltraPerson™ Precision Medicine'}
-              </li>
-            </ul>
-          </div>
+          {/* Interactive Mobile Accordions (Rule #26 Progressive Disclosure) */}
+          <div className="public-footer-mobile-accordions">
+            {FOOTER_SECTIONS.map((section) => {
+              const isOpen = Boolean(openMobileSections[section.id]);
+              return (
+                <div key={section.id} className="gcp-footer-accordion-item">
+                  <button
+                    type="button"
+                    onClick={() => toggleMobileSection(section.id)}
+                    className={`gcp-footer-accordion-header ${isOpen ? 'active' : ''}`}
+                    aria-expanded={isOpen}
+                  >
+                    <span className="gcp-footer-accordion-title">
+                      {isEs ? section.titleEs : section.titleMobile}
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="gcp-footer-accordion-badge">
+                        {section.links.length}
+                      </span>
+                      <ChevronDown
+                        size={15}
+                        className={`gcp-footer-accordion-icon ${isOpen ? 'open' : ''}`}
+                      />
+                    </div>
+                  </button>
 
-          {/* Column 4: Practitioner & Clinical Ops */}
-          <div>
-            <div className="public-footer-title">
-              {isEs ? 'Portal Médico & B2B' : 'Practitioner & Ops'}
-            </div>
-            <ul className="public-footer-links" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'Portal Médico Facultativo (/dr)' : 'Physician & Clinic Portal (/dr)'}
-              </li>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'Prescripción Electrónica (E-Rx)' : 'Digital Compounding E-Rx'}
-              </li>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'Tarifario Mayorista B2B' : 'B2B Wholesale Pricing'}
-              </li>
-              <li style={{ color: '#5f6368', fontSize: '0.82rem', padding: '3px 0' }}>
-                {isEs ? 'Verificación de Lotes & COAs' : 'Specimen & COA Verification'}
-              </li>
-            </ul>
+                  {isOpen && (
+                    <ul className="gcp-footer-accordion-list">
+                      {section.links.map((link, idx) => (
+                        <li key={idx}>
+                          <Link href={link.href} className="gcp-footer-accordion-link">
+                            <span>{isEs ? link.labelEs : link.label}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
         </div>
 
-        {/* ── Minimalist GCP Compliance Strip (GCP Trust Center Style) ── */}
+        {/* ── GCP Compliance Strip (Trust Center Style) ── */}
         <div className="gcp-compliance-strip">
           <div className="gcp-compliance-content">
             <ShieldCheck size={16} color="#188038" style={{ flexShrink: 0 }} />
@@ -138,7 +194,7 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
               </strong>
               {isEs
                 ? 'Dispositivos CE-IVDR (UE 2017/746) e ISO 15189/17025. Fabricación bajo normativas EU GMP. Acceso exclusivo para profesionales sanitarios acreditados.'
-                : 'CE-IVDR (EU 2017/746) & ISO 15189/17025 compliant diagnostics. Formulations compounded under EU GMP monographs. Intended strictly for accredited healthcare professionals.'}
+                : 'CE-IVDR (EU 2017/746) & ISO 15189/17025 compliant diagnostics. Formulations compounded under EU GMP monographs.'}
             </div>
           </div>
           <div className="gcp-compliance-badge">
@@ -147,9 +203,9 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
           </div>
         </div>
 
-        {/* ── Bottom Utility Bar: Clean, Minimalist & Legal (GCP Style) ── */}
+        {/* ── Bottom Utility Bar: Minimalist & Legal (GCP Style) ── */}
         <div className="public-footer-bottom">
-          <div>
+          <div className="public-footer-copyright">
             © 2026 <strong style={{ color: '#202124' }}>Atlas Health Services</strong>. {isEs ? 'Todos los derechos reservados.' : 'All rights reserved.'}
           </div>
 
