@@ -307,7 +307,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
       },
       {
         key: 'name',
-        label: 'Product & Clinical Indication',
+        label: 'Product',
         width: (canViewLanded && showLandedCost) ? '28%' : '34%',
         sortable: true,
         render: (_, row) => (
@@ -317,56 +317,47 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                 src={row.image}
                 alt={row.name}
                 style={{
-                  width: '52px',
-                  height: '52px',
-                  minWidth: '52px',
-                  maxWidth: '52px',
-                  minHeight: '52px',
-                  maxHeight: '52px',
+                  width: '42px',
+                  height: '42px',
+                  minWidth: '42px',
+                  maxWidth: '42px',
+                  minHeight: '42px',
+                  maxHeight: '42px',
                   objectFit: 'contain',
                   borderRadius: '6px',
                   background: '#ffffff',
                   border: '1px solid #e2e8f0',
-                  padding: '3px',
+                  padding: '2px',
                   flexShrink: 0
                 }}
                 loading="lazy"
               />
             )}
-            <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '1px' }}>
-              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a', lineHeight: 1.25 }}>
-                {row?.name}
-              </div>
-              <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.3 }}>
-                {row?.subtitle}
-              </div>
+            <div style={{ minWidth: 0, fontWeight: 700, fontSize: '0.85rem', color: '#0f172a', lineHeight: 1.3 }}>
+              {row?.name}
             </div>
           </div>
         )
       },
       {
         key: 'volume',
-        label: 'Presentation',
+        label: 'Size',
         width: '10%',
         sortable: true,
         render: (val, row) => (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
-            <span style={{
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              color: '#0369a1',
-              background: '#f0f9ff',
-              border: '1px solid #bae6fd',
-              padding: '2px 7px',
-              borderRadius: '4px',
-              whiteSpace: 'nowrap'
-            }}>
-              {val ?? row?.volume}
-            </span>
-            <div style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.25 }}>
-              {row?.presentation}
-            </div>
-          </div>
+          <span style={{
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            color: '#0369a1',
+            background: '#f0f9ff',
+            border: '1px solid #bae6fd',
+            padding: '2px 8px',
+            borderRadius: '4px',
+            whiteSpace: 'nowrap',
+            display: 'inline-block'
+          }}>
+            {val ?? row?.volume}
+          </span>
         )
       }
     ];
@@ -1228,8 +1219,8 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                 <tr>
                   <th style={{ width: '4%' }} className="text-center">#</th>
                   <th style={{ width: '12%' }}>SKU</th>
-                  <th style={{ width: '32%' }}>Product & Clinical Indication</th>
-                  <th style={{ width: '12%' }}>Presentation</th>
+                  <th style={{ width: '32%' }}>Product</th>
+                  <th style={{ width: '12%' }}>Size</th>
                   <th style={{ width: '14%' }} className="text-right th-highlight">
                     Wholesaler Price <span className="th-sub">(B2B Net)</span>
                   </th>
@@ -1260,17 +1251,17 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                             src={p.image}
                             alt={p.name}
                             style={{
-                              width: '54px',
-                              height: '54px',
-                              minWidth: '54px',
-                              maxWidth: '54px',
-                              minHeight: '54px',
-                              maxHeight: '54px',
+                              width: '44px',
+                              height: '44px',
+                              minWidth: '44px',
+                              maxWidth: '44px',
+                              minHeight: '44px',
+                              maxHeight: '44px',
                               objectFit: 'contain',
                               borderRadius: '6px',
                               background: '#ffffff',
                               border: '1px solid #e2e8f0',
-                              padding: '3px',
+                              padding: '2px',
                               flexShrink: 0
                             }}
                             className="product-thumb"
@@ -1279,14 +1270,12 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                         )}
                         <div>
                           <div className="product-name font-bold">{p.name}</div>
-                          <div className="product-subtitle text-xs text-slate-500">{p.subtitle}</div>
                         </div>
                       </div>
                     </td>
 
                     <td>
                       <span className="volume-badge">{p.volume}</span>
-                      <div className="text-xs text-slate-400 mt-0.5">{p.presentation}</div>
                     </td>
 
                     {/* Wholesaler Price */}
@@ -1339,9 +1328,22 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
                 </div>
 
                 <div className="card-body">
-                  <div className="card-sku font-mono">{(p.sku || '').replace(/^SKU-COLWAY-/i, '')}</div>
-                  <h3 className="card-title">{p.name}</h3>
-                  <p className="card-subtitle">{p.subtitle}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <div className="card-sku font-mono">{(p.sku || '').replace(/^SKU-COLWAY-/i, '')}</div>
+                    <span style={{
+                      fontSize: '0.70rem',
+                      fontWeight: 700,
+                      color: '#0369a1',
+                      background: '#f0f9ff',
+                      border: '1px solid #bae6fd',
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {p.volume}
+                    </span>
+                  </div>
+                  <h3 className="card-title" style={{ marginTop: '4px', marginBottom: '8px' }}>{p.name}</h3>
 
                   <div className="card-clinical-focus">
                     <strong>Clinical Role:</strong> {p.clinicalFocus}
