@@ -18,6 +18,7 @@ import {
 import { QRCodeSVG } from 'qrcode.react';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
+import { formatCommercialSupplierName } from '@/utils/supplierCommercialNames';
 import { classifyProductDomain } from '@/utils/productNormalizer';
 
 /**
