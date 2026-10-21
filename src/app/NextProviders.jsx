@@ -36,6 +36,7 @@ export const queryClient = new QueryClient({
       refetchOnReconnect: 'always',        // Re-sync on network restore
       structuralSharing: true,             // Skip re-renders when data is structurally equal
       throwOnError: false,                 // Prevent query errors from crashing component tree
+      placeholderData: (previousData) => previousData, // Prevents screen flickering on search/filter/page transitions
     },
     mutations: {
       throwOnError: false,                 // Same resilience for mutations

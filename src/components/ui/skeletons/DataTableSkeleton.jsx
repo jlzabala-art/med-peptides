@@ -101,7 +101,7 @@ export default function DataTableSkeleton({
               style={{ flex: colIdx === 0 ? 2 : 1, display: 'flex', flexDirection: 'column', gap: '6px' }}
             >
               <Skeleton
-                width={colIdx === 0 ? '70%' : `${50 + Math.random() * 30}%`}
+                width={colIdx === 0 ? '70%' : (colIdx % 2 === 0 ? '60%' : '75%')}
                 height="14px"
               />
               {colIdx === 0 && (

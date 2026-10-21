@@ -97,13 +97,15 @@ export async function POST(request) {
         shareableUrl: shortUrl,
         channel,
         sentBy,
-        sourceType: 'web', // 'web' | 'pdf'
+        sourceType: body.sourceType || 'web', // 'web' | 'pdf'
+        pdfUrl: body.pdfUrl || null,
+        downloadFilename: body.downloadFilename || null,
         status: 'sent', // 'sent' | 'viewed' | 'engaged' | 'converted' | 'revoked'
         visitsCount: 0,
         lastVisitedAt: null,
         // Interaction tracking for CatalogSharesHistoryTable
         interactions: {
-          pdfDownloaded: false,
+          pdfDownloaded: body.sourceType === 'pdf',
           webOpened: false,
           orderPlaced: false,
           lastInteractionAt: null,
@@ -113,6 +115,35 @@ export async function POST(request) {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }, { merge: true });
+
+      // Mirror to recipient user profile subcollection for instant 360 User CRM tracking
+      if (recipientUserId && adminDb) {
+        try {
+          await adminDb.collection('users').doc(recipientUserId).collection('shared_assets').doc(linkId).set({
+            id: linkId,
+            catalogId: linkId,
+            catalogCode: batchCode,
+            batchCode,
+            supplierId,
+            category: category || 'all',
+            sourceType: body.sourceType || 'web',
+            pdfUrl: body.pdfUrl || null,
+            downloadFilename: body.downloadFilename || null,
+            priceMarkupPercent: Number(priceMarkupPercent) || 0,
+            currency,
+            shortUrl,
+            longUrl,
+            status: 'sent',
+            visitsCount: 0,
+            lastVisitedAt: null,
+            issuedAt,
+            createdAt: issuedAt,
+            updatedAt: issuedAt
+          }, { merge: true });
+        } catch (uErr) {
+          console.warn('[share/route.js] Could not mirror to users subcollection:', uErr.message);
+        }
+      }
     } catch (dbErr) {
       console.warn('[share/route.js] Could not persist link in Firestore:', dbErr.message);
     }

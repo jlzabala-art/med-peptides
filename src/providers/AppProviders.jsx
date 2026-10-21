@@ -31,6 +31,7 @@ const queryClient = new QueryClient({
       gcTime: 1000 * 60 * 60 * 24, // 24 hours (Replaces cacheTime in RQv5)
       retry: 1,
       refetchOnWindowFocus: false,
+      placeholderData: (previousData) => previousData,
     },
   },
 });

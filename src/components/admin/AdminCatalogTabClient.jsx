@@ -343,6 +343,33 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
             console.warn('Direct popup blocked, user can open via dock button', e);
           }
         }
+        // Register PDF export in shared catalog history and user profile
+        try {
+          fetch('/api/catalog/share', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              supplierId: supplierFilter || 'all',
+              catalogueFilter: extraParams.catalogueFilter || null,
+              category: extraParams.category || 'all',
+              productIds: effectiveProductIds,
+              priceSource: 'cost',
+              priceMarkupPercent: markupPercent,
+              currency: extraParams.currency || 'USD',
+              recipientUserId: extraParams.recipientId || extraParams.recipientUserId || null,
+              recipientName: extraParams.recipientName || `${supplierLabel} Recipient`,
+              recipientEmail: extraParams.recipientEmail || '',
+              recipientPhone: extraParams.recipientPhone || '',
+              recipientType: extraParams.recipientType || 'clinic',
+              sourceType: 'pdf',
+              pdfUrl: fullUrl,
+              downloadFilename: finalFilename,
+              validityDays: 30,
+              ...extraParams,
+            })
+          }).catch(shareErr => console.warn('[handleSupplierPDF] Could not record share in history:', shareErr));
+        } catch {}
+
         toast.success(`✅ ${supplierLabel} PDF Catalog (+${markupPercent}%) ready!`, { id: 'catalog-export-toast' });
         setExportStatus({
           id: loadingKey,
@@ -425,12 +452,17 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           supplierId,
+          category: extraParams.category || 'all',
           productIds: effectiveProductIds,
           priceSource: 'cost',
           priceMarkupPercent: markupPercent,
           currency: extraParams.currency || 'USD',
-          recipientName: `${supplierLabel} Healthcare Providers`,
-          recipientType: 'clinic',
+          recipientUserId: extraParams.recipientId || extraParams.recipientUserId || null,
+          recipientName: extraParams.recipientName || `${supplierLabel} Healthcare Providers`,
+          recipientEmail: extraParams.recipientEmail || '',
+          recipientPhone: extraParams.recipientPhone || '',
+          recipientType: extraParams.recipientType || 'clinic',
+          sourceType: 'web',
           validityDays: 30,
           ...extraParams,
         })

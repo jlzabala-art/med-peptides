@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import AdminCatalogTabClient from './AdminCatalogTabClient';
-import { Skeleton } from '../ui';
+import { TabSkeleton } from '../ui';
 import { fetchProductsAction, fetchProductsMetricsAction } from '../../actions/productsActions';
 import AdminTabErrorBoundary from './AdminTabErrorBoundary';
 
@@ -16,7 +16,7 @@ export default async function AdminProductsTab({ readOnly = false, initialProduc
 
   return (
     <AdminTabErrorBoundary tabId="products" tabLabel="Products & Catalog">
-      <Suspense fallback={<div className="p-8"><Skeleton className="h-64 w-full" /></div>}>
+      <Suspense fallback={<TabSkeleton />}>
         <AdminCatalogTabClient 
           initialProducts={fetchedProducts}
           globalMetrics={fetchedMetrics}
