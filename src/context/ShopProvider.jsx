@@ -59,10 +59,25 @@ export function ShopProvider({ children }) {
   );
 }
 
+const DEFAULT_SHOP_CONTEXT = {
+  products: [],
+  region: 'us',
+  setRegion: () => {},
+  settings: {
+    detectedCountry: 'US',
+    exchangeRates: { EUR: 0.92, GBP: 0.79 },
+    shippingCosts: { standard: 0, express: 45 },
+    deliveryTimes: { standard: '5-7 business days', express: '2-3 business days' }
+  },
+  setSettings: () => {},
+  compareList: [],
+  setCompareList: () => {}
+};
+
 export function useShop() {
   const context = useContext(ShopContext);
   if (context === undefined) {
-    throw new Error('useShop must be used within a ShopProvider');
+    return DEFAULT_SHOP_CONTEXT;
   }
   return context;
 }

@@ -441,8 +441,8 @@ export default function BloodoRelatedPeptidesSection({ product, lang = 'en' }) {
             </div>
             <h3 className="brp-header-title">
               {isEs 
-                ? 'Péptidos Terapéuticos & Protocolo Relacionado' 
-                : 'Targeted Therapeutic Peptides & Calibrated Protocol'}
+                ? 'Protocolos Clínicos Acompañantes e Intervenciones Terapéuticas' 
+                : 'Companion Clinical Protocols & Therapeutic Interventions'}
             </h3>
           </div>
         </div>

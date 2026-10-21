@@ -184,25 +184,6 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
 
         </div>
 
-        {/* ── GCP Compliance Strip (Trust Center Style) ── */}
-        <div className="gcp-compliance-strip">
-          <div className="gcp-compliance-content">
-            <ShieldCheck size={16} color="#188038" style={{ flexShrink: 0 }} />
-            <div>
-              <strong style={{ color: '#202124' }}>
-                {isEs ? 'Cumplimiento Regulatorio: ' : 'Regulatory Compliance: '}
-              </strong>
-              {isEs
-                ? 'Dispositivos CE-IVDR (UE 2017/746) e ISO 15189/17025. Fabricación bajo normativas EU GMP. Acceso exclusivo para profesionales sanitarios acreditados.'
-                : 'CE-IVDR (EU 2017/746) & ISO 15189/17025 compliant diagnostics. Formulations compounded under EU GMP monographs.'}
-            </div>
-          </div>
-          <div className="gcp-compliance-badge">
-            <Award size={13} color="#1a73e8" />
-            <span>ISO 15189 · EU GMP</span>
-          </div>
-        </div>
-
         {/* ── Bottom Utility Bar: Minimalist & Legal (GCP Style) ── */}
         <div className="public-footer-bottom">
           <div className="public-footer-copyright">

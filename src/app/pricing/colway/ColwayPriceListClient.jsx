@@ -46,6 +46,7 @@ import DataTable from '@/components/ui/DataTable';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
 import InlineEditableCell from '@/components/ui/InlineEditableCell';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import './ColwayPriceList.css';
 
 export default function ColwayPriceListClient({ initialProducts = [] }) {
@@ -1565,6 +1566,9 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
           </div>
         </div>
       </div>
+
+      {/* ── Institutional Unified Public Footer ── */}
+      <PublicUnifiedFooter lang="en" />
     </div>
   );
 }

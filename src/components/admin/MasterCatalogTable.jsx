@@ -325,12 +325,16 @@ export default function MasterCatalogTable({
 
     // Filter by Active Workspace (SSOT active workbench)
     if (filterWorkspace === '1' || filterWorkspace === 'true') {
-      rows = rows.filter(row => {
+      const wsFiltered = rows.filter(row => {
         const id = String(row.id || '').trim();
         const slug = String(row.slug || '').trim();
         const hasVariantInWs = Array.isArray(row.variants) && row.variants.some(v => activeWsProductIds.has(String(v.id || '').trim()));
         return activeWsProductIds.has(id) || (slug && activeWsProductIds.has(slug)) || hasVariantInWs;
       });
+      // If user typed an explicit text search query (e.g. "Tirzepatide"), do not hide catalog search results if workspace has 0 matches
+      if (wsFiltered.length > 0 || !debouncedSearchTerm) {
+        rows = wsFiltered;
+      }
     }
 
     if (filterProductType.length > 0) {

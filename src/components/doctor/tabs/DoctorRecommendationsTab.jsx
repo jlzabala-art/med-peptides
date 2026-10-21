@@ -456,7 +456,7 @@ export default function DoctorRecommendationsTab({
               <Sparkles size={18} />
             </div>
             <h2 style={{ margin: 0, fontSize: '1.22rem', fontWeight: 800, color: '#0f172a' }}>
-              Clinical Intelligence: Specialty Blueprints &amp; Rx Synergies
+              Atlas Recommendations &amp; Clinical Synergies
             </h2>
             <span
               style={{
@@ -473,8 +473,8 @@ export default function DoctorRecommendationsTab({
             </span>
           </div>
           <p style={{ margin: 0, fontSize: '0.83rem', color: '#475569', maxWidth: '820px', lineHeight: 1.5 }}>
-            Tailored clinical protocols and multi-pillar formulations Across{' '}
-            <strong>1) Specialty Practice Blueprints</strong> (matched to {doctor?.name || 'your'}&apos;s medical specialty &amp; online clinical procedures) and{' '}
+            Tailored clinical protocols and multi-pillar formulations across{' '}
+            <strong>1) Atlas Recommendations</strong> (matched to {doctor?.name || 'your'}&apos;s medical specialty &amp; online clinical procedures) and{' '}
             <strong>2) Patient Regimen Synergies</strong> (matched to active patient prescriptions).
           </p>
         </div>
@@ -514,7 +514,7 @@ export default function DoctorRecommendationsTab({
             }}
           >
             <Stethoscope size={14} />
-            <span>1. Specialty Practice Blueprints</span>
+            <span>1. Atlas Recommendations</span>
             <span
               style={{
                 fontSize: '0.68rem',
@@ -1008,7 +1008,7 @@ export default function DoctorRecommendationsTab({
                 No Patient Prescriptions Recorded Yet for {doctor?.name || 'This Practice'}
               </h3>
               <p style={{ margin: '0 auto 16px auto', fontSize: '0.82rem', color: '#475569', maxWidth: '580px', lineHeight: 1.5 }}>
-                Once you submit your first prescription, this view automatically maps your patients&apos; active ingredients to synergistic peptides, nutraceuticals, and diagnostics. In the meantime, explore your curated <strong>Specialty Practice Blueprints</strong>.
+                Once you submit your first prescription, this view automatically maps your patients&apos; active ingredients to synergistic peptides, nutraceuticals, and diagnostics. In the meantime, explore your curated <strong>Atlas Recommendations</strong>.
               </p>
               <button
                 type="button"
@@ -1024,7 +1024,7 @@ export default function DoctorRecommendationsTab({
                   cursor: 'pointer'
                 }}
               >
-                Explore Specialty Practice Blueprints →
+                Explore Atlas Recommendations →
               </button>
             </div>
           ) : (

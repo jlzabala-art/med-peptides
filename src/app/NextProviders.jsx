@@ -65,6 +65,7 @@ export default function NextProviders({ children, serverUser }) {
     pathname?.startsWith('/rx') ||
     pathname?.startsWith('/proto') ||
     pathname?.startsWith('/collection') ||
+    pathname?.startsWith('/pricing') ||
     pathname?.startsWith('/catalog');
 
   // 🚀 Fast-path for public & clinical portal routes:
@@ -73,9 +74,17 @@ export default function NextProviders({ children, serverUser }) {
     return (
       <QueryClientProvider client={queryClient}>
         <AuthProvider serverUser={serverUser}>
-          <ThemeProvider>
-            {children}
-          </ThemeProvider>
+          <TenantProvider>
+            <StorefrontModeProvider>
+              <ShopProvider>
+                <CartProvider>
+                  <ThemeProvider>
+                    {children}
+                  </ThemeProvider>
+                </CartProvider>
+              </ShopProvider>
+            </StorefrontModeProvider>
+          </TenantProvider>
         </AuthProvider>
       </QueryClientProvider>
     );

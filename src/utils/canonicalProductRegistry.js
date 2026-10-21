@@ -200,7 +200,17 @@ const EXCLUSIONS = new Map([
   ['testosterone-test', { canonicalKey: 'testosterone-test', canonicalName: 'Bloodo™ Testosterone+ Test' }],
   ['hemoglobin-a1c', { canonicalKey: 'hemoglobin-a1c', canonicalName: 'Bloodo™ HbA1c Test' }],
   ['omega-ratio', { canonicalKey: 'omega-ratio', canonicalName: 'Bloodo™ Omega-3/6 Test' }],
-  ['vitamin-d-test', { canonicalKey: 'vitamin-d-test', canonicalName: 'Bloodo™ Vitamin D Test' }]
+  ['vitamin-d-test', { canonicalKey: 'vitamin-d-test', canonicalName: 'Bloodo™ Vitamin D Test' }],
+  ['teletest-mineralograma-cabello-htma', { canonicalKey: 'teletest-mineralograma-cabello-htma', canonicalName: 'TeleTest™ Hair Tissue Mineral Analysis (HTMA)' }],
+  ['teletest mineralograma cabello htma', { canonicalKey: 'teletest-mineralograma-cabello-htma', canonicalName: 'TeleTest™ Hair Tissue Mineral Analysis (HTMA)' }],
+  ['teletest-test-omega', { canonicalKey: 'teletest-test-omega', canonicalName: 'TeleTest™ Omega-3 Index & Fatty Acid Profile' }],
+  ['teletest test omega', { canonicalKey: 'teletest-test-omega', canonicalName: 'TeleTest™ Omega-3 Index & Fatty Acid Profile' }],
+  ['teletest-saliva-metabolizer-detox', { canonicalKey: 'teletest-saliva-metabolizer-detox', canonicalName: 'TeleTest™ Saliva Metabolizer & Detox Profile' }],
+  ['teletest saliva metabolizer detox', { canonicalKey: 'teletest-saliva-metabolizer-detox', canonicalName: 'TeleTest™ Saliva Metabolizer & Detox Profile' }],
+  ['teletest-gnt-hla-autoinmunidad', { canonicalKey: 'teletest-gnt-hla-autoinmunidad', canonicalName: 'TeleTest™ HLA Autoimmunity Genetic Panel' }],
+  ['teletest gnt hla autoinmunidad', { canonicalKey: 'teletest-gnt-hla-autoinmunidad', canonicalName: 'TeleTest™ HLA Autoimmunity Genetic Panel' }],
+  ['teletest-estudio-genetico-celiaca', { canonicalKey: 'teletest-estudio-genetico-celiaca', canonicalName: 'TeleTest™ Celiac Disease Genetic Panel' }],
+  ['teletest estudio genetico celiaca', { canonicalKey: 'teletest-estudio-genetico-celiaca', canonicalName: 'TeleTest™ Celiac Disease Genetic Panel' }]
 ]);
 
 /**

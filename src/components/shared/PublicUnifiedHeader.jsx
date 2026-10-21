@@ -406,18 +406,7 @@ function forceCanonicalDomain(urlOrPath) {
                 </button>
               )}
 
-              {/* Account Manager Multi-Portal Hub (Only shown when not explicitly hidden) */}
-              {!effectiveHideAccountManager && (
-                <Link
-                  href="/account-manager"
-                  className="puh-btn puh-btn-ghost hide-on-extra-narrow"
-                  title={isSpanish ? 'Consola de Account Manager (/account-manager)' : 'Account Manager Hub (/account-manager)'}
-                  style={{ textDecoration: 'none' }}
-                >
-                  <Sliders size={14} />
-                  <span className="puh-btn-label">{isSpanish ? 'Account Manager' : 'Account Mgr'}</span>
-                </Link>
-              )}
+
 
               {/* Language Selector */}
               <select

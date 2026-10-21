@@ -4189,7 +4189,7 @@ export default function DoctorPublicPortalClient({
         items: [
           {
             id: 'recommendations',
-            label: 'Specialty Blueprints',
+            label: 'Atlas Recommendations',
             icon: Sparkles,
             badge: doctorSpecialtyIntel.primaryBlueprints.length > 0 ? doctorSpecialtyIntel.primaryBlueprints.length : null
           },
@@ -5923,15 +5923,15 @@ export default function DoctorPublicPortalClient({
                         }}
                       >
                         {allPrescriptions.length === 0
-                          ? 'Ready-to-Prescribe Clinical Blueprints'
-                          : `${doctorSpecialtyIntel.primaryBlueprints.length} Specialty Blueprints + ${allPrescriptions.length} Active Rx Synergies`}
+                          ? 'Ready-to-Prescribe Clinical Recommendations'
+                          : `${doctorSpecialtyIntel.primaryBlueprints.length} Atlas Recommendations + ${allPrescriptions.length} Active Rx Synergies`}
                       </span>
                     </div>
                     <h3 style={{ margin: 0, fontSize: allPrescriptions.length === 0 ? '1.08rem' : '0.96rem', fontWeight: 700, color: allPrescriptions.length === 0 ? '#ffffff' : '#0f172a' }}>
-                      {isAuthorizedViewer ? `${doctor.name} — ` : ''}Specialty Focus & Ready-to-Prescribe Formulations
+                      {isAuthorizedViewer ? `${doctor.name} — ` : ''}Atlas Recommendations
                     </h3>
                     <p style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: allPrescriptions.length === 0 ? '#cbd5e1' : '#475569', lineHeight: 1.45, maxWidth: '860px' }}>
-                      {doctorSpecialtyIntel.webPracticeProfile?.summary}
+                      {doctorSpecialtyIntel.webPracticeProfile?.summary || 'Tailored clinical recommendations combining compounding formulations, peptide co-therapies, native collagen ECM support, and companion diagnostics.'}
                     </p>
                   </div>
 
@@ -5957,7 +5957,7 @@ export default function DoctorPublicPortalClient({
                     }}
                   >
                     <Sparkles size={14} />
-                    <span>Explore All Specialty Blueprints</span>
+                    <span>Explore All Atlas Recommendations</span>
                     <ArrowUpRight size={13} />
                   </button>
                 </div>
@@ -6026,95 +6026,189 @@ export default function DoctorPublicPortalClient({
                   </div>
                 )}
 
-                {/* Top Specialty Blueprints Grid (1-Click Prescribe) */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
-                  {doctorSpecialtyIntel.primaryBlueprints.slice(0, allPrescriptions.length === 0 ? 3 : 2).map((bp) => (
-                    <div
-                      key={bp.id}
-                      style={{
-                        background: allPrescriptions.length === 0 ? 'rgba(30, 41, 59, 0.85)' : '#f8fafc',
-                        border: allPrescriptions.length === 0 ? '1px solid #334155' : '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        padding: '12px 14px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        gap: '10px'
-                      }}
-                    >
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
-                          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: allPrescriptions.length === 0 ? '#38bdf8' : '#0284c7', textTransform: 'uppercase' }}>
-                            {bp.targetProcedure}
-                          </span>
-                          <span style={{ fontSize: '0.66rem', fontFamily: 'monospace', color: allPrescriptions.length === 0 ? '#94a3b8' : '#64748b' }}>
-                            {bp.code}
-                          </span>
+                {/* ── Atlas Recommendations: Continuous Linear Rows ── */}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    border: allPrescriptions.length === 0 ? '1px solid #334155' : '1px solid #e2e8f0',
+                    background: allPrescriptions.length === 0 ? 'rgba(30, 41, 59, 0.85)' : '#ffffff'
+                  }}
+                >
+                  {doctorSpecialtyIntel.primaryBlueprints.slice(0, allPrescriptions.length === 0 ? 4 : 3).map((bp, bpIdx, arr) => {
+                    const isLast = bpIdx === arr.length - 1;
+                    const isZeroRx = allPrescriptions.length === 0;
+
+                    return (
+                      <div
+                        key={bp.id}
+                        style={{
+                          padding: '14px 18px',
+                          borderBottom: isLast ? 'none' : isZeroRx ? '1px solid #334155' : '1px solid #e2e8f0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '14px',
+                          transition: 'background 0.15s ease'
+                        }}
+                      >
+                        {/* Left Column: Clinical Focus Pill, Code & Magistral Formula Details */}
+                        <div style={{ flex: '1 1 380px', minWidth: '280px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px', flexWrap: 'wrap' }}>
+                            <span
+                              style={{
+                                fontSize: '0.67rem',
+                                fontWeight: 800,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.04em',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                background: isZeroRx ? 'rgba(56, 189, 248, 0.2)' : '#e0f2fe',
+                                color: isZeroRx ? '#38bdf8' : '#0369a1',
+                                border: isZeroRx ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid #bae6fd'
+                              }}
+                            >
+                              {bp.targetProcedure}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: '0.66rem',
+                                fontFamily: 'monospace',
+                                color: isZeroRx ? '#94a3b8' : '#64748b',
+                                background: isZeroRx ? 'rgba(255,255,255,0.06)' : '#f1f5f9',
+                                padding: '1px 6px',
+                                borderRadius: '3px'
+                              }}
+                            >
+                              {bp.code}
+                            </span>
+                          </div>
+
+                          <div
+                            style={{
+                              fontSize: '0.88rem',
+                              fontWeight: 700,
+                              color: isZeroRx ? '#ffffff' : '#0f172a',
+                              lineHeight: 1.35
+                            }}
+                          >
+                            {bp.compoundingFormula?.treatmentTitle || bp.title}
+                            {bp.compoundingFormula?.volume && (
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: isZeroRx ? '#cbd5e1' : '#64748b', marginLeft: '6px' }}>
+                                · {bp.compoundingFormula.volume}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Synergies breakdown pills */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+                            {bp.peptideSynergy?.name && (
+                              <span
+                                style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: 650,
+                                  padding: '2px 7px',
+                                  borderRadius: '4px',
+                                  background: isZeroRx ? 'rgba(99, 102, 241, 0.2)' : '#eef2ff',
+                                  color: isZeroRx ? '#a5b4fc' : '#4338ca',
+                                  border: isZeroRx ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid #c7d2fe'
+                                }}
+                              >
+                                🧬 Peptide: {bp.peptideSynergy.name}
+                              </span>
+                            )}
+                            {bp.dermocosmeticSynergy?.name && (
+                              <span
+                                style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: 650,
+                                  padding: '2px 7px',
+                                  borderRadius: '4px',
+                                  background: isZeroRx ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5',
+                                  color: isZeroRx ? '#6ee7b7' : '#047857',
+                                  border: isZeroRx ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #a7f3d0'
+                                }}
+                              >
+                                🌿 Colway: {bp.dermocosmeticSynergy.name}
+                              </span>
+                            )}
+                            {bp.diagnosticSynergy?.name && (
+                              <span
+                                style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: 650,
+                                  padding: '2px 7px',
+                                  borderRadius: '4px',
+                                  background: isZeroRx ? 'rgba(14, 165, 233, 0.2)' : '#f0f9ff',
+                                  color: isZeroRx ? '#7dd3fc' : '#0369a1',
+                                  border: isZeroRx ? '1px solid rgba(14, 165, 233, 0.3)' : '1px solid #bae6fd'
+                                }}
+                              >
+                                🔬 Lab: {bp.diagnosticSynergy.name}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: allPrescriptions.length === 0 ? '#ffffff' : '#0f172a', marginBottom: '4px' }}>
-                          {bp.title}
-                        </div>
-                        <div style={{ fontSize: '0.73rem', color: allPrescriptions.length === 0 ? '#cbd5e1' : '#475569', lineHeight: 1.35 }}>
-                          <strong>Magistral Rx:</strong> {bp.compoundingFormula?.treatmentTitle} ({bp.compoundingFormula?.volume})
-                        </div>
-                        <div style={{ fontSize: '0.71rem', color: allPrescriptions.length === 0 ? '#94a3b8' : '#64748b', marginTop: '3px' }}>
-                          <strong>Atlas Synergies:</strong> {[bp.peptideSynergy?.name, bp.dermocosmeticSynergy?.name, bp.diagnosticSynergy?.name].filter(Boolean).join(' · ')}
+
+                        {/* Right Column: Direct Conversion Actions */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              triggerHaptic('light');
+                              setActiveBlueprintDossier(bp);
+                            }}
+                            style={{
+                              padding: '7px 12px',
+                              borderRadius: '5px',
+                              border: isZeroRx ? '1px solid #475569' : '1px solid #cbd5e1',
+                              background: isZeroRx ? 'rgba(255,255,255,0.06)' : '#ffffff',
+                              color: isZeroRx ? '#e2e8f0' : '#1e293b',
+                              fontSize: '0.72rem',
+                              fontWeight: 650,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              whiteSpace: 'nowrap'
+                            }}
+                            title="View detailed composition, mechanism of action, and posology"
+                          >
+                            <FileText size={12} style={{ color: '#0284c7' }} />
+                            <span>Clinical Monograph</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handlePrescribeSpecialtyBlueprint(bp)}
+                            style={{
+                              padding: '7px 14px',
+                              borderRadius: '5px',
+                              border: 'none',
+                              background: isZeroRx ? '#38bdf8' : '#003666',
+                              color: isZeroRx ? '#0f172a' : '#ffffff',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '5px',
+                              whiteSpace: 'nowrap',
+                              boxShadow: '0 1px 2px rgba(0,0,0,0.08)'
+                            }}
+                            title="Load formula into prescription builder to assign patient, titrate doses, and sign"
+                          >
+                            <Plus size={12} />
+                            <span>+ Customize & Prescribe</span>
+                          </button>
                         </div>
                       </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '8px', borderTop: allPrescriptions.length === 0 ? '1px solid rgba(255,255,255,0.08)' : '1px solid #e2e8f0' }}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            triggerHaptic('light');
-                            setActiveBlueprintDossier(bp);
-                          }}
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: '5px',
-                            border: allPrescriptions.length === 0 ? '1px solid #475569' : '1px solid #cbd5e1',
-                            background: allPrescriptions.length === 0 ? 'rgba(255,255,255,0.06)' : '#ffffff',
-                            color: allPrescriptions.length === 0 ? '#e2e8f0' : '#1e293b',
-                            fontSize: '0.72rem',
-                            fontWeight: 650,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px'
-                          }}
-                          title="View detailed composition, mechanism of action, and posology"
-                        >
-                          <FileText size={12} style={{ color: '#0284c7' }} />
-                          <span>Clinical Monograph & Evidence</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handlePrescribeSpecialtyBlueprint(bp)}
-                          style={{
-                            flex: 1,
-                            padding: '6px 12px',
-                            borderRadius: '5px',
-                            border: 'none',
-                            background: '#003666',
-                            color: '#ffffff',
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '5px',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.08)'
-                          }}
-                          title="Load formula into prescription builder to assign patient, titrate doses, and sign"
-                        >
-                          <Plus size={12} />
-                          <span>Customize & Prescribe</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

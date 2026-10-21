@@ -489,6 +489,14 @@ export default function PublicDatasheetView({
     return sId === 'supplier-eternadx' || sName.includes('eterna') || pSlug.includes('eterna') || pName.includes('eterna');
   }, [product, slug]);
 
+  const isTeletestDiagnostic = useMemo(() => {
+    const sId = (product?.supplierId || '').toLowerCase();
+    const sName = (product?.supplierName || '').toLowerCase();
+    const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
+    const pName = (product?.name || product?.canonicalName || '').toLowerCase();
+    return sId.includes('teletest') || sName.includes('teletest') || pSlug.includes('teletest') || pName.includes('teletest') || pSlug.includes('htma') || pSlug.includes('mineralograma');
+  }, [product, slug]);
+
   const isIvDrip = useMemo(() => {
     const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
     const cat = (product?.category || product?.categoryId || '').toLowerCase();
@@ -565,8 +573,16 @@ export default function PublicDatasheetView({
   }, [product, slug]);
 
   const isPeptideCompound = useMemo(() => {
-    return !isCorporateService && !isCosmeticProduct && !isSolventProduct && !isSupplementProduct;
-  }, [isCorporateService, isCosmeticProduct, isSolventProduct, isSupplementProduct]);
+    return !isCorporateService && 
+           !isCosmeticProduct && 
+           !isSolventProduct && 
+           !isSupplementProduct && 
+           !isIvDrip &&
+           !isDiagnosticKit && 
+           !isBloodoDiagnostic && 
+           !isTeletestDiagnostic && 
+           !isEternaDiagnostic;
+  }, [isCorporateService, isCosmeticProduct, isSolventProduct, isSupplementProduct, isIvDrip, isDiagnosticKit, isBloodoDiagnostic, isTeletestDiagnostic, isEternaDiagnostic]);
 
   const isLipProduct = useMemo(() => {
     const pSlug = (slug || product?.slug || product?.id || '').toLowerCase();
@@ -588,7 +604,38 @@ export default function PublicDatasheetView({
 
   const brandCollection = useMemo(() => resolveBrandCollectionInfo(product), [product]);
 
-  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA® Precision Health & Multiomics Platform') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : (isSupplementProduct ? (product?.name || 'UltraPerson Clinical Supplement') : 'Clinical Peptide'))))));
+  const name = useMemo(() => {
+    const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
+    if (pSlug.includes('bloodo-nad') || pSlug.includes('nad-level-test')) {
+      return lang === 'es' ? 'Bloodo™ Test Cuantitativo de NAD+ Intracelular' : 'Bloodo™ Intracellular NAD+ Level Diagnostic Test';
+    }
+    if (pSlug.includes('cortisol')) {
+      return lang === 'es' ? 'Bloodo™ Test de Ritmo Circadiano Cortisol AM/PM' : 'Bloodo™ Diurnal Cortisol & Circadian Rhythm Test';
+    }
+    if (pSlug.includes('testosterone') || pSlug.includes('testosterona')) {
+      return lang === 'es' ? 'Bloodo™ Testosterona Total y Libre (Perfil FAI)' : 'Bloodo™ Testosterone Plus (Free & Total) Test';
+    }
+    if (pSlug.includes('hba1c') || pSlug.includes('hemoglobin')) {
+      return lang === 'es' ? 'Bloodo™ Hemoglobina Glicosilada (HbA1c) 90 Días' : 'Bloodo™ Glycated Hemoglobin (HbA1c) 90-Day Blood Test';
+    }
+    if (pSlug.includes('teletest-mineralograma') || pSlug.includes('htma')) {
+      return lang === 'es' ? 'TeleTest™ Mineralograma en Cabello (HTMA)' : 'TeleTest™ Hair Tissue Mineral Analysis (HTMA)';
+    }
+    if (pSlug.includes('teletest-test-omega')) {
+      return lang === 'es' ? 'TeleTest™ Perfil de Ácidos Grasos e Índice Omega-3' : 'TeleTest™ Omega-3 Index & Complete Fatty Acids Profile';
+    }
+    if (pSlug.includes('teletest-saliva-metabolizer') || pSlug.includes('metabolizer')) {
+      return lang === 'es' ? 'TeleTest™ Saliva Metabolizer & Detoxificación Genética' : 'TeleTest™ Saliva Metabolizer & Detox Profile';
+    }
+    if (pSlug.includes('teletest-gnt-hla') || pSlug.includes('autoinmunidad')) {
+      return lang === 'es' ? 'TeleTest™ Estudio Genético HLA Autoinmunidad' : 'TeleTest™ HLA Autoimmunity Genetic Panel';
+    }
+    if (pSlug.includes('teletest-estudio-genetico-celiaca') || pSlug.includes('celiaca')) {
+      return lang === 'es' ? 'TeleTest™ Estudio Genético Enfermedad Celíaca' : 'TeleTest™ Celiac Disease Genetic Panel';
+    }
+    return product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA® Precision Health & Multiomics Platform') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : (isSupplementProduct ? (product?.name || 'UltraPerson Clinical Supplement') : 'Clinical Peptide'))))));
+  }, [product, slug, isSolventProduct, isEternaDiagnostic, isDiagnosticKit, isIvDrip, isCosmeticProduct, isSupplementProduct, lang]);
+
   const category = isLipProduct
     ? (lang === 'es' ? 'Cuidado Labial Bioactivo & Barrera' : 'Bioactive Lip Barrier Care')
     : isHairProduct
@@ -601,6 +648,8 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Solvente y Diluyente Estéril' : 'Sterile Reconstitution Solvent')
     : isEternaDiagnostic
     ? (lang === 'es' ? 'Plataforma Multiómica y Portal Clínico' : 'Multiomic Platform & Clinical Portal')
+    : isTeletestDiagnostic
+    ? (lang === 'es' ? 'Diagnóstico Clínico y Toxicología' : 'Clinical Diagnostics & Toxicology')
     : isDiagnosticKit
     ? (lang === 'es' ? 'Diagnóstico Clínico y Biomarcadores' : 'Clinical Diagnostics & Biomarkers')
     : isIvDrip
@@ -608,10 +657,13 @@ export default function PublicDatasheetView({
     : isSupplementProduct
     ? (lang === 'es' ? 'Suplementación Clínica Avanzada' : 'Advanced Clinical Supplementation')
     : getLocalizedCategory(product?.category || product?.therapeutic_category || 'Peptide', lang);
+
   const casNumber = isCosmeticProduct
     ? (lang === 'es' ? 'Reglamento Cosmético UE 1223/2009' : 'EU Cosmetics Reg. 1223/2009 (CPNP)')
     : isSolventProduct 
     ? '100-51-6 (Benzyl Alcohol USP)' 
+    : isTeletestDiagnostic
+    ? (lang === 'es' ? 'Acreditación ENAC ISO 17025 / ISO 15189' : 'ISO 17025 / ISO 15189 Central Lab')
     : isDiagnosticKit
     ? (lang === 'es' ? 'Directiva CE-IVDR (UE 2017/746)' : 'CE-IVDR Directive (EU 2017/746)')
     : isIvDrip
@@ -619,10 +671,17 @@ export default function PublicDatasheetView({
     : isSupplementProduct
     ? (lang === 'es' ? 'Directiva UE 2002/46/CE · Sin Fármacos' : 'EU Directive 2002/46/EC · Drug-Free')
     : (product?.casNumber || product?.cas || 'Documented on Monograph');
+
   const formula = isCosmeticProduct
     ? (lang === 'es' ? `Complejo Bioactivo (${product?.ingredients?.length || '15+'} Activos INCI)` : `Bioactive Multi-Complex (${product?.ingredients?.length || '15+'} INCI Actives)`)
     : isSolventProduct 
     ? 'H₂O + C₇H₈O (0.9%)' 
+    : isTeletestDiagnostic
+    ? (slug.includes('htma') || slug.includes('mineralograma')
+        ? (lang === 'es' ? 'Matriz: Cabello Proximal (3 cm)' : 'Matrix: Proximal Scalp Hair (3 cm)')
+        : (slug.includes('metabolizer') || slug.includes('hla') || slug.includes('celiac')
+            ? (lang === 'es' ? 'Matriz: Saliva / Frotis Bucal' : 'Matrix: Saliva / Buccal Swab')
+            : (lang === 'es' ? 'Matriz: Sangre Capilar Seca (DBS)' : 'Matrix: Dried Blood Spot (DBS)')))
     : isDiagnosticKit
     ? (lang === 'es' ? 'Matriz: Sangre Capilar Seca (DBS)' : 'Matrix: Dried Blood Spot (DBS)')
     : isIvDrip
@@ -630,6 +689,7 @@ export default function PublicDatasheetView({
     : isSupplementProduct
     ? (lang === 'es' ? `Fórmula Multi-Activa (${product?.ingredients?.length || '6+'} Activos Clave)` : `Multi-Active Matrix (${product?.ingredients?.length || '6+'} Key Actives)`)
     : (product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null);
+
   const mw = isLipProduct
     ? (lang === 'es' ? 'Barra Anhidra Lipídica (0% Agua)' : 'Anhydrous Lipid Stick (0% Water)')
     : isHairProduct
@@ -640,6 +700,8 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Formulación Tópica: pH 4.5–5.5' : 'Topical Cosmeceutical: pH 4.5–5.5')
     : isSolventProduct 
     ? '18.02 g/mol (H₂O)' 
+    : isTeletestDiagnostic
+    ? (lang === 'es' ? 'Laboratorio Central: TeleTest Analytika (ISO 17025)' : 'Central Laboratory: TeleTest Analytika (ISO 17025)')
     : isDiagnosticKit
     ? (lang === 'es' ? 'Laboratorio Central: LifeLab1' : 'Central Laboratory: LifeLab1')
     : isIvDrip
@@ -647,6 +709,7 @@ export default function PublicDatasheetView({
     : isSupplementProduct
     ? (lang === 'es' ? 'Cápsulas HPMC Gastrorresistentes' : 'Acid-Resistant HPMC Delayed-Release')
     : (product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null);
+
   const purity = isLipProduct
     ? (lang === 'es' ? 'Testado Dermatológicamente · Ceras Naturales' : 'Dermatologically Tested · Natural Waxes')
     : isHairProduct
@@ -657,14 +720,18 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Dermatológicamente Testado · Sin Sulfatos' : 'Dermatologically Tested · Sulphate-Free')
     : isSolventProduct 
     ? 'USP Pharmacopeial Grade (Sterile)' 
+    : isTeletestDiagnostic
+    ? (lang === 'es' ? 'Acreditado ISO 17025 / ISO 15189 · Analytika' : 'ISO 17025 / ISO 15189 Accredited · Analytika')
     : isDiagnosticKit
-    ? (lang === 'es' ? 'Precisión CV ≤ 6.6% (LoD 0.23 µmol/L)' : 'Precision CV ≤ 6.6% (LoD 0.23 µmol/L)')
+    ? (lang === 'es' ? 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)' : 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)')
     : isIvDrip
     ? 'USP <797> Sterile / ISO Class 5 Certified'
     : isSupplementProduct
     ? (lang === 'es' ? 'Grado Farmacéutico EU GMP · 100% Vegano' : 'EU GMP Certified · 100% Vegan')
     : (product?.purity || '≥ 99.4% (RP-HPLC)');
+
   const sequence = (isSolventProduct || isDiagnosticKit || isIvDrip || isCosmeticProduct || isSupplementProduct) ? null : (product?.sequence || product?.molecular?.sequence || null);
+
   const targetSystem = isLipProduct
     ? (lang === 'es' ? 'Borde Bermellón, Mucosa Labial y Barrera Cutánea' : 'Vermilion Border, Labial Mucosa & Cutaneous Barrier')
     : isHairProduct
@@ -677,26 +744,65 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Vehículo Estéril de Reconstitución de Péptidos (USP)' : 'Universal Sterile Peptide Reconstitution Vehicle (USP)')
     : isEternaDiagnostic
     ? (lang === 'es' ? 'Ecosistema de Salud de Precisión, Telemetría 24/7 y Portal Clínico' : 'Precision Multiomics Ecosystem, 24/7 Telemetry & Clinical OS')
-    : isDiagnosticKit
-    ? (lang === 'es' ? 'Monitoreo Cuantitativo de Biomarcadores y Longevidad Celular' : 'Cellular Longevity & Quantitative Biomarker Monitoring')
+    : isTeletestDiagnostic
+    ? (slug.includes('htma') || slug.includes('mineralograma')
+        ? (lang === 'es' ? 'Homeostasis Mineral, Toxicología de Metales Pesados y Tasa de Oxidación' : 'Trace Mineral Homeostasis, Chronic Heavy Metal Toxicology & Metabolic Oxidation Rate')
+        : slug.includes('omega')
+        ? (lang === 'es' ? 'Membrana Celular Cardiovascular, Neuroinflamación y Balance Eicosanoide' : 'Cardiovascular Cellular Membrane, Neuroinflammation & Eicosanoid Balance')
+        : slug.includes('metabolizer')
+        ? (lang === 'es' ? 'Biotransformación Hepática Fase I/II, Aclaramiento de Fármacos y Neutralización Oxidativa' : 'Hepatic Biotransformation Phase I/II, Drug Clearance & Oxidative Neutralization')
+        : slug.includes('hla')
+        ? (lang === 'es' ? 'Complejo Mayor de Histocompatibilidad (MHC), Regulación Inmune y Riesgo Autoinmune' : 'Major Histocompatibility Complex (MHC) Immune Regulation & Autoimmune Risk')
+        : slug.includes('celiac')
+        ? (lang === 'es' ? 'Inmunidad Mucosa Intestinal, Enteropatía al Gluten y Restricción HLA Clase II' : 'Intestinal Mucosal Immunity, Gluten Enteropathy & HLA Class II Restriction')
+        : (lang === 'es' ? 'Diagnóstico Clínico Avanzado y Marcadores Metabólicos' : 'Advanced Clinical Diagnostics & Metabolic Markers'))
+    : isBloodoDiagnostic || isDiagnosticKit
+    ? (slug.includes('nad')
+        ? (lang === 'es' ? 'Bioenergética Celular, Longevidad Mitocondrial y Activación de Sirtuinas (SIRT1/SIRT3)' : 'Cellular Bioenergetics, Mitochondrial Longevity & Sirtuin (SIRT1/SIRT3) Activation')
+        : slug.includes('cortisol')
+        ? (lang === 'es' ? 'Eje Hipotálamo-Hipofisario-Adrenal (HPA), Carga Alostática y Ritmo Circadiano' : 'Hypothalamic-Pituitary-Adrenal (HPA) Axis, Allostatic Load & Circadian Rhythm')
+        : slug.includes('testosterone')
+        ? (lang === 'es' ? 'Homeostasis Androgénica, Anabolismo Muscular y Eje Gonadal' : 'Androgenic Homeostasis, Lean Anabolism & Pituitary-Gonadal Axis')
+        : slug.includes('hba1c')
+        ? (lang === 'es' ? 'Glucorregulación a Largo Plazo, Sensibilidad a la Insulina y Glicación Tisular' : 'Long-Term Glycoregulation, Insulin Sensitivity & Tissue Glycation Index')
+        : slug.includes('omega')
+        ? (lang === 'es' ? 'Fluidez de Membrana Celular, Balance Eicosanoide y Protección Cardiovascular' : 'Cell Membrane Fluidity, Eicosanoid Balance & Cardiovascular Resilience')
+        : (lang === 'es' ? 'Monitoreo Cuantitativo de Biomarcadores y Longevidad Celular' : 'Cellular Longevity & Quantitative Biomarker Monitoring'))
     : isIvDrip
     ? (lang === 'es' ? 'Optimización Celular, Inmunidad y Longevidad Intravenosa' : 'Parenteral Cellular Optimization, Immunity & Longevity')
     : isSupplementProduct
     ? (lang === 'es' ? (product?.targetSystem || 'Optimización Metabólica, Mitocondrial y Celular') : (product?.targetSystem || 'Mitochondrial, Metabolic & Cellular Optimization'))
     : getLocalizedTargetSystem(product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis', lang);
-  const description = isEternaDiagnostic
-    ? (lang === 'es'
+
+  const description = useMemo(() => {
+    const pSlug = (slug || product?.slug || product?.id || '').toLowerCase();
+    if (pSlug.includes('bloodo-nad') || pSlug.includes('nad-level-test')) {
+      return lang === 'es'
+        ? 'Dispositivo de diagnóstico in vitro con marcado CE-IVDR para la cuantificación precisa del pool total de nicotinamida adenina dinucleótido (NAD+) intracelular en sangre completa mediante espectrometría de masas en tándem (UHPLC-MS/MS). Procesamiento analítico ejecutado por laboratorio clínico central acreditado (LifeLab1, certificación ISO 15189) sobre tarjeta de sangre seca Whatman 903. Establece la línea base biológica para bioenergética celular, actividad de sirtuinas y titulación de precursores de longevidad.'
+        : 'CE-IVDR capillary dried blood spot (DBS) diagnostic test measuring total intracellular nicotinamide adenine dinucleotide (NAD+) pool in whole blood via tandem mass spectrometry (UHPLC-MS/MS) at accredited central clinical lab (LifeLab1, ISO 15189 certified). Accurately establishes biological baseline for cellular bioenergetics, sirtuin longevity activity, and clinical NAD+ supplementation titration.';
+    }
+    if (pSlug.includes('teletest-mineralograma') || pSlug.includes('htma')) {
+      return lang === 'es'
+        ? 'Análisis tisular cuantitativo de oligoelementos y metales pesados tóxicos en matriz capilar proximal (3 cm desde el cuero cabelludo) mediante espectrometría de masas con plasma acoplado inductivamente (ICP-MS/MS). Procesado en el Laboratorio Central TeleTest Analytika (acreditación ISO 17025). Evalúa 36+ minerales y ratios fisiológicos clave (Ca/Mg, Na/K, Zn/Cu, Fe/Cu) que reflejan el depósito celular crónico de los últimos 90 días.'
+        : 'Advanced cellular trace element and heavy toxic metal tissue analysis measuring 36+ minerals, microelements, and critical clinical nutritional ratios (Ca/Mg, Na/K, Zn/Cu, Fe/Cu, Ca/P, Na/Mg) via proximal scalp hair matrix and high-resolution ICP-MS/MS spectrometry at Analytika Central Laboratory (ISO 17025 accredited). Reflects chronic 90-day metabolic mineral deposition and cellular toxic load.';
+    }
+    if (isEternaDiagnostic) {
+      return lang === 'es'
         ? 'ETERNA® es un ecosistema integral de salud de precisión que conecta el diagnóstico multiómico avanzado del paciente (Genetics 360, telemetría continua 24/7 con wearables y la serie bioquímica AgeScan) con un portal clínico profesional impulsado por Agentes de IA clínicos para briefings médicos, gestión de hasta 250 pacientes y personalización white-label para clínicas modernas de medicina preventiva y longevidad.'
-        : 'ETERNA® is a comprehensive precision health ecosystem bridging advanced patient multiomics (Genetics 360, 24/7 continuous wearable biometrics, and the AgeScan biochemical series) with a professional clinical management platform powered by autonomous AI clinical briefing agents, multi-practitioner orchestration, and full white-label capabilities for modern longevity and preventive medicine clinics.')
-    : (dynamicTranslations[lang]?.description
-        || getLocalizedField(product, 'description', lang) 
-        || getLocalizedField(product, 'clinicalOverview', lang)
-        || product?.clinicalOverview
-        || product?.clinical_overview
-        || product?.description 
-        || product?.desc 
-        || product?.objective 
-        || '');
+        : 'ETERNA® is a comprehensive precision health ecosystem bridging advanced patient multiomics (Genetics 360, 24/7 continuous wearable biometrics, and the AgeScan biochemical series) with a professional clinical management platform powered by autonomous AI clinical briefing agents, multi-practitioner orchestration, and full white-label capabilities for modern longevity and preventive medicine clinics.';
+    }
+    return (
+      dynamicTranslations[lang]?.description ||
+      getLocalizedField(product, 'description', lang) ||
+      getLocalizedField(product, 'clinicalOverview', lang) ||
+      product?.clinicalOverview ||
+      product?.clinical_overview ||
+      product?.description ||
+      product?.desc ||
+      product?.objective ||
+      ''
+    );
+  }, [product, slug, lang, isEternaDiagnostic, dynamicTranslations]);
 
   // ─── Version & Update Date System ──────────────────────────────────────────
   const versionInfo = useMemo(() => {
@@ -1749,12 +1855,12 @@ export default function PublicDatasheetView({
     <div className="public-datasheet-root">
       {/* ── Fixed Executive Navigation (Tier 1 Only on Product Page) ── */}
       <PublicUnifiedHeader
-        track="peptides"
+        track={isDiagnosticKit ? 'diagnostics' : isCosmeticProduct ? 'cosmetics' : isSupplementProduct ? 'supplements' : isCorporateService ? 'corporate' : 'peptides'}
         lang={lang}
         onLangChange={setLang}
         copyUrl={dynamicPublicUrl}
         shortUrl={shortMonographUrl}
-        supplierName={supplierName || product?.sourceSupplier || product?.supplierName || product?.supplier || 'Lotusland'}
+        supplierName={supplierName || product?.sourceSupplier || product?.supplierName || product?.supplier || (isBloodoDiagnostic ? 'Bloodo' : isTeletestDiagnostic ? 'TeleTest' : 'Lotusland')}
         currentSlug={slug}
         inquiryContextType="product"
         inquiryEntity={{
@@ -1762,7 +1868,7 @@ export default function PublicDatasheetView({
           slug,
           code: effectiveBatchCode || '',
           strength: selectedStrengthId || '',
-          category: category || 'Research Peptides'
+          category: category || (isDiagnosticKit ? 'Clinical Diagnostics' : 'Research Peptides')
         }}
         onOpenInquiry={handleOpenInquiry}
         hideContactButton={true}
@@ -1771,7 +1877,7 @@ export default function PublicDatasheetView({
         breadcrumb={[
           { label: lang === 'es' ? 'Catálogo de Productos' : 'Product Catalog', href: '/c/CAT-MU9L9GBN' },
           ...(brandCollection ? [{ label: brandCollection.title, href: brandCollection.href }] : []),
-          { label: product?.canonicalName || product?.name || name || 'Peptide Monograph' }
+          { label: product?.canonicalName || product?.name || name || (isDiagnosticKit ? 'Diagnostic Test' : 'Peptide Monograph') }
         ]}
       />
 
@@ -1816,12 +1922,50 @@ export default function PublicDatasheetView({
                   ? (displaySupplierName && !displaySupplierName.includes('Certified Clinical Laboratories') && !displaySupplierName.includes('Multi-Source')
                       ? `${displaySupplierName} ${lang === 'es' ? 'Calidad Verificada' : 'Quality Verified'}`
                       : (lang === 'es' ? 'Asesoramiento Institucional' : 'Institutional Advisory'))
+                  : isTeletestDiagnostic
+                  ? (lang === 'es' ? 'Acreditación ENAC ISO 17025 / ISO 15189' : 'ISO 17025 / ISO 15189 Accredited')
+                  : isBloodoDiagnostic || isDiagnosticKit
+                  ? (lang === 'es' ? 'Conforme CE-IVDR (UE 2017/746)' : 'CE-IVDR Certified (EU 2017/746)')
                   : isStrictlyLotusland 
                     ? (t.lotuslandVerified || (lang === 'es' ? 'Certificado Atlas Services' : 'Atlas Services Certified')) 
                     : `${displaySupplierName} ${lang === 'es' ? 'Calidad Verificada' : 'Quality Verified'}`}
               </span>
-              {!isCorporateService && !isDiagnosticKit && !isCosmeticProduct && <FdaRegulatoryBadge product={product} variant="hero-pill" lang={lang} />}
-              {!isCorporateService && !isSolventProduct && !isDiagnosticKit && !isCosmeticProduct && (
+              {!isCorporateService && !isDiagnosticKit && !isCosmeticProduct && !isTeletestDiagnostic && <FdaRegulatoryBadge product={product} variant="hero-pill" lang={lang} />}
+              {(isDiagnosticKit || isBloodoDiagnostic || isTeletestDiagnostic) && (
+                <>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: '#f0fdf4',
+                    color: '#166534',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700
+                  }}>
+                    <ShieldCheck size={13} color="#16a34a" />
+                    <span>{isTeletestDiagnostic ? (slug.includes('htma') ? 'ISO 17025 (ICP-MS/MS)' : 'ISO 17025 / ISO 15189') : 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)'}</span>
+                  </span>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: '#eff6ff',
+                    color: '#1e40af',
+                    border: '1px solid #bfdbfe',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700
+                  }}>
+                    <Activity size={13} color="#2563eb" />
+                    <span>{isTeletestDiagnostic ? 'TeleTest Analytika Central Lab' : 'LifeLab1 Vilnius Central Lab'}</span>
+                  </span>
+                </>
+              )}
+              {!isCorporateService && !isSolventProduct && !isDiagnosticKit && !isCosmeticProduct && !isTeletestDiagnostic && !isBloodoDiagnostic && (
                 <>
                   <span style={{
                     display: 'inline-flex',
