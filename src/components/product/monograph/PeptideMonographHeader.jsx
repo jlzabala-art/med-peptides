@@ -42,14 +42,19 @@ export default function PeptideMonographHeader({
   let primaryName = rawName;
   let cleanScientific = rawScientific;
 
-  const parenMatch = rawName.match(/^(.*?)\s*\((.*?)\)$/);
-  if (parenMatch) {
-    primaryName = parenMatch[1].trim();
-    if (!cleanScientific || cleanScientific.toLowerCase() === parenMatch[2].trim().toLowerCase()) {
-      cleanScientific = parenMatch[2].trim();
+  if (slug?.toLowerCase().includes('htma') || slug?.toLowerCase().includes('mineralograma') || rawName?.toLowerCase().includes('mineralograma')) {
+    primaryName = 'Hair Tissue Mineral Analysis (HTMA)';
+    cleanScientific = '33 Nutritional Minerals, Toxic Heavy Metals & Metabolic Ratios';
+  } else {
+    const parenMatch = rawName.match(/^(.*?)\s*\((.*?)\)$/);
+    if (parenMatch) {
+      primaryName = parenMatch[1].trim();
+      if (!cleanScientific || cleanScientific.toLowerCase() === parenMatch[2].trim().toLowerCase()) {
+        cleanScientific = parenMatch[2].trim();
+      }
+    } else if (rawName.toLowerCase() === rawScientific.toLowerCase()) {
+      cleanScientific = '';
     }
-  } else if (rawName.toLowerCase() === rawScientific.toLowerCase()) {
-    cleanScientific = '';
   }
 
   // Canonical domain classification
@@ -85,13 +90,14 @@ export default function PeptideMonographHeader({
   });
   
   // Clean strengths array to English
+  const isTeletestHtma = slug?.toLowerCase().includes('htma') || slug?.toLowerCase().includes('mineralograma');
   const strengthsArray = (rawStrengthsArray.length > 0 ? rawStrengthsArray : ['Standard Formulation']).map(str => {
     if (isDiagnostic || /perfil/i.test(str)) {
+      if (isTeletestHtma || /htma|mineral/i.test(str)) {
+        return '1 Complete 33 Mineral & Toxic Element Profile + Functional Assessment';
+      }
       if (/omega|l[ií]pido/i.test(str) || slug?.toLowerCase().includes('omega') || primaryName.toLowerCase().includes('omega')) {
         return '1 Complete 24 Fatty Acid Analytical Profile + Evaluation';
-      }
-      if (/htma|mineral/i.test(str)) {
-        return '1 Complete 33 Mineral & Toxic Element Profile';
       }
       if (/hla|auto/i.test(str)) {
         return '1 High-Resolution HLA Class I & II Screen';
@@ -119,7 +125,9 @@ export default function PeptideMonographHeader({
   const isOral = rawFormat.includes('capsule') || rawFormat.includes('tablet') || rawFormat.includes('oral');
 
   const presentation = isDiagnostic
-    ? (product.sampleType ? `Specimen Matrix: ${product.sampleType}` : 'Diagnostic Specimen Collection Kit')
+    ? (isTeletestHtma
+        ? 'Diagnostic Specimen Collection Kit (Proximal Scalp Hair)'
+        : (product.sampleType ? `Specimen Matrix: ${product.sampleType}` : 'Diagnostic Specimen Collection Kit'))
     : isNasalSpray 
       ? 'Nasal Spray (Intranasal)' 
       : isSublingual 
@@ -131,9 +139,9 @@ export default function PeptideMonographHeader({
             : (product.presentationFormat || product.presentation || 'Lyophilized sterile vial');
 
   const verifiedPurity = isDiagnostic
-    ? 'ISO 15189 · CE-IVD (CV < 4.5% GC-FID)'
+    ? (isTeletestHtma ? 'ISO 17025 Accredited · ICP-MS/MS' : 'ISO 15189 · CE-IVD (CV ≤ 6.6%)')
     : (product.purity || '≥99% (99.4% HPLC verified)');
-  const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || (product.variants?.[0]?.supplier) || (isDiagnostic ? 'TeleTest Analytika' : 'Lotusland');
+  const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || (product.variants?.[0]?.supplier) || (isDiagnostic ? (isTeletestHtma ? 'TeleTest Analytika' : 'Bloodo') : 'Lotusland');
   const supplier = formatCommercialSupplierName(rawSupplier);
   const batchCode = effectiveBatch || (product.testCode ? `TEST-TL01-${product.testCode}` : (product.batchNumber || (isDiagnostic ? 'AS-TEL-TL01-2610' : 'AS-LOT-PT05-2609')));
 
@@ -403,7 +411,7 @@ export default function PeptideMonographHeader({
               </span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '4px' }}>
                 {strengthsArray.map((str, sIdx) => {
-                  const isActive = (selectedStrength?.name === str || selectedStrength?.id === str || selectedStrength?.dosage === str);
+                  const isActive = (selectedStrength?.name === str || selectedStrength?.id === str || selectedStrength?.dosage === str || (isDiagnostic && strengthsArray.length === 1));
                   return (
                     <span
                       key={`${str}-${sIdx}`}

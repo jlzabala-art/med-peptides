@@ -34,7 +34,8 @@ import '../styles/collection_shared.css';
 const BRAND_CONFIGS = {
   colway: {
     name: 'Colway',
-    title: 'Colway® Bioactive Native Collagen, Cosmeceuticals & Trichology',
+    title: 'Colway® Bioactive Native Collagen',
+    tagline: 'Bioactive Freshwater Tropocollagen, Cellular Dermocosmetics & Trichology',
     badge: 'Clinical Nutriceuticals, Dermocosmetics & Trichology Desk',
     badgeColor: '#0d9488',
     subtitle: 'Polish pioneer in biologically active native freshwater fish tropocollagen (triple-helix preserved), cellular oral nutriceuticals, advanced diamond cosmeceuticals, and medical follicular trichology.',
@@ -625,70 +626,113 @@ export default function BrandCollectionPage({
       </div>
 
       {/* ── 3. Google Cloud Hero Header ── */}
-      <header style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', marginTop: '0.75rem', padding: '2.5rem 0 2rem' }}>
-        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem', width: '100%' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', width: '100%' }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              alignSelf: 'flex-start',
-              background: `${config.badgeColor}15`,
-              border: `1px solid ${config.badgeColor}35`,
-              color: config.badgeColor,
-              padding: '4px 12px',
-              borderRadius: '16px',
-              fontSize: '0.74rem',
-              fontWeight: 700,
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase'
-            }}>
-              <Sparkles size={13} />
-              <span>{config.badge}</span>
+      <header style={{
+        background: '#ffffff',
+        borderBottom: '1px solid #e2e8f0',
+        marginTop: '0.5rem',
+        padding: 'clamp(1.25rem, 2.5vw, 2.0rem) 0 clamp(1.0rem, 2vw, 1.5rem)'
+      }}>
+        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(1rem, 3vw, 2rem)', width: '100%' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%' }}>
+            
+            {/* GCP Service Eyebrow Badge Strip */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: `${config.badgeColor}12`,
+                border: `1px solid ${config.badgeColor}30`,
+                color: config.badgeColor,
+                padding: '3px 10px',
+                borderRadius: '4px',
+                fontSize: '0.68rem',
+                fontWeight: 750,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase'
+              }}>
+                <Sparkles size={11} />
+                <span>{config.badge}</span>
+              </div>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                color: '#64748b',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '0.68rem',
+                fontWeight: 650
+              }}>
+                {brandSlug === 'colway' ? 'EU CPNP Reg. · ISO 22716' : 'ISO Accredited · European Lab'}
+              </span>
             </div>
-            <h1 style={{
-              fontSize: 'clamp(1.9rem, 4.2vw, 3.35rem)',
-              fontWeight: 850,
-              color: '#0f172a',
-              letterSpacing: '-0.035em',
-              margin: 0,
-              lineHeight: 1.12,
-              textWrap: 'balance',
-              width: '100%'
-            }}>
-              {config.title}
-            </h1>
+
+            {/* GCP Authoritative Title & Domain Subtitle */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <h1 style={{
+                fontSize: 'clamp(1.45rem, 3.2vw, 2.35rem)',
+                fontWeight: 850,
+                color: '#003666',
+                letterSpacing: '-0.03em',
+                margin: 0,
+                lineHeight: 1.18,
+                textWrap: 'balance'
+              }}>
+                {config.title}
+              </h1>
+              {config.tagline && (
+                <div style={{
+                  fontSize: 'clamp(0.85rem, 1.4vw, 1.05rem)',
+                  fontWeight: 650,
+                  color: config.accentColor || '#0d9488',
+                  letterSpacing: '-0.015em',
+                  marginTop: '2px'
+                }}>
+                  {config.tagline}
+                </div>
+              )}
+            </div>
+
+            {/* Subtitle / Descriptive Scope */}
             <p style={{
-              fontSize: 'clamp(0.96rem, 1.35vw, 1.12rem)',
+              fontSize: 'clamp(0.82rem, 1.1vw, 0.94rem)',
               color: '#475569',
-              lineHeight: 1.6,
-              margin: 0,
+              lineHeight: 1.55,
+              margin: '2px 0 0 0',
               fontWeight: 450,
-              maxWidth: '1280px'
+              maxWidth: '1150px'
             }}>
               {config.subtitle}
             </p>
 
             {/* Architecture Metadata Badges (GCP Standard) */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '0.35rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 650, color: '#334155', background: '#f1f5f9', border: '1px solid #e2e8f0', padding: '4px 10px', borderRadius: '6px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '0.25rem' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#334155', background: '#f8fafc', border: '1px solid #cbd5e1', padding: '3px 9px', borderRadius: '4px' }}>
                 🧬 {filteredProducts.length} {brandSlug === 'colway' ? 'Formulations' : 'Items'}
               </span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 650, color: config.accentColor, background: `${config.accentColor}10`, border: `1px solid ${config.accentColor}30`, padding: '4px 10px', borderRadius: '6px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: config.accentColor, background: `${config.accentColor}10`, border: `1px solid ${config.accentColor}30`, padding: '3px 9px', borderRadius: '4px' }}>
                 {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : '🏛️ LifeLab1 Diagnostics'}
               </span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 650, color: '#0284c7', background: '#f0f9ff', border: '1px solid #e0f2fe', padding: '4px 10px', borderRadius: '6px' }}>
-                {brandSlug === 'colway' ? '🛡️ ISO 22716 & CPNP Compliant' : '🛡️ CE-IVDR & ISO 15189'}
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '3px 9px', borderRadius: '4px' }}>
+                {brandSlug === 'colway' ? '🛡️ ISO 22716 & EU CPNP Compliant' : '🛡️ CE-IVDR & ISO 15189'}
               </span>
+              {brandSlug === 'colway' && (
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '3px 9px', borderRadius: '4px' }}>
+                  ✨ Native Freshwater Tropocollagen (3D Helix)
+                </span>
+              )}
             </div>
 
             {/* Official Complete Collection Showcase Hero Banner */}
             {brandSlug === 'colway' && (
               <div style={{
-                marginTop: '1.5rem',
-                borderRadius: '16px',
+                marginTop: '1.25rem',
+                borderRadius: '12px',
                 overflow: 'hidden',
-                boxShadow: '0 8px 30px rgba(15, 23, 42, 0.08)',
+                boxShadow: '0 4px 20px rgba(15, 23, 42, 0.06)',
                 border: '1px solid #e2e8f0',
                 background: '#ffffff'
               }}>
@@ -1087,7 +1131,7 @@ export default function BrandCollectionPage({
                       }}
                     >
                       <Lock size={12} />
-                      <span>{isEs ? 'Tarifas B2B' : 'Unlock B2B'}</span>
+                      <span>{isEs ? 'Tarifas' : 'Pricing'}</span>
                     </button>
                   ) : (
                     <span style={{
@@ -1103,7 +1147,7 @@ export default function BrandCollectionPage({
                       fontWeight: 750
                     }}>
                       <ShieldCheck size={12} />
-                      <span>{isEs ? 'Tarifas Activas' : 'B2B Active'}</span>
+                      <span>{isEs ? 'Tarifas Activas' : 'Pricing Active'}</span>
                     </span>
                   )}
 

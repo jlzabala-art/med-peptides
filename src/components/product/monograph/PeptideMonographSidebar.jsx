@@ -51,18 +51,22 @@ export default function PeptideMonographSidebar({
   const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || 'Lotusland';
   const supplier = formatCommercialSupplierName(rawSupplier);
   const { isDiagnostic } = classifyProductDomain(product, { slug: cleanSlug, activeFormat });
+  const isTeletestHtma = cleanSlug.includes('htma') || cleanSlug.includes('mineralograma');
+  const isBloodo = cleanSlug.includes('bloodo') || cleanSlug.includes('nad') || cleanSlug.includes('cortisol') || cleanSlug.includes('hba1c');
 
   // Active strength & presentation label in English
   const rawStrength = selectedStrength?.name || selectedStrength?.id || (typeof selectedStrength === 'string' ? selectedStrength : '');
-  const cleanStrength = rawStrength && !rawStrength.toLowerCase().includes('perfil') 
-    ? rawStrength 
-    : '1 Complete 24 Fatty Acid Analytical Profile + Evaluation';
+  const cleanStrength = isTeletestHtma
+    ? '1 Complete 33 Mineral & Toxic Element Profile + Functional Assessment'
+    : rawStrength && !rawStrength.toLowerCase().includes('perfil') 
+      ? rawStrength 
+      : (cleanSlug.includes('omega') ? '1 Complete 24 Fatty Acid Analytical Profile + Evaluation' : '1 Complete Clinical Analytical Profile');
   const strengthLabel = isDiagnostic ? cleanStrength : (rawStrength || 'Standard Formulation');
   const formatLabel = isDiagnostic 
-    ? (product.sampleType ? `Matrix: ${product.sampleType}` : 'Diagnostic Specimen Collection Kit') 
+    ? (isTeletestHtma ? 'Matrix: Proximal Scalp Hair (0.25 g)' : (product.sampleType ? `Matrix: ${product.sampleType}` : 'Diagnostic Specimen Collection Kit')) 
     : (activeFormat?.name || activeFormat?.id || product.presentation || 'Lyophilized SubQ Vial');
   const purityText = isDiagnostic 
-    ? 'ISO 15189 · CE-IVD (CV < 4.5%)' 
+    ? (isTeletestHtma ? 'ISO 17025 Accredited (ICP-MS/MS)' : 'ISO 15189 · CE-IVD (CV ≤ 6.6%)') 
     : (product.purity || '≥99.2% (HPLC Verified)');
 
   const tabs = [
@@ -82,19 +86,19 @@ export default function PeptideMonographSidebar({
     {
       id: 'preparation',
       label: isDiagnostic ? 'Specimen Collection' : 'Preparation & Admin',
-      subtitle: isDiagnostic ? 'Pre-analytical prep & packaging' : 'Reconstitution & U-100 syringe',
+      subtitle: isDiagnostic ? (isTeletestHtma ? 'Hair collection protocol & packaging' : 'Pre-analytical prep & packaging') : 'Reconstitution & U-100 syringe',
       icon: Droplet
     },
     {
       id: 'quality',
       label: isDiagnostic ? 'Quality & Lab' : 'Quality & Batch',
-      subtitle: isDiagnostic ? 'GC-FID validation & ISO 15189 CoA' : 'HPLC purity & analytical CoA',
+      subtitle: isDiagnostic ? (isTeletestHtma ? 'ICP-MS validation & ISO 17025 CoA' : 'LC-MS/MS validation & ISO 15189 CoA') : 'HPLC purity & analytical CoA',
       icon: ShieldCheck
     },
     {
       id: 'references',
       label: 'References',
-      subtitle: isDiagnostic ? 'PubMed lipidology citations' : 'FDA dossiers & PubMed citations',
+      subtitle: isDiagnostic ? (isTeletestHtma ? 'PubMed toxicology & mineral citations' : 'PubMed clinical laboratory citations') : 'FDA dossiers & PubMed citations',
       icon: BookOpen
     },
     {
@@ -354,7 +358,7 @@ export default function PeptideMonographSidebar({
           <div style={{ background: '#f8fafc', padding: '5px 7px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
             <span style={{ fontSize: '0.60rem', color: '#64748b', display: 'block' }}>Assay Standard</span>
             <strong style={{ fontSize: '0.74rem', color: '#003666', display: 'block' }}>
-              {isDiagnostic ? 'GC-FID / ISO 15189' : 'RP-HPLC / MS'}
+              {isDiagnostic ? (isTeletestHtma ? 'ICP-MS / ISO 17025' : isBloodo ? 'UHPLC-MS/MS · ISO 15189' : 'ISO 15189 / 17025') : 'RP-HPLC / MS'}
             </strong>
           </div>
         </div>

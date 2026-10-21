@@ -175,53 +175,96 @@ export default function OverviewTab({
     activeFormat
   });
 
-  const genericName = product.scientificName || product.chemical_name || product.genericName || 
-    (isDiagnostic ? (product.name || product.canonicalName || 'Diagnostic Laboratory Test Panel') : (isPt141 ? 'Bremelanotide' : (product.canonicalName || product.name || '')));
+  const isTeletestHtma = resolvedSlug.includes('htma') || resolvedSlug.includes('mineralograma');
+  const isBloodoNad = resolvedSlug.includes('nad');
+  const isBloodoCortisol = resolvedSlug.includes('cortisol');
+  const isBloodoTestosterone = resolvedSlug.includes('testosterone');
+  const isBloodoHba1c = resolvedSlug.includes('hba1c');
+  const isTeletestHla = resolvedSlug.includes('hla');
 
-  const targetReceptor = product.targetSystem || product.mechanism_of_action || 
-    (isDiagnostic 
-      ? (product.methodology || 'Analytical Gas Chromatography (GC-FID) / 24 Fatty Acid Biomarker Spectrum')
-      : (isPt141 ? 'Central Melanocortin MC3R / MC4R Receptors' : 'Target Receptor / Biomolecular Pathway'));
+  const genericName = isTeletestHtma
+    ? 'Hair Tissue Mineral Analysis (HTMA) — 33 Nutritional Minerals, Toxic Heavy Metals & Metabolic Ratios'
+    : isBloodoNad
+      ? 'Intracellular Nicotinamide Adenine Dinucleotide (NAD+) Quantitative Assay'
+      : isBloodoCortisol
+        ? 'Diurnal Cortisol & Circadian Endocrine Rhythm Test'
+        : isBloodoTestosterone
+          ? 'Total Testosterone, Free Testosterone & Free Androgen Index (FAI)'
+          : isBloodoHba1c
+            ? 'Glycated Hemoglobin (HbA1c) 90-Day Glycemic Control Assay'
+            : isTeletestHla
+              ? 'HLA-DQ2 / HLA-DQ8 Celiac Disease Genetic Susceptibility Screen'
+              : (product.scientificName || product.chemical_name || product.genericName || 
+                (isDiagnostic ? (product.name || product.canonicalName || 'Diagnostic Laboratory Test Panel') : (isPt141 ? 'Bremelanotide' : (product.canonicalName || product.name || ''))));
 
-  const pharmacologicalSummary = product.overview_summary || product.summary || product.description || product.desc || 
-    (isDiagnostic
-      ? 'Clinical laboratory diagnostic kit for comprehensive biomarker quantification and metabolic profiling. Specimen collected via standardized dried blood spot (DBS) or specimen matrix and analyzed under certified ISO 15189 clinical laboratory standards with automated GC-FID/FAME chromatography.'
-      : (isPt141 ? 'Synthetic cyclic heptapeptide analogue of alpha-melanocyte-stimulating hormone (α-MSH). Acts centrally across the blood-brain barrier to stimulate hypothalamic melanocortin receptors (primarily MC3R and MC4R), promoting dopamine release in the medial preoptic area to restore sexual desire and arousal without vascular dependency.' : 'Authoritative pharmaceutical technical profile and clinical reference data for therapeutic peptides.'));
+  const targetReceptor = isTeletestHtma
+    ? 'Inductively Coupled Plasma Mass Spectrometry (ICP-MS/MS) / 33 Heavy Metal & Mineral Cellular Biomarker Spectrum'
+    : isBloodoNad
+      ? 'Liquid Chromatography Tandem Mass Spectrometry (UHPLC-MS/MS) / Intracellular Sirtuin-Active NAD+ Pool'
+      : isBloodoCortisol
+        ? 'LC-MS/MS Diurnal Adrenal Cortisol & Circadian Rhythms'
+        : (product.targetSystem || product.mechanism_of_action || 
+          (isDiagnostic 
+            ? (product.methodology || 'High-Resolution Clinical Mass Spectrometry & Validated Immunoassay Spectrum')
+            : (isPt141 ? 'Central Melanocortin MC3R / MC4R Receptors' : 'Target Receptor / Biomolecular Pathway')));
+
+  const pharmacologicalSummary = isTeletestHtma
+    ? 'Hair tissue mineral analysis (HTMA) measures the accumulation and intracellular tissue balance of essential minerals and toxic heavy metals over the preceding 2–3 months. Accurately quantifies parts-per-million (ppm / µg/g) levels of 21 nutritional minerals, 12 environmental toxins (including lead, mercury, arsenic, and cadmium), and 10 critical physiological ratios assessing adrenal output, thyroid cellular sensitivity, and oxidative stress. Includes comprehensive analytical report with clinical interpretation across fatigue, autonomic balance, bone metabolism, and cellular detoxification.'
+    : isBloodoNad
+      ? 'CE-IVDR capillary dried blood spot (DBS) diagnostic test measuring total intracellular nicotinamide adenine dinucleotide (NAD+) pool in whole blood via tandem mass spectrometry (UHPLC-MS/MS) at accredited central clinical lab (LifeLab1, ISO 15189 certified). Accurately establishes biological baseline for cellular bioenergetics, sirtuin longevity activity, and clinical NAD+ supplementation titration.'
+      : (product.overview_summary || product.summary || product.description || product.desc || 
+        (isDiagnostic
+          ? 'Clinical laboratory diagnostic kit for comprehensive biomarker quantification and metabolic profiling under certified European ISO 15189/17025 laboratory standards.'
+          : (isPt141 ? 'Synthetic cyclic heptapeptide analogue of alpha-melanocyte-stimulating hormone (α-MSH). Acts centrally across the blood-brain barrier to stimulate hypothalamic melanocortin receptors (primarily MC3R and MC4R), promoting dopamine release in the medial preoptic area to restore sexual desire and arousal without vascular dependency.' : 'Authoritative pharmaceutical technical profile and clinical reference data for therapeutic peptides.')));
 
   const fdaStatusObj = getFdaPeptideStatus(product.slug || product.canonicalName || product.name || '');
   const rawRef = product.referenceBrand 
     ? `${product.referenceBrand}${product.referenceApprovalYear ? ` (Approved ${product.referenceApprovalYear})` : ''}` 
-    : (isDiagnostic ? 'CE-IVD In Vitro Diagnostic Medical Device (EU IVDR 2017/746 Compliant) • ISO 15189:2022 Accredited' : (fdaStatusObj?.referenceBrand || (isPt141 ? 'Vyleesi® (bremelanotide injection 1.75 mg/0.3 mL, NDA 210583, FDA Approved June 2019)' : null)));
+    : (isDiagnostic 
+        ? (isTeletestHtma
+            ? 'CE-IVD In Vitro Diagnostic Medical Device (EU IVDR 2017/746 Compliant) · ISO 17025:2017 Accredited Laboratory'
+            : 'CE-IVD In Vitro Diagnostic Medical Device (EU IVDR 2017/746 Compliant) · ISO 15189:2022 Accredited') 
+        : (fdaStatusObj?.referenceBrand || (isPt141 ? 'Vyleesi® (bremelanotide injection 1.75 mg/0.3 mL, NDA 210583, FDA Approved June 2019)' : null)));
   const fdaRefProduct = rawRef && String(rawRef).trim().length > 0 ? String(rawRef).trim() : null;
 
   // Note: product.category is intentionally excluded — it stores type ('peptide'), not a clinical indication.
-  const defaultIndication = isDiagnostic
-    ? (product.primaryIndication || product.indication || 'Comprehensive Fatty Acid Profile (Omega-3/6/9, AA/EPA, DGLA/EPA, Trans-Fatty Acids Index)')
-    : isPt141
-      ? 'Hypoactive Sexual Desire Disorder (HSDD) & Non-vascular Erectile Dysfunction'
-      : (product.primaryIndication || product.indication || product.targetSystem || product.clinicalCategory || 'Targeted Physiological & Cellular Optimization');
+  const defaultIndication = isTeletestHtma
+    ? '33 Toxic Heavy Metals, Nutritional Trace Minerals & 10 Critical Metabolic Ratios'
+    : isBloodoNad
+      ? 'Intracellular NAD+ Bioenergetics, Mitochondrial Longevity & Supplementation Titration'
+      : (isDiagnostic
+          ? (product.primaryIndication || product.indication || 'Targeted Multi-Omic & Metabolic Biomarker Profiling')
+          : isPt141
+            ? 'Hypoactive Sexual Desire Disorder (HSDD) & Non-vascular Erectile Dysfunction'
+            : (product.primaryIndication || product.indication || product.targetSystem || product.clinicalCategory || 'Targeted Physiological & Cellular Optimization'));
 
-  const defaultRoute = isDiagnostic
-    ? 'Capillary Blood / Dried Blood Spot (Whatman 903 Collection Card)'
-    : isSpray
-      ? 'Intranasal Mucosal (Metered needle-free spray, 1–2 sprays per nostril)'
-      : isSublingual
-        ? 'Sublingual (Drops held under tongue for 60–90 seconds prior to swallowing)'
-        : isPen
-          ? 'Subcutaneous injection via calibrated multi-dose pen (lower abdomen or anterolateral thigh)'
-          : 'Subcutaneous injection (lower abdomen or anterolateral thigh)';
+  const defaultRoute = isTeletestHtma
+    ? 'Proximal Scalp Hair (0.25 g, root cut, untreated/unbleached)'
+    : (isDiagnostic
+        ? (product.sampleType || 'Capillary Whole Blood / Dried Blood Spot (Whatman 903 Card)')
+        : isSpray
+          ? 'Intranasal Mucosal (Metered needle-free spray, 1–2 sprays per nostril)'
+          : isSublingual
+            ? 'Sublingual (Drops held under tongue for 60–90 seconds prior to swallowing)'
+            : isPen
+              ? 'Subcutaneous injection via calibrated multi-dose pen (lower abdomen or anterolateral thigh)'
+              : 'Subcutaneous injection (lower abdomen or anterolateral thigh)');
 
-  const defaultPk = isDiagnostic
-    ? 'Analytical Precision: Gas Chromatography GC-FID (CV < 4.5% CE-IVD) • Turnaround: 5–7 Business Days'
-    : isPt141
-      ? 'Tmax: 45–60 min • Terminal t½: ~2.7 hours • On-demand duration: 8–12 hours'
-      : (product.pharmacokineticsSummary || (product.eliminationHalfLife ? `Elimination t½: ${product.eliminationHalfLife} • Rapid target bioavailability` : 'High bioavailability across mucosal/subcutaneous administration routes'));
+  const defaultPk = isTeletestHtma
+    ? 'Analytical Precision: ICP-MS/MS (ISO 17025 Accredited) · Turnaround: 7–10 Business Days'
+    : (isDiagnostic
+        ? (isBloodoNad ? 'Analytical Precision: UHPLC-MS/MS (CV ≤ 6.6% CE-IVD) · Turnaround: 3–5 Business Days' : 'Analytical Precision: ISO 15189 / 17025 Accredited · Turnaround: 5–7 Business Days')
+        : isPt141
+          ? 'Tmax: 45–60 min • Terminal t½: ~2.7 hours • On-demand duration: 8–12 hours'
+          : (product.pharmacokineticsSummary || (product.eliminationHalfLife ? `Elimination t½: ${product.eliminationHalfLife} • Rapid target bioavailability` : 'High bioavailability across mucosal/subcutaneous administration routes')));
 
-  const defaultDosing = isDiagnostic
-    ? 'Collect early morning fasting specimen (8–12h water only) prior to therapeutic interventions'
-    : isPt141
-      ? 'Administer at least 45 minutes prior to anticipated activity (max 1 dose/24h, max 8 doses/month)'
-      : (product.clinicalDosingWindow || (isSpray ? 'Daily morning administration or split protocol as directed by physician' : 'Follow physician clinical protocol and titration guidelines'));
+  const defaultDosing = isTeletestHtma
+    ? 'Collect 0.25 g proximal scalp hair (first 3 cm from scalp); avoid medicated shampoos for 48h prior'
+    : (isDiagnostic
+        ? 'Collect early morning fasting specimen (8–12h water only) prior to therapeutic interventions'
+        : isPt141
+          ? 'Administer at least 45 minutes prior to anticipated activity (max 1 dose/24h, max 8 doses/month)'
+          : (product.clinicalDosingWindow || (isSpray ? 'Daily morning administration or split protocol as directed by physician' : 'Follow physician clinical protocol and titration guidelines')));
 
   const clinicalConsiderations = [
     {
@@ -240,7 +283,7 @@ export default function OverviewTab({
       icon: Clock
     },
     {
-      label: isDiagnostic ? 'Patient Preparation & Fasting' : 'Clinical Dosing Window',
+      label: isDiagnostic ? 'Patient Preparation & Sampling' : 'Clinical Dosing Window',
       value: defaultDosing,
       icon: Activity
     }
@@ -268,7 +311,12 @@ export default function OverviewTab({
           field: 'strengthMg',
           width: '28%',
           render: (row) => {
-            const val = String(row.strengthMg || '');
+            const rawVal = String(row.strengthMg || '');
+            const val = (isTeletestHtma || /htma|mineral/i.test(rawVal))
+              ? '1 Complete 33 Mineral & Toxic Element Profile + Functional Assessment'
+              : /perfil|analítico/i.test(rawVal)
+                ? '1 Complete Clinical Analytical Profile + Functional Assessment'
+                : rawVal;
             return (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ fontWeight: 800, color: '#003666', fontSize: '0.86rem' }}>
@@ -479,12 +527,22 @@ export default function OverviewTab({
         formatId: isDiagnostic ? 'diagnostic_kit' : row.formatId,
         strengthId: row.strengthId,
         supplierId: row.supplierId,
-        strengthMg: row.strengthName,
+        strengthMg: isTeletestHtma
+          ? '1 Complete 33 Mineral & Toxic Element Profile + Functional Assessment'
+          : (row.strengthName && /perfil|analítico/i.test(row.strengthName)
+              ? '1 Complete Clinical Analytical Profile + Functional Assessment'
+              : row.strengthName),
         format: isDiagnostic ? 'Diagnostic Specimen Collection Kit' : row.formatName,
-        recommendedDiluent: isDiagnostic ? (product.sampleType || 'Capillary Whole Blood (DBS Whatman 903)') : row.diluentText,
-        concentrationMgMl: isDiagnostic ? 'GC-FID / FAME Chromatography' : row.concText,
-        route: isDiagnostic ? '5–7 Business Days (ISO 15189)' : row.adminText,
-        isCurrentlyActive: row.isCurrentlyActive,
+        recommendedDiluent: isTeletestHtma
+          ? 'Proximal Scalp Hair (0.25 g, root cut)'
+          : isDiagnostic ? (product.sampleType || 'Capillary Whole Blood (DBS Whatman 903)') : row.diluentText,
+        concentrationMgMl: isTeletestHtma
+          ? 'ICP-MS/MS (Inductively Coupled Plasma Mass Spectrometry)'
+          : isDiagnostic ? (product.methodology || 'GC-FID / FAME Chromatography') : row.concText,
+        route: isTeletestHtma
+          ? 'TeleTest Central Lab · 7–10 Business Days (ISO 17025)'
+          : isDiagnostic ? 'LifeLab1 Central · 5–7 Business Days (ISO 15189)' : row.adminText,
+        isCurrentlyActive: row.isCurrentlyActive || (isDiagnostic && presentationMatrixRows.length === 1),
         isDiagnostic,
         rawRow: row
       }))
@@ -502,12 +560,20 @@ export default function OverviewTab({
             formatId: isDiagnostic ? 'diagnostic_kit' : (v.format || v.presentation),
             strengthId: v.id || v.strength,
             supplierId: v.supplierId || null,
-            strengthMg: v.dosage || v.dose || v.strength || (isDiagnostic ? '1 Perfil Lipídico Analítico + Valoración' : 'Standard'),
+            strengthMg: isTeletestHtma
+              ? '1 Complete 33 Mineral & Toxic Element Profile + Functional Assessment'
+              : (v.dosage || v.dose || v.strength || (isDiagnostic ? '1 Complete Clinical Analytical Profile' : 'Standard')),
             format: isDiagnostic ? 'Diagnostic Specimen Collection Kit' : isVialSpray ? 'Nasal Spray' : isVialSublingual ? 'Sublingual Dropper' : isVialPen ? 'Pre-filled Pen' : (v.format || 'Lyophilized vial'),
-            recommendedDiluent: isDiagnostic ? (product.sampleType || 'Capillary Whole Blood (DBS Whatman 903)') : isVialSpray ? 'Pre-metered Intranasal Solution' : isVialSublingual ? 'Sublingual Vehicle' : isVialPen ? 'Pre-filled Solution' : '1.0–2.0 mL BAC Water',
-            concentrationMgMl: isDiagnostic ? 'GC-FID / FAME Chromatography' : isVialSpray ? `${sprayVol} mL (~${sprayCount} sprays)` : isVialPen ? '3.0 mL Pen' : '5.0 mg/mL',
-            route: isDiagnostic ? '5–7 Business Days (ISO 15189)' : isVialSpray ? 'Intranasal (Needle-Free)' : isVialSublingual ? 'Sublingual' : isVialPen ? 'Subcutaneous Pen' : 'Subcutaneous',
-            isCurrentlyActive: false,
+            recommendedDiluent: isTeletestHtma
+              ? 'Proximal Scalp Hair (0.25 g, root cut)'
+              : isDiagnostic ? (product.sampleType || 'Capillary Whole Blood (DBS Whatman 903)') : isVialSpray ? 'Pre-metered Intranasal Solution' : isVialSublingual ? 'Sublingual Vehicle' : isVialPen ? 'Pre-filled Solution' : '1.0–2.0 mL BAC Water',
+            concentrationMgMl: isTeletestHtma
+              ? 'ICP-MS/MS (Inductively Coupled Plasma Mass Spectrometry)'
+              : isDiagnostic ? (product.methodology || 'GC-FID / FAME Chromatography') : isVialSpray ? `${sprayVol} mL (~${sprayCount} sprays)` : isVialPen ? '3.0 mL Pen' : '5.0 mg/mL',
+            route: isTeletestHtma
+              ? 'TeleTest Central Lab · 7–10 Business Days (ISO 17025)'
+              : isDiagnostic ? 'LifeLab1 Central · 5–7 Business Days (ISO 15189)' : isVialSpray ? 'Intranasal (Needle-Free)' : isVialSublingual ? 'Sublingual' : isVialPen ? 'Subcutaneous Pen' : 'Subcutaneous',
+            isCurrentlyActive: isDiagnostic || false,
             isDiagnostic
           };
         })
@@ -515,11 +581,19 @@ export default function OverviewTab({
         ? [{
             id: 'test-kit-standard',
             formatId: 'diagnostic_kit',
-            strengthMg: 'Complete Diagnostic Panel',
+            strengthMg: isTeletestHtma
+              ? '1 Complete 33 Mineral & Toxic Element Profile + Functional Assessment'
+              : 'Complete Diagnostic Panel',
             format: 'Diagnostic Specimen Collection Kit',
-            recommendedDiluent: product.sampleType || 'Capillary Whole Blood (DBS Whatman 903)',
-            concentrationMgMl: 'GC-FID / FAME Chromatography',
-            route: '5–7 Business Days (ISO 15189)',
+            recommendedDiluent: isTeletestHtma
+              ? 'Proximal Scalp Hair (0.25 g, root cut)'
+              : (product.sampleType || 'Capillary Whole Blood (DBS Whatman 903)'),
+            concentrationMgMl: isTeletestHtma
+              ? 'ICP-MS/MS (Inductively Coupled Plasma Mass Spectrometry)'
+              : (product.methodology || 'GC-FID / FAME Chromatography'),
+            route: isTeletestHtma
+              ? 'TeleTest Central Lab · 7–10 Business Days (ISO 17025)'
+              : 'LifeLab1 Central · 5–7 Business Days (ISO 15189)',
             isCurrentlyActive: true,
             isDiagnostic: true
           }]

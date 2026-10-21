@@ -1115,7 +1115,7 @@ export default function PublicDatasheetView({
       const cleanS = String(initialStrength).toLowerCase().replace(/[-_\s]+/g, '');
       const found = filteredStrengths.find(s => {
         const sc = String(s.name || s.id).toLowerCase().replace(/[-_\s]+/g, '');
-        return sc === cleanS || sc.includes(cleanS) || cleanS.includes(sc);
+        return sc === cleanS || sc.includes(cleanS) || cleanS.includes(sc) || (cleanS.includes('perfil') && (sc.includes('complete') || sc.includes('profile') || sc.includes('htma')));
       });
       if (found) return found.id;
     }

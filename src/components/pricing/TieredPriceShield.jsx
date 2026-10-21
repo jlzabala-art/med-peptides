@@ -90,6 +90,14 @@ export default function TieredPriceShield({
 }) {
   const { user } = useAuth();
   const { is, can } = useRoleAccess();
+  const [localPreview, setLocalPreview] = React.useState(null);
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('atlas_b2b_verified_preview');
+      if (stored) setLocalPreview(JSON.parse(stored));
+    } catch (_) {}
+  }, []);
 
   const tiers = useMemo(() => resolveProductTierPricing(product), [product]);
 
@@ -97,14 +105,14 @@ export default function TieredPriceShield({
     return null;
   }
 
-  // Determine user authorization
-  const isAuthenticated = Boolean(user);
-  const isAdmin = is('admin');
-  const isWholesaler = is('wholesaler');
-  const isDoctor = is('doctor') || is('clinic') || is('medical_director') || is('fagron_clinic');
-  const isPatient = is('patient');
+  // Determine user authorization & role hierarchy
+  const isAuthenticated = Boolean(user) || Boolean(localPreview);
+  const isAdmin = is('admin') || is('medical_director') || (localPreview?.role === 'admin');
+  const isWholesaler = is('wholesaler') || is('supplier') || is('distributor') || (localPreview?.role === 'wholesaler');
+  const isDoctor = is('doctor') || is('clinic') || is('medical_director') || is('fagron_clinic') || is('compounding_pharmacy') || (localPreview?.role === 'clinic');
+  const isPatient = is('patient') || (localPreview?.role === 'patient');
 
-  // Determine which tier to display
+  // Determine which tier to display based on canonical role
   let activeTierKey = 'clinic';
   if (isAdmin && adminSimulationTier) {
     activeTierKey = adminSimulationTier;
@@ -185,10 +193,10 @@ export default function TieredPriceShield({
             cursor: 'pointer',
             transition: 'all 0.15s ease'
           }}
-          title={isEs ? "Desbloquear tarifas profesionales en 1 clic" : "Unlock practitioner wholesale pricing"}
+          title={isEs ? "Ver tarifas según perfil" : "View role-based pricing"}
         >
           <Lock size={12} color="#0d9488" />
-          <span>{isEs ? 'Ver B2B' : 'Unlock B2B'}</span>
+          <span>{isEs ? 'Tarifas' : 'Pricing'}</span>
         </button>
       );
     }
