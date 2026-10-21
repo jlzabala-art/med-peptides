@@ -72,14 +72,20 @@ export default function PeptideMonographHeader({
   const uniqueVariantDoses = [...new Set(variantDoses)];
 
   const strengthsList = (sortedStrengths || []).map(s => s.name || s.id).filter(Boolean);
-  const rawStrengthsArray = strengthsList.length > 0 
+  const baseStrengths = strengthsList.length > 0 
     ? strengthsList 
     : uniqueVariantDoses.length > 0 
       ? uniqueVariantDoses 
       : (product.availableStrengths ? String(product.availableStrengths).split('|').map(s => s.trim()).filter(Boolean) : ['Standard Formulation']);
   
+  // Strictly filter out Bulk Raw API powders from finished clinical monographs
+  const rawStrengthsArray = baseStrengths.filter(str => {
+    const s = String(str).toLowerCase();
+    return !s.includes('bulk') && !s.includes('api') && !/^\d+\s*g$/i.test(s.trim());
+  });
+  
   // Clean strengths array to English
-  const strengthsArray = rawStrengthsArray.map(str => {
+  const strengthsArray = (rawStrengthsArray.length > 0 ? rawStrengthsArray : ['Standard Formulation']).map(str => {
     if (isDiagnostic || /perfil/i.test(str)) {
       if (/omega|l[ií]pido/i.test(str) || slug?.toLowerCase().includes('omega') || primaryName.toLowerCase().includes('omega')) {
         return '1 Complete 24 Fatty Acid Analytical Profile + Evaluation';
@@ -138,10 +144,9 @@ export default function PeptideMonographHeader({
       `Product: ${primaryName}${cleanScientific ? ` (${cleanScientific})` : ''}`,
       `Classification: ${isDiagnostic ? 'Diagnostic Test • Laboratory Monograph' : 'Peptide • Clinical Monograph'}`,
       hasFdaRef ? `FDA Reference Product: ${fdaRefBrand} (Approved ${fdaRefYear})` : null,
-      `Available Strengths: ${availableStrengths}`,
+      isDiagnostic ? `Diagnostic Analytical Scope: ${availableStrengths}` : `Available Strengths: ${availableStrengths}`,
       `Presentation: ${presentation}`,
-      `Verified Precision / Purity: ${verifiedPurity}`,
-      `Supplier / Laboratory: ${supplier}`,
+      isDiagnostic ? `Analytical Standard: ${verifiedPurity}` : `Verified Precision / Purity: ${verifiedPurity}`,
       `Verified Batch: ${batchCode}`,
       `URL: ${resolvedMonographUrl}`
     ].filter(Boolean).join('\n');
@@ -216,33 +221,9 @@ export default function PeptideMonographHeader({
             )}
           </div>
 
-          {/* GCP Toolbar Actions */}
-          <div className="pds-header-actions-row" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {onOpenPreviewModal && (
-              <button
-                type="button"
-                onClick={onOpenPreviewModal}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  background: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  color: '#1e293b',
-                  fontSize: '0.76rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-                title="Print or export PDF monograph"
-              >
-                <Printer size={14} />
-                <span>Print / PDF</span>
-              </button>
-            )}
-
+          {/* GCP Console Action Toolbar (Golden Rule #9 & #45 Standard) */}
+          <div className="pds-header-actions-row" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            {/* Status verification pill (GCP status standard) */}
             <button
               type="button"
               onClick={() => {
@@ -252,22 +233,58 @@ export default function PeptideMonographHeader({
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
+                gap: '5px',
+                height: '30px',
+                padding: '0 10px',
                 borderRadius: '6px',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                color: '#1e293b',
-                fontSize: '0.76rem',
-                fontWeight: 700,
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                color: '#166534',
+                fontSize: '0.74rem',
+                fontWeight: 650,
                 cursor: 'pointer',
                 transition: 'all 0.15s ease'
               }}
-              title="Verify Digital Monograph & QR"
+              title="Click to inspect digital monograph integrity & QR code"
             >
-              <QrCode size={14} color="#003666" />
-              <span>Verify & QR</span>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a' }} />
+              <span>Verified Batch</span>
+              <QrCode size={12} color="#166534" style={{ marginLeft: '2px', opacity: 0.8 }} />
             </button>
+
+            {onOpenPreviewModal && (
+              <button
+                type="button"
+                onClick={onOpenPreviewModal}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  height: '30px',
+                  padding: '0 10px',
+                  borderRadius: '6px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#3c4043',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f8fafc';
+                  e.currentTarget.style.borderColor = '#bdc1c6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#dadce0';
+                }}
+                title="Print or export PDF monograph"
+              >
+                <Printer size={13} color="#5f6368" />
+                <span>PDF Monograph</span>
+              </button>
+            )}
 
             {onOpenShare && (
               <button
@@ -277,18 +294,28 @@ export default function PeptideMonographHeader({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '6px 12px',
+                  height: '30px',
+                  padding: '0 10px',
                   borderRadius: '6px',
-                  background: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  color: '#1e293b',
-                  fontSize: '0.76rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#3c4043',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f8fafc';
+                  e.currentTarget.style.borderColor = '#bdc1c6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#dadce0';
                 }}
                 title="Share link & QR code"
               >
-                <Share2 size={14} />
+                <Share2 size={13} color="#5f6368" />
                 <span>Share</span>
               </button>
             )}
@@ -298,71 +325,82 @@ export default function PeptideMonographHeader({
         {/* Row 2: Unified Google Cloud Resource Summary Panel (No Ragged Chips) */}
         <div className="pds-header-summary-panel">
           <div className="pds-summary-panel-grid">
-            {/* Field 1: Presentation (Interactive Segmented Switcher if multi-format) */}
+            {/* Field 1: Presentation (Interactive Segmented Switcher if multi-format, strictly finished products) */}
             <div className="pds-summary-cell">
               <span className="pds-summary-label">Presentation</span>
-              {availableFormats && availableFormats.length > 1 ? (
-                <div className="pds-header-format-select-wrap" style={{ marginTop: '4px' }}>
-                  <span style={{ fontSize: '0.9rem', lineHeight: 1, pointerEvents: 'none', position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)' }}>
-                    {(() => {
-                      if (isDiagnostic) return '🔬';
-                      const af = availableFormats.find(f => f.id === (activeFormat?.id || activeFormat));
-                      if (!af) return '🧪';
-                      const id = af.id;
-                      if (id.includes('spray') || id.includes('nasal')) return '💨';
-                      if (id.includes('pen') || id.includes('cartridge')) return '🖊️';
-                      if (id.includes('kit') || id.includes('test')) return '🔬';
-                      return '🧪';
-                    })()}
-                  </span>
-                  <select
-                    value={activeFormat?.id || activeFormat || ''}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      triggerHaptic('selection');
-                      onFormatChange?.(e.target.value);
-                    }}
-                    style={{
-                      appearance: 'none',
-                      WebkitAppearance: 'none',
-                      border: '1.5px solid #003666',
-                      borderRadius: '6px',
-                      background: '#ffffff',
-                      color: '#003666',
-                      fontWeight: 700,
-                      fontSize: '0.72rem',
-                      padding: '3px 22px 3px 26px',
-                      cursor: 'pointer',
-                      outline: 'none',
-                      backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' width%3D'12' height%3D'12' viewBox%3D'0 0 24 24' fill%3D'none' stroke%3D'%23003666' stroke-width%3D'2.5' stroke-linecap%3D'round' stroke-linejoin%3D'round'%3E%3Cpolyline points%3D'6 9 12 15 18 9'%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 5px center',
-                      backgroundSize: '10px',
-                      fontFamily: 'inherit',
-                      minWidth: '130px',
-                      boxShadow: '0 1px 3px rgba(0, 54, 102, 0.12)',
-                    }}
-                  >
-                    {availableFormats.map(fmt => {
-                      const id = fmt.id;
-                      const isFmtSpray = id.includes('spray') || id.includes('nasal');
-                      const isFmtPen = id.includes('pen') || id.includes('cartridge');
-                      const isFmtKit = id.includes('kit') || id.includes('test');
-                      const shortLabel = isFmtKit ? 'Collection Kit' : isFmtSpray ? 'Nasal Spray' : isFmtPen ? 'Pre-filled Pen' : (fmt.name || id);
-                      return (
-                        <option key={id} value={id}>{shortLabel}</option>
-                      );
-                    })}
-                  </select>
-                </div>
-              ) : (
-                <strong className="pds-summary-value">{presentation}</strong>
-              )}
+              {(() => {
+                const sanitizedFormats = (availableFormats || []).filter(fmt => {
+                  const fid = (fmt.id || fmt.name || '').toLowerCase();
+                  return !fid.includes('api') && !fid.includes('bulk') && !fid.includes('raw');
+                });
+
+                if (sanitizedFormats.length > 1) {
+                  return (
+                    <div className="pds-header-format-select-wrap" style={{ marginTop: '4px' }}>
+                      <span style={{ fontSize: '0.9rem', lineHeight: 1, pointerEvents: 'none', position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)' }}>
+                        {(() => {
+                          if (isDiagnostic) return '🔬';
+                          const af = sanitizedFormats.find(f => f.id === (activeFormat?.id || activeFormat));
+                          if (!af) return '🧪';
+                          const id = af.id;
+                          if (id.includes('spray') || id.includes('nasal')) return '💨';
+                          if (id.includes('pen') || id.includes('cartridge')) return '🖊️';
+                          if (id.includes('kit') || id.includes('test')) return '🔬';
+                          return '🧪';
+                        })()}
+                      </span>
+                      <select
+                        value={activeFormat?.id || activeFormat || ''}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          triggerHaptic('selection');
+                          onFormatChange?.(e.target.value);
+                        }}
+                        style={{
+                          appearance: 'none',
+                          WebkitAppearance: 'none',
+                          border: '1.5px solid #003666',
+                          borderRadius: '6px',
+                          background: '#ffffff',
+                          color: '#003666',
+                          fontWeight: 700,
+                          fontSize: '0.72rem',
+                          padding: '3px 22px 3px 26px',
+                          cursor: 'pointer',
+                          outline: 'none',
+                          backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' width%3D'12' height%3D'12' viewBox%3D'0 0 24 24' fill%3D'none' stroke%3D'%23003666' stroke-width%3D'2.5' stroke-linecap%3D'round' stroke-linejoin%3D'round'%3E%3Cpolyline points%3D'6 9 12 15 18 9'%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")`,
+                          backgroundRepeat: 'no-repeat',
+                          backgroundPosition: 'right 5px center',
+                          backgroundSize: '10px',
+                          fontFamily: 'inherit',
+                          minWidth: '130px',
+                          boxShadow: '0 1px 3px rgba(0, 54, 102, 0.12)',
+                        }}
+                      >
+                        {sanitizedFormats.map(fmt => {
+                          const id = fmt.id;
+                          const isFmtSpray = id.includes('spray') || id.includes('nasal');
+                          const isFmtPen = id.includes('pen') || id.includes('cartridge');
+                          const isFmtKit = id.includes('kit') || id.includes('test');
+                          const shortLabel = isFmtKit ? 'Collection Kit' : isFmtSpray ? 'Nasal Spray' : isFmtPen ? 'Pre-filled Pen' : (fmt.name || id);
+                          return (
+                            <option key={id} value={id}>{shortLabel}</option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                  );
+                }
+
+                return <strong className="pds-summary-value">{presentation}</strong>;
+              })()}
             </div>
 
-            {/* Field 2: Strengths */}
+            {/* Field 2: Strengths / Diagnostic Analytical Scope */}
             <div className="pds-summary-cell">
-              <span className="pds-summary-label">Available Strengths</span>
+              <span className="pds-summary-label">
+                {isDiagnostic ? 'Analytical Profile / Scope' : 'Available Strengths'}
+              </span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '4px' }}>
                 {strengthsArray.map((str, sIdx) => {
                   const isActive = (selectedStrength?.name === str || selectedStrength?.id === str || selectedStrength?.dosage === str);
@@ -393,9 +431,11 @@ export default function PeptideMonographHeader({
               </div>
             </div>
 
-            {/* Field 3: Verified Purity (Moved to Right Inspector on Desktop to prevent duplication) */}
+            {/* Field 3: Verified Purity / Standard */}
             <div className="pds-summary-cell pds-summary-cell-redundant-desktop">
-              <span className="pds-summary-label">Verified Purity</span>
+              <span className="pds-summary-label">
+                {isDiagnostic ? 'Analytical Precision / Standard' : 'Verified Purity'}
+              </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
                 <strong className="pds-summary-value" style={{ color: '#15803d' }}>{verifiedPurity}</strong>

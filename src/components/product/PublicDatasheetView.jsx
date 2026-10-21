@@ -484,8 +484,9 @@ export default function PublicDatasheetView({
     const sName = (product?.supplierName || '').toLowerCase();
     const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
     const pName = (product?.name || product?.canonicalName || '').toLowerCase();
-    const sample = (product?.sampleType || '').toLowerCase();
-    return sId === 'supplier-eternadx' || sName.includes('eterna') || pSlug.includes('eterna') || pName.includes('eterna') || sample.includes('saliva');
+    // NOTE: Do NOT match on sampleType here — saliva kits (e.g. TeleTest Metabolizer)
+    // are NOT Eterna products. Eterna detection must rely solely on supplier/slug/name.
+    return sId === 'supplier-eternadx' || sName.includes('eterna') || pSlug.includes('eterna') || pName.includes('eterna');
   }, [product, slug]);
 
   const isIvDrip = useMemo(() => {
@@ -882,6 +883,12 @@ export default function PublicDatasheetView({
     const seen = new Set();
     const deduped = [];
     for (const s of rawStrengths) {
+      const sId = String(s.id || '').toLowerCase();
+      const sName = String(s.name || '').toLowerCase();
+      // Exclude bulk API raw powders (e.g. "40g (Bulk API)", "10g", "100g") from finished clinical monographs
+      if (sId.includes('bulk') || sId.includes('api') || sName.includes('bulk') || sName.includes('api') || /\b\d+\s*g\b/i.test(sName)) {
+        continue;
+      }
       const key = String(s.id || s.name || '')
         .toLowerCase()
         .replace(/,/g, '')
@@ -903,10 +910,17 @@ export default function PublicDatasheetView({
   }, [supplierName, activeSupplierId, product]);
 
   const sanitizedFormats = useMemo(() => {
+    // Exclude bulk API / raw materials (Golden Rule: /p/ is exclusively for finished products)
+    let filtered = supplierFilteredFormats.filter(f => {
+      const fid = String(f.id || '').toLowerCase();
+      const fname = String(f.name || '').toLowerCase();
+      return !fid.includes('api') && !fid.includes('bulk') && !fid.includes('raw_') && !fname.includes('bulk api') && !fname.includes('raw material');
+    });
+
     if (isStrictlyLotusland) {
-      return supplierFilteredFormats.filter(f => !f.id.includes('pen') && !f.id.includes('cartridge'));
+      filtered = filtered.filter(f => !f.id.includes('pen') && !f.id.includes('cartridge'));
     }
-    return supplierFilteredFormats;
+    return filtered;
   }, [isStrictlyLotusland, supplierFilteredFormats]);
 
   // Priority-ordered available formats: Lyophilized Vial for peptides; Specimen Collection Kit for diagnostic tests
@@ -939,7 +953,7 @@ export default function PublicDatasheetView({
 
   const [activeFormatId, setActiveFormatId] = useState(() => {
     if (isDiagnosticKit) {
-      if (initialFormat && !initialFormat.toLowerCase().includes('vial')) {
+      if (initialFormat && !initialFormat.toLowerCase().includes('vial') && !initialFormat.toLowerCase().includes('api')) {
         const cleanF = String(initialFormat).toLowerCase();
         const found = availableFormats.find(f => f.id.toLowerCase() === cleanF || f.id.toLowerCase().includes(cleanF));
         if (found) return found.id;
@@ -948,8 +962,10 @@ export default function PublicDatasheetView({
     }
     if (initialFormat) {
       const cleanF = String(initialFormat).toLowerCase();
-      const found = availableFormats.find(f => f.id.toLowerCase() === cleanF || f.id.toLowerCase().includes(cleanF));
-      if (found) return found.id;
+      if (!cleanF.includes('api') && !cleanF.includes('bulk')) {
+        const found = availableFormats.find(f => f.id.toLowerCase() === cleanF || f.id.toLowerCase().includes(cleanF));
+        if (found) return found.id;
+      }
     }
     // Prefer lyophilized vial as primary standard; fall back to availableFormats[0]
     const vialFmt = availableFormats.find(f => f.id.toLowerCase().includes('vial'));
@@ -1200,12 +1216,20 @@ export default function PublicDatasheetView({
     }
 
     if (isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) {
+      // Determine collection protocol label based on actual specimen type
+      const sType = (product?.sampleType || '').toLowerCase();
+      const isHairSample = sType.includes('hair') || sType.includes('cabello') || sType.includes('capilar') || (product?.slug || '').includes('htma') || (product?.slug || '').includes('mineralograma');
+      const isSalivaSample = sType.includes('saliva') || sType.includes('buccal') || sType.includes('oral') || sType.includes('frotis') || (product?.slug || '').includes('metabolizer');
+      const isBloodSample = sType.includes('blood') || sType.includes('dbs') || sType.includes('sangre') || sType.includes('capilar blood') || sType.includes('finger');
+      const collectionLabelEn = isHairSample ? 'Hair Sample Collection Protocol' : isSalivaSample ? 'Oral Swab Collection Protocol' : 'DBS Collection Protocol';
+      const collectionLabelEs = isHairSample ? 'Protocolo de Recolección Capilar' : isSalivaSample ? 'Protocolo de Frotis Bucal' : 'Protocolo de Muestreo DBS';
+
       return [
         { id: 'overview', label: lang === 'es' ? 'Descripción y Utilidad' : 'Overview & Utility', icon: FileText },
         { id: 'presentations-matrix', label: lang === 'es' ? 'Presentaciones del Kit' : 'Kit Presentations', icon: Layers },
         { id: 'diagnostic-specs', label: lang === 'es' ? 'Especificaciones Analíticas' : 'Analytical Specs', icon: Activity },
         { id: 'biomarker-simulator', label: lang === 'es' ? 'Simulador Clínico' : 'Biomarker Simulator', icon: Sparkles },
-        { id: 'collection-protocol', label: lang === 'es' ? 'Protocolo de Muestreo DBS' : 'DBS Collection Protocol', icon: Droplets },
+        { id: 'collection-protocol', label: lang === 'es' ? collectionLabelEs : collectionLabelEn, icon: Droplets },
         { id: 'pre-analytical-prep', label: lang === 'es' ? 'Estandarización Preanalítica' : 'Pre-Analytical Prep', icon: CheckCircle2 },
         { id: 'kit-contents', label: lang === 'es' ? 'Contenido del Kit' : 'Kit Included Items', icon: Layers },
         { id: 'specs-section', label: lang === 'es' ? 'Trazabilidad y Calidad' : 'Lab Quality & Traceability', icon: ShieldCheck },
@@ -2876,7 +2900,7 @@ export default function PublicDatasheetView({
         showClinicalAI={true}
         showSections={true}
         sectionsCount={isPeptideCompound ? 5 : tocSections.length}
-        sectionsLabel={isPeptideCompound ? (lang === 'es' ? 'Pestañas' : 'Tabs') : null}
+        sectionsLabel={lang === 'es' ? 'Secciones' : 'Sections'}
         onOpenSections={() => {
           if (typeof window !== 'undefined') {
             if (isPeptideCompound) {

@@ -294,10 +294,10 @@ export default function PeptideMonographSidebar({
         {/* Selected Vial Strength & Presentation */}
         <div style={{ background: '#f8fafc', padding: '6px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
           <div style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-            Strength & Format
+            {isDiagnostic ? 'Analytical Scope & Specimen' : 'Strength & Format'}
           </div>
           <div style={{ fontSize: '0.82rem', fontWeight: 850, color: '#003666', marginTop: '1px' }}>
-            {strengthLabel} • {formatLabel}
+            {isDiagnostic ? formatLabel : `${strengthLabel} • ${formatLabel}`}
           </div>
         </div>
 
@@ -343,16 +343,18 @@ export default function PeptideMonographSidebar({
           </button>
         </div>
 
-        {/* Purity & Supplier row */}
+        {/* Purity & Assay row (Universal clinical quality, no lab dependency) */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
           <div style={{ background: '#f8fafc', padding: '5px 7px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-            <span style={{ fontSize: '0.60rem', color: '#64748b', display: 'block' }}>Verified Purity</span>
+            <span style={{ fontSize: '0.60rem', color: '#64748b', display: 'block' }}>
+              {isDiagnostic ? 'Analytical Precision' : 'Verified Purity'}
+            </span>
             <strong style={{ fontSize: '0.74rem', color: '#166534' }}>{purityText}</strong>
           </div>
           <div style={{ background: '#f8fafc', padding: '5px 7px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-            <span style={{ fontSize: '0.60rem', color: '#64748b', display: 'block' }}>Supplier Lab</span>
-            <strong style={{ fontSize: '0.74rem', color: '#003666', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
-              {supplier}
+            <span style={{ fontSize: '0.60rem', color: '#64748b', display: 'block' }}>Assay Standard</span>
+            <strong style={{ fontSize: '0.74rem', color: '#003666', display: 'block' }}>
+              {isDiagnostic ? 'GC-FID / ISO 15189' : 'RP-HPLC / MS'}
             </strong>
           </div>
         </div>

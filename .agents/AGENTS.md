@@ -560,4 +560,17 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 - **Adaptabilidad Móvil (< 768px)**:
   - En smartphones el dock no flota con márgenes laterales: se ancla a la base con `border-radius: 20px 20px 0 0;`, `border-top: 1px solid rgba(255, 255, 255, 0.9);`, fondo `rgba(255, 255, 255, 0.86);` y padding que respeta `env(safe-area-inset-bottom, 0px)`.
 
+## 47. Floating Sticky Monograph Footer — Golden UX Standard for Public Detail & Collection Pages
+- **Homogeneización Absoluta de la Barra Flotante Inferior**:
+  - Toda página pública de monografía de producto (`/p/[slug]`), monografía de materia prima API (`/raw/[slug]`) y páginas de colecciones de marca o categorías (`/brand/[slug]`, `/c/[slug]`) DEBE implementar la misma barra inferior adhesiva y ergonómica (Sticky Floating Footer).
+- **Estructura Estándar de la Barra (Pattern Z — Izquierda a Derecha)**:
+  1. **Zona Izquierda (Identidad y Estado)**:
+     - Badge de tipo (ej. `[CLINICAL MONOGRAPH]`, `[RAW API]`, `[COLLECTION]`).
+     - Título del producto o colección en semibold (`#0f172a`), acompañado de dosis o subtítulo clínico (ej. `Retatrutide • 10 mg (Vial)`).
+     - Punto de pulso verde de estado (`Verified Active Lot` o `Direct Ingestion`).
+  2. **Zona Derecha (Navegación e Interacción de Alto Valor)**:
+     - **Contador de Secciones**: Botón interactivo que SIEMPRE se rotula como **`Sections N/M`** (nunca `Tabs`), que abre el drawer o navegador de secciones.
+     - **Atlas AI Assistant Button**: Botón con badge de créditos o estado (ej. `[Atlas AI 5/5]`), que abre `PublicAtlasAIDrawer` precargado con el contexto exacto del producto o colección actual. Prohibido duplicar el botón de Atlas AI en la cabecera superior.
+     - **Botón Primario (Inquire)**: CTA principal en gradiente de acento (ej. `Inquire Product →` o `Inquire Collection →`), que abre el drawer institucional `PublicInstitutionalInquiryDrawer` con el producto/colección inyectado automáticamente.
+
 

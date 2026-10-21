@@ -86,13 +86,33 @@ export default function DiagnosticTestTechnicalSpecs({
   // Identify specific Bloodo test type
   const isNad = slug.includes('nad');
   const isHba1c = slug.includes('hba1c') || slug.includes('hemoglobin');
-  const isOmega = slug.includes('omega');
+  const isOmega = slug.includes('omega') && !slug.includes('teletest');
   const isVitD = slug.includes('vitamin-d') || slug.includes('vit-d');
   const isCortisol = slug.includes('cortisol');
   const isTestosterone = slug.includes('testosterone');
 
-  // Official Bloodo Kit Packaging Image from bloodo.com
-  const kitImage = isNad 
+  // Identify specific TeleTest (Analytika / Advanced Diagnostics) test type
+  const isTeletest = slug.startsWith('teletest-');
+  const isTeletestHTMA = slug === 'teletest-mineralograma-cabello-htma';
+  const isTeletestOmega = slug === 'teletest-test-omega';
+  const isTeletestMetabolizer = slug === 'teletest-saliva-metabolizer-detox';
+  const isTeletestHLA = slug === 'teletest-gnt-hla-autoinmunidad';
+  const isTeletestCeliac = slug === 'teletest-estudio-genetico-celiaca';
+  const isHairSample = isTeletestHTMA;
+  const isSalivaSample = isTeletestMetabolizer || isTeletestHLA || isTeletestCeliac;
+
+  // Official Kit Packaging Image
+  const kitImage = isTeletestHTMA
+    ? '/images/products/teletest/mineralograma-cabello.svg'
+    : isTeletestOmega
+    ? '/images/products/teletest/omega-test.svg'
+    : isTeletestMetabolizer
+    ? '/images/products/teletest/metabolizer-detox.svg'
+    : isTeletestHLA
+    ? '/images/products/teletest/hla-autoinmunidad.svg'
+    : isTeletestCeliac
+    ? '/images/products/teletest/celiac-genetics.svg'
+    : isNad 
     ? '/images/products/bloodo/nad.jpg'
     : isCortisol
     ? '/images/products/bloodo/cortisol.jpg'
@@ -940,6 +960,926 @@ export default function DiagnosticTestTechnicalSpecs({
       };
     }
 
+    // ═══════════════════════════════════════════════════════════════════
+    // TELETEST — HTMA (Hair Tissue Mineral Analysis / Mineralograma Capilar)
+    // Methodology: ICP-MS / ICP-OES · Specimen: Proximal 3cm scalp hair
+    // Lab: Analytika (EU ISO 17025 accredited)
+    // ═══════════════════════════════════════════════════════════════════
+    if (isTeletestHTMA) {
+      return {
+        name: isEs ? 'Mineralograma Capilar (HTMA) — 36+ Elementos' : 'Hair Tissue Mineral Analysis (HTMA) — 36+ Elements',
+        unit: isEs ? 'µg/g cabello (ppm)' : 'µg/g hair (ppm)',
+        method: isEs
+          ? 'Espectrometría de Masas con Plasma Acoplado Inductivamente (ICP-MS / ICP-OES)'
+          : 'Inductively Coupled Plasma Mass Spectrometry (ICP-MS / ICP-OES)',
+        lab: 'Analytika Laboratory (EU) · ISO 17025 Accredited',
+        lod: '0.001 – 0.01 µg/g (element-dependent)',
+        range: isEs ? '36+ elementos: minerales esenciales, tóxicos y relaciones inter-elementales' : '36+ elements: essential minerals, toxic metals \u0026 inter-element ratios',
+        precision: 'RSD \u003c 5% (certified reference hair materials)',
+        officialReportPdf: '/docs/teletest-report-htma.pdf',
+        officialReportDocName: 'teletest-report-htma.pdf',
+        ranges: [
+          {
+            label: isEs ? 'Toxicidad por Metales Pesados Detectada' : 'Heavy Metal Toxicity Detected',
+            value: isEs ? 'Hg, Pb, As, Cd, Al por encima de referencia' : 'Hg, Pb, As, Cd, Al above reference limits',
+            status: 'critical',
+            badge: isEs ? 'Carga Tóxica Elevada' : 'Elevated Toxic Burden',
+            color: '#dc2626',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Uno o más metales pesados (mercurio, plomo, arsénico, cadmio, aluminio) se encuentran por encima de los rangos de referencia poblacional. Indica exposición crónica que puede interferir con la función mitocondrial, la metilación hepática y el eje tiroideo. Evaluar fuentes de exposición (amalgamas, agua, pesticidas, cosméticos) y considerar protocolo de quelación supervisado.'
+              : 'One or more toxic metals (mercury, lead, arsenic, cadmium, aluminum) exceed population reference ranges. Indicates chronic exposure that may impair mitochondrial function, hepatic methylation, and thyroid axis. Evaluate exposure sources (amalgams, water, pesticides, cosmetics) and consider supervised chelation protocol.',
+            clinicalProtocol: {
+              slug: 'heavy-metal-detox-protocol',
+              queryParams: '?baseline=toxicity\u0026metals=elevated\u0026tier=critical\u0026modality=chelation\u0026retest=12w',
+              shortCode: 'REF-HTMA-DETOX',
+              name: isEs ? 'Protocolo Quelación de Metales Pesados' : 'Heavy Metal Chelation Protocol',
+              recommendedModality: isEs ? 'Quelación IV (EDTA/DMSA) + Soporte Hepático' : 'IV Chelation (EDTA/DMSA) + Hepatic Support',
+              dosageGuide: isEs ? 'EDTA 1.5g IV semanal × 10 sesiones; DMSA oral 500mg/8h × 3d/mes (supervisado)' : 'EDTA 1.5g IV weekly × 10 sessions; oral DMSA 500mg q8h × 3d/month (supervised)',
+              methylationRx: isEs ? 'NAC 1200mg/d + Glutatión Liposomal 500mg + Chlorella 3g + Cilantro' : 'NAC 1,200mg/d + Liposomal Glutathione 500mg + Chlorella 3g + Cilantro',
+              retestWindow: isEs ? 'Semana 12 (Post-ciclo quelación)' : 'Week 12 (Post-chelation cycle)',
+              cellularTarget: isEs ? 'Metalotioneínas, glutatión, citocromo P450, SOD mitocondrial' : 'Metallothioneins, glutathione, cytochrome P450, mitochondrial SOD',
+              clinicalRationale: isEs
+                ? 'Acumulación tisular de metales pesados documentada por HTMA. La quelación reduce la carga corporal total; la suplementación con antioxidantes endógenos restaura la capacidad de biotransformación hepática fase II.'
+                : 'Tissue-level heavy metal accumulation documented by HTMA. Chelation reduces total body burden; endogenous antioxidant supplementation restores Phase II hepatic biotransformation capacity.',
+              synergies: [
+                { name: isEs ? 'Glutatión IV/Liposomal' : 'Glutathione IV/Liposomal', role: isEs ? 'Detox Fase II' : 'Phase II Detox' },
+                { name: 'NAC 1200mg', role: isEs ? 'Precursor Glutatión' : 'Glutathione Precursor' },
+                { name: isEs ? 'Chlorella + Cilantro' : 'Chlorella + Cilantro', role: isEs ? 'Quelación Natural' : 'Natural Chelation' },
+                { name: isEs ? 'Selenio 200µg' : 'Selenium 200µg', role: isEs ? 'Protección contra Hg' : 'Mercury Protection' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuáles son los protocolos seguros de quelación para pacientes con mercurio y plomo elevados en HTMA?'
+                : 'What are evidence-based chelation protocols for elevated mercury and lead in HTMA?'
+            }
+          },
+          {
+            label: isEs ? 'Desequilibrios Minerales Significativos' : 'Significant Mineral Imbalances',
+            value: isEs ? 'Ratios Ca/Mg, Na/K, Cu/Zn alterados' : 'Ca/Mg, Na/K, Cu/Zn ratios disrupted',
+            status: 'warning',
+            badge: isEs ? 'Desequilibrio Mineral' : 'Mineral Imbalance',
+            color: '#d97706',
+            bgColor: '#fffbeb',
+            description: isEs
+              ? 'Las relaciones inter-elementales clave (Calcio/Magnesio, Sodio/Potasio, Cobre/Zinc) se desvían de los rangos óptimos. Estos ratios reflejan el estado del sistema nervioso autónomo, la función suprarrenal y la eficiencia tiroidea. Pueden indicar estrés crónico, resistencia a la insulina incipiente o disfunción adrenal.'
+              : 'Key inter-element ratios (Calcium/Magnesium, Sodium/Potassium, Copper/Zinc) deviate from optimal ranges. These ratios reflect autonomic nervous system balance, adrenal function, and thyroid efficiency. May indicate chronic stress, incipient insulin resistance, or adrenal dysfunction.',
+            clinicalProtocol: {
+              slug: 'mineral-rebalancing-protocol',
+              queryParams: '?baseline=imbalance\u0026ratios=disrupted\u0026tier=warning\u0026modality=oral\u0026retest=8w',
+              shortCode: 'REF-HTMA-BAL',
+              name: isEs ? 'Protocolo de Reequilibrio Mineral' : 'Mineral Rebalancing Protocol',
+              recommendedModality: isEs ? 'Suplementación Oral Dirigida por Ratios' : 'Ratio-Guided Oral Supplementation',
+              dosageGuide: isEs ? 'Mg glicinato 400-600mg/d + Zn picolinato 30mg + K citrato 300mg (ajustar según ratios)' : 'Mg glycinate 400-600mg/d + Zn picolinate 30mg + K citrate 300mg (adjust per ratios)',
+              methylationRx: isEs ? 'B6 P-5-P 50mg + Taurina 2g + Ácido Pantoténico 500mg' : 'B6 P-5-P 50mg + Taurine 2g + Pantothenic Acid 500mg',
+              retestWindow: isEs ? 'Semana 8-12 (Re-análisis HTMA)' : 'Week 8-12 (HTMA re-analysis)',
+              cellularTarget: isEs ? 'Bomba Na/K-ATPasa, conversión T4→T3, corteza adrenal' : 'Na/K-ATPase pump, T4→T3 conversion, adrenal cortex',
+              clinicalRationale: isEs
+                ? 'Los ratios HTMA reflejan la actividad bioquímica intracelular de los últimos 2-3 meses. La corrección dirigida de ratios restaura la eficiencia del eje HPA y la conversión periférica de hormonas tiroideas.'
+                : 'HTMA ratios reflect 2-3 months of intracellular biochemical activity. Targeted ratio correction restores HPA axis efficiency and peripheral thyroid hormone conversion.',
+              synergies: [
+                { name: isEs ? 'Magnesio Glicinato' : 'Magnesium Glycinate', role: isEs ? 'Ratio Ca/Mg' : 'Ca/Mg Ratio' },
+                { name: isEs ? 'Zinc Picolinato' : 'Zinc Picolinate', role: isEs ? 'Ratio Cu/Zn' : 'Cu/Zn Ratio' },
+                { name: isEs ? 'Potasio Citrato' : 'Potassium Citrate', role: isEs ? 'Ratio Na/K' : 'Na/K Ratio' },
+                { name: isEs ? 'Adaptógenos Adrenales' : 'Adrenal Adaptogens', role: isEs ? 'Soporte HPA' : 'HPA Support' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo interpretar y corregir los ratios Ca/Mg, Na/K y Cu/Zn en un mineralograma capilar?'
+                : 'How to interpret and correct Ca/Mg, Na/K, and Cu/Zn ratios in a hair tissue mineral analysis?'
+            }
+          },
+          {
+            label: isEs ? 'Perfil Mineral Óptimo' : 'Optimal Mineral Profile',
+            value: isEs ? 'Todos los elementos y ratios en rango' : 'All elements and ratios within range',
+            status: 'optimal',
+            badge: isEs ? 'Equilibrio Mineral' : 'Mineral Balance',
+            color: '#16a34a',
+            bgColor: '#f0fdf4',
+            description: isEs
+              ? 'Todos los minerales esenciales (Ca, Mg, Na, K, Zn, Fe, Se, Cr, Mn) están dentro de rangos poblacionales óptimos. Los ratios inter-elementales indican homeostasis metabólica adecuada, buen funcionamiento del eje HPA y conversión tiroidea eficiente. Los metales tóxicos se encuentran por debajo de los umbrales de preocupación clínica.'
+              : 'All essential minerals (Ca, Mg, Na, K, Zn, Fe, Se, Cr, Mn) are within optimal population ranges. Inter-element ratios indicate adequate metabolic homeostasis, healthy HPA axis function, and efficient thyroid conversion. Toxic metals are below clinical concern thresholds.',
+            clinicalProtocol: {
+              slug: 'mineral-maintenance-protocol',
+              queryParams: '?baseline=optimal\u0026ratios=balanced\u0026tier=optimal\u0026modality=maintenance\u0026retest=6m',
+              shortCode: 'REF-HTMA-OPT',
+              name: isEs ? 'Mantenimiento Mineral Óptimo' : 'Optimal Mineral Maintenance',
+              recommendedModality: isEs ? 'Mantenimiento con Alimentos Funcionales' : 'Functional Food Maintenance',
+              dosageGuide: isEs ? 'Dieta rica en minerales + multimineral de espectro completo a dosis de mantenimiento' : 'Mineral-rich diet + full-spectrum multimineral at maintenance doses',
+              retestWindow: isEs ? 'Semestre (Control periódico)' : 'Biannual (Periodic monitoring)',
+              cellularTarget: isEs ? 'Homeostasis metabólica general' : 'General metabolic homeostasis',
+              clinicalRationale: isEs
+                ? 'Perfil mineral equilibrado que refleja adecuada absorción intestinal, función renal y metabolismo celular. Mantener mediante alimentación funcional y monitoreo periódico.'
+                : 'Balanced mineral profile reflecting adequate intestinal absorption, renal function, and cellular metabolism. Maintain through functional nutrition and periodic monitoring.',
+              synergies: [
+                { name: isEs ? 'Dieta Funcional' : 'Functional Diet', role: isEs ? 'Base Nutricional' : 'Nutritional Base' },
+                { name: isEs ? 'Monitoreo Semestral' : 'Biannual Monitoring', role: isEs ? 'Control Preventivo' : 'Preventive Control' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuáles son las mejores estrategias para mantener un perfil mineral óptimo a largo plazo?'
+                : 'What are the best strategies to maintain an optimal mineral profile long-term?'
+            }
+          },
+          {
+            label: isEs ? 'Deficiencia Mineral Múltiple' : 'Multiple Mineral Deficiency',
+            value: isEs ? 'Zn, Se, Mg, Fe, Cr por debajo de referencia' : 'Zn, Se, Mg, Fe, Cr below reference',
+            status: 'low',
+            badge: isEs ? 'Depleción Mineral' : 'Mineral Depletion',
+            color: '#ea580c',
+            bgColor: '#fff7ed',
+            description: isEs
+              ? 'Múltiples minerales esenciales se encuentran por debajo de los rangos de referencia poblacional, indicando depleción tisular crónica. Puede deberse a malabsorción intestinal, dieta restrictiva, estrés oxidativo crónico o uso prolongado de medicamentos que depletan minerales (IBP, diuréticos, metformina).'
+              : 'Multiple essential minerals are below population reference ranges, indicating chronic tissue depletion. May result from intestinal malabsorption, restrictive diet, chronic oxidative stress, or prolonged use of mineral-depleting medications (PPIs, diuretics, metformin).',
+            clinicalProtocol: {
+              slug: 'mineral-repletion-protocol',
+              queryParams: '?baseline=depletion\u0026minerals=multiple\u0026tier=low\u0026modality=intensive\u0026retest=8w',
+              shortCode: 'REF-HTMA-REPL',
+              name: isEs ? 'Protocolo de Repleción Mineral Intensiva' : 'Intensive Mineral Repletion Protocol',
+              recommendedModality: isEs ? 'Suplementación Oral Intensiva + Evaluación GI' : 'Intensive Oral Supplementation + GI Evaluation',
+              dosageGuide: isEs ? 'Zn 50mg + Se 200µg + Mg 800mg + Fe bisglicinato 25mg + Cr picolinato 400µg × 8 semanas' : 'Zn 50mg + Se 200µg + Mg 800mg + Fe bisglycinate 25mg + Cr picolinate 400µg × 8 weeks',
+              retestWindow: isEs ? 'Semana 8 (HTMA + Perfil sérico)' : 'Week 8 (HTMA + Serum panel)',
+              cellularTarget: isEs ? 'Cofactores enzimáticos, glutatión peroxidasa, SOD, insulina' : 'Enzymatic cofactors, glutathione peroxidase, SOD, insulin signaling',
+              clinicalRationale: isEs
+                ? 'Depleción tisular documentada por HTMA. La repleción intensiva restora los cofactores enzimáticos críticos para la función mitocondrial y la defensa antioxidante endógena.'
+                : 'Tissue depletion documented by HTMA. Intensive repletion restores critical enzymatic cofactors for mitochondrial function and endogenous antioxidant defense.',
+              synergies: [
+                { name: isEs ? 'Evaluación GI' : 'GI Evaluation', role: isEs ? 'Descartar Malabsorción' : 'Rule Out Malabsorption' },
+                { name: isEs ? 'Ácido Estomacal' : 'Stomach Acid', role: isEs ? 'Optimizar Absorción' : 'Optimize Absorption' },
+                { name: isEs ? 'Cofactores B' : 'B Cofactors', role: isEs ? 'Sinergia Enzimática' : 'Enzymatic Synergy' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuál es el protocolo de repleción mineral más eficaz cuando el HTMA muestra deficiencias múltiples?'
+                : 'What is the most effective mineral repletion protocol when HTMA shows multiple deficiencies?'
+            }
+          },
+          {
+            label: isEs ? 'Exposición a Metales con Depleción Mineral' : 'Toxic Exposure with Mineral Depletion',
+            value: isEs ? 'Patrón mixto: tóxicos altos + esenciales bajos' : 'Mixed pattern: high toxics + low essentials',
+            status: 'critical',
+            badge: isEs ? 'Patrón Mixto Severo' : 'Severe Mixed Pattern',
+            color: '#7c2d12',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Patrón más preocupante: metales tóxicos elevados combinados con depleción de minerales protectores (Zn, Se, Mg). Los metales tóxicos desplazan competitivamente a los minerales esenciales de sus sitios de unión enzimáticos. Requiere abordaje dual: quelación + repleción mineral simultánea bajo supervisión médica.'
+              : 'Most concerning pattern: elevated toxic metals combined with depletion of protective minerals (Zn, Se, Mg). Toxic metals competitively displace essential minerals from their enzymatic binding sites. Requires dual approach: chelation + simultaneous mineral repletion under medical supervision.',
+            clinicalProtocol: {
+              slug: 'dual-detox-repletion-protocol',
+              queryParams: '?baseline=mixed\u0026pattern=toxic-depleted\u0026tier=critical\u0026modality=dual\u0026retest=12w',
+              shortCode: 'REF-HTMA-DUAL',
+              name: isEs ? 'Protocolo Dual: Quelación + Repleción' : 'Dual Protocol: Chelation + Repletion',
+              recommendedModality: isEs ? 'Quelación Supervisada + Repleción Mineral Secuencial' : 'Supervised Chelation + Sequential Mineral Repletion',
+              dosageGuide: isEs ? 'Fase 1: Quelación (4 sem) → Fase 2: Repleción intensiva (8 sem) → Re-test HTMA' : 'Phase 1: Chelation (4 wk) → Phase 2: Intensive repletion (8 wk) → HTMA re-test',
+              retestWindow: isEs ? 'Semana 12 (Post-protocolo dual completo)' : 'Week 12 (Post-complete dual protocol)',
+              cellularTarget: isEs ? 'Desplazamiento competitivo metales/minerales, metalotioneínas, glutatión' : 'Competitive metal/mineral displacement, metallothioneins, glutathione',
+              clinicalRationale: isEs
+                ? 'La acumulación tóxica agota los minerales protectores que son precisamente los cofactores necesarios para la biotransformación hepática de los propios metales. Ciclo vicioso que requiere intervención secuencial.'
+                : 'Toxic accumulation depletes the protective minerals that are precisely the cofactors needed for hepatic biotransformation of the metals themselves. Vicious cycle requiring sequential intervention.',
+              synergies: [
+                { name: isEs ? 'Quelación Fase 1' : 'Phase 1 Chelation', role: isEs ? 'Reducir Carga Tóxica' : 'Reduce Toxic Burden' },
+                { name: isEs ? 'Repleción Fase 2' : 'Phase 2 Repletion', role: isEs ? 'Restaurar Cofactores' : 'Restore Cofactors' },
+                { name: isEs ? 'Glutatión + NAC' : 'Glutathione + NAC', role: isEs ? 'Defensa Antioxidante' : 'Antioxidant Defense' },
+                { name: isEs ? 'Supervisión Médica' : 'Medical Supervision', role: isEs ? 'Seguridad del Protocolo' : 'Protocol Safety' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo abordar un HTMA con patrón mixto de metales pesados elevados y minerales esenciales depletados?'
+                : 'How to approach an HTMA showing a mixed pattern of elevated heavy metals and depleted essential minerals?'
+            }
+          }
+        ]
+      };
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // TELETEST — OMEGA (HS-Omega-3 Index + Fatty Acid Profile)
+    // Methodology: GC-FID / Gas Chromatography · Specimen: Dried Blood Spot
+    // Clinical reference: Harris WS et al. HS-Omega-3 Index®
+    // ═══════════════════════════════════════════════════════════════════
+    if (isTeletestOmega) {
+      return {
+        name: isEs ? 'Índice HS-Omega-3 + Perfil Ácidos Grasos' : 'HS-Omega-3 Index + Fatty Acid Profile',
+        unit: isEs ? '% de ácidos grasos totales en eritrocitos' : '% of total fatty acids in erythrocytes',
+        method: isEs
+          ? 'Cromatografía de Gases con Detector de Ionización de Llama (GC-FID)'
+          : 'Gas Chromatography with Flame Ionization Detection (GC-FID)',
+        lab: 'Analytika Laboratory (EU) · ISO 17025',
+        lod: '0.1% total fatty acids',
+        range: isEs ? 'EPA + DHA como % del total de AG en membrana eritrocitaria' : 'EPA + DHA as % of total FA in erythrocyte membrane',
+        precision: 'RSD \u003c 4.5%',
+        officialReportPdf: '/docs/teletest-report-omega.pdf',
+        officialReportDocName: 'teletest-report-omega.pdf',
+        ranges: [
+          {
+            label: isEs ? 'Zona de Alto Riesgo Cardiovascular' : 'High Cardiovascular Risk Zone',
+            value: 'HS-Omega-3 Index \u003c 4%',
+            status: 'critical',
+            badge: isEs ? 'Riesgo CV Alto' : 'High CV Risk',
+            color: '#dc2626',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Índice HS-Omega-3 inferior al 4%. Según los estudios de Harris \u0026 von Schacky, este nivel se asocia con un riesgo 10 veces mayor de muerte cardíaca súbita en comparación con índices >8%. La membrana eritrocitaria tiene un contenido críticamente bajo de EPA+DHA, lo que refleja una ingesta deficiente sostenida durante 2-3 meses y un perfil proinflamatorio con ratio AA:EPA marcadamente elevado.'
+              : 'HS-Omega-3 Index below 4%. Per Harris \u0026 von Schacky studies, this level is associated with a 10-fold higher risk of sudden cardiac death compared to indices >8%. Erythrocyte membrane has critically low EPA+DHA content, reflecting sustained inadequate intake over 2-3 months and a pro-inflammatory profile with markedly elevated AA:EPA ratio.',
+            clinicalProtocol: {
+              slug: 'omega3-intensive-repletion',
+              queryParams: '?baseline=critical\u0026omega3_index=3.5\u0026tier=critical\u0026modality=oral\u0026retest=12w',
+              shortCode: 'REF-OM3-CRIT',
+              name: isEs ? 'Protocolo Intensivo de Repleción Omega-3' : 'Intensive Omega-3 Repletion Protocol',
+              recommendedModality: isEs ? 'EPA+DHA Alta Dosis Oral (Forma Triglicérido rTG)' : 'High-Dose Oral EPA+DHA (rTG Triglyceride Form)',
+              dosageGuide: isEs ? 'EPA+DHA combinado ≥4000 mg/d (forma rTG) con comida grasa × 12 semanas' : 'Combined EPA+DHA ≥4,000 mg/d (rTG form) with fatty meal × 12 weeks',
+              methylationRx: isEs ? 'Vitamina E (tocoferoles mixtos) 400 UI para proteger AG del estrés oxidativo' : 'Vitamin E (mixed tocopherols) 400 IU to protect FA from oxidative stress',
+              retestWindow: isEs ? 'Semana 12 (HS-Omega-3 Index refleja 120 días de eritrocitos)' : 'Week 12 (HS-Omega-3 Index reflects 120-day RBC lifespan)',
+              cellularTarget: isEs ? 'Membrana eritrocitaria, resolución inflamatoria (resolvinas/protectinas), cardioprotección' : 'Erythrocyte membrane, inflammatory resolution (resolvins/protectins), cardioprotection',
+              clinicalRationale: isEs
+                ? 'El HS-Omega-3 Index es un biomarcador validado de riesgo cardiovascular a largo plazo. La repleción con dosis altas de EPA+DHA en forma rTG (mayor biodisponibilidad que éster etílico) modifica la composición de la membrana celular en 8-12 semanas, reduciendo el ratio AA:EPA y promoviendo la síntesis de mediadores pro-resolutivos (SPMs).'
+                : 'The HS-Omega-3 Index is a validated long-term cardiovascular risk biomarker. High-dose EPA+DHA repletion in rTG form (higher bioavailability than ethyl ester) modifies cell membrane composition in 8-12 weeks, reducing the AA:EPA ratio and promoting synthesis of specialized pro-resolving mediators (SPMs).',
+              synergies: [
+                { name: 'EPA+DHA rTG 4g', role: isEs ? 'Repleción Membrana' : 'Membrane Repletion' },
+                { name: isEs ? 'Vitamina E Mixta' : 'Mixed Vitamin E', role: isEs ? 'Protección Peroxidativa' : 'Peroxidative Protection' },
+                { name: isEs ? 'Reducir Omega-6' : 'Reduce Omega-6', role: isEs ? 'Mejorar Ratio AA:EPA' : 'Improve AA:EPA Ratio' }
+              ],
+              aiQuery: isEs
+                ? '¿Por qué un índice HS-Omega-3 inferior al 4% multiplica por 10 el riesgo de muerte cardíaca súbita?'
+                : 'Why does an HS-Omega-3 Index below 4% confer a 10-fold increase in sudden cardiac death risk?'
+            }
+          },
+          {
+            label: isEs ? 'Zona de Riesgo Intermedio' : 'Intermediate Risk Zone',
+            value: 'HS-Omega-3 Index 4% – 8%',
+            status: 'warning',
+            badge: isEs ? 'Subóptimo' : 'Suboptimal',
+            color: '#d97706',
+            bgColor: '#fffbeb',
+            description: isEs
+              ? 'Índice entre 4% y 8%. Zona intermedia con beneficio parcial. La mayoría de la población occidental se encuentra en este rango. Existe margen significativo de mejora cardiovascular, neurológica y antiinflamatoria al alcanzar la zona cardioprotectora (>8%).'
+              : 'Index between 4% and 8%. Intermediate zone with partial benefit. Most of the Western population falls in this range. Significant room for cardiovascular, neurological, and anti-inflammatory improvement by reaching the cardioprotective zone (>8%).',
+            clinicalProtocol: {
+              slug: 'omega3-optimization-protocol',
+              queryParams: '?baseline=intermediate\u0026omega3_index=6\u0026tier=warning\u0026modality=oral\u0026retest=12w',
+              shortCode: 'REF-OM3-OPT',
+              name: isEs ? 'Protocolo de Optimización Omega-3' : 'Omega-3 Optimization Protocol',
+              recommendedModality: isEs ? 'EPA+DHA Moderada Dosis + Dieta Mediterránea' : 'Moderate-Dose EPA+DHA + Mediterranean Diet',
+              dosageGuide: isEs ? 'EPA+DHA 2000-3000 mg/d (forma rTG) + 3 raciones pescado azul/semana' : 'EPA+DHA 2,000-3,000 mg/d (rTG form) + 3 servings fatty fish/week',
+              retestWindow: isEs ? 'Semana 12' : 'Week 12',
+              cellularTarget: isEs ? 'Membrana celular, mediadores lipídicos, función endotelial' : 'Cell membrane, lipid mediators, endothelial function',
+              clinicalRationale: isEs
+                ? 'Zona de transición donde la suplementación moderada combinada con modificación dietética puede elevar el índice a la zona cardioprotectora en un ciclo eritrocitario.'
+                : 'Transition zone where moderate supplementation combined with dietary modification can elevate the index to the cardioprotective zone within one RBC cycle.',
+              synergies: [
+                { name: 'EPA+DHA rTG 2.5g', role: isEs ? 'Suplementación' : 'Supplementation' },
+                { name: isEs ? 'Pescado Azul 3×/sem' : 'Fatty Fish 3×/wk', role: isEs ? 'Fuente Dietética' : 'Dietary Source' },
+                { name: isEs ? 'Reducir Aceites Semillas' : 'Reduce Seed Oils', role: isEs ? 'Ratio ω6:ω3' : 'ω6:ω3 Ratio' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuál es la dosis óptima de EPA+DHA para elevar el HS-Omega-3 Index de 6% a >8%?'
+                : 'What is the optimal EPA+DHA dose to raise the HS-Omega-3 Index from 6% to >8%?'
+            }
+          },
+          {
+            label: isEs ? 'Zona Cardioprotectora Óptima' : 'Optimal Cardioprotective Zone',
+            value: 'HS-Omega-3 Index 8% – 12%',
+            status: 'optimal',
+            badge: isEs ? 'Cardioprotección' : 'Cardioprotective',
+            color: '#16a34a',
+            bgColor: '#f0fdf4',
+            description: isEs
+              ? 'Zona objetivo definida por Harris \u0026 von Schacky como "cardioprotectora". El riesgo de muerte cardíaca súbita es 10 veces menor que en índices <4%. Asociado con resolución inflamatoria eficiente (resolvinas, maresinas), función endotelial óptima y neuroprotección. Correlacionado con menor riesgo de deterioro cognitivo y depresión.'
+              : 'Target zone defined by Harris \u0026 von Schacky as "cardioprotective." Sudden cardiac death risk is 10-fold lower than indices <4%. Associated with efficient inflammatory resolution (resolvins, maresins), optimal endothelial function, and neuroprotection. Correlated with lower risk of cognitive decline and depression.',
+            clinicalProtocol: {
+              slug: 'omega3-maintenance-protocol',
+              queryParams: '?baseline=optimal\u0026omega3_index=9\u0026tier=optimal\u0026modality=maintenance\u0026retest=6m',
+              shortCode: 'REF-OM3-MAINT',
+              name: isEs ? 'Mantenimiento Cardioprotector Omega-3' : 'Omega-3 Cardioprotective Maintenance',
+              recommendedModality: isEs ? 'Dosis de Mantenimiento + Monitoreo Semestral' : 'Maintenance Dose + Biannual Monitoring',
+              dosageGuide: isEs ? 'EPA+DHA 1000-2000 mg/d (mantenimiento) + dieta rica en pescado' : 'EPA+DHA 1,000-2,000 mg/d (maintenance) + fish-rich diet',
+              retestWindow: isEs ? 'Semestral (Control HS-Omega-3 Index)' : 'Biannual (HS-Omega-3 Index monitoring)',
+              cellularTarget: isEs ? 'Homeostasis membrana eritrocitaria, SPMs, endotelio' : 'RBC membrane homeostasis, SPMs, endothelium',
+              clinicalRationale: isEs
+                ? 'Nivel óptimo alcanzado. Mantener con dosis moderada y verificar estabilidad semestralmente.'
+                : 'Optimal level achieved. Maintain with moderate dose and verify stability biannually.',
+              synergies: [
+                { name: 'EPA+DHA 1.5g', role: isEs ? 'Mantenimiento' : 'Maintenance' },
+                { name: isEs ? 'Dieta Pescado' : 'Fish Diet', role: isEs ? 'Fuente Natural' : 'Natural Source' }
+              ],
+              aiQuery: isEs
+                ? '¿Qué beneficios cardiovasculares y neurológicos se asocian con un HS-Omega-3 Index >8%?'
+                : 'What cardiovascular and neurological benefits are associated with an HS-Omega-3 Index >8%?'
+            }
+          },
+          {
+            label: isEs ? 'Ratio AA:EPA Elevado (Proinflamatorio)' : 'Elevated AA:EPA Ratio (Pro-inflammatory)',
+            value: 'AA:EPA > 15:1',
+            status: 'warning',
+            badge: isEs ? 'Proinflamatorio' : 'Pro-inflammatory',
+            color: '#ea580c',
+            bgColor: '#fff7ed',
+            description: isEs
+              ? 'El ratio Ácido Araquidónico (AA) a EPA excede 15:1 (objetivo <5:1). Indica predominancia de cascadas proinflamatorias (prostaglandinas serie 2, leucotrienos serie 4) sobre las resolutivas. Asociado con inflamación crónica de bajo grado, síndrome metabólico y riesgo cardiovascular incrementado independientemente del índice Omega-3.'
+              : 'The Arachidonic Acid (AA) to EPA ratio exceeds 15:1 (target <5:1). Indicates predominance of pro-inflammatory cascades (series 2 prostaglandins, series 4 leukotrienes) over resolving ones. Associated with chronic low-grade inflammation, metabolic syndrome, and increased cardiovascular risk independent of the Omega-3 Index.',
+            clinicalProtocol: {
+              slug: 'aa-epa-ratio-correction',
+              queryParams: '?baseline=elevated_ratio\u0026aa_epa=18\u0026tier=warning\u0026modality=dietary\u0026retest=12w',
+              shortCode: 'REF-OM3-RATIO',
+              name: isEs ? 'Corrección Ratio AA:EPA' : 'AA:EPA Ratio Correction',
+              recommendedModality: isEs ? 'EPA Puro Alta Dosis + Restricción ω-6' : 'High-Dose Pure EPA + ω-6 Restriction',
+              dosageGuide: isEs ? 'EPA puro ≥2000 mg/d + eliminar aceites de semillas (girasol, soja, maíz)' : 'Pure EPA ≥2,000 mg/d + eliminate seed oils (sunflower, soy, corn)',
+              retestWindow: isEs ? 'Semana 12' : 'Week 12',
+              cellularTarget: isEs ? 'Competencia enzimática COX/LOX, desplazamiento AA de fosfolípidos' : 'COX/LOX enzymatic competition, AA displacement from phospholipids',
+              clinicalRationale: isEs
+                ? 'EPA compite directamente con AA por las enzimas COX y LOX. Una dosis alta de EPA puro (no DHA) desplaza el AA de los fosfolípidos de membrana, reduciendo la síntesis de eicosanoides proinflamatorios.'
+                : 'EPA directly competes with AA for COX and LOX enzymes. High-dose pure EPA (not DHA) displaces AA from membrane phospholipids, reducing pro-inflammatory eicosanoid synthesis.',
+              synergies: [
+                { name: 'EPA puro 2g', role: isEs ? 'Desplazamiento AA' : 'AA Displacement' },
+                { name: isEs ? 'Eliminar Aceites ω-6' : 'Eliminate ω-6 Oils', role: isEs ? 'Reducir Sustrato AA' : 'Reduce AA Substrate' },
+                { name: isEs ? 'Curcumina + Boswellia' : 'Curcumin + Boswellia', role: isEs ? 'Inhibición COX/LOX Natural' : 'Natural COX/LOX Inhibition' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo reducir un ratio AA:EPA elevado y qué impacto tiene en la inflamación crónica?'
+                : 'How to reduce an elevated AA:EPA ratio and what impact does it have on chronic inflammation?'
+            }
+          },
+          {
+            label: isEs ? 'Ácidos Grasos Trans Elevados' : 'Elevated Trans Fatty Acids',
+            value: isEs ? 'Trans > 1.5% del total de AG' : 'Trans > 1.5% of total FA',
+            status: 'critical',
+            badge: isEs ? 'Grasas Trans Altas' : 'High Trans Fats',
+            color: '#991b1b',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Los ácidos grasos trans exceden el 1.5% del total de ácidos grasos en membrana eritrocitaria. La OMS recomienda <1% de la ingesta calórica total. Los trans industriales (aceites parcialmente hidrogenados) alteran la fluidez de membrana, elevan el LDL oxidado, reducen el HDL y aumentan marcadores inflamatorios (PCR-us, IL-6). Cada 2% de incremento en trans se asocia con un 23% mayor riesgo de enfermedad coronaria.'
+              : 'Trans fatty acids exceed 1.5% of total erythrocyte membrane fatty acids. WHO recommends <1% of total caloric intake. Industrial trans fats (partially hydrogenated oils) disrupt membrane fluidity, elevate oxidized LDL, reduce HDL, and increase inflammatory markers (hs-CRP, IL-6). Each 2% increase in trans is associated with 23% higher coronary heart disease risk.',
+            clinicalProtocol: {
+              slug: 'trans-fat-elimination-protocol',
+              queryParams: '?baseline=elevated_trans\u0026trans_pct=2.1\u0026tier=critical\u0026modality=dietary\u0026retest=16w',
+              shortCode: 'REF-OM3-TRANS',
+              name: isEs ? 'Protocolo Eliminación de Grasas Trans' : 'Trans Fat Elimination Protocol',
+              recommendedModality: isEs ? 'Intervención Dietética Estricta' : 'Strict Dietary Intervention',
+              dosageGuide: isEs ? 'Eliminación total de aceites parcialmente hidrogenados + ω-3 EPA 2g/d para restaurar membrana' : 'Total elimination of partially hydrogenated oils + ω-3 EPA 2g/d to restore membrane',
+              retestWindow: isEs ? 'Semana 16 (2 ciclos eritrocitarios)' : 'Week 16 (2 RBC cycles)',
+              cellularTarget: isEs ? 'Fluidez de membrana, receptores LDL, marcadores inflamatorios' : 'Membrane fluidity, LDL receptors, inflammatory markers',
+              clinicalRationale: isEs
+                ? 'Los ácidos grasos trans se incorporan en la membrana celular y persisten durante toda la vida del eritrocito (120 días). La eliminación dietética + suplementación con ω-3 permite la sustitución gradual en la membrana durante 2 ciclos eritrocitarios.'
+                : 'Trans fatty acids incorporate into cell membranes and persist for the entire RBC lifespan (120 days). Dietary elimination + ω-3 supplementation allows gradual membrane substitution over 2 RBC cycles.',
+              synergies: [
+                { name: isEs ? 'Dieta Sin Trans' : 'Trans-Free Diet', role: isEs ? 'Eliminación Fuente' : 'Source Elimination' },
+                { name: 'EPA+DHA 2g', role: isEs ? 'Restauración Membrana' : 'Membrane Restoration' },
+                { name: isEs ? 'AOVE + Aguacate' : 'EVOO + Avocado', role: isEs ? 'Grasas Saludables' : 'Healthy Fats' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuánto tiempo tarda el cuerpo en eliminar las grasas trans de las membranas celulares tras su eliminación dietética?'
+                : 'How long does it take for the body to clear trans fats from cell membranes after dietary elimination?'
+            }
+          }
+        ]
+      };
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // TELETEST — METABOLIZER/DETOX (Pharmacogenetics Panel)
+    // Methodology: RT-PCR / Microarray · Specimen: Buccal swab (saliva)
+    // Clinical reference: CPIC (Clinical Pharmacogenetics Implementation Consortium)
+    // ═══════════════════════════════════════════════════════════════════
+    if (isTeletestMetabolizer) {
+      return {
+        name: isEs ? 'Panel Farmacogenético Metabolizer-Detox (CYP450 + Fase II)' : 'Pharmacogenetic Metabolizer-Detox Panel (CYP450 + Phase II)',
+        unit: isEs ? 'Fenotipo Metabólico (PM/IM/NM/RM/UM)' : 'Metabolizer Phenotype (PM/IM/NM/RM/UM)',
+        method: isEs
+          ? 'RT-PCR Multiplex + Microarray de Polimorfismos SNP'
+          : 'Multiplex RT-PCR + SNP Polymorphism Microarray',
+        lab: 'Analytika Genomics Laboratory (EU) · ISO 15189',
+        lod: 'N/A (qualitative genotyping)',
+        range: isEs ? 'Genes: CYP2D6, CYP2C19, CYP2C9, CYP3A4, CYP1A2, NAT2, COMT, MTHFR, GST, UGT' : 'Genes: CYP2D6, CYP2C19, CYP2C9, CYP3A4, CYP1A2, NAT2, COMT, MTHFR, GST, UGT',
+        precision: isEs ? 'Concordancia genotípica >99.5%' : 'Genotype concordance >99.5%',
+        officialReportPdf: '/docs/teletest-report-metabolizer.pdf',
+        officialReportDocName: 'teletest-report-metabolizer.pdf',
+        ranges: [
+          {
+            label: isEs ? 'Metabolizador Pobre (PM) en CYP Críticos' : 'Poor Metabolizer (PM) in Critical CYPs',
+            value: isEs ? 'CYP2D6 *4/*4 o CYP2C19 *2/*2' : 'CYP2D6 *4/*4 or CYP2C19 *2/*2',
+            status: 'critical',
+            badge: isEs ? 'Metabolizador Pobre' : 'Poor Metabolizer',
+            color: '#dc2626',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Actividad enzimática CYP450 ausente o severamente reducida. El paciente no puede metabolizar eficientemente sustratos de estas enzimas, lo que provoca acumulación de fármacos activos (riesgo de toxicidad) o falta de activación de prodrogas (falta de eficacia). CYP2D6 PM afecta ~25% de los fármacos más prescritos (codeína, tamoxifeno, antidepresivos ISRS). CYP2C19 PM impacta clopidogrel, IBPs y benzodiacepinas.'
+              : 'Absent or severely reduced CYP450 enzymatic activity. Patient cannot efficiently metabolize substrates for these enzymes, causing active drug accumulation (toxicity risk) or failure to activate prodrugs (lack of efficacy). CYP2D6 PM affects ~25% of most prescribed drugs (codeine, tamoxifen, SSRI antidepressants). CYP2C19 PM impacts clopidogrel, PPIs, and benzodiazepines.',
+            clinicalProtocol: {
+              slug: 'poor-metabolizer-adjustment',
+              queryParams: '?baseline=PM\u0026cyp=2D6_2C19\u0026tier=critical\u0026modality=pharma_adjustment\u0026retest=lifetime',
+              shortCode: 'REF-PGX-PM',
+              name: isEs ? 'Ajuste Farmacológico para PM' : 'Pharmacological Adjustment for PM',
+              recommendedModality: isEs ? 'Revisión Farmacoterapéutica Completa (CPIC Guidelines)' : 'Complete Pharmacotherapy Review (CPIC Guidelines)',
+              dosageGuide: isEs ? 'Reducir dosis 50-75% de sustratos CYP afectados o usar fármacos alternativos según guías CPIC/DPWG' : 'Reduce dose 50-75% of affected CYP substrates or use alternative drugs per CPIC/DPWG guidelines',
+              retestWindow: isEs ? 'De por vida (genotipo no cambia)' : 'Lifetime (genotype does not change)',
+              cellularTarget: isEs ? 'Enzimas CYP450 hepáticas microsomales' : 'Hepatic microsomal CYP450 enzymes',
+              clinicalRationale: isEs
+                ? 'El genotipo PM es constitutivo y permanente. Toda prescripción futura debe considerar este perfil. Las guías CPIC (cpicpgx.org) proporcionan recomendaciones específicas gen-fármaco con nivel de evidencia A.'
+                : 'The PM genotype is constitutive and permanent. All future prescriptions must consider this profile. CPIC guidelines (cpicpgx.org) provide specific gene-drug recommendations with level A evidence.',
+              synergies: [
+                { name: isEs ? 'Tarjeta PGx Médica' : 'PGx Medical Card', role: isEs ? 'Alerta Prescriptores' : 'Prescriber Alert' },
+                { name: isEs ? 'Guías CPIC' : 'CPIC Guidelines', role: isEs ? 'Dosificación Basada en Evidencia' : 'Evidence-Based Dosing' },
+                { name: isEs ? 'Farmacia Personalizada' : 'Personalized Pharmacy', role: isEs ? 'Monitoreo Fármacos' : 'Drug Monitoring' }
+              ],
+              aiQuery: isEs
+                ? '¿Qué fármacos deben evitarse o ajustarse en un paciente metabolizador pobre CYP2D6?'
+                : 'Which drugs should be avoided or dose-adjusted in a CYP2D6 poor metabolizer patient?'
+            }
+          },
+          {
+            label: isEs ? 'Metabolizador Ultrarrápido (UM)' : 'Ultrarapid Metabolizer (UM)',
+            value: isEs ? 'CYP2D6 duplicación (*1/*1xN) o CYP2C19 *17/*17' : 'CYP2D6 duplication (*1/*1xN) or CYP2C19 *17/*17',
+            status: 'warning',
+            badge: isEs ? 'Metabolizador Ultrarrápido' : 'Ultrarapid Metabolizer',
+            color: '#d97706',
+            bgColor: '#fffbeb',
+            description: isEs
+              ? 'Actividad enzimática CYP450 significativamente aumentada. Los fármacos se metabolizan demasiado rápido: las concentraciones plasmáticas terapéuticas no se alcanzan a dosis estándar (falta de eficacia) o las prodrogas se activan excesivamente (toxicidad del metabolito activo). CYP2D6 UM puede convertir codeína en morfina a velocidad letal en algunos individuos.'
+              : 'Significantly increased CYP450 enzymatic activity. Drugs are metabolized too rapidly: therapeutic plasma concentrations are not reached at standard doses (lack of efficacy) or prodrugs are activated excessively (active metabolite toxicity). CYP2D6 UM can convert codeine to morphine at lethal speed in some individuals.',
+            clinicalProtocol: {
+              slug: 'ultrarapid-metabolizer-adjustment',
+              queryParams: '?baseline=UM\u0026cyp=2D6_2C19\u0026tier=warning\u0026modality=pharma_adjustment\u0026retest=lifetime',
+              shortCode: 'REF-PGX-UM',
+              name: isEs ? 'Ajuste para Metabolizador Ultrarrápido' : 'Ultrarapid Metabolizer Adjustment',
+              recommendedModality: isEs ? 'Dosis Elevadas o Fármacos Alternativos (según CPIC)' : 'Elevated Doses or Alternative Drugs (per CPIC)',
+              dosageGuide: isEs ? 'Aumentar dosis 150-200% para sustratos directos; EVITAR prodrogas con metabolitos tóxicos (codeína en CYP2D6 UM = contraindicación absoluta)' : 'Increase dose 150-200% for direct substrates; AVOID prodrugs with toxic metabolites (codeine in CYP2D6 UM = absolute contraindication)',
+              retestWindow: isEs ? 'De por vida' : 'Lifetime',
+              cellularTarget: isEs ? 'Velocidad de biotransformación hepática' : 'Hepatic biotransformation velocity',
+              clinicalRationale: isEs
+                ? 'El fenotipo UM requiere dosis superiores al estándar para alcanzar concentración terapéutica con sustratos directos, pero la codeína está CONTRAINDICADA (riesgo de intoxicación por morfina). Genotipo permanente con implicaciones para toda la vida.'
+                : 'The UM phenotype requires above-standard doses to reach therapeutic concentration with direct substrates, but codeine is CONTRAINDICATED (morphine intoxication risk). Permanent genotype with lifelong implications.',
+              synergies: [
+                { name: isEs ? 'CONTRAINDICACIÓN: Codeína' : 'CONTRAINDICATED: Codeine', role: isEs ? 'Seguridad Vital' : 'Life Safety' },
+                { name: isEs ? 'Monitoreo TDM' : 'TDM Monitoring', role: isEs ? 'Niveles Plasmáticos' : 'Plasma Levels' },
+                { name: isEs ? 'Tarjeta PGx' : 'PGx Card', role: isEs ? 'Alerta Urgencias' : 'Emergency Alert' }
+              ],
+              aiQuery: isEs
+                ? '¿Por qué la codeína es potencialmente letal en metabolizadores ultrarrápidos CYP2D6?'
+                : 'Why is codeine potentially lethal in CYP2D6 ultrarapid metabolizers?'
+            }
+          },
+          {
+            label: isEs ? 'Metabolizador Normal (NM)' : 'Normal Metabolizer (NM)',
+            value: isEs ? 'Actividad enzimática estándar en todos los CYP' : 'Standard enzymatic activity across all CYPs',
+            status: 'optimal',
+            badge: isEs ? 'Metabolizador Normal' : 'Normal Metabolizer',
+            color: '#16a34a',
+            bgColor: '#f0fdf4',
+            description: isEs
+              ? 'Actividad enzimática CYP450 dentro de rangos poblacionales normales para todas las enzimas analizadas. Las dosis farmacológicas estándar son apropiadas. No se requieren ajustes de dosis específicos basados en el perfil farmacogenético. El resultado sigue siendo valioso: confirma que las dosis habituales son seguras y eficaces para este paciente.'
+              : 'CYP450 enzymatic activity within normal population ranges for all enzymes analyzed. Standard pharmacological doses are appropriate. No specific dose adjustments required based on pharmacogenetic profile. The result remains valuable: confirms that standard doses are safe and effective for this patient.',
+            clinicalProtocol: {
+              slug: 'normal-metabolizer-baseline',
+              queryParams: '?baseline=NM\u0026cyp=all_normal\u0026tier=optimal\u0026modality=standard\u0026retest=lifetime',
+              shortCode: 'REF-PGX-NM',
+              name: isEs ? 'Perfil Normal — Dosificación Estándar' : 'Normal Profile — Standard Dosing',
+              recommendedModality: isEs ? 'Dosificación Estándar según Guías Clínicas' : 'Standard Dosing per Clinical Guidelines',
+              dosageGuide: isEs ? 'Dosis estándar de todos los fármacos; no requiere ajuste farmacogenético' : 'Standard doses of all drugs; no pharmacogenetic adjustment required',
+              retestWindow: isEs ? 'De por vida (genotipo es permanente)' : 'Lifetime (genotype is permanent)',
+              cellularTarget: isEs ? 'Metabolismo hepático estándar' : 'Standard hepatic metabolism',
+              clinicalRationale: isEs
+                ? 'Resultado tranquilizador: confirma que el metabolismo hepático del paciente procesa fármacos a velocidad normal. Archivar resultado para consultas futuras.'
+                : 'Reassuring result: confirms the patient\'s hepatic metabolism processes drugs at normal speed. Archive result for future consultations.',
+              synergies: [
+                { name: isEs ? 'Archivo PGx' : 'PGx Archive', role: isEs ? 'Historial Médico' : 'Medical History' },
+                { name: isEs ? 'Tarjeta PGx' : 'PGx Card', role: isEs ? 'Referencia Futura' : 'Future Reference' }
+              ],
+              aiQuery: isEs
+                ? '¿Por qué es valioso realizar un panel farmacogenético incluso cuando el resultado es metabolizador normal?'
+                : 'Why is it valuable to perform a pharmacogenetics panel even when the result is normal metabolizer?'
+            }
+          },
+          {
+            label: isEs ? 'MTHFR / COMT Variante Homocigota' : 'MTHFR / COMT Homozygous Variant',
+            value: 'MTHFR C677T T/T o COMT Val158Met Met/Met',
+            status: 'warning',
+            badge: isEs ? 'Variante Metilación' : 'Methylation Variant',
+            color: '#ea580c',
+            bgColor: '#fff7ed',
+            description: isEs
+              ? 'Variante homocigota en genes de metilación (MTHFR C677T T/T reduce actividad enzimática al 30%) o catecol-O-metiltransferasa (COMT Met/Met = actividad lenta, mayor sensibilidad a catecolaminas). MTHFR T/T se asocia con homocisteína elevada, mayor necesidad de folato metilado (5-MTHF) y riesgo cardiovascular. COMT Met/Met implica metabolismo lento de dopamina/estradiol.'
+              : 'Homozygous variant in methylation genes (MTHFR C677T T/T reduces enzymatic activity to 30%) or catechol-O-methyltransferase (COMT Met/Met = slow activity, increased catecholamine sensitivity). MTHFR T/T is associated with elevated homocysteine, increased need for methylated folate (5-MTHF), and cardiovascular risk. COMT Met/Met implies slow dopamine/estradiol metabolism.',
+            clinicalProtocol: {
+              slug: 'methylation-support-protocol',
+              queryParams: '?baseline=homozygous\u0026gene=MTHFR_COMT\u0026tier=warning\u0026modality=methylation\u0026retest=8w',
+              shortCode: 'REF-PGX-METH',
+              name: isEs ? 'Protocolo de Soporte a la Metilación' : 'Methylation Support Protocol',
+              recommendedModality: isEs ? 'Folato Metilado (5-MTHF) + Metilcobalamina + TMG' : 'Methylated Folate (5-MTHF) + Methylcobalamin + TMG',
+              dosageGuide: isEs ? '5-MTHF 800µg-15mg/d (titular desde dosis baja) + Metilcobalamina 1000µg + TMG 500mg; monitorizar homocisteína' : '5-MTHF 800µg-15mg/d (titrate from low dose) + Methylcobalamin 1,000µg + TMG 500mg; monitor homocysteine',
+              retestWindow: isEs ? 'Semana 8 (Homocisteína sérica)' : 'Week 8 (Serum homocysteine)',
+              cellularTarget: isEs ? 'Ciclo de metilación, SAMe, homocisteína, síntesis de glutatión' : 'Methylation cycle, SAMe, homocysteine, glutathione synthesis',
+              clinicalRationale: isEs
+                ? 'MTHFR T/T requiere formas ya metiladas de folato (el ácido fólico sintético no se convierte eficientemente). La suplementación con 5-MTHF + B12 metilada reduce la homocisteína y restaura el pool de SAMe necesario para >200 reacciones de metilación celular.'
+                : 'MTHFR T/T requires already-methylated forms of folate (synthetic folic acid is not efficiently converted). 5-MTHF + methylated B12 supplementation reduces homocysteine and restores the SAMe pool needed for >200 cellular methylation reactions.',
+              synergies: [
+                { name: '5-MTHF', role: isEs ? 'Folato Activo' : 'Active Folate' },
+                { name: isEs ? 'Metilcobalamina' : 'Methylcobalamin', role: isEs ? 'B12 Activa' : 'Active B12' },
+                { name: 'TMG 500mg', role: isEs ? 'Donante de Metilo' : 'Methyl Donor' },
+                { name: isEs ? 'Homocisteína Sérica' : 'Serum Homocysteine', role: isEs ? 'Monitoreo' : 'Monitoring' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuál es el protocolo óptimo de suplementación para un paciente con MTHFR C677T homocigoto (T/T)?'
+                : 'What is the optimal supplementation protocol for a patient with homozygous MTHFR C677T (T/T)?'
+            }
+          },
+          {
+            label: isEs ? 'GST / NAT2 Acetilador Lento' : 'GST / NAT2 Slow Acetylator',
+            value: isEs ? 'Detoxificación Fase II Reducida' : 'Reduced Phase II Detoxification',
+            status: 'warning',
+            badge: isEs ? 'Detox Fase II Lenta' : 'Slow Phase II Detox',
+            color: '#b45309',
+            bgColor: '#fffbeb',
+            description: isEs
+              ? 'La glutatión S-transferasa (GST) y/o N-acetiltransferasa 2 (NAT2) muestran actividad reducida. Fase II de biotransformación hepática comprometida: los metabolitos intermedios generados por Fase I (CYP450) se acumulan al no conjugarse eficientemente. Mayor susceptibilidad a xenobióticos, pesticidas, humo de tabaco y metabolitos estrogénicos potencialmente carcinogénicos (4-OH-E1).'
+              : 'Glutathione S-transferase (GST) and/or N-acetyltransferase 2 (NAT2) show reduced activity. Phase II hepatic biotransformation is compromised: intermediate metabolites generated by Phase I (CYP450) accumulate when not efficiently conjugated. Increased susceptibility to xenobiotics, pesticides, tobacco smoke, and potentially carcinogenic estrogenic metabolites (4-OH-E1).',
+            clinicalProtocol: {
+              slug: 'phase-ii-detox-support',
+              queryParams: '?baseline=slow\u0026phase2=GST_NAT2\u0026tier=warning\u0026modality=support\u0026retest=12w',
+              shortCode: 'REF-PGX-PH2',
+              name: isEs ? 'Soporte Detox Fase II' : 'Phase II Detox Support',
+              recommendedModality: isEs ? 'Precursores de Glutatión + Sulforafano + NAC' : 'Glutathione Precursors + Sulforaphane + NAC',
+              dosageGuide: isEs ? 'NAC 1200mg/d + Sulforafano (brócoli germinado 30mg) + Glutatión Liposomal 500mg + Glicina 3g' : 'NAC 1,200mg/d + Sulforaphane (broccoli sprout 30mg) + Liposomal Glutathione 500mg + Glycine 3g',
+              retestWindow: isEs ? 'Semana 12 (Marcadores de detox urinarios)' : 'Week 12 (Urinary detox markers)',
+              cellularTarget: isEs ? 'Conjugación GSH, acetilación NAT2, glucuronidación UGT' : 'GSH conjugation, NAT2 acetylation, UGT glucuronidation',
+              clinicalRationale: isEs
+                ? 'La actividad reducida de Fase II es constitutiva pero compensable mediante suplementación con precursores de glutatión e inductores de Nrf2 (sulforafano). Estos amplifican las vías de conjugación residuales y protegen contra la acumulación de metabolitos reactivos.'
+                : 'Reduced Phase II activity is constitutive but compensable through glutathione precursor supplementation and Nrf2 inducers (sulforaphane). These amplify residual conjugation pathways and protect against reactive metabolite accumulation.',
+              synergies: [
+                { name: 'NAC 1200mg', role: isEs ? 'Precursor Glutatión' : 'Glutathione Precursor' },
+                { name: isEs ? 'Sulforafano' : 'Sulforaphane', role: isEs ? 'Inductor Nrf2' : 'Nrf2 Inducer' },
+                { name: isEs ? 'Glutatión Liposomal' : 'Liposomal Glutathione', role: isEs ? 'Soporte Directo GSH' : 'Direct GSH Support' },
+                { name: isEs ? 'Glicina 3g' : 'Glycine 3g', role: isEs ? 'Conjugación Hepática' : 'Hepatic Conjugation' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo compensar una actividad GST/NAT2 lenta para mejorar la detoxificación hepática de Fase II?'
+                : 'How to compensate slow GST/NAT2 activity to improve Phase II hepatic detoxification?'
+            }
+          }
+        ]
+      };
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // TELETEST — HLA AUTOIMMUNITY (HLA Immunogenetics Panel)
+    // Methodology: PCR-SSO / PCR-SSP / NGS · Specimen: Blood / Buccal swab
+    // Clinical reference: ASHI (American Society for Histocompatibility)
+    // ═══════════════════════════════════════════════════════════════════
+    if (isTeletestHLA) {
+      return {
+        name: isEs ? 'Panel HLA Inmunogenético de Autoinmunidad' : 'HLA Immunogenetics Autoimmunity Panel',
+        unit: isEs ? 'Alelos HLA (tipificación molecular)' : 'HLA Alleles (molecular typing)',
+        method: isEs
+          ? 'PCR-SSO (Sequence-Specific Oligonucleotide) / PCR-SSP / Secuenciación de Próxima Generación (NGS)'
+          : 'PCR-SSO (Sequence-Specific Oligonucleotide) / PCR-SSP / Next-Generation Sequencing (NGS)',
+        lab: 'Analytika Genomics Laboratory (EU) · ISO 15189 / EFI Accredited',
+        lod: 'N/A (qualitative molecular typing)',
+        range: isEs ? 'HLA-A, HLA-B, HLA-C (Clase I) + HLA-DRB1, HLA-DQB1, HLA-DPB1 (Clase II)' : 'HLA-A, HLA-B, HLA-C (Class I) + HLA-DRB1, HLA-DQB1, HLA-DPB1 (Class II)',
+        precision: isEs ? 'Resolución media-alta (4 dígitos mínimo)' : 'Medium-high resolution (4-digit minimum)',
+        officialReportPdf: '/docs/teletest-report-hla-autoimmunity.pdf',
+        officialReportDocName: 'teletest-report-hla-autoimmunity.pdf',
+        ranges: [
+          {
+            label: isEs ? 'HLA-B27 Positivo' : 'HLA-B27 Positive',
+            value: isEs ? 'Alelo HLA-B*27 detectado' : 'HLA-B*27 allele detected',
+            status: 'warning',
+            badge: isEs ? 'Riesgo Espondiloartropatía' : 'Spondyloarthropathy Risk',
+            color: '#d97706',
+            bgColor: '#fffbeb',
+            description: isEs
+              ? 'El alelo HLA-B*27 está presente. El 90-95% de pacientes con Espondilitis Anquilosante (EA) son HLA-B27 positivos, aunque solo el 5-6% de portadores B27 desarrollan EA. Asociado también con artritis reactiva, uveítis anterior aguda, artritis psoriásica y enfermedad inflamatoria intestinal. La presencia del alelo NO es diagnóstica por sí sola — requiere correlación clínica con síntomas axiales y/o sacroilitis en imagen.'
+              : 'The HLA-B*27 allele is present. 90-95% of Ankylosing Spondylitis (AS) patients are HLA-B27 positive, although only 5-6% of B27 carriers develop AS. Also associated with reactive arthritis, acute anterior uveitis, psoriatic arthritis, and inflammatory bowel disease. The presence of the allele is NOT diagnostic on its own — requires clinical correlation with axial symptoms and/or sacroiliitis on imaging.',
+            clinicalProtocol: {
+              slug: 'hla-b27-surveillance',
+              queryParams: '?baseline=B27_positive\u0026allele=B27\u0026tier=warning\u0026modality=surveillance\u0026retest=annual',
+              shortCode: 'REF-HLA-B27',
+              name: isEs ? 'Vigilancia Clínica HLA-B27+' : 'HLA-B27+ Clinical Surveillance',
+              recommendedModality: isEs ? 'Vigilancia Reumatológica + Anti-inflamación Preventiva' : 'Rheumatologic Surveillance + Preventive Anti-inflammation',
+              dosageGuide: isEs ? 'Omega-3 EPA 2g/d + Curcumina 1g/d + Vitamina D 5000 UI/d; derivación a Reumatología si lumbalgia inflamatoria >3 meses' : 'Omega-3 EPA 2g/d + Curcumin 1g/d + Vitamin D 5,000 IU/d; Rheumatology referral if inflammatory back pain >3 months',
+              retestWindow: isEs ? 'Anual (HLA es permanente; monitorizar clínica)' : 'Annual (HLA is permanent; monitor clinical presentation)',
+              cellularTarget: isEs ? 'Presentación antigénica MHC-I, articulaciones sacroilíacas, úvea' : 'MHC-I antigen presentation, sacroiliac joints, uvea',
+              clinicalRationale: isEs
+                ? 'HLA-B27 es un factor de riesgo genético permanente. La vigilancia preventiva con anti-inflamatorios naturales puede modular la respuesta inmune innata y retrasar o prevenir la manifestación clínica en portadores asintomáticos.'
+                : 'HLA-B27 is a permanent genetic risk factor. Preventive surveillance with natural anti-inflammatories can modulate innate immune response and delay or prevent clinical manifestation in asymptomatic carriers.',
+              synergies: [
+                { name: 'EPA 2g/d', role: isEs ? 'Anti-inflamación' : 'Anti-inflammation' },
+                { name: isEs ? 'Curcumina 1g' : 'Curcumin 1g', role: isEs ? 'Modulación NF-κB' : 'NF-κB Modulation' },
+                { name: isEs ? 'Vitamina D 5000 UI' : 'Vitamin D 5,000 IU', role: isEs ? 'Inmunomodulación' : 'Immunomodulation' },
+                { name: isEs ? 'Reumatología' : 'Rheumatology', role: isEs ? 'Vigilancia Especializada' : 'Specialized Surveillance' }
+              ],
+              aiQuery: isEs
+                ? '¿Qué porcentaje de portadores de HLA-B27 desarrollan espondilitis anquilosante y cómo se puede prevenir?'
+                : 'What percentage of HLA-B27 carriers develop ankylosing spondylitis and how can it be prevented?'
+            }
+          },
+          {
+            label: isEs ? 'HLA-DRB1 Epítopo Compartido (SE)' : 'HLA-DRB1 Shared Epitope (SE)',
+            value: isEs ? 'DRB1*01/*04/*10 (Epítopo Compartido +)' : 'DRB1*01/*04/*10 (Shared Epitope +)',
+            status: 'warning',
+            badge: isEs ? 'Riesgo Artritis Reumatoide' : 'Rheumatoid Arthritis Risk',
+            color: '#ea580c',
+            bgColor: '#fff7ed',
+            description: isEs
+              ? 'Detectados alelos HLA-DRB1 que contienen el "Epítopo Compartido" (secuencia QKRAA/QRRAA/RRRAA en posiciones 70-74 de la cadena DRβ1). El SE está presente en el 80-90% de pacientes con Artritis Reumatoide (AR) seropositiva. Doble copia (homocigoto SE) confiere mayor riesgo y peor pronóstico. Se asocia con producción de anticuerpos anti-CCP (anti-péptidos citrulinados cíclicos).'
+              : 'HLA-DRB1 alleles containing the "Shared Epitope" (QKRAA/QRRAA/RRRAA sequence at positions 70-74 of the DRβ1 chain) detected. The SE is present in 80-90% of seropositive Rheumatoid Arthritis (RA) patients. Double copy (SE homozygous) confers higher risk and worse prognosis. Associated with anti-CCP (anti-cyclic citrullinated peptide) antibody production.',
+            clinicalProtocol: {
+              slug: 'shared-epitope-surveillance',
+              queryParams: '?baseline=SE_positive\u0026allele=DRB1_SE\u0026tier=warning\u0026modality=surveillance\u0026retest=annual',
+              shortCode: 'REF-HLA-SE',
+              name: isEs ? 'Vigilancia Articular Epítopo Compartido' : 'Shared Epitope Joint Surveillance',
+              recommendedModality: isEs ? 'Monitoreo Anticuerpos Anti-CCP + Anti-inflamación Preventiva' : 'Anti-CCP Antibody Monitoring + Preventive Anti-inflammation',
+              dosageGuide: isEs ? 'Anti-CCP + FR cada 12 meses; Omega-3 3g/d + Curcumina + Vitamina D; derivar a Reumatología si rigidez matutina >30min' : 'Anti-CCP + RF every 12 months; Omega-3 3g/d + Curcumin + Vitamin D; Rheumatology referral if morning stiffness >30min',
+              retestWindow: isEs ? 'Anual (Anti-CCP + FR séricos)' : 'Annual (Serum anti-CCP + RF)',
+              cellularTarget: isEs ? 'Presentación MHC-II, células T CD4+, membrana sinovial' : 'MHC-II presentation, CD4+ T cells, synovial membrane',
+              clinicalRationale: isEs
+                ? 'El Epítopo Compartido es el factor genético de riesgo más fuerte para AR seropositiva. La detección de anti-CCP antes de los síntomas permite intervención precoz que puede prevenir el daño articular irreversible.'
+                : 'The Shared Epitope is the strongest genetic risk factor for seropositive RA. Detecting anti-CCP before symptoms allows early intervention that can prevent irreversible joint damage.',
+              synergies: [
+                { name: 'Anti-CCP', role: isEs ? 'Detección Precoz' : 'Early Detection' },
+                { name: 'Omega-3 3g', role: isEs ? 'Anti-inflamatorio' : 'Anti-inflammatory' },
+                { name: isEs ? 'Vitamina D' : 'Vitamin D', role: isEs ? 'Inmunomodulación' : 'Immunomodulation' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo el Epítopo Compartido HLA-DRB1 predispone a la Artritis Reumatoide y cuál es la ventana de intervención precoz?'
+                : 'How does the HLA-DRB1 Shared Epitope predispose to Rheumatoid Arthritis and what is the early intervention window?'
+            }
+          },
+          {
+            label: isEs ? 'Perfil HLA Sin Alelos de Riesgo' : 'HLA Profile Without Risk Alleles',
+            value: isEs ? 'Sin alelos HLA de riesgo autoinmune identificados' : 'No autoimmune risk HLA alleles identified',
+            status: 'optimal',
+            badge: isEs ? 'Bajo Riesgo Genético' : 'Low Genetic Risk',
+            color: '#16a34a',
+            bgColor: '#f0fdf4',
+            description: isEs
+              ? 'El panel HLA no ha identificado alelos asociados con alto riesgo de enfermedades autoinmunes. Esto NO excluye el riesgo autoinmune (que también depende de factores ambientales, epigenéticos y de otros genes), pero reduce significativamente la probabilidad genética. Resultado tranquilizador que debe archivarse para referencia futura.'
+              : 'The HLA panel has not identified alleles associated with high autoimmune disease risk. This does NOT exclude autoimmune risk (which also depends on environmental, epigenetic, and other gene factors), but significantly reduces genetic probability. Reassuring result that should be archived for future reference.',
+            clinicalProtocol: {
+              slug: 'hla-low-risk-maintenance',
+              queryParams: '?baseline=low_risk\u0026hla=no_risk_alleles\u0026tier=optimal\u0026modality=maintenance\u0026retest=none',
+              shortCode: 'REF-HLA-LOW',
+              name: isEs ? 'Perfil HLA de Bajo Riesgo — Archivo' : 'Low Risk HLA Profile — Archive',
+              recommendedModality: isEs ? 'Archivo de Resultado + Estilo de Vida Anti-inflamatorio' : 'Result Archive + Anti-inflammatory Lifestyle',
+              dosageGuide: isEs ? 'Dieta antiinflamatoria + Omega-3 + Vitamina D como base preventiva general' : 'Anti-inflammatory diet + Omega-3 + Vitamin D as general preventive base',
+              retestWindow: isEs ? 'No requiere (genotipo permanente)' : 'Not required (permanent genotype)',
+              cellularTarget: isEs ? 'Homeostasis inmunológica general' : 'General immunological homeostasis',
+              clinicalRationale: isEs
+                ? 'Ausencia de alelos HLA de alto riesgo autoinmune. El resultado de tipificación HLA es de por vida y debe conservarse en el historial médico del paciente.'
+                : 'Absence of high-risk autoimmune HLA alleles. HLA typing result is lifelong and should be preserved in the patient\'s medical record.',
+              synergies: [
+                { name: isEs ? 'Archivo Médico' : 'Medical Archive', role: isEs ? 'Referencia Permanente' : 'Permanent Reference' },
+                { name: isEs ? 'Estilo de Vida' : 'Lifestyle', role: isEs ? 'Prevención General' : 'General Prevention' }
+              ],
+              aiQuery: isEs
+                ? '¿Tener un perfil HLA sin alelos de riesgo descarta completamente las enfermedades autoinmunes?'
+                : 'Does having an HLA profile without risk alleles completely rule out autoimmune diseases?'
+            }
+          },
+          {
+            label: isEs ? 'HLA-DQ2.5 / DQ8 Positivo (Celíaca)' : 'HLA-DQ2.5 / DQ8 Positive (Celiac)',
+            value: isEs ? 'DQA1*05:01–DQB1*02:01 (DQ2.5) y/o DQ8 detectado' : 'DQA1*05:01–DQB1*02:01 (DQ2.5) and/or DQ8 detected',
+            status: 'warning',
+            badge: isEs ? 'Riesgo Celíaco' : 'Celiac Risk',
+            color: '#d97706',
+            bgColor: '#fffbeb',
+            description: isEs
+              ? 'Alelos HLA-DQ2.5 y/o DQ8 detectados en el panel de autoinmunidad. >95% de pacientes celíacos portan DQ2.5 o DQ8, aunque solo el 3-5% de portadores desarrollan la enfermedad. Este hallazgo es necesario pero no suficiente para el diagnóstico. Considerar test serológico específico (anti-tTG IgA) si hay síntomas gastrointestinales o sospecha clínica. Para estudio genético dedicado, el TeleTest Celíaca ofrece mayor profundidad.'
+              : 'HLA-DQ2.5 and/or DQ8 alleles detected in the autoimmunity panel. >95% of celiac patients carry DQ2.5 or DQ8, although only 3-5% of carriers develop the disease. This finding is necessary but not sufficient for diagnosis. Consider specific serologic test (anti-tTG IgA) if gastrointestinal symptoms or clinical suspicion. For a dedicated genetic study, the TeleTest Celiac offers greater depth.',
+            clinicalProtocol: {
+              slug: 'celiac-screening-from-hla',
+              queryParams: '?baseline=DQ2_DQ8_positive\u0026source=hla_panel\u0026tier=warning\u0026modality=screening\u0026retest=annual',
+              shortCode: 'REF-HLA-CEL',
+              name: isEs ? 'Cribado Celíaco por HLA Positivo' : 'Celiac Screening via Positive HLA',
+              recommendedModality: isEs ? 'Serología Anti-tTG IgA + Monitoreo Clínico' : 'Anti-tTG IgA Serology + Clinical Monitoring',
+              dosageGuide: isEs ? 'Anti-tTG IgA + IgA total anual mientras consuma gluten; si serología positiva → biopsia duodenal (Marsh)' : 'Anti-tTG IgA + total IgA annually while consuming gluten; if serology positive → duodenal biopsy (Marsh)',
+              retestWindow: isEs ? 'Anual (mientras consuma gluten)' : 'Annual (while consuming gluten)',
+              cellularTarget: isEs ? 'Mucosa duodenal, transglutaminasa tisular, linfocitos intraepiteliales' : 'Duodenal mucosa, tissue transglutaminase, intraepithelial lymphocytes',
+              clinicalRationale: isEs
+                ? 'HLA-DQ2.5/DQ8 detectado en el panel HLA general de autoinmunidad. Derivar a serología celíaca específica para descartar enfermedad activa.'
+                : 'HLA-DQ2.5/DQ8 detected in the general autoimmunity HLA panel. Refer to specific celiac serology to rule out active disease.',
+              synergies: [
+                { name: 'Anti-tTG IgA', role: isEs ? 'Confirmación Serológica' : 'Serologic Confirmation' },
+                { name: isEs ? 'Biopsia Duodenal' : 'Duodenal Biopsy', role: isEs ? 'Gold Standard Diagnóstico' : 'Diagnostic Gold Standard' },
+                { name: isEs ? 'TeleTest Celíaca' : 'TeleTest Celiac', role: isEs ? 'Estudio Genético Dedicado' : 'Dedicated Genetic Study' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuál es el algoritmo diagnóstico cuando se detecta HLA-DQ2.5 o DQ8 en un panel de autoinmunidad?'
+                : 'What is the diagnostic algorithm when HLA-DQ2.5 or DQ8 is detected in an autoimmunity panel?'
+            }
+          },
+          {
+            label: isEs ? 'Múltiples Alelos de Riesgo Autoinmune' : 'Multiple Autoimmune Risk Alleles',
+            value: isEs ? 'HLA-B27 + SE + DQ2.5/DQ8 (acumulación de riesgo)' : 'HLA-B27 + SE + DQ2.5/DQ8 (risk accumulation)',
+            status: 'critical',
+            badge: isEs ? 'Riesgo Autoinmune Múltiple' : 'Multiple Autoimmune Risk',
+            color: '#7c2d12',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Se detectan múltiples alelos HLA de riesgo autoinmune simultáneamente. La presencia combinada de B27 + SE + DQ2.5/DQ8 indica una susceptibilidad genética amplia a enfermedades autoinmunes de diferentes ejes (axial, articular, intestinal). Requiere vigilancia inmunológica integral y derivación a Inmunología/Reumatología para establecer un plan de monitoreo personalizado.'
+              : 'Multiple autoimmune risk HLA alleles detected simultaneously. The combined presence of B27 + SE + DQ2.5/DQ8 indicates broad genetic susceptibility to autoimmune diseases across different axes (axial, articular, intestinal). Requires comprehensive immunological surveillance and Immunology/Rheumatology referral for a personalized monitoring plan.',
+            clinicalProtocol: {
+              slug: 'multi-autoimmune-surveillance',
+              queryParams: '?baseline=multi_risk\u0026alleles=B27_SE_DQ2\u0026tier=critical\u0026modality=specialist\u0026retest=6m',
+              shortCode: 'REF-HLA-MULTI',
+              name: isEs ? 'Vigilancia Autoinmune Multiaxial' : 'Multiaxial Autoimmune Surveillance',
+              recommendedModality: isEs ? 'Inmunología Especializada + Panel Autoanticuerpos Completo' : 'Specialized Immunology + Complete Autoantibody Panel',
+              dosageGuide: isEs ? 'Panel autoanticuerpos completo (ANA, anti-CCP, FR, anti-tTG) + Vitamina D 5000 UI + Omega-3 3g + evaluación reumatológica cada 6 meses' : 'Complete autoantibody panel (ANA, anti-CCP, RF, anti-tTG) + Vitamin D 5,000 IU + Omega-3 3g + rheumatologic evaluation every 6 months',
+              retestWindow: isEs ? 'Semestral (Panel autoanticuerpos)' : 'Biannual (Autoantibody panel)',
+              cellularTarget: isEs ? 'MHC-I y MHC-II, tolerancia central y periférica, Tregs' : 'MHC-I and MHC-II, central and peripheral tolerance, Tregs',
+              clinicalRationale: isEs
+                ? 'Susceptibilidad genética multi-eje que requiere monitoreo proactivo. La detección precoz de autoanticuerpos antes de la manifestación clínica permite intervención en la fase "pre-clínica" de las enfermedades autoinmunes.'
+                : 'Multi-axis genetic susceptibility requiring proactive monitoring. Early autoantibody detection before clinical manifestation enables intervention in the "pre-clinical" phase of autoimmune diseases.',
+              synergies: [
+                { name: isEs ? 'Inmunología' : 'Immunology', role: isEs ? 'Evaluación Especializada' : 'Specialized Evaluation' },
+                { name: isEs ? 'Panel Autoanticuerpos' : 'Autoantibody Panel', role: isEs ? 'Detección Precoz' : 'Early Detection' },
+                { name: isEs ? 'Vitamina D + ω-3' : 'Vitamin D + ω-3', role: isEs ? 'Inmunomodulación' : 'Immunomodulation' },
+                { name: isEs ? 'Estilo de Vida' : 'Lifestyle', role: isEs ? 'Reducción Triggers' : 'Trigger Reduction' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo manejar un paciente con múltiples alelos HLA de riesgo autoinmune (B27 + SE + DQ2.5)?'
+                : 'How to manage a patient with multiple autoimmune risk HLA alleles (B27 + SE + DQ2.5)?'
+            }
+          }
+        ]
+      };
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // TELETEST — ESTUDIO GENÉTICO CELÍACA (HLA-DQ2/DQ8 Dedicated)
+    // Methodology: PCR-SSP / RT-PCR · Specimen: Blood / Buccal swab
+    // Clinical reference: ESPGHAN 2020 (European Society for Paediatric
+    //   Gastroenterology, Hepatology and Nutrition)
+    // ═══════════════════════════════════════════════════════════════════
+    if (isTeletestCeliac) {
+      return {
+        name: isEs ? 'Estudio Genético Enfermedad Celíaca (HLA-DQ2 / DQ8)' : 'Celiac Disease Genetic Study (HLA-DQ2 / DQ8)',
+        unit: isEs ? 'Alelos HLA-DQ (tipificación molecular)' : 'HLA-DQ Alleles (molecular typing)',
+        method: isEs
+          ? 'PCR-SSP (Sequence-Specific Primers) / RT-PCR con sondas TaqMan'
+          : 'PCR-SSP (Sequence-Specific Primers) / RT-PCR with TaqMan probes',
+        lab: 'Analytika Genomics Laboratory (EU) · ISO 15189',
+        lod: 'N/A (qualitative molecular typing)',
+        range: isEs ? 'DQA1*05, DQB1*02 (DQ2.5), DQA1*02:01, DQB1*03:02 (DQ8), DQB1*02:02 (DQ2.2)' : 'DQA1*05, DQB1*02 (DQ2.5), DQA1*02:01, DQB1*03:02 (DQ8), DQB1*02:02 (DQ2.2)',
+        precision: isEs ? 'Sensibilidad/Especificidad >99% para DQ2.5 y DQ8' : 'Sensitivity/Specificity >99% for DQ2.5 and DQ8',
+        officialReportPdf: '/docs/teletest-report-celiac.pdf',
+        officialReportDocName: 'teletest-report-celiac.pdf',
+        ranges: [
+          {
+            label: isEs ? 'HLA-DQ2.5 Homocigoto' : 'HLA-DQ2.5 Homozygous',
+            value: 'DQA1*05/DQB1*02 (doble dosis)',
+            status: 'critical',
+            badge: isEs ? 'Riesgo Máximo Celíaco' : 'Maximum Celiac Risk',
+            color: '#dc2626',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Genotipo de máximo riesgo celíaco: DQ2.5 en doble copia (homocigoto). El riesgo de desarrollar enfermedad celíaca es 5 veces mayor que en heterocigotos DQ2.5. Este genotipo se asocia con mayor densidad de moléculas DQ2.5 en la superficie de las células presentadoras de antígeno, lo que amplifica la respuesta inmune contra péptidos de gliadina desaminados. Presente en ~25% de los celíacos.'
+              : 'Maximum celiac risk genotype: DQ2.5 in double copy (homozygous). The risk of developing celiac disease is 5 times higher than in DQ2.5 heterozygotes. This genotype is associated with higher density of DQ2.5 molecules on antigen-presenting cell surfaces, amplifying the immune response against deaminated gliadin peptides. Present in ~25% of celiacs.',
+            clinicalProtocol: {
+              slug: 'celiac-high-risk-monitoring',
+              queryParams: '?baseline=DQ2.5_homozygous\u0026risk=maximum\u0026tier=critical\u0026modality=monitoring\u0026retest=annual',
+              shortCode: 'REF-CEL-MAX',
+              name: isEs ? 'Monitoreo Celíaco de Alto Riesgo' : 'High-Risk Celiac Monitoring',
+              recommendedModality: isEs ? 'Serología Celíaca Anual + Evaluación Gastroenterológica' : 'Annual Celiac Serology + Gastroenterologic Evaluation',
+              dosageGuide: isEs ? 'Anti-tTG IgA + IgA total anual; si positivo → biopsia duodenal con clasificación Marsh; considerar GFD proactiva si serología borderline' : 'Anti-tTG IgA + total IgA annually; if positive → duodenal biopsy with Marsh classification; consider proactive GFD if borderline serology',
+              retestWindow: isEs ? 'Anual (mientras consuma gluten)' : 'Annual (while consuming gluten)',
+              cellularTarget: isEs ? 'Mucosa duodenal, tTG, linfocitos intraepiteliales CD8+, vellosidades intestinales' : 'Duodenal mucosa, tTG, CD8+ intraepithelial lymphocytes, intestinal villi',
+              clinicalRationale: isEs
+                ? 'Riesgo genético máximo por doble dosis de DQ2.5. Cada molécula DQ2.5 adicional en la membrana de APC incrementa la eficiencia de presentación de péptidos de gliadina, multiplicando la respuesta linfocitaria T. Monitoreo serológico anual obligatorio.'
+                : 'Maximum genetic risk from double-dose DQ2.5. Each additional DQ2.5 molecule on APC membrane increases gliadin peptide presentation efficiency, multiplying T lymphocyte response. Annual serologic monitoring mandatory.',
+              synergies: [
+                { name: 'Anti-tTG IgA', role: isEs ? 'Cribado Serológico' : 'Serologic Screening' },
+                { name: isEs ? 'IgA Total' : 'Total IgA', role: isEs ? 'Descartar Déficit IgA' : 'Rule Out IgA Deficiency' },
+                { name: isEs ? 'Gastroenterología' : 'Gastroenterology', role: isEs ? 'Biopsia si Positivo' : 'Biopsy if Positive' },
+                { name: isEs ? 'Vitamina D + Fe + B12' : 'Vitamin D + Fe + B12', role: isEs ? 'Prevenir Malabsorción' : 'Prevent Malabsorption' }
+              ],
+              aiQuery: isEs
+                ? '¿Por qué los homocigotos HLA-DQ2.5 tienen 5 veces más riesgo de enfermedad celíaca que los heterocigotos?'
+                : 'Why do HLA-DQ2.5 homozygotes have 5 times higher celiac disease risk than heterozygotes?'
+            }
+          },
+          {
+            label: isEs ? 'HLA-DQ2.5 Heterocigoto' : 'HLA-DQ2.5 Heterozygous',
+            value: 'DQA1*05/DQB1*02 (cis o trans)',
+            status: 'warning',
+            badge: isEs ? 'Riesgo Moderado-Alto' : 'Moderate-High Risk',
+            color: '#d97706',
+            bgColor: '#fffbeb',
+            description: isEs
+              ? 'Heterodímero HLA-DQ2.5 presente en una sola copia (heterocigoto). Este es el genotipo más frecuente entre celíacos (~60% de los casos). El heterodímero puede formarse en cis (mismo cromosoma: DR3-DQ2 haplotype) o en trans (cromosomas diferentes: DR5/DR7). El riesgo absoluto de celiaquía es del 3-5% para portadores, pero sube al 10-15% si hay familiar de primer grado celíaco.'
+              : 'HLA-DQ2.5 heterodimer present in a single copy (heterozygous). This is the most frequent genotype among celiacs (~60% of cases). The heterodimer can be formed in cis (same chromosome: DR3-DQ2 haplotype) or in trans (different chromosomes: DR5/DR7). Absolute celiac risk is 3-5% for carriers, but rises to 10-15% with a first-degree relative who has celiac disease.',
+            clinicalProtocol: {
+              slug: 'celiac-moderate-risk-screening',
+              queryParams: '?baseline=DQ2.5_het\u0026risk=moderate_high\u0026tier=warning\u0026modality=screening\u0026retest=annual',
+              shortCode: 'REF-CEL-MOD',
+              name: isEs ? 'Cribado Celíaco Riesgo Moderado-Alto' : 'Moderate-High Risk Celiac Screening',
+              recommendedModality: isEs ? 'Serología Celíaca Anual' : 'Annual Celiac Serology',
+              dosageGuide: isEs ? 'Anti-tTG IgA + IgA total cada 12 meses; DGP IgG si déficit de IgA; ante síntomas GI → derivar a Gastroenterología' : 'Anti-tTG IgA + total IgA every 12 months; DGP IgG if IgA deficiency; for GI symptoms → refer to Gastroenterology',
+              retestWindow: isEs ? 'Anual' : 'Annual',
+              cellularTarget: isEs ? 'Mucosa duodenal, respuesta Th1 a gliadina' : 'Duodenal mucosa, Th1 response to gliadin',
+              clinicalRationale: isEs
+                ? 'Riesgo genético moderado-alto. La seroconversión puede ocurrir a cualquier edad, por lo que el monitoreo debe ser continuo mientras se consuma gluten.'
+                : 'Moderate-high genetic risk. Seroconversion can occur at any age, so monitoring must be continuous while consuming gluten.',
+              synergies: [
+                { name: 'Anti-tTG IgA', role: isEs ? 'Cribado Anual' : 'Annual Screening' },
+                { name: isEs ? 'Historia Familiar' : 'Family History', role: isEs ? 'Estratificación de Riesgo' : 'Risk Stratification' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuál es la diferencia entre formar el HLA-DQ2.5 en cis vs en trans y cómo afecta al riesgo celíaco?'
+                : 'What is the difference between forming HLA-DQ2.5 in cis vs trans and how does it affect celiac risk?'
+            }
+          },
+          {
+            label: isEs ? 'HLA-DQ8 Positivo (sin DQ2.5)' : 'HLA-DQ8 Positive (without DQ2.5)',
+            value: 'DQA1*03:01/DQB1*03:02 (DQ8)',
+            status: 'warning',
+            badge: isEs ? 'Riesgo Moderado' : 'Moderate Risk',
+            color: '#ca8a04',
+            bgColor: '#fefce8',
+            description: isEs
+              ? 'HLA-DQ8 detectado sin DQ2.5. Aproximadamente el 5-10% de pacientes celíacos son DQ8 positivos sin DQ2.5. El riesgo absoluto es menor que para DQ2.5 pero no despreciable, especialmente en combinación con factores ambientales (infecciones virales tempranas, microbiota intestinal alterada). Se asocia particularmente con celiaquía de presentación tardía (adultos) y con diabetes mellitus tipo 1.'
+              : 'HLA-DQ8 detected without DQ2.5. Approximately 5-10% of celiac patients are DQ8 positive without DQ2.5. Absolute risk is lower than for DQ2.5 but not negligible, especially combined with environmental factors (early viral infections, altered gut microbiota). Particularly associated with late-onset celiac disease (adults) and type 1 diabetes mellitus.',
+            clinicalProtocol: {
+              slug: 'celiac-dq8-screening',
+              queryParams: '?baseline=DQ8_positive\u0026risk=moderate\u0026tier=warning\u0026modality=screening\u0026retest=biannual',
+              shortCode: 'REF-CEL-DQ8',
+              name: isEs ? 'Cribado Celíaco por DQ8' : 'DQ8 Celiac Screening',
+              recommendedModality: isEs ? 'Serología Celíaca Bianual' : 'Biannual Celiac Serology',
+              dosageGuide: isEs ? 'Anti-tTG IgA cada 2 años si asintomático; anual si síntomas GI o DM1 comórbida' : 'Anti-tTG IgA every 2 years if asymptomatic; annual if GI symptoms or comorbid T1DM',
+              retestWindow: isEs ? 'Bianual (o anual si síntomas)' : 'Biannual (or annual if symptoms)',
+              cellularTarget: isEs ? 'Mucosa duodenal, presentación a células T CD4+ restringida por DQ8' : 'Duodenal mucosa, DQ8-restricted CD4+ T cell presentation',
+              clinicalRationale: isEs
+                ? 'Riesgo moderado por DQ8 aislado. Vigilancia menos intensiva que DQ2.5 pero necesaria, especialmente si coexiste con diabetes tipo 1 (asociación genética compartida).'
+                : 'Moderate risk from isolated DQ8. Less intensive surveillance than DQ2.5 but necessary, especially if type 1 diabetes coexists (shared genetic association).',
+              synergies: [
+                { name: 'Anti-tTG IgA', role: isEs ? 'Cribado Bianual' : 'Biannual Screening' },
+                { name: isEs ? 'Screening DM1' : 'T1DM Screening', role: isEs ? 'Asociación Genética' : 'Genetic Association' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuál es el riesgo real de celiaquía para portadores de HLA-DQ8 sin DQ2.5?'
+                : 'What is the actual celiac risk for HLA-DQ8 carriers without DQ2.5?'
+            }
+          },
+          {
+            label: isEs ? 'HLA-DQ2.5 + DQ8 (Doble Positivo)' : 'HLA-DQ2.5 + DQ8 (Double Positive)',
+            value: isEs ? 'Ambos heterodímeros DQ2.5 y DQ8 presentes' : 'Both DQ2.5 and DQ8 heterodimers present',
+            status: 'critical',
+            badge: isEs ? 'Doble Riesgo Genético' : 'Double Genetic Risk',
+            color: '#991b1b',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Ambos heterodímeros de riesgo celíaco (DQ2.5 y DQ8) están presentes. Esta combinación amplía el repertorio de péptidos de gliadina que el sistema inmune puede reconocer, ya que cada heterodímero presenta un subconjunto diferente de epítopos. Riesgo acumulativo superior al de cualquiera de los alelos por separado. Requiere monitoreo serológico anual estricto.'
+              : 'Both celiac risk heterodimers (DQ2.5 and DQ8) are present. This combination broadens the repertoire of gliadin peptides the immune system can recognize, as each heterodimer presents a different subset of epitopes. Cumulative risk exceeds that of either allele alone. Requires strict annual serologic monitoring.',
+            clinicalProtocol: {
+              slug: 'celiac-double-positive-monitoring',
+              queryParams: '?baseline=DQ2.5_DQ8_double\u0026risk=high\u0026tier=critical\u0026modality=intensive_monitoring\u0026retest=annual',
+              shortCode: 'REF-CEL-DBL',
+              name: isEs ? 'Monitoreo Intensivo Celíaco Doble Positivo' : 'Intensive Double-Positive Celiac Monitoring',
+              recommendedModality: isEs ? 'Serología + Evaluación GI Anual Estricta' : 'Strict Annual Serology + GI Evaluation',
+              dosageGuide: isEs ? 'Anti-tTG IgA + DGP IgG + IgA total anual; biopsia ante cualquier elevación serológica; considerar cápsula endoscópica si serología discordante' : 'Anti-tTG IgA + DGP IgG + total IgA annually; biopsy for any serologic elevation; consider video capsule endoscopy if discordant serology',
+              retestWindow: isEs ? 'Anual (estricto)' : 'Annual (strict)',
+              cellularTarget: isEs ? 'Doble repertorio de presentación antigénica DQ2.5 + DQ8' : 'Double antigen presentation repertoire DQ2.5 + DQ8',
+              clinicalRationale: isEs
+                ? 'Portador de ambos heterodímeros de riesgo: el espectro inmunogénico cubierto es máximo. Cada molécula HLA presenta un subconjunto diferente de péptidos de gliadina, multiplicando las vías de activación autoinmune.'
+                : 'Carrier of both risk heterodimers: the immunogenic spectrum covered is maximum. Each HLA molecule presents a different subset of gliadin peptides, multiplying autoimmune activation pathways.',
+              synergies: [
+                { name: 'Anti-tTG + DGP', role: isEs ? 'Panel Serológico Completo' : 'Complete Serologic Panel' },
+                { name: isEs ? 'Gastroenterología' : 'Gastroenterology', role: isEs ? 'Evaluación Endoscópica' : 'Endoscopic Evaluation' },
+                { name: isEs ? 'Nutrición' : 'Nutrition', role: isEs ? 'Preparación GFD' : 'GFD Preparation' }
+              ],
+              aiQuery: isEs
+                ? '¿Por qué la presencia simultánea de HLA-DQ2.5 y DQ8 incrementa el riesgo celíaco de forma sinérgica?'
+                : 'Why does the simultaneous presence of HLA-DQ2.5 and DQ8 synergistically increase celiac risk?'
+            }
+          },
+          {
+            label: isEs ? 'HLA-DQ2 / DQ8 Negativo' : 'HLA-DQ2 / DQ8 Negative',
+            value: isEs ? 'Ni DQ2.5, ni DQ2.2, ni DQ8 detectados' : 'Neither DQ2.5, nor DQ2.2, nor DQ8 detected',
+            status: 'optimal',
+            badge: isEs ? 'Celíaca Excluida (99%)' : 'Celiac Excluded (99%)',
+            color: '#16a34a',
+            bgColor: '#f0fdf4',
+            description: isEs
+              ? 'No se detectan alelos HLA-DQ2.5, DQ2.2 ni DQ8. El valor predictivo negativo es >99%: la enfermedad celíaca queda virtualmente descartada. Según las guías ESPGHAN 2020, un resultado negativo para DQ2 y DQ8 excluye el diagnóstico con un nivel de certeza muy alto. Este resultado es especialmente útil para familiares de celíacos y para pacientes ya en dieta sin gluten donde la serología es poco fiable.'
+              : 'No HLA-DQ2.5, DQ2.2, or DQ8 alleles detected. The negative predictive value is >99%: celiac disease is virtually ruled out. Per ESPGHAN 2020 guidelines, a negative result for DQ2 and DQ8 excludes the diagnosis with very high certainty. This result is especially useful for relatives of celiacs and for patients already on a gluten-free diet where serology is unreliable.',
+            clinicalProtocol: {
+              slug: 'celiac-excluded-by-genetics',
+              queryParams: '?baseline=DQ_negative\u0026risk=negligible\u0026tier=optimal\u0026modality=reassurance\u0026retest=none',
+              shortCode: 'REF-CEL-NEG',
+              name: isEs ? 'Celíaca Excluida Genéticamente — Archivo' : 'Genetically Excluded Celiac — Archive',
+              recommendedModality: isEs ? 'Archivo Definitivo — No Requiere Seguimiento Celíaco' : 'Definitive Archive — No Celiac Follow-up Required',
+              dosageGuide: isEs ? 'No requiere serología celíaca futura. Si hay síntomas GI, investigar otras causas (SIBO, intolerancia a FODMAPs, sensibilidad al gluten no celíaca)' : 'No future celiac serology required. If GI symptoms persist, investigate other causes (SIBO, FODMAP intolerance, non-celiac gluten sensitivity)',
+              retestWindow: isEs ? 'No requiere (resultado genético definitivo)' : 'Not required (definitive genetic result)',
+              cellularTarget: isEs ? 'N/A — Enfermedad Celíaca excluida' : 'N/A — Celiac Disease excluded',
+              clinicalRationale: isEs
+                ? 'VPN >99% según ESPGHAN 2020. Este resultado permite: (1) descartar celiaquía definitivamente, (2) evitar pruebas innecesarias en el futuro, (3) si hay síntomas GI, redirigir la investigación a otras etiologías (SIBO, NCGS, IBS). Resultado de por vida.'
+                : 'NPV >99% per ESPGHAN 2020. This result allows: (1) definitive celiac disease exclusion, (2) avoiding unnecessary future testing, (3) if GI symptoms exist, redirecting investigation to other etiologies (SIBO, NCGS, IBS). Lifetime result.',
+              synergies: [
+                { name: isEs ? 'Archivo Genético' : 'Genetic Archive', role: isEs ? 'Resultado Definitivo' : 'Definitive Result' },
+                { name: isEs ? 'Investigación GI' : 'GI Investigation', role: isEs ? 'Otras Causas si Síntomas' : 'Other Causes if Symptoms' }
+              ],
+              aiQuery: isEs
+                ? '¿Un resultado HLA-DQ2/DQ8 negativo descarta definitivamente la enfermedad celíaca?'
+                : 'Does a negative HLA-DQ2/DQ8 result definitively rule out celiac disease?'
+            }
+          }
+        ]
+      };
+    }
+
     // Default: Vitamin D
     return {
       name: isEs ? '25-Hidroxivitamina D [25(OH)D Total]' : 'Total 25-Hydroxyvitamin D [25(OH)D]',
@@ -1118,6 +2058,11 @@ export default function DiagnosticTestTechnicalSpecs({
     if (product?.sample_report_url) {
       return product.sample_report_url;
     }
+    if (isTeletestHTMA) return '/docs/teletest-report-htma.pdf';
+    if (isTeletestOmega) return '/docs/teletest-report-omega.pdf';
+    if (isTeletestMetabolizer) return '/docs/teletest-report-metabolizer.pdf';
+    if (isTeletestHLA) return '/docs/teletest-report-hla-autoimmunity.pdf';
+    if (isTeletestCeliac) return '/docs/teletest-report-celiac.pdf';
     if (isNad) return '/docs/bloodo-report-nad.pdf';
     if (isTestosterone) {
       return testosteroneGender === 'female' 
@@ -1132,6 +2077,11 @@ export default function DiagnosticTestTechnicalSpecs({
   })();
 
   const activeReportTitle = (() => {
+    if (isTeletestHTMA) return isEs ? 'TeleTest™ Informe Muestra Mineralograma Capilar (HTMA)' : 'TeleTest™ Sample Report Hair Tissue Mineral Analysis (HTMA)';
+    if (isTeletestOmega) return isEs ? 'TeleTest™ Informe Muestra Perfil de Ácidos Grasos Omega' : 'TeleTest™ Sample Report Omega Fatty Acid Profile';
+    if (isTeletestMetabolizer) return isEs ? 'TeleTest™ Informe Muestra Saliva Metabolizer & Detox Genético' : 'TeleTest™ Sample Report Saliva Metabolizer & Genetic Detox';
+    if (isTeletestHLA) return isEs ? 'TeleTest™ Informe Muestra Estudio Genético HLA Autoinmunidad' : 'TeleTest™ Sample Report HLA Autoimmunity Genetic Study';
+    if (isTeletestCeliac) return isEs ? 'TeleTest™ Informe Muestra Estudio Genético Enfermedad Celíaca' : 'TeleTest™ Sample Report Celiac Disease Genetic Study';
     if (isNad) return isEs ? 'Bloodo™ Protocolo de Validación Clínica NAD+ (CE-IVDR)' : 'Bloodo™ NAD+ Clinical Validation Protocol (CE-IVDR)';
     if (isTestosterone) {
       return isEs
@@ -1145,6 +2095,11 @@ export default function DiagnosticTestTechnicalSpecs({
   })();
 
   const activeReportSub = (() => {
+    if (isTeletestHTMA) return isEs ? 'Analytika Laboratorio · ICP-MS / ICP-OES · 36+ Elementos y Ratios Minerales · PDF de Demostración' : 'Analytika Central Lab · ICP-MS / ICP-OES · 36+ Elements & Mineral Ratios · Sample PDF';
+    if (isTeletestOmega) return isEs ? 'Analytika Laboratorio · Cromatografía de Gases (GC-FID) · Índice Omega-3, AA:EPA, Grasas Trans · PDF de Demostración' : 'Analytika Central Lab · Gas Chromatography (GC-FID) · Omega-3 Index, AA:EPA, Trans Fats · Sample PDF';
+    if (isTeletestMetabolizer) return isEs ? 'Analytika Laboratorio · Panel Farmacogenético & Detoxificación Hepática Fase I/II · PDF de Demostración' : 'Analytika Central Lab · Pharmacogenetic & Hepatic Phase I/II Detox Panel · Sample PDF';
+    if (isTeletestHLA) return isEs ? 'Analytika Laboratorio · Genotipado HLA Clase I y II por PCR Multiplex · PDF de Demostración' : 'Analytika Central Lab · HLA Class I & II Genotyping by Multiplex PCR · Sample PDF';
+    if (isTeletestCeliac) return isEs ? 'Analytika Laboratorio · Genotipado HLA-DQ2.5 / DQ2.2 / DQ8 · VPN >99% · PDF de Demostración' : 'Analytika Central Lab · HLA-DQ2.5 / DQ2.2 / DQ8 Genotyping · NPV >99% · Sample PDF';
     if (isNad) return isEs ? 'LifeLab1 Laboratorio Central · Ensayo XLT01690-0 · Cohorte de Validación (n = 1.068) · PDF Técnico' : 'LifeLab1 Central Laboratory Specification · Assay XLT01690-0 · Validation Cohort (n = 1,068) · Technical PDF';
     if (isTestosterone) {
       return isEs
@@ -1171,7 +2126,7 @@ export default function DiagnosticTestTechnicalSpecs({
                 {isEs ? 'ESPECIFICACIONES ANALÍTICAS & BIOMARCADORES' : 'ANALYTICAL SPECIFICATIONS & BIOMARKERS'}
               </span>
               <span className="pds-section-badge" style={{ background: '#f0fdfa', color: '#0d9488', borderColor: '#ccfbf1' }}>
-                <CheckCircle2 size={11} /> {isEs ? 'MÉTODO CERTIFICADO DBS' : 'CERTIFIED DBS METHOD'}
+                <CheckCircle2 size={11} /> {isHairSample ? (isEs ? 'MÉTODO CERTIFICADO HTMA' : 'CERTIFIED HTMA METHOD') : isSalivaSample ? (isEs ? 'FROTIS BUCAL / ADN GENÉTICO' : 'CERTIFIED BUCCAL DNA') : (isEs ? 'MÉTODO CERTIFICADO DBS' : 'CERTIFIED DBS METHOD')}
               </span>
             </div>
             <h3 className="pds-section-header-title">
@@ -1185,7 +2140,9 @@ export default function DiagnosticTestTechnicalSpecs({
         <div className="pds-section-header-right">
           <div className="pds-section-cert-badge" style={{ borderColor: '#0d9488' }}>
             <Award size={14} color="#0d9488" />
-            <span style={{ color: '#0d9488', fontWeight: 700 }}>CE-IVDR (EU 2017/746)</span>
+            <span style={{ color: '#0d9488', fontWeight: 700 }}>
+              {isTeletestHTMA ? 'ISO 17025 (ICP-MS)' : isTeletest ? 'ISO 15189 / ISO 17025' : 'CE-IVDR (EU 2017/746)'}
+            </span>
           </div>
         </div>
       </div>
@@ -1201,8 +2158,12 @@ export default function DiagnosticTestTechnicalSpecs({
 
           <div className="dts-metric-card">
             <span className="dts-metric-label">{isEs ? 'Tipo de Muestra' : 'Sample Format'}</span>
-            <strong className="dts-metric-value">Dried Blood Spot (DBS)</strong>
-            <span className="dts-metric-sub">{isEs ? 'Punción capilar en dedo (2–3 gotas)' : 'Finger-prick capillary blood (2–3 drops)'}</span>
+            <strong className="dts-metric-value">
+              {isHairSample ? (isEs ? 'Cabello Proximal (HTMA)' : 'Proximal Hair (HTMA)') : isSalivaSample ? (isEs ? 'Frotis Bucal (ADN)' : 'Buccal Swab (DNA)') : 'Dried Blood Spot (DBS)'}
+            </strong>
+            <span className="dts-metric-sub">
+              {isHairSample ? (isEs ? 'Zona occipital / nuca (100–150 mg)' : 'Occipital scalp (100–150 mg)') : isSalivaSample ? (isEs ? 'Células epiteliales bucales (60s)' : 'Buccal epithelial cells (60s)') : (isEs ? 'Punción capilar en dedo (2–3 gotas)' : 'Finger-prick capillary blood (2–3 drops)')}
+            </span>
           </div>
 
           <div className="dts-metric-card">
@@ -1225,8 +2186,8 @@ export default function DiagnosticTestTechnicalSpecs({
 
           <div className="dts-metric-card">
             <span className="dts-metric-label">{isEs ? 'Laboratorio Analítico' : 'Testing Laboratory'}</span>
-            <strong className="dts-metric-value">LifeLab1 (Vilnius, EU)</strong>
-            <span className="dts-metric-sub">{isEs ? 'Alineado con norma ISO 15189' : 'ISO 15189 standard alignment'}</span>
+            <strong className="dts-metric-value">{isTeletest ? 'Analytika (EU Lab)' : 'LifeLab1 (Vilnius, EU)'}</strong>
+            <span className="dts-metric-sub">{isTeletest ? (isEs ? 'Acreditación ISO 17025 / ISO 15189' : 'ISO 17025 / ISO 15189 accredited') : (isEs ? 'Alineado con norma ISO 15189' : 'ISO 15189 standard alignment')}</span>
           </div>
         </div>
 

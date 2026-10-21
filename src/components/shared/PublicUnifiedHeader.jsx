@@ -513,22 +513,6 @@ function forceCanonicalDomain(urlOrPath) {
                 </button>
               )}
 
-              {/* Clinical AI Copilot (hidden when in doctor view or when hideAiButton is true) */}
-              {!isDoctorView && !hideAiButton && (
-                <button
-                  type="button"
-                  className="puh-btn puh-btn-ai hide-on-extra-narrow hide-on-mobile-header"
-                  onClick={() => {
-                    triggerHaptic('selection');
-                    window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
-                  }}
-                  title={isSpanish ? 'Abrir Asistente Clínico Atlas AI' : 'Open Atlas Clinical AI Research Copilot'}
-                >
-                  <Sparkles size={14} />
-                  <span className="puh-btn-label">{isSpanish ? 'Atlas AI' : 'Atlas AI'}</span>
-                </button>
-              )}
-
               {/* Institutional Inquiry Drawer Trigger (if enabled) */}
               {!hideContactButton && (
                 <button

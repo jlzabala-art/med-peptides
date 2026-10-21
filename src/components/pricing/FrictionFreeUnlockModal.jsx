@@ -191,15 +191,15 @@ export default function FrictionFreeUnlockModal({
               {isEs ? 'Tarifas Confidenciales B2B' : 'Confidential B2B Pricing'}
             </span>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 850, color: '#0f172a', margin: '2px 0 0 0', lineHeight: 1.25 }}>
-              {isEs ? 'Desbloquear Baremos Clínicos' : 'Unlock Practitioner Pricing'}
+              {isEs ? 'Desbloquear Baremos B2B & Mayoristas' : 'Unlock Institutional & Wholesale Pricing'}
             </h3>
           </div>
         </div>
 
         <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
           {isEs
-            ? `Acceso directo y sin fricción a las tarifas Ex-Works (EXW) para médicos colegiados, clínicas y distribuidores autorizados de ${brandName}.`
-            : `Friction-free access to Ex-Works (EXW) pricing tiers for verified practitioners, clinics, and authorized wholesalers for ${brandName}.`}
+            ? `Acceso directo y sin fricción a las tarifas Ex-Works (EXW) para clínicas, profesionales de la salud y distribuidores mayoristas autorizados de ${brandName}.`
+            : `Friction-free access to Ex-Works (EXW) pricing tiers for verified clinics, practitioners, and authorized wholesale distributors for ${brandName}.`}
         </p>
 
         {/* Method Tabs */}
@@ -469,7 +469,7 @@ export default function FrictionFreeUnlockModal({
           fontSize: '0.70rem',
           color: '#64748b'
         }}>
-          <span>🔒 Cifrado & Conexión Segura SSL</span>
+          <span>🔒 {isEs ? 'Cifrado & Conexión Segura SSL' : 'Encrypted & Secure SSL Connection'}</span>
           <span>Incoterms: Ex-Works (EXW)</span>
         </div>
       </div>

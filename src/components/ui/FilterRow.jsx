@@ -173,35 +173,50 @@ export default function FilterRow({
 
   // Derive active count if not provided
   const computedActiveCount = activeCount || filterOptions.reduce((acc, fo) => {
-    if (fo.multiSelect) return acc + (fo.values?.length || 0);
-    return acc + (fo.value && fo.value !== '' && fo.value !== 'all' ? 1 : 0);
+    if (!fo) return acc;
+    if (fo.multiSelect) return acc + (Array.isArray(fo.values) ? fo.values.length : 0);
+    const val = fo.value !== undefined ? fo.value : (Array.isArray(fo.values) ? fo.values[0] : fo.values);
+    return acc + (val && val !== '' && val !== 'all' ? 1 : 0);
   }, 0);
 
   // Active filter chips (Rules #24 & #29)
   const activeChips = useMemo(() => {
     const chips = [];
     (filterOptions || []).forEach(fo => {
+      if (!fo) return;
       if (fo.multiSelect && Array.isArray(fo.values) && fo.values.length > 0) {
         fo.values.forEach(v => {
-          const opt = (fo.options || []).find(o => o.value === v);
+          if (v === undefined || v === null || v === '') return;
+          const opt = (fo.options || []).find(o => o && (o.value === v || o.id === v));
+          const rawLabel = opt?.label || opt?.name || (typeof v === 'object' ? (v.label || v.name || v.value) : v);
           chips.push({
-            id: `${fo.key || fo.id}-${v}`,
+            id: `${fo.key || fo.id}-${typeof v === 'object' ? JSON.stringify(v) : v}`,
             dimension: fo.label || fo.pluralLabel || 'Filter',
-            label: opt?.label || opt?.name || v,
+            label: typeof rawLabel === 'object' ? String(rawLabel.label || rawLabel.name || '') : String(rawLabel),
             onRemove: () => {
               const next = fo.values.filter(x => x !== v);
               fo.onChange?.(next);
             }
           });
         });
-      } else if (!fo.multiSelect && fo.value && fo.value !== '' && fo.value !== 'all') {
-        const opt = (fo.options || []).find(o => o.value === fo.value);
-        chips.push({
-          id: `${fo.key || fo.id}-${fo.value}`,
-          dimension: fo.label || 'Filter',
-          label: opt?.label || opt?.name || fo.value,
-          onRemove: () => fo.onChange?.('')
-        });
+      } else if (!fo.multiSelect) {
+        const val = fo.value !== undefined ? fo.value : (Array.isArray(fo.values) ? fo.values[0] : fo.values);
+        if (val && val !== '' && val !== 'all') {
+          const opt = (fo.options || []).find(o => o && (o.value === val || o.id === val));
+          const rawLabel = opt?.label || opt?.name || (typeof val === 'object' ? (val.label || val.name || val.value) : val);
+          chips.push({
+            id: `${fo.key || fo.id}-${typeof val === 'object' ? JSON.stringify(val) : val}`,
+            dimension: fo.label || 'Filter',
+            label: typeof rawLabel === 'object' ? String(rawLabel.label || rawLabel.name || '') : String(rawLabel),
+            onRemove: () => {
+              if (Array.isArray(fo.values)) {
+                fo.onChange?.([]);
+              } else {
+                fo.onChange?.('');
+              }
+            }
+          });
+        }
       }
     });
     return chips;
@@ -309,11 +324,12 @@ export default function FilterRow({
           }
 
           // Single-select pill (e.g. timeframe / Import Date, availability)
+          const singleVal = fo.value !== undefined ? fo.value : (Array.isArray(fo.values) ? fo.values[0] : fo.values);
           return (
             <SingleSelectFilterPill
               key={key}
               label={fo.label || 'Filter'}
-              value={fo.value}
+              value={singleVal}
               options={fo.options || []}
               onChange={fo.onChange}
               maxWidth={fo.maxWidth || 230}

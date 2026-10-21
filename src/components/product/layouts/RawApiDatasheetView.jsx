@@ -29,6 +29,7 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import { KNOWN_PEPTIDE_DATA } from '@/utils/knownPeptideData';
 import { CURATED_CAS_REGISTRY } from '@/utils/casResolver';
 import { deriveCanonicalIdentity } from '@/utils/canonicalProductRegistry';
@@ -622,6 +623,18 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
           grade,
           format
         }}
+      />
+
+      {/* ── Persistent Floating Sticky Monograph Footer (Golden Rule #47) ── */}
+      <PublicStickyActionBar
+        title={productName}
+        subtitle={`CAS: ${casNumber} • ${selectedPack} • Grade: ${grade}`}
+        badge="Bulk Raw API"
+        inquireLabel="Inquire Raw API"
+        onInquire={() => setIsInquiryOpen(true)}
+        showClinicalAI={true}
+        showSections={false}
+        lang="en"
       />
     </div>
   );

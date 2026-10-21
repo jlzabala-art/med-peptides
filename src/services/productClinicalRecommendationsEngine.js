@@ -403,19 +403,19 @@ export function getProductClinicalRecommendations(product = {}, slug = '', lang 
         role: isEs ? 'Solvente de Reconstitución' : 'Reconstitution Diluent'
       },
       {
-        id: 'teletest-test-omega',
-        slug: 'teletest-test-omega',
-        name: 'TeleTest Omega Test (HS Omega-3 & AA/EPA)',
-        category: isEs ? 'Diagnóstico Cardiovascular' : 'Cardiovascular Diagnostic',
-        presentation: isEs ? 'Analítica Sangre Total' : 'Whole Blood Diagnostic',
-        image: '/images/products/teletest/omega-test.svg',
-        url: '/p/teletest-test-omega',
-        synergyBadge: isEs ? 'Monitorización de Inflamación' : 'Inflammation Monitoring',
-        synergyBadgeColor: '#d97706',
+        id: 'bpc-157',
+        slug: 'bpc-157',
+        name: 'BPC-157 (Body Protection Compound)',
+        category: isEs ? 'Protección Tisular & Gástrica' : 'Tissue & Gastric Protection',
+        presentation: isEs ? 'Vial Liofilizado (5 mg / 10 mg)' : 'Lyophilized SubQ Vial (5 mg / 10 mg)',
+        image: '/images/products/lotusland/bpc-157.png',
+        url: '/p/bpc-157',
+        synergyBadge: isEs ? 'Tolerancia Digestiva & Masa Magra' : 'Gastric Comfort & Muscle Sparing',
+        synergyBadgeColor: '#0d9488',
         clinicalRationale: isEs
-          ? 'Monitoriza el índice Omega-3 y el ratio de inflamación AA/EPA durante protocolos de pérdida de peso con incretinas.'
-          : 'Tracks red blood cell Omega-3 index and inflammation ratio during incretin weight loss protocols.',
-        role: isEs ? 'Control de Inflamación' : 'Inflammation Monitoring'
+          ? 'Mitiga la dismotilidad gástrica y náuseas inducidas por agonistas GLP-1/GIP, protegiendo la mucosa y previniendo el catabolismo de masa magra durante la pérdida de peso acelerada.'
+          : 'Mitigates incretin-induced delayed gastric emptying and nausea while safeguarding nitrogen balance and lean muscle mass during rapid adipose loss.',
+        role: isEs ? 'Escudo Gástrico y Muscular' : 'Gastric & Muscle Shield'
       },
       {
         id: 'colway-colvita',
@@ -428,9 +428,24 @@ export function getProductClinicalRecommendations(product = {}, slug = '', lang 
         synergyBadge: isEs ? 'Prevención de Flacidez' : 'Dermal Density Protection',
         synergyBadgeColor: '#0284c7',
         clinicalRationale: isEs
-          ? 'Aporta tropocolágeno nativo para preservar la densidad de la dermis profunda ante una rápida pérdida de peso.'
-          : 'Replenishes native tropocollagen to sustain dermal thickness and skin firmness during rapid weight loss.',
+          ? 'Aporta tropocolágeno nativo para preservar la densidad de la dermis profunda y elasticidad dérmica ante una rápida reducción de volumen corporal.'
+          : 'Replenishes native tropocollagen to sustain dermal thickness and skin firmness during rapid incretin-driven volume reduction.',
         role: isEs ? 'Firmeza Dérmica' : 'Dermal Firmness'
+      },
+      {
+        id: 'teletest-test-omega',
+        slug: 'teletest-test-omega',
+        name: 'TeleTest Omega Test (HS Omega-3 & AA/EPA)',
+        category: isEs ? 'Diagnóstico Cardiovascular' : 'Cardiovascular Diagnostic',
+        presentation: isEs ? 'Analítica Sangre Total' : 'Whole Blood Diagnostic',
+        image: '/images/products/teletest/omega-test.svg',
+        url: '/p/teletest-test-omega',
+        synergyBadge: isEs ? 'Monitorización de Inflamación' : 'Inflammation Monitoring',
+        synergyBadgeColor: '#d97706',
+        clinicalRationale: isEs
+          ? 'Monitoriza el índice Omega-3 celular y el ratio inflamatorio AA/EPA durante la movilización masiva de ácidos grasos en protocolos metabólicos.'
+          : 'Tracks red blood cell Omega-3 index and AA/EPA inflammatory ratio during massive fatty acid mobilization in incretin protocols.',
+        role: isEs ? 'Control de Inflamación' : 'Inflammation Monitoring'
       }
     ];
   }

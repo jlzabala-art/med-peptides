@@ -91,7 +91,8 @@ export default function PreparationTab({
   const isPen = !isDiagnostic && (formatStr.includes('pen') || formatStr.includes('cartridge'));
   const isSublingual = !isDiagnostic && (formatStr.includes('sublingual') || formatStr.includes('drop'));
   const isOral = !isDiagnostic && (formatStr.includes('capsule') || formatStr.includes('tablet') || formatStr.includes('oral'));
-  const isVial = !isDiagnostic && !isSpray && !isPen && !isSublingual && !isOral;
+  const isBulkApi = !isDiagnostic && (formatStr.includes('api') || formatStr.includes('bulk') || product?.productType === 'raw_api' || product?.is_raw_api);
+  const isVial = !isDiagnostic && !isSpray && !isPen && !isSublingual && !isOral && !isBulkApi;
 
   // ── 2. Derive Dynamic Available Strengths ──
   const dynamicStrengths = useMemo(() => {
@@ -1015,6 +1016,60 @@ export default function PreparationTab({
                 whiteSpace: 'nowrap'
               }}>
                 CE-IVD Certified Matrix
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── D2. BULK API ACTIVE PHARMACEUTICAL INGREDIENT BANNER ── */}
+        {isBulkApi && (
+          <div style={{
+            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+            border: '1px solid #86efac',
+            borderRadius: '10px',
+            padding: '1.25rem',
+            marginBottom: '1.25rem',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '260px' }}>
+                <strong style={{ fontSize: '0.90rem', color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  🧪 Active Pharmaceutical Ingredient (Bulk Raw Material)
+                </strong>
+                <p style={{ margin: '6px 0 0 0', fontSize: '0.78rem', color: '#14532d', lineHeight: 1.5 }}>
+                  This presentation represents pure chemical API bulk powder intended strictly for licensed compounding pharmacies and analytical research. Reconstitution and U-100 syringe volumetric calibration are not applicable to bulk industrial powders.
+                </p>
+                <div style={{ marginTop: '10px' }}>
+                  <a
+                    href={`/raw/${String(slug || product?.slug || '').replace(/^api-/, '').replace(/-bulk$/, '')}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: '#166534',
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
+                      padding: '7px 14px',
+                      borderRadius: '6px'
+                    }}
+                  >
+                    <span>View Official Bulk API Chemical Monograph & CoA →</span>
+                  </a>
+                </div>
+              </div>
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #86efac',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                fontSize: '0.74rem',
+                fontWeight: 750,
+                color: '#15803d',
+                whiteSpace: 'nowrap'
+              }}>
+                USP / Ph. Eur. API Grade
               </div>
             </div>
           </div>
