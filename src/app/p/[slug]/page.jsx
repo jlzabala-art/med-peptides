@@ -45,19 +45,21 @@ async function getPublicProduct(slug, supplierFilter = null) {
 
   let doc = null;
 
-  // 1b. Canonical registry resolution (e.g. 'tb-500-thymosin-beta-4' -> 'tb-500')
-  const canonicalIdent = deriveCanonicalIdentity({ id: target, name: target });
-  if (canonicalIdent.isRecognized && canonicalIdent.canonicalKey && canonicalIdent.canonicalKey !== target) {
-    const canonicalDoc = await adminDb.collection('products').doc(canonicalIdent.canonicalKey).get().catch(() => null);
-    if (canonicalDoc?.exists && canonicalDoc.data().status !== 'archived' && canonicalDoc.data().status !== 'hidden') {
-      doc = canonicalDoc;
-    }
+  // 1. Try by exact doc ID first (Golden Standard: direct document lookup avoids alias collisions)
+  const byId = await adminDb.collection('products').doc(target).get().catch(() => null);
+  if (byId?.exists && byId.data().status !== 'archived' && byId.data().status !== 'hidden') {
+    doc = byId;
   }
 
-  // 2. Try by doc ID
+  // 2. Canonical registry resolution for recognized alias keys (e.g. 'tb-500-thymosin-beta-4' -> 'tb-500')
   if (!doc) {
-    const byId = await adminDb.collection('products').doc(target).get().catch(() => null);
-    if (byId?.exists) doc = byId;
+    const canonicalIdent = deriveCanonicalIdentity({ id: target, name: target });
+    if (canonicalIdent.isRecognized && canonicalIdent.canonicalKey && canonicalIdent.canonicalKey !== target) {
+      const canonicalDoc = await adminDb.collection('products').doc(canonicalIdent.canonicalKey).get().catch(() => null);
+      if (canonicalDoc?.exists && canonicalDoc.data().status !== 'archived' && canonicalDoc.data().status !== 'hidden') {
+        doc = canonicalDoc;
+      }
+    }
   }
 
   // 3. Try slug field
@@ -166,18 +168,31 @@ async function getPublicProduct(slug, supplierFilter = null) {
   // Filter variants strictly for target supplier to prevent cross-supplier contamination.
   // Clinical standard: Default to Lotusland Limited if available for peptide compounds,
   // or the product's own supplier, or the first available variant's supplier.
-  const hasLotusland = (rawVariants || []).some(v => matchSupplier(v, 'supplier-lotusland') || matchSupplier(v, 'lotusland'));
-  const inherentSupplier = (hasLotusland && (!supplierFilter || supplierFilter.toLowerCase() === 'all'))
-    ? 'supplier-lotusland'
-    : (raw.supplierId || (rawVariants && rawVariants[0]?.supplierId) || (rawVariants && rawVariants[0]?.supplier));
+  const isDiagnosticProduct = Boolean(
+    raw.category === 'diagnostic_test' ||
+    raw.category === 'diagnostic_tests' ||
+    raw.productType === 'diagnostic' ||
+    raw.type === 'diagnostic' ||
+    (raw.id && (raw.id.startsWith('bloodo-') || raw.id.endsWith('-test'))) ||
+    raw.supplierId === 'supplier-bloodo'
+  );
 
-  const targetSupplier = (supplierFilter && supplierFilter.toLowerCase() !== 'all')
-    ? supplierFilter
-    : (inherentSupplier && !String(inherentSupplier).toLowerCase().includes('unknown') ? inherentSupplier : 'supplier-lotusland');
+  const hasLotusland = !isDiagnosticProduct && (rawVariants || []).some(v => matchSupplier(v, 'supplier-lotusland') || matchSupplier(v, 'lotusland'));
+  const inherentSupplier = isDiagnosticProduct
+    ? (raw.supplierId || (rawVariants && rawVariants[0]?.supplierId) || 'supplier-bloodo')
+    : (hasLotusland && (!supplierFilter || supplierFilter.toLowerCase() === 'all'))
+      ? 'supplier-lotusland'
+      : (raw.supplierId || (rawVariants && rawVariants[0]?.supplierId) || (rawVariants && rawVariants[0]?.supplier));
+
+  const targetSupplier = isDiagnosticProduct
+    ? inherentSupplier
+    : (supplierFilter && supplierFilter.toLowerCase() !== 'all')
+      ? supplierFilter
+      : (inherentSupplier && !String(inherentSupplier).toLowerCase().includes('unknown') ? inherentSupplier : 'supplier-lotusland');
 
   let filtered = (rawVariants || []).filter(v => matchSupplier(v, targetSupplier));
   // If target supplier was 'unknown_supplier', match variants that have unknown/undefined supplier or fall back to inherent
-  if (filtered.length === 0 && (targetSupplier === 'unknown_supplier' || targetSupplier.includes('unknown'))) {
+  if (filtered.length === 0 && (targetSupplier === 'unknown_supplier' || targetSupplier.includes('unknown') || isDiagnosticProduct)) {
     filtered = rawVariants || [];
   }
 
@@ -194,8 +209,8 @@ async function getPublicProduct(slug, supplierFilter = null) {
   } else {
     // 🛡️ Graceful Fallback: If requested/default supplier has no active variants,
     // fallback to available variants rather than returning 404 (Golden UX Rule)
-    const fallbackSupp = raw.supplierName || raw.supplier || (rawVariants && rawVariants[0]?.supplierName) || (rawVariants && rawVariants[0]?.supplier);
-    const fallbackSuppId = raw.supplierId || (rawVariants && rawVariants[0]?.supplierId);
+    const fallbackSupp = raw.supplierName || raw.supplier || (rawVariants && rawVariants[0]?.supplierName) || (rawVariants && rawVariants[0]?.supplier) || (isDiagnosticProduct ? 'Bloodo UAB' : null);
+    const fallbackSuppId = raw.supplierId || (rawVariants && rawVariants[0]?.supplierId) || (isDiagnosticProduct ? 'supplier-bloodo' : null);
     if (fallbackSupp && fallbackSuppId) {
       raw.supplierName = fallbackSupp;
       raw.supplier = fallbackSupp;

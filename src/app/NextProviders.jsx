@@ -58,15 +58,25 @@ const persister = createAsyncStoragePersister({
 
 export default function NextProviders({ children, serverUser }) {
   const pathname = usePathname();
-  const isPublicStandalone = pathname?.startsWith('/p/') || pathname?.startsWith('/verify');
+  const isPublicFastPath =
+    pathname?.startsWith('/p/') ||
+    pathname?.startsWith('/verify') ||
+    pathname?.startsWith('/dr') ||
+    pathname?.startsWith('/rx') ||
+    pathname?.startsWith('/proto') ||
+    pathname?.startsWith('/collection') ||
+    pathname?.startsWith('/catalog');
 
-  // 🚀 Fast-path for public standalone routes: Zero Auth listeners, Zero AI Copilot, Zero Cart, Zero Omnibar
-  if (isPublicStandalone) {
+  // 🚀 Fast-path for public & clinical portal routes:
+  // Instant in-memory QueryClient, Zero IndexedDB lock/rehydration flicker, Zero Omnibar/Drawer background managers
+  if (isPublicFastPath) {
     return (
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <AuthProvider serverUser={serverUser}>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </AuthProvider>
       </QueryClientProvider>
     );
   }

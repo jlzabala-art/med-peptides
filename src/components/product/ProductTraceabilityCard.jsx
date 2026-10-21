@@ -165,7 +165,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
     product.is_aesthetic_injectable === true
   );
 
-  const canonicalProductUrl = isProductCosmetic
+  const canonicalProductUrl = (isProductCosmetic || isDiagnosticKit)
     ? `${origin}/p/${productSlug}`
     : `${origin}/p/${productSlug}?dose=${encodeURIComponent(defaultDose)}&presentation=${encodeURIComponent(defaultFormat)}&supplier=${encodeURIComponent(defaultSupplier)}&batch=${encodeURIComponent(batchCode)}&vialCode=${encodeURIComponent(batchCode)}`;
 

@@ -114,7 +114,11 @@ export default async function VerifyPage({ params }) {
   // If the batch code maps to a catalog peptide, redirect directly to the canonical
   // monograph where the live analytical CoA table and batch traceability card reside.
   if (verification?.productSlug) {
-    const canonicalUrl = `/p/${verification.productSlug}?dose=10%20mg&presentation=vial&supplier=supplier-lotusland&batch=${encodeURIComponent(code)}&vialCode=${encodeURIComponent(code)}#specs-section`;
+    const isDiag = verification.isDiagnostic || verification.productSlug.includes('bloodo') || verification.productSlug.includes('test');
+    const isCosm = verification.isCosmetic || verification.productSlug.includes('colway');
+    const canonicalUrl = (isDiag || isCosm)
+      ? `/p/${verification.productSlug}?batch=${encodeURIComponent(code)}`
+      : `/p/${verification.productSlug}?dose=10%20mg&presentation=vial&supplier=supplier-lotusland&batch=${encodeURIComponent(code)}&vialCode=${encodeURIComponent(code)}#specs-section`;
     redirect(canonicalUrl);
   }
 

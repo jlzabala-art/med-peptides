@@ -739,41 +739,6 @@ export default function BrandCollectionPage({
                 : (isEs ? `Colección Completa (${products.length} ${brandSlug === 'colway' ? 'formulaciones' : 'pruebas'})` : `Entire Collection (${products.length} items)`)}
             </span>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button
-              onClick={() => setScopeMode('filtered')}
-              style={{
-                background: scopeMode === 'filtered' ? '#0284c7' : '#ffffff',
-                color: scopeMode === 'filtered' ? '#ffffff' : '#64748b',
-                border: '1px solid',
-                borderColor: scopeMode === 'filtered' ? '#0284c7' : '#cbd5e1',
-                padding: '4px 10px',
-                borderRadius: '6px',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-            >
-              {isEs ? 'Filtros Activos' : 'Filtered View'}
-            </button>
-            <button
-              onClick={() => { setScopeMode('global'); setSearchQuery(''); setSelectedCategory('all'); }}
-              style={{
-                background: scopeMode === 'global' ? '#0284c7' : '#ffffff',
-                color: scopeMode === 'global' ? '#ffffff' : '#64748b',
-                border: '1px solid',
-                borderColor: scopeMode === 'global' ? '#0284c7' : '#cbd5e1',
-                padding: '4px 10px',
-                borderRadius: '6px',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-            >
-              {isEs ? 'Ver Colección Global' : 'Entire Database'}
-            </button>
-          </div>
         </div>
 
         {/* 4 Cards Grid */}
@@ -835,15 +800,19 @@ export default function BrandCollectionPage({
 
       {/* ── 6. MAIN WORKSPACE (Left Sidebar 320px + Right Main Content) ── */}
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 2rem 5rem' }}>
-        <div className="gcp-collection-workspace">
+        <div
+          className="gcp-collection-workspace"
+          style={{
+            gridTemplateColumns: (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '1fr' : undefined,
+            display: (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? 'block' : undefined
+          }}
+        >
           {/* ── LEFT COLUMN: STICKY DEDICATED SIDEBAR PER BRAND ── */}
           {brandSlug === 'bloodo' ? (
             <BloodoCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
           ) : brandSlug === 'eterna' ? (
             <EternaCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
-          ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? (
-            <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
-          ) : brandSlug === 'colway' ? (
+          ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? null : brandSlug === 'colway' ? (
             <ColwayCollectionSidebar
               lang={lang}
               onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
@@ -868,7 +837,15 @@ export default function BrandCollectionPage({
           )}
 
           {/* ── RIGHT COLUMN: MAIN CONTENT (DIRECT UNIFIED CATALOG & TREATMENT LINES) ── */}
-          <main id="colway-main-content" style={{ minWidth: 0, gridColumn: '2', order: 2 }}>
+          <main
+            id="colway-main-content"
+            style={{
+              minWidth: 0,
+              gridColumn: (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '1' : '2',
+              order: 2,
+              width: '100%'
+            }}
+          >
             {/* Mobile Categories Navigation Strip (Golden Rule #23) */}
             <div className="gcp-mobile-categories-strip" style={{
               flexDirection: 'column',
@@ -991,10 +968,12 @@ export default function BrandCollectionPage({
             }}>
               {/* Row 1: Search / Category Heading + View Toggle */}
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-                {brandSlug === 'colway' ? (
+                {(brandSlug === 'colway' || brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
-                      {isEs ? 'Catálogo de Formulaciones Colway®' : 'Colway® Formulations Catalog'}
+                      {brandSlug === 'colway'
+                        ? (isEs ? 'Catálogo de Formulaciones Colway®' : 'Colway® Formulations Catalog')
+                        : (isEs ? 'Fórmulas Clínicas UltraPerson™' : 'UltraPerson™ Clinical Formulations')}
                     </span>
                     <span style={{
                       fontSize: '0.74rem',
@@ -1006,7 +985,7 @@ export default function BrandCollectionPage({
                       borderRadius: '9999px'
                     }}>
                       {selectedCategory === 'all'
-                        ? (isEs ? 'Todas las Categorías' : 'All Formulations')
+                        ? (isEs ? 'Todas las Categorías' : 'All Categories')
                         : selectedCategory}
                     </span>
                   </div>
@@ -1356,25 +1335,27 @@ export default function BrandCollectionPage({
                               adminSimulationTier={adminSimulationTier}
                               onSelectAdminSimulationTier={setAdminSimulationTier}
                             />
-                            <button
-                              type="button"
-                              onClick={(e) => toggleExpand(product.id, e)}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                color: '#64748b',
-                                fontSize: '0.74rem',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '3px',
-                                padding: '6px 8px'
-                              }}
-                            >
-                              <span>{isExpanded ? (isEs ? 'Menos' : 'Less') : (isEs ? 'Detalles' : 'Details')}</span>
-                              <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-                            </button>
+                            {brandSlug !== 'ultraperson' && brandSlug !== 'ultraman' && (
+                              <button
+                                type="button"
+                                onClick={(e) => toggleExpand(product.id, e)}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#64748b',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px',
+                                  padding: '6px 8px'
+                                }}
+                              >
+                                <span>{isExpanded ? (isEs ? 'Menos' : 'Less') : (isEs ? 'Detalles' : 'Details')}</span>
+                                <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                              </button>
+                            )}
 
                             {(() => {
                               const doc = resolveProductDatasheet(product, brandSlug);
@@ -1438,7 +1419,7 @@ export default function BrandCollectionPage({
                         </div>
 
                         {/* Inline Expandable Details in Table mode */}
-                        {isExpanded && (
+                        {isExpanded && brandSlug !== 'ultraperson' && brandSlug !== 'ultraman' && (
                           <div style={{
                             background: '#f8fafc',
                             borderTop: '1px solid #e2e8f0',
@@ -1627,7 +1608,7 @@ export default function BrandCollectionPage({
                         </p>
 
                         {/* Master-Detail Expandable Drawer (Regla #4) */}
-                        {isExpanded && (
+                        {isExpanded && brandSlug !== 'ultraperson' && brandSlug !== 'ultraman' && (
                           <div style={{
                             background: '#f8fafc',
                             borderRadius: '8px',
@@ -1733,26 +1714,28 @@ export default function BrandCollectionPage({
                         />
 
                         {/* Card Action Strip */}
-                        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
-                          <button
-                            type="button"
-                            onClick={(e) => toggleExpand(product.id, e)}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: '#64748b',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              padding: '4px 0'
-                            }}
-                          >
-                            <span>{isExpanded ? (isEs ? 'Ocultar' : 'Hide Specs') : (isEs ? 'Master-Detail' : (brandSlug === 'colway' ? 'Clinical Specs' : 'Specs & Lab'))}</span>
-                            <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
-                          </button>
+                        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? 'flex-end' : 'space-between', gap: '8px', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
+                          {brandSlug !== 'ultraperson' && brandSlug !== 'ultraman' && (
+                            <button
+                              type="button"
+                              onClick={(e) => toggleExpand(product.id, e)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#64748b',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '4px 0'
+                              }}
+                            >
+                              <span>{isExpanded ? (isEs ? 'Ocultar' : 'Hide Specs') : (isEs ? 'Master-Detail' : (brandSlug === 'colway' ? 'Clinical Specs' : 'Specs & Lab'))}</span>
+                              <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                            </button>
+                          )}
 
                           <div style={{ display: 'flex', gap: '6px' }}>
                             {(() => {
@@ -1849,156 +1832,8 @@ export default function BrandCollectionPage({
         </div>
       </section>
 
-      {/* ── FLOATING ACTION DOCK / STICKED FOOT (Regla Golden User Idea) ── */}
-      <div className="collection-bottom-dock">
-        {/* Left: Brand Chip / Mobile Categories Trigger */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
-            type="button"
-            onClick={() => setIsMobileSidebarOpen(true)}
-            className="collection-dock-mobile-only"
-            style={{
-              height: '32px',
-              padding: '0 10px',
-              borderRadius: '9999px',
-              background: '#f1f5f9',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              fontSize: '0.74rem',
-              fontWeight: 700,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              cursor: 'pointer'
-            }}
-          >
-            <SlidersHorizontal size={12} color="#0d9488" />
-            <span>{isEs ? 'Categorías' : 'Categories'}</span>
-          </button>
-
-          <span style={{
-            width: '8px',
-            height: '8px',
-            borderRadius: '50%',
-            background: config.accentColor
-          }} />
-          <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a' }}>
-            {config.name}
-          </span>
-          <span className="collection-dock-hide-mobile" style={{ fontSize: '0.74rem', color: '#64748b' }}>
-            · {filteredProducts.length} {isEs ? 'ítems en catálogo' : 'items'}
-          </span>
-        </div>
-
-        {/* Dock Actions: Inquire Info + Atlas AI 5/5 (All Unified in One Single Footer) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {user && (
-            <button
-              type="button"
-              onClick={() => router.push('/checkout')}
-              style={{
-                height: '36px',
-                padding: '0 14px',
-                borderRadius: '9999px',
-                background: '#16a34a',
-                color: '#ffffff',
-                border: 'none',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <Sparkles size={13} />
-              <span>{isEs ? 'Ver Carrito' : 'View Cart'}</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setIsInquiryDrawerOpen(true)}
-            title={isEs ? 'Solicitar información del producto, ficha técnica y precios institucionales' : 'Inquire product information, technical dossiers and institutional pricing'}
-            style={{
-              height: '36px',
-              padding: '0 14px',
-              borderRadius: '9999px',
-              background: config.accentColor,
-              color: '#ffffff',
-              border: 'none',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}
-          >
-            <FileText size={13} />
-            <span>{isEs ? 'Consultar Info' : 'Inquire Info'}</span>
-          </button>
-
-          {/* Direct WhatsApp Clinical Concierge (Fase 1) */}
-          <a
-            href={getWhatsAppInquiryUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => triggerHaptic('selection')}
-            title={isEs ? 'Consulta Rápida por WhatsApp con Dirección Médica' : 'Fast WhatsApp Direct Inquiry with Medical Affairs'}
-            style={{
-              height: '36px',
-              padding: '0 13px',
-              borderRadius: '9999px',
-              background: '#25D366',
-              color: '#ffffff',
-              textDecoration: 'none',
-              fontSize: '0.78rem',
-              fontWeight: 750,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 8px rgba(37, 211, 102, 0.35)',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <MessageSquare size={14} color="#ffffff" />
-            <span>WhatsApp</span>
-          </a>
-
-          {/* Simple Atlas AI 5/5 trigger button integrated in the single footer dock */}
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('selection');
-              setIsAtlasAiOpen(true);
-            }}
-            title={isEs ? 'Atlas AI (Tope máximo de 5 consultas por sesión)' : 'Atlas AI (Maximum 5 inquiries per session)'}
-            style={{
-              height: '36px',
-              padding: '0 14px',
-              borderRadius: '9999px',
-              background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
-              color: '#ffffff',
-              border: '1px solid rgba(56, 189, 248, 0.45)',
-              fontSize: '0.78rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 10px rgba(0, 54, 102, 0.3)'
-            }}
-          >
-            <Sparkles size={14} color="#38bdf8" />
-            <span>Atlas AI 5/5</span>
-          </button>
-        </div>
-      </div>
-
       {/* ── MOBILE SIDEBAR DRAWER (Golden Rule #23) ── */}
-      {isMobileSidebarOpen && (
+      {isMobileSidebarOpen && brandSlug !== 'ultraperson' && brandSlug !== 'ultraman' && (
         <div style={{
           position: 'fixed',
           inset: 0,
@@ -2070,9 +1905,7 @@ export default function BrandCollectionPage({
                 <BloodoCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
               ) : brandSlug === 'eterna' ? (
                 <EternaCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
-              ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? (
-                <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
-              ) : (
+              ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? null : (
                 <ColwayCollectionSidebar
                   lang={lang}
                   onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }}

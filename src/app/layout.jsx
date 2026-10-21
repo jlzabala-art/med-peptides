@@ -164,14 +164,14 @@ export default function RootLayout({ children }) {
             font-family: var(--font-sans);
           }
           .global-spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid #334155;
-            border-bottom-color: #3b82f6;
+            width: 36px;
+            height: 36px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #003666;
             border-radius: 50%;
             display: inline-block;
             box-sizing: border-box;
-            animation: rotation 1s linear infinite;
+            animation: rotation 0.8s linear infinite;
           }
           @keyframes rotation {
             0% { transform: rotate(0deg); }
@@ -181,9 +181,9 @@ export default function RootLayout({ children }) {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            width: 100vw;
-            background-color: #0f172a;
+            min-height: 100vh;
+            width: 100%;
+            background-color: #f8fafc;
           }
         `}</style>
       </head>

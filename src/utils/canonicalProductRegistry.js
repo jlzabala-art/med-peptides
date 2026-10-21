@@ -192,8 +192,15 @@ for (const [key, def] of Object.entries(KNOWN_CANONICAL_PEPTIDES)) {
 // Words/compounds that must NOT be matched via partial prefixes
 const EXCLUSIONS = new Map([
   ['nadolol', { canonicalKey: 'nadolol', canonicalName: 'Nadolol' }],
-  ['nad level test', { canonicalKey: 'bloodo-nad-level-test', canonicalName: 'Bloodo NAD Level Test' }],
-  ['bloodo nad level test', { canonicalKey: 'bloodo-nad-level-test', canonicalName: 'Bloodo NAD Level Test' }],
+  ['nad-level-test', { canonicalKey: 'bloodo-nad-level-test', canonicalName: 'Bloodo™ NAD+ Level Test' }],
+  ['bloodo-nad-level-test', { canonicalKey: 'bloodo-nad-level-test', canonicalName: 'Bloodo™ NAD+ Level Test' }],
+  ['nad level test', { canonicalKey: 'bloodo-nad-level-test', canonicalName: 'Bloodo™ NAD+ Level Test' }],
+  ['bloodo nad level test', { canonicalKey: 'bloodo-nad-level-test', canonicalName: 'Bloodo™ NAD+ Level Test' }],
+  ['cortisol-test', { canonicalKey: 'cortisol-test', canonicalName: 'Bloodo™ Cortisol Diurnal Test' }],
+  ['testosterone-test', { canonicalKey: 'testosterone-test', canonicalName: 'Bloodo™ Testosterone+ Test' }],
+  ['hemoglobin-a1c', { canonicalKey: 'hemoglobin-a1c', canonicalName: 'Bloodo™ HbA1c Test' }],
+  ['omega-ratio', { canonicalKey: 'omega-ratio', canonicalName: 'Bloodo™ Omega-3/6 Test' }],
+  ['vitamin-d-test', { canonicalKey: 'vitamin-d-test', canonicalName: 'Bloodo™ Vitamin D Test' }]
 ]);
 
 /**
@@ -226,10 +233,11 @@ export function deriveCanonicalIdentity(product = {}) {
 
   const rawName = (product.name || product.title || product.canonicalName || product.id || '').trim();
   const lower = rawName.toLowerCase();
+  const normalizedLower = lower.replace(/[-_]+/g, ' ').trim();
 
-  // 2. Check exclusions table first (avoids "nadolol" -> "nad-plus")
-  if (EXCLUSIONS.has(lower)) {
-    const ex = EXCLUSIONS.get(lower);
+  // 2. Check exclusions table first (avoids "nadolol" -> "nad-plus" or "bloodo-nad-level-test" -> "nad")
+  if (EXCLUSIONS.has(lower) || EXCLUSIONS.has(normalizedLower)) {
+    const ex = EXCLUSIONS.get(lower) || EXCLUSIONS.get(normalizedLower);
     return {
       canonicalKey: ex.canonicalKey,
       canonicalName: ex.canonicalName,
@@ -237,13 +245,38 @@ export function deriveCanonicalIdentity(product = {}) {
     };
   }
   for (const [excPrefix, excDef] of EXCLUSIONS.entries()) {
-    if (lower === excPrefix || lower.startsWith(excPrefix + ' ') || lower.startsWith(excPrefix + '-')) {
+    if (lower === excPrefix || lower.startsWith(excPrefix + ' ') || lower.startsWith(excPrefix + '-') ||
+        normalizedLower === excPrefix || normalizedLower.startsWith(excPrefix + ' ')) {
       return {
         canonicalKey: excDef.canonicalKey,
         canonicalName: excDef.canonicalName,
         isRecognized: false
       };
     }
+  }
+
+  // 2b. Diagnostic Kits & Clinical Panels must NEVER be collapsed into single peptide compounds
+  const isDiagnosticOrKit = Boolean(
+    lower.startsWith('bloodo') ||
+    lower.includes('bloodo') ||
+    lower.includes('eterna') ||
+    lower.includes('test-kit') ||
+    lower.endsWith('-test') ||
+    lower.includes('-test-') ||
+    normalizedLower.includes('test kit') ||
+    normalizedLower.includes('level test') ||
+    product.category === 'diagnostic_test' ||
+    product.category === 'diagnostic_tests' ||
+    product.category === 'genomics_biomarkers' ||
+    product.productType === 'diagnostic' ||
+    product.type === 'diagnostic'
+  );
+  if (isDiagnosticOrKit) {
+    return {
+      canonicalKey: (product.slug || product.id || lower).replace(/[^a-z0-9_-]+/g, '-'),
+      canonicalName: product.canonicalName || product.name || rawName,
+      isRecognized: false
+    };
   }
 
   // 3. Exact alias match

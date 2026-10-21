@@ -84,7 +84,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import { COUNTRIES } from '@/data/countries';
 import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolidator';
 import { calculateTreatmentDates, calculateTreatmentDuration } from '@/utils/clinical/clinicalFormulations';
-import DoctorFloatingGlassDock from '@/components/doctor/docks/DoctorFloatingGlassDock';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
 import PrescriptionProtocolAlignmentCard from '@/components/doctor/PrescriptionProtocolAlignmentCard';
 import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
@@ -2150,31 +2150,39 @@ export default function DoctorPublicPortalClient({
       width: '26%',
       align: 'left',
       sortable: true,
-      render: (t) => {
-        const codifiedId = getCodifiedPatientId(t.patientName, t.code || (t.codes && t.codes[0]));
+      render: (val, row) => {
+        const t = row || val || {};
+        const rawName = t.nominalPatientName || t.patient?.name || t.patientName || (typeof val === 'string' && !val.startsWith('Patient PT-') ? val : '');
+        const rxCode = t.code || (t.codes && t.codes[0]) || t.rxId || '';
+        const codifiedId = t.codifiedPatientId || getCodifiedPatientId(rawName, rxCode);
         const dob = t.patient?.dob || t.patientDob || t.dob || (
-          allPrescriptions.find(p => p.patientName && t.patientName && p.patientName.toLowerCase().trim() === t.patientName.toLowerCase().trim())?.patient?.dob
+          allPrescriptions.find(p => p.patientName && rawName && p.patientName.toLowerCase().trim() === rawName.toLowerCase().trim())?.patient?.dob
         );
 
         return (
-          <div>
-            {!isAuthorizedViewer ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    fontWeight: 700,
-                    color: '#0f172a',
-                    fontSize: '0.86rem',
-                    fontFamily: 'monospace',
-                    letterSpacing: '0.03em',
-                    background: '#f1f5f9',
-                    padding: '2px 7px',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1'
-                  }}
-                >
-                  {codifiedId}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', textAlign: 'left' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span
+                style={{
+                  fontWeight: 700,
+                  color: '#0f172a',
+                  fontSize: '0.86rem',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.03em',
+                  background: '#f1f5f9',
+                  padding: '2px 7px',
+                  borderRadius: '4px',
+                  border: '1px solid #cbd5e1'
+                }}
+              >
+                {codifiedId}
+              </span>
+              {rawName && !rawName.startsWith('Patient PT-') ? (
+                <span style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.86rem' }}>
+                  {rawName}
                 </span>
+              ) : null}
+              {!isAuthorizedViewer && (
                 <span
                   onClick={(e) => {
                     e.stopPropagation();
@@ -2201,14 +2209,10 @@ export default function DoctorPublicPortalClient({
                   <Lock size={10} />
                   <span>Protected</span>
                 </span>
-              </div>
-            ) : (
-              <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.86rem' }}>
-                {t.patientName}
-              </div>
-            )}
+              )}
+            </div>
             {isAuthorizedViewer && dob && (
-              <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
                 DOB: {dob}
               </div>
             )}
@@ -2222,7 +2226,8 @@ export default function DoctorPublicPortalClient({
       width: '54%',
       align: 'left',
       sortable: true,
-      render: (t) => {
+      render: (val, row) => {
+        const t = row || val || {};
         const isSigned = t.isSigned || t.status === 'approved';
         const rxMatch = allPrescriptions.find(
           (p) => p.code === t.code || p.id === t.rxId || (p.code && t.codes?.includes(p.code))
@@ -2334,7 +2339,8 @@ export default function DoctorPublicPortalClient({
       align: 'right',
       isAction: true,
       mobilePriority: 'always',
-      render: (t) => {
+      render: (val, row) => {
+        const t = row || val || {};
         const isSigned = t.isSigned || t.status === 'approved';
         const isSigning = signingTaskId === (t.id || t.code);
 
@@ -3519,27 +3525,34 @@ export default function DoctorPublicPortalClient({
       width: '28%',
       align: 'left',
       sortable: true,
-      render: (pat) => {
-        const codifiedId = getCodifiedPatientId(pat.name, pat.latestRxCode);
+      render: (val, row) => {
+        const pat = row || val || {};
+        const patName = pat.name || (typeof val === 'string' ? val : '');
+        const codifiedId = pat.codifiedId || getCodifiedPatientId(patName, pat.latestRxCode || pat.id);
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', textAlign: 'left' }}>
-            {!isAuthorizedViewer ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    fontWeight: 700,
-                    color: '#0f172a',
-                    fontSize: '0.86rem',
-                    fontFamily: 'monospace',
-                    letterSpacing: '0.03em',
-                    background: '#f1f5f9',
-                    padding: '2px 7px',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1'
-                  }}
-                >
-                  {codifiedId}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span
+                style={{
+                  fontWeight: 700,
+                  color: '#0f172a',
+                  fontSize: '0.86rem',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.03em',
+                  background: '#f1f5f9',
+                  padding: '2px 7px',
+                  borderRadius: '4px',
+                  border: '1px solid #cbd5e1'
+                }}
+              >
+                {codifiedId}
+              </span>
+              {patName && !patName.startsWith('Patient PT-') && (
+                <span style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.86rem' }}>
+                  {patName}
                 </span>
+              )}
+              {!isAuthorizedViewer && (
                 <span
                   onClick={(e) => {
                     e.stopPropagation();
@@ -3566,12 +3579,8 @@ export default function DoctorPublicPortalClient({
                   <Lock size={10} />
                   <span>Protected</span>
                 </span>
-              </div>
-            ) : (
-              <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.88rem' }}>
-                {pat.name}
-              </div>
-            )}
+              )}
+            </div>
             {isAuthorizedViewer && pat.phone ? (
               <div style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Phone size={11} style={{ color: '#059669', flexShrink: 0 }} />
@@ -3619,48 +3628,55 @@ export default function DoctorPublicPortalClient({
       width: '22%',
       align: 'left',
       sortable: true,
-      render: (pat) => (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          {pat.hasSold ? (
-            <>
-              <StatusBadge status="approved" customLabel="Sold Customer" />
-              <div style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 650, marginTop: '3px' }}>
-                ✓ {pat.invoices.join(', ') || 'Invoiced Order'}
-              </div>
-            </>
-          ) : (
-            <>
-              <StatusBadge status="proposal_pending" customLabel="Offer Unaccepted" />
-              <div style={{ fontSize: '0.70rem', color: '#b45309', fontWeight: 600, marginTop: '3px' }}>
-                ⏳ Awaiting Confirmation
-              </div>
-            </>
-          )}
-        </div>
-      )
+      render: (val, row) => {
+        const pat = row || val || {};
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            {pat.hasSold ? (
+              <>
+                <StatusBadge status="approved" customLabel="Sold Customer" />
+                <div style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 650, marginTop: '3px' }}>
+                  ✓ {pat.invoices?.join(', ') || 'Invoiced Order'}
+                </div>
+              </>
+            ) : (
+              <>
+                <StatusBadge status="proposal_pending" customLabel="Offer Unaccepted" />
+                <div style={{ fontSize: '0.70rem', color: '#b45309', fontWeight: 600, marginTop: '3px' }}>
+                  ⏳ Awaiting Confirmation
+                </div>
+              </>
+            )}
+          </div>
+        );
+      }
     },
     {
       key: 'regimens',
       header: 'Prescriptions & History',
       width: '32%',
       align: 'left',
-      render: (pat) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
-          <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b' }}>
-            {pat.prescriptions.length === 1 ? '1 Clinical Regimen' : `${pat.prescriptions.length} Clinical Regimens`}
+      render: (val, row) => {
+        const pat = row || val || {};
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b' }}>
+              {pat.prescriptions?.length === 1 ? '1 Clinical Regimen' : `${pat.prescriptions?.length || 0} Clinical Regimens`}
+            </div>
+            <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.25 }}>
+              {pat.latestProduct || '—'}
+            </div>
           </div>
-          <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.25 }}>
-            {pat.latestProduct}
-          </div>
-        </div>
-      )
+        );
+      }
     },
     {
       key: 'actions',
       header: 'Actions',
       width: '18%',
       align: 'right',
-      render: (pat) => {
+      render: (val, row) => {
+        const pat = row || val || {};
         const cleanPhone = (pat.phone || '').replace(/[^0-9]/g, '');
         const waUrl = cleanPhone ? `https://wa.me/${cleanPhone}` : null;
         return (
@@ -8246,17 +8262,8 @@ export default function DoctorPublicPortalClient({
         </main>
       </div>
 
-      {/* ── Fixed Bottom Actions Dock ("Sticker" Footer for Laptop & Mobile) ── */}
-      <DoctorFloatingGlassDock
-        onOpenIntake={handleOpenNewPrescriptionIntake}
-        onOpenSearch={() => {
-          triggerHaptic('selection');
-          setIsPracticeSearchOpen(true);
-        }}
-        onOpenAtlasAi={() => setIsAtlasAiOpen(true)}
-        aiUsesRemaining={aiUsesRemaining}
-        onOpenWhatsApp={() => setIsRequestInfoOpen(true)}
-      />
+      {/* ── Google Cloud Console Standard Unified Footer ── */}
+      <PublicUnifiedFooter lang={lang || 'en'} />
 
       {/* ── Practice Spotlight Search Palette (Rule #7 & Spotlight standard) ── */}
       <DoctorPracticeSearchModal
