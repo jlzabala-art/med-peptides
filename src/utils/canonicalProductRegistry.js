@@ -87,9 +87,9 @@ export const KNOWN_CANONICAL_PEPTIDES = {
     category: 'Metabolic & Weight'
   },
   'nad-plus': {
-    canonicalKey: 'nad-plus',
+    canonicalKey: 'nad',
     canonicalName: 'NAD+',
-    aliases: ['nad+', 'nad', 'nad +', 'nicotinamide adenine dinucleotide'],
+    aliases: ['nad+', 'nad', 'nad +', 'nad-plus', 'nicotinamide adenine dinucleotide'],
     category: 'Longevity & Cellular'
   },
   'ghk-cu': {

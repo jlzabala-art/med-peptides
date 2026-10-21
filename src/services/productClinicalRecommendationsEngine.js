@@ -32,13 +32,13 @@ export function getProductClinicalRecommendations(product = {}, slug = '', lang 
   if (pSlug.includes('bloodo-nad') || (pSlug.includes('bloodo') && pSlug.includes('nad')) || pName.includes('bloodo nad')) {
     list = [
       {
-        id: 'nad-plus',
-        slug: 'nad-plus',
+        id: 'nad',
+        slug: 'nad',
         name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
         category: isEs ? 'Bioenergética Celular Inyectable' : 'Parenteral Bioenergetics',
         presentation: isEs ? 'Vial Clínico Liofilizado (500 mg / 1000 mg)' : 'Lyophilized Clinical Vial (500 mg / 1000 mg)',
         image: '/assets/vials/nadplus.png',
-        url: '/p/nad-plus',
+        url: '/p/nad',
         synergyBadge: isEs ? 'Tratamiento Restaurador Primario' : 'Primary Restorative Therapy',
         synergyBadgeColor: '#003666',
         clinicalRationale: isEs
@@ -98,13 +98,13 @@ export function getProductClinicalRecommendations(product = {}, slug = '', lang 
         role: isEs ? 'Protección Endotelial' : 'Endothelial Protection'
       },
       {
-        id: 'nad-plus',
-        slug: 'nad-plus',
+        id: 'nad',
+        slug: 'nad',
         name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
         category: isEs ? 'Optimización Metabólica' : 'Metabolic Optimization',
         presentation: isEs ? 'Vial Liofilizado (500 mg)' : 'Lyophilized Vial (500 mg)',
         image: '/assets/vials/nadplus.png',
-        url: '/p/nad-plus',
+        url: '/p/nad',
         synergyBadge: isEs ? 'Beta-Oxidación Lipídica' : 'Lipid Beta-Oxidation',
         synergyBadgeColor: '#0284c7',
         clinicalRationale: isEs
@@ -206,13 +206,13 @@ export function getProductClinicalRecommendations(product = {}, slug = '', lang 
         role: isEs ? 'Soporte Hepático' : 'Hepatic Support'
       },
       {
-        id: 'nad-plus',
-        slug: 'nad-plus',
+        id: 'nad',
+        slug: 'nad',
         name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
         category: isEs ? 'Cofactor Redox de Biotransformación' : 'Phase I/II Redox Cofactor',
         presentation: isEs ? 'Vial Liofilizado (500 mg)' : 'Lyophilized Vial (500 mg)',
         image: '/assets/vials/nadplus.png',
-        url: '/p/nad-plus',
+        url: '/p/nad',
         synergyBadge: isEs ? 'Aclaramiento Enzimático' : 'Enzymatic Clearance Support',
         synergyBadgeColor: '#0284c7',
         clinicalRationale: isEs
@@ -280,13 +280,13 @@ export function getProductClinicalRecommendations(product = {}, slug = '', lang 
       // Epithalon, MOTS-c, SS-31
       list = [
         {
-          id: 'nad-plus',
-          slug: 'nad-plus',
+          id: 'nad',
+          slug: 'nad',
           name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
           category: isEs ? 'Bioenergética Celular Inyectable' : 'Parenteral Bioenergetics',
           presentation: isEs ? 'Vial Clínico Liofilizado (500 mg)' : 'Lyophilized Clinical Vial (500 mg)',
           image: '/assets/vials/nadplus.png',
-          url: '/p/nad-plus',
+          url: '/p/nad',
           synergyBadge: isEs ? 'Sinergia Bioenergética' : 'Bioenergetic Synergy',
           synergyBadgeColor: '#003666',
           clinicalRationale: isEs
