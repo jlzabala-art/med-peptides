@@ -1,8 +1,10 @@
 "use client";
-import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Check } from 'lucide-react';
 import MultiSelectFilter from './MultiSelectFilter';
+import UnifiedFiltersDrawer from './UnifiedFiltersDrawer';
+import { SlidersHorizontal } from '@/lib/icons';
 
 /**
  * SingleSelectFilterPill — Floating popover pill for single-select dimensions
@@ -150,9 +152,6 @@ function SingleSelectFilterPill({ label, value, options = [], onChange, maxWidth
     </>
   );
 }
-
-import UnifiedFiltersDrawer from './UnifiedFiltersDrawer';
-import { SlidersHorizontal } from '@/lib/icons';
 
 /**
  * FilterRow — Line 2 of the unified search/filter layout.

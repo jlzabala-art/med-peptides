@@ -66,9 +66,13 @@ const BRAND_METADATA = {
   }
 };
 
+// Aliases for seamless routing and brand discovery
+BRAND_METADATA.ultraman = BRAND_METADATA.ultraperson;
+
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const slug = (resolvedParams?.slug || '').toLowerCase();
+  const rawSlug = (resolvedParams?.slug || '').toLowerCase();
+  const slug = rawSlug === 'ultraman' ? 'ultraperson' : rawSlug;
 
   const meta = BRAND_METADATA[slug] || {
     title: `${slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : 'Catalog'} | Atlas Collection`,
@@ -125,8 +129,36 @@ export async function generateMetadata({ params }) {
 
 // Server-side targeted product fetching for brand collections
 async function fetchTargetedBrandProducts(brandSlug) {
-  if (!adminDb) return [];
   const s = brandSlug.toLowerCase();
+  const targetBrand = (s === 'ultraman') ? 'ultraperson' : s;
+
+  // UltraPerson fallback: if Firestore is empty or unreachable, return official clinical registry items
+  if (targetBrand === 'ultraperson') {
+    try {
+      if (adminDb) {
+        const snap = await adminDb.collection('products').get();
+        const list = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          const id = (d.id || '').toLowerCase();
+          const brand = (data.brand || data.brandId || '').toLowerCase();
+          // Precise UltraPerson matching without cross-contamination with other products
+          if (id.startsWith('ultraperson-') || brand.includes('ultraperson')) {
+            list.push({ id: d.id, ...data });
+          }
+        });
+        if (list.length > 0) return list;
+      }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Firestore read error, falling back to registry:', e.message);
+    }
+
+    const { CLINICAL_SUPPLEMENTS } = await import('../../../data/clinicalSupplementsRegistry');
+    return Object.values(CLINICAL_SUPPLEMENTS).filter(p => p.id?.startsWith('ultraperson-') || p.slug?.startsWith('ultraperson-'));
+  }
+
+  if (!adminDb) return [];
   try {
     const snap = await adminDb.collection('products').get();
     const list = [];
@@ -140,8 +172,6 @@ async function fetchTargetedBrandProducts(brandSlug) {
         matches = str.includes('colway');
       } else if (s === 'bloodo') {
         matches = str.includes('bloodo') || ((data.category === 'diagnostic_test' || str.includes('dbs')) && (d.id.includes('test') || data.sampleType?.includes('DBS')));
-      } else if (s === 'ultraperson') {
-        matches = str.includes('ultraperson');
       } else if (s === 'eterna') {
         matches = str.includes('eterna') || str.includes('proteom') || d.id.startsWith('eternadx-') || d.id.startsWith('eterna-');
       } else if (s === 'teletest') {
@@ -161,10 +191,11 @@ async function fetchTargetedBrandProducts(brandSlug) {
 
 export default async function NextCollectionPage({ params }) {
   const resolvedParams = await params;
-  const slug = (resolvedParams?.slug || '').toLowerCase();
+  const rawSlug = (resolvedParams?.slug || '').toLowerCase();
+  const slug = rawSlug === 'ultraman' ? 'ultraperson' : rawSlug;
 
   let catalog;
-  if (['colway', 'bloodo', 'ultraperson', 'eterna'].includes(slug)) {
+  if (['colway', 'bloodo', 'ultraperson', 'eterna', 'teletest'].includes(slug)) {
     catalog = await fetchTargetedBrandProducts(slug);
   } else {
     catalog = await fetchProductsAction({ limitCount: 200 });
@@ -173,7 +204,7 @@ export default async function NextCollectionPage({ params }) {
   const safeCatalog = sanitizeForClient(catalog || []);
 
   return (
-    <CollectionClientWrapper serverParams={resolvedParams} initialProducts={safeCatalog} />
+    <CollectionClientWrapper serverParams={{ ...resolvedParams, slug }} initialProducts={safeCatalog} />
   );
 }
 

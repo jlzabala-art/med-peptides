@@ -134,12 +134,13 @@ export default function CollectionTemplate({
     );
   }
 
-  // Dedicated brand collections: /collection/colway, /collection/bloodo, /collection/ultraperson, /collection/eterna
-  if (s === 'colway' || s === 'bloodo' || s === 'ultraperson' || s === 'eterna') {
+  // Dedicated brand collections: /collection/colway, /collection/bloodo, /collection/ultraperson, /collection/eterna, /collection/teletest, /collection/ultraman
+  const normalizedBrand = (s === 'ultraman') ? 'ultraperson' : s;
+  if (normalizedBrand === 'colway' || normalizedBrand === 'bloodo' || normalizedBrand === 'ultraperson' || normalizedBrand === 'eterna' || normalizedBrand === 'teletest') {
     return (
       <RestrictedCatalogRoute catalogName="products">
         <BrandCollectionPage
-          brandSlug={s}
+          brandSlug={normalizedBrand}
           products={products || []}
           onSelectProduct={handleProductSelect}
           updateCart={updateCart}

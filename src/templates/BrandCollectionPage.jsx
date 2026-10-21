@@ -147,6 +147,8 @@ const BRAND_CONFIGS = {
   }
 };
 
+BRAND_CONFIGS.ultraman = BRAND_CONFIGS.ultraperson;
+
 function resolveBrandProductImage(product, brandSlug) {
   if (product.image_url) return product.image_url;
   if (product.imageUrl) return product.imageUrl;
@@ -296,7 +298,7 @@ export default function BrandCollectionPage({
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
+  const [viewMode, setViewMode] = useState('table'); // 'table' (rows/lines - GCP UX) | 'grid'
   const [sortOption, setSortOption] = useState('featured');
   const [addedItem, setAddedItem] = useState(null);
   const [expandedDetails, setExpandedDetails] = useState({});
@@ -436,12 +438,19 @@ export default function BrandCollectionPage({
     if (selectedCategory !== 'all' && selectedCategory !== 'bundles') {
       const cat = selectedCategory.toLowerCase();
       list = list.filter(p => {
-        const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''}`.toLowerCase();
+        const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''} ${p.description || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
         if (brandSlug === 'colway') {
           if (cat === 'epigenetic') return str.includes('diamond') || str.includes('diament') || str.includes('peeling') || str.includes('epigenetic');
           if (cat === 'native-dermal') return (str.includes('vege') || str.includes('wash') || str.includes('lip') || str.includes('dermal')) && !str.includes('diamond');
           if (cat === 'trichology' || cat === 'hair') return str.includes('hair') || str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('szampon') || str.includes('odzywka');
           if (cat === 'nutricosmetics' || cat === 'nutraceutical') return str.includes('colvita') || str.includes('supplement') || str.includes('capsule') || str.includes('suplement');
+        }
+        if (brandSlug === 'ultraperson' || brandSlug === 'ultraman') {
+          if (cat === 'energy') return str.includes('energy') || str.includes('metabolic') || str.includes('coq10') || str.includes('pqq');
+          if (cat === 'cognitive') return str.includes('cognitive') || str.includes('clarity') || str.includes('focus') || str.includes('stress') || str.includes('theanine');
+          if (cat === 'stress') return str.includes('stress') || str.includes('cortisol') || str.includes('resilience') || str.includes('ashwagandha');
+          if (cat === 'sleep') return str.includes('sleep') || str.includes('circadian') || str.includes('restoration') || str.includes('apigenin');
+          if (cat === 'longevity') return str.includes('longevity') || str.includes('cellular') || str.includes('renewal') || str.includes('resveratrol');
         }
         return str.includes(cat);
       });
@@ -832,7 +841,7 @@ export default function BrandCollectionPage({
             <BloodoCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
           ) : brandSlug === 'eterna' ? (
             <EternaCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
-          ) : brandSlug === 'ultraperson' ? (
+          ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? (
             <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
           ) : brandSlug === 'colway' ? (
             <ColwayCollectionSidebar
@@ -2061,7 +2070,7 @@ export default function BrandCollectionPage({
                 <BloodoCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
               ) : brandSlug === 'eterna' ? (
                 <EternaCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
-              ) : brandSlug === 'ultraperson' ? (
+              ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? (
                 <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
               ) : (
                 <ColwayCollectionSidebar
