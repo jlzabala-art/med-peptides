@@ -67,16 +67,14 @@ export async function buildCatalogSummary(searchParams) {
     const availabilityParam   = searchParams.get('availability') || '';
 
     const hasSupplierFilter     = supplierParams.length > 0;
-    const hasPresentationFilter = presentationParams.length > 0;
-    const hasTimeframeFilter    = timeframeParam.length > 0 && timeframeParam !== 'all';
-    const hasTagFilter          = tagParams.length > 0;
-    const hasPriorityFilter     = priorityParams.length > 0 && !priorityParams.includes('all');
+    const isStatusDefault = statusParams.length === 0 || (statusParams.length === 1 && statusParams[0] === 'active');
+    const hasStatusFilter = statusParams.length > 0 && !isStatusDefault;
 
     const hasActiveFilters =
       catParams.length > 0 || subcatParams.length > 0 || goalParams.length > 0 ||
       presentationParams.length > 0 || formatParams.length > 0 ||
       supplierParams.length > 0 || qParam.length > 0 || availabilityParam.length > 0 ||
-      pTypeParams.length > 0 || statusParams.length > 0 || hasTimeframeFilter ||
+      pTypeParams.length > 0 || hasStatusFilter || hasTimeframeFilter ||
       hasTagFilter || hasPriorityFilter;
 
     let metaFacets = null;
@@ -207,35 +205,29 @@ export async function buildCatalogSummary(searchParams) {
       };
     };
 
-    // Fast O(1) embedded variants resolution; query subcollection in parallel only if product lacks embedded variants
-    const missingVariantsProducts = [];
+    // Fast O(1) embedded variants resolution; create synthetic variant from product data if missing
     productsList.forEach(p => {
       const pData = p.data || {};
       if (pData.variants && Array.isArray(pData.variants) && pData.variants.length > 0) {
         variantsByProduct[p.id] = pData.variants.map((v, idx) => formatVariant(v, `v_${idx}`));
       } else {
-        missingVariantsProducts.push(p);
+        // Fast fallback: avoid N+1 subcollection queries by synthesizing a single variant from top-level attributes
+        variantsByProduct[p.id] = [
+          formatVariant({
+            id: `${p.id}_v0`,
+            name: pData.presentation || pData.name || 'Standard',
+            presentation: pData.presentation || '',
+            dose: pData.dose || pData.dosage || '',
+            price: Number(pData.price || 0),
+            retailPrice: Number(pData.retailPrice || pData.price || 0),
+            sku: pData.sku || '',
+            format: pData.format || '',
+            supplierId: pData.supplierId || pData.supplier || null,
+            supplierName: pData.supplierName || pData.supplier || ''
+          }, `v_0`)
+        ];
       }
     });
-
-    if (missingVariantsProducts.length > 0) {
-      const subcollectionFetches = await Promise.all(
-        missingVariantsProducts.map(async (p) => {
-          try {
-            const snap = await p.ref.collection('variants').get();
-            if (!snap.empty) return { id: p.id, docs: snap.docs };
-            // Fallback: check root collection product_variants where parentProductId == p.id
-            const pvSnap = await adminDb.collection('product_variants').where('parentProductId', '==', p.id).get();
-            return { id: p.id, docs: pvSnap.docs };
-          } catch {
-            return { id: p.id, docs: [] };
-          }
-        })
-      );
-      subcollectionFetches.forEach(({ id, docs }) => {
-        variantsByProduct[id] = docs.map((vd, idx) => formatVariant(vd.data(), vd.id || `v_${idx}`));
-      });
-    }
 
     // ── 6. AGGREGATE INTO CANONICAL PRODUCT GROUPS ───────────────────────────
     const groupsMap        = new Map();
