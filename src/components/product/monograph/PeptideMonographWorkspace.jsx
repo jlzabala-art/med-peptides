@@ -617,7 +617,7 @@ export default function PeptideMonographWorkspace({
                     Module 6
                   </span>
                   <h3 style={{ margin: '1px 0 0 0', fontSize: '0.88rem', fontWeight: 800, color: activeTab === 'synergy' ? '#003666' : '#1e293b' }}>
-                    Clinical Synergy & Pairings
+                    Atlas Recommendations
                   </h3>
                 </div>
               </div>

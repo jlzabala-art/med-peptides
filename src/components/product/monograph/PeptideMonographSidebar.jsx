@@ -18,9 +18,7 @@ import {
 import { QRCodeSVG } from 'qrcode.react';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
-import { formatCommercialSupplierName } from '@/utils/supplierCommercialNames';
 import { classifyProductDomain } from '@/utils/productNormalizer';
-import ClinicalRecommendationsSidebarWidget from '../widgets/ClinicalRecommendationsSidebarWidget';
 
 /**
  * PeptideMonographSidebar
@@ -100,8 +98,8 @@ export default function PeptideMonographSidebar({
     },
     {
       id: 'synergy',
-      label: 'Clinical Synergy',
-      subtitle: isDiagnostic ? 'Targeted therapeutic pairings' : 'Biochemical pairings & cross-sell',
+      label: 'Atlas Recommendations',
+      subtitle: isDiagnostic ? 'Targeted companion therapies' : 'Companion therapies & pairings',
       icon: Sparkles
     }
   ];
@@ -358,13 +356,6 @@ export default function PeptideMonographSidebar({
           </div>
         </div>
       </div>
-
-      {/* ── Universal Cross-Sell & Biochemical Synergy Widget ── */}
-      <ClinicalRecommendationsSidebarWidget
-        product={product}
-        slug={slug}
-        lang="en"
-      />
 
       {/* ── CARD 3: Direct Operative Actions (CoA, Label 300DPI, PDF) ── */}
       <div style={{

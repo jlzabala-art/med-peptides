@@ -955,6 +955,19 @@ export default function MasterCatalogTable({
             onChange: (val) => updateUrlParam('tagMode', val === 'all' ? 'all' : '')
           }
         ] : [
+          ...(!lockedSupplier ? [{
+            key: 'supplier',
+            label: 'Supplier',
+            pluralLabel: 'Suppliers',
+            multiSelect: true,
+            values: filterSupplier,
+            options: (facetSuppliers || []).map(s => ({
+              label: s.label,
+              value: s.value,
+              count: supplierFacets[s.value] ?? 0,
+            })).sort((a, b) => (b.count || 0) - (a.count || 0)),
+            onChange: (vals) => setMultiParam('supplier', vals)
+          }] : []),
           {
             key: 'workspace',
             label: 'Workspace',
@@ -1101,19 +1114,6 @@ export default function MasterCatalogTable({
             })).sort((a, b) => (b.count || 0) - (a.count || 0)),
             onChange: (vals) => setMultiParam('presentation', vals)
           },
-          ...(!lockedSupplier ? [{
-            key: 'supplier',
-            label: 'Supplier',
-            pluralLabel: 'Suppliers',
-            multiSelect: true,
-            values: filterSupplier,
-            options: (facetSuppliers || []).map(s => ({
-              label: s.label,
-              value: s.value,
-              count: supplierFacets[s.value] ?? 0,
-            })).sort((a, b) => (b.count || 0) - (a.count || 0)),
-            onChange: (vals) => setMultiParam('supplier', vals)
-          }] : []),
           {
             key: 'quality',
             label: 'Data Quality',

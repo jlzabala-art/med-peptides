@@ -19,7 +19,6 @@ import SolventReconWidget from './widgets/SolventReconWidget';
 import CorporateServiceWidget from './widgets/CorporateServiceWidget';
 import SupplementSidebarWidget from './widgets/SupplementSidebarWidget';
 import FdaApprovedPeptidesNetworkWidget from './FdaApprovedPeptidesNetworkWidget';
-import ClinicalRecommendationsSidebarWidget from './widgets/ClinicalRecommendationsSidebarWidget';
 import { isFdaApprovedPeptide } from '@/data/fdaPeptidesRegistry';
 import { QRCodeSVG } from 'qrcode.react';
 import './PublicDatasheetTableOfContents.css';
@@ -71,7 +70,7 @@ export default function ProductDetailSidebar({
     if (!list.some(s => s.id === 'clinical-synergy')) {
       list.push({
         id: 'clinical-synergy',
-        label: isEs ? 'Sinergia Clínica' : 'Clinical Synergy',
+        label: isEs ? 'Recomendaciones Atlas' : 'Atlas Recommendations',
         icon: Sparkles
       });
     }
@@ -299,13 +298,6 @@ export default function ProductDetailSidebar({
 
       {/* ── Dynamic Category-Specific Specialized Widget ── */}
       {renderContextualWidget()}
-
-      {/* ── Always-Visible Clinical Recommendations & Synergy Widget (Golden Rule Universal Cross-Sell) ── */}
-      <ClinicalRecommendationsSidebarWidget
-        product={product}
-        slug={slug}
-        lang={lang}
-      />
 
       {/* ── Associated Clinical Protocols (FIRST — clinical context before network) ── */}
       {!isCosmeticProduct && !isCorporateService && Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (

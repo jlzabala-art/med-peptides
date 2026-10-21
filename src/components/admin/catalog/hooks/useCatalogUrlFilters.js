@@ -139,7 +139,12 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
       localStorage.removeItem('regenpept-admin-catalog-prefs');
       localStorage.removeItem('regenpept_recent_imported');
     } catch (e) {}
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', pathname);
+      window.dispatchEvent(new Event('popstate'));
+    }
     router.replace(pathname, { scroll: false });
+    router.refresh();
   }, [pathname, router]);
 
   // Active filter chips array for DataTable

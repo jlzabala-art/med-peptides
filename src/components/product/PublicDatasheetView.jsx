@@ -1210,6 +1210,7 @@ export default function PublicDatasheetView({
         { id: 'kit-contents', label: lang === 'es' ? 'Contenido del Kit' : 'Kit Included Items', icon: Layers },
         { id: 'specs-section', label: lang === 'es' ? 'Trazabilidad y Calidad' : 'Lab Quality & Traceability', icon: ShieldCheck },
         { id: 'nad-clinical-faq', label: lang === 'es' ? 'Guías y Preguntas Clínicas' : 'Clinical FAQs & Guidance', icon: HelpCircle },
+        { id: 'clinical-synergy', label: lang === 'es' ? 'Recomendaciones Atlas' : 'Atlas Recommendations', icon: Sparkles },
         { id: 'related-peptides-section', label: lang === 'es' ? 'Protocolos Acompañantes' : 'Companion Protocols', icon: FlaskConical },
         ...(isBloodoDiagnostic ? [
           { id: 'bloodo-suite', label: lang === 'es' ? 'Otros Tests Disponibles' : 'Other Diagnostic Tests', icon: Sparkles },
@@ -1237,7 +1238,7 @@ export default function PublicDatasheetView({
         { id: 'inci-dossier', label: lang === 'es' ? 'Composición INCI Completa' : 'Full INCI Composition', icon: Microscope },
         { id: 'application-protocol', label: lang === 'es' ? 'Protocolo de Aplicación' : 'Clinical Usage Protocol', icon: ClipboardList },
         { id: 'colway-system', label: lang === 'es' ? 'Sistema Capilar Colway' : 'Colway 2-Step System', icon: Sparkles },
-        { id: 'clinical-synergy', label: lang === 'es' ? 'Sinergia Clínica y Maridajes' : 'Clinical Synergy & Pairings', icon: Sparkles },
+        { id: 'clinical-synergy', label: lang === 'es' ? 'Recomendaciones Atlas' : 'Atlas Recommendations', icon: Sparkles },
         { id: 'contraindications-section', label: lang === 'es' ? 'Seguridad y Test de Parche' : 'Safety & Patch Test', icon: ShieldCheck }
       ];
     }
@@ -1251,7 +1252,7 @@ export default function PublicDatasheetView({
         { id: 'publications-section', label: lang === 'es' ? 'Respaldos Científicos' : 'Scientific Evidence & Trials', icon: FileText },
         { id: 'contraindications-section', label: lang === 'es' ? 'Seguridad y Precauciones' : 'Safety & Precautions', icon: ShieldCheck },
         { id: 'labels-section', label: lang === 'es' ? 'Etiquetas de Farmacia' : 'Compounding Pharmacy Labels', icon: Tag },
-        { id: 'clinical-synergy', label: lang === 'es' ? 'Sinergias Clínicas y Maridajes' : 'Clinical Synergy & Pairings', icon: Sparkles },
+        { id: 'clinical-synergy', label: lang === 'es' ? 'Recomendaciones Atlas' : 'Atlas Recommendations', icon: Sparkles },
         { id: 'related-peptides-section', label: lang === 'es' ? 'Sinergias y Protocolos' : 'Synergies & Protocols', icon: FlaskConical }
       ];
     }
@@ -1265,7 +1266,7 @@ export default function PublicDatasheetView({
       ...(!isSolventProduct ? [
         { id: 'publications-section', label: lang === 'es' ? 'Ensayos y Literatura' : 'Scientific Literature', icon: FileText },
         { id: 'contraindications-section', label: lang === 'es' ? 'Seguridad y Precauciones' : 'Safety & Contraindications', icon: ShieldCheck },
-        { id: 'clinical-synergy', label: lang === 'es' ? 'Sinergia Clínica y Maridajes' : 'Clinical Synergy & Pairings', icon: Sparkles },
+        { id: 'clinical-synergy', label: lang === 'es' ? 'Recomendaciones Atlas' : 'Atlas Recommendations', icon: Sparkles },
         { id: 'labels-section', label: lang === 'es' ? 'Etiquetas de Dispensación' : 'Dispensing Vial Labels', icon: Tag },
         { id: 'analytical-specs', label: lang === 'es' ? 'Cromatografía y Pureza' : 'HPLC Purity & Mass', icon: Activity }
       ] : []),

@@ -32,7 +32,7 @@ export default function ClinicalRecommendationsSidebarWidget({
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Sparkles size={14} color="#003666" />
           <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-            {isEs ? 'Sinergia Clínica Recomendada' : 'Recommended Clinical Synergy'}
+            {isEs ? 'Recomendaciones Atlas' : 'Atlas Recommendations'}
           </span>
         </div>
         <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#0369a1', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '1px 6px', borderRadius: '9999px' }}>

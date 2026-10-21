@@ -164,7 +164,7 @@ export default function FilterRow({
   onClearAll = null, 
   activeCount = 0, 
   className = '',
-  maxInlinePills = 4,
+  maxInlinePills = 6,
   resultCount
 }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -176,6 +176,48 @@ export default function FilterRow({
     if (fo.multiSelect) return acc + (fo.values?.length || 0);
     return acc + (fo.value && fo.value !== '' && fo.value !== 'all' ? 1 : 0);
   }, 0);
+
+  // Active filter chips (Rules #24 & #29)
+  const activeChips = useMemo(() => {
+    const chips = [];
+    (filterOptions || []).forEach(fo => {
+      if (fo.multiSelect && Array.isArray(fo.values) && fo.values.length > 0) {
+        fo.values.forEach(v => {
+          const opt = (fo.options || []).find(o => o.value === v);
+          chips.push({
+            id: `${fo.key || fo.id}-${v}`,
+            dimension: fo.label || fo.pluralLabel || 'Filter',
+            label: opt?.label || opt?.name || v,
+            onRemove: () => {
+              const next = fo.values.filter(x => x !== v);
+              fo.onChange?.(next);
+            }
+          });
+        });
+      } else if (!fo.multiSelect && fo.value && fo.value !== '' && fo.value !== 'all') {
+        const opt = (fo.options || []).find(o => o.value === fo.value);
+        chips.push({
+          id: `${fo.key || fo.id}-${fo.value}`,
+          dimension: fo.label || 'Filter',
+          label: opt?.label || opt?.name || fo.value,
+          onRemove: () => fo.onChange?.('')
+        });
+      }
+    });
+    return chips;
+  }, [filterOptions]);
+
+  // Robust universal reset handler
+  const handleClearAll = useCallback(() => {
+    (filterOptions || []).forEach(fo => {
+      if (fo.multiSelect) {
+        fo.onChange?.([]);
+      } else {
+        fo.onChange?.('');
+      }
+    });
+    if (onClearAll) onClearAll();
+  }, [filterOptions, onClearAll]);
 
   // If there are many filter dimensions, pin the first `maxInlinePills` and group the rest in Drawer
   const hasManyFilters = filterOptions.length > maxInlinePills;
@@ -202,7 +244,7 @@ export default function FilterRow({
           WebkitOverflowScrolling: 'touch'
         }}
       >
-        {/* Unified All Filters Button (Always visible when there are 3+ filters) */}
+        {/* Unified All Filters Button (Always visible when there are more than maxInlinePills filters) */}
         {hasManyFilters && (
           <button
             type="button"
@@ -279,11 +321,11 @@ export default function FilterRow({
           );
         })}
 
-        {/* Inline Clear All Button (appears directly on the same line) */}
-        {onClearAll && computedActiveCount > 0 && (
+        {/* Inline Clear All Button */}
+        {computedActiveCount > 0 && (
           <button
             type="button"
-            onClick={onClearAll}
+            onClick={handleClearAll}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -309,6 +351,7 @@ export default function FilterRow({
               e.currentTarget.style.backgroundColor = '#fff1f2';
               e.currentTarget.style.borderColor = '#fecaca';
             }}
+            title="Clear all active filters"
           >
             <span>✕ Clear ({computedActiveCount})</span>
           </button>
@@ -321,6 +364,79 @@ export default function FilterRow({
           }
         `}</style>
       </div>
+
+      {/* Active Filter Chips Strip (Golden Rules #24 & #29: Transparent visibility from outside) */}
+      {activeChips.length > 0 && (
+        <div
+          className="active-filter-chips-bar"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            flexWrap: 'wrap',
+            padding: '2px 0 6px 0',
+            fontSize: '0.78rem'
+          }}
+        >
+          <span style={{ color: '#64748b', fontWeight: 650, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Active:
+          </span>
+          {activeChips.map(chip => (
+            <span
+              key={chip.id}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '2px 8px',
+                borderRadius: '12px',
+                backgroundColor: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                color: '#1e40af',
+                fontWeight: 600,
+                fontSize: '0.74rem'
+              }}
+            >
+              <span style={{ color: '#475569', fontWeight: 500 }}>{chip.dimension}:</span>
+              <span>{chip.label}</span>
+              <button
+                type="button"
+                onClick={chip.onRemove}
+                title={`Remove ${chip.dimension}: ${chip.label}`}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '0 2px',
+                  cursor: 'pointer',
+                  color: '#2563eb',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  fontWeight: 700,
+                  fontSize: '0.78rem'
+                }}
+              >
+                ✕
+              </button>
+            </span>
+          ))}
+          <button
+            type="button"
+            onClick={handleClearAll}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#e11d48',
+              fontSize: '0.74rem',
+              fontWeight: 650,
+              cursor: 'pointer',
+              padding: '2px 6px',
+              textDecoration: 'underline'
+            }}
+          >
+            Clear all ({activeChips.length})
+          </button>
+        </div>
+      )}
 
       {/* Unified Filters Drawer */}
       <UnifiedFiltersDrawer

@@ -1,16 +1,17 @@
 /**
  * src/services/productClinicalRecommendationsEngine.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Atlas Clinical Adjuvant & Cross-Selling Synergy Engine
+ * Atlas Recommendations Engine (Clinical Adjuvant & Pairings)
  *
- * Provides scientifically grounded, mechanism-based clinical recommendations
+ * Provides clear, doctor-friendly, mechanism-based clinical recommendations
  * for all products in the Atlas catalog across 4 biological pillars:
- *   1. Tissue Scaffolding & Substrates (Oral Tropocollagen, Galenic Bases)
+ *   1. Tissue Scaffolding & Substrates (Bioactive Collagen, Galenic Bases)
  *   2. Bioregulatory Peptides & Growth Signals (BPC-157, TB-500, GHK-Cu)
- *   3. Clinical Reconstitution Vehicles & Administration Supplies (BAC Water, Syringes)
- *   4. Diagnostic Biomarker Panels (TeleTest HTMA, Omega-3, Bloodo NAD+)
+ *   3. Clinical Reconstitution Vehicles & Administration (BAC Water, Syringes)
+ *   4. Diagnostic Biomarker Panels (Bloodo NAD+, TeleTest HTMA, Omega-3)
  *
- * Adheres strictly to AGENTS.md rules. Client-safe (0 Node.js dependencies).
+ * Golden Rule: Never recommend a product to itself. Keep rationales simple,
+ * concise, and doctor-friendly.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -21,11 +22,424 @@ export function getProductClinicalRecommendations(product = {}, slug = '', lang 
   const cat = String(product?.category || product?.therapeutic_category || '').toLowerCase();
   const type = String(product?.type || product?.productType || '').toLowerCase();
 
+  let list = [];
+
   // ─────────────────────────────────────────────────────────────────────────
-  // 1. COLVITA NATIVE TROPOCOLLAGEN & DIETARY SUPPLEMENTS
+  // 1. BLOOD & SALIVA DIAGNOSTIC TESTS (BLOODO NAD+, TELETEST PANELS)
   // ─────────────────────────────────────────────────────────────────────────
-  if (pSlug.includes('colvita') || pName.includes('colvita') || cat.includes('supplement') || type.includes('supplement')) {
-    return [
+
+  // 1A. Bloodo NAD+ Diagnostic Test (DBS Capillary)
+  if (pSlug.includes('bloodo-nad') || (pSlug.includes('bloodo') && pSlug.includes('nad')) || pName.includes('bloodo nad')) {
+    list = [
+      {
+        id: 'nad-plus',
+        slug: 'nad-plus',
+        name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
+        category: isEs ? 'Bioenergética Celular Inyectable' : 'Parenteral Bioenergetics',
+        presentation: isEs ? 'Vial Clínico Liofilizado (500 mg / 1000 mg)' : 'Lyophilized Clinical Vial (500 mg / 1000 mg)',
+        image: '/assets/vials/nadplus.png',
+        url: '/p/nad-plus',
+        synergyBadge: isEs ? 'Tratamiento Restaurador Primario' : 'Primary Restorative Therapy',
+        synergyBadgeColor: '#003666',
+        clinicalRationale: isEs
+          ? 'Terapia parenteral directa para restaurar los niveles de NAD+ intracelular cuando la prueba diagnóstica refleja depleción celular y mitocondrial.'
+          : 'Direct parenteral therapy to replenish intracellular NAD+ levels when diagnostic testing reveals cellular depletion and mitochondrial fatigue.',
+        role: isEs ? 'Reposición Intracelular Directa' : 'Direct Intracellular Repletion'
+      },
+      {
+        id: 'mots-c',
+        slug: 'mots-c',
+        name: 'MOTS-c (Mitochondrial-Derived Peptide)',
+        category: isEs ? 'Regulador Metabólico Mitocondrial' : 'Mitochondrial Metabolic Regulator',
+        presentation: isEs ? 'Vial Clínico (10 mg)' : '10 mg Clinical Vial',
+        image: '/images/products/lotusland/mots-c.png',
+        url: '/p/mots-c',
+        synergyBadge: isEs ? 'Sinergia Mitocondrial' : 'Mitochondrial Synergy',
+        synergyBadgeColor: '#0284c7',
+        clinicalRationale: isEs
+          ? 'Activa la vía AMPK y mejora la captación celular de glucosa, potenciando la respuesta energética mitocondrial en protocolos con NAD+.'
+          : 'Activates the AMPK pathway and improves cellular glucose uptake, enhancing mitochondrial bioenergetic response in NAD+ protocols.',
+        role: isEs ? 'Activador AMPK' : 'AMPK Activator'
+      },
+      {
+        id: 'epithalon',
+        slug: 'epithalon',
+        name: 'Epithalon (Synthetic Pineal Peptide)',
+        category: isEs ? 'Biorregulador de Longevidad' : 'Longevity Bioregulator',
+        presentation: isEs ? 'Vial Clínico (10 mg / 50 mg)' : '10 mg / 50 mg Clinical Vial',
+        image: '/images/products/lotusland/epithalon.png',
+        url: '/p/epithalon',
+        synergyBadge: isEs ? 'Protocolo de Longevidad Celular' : 'Cellular Longevity Protocol',
+        synergyBadgeColor: '#0d9488',
+        clinicalRationale: isEs
+          ? 'Estimula la telomerasa y armoniza el ritmo neuroendocrino, complementando la restauración de NAD+ para la longevidad celular.'
+          : 'Stimulates telomerase activity and harmonizes circadian endocrine rhythm, complementing NAD+ restoration for healthy cellular aging.',
+        role: isEs ? 'Regulación Telomérica' : 'Telomerase Regulation'
+      }
+    ];
+  }
+
+  // 1B. Omega Fatty Acids & Cellular Inflammation (TeleTest Test Omega / Bloodo Omega)
+  else if (pSlug.includes('omega') || pName.includes('omega') || pSlug.includes('lipid')) {
+    list = [
+      {
+        id: 'bpc-157',
+        slug: 'bpc-157',
+        name: 'BPC-157 (Body Protection Compound-157)',
+        category: isEs ? 'Citoprotección Endotelial' : 'Endothelial Cytoprotection',
+        presentation: isEs ? 'Vial Liofilizado (5 mg / 10 mg)' : 'Lyophilized Vial (5 mg / 10 mg)',
+        image: '/images/products/lotusland/bpc-157.png',
+        url: '/p/bpc-157',
+        synergyBadge: isEs ? 'Resolución Microvascular' : 'Microvascular Resolution',
+        synergyBadgeColor: '#16a34a',
+        clinicalRationale: isEs
+          ? 'Estabiliza el endotelio microvascular y modula citoquinas proinflamatorias cuando el ratio AA/EPA se encuentra elevado.'
+          : 'Stabilizes microvascular endothelium and down-regulates inflammatory cytokines when erythrocyte AA/EPA ratio is elevated.',
+        role: isEs ? 'Protección Endotelial' : 'Endothelial Protection'
+      },
+      {
+        id: 'nad-plus',
+        slug: 'nad-plus',
+        name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
+        category: isEs ? 'Optimización Metabólica' : 'Metabolic Optimization',
+        presentation: isEs ? 'Vial Liofilizado (500 mg)' : 'Lyophilized Vial (500 mg)',
+        image: '/assets/vials/nadplus.png',
+        url: '/p/nad-plus',
+        synergyBadge: isEs ? 'Beta-Oxidación Lipídica' : 'Lipid Beta-Oxidation',
+        synergyBadgeColor: '#0284c7',
+        clinicalRationale: isEs
+          ? 'Restaura el balance redox intracelular facilitando la beta-oxidación de ácidos grasos y la fluidez de membrana.'
+          : 'Restores intracellular redox balance to facilitate mitochondrial fatty acid beta-oxidation and membrane fluidity.',
+        role: isEs ? 'Soporte Redox' : 'Redox Support'
+      }
+    ];
+  }
+
+  // 1C. HTMA Hair Mineral Analysis (TeleTest HTMA)
+  else if (pSlug.includes('htma') || pSlug.includes('mineral') || pName.includes('mineral') || pSlug.includes('cabello')) {
+    list = [
+      {
+        id: 'bpc-157',
+        slug: 'bpc-157',
+        name: 'BPC-157 (Body Protection Compound-157)',
+        category: isEs ? 'Barrera Mucosa Intestinal' : 'Mucosal Barrier Protection',
+        presentation: isEs ? 'Vial Liofilizado (5 mg / 10 mg)' : 'Lyophilized Vial (5 mg / 10 mg)',
+        image: '/images/products/lotusland/bpc-157.png',
+        url: '/p/bpc-157',
+        synergyBadge: isEs ? 'Defensa de Uniones Estrechas' : 'Tight Junction Defense',
+        synergyBadgeColor: '#16a34a',
+        clinicalRationale: isEs
+          ? 'Protege la mucosa intestinal impidiendo la translocación de metales pesados y reduciendo la inflamación subclínica.'
+          : 'Protects the intestinal barrier against heavy metal translocation and reduces chronic subclinical inflammation.',
+        role: isEs ? 'Defensa de Barrera Mucosa' : 'Mucosal Barrier Defense'
+      },
+      {
+        id: 'colway-colvita',
+        slug: 'colway-colvita',
+        name: 'Colvita Bioactive Native Collagen',
+        category: isEs ? 'Sustrato de Matriz Conectiva' : 'Connective Tissue Matrix',
+        presentation: isEs ? 'Cápsulas Orales (60 / 120 cápsulas)' : 'Oral Capsules (60 / 120 capsules)',
+        image: '/images/products/colway/colvita.png',
+        url: '/p/colway-colvita',
+        synergyBadge: isEs ? 'Reposición Estructural' : 'Structural Matrix Repletion',
+        synergyBadgeColor: '#0284c7',
+        clinicalRationale: isEs
+          ? 'Aporta tropocolágeno nativo y oligoelementos marinos para restaurar la matriz extracelular tras exposición a metales tóxicos.'
+          : 'Supplies native tropocollagen and marine trace minerals to restore connective tissue matrix integrity.',
+        role: isEs ? 'Sustrato Conectivo' : 'Connective Substrate'
+      }
+    ];
+  }
+
+  // 1D. HLA Immunogenetics & Autoimmunity (TeleTest HLA / Celiac)
+  else if (pSlug.includes('hla') || pSlug.includes('celiac') || pName.includes('hla') || pSlug.includes('autoinmunidad')) {
+    list = [
+      {
+        id: 'bpc-157',
+        slug: 'bpc-157',
+        name: 'BPC-157 (Body Protection Compound-157)',
+        category: isEs ? 'Restauración de Barrera Intestinal' : 'Intestinal Barrier Restoration',
+        presentation: isEs ? 'Vial Liofilizado (5 mg / 10 mg)' : 'Lyophilized Vial (5 mg / 10 mg)',
+        image: '/images/products/lotusland/bpc-157.png',
+        url: '/p/bpc-157',
+        synergyBadge: isEs ? 'Sellado de Mucosa' : 'Mucosal Tight Junction Sealing',
+        synergyBadgeColor: '#16a34a',
+        clinicalRationale: isEs
+          ? 'Revierte la permeabilidad intestinal mediada por zonulina en pacientes con susceptibilidad genética HLA a la autoinmunidad.'
+          : 'Reverses intestinal hyperpermeability and stabilizes tight junctions in individuals with genetic autoimmune predisposition.',
+        role: isEs ? 'Sellado de Uniones Estrechas' : 'Tight Junction Sealing'
+      },
+      {
+        id: 'kpv',
+        slug: 'kpv',
+        name: 'KPV (Lysine-Proline-Valine)',
+        category: isEs ? 'Antiinflamatorio Mucoso' : 'Mucosal Anti-Inflammatory',
+        presentation: isEs ? 'Vial Liofilizado (5 mg)' : 'Lyophilized Vial (5 mg)',
+        image: '/assets/vials/kpv.png',
+        url: '/p/kpv',
+        synergyBadge: isEs ? 'Inhibición NF-κB' : 'NF-κB Pathway Down-Regulation',
+        synergyBadgeColor: '#d97706',
+        clinicalRationale: isEs
+          ? 'Tripéptido bioactivo que bloquea la activación de NF-κB en el epitelio intestinal reduciendo la respuesta autoinmune local.'
+          : 'Bioactive tripeptide that attenuates epithelial NF-κB signaling, dampening mucosal inflammatory flares.',
+        role: isEs ? 'Control de NF-κB' : 'NF-κB Control'
+      }
+    ];
+  }
+
+  // 1E. Pharmacogenetics & Hepatic Detox (TeleTest Saliva Metabolizer)
+  else if (pSlug.includes('detox') || pSlug.includes('metabolizer') || pName.includes('metabolizer') || pSlug.includes('farmacogenetica')) {
+    list = [
+      {
+        id: 'bpc-157',
+        slug: 'bpc-157',
+        name: 'BPC-157 (Body Protection Compound-157)',
+        category: isEs ? 'Citoprotección Hepática' : 'Hepatic Cytoprotection',
+        presentation: isEs ? 'Vial Liofilizado (5 mg / 10 mg)' : 'Lyophilized Vial (5 mg / 10 mg)',
+        image: '/images/products/lotusland/bpc-157.png',
+        url: '/p/bpc-157',
+        synergyBadge: isEs ? 'Protección Hepatocelular' : 'Hepatocellular Cytoprotection',
+        synergyBadgeColor: '#16a34a',
+        clinicalRationale: isEs
+          ? 'Protege los hepatocitos y la microcirculación hepática en pacientes con fenotipos metabolizadores lentos o intermedios.'
+          : 'Protects hepatocytes and hepatic microvasculature against reactive intermediate toxicity in slow metabolizers.',
+        role: isEs ? 'Soporte Hepático' : 'Hepatic Support'
+      },
+      {
+        id: 'nad-plus',
+        slug: 'nad-plus',
+        name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
+        category: isEs ? 'Cofactor Redox de Biotransformación' : 'Phase I/II Redox Cofactor',
+        presentation: isEs ? 'Vial Liofilizado (500 mg)' : 'Lyophilized Vial (500 mg)',
+        image: '/assets/vials/nadplus.png',
+        url: '/p/nad-plus',
+        synergyBadge: isEs ? 'Aclaramiento Enzimático' : 'Enzymatic Clearance Support',
+        synergyBadgeColor: '#0284c7',
+        clinicalRationale: isEs
+          ? 'Aporta el sustrato redox necesario para las enzimas del citocromo P450 y las reacciones de conjugación de Fase II.'
+          : 'Provides the essential redox cofactor required for cytochrome P450 monooxygenases and Phase II clearance.',
+        role: isEs ? 'Cofactor de Biotransformación' : 'Biotransformation Cofactor'
+      }
+    ];
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 2. LONGEVITY PEPTIDES & PARENTERAL NAD+ VIALS (NAD+, MOTS-C, EPITHALON, SS-31)
+  // ─────────────────────────────────────────────────────────────────────────
+  else if (pSlug.includes('nad') || pSlug.includes('epithalon') || pSlug.includes('mots-c') || pSlug.includes('ss-31') || pSlug.includes('humanin')) {
+    // If the product is injectable NAD+ itself
+    if (pSlug.includes('nad')) {
+      list = [
+        {
+          id: 'bloodo-nad-level-test',
+          slug: 'bloodo-nad-level-test',
+          name: 'Bloodo™ NAD+ Quantitative DBS Test',
+          category: isEs ? 'Monitorización Diagnóstica DBS' : 'DBS Diagnostic Monitoring',
+          presentation: isEs ? 'Kit Capilar DBS (CE-IVDR)' : 'CE-IVDR DBS Capillary Kit',
+          image: '/images/products/bloodo/nad-test.png',
+          url: '/p/bloodo-nad-level-test',
+          synergyBadge: isEs ? 'Monitorización Objetiva' : 'Objective Biomarker Monitoring',
+          synergyBadgeColor: '#003666',
+          clinicalRationale: isEs
+            ? 'Cuantifica los niveles basales de NAD+ intracelular para pautar la dosis de inyección y evaluar el progreso terapéutico.'
+            : 'Quantifies baseline and post-cycle intracellular NAD+ levels to objectively calibrate injection dosage and efficacy.',
+          role: isEs ? 'Validación Diagnóstica' : 'Diagnostic Validation'
+        },
+        {
+          id: 'bac-water-30ml',
+          slug: 'bac-water-30ml',
+          name: 'Bacteriostatic Water USP (30 mL)',
+          category: isEs ? 'Vehículo Estéril Requerido' : 'Mandatory Sterile Vehicle',
+          presentation: isEs ? 'Vial Multidosis Borosilicato Tipo I' : 'Multi-Dose Borosilicate Vial',
+          image: '/images/products/lotusland/bac-water.png',
+          url: '/p/bac-water-30ml',
+          synergyBadge: isEs ? 'Vehículo de Reconstitución' : 'Reconstitution Vehicle',
+          synergyBadgeColor: '#0284c7',
+          clinicalRationale: isEs
+            ? 'Solvente bacteriostático estéril con 0.9% alcohol bencílico indispensable para la reconstitución segura del vial.'
+            : 'Sterile bacteriostatic diluent with 0.9% benzyl alcohol USP required to safely reconstitute the lyophilized vial.',
+          role: isEs ? 'Solvente de Reconstitución' : 'Reconstitution Diluent'
+        },
+        {
+          id: 'mots-c',
+          slug: 'mots-c',
+          name: 'MOTS-c (Mitochondrial-Derived Peptide)',
+          category: isEs ? 'Regulador Metabólico Mitocondrial' : 'Mitochondrial Metabolic Regulator',
+          presentation: isEs ? 'Vial Clínico (10 mg)' : '10 mg Clinical Vial',
+          image: '/images/products/lotusland/mots-c.png',
+          url: '/p/mots-c',
+          synergyBadge: isEs ? 'Sinergia Mitocondrial' : 'Mitochondrial Synergy',
+          synergyBadgeColor: '#0d9488',
+          clinicalRationale: isEs
+            ? 'Actúa en sinergia directa con el NAD+ activando la vía AMPK y optimizando la respiración celular mitocondrial.'
+            : 'Acts in direct synergy with NAD+ by activating AMPK and boosting cellular mitochondrial respiration.',
+          role: isEs ? 'Activador AMPK' : 'AMPK Activator'
+        }
+      ];
+    } else {
+      // Epithalon, MOTS-c, SS-31
+      list = [
+        {
+          id: 'nad-plus',
+          slug: 'nad-plus',
+          name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
+          category: isEs ? 'Bioenergética Celular Inyectable' : 'Parenteral Bioenergetics',
+          presentation: isEs ? 'Vial Clínico Liofilizado (500 mg)' : 'Lyophilized Clinical Vial (500 mg)',
+          image: '/assets/vials/nadplus.png',
+          url: '/p/nad-plus',
+          synergyBadge: isEs ? 'Sinergia Bioenergética' : 'Bioenergetic Synergy',
+          synergyBadgeColor: '#003666',
+          clinicalRationale: isEs
+            ? 'Restaura el sustrato celular de sirtuinas y la fosforilación oxidativa, potenciando la acción de los péptidos de longevidad.'
+            : 'Restores sirtuin coenzyme substrate and oxidative phosphorylation, enhancing longevity peptide activity.',
+          role: isEs ? 'Bioenergética Celular' : 'Cellular Bioenergetics'
+        },
+        {
+          id: 'bloodo-nad-level-test',
+          slug: 'bloodo-nad-level-test',
+          name: 'Bloodo™ NAD+ Quantitative DBS Test',
+          category: isEs ? 'Monitorización Diagnóstica DBS' : 'DBS Diagnostic Monitoring',
+          presentation: isEs ? 'Kit Capilar DBS (CE-IVDR)' : 'CE-IVDR DBS Capillary Kit',
+          image: '/images/products/bloodo/nad-test.png',
+          url: '/p/bloodo-nad-level-test',
+          synergyBadge: isEs ? 'Marcador de Longevidad' : 'Longevity Biomarker',
+          synergyBadgeColor: '#0284c7',
+          clinicalRationale: isEs
+            ? 'Evalúa el estado bioenergético intracelular antes y después de los ciclos de péptidos bioreguladores.'
+            : 'Evaluates cellular bioenergetic status before and after bioregulatory peptide cycles.',
+          role: isEs ? 'Validación Analítica' : 'Analytical Validation'
+        },
+        {
+          id: 'bac-water-30ml',
+          slug: 'bac-water-30ml',
+          name: 'Bacteriostatic Water USP (30 mL)',
+          category: isEs ? 'Vehículo Estéril Requerido' : 'Mandatory Sterile Vehicle',
+          presentation: isEs ? 'Vial Multidosis Borosilicato Tipo I' : 'Multi-Dose Borosilicate Vial',
+          image: '/images/products/lotusland/bac-water.png',
+          url: '/p/bac-water-30ml',
+          synergyBadge: isEs ? 'Vehículo de Reconstitución' : 'Reconstitution Vehicle',
+          synergyBadgeColor: '#16a34a',
+          clinicalRationale: isEs
+            ? 'Solvente bacteriostático indispensable para la reconstitución estéril de péptidos liofilizados.'
+            : 'Sterile bacteriostatic diluent required for safe multi-dose peptide reconstitution.',
+          role: isEs ? 'Solvente de Reconstitución' : 'Reconstitution Diluent'
+        }
+      ];
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 3. REGENERATIVE TISSUE REPAIR (BPC-157, TB-500, KPV, GHK-CU)
+  // ─────────────────────────────────────────────────────────────────────────
+  else if (pSlug.includes('bpc') || pSlug.includes('tb-500') || pSlug.includes('kpv') || pSlug.includes('ghk') || pSlug.includes('ara-290')) {
+    const isBpc = pSlug.includes('bpc');
+    list = [
+      {
+        id: isBpc ? 'tb-500' : 'bpc-157',
+        slug: isBpc ? 'tb-500' : 'bpc-157',
+        name: isBpc ? 'TB-500 (Thymosin Beta-4)' : 'BPC-157 (Body Protection Compound-157)',
+        category: isEs ? 'Sinergia Regenerativa Dual' : 'Dual Regenerative Synergy',
+        presentation: isEs ? 'Vial Liofilizado (5 mg / 10 mg)' : 'Lyophilized Vial (5 mg / 10 mg)',
+        image: isBpc ? '/images/products/lotusland/tb-500.png' : '/images/products/lotusland/bpc-157.png',
+        url: isBpc ? '/p/tb-500' : '/p/bpc-157',
+        synergyBadge: isEs ? 'Dúo Regenerativo Canónico' : 'Canonical Regeneration Duo',
+        synergyBadgeColor: '#16a34a',
+        clinicalRationale: isEs
+          ? 'Combina angiogénesis temprana (BPC-157) con migración celular y remodelación de actina (TB-500) para acelerar la reparación tisular.'
+          : 'Combines rapid VEGF angiogenesis (BPC-157) with stem cell migration and actin remodeling (TB-500) for tissue repair.',
+        role: isEs ? 'Potenciador Reparador' : 'Repair Potentiator'
+      },
+      {
+        id: 'bac-water-30ml',
+        slug: 'bac-water-30ml',
+        name: 'Bacteriostatic Water USP (30 mL)',
+        category: isEs ? 'Vehículo Estéril Requerido' : 'Mandatory Sterile Vehicle',
+        presentation: isEs ? 'Vial Multidosis Borosilicato Tipo I' : 'Multi-Dose Borosilicate Vial',
+        image: '/images/products/lotusland/bac-water.png',
+        url: '/p/bac-water-30ml',
+        synergyBadge: isEs ? 'Vehículo de Reconstitución' : 'Reconstitution Vehicle',
+        synergyBadgeColor: '#003666',
+        clinicalRationale: isEs
+          ? 'Agua bacteriostática estéril con 0.9% alcohol bencílico USP indispensable para preservar la estabilidad del péptido.'
+          : 'Sterile bacteriostatic diluent with 0.9% benzyl alcohol USP essential for preserving peptide stability and sterility.',
+        role: isEs ? 'Vehículo Clínico' : 'Clinical Vehicle'
+      },
+      {
+        id: 'colway-colvita',
+        slug: 'colway-colvita',
+        name: 'Colvita Bioactive Native Collagen',
+        category: isEs ? 'Sustrato Estructural de Matriz' : 'Extracellular Matrix Substrate',
+        presentation: isEs ? 'Cápsulas Orales (60 / 120 cápsulas)' : 'Oral Capsules (60 / 120 capsules)',
+        image: '/images/products/colway/colvita.png',
+        url: '/p/colway-colvita',
+        synergyBadge: isEs ? 'Sustrato de Síntesis Tisular' : 'Tissue Synthesis Substrate',
+        synergyBadgeColor: '#0284c7',
+        clinicalRationale: isEs
+          ? 'Aporta oligopéptidos de colágeno nativo puro para nutrir la matriz extracelular activada por la señalización peptídica.'
+          : 'Supplies freeze-dried native collagen peptides to build extracellular matrix signaled by peptide therapy.',
+        role: isEs ? 'Sustrato Tisular' : 'Tissue Substrate'
+      }
+    ];
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 4. METABOLIC & WEIGHT MANAGEMENT (RETATRUTIDE, TIRZEPATIDE, SEMAGLUTIDE)
+  // ─────────────────────────────────────────────────────────────────────────
+  else if (pSlug.includes('retatrutide') || pSlug.includes('tirzepatide') || pSlug.includes('semaglutide') || pSlug.includes('cagrilintide') || pSlug.includes('aod-9604')) {
+    list = [
+      {
+        id: 'bac-water-30ml',
+        slug: 'bac-water-30ml',
+        name: 'Bacteriostatic Water USP (30 mL)',
+        category: isEs ? 'Vehículo Estéril Requerido' : 'Mandatory Sterile Vehicle',
+        presentation: isEs ? 'Vial Multidosis Borosilicato Tipo I' : 'Multi-Dose Borosilicate Vial',
+        image: '/images/products/lotusland/bac-water.png',
+        url: '/p/bac-water-30ml',
+        synergyBadge: isEs ? 'Vehículo de Reconstitución' : 'Reconstitution Vehicle',
+        synergyBadgeColor: '#003666',
+        clinicalRationale: isEs
+          ? 'Permite reconstituir los viales con concentraciones volumétricas exactas adaptadas a la titulación de dosis médica.'
+          : 'Allows precise volumetric reconstitution tailored to physician dosage titration schedules.',
+        role: isEs ? 'Solvente de Reconstitución' : 'Reconstitution Diluent'
+      },
+      {
+        id: 'teletest-test-omega',
+        slug: 'teletest-test-omega',
+        name: 'TeleTest Omega Test (HS Omega-3 & AA/EPA)',
+        category: isEs ? 'Diagnóstico Cardiovascular' : 'Cardiovascular Diagnostic',
+        presentation: isEs ? 'Analítica Sangre Total' : 'Whole Blood Diagnostic',
+        image: '/images/products/teletest/omega-test.svg',
+        url: '/p/teletest-test-omega',
+        synergyBadge: isEs ? 'Monitorización de Inflamación' : 'Inflammation Monitoring',
+        synergyBadgeColor: '#d97706',
+        clinicalRationale: isEs
+          ? 'Monitoriza el índice Omega-3 y el ratio de inflamación AA/EPA durante protocolos de pérdida de peso con incretinas.'
+          : 'Tracks red blood cell Omega-3 index and inflammation ratio during incretin weight loss protocols.',
+        role: isEs ? 'Control de Inflamación' : 'Inflammation Monitoring'
+      },
+      {
+        id: 'colway-colvita',
+        slug: 'colway-colvita',
+        name: 'Colvita Bioactive Native Collagen',
+        category: isEs ? 'Firmeza Cutánea & Elasticidad' : 'Skin Tightening & Elasticity',
+        presentation: isEs ? 'Cápsulas Orales (60 / 120 cápsulas)' : 'Oral Capsules (60 / 120 capsules)',
+        image: '/images/products/colway/colvita.png',
+        url: '/p/colway-colvita',
+        synergyBadge: isEs ? 'Prevención de Flacidez' : 'Dermal Density Protection',
+        synergyBadgeColor: '#0284c7',
+        clinicalRationale: isEs
+          ? 'Aporta tropocolágeno nativo para preservar la densidad de la dermis profunda ante una rápida pérdida de peso.'
+          : 'Replenishes native tropocollagen to sustain dermal thickness and skin firmness during rapid weight loss.',
+        role: isEs ? 'Firmeza Dérmica' : 'Dermal Firmness'
+      }
+    ];
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 5. COLVITA & ORAL NUTRACEUTICALS
+  // ─────────────────────────────────────────────────────────────────────────
+  else if (pSlug.includes('colvita') || pName.includes('colvita') || cat.includes('supplement') || type.includes('supplement')) {
+    list = [
       {
         id: 'bpc-157',
         slug: 'bpc-157',
@@ -34,12 +448,12 @@ export function getProductClinicalRecommendations(product = {}, slug = '', lang 
         presentation: isEs ? 'Vial Liofilizado (5 mg / 10 mg)' : 'Lyophilized Vial (5 mg / 10 mg)',
         image: '/images/products/lotusland/bpc-157.png',
         url: '/p/bpc-157',
-        synergyBadge: isEs ? 'Neo-Colagénesis & Angiogénesis' : 'Neo-Collagenesis & Angiogenesis',
+        synergyBadge: isEs ? 'Neo-Colagénesis' : 'Neo-Collagenesis',
         synergyBadgeColor: '#0284c7',
         clinicalRationale: isEs
-          ? 'BPC-157 activa la señalización de EGR-1 y VEGF en fibroblastos. El tropocolágeno puro liofilizado de Colvita suministra los oligopéptidos estructurales específicos (hidroxiprolina y prolina) necesarios para materializar la matriz extracelular ordenada.'
-          : 'BPC-157 upregulates EGR-1 and VEGF signaling in fibroblasts. Freeze-dried native Colvita tropocollagen provides the exact structural oligopeptide substrates (hydroxyproline, proline) required to synthesize organized ECM.',
-        role: isEs ? 'Activador Celular de Síntesis ECM' : 'ECM Cellular Synthesis Activator'
+          ? 'Estimula los fibroblastos para sintetizar nueva matriz extracelular aprovechando los aminoácidos de Colvita.'
+          : 'Stimulates fibroblasts to synthesize new extracellular matrix using bioavailable collagen substrates.',
+        role: isEs ? 'Activador de Síntesis' : 'Synthesis Activator'
       },
       {
         id: 'ghk-cu',
@@ -49,417 +463,97 @@ export function getProductClinicalRecommendations(product = {}, slug = '', lang 
         presentation: isEs ? 'Vial Liofilizado (50 mg / 100 mg)' : 'Lyophilized Vial (50 mg / 100 mg)',
         image: '/images/products/lotusland/ghk-cu.png',
         url: '/p/ghk-cu',
-        synergyBadge: isEs ? 'Entrecruzamiento LOX & Firmeza' : 'LOX Cross-Linking & Dermal Tensile',
+        synergyBadge: isEs ? 'Entrecruzamiento LOX' : 'LOX Cross-Linking',
         synergyBadgeColor: '#0d9488',
         clinicalRationale: isEs
-          ? 'GHK-Cu induce la expresión de la lisil oxidasa (LOX), la enzima que entrecruza covalentemente las triples hélices de tropocolágeno en fibras resistentes a la tracción dérmica y articular.'
-          : 'GHK-Cu upregulates lysyl oxidase (LOX), the key enzyme that covalently cross-links tropocollagen helices into resilient, load-bearing dermal and joint collagen fibers.',
-        role: isEs ? 'Catalizador de Entrecruzamiento de Fibras' : 'Collagen Fibril Cross-Linking Catalyst'
+          ? 'Induce la enzima lisil oxidasa (LOX), entrelazando las fibras de tropocolágeno para una piel más densa y firme.'
+          : 'Upregulates lysyl oxidase (LOX), cross-linking collagen fibers for greater dermal tensile strength.',
+        role: isEs ? 'Catalizador de Fibras' : 'Fiber Cross-Linker'
       },
       {
         id: 'teletest-mineralograma-cabello-htma',
         slug: 'teletest-mineralograma-cabello-htma',
-        name: 'TeleTest HTMA Mineralograma de Cabello',
+        name: 'TeleTest HTMA Hair Mineral Analysis',
         category: isEs ? 'Diagnóstico Clínico ICP-MS' : 'ICP-MS Clinical Diagnostic',
-        presentation: isEs ? 'Kit de Muestra Capilar (33 Minerales + 10 Ratios)' : 'Hair Kit (33 Elements + 10 Ratios)',
+        presentation: isEs ? 'Kit Capilar (33 Minerales)' : 'Hair Kit (33 Elements)',
         image: '/images/products/teletest/mineralograma.svg',
         url: '/p/teletest-mineralograma-cabello-htma',
-        synergyBadge: isEs ? 'Cofactores de Síntesis & Metales Pesados' : 'Cofactors & Toxic Elements',
+        synergyBadge: isEs ? 'Cofactores de Síntesis' : 'Synthesis Cofactors',
         synergyBadgeColor: '#7c3aed',
         clinicalRationale: isEs
-          ? 'La síntesis de colágeno depende de la homeostasis Zinc/Cobre y la actividad tiroidea (Ca/K). El HTMA descarta toxicidad por plomo o cadmio, metales que bloquean las enzimas colagenasas y degradan la matriz.'
-          : 'Collagen synthesis requires optimal Zn/Cu ratios and thyroid rate (Ca/K). HTMA rules out toxic heavy metals (Pb, Cd, Hg) that inhibit prolyl hydroxylase and degrade connective tissue.',
-        role: isEs ? 'Validación Analítica de Micronutrientes' : 'Micronutrient Analytical Baseline'
+          ? 'Evalúa el balance Zinc/Cobre y descarta metales pesados que bloquean la síntesis ordenada de colágeno.'
+          : 'Evaluates Zinc/Copper balance and rules out toxic metals that interfere with healthy collagen synthesis.',
+        role: isEs ? 'Validación Analítica' : 'Analytical Validation'
+      }
+    ];
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 6. DEFAULT CANONICAL PEPTIDE SYNERGY (FALLBACK)
+  // ─────────────────────────────────────────────────────────────────────────
+  else {
+    list = [
+      {
+        id: 'bac-water-30ml',
+        slug: 'bac-water-30ml',
+        name: 'Bacteriostatic Water USP (30 mL)',
+        category: isEs ? 'Vehículo Estéril Requerido' : 'Mandatory Sterile Vehicle',
+        presentation: isEs ? 'Vial Multidosis Borosilicato Tipo I' : 'Multi-Dose Borosilicate Vial',
+        image: '/images/products/lotusland/bac-water.png',
+        url: '/p/bac-water-30ml',
+        synergyBadge: isEs ? 'Vehículo de Reconstitución' : 'Reconstitution Vehicle',
+        synergyBadgeColor: '#003666',
+        clinicalRationale: isEs
+          ? 'Solvente bacteriostático indispensable para la reconstitución estéril y estabilidad del vial durante 28 días.'
+          : 'Sterile bacteriostatic diluent with 0.9% benzyl alcohol USP for multi-dose peptide stability up to 28 days.',
+        role: isEs ? 'Solvente de Reconstitución' : 'Reconstitution Diluent'
       },
       {
-        id: 'tb-500',
-        slug: 'tb-500',
-        name: 'TB-500 (Thymosin Beta-4)',
-        category: isEs ? 'Reparación Tisular' : 'Tissue Repair',
+        id: 'bpc-157',
+        slug: 'bpc-157',
+        name: 'BPC-157 (Body Protection Compound-157)',
+        category: isEs ? 'Péptido Regenerativo' : 'Regenerative Peptide',
         presentation: isEs ? 'Vial Liofilizado (5 mg / 10 mg)' : 'Lyophilized Vial (5 mg / 10 mg)',
-        image: '/images/products/lotusland/tb-500.png',
-        url: '/p/tb-500',
-        synergyBadge: isEs ? 'Migración Celular & Anti-Fibrosis' : 'Cell Migration & Anti-Fibrosis',
+        image: '/images/products/lotusland/bpc-157.png',
+        url: '/p/bpc-157',
+        synergyBadge: isEs ? 'Regeneración Tisular' : 'Tissue Regeneration',
         synergyBadgeColor: '#16a34a',
         clinicalRationale: isEs
-          ? 'TB-500 moviliza la actina y atrae células progenitoras hacia zonas lesionadas. Combinado con Colvita, asegura una remodelación ordenada sin formación de cicatrices hipertróficas o adherencias fibrosas.'
-          : 'TB-500 sequesters G-actin, driving stem cell migration to damaged connective tissue while preventing fibrotic collagen scar tissue in synergy with oral tropocollagen.',
-        role: isEs ? 'Coordinador de Remodelación Fibrilar' : 'Fibrillar Remodeling Coordinator'
-      }
-    ];
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // 2. REGENERATIVE & TISSUE REPAIR PEPTIDES (BPC-157, TB-500, KPV, ETC.)
-  // ─────────────────────────────────────────────────────────────────────────
-  if (pSlug.includes('bpc') || pSlug.includes('tb-500') || pSlug.includes('kpv') || pSlug.includes('ara-290') || pSlug.includes('pentosan')) {
-    return [
+          ? 'Péptido de referencia para la estabilización celular y la resolución de la inflamación sistémica.'
+          : 'Reference clinical peptide for cellular stabilization and resolution of systemic tissue stress.',
+        role: isEs ? 'Reparación Tisular' : 'Tissue Repair'
+      },
       {
         id: 'colway-colvita',
         slug: 'colway-colvita',
-        name: 'Colvita Tropocolágeno Nativo Liofilizado',
-        category: isEs ? 'Nutracéutico de Matriz Extracelular' : 'ECM Nutricosmetic & Substrate',
+        name: 'Colvita Bioactive Native Collagen',
+        category: isEs ? 'Sustrato de Matriz Conectiva' : 'Connective Tissue Matrix',
         presentation: isEs ? 'Cápsulas Orales (60 / 120 cápsulas)' : 'Oral Capsules (60 / 120 capsules)',
         image: '/images/products/colway/colvita.png',
         url: '/p/colway-colvita',
-        synergyBadge: isEs ? 'Sustrato Estructural de Prolina/Hidroxiprolina' : 'Structural Proline/Hydroxyproline Substrate',
+        synergyBadge: isEs ? 'Andamio Conectivo' : 'Connective Bio-Scaffold',
         synergyBadgeColor: '#0284c7',
         clinicalRationale: isEs
-          ? 'Los péptidos bioactivos señalizan la síntesis acelerada de tejido, pero la velocidad de recuperación está limitada por la biodisponibilidad de oligopéptidos de colágeno triple-hélice. Colvita provee el andamio bioactivo esencial.'
-          : 'Regenerative peptides signal rapid fibroblast activation, but clinical repair rate is limited by collagen oligopeptide precursor availability. Colvita supplies intact, freeze-dried tropocollagen building blocks.',
-        role: isEs ? 'Sustrato de Síntesis Tisular' : 'Tissue Synthesis Substrate'
-      },
-      {
-        id: 'bac-water-30ml',
-        slug: 'bac-water-30ml',
-        name: 'Bacteriostatic Water USP (30 mL)',
-        category: isEs ? 'Vehículo Estéril Requerido' : 'Mandatory Sterile Vehicle',
-        presentation: isEs ? 'Vial Multidosis Borosilicato Tipo I' : 'Multi-Dose Borosilicate Vial',
-        image: '/images/products/lotusland/bac-water.png',
-        url: '/p/bac-water-30ml',
-        synergyBadge: isEs ? 'Solvente de Reconstitución Oficial' : 'Official Reconstitution Diluent',
-        synergyBadgeColor: '#003666',
-        clinicalRationale: isEs
-          ? 'Agua estéril bacteriostática con alcohol bencílico 0.9% USP. Indispensable para preservar la estabilidad microbiológica y conformación molecular del péptido hasta 28 días refrigerado tras la reconstitución.'
-          : 'Sterile bacteriostatic water containing 0.9% benzyl alcohol USP. Essential for maintaining peptide molecular conformation and microbiological sterility for up to 28 days refrigerated.',
-        role: isEs ? 'Vehículo de Administración Clínico' : 'Clinical Reconstitution Vehicle'
-      },
-      {
-        id: pSlug.includes('bpc') ? 'tb-500' : 'bpc-157',
-        slug: pSlug.includes('bpc') ? 'tb-500' : 'bpc-157',
-        name: pSlug.includes('bpc') ? 'TB-500 (Thymosin Beta-4)' : 'BPC-157 (Body Protection Compound)',
-        category: isEs ? 'Sinergia Péptido Dual' : 'Dual Peptide Synergy',
-        presentation: isEs ? 'Vial Liofilizado (5 mg / 10 mg)' : 'Lyophilized Vial (5 mg / 10 mg)',
-        image: pSlug.includes('bpc') ? '/images/products/lotusland/tb-500.png' : '/images/products/lotusland/bpc-157.png',
-        url: pSlug.includes('bpc') ? '/p/tb-500' : '/p/bpc-157',
-        synergyBadge: isEs ? 'Dúo Regenerativo Canónico (Wolverine)' : 'Canonical Tissue Regeneration Duo',
-        synergyBadgeColor: '#16a34a',
-        clinicalRationale: isEs
-          ? 'La combinación BPC-157 + TB-500 ejerce una sinergia celular pleiotrópica: angiogénesis temprana vía VEGF (BPC) con migración de células madre y polimerización de actina (TB-500).'
-          : 'BPC-157 + TB-500 co-administration produces pleiotropic synergy: rapid early VEGF angiogenesis paired with stem cell mobilization and actin cytoskeleton repair.',
-        role: isEs ? 'Potenciador de Cinética Reparadora' : 'Repair Kinetics Enhancer'
+          ? 'Suministra tropocolágeno nativo puro como andamio biológico para la regeneración tisular estimulada por péptidos.'
+          : 'Supplies native tropocollagen triple-helix building blocks to support tissue regeneration stimulated by peptide therapy.',
+        role: isEs ? 'Sustrato Biológico' : 'Biological Substrate'
       }
     ];
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // 3. METABOLIC & WEIGHT MANAGEMENT (RETATRUTIDE, TIRZEPATIDE, SEMAGLUTIDE)
+  // UNIVERSAL FILTER: NEVER RECOMMEND THE PRODUCT TO ITSELF
   // ─────────────────────────────────────────────────────────────────────────
-  if (pSlug.includes('retatrutide') || pSlug.includes('tirzepatide') || pSlug.includes('semaglutide') || pSlug.includes('cagrilintide') || pSlug.includes('aod-9604')) {
-    return [
-      {
-        id: 'teletest-test-omega',
-        slug: 'teletest-test-omega',
-        name: 'TeleTest Omega Test (HS Omega-3 & AA/EPA)',
-        category: isEs ? 'Diagnóstico Metabólico & Cardiovascular' : 'Cardiovascular & Metabolic Diagnostic',
-        presentation: isEs ? 'Analítica Sangre Total (24 Ácidos Grasos)' : 'Whole Blood Diagnostic (24 Fatty Acids)',
-        image: '/images/products/teletest/omega-test.svg',
-        url: '/p/teletest-test-omega',
-        synergyBadge: isEs ? 'Marcador de Inflamación Celular & AA/EPA' : 'Cellular Inflammation & AA/EPA Ratio',
-        synergyBadgeColor: '#d97706',
-        clinicalRationale: isEs
-          ? 'En terapias con agonistas GLP-1/GIP/Glucagón, monitorizar el índice Omega-3 y el ratio AA/EPA previene la esteatosis hepática de rebote y evalúa la sensibilidad de la membrana adipocitaria a la lipólisis.'
-          : 'During multi-agonist metabolic protocols, tracking red blood cell HS Omega-3 index and AA/EPA ratio ensures anti-inflammatory cell membrane responsiveness and protects cardiovascular endothelium.',
-        role: isEs ? 'Monitorización de Resistencia Celular' : 'Membrane Sensitivity Monitoring'
-      },
-      {
-        id: 'bac-water-30ml',
-        slug: 'bac-water-30ml',
-        name: 'Bacteriostatic Water USP (30 mL)',
-        category: isEs ? 'Vehículo Estéril Requerido' : 'Mandatory Sterile Vehicle',
-        presentation: isEs ? 'Vial Multidosis Borosilicato Tipo I' : 'Multi-Dose Borosilicate Vial',
-        image: '/images/products/lotusland/bac-water.png',
-        url: '/p/bac-water-30ml',
-        synergyBadge: isEs ? 'Solvente de Reconstitución Oficial' : 'Official Reconstitution Diluent',
-        synergyBadgeColor: '#003666',
-        clinicalRationale: isEs
-          ? 'Permite reconstituir los viales con concentraciones volumétricas adaptadas a escalas de microdosis progresivas según posología clínica del médico tratante.'
-          : 'Enables precise, customized reconstitution volume matching the physician titration schedule with guaranteed microbiological stability.',
-        role: isEs ? 'Vehículo de Reconstitución' : 'Reconstitution Vehicle'
-      },
-      {
-        id: 'colway-colvita',
-        slug: 'colway-colvita',
-        name: 'Colvita Tropocolágeno Nativo',
-        category: isEs ? 'Preservación de Turgencia Cutánea' : 'Skin Tightening & Tissue Elasticity',
-        presentation: isEs ? 'Cápsulas Orales (60 / 120 cápsulas)' : 'Oral Capsules (60 / 120 capsules)',
-        image: '/images/products/colway/colvita.png',
-        url: '/p/colway-colvita',
-        synergyBadge: isEs ? 'Prevención de Flacidez en Pérdida de Peso' : 'Weight Loss Flaccidity Prevention',
-        synergyBadgeColor: '#0284c7',
-        clinicalRationale: isEs
-          ? 'La rápida pérdida ponderal mediada por análogos de incretinas genera flacidez dérmica ("Ozempic Face"). Colvita aporta tropocolágeno no desnaturalizado para preservar la densidad de la dermis profunda.'
-          : 'Rapid adipose tissue reduction often provokes dermal sagging. Colvita supplies triple-helix tropocollagen and sea algae trace elements to sustain facial collagen matrix thickness.',
-        role: isEs ? 'Preservación de Firmeza Dérmica' : 'Dermal Density Preservation'
-      }
-    ];
-  }
+  const currentId = String(product?.id || slug || '').toLowerCase();
+  const currentSlug = String(slug || product?.slug || '').toLowerCase();
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // 4. LONGEVITY & MITOCHONDRIAL OPTIMIZATION (EPITHALON, MOTS-C, NAD+)
-  // ─────────────────────────────────────────────────────────────────────────
-  if (pSlug.includes('epithalon') || pSlug.includes('mots-c') || pSlug.includes('humanin') || pSlug.includes('nad') || pSlug.includes('ss-31')) {
-    return [
-      {
-        id: 'bloodo-nad-level-test',
-        slug: 'bloodo-nad-level-test',
-        name: 'Bloodo NAD+ Quantitative DBS Test',
-        category: isEs ? 'Marcador Longevidad Celular' : 'Cellular Longevity Biomarker',
-        presentation: isEs ? 'Kit Capilar DBS (CE-IVDR)' : 'DBS Fingerstick Kit (CE-IVDR)',
-        image: '/images/products/bloodo/nad-test.png',
-        url: '/p/bloodo-nad-level-test',
-        synergyBadge: isEs ? 'Cuantificación Bioenergética Intracelular' : 'Intracellular Bioenergetic Status',
-        synergyBadgeColor: '#0284c7',
-        clinicalRationale: isEs
-          ? 'Evalúa la concentración real de NAD+ celular para calibrar la activación de sirtuinas (SIRT1-SIRT7) y la respuesta mitocondrial a los péptidos de longevidad.'
-          : 'Quantifies true intracellular NAD+ concentration to evaluate sirtuin activation capacity and mitochondrial substrate availability before and after therapy cycles.',
-        role: isEs ? 'Biomarcador Mitocondrial Objetivo' : 'Objective Mitochondrial Biomarker'
-      },
-      {
-        id: 'colway-colvita',
-        slug: 'colway-colvita',
-        name: 'Colvita Tropocolágeno Nativo',
-        category: isEs ? 'Rejuvenecimiento Matriz Extracelular' : 'Extracellular Matrix Rejuvenation',
-        presentation: isEs ? 'Cápsulas Orales (60 / 120 cápsulas)' : 'Oral Capsules (60 / 120 capsules)',
-        image: '/images/products/colway/colvita.png',
-        url: '/p/colway-colvita',
-        synergyBadge: isEs ? 'Andamio Conectivo Antisenescencia' : 'Anti-Senescence Matrix Scaffold',
-        synergyBadgeColor: '#0d9488',
-        clinicalRationale: isEs
-          ? 'La senescencia celular degrada el colágeno tipo I y activa metaloproteinasas (MMP). Colvita suministra tropocolágeno bioactivo para rejuvenecer el microambiente estromal.'
-          : 'Cellular senescence drives extracellular matrix fragmentation via MMP activation. Colvita replenishes undamaged native tropocollagen to rebuild the systemic stromal microenvironment.',
-        role: isEs ? 'Reconstrucción Estromal Sistémica' : 'Systemic Stromal Reconstruction'
-      },
-      {
-        id: 'bac-water-30ml',
-        slug: 'bac-water-30ml',
-        name: 'Bacteriostatic Water USP (30 mL)',
-        category: isEs ? 'Vehículo Estéril Requerido' : 'Mandatory Sterile Vehicle',
-        presentation: isEs ? 'Vial Multidosis Borosilicato Tipo I' : 'Multi-Dose Borosilicate Vial',
-        image: '/images/products/lotusland/bac-water.png',
-        url: '/p/bac-water-30ml',
-        synergyBadge: isEs ? 'Solvente de Reconstitución Oficial' : 'Official Reconstitution Diluent',
-        synergyBadgeColor: '#003666',
-        clinicalRationale: isEs
-          ? 'Agua bacteriostática estéril para reconstitución de péptidos bioreguladores con preservante microbiológico 0.9% alcohol bencílico.'
-          : 'Pharmaceutical sterile bacteriostatic diluent for multi-dose longevity peptide reconstitution and stability.',
-        role: isEs ? 'Vehículo de Reconstitución' : 'Reconstitution Vehicle'
-      }
-    ];
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // 5. DIAGNOSTIC TESTS (SPECIFIC CLINICAL PROTOCOLS PER TEST TYPE)
-  // ─────────────────────────────────────────────────────────────────────────
-  
-  // 5A. Omega Fatty Acids & Cellular Inflammation (TeleTest Test Omega / Bloodo Omega)
-  if (pSlug.includes('omega') || pName.includes('omega') || pSlug.includes('lipid')) {
-    return [
-      {
-        id: 'bpc-157',
-        slug: 'bpc-157',
-        name: 'BPC-157 (Body Protection Compound-157)',
-        category: 'Endothelial Cytoprotection & Anti-Inflammatory Axis',
-        presentation: 'Lyophilized Sterile Vial (5 mg / 10 mg)',
-        image: '/images/products/lotusland/bpc-157.png',
-        url: '/p/bpc-157',
-        synergyBadge: 'Microvascular & AA/EPA Resolution',
-        synergyBadgeColor: '#16a34a',
-        clinicalRationale: 'When the erythrocyte AA/EPA ratio is elevated (>10:1), excessive arachidonic acid metabolites drive systemic eicosanoid cascades and endothelial hyperpermeability. BPC-157 directly stabilizes microvascular tight junctions, promotes endothelial nitric oxide synthase (eNOS) activation, down-regulates pro-inflammatory cytokines (TNF-α, IL-6), and resolves subclinical tissue inflammation in synergy with membrane fatty acid rebalancing.',
-        role: 'Endothelial Cytoprotection'
-      },
-      {
-        id: 'nad-plus',
-        slug: 'nad-plus',
-        name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
-        category: 'Cellular Bioenergetics & Mitochondrial Beta-Oxidation',
-        presentation: 'Lyophilized Sterile Vial (500 mg)',
-        image: '/assets/vials/nadplus.png',
-        url: '/p/nad-plus',
-        synergyBadge: 'Mitochondrial Lipid Beta-Oxidation',
-        synergyBadgeColor: '#0284c7',
-        clinicalRationale: 'Cellular desaturation of polyunsaturated fatty acids and mitochondrial beta-oxidation of free fatty acids depend directly on the intracellular NAD+/NADH redox balance. Restoring NAD+ pool reserves activates sirtuin deacetylases (SIRT1/SIRT3), reduces membrane lipid peroxidation, and accelerates cardioprotective membrane fluidity recovery.',
-        role: 'Mitochondrial Metabolic Optimization'
-      }
-    ];
-  }
-
-  // 5B. HTMA Hair Tissue Mineral & Heavy Metal Toxicology (TeleTest HTMA)
-  if (pSlug.includes('htma') || pSlug.includes('mineral') || pName.includes('mineral') || pName.includes('htma') || pSlug.includes('cabello')) {
-    return [
-      {
-        id: 'bpc-157',
-        slug: 'bpc-157',
-        name: 'BPC-157 (Body Protection Compound-157)',
-        category: 'Intestinal Mucosal Barrier Protection',
-        presentation: 'Lyophilized Sterile Vial (5 mg / 10 mg)',
-        image: '/images/products/lotusland/bpc-157.png',
-        url: '/p/bpc-157',
-        synergyBadge: 'Heavy Metal Mucosal Defense',
-        synergyBadgeColor: '#16a34a',
-        clinicalRationale: 'When hair mineral analysis detects neurotoxic heavy metals (Lead, Mercury, Cadmium, Arsenic) or altered Na/K adrenal stress ratios, mucosal tight junctions are compromised. BPC-157 up-regulates claudin and occludin expression in the intestinal lamina propria, preventing toxic metal trans-epithelial migration and systemic inflammatory leakage.',
-        role: 'Mucosal Barrier Defense'
-      },
-      {
-        id: 'colway-colvita',
-        slug: 'colway-colvita',
-        name: 'Colvita Native Freeze-Dried Tropocollagen',
-        category: 'Extracellular Matrix Repair Substrate',
-        presentation: 'Oral Capsules (60 / 120 capsules)',
-        image: '/images/products/colway/colvita.png',
-        url: '/p/colway-colvita',
-        synergyBadge: 'Post-Toxic Connective Repletion',
-        synergyBadgeColor: '#0284c7',
-        clinicalRationale: 'Chronic heavy metal accumulation and endocrine exhaustion degrade systemic extracellular matrices and deplete trace minerals. Undenatured native tropocollagen combined with marine algae trace elements supplies bioactive triple-helix amino acid substrates (glycine, proline, hydroxyproline) to restore structural connective tissue and joint matrix integrity.',
-        role: 'Nutraceutical Connective Repletion'
-      }
-    ];
-  }
-
-  // 5C. HLA Immunogenetics & Autoimmunity (TeleTest HLA / Celiac)
-  if (pSlug.includes('hla') || pSlug.includes('celiac') || pName.includes('hla') || pName.includes('celiac') || pSlug.includes('autoinmunidad')) {
-    return [
-      {
-        id: 'bpc-157',
-        slug: 'bpc-157',
-        name: 'BPC-157 (Body Protection Compound-157)',
-        category: 'Intestinal Mucosal & Tight Junction Restoration',
-        presentation: 'Lyophilized Sterile Vial (5 mg / 10 mg)',
-        image: '/images/products/lotusland/bpc-157.png',
-        url: '/p/bpc-157',
-        synergyBadge: 'Autoimmune Barrier Restoration',
-        synergyBadgeColor: '#16a34a',
-        clinicalRationale: 'In individuals carrying HLA-DQ2/DQ8 or HLA-B27/DRB1 immunogenetic risk alleles, intestinal hyperpermeability triggers systemic antigen translocation. BPC-157 reverses zonulin-mediated junctional breakdown, stabilizes gut mucosal integrity, and dampens autoimmune antibody-mediated inflammatory cascades.',
-        role: 'Tight Junction Restoration'
-      },
-      {
-        id: 'kpv',
-        slug: 'kpv',
-        name: 'KPV (Lysine-Proline-Valine)',
-        category: 'Targeted Mucosal Anti-Inflammatory Tripeptide',
-        presentation: 'Lyophilized Sterile Vial (5 mg)',
-        image: '/assets/vials/kpv.png',
-        url: '/p/kpv',
-        synergyBadge: 'Mucosal NF-κB Pathway Down-Regulation',
-        synergyBadgeColor: '#d97706',
-        clinicalRationale: 'Biomimetic alpha-MSH tripeptide that directly blocks nuclear translocation of NF-κB in intestinal epithelial cells. Attenuates interleukin-8 (IL-8) and TNF-α synthesis in genetically susceptible autoimmune and mucosal inflammatory phenotypes.',
-        role: 'Mucosal NF-κB Down-Regulation'
-      }
-    ];
-  }
-
-  // 5D. Pharmacogenetics & Hepatic Biotransformation (TeleTest Saliva Metabolizer)
-  if (pSlug.includes('detox') || pSlug.includes('metabolizer') || pName.includes('metabolizer') || pName.includes('farmacogenetica')) {
-    return [
-      {
-        id: 'bpc-157',
-        slug: 'bpc-157',
-        name: 'BPC-157 (Body Protection Compound-157)',
-        category: 'Hepatic Cytoprotection & Biotransformation Support',
-        presentation: 'Lyophilized Sterile Vial (5 mg / 10 mg)',
-        image: '/images/products/lotusland/bpc-157.png',
-        url: '/p/bpc-157',
-        synergyBadge: 'Hepatic Microvascular Cytoprotection',
-        synergyBadgeColor: '#16a34a',
-        clinicalRationale: 'When pharmacogenetic profiling reveals slow or intermediate CYP450 or Phase II biotransformation phenotypes, reactive xenobiotic intermediates pose significant hepatic risk. BPC-157 exerts profound hepatoprotective and endothelial-stabilizing activity, mitigating drug-induced liver injury and promoting liver tissue regeneration.',
-        role: 'Hepatoprotective Cytoprotection'
-      },
-      {
-        id: 'nad-plus',
-        slug: 'nad-plus',
-        name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
-        category: 'Phase I & II Enzymatic Redox Cofactor',
-        presentation: 'Lyophilized Sterile Vial (500 mg)',
-        image: '/assets/vials/nadplus.png',
-        url: '/p/nad-plus',
-        synergyBadge: 'Enzymatic Clearance Redox Support',
-        synergyBadgeColor: '#0284c7',
-        clinicalRationale: 'Hepatic Phase I cytochrome P450 monooxygenases and Phase II conjugation pathways rely on cellular pyridine nucleotides. Supplying pure NAD+ restores bioenergetic mitochondrial reserves, ensuring efficient metabolic clearance of pharmaceutical and environmental compounds.',
-        role: 'Biotransformation Redox Cofactor'
-      }
-    ];
-  }
-
-  // General Diagnostic fallback
-  if (cat.includes('diagnostic') || type.includes('diagnostic') || pSlug.includes('teletest') || pSlug.includes('bloodo')) {
-    return [
-      {
-        id: 'bpc-157',
-        slug: 'bpc-157',
-        name: 'BPC-157 (Body Protection Compound-157)',
-        category: 'Targeted Therapeutic Cytoprotection',
-        presentation: 'Lyophilized Sterile Vial (5 mg / 10 mg)',
-        image: '/images/products/lotusland/bpc-157.png',
-        url: '/p/bpc-157',
-        synergyBadge: 'Biomarker-Directed Cytoprotection',
-        synergyBadgeColor: '#16a34a',
-        clinicalRationale: 'Gold-standard clinical peptide to restore cellular junction integrity, modulate microvascular endothelial tone, and resolve subclinical systemic inflammation identified by diagnostic biomarker monitoring.',
-        role: 'Biomarker-Directed Therapy'
-      },
-      {
-        id: 'colway-colvita',
-        slug: 'colway-colvita',
-        name: 'Colvita Native Freeze-Dried Tropocollagen',
-        category: 'Systemic Connective Matrix Substrate',
-        presentation: 'Oral Capsules (60 / 120 capsules)',
-        image: '/images/products/colway/colvita.png',
-        url: '/p/colway-colvita',
-        synergyBadge: 'Post-Diagnostic Structural Repletion',
-        synergyBadgeColor: '#0284c7',
-        clinicalRationale: 'Supplies undamaged, biologically active native marine tropocollagen triple-helix amino acids to replenish the extracellular matrix and support tissue regeneration following clinical diagnostic evaluation.',
-        role: 'Nutraceutical Structural Repletion'
-      }
-    ];
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // 6. DEFAULT CANONICAL PEPTIDE SYNERGY (FALLBACK FOR ALL PEPTIDES)
-  // ─────────────────────────────────────────────────────────────────────────
-  return [
-    {
-      id: 'bac-water-30ml',
-      slug: 'bac-water-30ml',
-      name: 'Bacteriostatic Water USP (30 mL)',
-      category: isEs ? 'Vehículo Estéril Requerido' : 'Mandatory Sterile Vehicle',
-      presentation: isEs ? 'Vial Multidosis Borosilicato Tipo I' : 'Multi-Dose Borosilicate Vial',
-      image: '/images/products/lotusland/bac-water.png',
-      url: '/p/bac-water-30ml',
-      synergyBadge: isEs ? 'Solvente de Reconstitución Oficial' : 'Official Reconstitution Diluent',
-      synergyBadgeColor: '#003666',
-      clinicalRationale: isEs
-        ? 'Vehículo estéril con 0.9% alcohol bencílico USP requerido para reconstituir viales multidosis, garantizando estabilidad físico-química y esterilidad durante 28 días.'
-        : 'Essential sterile reconstituting solvent with 0.9% benzyl alcohol USP for multi-dose peptide stability up to 28 days post-mixing.',
-      role: isEs ? 'Solvente de Reconstitución' : 'Reconstitution Diluent'
-    },
-    {
-      id: 'colway-colvita',
-      slug: 'colway-colvita',
-      name: 'Colvita Tropocolágeno Nativo',
-      category: isEs ? 'Sustrato Estructural ECM' : 'ECM Structural Substrate',
-      presentation: isEs ? 'Cápsulas Orales (60 / 120 cápsulas)' : 'Oral Capsules (60 / 120 capsules)',
-      image: '/images/products/colway/colvita.png',
-      url: '/p/colway-colvita',
-      synergyBadge: isEs ? 'Andamio de Péptidos Estructurales' : 'Structural Bio-Scaffold',
-      synergyBadgeColor: '#0284c7',
-      clinicalRationale: isEs
-        ? 'Suministra tropocolágeno nativo puro liofilizado como sustrato directo para las células activadas por péptidos bioactivos, acelerando la consolidación tisular.'
-        : 'Supplies freeze-dried native tropocollagen triple-helix substrates to support cellular regeneration stimulated by peptide signaling.',
-      role: isEs ? 'Sustrato Biológico Conectivo' : 'Biological Connective Substrate'
-    },
-    {
-      id: 'teletest-mineralograma-cabello-htma',
-      slug: 'teletest-mineralograma-cabello-htma',
-      name: 'TeleTest HTMA Mineralograma de Cabello',
-      category: isEs ? 'Analítica Diagnóstica de Base' : 'Baseline Diagnostic Panel',
-      presentation: isEs ? 'Kit Capilar ICP-MS (33 Elementos)' : 'ICP-MS Kit (33 Elements)',
-      image: '/images/products/teletest/mineralograma.svg',
-      url: '/p/teletest-mineralograma-cabello-htma',
-      synergyBadge: isEs ? 'Perfil de Minerales & Metales Pesados' : 'Trace Minerals & Heavy Metals',
-      synergyBadgeColor: '#7c3aed',
-      clinicalRationale: isEs
-        ? 'Prueba diagnóstica de alta sensibilidad para cuantificar cofactores minerales esenciales (Zn, Cu, Se, Mg) y descartar tóxicos que interfieran con la respuesta a la terapia.'
-        : 'High-precision diagnostic test evaluating essential mineral cofactors and toxic elements that modulate cellular peptide responsiveness.',
-      role: isEs ? 'Monitorización Diagnóstica' : 'Diagnostic Monitoring'
-    }
-  ];
+  return list
+    .filter(rec => {
+      const recId = String(rec.id || '').toLowerCase();
+      const recSlug = String(rec.slug || '').toLowerCase();
+      if (recId === currentId || recSlug === currentSlug) return false;
+      if (recId === currentSlug || recSlug === currentId) return false;
+      return true;
+    })
+    .slice(0, 3);
 }

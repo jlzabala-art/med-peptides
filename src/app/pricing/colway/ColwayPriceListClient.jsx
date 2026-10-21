@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Printer,
   Share2,
@@ -48,6 +49,7 @@ import InlineEditableCell from '@/components/ui/InlineEditableCell';
 import './ColwayPriceList.css';
 
 export default function ColwayPriceListClient({ initialProducts = [] }) {
+  const router = useRouter();
   const { user } = useAuth();
   const { is, effectiveRole } = useRoleAccess();
 
@@ -310,34 +312,50 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
         label: 'Product',
         width: (canViewLanded && showLandedCost) ? '28%' : '34%',
         sortable: true,
-        render: (_, row) => (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-            {row?.image && (
-              <img
-                src={row.image}
-                alt={row.name}
-                style={{
-                  width: '42px',
-                  height: '42px',
-                  minWidth: '42px',
-                  maxWidth: '42px',
-                  minHeight: '42px',
-                  maxHeight: '42px',
-                  objectFit: 'contain',
-                  borderRadius: '6px',
-                  background: '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  padding: '2px',
-                  flexShrink: 0
-                }}
-                loading="lazy"
-              />
-            )}
-            <div style={{ minWidth: 0, fontWeight: 700, fontSize: '0.85rem', color: '#0f172a', lineHeight: 1.3 }}>
-              {row?.name}
+        render: (_, row) => {
+          const detailUrl = `/p/${row.slug || row.id}`;
+          return (
+            <div 
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, cursor: 'pointer' }}
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(detailUrl);
+              }}
+              title="Click to view detailed clinical formulation & product specs"
+            >
+              {row?.image && (
+                <img
+                  src={row.image}
+                  alt={row.name}
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    minWidth: '42px',
+                    maxWidth: '42px',
+                    minHeight: '42px',
+                    maxHeight: '42px',
+                    objectFit: 'contain',
+                    borderRadius: '6px',
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    padding: '2px',
+                    flexShrink: 0
+                  }}
+                  loading="lazy"
+                />
+              )}
+              <div style={{ minWidth: 0, lineHeight: 1.3 }}>
+                <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>
+                  {row?.name}
+                </span>
+                <div style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '2px', marginTop: '2px' }}>
+                  <span>View Details</span>
+                  <ChevronRight size={12} />
+                </div>
+              </div>
             </div>
-          </div>
-        )
+          );
+        }
       },
       {
         key: 'volume',
@@ -1155,58 +1173,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
               columns={colwayColumns}
               data={filteredProducts}
               emptyMessage="No Colway formulations match the current filter criteria."
-              expandableRender={(row) => (
-                <div style={{ padding: '1rem 1.25rem', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', fontSize: '0.8rem' }}>
-                  <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Sparkles size={14} style={{ color: '#0d9488' }} />
-                      <span>Official Bioactive Actives & Complexes</span>
-                    </div>
-                    <div style={{ color: '#475569', lineHeight: 1.45 }}>{row.keyActives || 'Native Tropocollagen & Clinical Actives'}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Activity size={14} style={{ color: '#2563eb' }} />
-                      <span>Clinical Indication & Mechanism</span>
-                    </div>
-                    <div style={{ color: '#475569', lineHeight: 1.45 }}>{row.clinicalFocus || row.subtitle}</div>
-                    {row.applicationTip && (
-                      <div style={{ marginTop: '6px', padding: '6px 8px', background: '#eff6ff', borderRadius: '6px', border: '1px solid #bfdbfe', fontSize: '0.74rem', color: '#1e40af', lineHeight: 1.35 }}>
-                        <strong>Professional Protocol Tip:</strong> {row.applicationTip}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Package size={14} style={{ color: '#0d9488' }} />
-                      <span>Packaging &amp; Storage Specifications</span>
-                    </div>
-                    <div style={{ color: '#475569', lineHeight: 1.55, fontSize: '0.78rem' }}>
-                      <div><strong>Volume / Unit:</strong> {row.volume}</div>
-                      <div><strong>Presentation:</strong> {row.presentation}</div>
-                      <div><strong>Storage Spec:</strong> &lt;26°C Cold-Chain (Preserves Native Tropocollagen)</div>
-                      <div><strong>Stock Status:</strong> <span style={{ color: '#16a34a', fontWeight: 600 }}>{row.stockStatus || 'In Stock (Dubai Warehouse)'}</span></div>
-                    </div>
-                    <div style={{ marginTop: '8px' }}>
-                      <Link
-                        href="/collection/colway"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontSize: '0.74rem',
-                          fontWeight: 650,
-                          color: '#0284c7',
-                          textDecoration: 'none'
-                        }}
-                      >
-                        <span>View Clinical Dossier in Colway Portal</span>
-                        <ChevronRight size={13} />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
+              onRowClick={(row) => router.push(`/p/${row.slug || row.id}`)}
             />
           </div>
         )}

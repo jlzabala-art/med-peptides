@@ -34,15 +34,13 @@ export default function ClinicalSynergySection({
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#eff6ff', color: '#003666', padding: '3px 10px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
             <Sparkles size={13} color="#003666" />
-            <span>{isEs ? 'Sinergia Clínica del Catálogo' : 'Catalog Clinical Synergy'}</span>
+            <span>Atlas Recommendations</span>
           </div>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0', letterSpacing: '-0.02em' }}>
-            {isEs ? 'Co-Terapias & Recomendaciones Clínicas' : 'Co-Therapies & Clinical Recommendations'}
+            Atlas Recommendations
           </h2>
           <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
-            {isEs
-              ? 'Formulaciones y analíticas del ecosistema Atlas emparejadas por mecanismo biológico para optimizar la biodisponibilidad y respuesta clínica.'
-              : 'Ecosystem formulations and diagnostics biochemically paired to maximize tissue bioavailability and clinical response.'}
+            Recommended companion therapies, formulations, and co-factors to optimize clinical outcomes.
           </p>
         </div>
       </div>
