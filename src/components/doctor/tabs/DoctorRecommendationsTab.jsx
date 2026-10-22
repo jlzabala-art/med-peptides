@@ -568,120 +568,10 @@ export default function DoctorRecommendationsTab({
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════════
-          ENGINE 1: SPECIALTY PRACTICE BLUEPRINTS & WEB FOOTPRINT INTELLIGENCE
+          ENGINE 1: SPECIALTY PRACTICE BLUEPRINTS
          ══════════════════════════════════════════════════════════════════════════ */}
       {recommendationEngineMode === 'specialty' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Physician Web Footprint & Clinical Activity Profile Card */}
-          <div
-            style={{
-              background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
-              border: '1px solid #bfdbfe',
-              borderRadius: '10px',
-              padding: '18px 20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    fontSize: '0.70rem',
-                    fontWeight: 800,
-                    color: '#1e40af',
-                    background: '#dbeafe',
-                    border: '1px solid #93c5fd',
-                    padding: '3px 10px',
-                    borderRadius: '999px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em'
-                  }}
-                >
-                  <Globe size={12} /> Physician Web Activity &amp; Specialty Intelligence
-                </span>
-                <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
-                  {doctor?.name || 'Treating Specialist'} · {activeWebProfile?.specialtyLabel || doctor?.specialty}
-                </span>
-                {(activeWebProfile?.verifiedSources || []).map((src, sIdx) => (
-                  <span
-                    key={sIdx}
-                    style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 600,
-                      color: '#047857',
-                      background: '#ecfdf5',
-                      border: '1px solid #a7f3d0',
-                      padding: '2px 8px',
-                      borderRadius: '999px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <CheckCircle2 size={10} /> {src}
-                  </span>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleRefreshWebFootprint}
-                disabled={isEnrichingWebProfile}
-                style={{
-                  height: '30px',
-                  padding: '0 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #93c5fd',
-                  background: '#ffffff',
-                  color: '#1d4ed8',
-                  fontSize: '0.73rem',
-                  fontWeight: 700,
-                  cursor: isEnrichingWebProfile ? 'wait' : 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-                title="Re-scan online clinical footprint and procedures using Atlas AI"
-              >
-                <RefreshCw size={12} className={isEnrichingWebProfile ? 'animate-spin' : ''} />
-                <span>{isEnrichingWebProfile ? 'Researching Online Activity...' : 'Refresh Web Footprint with AI'}</span>
-              </button>
-            </div>
-
-            <p style={{ margin: 0, fontSize: '0.83rem', color: '#1e293b', lineHeight: 1.55 }}>
-              {activeWebProfile?.clinicalFocusSummary}
-            </p>
-
-            {/* Detected Clinical Procedures from Internet Footprint */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.71rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
-                Detected Clinical Procedures &amp; Focus Areas:
-              </span>
-              {(activeWebProfile?.detectedProcedures || []).map((proc, pIdx) => (
-                <span
-                  key={pIdx}
-                  style={{
-                    fontSize: '0.73rem',
-                    fontWeight: 600,
-                    color: '#0f172a',
-                    background: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    padding: '3px 10px',
-                    borderRadius: '6px',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
-                  }}
-                >
-                  • {proc}
-                </span>
-              ))}
-            </div>
-          </div>
-
           {/* Specialty Vertical Filter Pills */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -923,64 +813,255 @@ export default function DoctorRecommendationsTab({
                     </div>
                   )}
 
-                  {/* 2. Four-Pillar Atlas Ecosystem Synergies for this Procedure */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
-                    {bp.peptideSynergy && (
-                      <div style={{ background: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: '8px', padding: '10px 12px' }}>
-                        <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#4338ca', textTransform: 'uppercase', marginBottom: '3px' }}>
-                          🧬 Bioactive Peptide Co-Therapy
-                        </div>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e1b4b', marginBottom: '3px' }}>
-                          {bp.peptideSynergy.name}
-                        </div>
-                        <div style={{ fontSize: '0.71rem', color: '#3730a3', lineHeight: 1.4 }}>
-                          {bp.peptideSynergy.role}
-                        </div>
-                      </div>
-                    )}
+                  {/* 2. Numbered Four-Pillar Synergies: 1-per-line clickable rows */}
+                  {(() => {
+                    const synergyItems = [
+                      bp.peptideSynergy && {
+                        type: 'peptide',
+                        badge: 'Bioactive Peptide Co-Therapy',
+                        icon: '🧬',
+                        color: '#4338ca',
+                        bg: '#f8faff',
+                        border: '#c7d2fe',
+                        badgeBg: '#e0e7ff',
+                        name: bp.peptideSynergy.name,
+                        role: bp.peptideSynergy.role,
+                        url: bp.protocolUrl || '/collection/peptides'
+                      },
+                      bp.dermocosmeticSynergy && {
+                        type: 'colway',
+                        badge: 'Cuticular & Native ECM Care (Colway®)',
+                        icon: '🛡️',
+                        color: '#047857',
+                        bg: '#f9fefb',
+                        border: '#a7f3d0',
+                        badgeBg: '#d1fae5',
+                        name: bp.dermocosmeticSynergy.name,
+                        role: bp.dermocosmeticSynergy.role,
+                        url: '/collection/colway'
+                      },
+                      bp.nutraceuticalSynergy && {
+                        type: 'nutraceutical',
+                        badge: 'Oral Nutraceutical (UltraPerson™)',
+                        icon: '💊',
+                        color: '#b45309',
+                        bg: '#fffdf5',
+                        border: '#fde68a',
+                        badgeBg: '#fef3c7',
+                        name: bp.nutraceuticalSynergy.name,
+                        role: bp.nutraceuticalSynergy.role,
+                        url: bp.nutraceuticalSynergy.slug ? `/p/${bp.nutraceuticalSynergy.slug}` : '/collection/ultraman'
+                      },
+                      bp.diagnosticSynergy && {
+                        type: 'diagnostic',
+                        badge: 'Molecular / DNA Diagnostic',
+                        icon: '🔬',
+                        color: '#be185d',
+                        bg: '#fdf7f9',
+                        border: '#fbcfe8',
+                        badgeBg: '#fce7f3',
+                        name: bp.diagnosticSynergy.name,
+                        role: bp.diagnosticSynergy.role,
+                        url: bp.diagnosticSynergy.slug
+                          ? `/p/${bp.diagnosticSynergy.slug}`
+                          : (bp.diagnosticSynergy.name?.toLowerCase().includes('eterna')
+                              ? '/collection/eterna'
+                              : bp.diagnosticSynergy.name?.toLowerCase().includes('teletest')
+                              ? '/collection/teletest'
+                              : '/collection/bloodo')
+                      }
+                    ].filter(Boolean);
 
-                    {bp.dermocosmeticSynergy && (
-                      <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '8px', padding: '10px 12px' }}>
-                        <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#047857', textTransform: 'uppercase', marginBottom: '3px' }}>
-                          🛡️ Cuticular &amp; Native ECM Care (Colway)
-                        </div>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#064e3b', marginBottom: '3px' }}>
-                          {bp.dermocosmeticSynergy.name}
-                        </div>
-                        <div style={{ fontSize: '0.71rem', color: '#065f46', lineHeight: 1.4 }}>
-                          {bp.dermocosmeticSynergy.role}
-                        </div>
-                      </div>
-                    )}
+                    if (synergyItems.length === 0) return null;
 
-                    {bp.nutraceuticalSynergy && (
-                      <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '10px 12px' }}>
-                        <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase', marginBottom: '3px' }}>
-                          💊 Oral Nutraceutical (UltraPerson™)
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px', flexWrap: 'wrap', gap: '6px' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            Synergistic Adjuvant Recommendations ({synergyItems.length})
+                          </span>
+                          <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                            Click to review specs · Add selectively to prescription
+                          </span>
                         </div>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#78350f', marginBottom: '3px' }}>
-                          {bp.nutraceuticalSynergy.name}
-                        </div>
-                        <div style={{ fontSize: '0.71rem', color: '#92400e', lineHeight: 1.4 }}>
-                          {bp.nutraceuticalSynergy.role}
-                        </div>
-                      </div>
-                    )}
 
-                    {bp.diagnosticSynergy && (
-                      <div style={{ background: '#fdf2f8', border: '1px solid #fbcfe8', borderRadius: '8px', padding: '10px 12px' }}>
-                        <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#be185d', textTransform: 'uppercase', marginBottom: '3px' }}>
-                          🔬 Molecular / DNA Diagnostic
-                        </div>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#831843', marginBottom: '3px' }}>
-                          {bp.diagnosticSynergy.name}
-                        </div>
-                        <div style={{ fontSize: '0.71rem', color: '#9d174d', lineHeight: 1.4 }}>
-                          {bp.diagnosticSynergy.role}
-                        </div>
+                        {synergyItems.map((item, itemIdx) => {
+                          const itemNumber = String(itemIdx + 1).padStart(2, '0');
+                          return (
+                            <div
+                              key={itemIdx}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '12px',
+                                padding: '10px 14px',
+                                borderRadius: '8px',
+                                background: item.bg,
+                                border: `1px solid ${item.border}`,
+                                transition: 'all 0.15s ease',
+                                flexWrap: 'wrap'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = item.color;
+                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = item.border;
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            >
+                              {/* Left: Number Badge + Category + Product Name + Role */}
+                              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: '1 1 340px', minWidth: '240px' }}>
+                                <span
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '6px',
+                                    background: item.color,
+                                    color: '#ffffff',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 800,
+                                    flexShrink: 0,
+                                    marginTop: '2px'
+                                  }}
+                                >
+                                  {itemNumber}
+                                </span>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                    <span
+                                      style={{
+                                        fontSize: '0.64rem',
+                                        fontWeight: 800,
+                                        color: item.color,
+                                        background: item.badgeBg,
+                                        padding: '2px 7px',
+                                        borderRadius: '4px',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.03em'
+                                      }}
+                                    >
+                                      {item.icon} {item.badge}
+                                    </span>
+                                    <a
+                                      href={item.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{
+                                        fontSize: '0.86rem',
+                                        fontWeight: 800,
+                                        color: '#0f172a',
+                                        textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px'
+                                      }}
+                                      title={`View clinical monograph for ${item.name}`}
+                                      onMouseEnter={(e) => { e.currentTarget.style.color = item.color; }}
+                                      onMouseLeave={(e) => { e.currentTarget.style.color = '#0f172a'; }}
+                                    >
+                                      <span>{item.name}</span>
+                                      <ArrowUpRight size={13} style={{ opacity: 0.6 }} />
+                                    </a>
+                                  </div>
+
+                                  <div style={{ fontSize: '0.74rem', color: '#475569', lineHeight: 1.45 }}>
+                                    {item.role}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Right: Explicit Action Buttons */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                                <a
+                                  href={item.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '6px',
+                                    background: '#ffffff',
+                                    border: `1px solid ${item.border}`,
+                                    color: item.color,
+                                    fontSize: '0.74rem',
+                                    fontWeight: 700,
+                                    textDecoration: 'none',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = item.color;
+                                    e.currentTarget.style.color = '#ffffff';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = '#ffffff';
+                                    e.currentTarget.style.color = item.color;
+                                  }}
+                                >
+                                  <span>View Specs</span>
+                                  <ArrowUpRight size={13} />
+                                </a>
+
+                                {onPrescribeBlueprint && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (triggerHaptic) triggerHaptic('selection');
+                                      const singleItemBlueprint = {
+                                        ...bp,
+                                        title: `${item.name}`,
+                                        compoundingFormula: {
+                                          treatmentTitle: item.name,
+                                          dispensingForm: item.badge,
+                                          volume: 'Single Dispense',
+                                          posology: item.role,
+                                          items: [{ name: item.name, concentration: 'Standard', role: item.role }]
+                                        }
+                                      };
+                                      onPrescribeBlueprint(singleItemBlueprint);
+                                    }}
+                                    style={{
+                                      padding: '6px 12px',
+                                      borderRadius: '6px',
+                                      background: '#ffffff',
+                                      border: '1px solid #cbd5e1',
+                                      color: '#0f172a',
+                                      fontSize: '0.74rem',
+                                      fontWeight: 700,
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '5px',
+                                      transition: 'all 0.15s ease'
+                                    }}
+                                    title={`Add only ${item.name} to prescription`}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.background = '#f1f5f9';
+                                      e.currentTarget.style.borderColor = '#94a3b8';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.background = '#ffffff';
+                                      e.currentTarget.style.borderColor = '#cbd5e1';
+                                    }}
+                                  >
+                                    <Pill size={13} color="#0f172a" />
+                                    <span>+ Prescribe</span>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    )}
-                  </div>
+                    );
+                  })()}
                 </div>
               </div>
             ))}
