@@ -31,7 +31,7 @@ import { getPeptideReferenceDossier } from '@/data/peptideReferenceDossiers';
 export default function ContextualRightSidebar({
   activeTab = 'overview',
   slug = 'pt-141',
-  effectiveBatch = 'AS-LOT-PT05-2609',
+  effectiveBatch = 'AS-MED-PT05-2609',
   protocolContext = null,
   onOpenCoaModal
 }) {

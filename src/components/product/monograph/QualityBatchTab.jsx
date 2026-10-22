@@ -23,20 +23,20 @@ import { classifyProductDomain } from '@/utils/productNormalizer';
 export default function QualityBatchTab({
   product = {},
   slug = 'pt-141',
-  effectiveBatch = 'AS-LOT-PT05-2609',
+  effectiveBatch = 'AS-MED-PT05-2609',
   onOpenCoaModal
 }) {
   const [copiedBatch, setCopiedBatch] = useState(false);
 
   const { isDiagnostic } = classifyProductDomain(product, { slug });
 
-  const batchId = effectiveBatch || product.batchNumber || (isDiagnostic ? 'AS-TEL-TL01-2610' : 'AS-LOT-PT05-2609');
+  const batchId = effectiveBatch || product.batchNumber || (isDiagnostic ? 'AS-TEL-TL01-2610' : 'AS-MED-PT05-2609');
   const purity = isDiagnostic ? 'CV < 4.5% (CE-IVD)' : (product.purityPercentage || '99.4%');
   const identity = isDiagnostic ? 'GC-FID / FAME 24 Fatty Acid Spectrum' : 'LC-MS Confirmed (Single Quadrupole & ESI-TOF)';
   const molecularMass = isDiagnostic ? 'ISO 15189:2022' : (product.molecularWeight || '1025.16 Da');
   const molecularFormula = isDiagnostic ? 'NIST SRM 1950' : (product.molecularFormula || 'C50H68N14O10');
   const casNumber = isDiagnostic ? 'CE-IVDR 2017/746' : (product.casNumber || product.cas || '189691-06-3');
-  const labName = product.supplierName || (isDiagnostic ? 'TeleTest Analytika S.A.' : 'Lotusland Analytical Services');
+  const labName = product.supplierName || (isDiagnostic ? 'TeleTest Analytika S.A.' : 'Analytical Quality Control Testing Laboratory');
 
   const handleCopyBatch = () => {
     triggerHaptic('light');
@@ -58,9 +58,9 @@ export default function QualityBatchTab({
     { batch: 'AS-TEL-TL01-2607', date: 'July 2026', purity: 'ISO 15189 Validated', status: 'Archived' },
     { batch: 'AS-TEL-TL01-2604', date: 'April 2026', purity: 'ISO 15189 Validated', status: 'Archived' }
   ] : [
-    { batch: 'AS-LOT-PT05-2609', date: 'September 2026', purity: '99.4%', status: 'Active Release' },
-    { batch: 'AS-LOT-PT05-2606', date: 'June 2026', purity: '99.6%', status: 'Archived' },
-    { batch: 'AS-LOT-PT05-2603', date: 'March 2026', purity: '99.3%', status: 'Archived' }
+    { batch: 'AS-MED-PT05-2609', date: 'September 2026', purity: '99.4%', status: 'Active Release' },
+    { batch: 'AS-MED-PT05-2606', date: 'June 2026', purity: '99.6%', status: 'Archived' },
+    { batch: 'AS-MED-PT05-2603', date: 'March 2026', purity: '99.3%', status: 'Archived' }
   ];
 
   const batchColumns = [

@@ -96,10 +96,10 @@ export default function PrecisionSyringeVisualizer({
       </div>
 
       {/* ── High-Precision SVG Syringe Graphic ── */}
-      <div style={{ width: '100%', overflowX: 'auto', padding: '0.5rem 0' }}>
+      <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch', padding: '0.5rem 0' }}>
         <svg
           viewBox="0 0 540 102"
-          style={{ width: '100%', height: 'auto', minWidth: '460px', display: 'block' }}
+          style={{ width: '100%', height: 'auto', minWidth: '320px', maxWidth: '640px', margin: '0 auto', display: 'block' }}
           role="img"
           aria-label={`U-100 syringe drawn to ${units} units`}
         >

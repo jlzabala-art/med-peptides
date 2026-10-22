@@ -36,7 +36,7 @@ export default function PeptideMonographWorkspace({
   product = {},
   slug = 'pt-141',
   lang = 'en',
-  effectiveBatch = 'AS-LOT-PT05-2609',
+  effectiveBatch = 'AS-MED-PT05-2609',
   associatedProtocols = [],
   onAddToCart,
   baseUrl,
@@ -182,6 +182,7 @@ export default function PeptideMonographWorkspace({
                 presentationMatrixRows={presentationMatrixRows}
                 activeFormat={activeFormat}
                 availableFormats={availableFormats}
+                selectedStrength={selectedStrength}
                 onFormatChange={onFormatChange}
                 onSelectVariant={onSelectVariant}
                 onNavigateToProtocols={() => handleTabChange('protocols')}

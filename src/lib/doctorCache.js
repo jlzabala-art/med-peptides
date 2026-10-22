@@ -298,11 +298,13 @@ async function getCachedDoctorDirectory() {
         doctors.push({
           id: kd.id,
           docId: kd.id,
-          opaqueCode: getDoctorOpaqueCode(kd.id, kd),
+          opaqueCode: kd.opaqueCode || getDoctorOpaqueCode(kd.id, kd),
           nameSlug: slugify(kd.name),
           data: {
             displayName: kd.name,
             name: kd.name,
+            doctorCode: kd.doctorCode || kd.opaqueCode || getDoctorOpaqueCode(kd.id, kd),
+            opaqueCode: kd.opaqueCode || getDoctorOpaqueCode(kd.id, kd),
             clinic: kd.clinic || kd.clinicName,
             specialty: kd.specialty,
             licenseNumber: kd.license || kd.licenseNumber,

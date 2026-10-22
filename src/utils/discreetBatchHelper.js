@@ -86,8 +86,8 @@ export const DISCREET_PRODUCT_CODES = {
 };
 
 export const SUPPLIER_CODES = {
-  lotusland: 'LOT',
-  'supplier-lotusland': 'LOT',
+  lotusland: 'MED',
+  'supplier-lotusland': 'MED',
   pod: 'POD',
   'supplier-pod-poland': 'POD',
   nplabs: 'NPL',
@@ -112,9 +112,9 @@ export function getDiscreetProductPrefix(slug) {
 }
 
 export function getSupplierCode(supplierIdOrName) {
-  if (!supplierIdOrName) return 'LOT';
+  if (!supplierIdOrName) return 'MED';
   const clean = String(supplierIdOrName).toLowerCase().replace(/^supplier[-_]/, '').trim();
-  if (clean.includes('lotus')) return 'LOT';
+  if (clean.includes('lotus')) return 'MED';
   if (clean.includes('pod')) return 'POD';
   if (clean.includes('np')) return 'NPL';
   if (clean.includes('magenta')) return 'MAG';

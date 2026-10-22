@@ -1139,28 +1139,69 @@ export default function PublicDatasheetView({
       || null;
   }, [filteredStrengths, sortedStrengths, selectedStrengthId]);
 
-  const handleSelectVariant = useCallback(({ strengthId, formatId, supplierId, strengthName }) => {
+  const handleSelectVariant = useCallback((target) => {
     triggerHaptic('selection');
-    if (supplierId && supplierId !== 'all') {
-      setActiveSupplierId(supplierId);
+    if (!target) return;
+
+    let targetStrengthId = null;
+    let targetFormatId = null;
+    let targetSupplierId = null;
+    let targetStrengthName = null;
+
+    if (typeof target === 'string') {
+      targetStrengthName = target;
+      targetStrengthId = target;
+    } else if (typeof target === 'object') {
+      targetStrengthId = target.strengthId || target.id;
+      targetFormatId = target.formatId;
+      targetSupplierId = target.supplierId;
+      targetStrengthName = target.strengthName || target.name || target.dosage || target.dose;
     }
-    if (formatId) {
-      setActiveFormatId(formatId);
+
+    if (targetSupplierId && targetSupplierId !== 'all') {
+      setActiveSupplierId(targetSupplierId);
     }
-    if (strengthId) {
-      setSelectedStrengthId(strengthId);
-    } else if (strengthName) {
-      const cleanS = String(strengthName).toLowerCase().replace(/[-_\s]+/g, '');
-      const found = sortedStrengths.find(s => {
-        const sc = String(s.name || s.id).toLowerCase().replace(/[-_\s]+/g, '');
-        return sc === cleanS || sc.includes(cleanS) || cleanS.includes(sc);
+    if (targetFormatId) {
+      setActiveFormatId(targetFormatId);
+    }
+
+    // 1. Match by exact or normalized strengthId
+    if (targetStrengthId) {
+      const cleanTargetId = String(targetStrengthId).toLowerCase().replace(/[-_\s]+/g, '');
+      const foundById = sortedStrengths.find(s => {
+        const sc = String(s.id || '').toLowerCase().replace(/[-_\s]+/g, '');
+        return sc === cleanTargetId;
+      }) || filteredStrengths.find(s => {
+        const sc = String(s.id || '').toLowerCase().replace(/[-_\s]+/g, '');
+        return sc === cleanTargetId;
       });
-      if (found) {
-        setSelectedStrengthId(found.id);
+      if (foundById) {
+        setSelectedStrengthId(foundById.id);
+        return;
       }
     }
-    toast.success(lang === 'es' ? 'Presentación clínica activa actualizada ✓' : 'Active clinical presentation updated ✓');
-  }, [sortedStrengths, lang, setActiveSupplierId, setActiveFormatId, setSelectedStrengthId]);
+
+    // 2. Match by normalized strengthName / dose value
+    if (targetStrengthName) {
+      const cleanS = String(targetStrengthName).toLowerCase().replace(/[-_\s]+/g, '');
+      const foundByName = sortedStrengths.find(s => {
+        const sc = String(s.name || s.id || '').toLowerCase().replace(/[-_\s]+/g, '');
+        return sc === cleanS || sc.includes(cleanS) || cleanS.includes(sc);
+      }) || filteredStrengths.find(s => {
+        const sc = String(s.name || s.id || '').toLowerCase().replace(/[-_\s]+/g, '');
+        return sc === cleanS || sc.includes(cleanS) || cleanS.includes(sc);
+      });
+      if (foundByName) {
+        setSelectedStrengthId(foundByName.id);
+        return;
+      }
+    }
+
+    if (targetStrengthId) {
+      setSelectedStrengthId(targetStrengthId);
+    }
+    // Google Cloud Console UX standard: Instant in-place visual feedback, zero intrusive toast notifications
+  }, [sortedStrengths, filteredStrengths, setActiveSupplierId, setActiveFormatId, setSelectedStrengthId]);
 
   const handleCopyMonographSpecs = async () => {
     const isEs = lang === 'es';
@@ -1407,7 +1448,11 @@ export default function PublicDatasheetView({
   // Deterministic discreet batch code fallback
   const effectiveBatchCode = useMemo(() => {
     if (initialBatch && String(initialBatch).trim().length > 0 && !String(initialBatch).toLowerCase().includes('dummy')) {
-      return initialBatch;
+      return String(initialBatch)
+        .replace(/-LOT-/gi, '-MED-')
+        .replace(/^RP-LOT-/gi, 'RP-MED-')
+        .replace(/^AS-LOT-/gi, 'AS-MED-')
+        .replace(/^LOT-/gi, 'MED-');
     }
     const currentDose = selectedStrength?.name || selectedStrengthId || '10 mg';
     const currentSupplier = (activeSupplierId && activeSupplierId !== 'all') ? activeSupplierId : (supplierName || 'supplier-lotusland');

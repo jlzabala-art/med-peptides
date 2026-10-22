@@ -18,7 +18,7 @@ import { classifyProductDomain } from '@/utils/productNormalizer';
 export default function PeptideMonographHeader({
   product = {},
   slug = 'pt-141',
-  effectiveBatch = 'AS-LOT-PT05-2609',
+  effectiveBatch = 'AS-MED-PT05-2609',
   supplierName = '',
   activeFormat = null,
   availableFormats = [],
@@ -143,7 +143,7 @@ export default function PeptideMonographHeader({
     : (product.purity || '≥99% (99.4% HPLC verified)');
   const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || (product.variants?.[0]?.supplier) || (isDiagnostic ? (isTeletestHtma ? 'TeleTest Analytika' : 'Bloodo') : 'Lotusland');
   const supplier = formatCommercialSupplierName(rawSupplier);
-  const batchCode = effectiveBatch || (product.testCode ? `TEST-TL01-${product.testCode}` : (product.batchNumber || (isDiagnostic ? 'AS-TEL-TL01-2610' : 'AS-LOT-PT05-2609')));
+  const batchCode = effectiveBatch || (product.testCode ? `TEST-TL01-${product.testCode}` : (product.batchNumber || (isDiagnostic ? 'AS-TEL-TL01-2610' : 'AS-MED-PT05-2609')));
 
   const handleCopySpec = () => {
     triggerHaptic('light');
@@ -411,11 +411,16 @@ export default function PeptideMonographHeader({
               </span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '4px' }}>
                 {strengthsArray.map((str, sIdx) => {
-                  const isActive = (selectedStrength?.name === str || selectedStrength?.id === str || selectedStrength?.dosage === str || (isDiagnostic && strengthsArray.length === 1));
+                  const normStr = String(str || '').toLowerCase().replace(/[-_\s]+/g, '');
+                  const normSelected = String(selectedStrength?.name || selectedStrength?.id || selectedStrength?.dosage || '').toLowerCase().replace(/[-_\s]+/g, '');
+                  const isActive = normStr === normSelected || normSelected.includes(normStr) || normStr.includes(normSelected) || (isDiagnostic && strengthsArray.length === 1);
                   return (
                     <span
                       key={`${str}-${sIdx}`}
-                      onClick={() => onStrengthChange && onStrengthChange(str)}
+                      onClick={() => {
+                        triggerHaptic('selection');
+                        if (onStrengthChange) onStrengthChange({ strengthId: str, strengthName: str });
+                      }}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -428,7 +433,8 @@ export default function PeptideMonographHeader({
                         color: isActive ? '#ffffff' : '#003666',
                         border: `1px solid ${isActive ? '#003666' : '#cbd5e1'}`,
                         cursor: onStrengthChange ? 'pointer' : 'default',
-                        transition: 'all 0.15s ease'
+                        transition: 'all 0.15s ease',
+                        boxShadow: isActive ? '0 1px 3px rgba(0, 54, 102, 0.25)' : 'none'
                       }}
                       title={onStrengthChange ? `Select ${str}` : str}
                     >

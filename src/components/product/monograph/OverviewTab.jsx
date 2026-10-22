@@ -161,6 +161,7 @@ export default function OverviewTab({
   presentationMatrixRows = [],
   activeFormat = null,
   availableFormats = [],
+  selectedStrength = null,
   onFormatChange,
   onSelectVariant,
   onNavigateToProtocols
@@ -521,31 +522,41 @@ export default function OverviewTab({
     ];
   }, [isDiagnostic, handleRowClick]);
 
+  const normSelectedStrength = String(selectedStrength?.name || selectedStrength?.dosage || selectedStrength?.id || '').toLowerCase().replace(/[-_\s]+/g, '');
+
   const presentationData = (presentationMatrixRows && presentationMatrixRows.length > 0)
-    ? presentationMatrixRows.map((row, idx) => ({
-        id: row.key || `row-${idx}`,
-        formatId: isDiagnostic ? 'diagnostic_kit' : row.formatId,
-        strengthId: row.strengthId,
-        supplierId: row.supplierId,
-        strengthMg: isTeletestHtma
-          ? '1 Complete 33 Mineral & Toxic Element Profile + Functional Assessment'
-          : (row.strengthName && /perfil|analítico/i.test(row.strengthName)
-              ? '1 Complete Clinical Analytical Profile + Functional Assessment'
-              : row.strengthName),
-        format: isDiagnostic ? 'Diagnostic Specimen Collection Kit' : row.formatName,
-        recommendedDiluent: isTeletestHtma
-          ? 'Proximal Scalp Hair (0.25 g, root cut)'
-          : isDiagnostic ? (product.sampleType || 'Capillary Whole Blood (DBS Whatman 903)') : row.diluentText,
-        concentrationMgMl: isTeletestHtma
-          ? 'ICP-MS/MS (Inductively Coupled Plasma Mass Spectrometry)'
-          : isDiagnostic ? (product.methodology || 'GC-FID / FAME Chromatography') : row.concText,
-        route: isTeletestHtma
-          ? 'TeleTest Central Lab · 7–10 Business Days (ISO 17025)'
-          : isDiagnostic ? 'LifeLab1 Central · 5–7 Business Days (ISO 15189)' : row.adminText,
-        isCurrentlyActive: row.isCurrentlyActive || (isDiagnostic && presentationMatrixRows.length === 1),
-        isDiagnostic,
-        rawRow: row
-      }))
+    ? presentationMatrixRows.map((row, idx) => {
+        const rowNorm = String(row.strengthMg || row.strengthName || row.strengthId || '').toLowerCase().replace(/[-_\s]+/g, '');
+        const isCurrentlyActive = Boolean(
+          (normSelectedStrength && (rowNorm === normSelectedStrength || rowNorm.includes(normSelectedStrength) || normSelectedStrength.includes(rowNorm) || row.strengthId === selectedStrength?.id)) ||
+          row.isCurrentlyActive ||
+          (isDiagnostic && presentationMatrixRows.length === 1)
+        );
+        return {
+          id: row.key || `row-${idx}`,
+          formatId: isDiagnostic ? 'diagnostic_kit' : row.formatId,
+          strengthId: row.strengthId,
+          supplierId: row.supplierId,
+          strengthMg: isTeletestHtma
+            ? '1 Complete 33 Mineral & Toxic Element Profile + Functional Assessment'
+            : (row.strengthName && /perfil|analítico/i.test(row.strengthName)
+                ? '1 Complete Clinical Analytical Profile + Functional Assessment'
+                : row.strengthName),
+          format: isDiagnostic ? 'Diagnostic Specimen Collection Kit' : row.formatName,
+          recommendedDiluent: isTeletestHtma
+            ? 'Proximal Scalp Hair (0.25 g, root cut)'
+            : isDiagnostic ? (product.sampleType || 'Capillary Whole Blood (DBS Whatman 903)') : row.diluentText,
+          concentrationMgMl: isTeletestHtma
+            ? 'ICP-MS/MS (Inductively Coupled Plasma Mass Spectrometry)'
+            : isDiagnostic ? (product.methodology || 'GC-FID / FAME Chromatography') : row.concText,
+          route: isTeletestHtma
+            ? 'TeleTest Central Lab · 7–10 Business Days (ISO 17025)'
+            : isDiagnostic ? 'LifeLab1 Central · 5–7 Business Days (ISO 15189)' : row.adminText,
+          isCurrentlyActive,
+          isDiagnostic,
+          rawRow: row
+        };
+      })
     : (product.variants && product.variants.length > 0)
       ? product.variants.map((v, idx) => {
           const vFmt = String(v.format || v.presentation || '').toLowerCase();

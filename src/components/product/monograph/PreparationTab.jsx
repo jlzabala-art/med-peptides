@@ -44,7 +44,7 @@ function parseNumber(val, fallback = 10) {
 export default function PreparationTab({
   product = {},
   slug = 'pt-141',
-  effectiveBatch = 'AS-LOT-PT05-2609',
+  effectiveBatch = 'AS-MED-PT05-2609',
   activeFormat,
   selectedStrength,
   availableFormats = [],
@@ -1403,7 +1403,7 @@ export default function PreparationTab({
       {/* ── 2. Handling Stepper & Storage Guidelines ── */}
       <section style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
         gap: '1.5rem'
       }}>
         {/* Stepwise Handling Protocol */}
@@ -1617,6 +1617,62 @@ export default function PreparationTab({
                'Refrigerate at 2°C–8°C (Do not freeze). When reconstituted with 0.9% Benzyl Alcohol Bacteriostatic Water, the solution maintains chemical potency for up to 28 days.'}
             </p>
           </div>
+
+          {/* Clinical Transit Stability & Peace of Mind Assurance (Google Cloud Console Callout) */}
+          {!isDiagnostic && !isOral && (
+            <div style={{
+              background: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderLeft: '4px solid #003666',
+              borderRadius: '8px',
+              padding: '12px 14px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginBottom: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#003666', fontWeight: 800, fontSize: '0.80rem' }}>
+                  <ShieldCheck size={16} color="#003666" />
+                  <span>Transit Stability & Courier Peace of Mind</span>
+                </div>
+                <span style={{
+                  fontSize: '0.64rem',
+                  fontWeight: 800,
+                  color: '#166534',
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a' }} />
+                  USP & Ph. Eur. Solid-State Stability Validated
+                </span>
+              </div>
+              <p style={{ margin: '0 0 8px 0', fontSize: '0.74rem', color: '#334155', lineHeight: 1.5 }}>
+                <strong>100% Solid-State Molecular Preservation:</strong> Lyophilized peptides are deep-vacuum freeze-dried with &lt;1% residual moisture. In the absence of aqueous solvent, enzymatic degradation and hydrolytic cleavage cannot occur. Solid-state vials remain 100% stable at room temperature (up to 25°C–30°C) for <strong>30–60 days in transit</strong> with <strong>0.0% loss</strong> in HPLC analytical purity.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: '8px' }}>
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', fontSize: '0.70rem', color: '#475569', lineHeight: 1.4 }}>
+                  <div style={{ color: '#16a34a', fontWeight: 800, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Check size={12} /> Courier & Customs Transit
+                  </div>
+                  Extended international transit or customs hold (5–14 business days) has zero adverse effect on unopened lyophilized vials.
+                </div>
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', fontSize: '0.70rem', color: '#475569', lineHeight: 1.4 }}>
+                  <div style={{ color: '#16a34a', fontWeight: 800, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Check size={12} /> Cool Packs Thawed Upon Arrival
+                  </div>
+                  Melted cold packs upon delivery are completely normal and anticipated. Phase packs buffer thermal spikes; dry powder remains 100% intact.
+                </div>
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', fontSize: '0.70rem', color: '#475569', lineHeight: 1.4 }}>
+                  <div style={{ color: '#003666', fontWeight: 800, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Snowflake size={12} color="#003666" /> Storage Next Steps
+                  </div>
+                  Store dry vials in refrigerator (2°C–8°C) or freezer upon arrival. Only reconstitute with Bacteriostatic Water when ready for first dose.
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Physical Vial Label Links */}
           {/* Physical Vial Label Links (GCP Distributed Action Tiles) */}

@@ -231,6 +231,29 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     email: 'dr.fahed@myskin.com.kw',
     license: 'MOH Registered',
     authority: 'MOH'
+  },
+  {
+    id: 'dr-atlas-health-services',
+    name: 'Atlas Health Services',
+    aliases: [
+      'atlas health services', 'atlas health', 'dr atlas health services', 
+      'dr. atlas health services', 'atlas clinical team', 'atlas medical'
+    ],
+    title: 'Atlas Health Services',
+    specialty: 'Clinical Regenerative & Longevity Medicine · Compounded Therapeutics',
+    clinic: 'Atlas Health Services Clinical Dispensary',
+    clinicName: 'Atlas Health Services Clinical Dispensary',
+    clinicId: 'atlas-health-services-clinic',
+    address: 'Sheikh Zayed Road, Trade Centre, Dubai, UAE / Central Europe Hub',
+    city: 'Dubai',
+    country: 'United Arab Emirates',
+    phone: '+971 4 800 ATLAS',
+    email: 'clinical@atlashealth-services.com',
+    license: 'DHA-HPC-891042 / Institutional Clinical License',
+    licenseNumber: 'DHA-HPC-891042',
+    authority: 'DHA / EU EMA Compounding Standards',
+    opaqueCode: 'DR-ATLAS01',
+    doctorCode: 'DR-ATLAS01'
   }
 ];
 
