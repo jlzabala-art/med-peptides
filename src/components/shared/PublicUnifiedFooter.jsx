@@ -74,13 +74,6 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
     transition: 'color 0.15s ease'
   };
 
-  const primaryLinkStyle = {
-    color: '#1a73e8',
-    textDecoration: 'none',
-    fontWeight: 600,
-    transition: 'color 0.15s ease'
-  };
-
   return (
     <footer
       id="public-unified-footer"
@@ -188,24 +181,6 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
         <div className="public-footer-bottom">
           <div className="public-footer-copyright">
             © 2026 <strong style={{ color: '#202124' }}>Atlas Health Services</strong>. {isEs ? 'Todos los derechos reservados.' : 'All rights reserved.'}
-          </div>
-
-          <div className="public-footer-legal-links">
-            <Link href="/privacy" style={linkStyle}>
-              {isEs ? 'Privacidad' : 'Privacy'}
-            </Link>
-            <span className="public-footer-divider">•</span>
-            <Link href="/terms" style={linkStyle}>
-              {isEs ? 'Términos' : 'Terms'}
-            </Link>
-            <span className="public-footer-divider">•</span>
-            <Link href="/faq" style={linkStyle}>
-              {isEs ? 'Ayuda & FAQ' : 'Help & FAQ'}
-            </Link>
-            <span className="public-footer-divider">•</span>
-            <a href="mailto:clinical@atlashealth-services.com" style={primaryLinkStyle}>
-              clinical@atlashealth-services.com
-            </a>
           </div>
         </div>
 
