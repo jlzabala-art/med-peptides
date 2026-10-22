@@ -5600,7 +5600,7 @@ export default function DoctorPublicPortalClient({
                 title="Create a new compounded prescription, customize a blueprint, or upload a clinical PDF/image"
               >
                 <Plus size={15} />
-                <span>+ New Prescription</span>
+                <span>New Prescription</span>
               </button>
             </div>
           </header>
@@ -6087,7 +6087,7 @@ export default function DoctorPublicPortalClient({
                       <Plus size={18} style={{ color: '#1a73e8' }} />
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>+ New Prescription</div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>New Prescription</div>
                       <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '1px' }}>Compounded formula or Rx upload</div>
                     </div>
                   </div>
@@ -6111,7 +6111,7 @@ export default function DoctorPublicPortalClient({
                       <Users size={18} style={{ color: '#4f46e5' }} />
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>+ Add Patient</div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>Add Patient</div>
                       <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '1px' }}>Register or view clinical dossier</div>
                     </div>
                   </div>
@@ -8728,11 +8728,13 @@ export default function DoctorPublicPortalClient({
               }}
             />
           )}
+
+          {/* ── Google Cloud Console Standard Unified Footer ── */}
+          <div style={{ marginTop: '56px', borderTop: '1px solid #dadce0', paddingTop: '16px' }}>
+            <PublicUnifiedFooter lang={lang || 'en'} />
+          </div>
         </main>
       </div>
-
-      {/* ── Google Cloud Console Standard Unified Footer ── */}
-      <PublicUnifiedFooter lang={lang || 'en'} />
 
       {/* ── Practice Spotlight Search Palette (Rule #7 & Spotlight standard) ── */}
       <DoctorPracticeSearchModal

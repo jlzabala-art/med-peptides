@@ -1950,6 +1950,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         </div>
       </div>
 
+      {/* ── Google Cloud Console Standard Unified Footer ── */}
+      <PublicUnifiedFooter lang={lang || 'en'} />
+
       {/* Floating Bottom Action Dock (Doctor & Patient View - GCP Standard) */}
       {!embedded && (
         <div className="rx-bottom-dock">

@@ -650,7 +650,7 @@ export default function DoctorRecommendationsTab({
               const synergyItems = [
                 bp.peptideSynergy && {
                   type: 'peptide',
-                  badge: 'Péptido Bioactivo de Catálogo',
+                  badge: 'Catalog Bioactive Peptide',
                   icon: '🧬',
                   color: '#4338ca',
                   bg: '#f8faff',
@@ -662,7 +662,7 @@ export default function DoctorRecommendationsTab({
                 },
                 bp.dermocosmeticSynergy && {
                   type: 'colway',
-                  badge: 'Cosmecéutica de Catálogo (Colway®)',
+                  badge: 'Catalog Cosmeceuticals (Colway®)',
                   icon: '🛡️',
                   color: '#047857',
                   bg: '#f9fefb',
@@ -674,7 +674,7 @@ export default function DoctorRecommendationsTab({
                 },
                 bp.nutraceuticalSynergy && {
                   type: 'nutraceutical',
-                  badge: 'Nutracéutico Oral de Catálogo (UltraPerson™)',
+                  badge: 'Catalog Oral Nutraceutical (UltraPerson™)',
                   icon: '💊',
                   color: '#b45309',
                   bg: '#fffdf5',
@@ -686,7 +686,7 @@ export default function DoctorRecommendationsTab({
                 },
                 bp.diagnosticSynergy && {
                   type: 'diagnostic',
-                  badge: 'Panel Diagnóstico de Catálogo',
+                  badge: 'Catalog Diagnostic Panel',
                   icon: '🔬',
                   color: '#be185d',
                   bg: '#fdf7f9',
@@ -743,7 +743,7 @@ export default function DoctorRecommendationsTab({
                             textTransform: 'uppercase'
                           }}
                         >
-                          {bp.badge || 'Protocolo Clínico Especializado'}
+                          {bp.badge || 'Specialized Clinical Protocol'}
                         </span>
                         <span
                           style={{
@@ -768,7 +768,7 @@ export default function DoctorRecommendationsTab({
                             color: '#3c4043'
                           }}
                         >
-                          Paciente Diana: <strong style={{ color: '#202124' }}>{bp.targetPatients}</strong>
+                          Target Patient Profile: <strong style={{ color: '#202124' }}>{bp.targetPatients}</strong>
                         </span>
                       </div>
 
@@ -777,7 +777,7 @@ export default function DoctorRecommendationsTab({
                       </h3>
 
                       <p style={{ margin: 0, fontSize: '0.80rem', color: '#5f6368', lineHeight: 1.5 }}>
-                        <strong style={{ color: '#202124' }}>Rationale Clínico:</strong> {bp.clinicalRationale}
+                        <strong style={{ color: '#202124' }}>Clinical Rationale:</strong> {bp.clinicalRationale}
                       </p>
                     </div>
 
@@ -813,10 +813,10 @@ export default function DoctorRecommendationsTab({
                             e.currentTarget.style.background = '#ffffff';
                             e.currentTarget.style.borderColor = '#dadce0';
                           }}
-                          title="Abrir dossier clínico completo con farmacocinética y evidencia"
+                          title="Open comprehensive clinical monograph with pharmacokinetics and clinical evidence"
                         >
                           <FileText size={14} />
-                          <span>Ver Dossier Clínico</span>
+                          <span>View Clinical Dossier</span>
                         </button>
                       )}
 
@@ -827,15 +827,15 @@ export default function DoctorRecommendationsTab({
                             if (triggerHaptic) triggerHaptic('selection');
                             const fullProtocolBlueprint = {
                               ...bp,
-                              title: `${bp.title || bp.clinicalProcedure} (Protocolo Integral)`,
+                              title: `${bp.title || bp.clinicalProcedure} (Comprehensive Protocol)`,
                               compoundingFormula: {
                                 ...bp.compoundingFormula,
-                                treatmentTitle: `${bp.compoundingFormula?.treatmentTitle || bp.title} + Co-terapias de Catálogo`,
+                                treatmentTitle: `${bp.compoundingFormula?.treatmentTitle || bp.title} + Catalog Synergies`,
                                 items: [
                                   ...(bp.compoundingFormula?.items || []),
                                   ...synergyItems.map((item) => ({
-                                    name: `[Catálogo] ${item.name}`,
-                                    concentration: 'Dispensación Comercial',
+                                    name: `[Catalog] ${item.name}`,
+                                    concentration: 'Commercial Stock',
                                     role: `${item.badge} · ${item.role}`
                                   }))
                                 ]
@@ -861,10 +861,10 @@ export default function DoctorRecommendationsTab({
                           }}
                           onMouseEnter={(e) => { e.currentTarget.style.background = '#1557b0'; }}
                           onMouseLeave={(e) => { e.currentTarget.style.background = '#1a73e8'; }}
-                          title="Cargar la fórmula magistral y los productos de catálogo complementarios en el Recetario"
+                          title="Load compounded formula and complementary catalog products into the Rx Formulary"
                         >
                           <Layers size={14} />
-                          <span>Prescribir Protocolo Completo (Fórmula + {synergyItems.length} Catálogo)</span>
+                          <span>Prescribe Complete Protocol (Compounded + {synergyItems.length} Catalog)</span>
                         </button>
                       )}
                     </div>
@@ -909,7 +909,7 @@ export default function DoctorRecommendationsTab({
                                 }}
                               >
                                 <FlaskConical size={13} />
-                                Formulación Magistral Individualizada (Farmacia Elaboradora)
+                                Individualized Compounded Formulation (Compounding Pharmacy)
                               </span>
                               <span
                                 style={{
@@ -922,7 +922,7 @@ export default function DoctorRecommendationsTab({
                                   color: '#3c4043'
                                 }}
                               >
-                                Elaboración Galénica On-Demand · Concentraciones Titulables
+                                On-Demand Compounding · Titratable Concentrations
                               </span>
                             </div>
                             <h4 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 700, color: '#1a73e8', lineHeight: 1.3 }}>
@@ -945,14 +945,14 @@ export default function DoctorRecommendationsTab({
                             }}
                           >
                             <Pill size={13} color="#1a73e8" />
-                            <span><strong>Vehículo Galénico:</strong> {bp.compoundingFormula.dispensingForm} ({bp.compoundingFormula.volume})</span>
+                            <span><strong>Galenic Vehicle:</strong> {bp.compoundingFormula.dispensingForm} ({bp.compoundingFormula.volume})</span>
                           </div>
                         </div>
 
                         {/* Principios Activos Compuestos (APIs Galénicos) */}
                         <div>
                           <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
-                            Principios Activos Galénicos & Concentraciones Titulables en Receta:
+                            Active Compounded APIs & Titratable Concentrations in Rx:
                           </div>
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px' }}>
                             {(bp.compoundingFormula.items || []).map((item, idx) => (
@@ -1011,7 +1011,7 @@ export default function DoctorRecommendationsTab({
                             flexWrap: 'wrap'
                           }}
                         >
-                          <span style={{ fontWeight: 700, color: '#202124' }}>Pauta Posológica Galénica Recomendada:</span>
+                          <span style={{ fontWeight: 700, color: '#202124' }}>Recommended Galenic Posology Guideline:</span>
                           <span>{bp.compoundingFormula.posology}</span>
                         </div>
 
@@ -1028,7 +1028,7 @@ export default function DoctorRecommendationsTab({
                           }}
                         >
                           <div style={{ fontSize: '0.72rem', color: '#5f6368', maxWidth: '440px', lineHeight: 1.35 }}>
-                            Abre el Recetario Magistral para titular concentraciones exactas según analítica del paciente y ordenar la preparación personalizada a la farmacia elaboradora.
+                            Open the Compounding Formulary to titrate exact concentrations based on patient analytics and order custom preparation from the compounding pharmacy.
                           </div>
 
                           {onPrescribeBlueprint && (
@@ -1062,10 +1062,10 @@ export default function DoctorRecommendationsTab({
                                 e.currentTarget.style.background = '#1a73e8';
                                 e.currentTarget.style.boxShadow = '0 1px 2px rgba(26,115,232,0.35)';
                               }}
-                              title="Emitir receta oficial de esta fórmula magistral en el Recetario Compounding"
+                              title="Prescribe official compounding formula in the Rx Formulary"
                             >
                               <FlaskConical size={14} />
-                              <span>Prescribir Fórmula Magistral (Abrir Recetario)</span>
+                              <span>Prescribe Compounded Formula (Open Formulary)</span>
                             </button>
                           )}
                         </div>
@@ -1109,7 +1109,7 @@ export default function DoctorRecommendationsTab({
                                 }}
                               >
                                 <Package size={13} />
-                                Productos de Catálogo y Pruebas Diagnósticas ({synergyItems.length} Referencias de Stock)
+                                Catalog Products & Diagnostic Tests ({synergyItems.length} In-Stock References)
                               </span>
                               <span
                                 style={{
@@ -1121,11 +1121,11 @@ export default function DoctorRecommendationsTab({
                                   color: '#3c4043'
                                 }}
                               >
-                                Dispensación Directa · Productos Registrados · No Requiere Elaboración Magistral
+                                Direct Dispensing · Registered Products · No Compounding Required
                               </span>
                             </div>
                             <p style={{ margin: 0, fontSize: '0.76rem', color: '#5f6368', lineHeight: 1.4 }}>
-                              Co-terapias industriales registradas y paneles de laboratorio en stock que potencian la respuesta clínica de la fórmula magistral. Pueden prescribirse juntas o de manera individual.
+                              Registered commercial co-therapies and in-stock laboratory panels that enhance the clinical response of the compounded formula. Can be prescribed together or individually.
                             </p>
                           </div>
 
@@ -1136,15 +1136,15 @@ export default function DoctorRecommendationsTab({
                                 if (triggerHaptic) triggerHaptic('selection');
                                 const catalogGroupBlueprint = {
                                   ...bp,
-                                  title: `${bp.title || bp.clinicalProcedure} (Pack Co-Terapias de Catálogo)`,
+                                  title: `${bp.title || bp.clinicalProcedure} (Catalog Synergies Pack)`,
                                   compoundingFormula: {
-                                    treatmentTitle: `${bp.clinicalProcedure} — Pack de Catálogo (${synergyItems.length} Productos)`,
-                                    dispensingForm: 'Pack Comercial de Catálogo',
-                                    volume: 'Unidades en Stock',
-                                    posology: 'Consultar monografías individuales de catálogo',
+                                    treatmentTitle: `${bp.clinicalProcedure} — Catalog Pack (${synergyItems.length} Products)`,
+                                    dispensingForm: 'Commercial Catalog Pack',
+                                    volume: 'In-Stock Units',
+                                    posology: 'See individual catalog monographs',
                                     items: synergyItems.map((item) => ({
-                                      name: `[Catálogo] ${item.name}`,
-                                      concentration: 'Stock Comercial',
+                                      name: `[Catalog] ${item.name}`,
+                                      concentration: 'Commercial Stock',
                                       role: `${item.badge} · ${item.role}`
                                     }))
                                   }
@@ -1174,10 +1174,10 @@ export default function DoctorRecommendationsTab({
                                 e.currentTarget.style.background = '#ffffff';
                                 e.currentTarget.style.borderColor = '#cbd5e1';
                               }}
-                              title="Cargar todos los productos de catálogo complementarios en la receta"
+                              title="Load all complementary catalog products into the Rx Formulary"
                             >
                               <Layers size={13} />
-                              <span>Prescribir Todos los de Catálogo ({synergyItems.length})</span>
+                              <span>Prescribe All Catalog Products ({synergyItems.length})</span>
                             </button>
                           )}
                         </div>
@@ -1251,7 +1251,7 @@ export default function DoctorRecommendationsTab({
                                       </span>
 
                                       <span style={{ fontSize: '0.66rem', color: '#137333', background: '#e6f4ea', padding: '1px 5px', borderRadius: '4px', fontWeight: 600 }}>
-                                        En Stock Catálogo
+                                        In-Stock Catalog
                                       </span>
 
                                       <a
@@ -1267,7 +1267,7 @@ export default function DoctorRecommendationsTab({
                                           alignItems: 'center',
                                           gap: '4px'
                                         }}
-                                        title={`Ver monografía y especificaciones de catálogo para ${item.name}`}
+                                        title={`View catalog monograph and specifications for ${item.name}`}
                                         onMouseEnter={(e) => { e.currentTarget.style.color = '#1a73e8'; }}
                                         onMouseLeave={(e) => { e.currentTarget.style.color = '#202124'; }}
                                       >
@@ -1312,7 +1312,7 @@ export default function DoctorRecommendationsTab({
                                       e.currentTarget.style.borderColor = '#dadce0';
                                     }}
                                   >
-                                    <span>Ficha de Catálogo</span>
+                                    <span>Catalog Sheet</span>
                                     <ArrowUpRight size={12} />
                                   </a>
 
@@ -1325,11 +1325,11 @@ export default function DoctorRecommendationsTab({
                                           ...bp,
                                           title: `${item.name}`,
                                           compoundingFormula: {
-                                            treatmentTitle: `${item.name} (Producto de Catálogo)`,
+                                            treatmentTitle: `${item.name} (Catalog Product)`,
                                             dispensingForm: item.badge,
-                                            volume: 'Envase Comercial',
+                                            volume: 'Standard Packaging',
                                             posology: item.role,
-                                            items: [{ name: item.name, concentration: 'Stock Comercial', role: item.role }]
+                                            items: [{ name: item.name, concentration: 'Commercial Stock', role: item.role }]
                                           }
                                         };
                                         onPrescribeBlueprint(singleItemBlueprint);
@@ -1349,7 +1349,7 @@ export default function DoctorRecommendationsTab({
                                         gap: '4px',
                                         transition: 'all 0.15s'
                                       }}
-                                      title={`Prescribir únicamente ${item.name} de catálogo`}
+                                      title={`Prescribe only ${item.name} from catalog`}
                                       onMouseEnter={(e) => {
                                         e.currentTarget.style.background = '#e8f0fe';
                                         e.currentTarget.style.borderColor = '#1a73e8';
@@ -1362,7 +1362,7 @@ export default function DoctorRecommendationsTab({
                                       }}
                                     >
                                       <Pill size={12} />
-                                      <span>+ Prescribir Producto</span>
+                                      <span>Prescribe Product</span>
                                     </button>
                                   )}
                                 </div>

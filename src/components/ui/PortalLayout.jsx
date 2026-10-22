@@ -41,6 +41,7 @@ import WorkspaceTopBarControl from '../shared/workspaces/WorkspaceTopBarControl'
 import { useCart } from '../../context/CartProvider';
 import { useSimulationStore } from '../../stores/useSimulationStore';
 import MobileBottomNav from '../mobile/MobileBottomNav';
+import PublicUnifiedFooter from '../shared/PublicUnifiedFooter';
 
 // ── Atlas AI — Suggested Prompts per Role (100% English) ──────────────────────
 const ROLE_SUGGESTED_PROMPTS = {
@@ -1061,7 +1062,10 @@ export default function PortalLayout({
           }}
         >
           <PullToRefreshContainer>
-            {children}
+            <div style={{ minHeight: 'calc(100vh - 180px)' }}>
+              {children}
+            </div>
+            <PublicUnifiedFooter lang="en" />
           </PullToRefreshContainer>
         </main>
 
