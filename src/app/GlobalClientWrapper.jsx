@@ -128,7 +128,7 @@ function StorefrontShell({ children }) {
         {children}
       </main>
 
-      {pathname === '/' && <Footer />}
+      <Footer />
       <Cart />
       <BackToTop />
       <BottomTabBar />
@@ -162,7 +162,9 @@ function StorefrontShell({ children }) {
 
 export default function GlobalClientWrapper({ children }) {
   const pathname = usePathname();
-  const isPortalRoute = PORTAL_PREFIXES.some((prefix) => pathname?.startsWith(prefix));
+  const isPortalRoute = PORTAL_PREFIXES.some((prefix) => 
+    pathname === prefix || pathname?.startsWith(`${prefix}/`)
+  );
 
   // Portal routes have their own layout — just render children without loading B2C data
   if (isPortalRoute) {

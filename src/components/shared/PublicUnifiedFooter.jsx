@@ -6,9 +6,12 @@ import {
   ShieldCheck,
   Award,
   ChevronDown,
-  ExternalLink
+  ExternalLink,
+  Sparkles,
+  ArrowRight
 } from '@/lib/icons';
 import BrandLogo from '../common/BrandLogo';
+import { triggerHaptic } from '@/utils/haptics';
 import './PublicUnifiedFooter.css';
 
 const FOOTER_SECTIONS = [
@@ -54,11 +57,12 @@ const FOOTER_SECTIONS = [
  * PublicUnifiedFooter
  * ─────────────────────────────────────────────────────────────────────────────
  * Google Cloud Console compliant clinical and institutional footer.
- * Features an adaptive, progressive-disclosure mobile accordion layout
- * to eliminate mobile scroll fatigue and prevent overlap with bottom action docks.
+ * Features an adaptive, progressive-disclosure mobile accordion layout,
+ * dedicated Atlas AI Clinical Consultant copilot dock, and safe clearance
+ * for floating action docks and tab bars.
  */
 export default function PublicUnifiedFooter({ lang = 'en' }) {
-  const isEs = false; // Force English — translations preserved for i18n
+  const isEs = lang === 'es';
   const [openMobileSections, setOpenMobileSections] = useState({});
 
   const toggleMobileSection = (id) => {
@@ -66,6 +70,19 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
       ...prev,
       [id]: !prev[id]
     }));
+  };
+
+  const handleOpenAtlasAi = (promptText = '') => {
+    triggerHaptic('selection');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('open-atlas-ai', {
+        detail: {
+          prompt: promptText || (isEs
+            ? '¿Cuáles son las formulaciones, sinergias con péptidos y protocolos clínicos de Atlas?'
+            : 'What clinical protocols, peptide synergies, and targeted formulations are available at Atlas Health?')
+        }
+      }));
+    }
   };
 
   const linkStyle = {
@@ -84,7 +101,7 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
         {/* ── DESKTOP & TABLET VIEW (Clean 4-Column GCP Grid) ── */}
         <div className="public-footer-desktop-grid">
           
-          {/* Column 1: Institutional Identity & Live Operational Status */}
+          {/* Column 1: Institutional Identity, Live Operational Status & Atlas AI Consultant */}
           <div className="public-footer-brand-col">
             <div style={{ marginBottom: '0.65rem' }}>
               <BrandLogo variant="dark" showText={true} />
@@ -98,6 +115,30 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
             <div className="gcp-status-pill">
               <span className="gcp-status-dot" />
               <span>{isEs ? 'Sistemas Operativos 100%' : 'All Systems Operational'}</span>
+            </div>
+
+            {/* ── Atlas Clinical AI Consultant Card in Footer ── */}
+            <div className="gcp-footer-ai-card">
+              <div className="gcp-footer-ai-header">
+                <Sparkles size={15} color="#7c3aed" />
+                <span className="gcp-footer-ai-title">Atlas AI Clinical Consultant</span>
+                <span className="gcp-footer-ai-badge">Copilot</span>
+              </div>
+              <p className="gcp-footer-ai-desc">
+                {isEs
+                  ? 'Consulta interacciones magistrales, sinergias con péptidos y protocolos de suplementación.'
+                  : 'Inquire about peptide synergies, active compounding cofactors, and targeted protocols.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => handleOpenAtlasAi()}
+                className="gcp-footer-ai-btn"
+                aria-label="Ask Atlas AI Clinical Consultant"
+              >
+                <Sparkles size={13} />
+                <span>{isEs ? 'Consultar con Atlas IA' : 'Ask Atlas AI'}</span>
+                <ArrowRight size={13} />
+              </button>
             </div>
           </div>
 
@@ -131,6 +172,25 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
               <span className="gcp-status-dot" />
               <span>{isEs ? 'Sistemas OK' : 'Operational'}</span>
             </div>
+          </div>
+
+          {/* Mobile Atlas AI Consultant Card */}
+          <div className="gcp-footer-ai-card gcp-footer-ai-card-mobile">
+            <div className="gcp-footer-ai-header">
+              <Sparkles size={14} color="#7c3aed" />
+              <span className="gcp-footer-ai-title">Atlas AI Clinical Consultant</span>
+              <span className="gcp-footer-ai-badge">Copilot</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleOpenAtlasAi()}
+              className="gcp-footer-ai-btn"
+              aria-label="Ask Atlas AI"
+            >
+              <Sparkles size={13} />
+              <span>{isEs ? 'Consultar con Atlas IA' : 'Ask Atlas AI Clinical Consultant'}</span>
+              <ArrowRight size={13} />
+            </button>
           </div>
 
           {/* Interactive Mobile Accordions (Rule #26 Progressive Disclosure) */}
@@ -181,6 +241,26 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
         <div className="public-footer-bottom">
           <div className="public-footer-copyright">
             © 2026 <strong style={{ color: '#202124' }}>Atlas Health Services</strong>. {isEs ? 'Todos los derechos reservados.' : 'All rights reserved.'}
+          </div>
+
+          {/* Atlas Clinical AI Status Pill */}
+          <button
+            type="button"
+            onClick={() => handleOpenAtlasAi()}
+            className="gcp-footer-bottom-ai-pill"
+            title="Open Atlas Clinical AI"
+          >
+            <span className="gcp-footer-ai-dot" />
+            <Sparkles size={12} color="#7c3aed" />
+            <span>Atlas AI Clinical Intelligence</span>
+          </button>
+
+          <div className="public-footer-legal-links">
+            <Link href="/faq">FAQ</Link>
+            <span className="public-footer-divider">·</span>
+            <Link href="/verify">COA Verification</Link>
+            <span className="public-footer-divider">·</span>
+            <Link href="/contact">Support Desk</Link>
           </div>
         </div>
 

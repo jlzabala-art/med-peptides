@@ -2083,11 +2083,6 @@ export default function BrandCollectionPage({
         isEs={isEs}
         brandName={config.name}
       />
-
-      {/* ── 7. Unified Public Institutional Footer (Bottom) ── */}
-      <div style={{ clear: 'both', width: '100%', marginTop: '3.5rem' }}>
-        <PublicUnifiedFooter lang={lang} />
-      </div>
     </div>
   );
 }

@@ -115,51 +115,6 @@ export default function UltraPersonCollectionSidebar({
         </div>
       </div>
 
-      {/* ── 4. Interactive Atlas Clinical AI Assistant ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
-        border: '1px solid #ddd6fe',
-        borderRadius: '14px',
-        padding: '1.25rem',
-        boxShadow: '0 2px 8px rgba(124, 58, 237, 0.08)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <Sparkles size={16} color="#7c3aed" />
-          <h5 style={{ fontSize: '0.84rem', fontWeight: 800, color: '#5b21b6', margin: 0 }}>
-            Atlas AI Clinical Consultant
-          </h5>
-        </div>
-        <p style={{ fontSize: '0.74rem', color: '#6d28d9', lineHeight: 1.4, margin: '0 0 10px 0' }}>
-          {isEs
-            ? 'Consulta interacciones, sinergias con péptidos y protocolos personalizados de suplementación.'
-            : 'Inquire about peptide synergies, co-factor posology, and customized compounding cofactors.'}
-        </p>
-        <button
-          type="button"
-          onClick={handleAskAi}
-          style={{
-            width: '100%',
-            padding: '8px 12px',
-            borderRadius: '8px',
-            background: '#7c3aed',
-            color: '#ffffff',
-            border: 'none',
-            fontSize: '0.76rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            transition: 'background 0.15s ease'
-          }}
-        >
-          <Sparkles size={13} />
-          <span>{isEs ? 'Consultar con IA' : 'Ask Atlas AI'}</span>
-          <ArrowRight size={13} />
-        </button>
-      </div>
-
     </aside>
   );
 }
