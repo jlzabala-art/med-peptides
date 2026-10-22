@@ -1367,28 +1367,18 @@ export default function PublicDatasheetView({
       const sType = (product?.sampleType || '').toLowerCase();
       const isHairSample = sType.includes('hair') || sType.includes('cabello') || sType.includes('capilar') || (product?.slug || '').includes('htma') || (product?.slug || '').includes('mineralograma');
       const isSalivaSample = sType.includes('saliva') || sType.includes('buccal') || sType.includes('oral') || sType.includes('frotis') || (product?.slug || '').includes('metabolizer');
-      const isBloodSample = sType.includes('blood') || sType.includes('dbs') || sType.includes('sangre') || sType.includes('capilar blood') || sType.includes('finger');
-      const collectionLabelEn = isHairSample ? 'Hair Sample Collection Protocol' : isSalivaSample ? 'Oral Swab Collection Protocol' : 'DBS Collection Protocol';
-      const collectionLabelEs = isHairSample ? 'Protocolo de Recolección Capilar' : isSalivaSample ? 'Protocolo de Frotis Bucal' : 'Protocolo de Muestreo DBS';
+      const collectionLabelEn = isHairSample ? 'Specimen Collection Protocol' : isSalivaSample ? 'Oral Swab Collection Protocol' : 'DBS Collection Protocol';
+      const collectionLabelEs = isHairSample ? 'Protocolo de Muestreo Capilar' : isSalivaSample ? 'Protocolo de Frotis Bucal' : 'Protocolo de Muestreo DBS';
 
       return [
-        { id: 'overview', label: lang === 'es' ? 'Descripción y Utilidad' : 'Overview & Utility', icon: FileText },
-        { id: 'presentations-matrix', label: lang === 'es' ? 'Presentaciones del Kit' : 'Kit Presentations', icon: Layers },
-        { id: 'diagnostic-specs', label: lang === 'es' ? 'Especificaciones Analíticas' : 'Analytical Specs', icon: Activity },
-        { id: 'biomarker-simulator', label: lang === 'es' ? 'Simulador Clínico' : 'Biomarker Simulator', icon: Sparkles },
-        { id: 'collection-protocol', label: lang === 'es' ? collectionLabelEs : collectionLabelEn, icon: Droplets },
-        { id: 'pre-analytical-prep', label: lang === 'es' ? 'Estandarización Preanalítica' : 'Pre-Analytical Prep', icon: CheckCircle2 },
-        { id: 'kit-contents', label: lang === 'es' ? 'Contenido del Kit' : 'Kit Included Items', icon: Layers },
-        { id: 'specs-section', label: lang === 'es' ? 'Trazabilidad y Calidad' : 'Lab Quality & Traceability', icon: ShieldCheck },
-        { id: 'nad-clinical-faq', label: lang === 'es' ? 'Guías y Preguntas Clínicas' : 'Clinical FAQs & Guidance', icon: HelpCircle },
-        { id: 'clinical-synergy', label: lang === 'es' ? 'Recomendaciones Atlas' : 'Atlas Recommendations', icon: Sparkles },
-        { id: 'related-peptides-section', label: lang === 'es' ? 'Protocolos Acompañantes' : 'Companion Protocols', icon: FlaskConical },
+        { id: 'overview', label: lang === 'es' ? 'Descripción y Presentaciones' : 'Overview & Presentations', icon: FileText },
+        { id: 'diagnostic-specs', label: lang === 'es' ? 'Especificaciones y Biomarcadores' : 'Analytical Specs & Biomarkers', icon: Activity },
+        { id: 'collection-protocol', label: collectionLabelEs, icon: Droplets },
+        { id: 'specs-section', label: lang === 'es' ? 'Calidad, Trazabilidad y FAQs' : 'Lab Quality, Standards & FAQs', icon: ShieldCheck },
+        { id: 'clinical-synergy', label: lang === 'es' ? 'Recomendaciones y Protocolos' : 'Atlas Recommendations & Protocols', icon: Sparkles },
         ...(isBloodoDiagnostic ? [
-          { id: 'bloodo-suite', label: lang === 'es' ? 'Otros Tests Disponibles' : 'Other Diagnostic Tests', icon: Sparkles },
-          { id: 'clinical-dbs-advantages', label: lang === 'es' ? 'Ventaja DBS en Consulta' : 'In-Office DBS Advantages', icon: ShieldCheck }
-        ] : [
-          { id: 'clinical-dbs-advantages', label: lang === 'es' ? 'Ventaja DBS en Consulta' : 'In-Office DBS Advantages', icon: ShieldCheck }
-        ])
+          { id: 'bloodo-suite', label: lang === 'es' ? 'Suite Diagnóstica Bloodo™' : 'Bloodo™ Diagnostic Suite', icon: Layers }
+        ] : [])
       ];
     }
 
@@ -2440,6 +2430,47 @@ export default function PublicDatasheetView({
             onSelectSection={handleSelectSection}
           />
         )}
+        {(isDiagnosticKit || isBloodoDiagnostic) && (
+          <div style={{ marginTop: '24px' }}>
+            <PresentationsMatrixSection
+              product={product}
+              slug={slug}
+              lang={lang}
+              t={t}
+              isCorporateService={isCorporateService}
+              isDiagnosticKit={isDiagnosticKit}
+              isSolventProduct={isSolventProduct}
+              isSupplementProduct={isSupplementProduct}
+              isCosmeticProduct={isCosmeticProduct}
+              isPenOrCart={isPenOrCart}
+              isSprayFormat={isSprayFormat}
+              isCartridgeFormat={isCartridgeFormat}
+              isPenFormat={isPenFormat}
+              isPenAndCartridgeEcosystem={isPenAndCartridgeEcosystem}
+              distinctCartridgeFmt={distinctCartridgeFmt}
+              distinctPenFmt={distinctPenFmt}
+              isMultiSupplierMode={isMultiSupplierMode}
+              suppliersList={suppliersList}
+              activeSupplierId={activeSupplierId}
+              setActiveSupplierId={setActiveSupplierId}
+              availableFormats={availableFormats}
+              activeFormatId={activeFormatId}
+              setActiveFormatId={setActiveFormatId}
+              rawFormats={rawFormats}
+              filteredStrengths={filteredStrengths}
+              sortedStrengths={sortedStrengths}
+              selectedStrengthId={selectedStrengthId}
+              setSelectedStrengthId={setSelectedStrengthId}
+              selectedStrength={selectedStrength}
+              packUnits={packUnits}
+              setPackUnits={setPackUnits}
+              realKitSavings={realKitSavings}
+              displaySupplierName={displaySupplierName}
+              matrixRows={matrixRows}
+              getReconstitutionVolume={getReconstitutionVolume}
+            />
+          </div>
+        )}
         </div>
       ) : (
         <div className="pds-single-section-view">
@@ -2526,6 +2557,11 @@ export default function PublicDatasheetView({
             monographUrl={dynamicPublicUrl}
             batchCode={effectiveBatchCode}
           />
+          {(isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) && (
+            <div style={{ marginTop: '20px' }}>
+              <BloodoNadFaqCard product={product} lang={lang} />
+            </div>
+          )}
         </section>
       )}
 
@@ -2725,19 +2761,27 @@ export default function PublicDatasheetView({
           />
         )}
 
-        {/* ── Block 4.8: Bloodo™ Clinical Diagnostic FAQ & WhatsApp Share ── */}
+        {/* ── Block 4.8: Bloodo™ Clinical Diagnostic FAQ & WhatsApp Share (Legacy fallback) ── */}
         {effectiveActiveSection === 'nad-clinical-faq' && !isCosmeticProduct && (isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo') || (Array.isArray(product?.clinical_faq) && product.clinical_faq.length > 0)) && (
           <BloodoNadFaqCard product={product} lang={lang} />
         )}
 
-        {/* ── Block 5: Targeted Therapeutic Peptides (Lotusland Limited) ── */}
+        {/* ── Block 5: Targeted Therapeutic Peptides (Legacy fallback) ── */}
         {effectiveActiveSection === 'related-peptides-section' && (
           <BloodoRelatedPeptidesSection product={product} lang={lang} />
         )}
 
         {/* ── Block 5.5: Universal Clinical Synergy & Adjuvant Recommendations (Cross-Sell Engine) ── */}
         {effectiveActiveSection === 'clinical-synergy' && (
-          <ClinicalSynergySection product={product} slug={slug || product?.slug} lang={lang} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <ClinicalSynergySection product={product} slug={slug || product?.slug} lang={lang} />
+            {(isBloodoDiagnostic || isDiagnosticKit) && (
+              <>
+                <BloodoRelatedPeptidesSection product={product} lang={lang} />
+                <BloodoClinicalAdvantageCard lang={lang} />
+              </>
+            )}
+          </div>
         )}
 
         {/* ── Block 6: Bloodo™ Diagnostic Suite Switcher (All 6 Clinical DBS Tests) ── */}
@@ -2745,13 +2789,13 @@ export default function PublicDatasheetView({
           <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
         )}
 
-        {/* ── Block 7: In-Office Clinical Advantage (Capillary DBS vs Traditional Phlebotomy) ── */}
+        {/* ── Block 7: In-Office Clinical Advantage (Legacy fallback) ── */}
         {effectiveActiveSection === 'clinical-dbs-advantages' && (isBloodoDiagnostic || isDiagnosticKit) && (
           <BloodoClinicalAdvantageCard lang={lang} />
         )}
 
         {/* Diagnostic kit specific sub-sections */}
-        {['diagnostic-specs', 'biomarker-simulator', 'collection-protocol', 'pre-analytical-prep', 'kit-contents'].includes(effectiveActiveSection) && (
+        {(effectiveActiveSection === 'diagnostic-specs' || effectiveActiveSection === 'collection-protocol' || ['biomarker-simulator', 'pre-analytical-prep', 'kit-contents'].includes(effectiveActiveSection)) && (
           <section id={effectiveActiveSection} className="pds-section-card">
             <DiagnosticTestTechnicalSpecs
               product={product}

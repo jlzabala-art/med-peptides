@@ -555,6 +555,7 @@ export default function DoctorPublicPortalClient({
   const [workstationAuthorized, setWorkstationAuthorized] = useState(false);
   const [isSwitchingDoctor, setIsSwitchingDoctor] = useState(false);
   const [followUpModalTask, setFollowUpModalTask] = useState(null);
+  const [hoveredInsightBar, setHoveredInsightBar] = useState(null);
 
   const { user, activeRole, isAdmin } = useAuth();
 
@@ -6461,122 +6462,328 @@ export default function DoctorPublicPortalClient({
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
-                  {/* Card 1: 6-Month Prescription Activity */}
-                  <div style={{ padding: '12px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  {/* Card 1: 6-Month Prescription Activity (GCP Cloud Monitoring Style) */}
+                  <div style={{ padding: '14px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #dadce0', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                         Prescription Activity
                       </span>
-                      <span style={{ fontSize: '0.70rem', color: '#64748b' }}>Last 6 Months</span>
+                      <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 500 }}>
+                        {practiceMonthlyTrends.length > 0
+                          ? `${practiceMonthlyTrends[0].label?.split(' ')[0] || ''} – ${practiceMonthlyTrends[practiceMonthlyTrends.length - 1].label || ''}`
+                          : 'Last 6 Months'}
+                      </span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '65px', paddingTop: '8px', gap: '6px' }}>
-                      {practiceMonthlyTrends.map((m, idx) => {
-                        const maxCount = Math.max(...practiceMonthlyTrends.map((t) => t.count), 1);
-                        const barHeight = Math.max(8, Math.round((m.count / maxCount) * 44));
-                        const isLatest = idx === practiceMonthlyTrends.length - 1;
-                        return (
-                          <div key={m.key || idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, gap: '4px' }}>
-                            <div style={{ fontSize: '0.64rem', fontWeight: 700, color: isLatest ? '#1a73e8' : '#64748b' }}>
-                              {m.count}
-                            </div>
-                            <div
-                              style={{
-                                width: '100%',
-                                maxWidth: '24px',
-                                height: `${barHeight}px`,
-                                borderRadius: '3px 3px 0 0',
-                                background: isLatest ? '#1a73e8' : '#cbd5e1'
-                              }}
-                              title={`${m.label}: ${m.count} prescriptions`}
-                            />
-                            <div style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 600 }}>
-                              {m.label}
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div style={{ position: 'relative', width: '100%', height: '96px', marginTop: 'auto' }}>
+                      <svg viewBox="0 0 280 88" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                        {/* GCP Guideline */}
+                        <line x1="0" y1="30" x2="280" y2="30" stroke="#f1f3f4" strokeDasharray="3 3" />
+                        {/* GCP Baseline */}
+                        <line x1="0" y1="68" x2="280" y2="68" stroke="#dadce0" strokeWidth="1" />
+
+                        {practiceMonthlyTrends.map((m, idx) => {
+                          const totalBars = practiceMonthlyTrends.length;
+                          const availableWidth = 280;
+                          const barWidth = Math.min(22, (availableWidth / totalBars) * 0.55);
+                          const gap = availableWidth / totalBars;
+                          const x = idx * gap + (gap - barWidth) / 2;
+                          const maxCount = Math.max(...practiceMonthlyTrends.map((t) => t.count), 1);
+                          const barHeight = Math.max(6, Math.round((m.count / maxCount) * 44));
+                          const y = 68 - barHeight;
+                          const isLatest = idx === totalBars - 1;
+                          const isHovered = hoveredInsightBar === idx;
+                          const shortMonth = m.label ? m.label.split(' ')[0] : (m.key ? m.key.split('-')[1] : '');
+
+                          return (
+                            <g
+                              key={m.key || idx}
+                              onMouseEnter={() => setHoveredInsightBar(idx)}
+                              onMouseLeave={() => setHoveredInsightBar(null)}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              {/* Transparent hit area to make hovering easy */}
+                              <rect
+                                x={idx * gap}
+                                y="0"
+                                width={gap}
+                                height="88"
+                                fill="transparent"
+                              />
+
+                              {/* Bar rectangle */}
+                              <rect
+                                x={x}
+                                y={y}
+                                width={barWidth}
+                                height={barHeight}
+                                rx={3}
+                                fill={isHovered ? '#1557b0' : isLatest ? '#1a73e8' : '#8ab4f8'}
+                                style={{ transition: 'all 0.15s ease' }}
+                              />
+
+                              {/* Value count above bar */}
+                              <text
+                                x={x + barWidth / 2}
+                                y={y - 4}
+                                textAnchor="middle"
+                                fontSize="9"
+                                fontWeight={isHovered || isLatest ? '700' : '600'}
+                                fill={isHovered ? '#1557b0' : isLatest ? '#1a73e8' : '#5f6368'}
+                              >
+                                {m.count}
+                              </text>
+
+                              {/* Month label below baseline */}
+                              <text
+                                x={x + barWidth / 2}
+                                y="81"
+                                textAnchor="middle"
+                                fontSize="8.5"
+                                fontWeight={isLatest ? '650' : '500'}
+                                fill={isLatest ? '#1a73e8' : '#5f6368'}
+                              >
+                                {shortMonth}
+                              </text>
+                            </g>
+                          );
+                        })}
+                      </svg>
+
+                      {/* GCP Floating Tooltip */}
+                      {hoveredInsightBar !== null && practiceMonthlyTrends[hoveredInsightBar] && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '-12px',
+                            right: '0',
+                            background: '#202124',
+                            color: '#ffffff',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            fontSize: '0.68rem',
+                            fontWeight: 500,
+                            pointerEvents: 'none',
+                            boxShadow: '0 2px 6px rgba(60,64,67,0.3)',
+                            zIndex: 10,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          <strong>{practiceMonthlyTrends[hoveredInsightBar].label}:</strong> {practiceMonthlyTrends[hoveredInsightBar].count} prescriptions
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Card 2: Top 3 Prescribed Formulations */}
-                  <div style={{ padding: '12px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+                  <div style={{ padding: '14px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #dadce0', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                         Top Formulations
                       </span>
-                      <span style={{ fontSize: '0.70rem', color: '#1a73e8', fontWeight: 600, cursor: 'pointer' }} onClick={() => handleSidebarNavigate('analytics')}>
-                        Explore all →
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('light');
+                          handleSidebarNavigate('analytics');
+                        }}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          padding: 0,
+                          fontSize: '0.70rem',
+                          color: '#1a73e8',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '2px'
+                        }}
+                      >
+                        <span>Explore all</span>
+                        <span>→</span>
+                      </button>
                     </div>
 
                     {doctorTopApis.length > 0 ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: 'auto' }}>
                         {doctorTopApis.slice(0, 3).map((item, idx) => {
                           const maxTop = Math.max(...doctorTopApis.slice(0, 3).map((a) => a.count), 1);
                           const pct = Math.round((item.count / maxTop) * 100);
                           return (
-                            <div key={idx} style={{ fontSize: '0.74rem' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                                <span style={{ fontWeight: 650, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '170px' }}>
-                                  #{idx + 1} {item.name}
-                                </span>
-                                <span style={{ color: '#475569', fontWeight: 700 }}>
-                                  {item.count} Rx
+                            <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flex: 1 }}>
+                                  <span
+                                    style={{
+                                      fontSize: '0.65rem',
+                                      fontWeight: 700,
+                                      color: '#5f6368',
+                                      background: '#f1f3f4',
+                                      padding: '1px 5px',
+                                      borderRadius: '3px',
+                                      flexShrink: 0
+                                    }}
+                                  >
+                                    #{idx + 1}
+                                  </span>
+                                  <span
+                                    title={item.name}
+                                    style={{
+                                      fontSize: '0.74rem',
+                                      fontWeight: 600,
+                                      color: '#202124',
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis'
+                                    }}
+                                  >
+                                    {item.name}
+                                  </span>
+                                </div>
+                                <span style={{ fontSize: '0.74rem', color: '#202124', fontWeight: 700, flexShrink: 0 }}>
+                                  {item.count} <span style={{ fontSize: '0.66rem', fontWeight: 500, color: '#5f6368' }}>Rx</span>
                                 </span>
                               </div>
-                              <div style={{ width: '100%', height: '5px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
-                                <div style={{ width: `${pct}%`, height: '100%', background: '#003666', borderRadius: '3px' }} />
+                              <div style={{ width: '100%', height: '6px', background: '#f1f3f4', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div
+                                  style={{
+                                    width: `${pct}%`,
+                                    height: '100%',
+                                    background: idx === 0 ? '#1a73e8' : '#4285f4',
+                                    borderRadius: '3px',
+                                    transition: 'width 0.3s ease'
+                                  }}
+                                />
                               </div>
                             </div>
                           );
                         })}
                       </div>
                     ) : (
-                      <div style={{ fontSize: '0.72rem', color: '#64748b', paddingTop: '14px', textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.72rem', color: '#5f6368', padding: '24px 0', textAlign: 'center' }}>
                         Ready for first compounded formulation.
                       </div>
                     )}
                   </div>
 
                   {/* Card 3: Patient Follow-up Status */}
-                  <div style={{ padding: '12px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+                  <div style={{ padding: '14px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #dadce0', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                         Patient Cohort Status
                       </span>
-                      <span style={{ fontSize: '0.70rem', color: '#1a73e8', fontWeight: 600, cursor: 'pointer' }} onClick={() => handleSidebarNavigate('patients')}>
-                        Directory →
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('light');
+                          handleSidebarNavigate('patients');
+                        }}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          padding: 0,
+                          fontSize: '0.70rem',
+                          color: '#1a73e8',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '2px'
+                        }}
+                      >
+                        <span>Directory</span>
+                        <span>→</span>
+                      </button>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: '#ffffff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a' }} />
-                          <span style={{ fontSize: '0.73rem', color: '#334155' }}>Active on Therapy</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'auto' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '7px 10px',
+                          background: '#ffffff',
+                          borderRadius: '6px',
+                          border: '1px solid #e0e0e0',
+                          transition: 'background 0.15s ease'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1e8e3e', flexShrink: 0 }} />
+                          <span style={{ fontSize: '0.74rem', color: '#3c4043', fontWeight: 500 }}>Active on Therapy</span>
                         </div>
-                        <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#15803d' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            color: '#137333',
+                            background: '#e6f4ea',
+                            padding: '2px 8px',
+                            borderRadius: '12px'
+                          }}
+                        >
                           {soldPatientsCount}
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: '#ffffff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#d97706' }} />
-                          <span style={{ fontSize: '0.73rem', color: '#334155' }}>Offers Awaiting Checkout</span>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '7px 10px',
+                          background: '#ffffff',
+                          borderRadius: '6px',
+                          border: '1px solid #e0e0e0',
+                          transition: 'background 0.15s ease'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f9ab00', flexShrink: 0 }} />
+                          <span style={{ fontSize: '0.74rem', color: '#3c4043', fontWeight: 500 }}>Offers Awaiting Checkout</span>
                         </div>
-                        <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#b45309' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            color: '#b06000',
+                            background: '#fef7e0',
+                            padding: '2px 8px',
+                            borderRadius: '12px'
+                          }}
+                        >
                           {unacceptedPatientsCount}
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: '#ffffff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1a73e8' }} />
-                          <span style={{ fontSize: '0.73rem', color: '#334155' }}>Total Monitored Cohort</span>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '7px 10px',
+                          background: '#ffffff',
+                          borderRadius: '6px',
+                          border: '1px solid #e0e0e0',
+                          transition: 'background 0.15s ease'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1a73e8', flexShrink: 0 }} />
+                          <span style={{ fontSize: '0.74rem', color: '#3c4043', fontWeight: 500 }}>Total Monitored Cohort</span>
                         </div>
-                        <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            color: '#174ea6',
+                            background: '#e8f0fe',
+                            padding: '2px 8px',
+                            borderRadius: '12px'
+                          }}
+                        >
                           {doctorPatientsList.length}
                         </span>
                       </div>

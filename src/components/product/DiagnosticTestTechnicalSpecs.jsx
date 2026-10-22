@@ -78,10 +78,14 @@ export default function DiagnosticTestTechnicalSpecs({
   product, 
   selectedDose = '1 test / kit', 
   supplierName = 'Bloodo UAB', 
-  lang = 'en' 
+  lang = 'en',
+  activeSection = null
 }) {
   const isEs = lang === 'es';
   const slug = (product?.slug || product?.id || '').toLowerCase();
+  
+  const isCollectionOnly = activeSection === 'collection-protocol' || activeSection === 'pre-analytical-prep' || activeSection === 'kit-contents';
+  const isSpecsOnly = activeSection === 'diagnostic-specs' || activeSection === 'biomarker-simulator';
   
   // Identify specific Bloodo test type
   const isNad = slug.includes('nad');
@@ -2118,21 +2122,23 @@ export default function DiagnosticTestTechnicalSpecs({
       <div className="pds-section-header">
         <div className="pds-section-header-left">
           <div className="pds-section-header-shield" style={{ background: 'rgba(13, 148, 136, 0.12)', color: '#0d9488' }}>
-            <Activity size={22} />
+            {isCollectionOnly ? <Droplets size={22} /> : <Activity size={22} />}
           </div>
           <div className="pds-section-header-titles">
             <div className="pds-section-header-meta-row">
               <span className="pds-section-header-category">
-                {isEs ? 'ESPECIFICACIONES ANALÍTICAS & BIOMARCADORES' : 'ANALYTICAL SPECIFICATIONS & BIOMARKERS'}
+                {isCollectionOnly 
+                  ? (isEs ? 'PROTOCOLO DE MUESTREO Y RECOGIDA' : 'STANDARDIZED SPECIMEN SAMPLING & PROTOCOL')
+                  : (isEs ? 'ESPECIFICACIONES ANALÍTICAS & BIOMARCADORES' : 'ANALYTICAL SPECIFICATIONS & BIOMARKERS')}
               </span>
               <span className="pds-section-badge" style={{ background: '#f0fdfa', color: '#0d9488', borderColor: '#ccfbf1' }}>
                 <CheckCircle2 size={11} /> {isHairSample ? (isEs ? 'MÉTODO CERTIFICADO HTMA' : 'CERTIFIED HTMA METHOD') : isSalivaSample ? (isEs ? 'FROTIS BUCAL / ADN GENÉTICO' : 'CERTIFIED BUCCAL DNA') : (isEs ? 'MÉTODO CERTIFICADO DBS' : 'CERTIFIED DBS METHOD')}
               </span>
             </div>
             <h3 className="pds-section-header-title">
-              {isEs 
-                ? 'Monografía Analítica y Cuantificación de Biomarcadores' 
-                : 'Analytical Monograph & Biomarker Quantification Protocol'}
+              {isCollectionOnly
+                ? (isEs ? 'Protocolo de Extracción y Preparación Preanalítica' : 'Standardized Specimen Collection & Pre-Analytical Protocol')
+                : (isEs ? 'Monografía Analítica y Cuantificación de Biomarcadores' : 'Analytical Monograph & Biomarker Quantification Protocol')}
             </h3>
           </div>
         </div>
@@ -2148,8 +2154,10 @@ export default function DiagnosticTestTechnicalSpecs({
       </div>
 
       <div className="dts-body">
-        {/* ── 1. ANALYTICAL METRICS GRID ── */}
-        <div id="diagnostic-specs" className="dts-metrics-grid">
+        {/* ── 1. ANALYTICAL METRICS GRID & 2. SIMULATOR (Specs Mode) ── */}
+        {!isCollectionOnly && (
+          <>
+            <div id="diagnostic-specs" className="dts-metrics-grid">
           <div className="dts-metric-card">
             <span className="dts-metric-label">{isEs ? 'Método Analítico' : 'Analytical Method'}</span>
             <strong className="dts-metric-value">{biomarkerData.method}</strong>
@@ -2392,9 +2400,13 @@ export default function DiagnosticTestTechnicalSpecs({
             </div>
           )}
         </div>
+          </>
+        )}
 
-        {/* ── 3. STANDARDIZED DBS CAPILLARY COLLECTION PROTOCOL (BLOODO.COM METHODOLOGY) ── */}
-        <div id="collection-protocol" className="dts-protocol-card">
+        {/* ── 3. STANDARDIZED DBS CAPILLARY COLLECTION PROTOCOL & PREP (Collection Mode) ── */}
+        {!isSpecsOnly && (
+          <>
+            <div id="collection-protocol" className="dts-protocol-card">
           <div className="dts-protocol-header-row">
             <div>
               <div className="dts-protocol-tag">
@@ -3101,6 +3113,8 @@ export default function DiagnosticTestTechnicalSpecs({
             </a>
           </div>
         </div>
+          </>
+        )}
       </div>
     </div>
   );
