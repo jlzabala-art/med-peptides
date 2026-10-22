@@ -51,6 +51,19 @@ export const PORTFOLIO_GROUPS = [
         icon: Zap,
         color: '#7c3aed',
         badge: 'Nutraceuticals'
+      },
+      {
+        id: 'supplements',
+        slug: 'supplements',
+        aliases: ['supplements'],
+        href: '/collection/supplements',
+        name: 'Clinical Supplements',
+        shortName: 'Supplements',
+        domain: 'Therapeutic Cofactors & Precursors',
+        subdomain: 'Mitochondrial & Cellular Longevity Formulations',
+        icon: Zap,
+        color: '#10b981',
+        badge: 'Nutraceuticals'
       }
     ]
   },
@@ -118,6 +131,19 @@ export const PORTFOLIO_GROUPS = [
         icon: Shield,
         color: '#003666',
         badge: 'Therapeutics'
+      },
+      {
+        id: 'protocols',
+        slug: 'protocols',
+        aliases: ['protocols'],
+        href: '/collection/protocols',
+        name: 'Clinical Peptide Protocols',
+        shortName: 'Protocols',
+        domain: 'Evidence-Based Clinical Blueprints',
+        subdomain: 'Standardized Dosing & Administration Pathways',
+        icon: Layers,
+        color: '#0d9488',
+        badge: 'Protocols'
       }
     ]
   }

@@ -139,6 +139,25 @@ export function resolveBrandCollectionInfo(product) {
     };
   }
 
+  // 5. TeleTest Analytika
+  if (id.includes('teletest') || slug.includes('teletest') || brand.includes('teletest') || name.includes('teletest') || product.supplierId === 'supplier-teletest') {
+    return {
+      brandSlug: 'teletest',
+      brandName: 'TeleTest® Analytika',
+      collectionTitle: 'TeleTest Analytika® Clinical Genomics & HTMA Toxicology',
+      collectionUrl: '/collection/teletest',
+      accentColor: '#0284c7',
+      accentBg: '#f0f9ff',
+      borderColor: '#e0f2fe',
+      badgeLabel: 'TeleTest® Clinical Lab Suite',
+      icon: Dna,
+      systemName: 'TeleTest Analytika® European Reference Diagnostics',
+      systemSubtitle: 'HLA Immunogenetics, Celiac Predisposition & ICP-MS/MS Hair Heavy Metal Toxicology',
+      ctaLabel: 'Explore TeleTest® Collection',
+      quickChips: ['HLA Genética', 'Mineralograma Cabello', 'Metales Pesados ICP-MS', 'Estudio Celiaquía', 'ISO 17025']
+    };
+  }
+
   return null;
 }
 

@@ -11,6 +11,7 @@ import SupplementCollectionPage from './SupplementCollectionPage';
 import SuppliesView from './SuppliesView';
 import RestrictedCatalogRoute from '../components/auth/RestrictedCatalogRoute';
 import BrandCollectionPage from './BrandCollectionPage';
+import ClinicalPortfolioSuiteSwitcher from '../components/navigation/ClinicalPortfolioSuiteSwitcher';
 
 
 // Slug → exact category name mapping
@@ -80,6 +81,7 @@ export default function CollectionTemplate({
   if (s === 'peptides') {
     return (
       <RestrictedCatalogRoute catalogName="products">
+        <ClinicalPortfolioSuiteSwitcher currentSlug="peptides" />
         <PeptideCollectionPage
           initialProducts={products || []}
           onNavigate={(productSlug) => router.push(`/product/${productSlug}`)}
@@ -94,6 +96,7 @@ export default function CollectionTemplate({
   if (s === 'protocols') {
     return (
       <RestrictedCatalogRoute catalogName="protocols">
+        <ClinicalPortfolioSuiteSwitcher currentSlug="protocols" />
         <ProtocolCollectionPage
           onNavigate={(slug) => router.push(`/protocol/${slug}`)}
           onBack={() => router.back()}
@@ -106,6 +109,7 @@ export default function CollectionTemplate({
   if (s === 'supplements') {
     return (
       <RestrictedCatalogRoute catalogName="products">
+        <ClinicalPortfolioSuiteSwitcher currentSlug="supplements" />
         <SupplementCollectionPage
           onNavigate={(supplementSlug) => router.push(`/supplements/${supplementSlug}`)}
           onBack={() => router.back()}
@@ -119,6 +123,7 @@ export default function CollectionTemplate({
   if (s === 'research-supplies') {
     return (
       <RestrictedCatalogRoute catalogName="apis">
+        <ClinicalPortfolioSuiteSwitcher currentSlug="peptides" />
         <SuppliesView
           onBack={() => router.back()}
           onSelectProduct={handleProductSelect}
@@ -184,6 +189,7 @@ export default function CollectionTemplate({
 
   return (
     <div className="template-root">
+      <ClinicalPortfolioSuiteSwitcher currentSlug={slug} />
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
         <Breadcrumbs items={breadcrumbItems} />
       </div>
