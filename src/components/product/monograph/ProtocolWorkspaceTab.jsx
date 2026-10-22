@@ -1657,7 +1657,7 @@ export default function ProtocolWorkspaceTab({
               </div>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: `repeat(${Math.min(physicianDurationWeeks, 6)}, 1fr)`,
+                gridTemplateColumns: 'repeat(auto-fill, minmax(64px, 1fr))',
                 gap: '0.4rem'
               }}>
                 {Array.from({ length: physicianDurationWeeks }).map((_, i) => (
