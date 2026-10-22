@@ -25,14 +25,37 @@ export default function DoctorPatientFollowUpModal({
   doctor = {}
 }) {
   const [selectedScenario, setSelectedScenario] = useState('treatment_inquiry');
-  const [language, setLanguage] = useState('es'); // 'es' | 'en'
+  const [language, setLanguage] = useState('en'); // Default 'en', voluntarily switchable to 'es'
   const [editedMessage, setEditedMessage] = useState('');
   const [copied, setCopied] = useState(false);
   const [isEditingManually, setIsEditingManually] = useState(false);
 
+  const t = useMemo(() => {
+    const isEn = language === 'en';
+    return {
+      title: isEn ? 'Clinical Follow-Up Preview' : 'Previsualización de Seguimiento Clínico',
+      subtitle: isEn ? 'Empathetic medical tone · Review by clinician prior to dispatch' : 'Tono médico empático · Revisión previa por el facultativo antes del envío',
+      scenarioLabel: isEn ? 'Clinical Follow-Up Scenario:' : 'Escenario de Seguimiento Clínico:',
+      previewTitle: isEn ? 'Editable Message Preview' : 'Previsualización Editable del Mensaje',
+      editedManually: isEn ? 'Edited manually' : 'Editado manualmente',
+      resetTemplate: isEn ? 'Reset template' : 'Restablecer plantilla',
+      resetToast: isEn ? 'Template reset to original text' : 'Texto restaurado a la plantilla original',
+      patientLink: isEn ? 'Patient Link (1-Click, no password):' : 'Enlace de Paciente (1-Click sin password):',
+      viewChart: isEn ? 'View Chart' : 'Ver Ficha',
+      secureDomain: isEn ? 'Secure domain:' : 'Dominio seguro:',
+      close: isEn ? 'Close' : 'Cerrar',
+      copy: isEn ? 'Copy Message' : 'Copiar Mensaje',
+      copied: isEn ? 'Copied ✓' : 'Copiado ✓',
+      copyToast: isEn ? 'Message copied to clipboard ✓' : 'Mensaje copiado al portapapeles ✓',
+      sendEmail: isEn ? 'Send via Email' : 'Enviar por Email',
+      sendWhatsApp: isEn ? 'Send via WhatsApp' : 'Enviar por WhatsApp',
+      emailTitle: isEn ? 'Open in email client with pre-filled subject and body' : 'Abrir en cliente de correo con asunto y cuerpo pre-rellenados'
+    };
+  }, [language]);
+
   const patientName = useMemo(() => {
-    return task.patientName || task.patient?.name || 'Estimado Paciente';
-  }, [task]);
+    return task.patientName || task.patient?.name || (language === 'en' ? 'Dear Patient' : 'Estimado Paciente');
+  }, [task, language]);
 
   const patientPhone = useMemo(() => {
     const raw = task.patientPhone || task.patient?.phone || task.phone || task.mobile || '';
@@ -44,8 +67,8 @@ export default function DoctorPatientFollowUpModal({
   }, [task]);
 
   const treatmentTitle = useMemo(() => {
-    return task.treatmentTitle || task.title || task.productName || 'Tratamiento Médico Personalizado';
-  }, [task]);
+    return task.treatmentTitle || task.title || task.productName || (language === 'en' ? 'Personalized Medical Treatment' : 'Tratamiento Médico Personalizado');
+  }, [task, language]);
 
   const rxCode = useMemo(() => {
     return task.code || task.prescriptionNumber || task.id || '';
@@ -95,7 +118,7 @@ export default function DoctorPatientFollowUpModal({
     triggerHaptic('selection');
     navigator.clipboard.writeText(editedMessage);
     setCopied(true);
-    toast.success('Mensaje copiado al portapapeles ✓');
+    toast.success(t.copyToast);
     setTimeout(() => setCopied(false), 2500);
   };
 
@@ -191,10 +214,10 @@ export default function DoctorPatientFollowUpModal({
             </div>
             <div>
               <h2 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 700, color: '#202124', letterSpacing: '-0.01em' }}>
-                Previsualización de Seguimiento Clínico
+                {t.title}
               </h2>
               <p style={{ margin: '2px 0 0', fontSize: '0.74rem', color: '#5f6368' }}>
-                Tono médico empático · Revisión previa por el facultativo antes del envío
+                {t.subtitle}
               </p>
             </div>
           </div>
@@ -202,22 +225,6 @@ export default function DoctorPatientFollowUpModal({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {/* Language Switcher */}
             <div style={{ display: 'inline-flex', background: '#f1f3f4', padding: '2px', borderRadius: '4px' }}>
-              <button
-                type="button"
-                onClick={() => handleLanguageToggle('es')}
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: '3px',
-                  border: 'none',
-                  background: language === 'es' ? '#ffffff' : 'transparent',
-                  color: language === 'es' ? '#1a73e8' : '#5f6368',
-                  fontWeight: language === 'es' ? 700 : 500,
-                  fontSize: '0.72rem',
-                  cursor: 'pointer'
-                }}
-              >
-                🇪🇸 ES
-              </button>
               <button
                 type="button"
                 onClick={() => handleLanguageToggle('en')}
@@ -233,6 +240,22 @@ export default function DoctorPatientFollowUpModal({
                 }}
               >
                 🇬🇧 EN
+              </button>
+              <button
+                type="button"
+                onClick={() => handleLanguageToggle('es')}
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: '3px',
+                  border: 'none',
+                  background: language === 'es' ? '#ffffff' : 'transparent',
+                  color: language === 'es' ? '#1a73e8' : '#5f6368',
+                  fontWeight: language === 'es' ? 700 : 500,
+                  fontSize: '0.72rem',
+                  cursor: 'pointer'
+                }}
+              >
+                🇪🇸 ES
               </button>
             </div>
 
@@ -301,7 +324,7 @@ export default function DoctorPatientFollowUpModal({
           }}
         >
           <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Escenario de Seguimiento Clínico:
+            {t.scenarioLabel}
           </span>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '8px' }}>
             {FOLLOWUP_SCENARIOS.map((s) => {
@@ -354,11 +377,11 @@ export default function DoctorPatientFollowUpModal({
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Edit3 size={13} style={{ color: '#5f6368' }} />
               <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#3c4043' }}>
-                Previsualización Editable del Mensaje
+                {t.previewTitle}
               </span>
               {isEditingManually && (
                 <span style={{ fontSize: '0.68rem', color: '#d97706', background: '#fffbeb', padding: '1px 6px', borderRadius: '3px', fontWeight: 600 }}>
-                  Editado manualmente
+                  {t.editedManually}
                 </span>
               )}
             </div>
@@ -377,7 +400,7 @@ export default function DoctorPatientFollowUpModal({
                 });
                 setEditedMessage(generated);
                 setIsEditingManually(false);
-                toast.success('Texto restaurado a la plantilla original');
+                toast.success(t.resetToast);
               }}
               style={{
                 background: 'transparent',
@@ -388,7 +411,7 @@ export default function DoctorPatientFollowUpModal({
                 cursor: 'pointer'
               }}
             >
-              Restablecer plantilla
+              {t.resetTemplate}
             </button>
           </div>
 
@@ -433,7 +456,7 @@ export default function DoctorPatientFollowUpModal({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <ShieldCheck size={16} style={{ color: '#16a34a' }} />
               <span style={{ fontSize: '0.74rem', color: '#166534', fontWeight: 600 }}>
-                Enlace de Paciente (1-Click sin password):
+                {t.patientLink}
               </span>
               <code style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>
                 {patientPortalUrl}
@@ -453,7 +476,7 @@ export default function DoctorPatientFollowUpModal({
                 gap: '3px'
               }}
             >
-              <span>Ver Ficha</span>
+              <span>{t.viewChart}</span>
               <ExternalLink size={11} />
             </a>
           </div>
@@ -473,7 +496,7 @@ export default function DoctorPatientFollowUpModal({
           }}
         >
           <div style={{ fontSize: '0.72rem', color: '#5f6368' }}>
-            Dominio seguro: <strong style={{ color: '#1a73e8' }}>https://www.atlashealth-services.com</strong>
+            {t.secureDomain} <strong style={{ color: '#1a73e8' }}>https://www.atlashealth-services.com</strong>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -491,7 +514,7 @@ export default function DoctorPatientFollowUpModal({
                 cursor: 'pointer'
               }}
             >
-              Cerrar
+              {t.close}
             </button>
 
             {/* Copy Button */}
@@ -513,7 +536,7 @@ export default function DoctorPatientFollowUpModal({
               }}
             >
               {copied ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
-              <span>{copied ? 'Copiado ✓' : 'Copiar Mensaje'}</span>
+              <span>{copied ? t.copied : t.copy}</span>
             </button>
 
             {/* Email Dispatch */}
@@ -533,10 +556,10 @@ export default function DoctorPatientFollowUpModal({
                 fontWeight: 600,
                 cursor: 'pointer'
               }}
-              title="Abrir en cliente de correo con asunto y cuerpo pre-rellenados"
+              title={t.emailTitle}
             >
               <Mail size={14} style={{ color: '#1a73e8' }} />
-              <span>Enviar por Email</span>
+              <span>{t.sendEmail}</span>
             </button>
 
             {/* WhatsApp Dispatch */}
@@ -559,7 +582,7 @@ export default function DoctorPatientFollowUpModal({
               }}
             >
               <MessageCircle size={14} />
-              <span>Enviar por WhatsApp</span>
+              <span>{t.sendWhatsApp}</span>
               <ExternalLink size={12} />
             </button>
           </div>

@@ -38,10 +38,10 @@ export const FOLLOWUP_SCENARIOS = [
 
 export function generatePatientFollowUpMessage({
   scenario = 'treatment_inquiry',
-  language = 'es', // 'es' | 'en'
-  patientName = 'Paciente',
+  language = 'en', // 'en' | 'es' (default is 'en')
+  patientName = 'Patient',
   doctorName = 'Dr. Khalid Shukri',
-  treatmentTitle = 'Tratamiento Pautado',
+  treatmentTitle = 'Prescribed Treatment',
   rxCode = '',
   patientPortalUrl = ''
 }) {
