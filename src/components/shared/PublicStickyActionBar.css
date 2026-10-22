@@ -371,23 +371,23 @@
 
 /* ── Global Sticky Bottom Clearance & Coordination Tokens ── */
 :root {
-  --atlas-sticky-bar-height: 62px;
+  --atlas-sticky-bar-height: 84px;
 }
 
 @media (max-width: 768px) {
   :root {
-    --atlas-sticky-bar-height: 110px;
+    --atlas-sticky-bar-height: 140px;
   }
 }
 
-/* Ensure footer text and copyright are never obscured when sticky bar is active */
+/* Ensure footer text, status badge, and copyright are NEVER obscured when sticky bar is active */
 body.has-sticky-bottom-bar footer.public-unified-footer {
-  padding-bottom: calc(2.5rem + var(--atlas-sticky-bar-height, 62px)) !important;
+  padding-bottom: calc(3.5rem + var(--atlas-sticky-bar-height, 84px) + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 @media (max-width: 768px) {
   body.has-sticky-bottom-bar footer.public-unified-footer {
-    padding-bottom: calc(2rem + var(--atlas-sticky-bar-height, 110px)) !important;
+    padding-bottom: calc(4.5rem + var(--atlas-sticky-bar-height, 140px) + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 

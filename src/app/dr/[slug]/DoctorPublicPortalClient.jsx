@@ -4517,7 +4517,7 @@ export default function DoctorPublicPortalClient({
           flex: 1;
           min-width: 0;
           max-width: 1320px;
-          padding: 24px 28px 120px 28px;
+          padding: 24px 28px 48px 28px;
           margin: 0 auto;
         }
         .doctor-bottom-dock {
@@ -4702,7 +4702,7 @@ export default function DoctorPublicPortalClient({
             display: flex !important;
           }
           .gcp-portal-main {
-            padding: 14px 14px 130px 14px;
+            padding: 14px 14px 48px 14px;
           }
         }
         .gcp-kpi-grid {

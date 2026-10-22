@@ -299,7 +299,13 @@ export default function CompoundedFormulationsSection({
                     </div>
                     <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#047857', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <CheckCircle2 size={13} />
-                      <span>{formulation.isOral ? (isEs ? '100% Cápsulas Vegetales HPMC · Sin Gluten · Sin Alérgenos' : '100% Plant-Based HPMC Capsules · Gluten-Free · Allergen-Free') : (formulation.id.includes('topical') ? 'Alcohol-Free & Non-Irritating' : 'Enteric Bioavailable Powder')}</span>
+                      <span>
+                        {formulation.isInjectable 
+                          ? (isEs ? 'Matriz Liofilizada Estéril Libre de Pirógenos · Grado Farmacéutico cGMP' : 'Sterile Pyrogen-Free Lyophilized Matrix · cGMP Cleanroom Compliant')
+                          : formulation.isOral 
+                            ? (isEs ? '100% Cápsulas Vegetales HPMC · Sin Gluten · Sin Alérgenos' : '100% Plant-Based HPMC Capsules · Gluten-Free · Allergen-Free') 
+                            : (formulation.id?.includes('topical') ? 'Alcohol-Free & Non-Irritating' : 'Enteric Bioavailable Powder')}
+                      </span>
                     </div>
                   </div>
 
@@ -434,11 +440,15 @@ export default function CompoundedFormulationsSection({
                                 alignItems: 'center',
                                 gap: '3px'
                               }}>
-                                {formulation.isOral 
-                                  ? (String(api.dosage).includes('Ref:') || String(api.dosage).includes('Dosis') || String(api.dosage).includes('Dose') || String(api.dosage).toLowerCase().includes('/ cap') || String(api.dosage).toLowerCase().includes('/cap')
-                                      ? `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}` 
-                                      : `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')} / capsule`) 
-                                  : String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}
+                                {formulation.isInjectable
+                                  ? (formulation.isDiluent 
+                                      ? `💧 ${String(api.dosage).replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()}` 
+                                      : `💉 ${String(api.dosage).replace(/cápsulas?/gi, '').replace(/cápsula/gi, '').trim()} / vial`)
+                                  : formulation.isOral 
+                                    ? (String(api.dosage).includes('Ref:') || String(api.dosage).includes('Dosis') || String(api.dosage).includes('Dose') || String(api.dosage).toLowerCase().includes('/ cap') || String(api.dosage).toLowerCase().includes('/cap')
+                                        ? `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}` 
+                                        : `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')} / capsule`) 
+                                    : String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}
                               </span>
                               {api.dosageSafety?.evaluated && (
                                 <span 

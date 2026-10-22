@@ -906,10 +906,10 @@ export default function DataTable({
         className={`gcp-table-container ui-table-container content-visibility-auto${!virtualize && mobileView === 'stack' ? ' rsp-table-wrap responsive-stack' : ''}`}
         style={{
           overflowX: 'auto',
-          overflowY: 'auto',
+          overflowY: virtualize ? 'auto' : 'visible',
           width: '100%',
           minHeight: minHeight !== undefined ? minHeight : (isLoading ? '350px' : (!data || data.length <= 8 ? 'auto' : '350px')),
-          maxHeight: virtualize ? 'calc(100vh - 220px)' : 'calc(100vh - 200px)',
+          maxHeight: virtualize ? 'calc(100vh - 220px)' : 'none',
           backgroundColor: 'var(--color-bg-app)',
           WebkitOverflowScrolling: 'touch',
         }}

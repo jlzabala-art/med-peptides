@@ -234,6 +234,44 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       const titleLower = (treatmentTitle || '').toLowerCase();
       const routeLower = (route || '').toLowerCase();
 
+      const dosageLower = (dosageForm || '').toLowerCase();
+      const isInjectable = vNameLower.includes('vial') || 
+                           vNameLower.includes('lyophilized') || 
+                           vNameLower.includes('liofilizado') || 
+                           vNameLower.includes('diluent') || 
+                           vNameLower.includes('bacteriostatic') || 
+                           vNameLower.includes('subq') ||
+                           vNameLower.includes('subcutaneous') ||
+                           titleLower.includes('vial') || 
+                           titleLower.includes('lyophilized') || 
+                           titleLower.includes('liofilizado') || 
+                           titleLower.includes('retatrutide') || 
+                           titleLower.includes('tirzepatide') || 
+                           titleLower.includes('semaglutide') || 
+                           titleLower.includes('kisspeptin') ||
+                           titleLower.includes('mots-c') ||
+                           titleLower.includes('bacteriostatic') || 
+                           titleLower.includes('diluent') ||
+                           routeLower.includes('subq') || 
+                           routeLower.includes('subcutaneous') || 
+                           routeLower.includes('inject') ||
+                           routeLower.includes('inyect') ||
+                           dosageLower.includes('vial') ||
+                           dosageLower.includes('lyophilized') ||
+                           dosageLower.includes('liofilizado') ||
+                           dosageLower.includes('inject');
+
+      const isDiluent = isInjectable && (
+                        titleLower.includes('diluent') || 
+                        titleLower.includes('bacteriostatic') || 
+                        vNameLower.includes('diluent') || 
+                        vNameLower.includes('bacteriostatic') ||
+                        apis.some(a => {
+                          const an = (a.name || a.productName || a.activeIngredient || '').toLowerCase();
+                          return an.includes('bacteriostatic') || an.includes('diluent') || an.includes('sterile water');
+                        })
+      );
+
       const isTrichoOil = vNameLower.includes('trichooil') || 
                           vNameLower.includes('oil') || 
                           vNameLower.includes('aceite') ||
@@ -246,7 +284,8 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
                             return an.includes('ginseng') || an.includes('ginkgo') || an.includes('tocopherol') || an.includes('vitamin e');
                           }) && (vNameLower.includes('oil') || titleLower.includes('scalp care') || titleLower.includes('higiene')));
 
-      const isOral = routeLower.includes('oral') || 
+      const isOral = !isInjectable && (
+                     routeLower.includes('oral') || 
                      titleLower.includes('oral') || 
                      titleLower.includes('capsule') || 
                      titleLower.includes('cápsula') || 
@@ -254,7 +293,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
                      vNameLower.includes('cápsula') || 
                      vNameLower.includes('tablet') ||
                      isNutrigen ||
-                     isEntirelyOral;
+                     isEntirelyOral);
 
       const isTrichoFoam = vNameLower.includes('trichofoam') || vNameLower.includes('foam') || titleLower.includes('foam');
 
@@ -283,6 +322,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
                      }));
 
       const resolvedDosageForm = dosageForm || (
+        isInjectable ? (isDiluent ? (isEs ? 'Vehículo Diluyente Estéril' : 'Sterile Diluent Vehicle') : (isEs ? 'Vial Liofilizado Estéril' : 'Sterile Lyophilized Vial')) :
         isTrichoOil ? (isEs ? 'Aceite Capilar Tópico' : 'Topical Scalp Oil') :
         isOral ? (isEs ? 'Cápsulas Orales' : 'Oral Capsules') :
         isTrichoFoam ? (isEs ? 'Espuma Tópica' : 'Topical Foam') :
@@ -300,8 +340,8 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
 
       const vehicleObj = {
         tag: isEs ? 'VEHÍCULO MAGISTRAL' : 'COMPOUNDING VEHICLE / BASE',
-        name: vehicleName || (isTrichoOil ? 'TrichoOil™ Natural Lipidic Carrier' : 'TrichoSol™ Liposomal Hydrophilic Base'),
-        volume: volume || (isTrichoOil ? '30 mL' : (isOral ? '90 Capsules' : (isPomade ? '30 g' : (isBHRT ? '90 mL' : '100 mL')))),
+        name: vehicleName || (isInjectable ? (isDiluent ? 'Sterile Bacteriostatic Water (0.9% Benzyl Alcohol USP)' : 'Type I Borosilicate Glass Sterile Vial (USP/Ph. Eur.)') : (isTrichoOil ? 'TrichoOil™ Natural Lipidic Carrier' : 'TrichoSol™ Liposomal Hydrophilic Base')),
+        volume: volume || (isInjectable ? (isDiluent ? '3 mL' : '10 mg') : (isTrichoOil ? '30 mL' : (isOral ? '90 Capsules' : (isPomade ? '30 g' : (isBHRT ? '90 mL' : '100 mL'))))),
         specs: ''
       };
 
@@ -314,7 +354,32 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         steps: []
       };
 
-      if (isTrichoOil) {
+      if (isInjectable) {
+        accentColor = isDiluent ? '#0284c7' : '#2563eb';
+        accentBg = isDiluent ? '#f0f9ff' : '#eff6ff';
+        badgeText += isDiluent 
+          ? (isEs ? ' · VEHÍCULO DILUYENTE ESTÉRIL' : ' · STERILE DILUENT VEHICLE')
+          : (isEs ? ' · INYECCIÓN SUBCUTÁNEA (SUBQ)' : ' · SUBCUTANEOUS INJECTION (SUBQ)');
+        resolvedTitle = treatmentTitle || (isDiluent ? (isEs ? 'Agua Bacteriostática Grado Farmacéutico' : 'Bacteriostatic Water Diluent') : (isEs ? 'Vial Liofilizado Estéril SubQ' : 'Sterile Lyophilized SubQ Vial'));
+        resolvedRoute = isDiluent 
+          ? (isEs ? 'Vehículo Reconstituyente Estéril' : 'Sterile Reconstitution Vehicle')
+          : (isEs ? 'Inyección Subcutánea (SubQ)' : 'Subcutaneous Injection (SubQ)');
+        resolvedVolume = volume || (isDiluent ? '3 mL' : '10 mg');
+        vehicleObj.name = vehicleName || (isDiluent ? 'Sterile Bacteriostatic Water (0.9% Benzyl Alcohol USP)' : 'Type I Borosilicate Glass Sterile Vial (USP/Ph. Eur.)');
+        vehicleObj.specs = isDiluent
+          ? (isEs ? 'Agua estéril USP para inyección con 0.9% de alcohol bencílico como conservante bacteriostático. Permite múltiples extracciones asépticas durante 28-30 días post-reconstitución.' : 'USP sterile water for injection with 0.9% benzyl alcohol bacteriostatic preservative. Enables multiple aseptic withdrawals for 28-30 days post-reconstitution.')
+          : (isEs ? 'Pastilla liofilizada estéril libre de pirógenos. Formulada en sala blanca cGMP para reconstitución aséptica con agua bacteriostática.' : 'Sterile, pyrogen-free lyophilized cake. Formulated under cleanroom cGMP standards for aseptic reconstitution with bacteriostatic water.');
+        
+        posologyObj.title = isDiluent 
+          ? (isEs ? 'Protocolo de Reconstitución Aséptica' : 'Aseptic Reconstitution Protocol')
+          : (isEs ? 'Pauta de Administración Subcutánea' : 'Subcutaneous Dosing Schedule');
+        posologyObj.regimen = safeCustomPosology || (isDiluent 
+          ? (isEs ? 'Reconstituir con 2.0 mL - 3.0 mL de Agua Bacteriostática estéril' : 'Reconstitute with 2.0 mL - 3.0 mL Bacteriostatic Water')
+          : (isEs ? 'Inyección subcutánea semanal (titulación progresiva)' : 'Administer subcutaneous injection once weekly (gradual titration)'));
+        posologyObj.timing = isDiluent 
+          ? (isEs ? 'Antes del primer uso' : 'Prior to initial administration')
+          : (isEs ? 'Mismo día cada semana, rotando sitios de inyección abdominal' : 'Same day each week, rotating abdominal subcutaneous injection sites');
+      } else if (isTrichoOil) {
         accentColor = '#0d9488';
         accentBg = '#ccfbf1';
         badgeText += isEs ? ' · ACEITE DE CUIDADO CAPILAR' : ' · SCALP CARE & HYGIENE OIL';
@@ -373,6 +438,13 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         route: resolvedRoute,
         volume: resolvedVolume,
         isOral,
+        isInjectable,
+        isDiluent,
+        container: isInjectable
+          ? (isEs ? 'Vial de Vidrio Borosilicato Tipo I con Tapón de Clorobutilo y Sellado Flip-Off' : 'Type I Borosilicate Glass Vial with Chlorobutyl Stopper & Flip-Off Seal')
+          : (isOral 
+              ? (isEs ? 'Frasco HDPE Farmacéutico de Seguridad con Cierre Inviolable' : 'Pharmaceutical HDPE Safety Bottle with Tamper-Evident Cap')
+              : (isTrichoOil ? 'Amber Glass Dropper Bottle' : 'Dispensing Container')),
         isTrichoOil,
         isPomade,
         isBHRT,
@@ -453,13 +525,35 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
           dosage: a.dosage || a.dose || a.strength || '—'
         }));
 
+        const pTitleLower = (p.title || '').toLowerCase();
+        const pFormatLower = (p.format || p.dosageForm || '').toLowerCase();
+        const pVehLower = (p.vehicle || '').toLowerCase();
+        const isPartInject = pTitleLower.includes('vial') || 
+                             pTitleLower.includes('lyophilized') || 
+                             pTitleLower.includes('retatrutide') || 
+                             pTitleLower.includes('bacteriostatic') || 
+                             pTitleLower.includes('diluent') ||
+                             pFormatLower.includes('vial') ||
+                             pVehLower.includes('vial');
+        const isPartDil = isPartInject && (pTitleLower.includes('diluent') || pTitleLower.includes('bacteriostatic') || pVehLower.includes('bacteriostatic'));
+
+        const fallbackVehicle = isPartInject 
+          ? (isPartDil ? 'Sterile Bacteriostatic Water (0.9% Benzyl Alcohol USP)' : 'Type I Borosilicate Glass Sterile Vial (USP/Ph. Eur.)')
+          : 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.';
+        const fallbackFormat = isPartInject 
+          ? (isPartDil ? (isEs ? 'Vehículo Diluyente Estéril' : 'Sterile Diluent Vehicle') : (isEs ? 'Vial Liofilizado Estéril' : 'Sterile Lyophilized Vial'))
+          : (isEs ? 'Cápsulas Orales (Vegetales)' : 'Oral Capsules (Vegetable)');
+        const fallbackRoute = isPartInject 
+          ? (isPartDil ? (isEs ? 'Vehículo Reconstituyente Estéril' : 'Sterile Reconstitution Vehicle') : (isEs ? 'Inyección Subcutánea (SubQ)' : 'Subcutaneous Injection (SubQ)'))
+          : (isEs ? 'Vía Oral' : 'Oral Route');
+
         const vehicleData = buildVehicleData({
           index: p.partNumber || idx + 1,
           totalCount: p.totalParts || rx.parts.length,
-          vehicleName: p.vehicle || rx.vehicle || 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.',
+          vehicleName: p.vehicle || rx.vehicle || fallbackVehicle,
           treatmentTitle: p.title || (isEs ? `Fórmula Fase ${idx + 1}` : `Formula Phase ${idx + 1}`),
-          dosageForm: p.format || p.dosageForm || (isEs ? 'Cápsulas Orales (Vegetales)' : 'Oral Capsules (Vegetable)'),
-          route: p.route || (isEs ? 'Vía Oral' : 'Oral Route'),
+          dosageForm: p.format || p.dosageForm || fallbackFormat,
+          route: p.route || fallbackRoute,
           volume: p.volume || rx.volume,
           customPosology: p.directions || p.posology || rx.dosageInstructions,
           apis: partApis
