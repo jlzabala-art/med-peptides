@@ -29,11 +29,16 @@ export async function POST(request) {
     const now = new Date();
 
     // 1. Check Workstation Persistent Token (90-day session)
+    const norm = (s) => String(s || '').toLowerCase().replace(/^dr[-.]?/, '').trim();
     if (workstationToken) {
       const wsDoc = await adminDb.collection('doctor_workstations').doc(workstationToken).get();
       if (wsDoc.exists) {
         const data = wsDoc.data();
-        if (data.doctorSlug === doctorSlug && new Date(data.expiresAt) > now) {
+        const matchesWs =
+          data.doctorSlug === doctorSlug ||
+          norm(data.doctorSlug) === norm(doctorSlug) ||
+          (data.opaqueCode && String(data.opaqueCode).toUpperCase() === String(doctorSlug).toUpperCase());
+        if (matchesWs && new Date(data.expiresAt) > now) {
           return NextResponse.json({
             authorized: true,
             workstationToken,
@@ -45,14 +50,21 @@ export async function POST(request) {
       }
     }
 
-    // 2. Check Magic Token (15-min single-use)
+    // 2. Check Magic Token (24-hour / single-use)
     if (magicToken) {
       const magicDocRef = adminDb.collection('doctor_magic_tokens').doc(magicToken);
       const magicDoc = await magicDocRef.get();
 
       if (magicDoc.exists) {
         const data = magicDoc.data();
-        if (data.doctorSlug === doctorSlug && !data.used && new Date(data.expiresAt) > now) {
+        const matchesSlug =
+          !data.doctorSlug ||
+          data.doctorSlug.toLowerCase() === doctorSlug.toLowerCase() ||
+          norm(data.doctorSlug) === norm(doctorSlug) ||
+          (Array.isArray(data.alternateSlugs) && data.alternateSlugs.some(as => norm(as) === norm(doctorSlug) || as.toUpperCase() === String(doctorSlug).toUpperCase())) ||
+          (data.opaqueCode && String(data.opaqueCode).toUpperCase() === String(doctorSlug).toUpperCase());
+
+        if (matchesSlug && !data.used && new Date(data.expiresAt) > now) {
           // Mark magic token as used
           await magicDocRef.update({ used: true, usedAt: now.toISOString() });
 

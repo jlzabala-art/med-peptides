@@ -9,7 +9,8 @@ export async function POST(request) {
       doctorSlug = '',
       phone = '',
       email = '',
-      rememberDevice = true
+      rememberDevice = true,
+      expiresInHours = 24
     } = body;
 
     if (!doctorSlug) {
@@ -33,17 +34,22 @@ export async function POST(request) {
       );
     }
 
+    const durationHours = Number(expiresInHours) || 24;
     const magicToken = `mag_${crypto.randomBytes(20).toString('hex')}`;
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + 15 * 60 * 1000).toISOString(); // 15 mins
+    const expiresAt = new Date(now.getTime() + durationHours * 60 * 60 * 1000).toISOString();
 
+    const cleanSlug = String(doctorSlug).trim();
+    const norm = cleanSlug.replace(/^dr[-.]?/, '');
     const tokenDoc = {
       token: magicToken,
-      doctorSlug: String(doctorSlug).trim(),
+      doctorSlug: cleanSlug,
+      alternateSlugs: [cleanSlug, `dr-${norm}`, norm],
       phone: String(phone).trim(),
       email: String(email).toLowerCase().trim(),
       rememberDevice: Boolean(rememberDevice),
       used: false,
+      durationHours,
       createdAt: now.toISOString(),
       expiresAt
     };
