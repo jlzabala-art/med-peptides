@@ -198,6 +198,8 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
       ? extraParams.productIds
       : (isFilteredView && currentFilteredProductIds.length > 0)
       ? currentFilteredProductIds
+      : (supplierFilter || extraParams.catalogueFilter)
+      ? []
       : (initialProducts || []).map(p => p.id).filter(Boolean);
 
     const variantCount = extraParams.variantCount || (

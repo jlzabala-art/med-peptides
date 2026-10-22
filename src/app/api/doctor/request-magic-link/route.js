@@ -97,7 +97,11 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      message: '1-Tap Access Link generated and dispatched.'
+      message: '1-Tap Access Link generated and dispatched.',
+      magicToken,
+      accessUrl,
+      expiresAt,
+      durationHours
     });
   } catch (error) {
     console.error('Error generating magic link:', error);

@@ -84,6 +84,12 @@ export function ModalProvider({ children }) {
   );
 }
 
+const fallbackModalContext = {
+  modals: [],
+  openModal: () => {},
+  closeModal: () => {}
+};
+
 /**
  * useModalStack
  * Hook to access the global modal context.
@@ -91,7 +97,7 @@ export function ModalProvider({ children }) {
 export function useModalStack() {
   const context = useContext(ModalContext);
   if (!context) {
-    throw new Error('useModalStack must be used within a ModalProvider');
+    return fallbackModalContext;
   }
   return context;
 }

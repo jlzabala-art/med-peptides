@@ -12,6 +12,7 @@ import {
   Check,
   ExternalLink,
   Clock,
+  Globe,
   Pill,
   Sparkles,
   Award,
@@ -168,6 +169,10 @@ const DoctorAuthNoticeModal = dynamic(
 );
 const DoctorBlueprintDossierModal = dynamic(
   () => import('@/components/doctor/modals/DoctorBlueprintDossierModal'),
+  { ssr: false }
+);
+const DoctorPatientFollowUpModal = dynamic(
+  () => import('@/components/doctor/modals/DoctorPatientFollowUpModal'),
   { ssr: false }
 );
 const DoctorCommandPalette = dynamic(
@@ -549,6 +554,7 @@ export default function DoctorPublicPortalClient({
   const [authNoticeResource, setAuthNoticeResource] = useState('');
   const [workstationAuthorized, setWorkstationAuthorized] = useState(false);
   const [isSwitchingDoctor, setIsSwitchingDoctor] = useState(false);
+  const [followUpModalTask, setFollowUpModalTask] = useState(null);
 
   const { user, activeRole, isAdmin } = useAuth();
 
@@ -1176,6 +1182,10 @@ export default function DoctorPublicPortalClient({
           if (t.type !== 'refill' && t.type !== 'cycles') return false;
         } else if (taskFilter === 'proposal_followup' || taskFilter === 'followup') {
           if (t.type !== 'proposal_followup' && t.type !== 'followup') return false;
+        } else if (taskFilter === 'portal_inactive' || taskFilter === 'portal') {
+          if (t.type !== 'portal_inactive') return false;
+        } else if (taskFilter === 'tolerance_check' || taskFilter === 'tolerance') {
+          if (t.type !== 'tolerance_check' && t.type !== 'tolerance_checkin') return false;
         } else if (t.type !== taskFilter) {
           return false;
         }
@@ -1194,7 +1204,9 @@ export default function DoctorPublicPortalClient({
   const taskCounts = useMemo(() => {
     return {
       all: allTasks.length,
+      portal_inactive: allTasks.filter(t => t.type === 'portal_inactive').length,
       proposal_followup: allTasks.filter(t => t.type === 'proposal_followup' || t.type === 'followup').length,
+      tolerance_check: allTasks.filter(t => t.type === 'tolerance_check' || t.type === 'tolerance_checkin').length,
       titration: allTasks.filter(t => t.type === 'titration').length,
       refill: allTasks.filter(t => t.type === 'refill' || t.type === 'cycles').length,
       approval: allTasks.filter(t => t.type === 'approval').length,
@@ -2240,6 +2252,76 @@ export default function DoctorPublicPortalClient({
         const codeDisplay = t.code || (t.codes && t.codes[0]) || null;
         const medicationSummary = rxMatch?.treatmentTitle || rxMatch?.items?.map(i => i.name).filter(Boolean).slice(0, 2).join(' + ') || null;
 
+        if (t.type === 'portal_inactive') {
+          const treatmentName = t.treatmentTitle || medicationSummary || 'Atlas Patient Portal';
+          return (
+            <div style={{ textAlign: 'left', width: '100%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.86rem' }}>
+                  {treatmentName}
+                </span>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '0.68rem',
+                    fontWeight: 650,
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    background: '#f0f9ff',
+                    color: '#0284c7',
+                    border: '1px solid #bae6fd'
+                  }}
+                >
+                  <Globe size={11} />
+                  Portal Inactive
+                </span>
+              </div>
+              <div style={{ fontSize: '0.73rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>Prescription confirmed</span>
+                <span>•</span>
+                <span style={{ color: '#0284c7', fontWeight: 600 }}>Unclaimed private portal access</span>
+              </div>
+            </div>
+          );
+        }
+
+        if (t.type === 'tolerance_check') {
+          const treatmentName = t.treatmentTitle || medicationSummary || 'Delivered Regimen';
+          return (
+            <div style={{ textAlign: 'left', width: '100%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.86rem' }}>
+                  {treatmentName}
+                </span>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '0.68rem',
+                    fontWeight: 650,
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    background: '#f0fdfa',
+                    color: '#0d9488',
+                    border: '1px solid #99f6e4'
+                  }}
+                >
+                  <Activity size={11} />
+                  {t.daysAgo ? `Check-in (Day ${t.daysAgo})` : 'Tolerance Check-in'}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.73rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>Treatment delivered</span>
+                <span>•</span>
+                <span style={{ color: '#0d9488', fontWeight: 600 }}>Verify patient tolerance &amp; response</span>
+              </div>
+            </div>
+          );
+        }
+
         if (t.type === 'proposal_followup') {
           const treatmentName = t.treatmentTitle || medicationSummary || 'Compounded Treatment';
           return (
@@ -2347,43 +2429,41 @@ export default function DoctorPublicPortalClient({
         const isSigned = t.isSigned || t.status === 'approved';
         const isSigning = signingTaskId === (t.id || t.code);
 
-        if (t.type === 'proposal_followup') {
-          const patientPhone = (t.patientPhone || t.patient?.phone || '').replace(/[^0-9+]/g, '');
-          const cleanDocTitle = (doctor?.name || 'Khalid Shukri').replace(/^Dr\.?\s*/i, '').trim();
-          const rawMsg = (t.whatsappMessage || `Hello ${t.patientName}, this is Dr. ${cleanDocTitle}'s clinical practice following up on your personalized ${t.treatmentTitle || 'treatment plan'}. You can review your medical protocol here: https://atlashealth-services.com/rx/${t.code}. Please let us know if you have any questions or would like to proceed.`)
-            .replace(/Dr\.\s+Dr\.\s+/gi, 'Dr. ');
-          const encodedMsg = encodeURIComponent(rawMsg);
-          const waUrl = patientPhone ? `https://wa.me/${patientPhone}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
+        if (t.type === 'portal_inactive' || t.type === 'proposal_followup' || t.type === 'tolerance_check') {
+          const isPortal = t.type === 'portal_inactive';
+          const isTolerance = t.type === 'tolerance_check';
 
           return (
             <div
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', width: '100%' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() => setFollowUpModalTask(t)}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '28px',
-                  height: '28px',
+                  gap: '5px',
+                  padding: '5px 10px',
                   borderRadius: '4px',
-                  background: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  color: '#16a34a',
-                  textDecoration: 'none',
+                  background: isPortal ? '#f0f9ff' : (isTolerance ? '#f0fdfa' : '#f0fdf4'),
+                  border: `1px solid ${isPortal ? '#bae6fd' : (isTolerance ? '#99f6e4' : '#bbf7d0')}`,
+                  color: isPortal ? '#0284c7' : (isTolerance ? '#0d9488' : '#16a34a'),
+                  cursor: 'pointer',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
                   flexShrink: 0,
                   transition: 'all 0.12s',
-                  boxShadow: '0 1px 2px rgba(22,163,74,0.1)'
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                 }}
-                title="Send personalized clinical reminder via WhatsApp"
-                aria-label="Send WhatsApp reminder"
+                title={isPortal ? "Send 1-Click Patient Portal Invitation" : (isTolerance ? "Review Tolerance Check-in" : "Prepare Clinical Follow-up")}
+                aria-label="Clinical action"
               >
-                <MessageCircle size={15} />
-              </a>
+                {isPortal ? <Globe size={13} /> : (isTolerance ? <Activity size={13} /> : <MessageCircle size={13} />)}
+                <span className="btn-label">{isPortal ? 'Invite Portal' : (isTolerance ? 'Check-in' : 'Follow-up')}</span>
+              </button>
 
               <Link
                 href={t.actionUrl || `/rx/${t.code}`}
@@ -2402,20 +2482,10 @@ export default function DoctorPublicPortalClient({
                   flexShrink: 0,
                   transition: 'all 0.12s ease'
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#eff6ff';
-                  e.currentTarget.style.borderColor = '#1a73e8';
-                  e.currentTarget.style.color = '#1a73e8';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#ffffff';
-                  e.currentTarget.style.borderColor = '#dadce0';
-                  e.currentTarget.style.color = '#5f6368';
-                }}
-                title="Open treatment proposal dossier"
-                aria-label="Open treatment proposal dossier"
+                title="View full prescription dossier"
+                aria-label="Open dossier"
               >
-                <ExternalLink size={14} />
+                <ArrowUpRight size={13} />
               </Link>
             </div>
           );
@@ -6578,7 +6648,37 @@ export default function DoctorPublicPortalClient({
                   </div>
                 </div>
 
-                {/* KPI 2: Follow-ups */}
+                {/* KPI 2: Portal Inactive */}
+                <div
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setTaskFilter('portal_inactive');
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: `1.5px solid ${taskFilter === 'portal_inactive' ? '#0284c7' : '#e2e8f0'}`,
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    boxShadow: taskFilter === 'portal_inactive' ? '0 2px 6px rgba(2,132,199,0.15)' : '0 1px 2px rgba(60,64,67,0.06)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Portal Inactive
+                    </span>
+                    <Globe size={15} style={{ color: '#0284c7' }} />
+                  </div>
+                  <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a' }}>
+                    {taskCounts.portal_inactive}
+                  </div>
+                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                    Unclaimed patient portals
+                  </div>
+                </div>
+
+                {/* KPI 3: Follow-ups */}
                 <div
                   onClick={() => {
                     triggerHaptic('light');
@@ -6608,37 +6708,7 @@ export default function DoctorPublicPortalClient({
                   </div>
                 </div>
 
-                {/* KPI 3: Sign-offs */}
-                <div
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setTaskFilter('approval');
-                  }}
-                  style={{
-                    background: '#ffffff',
-                    border: `1.5px solid ${taskFilter === 'approval' ? '#4f46e5' : '#e2e8f0'}`,
-                    borderRadius: '8px',
-                    padding: '12px 16px',
-                    cursor: 'pointer',
-                    boxShadow: taskFilter === 'approval' ? '0 2px 6px rgba(79,70,229,0.15)' : '0 1px 2px rgba(60,64,67,0.06)',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Prescription Sign-offs
-                    </span>
-                    <CheckCircle2 size={15} style={{ color: '#4f46e5' }} />
-                  </div>
-                  <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a' }}>
-                    {taskCounts.approval}
-                  </div>
-                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
-                    Awaiting physician authorization
-                  </div>
-                </div>
-
-                {/* KPI 4: Refills & Titrations */}
+                {/* KPI 4: Checks & Refills */}
                 <div
                   onClick={() => {
                     triggerHaptic('light');
@@ -6656,15 +6726,15 @@ export default function DoctorPublicPortalClient({
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                     <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#0d9488', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Refills & Titrations
+                      Checks &amp; Refills
                     </span>
-                    <RefreshCw size={15} style={{ color: '#0d9488' }} />
+                    <Activity size={15} style={{ color: '#0d9488' }} />
                   </div>
                   <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a' }}>
-                    {taskCounts.refill + taskCounts.titration}
+                    {taskCounts.refill + taskCounts.titration + taskCounts.tolerance_check}
                   </div>
                   <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
-                    Adherence & cycle titrations
+                    Adherence &amp; tolerance reviews
                   </div>
                 </div>
               </div>
@@ -6766,11 +6836,12 @@ export default function DoctorPublicPortalClient({
                       )}
                     </div>
 
-                    {/* Quick Task Filter Pills with Badges */}
-                    <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '3px', gap: '2px' }}>
+                    <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '3px', gap: '2px', flexWrap: 'wrap' }}>
                       {[
                         { id: 'all', label: 'All', count: taskCounts.all },
+                        { id: 'portal_inactive', label: 'Portal Inactive', count: taskCounts.portal_inactive },
                         { id: 'proposal_followup', label: 'Follow-ups', count: taskCounts.proposal_followup },
+                        { id: 'tolerance_check', label: 'Check-ins', count: taskCounts.tolerance_check },
                         { id: 'titration', label: 'Titrations', count: taskCounts.titration },
                         { id: 'refill', label: 'Refills', count: taskCounts.refill },
                         { id: 'approval', label: 'Sign-offs', count: taskCounts.approval }
@@ -11673,6 +11744,14 @@ export default function DoctorPublicPortalClient({
           setActiveBlueprintDossier(null);
           handleRequestBlueprintWhatsApp(bp);
         }}
+      />
+
+      {/* ── Doctor Patient Clinical Follow-Up & Portal Invitation Modal (GCP UX Style) ── */}
+      <DoctorPatientFollowUpModal
+        isOpen={Boolean(followUpModalTask)}
+        onClose={() => setFollowUpModalTask(null)}
+        task={followUpModalTask || {}}
+        doctor={doctor || {}}
       />
     </div>
   );

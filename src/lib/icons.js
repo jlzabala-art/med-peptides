@@ -98,6 +98,7 @@ export { default as LineChart } from 'lucide-react/dist/esm/icons/line-chart';
 export { default as Link2 } from 'lucide-react/dist/esm/icons/link-2';
 export { default as List } from 'lucide-react/dist/esm/icons/list';
 export { default as ListTodo } from 'lucide-react/dist/esm/icons/list-todo';
+export { default as Key } from 'lucide-react/dist/esm/icons/key';
 export { default as Loader2 } from 'lucide-react/dist/esm/icons/loader-2';
 export { default as Lock } from 'lucide-react/dist/esm/icons/lock';
 export { default as Unlock } from 'lucide-react/dist/esm/icons/unlock';

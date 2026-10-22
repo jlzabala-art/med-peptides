@@ -24,9 +24,9 @@ import DataTable from '../../ui/DataTable';
 import EmptyState from '../../ui/EmptyState';
 import AppActionGroup from '../../ui/AppActionGroup';
 import MobileDoctorCard from './mobile/MobileDoctorCard';
-import MobileActionSheet from '../../ui/MobileActionSheet';
-import { Eye, Edit3, XCircle, Layers, ExternalLink } from '@/lib/icons';
+import { Eye, Edit3, XCircle, Layers, ExternalLink, Key } from '@/lib/icons';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
+import DoctorAccessLinkModal from './DoctorAccessLinkModal';
 
 export default function AdminPhysiciansTab() {
   // UI State
@@ -34,6 +34,7 @@ export default function AdminPhysiciansTab() {
   const [activeAction, setActiveAction] = useState(null); // 'create_physician', 'assign_patient', 'assign_am', 'create_prescription'
   const [actionDoctor, setActionDoctor] = useState(null);
   const [mobileActionDoctor, setMobileActionDoctor] = useState(null);
+  const [accessModalDoctor, setAccessModalDoctor] = useState(null);
 
   const handleMobileQuickAction = React.useCallback((action, doctor) => {
     if (action === 'menu') {
@@ -569,6 +570,24 @@ export default function AdminPhysiciansTab() {
             >
               <ExternalLink size={13} /> Ver Página Pública
             </a>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => setAccessModalDoctor(d)}
+              style={{
+                fontSize: '0.78rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                borderColor: '#1a73e8',
+                color: '#1a73e8',
+                background: '#e8f0fe',
+                fontWeight: 700
+              }}
+              title="Generate 1-Tap Access link for WhatsApp or Email"
+            >
+              <Key size={13} /> 1-Tap Access (WhatsApp / Email)
+            </button>
             <button
               type="button"
               className="btn btn-outline btn-sm"

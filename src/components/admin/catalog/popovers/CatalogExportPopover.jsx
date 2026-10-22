@@ -271,11 +271,18 @@ export default function CatalogExportPopover({
   };
 
   const buildScopeExtras = (scopeObj) => {
+    const isApiCategory = selectedCategory === 'raw_material';
     const extras = {
       currency: scopeObj.currency || 'USD',
       supplierId: scopeObj.id === 'filtered' ? null : (scopeObj.filter || scopeObj.id),
-      catalogueFilter: scopeObj.catalogueFilter || null,
+      // If user selected raw materials / APIs, do not constrain by finished catalogue 'RegenPept'
+      catalogueFilter: isApiCategory ? null : (scopeObj.catalogueFilter || null),
       category: selectedCategory || 'all',
+      categoryFilter: selectedCategory || 'all',
+      productTypeFilter: isApiCategory ? 'raw_material' : (selectedCategory === 'peptide' ? 'finished_product' : 'all'),
+      includeRawMaterials: isApiCategory,
+      includeApis: isApiCategory,
+      priceMarkupPercent: markupPercent,
       linkMode: linkMode, // 'order' or 'pricelist'
       allowPurchasing: linkMode === 'order',
       recipientType: recipientType === 'general' ? 'clinic' : recipientType,
@@ -288,8 +295,7 @@ export default function CatalogExportPopover({
     if (scopeObj.id === 'filtered') {
       extras.productIds = filteredProductIds;
       extras.variantCount = filteredProductIds.length;
-    } else if (scopeObj.catalogueFilter) {
-      extras.catalogueFilter = scopeObj.catalogueFilter;
+    } else {
       extras.productIds = [];
     }
     return extras;

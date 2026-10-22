@@ -3,10 +3,21 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 
 const DrawerContext = createContext(null);
 
+const fallbackDrawerContext = {
+  drawers: [],
+  openDrawer: (type, id, _data) => {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+      console.warn(`[useDrawer] openDrawer(${type}, ${id}) called outside DrawerProvider.`);
+    }
+  },
+  closeDrawer: () => {},
+  closeAllDrawers: () => {}
+};
+
 export const useDrawer = () => {
   const context = useContext(DrawerContext);
   if (!context) {
-    throw new Error('useDrawer must be used within a DrawerProvider');
+    return fallbackDrawerContext;
   }
   return context;
 };

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ShieldCheck, MapPin, Mail, FilePlus, UserPlus, ClipboardList, Loader2, Eye, FileUp, Layers } from '@/lib/icons';
+import Key from 'lucide-react/dist/esm/icons/key';
 import { useDrawer } from '../../../context/DrawerContext';
 import { UniversalForm } from '../../shared/UniversalFormDrawer';
 import notifier from '../../../services/NotificationService';
@@ -16,6 +17,7 @@ import StatusChip from '../../ui/StatusChip';
 import ImportPrescriptionModal from '../../../features/prescriptions/components/ImportPrescriptionModal';
 import DocumentPreviewModal from '../../ui/DocumentPreviewModal';
 import CatalogSharesHistoryTable from '../catalog/CatalogSharesHistoryTable';
+import DoctorAccessLinkModal from './DoctorAccessLinkModal';
 
 import { useSimulationStore } from '../../../stores/useSimulationStore';
 
@@ -181,6 +183,7 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
   const [isImportOpen,   setIsImportOpen]   = useState(false);
   const [previewPdfUrl,  setPreviewPdfUrl]  = useState(null);
   const [currentDoctor,  setCurrentDoctor]  = useState(doctor);
+  const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
 
   const doctorName = currentDoctor
     ? (currentDoctor.displayName || [currentDoctor.firstName, currentDoctor.lastName].filter(Boolean).join(' ') || 'Unnamed Physician')
@@ -509,6 +512,27 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
             >
               🩺 Simulate Doctor Portal
             </a>
+            {/* 1-Tap Access Link Dispatch */}
+            <button
+              type="button"
+              onClick={() => setIsAccessModalOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.8rem',
+                padding: '0.45rem 0.85rem',
+                borderRadius: '8px',
+                border: '1.5px solid #1a73e8',
+                backgroundColor: '#e8f0fe',
+                color: '#1a73e8',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+              title="Generate 1-Tap Access link for WhatsApp or Email"
+            >
+              <Key size={14} /> 1-Tap Access Link
+            </button>
             {/* Abrir en Workspace */}
             <button
               type="button"
@@ -685,6 +709,11 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
         isOpen={!!previewPdfUrl}
         onClose={() => setPreviewPdfUrl(null)}
         fileUrl={previewPdfUrl}
+      />
+      <DoctorAccessLinkModal
+        isOpen={isAccessModalOpen}
+        onClose={() => setIsAccessModalOpen(false)}
+        doctor={currentDoctor}
       />
     </StandardDrawer>
   );

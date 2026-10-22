@@ -79,7 +79,10 @@ export default function NextProviders({ children, serverUser }) {
               <ShopProvider>
                 <CartProvider>
                   <ThemeProvider>
-                    {children}
+                    <DrawerProvider>
+                      {children}
+                      <GlobalDrawerManager />
+                    </DrawerProvider>
                   </ThemeProvider>
                 </CartProvider>
               </ShopProvider>

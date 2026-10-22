@@ -868,6 +868,66 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         whatsappMessage: `Hello ${rx.patientName}, this is Dr. ${rawDocName}'s clinical practice following up on your personalized ${treatmentName} regimen. You can access your clinical proposal here: https://atlashealth-services.com/rx/${rx.code}. Please let us know if you have any questions or would like to proceed with dispensing.`
       });
     }
+
+    // Clinical Action 4: Patient Portal Unclaimed / Inactive (1-Click Magic Link Invitation)
+    const portalKey = `${patientKey}_portal`;
+    const isSoldOrApproved = isRxSold(rx) || rxStatus === 'approved' || rxStatus === 'delivered' || rxStatus === 'active';
+    const hasUnclaimedPortal = rx.patient?.hasPortalAccount !== true && rx.patient?.portalActivated !== true;
+
+    if (isSoldOrApproved && hasUnclaimedPortal && !seenPatientTasks.has(portalKey)) {
+      seenPatientTasks.add(portalKey);
+      const patientPhone = rx.patient?.phone || rx.patientPhone || '';
+      const rawDocName = (cleanDoctorName || 'Khalid Shukri').replace(/^Dr\.?\s*/i, '').trim();
+
+      clinicalTasks.push({
+        id: `task-portal-${rx.id}`,
+        rxId: rx.id,
+        code: rx.code,
+        codes: [rx.code],
+        patientName: rx.patientName,
+        patient: rx.patient || null,
+        patientDob: rx.patient?.dob || null,
+        patientPhone: patientPhone,
+        type: 'portal_inactive',
+        priority: 'medium',
+        daysAgo: rxAgeDays,
+        treatmentTitle: rx.treatmentTitle || 'Atlas Patient Portal',
+        title: 'Patient Portal Activation Pending',
+        description: `Patient has active treatment record but has not yet activated their private Atlas Health Services portal.`,
+        dueDate: 'Portal Access Pending',
+        actionLabel: 'Invite to Portal',
+        actionUrl: `/rx/${rx.code}`,
+        whatsappMessage: `Hello ${rx.patientName}, Dr. ${rawDocName}'s practice has prepared your private patient portal at Atlas Health Services. You can review your verified prescription, dosage schedule, and clinical records here: https://atlashealth-services.com/rx/${rx.code}. No password required.`
+      });
+    }
+
+    // Clinical Action 5: Post-Delivery Tolerance & Symptom Check-in (7-14 days after dispensing)
+    const toleranceKey = `${patientKey}_tolerance`;
+    const isDeliveredOrRecent = (rxStatus === 'delivered' || (isRxSold(rx) && rxAgeDays >= 7 && rxAgeDays <= 21));
+    if (isDeliveredOrRecent && !seenPatientTasks.has(toleranceKey)) {
+      seenPatientTasks.add(toleranceKey);
+      const rawDocName = (cleanDoctorName || 'Khalid Shukri').replace(/^Dr\.?\s*/i, '').trim();
+      clinicalTasks.push({
+        id: `task-tol-${rx.id}`,
+        rxId: rx.id,
+        code: rx.code,
+        codes: [rx.code],
+        patientName: rx.patientName,
+        patient: rx.patient || null,
+        patientDob: rx.patient?.dob || null,
+        patientPhone: rx.patient?.phone || rx.patientPhone || '',
+        type: 'tolerance_check',
+        priority: 'routine',
+        daysAgo: rxAgeDays,
+        treatmentTitle: rx.treatmentTitle || 'Prescription',
+        title: 'Tolerance & Symptom Check-in',
+        description: `Patient received ${rx.treatmentTitle || 'medication'}. Assess early tolerance, posology adherence, and initial response.`,
+        dueDate: 'Check-in Due',
+        actionLabel: 'Clinical Check-in',
+        actionUrl: `/rx/${rx.code}`,
+        whatsappMessage: `Hello ${rx.patientName}, this is Dr. ${rawDocName}'s practice checking in regarding your ${rx.treatmentTitle || 'prescribed treatment'}. We want to verify how you are feeling and if you have any questions regarding your posology schedule.`
+      });
+    }
   });
 
   // Fallback task if none triggered

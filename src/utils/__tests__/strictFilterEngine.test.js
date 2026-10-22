@@ -76,4 +76,36 @@ describe('strictFilterEngine — Supplier and Brand Catalogue Filtering', () => 
 
     expect(matched.length).toBe(2);
   });
+
+  it('strictly isolates Raw Materials & APIs when category=raw_material, excluding finished vials', () => {
+    // When requesting raw materials: sampleProduct (vials) must yield 0, bulkApiProduct must yield 1
+    const vialResult = filterProductVariantsStrictly(sampleProduct, {
+      supplierId: 'supplier-lotusland',
+      category: 'raw_material'
+    });
+    expect(vialResult.length).toBe(0);
+
+    const apiResult = filterProductVariantsStrictly(bulkApiProduct, {
+      supplierId: 'supplier-lotusland',
+      category: 'raw_material'
+    });
+    expect(apiResult.length).toBe(1);
+    expect(apiResult[0].id).toBe('lotus-calcitonin-5g');
+  });
+
+  it('strictly isolates finished Peptides when category=peptide, excluding Bulk APIs', () => {
+    const vialResult = filterProductVariantsStrictly(sampleProduct, {
+      supplierId: 'supplier-lotusland',
+      category: 'peptide'
+    });
+    expect(vialResult.length).toBe(1);
+    expect(vialResult[0].id).toBe('lotusland-cjc-1295-5mg-5mg');
+
+    const apiResult = filterProductVariantsStrictly(bulkApiProduct, {
+      supplierId: 'supplier-lotusland',
+      category: 'peptide'
+    });
+    expect(apiResult.length).toBe(0);
+  });
 });
+

@@ -8,8 +8,8 @@
 // Known supplier manufacturing profiles & constraints
 export const SUPPLIER_CONSTRAINTS = {
   lotusland: {
-    allowedPresentations: ['vial', 'lyophilized vial', 'powder', 'bottle', 'tablet'],
-    disallowedPresentations: ['pen', 'pre-filled pen', 'cartridge', 'refill cartridge', 'spray', 'nasal spray', 'bulk api', 'bulk api powder', 'api']
+    allowedPresentations: ['vial', 'lyophilized vial', 'powder', 'bottle', 'tablet', 'bulk api', 'bulk api powder', 'api'],
+    disallowedPresentations: ['pen', 'pre-filled pen', 'cartridge', 'refill cartridge', 'spray', 'nasal spray']
   }
 };
 
@@ -25,20 +25,42 @@ export function isApiOrRawMaterialVariant(variant = {}, product = {}) {
   const pName = String(p.canonicalName || p.name || '').toLowerCase();
   const pType = String(p.productType || p.primaryType || p.type || p.category || '').toLowerCase();
 
+  // Finished presentations are strictly NEVER APIs (vials, cartridges, pens, sprays, oral capsules, bottles, boxes, kits)
+  const isFinishedPres =
+    vPres.includes('vial') ||
+    vPres.includes('bottle') ||
+    vPres.includes('cartridge') ||
+    vPres.includes('pen') ||
+    vPres.includes('spray') ||
+    vPres.includes('nasal') ||
+    vPres.includes('capsule') ||
+    vPres.includes('tablet') ||
+    vPres.includes('kit') ||
+    vPres.includes('box') ||
+    vName.includes('vial') ||
+    vName.includes('cartridge') ||
+    vName.includes('pen') ||
+    vName.includes('capsule');
+
+  if (isFinishedPres) {
+    return false;
+  }
+
   return (
     v.isApi === true ||
     vType === 'raw_material' ||
     vType === 'api_raw_material' ||
     vType === 'api' ||
-    pType === 'raw_material' ||
-    pType === 'api_raw_material' ||
     vPres.includes('bulk api') ||
     vPres.includes('bulk powder') ||
     vPres === 'api' ||
     vPres.includes('bulk api powder') ||
     vName.includes('bulk api') ||
     vName.includes('(bulk api)') ||
-    pName.includes('(bulk api)')
+    pType === 'raw_material' ||
+    pType === 'api_raw_material' ||
+    pName.includes('(bulk api)') ||
+    p.category === 'raw_material'
   );
 }
 
@@ -82,7 +104,14 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
     filters.includeRawMaterials === true ||
     filters.includeApis === true;
 
-  if (!isExplicitApiCatalog && isApiOrRawMaterialVariant(v, p)) {
+  const isApi = isApiOrRawMaterialVariant(v, p);
+
+  // If requesting raw materials/APIs, strictly reject finished goods/vials
+  if (isExplicitApiCatalog && !isApi) {
+    return false;
+  }
+  // If requesting standard/finished catalog, strictly reject raw materials/APIs
+  if (!isExplicitApiCatalog && isApi) {
     return false;
   }
 
@@ -109,8 +138,12 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
           const isLotusVariant = vSupplierText.includes('lotus') || v.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
           const isLotusProduct = pSupplierText.includes('lotus') || p.supplierId === 'OLlBbQjgrj6tY7GmM2Jo' || (Array.isArray(p.supplierIds) && p.supplierIds.some(s => String(s).toLowerCase().includes('lotus')));
 
-          // Lotus Land strictly provides Vials / Lyophilized Powder / Bottles / Boxes / Kits — never Pre-filled Pens, Cartridges, or Bulk APIs
-          if (pres.includes('pen') || vName.includes('pen') || pres.includes('cartridge') || pres.includes('bulk api') || vName.includes('bulk api')) {
+          // Lotus Land strictly provides Vials / Lyophilized Powder / Bottles / Boxes / Kits / Bulk APIs — never Pre-filled Pens or Cartridges
+          if (pres.includes('pen') || vName.includes('pen') || pres.includes('cartridge')) {
+            return false;
+          }
+          // Only exclude bulk APIs if this is NOT an explicit API catalog
+          if (!isExplicitApiCatalog && (pres.includes('bulk api') || vName.includes('bulk api'))) {
             return false;
           }
           if (v.supplier || v.supplierName || v.supplierId) {
@@ -214,20 +247,20 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
   if (targetCategory && targetCategory !== 'all' && targetCategory !== 'All' && targetCategory !== 'All Categories') {
     const normTargetCat = String(targetCategory).toLowerCase().trim().replace(/s$/, '');
     const vCat = String(v.category || p.category || p.categoryId || '').toLowerCase().trim().replace(/s$/, '');
-    if (!vCat.includes(normTargetCat) && !normTargetCat.includes(vCat)) {
-      return false;
-    }
 
-    // When explicitly filtering for peptides, strictly exclude Bulk APIs, raw materials, and clinical supplies
-    if (normTargetCat === 'peptide' && !filters.includeSupplies) {
-      const pNameLower = String(p.canonicalName || p.name || '').toLowerCase();
-      const vNameLower = String(v.name || '').toLowerCase();
-      const isRaw = v.type === 'raw_material' || v.type === 'api_raw_material' ||
-                    p.primaryType === 'raw_material' || p.category === 'raw_material' ||
-                    pNameLower.includes('(bulk api)') || vNameLower.includes('bulk api');
-      const isSupply = pNameLower.includes('bacteriostatic') || pNameLower.includes('syringe') ||
-                       vNameLower.includes('bacteriostatic') || vNameLower.includes('syringe');
-      if (isRaw || isSupply) {
+    if (normTargetCat === 'raw_material' || normTargetCat === 'api') {
+      if (!isApi) {
+        return false;
+      }
+    } else if (normTargetCat === 'peptide') {
+      if (isApi) {
+        return false;
+      }
+      if (!vCat.includes('peptide') && !normTargetCat.includes(vCat)) {
+        return false;
+      }
+    } else {
+      if (!vCat.includes(normTargetCat) && !normTargetCat.includes(vCat)) {
         return false;
       }
     }
