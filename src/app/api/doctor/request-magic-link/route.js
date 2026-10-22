@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import crypto from 'crypto';
+import { generateDoctorWelcomeWhatsApp } from '@/data/doctorOnboardingTemplates';
 
 export async function POST(request) {
   try {
@@ -61,17 +62,11 @@ export async function POST(request) {
     // If phone is provided, enqueue WhatsApp message to the doctor
     if (tokenDoc.phone) {
       const cleanPhone = tokenDoc.phone.replace(/[^0-9+]/g, '');
-      const doctorWhatsAppMsg = `🔑 *Atlas Health Services — 1-Tap Clinical Access*
-
-Dear Prescribing Physician,
-
-Use this secure 1-Tap Access link to access your clinical portal and unlock nominal patient dossiers:
-👉 ${accessUrl}
-
-⏱️ *Valid for 15 minutes.*
-💻 Opening this link will authorize this workstation for 90 days.
-
-_Atlas Health Services — Clinical Operations Team_`;
+      const doctorWhatsAppMsg = generateDoctorWelcomeWhatsApp({
+        doctorName: tokenDoc.doctorName || tokenDoc.doctorSlug || 'Physician',
+        accessUrl,
+        durationHours: tokenDoc.durationHours || 24
+      });
 
       const queueId = `outbox_magic_${magicToken}`;
       const outboxDoc = {
