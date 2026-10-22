@@ -22,6 +22,9 @@ import {
   ShieldCheck,
   Shield,
   Lock,
+  Bell,
+  TrendingUp,
+  UserPlus,
   MapPin,
   Mail,
   Edit3,
@@ -3501,6 +3504,45 @@ export default function DoctorPublicPortalClient({
     return Array.from(counts.values()).sort((a, b) => b.count - a.count);
   }, [data?.serverAnalytics?.topApis, allPrescriptions]);
 
+  const practiceMonthlyTrends = useMemo(() => {
+    if (Array.isArray(data?.serverAnalytics?.monthlyData) && data.serverAnalytics.monthlyData.length >= 6) {
+      return data.serverAnalytics.monthlyData;
+    }
+    const monthMap = {};
+    let latestTimestamp = 0;
+    allPrescriptions.forEach((rx) => {
+      const rawDate = rx.startDate || rx.dateIssued || rx.createdAt || rx.date;
+      if (!rawDate) return;
+      let d = rawDate.toDate ? rawDate.toDate() : new Date(rawDate);
+      if (isNaN(d.getTime()) && typeof rawDate === 'string' && rawDate.includes('/')) {
+        const [day, m, y] = rawDate.split('/');
+        d = new Date(`${y}-${m}-${day}`);
+      }
+      if (isNaN(d.getTime())) return;
+      if (d.getTime() > latestTimestamp) latestTimestamp = d.getTime();
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = d.toLocaleDateString('en-US', { month: 'short' });
+      if (!monthMap[key]) {
+        monthMap[key] = { key, label, count: 0 };
+      }
+      monthMap[key].count += 1;
+    });
+
+    const anchorDate = latestTimestamp > 0 ? new Date(latestTimestamp) : new Date();
+    const timeline = [];
+    for (let i = 5; i >= 0; i--) {
+      const targetDate = new Date(anchorDate.getFullYear(), anchorDate.getMonth() - i, 1);
+      const key = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}`;
+      const label = targetDate.toLocaleDateString('en-US', { month: 'short' });
+      timeline.push({
+        key,
+        label,
+        count: monthMap[key]?.count || 0
+      });
+    }
+    return timeline;
+  }, [data?.serverAnalytics?.monthlyData, allPrescriptions]);
+
   const filteredDoctorPatients = useMemo(() => {
     return doctorPatientsList.filter(pat => {
       if (patientFilterMode === 'sold' && !pat.hasSold) return false;
@@ -4143,16 +4185,6 @@ export default function DoctorPublicPortalClient({
         badge: null
       },
       {
-        id: 'prescriptions',
-        label: 'Prescriptions',
-        icon: Layers,
-        isLocked: !isAuthorizedViewer,
-        badge: allPrescriptions.length > 0 ? allPrescriptions.length : null,
-        actionBadgeTooltip: quickCounts.active > 0
-          ? `${allPrescriptions.length} total prescriptions (${quickCounts.active} sold & invoiced, ${quickCounts.proposals} unaccepted proposals)`
-          : undefined
-      },
-      {
         id: 'patients',
         label: 'Patients',
         icon: Users,
@@ -4160,6 +4192,16 @@ export default function DoctorPublicPortalClient({
         badge: uniquePatientsCount > 0 ? uniquePatientsCount : null,
         actionBadgeTooltip: uniquePatientsCount > 0
           ? `${uniquePatientsCount} unique patients (${soldPatientsCount} sold customers, ${unacceptedPatientsCount} unaccepted proposals)`
+          : undefined
+      },
+      {
+        id: 'prescriptions',
+        label: 'Prescriptions',
+        icon: Layers,
+        isLocked: !isAuthorizedViewer,
+        badge: allPrescriptions.length > 0 ? allPrescriptions.length : null,
+        actionBadgeTooltip: quickCounts.active > 0
+          ? `${allPrescriptions.length} total prescriptions (${quickCounts.active} sold & invoiced, ${quickCounts.proposals} unaccepted proposals)`
           : undefined
       }
     ];
@@ -4184,8 +4226,8 @@ export default function DoctorPublicPortalClient({
         items: workspaceItems
       },
       {
-        group: 'SPECIALTY & DIAGNOSTICS',
-        groupTitle: 'SPECIALTY & DIAGNOSTICS',
+        group: 'CLINICAL INTELLIGENCE',
+        groupTitle: 'CLINICAL INTELLIGENCE',
         items: [
           {
             id: 'recommendations',
@@ -4198,12 +4240,18 @@ export default function DoctorPublicPortalClient({
             label: 'Lab Diagnostics',
             icon: FlaskConical,
             badge: allLabResults.length > 0 ? allLabResults.length : null
+          },
+          {
+            id: 'analytics',
+            label: 'Practice Analytics',
+            icon: TrendingUp,
+            badge: null
           }
         ]
       },
       {
-        group: 'CLINIC PROFILE',
-        groupTitle: 'CLINIC PROFILE',
+        group: 'PRACTICE SETTINGS',
+        groupTitle: 'PRACTICE SETTINGS',
         items: [
           {
             id: 'credentials',
@@ -5284,6 +5332,7 @@ export default function DoctorPublicPortalClient({
                   {activeAnchor === 'patients' && `Patients (${doctorPatientsList.length})`}
                   {activeAnchor === 'recommendations' && 'Specialty Blueprints & Rx Synergies'}
                   {activeAnchor === 'lab_results' && `Lab Diagnostics (${allLabResults.length})`}
+                  {activeAnchor === 'analytics' && 'Practice Analytics'}
                   {activeAnchor === 'credentials' && 'Clinic Credentials & Verification'}
                   {activeAnchor === 'services_tiers' && 'Platform Services & Compounding Access'}
                 </h1>
@@ -5337,43 +5386,8 @@ export default function DoctorPublicPortalClient({
               </div>
             </div>
 
-            {/* Consolidated Header Actions (De-duplicated & Clean) */}
+            {/* Consolidated Header Actions (Clean Physician Command Center) */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              {/* Live Sync Badge */}
-              <div
-                title="Continuous background synchronization active."
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '5px 10px',
-                  borderRadius: '16px',
-                  background: isBackgroundSyncing ? '#eff6ff' : '#f8fafc',
-                  border: `1px solid ${isBackgroundSyncing ? '#bfdbfe' : '#e2e8f0'}`,
-                  fontSize: '0.72rem',
-                  color: isBackgroundSyncing ? '#1d4ed8' : '#64748b',
-                  fontWeight: 500,
-                  userSelect: 'none'
-                }}
-              >
-                <span
-                  style={{
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    background: isBackgroundSyncing ? '#2563eb' : '#16a34a',
-                    display: 'inline-block'
-                  }}
-                />
-                <span suppressHydrationWarning>
-                  {isBackgroundSyncing
-                    ? 'Syncing...'
-                    : isMounted && lastRefreshed
-                    ? `Live · ${lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                    : 'Live · Synced'}
-                </span>
-              </div>
-
               {/* Quick Search Trigger (⌘K) */}
               <button
                 type="button"
@@ -5396,14 +5410,105 @@ export default function DoctorPublicPortalClient({
                   gap: '6px',
                   boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
                 }}
-                title="Quick search across patients, prescriptions, and specialty blueprints (⌘K)"
+                title="Search patients, prescriptions, formulations (⌘K)"
               >
                 <Search size={14} style={{ color: '#5f6368' }} />
                 <span>Search</span>
                 <kbd style={{ fontSize: '0.66rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '1px 5px', color: '#64748b' }}>⌘K</kbd>
               </button>
 
-              {/* Single Unified Primary Action: New Prescription / Upload Rx */}
+              {/* Notifications Icon (Pending Tasks Counter) */}
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  handleSidebarNavigate('tasks');
+                }}
+                style={{
+                  position: 'relative',
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: filteredTasks.length > 0 ? '#b45309' : '#5f6368',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
+                }}
+                title={filteredTasks.length > 0 ? `${filteredTasks.length} pending clinical actions requiring review` : 'No pending actions'}
+              >
+                <Bell size={16} />
+                {filteredTasks.length > 0 && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '-4px',
+                      right: '-4px',
+                      background: '#f59e0b',
+                      color: '#ffffff',
+                      fontSize: '0.60rem',
+                      fontWeight: 700,
+                      borderRadius: '999px',
+                      padding: '1px 5px',
+                      lineHeight: 1.2
+                    }}
+                  >
+                    {filteredTasks.length}
+                  </span>
+                )}
+              </button>
+
+              {/* Doctor Avatar / Profile Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  if (isAuthorizedViewer) {
+                    setIsCredentialsModalOpen(true);
+                  } else {
+                    setIsClaimModalOpen(true);
+                  }
+                }}
+                style={{
+                  height: '34px',
+                  padding: '0 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#3c4043',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
+                }}
+                title={isAuthorizedViewer ? `Verified Physician: ${doctor.name}` : 'Sign in to practice portal'}
+              >
+                <div
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #003666 0%, #0d9488 100%)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.68rem',
+                    fontWeight: 750
+                  }}
+                >
+                  {isAuthorizedViewer ? (doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D') : <Shield size={10} color="#ffffff" />}
+                </div>
+                <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a' }}>
+                  {isAuthorizedViewer ? doctor.name?.split(' ').slice(0, 2).join(' ') : 'Practice ID'}
+                </span>
+              </button>
+
+              {/* Primary Action Button: New Prescription */}
               <button
                 type="button"
                 onClick={handleOpenNewPrescriptionIntake}
@@ -5415,7 +5520,7 @@ export default function DoctorPublicPortalClient({
                   background: '#1a73e8',
                   color: '#ffffff',
                   fontSize: '0.80rem',
-                  fontWeight: 600,
+                  fontWeight: 650,
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -5425,7 +5530,7 @@ export default function DoctorPublicPortalClient({
                 title="Create a new compounded prescription, customize a blueprint, or upload a clinical PDF/image"
               >
                 <Plus size={15} />
-                <span>New Prescription / Upload Rx</span>
+                <span>+ New Prescription</span>
               </button>
             </div>
           </header>
@@ -5558,223 +5663,185 @@ export default function DoctorPublicPortalClient({
                 </div>
               )}
 
-              {/* 3. Adaptive 4-KPI Row (Rule #22): Specialty Readiness KPIs for Zero-Rx vs Operational KPIs for Active Doctors */}
-              {allPrescriptions.length === 0 ? (
-                <div className="gcp-kpi-grid" style={{ marginBottom: '18px' }}>
+              {/* ── SECTION 1: Practice Summary (4 Compact Equal-Height KPI Cards) ── */}
+              <div style={{ marginBottom: '18px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '12px' }}>
+                  {/* KPI 1: Active Patients */}
                   <div
-                    className="gcp-kpi-card"
-                    onClick={() => handleSidebarNavigate('recommendations')}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase' }}>Specialty Blueprints</span>
-                      <Sparkles size={16} style={{ color: '#0284c7' }} />
-                    </div>
-                    <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>
-                      {doctorSpecialtyIntel.primaryBlueprints.length}
-                    </div>
-                    <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Ready-to-prescribe protocols</span>
-                      <span style={{ color: '#0284c7', fontWeight: 600 }}>Explore →</span>
-                    </div>
-                  </div>
-
-                  <div
-                    className="gcp-kpi-card"
-                    onClick={() => handleSidebarNavigate('recommendations')}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase' }}>Clinical Procedures</span>
-                      <Stethoscope size={16} style={{ color: '#16a34a' }} />
-                    </div>
-                    <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#15803d' }}>
-                      {doctorSpecialtyIntel.webPracticeProfile?.detectedProcedures?.length || 4}
-                    </div>
-                    <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Mapped to your specialty</span>
-                      <span style={{ color: '#15803d', fontWeight: 600 }}>View match →</span>
-                    </div>
-                  </div>
-
-                  <div
-                    className="gcp-kpi-card"
-                    onClick={handleOpenNewPrescriptionIntake}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#4f46e5', textTransform: 'uppercase' }}>Magistral APIs Ready</span>
-                      <FlaskConical size={16} style={{ color: '#4f46e5' }} />
-                    </div>
-                    <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#4f46e5' }}>
-                      25+
-                    </div>
-                    <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Pharmaceutical-grade actives</span>
-                      <span style={{ color: '#4f46e5', fontWeight: 600 }}>Prescribe →</span>
-                    </div>
-                  </div>
-
-                  <div
-                    className="gcp-kpi-card"
-                    onClick={() => handleSidebarNavigate('lab_results')}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#b45309', textTransform: 'uppercase' }}>Diagnostic Panels</span>
-                      <Activity size={16} style={{ color: '#d97706' }} />
-                    </div>
-                    <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#d97706' }}>
-                      {allLabResults.length || 3}
-                    </div>
-                    <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Genetic & biomarker screening</span>
-                      <span style={{ color: '#d97706', fontWeight: 600 }}>Open labs →</span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="gcp-kpi-grid">
-                  {/* KPI 1: Sold & Invoiced Orders */}
-                  <div
-                    className="gcp-kpi-card"
-                    onClick={() => {
-                      triggerHaptic('light');
-                      setQuickRxFilter('active');
-                      setStatusFilter('all');
-                      setPatientFilter('all');
-                      setTemporalFilter('all');
-                      setSearchQuery('');
-                      setActiveAnchor('prescriptions');
-                      toast.success(`Showing ${quickCounts.active} sold & invoiced prescriptions`, { id: 'kpi-filter' });
-                    }}
-                    style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
-                    title="Click to view Sold & Invoiced orders"
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Sold & Invoiced</span>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <CheckCircle2 size={16} style={{ color: '#16a34a' }} />
-                      </div>
-                    </div>
-                    <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#15803d', lineHeight: 1.1 }}>
-                      {quickCounts.active}
-                    </div>
-                    <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span>Confirmed & invoiced orders</span>
-                      <span style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 600 }}>View sold →</span>
-                    </div>
-                  </div>
-
-                  {/* KPI 2: Patients */}
-                  <div
-                    className="gcp-kpi-card"
                     onClick={() => {
                       triggerHaptic('light');
                       handleSidebarNavigate('patients');
-                      toast.success(`Displaying ${doctorPatientsList.length} patients`, { id: 'kpi-filter' });
                     }}
-                    style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
-                    title="Click to view Patients directory"
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '8px',
+                      padding: '14px 16px',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      minHeight: '105px',
+                      transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
+                    }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Patients</span>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Users size={16} style={{ color: '#1a73e8' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Active Patients</span>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Users size={15} style={{ color: '#1a73e8' }} />
                       </div>
                     </div>
-                    <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
-                      {doctorPatientsList.length}
-                    </div>
-                    <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span>{soldPatientsCount} active · {unacceptedPatientsCount} pending offer</span>
-                      <span style={{ fontSize: '0.70rem', color: '#1a73e8', fontWeight: 600 }}>View patients →</span>
+                    <div>
+                      <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#202124', lineHeight: 1.15 }}>
+                        {soldPatientsCount || doctorPatientsList.length}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Currently on therapy</span>
+                        <span style={{ color: '#1a73e8', fontWeight: 600 }}>View →</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* KPI 3: Unaccepted Offers */}
+                  {/* KPI 2: Active Prescriptions */}
                   <div
-                    className="gcp-kpi-card"
+                    onClick={() => {
+                      triggerHaptic('light');
+                      setQuickRxFilter('active');
+                      handleSidebarNavigate('prescriptions');
+                    }}
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '8px',
+                      padding: '14px 16px',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      minHeight: '105px',
+                      transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Active Prescriptions</span>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Layers size={15} style={{ color: '#16a34a' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#15803d', lineHeight: 1.15 }}>
+                        {quickCounts.active}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Dispensed & invoiced</span>
+                        <span style={{ color: '#15803d', fontWeight: 600 }}>Explore →</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* KPI 3: Pending Actions */}
+                  <div
+                    onClick={() => {
+                      triggerHaptic('light');
+                      handleSidebarNavigate('tasks');
+                    }}
+                    style={{
+                      background: '#ffffff',
+                      border: filteredTasks.length > 0 ? '1.5px solid #f59e0b' : '1px solid #dadce0',
+                      borderRadius: '8px',
+                      padding: '14px 16px',
+                      cursor: 'pointer',
+                      boxShadow: filteredTasks.length > 0 ? '0 2px 6px rgba(245,158,11,0.12)' : '0 1px 2px rgba(60,64,67,0.06)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      minHeight: '105px',
+                      transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 650, color: filteredTasks.length > 0 ? '#b45309' : '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Pending Actions</span>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: filteredTasks.length > 0 ? '#fffbeb' : '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Clock size={15} style={{ color: filteredTasks.length > 0 ? '#d97706' : '#64748b' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '1.75rem', fontWeight: 700, color: filteredTasks.length > 0 ? '#b45309' : '#202124', lineHeight: 1.15 }}>
+                        {filteredTasks.length}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>{filteredTasks.length > 0 ? 'Require your review' : 'All caught up'}</span>
+                        <span style={{ color: filteredTasks.length > 0 ? '#b45309' : '#1a73e8', fontWeight: 600 }}>Resolve →</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* KPI 4: Pending Patient Offers */}
+                  <div
                     onClick={() => {
                       triggerHaptic('light');
                       setQuickRxFilter('proposals');
-                      setStatusFilter('all');
-                      setPatientFilter('all');
-                      setTemporalFilter('all');
-                      setSearchQuery('');
-                      setActiveAnchor('prescriptions');
-                      toast.success(`Showing ${quickCounts.proposals} unaccepted proposals awaiting checkout`, { id: 'kpi-filter' });
+                      handleSidebarNavigate('prescriptions');
                     }}
-                    style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
-                    title="Click to view Unaccepted Offers"
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '8px',
+                      padding: '14px 16px',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      minHeight: '105px',
+                      transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
+                    }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Unaccepted Offers</span>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Clock size={16} style={{ color: '#d97706' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Pending Offers</span>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <FileText size={15} style={{ color: '#7c3aed' }} />
                       </div>
                     </div>
-                    <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#d97706', lineHeight: 1.1 }}>
-                      {quickCounts.proposals}
-                    </div>
-                    <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span>Proposals awaiting checkout</span>
-                      <span style={{ fontSize: '0.70rem', color: '#d97706', fontWeight: 600 }}>Follow up →</span>
-                    </div>
-                  </div>
-
-                  {/* KPI 4: Pending Actions */}
-                  <div
-                    className="gcp-kpi-card"
-                    onClick={() => {
-                      triggerHaptic('light');
-                      setTaskFilter('all');
-                      setSearchQuery('');
-                      handleSidebarNavigate('tasks');
-                      toast.success(`Showing ${activeKpis.pendingTasksCount} pending actions`, { id: 'kpi-filter' });
-                    }}
-                    style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
-                    title="Click to view Pending Actions"
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Pending Actions</span>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Sparkles size={16} style={{ color: '#7c3aed' }} />
+                    <div>
+                      <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#7c3aed', lineHeight: 1.15 }}>
+                        {quickCounts.proposals}
                       </div>
-                    </div>
-                    <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#7c3aed', lineHeight: 1.1 }}>
-                      {activeKpis.pendingTasksCount}
-                    </div>
-                    <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span>Sign-offs & patient follow-ups</span>
-                      <span style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 600 }}>Resolve →</span>
+                      <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Awaiting patient checkout</span>
+                        <span style={{ color: '#7c3aed', fontWeight: 600 }}>Follow up →</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
 
-              {/* 4. 1-Click Priority Patient Actions Strip (For Active Doctors with Pending Tasks) */}
-              {allPrescriptions.length > 0 && filteredTasks.length > 0 && (
-                <div
-                  style={{
-                    marginTop: '16px',
-                    background: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    borderLeft: '4px solid #f59e0b',
-                    borderRadius: '8px',
-                    padding: '12px 16px',
-                    boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                        ⚡ Priority Patient Actions ({filteredTasks.length})
-                      </span>
-                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                        Resolve pending sign-offs or remind patients with unaccepted treatment offers in 1 click
-                      </span>
-                    </div>
+              {/* ── SECTION 2: Requires Your Attention (Priority Actions Queue) ── */}
+              <div
+                style={{
+                  marginBottom: '20px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  borderLeft: filteredTasks.length > 0 ? '4px solid #f59e0b' : '4px solid #16a34a',
+                  borderRadius: '8px',
+                  padding: '14px 18px',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: filteredTasks.length > 0 ? '12px' : '0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                      ⚡ Requires Your Attention {filteredTasks.length > 0 && `(${filteredTasks.length})`}
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      {filteredTasks.length > 0
+                        ? 'Prioritized actions requiring your clinical intervention'
+                        : 'Practice queue is clear'}
+                    </span>
+                  </div>
+                  {filteredTasks.length > 0 && (
                     <button
                       type="button"
                       onClick={() => handleSidebarNavigate('tasks')}
@@ -5789,10 +5856,12 @@ export default function DoctorPublicPortalClient({
                     >
                       View all {filteredTasks.length} actions →
                     </button>
-                  </div>
+                  )}
+                </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
-                    {filteredTasks.slice(0, 3).map((t) => {
+                {filteredTasks.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {filteredTasks.slice(0, 5).map((t) => {
                       const isProposalTask = t.type === 'proposal_followup';
                       const codifiedId = getCodifiedPatientId(t.patientName, t.code);
                       const displayPatient = isAuthorizedViewer ? t.patientName : codifiedId;
@@ -5811,93 +5880,234 @@ export default function DoctorPublicPortalClient({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            gap: '10px',
-                            padding: '8px 12px',
+                            gap: '12px',
+                            padding: '10px 14px',
                             background: '#f8fafc',
                             border: '1px solid #e2e8f0',
                             borderRadius: '6px'
                           }}
                         >
                           <div style={{ minWidth: 0, flex: 1 }}>
-                            <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {displayPatient}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                                {displayPatient}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: '0.64rem',
+                                  fontWeight: 700,
+                                  padding: '1px 6px',
+                                  borderRadius: '4px',
+                                  background: isProposalTask ? '#fffbeb' : '#eff6ff',
+                                  color: isProposalTask ? '#b45309' : '#1d4ed8',
+                                  border: `1px solid ${isProposalTask ? '#fde68a' : '#bfdbfe'}`
+                                }}
+                              >
+                                {isProposalTask ? 'Offer Pending Checkout' : 'Awaiting Rx Approval'}
+                              </span>
                             </div>
-                            <div style={{ fontSize: '0.71rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {isProposalTask ? '⏳ Offer awaiting checkout' : '✍️ Pending Rx authorization'} · {t.treatmentTitle || t.code}
+                            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {t.treatmentTitle || t.code} {t.daysPending ? `· ${t.daysPending} days pending` : ''}
                             </div>
                           </div>
 
-                          {isProposalTask ? (
-                            <a
-                              href={waUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                                padding: '5px 10px',
-                                borderRadius: '5px',
-                                background: '#f0fdf4',
-                                border: '1px solid #bbf7d0',
-                                color: '#15803d',
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
-                                textDecoration: 'none',
-                                whiteSpace: 'nowrap'
-                              }}
-                              title="Send 1-click WhatsApp follow-up reminder to patient"
-                            >
-                              <MessageCircle size={13} />
-                              <span>Remind</span>
-                            </a>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={(e) => handleSignOffPrescription(t, e)}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                                padding: '5px 10px',
-                                borderRadius: '5px',
-                                background: '#1a73e8',
-                                border: 'none',
-                                color: '#ffffff',
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
-                                cursor: 'pointer',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              <CheckCircle2 size={12} />
-                              <span>Sign-off</span>
-                            </button>
-                          )}
+                          <div style={{ flexShrink: 0 }}>
+                            {isProposalTask ? (
+                              <a
+                                href={waUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  padding: '6px 12px',
+                                  borderRadius: '5px',
+                                  background: '#f0fdf4',
+                                  border: '1px solid #bbf7d0',
+                                  color: '#15803d',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  textDecoration: 'none',
+                                  whiteSpace: 'nowrap'
+                                }}
+                                title="Send WhatsApp follow-up reminder to patient"
+                              >
+                                <MessageCircle size={13} />
+                                <span>Send Reminder</span>
+                              </a>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => handleSignOffPrescription(t, e)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  padding: '6px 12px',
+                                  borderRadius: '5px',
+                                  background: '#1a73e8',
+                                  border: 'none',
+                                  color: '#ffffff',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                <CheckCircle2 size={13} />
+                                <span>Approve</span>
+                              </button>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', paddingTop: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <CheckCircle2 size={16} style={{ color: '#16a34a' }} />
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: '#166534', fontWeight: 600 }}>
+                        You’re all caught up. No urgent actions require your clinical attention.
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleSidebarNavigate('tasks')}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#15803d',
+                        fontSize: '0.73rem',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      View action history →
+                    </button>
+                  </div>
+                )}
+              </div>
 
-              {/* 5. Specialty Practice Blueprints & Web Footprint Showcase (Zero-Rx & Active Doctors) */}
+              {/* ── SECTION 3: Quick Actions ── */}
+              <div style={{ marginBottom: '22px' }}>
+                <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
+                  Quick Actions
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px' }}>
+                  <div
+                    onClick={handleOpenNewPrescriptionIntake}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '12px 14px',
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(60,64,67,0.04)',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#e8f0fe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Plus size={18} style={{ color: '#1a73e8' }} />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>+ New Prescription</div>
+                      <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '1px' }}>Compounded formula or Rx upload</div>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => handleSidebarNavigate('patients')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '12px 14px',
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(60,64,67,0.04)',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Users size={18} style={{ color: '#4f46e5' }} />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>+ Add Patient</div>
+                      <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '1px' }}>Register or view clinical dossier</div>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => handleSidebarNavigate('lab_results')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '12px 14px',
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(60,64,67,0.04)',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <FlaskConical size={18} style={{ color: '#d97706' }} />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>Request Diagnostic Test</div>
+                      <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '1px' }}>Biomarkers & screening panels</div>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => handleSidebarNavigate('recommendations')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '12px 14px',
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(60,64,67,0.04)',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#f0fdfa', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Sparkles size={18} style={{ color: '#0d9488' }} />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>Clinical Recommendations</div>
+                      <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '1px' }}>Specialty protocols & blueprints</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── SECTION 4: Atlas Clinical Intelligence (Top 3 Recommendations) ── */}
               <div
                 style={{
-                  marginTop: '18px',
-                  background: allPrescriptions.length === 0
-                    ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
-                    : '#ffffff',
-                  color: allPrescriptions.length === 0 ? '#f8fafc' : '#0f172a',
-                  border: allPrescriptions.length === 0 ? '1px solid #334155' : '1px solid #dadce0',
-                  borderRadius: '10px',
-                  padding: allPrescriptions.length === 0 ? '20px 22px' : '16px 20px',
-                  boxShadow: allPrescriptions.length === 0
-                    ? '0 8px 24px rgba(15, 23, 42, 0.16)'
-                    : '0 1px 2px rgba(60,64,67,0.06)'
+                  marginBottom: '22px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  borderRadius: '8px',
+                  padding: '16px 20px',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
                       <span
@@ -5908,31 +6118,20 @@ export default function DoctorPublicPortalClient({
                           letterSpacing: '0.06em',
                           padding: '2px 8px',
                           borderRadius: '999px',
-                          background: allPrescriptions.length === 0 ? 'rgba(56, 189, 248, 0.16)' : '#eff6ff',
-                          color: allPrescriptions.length === 0 ? '#38bdf8' : '#1d4ed8',
-                          border: allPrescriptions.length === 0 ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid #bfdbfe'
+                          background: '#eff6ff',
+                          color: '#1d4ed8',
+                          border: '1px solid #bfdbfe'
                         }}
                       >
-                        {doctorSpecialtyIntel.primaryMeta?.badgeIcon} {doctorSpecialtyIntel.primaryMeta?.label || 'Specialty Practice Intelligence'}
+                        {doctorSpecialtyIntel.primaryMeta?.badgeIcon} {doctorSpecialtyIntel.primaryMeta?.label || 'Specialty Intelligence'}
                       </span>
-                      <span
-                        style={{
-                          fontSize: '0.68rem',
-                          fontWeight: 600,
-                          color: allPrescriptions.length === 0 ? '#94a3b8' : '#64748b'
-                        }}
-                      >
-                        {allPrescriptions.length === 0
-                          ? 'Ready-to-Prescribe Clinical Recommendations'
-                          : `${doctorSpecialtyIntel.primaryBlueprints.length} Atlas Recommendations + ${allPrescriptions.length} Active Rx Synergies`}
+                      <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#64748b' }}>
+                        Specialty-tailored formulations & synergies
                       </span>
                     </div>
-                    <h3 style={{ margin: 0, fontSize: allPrescriptions.length === 0 ? '1.08rem' : '0.96rem', fontWeight: 700, color: allPrescriptions.length === 0 ? '#ffffff' : '#0f172a' }}>
-                      {isAuthorizedViewer ? `${doctor.name} — ` : ''}Atlas Recommendations
+                    <h3 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 700, color: '#202124' }}>
+                      Atlas Clinical Intelligence
                     </h3>
-                    <p style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: allPrescriptions.length === 0 ? '#cbd5e1' : '#475569', lineHeight: 1.45, maxWidth: '860px' }}>
-                      {doctorSpecialtyIntel.webPracticeProfile?.summary || 'Tailored clinical recommendations combining compounding formulations, peptide co-therapies, native collagen ECM support, and companion diagnostics.'}
-                    </p>
                   </div>
 
                   <button
@@ -5945,130 +6144,78 @@ export default function DoctorPublicPortalClient({
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '6px',
-                      padding: '8px 14px',
+                      padding: '7px 12px',
                       borderRadius: '6px',
-                      background: allPrescriptions.length === 0 ? '#38bdf8' : '#003666',
-                      color: allPrescriptions.length === 0 ? '#0f172a' : '#ffffff',
-                      border: 'none',
-                      fontSize: '0.76rem',
+                      background: '#f8fafc',
+                      color: '#1a73e8',
+                      border: '1px solid #dadce0',
+                      fontSize: '0.74rem',
                       fontWeight: 700,
                       cursor: 'pointer',
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    <Sparkles size={14} />
                     <span>Explore All Atlas Recommendations</span>
                     <ArrowUpRight size={13} />
                   </button>
                 </div>
 
-                {/* ── Quick-Start Onboarding Guide for New Physicians (Zero-Rx State) ── */}
-                {allPrescriptions.length === 0 && (
-                  <div
-                    style={{
-                      background: 'rgba(15, 23, 42, 0.6)',
-                      border: '1px solid rgba(56, 189, 248, 0.3)',
-                      borderRadius: '10px',
-                      padding: '14px 18px',
-                      marginBottom: '16px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#38bdf8' }}>
-                        👋 Quick-Start Clinical Guide
-                      </span>
-                      <span style={{ fontSize: '0.66rem', fontWeight: 700, background: 'rgba(56, 189, 248, 0.2)', color: '#bae6fd', padding: '1px 6px', borderRadius: '4px' }}>
-                        3 Simple Steps
-                      </span>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px', marginTop: '4px' }}>
-                      <div style={{ background: 'rgba(30, 41, 59, 0.8)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.74rem', color: '#cbd5e1' }}>
-                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>1. Review Clinical Monograph:</strong>
-                        Click <em>"Clinical Monograph & Evidence"</em> to inspect active ingredients, concentrations, vehicles, and posology.
-                      </div>
-                      <div style={{ background: 'rgba(30, 41, 59, 0.8)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.74rem', color: '#cbd5e1' }}>
-                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>2. Customize & Prescribe:</strong>
-                        Click <em>"Customize & Prescribe"</em> to load the formula into the Rx builder, assign your patient, and adjust doses.
-                      </div>
-                      <div style={{ background: 'rgba(30, 41, 59, 0.8)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.74rem', color: '#cbd5e1' }}>
-                        <strong style={{ color: '#ffffff', display: 'block', marginBottom: '3px' }}>3. Pharmacy Compounding:</strong>
-                        Authorized compounding pharmacy prepares the formulation and delivers directly to your clinic or patient.
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Detected Clinical Procedures Pills */}
-                {Array.isArray(doctorSpecialtyIntel.webPracticeProfile?.detectedProcedures) && doctorSpecialtyIntel.webPracticeProfile.detectedProcedures.length > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', color: allPrescriptions.length === 0 ? '#94a3b8' : '#64748b' }}>
-                      Detected Clinical Focus:
-                    </span>
-                    {doctorSpecialtyIntel.webPracticeProfile.detectedProcedures.map((proc, idx) => (
-                      <span
-                        key={idx}
-                        style={{
-                          fontSize: '0.70rem',
-                          fontWeight: 600,
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          background: allPrescriptions.length === 0 ? 'rgba(255,255,255,0.08)' : '#f8fafc',
-                          color: allPrescriptions.length === 0 ? '#e2e8f0' : '#334155',
-                          border: allPrescriptions.length === 0 ? '1px solid rgba(255,255,255,0.14)' : '1px solid #e2e8f0'
-                        }}
-                      >
-                        {proc}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* ── Atlas Recommendations: Continuous Linear Rows ── */}
                 <div
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
                     borderRadius: '8px',
                     overflow: 'hidden',
-                    border: allPrescriptions.length === 0 ? '1px solid #334155' : '1px solid #e2e8f0',
-                    background: allPrescriptions.length === 0 ? 'rgba(30, 41, 59, 0.85)' : '#ffffff'
+                    border: '1px solid #e2e8f0',
+                    background: '#ffffff'
                   }}
                 >
-                  {doctorSpecialtyIntel.primaryBlueprints.slice(0, allPrescriptions.length === 0 ? 4 : 3).map((bp, bpIdx, arr) => {
+                  {doctorSpecialtyIntel.primaryBlueprints.slice(0, 3).map((bp, bpIdx, arr) => {
                     const isLast = bpIdx === arr.length - 1;
-                    const isZeroRx = allPrescriptions.length === 0;
 
                     return (
                       <div
                         key={bp.id}
                         style={{
-                          padding: '14px 18px',
-                          borderBottom: isLast ? 'none' : isZeroRx ? '1px solid #334155' : '1px solid #e2e8f0',
+                          padding: '12px 16px',
+                          borderBottom: isLast ? 'none' : '1px solid #e2e8f0',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           flexWrap: 'wrap',
-                          gap: '14px',
+                          gap: '12px',
                           transition: 'background 0.15s ease'
                         }}
                       >
-                        {/* Left Column: Clinical Focus Pill, Code & Magistral Formula Details */}
-                        <div style={{ flex: '1 1 380px', minWidth: '280px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px', flexWrap: 'wrap' }}>
+                        <div style={{ flex: '1 1 340px', minWidth: '260px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
                             <span
                               style={{
-                                fontSize: '0.67rem',
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                background: '#f1f5f9',
+                                color: '#475569',
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              {bpIdx + 1}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: '0.66rem',
                                 fontWeight: 800,
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.04em',
                                 padding: '2px 8px',
                                 borderRadius: '4px',
-                                background: isZeroRx ? 'rgba(56, 189, 248, 0.2)' : '#e0f2fe',
-                                color: isZeroRx ? '#38bdf8' : '#0369a1',
-                                border: isZeroRx ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid #bae6fd'
+                                background: '#e0f2fe',
+                                color: '#0369a1',
+                                border: '1px solid #bae6fd'
                               }}
                             >
                               {bp.targetProcedure}
@@ -6077,8 +6224,8 @@ export default function DoctorPublicPortalClient({
                               style={{
                                 fontSize: '0.66rem',
                                 fontFamily: 'monospace',
-                                color: isZeroRx ? '#94a3b8' : '#64748b',
-                                background: isZeroRx ? 'rgba(255,255,255,0.06)' : '#f1f5f9',
+                                color: '#64748b',
+                                background: '#f1f5f9',
                                 padding: '1px 6px',
                                 borderRadius: '3px'
                               }}
@@ -6087,34 +6234,26 @@ export default function DoctorPublicPortalClient({
                             </span>
                           </div>
 
-                          <div
-                            style={{
-                              fontSize: '0.88rem',
-                              fontWeight: 700,
-                              color: isZeroRx ? '#ffffff' : '#0f172a',
-                              lineHeight: 1.35
-                            }}
-                          >
+                          <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
                             {bp.compoundingFormula?.treatmentTitle || bp.title}
                             {bp.compoundingFormula?.volume && (
-                              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: isZeroRx ? '#cbd5e1' : '#64748b', marginLeft: '6px' }}>
+                              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#64748b', marginLeft: '6px' }}>
                                 · {bp.compoundingFormula.volume}
                               </span>
                             )}
                           </div>
 
-                          {/* Synergies breakdown pills */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
                             {bp.peptideSynergy?.name && (
                               <span
                                 style={{
-                                  fontSize: '0.68rem',
+                                  fontSize: '0.66rem',
                                   fontWeight: 650,
                                   padding: '2px 7px',
                                   borderRadius: '4px',
-                                  background: isZeroRx ? 'rgba(99, 102, 241, 0.2)' : '#eef2ff',
-                                  color: isZeroRx ? '#a5b4fc' : '#4338ca',
-                                  border: isZeroRx ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid #c7d2fe'
+                                  background: '#eef2ff',
+                                  color: '#4338ca',
+                                  border: '1px solid #c7d2fe'
                                 }}
                               >
                                 🧬 Peptide: {bp.peptideSynergy.name}
@@ -6123,13 +6262,13 @@ export default function DoctorPublicPortalClient({
                             {bp.dermocosmeticSynergy?.name && (
                               <span
                                 style={{
-                                  fontSize: '0.68rem',
+                                  fontSize: '0.66rem',
                                   fontWeight: 650,
                                   padding: '2px 7px',
                                   borderRadius: '4px',
-                                  background: isZeroRx ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5',
-                                  color: isZeroRx ? '#6ee7b7' : '#047857',
-                                  border: isZeroRx ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #a7f3d0'
+                                  background: '#ecfdf5',
+                                  color: '#047857',
+                                  border: '1px solid #a7f3d0'
                                 }}
                               >
                                 🌿 Colway: {bp.dermocosmeticSynergy.name}
@@ -6138,13 +6277,13 @@ export default function DoctorPublicPortalClient({
                             {bp.diagnosticSynergy?.name && (
                               <span
                                 style={{
-                                  fontSize: '0.68rem',
+                                  fontSize: '0.66rem',
                                   fontWeight: 650,
                                   padding: '2px 7px',
                                   borderRadius: '4px',
-                                  background: isZeroRx ? 'rgba(14, 165, 233, 0.2)' : '#f0f9ff',
-                                  color: isZeroRx ? '#7dd3fc' : '#0369a1',
-                                  border: isZeroRx ? '1px solid rgba(14, 165, 233, 0.3)' : '1px solid #bae6fd'
+                                  background: '#f0f9ff',
+                                  color: '#0369a1',
+                                  border: '1px solid #bae6fd'
                                 }}
                               >
                                 🔬 Lab: {bp.diagnosticSynergy.name}
@@ -6153,7 +6292,6 @@ export default function DoctorPublicPortalClient({
                           </div>
                         </div>
 
-                        {/* Right Column: Direct Conversion Actions */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                           <button
                             type="button"
@@ -6162,11 +6300,11 @@ export default function DoctorPublicPortalClient({
                               setActiveBlueprintDossier(bp);
                             }}
                             style={{
-                              padding: '7px 12px',
+                              padding: '6px 12px',
                               borderRadius: '5px',
-                              border: isZeroRx ? '1px solid #475569' : '1px solid #cbd5e1',
-                              background: isZeroRx ? 'rgba(255,255,255,0.06)' : '#ffffff',
-                              color: isZeroRx ? '#e2e8f0' : '#1e293b',
+                              border: '1px solid #cbd5e1',
+                              background: '#ffffff',
+                              color: '#1e293b',
                               fontSize: '0.72rem',
                               fontWeight: 650,
                               cursor: 'pointer',
@@ -6175,21 +6313,20 @@ export default function DoctorPublicPortalClient({
                               gap: '5px',
                               whiteSpace: 'nowrap'
                             }}
-                            title="View detailed composition, mechanism of action, and posology"
                           >
                             <FileText size={12} style={{ color: '#0284c7' }} />
-                            <span>Clinical Monograph</span>
+                            <span>View Details</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={() => handlePrescribeSpecialtyBlueprint(bp)}
                             style={{
-                              padding: '7px 14px',
+                              padding: '6px 14px',
                               borderRadius: '5px',
                               border: 'none',
-                              background: isZeroRx ? '#38bdf8' : '#003666',
-                              color: isZeroRx ? '#0f172a' : '#ffffff',
+                              background: '#003666',
+                              color: '#ffffff',
                               fontSize: '0.72rem',
                               fontWeight: 700,
                               cursor: 'pointer',
@@ -6200,7 +6337,6 @@ export default function DoctorPublicPortalClient({
                               whiteSpace: 'nowrap',
                               boxShadow: '0 1px 2px rgba(0,0,0,0.08)'
                             }}
-                            title="Load formula into prescription builder to assign patient, titrate doses, and sign"
                           >
                             <Plus size={12} />
                             <span>+ Customize & Prescribe</span>
@@ -6212,32 +6348,199 @@ export default function DoctorPublicPortalClient({
                 </div>
               </div>
 
-              {/* 6. Deep Clinical Analytics (Only shown when doctor has prescriptions so Zero-Rx doctors don't see empty charts) */}
-              {allPrescriptions.length > 0 && (
-                <div style={{ marginTop: '24px' }}>
-                  <DoctorClinicalAnalytics
-                    prescriptions={scopeMode === 'filtered' ? filteredPrescriptions : allPrescriptions}
-                    serverAnalytics={data?.serverAnalytics}
-                    onSelectApi={(apiName) => {
-                      if (apiFilter && apiFilter.toLowerCase() === apiName.toLowerCase()) {
-                        setApiFilter(null);
-                        toast('Cleared active API filter', { id: 'api-filter' });
-                      } else {
-                        setApiFilter(apiName);
-                        handleSidebarNavigate('prescriptions');
-                        toast.success(`Filtered table: showing ${apiName} formulations`, { id: 'api-filter' });
-                      }
+              {/* ── SECTION 5: Practice Insights ── */}
+              <div
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  borderRadius: '8px',
+                  padding: '16px 20px',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 700, color: '#202124' }}>
+                      Practice Insights
+                    </h3>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: '#5f6368' }}>
+                      High-level prescription activity, top formulations, and patient follow-up status
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('light');
+                      handleSidebarNavigate('analytics');
                     }}
-                    selectedApiFilter={apiFilter}
-                    onClearApiFilter={() => {
-                      setApiFilter(null);
-                      toast('Cleared active API filter', { id: 'api-filter' });
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#1a73e8',
+                      fontSize: '0.76rem',
+                      fontWeight: 650,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
                     }}
-                    isFiltered={scopeMode === 'filtered' || !!apiFilter}
-                  />
+                  >
+                    <span>View Detailed Analytics</span>
+                    <ArrowUpRight size={13} />
+                  </button>
                 </div>
-              )}
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+                  {/* Card 1: 6-Month Prescription Activity */}
+                  <div style={{ padding: '12px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+                        Prescription Activity
+                      </span>
+                      <span style={{ fontSize: '0.70rem', color: '#64748b' }}>Last 6 Months</span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '65px', paddingTop: '8px', gap: '6px' }}>
+                      {practiceMonthlyTrends.map((m, idx) => {
+                        const maxCount = Math.max(...practiceMonthlyTrends.map((t) => t.count), 1);
+                        const barHeight = Math.max(8, Math.round((m.count / maxCount) * 44));
+                        const isLatest = idx === practiceMonthlyTrends.length - 1;
+                        return (
+                          <div key={m.key || idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, gap: '4px' }}>
+                            <div style={{ fontSize: '0.64rem', fontWeight: 700, color: isLatest ? '#1a73e8' : '#64748b' }}>
+                              {m.count}
+                            </div>
+                            <div
+                              style={{
+                                width: '100%',
+                                maxWidth: '24px',
+                                height: `${barHeight}px`,
+                                borderRadius: '3px 3px 0 0',
+                                background: isLatest ? '#1a73e8' : '#cbd5e1'
+                              }}
+                              title={`${m.label}: ${m.count} prescriptions`}
+                            />
+                            <div style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 600 }}>
+                              {m.label}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Card 2: Top 3 Prescribed Formulations */}
+                  <div style={{ padding: '12px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+                        Top Formulations
+                      </span>
+                      <span style={{ fontSize: '0.70rem', color: '#1a73e8', fontWeight: 600, cursor: 'pointer' }} onClick={() => handleSidebarNavigate('analytics')}>
+                        Explore all →
+                      </span>
+                    </div>
+
+                    {doctorTopApis.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {doctorTopApis.slice(0, 3).map((item, idx) => {
+                          const maxTop = Math.max(...doctorTopApis.slice(0, 3).map((a) => a.count), 1);
+                          const pct = Math.round((item.count / maxTop) * 100);
+                          return (
+                            <div key={idx} style={{ fontSize: '0.74rem' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                                <span style={{ fontWeight: 650, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '170px' }}>
+                                  #{idx + 1} {item.name}
+                                </span>
+                                <span style={{ color: '#475569', fontWeight: 700 }}>
+                                  {item.count} Rx
+                                </span>
+                              </div>
+                              <div style={{ width: '100%', height: '5px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{ width: `${pct}%`, height: '100%', background: '#003666', borderRadius: '3px' }} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '0.72rem', color: '#64748b', paddingTop: '14px', textAlign: 'center' }}>
+                        Ready for first compounded formulation.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card 3: Patient Follow-up Status */}
+                  <div style={{ padding: '12px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+                        Patient Cohort Status
+                      </span>
+                      <span style={{ fontSize: '0.70rem', color: '#1a73e8', fontWeight: 600, cursor: 'pointer' }} onClick={() => handleSidebarNavigate('patients')}>
+                        Directory →
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: '#ffffff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a' }} />
+                          <span style={{ fontSize: '0.73rem', color: '#334155' }}>Active on Therapy</span>
+                        </div>
+                        <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#15803d' }}>
+                          {soldPatientsCount}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: '#ffffff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#d97706' }} />
+                          <span style={{ fontSize: '0.73rem', color: '#334155' }}>Offers Awaiting Checkout</span>
+                        </div>
+                        <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#b45309' }}>
+                          {unacceptedPatientsCount}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: '#ffffff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1a73e8' }} />
+                          <span style={{ fontSize: '0.73rem', color: '#334155' }}>Total Monitored Cohort</span>
+                        </div>
+                        <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                          {doctorPatientsList.length}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          )}
+
+          {/* ── View: Practice Analytics (Dedicated Deep-Dive Tab) ── */}
+          {activeAnchor === 'analytics' && (
+            <section id="analytics" style={{ marginBottom: '32px' }}>
+              <DoctorClinicalAnalytics
+                prescriptions={scopeMode === 'filtered' ? filteredPrescriptions : allPrescriptions}
+                serverAnalytics={data?.serverAnalytics}
+                onSelectApi={(apiName) => {
+                  if (apiFilter && apiFilter.toLowerCase() === apiName.toLowerCase()) {
+                    setApiFilter(null);
+                    toast('Cleared active API filter', { id: 'api-filter' });
+                  } else {
+                    setApiFilter(apiName);
+                    handleSidebarNavigate('prescriptions');
+                    toast.success(`Filtered table: showing ${apiName} formulations`, { id: 'api-filter' });
+                  }
+                }}
+                selectedApiFilter={apiFilter}
+                onClearApiFilter={() => {
+                  setApiFilter(null);
+                  toast('Cleared active API filter', { id: 'api-filter' });
+                }}
+                isFiltered={scopeMode === 'filtered' || !!apiFilter}
+              />
+            </section>
           )}
 
           {/* ── View 2: Pending Clinical Tasks & To-Do Actions (DataTable Universal) ── */}
