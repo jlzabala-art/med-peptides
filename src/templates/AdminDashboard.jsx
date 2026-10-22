@@ -8,7 +8,7 @@ import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 import { conversationRepository } from '../repositories/conversationRepository';
 import { useAuth } from '../context/AuthContext';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, limit } from 'firebase/firestore';
 import { db } from '../firebase';
 
 import PanelShell from '../components/shell/PanelShell';
@@ -136,7 +136,7 @@ function usePendingApiCount() {
     if (!isAdmin || typeof window === 'undefined') return;
     let unsub = null;
     const timer = setTimeout(() => {
-      const q = query(collection(db, 'products'), where('isApiPlaceholder', '==', true));
+      const q = query(collection(db, 'products'), where('isApiPlaceholder', '==', true), limit(50));
       unsub = onSnapshot(q, (snap) => setCount(snap.size), (err) => {
         console.error('Error fetching pending APIs', err);
         setCount(0);

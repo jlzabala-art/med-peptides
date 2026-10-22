@@ -26,8 +26,8 @@ import { logger } from '../utils/logger';
  */
 export function subscribeToUnreadMessages({ userId, isAdmin }, onCount) {
   const q = isAdmin
-    ? query(collection(db, 'conversations'))
-    : query(collection(db, 'conversations'), where('participants', 'array-contains', userId));
+    ? query(collection(db, 'conversations'), limit(50))
+    : query(collection(db, 'conversations'), where('participants', 'array-contains', userId), limit(50));
 
   return onSnapshot(q, (snap) => {
     let count = 0;
@@ -36,7 +36,7 @@ export function subscribeToUnreadMessages({ userId, isAdmin }, onCount) {
       if (data.unreadCount?.[userId] > 0) count++;
     });
     onCount(count);
-  });
+  }, () => onCount(0));
 }
 
 /**
@@ -47,7 +47,8 @@ export function subscribeToUnreadMessages({ userId, isAdmin }, onCount) {
 export function subscribeToInboxPending(onCount) {
   const q = query(
     collection(db, 'operations_queue'),
-    where('status', 'in', ['New', 'AI Processing', 'pending', 'Awaiting Approval'])
+    where('status', 'in', ['New', 'AI Processing', 'pending', 'Awaiting Approval']),
+    limit(50)
   );
   return onSnapshot(q, (snap) => onCount(snap.size), () => onCount(0));
 }

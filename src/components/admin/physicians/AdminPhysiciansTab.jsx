@@ -2,7 +2,7 @@
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, limit, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { Search, Users, Plus, Archive, CheckCircle2, Trash2, FilePlus, UserPlus, ClipboardList, Activity, Mail, Wand2, ScanText, Download, RefreshCw } from 'lucide-react';
 import * as fb from '../../../firebase';
 const db = fb?.db;
@@ -24,6 +24,7 @@ import DataTable from '../../ui/DataTable';
 import EmptyState from '../../ui/EmptyState';
 import AppActionGroup from '../../ui/AppActionGroup';
 import MobileDoctorCard from './mobile/MobileDoctorCard';
+import MobileActionSheet from '../../ui/MobileActionSheet';
 import { Eye, Edit3, XCircle, Layers, ExternalLink, Key } from '@/lib/icons';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import DoctorAccessLinkModal from './DoctorAccessLinkModal';
@@ -129,9 +130,6 @@ export default function AdminPhysiciansTab() {
 
     if (filterActivity === 'has_prescriptions') {
       conditions.push(['prescriptionCount', '>', 0]);
-      orders.push(['prescriptionCount', 'desc']);
-    } else {
-      orders.push(['createdAt', 'desc']);
     }
 
     if (filterStatus !== 'all') {
@@ -139,14 +137,6 @@ export default function AdminPhysiciansTab() {
     }
     if (filterSpecialty !== 'all') {
       conditions.push(['specialty', '==', filterSpecialty]);
-    }
-    if (filterRange !== 'all') {
-      const d = new Date();
-      if (filterRange === '7d') d.setDate(d.getDate() - 7);
-      else if (filterRange === '30d') d.setDate(d.getDate() - 30);
-      else if (filterRange === '90d') d.setDate(d.getDate() - 90);
-      else if (filterRange === '1y') d.setFullYear(d.getFullYear() - 1);
-      conditions.push(['createdAt', '>=', d]);
     }
 
     return { conditions, orders };
@@ -1077,6 +1067,7 @@ export default function AdminPhysiciansTab() {
       />
       
       {/* Mobile quick-action sheet for doctors */}
+      {/* Mobile quick-action sheet for doctors */}
       <MobileActionSheet
         isOpen={!!mobileActionDoctor}
         onClose={() => setMobileActionDoctor(null)}
@@ -1098,9 +1089,9 @@ export default function AdminPhysiciansTab() {
             onClick: async () => {
               if (!mobileActionDoctor) return;
               try {
-                await updateDoc(doc(db, 'atlas_physicians', mobileActionDoctor.id), { status: 'approved' });
+                await updateDoc(doc(db, 'users', mobileActionDoctor.id), { status: 'approved' });
                 toast.success('Physician approved');
-                // Could refresh data here
+                refresh();
               } catch (e) {
                 toast.error('Failed to approve');
               }
@@ -1114,13 +1105,21 @@ export default function AdminPhysiciansTab() {
               notifier.confirmCritical(
                 `Archive physician ${mobileActionDoctor?.email}?`,
                 async () => {
-                  await updateDoc(doc(db, 'atlas_physicians', mobileActionDoctor.id), { isArchived: true, status: 'inactive' });
+                  await updateDoc(doc(db, 'users', mobileActionDoctor.id), { isArchived: true, status: 'inactive' });
                   toast.success('Physician archived');
+                  refresh();
                 }
               );
             },
           },
         ]}
+      />
+
+      {/* 1-Tap Access Link Modal for WhatsApp / Email */}
+      <DoctorAccessLinkModal
+        isOpen={Boolean(accessModalDoctor)}
+        onClose={() => setAccessModalDoctor(null)}
+        doctor={accessModalDoctor}
       />
     </>
   );
