@@ -8641,6 +8641,7 @@ export default function DoctorPublicPortalClient({
               triggerHaptic={triggerHaptic}
               onPrescribeBlueprint={handlePrescribeSpecialtyBlueprint}
               onRequestSampleWhatsApp={handleRequestBlueprintWhatsApp}
+              onOpenDossier={setActiveBlueprintDossier}
               onProfileEnriched={(enriched) => {
                 setData((prev) => ({
                   ...prev,

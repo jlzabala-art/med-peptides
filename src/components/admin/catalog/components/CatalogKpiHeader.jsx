@@ -216,7 +216,10 @@ export default function CatalogKpiHeader({
         ].map(tab => {
           const isSelected = tab.id === 'all' 
             ? filterProductType.length === 0 
-            : (filterProductType.length === 1 && filterProductType[0] === tab.id);
+            : (filterProductType.length === 1 && (
+                filterProductType[0] === tab.id ||
+                (tab.id === 'api_raw_material' && (filterProductType[0] === 'raw_material' || filterProductType[0] === 'raw_api'))
+              ));
 
           return (
             <button

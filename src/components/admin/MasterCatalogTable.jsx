@@ -340,10 +340,16 @@ export default function MasterCatalogTable({
     if (filterProductType.length > 0) {
       rows = rows.filter(row => {
         const rowTypes = getProductAvailableTypes(row);
-        const normalizedFilter = filterProductType.map(t => t === 'api_raw_material' ? 'raw_material' : t);
+        const normalizedFilter = filterProductType.map(t => (t === 'api_raw_material' || t === 'raw_api' || t === 'bulk_api' || t === 'api_peptide') ? 'raw_material' : t);
         
         if (normalizedFilter.includes('multi_type') || normalizedFilter.includes('dual')) {
-          if (rowTypes.length >= 2 || row.isHybrid || row.productType === 'dual') {
+          if (rowTypes.length >= 2 || row.isHybrid || row.productType === 'dual' || row.primaryType === 'dual') {
+            return true;
+          }
+        }
+
+        if (normalizedFilter.includes('raw_material')) {
+          if (rowTypes.some(t => ['raw_material', 'api_raw_material', 'raw_api', 'bulk_api', 'api_peptide'].includes(t))) {
             return true;
           }
         }
@@ -510,7 +516,12 @@ export default function MasterCatalogTable({
 
     const checkIsApi = (p) => {
       const types = getProductAvailableTypes(p);
-      return types.includes('raw_material') || types.includes('api_raw_material') || p.primaryType === 'raw_material' || p.primaryType === 'api_raw_material' || p.productType === 'raw_material' || (p.category && String(p.category).toLowerCase().includes('raw'));
+      return types.some(t => ['raw_material', 'api_raw_material', 'raw_api', 'bulk_api', 'api_peptide'].includes(t)) ||
+        p.primaryType === 'raw_material' || p.primaryType === 'api_raw_material' || p.primaryType === 'raw_api' ||
+        p.productType === 'raw_material' || p.productType === 'raw_api' ||
+        p.format === 'bulk_api' ||
+        (p.category && String(p.category).toLowerCase().includes('raw')) ||
+        (Array.isArray(p.variants) && p.variants.some(v => v.format === 'bulk_api' || v.type === 'raw_material' || v.type === 'raw_api'));
     };
 
     const filteredApisProducts = (kpis?.apisProducts != null && kpis.apisProducts > 0)

@@ -10,14 +10,14 @@ import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import FlaskConical from 'lucide-react/dist/esm/icons/flask-conical';
+import ExternalLink from 'lucide-react/dist/esm/icons/external-link';
 import { triggerHaptic } from '@/utils/haptics';
 
 export default function DoctorBlueprintDossierModal({
   isOpen,
   onClose,
   blueprint,
-  onCustomizePrescribe,
-  onRequestSample
+  onCustomizePrescribe
 }) {
   if (!isOpen || !blueprint) return null;
 
@@ -143,15 +143,43 @@ export default function DoctorBlueprintDossierModal({
             )}
           </div>
 
-          {/* Active Pharmaceutical Ingredients (APIs) Table */}
+          {/* Active Pharmaceutical Ingredients (APIs) Table — Magistral Compounding */}
           <div style={{ marginBottom: '18px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
-                <FlaskConical size={14} style={{ color: '#0d9488' }} />
-                <span>Composition & Active Pharmaceutical Ingredients (APIs)</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    background: '#e8f0fe',
+                    color: '#1a73e8',
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
+                >
+                  <FlaskConical size={13} />
+                  Formulación Magistral Individualizada (Farmacia Elaboradora)
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 600,
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    background: '#f1f3f4',
+                    color: '#3c4043'
+                  }}
+                >
+                  Elaboración Galénica On-Demand · Concentraciones Titulables
+                </span>
               </div>
-              <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>
-                Vehicle: {cf.dispensingForm || 'Compounded'} ({cf.volume || '100 mL'})
+              <span style={{ fontSize: '0.72rem', color: '#003666', fontWeight: 600, background: '#ffffff', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: '4px' }}>
+                Vehículo Galénico: {cf.dispensingForm || 'Compounded'} ({cf.volume || '100 mL'})
               </span>
             </div>
 
@@ -217,44 +245,181 @@ export default function DoctorBlueprintDossierModal({
             </div>
           )}
 
-          {/* Synergies */}
-          <div style={{ marginBottom: '16px' }}>
-            <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
-              Validated Clinical & Diagnostic Synergies
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' }}>
-              {blueprint.peptideSynergy && (
-                <div style={{ padding: '8px 10px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0f172a' }}>
-                    🧬 {blueprint.peptideSynergy.name}
+          {/* Synergies — Single-Line Clickable Rows (Monographs / Catalog Specs) */}
+          {(() => {
+            const synergyList = [
+              blueprint.peptideSynergy && {
+                type: 'peptide',
+                badge: 'Peptide Co-Therapy',
+                icon: '🧬',
+                color: '#4338ca',
+                bg: '#f8faff',
+                border: '#c7d2fe',
+                badgeBg: '#e0e7ff',
+                name: blueprint.peptideSynergy.name,
+                role: blueprint.peptideSynergy.role,
+                url: blueprint.protocolUrl || `/catalog?q=${encodeURIComponent(blueprint.peptideSynergy.name.split(' ')[0] || 'peptide')}`
+              },
+              blueprint.dermocosmeticSynergy && {
+                type: 'colway',
+                badge: 'Native Collagen & ECM',
+                icon: '💧',
+                color: '#047857',
+                bg: '#f9fefb',
+                border: '#a7f3d0',
+                badgeBg: '#d1fae5',
+                name: blueprint.dermocosmeticSynergy.name,
+                role: blueprint.dermocosmeticSynergy.role,
+                url: `/catalog?q=${encodeURIComponent(blueprint.dermocosmeticSynergy.name.toLowerCase().includes('colway') ? 'colway' : blueprint.dermocosmeticSynergy.name)}`
+              },
+              blueprint.diagnosticSynergy && {
+                type: 'diagnostic',
+                badge: 'Biomarker Panel',
+                icon: '🔬',
+                color: '#be185d',
+                bg: '#fdf7f9',
+                border: '#fbcfe8',
+                badgeBg: '#fce7f3',
+                name: blueprint.diagnosticSynergy.name,
+                role: blueprint.diagnosticSynergy.role,
+                url: blueprint.diagnosticSynergy.slug
+                  ? `/p/${blueprint.diagnosticSynergy.slug}`
+                  : `/catalog?q=${encodeURIComponent(blueprint.diagnosticSynergy.name.toLowerCase().includes('bloodo') ? 'bloodo' : blueprint.diagnosticSynergy.name.toLowerCase().includes('eterna') ? 'eterna' : 'diagnostic')}`
+              },
+              blueprint.nutraceuticalSynergy && {
+                type: 'nutraceutical',
+                badge: 'Oral Nutraceutical',
+                icon: '💊',
+                color: '#b45309',
+                bg: '#fffdf5',
+                border: '#fde68a',
+                badgeBg: '#fef3c7',
+                name: blueprint.nutraceuticalSynergy.name,
+                role: blueprint.nutraceuticalSynergy.role,
+                url: blueprint.nutraceuticalSynergy.slug ? `/p/${blueprint.nutraceuticalSynergy.slug}` : '/catalog?q=ultraperson'
+              }
+            ].filter(Boolean);
+
+            if (synergyList.length === 0) return null;
+
+            return (
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Package size={13} style={{ color: '#1a73e8' }} />
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Productos Complementarios de Catálogo y Diagnóstico ({synergyList.length} Referencias Stock)
+                    </span>
                   </div>
-                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
-                    {blueprint.peptideSynergy.role}
-                  </div>
+                  <span style={{ fontSize: '0.68rem', color: '#1a73e8', fontWeight: 600 }}>
+                    Dispensación directa · Clic para ver ficha clínica ↗
+                  </span>
                 </div>
-              )}
-              {blueprint.dermocosmeticSynergy && (
-                <div style={{ padding: '8px 10px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0f172a' }}>
-                    💧 {blueprint.dermocosmeticSynergy.name}
-                  </div>
-                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
-                    {blueprint.dermocosmeticSynergy.role}
-                  </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {synergyList.map((item, sIdx) => (
+                    <a
+                      key={sIdx}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => triggerHaptic('selection')}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '10px',
+                        padding: '8px 12px',
+                        background: item.bg,
+                        border: `1px solid ${item.border}`,
+                        borderRadius: '7px',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        transition: 'all 0.15s ease',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = item.color;
+                        e.currentTarget.style.background = '#ffffff';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = item.border;
+                        e.currentTarget.style.background = item.bg;
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                      title={`Click to open clinical monograph and ordering specs for ${item.name}`}
+                    >
+                      {/* Left: Icon + Category Badge + Name + Role on 1 Line */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                        <span style={{ fontSize: '0.95rem', flexShrink: 0 }}>{item.icon}</span>
+                        <span
+                          style={{
+                            fontSize: '0.64rem',
+                            fontWeight: 700,
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            background: item.badgeBg,
+                            color: item.color,
+                            textTransform: 'uppercase',
+                            flexShrink: 0,
+                            letterSpacing: '0.03em'
+                          }}
+                        >
+                          {item.badge}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '0.76rem',
+                            fontWeight: 700,
+                            color: '#0f172a',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            flexShrink: 0,
+                            maxWidth: '260px'
+                          }}
+                        >
+                          {item.name}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '0.70rem',
+                            color: '#64748b',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            flex: 1
+                          }}
+                        >
+                          · {item.role}
+                        </span>
+                      </div>
+
+                      {/* Right: Explicit Clickable Indicator */}
+                      <div
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          color: item.color,
+                          fontSize: '0.70rem',
+                          fontWeight: 700,
+                          flexShrink: 0,
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          background: item.badgeBg
+                        }}
+                      >
+                        <span>Monograph</span>
+                        <ExternalLink size={11} />
+                      </div>
+                    </a>
+                  ))}
                 </div>
-              )}
-              {blueprint.diagnosticSynergy && (
-                <div style={{ padding: '8px 10px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0f172a' }}>
-                    🔬 {blueprint.diagnosticSynergy.name}
-                  </div>
-                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
-                    {blueprint.diagnosticSynergy.role}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Footer Actions */}
@@ -265,80 +430,62 @@ export default function DoctorBlueprintDossierModal({
             borderTop: '1px solid #e2e8f0',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px',
+            justifyContent: 'flex-end',
+            gap: '10px',
             flexWrap: 'wrap'
           }}
         >
           <button
             type="button"
-            onClick={() => {
-              if (onRequestSample) onRequestSample(blueprint);
-            }}
+            onClick={onClose}
             style={{
               padding: '8px 14px',
-              borderRadius: '6px',
-              border: '1px solid #cbd5e1',
+              borderRadius: '4px',
+              border: '1px solid #dadce0',
               background: '#ffffff',
-              color: '#334155',
+              color: '#3c4043',
               fontSize: '0.78rem',
               fontWeight: 600,
               cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px'
+              transition: 'background 0.15s ease'
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#f8f9fa'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; }}
           >
-            <Package size={14} />
-            <span>Request Clinic Sample</span>
+            Cerrar
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                padding: '8px 14px',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                background: 'transparent',
-                color: '#64748b',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Close
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                onClose();
-                if (onCustomizePrescribe) onCustomizePrescribe(blueprint);
-              }}
-              style={{
-                padding: '9px 18px',
-                borderRadius: '6px',
-                border: 'none',
-                background: '#003666',
-                color: '#ffffff',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: '0 2px 4px rgba(0, 54, 102, 0.2)'
-              }}
-            >
-              <span>Customize & Prescribe for Patient</span>
-              <ArrowRight size={14} />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              onClose();
+              if (onCustomizePrescribe) onCustomizePrescribe(blueprint);
+            }}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '4px',
+              border: 'none',
+              background: '#1a73e8',
+              color: '#ffffff',
+              fontSize: '0.80rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 1px 2px rgba(26, 115, 232, 0.3)',
+              transition: 'background 0.15s ease'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#1557b0'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#1a73e8'; }}
+          >
+            <FlaskConical size={14} />
+            <span>Prescribir Fórmula Magistral (Abrir Recetario)</span>
+            <ArrowRight size={13} />
+          </button>
+        </div>
         </div>
       </div>
-    </div>
   );
 }

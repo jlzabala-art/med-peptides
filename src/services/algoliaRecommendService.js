@@ -22,7 +22,7 @@ const APP_ID = (typeof process !== 'undefined'
   : '') || 'G722EVODUJ';
 const SEARCH_KEY = (typeof process !== 'undefined'
   ? (process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || process.env.VITE_ALGOLIA_SEARCH_KEY)
-  : '') || '609364d5500e57e9547d6e6ab05e04cb';
+  : '') || '609364d52903d7aefa3080d0fe63db2a';
 
 const INDEX_PRODUCTS = 'products';
 const INDEX_PROTOCOLS = 'protocols';
@@ -252,7 +252,7 @@ export async function getFrequentlyPrescribedTogether({
         return filtered;
       }
     }
-  } catch (err) {
+  } catch {
     console.debug('[AlgoliaRecommend] Bought-together ML unavailable, falling back');
   }
 

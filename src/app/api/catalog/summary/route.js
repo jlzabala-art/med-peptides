@@ -69,6 +69,10 @@ export async function buildCatalogSummary(searchParams) {
     const hasSupplierFilter     = supplierParams.length > 0;
     const isStatusDefault = statusParams.length === 0 || (statusParams.length === 1 && statusParams[0] === 'active');
     const hasStatusFilter = statusParams.length > 0 && !isStatusDefault;
+    const hasTimeframeFilter = Boolean(timeframeParam);
+    const hasTagFilter = tagParams.length > 0;
+    const hasPriorityFilter = priorityParams.length > 0;
+    const hasPresentationFilter = presentationParams.length > 0;
 
     const hasActiveFilters =
       catParams.length > 0 || subcatParams.length > 0 || goalParams.length > 0 ||
@@ -78,7 +82,7 @@ export async function buildCatalogSummary(searchParams) {
       hasTagFilter || hasPriorityFilter;
 
     let metaFacets = null;
-    let productsList = []; // Array of { id, ref, data }
+    const productsList = []; // Array of { id, ref, data }
     const variantsByProduct = {};
 
     // Algolia Search (supports medical synonyms e.g. Ozempic -> Semaglutide, Mounjaro -> Tirzepatide)
@@ -145,7 +149,7 @@ export async function buildCatalogSummary(searchParams) {
     const useOptimizedPaging = !hasActiveFilters && Boolean(metaFacets?.totals?.activeProducts);
 
     // ── 3. FETCH CATALOG PRODUCTS (Strict Limit & Embedded-First Variants) ───
-    const fetchLimit = useOptimizedPaging ? (offsetParam + limitParam) : 500;
+    const fetchLimit = useOptimizedPaging ? (offsetParam + limitParam) : 1000;
 
     let productsSnap;
     try {
@@ -174,8 +178,9 @@ export async function buildCatalogSummary(searchParams) {
               if (dSnap.exists) return { id: dSnap.id, ref: dSnap.ref, data: dSnap.data() };
               const sSnap = await adminDb.collection('products').where('slug', '==', mid).limit(1).get();
               if (!sSnap.empty) return { id: sSnap.docs[0].id, ref: sSnap.docs[0].ref, data: sSnap.docs[0].data() };
-            } catch {}
-            return null;
+            } catch {
+              // ignore fetch failure for missing product
+            }
           })
         );
         fetchedMissing.filter(Boolean).forEach(p => {
@@ -231,16 +236,16 @@ export async function buildCatalogSummary(searchParams) {
 
     // ── 6. AGGREGATE INTO CANONICAL PRODUCT GROUPS ───────────────────────────
     const groupsMap        = new Map();
-    let kpiCategorySet     = new Set();
-    let kpiSupplierSet     = new Set();
-    let kpiSupplierNameMap = new Map();
+    const kpiCategorySet     = new Set();
+    const kpiSupplierSet     = new Set();
+    const kpiSupplierNameMap = new Map();
     let kpiTotalCanonical  = 0;
     let kpiTotalVariants   = 0;
     let kpiApiProducts     = 0;
     let kpiApiVariants     = 0;
     let kpiFinishedProducts = 0;
     let kpiFinishedVariants = 0;
-    let kpiFormatCounts    = { vial: 0, pen: 0, spray: 0, oral: 0, topical: 0 };
+    const kpiFormatCounts    = { vial: 0, pen: 0, spray: 0, oral: 0, topical: 0 };
 
     productsList.forEach(item => {
       const data  = item.data;
@@ -387,17 +392,42 @@ export async function buildCatalogSummary(searchParams) {
         if (!matchesCat) return;
       }
 
-      // ProductType filter (supports availableTypes[] and primaryType)
+      // ProductType filter (supports availableTypes[], primaryType, and dual/bulk API formats)
       if (pTypeParams.length > 0) {
-        const productAvailableTypes = Array.isArray(data.availableTypes) && data.availableTypes.length > 0
+        const rawTypes = Array.isArray(data.availableTypes) && data.availableTypes.length > 0
           ? data.availableTypes
           : [data.primaryType || data.productType || data.type || 'finished_product'];
 
+        const normType = (t) => {
+          const low = String(t || '').toLowerCase();
+          if (['raw_api', 'api_raw_material', 'bulk_api', 'api_peptide', 'api_peptides'].includes(low)) return 'raw_material';
+          return low;
+        };
+
+        const productAvailableTypes = rawTypes.map(normType);
+        if (data.primaryType === 'dual' || data.productType === 'dual' || data.isHybrid) {
+          productAvailableTypes.push('finished_product', 'raw_material');
+        }
+
+        const cat = String(data.category || data.categoryId || '').toLowerCase();
+        if (cat === 'raw_material' || cat === 'api_raw_materials' || cat === 'api_peptide') {
+          productAvailableTypes.push('raw_material');
+        }
+
+        if (data.format === 'bulk_api') {
+          productAvailableTypes.push('raw_material');
+        }
+
         const matchesPType = pTypeParams.some(pt => {
-          if (pt === 'api_raw_material' || pt === 'raw_material') {
-            return productAvailableTypes.includes('raw_material') || productAvailableTypes.includes('api_raw_material');
+          const normPt = normType(pt);
+          if (normPt === 'multi_type' || normPt === 'dual') {
+            return productAvailableTypes.length >= 2 || data.isHybrid || data.productType === 'dual' || data.primaryType === 'dual';
           }
-          return productAvailableTypes.includes(pt);
+          if (normPt === 'raw_material') {
+            return productAvailableTypes.includes('raw_material') ||
+              (Array.isArray(variantsByProduct[docId]) && variantsByProduct[docId].some(v => v.format === 'bulk_api' || v.type === 'raw_material' || v.type === 'raw_api' || String(v.presentation || '').toLowerCase().includes('api')));
+          }
+          return productAvailableTypes.includes(normPt) || productAvailableTypes.includes(pt);
         });
         if (!matchesPType) return;
       }
@@ -420,21 +450,28 @@ export async function buildCatalogSummary(searchParams) {
           data.supplierId,
           data.supplier,
           ...(Array.isArray(data.supplierIds) ? data.supplierIds : []),
+          ...(Array.isArray(data.suppliers) ? data.suppliers : []).flatMap(s => typeof s === 'object' && s !== null ? [s.id, s.name] : [s]),
           ...productVariants.map(v => v.supplierId || v.supplier)
         ].filter(Boolean).map(s => String(s).toLowerCase().replace(/^supplier-/, ''));
 
         const matchedSupplier = supplierParams.some(sp => {
           const cleanSp = String(sp).toLowerCase().replace(/^supplier-/, '');
-          return itemSuppliers.includes(cleanSp);
+          return itemSuppliers.some(is => is.includes(cleanSp) || cleanSp.includes(is));
         });
 
         if (!matchedSupplier) return;
 
         if (productVariants.length > 0) {
-          productVariants = productVariants.filter(v => {
+          const filteredVars = productVariants.filter(v => {
             const vSup = String(v.supplierId || v.supplier || '').toLowerCase().replace(/^supplier-/, '');
-            return supplierParams.some(sp => String(sp).toLowerCase().replace(/^supplier-/, '') === vSup);
+            return supplierParams.some(sp => {
+              const cleanSp = String(sp).toLowerCase().replace(/^supplier-/, '');
+              return vSup && (vSup.includes(cleanSp) || cleanSp.includes(vSup));
+            });
           });
+          if (filteredVars.length > 0) {
+            productVariants = filteredVars;
+          }
         }
       }
 

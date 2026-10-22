@@ -20,7 +20,7 @@ const APP_ID = (typeof process !== 'undefined'
   : '') || 'G722EVODUJ';
 const SEARCH_KEY = (typeof process !== 'undefined'
   ? (process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || process.env.VITE_ALGOLIA_SEARCH_KEY)
-  : '') || '609364d5500e57e9547d6e6ab05e04cb';
+  : '') || '609364d52903d7aefa3080d0fe63db2a';
 const INDEX_COMPETITORS = 'competitor_prices';
 
 let client = null;
@@ -224,10 +224,10 @@ export async function getCompetitorBenchmark({
   if (cached) return cached;
 
   let competitors = [];
-  let avgPrice = 0;
-  let minPrice = 0;
-  let maxPrice = 0;
-  let avgPpm = 0;
+  let avgPrice;
+  let minPrice;
+  let maxPrice;
+  let avgPpm;
 
   // 1. Try querying Algolia index `competitor_prices`
   if (client) {
@@ -470,10 +470,7 @@ export async function getVariantCompetitorBenchmark({
 
     // Compare our price (clinic / wholesale / retail) vs Manufacturer Web Retail MSRP
     const marketDeltaPercent = Number((((manufacturerMSRP - effectivePrice) / manufacturerMSRP) * 100).toFixed(1));
-    let status = 'competitive';
-    if (marketDeltaPercent >= 5) status = 'cheaper'; // We are cheaper than official manufacturer web retail!
-    else if (marketDeltaPercent <= -5) status = 'higher'; // Our price exceeds manufacturer web MSRP
-    else status = 'competitive'; // Aligned with web MSRP
+    const status = marketDeltaPercent >= 5 ? 'cheaper' : marketDeltaPercent <= -5 ? 'higher' : 'competitive';
 
     const variantLabel = variant.dosage || variant.presentation || '1 Blood Test Kit (DBS)';
 
@@ -529,7 +526,7 @@ export async function getVariantCompetitorBenchmark({
   const scaledMaxPrice = Number((baseBenchmark.maxPrice * (dosageMg === 5 ? 1 : scaleFactor)).toFixed(2));
   const scaledAvgPpm = dosageMg > 0 ? Number((scaledAvgPrice / dosageMg).toFixed(2)) : 0;
 
-  const scaledCompetitors = (baseBenchmark.competitors || []).map((comp, idx) => {
+  const scaledCompetitors = (baseBenchmark.competitors || []).map((comp) => {
     const compPrice = Number((comp.price * (dosageMg === 5 ? 1 : scaleFactor)).toFixed(2));
     const compPpm = dosageMg > 0 ? Number((compPrice / dosageMg).toFixed(2)) : 0;
     return {

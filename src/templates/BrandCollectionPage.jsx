@@ -17,6 +17,7 @@ import PublicInstitutionalInquiryDrawer from '../components/shared/PublicInstitu
 import PublicAtlasAIDrawer from '../components/shared/PublicAtlasAIDrawer';
 import ColwayTrichologyStemCellShowcase from '../components/product/ColwayTrichologyStemCellShowcase';
 import ClinicalPortfolioSuiteSwitcher from '../components/navigation/ClinicalPortfolioSuiteSwitcher';
+import GenericCollectionSidebar from '../components/diagnostic/GenericCollectionSidebar';
 import ProductTechnicalDetailsPanel from '../components/collection/ProductTechnicalDetailsPanel';
 import CopyableId from '../components/ui/CopyableId';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -147,6 +148,30 @@ const BRAND_CONFIGS = {
       { id: 'metabolic', label: 'Omega Fatty Acids & Inflammatory Balance' },
       { id: 'detox', label: 'Pharmacogenetics & Metabolizer Detox' }
     ]
+  },
+  peptides: {
+    name: 'Peptide Therapeutics',
+    title: 'Analytical Research Peptides & Compounding Monographs',
+    tagline: 'High-Purity Reference Standards & Clinical Monographs',
+    badge: 'Analytical Peptides & Compounding Monographs',
+    badgeColor: '#003666',
+    subtitle: 'Comprehensive monograph catalog of verified analytical research peptides and active compounding APIs (≥99.0% HPLC purity, certified mass spectrometry, endotoxin-tested).',
+    heroImage: '/images/og-peptides.png',
+    accentColor: '#003666',
+    kpis: [
+      { label: 'Analytical Purity', value: '≥99.0% HPLC', sub: 'Certified Lot Analysis & Mass Spec', icon: ShieldCheck, color: '#16a34a' },
+      { label: 'Compound Classes', value: 'Peptides & Secretagogues', sub: 'Bioregulators, Incretins & Tropics', icon: FlaskConical, color: '#003666' },
+      { label: 'Form Factor', value: 'Lyophilized Cake', sub: 'Sealed Glass Vials with Septum', icon: Award, color: '#2563eb' },
+      { label: 'Monograph Specs', value: 'Full COA Included', sub: 'Sequence, MW & Net Peptide Content', icon: FileText, color: '#7c3aed' }
+    ],
+    categories: [
+      { id: 'all', label: 'All Peptides' },
+      { id: 'tissue-repair', label: 'Tissue Repair & Healing' },
+      { id: 'metabolic', label: 'Metabolic & GLP-1' },
+      { id: 'cellular', label: 'Cellular & Mitochondrial' },
+      { id: 'cognitive', label: 'Neuro & Cognitive' },
+      { id: 'cosmetic', label: 'Dermal & Collagen' }
+    ]
   }
 };
 
@@ -156,6 +181,10 @@ function resolveBrandProductImage(product, brandSlug) {
   if (product.image_url) return product.image_url;
   if (product.imageUrl) return product.imageUrl;
   if (product.image) return product.image;
+
+  if (brandSlug === 'peptides') {
+    return '/images/og-peptides.png';
+  }
 
   const id = (product.id || '').toLowerCase();
   const name = (product.name || product.title || '').toLowerCase();
@@ -241,8 +270,17 @@ function resolveProductDatasheet(product, brandSlug) {
 
 function resolveProductRegulatoryBadges(product, brandSlug) {
   if (brandSlug !== 'colway') {
+    const badgeLabel = brandSlug === 'eterna'
+      ? 'CAP / CLIA'
+      : (brandSlug === 'ultraperson' || brandSlug === 'ultraman')
+      ? 'EU GMP'
+      : brandSlug === 'peptides'
+      ? 'HPLC ≥99.0%'
+      : brandSlug === 'teletest'
+      ? 'ISO 17025'
+      : 'CE-IVDR';
     return [
-      { label: brandSlug === 'eterna' ? 'CAP / CLIA' : brandSlug === 'ultraperson' ? 'EU GMP' : 'CE-IVDR', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'Laboratory Accreditation' }
+      { label: badgeLabel, color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'Laboratory & Quality Standard' }
     ];
   }
 
@@ -287,16 +325,13 @@ export default function BrandCollectionPage({
   const brandCategories = useMemo(() => {
     return (config.categories || []).map((cat) => {
       const isAll = cat.id === 'all';
-      let count = 0;
-      if (isAll) {
-        count = products.length;
-      } else {
-        const catId = cat.id.toLowerCase();
-        count = products.filter(p => {
-          const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''} ${p.description || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
-          return str.includes(catId);
-        }).length;
-      }
+      const catId = cat.id.toLowerCase();
+      const count = isAll
+        ? products.length
+        : products.filter(p => {
+            const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''} ${p.description || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
+            return str.includes(catId);
+          }).length;
       return {
         id: cat.id,
         label: cat.label,
@@ -730,13 +765,13 @@ export default function BrandCollectionPage({
             {/* Architecture Metadata Badges (GCP Standard) */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '0.25rem' }}>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#334155', background: '#f8fafc', border: '1px solid #cbd5e1', padding: '3px 9px', borderRadius: '4px' }}>
-                🧬 {filteredProducts.length} {brandSlug === 'colway' ? 'Formulations' : 'Items'}
+                🧬 {filteredProducts.length} {brandSlug === 'colway' ? 'Formulations' : brandSlug === 'peptides' ? 'Peptides' : 'Items'}
               </span>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: config.accentColor, background: `${config.accentColor}10`, border: `1px solid ${config.accentColor}30`, padding: '3px 9px', borderRadius: '4px' }}>
-                {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : '🏛️ LifeLab1 Diagnostics'}
+                {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : brandSlug === 'peptides' ? '🏛️ Atlas Certified Standards' : brandSlug === 'teletest' ? '🏛️ Generalitat de Catalunya E08750211' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🏛️ PharmaPolis Labs' : '🏛️ LifeLab1 Diagnostics'}
               </span>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '3px 9px', borderRadius: '4px' }}>
-                {brandSlug === 'colway' ? '🛡️ ISO 22716 & EU CPNP Compliant' : '🛡️ CE-IVDR & ISO 15189'}
+                {brandSlug === 'colway' ? '🛡️ ISO 22716 & EU CPNP Compliant' : brandSlug === 'peptides' ? '🛡️ HPLC ≥99.0% & Endotoxin Tested' : brandSlug === 'teletest' ? '🛡️ ISO 17025 Accredited' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🛡️ EU GMP Certified' : '🛡️ CE-IVDR & ISO 15189'}
               </span>
               {brandSlug === 'colway' && (
                 <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '3px 9px', borderRadius: '4px' }}>
@@ -744,28 +779,6 @@ export default function BrandCollectionPage({
                 </span>
               )}
             </div>
-
-            {/* Official Complete Collection Showcase Hero Banner */}
-            {brandSlug === 'colway' && (
-              <div style={{
-                marginTop: '1.25rem',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                boxShadow: '0 4px 20px rgba(15, 23, 42, 0.06)',
-                border: '1px solid #e2e8f0',
-                background: '#ffffff'
-              }}>
-                <img
-                  src="/images/products/colway/colway-dermatology-clinic-hero-v2.jpg"
-                  alt="Colway® Complete Cellular Dermocosmetics & Nutricosmetics Collection"
-                  style={{
-                    width: '100%',
-                    height: 'auto',
-                    display: 'block'
-                  }}
-                />
-              </div>
-            )}
           </div>
         </div>
       </header>
@@ -851,15 +864,7 @@ export default function BrandCollectionPage({
         </div>
       </section>
 
-      {/* ── 5. GRAPHIC OVERVIEW: HOW RESULTS ARE OBTAINED & LAB REPORT MOCKUP ── */}
-      {brandSlug === 'bloodo' && (
-        <section style={{ maxWidth: '1440px', margin: '0 auto 2.5rem', padding: '0 2rem' }}>
-          <DiagnosticReportVisualPreview lang={lang} activeTest="nad" />
-        </section>
-      )}
-
-
-      {/* ── 6. MAIN WORKSPACE (Left Sidebar 320px + Right Main Content) ── */}
+      {/* ── 5. MAIN WORKSPACE (Left Sidebar 320px + Right Main Content) ── */}
       <section style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(1rem, 3vw, 2rem) 5rem' }}>
         <div className="gcp-collection-workspace">
           {/* ── LEFT COLUMN: STICKY DEDICATED SIDEBAR PER BRAND ── */}
@@ -886,11 +891,19 @@ export default function BrandCollectionPage({
               }}
             />
           ) : (
-            <aside className="gcp-collection-sidebar" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.5rem', position: 'sticky', top: '90px' }}>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>{config.name}</h4>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 1rem 0' }}>{config.subtitle}</p>
-              <div style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>{filteredProducts.length} items in catalog</div>
-            </aside>
+            <GenericCollectionSidebar
+              brandSlug={brandSlug}
+              config={config}
+              categories={brandCategories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={(catId) => {
+                setSelectedCategory(catId);
+                const el = document.getElementById('colway-main-content');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              totalCount={products.length}
+              onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+            />
           )}
 
           {/* ── RIGHT COLUMN: MAIN CONTENT (DIRECT UNIFIED CATALOG & TREATMENT LINES) ── */}
@@ -1026,36 +1039,15 @@ export default function BrandCollectionPage({
               gap: '1rem',
               boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
             }}>
-              {/* Row 1: Search / Category Heading + View Toggle */}
+              {/* Row 1: Search Input (Google Cloud Standard - Regla #7) + Actions */}
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-                {(brandSlug === 'colway' || brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
-                      {brandSlug === 'colway'
-                        ? (isEs ? 'Catálogo de Formulaciones Colway®' : 'Colway® Formulations Catalog')
-                        : (isEs ? 'Fórmulas Clínicas UltraPerson™' : 'UltraPerson™ Clinical Formulations')}
-                    </span>
-                    <span style={{
-                      fontSize: '0.74rem',
-                      fontWeight: 650,
-                      color: '#0d9488',
-                      background: '#f0fdfa',
-                      border: '1px solid #a7f3d0',
-                      padding: '3px 10px',
-                      borderRadius: '9999px'
-                    }}>
-                      {selectedCategory === 'all'
-                        ? (isEs ? 'Todas las Categorías' : 'All Categories')
-                        : selectedCategory}
-                    </span>
-                  </div>
-                ) : (
-                  <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '480px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 320px', maxWidth: '540px' }}>
+                  <div style={{ position: 'relative', width: '100%' }}>
                     <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
                     <input
                       id="catalog-search-input"
                       type="text"
-                      placeholder={isEs ? `Buscar en ${config.name} (ej. NAD+, cortisol, DBS)... ⌘K` : `Search in ${config.name} (e.g. NAD+, cortisol)... ⌘K`}
+                      placeholder={`Search in ${config.name} (e.g. ${brandSlug === 'colway' ? 'collagen, cream' : brandSlug === 'peptides' ? 'BPC-157, GHK-Cu' : brandSlug === 'teletest' ? 'HLA, metals' : 'NAD+, cortisol'})... ⌘K`}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       style={{
@@ -1078,7 +1070,31 @@ export default function BrandCollectionPage({
                       </button>
                     )}
                   </div>
-                )}
+
+                  {selectedCategory !== 'all' && (
+                    <span style={{
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      color: config.accentColor || '#003666',
+                      background: `${config.accentColor || '#003666'}15`,
+                      border: `1px solid ${config.accentColor || '#003666'}30`,
+                      padding: '4px 10px',
+                      borderRadius: '9999px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      <span>{selectedCategory}</span>
+                      <button
+                        onClick={() => setSelectedCategory('all')}
+                        style={{ background: 'none', border: 'none', color: config.accentColor || '#003666', cursor: 'pointer', padding: 0, fontSize: '0.8rem', lineHeight: 1 }}
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  )}
+                </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
@@ -1547,7 +1563,7 @@ export default function BrandCollectionPage({
                               : product.category?.toLowerCase().includes('nutricosmetic') || product.slug?.includes('colvita')
                               ? 'Bioactive Nutricosmetic'
                               : 'Native Bio-Collagen'
-                          ) : brandSlug === 'eterna' ? 'Genomic Multi-Omics' : brandSlug === 'ultraperson' ? 'Longevity Formula' : 'Laboratory Diagnostic'}
+                          ) : brandSlug === 'eterna' ? 'Genomic Multi-Omics' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? 'Longevity Formula' : brandSlug === 'peptides' ? 'Peptide Monograph' : brandSlug === 'teletest' ? 'Clinical Genomics' : 'Laboratory Diagnostic'}
                         </div>
                       </div>
 
@@ -1558,7 +1574,7 @@ export default function BrandCollectionPage({
                             ID: <CopyableId value={product.id} maxLength={18} />
                           </span>
                           <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <CheckCircle2 size={12} /> {brandSlug === 'eterna' ? 'Eurofins Genomics' : brandSlug === 'ultraperson' ? 'PharmaPolis Labs' : brandSlug === 'colway' ? 'Colway Dermocosmetics' : 'LifeLab1'}
+                            <CheckCircle2 size={12} /> {brandSlug === 'eterna' ? 'Eurofins Genomics' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? 'PharmaPolis Labs' : brandSlug === 'colway' ? 'Colway Dermocosmetics' : brandSlug === 'peptides' ? 'Atlas Analytical' : brandSlug === 'teletest' ? 'TeleTest Reference Lab' : 'LifeLab1'}
                           </span>
                         </div>
 
@@ -1840,7 +1856,7 @@ export default function BrandCollectionPage({
                 <EternaCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
               ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? (
                 <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
-              ) : (
+              ) : brandSlug === 'colway' ? (
                 <ColwayCollectionSidebar
                   lang={lang}
                   onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }}
@@ -1857,6 +1873,21 @@ export default function BrandCollectionPage({
                     const el = document.getElementById('colway-main-content');
                     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }}
+                />
+              ) : (
+                <GenericCollectionSidebar
+                  brandSlug={brandSlug}
+                  config={config}
+                  categories={brandCategories}
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={(catId) => {
+                    setSelectedCategory(catId);
+                    setIsMobileSidebarOpen(false);
+                    const el = document.getElementById('colway-main-content');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  totalCount={products.length}
+                  onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }}
                 />
               )}
             </div>

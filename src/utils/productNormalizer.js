@@ -175,12 +175,64 @@ export function extractProductPresentation(product) {
  */
 export function getProductAvailableTypes(product) {
   if (!product) return ['finished_product'];
+  const types = new Set();
+
+  const normalizeType = (t) => {
+    if (!t) return null;
+    const low = String(t).toLowerCase();
+    if (low === 'raw_api' || low === 'api_raw_material' || low === 'bulk_api' || low === 'api_peptide' || low === 'api_peptides') {
+      return 'raw_material';
+    }
+    return t;
+  };
+
   if (Array.isArray(product.availableTypes) && product.availableTypes.length > 0) {
-    return Array.from(new Set(product.availableTypes.filter(Boolean)));
+    product.availableTypes.forEach(t => {
+      const norm = normalizeType(t);
+      if (norm) types.add(norm);
+    });
   }
-  const primary = product.primaryType || product.type || product.productType;
-  if (primary) return [primary];
-  return [inferProductType(product)];
+
+  const rawPrimary = product.primaryType || product.type || product.productType;
+  const primary = normalizeType(rawPrimary);
+  if (primary) types.add(primary);
+
+  if (primary === 'dual' || product.isHybrid || rawPrimary === 'dual') {
+    types.add('finished_product');
+    types.add('raw_material');
+  }
+
+  const variants = product.variants || [];
+  if (variants.length > 0) {
+    variants.forEach(v => {
+      const pStr = String(v.presentation || v.presentationName || v.format || '').toLowerCase();
+      const isRaw = v.unitOfMeasure === 'g' || 
+                    v.unitOfMeasure === 'kg' || 
+                    v.supplierPricing?.unitOfMeasure === 'g' || 
+                    pStr.includes('bulk') || 
+                    pStr.includes('api') || 
+                    pStr.includes('powder') || 
+                    v.type === 'raw_material' ||
+                    v.type === 'raw_api' ||
+                    v.format === 'bulk_api';
+      const isFin = v.unitOfMeasure === 'unit' ||
+                    v.unitOfMeasure === 'kit' ||
+                    pStr.includes('pen') ||
+                    pStr.includes('vial') ||
+                    pStr.includes('spray') ||
+                    pStr.includes('capsule') ||
+                    v.type === 'finished_product' ||
+                    v.format === 'vial';
+      if (isRaw) types.add('raw_material');
+      if (isFin) types.add('finished_product');
+    });
+  }
+
+  if (types.size === 0) {
+    types.add(inferProductType(product));
+  }
+
+  return Array.from(types);
 }
 
 /**
@@ -189,9 +241,21 @@ export function getProductAvailableTypes(product) {
  */
 export function inferProductType(product) {
   if (!product) return 'finished_product';
-  if (product.primaryType) return product.primaryType;
-  if (product.type && product.type !== 'dual') return product.type;
-  if (product.productType && product.productType !== 'dual') return product.productType;
+  if (product.primaryType) {
+    const pt = String(product.primaryType).toLowerCase();
+    if (pt === 'raw_api' || pt === 'api_raw_material' || pt === 'bulk_api' || pt === 'api_peptide') return 'raw_material';
+    return product.primaryType;
+  }
+  if (product.type && product.type !== 'dual') {
+    const t = String(product.type).toLowerCase();
+    if (t === 'raw_api' || t === 'api_raw_material' || t === 'bulk_api' || t === 'api_peptide') return 'raw_material';
+    return product.type;
+  }
+  if (product.productType && product.productType !== 'dual') {
+    const pt = String(product.productType).toLowerCase();
+    if (pt === 'raw_api' || pt === 'api_raw_material' || pt === 'bulk_api' || pt === 'api_peptide') return 'raw_material';
+    return product.productType;
+  }
   if (product.isHybrid || product.productType === 'dual') return 'dual';
 
   // Check variants if available to detect dual / multi nature

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { liteClient as algoliasearch } from 'algoliasearch/lite';
 
 const APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'G722EVODUJ';
-const SEARCH_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || '609364d5500e57e9547d6e6ab05e04cb';
+const SEARCH_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || '609364d52903d7aefa3080d0fe63db2a';
 
 let _client = null;
 function getClient() {
@@ -63,10 +63,10 @@ export function getAlgoliaHighlight(hit, attribute, fallback = '') {
  */
 export function useAlgoliaSearch(arg1, arg2, arg3 = {}, arg4 = 300) {
   // Normalize arguments between Positional vs Object format
-  let indexName = '';
-  let query = '';
-  let searchParams = {};
-  let debounce = 300;
+  let indexName;
+  let query;
+  let searchParams;
+  let debounce;
 
   if (typeof arg1 === 'object' && arg1 !== null) {
     indexName = arg1.indexName || arg1.collectionName || '';
@@ -108,6 +108,7 @@ export function useAlgoliaSearch(arg1, arg2, arg3 = {}, arg4 = 300) {
 
   const isAlgoliaActive = Boolean(APP_ID && SEARCH_KEY);
   const { alwaysFetch, hitsPerPage = 50, ...algoliaParams } = searchParams;
+  const algoliaParamsSerialized = JSON.stringify(algoliaParams);
 
   const search = useCallback(
     async (q, pageNum = 0, isLoadMore = false) => {
@@ -120,7 +121,7 @@ export function useAlgoliaSearch(arg1, arg2, arg3 = {}, arg4 = 300) {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const cacheKey = `${indexName}:${q}:${pageNum}:${hitsPerPage}:${JSON.stringify(algoliaParams)}`;
+      const cacheKey = `${indexName}:${q}:${pageNum}:${hitsPerPage}:${algoliaParamsSerialized}`;
       const cached = getCachedResult(cacheKey);
 
       if (cached && !isLoadMore) {
@@ -183,7 +184,7 @@ export function useAlgoliaSearch(arg1, arg2, arg3 = {}, arg4 = 300) {
         }
       }
     },
-    [indexName, hitsPerPage, JSON.stringify(algoliaParams)]
+    [indexName, hitsPerPage, algoliaParamsSerialized]
   );
 
   const loadMore = useCallback(() => {
@@ -243,11 +244,12 @@ export function useAlgoliaFacets(indexName, facetFields = []) {
   const [facets, setFacets] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const facetFieldsKey = Array.isArray(facetFields) ? facetFields.join(',') : '';
 
   useEffect(() => {
     let isMounted = true;
     async function fetchFacets() {
-      if (!indexName || facetFields.length === 0) {
+      if (!indexName || !facetFieldsKey) {
         setLoading(false);
         return;
       }
@@ -258,17 +260,18 @@ export function useAlgoliaFacets(indexName, facetFields = []) {
           setLoading(false);
           return;
         }
+        const fields = facetFieldsKey.split(',').filter(Boolean);
         const { results } = await client.search([{
           indexName,
           query: '',
-          facets: facetFields,
+          facets: fields,
           hitsPerPage: 0,
         }]);
 
         if (isMounted && results && results[0]) {
           const returnedFacets = results[0].facets;
           const formattedFacets = {};
-          for (const field of facetFields) {
+          for (const field of fields) {
             formattedFacets[field] = [];
             if (returnedFacets && returnedFacets[field]) {
               formattedFacets[field] = Object.entries(returnedFacets[field])
@@ -287,7 +290,7 @@ export function useAlgoliaFacets(indexName, facetFields = []) {
     }
     fetchFacets();
     return () => { isMounted = false; };
-  }, [indexName, facetFields.join(',')]);
+  }, [indexName, facetFieldsKey]);
 
   return { facets, loading, error };
 }

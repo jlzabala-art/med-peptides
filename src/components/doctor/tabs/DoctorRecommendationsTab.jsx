@@ -15,7 +15,9 @@ import {
   ShieldCheck,
   MessageCircle,
   Layers,
-  CheckCircle2
+  CheckCircle2,
+  Package,
+  FileText
 } from 'lucide-react';
 import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
 import {
@@ -54,6 +56,7 @@ export default function DoctorRecommendationsTab({
   onPrescribeBlueprint,
   onRequestSampleWhatsApp,
   onProfileEnriched,
+  onOpenDossier,
   triggerHaptic
 }) {
   const hasPrescriptions = Array.isArray(allPrescriptions) && allPrescriptions.length > 0;
@@ -642,429 +645,737 @@ export default function DoctorRecommendationsTab({
           </div>
 
           {/* Specialty Blueprints Cards Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-            {blueprintsForSelectedSpecialty.map((bp) => (
-              <div
-                key={bp.id}
-                style={{
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '10px',
-                  background: '#ffffff',
-                  overflow: 'hidden',
-                  boxShadow: '0 2px 6px rgba(15, 23, 42, 0.04)'
-                }}
-              >
-                {/* Card Top Banner */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+            {blueprintsForSelectedSpecialty.map((bp) => {
+              const synergyItems = [
+                bp.peptideSynergy && {
+                  type: 'peptide',
+                  badge: 'Péptido Bioactivo de Catálogo',
+                  icon: '🧬',
+                  color: '#4338ca',
+                  bg: '#f8faff',
+                  border: '#c7d2fe',
+                  badgeBg: '#e0e7ff',
+                  name: bp.peptideSynergy.name,
+                  role: bp.peptideSynergy.role,
+                  url: bp.protocolUrl || '/collection/peptides'
+                },
+                bp.dermocosmeticSynergy && {
+                  type: 'colway',
+                  badge: 'Cosmecéutica de Catálogo (Colway®)',
+                  icon: '🛡️',
+                  color: '#047857',
+                  bg: '#f9fefb',
+                  border: '#a7f3d0',
+                  badgeBg: '#d1fae5',
+                  name: bp.dermocosmeticSynergy.name,
+                  role: bp.dermocosmeticSynergy.role,
+                  url: '/collection/colway'
+                },
+                bp.nutraceuticalSynergy && {
+                  type: 'nutraceutical',
+                  badge: 'Nutracéutico Oral de Catálogo (UltraPerson™)',
+                  icon: '💊',
+                  color: '#b45309',
+                  bg: '#fffdf5',
+                  border: '#fde68a',
+                  badgeBg: '#fef3c7',
+                  name: bp.nutraceuticalSynergy.name,
+                  role: bp.nutraceuticalSynergy.role,
+                  url: bp.nutraceuticalSynergy.slug ? `/p/${bp.nutraceuticalSynergy.slug}` : '/collection/ultraman'
+                },
+                bp.diagnosticSynergy && {
+                  type: 'diagnostic',
+                  badge: 'Panel Diagnóstico de Catálogo',
+                  icon: '🔬',
+                  color: '#be185d',
+                  bg: '#fdf7f9',
+                  border: '#fbcfe8',
+                  badgeBg: '#fce7f3',
+                  name: bp.diagnosticSynergy.name,
+                  role: bp.diagnosticSynergy.role,
+                  url: bp.diagnosticSynergy.slug
+                    ? `/p/${bp.diagnosticSynergy.slug}`
+                    : (bp.diagnosticSynergy.name?.toLowerCase().includes('eterna')
+                        ? '/collection/eterna'
+                        : bp.diagnosticSynergy.name?.toLowerCase().includes('teletest')
+                        ? '/collection/teletest'
+                        : '/collection/bloodo')
+                }
+              ].filter(Boolean);
+
+              return (
                 <div
+                  key={bp.id}
                   style={{
-                    padding: '14px 20px',
-                    background: '#f8fafc',
-                    borderBottom: '1px solid #e2e8f0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '10px'
+                    border: '1px solid #dadce0',
+                    borderRadius: '8px',
+                    background: '#ffffff',
+                    overflow: 'hidden',
+                    boxShadow: '0 1px 3px rgba(60,64,67,0.12), 0 1px 2px rgba(60,64,67,0.08)',
+                    transition: 'box-shadow 0.2s ease'
                   }}
                 >
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                      <span
-                        style={{
-                          fontSize: '0.68rem',
-                          fontWeight: 800,
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          background: '#003666',
-                          color: '#ffffff',
-                          letterSpacing: '0.04em'
-                        }}
-                      >
-                        {bp.badge}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: '0.70rem',
-                          fontWeight: 700,
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          background: '#e0f2fe',
-                          color: '#0369a1',
-                          border: '1px solid #bae6fd'
-                        }}
-                      >
-                        {bp.specialtyLabel}
-                      </span>
-                      <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
-                        Target: <strong>{bp.targetPatients}</strong>
-                      </span>
-                    </div>
-                    <h3 style={{ margin: 0, fontSize: '1.04rem', fontWeight: 800, color: '#0f172a' }}>
-                      {bp.clinicalProcedure}
-                    </h3>
-                  </div>
-
-                  {/* Direct 1-Click Conversion CTAs */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    {onPrescribeBlueprint && (
-                      <button
-                        type="button"
-                        onClick={() => onPrescribeBlueprint(bp)}
-                        style={{
-                          height: '34px',
-                          padding: '0 14px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          background: 'linear-gradient(135deg, #003666 0%, #1a73e8 100%)',
-                          color: '#ffffff',
-                          fontSize: '0.76rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          boxShadow: '0 2px 5px rgba(26,115,232,0.25)'
-                        }}
-                        title="Open Prescription Builder pre-populated with this specialty formula"
-                      >
-                        <Sparkles size={13} />
-                        <span>Prescribe This Blueprint (1-Click)</span>
-                      </button>
-                    )}
-
-                    {onRequestSampleWhatsApp && (
-                      <button
-                        type="button"
-                        onClick={() => onRequestSampleWhatsApp(bp)}
-                        style={{
-                          height: '34px',
-                          padding: '0 12px',
-                          borderRadius: '6px',
-                          border: '1px solid #16a34a',
-                          background: '#f0fdf4',
-                          color: '#15803d',
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px'
-                        }}
-                      >
-                        <MessageCircle size={13} />
-                        <span>Request Clinic Sample / Dossier</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Card Body */}
-                <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#334155', lineHeight: 1.55 }}>
-                    <strong>Clinical Rationale for Your Specialty:</strong> {bp.clinicalRationale}
-                  </p>
-
-                  {/* 1. Primary Magistral Compounding Formulation Box */}
-                  {bp.compoundingFormula && (
-                    <div
-                      style={{
-                        background: '#f8fafc',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '8px',
-                        padding: '12px 16px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <Pill size={15} color="#003666" />
-                          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase' }}>
-                             Ready-to-Prescribe Magistral Formula: {bp.compoundingFormula.treatmentTitle}
-                          </span>
-                        </div>
-                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', background: '#ffffff', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: '4px' }}>
-                          Vehicle: {bp.compoundingFormula.dispensingForm} ({bp.compoundingFormula.volume})
+                  {/* ── CARD TOP HEADER (GOOGLE CLOUD UX HIERARCHY) ── */}
+                  <div
+                    style={{
+                      padding: '16px 20px',
+                      background: '#ffffff',
+                      borderBottom: '1px solid #e8eaed',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '12px'
+                    }}
+                  >
+                    <div style={{ flex: '1 1 500px', minWidth: '280px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: '#003666',
+                            color: '#ffffff',
+                            letterSpacing: '0.03em',
+                            textTransform: 'uppercase'
+                          }}
+                        >
+                          {bp.badge || 'Protocolo Clínico Especializado'}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '0.70rem',
+                            fontWeight: 600,
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: '#e8f0fe',
+                            color: '#1a73e8',
+                            border: '1px solid #d2e3fc'
+                          }}
+                        >
+                          {bp.specialtyLabel}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '0.70rem',
+                            fontWeight: 500,
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: '#f1f3f4',
+                            color: '#3c4043'
+                          }}
+                        >
+                          Paciente Diana: <strong style={{ color: '#202124' }}>{bp.targetPatients}</strong>
                         </span>
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', marginBottom: '8px' }}>
-                        {(bp.compoundingFormula.items || []).map((item, idx) => (
+                      <h3 style={{ margin: '0 0 6px 0', fontSize: '1.12rem', fontWeight: 600, color: '#202124', lineHeight: 1.35 }}>
+                        {bp.clinicalProcedure}
+                      </h3>
+
+                      <p style={{ margin: 0, fontSize: '0.80rem', color: '#5f6368', lineHeight: 1.5 }}>
+                        <strong style={{ color: '#202124' }}>Rationale Clínico:</strong> {bp.clinicalRationale}
+                      </p>
+                    </div>
+
+                    {/* Top Level Action Bar (Google Cloud Standard Buttons) */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', alignSelf: 'center' }}>
+                      {onOpenDossier && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (triggerHaptic) triggerHaptic('selection');
+                            onOpenDossier(bp);
+                          }}
+                          style={{
+                            height: '34px',
+                            padding: '0 12px',
+                            borderRadius: '4px',
+                            border: '1px solid #dadce0',
+                            background: '#ffffff',
+                            color: '#1a73e8',
+                            fontSize: '0.76rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            transition: 'background 0.15s, border-color 0.15s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#f8fafd';
+                            e.currentTarget.style.borderColor = '#1a73e8';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#ffffff';
+                            e.currentTarget.style.borderColor = '#dadce0';
+                          }}
+                          title="Abrir dossier clínico completo con farmacocinética y evidencia"
+                        >
+                          <FileText size={14} />
+                          <span>Ver Dossier Clínico</span>
+                        </button>
+                      )}
+
+                      {onPrescribeBlueprint && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (triggerHaptic) triggerHaptic('selection');
+                            const fullProtocolBlueprint = {
+                              ...bp,
+                              title: `${bp.title || bp.clinicalProcedure} (Protocolo Integral)`,
+                              compoundingFormula: {
+                                ...bp.compoundingFormula,
+                                treatmentTitle: `${bp.compoundingFormula?.treatmentTitle || bp.title} + Co-terapias de Catálogo`,
+                                items: [
+                                  ...(bp.compoundingFormula?.items || []),
+                                  ...synergyItems.map((item) => ({
+                                    name: `[Catálogo] ${item.name}`,
+                                    concentration: 'Dispensación Comercial',
+                                    role: `${item.badge} · ${item.role}`
+                                  }))
+                                ]
+                              }
+                            };
+                            onPrescribeBlueprint(fullProtocolBlueprint);
+                          }}
+                          style={{
+                            height: '34px',
+                            padding: '0 14px',
+                            borderRadius: '4px',
+                            border: 'none',
+                            background: '#1a73e8',
+                            color: '#ffffff',
+                            fontSize: '0.76rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: '0 1px 2px rgba(26,115,232,0.3)',
+                            transition: 'background 0.15s'
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = '#1557b0'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = '#1a73e8'; }}
+                          title="Cargar la fórmula magistral y los productos de catálogo complementarios en el Recetario"
+                        >
+                          <Layers size={14} />
+                          <span>Prescribir Protocolo Completo (Fórmula + {synergyItems.length} Catálogo)</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ── CARD BODY: 2 CLEARLY DIFFERENTIATED THERAPEUTIC SECTIONS ── */}
+                  <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+                    {/* ════════════════════════════════════════════════════════════════════════
+                        SECCIÓN 1: FORMULACIÓN MAGISTRAL PERSONALIZADA (FARMACIA ELABORADORA)
+                        ════════════════════════════════════════════════════════════════════════ */}
+                    {bp.compoundingFormula && (
+                      <div
+                        style={{
+                          background: '#f8fafd',
+                          border: '1px solid #d2e3fc',
+                          borderLeft: '4px solid #1a73e8',
+                          borderRadius: '8px',
+                          padding: '16px 18px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '12px'
+                        }}
+                      >
+                        {/* Section 1 Header */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '3px' }}>
+                              <span
+                                style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: 700,
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  background: '#e8f0fe',
+                                  color: '#1a73e8',
+                                  letterSpacing: '0.04em',
+                                  textTransform: 'uppercase',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px'
+                                }}
+                              >
+                                <FlaskConical size={13} />
+                                Formulación Magistral Individualizada (Farmacia Elaboradora)
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: 600,
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  background: '#ffffff',
+                                  border: '1px solid #d2e3fc',
+                                  color: '#3c4043'
+                                }}
+                              >
+                                Elaboración Galénica On-Demand · Concentraciones Titulables
+                              </span>
+                            </div>
+                            <h4 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 700, color: '#1a73e8', lineHeight: 1.3 }}>
+                              {bp.compoundingFormula.treatmentTitle}
+                            </h4>
+                          </div>
+
                           <div
-                            key={idx}
                             style={{
+                              fontSize: '0.74rem',
+                              fontWeight: 600,
+                              color: '#003666',
                               background: '#ffffff',
-                              border: '1px solid #e2e8f0',
-                              borderRadius: '6px',
-                              padding: '7px 10px'
+                              border: '1px solid #cbd5e1',
+                              padding: '4px 10px',
+                              borderRadius: '4px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px'
                             }}
                           >
-                            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
-                              {item.name} <span style={{ color: '#1a73e8' }}>{item.concentration}</span>
-                            </div>
-                            <div style={{ fontSize: '0.69rem', color: '#64748b', marginTop: '2px' }}>
-                              {item.role}
-                            </div>
+                            <Pill size={13} color="#1a73e8" />
+                            <span><strong>Vehículo Galénico:</strong> {bp.compoundingFormula.dispensingForm} ({bp.compoundingFormula.volume})</span>
                           </div>
-                        ))}
-                      </div>
-
-                      <div style={{ fontSize: '0.74rem', color: '#334155' }}>
-                        <strong>Recommended Posology:</strong> {bp.compoundingFormula.posology}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 2. Numbered Four-Pillar Synergies: 1-per-line clickable rows */}
-                  {(() => {
-                    const synergyItems = [
-                      bp.peptideSynergy && {
-                        type: 'peptide',
-                        badge: 'Bioactive Peptide Co-Therapy',
-                        icon: '🧬',
-                        color: '#4338ca',
-                        bg: '#f8faff',
-                        border: '#c7d2fe',
-                        badgeBg: '#e0e7ff',
-                        name: bp.peptideSynergy.name,
-                        role: bp.peptideSynergy.role,
-                        url: bp.protocolUrl || '/collection/peptides'
-                      },
-                      bp.dermocosmeticSynergy && {
-                        type: 'colway',
-                        badge: 'Cuticular & Native ECM Care (Colway®)',
-                        icon: '🛡️',
-                        color: '#047857',
-                        bg: '#f9fefb',
-                        border: '#a7f3d0',
-                        badgeBg: '#d1fae5',
-                        name: bp.dermocosmeticSynergy.name,
-                        role: bp.dermocosmeticSynergy.role,
-                        url: '/collection/colway'
-                      },
-                      bp.nutraceuticalSynergy && {
-                        type: 'nutraceutical',
-                        badge: 'Oral Nutraceutical (UltraPerson™)',
-                        icon: '💊',
-                        color: '#b45309',
-                        bg: '#fffdf5',
-                        border: '#fde68a',
-                        badgeBg: '#fef3c7',
-                        name: bp.nutraceuticalSynergy.name,
-                        role: bp.nutraceuticalSynergy.role,
-                        url: bp.nutraceuticalSynergy.slug ? `/p/${bp.nutraceuticalSynergy.slug}` : '/collection/ultraman'
-                      },
-                      bp.diagnosticSynergy && {
-                        type: 'diagnostic',
-                        badge: 'Molecular / DNA Diagnostic',
-                        icon: '🔬',
-                        color: '#be185d',
-                        bg: '#fdf7f9',
-                        border: '#fbcfe8',
-                        badgeBg: '#fce7f3',
-                        name: bp.diagnosticSynergy.name,
-                        role: bp.diagnosticSynergy.role,
-                        url: bp.diagnosticSynergy.slug
-                          ? `/p/${bp.diagnosticSynergy.slug}`
-                          : (bp.diagnosticSynergy.name?.toLowerCase().includes('eterna')
-                              ? '/collection/eterna'
-                              : bp.diagnosticSynergy.name?.toLowerCase().includes('teletest')
-                              ? '/collection/teletest'
-                              : '/collection/bloodo')
-                      }
-                    ].filter(Boolean);
-
-                    if (synergyItems.length === 0) return null;
-
-                    return (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px', flexWrap: 'wrap', gap: '6px' }}>
-                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                            Synergistic Adjuvant Recommendations ({synergyItems.length})
-                          </span>
-                          <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                            Click to review specs · Add selectively to prescription
-                          </span>
                         </div>
 
-                        {synergyItems.map((item, itemIdx) => {
-                          const itemNumber = String(itemIdx + 1).padStart(2, '0');
-                          return (
-                            <div
-                              key={itemIdx}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: '12px',
-                                padding: '10px 14px',
-                                borderRadius: '8px',
-                                background: item.bg,
-                                border: `1px solid ${item.border}`,
-                                transition: 'all 0.15s ease',
-                                flexWrap: 'wrap'
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = item.color;
-                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = item.border;
-                                e.currentTarget.style.boxShadow = 'none';
-                              }}
-                            >
-                              {/* Left: Number Badge + Category + Product Name + Role */}
-                              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: '1 1 340px', minWidth: '240px' }}>
-                                <span
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '24px',
-                                    height: '24px',
-                                    borderRadius: '6px',
-                                    background: item.color,
-                                    color: '#ffffff',
-                                    fontSize: '0.72rem',
-                                    fontWeight: 800,
-                                    flexShrink: 0,
-                                    marginTop: '2px'
-                                  }}
-                                >
-                                  {itemNumber}
-                                </span>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                    <span
-                                      style={{
-                                        fontSize: '0.64rem',
-                                        fontWeight: 800,
-                                        color: item.color,
-                                        background: item.badgeBg,
-                                        padding: '2px 7px',
-                                        borderRadius: '4px',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.03em'
-                                      }}
-                                    >
-                                      {item.icon} {item.badge}
-                                    </span>
-                                    <a
-                                      href={item.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      style={{
-                                        fontSize: '0.86rem',
-                                        fontWeight: 800,
-                                        color: '#0f172a',
-                                        textDecoration: 'none',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '4px'
-                                      }}
-                                      title={`View clinical monograph for ${item.name}`}
-                                      onMouseEnter={(e) => { e.currentTarget.style.color = item.color; }}
-                                      onMouseLeave={(e) => { e.currentTarget.style.color = '#0f172a'; }}
-                                    >
-                                      <span>{item.name}</span>
-                                      <ArrowUpRight size={13} style={{ opacity: 0.6 }} />
-                                    </a>
-                                  </div>
-
-                                  <div style={{ fontSize: '0.74rem', color: '#475569', lineHeight: 1.45 }}>
-                                    {item.role}
-                                  </div>
+                        {/* Principios Activos Compuestos (APIs Galénicos) */}
+                        <div>
+                          <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
+                            Principios Activos Galénicos & Concentraciones Titulables en Receta:
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px' }}>
+                            {(bp.compoundingFormula.items || []).map((item, idx) => (
+                              <div
+                                key={idx}
+                                style={{
+                                  background: '#ffffff',
+                                  border: '1px solid #e0e2e6',
+                                  borderRadius: '6px',
+                                  padding: '8px 12px',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  justifyContent: 'space-between',
+                                  gap: '4px'
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                                  <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#202124' }}>
+                                    {item.name}
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: '0.72rem',
+                                      fontWeight: 700,
+                                      color: '#1a73e8',
+                                      background: '#e8f0fe',
+                                      border: '1px solid #c2e7ff',
+                                      padding: '1px 6px',
+                                      borderRadius: '4px',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {item.concentration}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '0.70rem', color: '#5f6368', lineHeight: 1.35 }}>
+                                  {item.role}
                                 </div>
                               </div>
+                            ))}
+                          </div>
+                        </div>
 
-                              {/* Right: Explicit Action Buttons */}
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                                <a
-                                  href={item.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{
-                                    padding: '6px 12px',
-                                    borderRadius: '6px',
-                                    background: '#ffffff',
-                                    border: `1px solid ${item.border}`,
-                                    color: item.color,
-                                    fontSize: '0.74rem',
-                                    fontWeight: 700,
-                                    textDecoration: 'none',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    transition: 'all 0.15s ease'
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = item.color;
-                                    e.currentTarget.style.color = '#ffffff';
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = '#ffffff';
-                                    e.currentTarget.style.color = item.color;
-                                  }}
-                                >
-                                  <span>View Specs</span>
-                                  <ArrowUpRight size={13} />
-                                </a>
+                        {/* Posología Galénica */}
+                        <div
+                          style={{
+                            background: '#ffffff',
+                            border: '1px solid #e0e2e6',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            fontSize: '0.76rem',
+                            color: '#3c4043',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            flexWrap: 'wrap'
+                          }}
+                        >
+                          <span style={{ fontWeight: 700, color: '#202124' }}>Pauta Posológica Galénica Recomendada:</span>
+                          <span>{bp.compoundingFormula.posology}</span>
+                        </div>
 
-                                {onPrescribeBlueprint && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (triggerHaptic) triggerHaptic('selection');
-                                      const singleItemBlueprint = {
-                                        ...bp,
-                                        title: `${item.name}`,
-                                        compoundingFormula: {
-                                          treatmentTitle: item.name,
-                                          dispensingForm: item.badge,
-                                          volume: 'Single Dispense',
-                                          posology: item.role,
-                                          items: [{ name: item.name, concentration: 'Standard', role: item.role }]
-                                        }
-                                      };
-                                      onPrescribeBlueprint(singleItemBlueprint);
-                                    }}
+                        {/* BOTÓN DEDICADO ORIENTADO A LA FORMULACIÓN MAGISTRAL */}
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '10px',
+                            paddingTop: '8px',
+                            borderTop: '1px solid #e2e8f0'
+                          }}
+                        >
+                          <div style={{ fontSize: '0.72rem', color: '#5f6368', maxWidth: '440px', lineHeight: 1.35 }}>
+                            Abre el Recetario Magistral para titular concentraciones exactas según analítica del paciente y ordenar la preparación personalizada a la farmacia elaboradora.
+                          </div>
+
+                          {onPrescribeBlueprint && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (triggerHaptic) triggerHaptic('selection');
+                                onPrescribeBlueprint(bp);
+                              }}
+                              style={{
+                                height: '36px',
+                                padding: '0 18px',
+                                borderRadius: '4px',
+                                border: 'none',
+                                background: '#1a73e8',
+                                color: '#ffffff',
+                                fontSize: '0.78rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                boxShadow: '0 1px 2px rgba(26,115,232,0.35)',
+                                transition: 'background 0.15s, box-shadow 0.15s'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#1557b0';
+                                e.currentTarget.style.boxShadow = '0 2px 4px rgba(26,115,232,0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#1a73e8';
+                                e.currentTarget.style.boxShadow = '0 1px 2px rgba(26,115,232,0.35)';
+                              }}
+                              title="Emitir receta oficial de esta fórmula magistral en el Recetario Compounding"
+                            >
+                              <FlaskConical size={14} />
+                              <span>Prescribir Fórmula Magistral (Abrir Recetario)</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ════════════════════════════════════════════════════════════════════════
+                        SECCIÓN 2: PRODUCTOS COMPLEMENTARIOS DE CATÁLOGO (STOCK DIRECTO)
+                        ════════════════════════════════════════════════════════════════════════ */}
+                    {synergyItems.length > 0 && (
+                      <div
+                        style={{
+                          background: '#ffffff',
+                          border: '1px solid #dadce0',
+                          borderLeft: '4px solid #0d9488',
+                          borderRadius: '8px',
+                          padding: '16px 18px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '12px'
+                        }}
+                      >
+                        {/* Section 2 Header */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '3px' }}>
+                              <span
+                                style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: 700,
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  background: '#f0fdfa',
+                                  color: '#0d9488',
+                                  border: '1px solid #a7f3d0',
+                                  letterSpacing: '0.04em',
+                                  textTransform: 'uppercase',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px'
+                                }}
+                              >
+                                <Package size={13} />
+                                Productos de Catálogo y Pruebas Diagnósticas ({synergyItems.length} Referencias de Stock)
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: 600,
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  background: '#f1f3f4',
+                                  color: '#3c4043'
+                                }}
+                              >
+                                Dispensación Directa · Productos Registrados · No Requiere Elaboración Magistral
+                              </span>
+                            </div>
+                            <p style={{ margin: 0, fontSize: '0.76rem', color: '#5f6368', lineHeight: 1.4 }}>
+                              Co-terapias industriales registradas y paneles de laboratorio en stock que potencian la respuesta clínica de la fórmula magistral. Pueden prescribirse juntas o de manera individual.
+                            </p>
+                          </div>
+
+                          {onPrescribeBlueprint && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (triggerHaptic) triggerHaptic('selection');
+                                const catalogGroupBlueprint = {
+                                  ...bp,
+                                  title: `${bp.title || bp.clinicalProcedure} (Pack Co-Terapias de Catálogo)`,
+                                  compoundingFormula: {
+                                    treatmentTitle: `${bp.clinicalProcedure} — Pack de Catálogo (${synergyItems.length} Productos)`,
+                                    dispensingForm: 'Pack Comercial de Catálogo',
+                                    volume: 'Unidades en Stock',
+                                    posology: 'Consultar monografías individuales de catálogo',
+                                    items: synergyItems.map((item) => ({
+                                      name: `[Catálogo] ${item.name}`,
+                                      concentration: 'Stock Comercial',
+                                      role: `${item.badge} · ${item.role}`
+                                    }))
+                                  }
+                                };
+                                onPrescribeBlueprint(catalogGroupBlueprint);
+                              }}
+                              style={{
+                                height: '30px',
+                                padding: '0 12px',
+                                borderRadius: '4px',
+                                border: '1px solid #cbd5e1',
+                                background: '#ffffff',
+                                color: '#0d9488',
+                                fontSize: '0.72rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                transition: 'all 0.15s'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#f0fdfa';
+                                e.currentTarget.style.borderColor = '#0d9488';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#ffffff';
+                                e.currentTarget.style.borderColor = '#cbd5e1';
+                              }}
+                              title="Cargar todos los productos de catálogo complementarios en la receta"
+                            >
+                              <Layers size={13} />
+                              <span>Prescribir Todos los de Catálogo ({synergyItems.length})</span>
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Filas de Productos de Catálogo (1 por línea, estilo GCP List Item) */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {synergyItems.map((item, itemIdx) => {
+                            const itemNumber = String(itemIdx + 1).padStart(2, '0');
+                            return (
+                              <div
+                                key={itemIdx}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  gap: '12px',
+                                  padding: '10px 14px',
+                                  borderRadius: '6px',
+                                  background: '#ffffff',
+                                  border: '1px solid #e8eaed',
+                                  transition: 'border-color 0.15s, box-shadow 0.15s',
+                                  flexWrap: 'wrap'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.borderColor = '#1a73e8';
+                                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(60,64,67,0.08)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.borderColor = '#e8eaed';
+                                  e.currentTarget.style.boxShadow = 'none';
+                                }}
+                              >
+                                {/* Left: Number + Category Tag + Product Name + Role */}
+                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: '1 1 340px', minWidth: '240px' }}>
+                                  <span
                                     style={{
-                                      padding: '6px 12px',
-                                      borderRadius: '6px',
-                                      background: '#ffffff',
-                                      border: '1px solid #cbd5e1',
-                                      color: '#0f172a',
-                                      fontSize: '0.74rem',
-                                      fontWeight: 700,
-                                      cursor: 'pointer',
                                       display: 'inline-flex',
                                       alignItems: 'center',
-                                      gap: '5px',
-                                      transition: 'all 0.15s ease'
+                                      justifyContent: 'center',
+                                      width: '24px',
+                                      height: '24px',
+                                      borderRadius: '4px',
+                                      background: item.badgeBg || '#f1f3f4',
+                                      color: item.color || '#202124',
+                                      fontSize: '0.72rem',
+                                      fontWeight: 700,
+                                      flexShrink: 0,
+                                      marginTop: '2px',
+                                      border: `1px solid ${item.border || '#dadce0'}`
                                     }}
-                                    title={`Add only ${item.name} to prescription`}
+                                  >
+                                    {itemNumber}
+                                  </span>
+
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                      <span
+                                        style={{
+                                          fontSize: '0.64rem',
+                                          fontWeight: 700,
+                                          color: item.color,
+                                          background: item.badgeBg,
+                                          padding: '2px 6px',
+                                          borderRadius: '4px',
+                                          textTransform: 'uppercase',
+                                          letterSpacing: '0.03em',
+                                          border: `1px solid ${item.border}`
+                                        }}
+                                      >
+                                        {item.icon} {item.badge}
+                                      </span>
+
+                                      <span style={{ fontSize: '0.66rem', color: '#137333', background: '#e6f4ea', padding: '1px 5px', borderRadius: '4px', fontWeight: 600 }}>
+                                        En Stock Catálogo
+                                      </span>
+
+                                      <a
+                                        href={item.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                          fontSize: '0.86rem',
+                                          fontWeight: 600,
+                                          color: '#202124',
+                                          textDecoration: 'none',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '4px'
+                                        }}
+                                        title={`Ver monografía y especificaciones de catálogo para ${item.name}`}
+                                        onMouseEnter={(e) => { e.currentTarget.style.color = '#1a73e8'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.color = '#202124'; }}
+                                      >
+                                        <span>{item.name}</span>
+                                        <ArrowUpRight size={13} style={{ opacity: 0.6 }} />
+                                      </a>
+                                    </div>
+
+                                    <div style={{ fontSize: '0.72rem', color: '#5f6368', lineHeight: 1.4 }}>
+                                      {item.role}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Right: GCP Action Buttons for Catalog Item */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                                  <a
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      height: '30px',
+                                      padding: '0 10px',
+                                      borderRadius: '4px',
+                                      background: '#ffffff',
+                                      border: '1px solid #dadce0',
+                                      color: '#1a73e8',
+                                      fontSize: '0.72rem',
+                                      fontWeight: 600,
+                                      textDecoration: 'none',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px',
+                                      transition: 'background 0.15s, border-color 0.15s'
+                                    }}
                                     onMouseEnter={(e) => {
-                                      e.currentTarget.style.background = '#f1f5f9';
-                                      e.currentTarget.style.borderColor = '#94a3b8';
+                                      e.currentTarget.style.background = '#f8fafd';
+                                      e.currentTarget.style.borderColor = '#1a73e8';
                                     }}
                                     onMouseLeave={(e) => {
                                       e.currentTarget.style.background = '#ffffff';
-                                      e.currentTarget.style.borderColor = '#cbd5e1';
+                                      e.currentTarget.style.borderColor = '#dadce0';
                                     }}
                                   >
-                                    <Pill size={13} color="#0f172a" />
-                                    <span>+ Prescribe</span>
-                                  </button>
-                                )}
+                                    <span>Ficha de Catálogo</span>
+                                    <ArrowUpRight size={12} />
+                                  </a>
+
+                                  {onPrescribeBlueprint && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (triggerHaptic) triggerHaptic('selection');
+                                        const singleItemBlueprint = {
+                                          ...bp,
+                                          title: `${item.name}`,
+                                          compoundingFormula: {
+                                            treatmentTitle: `${item.name} (Producto de Catálogo)`,
+                                            dispensingForm: item.badge,
+                                            volume: 'Envase Comercial',
+                                            posology: item.role,
+                                            items: [{ name: item.name, concentration: 'Stock Comercial', role: item.role }]
+                                          }
+                                        };
+                                        onPrescribeBlueprint(singleItemBlueprint);
+                                      }}
+                                      style={{
+                                        height: '30px',
+                                        padding: '0 12px',
+                                        borderRadius: '4px',
+                                        background: '#ffffff',
+                                        border: '1px solid #dadce0',
+                                        color: '#202124',
+                                        fontSize: '0.72rem',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        transition: 'all 0.15s'
+                                      }}
+                                      title={`Prescribir únicamente ${item.name} de catálogo`}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = '#e8f0fe';
+                                        e.currentTarget.style.borderColor = '#1a73e8';
+                                        e.currentTarget.style.color = '#1a73e8';
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = '#ffffff';
+                                        e.currentTarget.style.borderColor = '#dadce0';
+                                        e.currentTarget.style.color = '#202124';
+                                      }}
+                                    >
+                                      <Pill size={12} />
+                                      <span>+ Prescribir Producto</span>
+                                    </button>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
                       </div>
-                    );
-                  })()}
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
