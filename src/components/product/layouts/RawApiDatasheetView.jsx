@@ -634,7 +634,7 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
         badge="Bulk Raw API"
         inquireLabel="Inquire Raw API"
         onInquire={() => setIsInquiryOpen(true)}
-        showClinicalAI={true}
+        showClinicalAI={false}
         showSections={true}
         sectionsCount={3}
         sectionsLabel="Sections"

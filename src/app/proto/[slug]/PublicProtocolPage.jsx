@@ -1460,7 +1460,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         badgeType="protocol"
         inquireLabel={lang === 'es' ? 'Consultar Protocolo' : 'Inquire Protocol'}
         onInquire={() => setIsInquiryDrawerOpen(true)}
-        showClinicalAI={true}
+        showClinicalAI={false}
         showSections={true}
         sectionsCount={tocSections.length}
         activeSectionIndex={tocSections.findIndex(s => s.id === effectiveActiveSection) + 1}

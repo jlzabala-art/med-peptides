@@ -5628,47 +5628,32 @@ export default function DoctorPublicPortalClient({
                   totalCount={allPrescriptions.length > 0 ? allPrescriptions.length : doctorSpecialtyIntel.primaryBlueprints.length}
                   size="md"
                   namespace={`dr_overview_${slug}`}
-                  filters={
-                    allPrescriptions.length > 0 ? [
-                      {
-                        key: 'quick_sold',
-                        label: `Sold & Invoiced (${quickCounts.active})`,
-                        active: quickRxFilter === 'active',
-                        onClick: () => {
-                          setQuickRxFilter(quickRxFilter === 'active' ? 'all' : 'active');
-                          handleSidebarNavigate('prescriptions');
-                        }
-                      },
-                      {
-                        key: 'quick_offers',
-                        label: `Unaccepted Offers (${quickCounts.proposals})`,
-                        active: quickRxFilter === 'proposals',
-                        onClick: () => {
-                          setQuickRxFilter(quickRxFilter === 'proposals' ? 'all' : 'proposals');
-                          handleSidebarNavigate('prescriptions');
-                        }
-                      },
-                      {
-                        key: 'quick_blueprints',
-                        label: `Specialty Blueprints (${doctorSpecialtyIntel.primaryBlueprints.length})`,
-                        active: false,
-                        onClick: () => handleSidebarNavigate('recommendations')
-                      }
-                    ] : [
-                      {
-                        key: 'quick_blueprints',
-                        label: `${doctorSpecialtyIntel.primaryMeta?.shortLabel || 'Specialty'} Blueprints (${doctorSpecialtyIntel.primaryBlueprints.length})`,
-                        active: true,
-                        onClick: () => handleSidebarNavigate('recommendations')
-                      },
-                      {
-                        key: 'quick_new_rx',
-                        label: '+ Create First Prescription',
-                        active: false,
-                        onClick: handleOpenNewPrescriptionIntake
-                      }
-                    ]
-                  }
+                  filters={[
+                    ...(searchQuery?.trim() ? [{
+                      key: 'search_query',
+                      label: 'Search',
+                      value: searchQuery.trim(),
+                      onRemove: () => setSearchQuery('')
+                    }] : []),
+                    ...(quickRxFilter && quickRxFilter !== 'all' ? [{
+                      key: 'status_filter',
+                      label: 'Status',
+                      value: quickRxFilter === 'active' ? 'Sold & Invoiced' : quickRxFilter === 'proposals' ? 'Unaccepted Offers' : quickRxFilter,
+                      onRemove: () => setQuickRxFilter('all')
+                    }] : []),
+                    ...(apiFilter ? [{
+                      key: 'api_filter',
+                      label: 'Formulation',
+                      value: apiFilter,
+                      onRemove: () => setApiFilter(null)
+                    }] : []),
+                    ...(patientFilter && patientFilter !== 'all' ? [{
+                      key: 'patient_filter',
+                      label: 'Patient',
+                      value: patientFilter,
+                      onRemove: () => setPatientFilter('all')
+                    }] : [])
+                  ]}
                 />
               </div>
 
@@ -6435,7 +6420,7 @@ export default function DoctorPublicPortalClient({
                       Practice Insights
                     </h3>
                     <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: '#5f6368' }}>
-                      High-level prescription activity, top formulations, and patient follow-up status
+                      High-level prescription velocity and signature compounded formulations
                     </p>
                   </div>
                   <button
@@ -6461,7 +6446,7 @@ export default function DoctorPublicPortalClient({
                   </button>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '14px' }}>
                   {/* Card 1: 6-Month Prescription Activity (GCP Cloud Monitoring Style) */}
                   <div style={{ padding: '14px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #dadce0', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -6665,129 +6650,6 @@ export default function DoctorPublicPortalClient({
                         Ready for first compounded formulation.
                       </div>
                     )}
-                  </div>
-
-                  {/* Card 3: Patient Follow-up Status */}
-                  <div style={{ padding: '14px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #dadce0', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        Patient Cohort Status
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          triggerHaptic('light');
-                          handleSidebarNavigate('patients');
-                        }}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          padding: 0,
-                          fontSize: '0.70rem',
-                          color: '#1a73e8',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '2px'
-                        }}
-                      >
-                        <span>Directory</span>
-                        <span>→</span>
-                      </button>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'auto' }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '7px 10px',
-                          background: '#ffffff',
-                          borderRadius: '6px',
-                          border: '1px solid #e0e0e0',
-                          transition: 'background 0.15s ease'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1e8e3e', flexShrink: 0 }} />
-                          <span style={{ fontSize: '0.74rem', color: '#3c4043', fontWeight: 500 }}>Active on Therapy</span>
-                        </div>
-                        <span
-                          style={{
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            color: '#137333',
-                            background: '#e6f4ea',
-                            padding: '2px 8px',
-                            borderRadius: '12px'
-                          }}
-                        >
-                          {soldPatientsCount}
-                        </span>
-                      </div>
-
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '7px 10px',
-                          background: '#ffffff',
-                          borderRadius: '6px',
-                          border: '1px solid #e0e0e0',
-                          transition: 'background 0.15s ease'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f9ab00', flexShrink: 0 }} />
-                          <span style={{ fontSize: '0.74rem', color: '#3c4043', fontWeight: 500 }}>Offers Awaiting Checkout</span>
-                        </div>
-                        <span
-                          style={{
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            color: '#b06000',
-                            background: '#fef7e0',
-                            padding: '2px 8px',
-                            borderRadius: '12px'
-                          }}
-                        >
-                          {unacceptedPatientsCount}
-                        </span>
-                      </div>
-
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '7px 10px',
-                          background: '#ffffff',
-                          borderRadius: '6px',
-                          border: '1px solid #e0e0e0',
-                          transition: 'background 0.15s ease'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1a73e8', flexShrink: 0 }} />
-                          <span style={{ fontSize: '0.74rem', color: '#3c4043', fontWeight: 500 }}>Total Monitored Cohort</span>
-                        </div>
-                        <span
-                          style={{
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            color: '#174ea6',
-                            background: '#e8f0fe',
-                            padding: '2px 8px',
-                            borderRadius: '12px'
-                          }}
-                        >
-                          {doctorPatientsList.length}
-                        </span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -8940,7 +8802,7 @@ export default function DoctorPublicPortalClient({
       </div>
 
       {/* ── Google Cloud Console Standard Unified Footer (100% Full-Width) ── */}
-      <PublicUnifiedFooter lang={lang || 'en'} />
+      <PublicUnifiedFooter lang={lang || 'en'} minimal={true} />
 
       {/* ── Practice Spotlight Search Palette (Rule #7 & Spotlight standard) ── */}
       <DoctorPracticeSearchModal

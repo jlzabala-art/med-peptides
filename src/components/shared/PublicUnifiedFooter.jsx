@@ -3,12 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  ShieldCheck,
-  Award,
-  ChevronDown,
-  ExternalLink,
-  Sparkles,
-  ArrowRight
+  ChevronDown
 } from '@/lib/icons';
 import BrandLogo from '../common/BrandLogo';
 import { triggerHaptic } from '@/utils/haptics';
@@ -61,7 +56,7 @@ const FOOTER_SECTIONS = [
  * dedicated Atlas AI Clinical Consultant copilot dock, and safe clearance
  * for floating action docks and tab bars.
  */
-export default function PublicUnifiedFooter({ lang = 'en' }) {
+export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
   const isEs = lang === 'es';
   const [openMobileSections, setOpenMobileSections] = useState({});
 
@@ -72,24 +67,26 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
     }));
   };
 
-  const handleOpenAtlasAi = (promptText = '') => {
-    triggerHaptic('selection');
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('open-atlas-ai', {
-        detail: {
-          prompt: promptText || (isEs
-            ? '¿Cuáles son las formulaciones, sinergias con péptidos y protocolos clínicos de Atlas?'
-            : 'What clinical protocols, peptide synergies, and targeted formulations are available at Atlas Health?')
-        }
-      }));
-    }
-  };
-
   const linkStyle = {
     color: '#5f6368',
     textDecoration: 'none',
     transition: 'color 0.15s ease'
   };
+
+  if (minimal) {
+    return (
+      <footer
+        id="public-unified-footer"
+        className="public-unified-footer public-unified-footer-minimal"
+      >
+        <div className="public-footer-container public-footer-container-minimal">
+          <div className="public-footer-copyright">
+            © 2026 <strong style={{ color: '#202124' }}>Atlas Health Services</strong>. {isEs ? 'Todos los derechos reservados.' : 'All rights reserved.'}
+          </div>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer
@@ -115,30 +112,6 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
             <div className="gcp-status-pill">
               <span className="gcp-status-dot" />
               <span>{isEs ? 'Sistemas Operativos 100%' : 'All Systems Operational'}</span>
-            </div>
-
-            {/* ── Atlas Clinical AI Consultant Card in Footer ── */}
-            <div className="gcp-footer-ai-card">
-              <div className="gcp-footer-ai-header">
-                <Sparkles size={15} color="#7c3aed" />
-                <span className="gcp-footer-ai-title">Atlas AI Clinical Consultant</span>
-                <span className="gcp-footer-ai-badge">Copilot</span>
-              </div>
-              <p className="gcp-footer-ai-desc">
-                {isEs
-                  ? 'Consulta interacciones magistrales, sinergias con péptidos y protocolos de suplementación.'
-                  : 'Inquire about peptide synergies, active compounding cofactors, and targeted protocols.'}
-              </p>
-              <button
-                type="button"
-                onClick={() => handleOpenAtlasAi()}
-                className="gcp-footer-ai-btn"
-                aria-label="Ask Atlas AI Clinical Consultant"
-              >
-                <Sparkles size={13} />
-                <span>{isEs ? 'Consultar con Atlas IA' : 'Ask Atlas AI'}</span>
-                <ArrowRight size={13} />
-              </button>
             </div>
           </div>
 
@@ -172,25 +145,6 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
               <span className="gcp-status-dot" />
               <span>{isEs ? 'Sistemas OK' : 'Operational'}</span>
             </div>
-          </div>
-
-          {/* Mobile Atlas AI Consultant Card */}
-          <div className="gcp-footer-ai-card gcp-footer-ai-card-mobile">
-            <div className="gcp-footer-ai-header">
-              <Sparkles size={14} color="#7c3aed" />
-              <span className="gcp-footer-ai-title">Atlas AI Clinical Consultant</span>
-              <span className="gcp-footer-ai-badge">Copilot</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleOpenAtlasAi()}
-              className="gcp-footer-ai-btn"
-              aria-label="Ask Atlas AI"
-            >
-              <Sparkles size={13} />
-              <span>{isEs ? 'Consultar con Atlas IA' : 'Ask Atlas AI Clinical Consultant'}</span>
-              <ArrowRight size={13} />
-            </button>
           </div>
 
           {/* Interactive Mobile Accordions (Rule #26 Progressive Disclosure) */}
@@ -241,26 +195,6 @@ export default function PublicUnifiedFooter({ lang = 'en' }) {
         <div className="public-footer-bottom">
           <div className="public-footer-copyright">
             © 2026 <strong style={{ color: '#202124' }}>Atlas Health Services</strong>. {isEs ? 'Todos los derechos reservados.' : 'All rights reserved.'}
-          </div>
-
-          {/* Atlas Clinical AI Status Pill */}
-          <button
-            type="button"
-            onClick={() => handleOpenAtlasAi()}
-            className="gcp-footer-bottom-ai-pill"
-            title="Open Atlas Clinical AI"
-          >
-            <span className="gcp-footer-ai-dot" />
-            <Sparkles size={12} color="#7c3aed" />
-            <span>Atlas AI Clinical Intelligence</span>
-          </button>
-
-          <div className="public-footer-legal-links">
-            <Link href="/faq">FAQ</Link>
-            <span className="public-footer-divider">·</span>
-            <Link href="/verify">COA Verification</Link>
-            <span className="public-footer-divider">·</span>
-            <Link href="/contact">Support Desk</Link>
           </div>
         </div>
 

@@ -2746,56 +2746,61 @@ export default function ProtocolWorkspaceTab({
                   </div>
                 </div>
 
-                {/* Clinical Transit Stability & Peace of Mind Assurance (Google Cloud Console Callout) */}
+                {/* Clinical Transit Stability & Peace of Mind Assurance (Google Cloud Console Lines Mode) */}
                 <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  borderLeft: '4px solid #003666',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
                   borderRadius: '8px',
-                  padding: '12px 14px'
+                  overflow: 'hidden',
+                  marginTop: '12px'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginBottom: '6px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#003666', fontWeight: 800, fontSize: '0.80rem' }}>
-                      <ShieldCheck size={16} color="#003666" />
+                  <div style={{
+                    background: '#f8f9fa',
+                    borderBottom: '1px solid #dadce0',
+                    padding: '10px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '6px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#202124', fontWeight: 700, fontSize: '0.80rem' }}>
+                      <ShieldCheck size={15} color="#003666" />
                       <span>Transit Stability & Courier Peace of Mind</span>
                     </div>
                     <span style={{
-                      fontSize: '0.64rem',
-                      fontWeight: 800,
-                      color: '#166534',
-                      background: '#f0fdf4',
-                      border: '1px solid #bbf7d0',
-                      padding: '2px 6px',
-                      borderRadius: '4px',
+                      fontSize: '0.66rem',
+                      fontWeight: 600,
+                      color: '#137333',
+                      background: '#e6f4ea',
+                      border: '1px solid #ceead6',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px'
                     }}>
-                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a' }} />
+                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#188038' }} />
                       USP & Ph. Eur. Solid-State Stability Validated
                     </span>
                   </div>
-                  <p style={{ margin: '0 0 8px 0', fontSize: '0.74rem', color: '#334155', lineHeight: 1.5 }}>
-                    <strong>100% Solid-State Molecular Preservation:</strong> Lyophilized peptides are deep-vacuum freeze-dried with &lt;1% residual moisture. In the absence of aqueous solvent, enzymatic degradation and hydrolytic cleavage cannot occur. Solid-state vials remain 100% stable at room temperature (up to 25°C–30°C) for <strong>30–60 days in transit</strong> with <strong>0.0% loss</strong> in HPLC analytical purity.
-                  </p>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: '8px' }}>
-                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', fontSize: '0.70rem', color: '#475569', lineHeight: 1.4 }}>
-                      <div style={{ color: '#16a34a', fontWeight: 800, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Check size={12} /> Courier & Customs Transit
+                  <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45 }}>
+                      <strong style={{ color: '#202124' }}>100% Solid-State Molecular Preservation:</strong> Lyophilized peptides are deep-vacuum freeze-dried with &lt;1% residual moisture. In the absence of aqueous solvent, enzymatic degradation and hydrolytic cleavage cannot occur. Solid-state vials remain 100% stable at room temperature (up to 25°C–30°C) for <strong>30–60 days in transit</strong> with <strong>0.0% loss</strong> in HPLC analytical purity.
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '6px' }}>
+                      <div style={{ background: '#f8f9fa', border: '1px solid #e8eaed', borderRadius: '4px', padding: '6px 8px', fontSize: '0.70rem', color: '#3c4043', lineHeight: 1.35, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                        <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <span><strong>Courier & Customs:</strong> 5–14 days hold has zero adverse effect on unopened vials.</span>
                       </div>
-                      Extended international transit or customs hold (5–14 business days) has zero adverse effect on unopened lyophilized vials.
-                    </div>
-                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', fontSize: '0.70rem', color: '#475569', lineHeight: 1.4 }}>
-                      <div style={{ color: '#16a34a', fontWeight: 800, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Check size={12} /> Cool Packs Thawed Upon Arrival
+                      <div style={{ background: '#f8f9fa', border: '1px solid #e8eaed', borderRadius: '4px', padding: '6px 8px', fontSize: '0.70rem', color: '#3c4043', lineHeight: 1.35, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                        <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <span><strong>Thawed Cold Packs:</strong> Normal upon arrival; phase packs buffer thermal spikes.</span>
                       </div>
-                      Melted cold packs upon delivery are completely normal and anticipated. Phase packs buffer thermal spikes; dry powder remains 100% intact.
-                    </div>
-                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', fontSize: '0.70rem', color: '#475569', lineHeight: 1.4 }}>
-                      <div style={{ color: '#003666', fontWeight: 800, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Snowflake size={12} color="#003666" /> Storage Next Steps
+                      <div style={{ background: '#f8f9fa', border: '1px solid #e8eaed', borderRadius: '4px', padding: '6px 8px', fontSize: '0.70rem', color: '#3c4043', lineHeight: 1.35, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                        <Snowflake size={12} color="#003666" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <span><strong>Storage Action:</strong> Place in refrigerator (2°C–8°C) upon arrival.</span>
                       </div>
-                      Store dry vials in refrigerator (2°C–8°C) or freezer upon arrival. Only reconstitute with Bacteriostatic Water when ready for first dose.
                     </div>
                   </div>
                 </div>

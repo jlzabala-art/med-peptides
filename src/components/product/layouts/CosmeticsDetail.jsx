@@ -2317,8 +2317,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
         badgeType="default"
         inquireLabel="Inquire Product"
         onInquire={() => setIsInquiryDrawerOpen(true)}
-        showClinicalAI={true}
-        onOpenClinicalAI={() => setIsAIDrawerOpen(true)}
+        showClinicalAI={false}
         showSections={true}
         sectionsCount={tocSections.length}
         onOpenSections={() => {

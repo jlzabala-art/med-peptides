@@ -1347,7 +1347,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         badgeType="teal"
         inquireLabel={lang === 'es' ? 'Consultar Directorio' : 'Inquire Directory'}
         onInquire={() => setIsInquiryDrawerOpen(true)}
-        showClinicalAI={true}
+        showClinicalAI={false}
         showSections={true}
         sectionsCount={GOAL_BUCKETS.length}
         sectionsLabel={lang === 'es' ? 'Objetivos & Filtros' : 'Goals & Filters'}

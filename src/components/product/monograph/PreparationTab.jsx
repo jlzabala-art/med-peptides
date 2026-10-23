@@ -1401,46 +1401,71 @@ export default function PreparationTab({
       </section>
 
       {/* ── 2. Handling Stepper & Storage Guidelines ── */}
+      {/* ── 2. Handling Stepper & Storage Guidelines (Google Cloud Console Lines Mode) ── */}
       <section style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
-        gap: '1.5rem'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
+        gap: '1.25rem',
+        alignItems: 'start'
       }}>
-        {/* Stepwise Handling Protocol */}
+        {/* Stepwise Handling Protocol — Linear Row Mode */}
         <div style={{
           background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '10px',
-          padding: '1.25rem',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+          border: '1px solid #dadce0',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          boxShadow: '0 1px 2px rgba(60, 64, 67, 0.04)'
         }}>
-          <h3 style={{
-            margin: '0 0 0.75rem 0',
-            fontSize: '0.86rem',
-            fontWeight: 800,
-            color: '#003666',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em'
+          {/* GCP Table/Panel Header */}
+          <div style={{
+            background: '#f8f9fa',
+            borderBottom: '1px solid #dadce0',
+            padding: '10px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '8px'
           }}>
-            {isDiagnostic ? 'Clinical Specimen Collection & Transportation Protocol' :
-             isSpray ? 'Intranasal Aseptic Administration Protocol' :
-             isPen ? 'Multi-Dose Pen Stepwise Procedure' :
-             isSublingual ? 'Sublingual Administration Protocol' :
-             isOral ? 'Oral Enteric Ingestion Protocol' :
-             'Aseptic Reconstitution & Handling Protocol'}
-          </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FlaskConical size={15} color="#003666" />
+              <span style={{
+                fontSize: '0.80rem',
+                fontWeight: 700,
+                color: '#202124',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em'
+              }}>
+                {isDiagnostic ? 'Specimen Collection Protocol' :
+                 isSpray ? 'Intranasal Aseptic Administration' :
+                 isPen ? 'Multi-Dose Pen Procedure' :
+                 isSublingual ? 'Sublingual Administration' :
+                 isOral ? 'Oral Enteric Ingestion' :
+                 'Aseptic Reconstitution & Handling'}
+              </span>
+            </div>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 600,
+              color: '#5f6368',
+              background: '#e8eaed',
+              padding: '2px 8px',
+              borderRadius: '12px'
+            }}>
+              6 Steps
+            </span>
+          </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            {/* DYNAMIC STEPS BASED ON PRESENTATION */}
+          {/* Linear Step Rows */}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {(isDiagnostic ? [
-              { step: 1, title: 'Patient Preparation & Verification', summary: `Confirm 8–12h overnight fast; verify kit lot ${effectiveBatch}`, detail: 'Drink 1–2 glasses of water 30 minutes prior to improve peripheral microvascular perfusion. Avoid taking fish oil or lipid supplements for 48 hours prior to baseline sampling.' },
+              { step: 1, title: 'Patient Preparation & Verification', summary: `Confirm 8–12h fast; verify lot ${effectiveBatch}`, detail: 'Drink 1–2 glasses of water 30 minutes prior to improve peripheral microvascular perfusion. Avoid taking fish oil or lipid supplements for 48 hours prior to baseline sampling.' },
               { step: 2, title: 'Warm Water Perfusion Stimulation', summary: 'Wash hands with warm soapy water for 2 minutes', detail: 'Warmth dilates digital capillaries, ensuring effortless blood flow. Dry thoroughly with a clean lint-free towel.' },
               { step: 3, title: 'Sterile Antisepsis & Puncture', summary: 'Disinfect side of fingertip; trigger safety lancet', detail: 'Clean the lateral side of the middle or ring finger with the included 70% isopropyl alcohol wipe. Place sterile lancet firmly against skin and press activation button.' },
               { step: 4, title: 'Capillary Spotting on Whatman Card', summary: 'Wipe first drop; saturate 3–4 collection circles', detail: 'Wipe away the very first drop with sterile gauze. Allow large, hanging drops of blood to fall directly onto the circles of the Whatman 903 collection card without touching the paper to your skin.' },
-              { step: 5, title: 'Horizontal Ambient Drying', summary: 'Air-dry horizontally for 20 minutes at room temperature', detail: 'Keep the card flat on a clean surface away from direct sunlight, air conditioners, or heat sources. Do not close or fold the card until spots are completely dry and dark red.' },
-              { step: 6, title: 'Desiccant Packaging & Dispatch', summary: 'Seal in moisture-barrier pouch with desiccant; ship via courier', detail: 'Place dried card into the biohazard envelope with the desiccant pack. Insert the completed requisition form into the prepaid postal mailer and dispatch to the accredited testing laboratory.' }
+              { step: 5, title: 'Horizontal Ambient Drying', summary: 'Air-dry horizontally for 20 minutes at room temp', detail: 'Keep the card flat on a clean surface away from direct sunlight, air conditioners, or heat sources. Do not close or fold the card until spots are completely dry and dark red.' },
+              { step: 6, title: 'Desiccant Packaging & Dispatch', summary: 'Seal in moisture-barrier pouch with desiccant; ship', detail: 'Place dried card into the biohazard envelope with the desiccant pack. Insert the completed requisition form into the prepaid postal mailer and dispatch to the accredited laboratory.' }
             ] : isSpray ? [
-              { step: 1, title: 'Verify & Remove Cap', summary: `Remove protective dust cap; confirm lot ${effectiveBatch}`, detail: 'Check actuator nozzle for cleanliness. Maintain sterile integrity and ensure the tip is free from debris.' },
+              { step: 1, title: 'Verify & Remove Cap', summary: `Remove dust cap; confirm lot ${effectiveBatch}`, detail: 'Check actuator nozzle for cleanliness. Maintain sterile integrity and ensure the tip is free from debris.' },
               { step: 2, title: 'Prime Pump (First Use)', summary: 'Pump 2 times into air until fine mist appears', detail: 'Hold bottle upright. Priming ensures the calibrated 0.1 mL metering chamber is completely filled. Only prime prior to the very first dose.' },
               { step: 3, title: 'Prepare Nasal Cavity', summary: 'Gently blow nose before administration', detail: 'Clearing excess mucus ensures maximum direct peptide contact with the highly vascularized nasal mucosa.' },
               { step: 4, title: 'Position & Insuflation (45°)', summary: 'Aim tip outward toward lateral eye/ear wall', detail: 'Tilt head slightly forward. Insert nozzle ~1 cm into nostril. Avoid spraying directly against the sensitive central nasal septum.' },
@@ -1455,8 +1480,8 @@ export default function PreparationTab({
               { step: 6, title: 'Discard Needle Safely', summary: 'Unscrew needle into sharps bin; replace pen cap', detail: 'Never leave the needle attached to the pen between doses to prevent air ingress and liquid evaporation.' },
             ] : isSublingual ? [
               { step: 1, title: 'Inspect & Agitate', summary: `Confirm seal integrity; verify lot ${effectiveBatch}`, detail: 'Gently invert bottle 3–5 times. Ensure uniform distribution of active peptide throughout the sublingual suspension vehicle.' },
-              { step: 2, title: 'Draw Calibrated Dose', summary: `Draw exactly ${dropperVolumeMl.toFixed(2)} mL using graduated pipette`, detail: 'Squeeze rubber bulb, insert into bottle, and release to draw liquid up to the calibrated volume mark.' },
-              { step: 3, title: 'Deposit Under Tongue', summary: 'Place droplets on the floor of the mouth beneath tongue', detail: 'Raise tongue to roof of mouth. Dispense the liquid directly over the sublingual vascular venous plexus.' },
+              { step: 2, title: 'Draw Calibrated Dose', summary: `Draw ${dropperVolumeMl.toFixed(2)} mL using graduated pipette`, detail: 'Squeeze rubber bulb, insert into bottle, and release to draw liquid up to the calibrated volume mark.' },
+              { step: 3, title: 'Deposit Under Tongue', summary: 'Place droplets on floor of mouth beneath tongue', detail: 'Raise tongue to roof of mouth. Dispense the liquid directly over the sublingual vascular venous plexus.' },
               { step: 4, title: 'Hold for 60–90 Seconds', summary: 'Maintain under tongue without swallowing', detail: 'Crucial for bioavailability: transmucosal venous absorption bypasses first-pass hepatic metabolism. Swallow remaining liquid after 90 seconds.' },
               { step: 5, title: 'Post-Dose Fasting', summary: 'No drinking, eating, or rinsing for 15 minutes', detail: 'Preserves residual mucosal absorption window and prevents premature wash-out.' },
               { step: 6, title: 'Seal & Store', summary: 'Close tightly; store in cool dry place (15°C–25°C)', detail: 'Keep bottle upright away from moisture, heat sources, and direct light.' },
@@ -1473,55 +1498,63 @@ export default function PreparationTab({
               { step: 4, title: 'Draw dose', summary: `Draw ${recon.syringeUnitsU100} U (${recon.injectionVolumeMl} mL) in U-100 syringe`, detail: 'Invert vial vertically, confirm volume alignment.' },
               { step: 5, title: 'Administer', summary: 'SubQ injection at 45–90°', detail: 'Rotate abdomen/thigh sites.' },
               { step: 6, title: 'Store', summary: 'Refrigerate (2°C–8°C)', detail: 'Discard after 28 days of reconstitution.' },
-            ]).map(item => {
+            ]).map((item, idx, arr) => {
               const isExp = expandedSteps[item.step];
+              const isLast = idx === arr.length - 1;
               return (
                 <div
                   key={item.step}
                   style={{
-                    border: '1px solid #f1f5f9',
-                    borderRadius: '6px',
-                    overflow: 'hidden',
-                    background: isExp ? '#f8fafc' : '#ffffff'
+                    borderBottom: isLast ? 'none' : '1px solid #f1f3f4',
+                    background: isExp ? '#f8f9fa' : '#ffffff',
+                    transition: 'background 0.15s ease'
                   }}
                 >
                   <button
                     type="button"
-                    onClick={() => setExpandedSteps(prev => ({ ...prev, [item.step]: !prev[item.step] }))}
+                    onClick={() => {
+                      triggerHaptic('light');
+                      setExpandedSteps(prev => ({ ...prev, [item.step]: !prev[item.step] }));
+                    }}
                     style={{
                       width: '100%',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '8px 12px',
+                      padding: '10px 14px',
                       border: 'none',
                       background: 'transparent',
                       cursor: 'pointer',
-                      textAlign: 'left'
+                      textAlign: 'left',
+                      gap: '10px',
+                      minHeight: '44px'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
                       <span style={{
-                        width: '18px',
-                        height: '18px',
+                        width: '20px',
+                        height: '20px',
                         borderRadius: '50%',
-                        background: '#e0f2fe',
-                        color: '#0369a1',
-                        fontSize: '0.68rem',
-                        fontWeight: 800,
+                        background: '#e8f0fe',
+                        color: '#1a73e8',
+                        fontSize: '0.70rem',
+                        fontWeight: 700,
                         display: 'inline-flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        flexShrink: 0
                       }}>
                         {item.step}
                       </span>
-                      <strong style={{ fontSize: '0.78rem', color: '#0f172a' }}>{item.title}</strong>
-                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>• {item.summary}</span>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap', minWidth: 0 }}>
+                        <strong style={{ fontSize: '0.78rem', color: '#202124', fontWeight: 600 }}>{item.title}</strong>
+                        <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>— {item.summary}</span>
+                      </div>
                     </div>
-                    {isExp ? <ChevronUp size={13} color="#64748b" /> : <ChevronDown size={13} color="#64748b" />}
+                    {isExp ? <ChevronUp size={14} color="#5f6368" /> : <ChevronDown size={14} color="#5f6368" />}
                   </button>
                   {isExp && (
-                    <div style={{ padding: '2px 12px 8px 38px', fontSize: '0.72rem', color: '#475569', lineHeight: 1.45 }}>
+                    <div style={{ padding: '0 14px 10px 44px', fontSize: '0.72rem', color: '#3c4043', lineHeight: 1.5 }}>
                       {item.detail}
                     </div>
                   )}
@@ -1531,260 +1564,347 @@ export default function PreparationTab({
           </div>
         </div>
 
-        {/* Cold-Chain & Storage Standards tailored to format */}
+        {/* Cold-Chain & Beyond-Use Stability — Linear Row Mode (No Chunky Cards) */}
         <div style={{
           background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '10px',
-          padding: '1.25rem',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+          border: '1px solid #dadce0',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          boxShadow: '0 1px 2px rgba(60, 64, 67, 0.04)',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '0.85rem'
+          flexDirection: 'column'
         }}>
-          <h3 style={{
-            margin: '0',
-            fontSize: '0.86rem',
-            fontWeight: 800,
-            color: '#003666',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em'
-          }}>
-            {isDiagnostic ? 'Specimen Stability & Courier Logistics' :
-             isOral ? 'Storage & Climate Control Standards' : 
-             'Cold Chain & Beyond-Use Stability'}
-          </h3>
-
-          {/* Primary Condition */}
+          {/* GCP Table/Panel Header */}
           <div style={{
-            background: isDiagnostic ? '#f8fafc' : isOral ? '#fff7ed' : isSublingual ? '#faf5ff' : '#eff6ff',
-            border: `1px solid ${isDiagnostic ? '#e2e8f0' : isOral ? '#fed7aa' : isSublingual ? '#e9d5ff' : '#bfdbfe'}`,
-            borderRadius: '8px',
-            padding: '10px 12px'
+            background: '#f8f9fa',
+            borderBottom: '1px solid #dadce0',
+            padding: '10px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '8px'
           }}>
-            <div style={{
-              display: 'flex',
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Thermometer size={15} color="#003666" />
+              <span style={{
+                fontSize: '0.80rem',
+                fontWeight: 700,
+                color: '#202124',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em'
+              }}>
+                {isDiagnostic ? 'Specimen Stability & Logistics' :
+                 isOral ? 'Storage & Climate Standards' : 
+                 'Cold Chain & Beyond-Use Stability'}
+              </span>
+            </div>
+            <span style={{
+              fontSize: '0.66rem',
+              fontWeight: 600,
+              color: '#137333',
+              background: '#e6f4ea',
+              border: '1px solid #ceead6',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              color: isDiagnostic ? '#003666' : isOral ? '#c2410c' : isSublingual ? '#6b21a8' : '#1e40af',
-              fontWeight: 800,
-              fontSize: '0.78rem'
+              gap: '4px'
             }}>
-              {isDiagnostic ? <Archive size={14} color="#003666" /> : isOral ? <Archive size={14} color="#ea580c" /> : <Snowflake size={14} color="#2563eb" />}
-              <span>
-                {isDiagnostic ? 'Unopened Specimen Collection Kit' :
-                 isSpray ? 'Nasal Spray Solution (Unopened)' :
-                 isPen ? 'Pre-filled Pen Cartridge (Unopened)' :
-                 isSublingual ? 'Sublingual Vehicle (Sealed)' :
-                 isOral ? 'Oral Capsules in Bottle with Desiccant' :
-                 'Lyophilized Dry Powder (Unopened)'}
-              </span>
-            </div>
-            <p style={{ margin: '4px 0 0 0', fontSize: '0.74rem', color: isDiagnostic ? '#334155' : isOral ? '#9a3412' : isSublingual ? '#581c87' : '#1e3a8a', lineHeight: 1.4 }}>
-              {isDiagnostic ? 'Store collection kit at ambient room temperature (15°C–25°C). Stable on shelf for up to 24 months before sampling. Keep dry and protected from direct sunlight.' :
-               isSpray ? 'Store at 2°C–8°C (Refrigerated). Protect from heat and direct sunlight. Transit stable up to 14 days at ambient 20°C–25°C.' :
-               isPen ? 'Store refrigerated at 2°C–8°C. Do NOT freeze. Stable in transit in temperature-controlled packaging.' :
-               isSublingual ? 'Store in a cool, dry location (15°C–25°C). Avoid freezer storage. Protect from strong light.' :
-               isOral ? 'Store at controlled room temperature (15°C–25°C). Keep bottle tightly capped with desiccant. Do not store in bathrooms or refrigerators.' :
-               'Store at -20°C (Freezer) for up to 24 months. Stable at room temperature (20°C–25°C) for short-term transit (up to 30 days). Protect from direct light.'}
-            </p>
+              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#188038' }} />
+              USP / Ph. Eur. Validated
+            </span>
           </div>
 
-          {/* Secondary Condition */}
-          <div style={{
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: '8px',
-            padding: '10px 12px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#166534', fontWeight: 800, fontSize: '0.78rem' }}>
-              <Thermometer size={14} color="#16a34a" />
-              <span>
-                {isDiagnostic ? 'Dried Blood Spot Transit Stability' :
-                 isSpray ? 'In-Use Nasal Spray Stability' :
-                 isPen ? 'In-Use Pen Stability (Active Period)' :
-                 isSublingual ? 'Opened Dropper Stability' :
-                 isOral ? 'Enteric Integrity & Shelf-Life' :
-                 'Reconstituted Solution (In Use)'}
-              </span>
-            </div>
-            <p style={{ margin: '4px 0 0 0', fontSize: '0.74rem', color: '#14532d', lineHeight: 1.4 }}>
-              {isDiagnostic ? 'Once dried onto Whatman 903 matrix and sealed with desiccant, biological fatty acid specimens are stable at ambient temperature for up to 28 days during transit.' :
-               isSpray ? 'Refrigerate at 2°C–8°C after first use. Solution maintains full peptide stability for up to 60 days post-opening. Keep upright.' :
-               isPen ? 'Once attached, in-use pen may be kept at room temperature < 25°C or refrigerated for up to 28 days. Remove needle after each injection.' :
-               isSublingual ? 'Maintains full chemical potency for up to 60 days after opening at room temperature (15°C–25°C).' :
-               isOral ? 'Enteric coating remains 100% gastro-resistant for 24 months from manufacturing date when stored dry and sealed.' :
-               'Refrigerate at 2°C–8°C (Do not freeze). When reconstituted with 0.9% Benzyl Alcohol Bacteriostatic Water, the solution maintains chemical potency for up to 28 days.'}
-            </p>
-          </div>
+          {/* Linear Specification Rows */}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
 
-          {/* Clinical Transit Stability & Peace of Mind Assurance (Google Cloud Console Callout) */}
-          {!isDiagnostic && !isOral && (
+            {/* Line 1: Primary Unopened Condition */}
             <div style={{
-              background: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              borderLeft: '4px solid #003666',
-              borderRadius: '8px',
-              padding: '12px 14px'
+              padding: '12px 16px',
+              borderBottom: '1px solid #f1f3f4',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginBottom: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#003666', fontWeight: 800, fontSize: '0.80rem' }}>
-                  <ShieldCheck size={16} color="#003666" />
-                  <span>Transit Stability & Courier Peace of Mind</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Archive size={14} color="#1a73e8" />
+                  <strong style={{ fontSize: '0.78rem', color: '#202124', fontWeight: 600 }}>
+                    {isDiagnostic ? 'Unopened Specimen Collection Kit' :
+                     isSpray ? 'Nasal Spray Solution (Unopened)' :
+                     isPen ? 'Pre-filled Cartridge (Unopened)' :
+                     isSublingual ? 'Sublingual Vehicle (Sealed)' :
+                     isOral ? 'Oral Capsules in Sealed Bottle' :
+                     'Lyophilized Dry Powder (Unopened)'}
+                  </strong>
                 </div>
                 <span style={{
-                  fontSize: '0.64rem',
-                  fontWeight: 800,
-                  color: '#166534',
-                  background: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  padding: '2px 6px',
-                  borderRadius: '4px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: '#1a73e8',
+                  background: '#e8f0fe',
+                  padding: '2px 7px',
+                  borderRadius: '4px'
                 }}>
-                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a' }} />
-                  USP & Ph. Eur. Solid-State Stability Validated
+                  {isDiagnostic ? '15°C–25°C · 24 Mo' :
+                   isOral ? '15°C–25°C · Dry' :
+                   '-20°C Freezer · 24 Mo'}
                 </span>
               </div>
-              <p style={{ margin: '0 0 8px 0', fontSize: '0.74rem', color: '#334155', lineHeight: 1.5 }}>
-                <strong>100% Solid-State Molecular Preservation:</strong> Lyophilized peptides are deep-vacuum freeze-dried with &lt;1% residual moisture. In the absence of aqueous solvent, enzymatic degradation and hydrolytic cleavage cannot occur. Solid-state vials remain 100% stable at room temperature (up to 25°C–30°C) for <strong>30–60 days in transit</strong> with <strong>0.0% loss</strong> in HPLC analytical purity.
+              <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45 }}>
+                {isDiagnostic ? 'Store collection kit at ambient room temperature (15°C–25°C). Stable on shelf for up to 24 months before sampling. Keep dry and protected from direct sunlight.' :
+                 isSpray ? 'Store at 2°C–8°C (Refrigerated). Protect from heat and direct sunlight. Transit stable up to 14 days at ambient 20°C–25°C.' :
+                 isPen ? 'Store refrigerated at 2°C–8°C. Do NOT freeze. Stable in transit in temperature-controlled packaging.' :
+                 isSublingual ? 'Store in a cool, dry location (15°C–25°C). Avoid freezer storage. Protect from strong light.' :
+                 isOral ? 'Store at controlled room temperature (15°C–25°C). Keep bottle tightly capped with desiccant. Do not store in bathrooms or refrigerators.' :
+                 'Store at -20°C (Freezer) for up to 24 months. Stable at room temperature (20°C–25°C) for short-term transit (up to 30 days). Protect from direct light.'}
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: '8px' }}>
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', fontSize: '0.70rem', color: '#475569', lineHeight: 1.4 }}>
-                  <div style={{ color: '#16a34a', fontWeight: 800, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Check size={12} /> Courier & Customs Transit
-                  </div>
-                  Extended international transit or customs hold (5–14 business days) has zero adverse effect on unopened lyophilized vials.
+            </div>
+
+            {/* Line 2: In-Use Reconstituted Condition */}
+            <div style={{
+              padding: '12px 16px',
+              borderBottom: '1px solid #f1f3f4',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Snowflake size={14} color="#137333" />
+                  <strong style={{ fontSize: '0.78rem', color: '#202124', fontWeight: 600 }}>
+                    {isDiagnostic ? 'Dried Blood Spot Transit Stability' :
+                     isSpray ? 'In-Use Nasal Spray Stability' :
+                     isPen ? 'In-Use Pen Stability (Active Period)' :
+                     isSublingual ? 'Opened Dropper Stability' :
+                     isOral ? 'Enteric Integrity & Shelf-Life' :
+                     'Reconstituted Solution (In Use)'}
+                  </strong>
                 </div>
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', fontSize: '0.70rem', color: '#475569', lineHeight: 1.4 }}>
-                  <div style={{ color: '#16a34a', fontWeight: 800, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Check size={12} /> Cool Packs Thawed Upon Arrival
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: '#137333',
+                  background: '#e6f4ea',
+                  padding: '2px 7px',
+                  borderRadius: '4px'
+                }}>
+                  {isDiagnostic ? '28 Days Ambient' :
+                   isOral ? '24 Mo Gastro-Resistant' :
+                   '2°C–8°C Refrig · 28 Days'}
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45 }}>
+                {isDiagnostic ? 'Once dried onto Whatman 903 matrix and sealed with desiccant, biological fatty acid specimens are stable at ambient temperature for up to 28 days during transit.' :
+                 isSpray ? 'Refrigerate at 2°C–8°C after first use. Solution maintains full peptide stability for up to 60 days post-opening. Keep upright.' :
+                 isPen ? 'Once attached, in-use pen may be kept at room temperature < 25°C or refrigerated for up to 28 days. Remove needle after each injection.' :
+                 isSublingual ? 'Maintains full chemical potency for up to 60 days after opening at room temperature (15°C–25°C).' :
+                 isOral ? 'Enteric coating remains 100% gastro-resistant for 24 months from manufacturing date when stored dry and sealed.' :
+                 'Refrigerate at 2°C–8°C (Do not freeze). When reconstituted with 0.9% Benzyl Alcohol Bacteriostatic Water, the solution maintains chemical potency for up to 28 days.'}
+              </p>
+            </div>
+
+            {/* Line 3: Transit Stability & Courier Peace of Mind */}
+            {!isDiagnostic && !isOral && (
+              <div style={{
+                padding: '12px 16px',
+                borderBottom: '1px solid #f1f3f4',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ShieldCheck size={14} color="#003666" />
+                    <strong style={{ fontSize: '0.78rem', color: '#202124', fontWeight: 600 }}>
+                      Transit Stability & Courier Peace of Mind
+                    </strong>
                   </div>
-                  Melted cold packs upon delivery are completely normal and anticipated. Phase packs buffer thermal spikes; dry powder remains 100% intact.
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: '#003666',
+                    background: '#f1f5f9',
+                    padding: '2px 7px',
+                    borderRadius: '4px'
+                  }}>
+                    30–60 Days Ambient Stable
+                  </span>
                 </div>
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', fontSize: '0.70rem', color: '#475569', lineHeight: 1.4 }}>
-                  <div style={{ color: '#003666', fontWeight: 800, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Snowflake size={12} color="#003666" /> Storage Next Steps
+                <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45 }}>
+                  <strong style={{ color: '#202124' }}>100% Solid-State Molecular Preservation:</strong> Lyophilized peptides are deep-vacuum freeze-dried with &lt;1% residual moisture. In the absence of aqueous solvent, enzymatic degradation and hydrolytic cleavage cannot occur. Solid-state vials remain 100% stable at room temperature (up to 25°C–30°C) for <strong>30–60 days in transit</strong> with <strong>0.0% loss</strong> in HPLC analytical purity.
+                </p>
+
+                {/* Sub-lines in compact GCP table format */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '6px',
+                  marginTop: '4px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '6px',
+                    fontSize: '0.70rem',
+                    color: '#3c4043',
+                    lineHeight: 1.35,
+                    background: '#f8f9fa',
+                    border: '1px solid #e8eaed',
+                    padding: '6px 8px',
+                    borderRadius: '4px'
+                  }}>
+                    <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span><strong>Customs & Transit:</strong> 5–14 days hold has zero adverse effect on unopened vials.</span>
                   </div>
-                  Store dry vials in refrigerator (2°C–8°C) or freezer upon arrival. Only reconstitute with Bacteriostatic Water when ready for first dose.
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '6px',
+                    fontSize: '0.70rem',
+                    color: '#3c4043',
+                    lineHeight: 1.35,
+                    background: '#f8f9fa',
+                    border: '1px solid #e8eaed',
+                    padding: '6px 8px',
+                    borderRadius: '4px'
+                  }}>
+                    <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span><strong>Thawed Cold Packs:</strong> Normal upon delivery; phase packs buffer thermal spikes.</span>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '6px',
+                    fontSize: '0.70rem',
+                    color: '#3c4043',
+                    lineHeight: 1.35,
+                    background: '#f8f9fa',
+                    border: '1px solid #e8eaed',
+                    padding: '6px 8px',
+                    borderRadius: '4px'
+                  }}>
+                    <Snowflake size={12} color="#003666" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span><strong>Storage Action:</strong> Place in refrigerator (2°C–8°C) upon delivery.</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Physical Vial Label Links */}
-          {/* Physical Vial Label Links (GCP Distributed Action Tiles) */}
-          <div style={{
-            borderTop: '1px solid #e2e8f0',
-            paddingTop: '0.85rem',
-            marginTop: 'auto'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
-              <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Physical Label Dispensing
-              </span>
-              <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                Standard clinical thermal & A4 templates
-              </span>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '8px' }}>
-              {[
-                { 
-                  key: '38x90', 
-                  format: '38x90', 
-                  label: '38×90 mm Thermal Label', 
-                  desc: 'Individual vial & outer carton adhesive sticker',
-                  icon: <Printer size={15} color="#003666" />, 
-                  title: 'Patient Label — 38×90 mm' 
-                },
-                { 
-                  key: 'sheet', 
-                  format: 'sheet_a4', 
-                  label: 'A4 Dispensing Sheet (×8)', 
-                  desc: 'Multi-dose batch print sheet for clinical trays',
-                  icon: <FileText size={15} color="#003666" />, 
-                  title: 'Patient Labels — A4 Sheet (×8)' 
-                },
-              ].map((opt) => {
-                const qs = new URLSearchParams({ format: opt.format, type: 'client' });
-                if (activeFormat?.id) { qs.set('presentation', activeFormat.id); }
-                const doseLabel = selectedStrength?.name || selectedStrength?.dosage || '';
-                if (doseLabel) qs.set('dose', doseLabel);
-                if (effectiveBatch) qs.set('batch', effectiveBatch);
-                const base = `/api/vial-label/${encodeURIComponent(slug)}?${qs.toString()}`;
-                return (
-                  <button
-                    key={opt.key}
-                    id={`prep-label-preview-${opt.key}`}
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('light');
-                      setLabelPreview({
-                        url: base,
-                        downloadUrl: `${base}&download=1`,
-                        title: opt.title,
-                        subtitle: [activeFormat?.name, doseLabel, effectiveBatch].filter(Boolean).join(' · '),
-                        name: `label_${slug}_${opt.format}.pdf`,
-                      });
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '8px 12px',
-                      background: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#003666';
-                      e.currentTarget.style.background = '#f8fafc';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#cbd5e1';
-                      e.currentTarget.style.background = '#ffffff';
-                    }}
-                    title="Preview before printing"
-                  >
-                    <div style={{ 
-                      width: '32px', 
-                      height: '32px', 
-                      borderRadius: '4px', 
-                      background: '#e0f2fe', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      flexShrink: 0 
-                    }}>
-                      {opt.icon}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
-                        {opt.label}
+            {/* Line 4: Physical Vial Label Dispensing */}
+            <div style={{
+              padding: '12px 16px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              background: '#fafbfc'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Physical Label Dispensing
+                </span>
+                <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                  Standard clinical thermal & A4 templates
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
+                {[
+                  { 
+                    key: '38x90', 
+                    format: '38x90', 
+                    label: '38×90 mm Thermal Label', 
+                    desc: 'Vial & outer carton sticker',
+                    icon: <Printer size={14} color="#003666" />, 
+                    title: 'Patient Label — 38×90 mm' 
+                  },
+                  { 
+                    key: 'sheet', 
+                    format: 'sheet_a4', 
+                    label: 'A4 Dispensing Sheet (×8)', 
+                    desc: 'Batch print for clinical trays',
+                    icon: <FileText size={14} color="#003666" />, 
+                    title: 'Patient Labels — A4 Sheet (×8)' 
+                  },
+                ].map((opt) => {
+                  const qs = new URLSearchParams({ format: opt.format, type: 'client' });
+                  if (activeFormat?.id) { qs.set('presentation', activeFormat.id); }
+                  const doseLabel = selectedStrength?.name || selectedStrength?.dosage || '';
+                  if (doseLabel) qs.set('dose', doseLabel);
+                  if (effectiveBatch) qs.set('batch', effectiveBatch);
+                  const base = `/api/vial-label/${encodeURIComponent(slug)}?${qs.toString()}`;
+                  return (
+                    <button
+                      key={opt.key}
+                      id={`prep-label-preview-${opt.key}`}
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setLabelPreview({
+                          url: base,
+                          downloadUrl: `${base}&download=1`,
+                          title: opt.title,
+                          subtitle: [activeFormat?.name, doseLabel, effectiveBatch].filter(Boolean).join(' · '),
+                          name: `label_${slug}_${opt.format}.pdf`,
+                        });
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 10px',
+                        background: '#ffffff',
+                        border: '1px solid #dadce0',
+                        borderRadius: '6px',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        minHeight: '44px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#1a73e8';
+                        e.currentTarget.style.background = '#f8f9fa';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#dadce0';
+                        e.currentTarget.style.background = '#ffffff';
+                      }}
+                      title="Preview before printing"
+                    >
+                      <div style={{ 
+                        width: '28px', 
+                        height: '28px', 
+                        borderRadius: '4px', 
+                        background: '#e8f0fe', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        flexShrink: 0 
+                      }}>
+                        {opt.icon}
                       </div>
-                      <div style={{ fontSize: '0.66rem', color: '#64748b', marginTop: '2px', lineHeight: 1.2 }}>
-                        {opt.desc}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.74rem', fontWeight: 600, color: '#202124', lineHeight: 1.2 }}>
+                          {opt.label}
+                        </div>
+                        <div style={{ fontSize: '0.66rem', color: '#5f6368', marginTop: '2px', lineHeight: 1.2 }}>
+                          {opt.desc}
+                        </div>
                       </div>
-                    </div>
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                })}
+              </div>
+              <DocumentPreviewModal
+                isOpen={!!labelPreview}
+                onClose={() => setLabelPreview(null)}
+                fileUrl={labelPreview?.url}
+                downloadUrl={labelPreview?.downloadUrl}
+                downloadName={labelPreview?.name}
+                title={labelPreview?.title}
+                subtitle={labelPreview?.subtitle}
+              />
             </div>
-            <DocumentPreviewModal
-              isOpen={!!labelPreview}
-              onClose={() => setLabelPreview(null)}
-              fileUrl={labelPreview?.url}
-              downloadUrl={labelPreview?.downloadUrl}
-              downloadName={labelPreview?.name}
-              title={labelPreview?.title}
-              subtitle={labelPreview?.subtitle}
-            />
+
           </div>
         </div>
       </section>
