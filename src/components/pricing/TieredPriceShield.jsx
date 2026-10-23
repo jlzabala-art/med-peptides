@@ -37,13 +37,104 @@ export function resolveProductTierPricing(product) {
     retailPrice = Math.round((product.retailPriceAed / 3.97) * 100) / 100;
   }
 
+  // Direct pricing object in Firestore schema
+  if (product.pricing && typeof product.pricing === 'object') {
+    if (typeof product.pricing.clinic === 'number' && product.pricing.clinic > 0) clinicPrice = product.pricing.clinic;
+    if (typeof product.pricing.wholesale === 'number' && product.pricing.wholesale > 0) wholesalePrice = product.pricing.wholesale;
+    if (typeof product.pricing.retail === 'number' && product.pricing.retail > 0) retailPrice = product.pricing.retail;
+    if (typeof product.pricing.supplierCost === 'number' && product.pricing.supplierCost > 0) landedCost = product.pricing.supplierCost;
+  }
+
   // Direct EUR / base price overrides
   if (!clinicPrice) {
     if (typeof product.price === 'number' && product.price > 0) {
       clinicPrice = product.price;
+    } else if (typeof product.originalPrice === 'number' && product.originalPrice > 0) {
+      clinicPrice = product.originalPrice;
     } else {
-      const id = (product.id || product.slug || '').toLowerCase();
-      if (id.includes('diamond-cream')) clinicPrice = 64.00;
+      const id = (product.id || product.slug || product.canonicalId || product.name || '').toLowerCase();
+      
+      // 1. Bloodo™ Diagnostic Panels (Capillary DBS LC-MS/MS)
+      if (id.includes('nad') || id.includes('bloodo-nad')) {
+        clinicPrice = 149.00;
+        wholesalePrice = 119.00;
+        retailPrice = 195.00;
+        landedCost = 79.00;
+      } else if (id.includes('testosterone') || id.includes('testosterona')) {
+        clinicPrice = 115.00;
+        wholesalePrice = 92.00;
+        retailPrice = 149.00;
+        landedCost = 62.00;
+      } else if (id.includes('cortisol')) {
+        clinicPrice = 129.00;
+        wholesalePrice = 105.00;
+        retailPrice = 169.00;
+        landedCost = 72.00;
+      } else if (id.includes('hba1c') || id.includes('hemoglobin') || id.includes('glucose') || id.includes('glicacion')) {
+        clinicPrice = 69.00;
+        wholesalePrice = 55.00;
+        retailPrice = 89.00;
+        landedCost = 38.00;
+      } else if (id.includes('omega') || id.includes('lipid')) {
+        clinicPrice = 119.00;
+        wholesalePrice = 95.00;
+        retailPrice = 159.00;
+        landedCost = 65.00;
+      } else if (id.includes('vitamin-d') || id.includes('vitd') || id.includes('vit-d')) {
+        clinicPrice = 59.00;
+        wholesalePrice = 47.00;
+        retailPrice = 79.00;
+        landedCost = 32.00;
+      }
+      
+      // 2. TeleTest Laboratory Spain (HTMA, HLA, Toxicology)
+      else if (id.includes('htma') || id.includes('mineralograma')) {
+        clinicPrice = 125.00;
+        wholesalePrice = 99.00;
+        retailPrice = 165.00;
+        landedCost = 68.00;
+      } else if (id.includes('celiac') || id.includes('gluten') || id.includes('hla')) {
+        clinicPrice = 140.00;
+        wholesalePrice = 112.00;
+        retailPrice = 185.00;
+        landedCost = 75.00;
+      } else if (id.includes('metabolizer') || id.includes('detox')) {
+        clinicPrice = 175.00;
+        wholesalePrice = 140.00;
+        retailPrice = 230.00;
+        landedCost = 95.00;
+      } else if (id.includes('heavy-metals') || id.includes('pesados')) {
+        clinicPrice = 135.00;
+        wholesalePrice = 108.00;
+        retailPrice = 179.00;
+        landedCost = 72.00;
+      }
+
+      // 3. Fagron Genomics TeloTest™ & Genomics Platforms
+      else if (id.includes('telotest') || id.includes('telomere')) {
+        clinicPrice = 199.00;
+        wholesalePrice = 159.00;
+        retailPrice = 269.00;
+        landedCost = 110.00;
+      } else if (id.includes('trichotest')) {
+        clinicPrice = 189.00;
+        wholesalePrice = 149.00;
+        retailPrice = 249.00;
+        landedCost = 105.00;
+      } else if (id.includes('nutrigen')) {
+        clinicPrice = 220.00;
+        wholesalePrice = 175.00;
+        retailPrice = 295.00;
+        landedCost = 120.00;
+      } else if (id.includes('eterna')) {
+        clinicPrice = 280.00;
+        wholesalePrice = 220.00;
+        retailPrice = 360.00;
+        landedCost = 150.00;
+      }
+
+      // 4. Colway Official Cosmeceuticals
+      else if (id.includes('diamond-cream')) clinicPrice = 64.00;
       else if (id.includes('diamond-peeling') || id.includes('diamond-exfoliat')) clinicPrice = 34.00;
       else if (id.includes('colvita')) clinicPrice = 31.00;
       else if (id.includes('vege')) clinicPrice = 25.00;
@@ -51,6 +142,28 @@ export function resolveProductTierPricing(product) {
       else if (id.includes('conditioner')) clinicPrice = 29.00;
       else if (id.includes('wash')) clinicPrice = 29.00;
       else if (id.includes('lip')) clinicPrice = 4.50;
+
+      // 5. Category-level clinical fallbacks
+      else {
+        const cat = (product.category || product.type || '').toLowerCase();
+        if (cat.includes('test') || cat.includes('diagnostic') || cat.includes('biomarker')) {
+          clinicPrice = 119.00;
+          wholesalePrice = 95.00;
+          retailPrice = 159.00;
+          landedCost = 65.00;
+        } else if (cat.includes('supplement') || cat.includes('nutra')) {
+          clinicPrice = 38.00;
+          wholesalePrice = 29.00;
+          retailPrice = 55.00;
+          landedCost = 18.00;
+        } else {
+          // Default peptide vial
+          clinicPrice = 48.00;
+          wholesalePrice = 38.00;
+          retailPrice = 68.00;
+          landedCost = 24.00;
+        }
+      }
     }
   }
 

@@ -18,6 +18,8 @@ import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import { QRCodeSVG } from 'qrcode.react';
 import UniversalQrCard from '@/components/ui/UniversalQrCard';
+import TieredPriceShield from '@/components/pricing/TieredPriceShield';
+import FrictionFreeUnlockModal from '@/components/pricing/FrictionFreeUnlockModal';
 
 /**
  * DiagnosticTestWidget
@@ -32,6 +34,7 @@ export default function DiagnosticTestWidget({
 }) {
   const isEs = lang === 'es';
   const [copied, setCopied] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
 
   const resolvedUrl = publicUrl || (typeof window !== 'undefined' ? window.location.href : `https://www.atlashealth-services.com/p/${slug}`);
 
@@ -52,6 +55,59 @@ export default function DiagnosticTestWidget({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginTop: '1rem' }}>
       
+      {/* ── CARD 0: ROLE-BASED TIERED PRICE SHIELD (Google Cloud UX) ── */}
+      <div style={{
+        background: '#ffffff',
+        borderRadius: '10px',
+        border: '1px solid #e2e8f0',
+        padding: '0.85rem',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+      }}>
+        <TieredPriceShield
+          product={product || { id: slug, slug, category: 'Biomarker Test' }}
+          currency="EUR"
+          compact={false}
+          isEs={isEs}
+          onUnlockRequest={() => setIsUnlockModalOpen(true)}
+        />
+        {onOpenInquiry && (
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              onOpenInquiry();
+            }}
+            style={{
+              width: '100%',
+              marginTop: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '8px 12px',
+              background: 'linear-gradient(135deg, #003666 0%, #0284c7 100%)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '0.74rem',
+              fontWeight: 750,
+              cursor: 'pointer',
+              boxShadow: '0 2px 4px rgba(0,54,102,0.18)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <span>{isEs ? 'Consultar Kit Diagnóstico →' : 'Inquire Diagnostic Kit →'}</span>
+          </button>
+        )}
+      </div>
+
+      <FrictionFreeUnlockModal
+        isOpen={isUnlockModalOpen}
+        onClose={() => setIsUnlockModalOpen(false)}
+        isEs={isEs}
+        brandName="Bloodo™ Diagnostics"
+      />
+
       {/* ── CARD 1: CLINICAL LABORATORY SPECIFICATIONS ── */}
       <div style={{
         background: '#ffffff',

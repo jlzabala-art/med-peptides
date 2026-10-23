@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   Activity,
@@ -17,6 +17,8 @@ import {
   ExternalLink
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
+import TieredPriceShield from '@/components/pricing/TieredPriceShield';
+import FrictionFreeUnlockModal from '@/components/pricing/FrictionFreeUnlockModal';
 import './BloodoSuiteNav.css';
 
 /**
@@ -197,6 +199,7 @@ export default function BloodoSuiteNav({
   onSelect = null
 }) {
   const isEs = lang === 'es';
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
   const currentTest = getBloodoTestBySlug(currentSlug);
   const activeSlug = currentTest?.slug || currentSlug;
 
@@ -425,6 +428,21 @@ export default function BloodoSuiteNav({
                 </p>
               </div>
 
+              {/* Role-Based Blurred Price Shield (Google Cloud UX) */}
+              <div className="bloodo-suite-card__price-shield" style={{ marginTop: 'auto', marginBottom: '0.75rem' }}>
+                <TieredPriceShield
+                  product={{
+                    id: test.id,
+                    slug: test.slug,
+                    name: test.nameEn,
+                    category: 'Biomarker Test'
+                  }}
+                  isEs={isEs}
+                  compact={false}
+                  onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                />
+              </div>
+
               <div className="bloodo-suite-card__footer">
                 {isActive ? (
                   <div className="bloodo-suite-card__active-state">
@@ -446,6 +464,14 @@ export default function BloodoSuiteNav({
           );
         })}
       </div>
+
+      {/* ── Friction-Free B2B Unlock Modal (1-Click Google / WhatsApp Magic Link) ── */}
+      <FrictionFreeUnlockModal
+        isOpen={isUnlockModalOpen}
+        onClose={() => setIsUnlockModalOpen(false)}
+        isEs={isEs}
+        brandName="Bloodo™ Diagnostics"
+      />
     </section>
   );
 }

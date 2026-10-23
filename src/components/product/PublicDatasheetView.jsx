@@ -97,6 +97,8 @@ import ReconstitutionRouterSection from './datasheet/sections/ReconstitutionRout
 import PeptideMonographWorkspace from './monograph/PeptideMonographWorkspace';
 import { CollectionBadgePill, CollectionCompanionBanner, resolveBrandCollectionInfo } from './CollectionBannerWidget';
 import { Mail, Lock } from 'lucide-react';
+import TieredPriceShield from '@/components/pricing/TieredPriceShield';
+import FrictionFreeUnlockModal from '@/components/pricing/FrictionFreeUnlockModal';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
 import { getHumanFormatName } from '../../utils/productVariantProcessing';
@@ -201,6 +203,8 @@ export default function PublicDatasheetView({
     }, 4000);
   };
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+  const [adminSimulationTier, setAdminSimulationTier] = useState(null);
   const requestedLangs = useRef(new Set());
 
   const primaryProtocol = useMemo(() => {
@@ -2240,126 +2244,215 @@ export default function PublicDatasheetView({
           }
           desktopSecondary={
             diagnosticHeroImage ? (
-              <div 
-                className="pds-hero-square-showcase"
-                onClick={() => setIsImageModalOpen(true)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsImageModalOpen(true); }}
-                title={lang === 'es' ? 'Haz clic para ampliar la imagen del kit oficial' : 'Click to inspect official kit packaging'}
-              >
-                {/* 1. Frosted Glass Top Badges */}
-                <div className="pds-square-badge-strip">
-                  <div className="pds-square-frosted-pill">
-                    <ShieldCheck size={13} color="#0d9488" />
-                    <span>
-                      {isEternaDiagnostic
-                        ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
-                        : (isDiagnosticKit || isBloodoDiagnostic)
-                        ? (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')
-                        : isSupplementProduct
-                        ? (lang === 'es' ? 'Nutracéutico Clínico Oficial' : 'Official Clinical Nutraceutical')
-                        : (lang === 'es' ? 'Cosmecéutico Oficial Colway' : 'Official Colway Cosmeceutical')}
-                    </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', maxWidth: '320px' }}>
+                <div 
+                  className="pds-hero-square-showcase"
+                  onClick={() => setIsImageModalOpen(true)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsImageModalOpen(true); }}
+                  title={lang === 'es' ? 'Haz clic para ampliar la imagen del kit oficial' : 'Click to inspect official kit packaging'}
+                >
+                  {/* 1. Frosted Glass Top Badges */}
+                  <div className="pds-square-badge-strip">
+                    <div className="pds-square-frosted-pill">
+                      <ShieldCheck size={13} color="#0d9488" />
+                      <span>
+                        {isEternaDiagnostic
+                          ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
+                          : (isDiagnosticKit || isBloodoDiagnostic)
+                          ? (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')
+                          : isSupplementProduct
+                          ? (lang === 'es' ? 'Nutracéutico Clínico Oficial' : 'Official Clinical Nutraceutical')
+                          : (lang === 'es' ? 'Cosmecéutico Oficial Colway' : 'Official Colway Cosmeceutical')}
+                      </span>
+                    </div>
+                    <div className="pds-square-zoom-btn" title={lang === 'es' ? 'Ampliar imagen' : 'Enlarge image'}>
+                      <ZoomIn size={14} />
+                    </div>
                   </div>
-                  <div className="pds-square-zoom-btn" title={lang === 'es' ? 'Ampliar imagen' : 'Enlarge image'}>
-                    <ZoomIn size={14} />
+
+                  {/* 2. Studio Lighting Square Viewport */}
+                  <div className="pds-square-img-viewport">
+                    <img
+                      src={diagnosticHeroImage}
+                      alt={name}
+                      className="pds-square-product-img"
+                      loading="eager"
+                    />
+                  </div>
+
+                  {/* 3. High-End Technical Spec Strip */}
+                  <div className="pds-square-footer-spec">
+                    <div className="pds-square-lab-row">
+                      <span className="pds-square-lab-name">
+                        {isEternaDiagnostic
+                          ? 'Fagron Genomics / European Lab'
+                          : (isDiagnosticKit || isBloodoDiagnostic)
+                          ? 'LifeLab1 Central Lab (Vilnius)'
+                          : `${displaySupplierName || 'Colway'} · Bioactive Laboratory`}
+                      </span>
+                      <span className="pds-square-ce-tag">
+                        {isEternaDiagnostic ? 'CE-IVD' : (isDiagnosticKit || isBloodoDiagnostic) ? 'CE-IVDR' : 'EU GMP'}
+                      </span>
+                    </div>
+                    <div className="pds-square-sub-meta">
+                      <span>
+                        {isEternaDiagnostic
+                          ? 'Saliva DNA Buffer'
+                          : (isDiagnosticKit || isBloodoDiagnostic)
+                          ? 'Whatman® 903 Card'
+                          : isSupplementProduct
+                          ? (lang === 'es' ? 'Colágeno Liofilizado Nativo' : 'Native Freeze-Dried Tropocollagen')
+                          : 'Biologically Active Tropocollagen'}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        {isEternaDiagnostic
+                          ? '+700K Microarray'
+                          : (isDiagnosticKit || isBloodoDiagnostic)
+                          ? 'Capillary DBS LC-MS'
+                          : `Batch: ${selectedStrength?.batchCode || 'AS-COL-CL60-2610'}`}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* 2. Studio Lighting Square Viewport */}
-                <div className="pds-square-img-viewport">
-                  <img
-                    src={diagnosticHeroImage}
-                    alt={name}
-                    className="pds-square-product-img"
-                    loading="eager"
+                {/* ── Google Cloud UX Role-Based Tiered Price Card (Overview) ── */}
+                <div style={{
+                  background: '#ffffff',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  padding: '12px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+                }}>
+                  <TieredPriceShield
+                    product={product}
+                    currency="EUR"
+                    compact={false}
+                    isEs={lang === 'es'}
+                    onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                    adminSimulationTier={adminSimulationTier}
+                    onSelectAdminSimulationTier={setAdminSimulationTier}
                   />
-                </div>
 
-                {/* 3. High-End Technical Spec Strip */}
-                <div className="pds-square-footer-spec">
-                  <div className="pds-square-lab-row">
-                    <span className="pds-square-lab-name">
-                      {isEternaDiagnostic
-                        ? 'Fagron Genomics / European Lab'
-                        : (isDiagnosticKit || isBloodoDiagnostic)
-                        ? 'LifeLab1 Central Lab (Vilnius)'
-                        : `${displaySupplierName || 'Colway'} · Bioactive Laboratory`}
-                    </span>
-                    <span className="pds-square-ce-tag">
-                      {isEternaDiagnostic ? 'CE-IVD' : (isDiagnosticKit || isBloodoDiagnostic) ? 'CE-IVDR' : 'EU GMP'}
-                    </span>
-                  </div>
-                  <div className="pds-square-sub-meta">
-                    <span>
-                      {isEternaDiagnostic
-                        ? 'Saliva DNA Buffer'
-                        : (isDiagnosticKit || isBloodoDiagnostic)
-                        ? 'Whatman® 903 Card'
-                        : isSupplementProduct
-                        ? (lang === 'es' ? 'Colágeno Liofilizado Nativo' : 'Native Freeze-Dried Tropocollagen')
-                        : 'Biologically Active Tropocollagen'}
-                    </span>
-                    <span>•</span>
-                    <span>
-                      {isEternaDiagnostic
-                        ? '+700K Microarray'
-                        : (isDiagnosticKit || isBloodoDiagnostic)
-                        ? 'Capillary DBS LC-MS'
-                        : `Batch: ${selectedStrength?.batchCode || 'AS-COL-CL60-2610'}`}
-                    </span>
-                  </div>
+                  {/* Primary Inquire / Order CTA Button */}
+                  <button
+                    type="button"
+                    onClick={handleOpenInquiry}
+                    style={{
+                      width: '100%',
+                      padding: '8px 14px',
+                      borderRadius: '6px',
+                      background: 'linear-gradient(135deg, #003666 0%, #0284c7 100%)',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontSize: '0.80rem',
+                      fontWeight: 750,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      boxShadow: '0 2px 4px rgba(0,54,102,0.18)',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <span>{isDiagnosticKit ? (lang === 'es' ? 'Consultar Test Diagnóstico →' : 'Inquire Diagnostic Test →') : (lang === 'es' ? 'Consultar Formulación →' : 'Inquire Formulation →')}</span>
+                  </button>
                 </div>
               </div>
             ) : null
           }
           mobileSecondary={
             diagnosticHeroImage ? (
-              <div 
-                className="pds-hero-mobile-square-card"
-                onClick={() => setIsImageModalOpen(true)}
-                role="button"
-                tabIndex={0}
-              >
-                <div className="pds-mobile-square-thumb-wrap">
-                  <img
-                    src={diagnosticHeroImage}
-                    alt={name}
-                    className="pds-mobile-square-thumb"
-                    loading="eager"
-                  />
-                </div>
-                <div className="pds-mobile-square-content">
-                  <div className="pds-mobile-square-badge">
-                    <ShieldCheck size={11} color="#0d9488" />
-                    <span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                <div 
+                  className="pds-hero-mobile-square-card"
+                  onClick={() => setIsImageModalOpen(true)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="pds-mobile-square-thumb-wrap">
+                    <img
+                      src={diagnosticHeroImage}
+                      alt={name}
+                      className="pds-mobile-square-thumb"
+                      loading="eager"
+                    />
+                  </div>
+                  <div className="pds-mobile-square-content">
+                    <div className="pds-mobile-square-badge">
+                      <ShieldCheck size={11} color="#0d9488" />
+                      <span>
+                        {isEternaDiagnostic
+                          ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
+                          : (isDiagnosticKit || isBloodoDiagnostic)
+                          ? (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')
+                          : isSupplementProduct
+                          ? (lang === 'es' ? 'Nutracéutico Clínico' : 'Clinical Nutraceutical')
+                          : (lang === 'es' ? 'Cosmecéutico Oficial' : 'Official Cosmeceutical')}
+                      </span>
+                    </div>
+                    <strong className="pds-mobile-square-title">
                       {isEternaDiagnostic
-                        ? (lang === 'es' ? 'Kit Oficial ETERNA DX' : 'Official ETERNA DX Kit')
+                        ? 'Fagron Genomics / European Lab'
                         : (isDiagnosticKit || isBloodoDiagnostic)
-                        ? (lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit')
-                        : isSupplementProduct
-                        ? (lang === 'es' ? 'Nutracéutico Clínico' : 'Clinical Nutraceutical')
-                        : (lang === 'es' ? 'Cosmecéutico Oficial' : 'Official Cosmeceutical')}
+                        ? 'LifeLab1 Clinical Laboratory'
+                        : `${displaySupplierName || 'Colway'} Bioactive`}
+                    </strong>
+                    <span className="pds-mobile-square-sub">
+                      {isEternaDiagnostic
+                        ? 'CE-IVD Certified · Saliva DNA Kit'
+                        : (isDiagnosticKit || isBloodoDiagnostic)
+                        ? 'CE-IVDR Certified · Whatman® 903 Card'
+                        : 'EU GMP Standard · 100% Bioactive Formulations'}
                     </span>
                   </div>
-                  <strong className="pds-mobile-square-title">
-                    {isEternaDiagnostic
-                      ? 'Fagron Genomics / European Lab'
-                      : (isDiagnosticKit || isBloodoDiagnostic)
-                      ? 'LifeLab1 Clinical Laboratory'
-                      : `${displaySupplierName || 'Colway'} Bioactive`}
-                  </strong>
-                  <span className="pds-mobile-square-sub">
-                    {isEternaDiagnostic
-                      ? 'CE-IVD Certified · Saliva DNA Kit'
-                      : (isDiagnosticKit || isBloodoDiagnostic)
-                      ? 'CE-IVDR Certified · Whatman® 903 Card'
-                      : 'EU GMP Standard · 100% Bioactive Formulations'}
-                  </span>
+                  <div className="pds-mobile-square-action">
+                    <ZoomIn size={16} color="#0284c7" />
+                  </div>
                 </div>
-                <div className="pds-mobile-square-action">
-                  <ZoomIn size={16} color="#0284c7" />
+
+                {/* ── Mobile Tiered Price Shield (Google Cloud UX) ── */}
+                <div style={{
+                  background: '#ffffff',
+                  borderRadius: '10px',
+                  border: '1px solid #e2e8f0',
+                  padding: '10px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+                }}>
+                  <TieredPriceShield
+                    product={product}
+                    currency="EUR"
+                    compact={false}
+                    isEs={lang === 'es'}
+                    onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                    adminSimulationTier={adminSimulationTier}
+                    onSelectAdminSimulationTier={setAdminSimulationTier}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleOpenInquiry}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      background: 'linear-gradient(135deg, #003666 0%, #0284c7 100%)',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontSize: '0.78rem',
+                      fontWeight: 750,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      boxShadow: '0 2px 4px rgba(0,54,102,0.18)'
+                    }}
+                  >
+                    <span>{isDiagnosticKit ? (lang === 'es' ? 'Consultar Test Diagnóstico →' : 'Inquire Diagnostic Test →') : (lang === 'es' ? 'Consultar Formulación →' : 'Inquire Formulation →')}</span>
+                  </button>
                 </div>
               </div>
             ) : null
@@ -3085,6 +3178,14 @@ export default function PublicDatasheetView({
           lang={lang}
         />
       )}
+
+      {/* ── Friction-Free B2B Unlock Modal (1-Click Google / WhatsApp Magic Link) ── */}
+      <FrictionFreeUnlockModal
+        isOpen={isUnlockModalOpen}
+        onClose={() => setIsUnlockModalOpen(false)}
+        isEs={lang === 'es'}
+        brandName={product?.brand || 'Atlas Health'}
+      />
 
       {/* Unified Persistent Sticky Bottom Action Bar (GCP Standard) */}
       <PublicStickyActionBar
