@@ -357,6 +357,22 @@ const INQUIRY_TOPICS_COLWAY = [
 
 const INQUIRY_TOPICS_BLOODO = [
   {
+    id: 'home_dbs_kit',
+    labelEn: 'Home DBS Test Kit Dispatch & Patient Sampling',
+    labelEs: 'Envío de Kit a Domicilio y Toma Capilar (DBS)',
+    icon: FlaskConical,
+    placeholderEn: 'Specify home or clinic delivery address, sample collection instructions, or expedited courier dispatch requirements...',
+    placeholderEs: 'Indique dirección de envío para el kit, dudas sobre la toma capilar con lanceta o solicitud de entrega urgente...'
+  },
+  {
+    id: 'clinic_b2b',
+    labelEn: 'Clinic B2B Panel Packages & Volume Orders',
+    labelEs: 'Tarifas B2B por Volumen y Packs para Clínicas',
+    icon: Building2,
+    placeholderEn: 'Inquire about recurring clinic diagnostic subscriptions, volume pricing on biomarker panels, or partner lab dashboard access...',
+    placeholderEs: 'Consulte sobre paquetes recurrentes para clínicas de longevidad, descuentos por volumen o acceso al portal médico...'
+  },
+  {
     id: 'lab_specs',
     labelEn: 'LC-MS/MS Methodology & Biomarker Ranges',
     labelEs: 'Metodología Analítica LC-MS/MS y Rangos de Referencia',
@@ -373,16 +389,8 @@ const INQUIRY_TOPICS_BLOODO = [
     placeholderEs: 'Consulte sobre estabilidad de la muestra, logística de devolución postal, mensajería o plazos de entrega de resultados...'
   },
   {
-    id: 'clinic_b2b',
-    labelEn: 'Clinic B2B Panel Packages & Volume Subscription',
-    labelEs: 'Tarifas B2B por Volumen y Packs para Clínicas',
-    icon: Building2,
-    placeholderEn: 'Inquire about recurring clinic diagnostic subscriptions, volume pricing on biomarker panels, or partner lab dashboard access...',
-    placeholderEs: 'Consulte sobre paquetes recurrentes para clínicas de longevidad, descuentos por volumen o acceso al portal médico...'
-  },
-  {
     id: 'decision_support',
-    labelEn: 'Clinical Decision Support & Interpretation',
+    labelEn: 'Clinical Decision Support & Biomarker Consultation',
     labelEs: 'Soporte de Interpretación Médica y Decisión Clínica',
     icon: Sparkles,
     placeholderEn: 'Request clinician-to-clinician consultation on biomarker correlation (intracellular NAD+, diurnal cortisol, FAI) with therapeutics...',
@@ -555,7 +563,7 @@ export default function PublicInstitutionalInquiryDrawer({
     if (brandType === 'peptides') return 'clinical_dosing';
     if (brandType === 'prescription') return 'rx_details';
     if (brandType === 'colway') return 'salon_wholesale';
-    if (brandType === 'bloodo') return 'clinic_b2b';
+    if (brandType === 'bloodo') return 'home_dbs_kit';
     if (contextType === 'product') return 'coa_specs';
     if (contextType === 'protocol') return 'clinical_dosing';
     if (contextType === 'catalog') return 'wholesale_access';

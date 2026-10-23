@@ -10,7 +10,6 @@ import {
   Sparkles
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
-import BloodoSuiteNav from './BloodoSuiteNav';
 import AssociatedProtocolsSidebarWidget from './AssociatedProtocolsSidebarWidget';
 import CosmeticsSidebarWidget from './CosmeticsSidebarWidget';
 import PeptideVialWidget from './widgets/PeptideVialWidget';
@@ -29,7 +28,7 @@ import './PublicDatasheetTableOfContents.css';
  * Specialized, highly flexible Google Cloud Console-compliant sidebar for product datasheets.
  * Automatically delegates to appropriate specialized widgets based on product category:
  *  - Lyophilized Peptides & Viales -> PeptideVialWidget (PDF Monograph, COA, HPLC >99%, Active Batch)
- *  - Diagnostic Kits -> DiagnosticTestWidget (CE-IVDR, LifeLab1, DBS Protocol) + BloodoSuiteNav
+ *  - Diagnostic Kits -> DiagnosticTestWidget (CE-IVDR, LifeLab1, DBS Protocol)
  *  - Cosmeceuticals & Hair -> CosmeticsSidebarWidget (Colway 2-Step Routine, CPNP 1223/2009)
  *  - Sterile Solvents -> SolventReconWidget (28-day rule, Benzyl alcohol 0.9%, Endotoxins)
  *  - Corporate Services -> CorporateServiceWidget (Law 14/2013, 20-day UGE-CE, Schengen)
@@ -186,19 +185,12 @@ export default function ProductDetailSidebar({
 
     if (isDiagnosticKit || isBloodoDiagnostic) {
       return (
-        <>
-          <BloodoSuiteNav
-            currentSlug={slug || product?.slug || ''}
-            lang={lang}
-            variant="drawer"
-          />
-          <DiagnosticTestWidget
-            product={product}
-            slug={slug}
-            lang={lang}
-            onOpenInquiry={onOpenInquiry}
-          />
-        </>
+        <DiagnosticTestWidget
+          product={product}
+          slug={slug}
+          lang={lang}
+          onOpenInquiry={onOpenInquiry}
+        />
       );
     }
 

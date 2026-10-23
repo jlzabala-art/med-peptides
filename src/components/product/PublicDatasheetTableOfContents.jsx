@@ -9,7 +9,6 @@ import {
   ArrowUp 
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
-import BloodoSuiteNav from './BloodoSuiteNav';
 import AssociatedProtocolsSidebarWidget from './AssociatedProtocolsSidebarWidget';
 import SimilarProtocolsSidebarWidget from './SimilarProtocolsSidebarWidget';
 import ProtocolTopicalAdjunctsSidebarWidget from '@/components/protocol/ProtocolTopicalAdjunctsSidebarWidget';
@@ -205,15 +204,6 @@ export default function PublicDatasheetTableOfContents({
             </ul>
           </nav>
 
-          {/* Bloodo Diagnostic Suite Direct Test Switcher (Bloodo Products Only) */}
-          {isBloodoSuite && (
-            <BloodoSuiteNav
-              currentSlug={currentProductSlug}
-              lang={lang}
-              variant="drawer"
-            />
-          )}
-
           {/* Associated Clinical Protocols (All Products) */}
           {Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (
             <AssociatedProtocolsSidebarWidget
@@ -367,16 +357,6 @@ export default function PublicDatasheetTableOfContents({
                   );
                 })}
               </ul>
-
-              {/* Bloodo Diagnostic Suite Direct Test Switcher (Bloodo Products Only) */}
-              {isBloodoSuite && (
-                <BloodoSuiteNav
-                  currentSlug={currentProductSlug}
-                  lang={lang}
-                  variant="drawer"
-                  onSelect={() => setIsMobileDrawerOpen(false)}
-                />
-              )}
 
               {/* Associated Clinical Protocols (All Products) */}
               {Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (

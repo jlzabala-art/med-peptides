@@ -188,13 +188,7 @@ export default function PublicDatasheetView({
   const router = useRouter();
 
   const handleOpenInquiry = () => {
-    if (!user) {
-      triggerHaptic('warning');
-      toast.error(lang === 'es' ? 'Debes iniciar sesión para consultar o solicitar cotizaciones.' : 'Please sign in to request a quotation.');
-      const redirectUrl = typeof window !== 'undefined' ? window.location.pathname : '/';
-      router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
-      return;
-    }
+    triggerHaptic('light');
     setIsInquiryDrawerOpen(true);
   };
 
@@ -3073,12 +3067,20 @@ export default function PublicDatasheetView({
         <PublicInstitutionalInquiryDrawer
           isOpen={isInquiryDrawerOpen}
           onClose={() => setIsInquiryDrawerOpen(false)}
-          contextType={isCompoundingService ? 'compounding' : isPeptideSupplyService ? 'supply' : 'product'}
+          contextType={isDiagnosticKit ? 'diagnostic' : isCompoundingService ? 'compounding' : isPeptideSupplyService ? 'supply' : 'product'}
+          brandType={isBloodoDiagnostic ? 'bloodo' : isDiagnosticKit ? 'bloodo' : undefined}
           initialEntity={{
             name: product?.canonicalName || product?.name || slug,
             slug: slug,
             strength: selectedStrength?.name || selectedStrengthId || '',
-            category: isCompoundingService ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding') : isPeptideSupplyService ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management') : (product?.category || 'Peptides')
+            category: isDiagnosticKit
+              ? (lang === 'es' ? 'Test Diagnóstico Capilar (DBS LC-MS)' : 'Capillary Diagnostic Test (DBS LC-MS)')
+              : isCompoundingService
+              ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding')
+              : isPeptideSupplyService
+              ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management')
+              : (product?.category || 'Peptides'),
+            inquiryGoal: isDiagnosticKit ? 'home_dbs_kit' : undefined
           }}
           lang={lang}
         />
