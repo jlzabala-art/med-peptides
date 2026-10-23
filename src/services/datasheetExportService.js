@@ -254,10 +254,10 @@ export async function generateProductDatasheetPdf(product, options = {}) {
   y += 4;
 
   const storageInfo = [
-    ['Lyophilized Storage:', 'Store at -20°C for optimal long-term stability (up to 24 months). Protect from direct light.'],
+    ['Lyophilized Storage:', 'Store at -20°C (freezer) for long-term stability (up to 24 months*). Ambient transit (20°C–25°C) stable up to 30 days*.'],
     ['Reconstitution Solvent:', 'Bacteriostatic Water (0.9% Benzyl Alcohol) or Sterile Saline.'],
-    ['Reconstituted Stability:', 'Store at 2°C to 8°C (Refrigerated). Do not freeze reconstituted solution. Stable 28 days.'],
-    ['Handling Note:', 'Allow vial to reach room temperature before adding solvent. Gently swirl — do not vortex.']
+    ['Reconstituted Stability:', 'Store at 2°C to 8°C (Refrigerated). Do not freeze. Reconstituted with BAC water stable up to 28 days* (sterile water: single use / 24–48h*).'],
+    ['Handling Note:', 'Allow vial to reach room temperature before adding solvent. Gently swirl — do not vortex or shake.']
   ];
 
   autoTable(doc, {

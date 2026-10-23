@@ -279,7 +279,7 @@ export default function PreparationTab({
         `Administration Route: Intranasal Mucosal (Needle-Free · Bilateral)`,
         `Doses per Container: ~${sprayCalc.totalApplications} administrations`,
         `Technique: 45° angle towards lateral nasal wall, gentle inhalation`,
-        `Storage: Refrigerate at 2°C–8°C upright • Shelf Life: 60 Days Post-Opening`
+        `Storage: Refrigerate at 2°C–8°C upright • Beyond-Use Date: Up to 28 Days Post-Opening (subject to product validation)`
       ].join('\n');
     } else if (isPen) {
       text = [
@@ -290,7 +290,7 @@ export default function PreparationTab({
         `Delivered Dose: ${penCalc.deliveredDoseDisplay}`,
         `Administration Route: Subcutaneous (90° injection, 6–10s release hold)`,
         `Needle Compatibility: 31G or 32G 4mm/5mm Sterile Pen Needles`,
-        `Storage: 2°C–8°C Refrigerated (In-use pen < 25°C up to 28 days)`
+        `Storage: 2°C–8°C Refrigerated (In-use pen < 25°C up to 28 days*)`
       ].join('\n');
     } else if (isSublingual) {
       text = [
@@ -322,7 +322,7 @@ export default function PreparationTab({
         `Target Dose: ${targetDoseMg} mg`,
         `Calculated Draw: ${recon.injectionVolumeDisplay} (${recon.syringeUnitsDisplay} in U-100 syringe)`,
         `Doses per Vial: ${recon.dosesPerVial}`,
-        `Storage: 2°C–8°C Refrigerated • Beyond-Use Date: 28 Days`
+        `Storage: 2°C–8°C Refrigerated • Beyond-Use Date: Up to 28 Days* (subject to product validation)`
       ].join('\n');
     }
 
@@ -1696,15 +1696,15 @@ export default function PreparationTab({
               </div>
               <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45 }}>
                 {isDiagnostic ? 'Once dried onto Whatman 903 matrix and sealed with desiccant, biological fatty acid specimens are stable at ambient temperature for up to 28 days during transit.' :
-                 isSpray ? 'Refrigerate at 2°C–8°C after first use. Solution maintains full peptide stability for up to 60 days post-opening. Keep upright.' :
-                 isPen ? 'Once attached, in-use pen may be kept at room temperature < 25°C or refrigerated for up to 28 days. Remove needle after each injection.' :
-                 isSublingual ? 'Maintains full chemical potency for up to 60 days after opening at room temperature (15°C–25°C).' :
-                 isOral ? 'Enteric coating remains 100% gastro-resistant for 24 months from manufacturing date when stored dry and sealed.' :
-                 'Refrigerate at 2°C–8°C (Do not freeze). When reconstituted with 0.9% Benzyl Alcohol Bacteriostatic Water, the solution maintains chemical potency for up to 28 days.'}
+                 isSpray ? 'Refrigerate at 2°C–8°C after first use. Solution maintains stability for up to 28 days* post-opening. Keep upright.' :
+                 isPen ? 'Once attached, in-use pen may be kept at room temperature < 25°C or refrigerated for up to 28 days*. Remove needle after each injection.' :
+                 isSublingual ? 'Maintains chemical potency for up to 28 days* after opening when stored protected from heat and light.' :
+                 isOral ? 'Enteric coating remains gastro-resistant for 24 months* from manufacturing date when stored dry and sealed.' :
+                 'Refrigerate at 2°C–8°C (Do not freeze). When reconstituted with bacteriostatic water (0.9% benzyl alcohol), microbiological safety is preserved and potency is typically maintained for up to 28 days*. Note: Bacteriostatic water preserves microbiological safety but does not guarantee 28-day stability for all peptides; chemical degradation rates depend on the specific peptide sequence, pH, and formulation. When reconstituted with sterile water for injection, use immediately or within 24–48 hours refrigerated.'}
               </p>
             </div>
 
-            {/* Line 3: Transit Stability & Courier Peace of Mind */}
+            {/* Line 3: Transit Stability & Courier Delivery Guidelines */}
             {!isDiagnostic && !isOral && (
               <div style={{
                 padding: '12px 16px',
@@ -1717,7 +1717,7 @@ export default function PreparationTab({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <ShieldCheck size={14} color="#003666" />
                     <strong style={{ fontSize: '0.78rem', color: '#202124', fontWeight: 600 }}>
-                      Transit Stability & Courier Peace of Mind
+                      Transit Stability & Courier Delivery Guidelines
                     </strong>
                   </div>
                   <span style={{
@@ -1728,11 +1728,11 @@ export default function PreparationTab({
                     padding: '2px 7px',
                     borderRadius: '4px'
                   }}>
-                    30–60 Days Ambient Stable
+                    Up to 30 Days Ambient Transit*
                   </span>
                 </div>
                 <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45 }}>
-                  <strong style={{ color: '#202124' }}>100% Solid-State Molecular Preservation:</strong> Lyophilized peptides are deep-vacuum freeze-dried with &lt;1% residual moisture. In the absence of aqueous solvent, enzymatic degradation and hydrolytic cleavage cannot occur. Solid-state vials remain 100% stable at room temperature (up to 25°C–30°C) for <strong>30–60 days in transit</strong> with <strong>0.0% loss</strong> in HPLC analytical purity.
+                  <strong style={{ color: '#202124' }}>Vacuum-Sealed Solid-State Preservation:</strong> Lyophilized peptides are deep-vacuum freeze-dried with &lt;1% residual moisture. In the absence of aqueous solvent, hydrolytic cleavage and enzymatic degradation pathways are significantly restricted. Unopened solid-state vials maintain analytical stability at controlled room temperature (20°C–25°C) for <strong>up to 30 days in transit*</strong> without meaningful loss of chromatographic purity.
                 </p>
 
                 {/* Sub-lines in compact GCP table format */}
@@ -1755,7 +1755,7 @@ export default function PreparationTab({
                     borderRadius: '4px'
                   }}>
                     <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span><strong>Customs & Transit:</strong> 5–14 days hold has zero adverse effect on unopened vials.</span>
+                    <span><strong>Customs & Transit:</strong> International transit (5–14 business days) and temporary customs holds are well-tolerated by unopened vials.</span>
                   </div>
                   <div style={{
                     display: 'flex',
@@ -1770,7 +1770,7 @@ export default function PreparationTab({
                     borderRadius: '4px'
                   }}>
                     <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span><strong>Thawed Cold Packs:</strong> Normal upon delivery; phase packs buffer thermal spikes.</span>
+                    <span><strong>Thawed Cold Packs:</strong> Normal upon delivery; phase packs buffer thermal spikes. Thawed packs do not indicate product degradation.</span>
                   </div>
                   <div style={{
                     display: 'flex',
@@ -1785,7 +1785,57 @@ export default function PreparationTab({
                     borderRadius: '4px'
                   }}>
                     <Snowflake size={12} color="#003666" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span><strong>Storage Action:</strong> Place in refrigerator (2°C–8°C) upon delivery.</span>
+                    <span><strong>Storage Action:</strong> Place in refrigerator (2°C–8°C) for short-term use, or freezer (−20°C) for long-term storage.</span>
+                  </div>
+                </div>
+
+                {/* Standardized Storage Summary Table */}
+                <div style={{ marginTop: '8px', overflowX: 'auto' }}>
+                  <table style={{
+                    width: '100%',
+                    borderCollapse: 'collapse',
+                    fontSize: '0.70rem',
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px'
+                  }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
+                        <th style={{ padding: '6px 8px', fontWeight: 700, color: '#334155' }}>Product State</th>
+                        <th style={{ padding: '6px 8px', fontWeight: 700, color: '#334155' }}>Recommended Temp</th>
+                        <th style={{ padding: '6px 8px', fontWeight: 700, color: '#334155' }}>Max Stability Period</th>
+                        <th style={{ padding: '6px 8px', fontWeight: 700, color: '#334155' }}>Key Handling Instruction</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '5px 8px', fontWeight: 600, color: '#0f172a' }}>Lyophilized (unopened) — Long-term</td>
+                        <td style={{ padding: '5px 8px', color: '#0284c7' }}>−20°C (freezer)</td>
+                        <td style={{ padding: '5px 8px', color: '#334155' }}>Up to 24 months*</td>
+                        <td style={{ padding: '5px 8px', color: '#64748b' }}>Keep sealed with desiccant; protect from light</td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '5px 8px', fontWeight: 600, color: '#0f172a' }}>Lyophilized (unopened) — Transit</td>
+                        <td style={{ padding: '5px 8px', color: '#d97706' }}>20°C–25°C (ambient)</td>
+                        <td style={{ padding: '5px 8px', color: '#334155' }}>Up to 30 days*</td>
+                        <td style={{ padding: '5px 8px', color: '#64748b' }}>Avoid prolonged heat exposure (&gt;30°C)</td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '5px 8px', fontWeight: 600, color: '#0f172a' }}>Reconstituted (bacteriostatic water)</td>
+                        <td style={{ padding: '5px 8px', color: '#16a34a' }}>2°C–8°C (refrigerated)</td>
+                        <td style={{ padding: '5px 8px', color: '#334155' }}>Up to 28 days*</td>
+                        <td style={{ padding: '5px 8px', color: '#64748b' }}>Do not freeze; protect from light; minimize agitation</td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '5px 8px', fontWeight: 600, color: '#0f172a' }}>Reconstituted (sterile water)</td>
+                        <td style={{ padding: '5px 8px', color: '#16a34a' }}>2°C–8°C (refrigerated)</td>
+                        <td style={{ padding: '5px 8px', color: '#334155' }}>Single-use / 24–48 h*</td>
+                        <td style={{ padding: '5px 8px', color: '#64748b' }}>Administer immediately; discard unused portion</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div style={{ fontSize: '0.64rem', color: '#94a3b8', marginTop: '4px', fontStyle: 'italic' }}>
+                    *Subject to product-specific stability data and manufacturer release specifications.
                   </div>
                 </div>
               </div>

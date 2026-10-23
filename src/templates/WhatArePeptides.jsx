@@ -334,7 +334,7 @@ export default function WhatArePeptides() {
               />
               <FaqItem 
                 question="How should they be stored?"
-                answer="Lyophilized (powder) peptides should be stored in a cool, dark place. Once reconstituted with bacteriostatic water, they must be refrigerated and used within a specific timeframe (usually 30-60 days)."
+                answer="Lyophilized (powder) peptides should be stored in a freezer at −20°C for long-term storage (up to 24 months*). Once reconstituted with bacteriostatic water, they must be refrigerated (2°C–8°C, never frozen) and used within the recommended beyond-use period (typically up to 28 days*)."
               />
               <FaqItem 
                 question="What is reconstitution?"

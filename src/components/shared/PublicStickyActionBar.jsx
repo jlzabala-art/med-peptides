@@ -102,7 +102,15 @@ export default function PublicStickyActionBar({
       onOpenClinicalAI();
     }
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
+      window.dispatchEvent(new CustomEvent('open-public-atlas-ai', {
+        detail: {
+          productName: title,
+          category: badge,
+          initialQuery: lang === 'es' 
+            ? `¿Qué aplicaciones clínicas y evidencia tiene ${title}?`
+            : `What are the clinical applications and evidence for ${title}?`
+        }
+      }));
     }
   };
 
@@ -165,7 +173,20 @@ export default function PublicStickyActionBar({
             </button>
           )}
 
-
+          {/* Atlas AI Clinical Copilot with Active Product Context */}
+          {showClinicalAI && (
+            <button
+              type="button"
+              onClick={handleOpenAI}
+              className="public-sticky-action-bar__ai-btn"
+              title={lang === 'es' ? `Consultar con Atlas AI sobre ${title}` : `Consult Atlas AI regarding ${title}`}
+              aria-label="Atlas AI"
+            >
+              <Sparkles size={14} className="public-sticky-action-bar__sparkle-icon" />
+              <span className="public-sticky-action-bar__ai-label-full">Atlas AI</span>
+              <span className="public-sticky-action-bar__ai-label-short">AI</span>
+            </button>
+          )}
 
           <button
             type="button"

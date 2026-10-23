@@ -3233,7 +3233,7 @@ export default function PublicDatasheetView({
             : (lang === 'es' ? 'Consultar Producto' : 'Inquire Product')
         }
         onInquire={handleOpenInquiry}
-        showClinicalAI={false}
+        showClinicalAI={true}
         showSections={true}
         sectionsCount={isPeptideCompound ? 5 : tocSections.length}
         sectionsLabel={lang === 'es' ? 'Secciones' : 'Sections'}

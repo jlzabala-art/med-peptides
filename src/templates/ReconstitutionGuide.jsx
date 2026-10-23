@@ -41,9 +41,9 @@ const STEPS = [
 ];
 
 const STORAGE = [
-  { icon: '❄️', text: 'Keep refrigerated after reconstitution' },
-  { icon: '🧼', text: 'Keep the vial and syringe clean' },
-  { icon: '🌡️', text: 'Avoid heat or direct sunlight' },
+  { icon: '❄️', text: 'Keep refrigerated at 2°C–8°C (never freeze reconstituted peptides)' },
+  { icon: '🧼', text: 'Keep the vial septum and syringe sterile' },
+  { icon: '🌡️', text: 'Protect from light and physical agitation' },
 ];
 
 const FAQS = [
@@ -57,7 +57,7 @@ const FAQS = [
   },
   {
     q: 'How long does a reconstituted peptide last?',
-    a: 'This varies by peptide. As a general guide, keep refrigerated and use within 30–60 days. Check the product details for specifics.',
+    a: 'When reconstituted with bacteriostatic water (0.9% benzyl alcohol), store refrigerated at 2°C–8°C and use within 28 days*. Avoid freezing. Check the specific peptide monograph or CoA for exact compound data.',
   },
 ];
 

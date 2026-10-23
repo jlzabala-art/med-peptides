@@ -88,11 +88,11 @@ export default function SolventReconWidget({
         }}>
           <AlertTriangle size={15} color="#d97706" style={{ flexShrink: 0, marginTop: '2px' }} />
           <div style={{ fontSize: '0.72rem', color: '#92400e', lineHeight: 1.4 }}>
-            <strong>{isEs ? 'Regla Estricta de 28 Días:' : 'Strict 28-Day Puncture Rule:'}</strong>
+            <strong>{isEs ? 'Regla Farmacopea de 28 Días (BUD):' : 'Strict 28-Day Pharmacopeial Rule (BUD):'}</strong>
             <p style={{ margin: '2px 0 0 0' }}>
               {isEs 
-                ? 'Desechar el vial exactamente a los 28 días tras la primera punción estéril para evitar contaminación bacteriana.'
-                : 'Discard vial exactly 28 days post first septum puncture to prevent microbial breach.'}
+                ? 'Desechar el vial a los 28 días tras la primera punción estéril. Nota: El alcohol bencílico al 0.9% garantiza seguridad microbiológica pero no asegura estabilidad química de 28 días para todos los péptidos; la degradación depende de la secuencia y pH.'
+                : 'Discard vial within 28 days post first septum puncture. Note: 0.9% Benzyl Alcohol preserves microbiological safety but does not guarantee 28-day chemical stability for all peptides; degradation depends on specific sequence and pH.'}
             </p>
           </div>
         </div>

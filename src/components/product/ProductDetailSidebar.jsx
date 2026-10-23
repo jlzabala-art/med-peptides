@@ -291,8 +291,8 @@ export default function ProductDetailSidebar({
       {/* ── Dynamic Category-Specific Specialized Widget ── */}
       {renderContextualWidget()}
 
-      {/* ── Associated Clinical Protocols (FIRST — clinical context before network) ── */}
-      {!isCosmeticProduct && !isCorporateService && Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (
+      {/* ── Associated Clinical Protocols (Exempt on cosmetics, corporate services, and diagnostic kits) ── */}
+      {!isCosmeticProduct && !isCorporateService && !isDiagnosticKit && !isBloodoDiagnostic && Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (
         <AssociatedProtocolsSidebarWidget
           protocols={associatedProtocols}
           lang={lang}
@@ -308,8 +308,8 @@ export default function ProductDetailSidebar({
         />
       )}
 
-      {/* ── QR Code — Direct monograph link for print / clinical handout ── */}
-      {slug && (() => {
+      {/* ── QR Code — Direct monograph link for print / clinical handout (Exempt on diagnostic kits) ── */}
+      {slug && !isDiagnosticKit && !isBloodoDiagnostic && (() => {
         const pageUrl = `https://www.atlashealth-services.com/p/${slug}`;
         return (
           <div style={{

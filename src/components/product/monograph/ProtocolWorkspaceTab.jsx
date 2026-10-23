@@ -2309,7 +2309,7 @@ export default function ProtocolWorkspaceTab({
                     </div>
                     <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.74rem', color: '#14532d', lineHeight: 1.45 }}>
                       <li><strong>Unopened Storage:</strong> Store in refrigerator at 2°C–8°C away from direct sunlight. Stable until expiration date.</li>
-                      <li><strong>In-Use Viability:</strong> Ambient room temperature (&lt;25°C) stable for up to 30–45 days. Refrigerate to extend integrity up to 60 days.</li>
+                      <li><strong>In-Use Viability:</strong> Ambient room temperature (&lt;25°C) stable for up to 30 days*. Refrigerate at 2°C–8°C to maintain stability for up to 28 days*.</li>
                       <li><strong>Do Not Freeze:</strong> Freezing causes ice micro-crystallization that damages the internal gasket and pump calibration.</li>
                     </ul>
                   </div>
@@ -2781,25 +2781,25 @@ export default function ProtocolWorkspaceTab({
                       gap: '4px'
                     }}>
                       <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#188038' }} />
-                      USP & Ph. Eur. Solid-State Stability Validated
+                      Solid-State Stability Validated
                     </span>
                   </div>
                   <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45 }}>
-                      <strong style={{ color: '#202124' }}>100% Solid-State Molecular Preservation:</strong> Lyophilized peptides are deep-vacuum freeze-dried with &lt;1% residual moisture. In the absence of aqueous solvent, enzymatic degradation and hydrolytic cleavage cannot occur. Solid-state vials remain 100% stable at room temperature (up to 25°C–30°C) for <strong>30–60 days in transit</strong> with <strong>0.0% loss</strong> in HPLC analytical purity.
+                      <strong style={{ color: '#202124' }}>Vacuum-Sealed Solid-State Preservation:</strong> Lyophilized peptides are deep-vacuum freeze-dried with &lt;1% residual moisture. In the absence of aqueous solvent, hydrolytic cleavage and enzymatic degradation pathways are significantly restricted. Solid-state vials maintain analytical stability at controlled room temperature (20°C–25°C) for <strong>up to 30 days in transit*</strong> without meaningful loss of chromatographic purity.
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '6px' }}>
                       <div style={{ background: '#f8f9fa', border: '1px solid #e8eaed', borderRadius: '4px', padding: '6px 8px', fontSize: '0.70rem', color: '#3c4043', lineHeight: 1.35, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
                         <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
-                        <span><strong>Courier & Customs:</strong> 5–14 days hold has zero adverse effect on unopened vials.</span>
+                        <span><strong>Courier & Customs:</strong> International transit (5–14 business days) and temporary customs holds are well-tolerated by unopened vials.</span>
                       </div>
                       <div style={{ background: '#f8f9fa', border: '1px solid #e8eaed', borderRadius: '4px', padding: '6px 8px', fontSize: '0.70rem', color: '#3c4043', lineHeight: 1.35, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
                         <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
-                        <span><strong>Thawed Cold Packs:</strong> Normal upon arrival; phase packs buffer thermal spikes.</span>
+                        <span><strong>Thawed Cold Packs:</strong> Normal upon arrival; phase packs buffer thermal spikes. Thawed packs do not indicate product degradation.</span>
                       </div>
                       <div style={{ background: '#f8f9fa', border: '1px solid #e8eaed', borderRadius: '4px', padding: '6px 8px', fontSize: '0.70rem', color: '#3c4043', lineHeight: 1.35, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
                         <Snowflake size={12} color="#003666" style={{ flexShrink: 0, marginTop: '2px' }} />
-                        <span><strong>Storage Action:</strong> Place in refrigerator (2°C–8°C) upon arrival.</span>
+                        <span><strong>Storage Action:</strong> Place in refrigerator (2°C–8°C) for short-term use, or freezer (−20°C) for long-term storage.</span>
                       </div>
                     </div>
                   </div>

@@ -653,7 +653,7 @@ export const generateClinicalProtocol = async (rawProtocol, options = {}) => {
 
   const instructions = [
     ["Compounding:", "Ensure aseptic environment. Reconstitute with 0.9% Benzyl Alcohol Bacteriostatic Water. Direct diluent stream to vial wall; do not vortex."],
-    ["Storage:", "Lyophilized: -20°C for long-term integrity. Reconstituted: Maintain at 2-8°C. Do not exceed 28 days post-reconstitution."],
+    ["Storage:", "Lyophilized: −20°C for long-term (up to 24 mo*), 20°C–25°C transit (up to 30 days*). Reconstituted: 2°C–8°C, do not freeze; up to 28 days* with BAC water."],
     ["Safety:", "Monitor for localized sensitivity at injection site. Maintain consistent administration timing (±4h for daily, ±12h for weekly)."],
     ["Traceability:", "Verify Batch IDs before administration. Log all dosage events in the research verification checklist."]
   ];
@@ -1479,12 +1479,12 @@ export const generateDosageGuide = async (rawProtocol, formData) => {
     head: [['Parameter', 'Lyophilized (Unreconstituted)', 'Reconstituted Solution']],
     headStyles: { fillColor: [51, 65, 85], fontSize: 7.5, textColor: [255, 255, 255] },
     body: [
-      ['Temperature',      '≤−20°C (long-term) | 2–8°C (short-term ≤30 days)', '2–8°C (refrigerated). Do NOT freeze.'],
-      ['Light Exposure',   'Protect from UV. Store in original amber vial.',     'Use opaque syringe cap if storing drawn dose.'],
-      ['Shelf Life',       'Per manufacturer label (typically 24 months)',       'Maximum 28 days post-reconstitution.'],
-      ['Container',        'Original sealed vial under inert gas blanket.',      'Original vial. Cap tightly after each draw.'],
-      ['Transport',        'Cold-chain shipment (2–8°C). Insulated packaging.', 'Do not transport reconstituted formulations.'],
-      ['Discard Criteria', 'Discard if particulate matter visible or vial compromised.', 'Discard if cloudy, discolored, or >28 days post-reconstitution.']
+      ['Temperature',      '−20°C (long-term) | 20°C–25°C (transit ≤30 days*)', '2°C–8°C (refrigerated). Do NOT freeze.'],
+      ['Light Exposure',   'Protect from direct light and moisture. Store in original vial.', 'Protect from light and physical agitation.'],
+      ['Shelf Life',       'Up to 24 months* (unopened, -20°C)',                 'Up to 28 days* (reconstituted with BAC water).'],
+      ['Container',        'Original sealed vial under inert gas / vacuum.',     'Original vial. Keep septum sanitized.'],
+      ['Transport',        'Insulated packaging (ambient transit ≤30 days*).',   'Do not transport reconstituted formulations.'],
+      ['Discard Criteria', 'Discard if vacuum compromised or particulate noted.', 'Discard if cloudy, discolored, or >28 days post-reconstitution.']
     ]
   });
   yPos = doc.lastAutoTable.finalY + 14;
