@@ -482,49 +482,51 @@ export default function DoctorRecommendationsTab({
           </p>
         </div>
 
-        {/* Dual-Engine Segmented Switcher */}
+        {/* Dual-Engine Google Cloud Console Material Underline Tabs */}
         <div
+          role="tablist"
           style={{
-            display: 'inline-flex',
-            background: '#f1f5f9',
-            padding: '4px',
-            borderRadius: '10px',
-            border: '1px solid #cbd5e1',
-            gap: '4px',
-            flexWrap: 'wrap'
+            display: 'flex',
+            alignItems: 'center',
+            gap: '28px',
+            borderBottom: '1px solid #dadce0',
+            width: '100%',
+            marginBottom: '4px'
           }}
         >
           <button
             type="button"
+            role="tab"
+            aria-selected={recommendationEngineMode === 'specialty'}
             onClick={() => {
               if (triggerHaptic) triggerHaptic('selection');
               setRecommendationEngineMode('specialty');
             }}
             style={{
-              padding: '8px 14px',
-              borderRadius: '7px',
+              padding: '12px 2px 10px 2px',
               border: 'none',
-              background: recommendationEngineMode === 'specialty' ? '#003666' : 'transparent',
-              color: recommendationEngineMode === 'specialty' ? '#ffffff' : '#334155',
-              fontSize: '0.78rem',
-              fontWeight: 700,
+              borderBottom: recommendationEngineMode === 'specialty' ? '2px solid #1a73e8' : '2px solid transparent',
+              background: 'transparent',
+              color: recommendationEngineMode === 'specialty' ? '#1a73e8' : '#5f6368',
+              fontSize: '0.84rem',
+              fontWeight: recommendationEngineMode === 'specialty' ? 600 : 500,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              boxShadow: recommendationEngineMode === 'specialty' ? '0 2px 6px rgba(0,54,102,0.2)' : 'none',
-              transition: 'all 0.15s ease'
+              gap: '8px',
+              transition: 'color 0.15s, border-color 0.15s'
             }}
           >
-            <Stethoscope size={14} />
+            <Stethoscope size={15} color={recommendationEngineMode === 'specialty' ? '#1a73e8' : '#5f6368'} />
             <span>1. Atlas Recommendations</span>
             <span
               style={{
                 fontSize: '0.68rem',
-                padding: '1px 7px',
-                borderRadius: '999px',
-                background: recommendationEngineMode === 'specialty' ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                color: recommendationEngineMode === 'specialty' ? '#ffffff' : '#334155'
+                fontWeight: 600,
+                padding: '2px 8px',
+                borderRadius: '10px',
+                background: recommendationEngineMode === 'specialty' ? '#e8f0fe' : '#f1f3f4',
+                color: recommendationEngineMode === 'specialty' ? '#1a73e8' : '#5f6368'
               }}
             >
               For Your Specialty
@@ -533,35 +535,37 @@ export default function DoctorRecommendationsTab({
 
           <button
             type="button"
+            role="tab"
+            aria-selected={recommendationEngineMode === 'prescriptions'}
             onClick={() => {
               if (triggerHaptic) triggerHaptic('selection');
               setRecommendationEngineMode('prescriptions');
             }}
             style={{
-              padding: '8px 14px',
-              borderRadius: '7px',
+              padding: '12px 2px 10px 2px',
               border: 'none',
-              background: recommendationEngineMode === 'prescriptions' ? '#1a73e8' : 'transparent',
-              color: recommendationEngineMode === 'prescriptions' ? '#ffffff' : '#334155',
-              fontSize: '0.78rem',
-              fontWeight: 700,
+              borderBottom: recommendationEngineMode === 'prescriptions' ? '2px solid #1a73e8' : '2px solid transparent',
+              background: 'transparent',
+              color: recommendationEngineMode === 'prescriptions' ? '#1a73e8' : '#5f6368',
+              fontSize: '0.84rem',
+              fontWeight: recommendationEngineMode === 'prescriptions' ? 600 : 500,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              boxShadow: recommendationEngineMode === 'prescriptions' ? '0 2px 6px rgba(26,115,232,0.2)' : 'none',
-              transition: 'all 0.15s ease'
+              gap: '8px',
+              transition: 'color 0.15s, border-color 0.15s'
             }}
           >
-            <Layers size={14} />
+            <Layers size={15} color={recommendationEngineMode === 'prescriptions' ? '#1a73e8' : '#5f6368'} />
             <span>2. Patient Regimen Synergies</span>
             <span
               style={{
                 fontSize: '0.68rem',
-                padding: '1px 7px',
-                borderRadius: '999px',
-                background: recommendationEngineMode === 'prescriptions' ? 'rgba(255,255,255,0.22)' : '#e2e8f0',
-                color: recommendationEngineMode === 'prescriptions' ? '#ffffff' : '#334155'
+                fontWeight: 600,
+                padding: '2px 8px',
+                borderRadius: '10px',
+                background: recommendationEngineMode === 'prescriptions' ? '#e8f0fe' : '#f1f3f4',
+                color: recommendationEngineMode === 'prescriptions' ? '#1a73e8' : '#5f6368'
               }}
             >
               {allPrescriptions.length} Rx
@@ -575,10 +579,10 @@ export default function DoctorRecommendationsTab({
          ══════════════════════════════════════════════════════════════════════════ */}
       {recommendationEngineMode === 'specialty' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Specialty Vertical Filter Pills */}
+          {/* Specialty Vertical Filter Chips (GCP Standard) */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.73rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                 Specialty Vertical:
               </span>
               {SPECIALTY_VERTICALS.map((vert) => {
@@ -593,18 +597,20 @@ export default function DoctorRecommendationsTab({
                       setSelectedSpecialtyKey(vert.key);
                     }}
                     style={{
-                      padding: '6px 12px',
-                      borderRadius: '999px',
-                      border: isSelected ? `2px solid ${vert.color}` : '1px solid #cbd5e1',
-                      background: isSelected ? vert.bg : '#ffffff',
-                      color: isSelected ? vert.color : '#334155',
-                      fontSize: '0.75rem',
-                      fontWeight: isSelected ? 700 : 600,
+                      height: '32px',
+                      padding: '0 12px',
+                      borderRadius: '8px',
+                      border: isSelected ? '1px solid #1a73e8' : '1px solid #dadce0',
+                      background: isSelected ? '#e8f0fe' : '#ffffff',
+                      color: isSelected ? '#1a73e8' : '#3c4043',
+                      fontSize: '0.76rem',
+                      fontWeight: isSelected ? 600 : 500,
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '5px',
-                      transition: 'all 0.12s ease'
+                      gap: '6px',
+                      boxShadow: isSelected ? '0 1px 2px rgba(26,115,232,0.12)' : 'none',
+                      transition: 'all 0.15s ease'
                     }}
                   >
                     <span>{vert.shortLabel}</span>
@@ -612,10 +618,10 @@ export default function DoctorRecommendationsTab({
                       <span
                         style={{
                           fontSize: '0.62rem',
-                          fontWeight: 800,
-                          padding: '1px 5px',
+                          fontWeight: 700,
+                          padding: '1px 6px',
                           borderRadius: '4px',
-                          background: vert.color,
+                          background: isSelected ? '#1a73e8' : '#0d9488',
                           color: '#ffffff'
                         }}
                       >
@@ -629,14 +635,16 @@ export default function DoctorRecommendationsTab({
                 type="button"
                 onClick={() => setSelectedSpecialtyKey('all')}
                 style={{
-                  padding: '6px 12px',
-                  borderRadius: '999px',
-                  border: selectedSpecialtyKey === 'all' ? '2px solid #0f172a' : '1px solid #cbd5e1',
-                  background: selectedSpecialtyKey === 'all' ? '#f1f5f9' : '#ffffff',
-                  color: '#0f172a',
-                  fontSize: '0.75rem',
-                  fontWeight: selectedSpecialtyKey === 'all' ? 700 : 500,
-                  cursor: 'pointer'
+                  height: '32px',
+                  padding: '0 12px',
+                  borderRadius: '8px',
+                  border: selectedSpecialtyKey === 'all' ? '1px solid #1a73e8' : '1px solid #dadce0',
+                  background: selectedSpecialtyKey === 'all' ? '#e8f0fe' : '#ffffff',
+                  color: selectedSpecialtyKey === 'all' ? '#1a73e8' : '#3c4043',
+                  fontSize: '0.76rem',
+                  fontWeight: selectedSpecialtyKey === 'all' ? 600 : 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
                 }}
               >
                 All Specialties ({Object.values(SPECIALTY_BLUEPRINTS_CATALOG).flat().length})
@@ -734,12 +742,13 @@ export default function DoctorRecommendationsTab({
                         <span
                           style={{
                             fontSize: '0.68rem',
-                            fontWeight: 700,
+                            fontWeight: 600,
                             padding: '2px 8px',
                             borderRadius: '4px',
-                            background: '#003666',
-                            color: '#ffffff',
-                            letterSpacing: '0.03em',
+                            background: '#e8f0fe',
+                            color: '#1a73e8',
+                            border: '1px solid #c2e7ff',
+                            letterSpacing: '0.02em',
                             textTransform: 'uppercase'
                           }}
                         >
