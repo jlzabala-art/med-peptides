@@ -130,6 +130,7 @@ export default function CatalogModalsContainer({
           }}
           selectedProduct={selectedProduct}
           setSelectedProduct={setSelectedProduct}
+          products={data}
           displayCurrency={displayCurrency}
           setDisplayCurrency={setDisplayCurrency}
           priceView={priceView}

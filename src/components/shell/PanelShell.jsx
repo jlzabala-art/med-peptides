@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import PortalLayout from '../ui/PortalLayout';
 import { useAuth, ADMIN_EMAILS } from '../../context/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
 import AtlasLoadingScreen from '../ui/AtlasLoadingScreen';
 import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
 import { useNotificationContext } from '../../context/NotificationContext';
 import IOSPushBanner from '../ui/IOSPushBanner';
 import OfflineSyncProvider from '../shared/OfflineSyncProvider';
@@ -44,9 +43,15 @@ export default function PanelShell({
   const pathname = usePathname();
   const router = useRouter();
 
+  const isDevBypass = process.env.NODE_ENV === 'development' && (
+    typeof window !== 'undefined' && window.location.search.includes('dev_bypass=1')
+  );
+
   // Handle route protection
   useEffect(() => {
     if (!loading) {
+      if (isDevBypass) return;
+
       const isUserAdmin = activeRole === 'admin' || (user && ADMIN_EMAILS.includes(user?.email?.toLowerCase()));
       if (!user) {
         const target = pathname ? `/login?redirect=${encodeURIComponent(pathname)}` : '/login';
@@ -82,7 +87,7 @@ export default function PanelShell({
 
   useKeyboardShortcuts();
 
-  if (loading || !user || (allowedRoles.length > 0 && !allowedRoles.includes(activeRole))) {
+  if (!isDevBypass && (loading || !user || (allowedRoles.length > 0 && !allowedRoles.includes(activeRole)))) {
     return <AtlasLoadingScreen />;
   }
 

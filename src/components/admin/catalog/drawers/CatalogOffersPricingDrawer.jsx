@@ -12,7 +12,7 @@ import {
   buildServiceColumns,
   buildApiColumns 
 } from '../columns/catalogColumns';
-import { UploadCloud, FileText, Share2, Layers, TrendingUp, Copy, Star, ShoppingCart } from 'lucide-react';
+import { UploadCloud, FileText, Share2, Layers, TrendingUp, Copy, Star, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Maximize2, Minimize2 } from '@/lib/icons';
 import InlineEditableCell from '../../../ui/InlineEditableCell';
 import notifier from '../../../../services/NotificationService';
@@ -37,6 +37,7 @@ export default function CatalogOffersPricingDrawer({
   onClose,
   selectedProduct,
   setSelectedProduct,
+  products = [],
   displayCurrency = 'USD',
   setDisplayCurrency,
   priceView = 'single',
@@ -55,6 +56,49 @@ export default function CatalogOffersPricingDrawer({
   const [drawerTab, setDrawerTab] = React.useState('offers'); // 'offers' | 'competitors'
   const [loadingVariants, setLoadingVariants] = React.useState(false);
   const [isExpanded, setIsExpanded] = React.useState(false);
+
+  // Next / Previous product index resolution
+  const currentIndex = useMemo(() => {
+    if (!products || products.length === 0 || !selectedProduct) return -1;
+    return products.findIndex(p => 
+      (p.id && selectedProduct.id && String(p.id).toLowerCase() === String(selectedProduct.id).toLowerCase()) ||
+      (p.slug && selectedProduct.slug && String(p.slug).toLowerCase() === String(selectedProduct.slug).toLowerCase()) ||
+      (p.canonicalName && selectedProduct.canonicalName && String(p.canonicalName).toLowerCase() === String(selectedProduct.canonicalName).toLowerCase())
+    );
+  }, [products, selectedProduct]);
+
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex >= 0 && currentIndex < products.length - 1;
+
+  const handlePrevProduct = React.useCallback(() => {
+    if (hasPrev) {
+      setSelectedProduct(products[currentIndex - 1]);
+    }
+  }, [hasPrev, currentIndex, products, setSelectedProduct]);
+
+  const handleNextProduct = React.useCallback(() => {
+    if (hasNext) {
+      setSelectedProduct(products[currentIndex + 1]);
+    }
+  }, [hasNext, currentIndex, products, setSelectedProduct]);
+
+  // Keyboard navigation: [ or ArrowLeft -> Prev, ] or ArrowRight -> Next
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      const activeTag = document.activeElement?.tagName;
+      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
+      if (e.key === 'ArrowLeft' || e.key === '[') {
+        e.preventDefault();
+        handlePrevProduct();
+      } else if (e.key === 'ArrowRight' || e.key === ']') {
+        e.preventDefault();
+        handleNextProduct();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, handlePrevProduct, handleNextProduct]);
 
   React.useEffect(() => {
     if (activeDrawer === 'competitors') {
@@ -87,6 +131,10 @@ export default function CatalogOffersPricingDrawer({
         if (!isCancelled) setLoadingVariants(false);
       });
     }
+
+    return () => {
+      isCancelled = true;
+    };
   }, [isOpen, selectedProduct?.id]);
 
   const isGenomics = selectedProduct?.category?.toLowerCase().includes('genom') || 
@@ -810,6 +858,66 @@ export default function CatalogOffersPricingDrawer({
       expandable={false}
       actions={
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          {currentIndex !== -1 && products.length > 1 && (
+            <div
+              className="catalog-drawer-stepper"
+              data-testid="product-stepper"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '2px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                borderRadius: '7px',
+                padding: '2px 4px',
+                marginRight: '4px'
+              }}
+            >
+              <button
+                type="button"
+                onClick={handlePrevProduct}
+                disabled={!hasPrev}
+                title="Previous product (← or [)"
+                aria-label="Previous product"
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  padding: '3px 4px',
+                  cursor: hasPrev ? 'pointer' : 'not-allowed',
+                  opacity: hasPrev ? 1 : 0.35,
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderRadius: '4px',
+                  color: '#0f172a'
+                }}
+              >
+                <ChevronLeft size={14} />
+              </button>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', minWidth: '45px', textAlign: 'center', userSelect: 'none' }}>
+                {currentIndex + 1} / {products.length}
+              </span>
+              <button
+                type="button"
+                onClick={handleNextProduct}
+                disabled={!hasNext}
+                title="Next product (→ or ])"
+                aria-label="Next product"
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  padding: '3px 4px',
+                  cursor: hasNext ? 'pointer' : 'not-allowed',
+                  opacity: hasNext ? 1 : 0.35,
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderRadius: '4px',
+                  color: '#0f172a'
+                }}
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          )}
           {activeDrawer === 'offers' && (
             <>
               <button

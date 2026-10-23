@@ -824,7 +824,20 @@ export async function buildCatalogSummary(searchParams) {
     }
 
     const ttl = hasActiveFilters ? 15 : 60;
-    const payloadItems = results.slice(offsetParam, offsetParam + limitParam);
+    const rawSlice = results.slice(offsetParam, offsetParam + limitParam);
+    const payloadItems = rawSlice.map(item => {
+      // Omit heavy internal document blobs not needed by the catalog table or drawer
+      const {
+        ocrContent,
+        rawPdfText,
+        coaBase64,
+        vectorEmbedding,
+        embedding,
+        rawOcr,
+        ...rest
+      } = item;
+      return rest;
+    });
     const totalGroups = useOptimizedPaging 
       ? (metaFacets?.totals?.activeProducts || metaFacets?.totals?.products || results.length)
       : results.length;

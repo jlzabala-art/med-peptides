@@ -14,6 +14,7 @@ import {
   getDocs,
   addDoc,
   serverTimestamp,
+  limit,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { logger } from '../utils/logger';

@@ -689,9 +689,9 @@
   }
 }
 
-/* ── Bloodo™ & ETERNA Ultra-Premium Square Kit Showcase ── */
+/* ── Bloodo™ & ETERNA Ultra-Premium Square Kit Showcase (Option A: Integrated Hardware Card) ── */
 .pds-hero-square-showcase {
-  width: 250px;
+  width: 285px;
   background: #ffffff;
   border: 1px solid rgba(226, 232, 240, 0.95);
   border-radius: 14px;
@@ -700,16 +700,26 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  cursor: pointer;
   position: relative;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
-  user-select: none;
+  overflow: hidden;
 }
 
 .pds-hero-square-showcase:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 24px -4px rgba(0, 54, 102, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
   border-color: #cbd5e1;
+}
+
+/* Integrated Hardware Base Dock for Price & Inquiry */
+.pds-square-price-dock {
+  margin: 4px -12px -12px -12px;
+  padding: 10px 12px 12px 12px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* Frosted glass top badges */

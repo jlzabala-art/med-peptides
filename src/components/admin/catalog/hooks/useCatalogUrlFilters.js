@@ -32,8 +32,12 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
     }
     const queryString = params.toString();
     const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
-    window.history.replaceState(null, '', newUrl);
-  }, [searchParams, pathname]);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', newUrl);
+      window.dispatchEvent(new Event('popstate'));
+    }
+    router.replace(newUrl, { scroll: false });
+  }, [searchParams, pathname, router]);
 
   const setMultiParam = useCallback((key, values) => {
     const uniqueVals = Array.from(new Set(values));
@@ -81,7 +85,9 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
           const currentPrefs = JSON.parse(localStorage.getItem('regenpept-admin-catalog-prefs') || '{}');
           currentPrefs['q'] = searchTerm;
           localStorage.setItem('regenpept-admin-catalog-prefs', JSON.stringify(currentPrefs));
-        } catch (err) {}
+        } catch {
+          // ignore storage error
+        }
       }
     }, 500);
     return () => clearTimeout(handler);
@@ -89,12 +95,9 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
 
   // Dynamically compute available subcategories based on selected categories
   const availableSubcategories = useMemo(() => {
-    let subcats = [];
-    if (filterCategory.length === 0) {
-      subcats = Object.values(CATEGORY_SUBCATEGORIES).flat();
-    } else {
-      subcats = filterCategory.flatMap(cat => CATEGORY_SUBCATEGORIES[cat] || []);
-    }
+    const subcats = filterCategory.length === 0
+      ? Object.values(CATEGORY_SUBCATEGORIES).flat()
+      : filterCategory.flatMap(cat => CATEGORY_SUBCATEGORIES[cat] || []);
     const unique = [];
     const seen = new Set();
     subcats.forEach(s => {
@@ -138,7 +141,9 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
     try {
       localStorage.removeItem('regenpept-admin-catalog-prefs');
       localStorage.removeItem('regenpept_recent_imported');
-    } catch (e) {}
+    } catch {
+      // ignore storage error
+    }
     if (typeof window !== 'undefined') {
       window.history.replaceState(null, '', pathname);
       window.dispatchEvent(new Event('popstate'));

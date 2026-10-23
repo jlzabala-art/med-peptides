@@ -124,6 +124,15 @@ export async function POST(request) {
       statusHistory: FieldValue.arrayUnion(historyEntry)
     };
 
+    if (['approved', 'ordered', 'active', 'delivered', 'completed', 'dispensed'].includes(normalizedStatus)) {
+      updatePayload.isTreatmentProposal = false;
+      updatePayload.orderStatus = isNowDispensed ? 'Delivered' : 'Ordered';
+    }
+
+    if (body.invoiceRef) {
+      updatePayload.invoiceRef = String(body.invoiceRef).trim();
+    }
+
     if (isNowDispensed && !existingData.dispensedAt) {
       updatePayload.dispensedAt = new Date().toISOString();
     }

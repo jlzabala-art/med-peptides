@@ -19,6 +19,9 @@ export default function ProfessionalWelcomeOverlay() {
   const [fadingOut, setFadingOut] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('dev_bypass=1')) {
+      return;
+    }
     // Show on entrance to the portal. Uses sessionStorage so it greets on portal arrival
     // without interrupting every minor internal subtab click within 3 minutes.
     try {

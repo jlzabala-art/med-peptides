@@ -626,24 +626,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   </Link>
                 </div>
               </div>
-            ) : (
-              <div className="rx-mode-subbanner" style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                padding: '6px 20px',
-                background: '#003666',
-                borderBottom: '1px solid rgba(255,255,255,0.12)'
-              }}>
-                <ShieldCheck size={14} color="#4ade80" />
-                <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#ffffff', letterSpacing: '0.02em' }}>
-                  {isEs
-                    ? 'Expediente Clínico Oficial · Formulación Magistral Certificada · Estándares EU GMP / DHA'
-                    : 'Official Clinical Dossier · Verified Compounded Prescription · EU GMP / DHA Quality Standards'}
-                </span>
-              </div>
-            )
+            ) : null
           }
         />
       )}

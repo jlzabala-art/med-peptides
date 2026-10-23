@@ -84,16 +84,17 @@ export default function DoctorPracticeSearchModal({
             .toLowerCase() || String(rx.patientId || rx.id || '').toLowerCase())
         : codifiedId;
 
-      const s = (rx.status || rx.state || '').toLowerCase();
-      const isProp = Boolean(
+      const s = (rx.status || rx.state || '').toLowerCase().trim();
+      const rawInv = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
+      const hasInv = rawInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInv);
+      const isFulfilled = ['completed', 'delivered', 'shipped', 'paid'].includes(s) || ['Delivered', 'Ordered'].includes(rx.orderStatus || '');
+      const isProp = !isFulfilled && !hasInv && Boolean(
         s === 'proposal_pending' ||
         rx.isTreatmentProposal ||
         rx.orderStatus === 'Offer Not Accepted' ||
         String(rx.treatmentProgram || '').toLowerCase().includes('proposal') ||
         String(rx.invoiceRef || '').toLowerCase().includes('proposal')
       );
-      const rawInv = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
-      const hasInv = rawInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInv);
       const isSold = !isProp && Boolean(hasInv || rx.orderStatus === 'Ordered' || ['active', 'approved', 'completed', 'paid', 'shipped', 'delivered', 'en tránsito', 'processing', 'dispensed'].includes(s));
 
       if (!map.has(key)) {

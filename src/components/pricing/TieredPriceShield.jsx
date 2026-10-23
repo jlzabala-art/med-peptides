@@ -199,7 +199,8 @@ export default function TieredPriceShield({
   compact = false,
   isEs = false,
   adminSimulationTier = null,
-  onSelectAdminSimulationTier = null
+  onSelectAdminSimulationTier = null,
+  embedded = false
 }) {
   const { user } = useAuth();
   const { is, can } = useRoleAccess();
@@ -330,11 +331,11 @@ export default function TieredPriceShield({
   if (isAuthenticated) {
     return (
       <div style={{
-        marginBottom: '0.65rem',
-        padding: '8px 12px',
+        marginBottom: embedded ? '6px' : '0.65rem',
+        padding: embedded ? '6px 8px' : '8px 12px',
         borderRadius: '8px',
-        background: '#f8fafc',
-        border: '1px solid #e2e8f0',
+        background: embedded ? '#ffffff' : '#f8fafc',
+        border: embedded ? '1px solid #e2e8f0' : '1px solid #e2e8f0',
         transition: 'all 0.2s ease'
       }}>
         {/* Top Header: Tier Label + Incoterm Badge */}
@@ -421,15 +422,15 @@ export default function TieredPriceShield({
         if (onUnlockRequest) onUnlockRequest();
       }}
       style={{
-        marginBottom: '0.65rem',
-        padding: '8px 12px',
+        marginBottom: embedded ? '8px' : '0.65rem',
+        padding: embedded ? '8px 10px' : '8px 12px',
         borderRadius: '8px',
-        background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-        border: '1px solid #cbd5e1',
+        background: embedded ? '#ffffff' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+        border: embedded ? '1px solid #cbd5e1' : '1px solid #cbd5e1',
         cursor: 'pointer',
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+        boxShadow: embedded ? 'none' : '0 1px 3px rgba(0,0,0,0.03)',
         transition: 'transform 0.15s ease, border-color 0.15s ease'
       }}
       title={isEs ? "Haga clic para desbloquear las tarifas profesionales B2B" : "Click to unlock practitioner B2B pricing"}

@@ -203,17 +203,27 @@ export default function DataTable({
   const [internalPage, setInternalPage] = useState(1);
   const [internalRowsPerPage, setInternalRowsPerPage] = useState(initialRowsPerPage);
 
-  // Reset to page 1 whenever the data set changes (e.g. filter applied on server).
-  // Without this, navigating from page 2 of 46 results to a 21-result filtered set
-  // keeps internalPage=2 and slice(20,40) returns 0-1 rows → blank table.
+  // Reset to page 1 ONLY when the dataset fundamentally changes (e.g. filter/search changed),
+  // NEVER when new items are appended via pagination/infinite scroll.
+  const prevFirstItemIdRef = React.useRef(data?.[0]?.[keyField] ?? data?.[0]?.id ?? null);
   const prevDataLenRef = React.useRef(data?.length ?? 0);
   React.useEffect(() => {
+    const currentFirstId = data?.[0]?.[keyField] ?? data?.[0]?.id ?? null;
     const newLen = data?.length ?? 0;
-    if (newLen !== prevDataLenRef.current) {
+
+    // Case 1: First item changed -> user applied a new filter or new search query
+    const isNewDataset = currentFirstId !== prevFirstItemIdRef.current;
+
+    // Case 2: Data shrank below current page range -> user filter reduced total results
+    const isOutOfRange = newLen > 0 && (internalPage - 1) * internalRowsPerPage >= newLen;
+
+    if (isNewDataset || isOutOfRange) {
       setInternalPage(1);
-      prevDataLenRef.current = newLen;
     }
-  }, [data]);
+
+    prevFirstItemIdRef.current = currentFirstId;
+    prevDataLenRef.current = newLen;
+  }, [data, keyField, internalPage, internalRowsPerPage]);
   
   // Search state
   const [filteredData, setFilteredData] = useState(data || []);
@@ -300,7 +310,7 @@ export default function DataTable({
   const sortedData = useMemo(() => {
     const safeData = filteredData || [];
     if (!sortConfig.key) return safeData;
-    let sortableItems = [...safeData];
+    const sortableItems = [...safeData];
     sortableItems.sort((a, b) => {
       const col = columns.find((c) => c.key === sortConfig.key);
       let aVal = col && col.sortValue ? col.sortValue(a) : a[sortConfig.key];
@@ -336,6 +346,16 @@ export default function DataTable({
       ? sortedData.slice((internalPage - 1) * internalRowsPerPage, internalPage * internalRowsPerPage)
       : sortedData;
   }, [sortedData, onPageChange, internalPage, internalRowsPerPage]);
+
+  // Seamless background prefetch of next batch when approaching end of current loaded window
+  useEffect(() => {
+    if (!onPageChange && hasNextPage && onNextPage) {
+      const neededCount = activePage * activeRowsPerPage;
+      if (neededCount >= sortedData.length) {
+        onNextPage();
+      }
+    }
+  }, [activePage, activeRowsPerPage, sortedData.length, hasNextPage, onNextPage, onPageChange]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -914,6 +934,7 @@ export default function DataTable({
           WebkitOverflowScrolling: 'touch',
         }}
       >
+        {/* eslint-disable-next-line no-restricted-syntax */}
         <table
           className="gcp-table ui-table"
           style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', textAlign: 'left' }}
@@ -1120,6 +1141,32 @@ export default function DataTable({
                     />
                 </td>
               </tr>
+            ) : paginatedData.length === 0 && sortedData.length > 0 ? (
+              Array.from({ length: Math.min(activeRowsPerPage, 5) }).map((_, rowIndex) => (
+                <tr
+                  key={`chunk-loading-${rowIndex}`}
+                  style={{
+                    borderBottom: '1px solid var(--color-border)',
+                    minHeight: 'var(--row-min-height)',
+                  }}
+                >
+                  {onSelectionChange && (
+                    <td style={{ padding: isCompact ? '6px 8px' : '12px', textAlign: 'center' }}>
+                      <Skeleton width="16px" height="16px" borderRadius="4px" />
+                    </td>
+                  )}
+                  {expandableRender && (
+                    <td style={{ padding: isCompact ? '6px 8px' : '12px', textAlign: 'center' }}>
+                      <Skeleton width="16px" height="16px" borderRadius="50%" />
+                    </td>
+                  )}
+                  {columns.map((col, colIndex) => (
+                    <td key={`chunk-skel-col-${colIndex}`} style={{ padding: isCompact ? '6px 10px' : '12px 16px' }}>
+                      <Skeleton width={colIndex === 0 ? '80%' : '60%'} height="16px" />
+                    </td>
+                  ))}
+                </tr>
+              ))
             ) : (
               ((virtualize && rowVirtualizer.getVirtualItems().length > 0) ? rowVirtualizer.getVirtualItems() : paginatedData).map(
                 (virtualRowOrRow, index) => {
@@ -1472,6 +1519,8 @@ export default function DataTable({
                 onClick={() => (onPrevPage ? onPrevPage() : handlePageChange(activePage - 1))}
                 disabled={hasPrevPage !== undefined ? !hasPrevPage : activePage <= 1}
                 title="Previous page"
+                aria-label="Previous page"
+                className="pagination-prev-btn"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1522,6 +1571,8 @@ export default function DataTable({
                       : activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
                 }
                 title="Next page"
+                aria-label="Next page"
+                className="pagination-next-btn"
                 style={{
                   display: 'flex',
                   alignItems: 'center',

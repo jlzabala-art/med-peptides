@@ -628,7 +628,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         ? d.treatmentTitle
         : (d.regimenShortTitle || catData.regimenShortTitle || baseTitle);
       const finalTreatmentTitle = sanitizeEnglishText(rawTitle);
-      const isProposal = Boolean(d.isTreatmentProposal) || d.status === 'proposal_pending' || d.orderStatus === 'Offer Not Accepted' || String(d.treatmentProgram || '').toLowerCase().includes('proposal') || String(d.invoiceRef || '').toLowerCase().includes('proposal');
+      const isFulfilledOrOrdered = ['completed', 'delivered', 'shipped', 'paid'].includes(String(d.status || d.state || '').toLowerCase()) || ['Ordered', 'Delivered'].includes(String(d.orderStatus || ''));
+      const isProposal = !isFulfilledOrOrdered && (Boolean(d.isTreatmentProposal) || d.status === 'proposal_pending' || d.orderStatus === 'Offer Not Accepted' || String(d.treatmentProgram || '').toLowerCase().includes('proposal') || String(d.invoiceRef || '').toLowerCase().includes('proposal'));
       const normalizedStatus = isProposal ? 'proposal_pending' : (d.status || d.state || 'active');
 
       const rawPrescriptionCode = d.prescriptionNumber || d.code || doc.id;

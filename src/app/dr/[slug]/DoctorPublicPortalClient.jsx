@@ -68,7 +68,8 @@ import {
   Upload,
   Building2,
   Network,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Package
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -333,18 +334,26 @@ export function resolveClinicalVehicle(rxObj = {}, items = [], explicitVehicle =
 
 export function isProposalPrescription(rx) {
   if (!rx) return false;
-  const s = (rx.status || rx.state || '').toLowerCase();
+  const s = (rx.status || rx.state || '').toLowerCase().trim();
+  const rawInv = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
+  const hasInv = rawInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInv);
+  if (hasInv || ['completed', 'delivered', 'shipped', 'paid'].includes(s) || rx.orderStatus === 'Delivered' || rx.orderStatus === 'Ordered') {
+    return false;
+  }
   return Boolean(s === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted');
 }
 
 export function isSoldPrescription(rx) {
   if (!rx) return false;
-  const isProp = isProposalPrescription(rx);
-  if (isProp) return false;
+  const s = (rx.status || rx.state || '').toLowerCase().trim();
   const rawInv = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
   const hasInv = rawInv && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInv);
-  const s = (rx.status || rx.state || '').toLowerCase();
-  return Boolean(hasInv || rx.orderStatus === 'Ordered' || ['active', 'approved', 'dispensed'].includes(s));
+  if (hasInv || ['completed', 'delivered', 'shipped', 'paid'].includes(s) || rx.orderStatus === 'Delivered') {
+    return true;
+  }
+  const isProp = isProposalPrescription(rx);
+  if (isProp) return false;
+  return Boolean(rx.orderStatus === 'Ordered' || ['active', 'approved', 'dispensed', 'completed', 'delivered', 'shipped', 'paid'].includes(s));
 }
 
 export function resolvePrescriptionParts(rx) {
@@ -2106,6 +2115,82 @@ export default function DoctorPublicPortalClient({
       toast.error('Signing error: ' + (err.message || 'Please try again'));
     } finally {
       setSigningTaskId(null);
+    }
+  };
+
+  const handleQuickUpdatePrescriptionStatus = async (rx, targetStatus, customInvoiceRef = null, e = null) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    const rxCode = rx.prescriptionNumber || rx.code || rx.id;
+    if (!rxCode) return;
+
+    try {
+      toast.loading(`Updating prescription #${rxCode} to ${targetStatus}...`, { id: `status-${rxCode}` });
+      const res = await fetch('/api/prescriptions/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prescriptionId: rx.id || rxCode,
+          prescriptionNumber: rxCode,
+          status: targetStatus,
+          invoiceRef: customInvoiceRef || rx.invoiceRef,
+          updatedBy: isAuthorizedViewer ? (doctor.name || 'Treating Physician') : 'Clinical Physician',
+          reason: targetStatus === 'delivered' ? 'Clinical delivery verified by practitioner' : 'Prescription order confirmed & accepted'
+        })
+      });
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error || 'Failed to update status');
+
+      toast.success(`Prescription #${rxCode} marked as ${targetStatus.toUpperCase()} ✓`, { id: `status-${rxCode}` });
+
+      setData((prev) => {
+        if (!prev) return prev;
+        const updatedPrescriptions = (prev.prescriptions || []).map((p) => {
+          if (p.id === rx.id || p.code === rxCode || p.prescriptionNumber === rxCode) {
+            return {
+              ...p,
+              status: targetStatus,
+              state: targetStatus,
+              orderStatus: targetStatus === 'delivered' ? 'Delivered' : 'Ordered',
+              isTreatmentProposal: false,
+              isDispensed: targetStatus === 'delivered',
+              invoiceRef: customInvoiceRef || p.invoiceRef || (targetStatus === 'approved' ? `ORD-${Date.now().toString().slice(-6)}` : p.invoiceRef)
+            };
+          }
+          return p;
+        });
+        return {
+          ...prev,
+          prescriptions: updatedPrescriptions
+        };
+      });
+
+      setSelectedInspectorItem((prev) => {
+        if (!prev || !prev.data) return prev;
+        const isMatched = prev.data.id === rx.id || prev.data.code === rxCode || (prev.prescription && prev.prescription.code === rxCode);
+        if (isMatched) {
+          return {
+            ...prev,
+            data: {
+              ...prev.data,
+              status: targetStatus,
+              state: targetStatus,
+              orderStatus: targetStatus === 'delivered' ? 'Delivered' : 'Ordered',
+              isTreatmentProposal: false
+            },
+            prescription: prev.prescription ? {
+              ...prev.prescription,
+              status: targetStatus,
+              state: targetStatus,
+              orderStatus: targetStatus === 'delivered' ? 'Delivered' : 'Ordered',
+              isTreatmentProposal: false
+            } : null
+          };
+        }
+        return prev;
+      });
+    } catch (err) {
+      console.error('Error updating status:', err);
+      toast.error(err.message || 'Failed to update prescription status', { id: `status-${rxCode}` });
     }
   };
 
@@ -8324,6 +8409,58 @@ export default function DoctorPublicPortalClient({
                               ) : (
                                 <StatusBadge status={p.status || 'active'} />
                               )}
+                              {pIsProp && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleQuickUpdatePrescriptionStatus(p, 'approved', null, e);
+                                  }}
+                                  style={{
+                                    padding: '3px 8px',
+                                    fontSize: '0.72rem',
+                                    borderRadius: '4px',
+                                    border: '1px solid #16a34a',
+                                    background: '#f0fdf4',
+                                    color: '#15803d',
+                                    cursor: 'pointer',
+                                    fontWeight: 700,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                  }}
+                                  title="Aceptar propuesta y registrar pedido confirmado"
+                                >
+                                  <span>✓ Aceptar Oferta</span>
+                                </button>
+                              )}
+
+                              {pIsSold && !['delivered', 'completed', 'dispensed'].includes(String(p.status || '').toLowerCase()) && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleQuickUpdatePrescriptionStatus(p, 'delivered', null, e);
+                                  }}
+                                  style={{
+                                    padding: '3px 8px',
+                                    fontSize: '0.72rem',
+                                    borderRadius: '4px',
+                                    border: '1px solid #0284c7',
+                                    background: '#f0f9ff',
+                                    color: '#0369a1',
+                                    cursor: 'pointer',
+                                    fontWeight: 700,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                  }}
+                                  title="Marcar formulación como entregada al paciente"
+                                >
+                                  <span>📦 Marcar Entregado</span>
+                                </button>
+                              )}
+
                               <button
                                 type="button"
                                 onClick={() => handleRowClickPrescription(p)}
@@ -11593,7 +11730,58 @@ export default function DoctorPublicPortalClient({
                   Close
                 </button>
 
-                {rx && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {isProposal && (
+                    <button
+                      type="button"
+                      onClick={() => handleQuickUpdatePrescriptionStatus(rx, 'approved')}
+                      style={{
+                        height: '34px',
+                        padding: '0 12px',
+                        borderRadius: '4px',
+                        background: '#f0fdf4',
+                        border: '1px solid #16a34a',
+                        color: '#15803d',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                      title="Convertir propuesta en oferta aceptada y pedido confirmado"
+                    >
+                      <CheckCircle2 size={13} />
+                      <span>Aceptar Oferta</span>
+                    </button>
+                  )}
+
+                  {!isProposal && !['delivered', 'completed', 'dispensed'].includes(String(rx.status || '').toLowerCase()) && (
+                    <button
+                      type="button"
+                      onClick={() => handleQuickUpdatePrescriptionStatus(rx, 'delivered')}
+                      style={{
+                        height: '34px',
+                        padding: '0 12px',
+                        borderRadius: '4px',
+                        background: '#f0f9ff',
+                        border: '1px solid #0284c7',
+                        color: '#0369a1',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                      title="Marcar formulación como entregada al paciente"
+                    >
+                      <Package size={13} />
+                      <span>Marcar Entregado</span>
+                    </button>
+                  )}
+
+                  {rx && (
                   <Link
                     href={`/rx/${safeRxCode}`}
                     style={{
@@ -11614,6 +11802,7 @@ export default function DoctorPublicPortalClient({
                     <ArrowUpRight size={13} />
                   </Link>
                 )}
+                </div>
               </div>
             </aside>
           </div>
