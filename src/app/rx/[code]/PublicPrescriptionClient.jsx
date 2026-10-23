@@ -1936,272 +1936,249 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       {/* ── Google Cloud Console Standard Unified Footer ── */}
       <PublicUnifiedFooter lang={lang || 'en'} minimal={true} />
 
-      {/* Full-Width Bottom Sticky Action Bar (Google Cloud Standard - Matching Screenshot 2) */}
+      {/* ── Universal Public Sticky Action Bar (GCP Standard Across All Public Pages) ── */}
       {!embedded && (
-        <aside className="rx-bottom-dock" aria-label="Prescription Quick Actions">
-          <div className="rx-bottom-dock-container">
-            {/* Left: Entity Context Identity (Matching Screenshot 2) */}
-            <div className="rx-bottom-dock-info">
-              <div className="rx-bottom-dock-meta-row">
-                <span className="rx-bottom-dock-badge">
-                  {isPatientView ? (isEs ? 'PACIENTE RX' : 'PATIENT RX') : (isEs ? 'RECETA MÉDICA' : 'PRESCRIPTION')}
-                </span>
-                <div className="rx-bottom-dock-title" title={`${patientName} · #${rxId}`}>
-                  {patientName} <span className="rx-bottom-dock-ref">#{rxId}</span>
-                </div>
-              </div>
-              <div className="rx-bottom-dock-subtitle" title={`${resolvedFormulaSummary || prescriptionTypeInfo.label} · Dr. ${nominalDoctorName || 'Atlas Clinical'}`}>
-                <span>{resolvedFormulaSummary || prescriptionTypeInfo.label}</span>
-                {nominalDoctorName && (
-                  <>
-                    <span style={{ margin: '0 4px', opacity: 0.6 }}>•</span>
-                    <span>Dr. {nominalDoctorName}</span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Right: Actions Cluster */}
-            <div className="rx-bottom-dock-actions">
-              {!isPatientView ? (
-                /* Doctor View CTAs */
-                <>
-                  {/* 1. Sign & Authorize (if draft/pending) */}
-                  {['draft', 'pending'].includes(currentStatus) && (
-                    <button
-                      type="button"
-                      disabled={isSigning}
-                      onClick={handleDoctorSignOff}
-                      className="rx-dock-btn rx-dock-btn-sign"
-                      title={isEs ? 'Firmar y autorizar formulación magistral' : 'Digitally sign and authorize prescription'}
-                    >
-                      {isSigning ? (
-                        <>
-                          <Loader2 size={14} className="animate-spin" />
-                          <span>{isEs ? 'Firmando...' : 'Signing...'}</span>
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle2 size={14} color="#38bdf8" />
-                          <span>{isEs ? 'Firmar Receta' : 'Sign & Authorize'}</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-
-                  {/* 2. Documents dropdown */}
-                  <div style={{ position: 'relative' }} ref={docDropdownRef}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('selection');
-                        setShowDocDropdown(prev => !prev);
-                      }}
-                      className="rx-dock-btn rx-dock-btn-secondary"
-                      title={isEs ? 'Ver monografía, guía o etiquetas' : 'View Monograph, Guide or Labels'}
-                    >
-                      <FileText size={14} color="#003666" />
-                      <span>{isEs ? 'Documentos' : 'Documents'}</span>
-                      <ChevronDown
-                        size={13}
-                        color="#64748b"
-                        style={{
-                          transform: showDocDropdown ? 'rotate(180deg)' : 'none',
-                          transition: 'transform 0.15s ease'
-                        }}
-                      />
-                    </button>
-
-                    {/* Upward Dropdown Menu */}
-                    {showDocDropdown && (
-                      <div style={{
-                        position: 'absolute',
-                        bottom: 'calc(100% + 12px)',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        zIndex: 999,
-                        background: 'rgba(255, 255, 255, 0.95)',
-                        backdropFilter: 'blur(24px) saturate(190%)',
-                        WebkitBackdropFilter: 'blur(24px) saturate(190%)',
-                        borderRadius: '8px',
-                        boxShadow: '0 12px 32px rgba(15, 23, 42, 0.16)',
-                        border: '1px solid #cbd5e1',
-                        padding: '6px',
-                        minWidth: '270px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '4px',
-                        animation: 'fadeIn 0.15s ease-out'
-                      }}>
-                        <button
-                          type="button"
-                          onClick={() => { setShowDocDropdown(false); setShowBrochureModal(true); }}
-                          className="rx-dock-drop-item"
-                        >
-                          <FileText size={15} color="#1a73e8" />
-                          <div>
-                            <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Bróchure Médico' : 'Medical Brochure'}</div>
-                            <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Monografía clínica completa (A4)' : 'Full clinical monograph (A4)'}</div>
-                          </div>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => { setShowDocDropdown(false); setShowBrochureModal(true); }}
-                          className="rx-dock-drop-item"
-                        >
-                          <User size={15} color="#059669" />
-                          <div>
-                            <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Guía del Paciente' : 'Patient Guide'}</div>
-                            <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Pauta diaria de administración' : 'Daily administration schedule'}</div>
-                          </div>
-                        </button>
-
-                        {prescriptionLabels.length > 0 && (
-                          <>
-                            <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
-                            <button
-                              type="button"
-                              onClick={() => { setShowDocDropdown(false); setSelectedLabelIndex(0); setShowLabelsModal(true); }}
-                              className="rx-dock-drop-item"
-                            >
-                              <Tag size={15} color="#c2410c" />
-                              <div>
-                                <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? `Etiquetas (${prescriptionLabels.length})` : `Bottle Labels (${prescriptionLabels.length})`}</div>
-                                <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Etiquetas EU GMP 300 DPI' : 'EU GMP labels 300 DPI'}</div>
-                              </div>
-                            </button>
-                          </>
-                        )}
-
-                        <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
-                        <button
-                          type="button"
-                          onClick={() => { setShowDocDropdown(false); handleExportExcel(); }}
-                          className="rx-dock-drop-item"
-                        >
-                          <FileSpreadsheet size={15} color="#16a34a" />
-                          <div>
-                            <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Exportar Ficha (Excel)' : 'Export Specs (Excel)'}</div>
-                            <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Fórmula galénica completa' : 'Complete compounding formula'}</div>
-                          </div>
-                        </button>
-
-                        <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
-                        <button
-                          type="button"
-                          onClick={() => { setShowDocDropdown(false); setShowAtlasQuotationModal(true); }}
-                          className="rx-dock-drop-item"
-                        >
-                          <FileText size={15} color="#0284c7" />
-                          <div>
-                            <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Cotización de Laboratorio' : 'Lab Compounding Quote'}</div>
-                            <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Solicitar presupuesto a Fagron / Atlas' : 'Request compounding quotation'}</div>
-                          </div>
-                        </button>
-                      </div>
+        <PublicStickyActionBar
+          title={`${patientName} #${rxId}`}
+          subtitle={`${resolvedFormulaSummary || prescriptionTypeInfo.label} • Dr. ${nominalDoctorName || 'Atlas Clinical'}`}
+          badge={isPatientView ? (isEs ? 'PACIENTE RX' : 'PATIENT RX') : (isEs ? 'RECETA MÉDICA' : 'PRESCRIPTION')}
+          badgeType="protocol"
+          inquireLabel={
+            isPatientView
+              ? (isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Consultar Prescripción' : 'Inquire Prescription'))
+              : (isEs ? 'Consultar Laboratorio' : 'Inquire Lab Support')
+          }
+          onInquire={() => setIsInquiryDrawerOpen(true)}
+          showClinicalAI={true}
+          showSections={true}
+          sectionsCount={4}
+          sectionsLabel={isEs ? 'Secciones' : 'Sections'}
+          onOpenSections={() => {
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('open-rx-sections'));
+            }
+          }}
+          lang={lang}
+          extraActions={
+            !isPatientView ? (
+              /* Doctor View Supplemental Actions */
+              <>
+                {['draft', 'pending'].includes(currentStatus) && (
+                  <button
+                    type="button"
+                    disabled={isSigning}
+                    onClick={handleDoctorSignOff}
+                    className="rx-dock-btn rx-dock-btn-sign"
+                    title={isEs ? 'Firmar y autorizar formulación magistral' : 'Digitally sign and authorize prescription'}
+                  >
+                    {isSigning ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" />
+                        <span>{isEs ? 'Firmando...' : 'Signing...'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 size={14} color="#38bdf8" />
+                        <span>{isEs ? 'Firmar Receta' : 'Sign & Authorize'}</span>
+                      </>
                     )}
-                  </div>
+                  </button>
+                )}
 
-                  {/* 3. Follow-up / Share with Patient via WhatsApp (Contextual Clinical Action) */}
+                <div style={{ position: 'relative' }} ref={docDropdownRef}>
                   <button
                     type="button"
                     onClick={() => {
                       triggerHaptic('selection');
-                      const rawPhone = rx?.patientPhone || patient?.phone || patient?.mobile || '';
-                      const cleanPhone = String(rawPhone).replace(/[^\d+]/g, '').replace(/^00/, '+');
-                      const isProposal = currentStatus === 'proposal_pending' || rx?.isTreatmentProposal || rx?.orderStatus === 'Offer Not Accepted';
-                      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
-                      const docSignature = isAuthorizedViewer ? (nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`) : (isEs ? 'Su práctica médica' : 'Your medical practice');
-                      const text = isProposal
-                        ? (isEs
-                            ? `Estimado/a ${patientName},\n\n${docSignature} le remite su Propuesta de Tratamiento Personalizada:\n\n📋 Pauta: ${resolvedFormulaSummary}\n🆔 Ref: #${rxId}\n\nPuede revisar su formulación y confirmar la dispensación aquí:\n🔗 ${origin}/rx/${rxId}`
-                            : `Dear ${patientName},\n\n${docSignature} has prepared your personalized Clinical Treatment Proposal:\n\n📋 Regimen: ${resolvedFormulaSummary}\n🆔 Proposal Ref: #${rxId}\n\nYou can review your formulation and activate your order here:\n🔗 ${origin}/rx/${rxId}`)
-                        : (isEs
-                            ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por ${docSignature}:\n🔗 ${patientPublicUrl}`
-                            : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by ${docSignature}:\n🔗 ${patientPublicUrl}`);
-                      const waBase = cleanPhone ? `https://wa.me/${cleanPhone.replace('+', '')}` : 'https://wa.me/';
-                      window.open(`${waBase}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+                      setShowDocDropdown(prev => !prev);
                     }}
-                    className="rx-dock-btn"
-                    style={{
-                      background: '#16a34a',
-                      color: '#ffffff',
-                      border: '1px solid #15803d',
-                      boxShadow: '0 1px 3px rgba(22, 163, 74, 0.25)'
-                    }}
-                    title={isEs ? 'Compartir pauta o seguimiento con el paciente por WhatsApp' : 'Share posology or follow up with patient on WhatsApp'}
-                  >
-                    <MessageCircle size={14} color="#ffffff" />
-                    <span>
-                      {currentStatus === 'proposal_pending' || rx?.isTreatmentProposal
-                        ? (isEs ? 'Seguimiento' : 'Follow-up')
-                        : (isEs ? 'Compartir Paciente' : 'Share with Patient')}
-                    </span>
-                  </button>
-
-                  {/* 4. Quick Return to Doctor Portal */}
-                  <Link
-                    href={doctorPublicUrl}
                     className="rx-dock-btn rx-dock-btn-secondary"
-                    style={{ textDecoration: 'none' }}
-                    title={isAuthorizedViewer ? (isEs ? `Volver al portal clínico de ${nominalDoctorName}` : `Return to ${nominalDoctorName}'s Clinical Portal`) : (isEs ? 'Volver al portal de la práctica' : 'Return to practice portal')}
+                    title={isEs ? 'Ver monografía, guía o etiquetas' : 'View Monograph, Guide or Labels'}
                   >
-                    <ArrowLeft size={14} color="#003666" strokeWidth={2.5} />
-                    <span className="rx-dock-btn-label-desktop">{isEs ? 'Mi Portal' : 'My Portal'}</span>
-                  </Link>
-
-                  {/* 5. QR Verification */}
-                  <button
-                    type="button"
-                    onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
-                    className="rx-dock-btn rx-dock-btn-secondary"
-                    title={isEs ? 'Verificación QR de la prescripción' : 'QR Verification'}
-                  >
-                    <QrCode size={14} color="#003666" />
-                    <span className="rx-dock-btn-label-desktop">{isEs ? 'QR' : 'QR'}</span>
-                  </button>
-                </>
-              ) : (
-                /* Patient View CTAs (Strictly Patient-Centered) */
-                <>
-                  {/* 1. Treatment Guide & PDF */}
-                  <button
-                    type="button"
-                    onClick={() => { triggerHaptic('selection'); setShowBrochureModal(true); }}
-                    className="rx-dock-btn rx-dock-btn-primary"
-                    title={isEs ? 'Ver guía de tratamiento y descargar PDF' : 'View treatment guide & download PDF'}
-                  >
-                    <FileText size={14} color="#ffffff" />
-                    <span>{isEs ? 'Guía de Tratamiento' : 'Treatment Guide'}</span>
+                    <FileText size={14} color="#003666" />
+                    <span>{isEs ? 'Documentos' : 'Documents'}</span>
+                    <ChevronDown
+                      size={13}
+                      color="#64748b"
+                      style={{
+                        transform: showDocDropdown ? 'rotate(180deg)' : 'none',
+                        transition: 'transform 0.15s ease'
+                      }}
+                    />
                   </button>
 
-                  {/* 2. Direct Clinical Care / Inquire */}
-                  <button
-                    type="button"
-                    onClick={() => setIsInquiryDrawerOpen(true)}
-                    className="rx-dock-btn rx-dock-btn-quote"
-                    title={isEs ? 'Contactar con la clínica o consultar dudas' : 'Contact clinic or submit inquiry'}
-                  >
-                    <MessageSquare size={14} color="#003666" />
-                    <span>{isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Contactar Clínica' : 'Contact Clinic')}</span>
-                  </button>
+                  {showDocDropdown && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 'calc(100% + 12px)',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      zIndex: 999,
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      backdropFilter: 'blur(24px) saturate(190%)',
+                      WebkitBackdropFilter: 'blur(24px) saturate(190%)',
+                      borderRadius: '8px',
+                      boxShadow: '0 12px 32px rgba(15, 23, 42, 0.16)',
+                      border: '1px solid #cbd5e1',
+                      padding: '6px',
+                      minWidth: '270px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                      animation: 'fadeIn 0.15s ease-out'
+                    }}>
+                      <button
+                        type="button"
+                        onClick={() => { setShowDocDropdown(false); setShowBrochureModal(true); }}
+                        className="rx-dock-drop-item"
+                      >
+                        <FileText size={15} color="#1a73e8" />
+                        <div>
+                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Bróchure Médico' : 'Medical Brochure'}</div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Monografía clínica completa (A4)' : 'Full clinical monograph (A4)'}</div>
+                        </div>
+                      </button>
 
-                  {/* 3. Official QR Authenticity Badge */}
-                  <button
-                    type="button"
-                    onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
-                    className="rx-dock-btn rx-dock-btn-secondary"
-                    title={isEs ? 'Verificar autenticidad digital con código QR' : 'Verify authenticity QR code'}
-                  >
-                    <QrCode size={14} color="#003666" />
-                    <span className="rx-dock-btn-label-desktop">{isEs ? 'Autenticidad QR' : 'Verify QR'}</span>
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </aside>
+                      <button
+                        type="button"
+                        onClick={() => { setShowDocDropdown(false); setShowBrochureModal(true); }}
+                        className="rx-dock-drop-item"
+                      >
+                        <User size={15} color="#059669" />
+                        <div>
+                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Guía del Paciente' : 'Patient Guide'}</div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Pauta diaria de administración' : 'Daily administration schedule'}</div>
+                        </div>
+                      </button>
+
+                      {prescriptionLabels.length > 0 && (
+                        <>
+                          <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
+                          <button
+                            type="button"
+                            onClick={() => { setShowDocDropdown(false); setSelectedLabelIndex(0); setShowLabelsModal(true); }}
+                            className="rx-dock-drop-item"
+                          >
+                            <Tag size={15} color="#c2410c" />
+                            <div>
+                              <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? `Etiquetas (${prescriptionLabels.length})` : `Bottle Labels (${prescriptionLabels.length})`}</div>
+                              <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Etiquetas EU GMP 300 DPI' : 'EU GMP labels 300 DPI'}</div>
+                            </div>
+                          </button>
+                        </>
+                      )}
+
+                      <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
+                      <button
+                        type="button"
+                        onClick={() => { setShowDocDropdown(false); handleExportExcel(); }}
+                        className="rx-dock-drop-item"
+                      >
+                        <FileSpreadsheet size={15} color="#16a34a" />
+                        <div>
+                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Exportar Ficha (Excel)' : 'Export Specs (Excel)'}</div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Fórmula galénica completa' : 'Complete compounding formula'}</div>
+                        </div>
+                      </button>
+
+                      <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
+                      <button
+                        type="button"
+                        onClick={() => { setShowDocDropdown(false); setShowAtlasQuotationModal(true); }}
+                        className="rx-dock-drop-item"
+                      >
+                        <FileText size={15} color="#0284c7" />
+                        <div>
+                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Cotización de Laboratorio' : 'Lab Compounding Quote'}</div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Solicitar presupuesto a Fagron / Atlas' : 'Request compounding quotation'}</div>
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    const rawPhone = rx?.patientPhone || patient?.phone || patient?.mobile || '';
+                    const cleanPhone = String(rawPhone).replace(/[^\d+]/g, '').replace(/^00/, '+');
+                    const isProposal = currentStatus === 'proposal_pending' || rx?.isTreatmentProposal || rx?.orderStatus === 'Offer Not Accepted';
+                    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.atlashealth-services.com';
+                    const docSignature = isAuthorizedViewer ? (nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`) : (isEs ? 'Su práctica médica' : 'Your medical practice');
+                    const text = isProposal
+                      ? (isEs
+                          ? `Estimado/a ${patientName},\n\n${docSignature} le remite su Propuesta de Tratamiento Personalizada:\n\n📋 Pauta: ${resolvedFormulaSummary}\n🆔 Ref: #${rxId}\n\nPuede revisar su formulación y confirmar la dispensación aquí:\n🔗 ${origin}/rx/${rxId}`
+                          : `Dear ${patientName},\n\n${docSignature} has prepared your personalized Clinical Treatment Proposal:\n\n📋 Regimen: ${resolvedFormulaSummary}\n🆔 Proposal Ref: #${rxId}\n\nYou can review your formulation and activate your order here:\n🔗 ${origin}/rx/${rxId}`)
+                      : (isEs
+                          ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por ${docSignature}:\n🔗 ${patientPublicUrl}`
+                          : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by ${docSignature}:\n🔗 ${patientPublicUrl}`);
+                    const waBase = cleanPhone ? `https://wa.me/${cleanPhone.replace('+', '')}` : 'https://wa.me/';
+                    window.open(`${waBase}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+                  }}
+                  className="rx-dock-btn"
+                  style={{
+                    background: '#16a34a',
+                    color: '#ffffff',
+                    border: '1px solid #15803d',
+                    boxShadow: '0 1px 3px rgba(22, 163, 74, 0.25)'
+                  }}
+                  title={isEs ? 'Compartir pauta o seguimiento con el paciente por WhatsApp' : 'Share posology or follow up with patient on WhatsApp'}
+                >
+                  <MessageCircle size={14} color="#ffffff" />
+                  <span>
+                    {currentStatus === 'proposal_pending' || rx?.isTreatmentProposal
+                      ? (isEs ? 'Seguimiento' : 'Follow-up')
+                      : (isEs ? 'Compartir Paciente' : 'Share with Patient')}
+                  </span>
+                </button>
+
+                <Link
+                  href={doctorPublicUrl}
+                  className="rx-dock-btn rx-dock-btn-secondary"
+                  style={{ textDecoration: 'none' }}
+                  title={isAuthorizedViewer ? (isEs ? `Volver al portal clínico de ${nominalDoctorName}` : `Return to ${nominalDoctorName}'s Clinical Portal`) : (isEs ? 'Volver al portal de la práctica' : 'Return to practice portal')}
+                >
+                  <ArrowLeft size={14} color="#003666" strokeWidth={2.5} />
+                  <span className="rx-dock-btn-label-desktop">{isEs ? 'Mi Portal' : 'My Portal'}</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
+                  className="rx-dock-btn rx-dock-btn-secondary"
+                  title={isEs ? 'Verificación QR de la prescripción' : 'QR Verification'}
+                >
+                  <QrCode size={14} color="#003666" />
+                  <span className="rx-dock-btn-label-desktop">{isEs ? 'QR' : 'QR'}</span>
+                </button>
+              </>
+            ) : (
+              /* Patient View Supplemental Actions */
+              <>
+                <button
+                  type="button"
+                  onClick={() => { triggerHaptic('selection'); setShowBrochureModal(true); }}
+                  className="rx-dock-btn rx-dock-btn-primary"
+                  title={isEs ? 'Ver guía de tratamiento y descargar PDF' : 'View treatment guide & download PDF'}
+                >
+                  <FileText size={14} color="#ffffff" />
+                  <span>{isEs ? 'Guía de Tratamiento' : 'Treatment Guide'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
+                  className="rx-dock-btn rx-dock-btn-secondary"
+                  title={isEs ? 'Verificar autenticidad digital con código QR' : 'Verify authenticity QR code'}
+                >
+                  <QrCode size={14} color="#003666" />
+                  <span className="rx-dock-btn-label-desktop">{isEs ? 'Autenticidad QR' : 'Verify QR'}</span>
+                </button>
+              </>
+            )
+          }
+        />
       )}
 
       {/* Context-Aware Prescription Clinical Inquiry Drawer */}

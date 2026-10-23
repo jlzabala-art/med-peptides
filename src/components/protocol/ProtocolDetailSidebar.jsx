@@ -6,7 +6,6 @@ import {
   Menu, 
   X, 
   ChevronRight, 
-  ArrowUp,
   Printer,
   Copy,
   Check,
@@ -135,14 +134,6 @@ export default function ProtocolDetailSidebar({
       if (typeof window !== 'undefined' && window.history?.replaceState) {
         window.history.replaceState(null, '', `#${targetId}`);
       }
-    }
-  };
-
-  const scrollToTop = () => {
-    triggerHaptic('light');
-    setIsMobileDrawerOpen(false);
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -448,19 +439,6 @@ export default function ProtocolDetailSidebar({
           <span>{copiedUrl ? (isEs ? 'Enlace Copiado ✓' : 'Link Copied ✓') : (isEs ? 'Copiar Enlace Directo' : 'Copy Direct Link')}</span>
         </button>
       </div>
-
-      {/* Back to top */}
-      <div className="pds-toc-footer">
-        <button
-          type="button"
-          className="pds-toc-top-btn"
-          onClick={scrollToTop}
-          title={isEs ? 'Volver al inicio del protocolo' : 'Back to top'}
-        >
-          <ArrowUp size={13} />
-          <span>{isEs ? 'Inicio del protocolo' : 'Back to top'}</span>
-        </button>
-      </div>
     </div>
   );
 
@@ -752,18 +730,6 @@ export default function ProtocolDetailSidebar({
                   currentSlug={slug}
                 />
               )}
-            </div>
-
-            {/* Footer */}
-            <div className="pds-drawer-footer">
-              <button
-                type="button"
-                className="pds-drawer-top-action"
-                onClick={scrollToTop}
-              >
-                <ArrowUp size={14} />
-                <span>{isEs ? 'Volver al Inicio del Protocolo' : 'Back to Top of Protocol'}</span>
-              </button>
             </div>
           </div>
         </div>

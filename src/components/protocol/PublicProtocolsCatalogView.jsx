@@ -295,7 +295,9 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         localStorage.setItem('atlas_portal_lang', nextLang);
         localStorage.setItem('atlas_catalog_lang', nextLang);
         window.dispatchEvent(new CustomEvent('atlas_lang_change', { detail: nextLang }));
-      } catch {}
+      } catch (_) {
+        /* storage unavailable */
+      }
       const url = new URL(window.location.href);
       url.searchParams.set('lang', nextLang);
       window.history.replaceState({}, '', url.toString());
@@ -396,7 +398,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
 
   // Filtered and sorted protocols
   const filteredProtocols = useMemo(() => {
-    let result = enrichedProtocols.filter(p => {
+    const result = enrichedProtocols.filter(p => {
       // 1. Goal filter
       if (selectedGoal !== 'all' && !p.mappedGoals.includes(selectedGoal)) {
         return false;
@@ -539,7 +541,9 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         setCopiedDirectoryUrl(true);
         setTimeout(() => setCopiedDirectoryUrl(false), 2000);
       }
-    } catch {}
+    } catch (_) {
+      /* clipboard write rejected */
+    }
   };
 
   const handleResetFilters = () => {
@@ -1347,7 +1351,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         badgeType="teal"
         inquireLabel={lang === 'es' ? 'Consultar Directorio' : 'Inquire Directory'}
         onInquire={() => setIsInquiryDrawerOpen(true)}
-        showClinicalAI={false}
+        showClinicalAI={true}
         showSections={true}
         sectionsCount={GOAL_BUCKETS.length}
         sectionsLabel={lang === 'es' ? 'Objetivos & Filtros' : 'Goals & Filters'}

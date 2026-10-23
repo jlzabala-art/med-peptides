@@ -2372,7 +2372,7 @@ export default function PublicDatasheetView({
                   </div>
                 </div>
 
-                {/* 4. Base Dock: Tiered Price Shield + Inquire CTA */}
+                {/* 4. Base Dock: Tiered Price Shield */}
                 <div className="pds-square-price-dock">
                   <TieredPriceShield
                     product={product}
@@ -2384,31 +2384,6 @@ export default function PublicDatasheetView({
                     adminSimulationTier={adminSimulationTier}
                     onSelectAdminSimulationTier={setAdminSimulationTier}
                   />
-
-                  {/* Primary Inquire / Order CTA Button */}
-                  <button
-                    type="button"
-                    onClick={handleOpenInquiry}
-                    style={{
-                      width: '100%',
-                      padding: '8px 14px',
-                      borderRadius: '6px',
-                      background: 'linear-gradient(135deg, #003666 0%, #0284c7 100%)',
-                      color: '#ffffff',
-                      border: 'none',
-                      fontSize: '0.80rem',
-                      fontWeight: 750,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      boxShadow: '0 2px 4px rgba(0,54,102,0.18)',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <span>{isDiagnosticKit ? (lang === 'es' ? 'Consultar Test Diagnóstico →' : 'Inquire Diagnostic Test →') : (lang === 'es' ? 'Consultar Formulación →' : 'Inquire Formulation →')}</span>
-                  </button>
                 </div>
               </div>
             ) : null
@@ -2481,28 +2456,7 @@ export default function PublicDatasheetView({
                     adminSimulationTier={adminSimulationTier}
                     onSelectAdminSimulationTier={setAdminSimulationTier}
                   />
-                  <button
-                    type="button"
-                    onClick={handleOpenInquiry}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      background: 'linear-gradient(135deg, #003666 0%, #0284c7 100%)',
-                      color: '#ffffff',
-                      border: 'none',
-                      fontSize: '0.78rem',
-                      fontWeight: 750,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      boxShadow: '0 2px 4px rgba(0,54,102,0.18)'
-                    }}
-                  >
-                    <span>{isDiagnosticKit ? (lang === 'es' ? 'Consultar Test Diagnóstico →' : 'Inquire Diagnostic Test →') : (lang === 'es' ? 'Consultar Formulación →' : 'Inquire Formulation →')}</span>
-                  </button>
+
                 </div>
               </div>
             ) : null

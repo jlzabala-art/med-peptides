@@ -32,8 +32,10 @@ export default function PublicStickyActionBar({
   sectionsCount = null,
   activeSectionIndex = null,
   sectionsLabel = null,
+  extraActions = null,
+  children = null,
 }) {
-  const [quota, setQuota] = useState({ remaining: 5, limit: 5 });
+  const [_quota, setQuota] = useState({ remaining: 5, limit: 5 });
   const [tocProgress, setTocProgress] = useState({
     currentProgress: activeSectionIndex || 1,
     totalSections: sectionsCount || 0,
@@ -152,6 +154,9 @@ export default function PublicStickyActionBar({
 
         {/* Right: Actions Cluster */}
         <div className="public-sticky-action-bar__actions">
+          {extraActions}
+          {children}
+
           {/* Page Outline / Sections Trigger (Mobile & Desktop) */}
           {hasSectionsOutline && (
             <button

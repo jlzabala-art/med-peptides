@@ -666,36 +666,7 @@ export default function CosmeticsSidebarWidget({
           </div>
         </div>
 
-        {onInquireRoutine && (
-          <div style={{ padding: '0.5rem 0.85rem', background: '#ffffff', borderTop: '1px solid #f1f5f9' }}>
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('impactLight');
-                onInquireRoutine();
-              }}
-              style={{
-                width: '100%',
-                padding: '7px 12px',
-                borderRadius: '6px',
-                border: '1px solid #99f6e4',
-                background: '#f0fdfa',
-                color: '#0d9488',
-                fontSize: '0.70rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <Mail size={12} />
-              {isEs ? 'Consultar protocolo completo' : 'Inquire full routine protocol'}
-            </button>
-          </div>
-        )}
+
 
       </div>
 

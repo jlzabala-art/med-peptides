@@ -114,34 +114,7 @@ export default function CorporateServiceWidget({
           </div>
         </div>
 
-        {onOpenInquiry && (
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('selection');
-              onOpenInquiry();
-            }}
-            style={{
-              width: '100%',
-              marginTop: '0.85rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '8px 12px',
-              background: 'linear-gradient(135deg, #003666 0%, #001f3f 100%)',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '0.76rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 2px 4px rgba(0,54,102,0.2)'
-            }}
-          >
-            <span>{isEs ? 'Iniciar Consulta Confidencial' : 'Initiate Confidential Inquiry'}</span>
-          </button>
-        )}
+
       </div>
 
       {/* ── CARD 2: QR VERIFICATION ── */}

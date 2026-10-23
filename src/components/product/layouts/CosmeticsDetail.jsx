@@ -2313,13 +2313,15 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
       <PublicStickyActionBar
         title={name}
         subtitle={`${volumeText} • ${isHairProduct ? 'Colway Hair Strengthening System' : isNutricosmetic ? 'Colway Oral Nutricosmetics' : (slug.includes('vege') || slug.includes('wash-gel')) ? 'Colway Native Dermal Collagen Line' : 'Colway Blue Diamond Cellular Line'} • ${isNutricosmetic ? 'EU Reg. 1169/2011' : 'EU Reg. 1223/2009'}`}
-        badge="Cosmeceutical Monograph"
+        badge={lang === 'es' ? 'COSMECÉUTICO' : 'COSMECEUTICAL'}
         badgeType="default"
-        inquireLabel="Inquire Product"
+        inquireLabel={lang === 'es' ? 'Consultar Producto' : 'Inquire Product'}
         onInquire={() => setIsInquiryDrawerOpen(true)}
-        showClinicalAI={false}
+        showClinicalAI={true}
+        onOpenClinicalAI={() => setIsAIDrawerOpen(true)}
         showSections={true}
         sectionsCount={tocSections.length}
+        sectionsLabel={lang === 'es' ? 'Secciones' : 'Sections'}
         onOpenSections={() => {
           if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('open-datasheet-toc'));

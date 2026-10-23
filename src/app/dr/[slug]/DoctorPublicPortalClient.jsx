@@ -824,7 +824,7 @@ export default function DoctorPublicPortalClient({
   const [apiFilter, setApiFilter] = useState(null); // Active pharmaceutical ingredient filter from Analytics
 
   // Atlas Recommendations UI State (Consolidated Master Catalog)
-  const [recCategoryFilter, setRecCategoryFilter] = useState('all'); // 'all' | 'peptides' | 'supplements' | 'eterna' | 'colway'
+  const [recCategoryFilter, setRecCategoryFilter] = useState(initialSearchParams?.cat || 'all'); // 'all' | 'peptides' | 'supplements' | 'colway' | 'diagnostics'
   const [recSearchQuery, setRecSearchQuery] = useState('');
   const [expandedRecId, setExpandedRecId] = useState(null);
   const [recFilter, setRecFilter] = useState(null); // { id: string, title: string, rxIds: string[] }
@@ -1585,7 +1585,7 @@ export default function DoctorPublicPortalClient({
     [doctor, allPrescriptions]
   );
 
-  const handlePrescribeSpecialtyBlueprint = useCallback((blueprint) => {
+  const handlePrescribeSpecialtyBlueprint = useCallback((blueprint, targetPatient = null) => {
     if (!blueprint?.compoundingFormula) return;
     triggerHaptic('selection');
     const cf = blueprint.compoundingFormula;
@@ -1595,15 +1595,19 @@ export default function DoctorPublicPortalClient({
       items: Array.isArray(cf.items) ? cf.items : [],
       volume: cf.volume || '60 mL',
       posology: cf.posology || '',
-      patientName: '',
-      patientPhone: '',
-      patientDob: '',
+      patientName: targetPatient?.name || '',
+      patientPhone: targetPatient?.phone || '',
+      patientDob: targetPatient?.dob || '',
       sourceRx: blueprint.code || blueprint.id || 'BLUEPRINT'
     };
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('atlas_represcribe_prefill', JSON.stringify(formulaSummary));
     }
-    toast.success(`Specialty Blueprint "${blueprint.title}" loaded into Prescription Builder ✓`);
+    toast.success(
+      targetPatient?.name
+        ? `"${blueprint.title}" pre-filled for ${targetPatient.name} ✓`
+        : `Specialty Blueprint "${blueprint.title}" loaded into Prescription Builder ✓`
+    );
     setIsIntakeOpen(true);
   }, []);
 
@@ -8916,6 +8920,7 @@ export default function DoctorPublicPortalClient({
               setRecFilter={setRecFilter}
               setActiveAnchor={setActiveAnchor}
               triggerHaptic={triggerHaptic}
+              patientsList={doctorPatientsList}
               onPrescribeBlueprint={handlePrescribeSpecialtyBlueprint}
               onRequestSampleWhatsApp={handleRequestBlueprintWhatsApp}
               onOpenDossier={setActiveBlueprintDossier}

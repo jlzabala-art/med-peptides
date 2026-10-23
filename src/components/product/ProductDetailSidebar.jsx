@@ -6,7 +6,6 @@ import {
   Menu, 
   X, 
   ChevronRight, 
-  ArrowUp,
   Sparkles
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
@@ -138,18 +137,6 @@ export default function ProductDetailSidebar({
       if (typeof window !== 'undefined' && window.history?.replaceState) {
         window.history.replaceState(null, '', `#${targetId}`);
       }
-    }
-  };
-
-  const scrollToTop = () => {
-    triggerHaptic('light');
-    setIsMobileDrawerOpen(false);
-    if (onSelectSection) {
-      onSelectSection('overview');
-      return;
-    }
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -351,18 +338,7 @@ export default function ProductDetailSidebar({
         );
       })()}
 
-      {/* Quick Back to Top Action */}
-      <div className="pds-toc-footer">
-        <button
-          type="button"
-          className="pds-toc-top-btn"
-          onClick={scrollToTop}
-          title={isEs ? 'Volver al inicio del documento' : 'Scroll to top'}
-        >
-          <ArrowUp size={13} />
-          <span>{isEs ? 'Inicio del documento' : 'Back to top'}</span>
-        </button>
-      </div>
+
     </div>
   );
 
@@ -543,16 +519,7 @@ export default function ProductDetailSidebar({
               )}
             </div>
 
-            <div className="pds-drawer-footer">
-              <button
-                type="button"
-                className="pds-drawer-top-action"
-                onClick={scrollToTop}
-              >
-                <ArrowUp size={14} />
-                <span>{isEs ? 'Volver al Inicio del Documento' : 'Back to Top of Document'}</span>
-              </button>
-            </div>
+
           </div>
         </div>
       )}

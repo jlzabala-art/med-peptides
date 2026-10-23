@@ -5,8 +5,7 @@ import {
   List, 
   Menu, 
   X, 
-  ChevronRight, 
-  ArrowUp 
+  ChevronRight 
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import AssociatedProtocolsSidebarWidget from './AssociatedProtocolsSidebarWidget';
@@ -123,18 +122,6 @@ export default function PublicDatasheetTableOfContents({
     }
   };
 
-  const scrollToTop = () => {
-    triggerHaptic('light');
-    setIsMobileDrawerOpen(false);
-    if (onSelectSection) {
-      onSelectSection(availableSections[0]?.id || 'overview');
-      return;
-    }
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
   // Find active index for reading progress indicator
   const activeIndex = availableSections.findIndex(s => s.id === currentActiveId);
   const currentProgress = activeIndex >= 0 ? activeIndex + 1 : 1;
@@ -231,19 +218,6 @@ export default function PublicDatasheetTableOfContents({
 
           {/* Optional Injected Sidebar Children */}
           {children}
-
-          {/* Quick Back to Top Action */}
-          <div className="pds-toc-footer">
-            <button
-              type="button"
-              className="pds-toc-top-btn"
-              onClick={scrollToTop}
-              title={isEs ? 'Volver al inicio del documento' : 'Scroll to top'}
-            >
-              <ArrowUp size={13} />
-              <span>{isEs ? 'Inicio del documento' : 'Back to top'}</span>
-            </button>
-          </div>
         </div>
       </aside>
 
@@ -384,18 +358,6 @@ export default function PublicDatasheetTableOfContents({
               )}
 
               {children}
-            </div>
-
-            {/* Drawer Footer Actions */}
-            <div className="pds-drawer-footer">
-              <button
-                type="button"
-                className="pds-drawer-top-action"
-                onClick={scrollToTop}
-              >
-                <ArrowUp size={14} />
-                <span>{isEs ? 'Volver al Inicio del Documento' : 'Back to Top of Page'}</span>
-              </button>
             </div>
           </div>
         </div>
