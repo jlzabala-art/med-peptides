@@ -90,7 +90,7 @@ import { COUNTRIES } from '@/data/countries';
 import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolidator';
 import { calculateTreatmentDates, calculateTreatmentDuration } from '@/utils/clinical/clinicalFormulations';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
-import DoctorFloatingGlassDock from '@/components/doctor/docks/DoctorFloatingGlassDock';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
 import PrescriptionProtocolAlignmentCard from '@/components/doctor/PrescriptionProtocolAlignmentCard';
 import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
@@ -4611,152 +4611,7 @@ export default function DoctorPublicPortalClient({
           padding: 24px 28px 100px 28px;
           margin: 0 auto;
         }
-        .doctor-bottom-dock {
-          position: fixed;
-          bottom: 18px;
-          left: calc(250px + (100% - 250px) / 2);
-          transform: translateX(-50%);
-          width: calc(100% - 280px);
-          max-width: 820px;
-          z-index: 40;
-          background: rgba(255, 255, 255, 0.78);
-          backdrop-filter: blur(24px) saturate(190%);
-          -webkit-backdrop-filter: blur(24px) saturate(190%);
-          border: 1px solid rgba(255, 255, 255, 0.85);
-          outline: 1px solid rgba(203, 213, 225, 0.4);
-          border-radius: 9999px;
-          box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.05), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
-          padding: 8px 14px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .gcp-portal-layout:has(.gcp-clinical-sidebar.collapsed) .doctor-bottom-dock {
-          left: calc(64px + (100% - 64px) / 2);
-          width: calc(100% - 96px);
-        }
-        .doctor-bottom-dock-actions {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          flex-wrap: wrap;
-          width: 100%;
-        }
-        .doctor-dock-btn {
-          height: 36px;
-          padding: 0 14px;
-          border-radius: 9999px;
-          font-size: 0.80rem;
-          font-weight: 600;
-          cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          transition: all 0.15s ease;
-          white-space: nowrap;
-          border: 1px solid transparent;
-        }
-        .doctor-dock-mobile-only {
-          display: none !important;
-        }
         @media (max-width: 768px) {
-          .doctor-dock-mobile-only {
-            display: inline-flex !important;
-          }
-        }
-        .doctor-dock-btn-primary {
-          background: linear-gradient(180deg, #1a73e8 0%, #1557b0 100%);
-          color: #ffffff;
-          border-color: rgba(21, 87, 176, 0.85);
-          box-shadow: 0 2px 6px rgba(26, 115, 232, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-        }
-        .doctor-dock-btn-primary:hover {
-          background: #1557b0;
-          border-color: #1557b0;
-          box-shadow: 0 3px 8px rgba(26, 115, 232, 0.45);
-        }
-        .doctor-dock-btn-secondary {
-          background: rgba(255, 255, 255, 0.85);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          color: #1e293b;
-          border-color: rgba(203, 213, 225, 0.85);
-          box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        }
-        .doctor-dock-btn-secondary:hover {
-          background: #ffffff;
-          border-color: #1a73e8;
-          color: #1a73e8;
-          box-shadow: 0 2px 6px rgba(26, 115, 232, 0.12);
-        }
-        .doctor-dock-btn-whatsapp {
-          background: rgba(255, 255, 255, 0.85);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          color: #1e293b;
-          border-color: rgba(203, 213, 225, 0.85);
-          box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        }
-        .doctor-dock-btn-whatsapp:hover {
-          background: #f0fdf4;
-          border-color: #86efac;
-          color: #166534;
-          box-shadow: 0 2px 6px rgba(22, 163, 74, 0.12);
-        }
-        .doctor-dock-btn-whatsapp:hover svg {
-          color: #16a34a !important;
-        }
-        .doctor-dock-btn-ai {
-          background: rgba(255, 255, 255, 0.85);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          color: #1e293b;
-          border-color: rgba(203, 213, 225, 0.85);
-          box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        }
-        .doctor-dock-btn-ai:hover {
-          background: #f5f3ff;
-          border-color: #c4b5fd;
-          color: #4338ca;
-          box-shadow: 0 2px 6px rgba(124, 58, 237, 0.12);
-        }
-        .doctor-dock-btn-ai:hover svg {
-          color: #7c3aed !important;
-        }
-        @media (max-width: 768px) {
-          .doctor-bottom-dock {
-            bottom: 0;
-            left: 0;
-            transform: none;
-            width: 100%;
-            max-width: 100%;
-            border-radius: 20px 20px 0 0;
-            border-left: none;
-            border-right: none;
-            border-bottom: none;
-            border-top: 1px solid rgba(255, 255, 255, 0.9);
-            background: rgba(255, 255, 255, 0.86);
-            backdrop-filter: blur(24px) saturate(190%);
-            -webkit-backdrop-filter: blur(24px) saturate(190%);
-            padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)) 10px;
-            box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-          }
-          .doctor-bottom-dock-actions {
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            justify-content: flex-start;
-            padding: 2px 4px;
-            -webkit-overflow-scrolling: touch;
-          }
-          .doctor-dock-btn {
-            height: 36px;
-            padding: 0 12px;
-            font-size: 0.74rem;
-            flex-shrink: 0;
-          }
           .doctor-recommendations-section {
             padding: 16px 12px !important;
             margin-bottom: 120px !important;
@@ -8944,22 +8799,53 @@ export default function DoctorPublicPortalClient({
         </main>
       </div>
 
-      {/* ── Fixed Bottom Actions Dock (Floating Glass Bar for Laptop & Mobile) ── */}
-      <DoctorFloatingGlassDock
-        onOpenIntake={handleOpenNewPrescriptionIntake}
-        onOpenSearch={() => {
-          triggerHaptic('selection');
-          setIsPracticeSearchOpen(true);
-        }}
-        onOpenAtlasAi={() => {
+      {/* ── Universal Public Sticky Action Bar (GCP Standard Fixed Bottom Bar) ── */}
+      <PublicStickyActionBar
+        title={doctor?.name || `Doctor ${opaqueCode}`}
+        subtitle={`${doctor?.clinic || (lang === 'es' ? 'Consulta Médica Verificada' : 'Verified Medical Practice')} • ${allPrescriptions.length} ${lang === 'es' ? 'Prescripciones' : 'Prescriptions'} • ${doctorPatientsList.length} ${lang === 'es' ? 'Pacientes' : 'Patients'}`}
+        badge={lang === 'es' ? 'CONSOLA MÉDICA' : 'PHYSICIAN CONSOLE'}
+        badgeType="protocol"
+        inquireLabel={lang === 'es' ? 'Nueva Prescripción' : 'New Prescription'}
+        onInquire={handleOpenNewPrescriptionIntake}
+        showClinicalAI={true}
+        onOpenClinicalAI={() => {
           triggerHaptic('selection');
           setIsAtlasAiOpen(true);
         }}
-        aiUsesRemaining={aiUsesRemaining}
-        onOpenWhatsApp={() => {
-          triggerHaptic('light');
-          setIsRequestInfoOpen(true);
-        }}
+        lang={lang}
+        extraActions={
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                setIsPracticeSearchOpen(true);
+              }}
+              className="public-sticky-action-bar__sections-btn"
+              title={lang === 'es' ? 'Buscar paciente o receta (⌘K)' : 'Quickly find any patient or prescription (⌘K)'}
+            >
+              <Search size={14} style={{ color: '#003666' }} />
+              <span className="public-sticky-action-bar__sections-label">
+                {lang === 'es' ? 'Buscar Paciente / Rx (⌘K)' : 'Find Patient / Rx (⌘K)'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setIsRequestInfoOpen(true);
+              }}
+              className="public-sticky-action-bar__sections-btn"
+              title={lang === 'es' ? 'Asistencia médica directa por WhatsApp' : 'Direct clinical assistance via WhatsApp'}
+            >
+              <MessageCircle size={14} style={{ color: '#16a34a' }} />
+              <span className="public-sticky-action-bar__sections-label" style={{ color: '#166534' }}>
+                WhatsApp
+              </span>
+            </button>
+          </>
+        }
       />
 
       {/* ── Google Cloud Console Standard Unified Footer (100% Full-Width) ── */}
