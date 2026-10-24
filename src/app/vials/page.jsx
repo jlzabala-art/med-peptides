@@ -1,5 +1,6 @@
 import React from 'react';
-import { fetchCollectionProductsAction, trackReferralVisitAction, SUPPORTED_COLLECTIONS } from '@/actions/vialsCatalogActions';
+import { fetchCollectionProductsAction, trackReferralVisitAction } from '@/actions/vialsCatalogActions';
+import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
 import VialsCatalogClient from './VialsCatalogClient';
 
 export const dynamic = 'force-dynamic';

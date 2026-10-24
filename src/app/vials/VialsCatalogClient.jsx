@@ -3,7 +3,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search, ShoppingCart, Package, Check, CheckCircle2, ShieldCheck, ArrowRight, X, Plus, Minus, Globe } from '@/lib/icons';
 import CopyableId from '@/components/ui/CopyableId';
-import { trackReferralVisitAction, fetchCollectionProductsAction, SUPPORTED_COLLECTIONS } from '@/actions/vialsCatalogActions';
+import { trackReferralVisitAction, fetchCollectionProductsAction } from '@/actions/vialsCatalogActions';
+import { SUPPORTED_COLLECTIONS } from '@/constants/supportedCollections';
 
 const COLLECTIONS_LIST = [
   { id: 'vials', label: 'Peptides (Vials)', icon: '🧪' },
