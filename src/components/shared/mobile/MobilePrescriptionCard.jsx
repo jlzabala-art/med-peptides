@@ -40,8 +40,14 @@ export default function MobilePrescriptionCard({
   onLongPress,
   onQuickAction,
 }) {
-  const patient  = rx.patient?.name || rx.patientName || 'Unknown Patient';
-  const doctor   = rx.doctor?.name  || rx.doctorName  || null;
+  const patient = (rx.patient?.name && rx.patient.name !== 'Unknown Patient')
+    ? rx.patient.name
+    : (rx.patientName || rx.patientInfo?.name || rx.prescriptionDetails?.patientName || rx.patient?.fullName || (typeof rx.patient === 'string' ? rx.patient : '') || (rx.patient?.name || 'Unknown Patient'));
+  const doctor = (typeof rx.treatingDoctor === 'string' ? rx.treatingDoctor : rx.treatingDoctor?.name)
+    || (rx.doctor?.name && rx.doctor.name !== '—' && rx.doctor.name !== 'Unknown Doctor' ? rx.doctor.name : null)
+    || rx.doctorName
+    || rx.prescribingDoctor
+    || null;
   const status   = rx.status || 'draft';
   const source   = (rx.source || 'manual').toLowerCase().trim();
   const srcMeta  = SOURCE_META[source] || SOURCE_META.manual;

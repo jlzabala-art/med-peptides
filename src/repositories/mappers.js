@@ -97,11 +97,21 @@ export function normalizePrescription(data, id = null) {
     items: prescriptionLines,
     patient: {
       ...data.patient,
-      name: safeString(data.patient?.name, 'Unknown Patient'),
+      name: safeString(
+        (data.patient?.name && data.patient.name !== 'Unknown Patient')
+          ? data.patient.name
+          : (data.patientName || data.patientInfo?.name || data.patientInfo?.fullName || data.fullName),
+        safeString(data.patient?.name, 'Unknown Patient')
+      ),
     },
     doctor: {
       ...data.doctor,
-      name: safeString(data.doctor?.name, '—'),
+      name: safeString(
+        (data.doctor?.name && data.doctor.name !== '—' && data.doctor.name !== 'Unknown Doctor')
+          ? data.doctor.name
+          : (data.doctorName || (typeof data.treatingDoctor === 'string' ? data.treatingDoctor : data.treatingDoctor?.name) || data.prescribingDoctor),
+        safeString(data.doctor?.name, '—')
+      ),
     },
   };
 }

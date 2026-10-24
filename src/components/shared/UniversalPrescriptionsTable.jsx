@@ -397,6 +397,12 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
 
         const first = members[0];
         const isFagronGroup = members.some(m => Boolean(m.fagron || m.source === 'fagron' || m.importSource === 'fagron' || m.testName === 'NutriGen'));
+        
+        // Find best patient, doctor, and date metadata across all session members
+        const memberWithPatient = members.find(m => (m.patient?.name && m.patient.name !== 'Unknown Patient') || (m.patientName && m.patientName !== 'Unknown Patient') || m.patientInfo?.name) || first;
+        const memberWithDoctor = members.find(m => (m.doctor?.name && m.doctor.name !== '—' && m.doctor.name !== 'Unknown Doctor') || (m.doctorName && m.doctorName !== 'Unknown Doctor') || m.treatingDoctor) || first;
+        const memberWithDate = members.find(m => m.date || m.dateIssued || m.createdAt || m.resultDate || m.receivedInLabDate) || first;
+
         result.push({
           ...first,
           id: `multipart_${groupKey}`,
@@ -404,6 +410,15 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
           _sessionCount: members.length,
           _sessionMembers: members,
           memberIds: members.map(m => m.id),
+          patient: memberWithPatient.patient || first.patient,
+          patientName: memberWithPatient.patientName || memberWithPatient.patient?.name || first.patientName,
+          patientId: memberWithPatient.patientId || memberWithPatient.patient?.id || first.patientId,
+          doctor: memberWithDoctor.doctor || first.doctor,
+          doctorName: memberWithDoctor.doctorName || memberWithDoctor.doctor?.name || first.doctorName,
+          doctorId: memberWithDoctor.doctorId || memberWithDoctor.doctor?.id || first.doctorId,
+          treatingDoctor: memberWithDoctor.treatingDoctor || first.treatingDoctor,
+          date: memberWithDate.date || first.date,
+          createdAt: memberWithDate.createdAt || first.createdAt,
           source: isFagronGroup ? 'fagron' : first.source,
           items: members.flatMap(m => (Array.isArray(m.items) && m.items.length > 0) ? m.items : (m.compounds || m.prescriptionLines || [])),
           prescriptionLines: members.flatMap(m => m.prescriptionLines || m.items || []),
@@ -1061,7 +1076,9 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const patientOptions = useMemo(() => {
     const patMap = new Map();
     (displayPrescriptions || []).forEach(rx => {
-      const name = rx.patient?.name || rx.patientName;
+      const name = (rx.patient?.name && rx.patient.name !== 'Unknown Patient')
+        ? rx.patient.name
+        : (rx.patientName || rx.patientInfo?.name);
       if (name && name !== 'Unknown Patient') {
         patMap.set(name, name);
       }

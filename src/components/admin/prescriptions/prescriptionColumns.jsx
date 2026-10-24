@@ -331,6 +331,120 @@ function WorkspaceRxToggleButton({ rx }) {
   );
 }
 
+// Robust resolvers that extract genuine properties without destructive or artificial mapping
+const resolvePatientName = (record) => {
+  if (!record) return '';
+  if (typeof record === 'string') return record.trim();
+  
+  const cand = (record.patient?.name && record.patient.name !== 'Unknown Patient' && record.patient.name !== 'Sin Paciente')
+    ? record.patient.name
+    : (record.patientName && record.patientName !== 'Unknown Patient' && record.patientName !== 'Sin Paciente')
+      ? record.patientName
+      : (record.patientInfo?.name || record.patientInfo?.fullName)
+        ? (record.patientInfo.name || record.patientInfo.fullName)
+        : (record.prescriptionDetails?.patientName)
+          ? record.prescriptionDetails.patientName
+          : (record.customer?.name || record.customerDetection?.name || record.client?.name || record.clientName)
+            ? (record.customer?.name || record.customerDetection?.name || record.client?.name || record.clientName)
+            : (record.patient?.fullName || record.fullName)
+              ? (record.patient?.fullName || record.fullName)
+              : (typeof record.patient === 'string' && record.patient.trim() && record.patient !== 'Unknown Patient')
+                ? record.patient
+                : '';
+
+  if (cand && String(cand).trim()) return String(cand).trim();
+
+  // If this record is a session/group, inspect its members
+  if (Array.isArray(record._sessionMembers) && record._sessionMembers.length > 0) {
+    for (const member of record._sessionMembers) {
+      const memberName = resolvePatientName(member);
+      if (memberName && memberName !== 'Unknown Patient') return memberName;
+    }
+  }
+
+  // If patient object has code or ID, don't leave completely blank
+  if (record.patient?.code && record.patient.code !== 'Anonymous') {
+    return `Patient (${record.patient.code})`;
+  }
+
+  return 'Unknown Patient';
+};
+
+const resolvePatientId = (record) => {
+  if (!record || typeof record !== 'object') return null;
+  const directId = record.patientId || record.patient?.id || record.patient?.uid || record.patientInfo?.id || record.patient?.code || null;
+  if (directId) return directId;
+  if (Array.isArray(record._sessionMembers)) {
+    for (const m of record._sessionMembers) {
+      const mid = m.patientId || m.patient?.id || m.patient?.uid || m.patientInfo?.id;
+      if (mid) return mid;
+    }
+  }
+  return null;
+};
+
+const resolveDoctorName = (record) => {
+  if (!record) return '—';
+  if (typeof record === 'string') return record;
+  const treatingDoc = typeof record.treatingDoctor === 'string' 
+    ? record.treatingDoctor 
+    : (record.treatingDoctor?.name || null);
+
+  const doc = (treatingDoc && treatingDoc !== '—')
+    ? treatingDoc
+    : (record.doctor?.name && record.doctor.name !== '—' && record.doctor.name !== 'Unknown Doctor')
+      ? record.doctor.name
+      : (record.doctorName && record.doctorName !== '—' && record.doctorName !== 'Unknown Doctor')
+        ? record.doctorName
+        : (record.prescribingDoctor && record.prescribingDoctor !== '—')
+          ? record.prescribingDoctor
+          : (record.doctor?.displayName || record.doctorInfo?.name || null);
+
+  if (doc && String(doc).trim()) return String(doc).trim();
+
+  if (Array.isArray(record._sessionMembers)) {
+    for (const m of record._sessionMembers) {
+      const mDoc = resolveDoctorName(m);
+      if (mDoc && mDoc !== '—' && mDoc !== 'Unknown Doctor') return mDoc;
+    }
+  }
+
+  return '—';
+};
+
+const resolveClinicName = (record, docName) => {
+  if (!record || typeof record !== 'object') return null;
+  const treatingDocClinic = typeof record.treatingDoctor === 'object' ? record.treatingDoctor?.clinic : null;
+  const clinic = treatingDocClinic 
+    || record.doctor?.clinic 
+    || record.clinic 
+    || record.clinicName 
+    || (docName && (String(docName).toLowerCase().includes('haytham') || String(docName).toLowerCase().includes('heytham')) ? 'Arthregen Clinic' : null);
+
+  if (clinic) return clinic;
+
+  if (Array.isArray(record._sessionMembers)) {
+    for (const m of record._sessionMembers) {
+      const mClinic = resolveClinicName(m, docName);
+      if (mClinic) return mClinic;
+    }
+  }
+  return null;
+};
+
+const resolveRxRecord = (val, row) => {
+  if (row && typeof row === 'object' && (row.id || row.patient || row.patientName || row.patientInfo || row.doctor || row.doctorName || row.items || row._isSessionGroup)) {
+    return row;
+  }
+  if (val && typeof val === 'object' && (val.id || val.patient || val.patientName || val.patientInfo || val.doctor || val.doctorName || val.items || val._isSessionGroup)) {
+    return val;
+  }
+  if (val && typeof val === 'object' && val.name) {
+    return { patient: val };
+  }
+  return row || val || {};
+};
+
 // ── Columns Definition (GCP UX Standard: 4 Consolidated Columns) ──────────────
 export const getPrescriptionColumns = (options = {}) => {
   const { onEdit, onRefresh, onRefill, onEnrich, isDoctor, role } = options;
@@ -340,14 +454,13 @@ export const getPrescriptionColumns = (options = {}) => {
       key: 'patient',
       header: 'Patient & Doctor',
       width: '38%',
-      render: (rx) => {
-        const patient = rx.patient?.name || rx.patientName || 'Unknown Patient';
-        const patientId = rx.patientId || (rx.patient && rx.patient.id) || null;
-        const treatingDocName = typeof rx.treatingDoctor === 'string' ? rx.treatingDoctor : rx.treatingDoctor?.name;
-        const doctor = treatingDocName || rx.doctor?.name || rx.doctorName || rx.prescribingDoctor || '—';
+      render: (val, row) => {
+        const rx = resolveRxRecord(val, row);
+        const patient = resolvePatientName(rx);
+        const patientId = resolvePatientId(rx);
+        const doctor = resolveDoctorName(rx);
         const formattedDoc = formatDoctorName(doctor);
-        const treatingDocClinic = typeof rx.treatingDoctor === 'object' ? rx.treatingDoctor?.clinic : null;
-        const clinicName = treatingDocClinic || rx.doctor?.clinic || rx.clinic || rx.clinicName || (String(doctor).toLowerCase().includes('haytham') || String(doctor).toLowerCase().includes('heytham') ? 'Arthregen Clinic' : null);
+        const clinicName = resolveClinicName(rx, doctor);
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0, padding: '2px 0' }}>
@@ -428,7 +541,8 @@ export const getPrescriptionColumns = (options = {}) => {
       key: 'parts',
       header: 'Parts',
       width: '64px',
-      render: (rx) => {
+      render: (val, row) => {
+        const rx = resolveRxRecord(val, row);
         let count = 1;
         if (rx._isSessionGroup) {
           count = rx._sessionCount || rx._sessionMembers?.length || 2;
@@ -474,32 +588,51 @@ export const getPrescriptionColumns = (options = {}) => {
       key: 'date',
       header: 'Date',
       width: '90px',
-      render: (rx) => {
-        const parseAnyDate = (val) => {
-          if (!val) return null;
+      render: (val, row) => {
+        const rx = resolveRxRecord(val, row);
+        const parseAnyDate = (v) => {
+          if (!v) return null;
           let d = null;
-          if (typeof val.toDate === 'function') d = val.toDate();
-          else if (val._seconds || val.seconds) d = new Date((val._seconds || val.seconds) * 1000);
-          else if (typeof val === 'number') d = new Date(val);
-          else if (typeof val === 'string') {
-            const dmy = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          if (typeof v.toDate === 'function') d = v.toDate();
+          else if (v._seconds || v.seconds) d = new Date((v._seconds || v.seconds) * 1000);
+          else if (typeof v === 'number') d = new Date(v);
+          else if (typeof v === 'string') {
+            const dmy = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
             if (dmy) {
               d = new Date(parseInt(dmy[3], 10), parseInt(dmy[2], 10) - 1, parseInt(dmy[1], 10));
             } else {
-              d = new Date(val);
+              d = new Date(v);
             }
           }
           if (d && !isNaN(d.getTime())) return d;
           return null;
         };
 
-        const dObj = parseAnyDate(rx.date)
-          || parseAnyDate(rx.dateIssued)
-          || parseAnyDate(rx.createdAt)
-          || parseAnyDate(rx.createdAt_ts)
-          || parseAnyDate(rx.updatedAt)
-          || parseAnyDate(rx.fagron?.importedAt)
-          || parseAnyDate(rx.fagron?.reportDate);
+        const resolveDate = (record) => {
+          if (!record) return null;
+          let d = parseAnyDate(record.date)
+            || parseAnyDate(record.dateIssued)
+            || parseAnyDate(record.createdAt)
+            || parseAnyDate(record.createdAt_ts)
+            || parseAnyDate(record.resultDate)
+            || parseAnyDate(record.receivedInLabDate)
+            || parseAnyDate(record.collectionDate)
+            || parseAnyDate(record.analysisDate)
+            || parseAnyDate(record.protocolDate)
+            || parseAnyDate(record.updatedAt)
+            || parseAnyDate(record.fagron?.importedAt)
+            || parseAnyDate(record.fagron?.reportDate);
+
+          if (!d && Array.isArray(record._sessionMembers)) {
+            for (const m of record._sessionMembers) {
+              d = resolveDate(m);
+              if (d) break;
+            }
+          }
+          return d;
+        };
+
+        const dObj = resolveDate(rx) || (typeof val === 'string' || typeof val === 'number' ? parseAnyDate(val) : null);
 
         if (!dObj) {
           return <span style={{ color: '#9aa0a6', fontSize: '0.78rem' }}>—</span>;
@@ -533,10 +666,11 @@ export const getPrescriptionColumns = (options = {}) => {
       key: 'status',
       header: 'Status',
       width: '14%',
-      render: (rx) => {
+      render: (val, row) => {
+        const rx = resolveRxRecord(val, row);
         if (rx._isSessionGroup) {
           const statuses = (rx._sessionMembers || []).map(m => normalizeRxStatus(m.status) || 'draft');
-          let aggregateStatus = 'draft';
+          let aggregateStatus;
           if (statuses.includes('cancelled')) aggregateStatus = 'cancelled';
           else if (statuses.includes('pending')) aggregateStatus = 'pending';
           else if (statuses.includes('processing')) aggregateStatus = 'processing';
@@ -544,8 +678,6 @@ export const getPrescriptionColumns = (options = {}) => {
           else if (statuses.every(s => s === 'completed')) aggregateStatus = 'completed';
           else if (statuses.every(s => s === 'approved' || s === 'completed')) aggregateStatus = 'approved';
           else aggregateStatus = statuses[0] || 'draft';
-
-          const isZohoAllMatched = checkAllApisZohoMatched(rx);
 
           return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
@@ -555,10 +687,12 @@ export const getPrescriptionColumns = (options = {}) => {
           );
         }
 
+        const currentStatus = normalizeRxStatus(rx.status) || (typeof val === 'string' ? normalizeRxStatus(val) : null) || 'draft';
+
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
             <InlineEditableCell
-              value={normalizeRxStatus(rx.status) || 'draft'}
+              value={currentStatus}
               type="select"
               options={[
                 { label: 'Draft', value: 'draft' },
@@ -569,10 +703,12 @@ export const getPrescriptionColumns = (options = {}) => {
                 { label: 'Completed', value: 'completed' },
                 { label: 'Cancelled', value: 'cancelled' }
               ]}
-              format={(val) => <StatusBadge status={val} label={RX_STATUS_LABELS[val]} />}
+              format={(statusVal) => <StatusBadge status={statusVal} label={RX_STATUS_LABELS[statusVal]} />}
               onSave={async (newStatus) => {
                 try {
-                  await prescriptionRepository.updatePrescription(rx.id, { status: newStatus });
+                  const targetId = rx.id || (typeof row === 'object' ? row.id : null);
+                  if (!targetId) throw new Error('No prescription ID for status update');
+                  await prescriptionRepository.updatePrescription(targetId, { status: newStatus });
                   toast.success('Status updated');
                   if (options.onRefresh) options.onRefresh();
                 } catch (err) {
@@ -595,7 +731,8 @@ export const getPrescriptionColumns = (options = {}) => {
       isAction: true,
       align: 'right',
       sortable: false,
-      render: (rx) => {
+      render: (val, row) => {
+        const rx = resolveRxRecord(val, row);
         
         const isPeptideRx = hasPeptideItems(rx);
         const isPharmopolisSupplier = isPharmopolisRx(rx);
