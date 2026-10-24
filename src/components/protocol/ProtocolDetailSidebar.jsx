@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   List, 
   Menu, 
@@ -13,7 +13,8 @@ import {
   Sparkles,
   ClipboardList,
   Download,
-  RefreshCw
+  RefreshCw,
+  Search
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -112,6 +113,42 @@ export default function ProtocolDetailSidebar({
   }, [availableSections, onSelectSection]);
 
   const currentActiveId = activeSection || activeId || availableSections[0]?.id || '';
+  const [filterQuery, setFilterQuery] = useState('');
+  const filterInputRef = useRef(null);
+
+  // Keyboard shortcut listener (/ or ⌘K)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName) || document.activeElement?.isContentEditable) {
+        return;
+      }
+      if (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')) {
+        e.preventDefault();
+        filterInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const displayedSections = useMemo(() => {
+    if (!filterQuery.trim()) return availableSections;
+    const q = filterQuery.toLowerCase();
+    return availableSections.filter(sec => 
+      (sec.label && sec.label.toLowerCase().includes(q)) ||
+      (sec.id && sec.id.toLowerCase().includes(q))
+    );
+  }, [availableSections, filterQuery]);
+
+  const handleFilterKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      setFilterQuery('');
+      filterInputRef.current?.blur();
+    } else if (e.key === 'Enter' && displayedSections.length > 0) {
+      e.preventDefault();
+      scrollToSection(null, displayedSections[0].id);
+    }
+  };
 
   const scrollToSection = (e, targetId) => {
     if (e && e.preventDefault) e.preventDefault();
@@ -237,32 +274,67 @@ export default function ProtocolDetailSidebar({
         </span>
       </div>
 
+      {/* Quick Section Filter (GCP / Cloud Docs style) */}
+      {availableSections.length > 3 && (
+        <div className="pds-toc-filter-box">
+          <Search size={13} className="pds-toc-filter-icon" />
+          <input
+            ref={filterInputRef}
+            type="text"
+            value={filterQuery}
+            onChange={(e) => setFilterQuery(e.target.value)}
+            onKeyDown={handleFilterKeyDown}
+            placeholder={isEs ? 'Filtrar secciones...' : 'Filter sections...'}
+            className="pds-toc-filter-input"
+            aria-label={isEs ? 'Filtrar secciones' : 'Filter sections'}
+          />
+          {filterQuery ? (
+            <button
+              type="button"
+              onClick={() => setFilterQuery('')}
+              className="pds-toc-filter-clear"
+              title="Clear"
+            >
+              <X size={11} />
+            </button>
+          ) : (
+            <kbd className="pds-toc-filter-kbd">/</kbd>
+          )}
+        </div>
+      )}
+
       {/* Navigation List */}
       <nav className="pds-toc-nav" role="navigation">
-        <ul className="pds-toc-list">
-          {availableSections.map((sec, idx) => {
-            const isActive = currentActiveId === sec.id;
-            const IconComponent = sec.icon;
+        {displayedSections.length === 0 ? (
+          <div className="pds-toc-empty">
+            {isEs ? 'No se encontraron secciones' : 'No matching sections'}
+          </div>
+        ) : (
+          <ul className="pds-toc-list">
+            {displayedSections.map((sec, idx) => {
+              const isActive = currentActiveId === sec.id;
+              const IconComponent = sec.icon;
 
-            return (
-              <li key={sec.id} className="pds-toc-item">
-                <a
-                  href={`#${sec.id}`}
-                  className={`pds-toc-link ${isActive ? 'is-active' : ''}`}
-                  onClick={(e) => scrollToSection(e, sec.id)}
-                  title={sec.label}
-                >
-                  <span className="pds-toc-step-number">{idx + 1}</span>
-                  {IconComponent && (
-                    <IconComponent size={14} className="pds-toc-item-icon" />
-                  )}
-                  <span className="pds-toc-item-text">{sec.label}</span>
-                  {isActive && <ChevronRight size={13} className="pds-toc-active-arrow" />}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
+              return (
+                <li key={sec.id} className="pds-toc-item">
+                  <a
+                    href={`#${sec.id}`}
+                    className={`pds-toc-link ${isActive ? 'is-active' : ''}`}
+                    onClick={(e) => scrollToSection(e, sec.id)}
+                    title={sec.label}
+                  >
+                    <span className="pds-toc-step-number">{idx + 1}</span>
+                    {IconComponent && (
+                      <IconComponent size={14} className="pds-toc-item-icon" />
+                    )}
+                    <span className="pds-toc-item-text">{sec.label}</span>
+                    {isActive && <ChevronRight size={13} className="pds-toc-active-arrow" />}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </nav>
 
       {/* ── CARD 1: QUICK PROTOCOL ACTIONS ── */}
