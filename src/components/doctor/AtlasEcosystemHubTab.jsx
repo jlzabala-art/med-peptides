@@ -180,7 +180,7 @@ const COLLECTIVES = [
     bgColor: '#fff7ed',
     borderColor: '#fed7aa',
     headline: 'Volume procurement, tiered margins, and multi-clinic fulfillment from a single console.',
-    subheadline: 'Equip hospital groups, polyclinic networks, and medical distributors with wholesale pricing on peptide APIs, Colway collagen, Eterna marine plasma, and diagnostic kits.',
+    subheadline: 'Equip hospital groups, polyclinic networks, and medical distributors with wholesale pricing on peptide APIs, Colway collagen, UltraPerson nutraceuticals, and diagnostic kits.',
     kpis: [
       { label: 'Procurement Scale', value: 'Tiered', sub: 'Volume-based pricing' },
       { label: 'Clinic Management', value: 'Multi-Tenant', sub: 'Consolidated ordering' },

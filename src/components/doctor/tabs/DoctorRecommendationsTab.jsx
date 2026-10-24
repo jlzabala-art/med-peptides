@@ -48,7 +48,7 @@ import {
  *     Ideal for both Zero-Rx onboarding doctors and active prescribers expanding lines.
  *  2. "Patient Regimen Synergies" (Active Prescription Engine):
  *     Analyzes existing prescriptions across Bioactive Peptides, UltraPerson Nutraceuticals,
- *     ETERNA® Genomics, and Colway Cuticular ECM Care.
+ *     Fagron TrichoTest™ Genomics, Bloodo™ Diagnostics, and Colway Cuticular ECM Care.
  */
 export default function DoctorRecommendationsTab({
   doctor = {},
@@ -291,7 +291,7 @@ export default function DoctorRecommendationsTab({
     const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
     return s === 'ultraperson-sleep-quality-restoration' || raw.includes('sleep') || raw.includes('melatonin') || raw.includes('theanine') || raw.includes('gaba');
   });
-  const eternaMatches = analyzedItems.filter((item) => {
+  const trichotestMatches = analyzedItems.filter((item) => {
     const raw = (item.rx?.rawText || JSON.stringify(item.rx) || '').toLowerCase();
     return (
       raw.includes('finasteride') ||
@@ -491,7 +491,7 @@ export default function DoctorRecommendationsTab({
       summary:
         'Non-invasive buccal/saliva genomic assay analyzing sulfotransferase (SULT1A1) activity, 5α-reductase polymorphisms, and prostaglandin receptors to eliminate trial-and-error prescribing.',
       synergisticApis: ['Minoxidil', 'Finasteride', 'Dutasteride', 'Latanoprost', 'Spironolactone', 'Epithalon'],
-      matchingItems: eternaMatches,
+      matchingItems: trichotestMatches,
       protocolTitle: 'Explore TrichoTest™ Clinical Panel',
       protocolUrl: '/collection/bloodo'
     },
@@ -1253,9 +1253,7 @@ export default function DoctorRecommendationsTab({
                   role: bp.diagnosticSynergy.role,
                   url: bp.diagnosticSynergy.slug
                     ? `/p/${bp.diagnosticSynergy.slug}`
-                    : (bp.diagnosticSynergy.name?.toLowerCase().includes('eterna')
-                        ? '/collection/eterna'
-                        : bp.diagnosticSynergy.name?.toLowerCase().includes('teletest')
+                    : (bp.diagnosticSynergy.name?.toLowerCase().includes('teletest')
                         ? '/collection/teletest'
                         : '/collection/bloodo')
                 }

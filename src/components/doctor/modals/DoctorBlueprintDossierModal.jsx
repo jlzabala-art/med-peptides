@@ -284,7 +284,7 @@ export default function DoctorBlueprintDossierModal({
                 role: blueprint.diagnosticSynergy.role,
                 url: blueprint.diagnosticSynergy.slug
                   ? `/p/${blueprint.diagnosticSynergy.slug}`
-                  : `/catalog?q=${encodeURIComponent(blueprint.diagnosticSynergy.name.toLowerCase().includes('bloodo') ? 'bloodo' : blueprint.diagnosticSynergy.name.toLowerCase().includes('eterna') ? 'eterna' : 'diagnostic')}`
+                  : `/catalog?q=${encodeURIComponent(blueprint.diagnosticSynergy.name.toLowerCase().includes('bloodo') ? 'bloodo' : blueprint.diagnosticSynergy.name.toLowerCase().includes('tricho') ? 'trichotest' : 'diagnostic')}`
               },
               blueprint.nutraceuticalSynergy && {
                 type: 'nutraceutical',
