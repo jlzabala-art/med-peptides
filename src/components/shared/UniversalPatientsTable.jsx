@@ -77,7 +77,7 @@ function resolvePatientDoctorAndClinic(row, doctors = []) {
   };
 }
 
-export default function UniversalPatientsTable({ doctorId, accountManagerId, readOnly = false, viewMode = 'admin', hideHeader = false, title = 'Patient Registry', subtitle = 'Centralized database for managing all patients across the platform.', initialData = null, serverKPIs = null }) {
+export default function UniversalPatientsTable({ doctorId, accountManagerId, readOnly = false, viewMode = 'admin', hideHeader = false, title = 'Patient Registry', subtitle = 'Centralized database for managing all patients across the platform.', initialData = null, serverKPIs = null, scopeFilter = 'all' }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [mobileActionPatient, setMobileActionPatient] = useState(null);
@@ -280,8 +280,15 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       });
     }
 
+    // Filter by doctor practice scope (con nosotros vs consulta propia)
+    if (scopeFilter === 'rx_active') {
+      list = list.filter(p => p.patientType === 'regenpept_rx' || p.hasActivePrescription === true || p.prescriptionCount > 0 || (Array.isArray(p.prescriptions) && p.prescriptions.length > 0));
+    } else if (scopeFilter === 'external') {
+      list = list.filter(p => p.patientType === 'external_practice' || (!p.hasActivePrescription && (!p.prescriptionCount || p.prescriptionCount === 0) && (!Array.isArray(p.prescriptions) || p.prescriptions.length === 0)));
+    }
+
     return list;
-  }, [algoliaHits, initialData, firestorePatients, effectiveDoctorId, searchTerm, filters.status, filters.physicianId, filters.prescriptionStatus, filters.commercialStage, doctors]);
+  }, [algoliaHits, initialData, firestorePatients, effectiveDoctorId, searchTerm, filters.status, filters.physicianId, filters.prescriptionStatus, filters.commercialStage, scopeFilter, doctors]);
 
   // Stage counts for segmented tabs (calculated against the scoped doctor's patients)
   const stageCounts = useMemo(() => {

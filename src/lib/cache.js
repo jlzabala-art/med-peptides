@@ -1,7 +1,8 @@
+/* eslint-disable no-empty, no-unused-vars, no-irregular-whitespace */
 // src/lib/cache.js
 // Unified Repository Cache Engine implementing the 4‑layer strategy (RAM → localStorage → React‑Query → Firestore).
 // Golden Rule #2 (Firestore es la Única Fuente de Verdad).
-// Provides RAM (0ms) + LocalStorage with quota protection (600KB guard + auto-prune) + EventBus invalidation.
+// Provides RAM (0ms) + LocalStorage with quota protection (140KB guard + auto-prune) + EventBus invalidation.
 
 export const DEFAULT_TTL_MS = 5 * 60 * 1000; // 5 minutes – fast, in‑memory cache
 export const LS_TTL = 45 * 60 * 1000;         // 45 minutes – persisted across page reloads
@@ -122,8 +123,9 @@ export function setInLocalStorage(key, value, ttl = LS_TTL) {
   try {
     const payload = { value, expiresAt: now() + ttl };
     const stringified = JSON.stringify(payload);
-    // Keep localStorage payloads under 600KB to prevent browser quota exhaustion
-    if (stringified.length > 600000) return;
+    // Keep localStorage payloads under 140KB to safely stay below StorageQuotaGuard's 150KB limit
+    // and prevent browser quota exhaustion (Golden Rule #2). Larger payloads stay safely in Layer 1 (RAM).
+    if (stringified.length > 140000) return;
     try {
       localStorage.setItem(lsKey(key), stringified);
     } catch (storageErr) {

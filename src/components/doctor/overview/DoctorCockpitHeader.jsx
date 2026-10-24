@@ -6,7 +6,8 @@ import Plus from 'lucide-react/dist/esm/icons/plus';
 import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
 import Pill from 'lucide-react/dist/esm/icons/pill';
 import FlaskConical from 'lucide-react/dist/esm/icons/flask-conical';
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
+import QrCode from 'lucide-react/dist/esm/icons/qr-code';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import CopyableId from '../../ui/CopyableId';
 
 export default function DoctorCockpitHeader({
@@ -16,6 +17,8 @@ export default function DoctorCockpitHeader({
   showBuilder,
   setShowBuilder,
   onNavigate,
+  onOpenQuickPatient,
+  onOpenQrInvite,
 }) {
   return (
     <div
@@ -68,7 +71,7 @@ export default function DoctorCockpitHeader({
               </h2>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '12px', backgroundColor: 'rgba(34, 197, 94, 0.16)', border: '1px solid rgba(34, 197, 94, 0.35)', fontSize: '0.72rem', color: '#4ade80', fontWeight: 700 }}>
                 <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'gcpPulseBeaconOverview 2s infinite' }} />
-                <span>Realtime Sync ✓</span>
+                <span>Multi-purpose Doctor Suite ✓</span>
               </div>
             </div>
 
@@ -79,44 +82,67 @@ export default function DoctorCockpitHeader({
               </span>
               <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
               <span style={{ fontSize: '0.75rem', color: '#93c5fd', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                🏥 {isSimulatingDrErdmann ? 'Bedaya Polyclinic L.L.C.' : 'Specialist Clinical Practice'}
+                🏥 {isSimulatingDrErdmann ? 'Bedaya Polyclinic L.L.C.' : (doctorMeta?.clinic || 'Specialist Clinical Practice')}
               </span>
               <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
               <span style={{ fontSize: '0.70rem', color: '#86efac', backgroundColor: 'rgba(34, 197, 94, 0.15)', padding: '1px 6px', borderRadius: '4px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
-                🟢 DHA Regulated Practice (UAE)
-              </span>
-              <span style={{ fontSize: '0.70rem', color: '#cbd5e1', backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
-                Latency 14ms
+                Dermatology & Trichology Focus
               </span>
             </div>
           </div>
         </div>
 
-        {/* Primary CTA: New Prescription */}
-        <button
-          type="button"
-          onClick={() => setShowBuilder(!showBuilder)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 20px',
-            minHeight: '44px',
-            borderRadius: '8px',
-            backgroundColor: showBuilder ? '#ffffff' : '#0d9488',
-            color: showBuilder ? '#003666' : '#ffffff',
-            border: 'none',
-            fontSize: '0.85rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-            transition: 'all 0.15s ease',
-            flexShrink: 0,
-          }}
-        >
-          <Plus size={16} />
-          <span>{showBuilder ? 'Close Rx Form' : 'New Prescription'}</span>
-        </button>
+        {/* Primary CTA Buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => onOpenQuickPatient && onOpenQuickPatient()}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '10px 16px',
+              minHeight: '44px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(255, 255, 255, 0.14)',
+              border: '1px solid rgba(255, 255, 255, 0.28)',
+              color: '#ffffff',
+              fontSize: '0.84rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              flexShrink: 0,
+            }}
+          >
+            <UserPlus size={16} />
+            <span>+ Alta Exprés Paciente (15s)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowBuilder(!showBuilder)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 20px',
+              minHeight: '44px',
+              borderRadius: '8px',
+              backgroundColor: showBuilder ? '#ffffff' : '#0d9488',
+              color: showBuilder ? '#003666' : '#ffffff',
+              border: 'none',
+              fontSize: '0.85rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+              transition: 'all 0.15s ease',
+              flexShrink: 0,
+            }}
+          >
+            <Plus size={16} />
+            <span>{showBuilder ? 'Cerrar Receta' : 'Nueva Prescripción'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Quick Launch Clinical Action Chips */}
@@ -132,17 +158,13 @@ export default function DoctorCockpitHeader({
       >
         <button
           type="button"
-          onClick={() => {
-            if (typeof window !== 'undefined') {
-              window.dispatchEvent(new CustomEvent('open-quick-create', { detail: { type: 'new-patient' } }));
-            }
-          }}
+          onClick={() => onOpenQrInvite && onOpenQrInvite()}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
             padding: '8px 14px',
-            minHeight: '40px',
+            minHeight: '38px',
             borderRadius: '8px',
             backgroundColor: 'rgba(255, 255, 255, 0.12)',
             border: '1px solid rgba(255, 255, 255, 0.22)',
@@ -154,24 +176,48 @@ export default function DoctorCockpitHeader({
             flexShrink: 0,
           }}
         >
-          <UserPlus size={15} />
-          <span>Intake Patient</span>
+          <QrCode size={15} color="#38bdf8" />
+          <span>📲 QR Sala de Espera / WhatsApp</span>
         </button>
 
         <button
           type="button"
-          onClick={() => onNavigate?.('catalog')}
+          onClick={() => onNavigate?.('patients')}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            padding: '10px 16px',
-            minHeight: '44px',
-            borderRadius: '10px',
-            backgroundColor: 'rgba(255, 255, 255, 0.14)',
-            border: '1px solid rgba(255, 255, 255, 0.25)',
+            padding: '8px 14px',
+            minHeight: '38px',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(255, 255, 255, 0.12)',
+            border: '1px solid rgba(255, 255, 255, 0.22)',
             color: '#ffffff',
-            fontSize: '0.82rem',
+            fontSize: '0.8125rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+          }}
+        >
+          <Stethoscope size={15} />
+          <span>Directorio Pacientes (Con/Sin nosotros)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate?.('prescriptions-history')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            minHeight: '38px',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(255, 255, 255, 0.12)',
+            border: '1px solid rgba(255, 255, 255, 0.22)',
+            color: '#ffffff',
+            fontSize: '0.8125rem',
             fontWeight: 700,
             cursor: 'pointer',
             whiteSpace: 'nowrap',
@@ -179,7 +225,7 @@ export default function DoctorCockpitHeader({
           }}
         >
           <Pill size={15} />
-          <span>Lotusland Formulary</span>
+          <span>Mis Prescripciones & Envíos</span>
         </button>
 
         <button
@@ -189,13 +235,13 @@ export default function DoctorCockpitHeader({
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            padding: '10px 16px',
-            minHeight: '44px',
-            borderRadius: '10px',
-            backgroundColor: 'rgba(255, 255, 255, 0.14)',
-            border: '1px solid rgba(255, 255, 255, 0.25)',
+            padding: '8px 14px',
+            minHeight: '38px',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(255, 255, 255, 0.12)',
+            border: '1px solid rgba(255, 255, 255, 0.22)',
             color: '#ffffff',
-            fontSize: '0.82rem',
+            fontSize: '0.8125rem',
             fontWeight: 700,
             cursor: 'pointer',
             whiteSpace: 'nowrap',
@@ -203,31 +249,7 @@ export default function DoctorCockpitHeader({
           }}
         >
           <FlaskConical size={15} />
-          <span>Clinical Protocols</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onNavigate?.('messages')}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '10px 16px',
-            minHeight: '44px',
-            borderRadius: '10px',
-            backgroundColor: 'rgba(255, 255, 255, 0.14)',
-            border: '1px solid rgba(255, 255, 255, 0.25)',
-            color: '#ffffff',
-            fontSize: '0.82rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-          }}
-        >
-          <MessageSquare size={15} />
-          <span>Patient Inquiries</span>
+          <span>Protocolos Validados</span>
         </button>
       </div>
     </div>

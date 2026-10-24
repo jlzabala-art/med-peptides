@@ -99,6 +99,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/product/:slug',
+        destination: '/p/:slug',
+        permanent: true,
+      },
+      {
         source: '/auth/login',
         destination: '/login',
         permanent: false,

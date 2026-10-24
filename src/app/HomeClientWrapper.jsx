@@ -85,7 +85,7 @@ export default function HomeClientWrapper({ initialProducts = [] }) {
   const handleProductSelect = (productOrName) => {
     const ROUTE_MAP = {
       supplement: (slug) => `/supplements/${slug}`,
-      peptide: (slug) => `/product/${slug}`,
+      peptide: (slug) => `/p/${slug}`,
       testing: (slug) => `/testing/${slug}`,
       diagnostic: (slug) => `/testing/${slug}`,
     };
@@ -101,16 +101,16 @@ export default function HomeClientWrapper({ initialProducts = [] }) {
 
       const isKnownPeptide = initialProducts.some(p => p.id === obj.id || p.slug === slug || p.name === obj.name);
       const isTestingCategory = obj.category === 'Longevity Diagnostics';
-      router.push(isKnownPeptide ? `/product/${slug}` : isTestingCategory ? `/testing/${slug}` : `/supplements/${slug}`);
+      router.push(isKnownPeptide ? `/p/${slug}` : isTestingCategory ? `/testing/${slug}` : `/supplements/${slug}`);
       return;
     }
 
     const product = initialProducts.find(p => p.name === productOrName || p.id === productOrName);
     if (product) {
       const slug = product.slug || product.name.toLowerCase().replace(/\s+/g, '-');
-      router.push(`/product/${slug}`);
+      router.push(`/p/${slug}`);
     } else {
-      router.push(`/product/${productOrName.toLowerCase().replace(/\s+/g, '-')}`);
+      router.push(`/p/${productOrName.toLowerCase().replace(/\s+/g, '-')}`);
     }
   };
 

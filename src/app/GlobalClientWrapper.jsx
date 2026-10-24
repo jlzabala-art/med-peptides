@@ -1,22 +1,25 @@
 "use client";
 
 import React, { Suspense, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import Header from '../layout/Header';
 import Footer from '../layout/Footer';
-import Cart from '../snippets/Cart';
 import BackToTop from '../layout/BackToTop';
 import BottomTabBar from '../layout/BottomTabBar';
-import SearchModal from '../snippets/SearchModal';
 import { useAuth } from '../context/AuthContext';
 import { useUIStore } from '../stores/uiStore';
 import { usePathname, useRouter } from 'next/navigation';
 import { Toaster } from 'react-hot-toast';
 import AppErrorBoundary from '../components/AppErrorBoundary';
 import PWAInstallPrompt from '../components/mobile/PWAInstallPrompt';
-import AtlasAIDrawer from '../components/shared/AtlasAIDrawer';
 import { useFirestoreData } from '../hooks/useFirestoreData';
-import GCPImpersonationDock from '../components/navigation/GCPImpersonationDock';
-import GCPCommandPalette from '../components/navigation/GCPCommandPalette';
+
+// ⚡ Dynamic Client-Only Lazy Imports for Zero TBT & Optimal LCP
+const Cart = dynamic(() => import('../snippets/Cart'), { ssr: false });
+const SearchModal = dynamic(() => import('../snippets/SearchModal'), { ssr: false });
+const AtlasAIDrawer = dynamic(() => import('../components/shared/AtlasAIDrawer'), { ssr: false });
+const GCPImpersonationDock = dynamic(() => import('../components/navigation/GCPImpersonationDock'), { ssr: false });
+const GCPCommandPalette = dynamic(() => import('../components/navigation/GCPCommandPalette'), { ssr: false });
 
 const PORTAL_PREFIXES = [
   '/admin',
@@ -59,7 +62,6 @@ function StorefrontShell({ children }) {
   const { activeModal, setActiveModal, searchQuery, setSearchQuery, setSearchInitialTab } = useUIStore();
   const { catalogue: products, protocols, supplements } = useFirestoreData();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     const handleOpen = () => setActiveModal('ai');
@@ -148,7 +150,7 @@ function StorefrontShell({ children }) {
             onClose={() => setActiveModal(null)} 
             onSelectProduct={(p) => {
                const slug = p.slug || p.id;
-               router.push(`/product/${slug}`);
+               router.push(`/p/${slug}`);
                setActiveModal(null);
             }} 
           />

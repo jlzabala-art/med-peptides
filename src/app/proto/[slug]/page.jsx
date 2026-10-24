@@ -5,7 +5,7 @@ import { sanitizePublicProtocol } from '../../../repositories/publicDataSanitize
 import { generateProtocolJsonLd, generateBreadcrumbJsonLd } from '../../../utils/seoStructuredData';
 import PublicProtocolPage from './PublicProtocolPage';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // ⚡ Multi-Tier ISR (1 hour Edge Cache)
 export const dynamicParams = true;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';

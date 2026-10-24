@@ -94,6 +94,17 @@ export function useFirestoreData() {
     staleTime: 1000 * 60 * 30, // 30 mins
   });
 
-  // Expose empty products array to not break any legacy code expecting it
-  return { products: [], setProducts: () => {}, allFaqs, protocolIndex, loadingProducts: false, supplementCatalogue, activeB2cSuppliers };
+  // Expose both legacy and normalized keys to prevent undefined destructuring
+  return { 
+    products: [], 
+    catalogue: [], 
+    protocols: protocolIndex,
+    supplements: supplementCatalogue,
+    setProducts: () => {}, 
+    allFaqs, 
+    protocolIndex, 
+    loadingProducts: false, 
+    supplementCatalogue, 
+    activeB2cSuppliers 
+  };
 }

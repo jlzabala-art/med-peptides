@@ -50,10 +50,13 @@ async function getAllProtocols() {
       .get();
 
     let docs = snap.docs;
-    // Fallback if status isn't matched or if less than 10
-    if (!docs || docs.length < 10) {
+    // Fallback for legacy protocols without an explicit status field, excluding drafts and archived
+    if (!docs || docs.length === 0) {
       const allSnap = await adminDb.collection('protocols').limit(100).get();
-      docs = allSnap.docs;
+      docs = (allSnap.docs || []).filter(d => {
+        const s = d.data()?.status;
+        return s === 'active' || s === 'published' || !s;
+      });
     }
 
     const protocols = docs.map(d => {

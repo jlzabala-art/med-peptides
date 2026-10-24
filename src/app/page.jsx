@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components -- Next.js App Router: metadata exports must live in page/layout files */
 import React from 'react';
 import HomeClientWrapper from './HomeClientWrapper';
 import { getFeaturedProductsServer } from '../repositories/productRepository';
@@ -20,10 +19,12 @@ export const metadata = {
 };
 
 import { sanitizeForClient } from '../utils/sanitizeForClient';
+import { sanitizePublicProduct } from '../repositories/publicDataSanitizer';
 
 export default async function HomePage() {
   const catalog = await getFeaturedProductsServer();
-  const serializedCatalog = sanitizeForClient(catalog || []);
+  const safeCatalog = (catalog || []).map(p => sanitizePublicProduct(p, p.variants || []));
+  const serializedCatalog = sanitizeForClient(safeCatalog);
   
   return (
     <HomeClientWrapper initialProducts={serializedCatalog} />

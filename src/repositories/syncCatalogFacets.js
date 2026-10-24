@@ -5,8 +5,6 @@
  * Call this whenever master products or variants are mutated to keep O(1) reads fresh.
  */
 
-const admin = require('firebase-admin');
-
 import { logger } from '../utils/logger';
 
 export async function syncCatalogFacetsDoc(db) {
