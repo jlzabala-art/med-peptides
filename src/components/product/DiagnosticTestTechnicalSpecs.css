@@ -55,6 +55,8 @@
   font-weight: 800;
   color: #003666;
   line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 .dts-metric-sub {
@@ -173,6 +175,9 @@
   font-size: 0.95rem;
   font-weight: 800;
   margin-bottom: 0.2rem;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  letter-spacing: -0.01em;
 }
 
 .dts-range-btn-label {
@@ -207,6 +212,9 @@
 .dts-range-value-large {
   font-size: 1.15rem;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  letter-spacing: -0.02em;
 }
 
 .dts-range-desc {
@@ -325,6 +333,7 @@
   font-size: 0.84rem;
   font-weight: 700;
   color: #0f172a;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Cortisol Dual Cadence Card */
