@@ -37,6 +37,7 @@ import {
   Dna,
   Factory,
   QrCode,
+  Upload,
   ChevronDown,
   ChevronUp,
   Tag,
@@ -2379,6 +2380,27 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         </div>
                       </button>
                     )}
+
+                    {/* 6. Submit New Prescription / Lab Report (Frictionless Ingestion) */}
+                    <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowPatientDropdown(false);
+                        window.location.href = `/rx/intake?from=${rxId}${treatingDoc?.opaqueCode ? `&refDoctor=${treatingDoc.opaqueCode}` : ''}`;
+                      }}
+                      className="rx-dock-drop-item"
+                    >
+                      <Upload size={15} color="#003666" />
+                      <div>
+                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>
+                          {isEs ? 'Subir Nueva Receta o Analítica' : 'Submit New Rx or Lab'}
+                        </div>
+                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
+                          {isEs ? 'Digitalización autónoma multimodal' : 'Autonomous multimodal AI intake'}
+                        </div>
+                      </div>
+                    </button>
                   </div>
                 )}
               </div>

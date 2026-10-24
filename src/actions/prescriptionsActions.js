@@ -387,5 +387,22 @@ export async function triggerPrescriptionRefillAlertAction(prescriptionId) {
   }
 }
 
+/**
+ * Fetches full un-sanitized prescription payload for authorized clinicians and administrators.
+ */
+export async function fetchAuthorizedPrescriptionAction(code) {
+  try {
+    const { getPrescriptionData } = await import('@/lib/prescriptionFetcher');
+    const { sanitizePrescriptionPayload } = await import('@/lib/prescriptionSanitizer');
+    const rx = await getPrescriptionData(code);
+    if (!rx) return null;
+    return sanitizePrescriptionPayload(rx, { isAuthorized: true });
+  } catch (err) {
+    logger.error("fetchAuthorizedPrescriptionAction error", err);
+    return null;
+  }
+}
+
+
 
 

@@ -634,6 +634,7 @@ export default function PublicPrescriptionIntakeClient() {
   }, [activeDraftRx, user]);
 
   const refDoctor = searchParams?.get('refDoctor') || searchParams?.get('doctor') || '';
+  const refProtocol = searchParams?.get('refProtocol') || searchParams?.get('protocol') || '';
 
   // Auto-populate physicianForm if refDoctor parameter is provided in URL (opaque code or slug)
   useEffect(() => {
@@ -1288,6 +1289,10 @@ export default function PublicPrescriptionIntakeClient() {
           { label: isEs ? 'Directorio Médico' : 'Doctors Directory', href: '/dr' },
           { label: physicianForm?.name || (isEs ? 'Médico Especialista' : 'Doctor Specialist'), href: `/dr/${encodeURIComponent(refDoctor)}` },
           { label: isEs ? 'Subir Receta' : 'Submit Prescription' }
+        ] : refProtocol ? [
+          { label: isEs ? 'Directorio de Protocolos' : 'Protocols Directory', href: '/proto' },
+          { label: refProtocol.replace(/-/g, ' ').toUpperCase(), href: `/proto/${encodeURIComponent(refProtocol)}` },
+          { label: isEs ? 'Subir Receta' : 'Submit Prescription' }
         ] : [
           { label: isEs ? 'Portal Clínico' : 'Clinical Portal', href: '/' },
           { label: isEs ? 'Pacientes' : 'Patients', href: '/patient' },
@@ -1378,6 +1383,43 @@ export default function PublicPrescriptionIntakeClient() {
                 <FileText size={14} color="#1a73e8" />
                 <span>{isEs ? 'Explorar Mis Prescripciones' : 'Browse My Prescriptions'}</span>
               </button>
+            </div>
+          )}
+
+          {/* GCP Protocol Referral Context Banner */}
+          {refProtocol && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              color: '#166534',
+              fontSize: '0.82rem',
+              fontWeight: 650,
+              marginBottom: '1rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 size={16} color="#15803d" />
+                <span>
+                  {isEs ? 'Protocolo Clínico Seleccionado:' : 'Selected Clinical Protocol:'}{' '}
+                  <strong>{refProtocol.replace(/-/g, ' ').toUpperCase()}</strong>
+                </span>
+              </div>
+              <a
+                href={`/proto/${encodeURIComponent(refProtocol)}`}
+                style={{
+                  color: '#15803d',
+                  fontSize: '0.76rem',
+                  textDecoration: 'underline',
+                  fontWeight: 700
+                }}
+              >
+                {isEs ? 'Ver Protocolo ➔' : 'View Protocol ➔'}
+              </a>
             </div>
           )}
 

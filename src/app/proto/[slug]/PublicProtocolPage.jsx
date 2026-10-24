@@ -31,6 +31,7 @@ import toast from 'react-hot-toast';
 import { Mail, Lock } from 'lucide-react';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicPageHero from '@/components/shared/public/PublicPageHero';
 import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
@@ -804,7 +805,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
         hideContactButton={true}
         loginRedirect={`/proto/${encodeURIComponent(slug)}`}
-        hideTier2={true}
+        hideTier2={false}
         breadcrumb={[
           { label: lang === 'es' ? 'Protocolos' : 'Protocols', href: '/proto' },
           { label: displayName }
@@ -1452,14 +1453,38 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         />
       </PublicPageShell>
 
+      {/* Standardized Institutional GCP Footer */}
+      <PublicUnifiedFooter lang={lang || 'en'} minimal={false} />
+
       {/* Unified Persistent Sticky Bottom Action Bar (GCP Standard) */}
       <PublicStickyActionBar
         title={displayName}
         subtitle={`${displayDuration} • ${phases.length || 3} ${lang === 'es' ? 'Fases' : 'Phases'}`}
         badge={lang === 'es' ? 'Protocolo Clínico' : 'Clinical Protocol'}
         badgeType="protocol"
-        inquireLabel={lang === 'es' ? 'Consultar Protocolo' : 'Inquire Protocol'}
-        onInquire={() => setIsInquiryDrawerOpen(true)}
+        inquireLabel={lang === 'es' ? 'Prescribir / Subir Receta ➔' : 'Prescribe / E-Rx Intake ➔'}
+        onInquire={() => {
+          window.location.href = `/rx/intake?refProtocol=${encodeURIComponent(slug)}`;
+        }}
+        extraActions={
+          <button
+            type="button"
+            onClick={() => setIsInquiryDrawerOpen(true)}
+            style={{
+              padding: '7px 12px',
+              borderRadius: '6px',
+              border: '1px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#334155',
+              fontSize: '0.78rem',
+              fontWeight: 650,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {lang === 'es' ? 'Consultar' : 'Inquire'}
+          </button>
+        }
         showClinicalAI={true}
         showSections={true}
         sectionsCount={tocSections.length}

@@ -1906,7 +1906,7 @@ export default function PublicDatasheetView({
         onOpenInquiry={handleOpenInquiry}
         hideContactButton={true}
         loginRedirect={`/p/${encodeURIComponent(slug)}`}
-        hideTier2={true}
+        hideTier2={false}
         breadcrumb={[
           { label: lang === 'es' ? 'Catálogo de Productos' : 'Product Catalog', href: '/c/CAT-MU9L9GBN' },
           ...(brandCollection ? [{ label: brandCollection.title, href: brandCollection.href }] : []),

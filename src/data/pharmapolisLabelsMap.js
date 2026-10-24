@@ -1221,21 +1221,52 @@ export function getAuthoritativeClinicalData(rx) {
   let doctorLicense = '';
   let clinicName = '';
 
+  // Direct lookup from verified PHARMAPOLIS_LABELS_MAP by fileNumber or prescriptionMatches
+  const cleanCode = String(fileNumber || rx.code || rx.id || rx.prescriptionNumber || '').replace(/^RX-/i, '').trim().toLowerCase();
+  const labelMatch = PHARMAPOLIS_LABELS_MAP.find(l => {
+    if (!l) return false;
+    const lFile = String(l.fileNumber || '').replace(/^RX-/i, '').trim().toLowerCase();
+    if (lFile && (lFile === cleanCode || cleanCode.startsWith(lFile))) return true;
+    if (Array.isArray(l.prescriptionMatches)) {
+      if (l.prescriptionMatches.some(m => String(m).replace(/^RX-/i, '').trim().toLowerCase() === cleanCode)) return true;
+    }
+    return false;
+  });
+
+  if (labelMatch) {
+    if (!patientName || patientName.startsWith('Patient PT-') || patientName === 'Patient') {
+      patientName = labelMatch.patientName || patientName;
+    }
+    if (!doctorName || doctorName === 'Licensed Clinical Practice') {
+      doctorName = labelMatch.doctorName || doctorName;
+    }
+    if (!doctorLicense || doctorLicense === 'DHA Registered') {
+      doctorLicense = labelMatch.doctorLicense || doctorLicense;
+    }
+    if (!clinicName || clinicName === 'Licensed Clinical Practice') {
+      clinicName = labelMatch.clinicName || clinicName;
+    }
+  }
+
   const rawDoctor = (rx.treatingDoctor && typeof rx.treatingDoctor === 'object' && !String(rx.treatingDoctor.name || '').includes('Miguel Ángel') ? rx.treatingDoctor : (typeof rx.treatingDoctor === 'string' && !rx.treatingDoctor.includes('Miguel Ángel') ? { name: rx.treatingDoctor } : null)) ||
     (rx.doctor && typeof rx.doctor === 'object' && !String(rx.doctor.name || '').includes('Miguel Ángel') ? rx.doctor : null) ||
     (rx.patientDoctor && !rx.patientDoctor.isInternalOnly && !String(rx.patientDoctor.name || '').includes('Miguel Ángel') ? rx.patientDoctor : null);
 
   if (rawDoctor) {
-    doctorName = rawDoctor.name || '';
-    doctorLicense = rawDoctor.license || rawDoctor.licenseNumber || '';
-    clinicName = rawDoctor.clinic || rawDoctor.clinicName || '';
+    doctorName = doctorName || rawDoctor.name || '';
+    doctorLicense = doctorLicense || rawDoctor.license || rawDoctor.licenseNumber || '';
+    clinicName = clinicName || rawDoctor.clinic || rawDoctor.clinicName || '';
   }
 
   if (!doctorName) {
     const candidate = rx.doctorName || rx.prescribingDoctor || rx.physician || '';
-    if (!String(candidate).includes('Miguel Ángel') && !String(candidate).includes('Aranda')) {
+    if (!String(candidate).includes('Miguel Ángel') && !String(candidate).includes('Aranda') && candidate !== 'Licensed Clinical Practice') {
       doctorName = candidate;
     }
+  }
+
+  if (!clinicName) {
+    clinicName = rx.treatingClinic?.name || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : '') || '';
   }
 
   // Production doctors (Dr. Miguel Ángel López Aranda & Dra. Haydee Camacho Gamboa) are strictly internal and must NEVER appear on patient labels
@@ -1266,8 +1297,6 @@ export function getAuthoritativeClinicalData(rx) {
     clinicName = isEldose ? 'Hortman Clinics · Jumeirah 1, Dubai' : 'Hortman Clinics, Dubai';
   }
 
-
-
   const isHaytham = !isSezgin && (
                     String(doctorName).toLowerCase().includes('haytham') || 
                     String(doctorName).toLowerCase().includes('heytham') ||
@@ -1280,29 +1309,37 @@ export function getAuthoritativeClinicalData(rx) {
     clinicName = clinicName || 'Arthregen Clinic / Med Art Clinic Day Surgery Center';
   }
 
-  // Dr. Marina Cordeiro Fernandes for NOVA Clinic & Alan Maclean Rutledge (50957)
+  // Dr. Marina Cordeiro Fernandes for NOVA Clinic & Alan Maclean Rutledge (50957) & Abdulla Alotaiba (51812)
   const isMarina = !isSezgin && !isHaytham && (
     String(doctorName).toLowerCase().includes('marina') ||
+    String(doctorName).toLowerCase().includes('cordeiro') ||
     String(rx.id || '').includes('50957') ||
     String(rx.code || '').includes('50957') ||
     String(rx.prescriptionCode || '').includes('50957') ||
     String(fileNumber || '').includes('50957') ||
+    String(rx.id || '').includes('51812') ||
+    String(rx.code || '').includes('51812') ||
+    String(rx.prescriptionCode || '').includes('51812') ||
+    String(fileNumber || '').includes('51812') ||
     String(patientName || '').toLowerCase().includes('rutledge') ||
-    String(clinicName || '').toLowerCase().includes('nova')
+    String(patientName || '').toLowerCase().includes('alotaiba') ||
+    String(patientName || '').toLowerCase().includes('abdulla') ||
+    String(clinicName || '').toLowerCase().includes('nova') ||
+    String(rx.clinic || rx.clinicName || '').toLowerCase().includes('nova')
   );
 
   if (isMarina) {
-    doctorName = 'Dr. Marina Cordeiro Fernandes';
-    doctorLicense = 'DHA-91105367';
-    clinicName = 'NOVA Clinic · Dubai Healthcare City, Dubai, UAE';
+    doctorName = (doctorName && doctorName !== 'Licensed Clinical Practice') ? doctorName : 'Dr. Marina Cordeiro Fernandes';
+    doctorLicense = (doctorLicense && doctorLicense !== 'DHA Registered') ? doctorLicense : 'DHA-91105367';
+    clinicName = (clinicName && clinicName !== 'Licensed Clinical Practice') ? clinicName : 'NOVA Clinic · Dubai Healthcare City, Dubai, UAE';
   }
 
   if (!clinicName) {
-    clinicName = rx.treatingClinic?.name || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : '') || 'Licensed Clinical Practice';
+    clinicName = 'Licensed Clinical Practice';
   }
 
   if (!doctorLicense) {
-    doctorLicense = rx.treatingDoctor?.license || rx.doctorLicense || (isSezgin ? 'DHA 00208953-005' : (isHaytham ? 'DHA-P-0319842' : 'DHA Registered'));
+    doctorLicense = rx.treatingDoctor?.license || rx.doctorLicense || (isSezgin ? 'DHA 00208953-005' : (isHaytham ? 'DHA-P-0319842' : (isMarina ? 'DHA-91105367' : 'DHA Registered')));
   }
 
   // QR encoded URL on bottles points directly to patient portal

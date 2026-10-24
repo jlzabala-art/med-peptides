@@ -4854,7 +4854,11 @@ export default function DoctorPublicPortalClient({
         brandHref={isCustomerAgent ? `/agent?dr=${slug}` : `/dr/${slug}`}
         doctorHomeHref={null}
         doctorName={null}
-        hideTier2={true}
+        hideTier2={false}
+        breadcrumb={[
+          { label: isEs ? 'Portal Médico' : 'Doctor Portal', href: '/doctor' },
+          { label: isAuthorizedViewer ? (doctor?.name || 'Dr. Practitioner') : (doctor?.clinic || `Doctor #${doctor?.opaqueCode || slug}`) }
+        ]}
         hideImportRx={true}
         hideSwitchRx={true}
         hideSearchButton={true}
@@ -8912,10 +8916,12 @@ export default function DoctorPublicPortalClient({
       <PublicStickyActionBar
         title={doctor?.name || `Doctor ${opaqueCode}`}
         subtitle={`${doctor?.clinic || (lang === 'es' ? 'Consulta Médica Verificada' : 'Verified Medical Practice')} • ${allPrescriptions.length} ${lang === 'es' ? 'Prescripciones' : 'Prescriptions'} • ${doctorPatientsList.length} ${lang === 'es' ? 'Pacientes' : 'Patients'}`}
-        badge={lang === 'es' ? 'CONSOLA MÉDICA' : 'PHYSICIAN CONSOLE'}
+        badge={isAuthorizedViewer ? (lang === 'es' ? 'CONSOLA MÉDICA' : 'PHYSICIAN CONSOLE') : (lang === 'es' ? 'MÉDICO VERIFICADO' : 'VERIFIED PHYSICIAN')}
         badgeType="protocol"
-        inquireLabel={lang === 'es' ? 'Nueva Prescripción' : 'New Prescription'}
-        onInquire={handleOpenNewPrescriptionIntake}
+        inquireLabel={isAuthorizedViewer ? (lang === 'es' ? 'Nueva Prescripción' : 'New Prescription') : (lang === 'es' ? 'Enviar Receta a este Doctor ➔' : 'Submit Rx to this Doctor ➔')}
+        onInquire={isAuthorizedViewer ? handleOpenNewPrescriptionIntake : () => {
+          window.location.href = `/rx/intake?refDoctor=${doctor?.opaqueCode || slug}`;
+        }}
         showClinicalAI={true}
         onOpenClinicalAI={() => {
           triggerHaptic('selection');
@@ -8958,7 +8964,7 @@ export default function DoctorPublicPortalClient({
       />
 
       {/* ── Google Cloud Console Standard Unified Footer (100% Full-Width) ── */}
-      <PublicUnifiedFooter lang={lang || 'en'} minimal={true} />
+      <PublicUnifiedFooter lang={lang || 'en'} minimal={isAuthorizedViewer} />
 
       {/* ── Practice Spotlight Search Palette (Rule #7 & Spotlight standard) ── */}
       <DoctorPracticeSearchModal

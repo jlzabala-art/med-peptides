@@ -1,5 +1,8 @@
 import React, { cache } from 'react';
 import { notFound, redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
+import { getTokens } from 'next-firebase-auth-edge';
+import { serverConfig } from '@/authConfig';
 import { adminDb } from '@/lib/firebaseAdmin';
 import PublicPrescriptionClient from './PublicPrescriptionClient';
 
@@ -130,8 +133,33 @@ export default async function PublicPrescriptionPage({ params, searchParams }) {
     notFound();
   }
 
-  // 2. Zero-Trust Server Sanitization: Strip nominal PII from initial SSR payload
-  const sanitizedRx = sanitizePrescriptionPayload(rx, { isAuthorized: false });
+  // 2. Server Authentication Verification (Admin, Doctor, Medical Director, Clinic)
+  let isAuthorized = false;
+  try {
+    const cookieStore = await cookies();
+    if (cookieStore.has(serverConfig.cookieName)) {
+      const tokens = await getTokens(cookieStore, {
+        apiKey: serverConfig.firebaseApiKey,
+        cookieName: serverConfig.cookieName,
+        cookieSignatureKeys: serverConfig.cookieSignatureKeys,
+        serviceAccount: serverConfig.serviceAccount,
+      });
+      const role = String(tokens?.decodedToken?.role || '').toLowerCase();
+      const email = String(tokens?.decodedToken?.email || '').toLowerCase().trim();
+      if (
+        ['admin', 'medical_director', 'doctor', 'clinic', 'account_manager', 'fagron_clinic', 'patient_coordinator'].includes(role) ||
+        tokens?.decodedToken?.admin === true ||
+        ['jlzabala@gmail.com', 'admin@atlashealth-services.com'].includes(email)
+      ) {
+        isAuthorized = true;
+      }
+    }
+  } catch {
+    // cookies not accessible or invalid, client-side auth will hydrate
+  }
+
+  // 3. Zero-Trust Server Sanitization: Strip nominal PII from SSR payload ONLY for unauthenticated public viewers
+  const sanitizedRx = sanitizePrescriptionPayload(rx, { isAuthorized });
 
   return <PublicPrescriptionClient rx={sanitizedRx} initialView={initialView} />;
 }
