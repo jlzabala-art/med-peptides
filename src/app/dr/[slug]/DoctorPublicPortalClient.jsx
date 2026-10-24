@@ -724,6 +724,7 @@ export default function DoctorPublicPortalClient({
 
   // Language & Clinical Sidebar Navigation State (GCP Standard)
   const [lang, setLang] = useState('en');
+  const isEs = lang === 'es';
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [activeAnchor, setActiveAnchor] = useState(
@@ -8341,10 +8342,10 @@ export default function DoctorPublicPortalClient({
                 expandableRender={(pat) => (
                   <div style={{ padding: '14px 18px', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
                     <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Associated Clinical Prescriptions & Proposals ({pat.prescriptions.length})
+                      Associated Clinical Prescriptions & Proposals ({(pat.prescriptions || []).length})
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {pat.prescriptions.map((p, idx) => {
+                      {(pat.prescriptions || []).map((p, idx) => {
                         const pIsSold = isSoldPrescription(p);
                         const pIsProp = isProposalPrescription(p);
                         const pInv = p.invoiceRef ? String(p.invoiceRef).trim() : '';
