@@ -7,6 +7,7 @@ import Breadcrumbs from '../components/common/Breadcrumbs';
 import { usePageMeta } from '../hooks/usePageMeta';
 import PublicUnifiedHeader from '../components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '../components/shared/PublicUnifiedFooter';
+import PublicStickyActionBar from '../components/shared/PublicStickyActionBar';
 import DiagnosticReportVisualPreview from '../components/diagnostic/DiagnosticReportVisualPreview';
 import BloodoCollectionSidebar from '../components/diagnostic/BloodoCollectionSidebar';
 import EternaCollectionSidebar from '../components/diagnostic/EternaCollectionSidebar';
@@ -339,7 +340,13 @@ export default function BrandCollectionPage({
   const config = BRAND_CONFIGS[brandSlug] || BRAND_CONFIGS.bloodo;
   const { user, isProfessional, loginWithGoogle } = useAuth();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const isEs = false; // Force English — Spanish translations preserved for future i18n
+  const [lang, setLang] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('atlas_portal_lang') || 'en';
+    }
+    return 'en';
+  });
+  const isEs = lang === 'es';
 
   const products = useMemo(() => {
     if (brandSlug === 'teletest' && (!initialProducts || initialProducts.length === 0)) {
@@ -373,13 +380,6 @@ export default function BrandCollectionPage({
   }, [config.categories, products, brandSlug]);
 
   const colwayCategories = brandCategories;
-
-  const [lang, setLang] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('atlas_portal_lang') || 'en';
-    }
-    return 'en';
-  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState('table'); // 'table' (rows/lines - GCP UX) | 'grid'
@@ -732,7 +732,15 @@ export default function BrandCollectionPage({
   };
 
   return (
-    <div className="brand-collection-root" style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a' }}>
+    <div
+      className="brand-collection-root"
+      style={{
+        minHeight: '100vh',
+        background: '#f8fafc',
+        color: '#0f172a',
+        paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 16px))'
+      }}
+    >
       {/* ── 1. Unified Public Header (Sticky top) ── */}
       <PublicUnifiedHeader
         track="products"
@@ -749,6 +757,8 @@ export default function BrandCollectionPage({
         collectionProducts={filteredProducts}
         collectionTitle={config.name}
         onSelectCollectionProduct={handleProductClick}
+        inquiryContextType="brand_collection"
+        onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
       />
 
       {/* ── 2. Atlas Clinical Portfolio Suites Navigation Bar ── */}
@@ -2187,7 +2197,8 @@ export default function BrandCollectionPage({
         contextType="brand_collection"
         contextAnchor={activeSectionContext}
         collectionProducts={filteredProducts}
-        storageKey={`colway_${selectedCategory}`}
+        storageKey={`brand_collection_${brandSlug}_${selectedCategory}`}
+        lang={lang}
       />
 
       {/* ── Friction-Free B2B Unlock Modal (Golden Rule #14 & #22) ── */}
@@ -2196,6 +2207,26 @@ export default function BrandCollectionPage({
         onClose={() => setIsUnlockModalOpen(false)}
         isEs={isEs}
         brandName={config.name}
+      />
+
+      {/* ── Institutional Unified Public Footer ── */}
+      <PublicUnifiedFooter lang={lang} />
+
+      {/* ── Persistent Google Cloud Console Sticky Bottom Action Bar ── */}
+      <PublicStickyActionBar
+        title={config.name || (isEs ? 'Colección Lotusland Peptides' : 'Lotusland Peptides Collection')}
+        subtitle={`${filteredProducts.length} ${isEs ? 'Monografías y Referencias' : 'Reference Peptides & Monographs'} • HPLC ≥99.0%`}
+        badge={brandSlug === 'peptides' ? 'HPLC ≥99.0%' : (config.badge || 'Clinical Portfolio')}
+        badgeType={brandSlug === 'peptides' ? 'teal' : 'default'}
+        inquireLabel={isEs ? 'Consultar Catálogo' : 'Inquire Catalog'}
+        onInquire={() => setIsInquiryDrawerOpen(true)}
+        showClinicalAI={true}
+        onOpenClinicalAI={() => setIsAtlasAiOpen(true)}
+        showSections={true}
+        sectionsCount={brandCategories?.length || 0}
+        sectionsLabel={isEs ? 'Categorías' : 'Categories'}
+        onOpenSections={() => setIsMobileSidebarOpen(true)}
+        lang={lang}
       />
     </div>
   );

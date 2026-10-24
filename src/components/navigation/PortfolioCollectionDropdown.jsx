@@ -135,8 +135,8 @@ export const PORTFOLIO_GROUPS = [
       {
         id: 'protocols',
         slug: 'protocols',
-        aliases: ['protocols'],
-        href: '/collection/protocols',
+        aliases: ['protocols', 'proto'],
+        href: '/proto',
         name: 'Clinical Peptide Protocols',
         shortName: 'Protocols',
         domain: 'Evidence-Based Clinical Blueprints',

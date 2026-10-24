@@ -12,6 +12,9 @@ import SuppliesView from './SuppliesView';
 import RestrictedCatalogRoute from '../components/auth/RestrictedCatalogRoute';
 import BrandCollectionPage from './BrandCollectionPage';
 import ClinicalPortfolioSuiteSwitcher from '../components/navigation/ClinicalPortfolioSuiteSwitcher';
+import PublicUnifiedHeader from '../components/shared/PublicUnifiedHeader';
+import PublicUnifiedFooter from '../components/shared/PublicUnifiedFooter';
+import PublicStickyActionBar from '../components/shared/PublicStickyActionBar';
 
 
 // Slug → exact category name mapping
@@ -92,28 +95,44 @@ export default function CollectionTemplate({
     );
   }
 
-  // /collection/protocols → protocol library
-  if (s === 'protocols') {
-    return (
-      <RestrictedCatalogRoute catalogName="protocols">
-        <ClinicalPortfolioSuiteSwitcher currentSlug="protocols" />
-        <ProtocolCollectionPage
-          onNavigate={(slug) => router.push(`/protocol/${slug}`)}
-          onBack={() => router.back()}
-        />
-      </RestrictedCatalogRoute>
-    );
+  // /collection/protocols → redirect to official /proto directory
+  if (s === 'protocols' || s === 'protocol') {
+    if (typeof window !== 'undefined') {
+      router.replace('/proto');
+    }
+    return null;
   }
 
   // /collection/supplements → supplement catalog
   if (s === 'supplements') {
     return (
       <RestrictedCatalogRoute catalogName="products">
+        <PublicUnifiedHeader
+          track="products"
+          lang="en"
+          copyUrl="https://www.atlashealth-services.com/collection/supplements"
+          shortUrl="https://www.atlashealth-services.com/collection/supplements"
+          brandHref="/c/CAT-MU9L9GBN"
+          brandTitle="Atlas Health Services Clinical & Healthcare Intelligence"
+          hideTier2={true}
+          hideAccountManager={true}
+          hideAiButton={true}
+        />
         <ClinicalPortfolioSuiteSwitcher currentSlug="supplements" />
         <SupplementCollectionPage
           onNavigate={(supplementSlug) => router.push(`/supplements/${supplementSlug}`)}
           onBack={() => router.back()}
           toggleCompare={toggleCompare}
+        />
+        <PublicUnifiedFooter lang="en" />
+        <PublicStickyActionBar
+          title="Clinical Supplements & Longevity Formulations"
+          subtitle="Therapeutic Cofactors, Mitochondrial Actives & Precursors"
+          badge="Nutraceuticals"
+          inquireLabel="Inquire Catalog"
+          onInquire={() => { if (typeof window !== 'undefined') window.location.href = '/contact'; }}
+          showClinicalAI={true}
+          lang="en"
         />
       </RestrictedCatalogRoute>
     );
@@ -188,7 +207,18 @@ export default function CollectionTemplate({
   ];
 
   return (
-    <div className="template-root">
+    <div className="template-root" style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 16px))' }}>
+      <PublicUnifiedHeader
+        track="products"
+        lang="en"
+        copyUrl={typeof window !== 'undefined' ? window.location.href : 'https://www.atlashealth-services.com/collection/peptides'}
+        shortUrl={typeof window !== 'undefined' ? window.location.href : 'https://www.atlashealth-services.com/collection/peptides'}
+        brandHref="/c/CAT-MU9L9GBN"
+        brandTitle="Atlas Health Services Clinical & Healthcare Intelligence"
+        hideTier2={true}
+        hideAccountManager={true}
+        hideAiButton={true}
+      />
       <ClinicalPortfolioSuiteSwitcher currentSlug={slug} />
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
         <Breadcrumbs items={breadcrumbItems} />
@@ -205,6 +235,16 @@ export default function CollectionTemplate({
         onBack={() => router.back()}
         onSelectProduct={handleProductSelect}
         allFaqs={allFaqs}
+      />
+      <PublicUnifiedFooter lang="en" />
+      <PublicStickyActionBar
+        title={`${categoryName} Reference Catalog`}
+        subtitle="Verified Clinical Monograph Standards • HPLC ≥99.0%"
+        badge="Peptide Portfolio"
+        inquireLabel="Inquire Catalog"
+        onInquire={() => { if (typeof window !== 'undefined') window.location.href = '/contact'; }}
+        showClinicalAI={true}
+        lang="en"
       />
     </div>
   );

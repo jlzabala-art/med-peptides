@@ -40,6 +40,7 @@ const PORTAL_PREFIXES = [
   '/catalog',
   '/verify',
   '/c',
+  '/collection',
   '/mediluxe',
   '/company',
   '/atlas',

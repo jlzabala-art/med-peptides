@@ -1,4 +1,5 @@
 import React from 'react';
+import { redirect } from 'next/navigation';
 import { fetchProductsAction } from '../../../actions/productsActions';
 import CollectionClientWrapper from './CollectionClientWrapper';
 import { sanitizeForClient } from '../../../utils/sanitizeForClient';
@@ -265,6 +266,10 @@ export default async function NextCollectionPage({ params, searchParams }) {
   const resolvedSearch = await searchParams;
   const rawSlug = (resolvedParams?.slug || '').toLowerCase();
   const slug = rawSlug === 'ultraman' ? 'ultraperson' : rawSlug;
+
+  if (slug === 'protocols' || slug === 'protocol' || slug === 'proto') {
+    redirect('/proto');
+  }
 
   const ref = resolvedSearch?.ref || resolvedSearch?.referral || null;
   const code = resolvedSearch?.code || ref;
