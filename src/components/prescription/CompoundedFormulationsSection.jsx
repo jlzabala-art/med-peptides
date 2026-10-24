@@ -16,6 +16,7 @@ import {
 } from '@/lib/icons';
 import { AlertTriangle } from 'lucide-react';
 import { resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
+import ReconstitutionGuideCard from './ReconstitutionGuideCard';
 
 /**
  * CompoundedFormulationsSection
@@ -767,6 +768,20 @@ export default function CompoundedFormulationsSection({
                       </div>
                     ))}
                   </div>
+
+                  {/* Sub-Section 3a: Reconstitution Guide if Injectable / Peptide Vial */}
+                  {formulation.isInjectable && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <ReconstitutionGuideCard
+                        productName={formulation.title}
+                        vialDoseMg={parseFloat(String(formulation.volume || '5').replace(/[^\d.]/g, '')) || 5}
+                        diluentVolumeMl={2.0}
+                        prescribedDoseMcg={250}
+                        lang={isEs ? 'es' : 'en'}
+                        initiallyExpanded={false}
+                      />
+                    </div>
+                  )}
 
                   {/* Sub-Section 3b: Critical Medical Safety Alerts & Pre-Procedure Guidance */}
                   {Array.isArray(formulation.extra?.criticalPrecautions) && formulation.extra.criticalPrecautions.length > 0 && (

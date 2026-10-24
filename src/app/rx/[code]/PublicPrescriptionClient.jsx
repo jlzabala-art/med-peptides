@@ -70,6 +70,7 @@ import AtlasSynergyRecommendationsSection from '@/components/prescription/AtlasS
 import PrescriptionMasterHeader from '@/components/prescription/PrescriptionMasterHeader';
 import PatientActionBannerCard from '@/components/prescription/PatientActionBannerCard';
 import CompoundedFormulationsSection from '@/components/prescription/CompoundedFormulationsSection';
+import PatientPrescriptionGuide from '@/components/prescription/PatientPrescriptionGuide';
 import RoadmapMilestonesSection from '@/components/prescription/RoadmapMilestonesSection';
 import QualityTraceabilitySection from '@/components/prescription/QualityTraceabilitySection';
 import PrescriptionModalsContainer from '@/components/prescription/PrescriptionModalsContainer';
@@ -683,19 +684,34 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           />
         )}
 
-        {/* ── Compounded Formulations & Dedicated Posology Architecture ──────────── */}
+        {/* ── Compounded Formulations & Dedicated Posology Architecture (Patient vs Clinical) ──────────── */}
         {activeGcpTab === 'treatment' && (
-          <CompoundedFormulationsSection
-            compoundedFormulations={compoundedFormulations}
-            isEs={isEs}
-            prescriptionLabels={prescriptionLabels}
-            expandedPhases={expandedPhases}
-            setExpandedPhases={setExpandedPhases}
-            setSelectedPhase={setSelectedPhase}
-            togglePhase={togglePhase}
-            setSelectedLabelIndex={setSelectedLabelIndex}
-            setShowLabelsModal={setShowLabelsModal}
-          />
+          isPatientView ? (
+            <PatientPrescriptionGuide
+              rx={currentRx}
+              compoundedFormulations={compoundedFormulations}
+              isEs={isEs}
+              doctorName={displayDoctorNameShort}
+              doctorClinic={doctorClinic}
+              doctorPhone={safeDoctorPhone}
+              patientName={patientName}
+              rxId={rxId}
+              patientPublicUrl={patientPublicUrl}
+              onOpenQuotation={() => setShowAtlasQuotationModal(true)}
+            />
+          ) : (
+            <CompoundedFormulationsSection
+              compoundedFormulations={compoundedFormulations}
+              isEs={isEs}
+              prescriptionLabels={prescriptionLabels}
+              expandedPhases={expandedPhases}
+              setExpandedPhases={setExpandedPhases}
+              setSelectedPhase={setSelectedPhase}
+              togglePhase={togglePhase}
+              setSelectedLabelIndex={setSelectedLabelIndex}
+              setShowLabelsModal={setShowLabelsModal}
+            />
+          )
         )}
 
         {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}

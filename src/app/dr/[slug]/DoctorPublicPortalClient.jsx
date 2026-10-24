@@ -737,6 +737,19 @@ export default function DoctorPublicPortalClient({
   const [isPracticeSearchOpen, setIsPracticeSearchOpen] = useState(false);
   const [isServicesModalOpen, setIsServicesModalOpen] = useState(false);
   const [activeBlueprintDossier, setActiveBlueprintDossier] = useState(null);
+  const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false);
+  const notifMenuRef = useRef(null);
+
+  useEffect(() => {
+    if (!isNotifDropdownOpen) return;
+    const handleClickOutside = (e) => {
+      if (notifMenuRef.current && !notifMenuRef.current.contains(e.target)) {
+        setIsNotifDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isNotifDropdownOpen]);
 
   // Keyboard shortcut (⌘K or /) for Practice Search
   useEffect(() => {
@@ -5433,49 +5446,247 @@ export default function DoctorPublicPortalClient({
                 <kbd style={{ fontSize: '0.66rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '1px 5px', color: '#64748b' }}>⌘K</kbd>
               </button>
 
-              {/* Notifications Icon (Pending Tasks Counter) */}
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  handleSidebarNavigate('tasks');
-                }}
-                style={{
-                  position: 'relative',
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '6px',
-                  border: '1px solid #dadce0',
-                  background: '#ffffff',
-                  color: filteredTasks.length > 0 ? '#b45309' : '#5f6368',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
-                }}
-                title={filteredTasks.length > 0 ? `${filteredTasks.length} pending clinical actions requiring review` : 'No pending actions'}
-              >
-                <Bell size={16} />
-                {filteredTasks.length > 0 && (
-                  <span
+              {/* Notifications Icon & Flyout Dropdown (Pending Clinical Actions) */}
+              <div style={{ position: 'relative' }} ref={notifMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setIsNotifDropdownOpen(prev => !prev);
+                  }}
+                  style={{
+                    position: 'relative',
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '6px',
+                    border: isNotifDropdownOpen ? '1px solid #1a73e8' : '1px solid #dadce0',
+                    background: isNotifDropdownOpen ? '#eff6ff' : '#ffffff',
+                    color: filteredTasks.length > 0 ? '#b45309' : '#5f6368',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
+                  }}
+                  title={filteredTasks.length > 0 ? `${filteredTasks.length} pending clinical actions requiring review` : 'No pending actions'}
+                  aria-expanded={isNotifDropdownOpen}
+                >
+                  <Bell size={16} />
+                  {filteredTasks.length > 0 && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-4px',
+                        right: '-4px',
+                        background: '#f59e0b',
+                        color: '#ffffff',
+                        fontSize: '0.60rem',
+                        fontWeight: 700,
+                        borderRadius: '999px',
+                        padding: '1px 5px',
+                        lineHeight: 1.2
+                      }}
+                    >
+                      {filteredTasks.length}
+                    </span>
+                  )}
+                </button>
+
+                {isNotifDropdownOpen && (
+                  <div
                     style={{
                       position: 'absolute',
-                      top: '-4px',
-                      right: '-4px',
-                      background: '#f59e0b',
-                      color: '#ffffff',
-                      fontSize: '0.60rem',
-                      fontWeight: 700,
-                      borderRadius: '999px',
-                      padding: '1px 5px',
-                      lineHeight: 1.2
+                      top: 'calc(100% + 8px)',
+                      right: 0,
+                      width: '360px',
+                      maxWidth: 'calc(100vw - 24px)',
+                      backgroundColor: '#ffffff',
+                      borderRadius: '12px',
+                      border: '1px solid #dadce0',
+                      boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)',
+                      zIndex: 1100,
+                      overflow: 'hidden'
                     }}
                   >
-                    {filteredTasks.length}
-                  </span>
+                    {/* Header */}
+                    <div
+                      style={{
+                        padding: '12px 16px',
+                        borderBottom: '1px solid #e2e8f0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        background: '#f8fafc'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Bell size={15} style={{ color: '#003666' }} />
+                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                          Clinical Notifications
+                        </span>
+                        {filteredTasks.length > 0 ? (
+                          <span
+                            style={{
+                              fontSize: '0.64rem',
+                              fontWeight: 700,
+                              background: '#fffbeb',
+                              color: '#b45309',
+                              border: '1px solid #fde68a',
+                              padding: '1px 6px',
+                              borderRadius: '999px'
+                            }}
+                          >
+                            {filteredTasks.length} pending
+                          </span>
+                        ) : null}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsNotifDropdownOpen(false)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#94a3b8',
+                          cursor: 'pointer',
+                          padding: '2px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+
+                    {/* Notifications List */}
+                    <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
+                      {filteredTasks.length === 0 ? (
+                        <div style={{ padding: '32px 20px', textAlign: 'center' }}>
+                          <div
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              background: '#f0fdf4',
+                              color: '#16a34a',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginBottom: '8px'
+                            }}
+                          >
+                            <CheckCircle2 size={20} />
+                          </div>
+                          <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                            All caught up!
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                            No urgent clinical tasks or approvals pending.
+                          </div>
+                        </div>
+                      ) : (
+                        filteredTasks.slice(0, 6).map((task) => {
+                          const codifiedId = getCodifiedPatientId(task.patientName, task.code);
+                          const displayPt = isAuthorizedViewer ? (task.patientName || `Patient ${codifiedId}`) : `Patient ${codifiedId}`;
+                          const isProposal = task.type === 'proposal_followup';
+                          const isPortal = task.type === 'portal_inactive';
+
+                          return (
+                            <div
+                              key={task.id || task.code}
+                              onClick={() => {
+                                setIsNotifDropdownOpen(false);
+                                handleSidebarNavigate('tasks');
+                              }}
+                              style={{
+                                padding: '12px 16px',
+                                borderBottom: '1px solid #f1f5f9',
+                                cursor: 'pointer',
+                                transition: 'background-color 0.12s ease',
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: '10px'
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                            >
+                              <div
+                                style={{
+                                  width: '8px',
+                                  height: '8px',
+                                  borderRadius: '50%',
+                                  background: isProposal ? '#f59e0b' : (isPortal ? '#3b82f6' : '#10b981'),
+                                  marginTop: '5px',
+                                  flexShrink: 0
+                                }}
+                              />
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
+                                    {displayPt}
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: '0.62rem',
+                                      fontWeight: 600,
+                                      padding: '1px 5px',
+                                      borderRadius: '4px',
+                                      background: isPortal ? '#eff6ff' : (isProposal ? '#fffbeb' : '#f1f5f9'),
+                                      color: isPortal ? '#1d4ed8' : (isProposal ? '#b45309' : '#475569')
+                                    }}
+                                  >
+                                    {isPortal ? 'Portal Inactive' : (isProposal ? 'Offer Follow-up' : (task.typeLabel || 'Action Required'))}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '2px', lineHeight: 1.35 }}>
+                                  {task.treatmentTitle || task.description || task.code}
+                                </div>
+                                {task.daysPending ? (
+                                  <div style={{ fontSize: '0.66rem', color: '#94a3b8', marginTop: '3px' }}>
+                                    Pending for {task.daysPending} days
+                                  </div>
+                                ) : null}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div
+                      style={{
+                        padding: '10px 16px',
+                        background: '#f8fafc',
+                        borderTop: '1px solid #e2e8f0',
+                        textAlign: 'center'
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsNotifDropdownOpen(false);
+                          handleSidebarNavigate('tasks');
+                        }}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#1a73e8',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <span>Open Action Queue (Pending Actions)</span>
+                        <span>→</span>
+                      </button>
+                    </div>
+                  </div>
                 )}
-              </button>
+              </div>
 
               {/* Doctor Avatar / Profile Button */}
               <button
@@ -5993,109 +6204,7 @@ export default function DoctorPublicPortalClient({
                 )}
               </div>
 
-              {/* ── SECTION 3: Quick Actions ── */}
-              <div style={{ marginBottom: '22px' }}>
-                <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
-                  Quick Actions
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px' }}>
-                  <div
-                    onClick={handleOpenNewPrescriptionIntake}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 14px',
-                      background: '#ffffff',
-                      border: '1px solid #dadce0',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 2px rgba(60,64,67,0.04)',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#e8f0fe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Plus size={18} style={{ color: '#1a73e8' }} />
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>New Prescription</div>
-                      <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '1px' }}>Compounded formula or Rx upload</div>
-                    </div>
-                  </div>
 
-                  <div
-                    onClick={() => handleSidebarNavigate('patients')}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 14px',
-                      background: '#ffffff',
-                      border: '1px solid #dadce0',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 2px rgba(60,64,67,0.04)',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Users size={18} style={{ color: '#4f46e5' }} />
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>Add Patient</div>
-                      <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '1px' }}>Register or view clinical dossier</div>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => handleSidebarNavigate('lab_results')}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 14px',
-                      background: '#ffffff',
-                      border: '1px solid #dadce0',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 2px rgba(60,64,67,0.04)',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <FlaskConical size={18} style={{ color: '#d97706' }} />
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>Request Diagnostic Test</div>
-                      <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '1px' }}>Biomarkers & screening panels</div>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => handleSidebarNavigate('recommendations')}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 14px',
-                      background: '#ffffff',
-                      border: '1px solid #dadce0',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 2px rgba(60,64,67,0.04)',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#f0fdfa', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Sparkles size={18} style={{ color: '#0d9488' }} />
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>Clinical Recommendations</div>
-                      <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '1px' }}>Specialty protocols & blueprints</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               {/* ── SECTION 4: Atlas Clinical Intelligence (Top 3 Recommendations) ── */}
               <div

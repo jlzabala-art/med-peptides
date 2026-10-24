@@ -54,6 +54,7 @@ export default function PreparationTab({
 }) {
   // Label preview ("preview first, then print")
   const [labelPreview, setLabelPreview] = useState(null); // { url, downloadUrl, title, subtitle, name }
+  const [isTransitDetailsOpen, setIsTransitDetailsOpen] = useState(false);
 
   // ── 1. Determine Exact Presentation Category ──
   const formatStr = String(
@@ -1401,12 +1402,167 @@ export default function PreparationTab({
       </section>
 
       {/* ── 2. Handling Stepper & Storage Guidelines ── */}
-      {/* ── 2. Handling Stepper & Storage Guidelines (Google Cloud Console Lines Mode) ── */}
-      <section style={{
+      {/* Quick Storage & Stability KPI Strip (Google Cloud Console Metrics Pattern) */}
+      <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
-        gap: '1.25rem',
-        alignItems: 'start'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+        gap: '0.85rem',
+        marginBottom: '1.25rem'
+      }}>
+        {/* Metric 1: Unopened Condition */}
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #dadce0',
+          borderRadius: '8px',
+          padding: '10px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          boxShadow: '0 1px 2px rgba(60, 64, 67, 0.04)'
+        }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '6px',
+            background: '#e8f0fe',
+            color: '#1a73e8',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <Archive size={16} />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isDiagnostic ? 'Specimen Kit' : isOral ? 'Oral Sealed Bottle' : 'Unopened Storage'}
+            </div>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1a73e8', lineHeight: 1.25, marginTop: '1px' }}>
+              {isDiagnostic ? '15°C–25°C · 24 Mo' : isOral ? '15°C–25°C · Dry' : '-20°C Freezer · 24 Mo'}
+            </div>
+            <div style={{ fontSize: '0.66rem', color: '#5f6368', marginTop: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {isOral ? 'Room temperature' : isDiagnostic ? 'Ambient shelf-life' : 'Long-term preservation'}
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 2: In-Use Reconstituted */}
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #dadce0',
+          borderRadius: '8px',
+          padding: '10px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          boxShadow: '0 1px 2px rgba(60, 64, 67, 0.04)'
+        }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '6px',
+            background: '#e6f4ea',
+            color: '#137333',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <Snowflake size={16} />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isDiagnostic ? 'Transit Specimen' : isOral ? 'Enteric Integrity' : 'In-Use Solution'}
+            </div>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#137333', lineHeight: 1.25, marginTop: '1px' }}>
+              {isDiagnostic ? '28 Days Ambient' : isOral ? '24 Mo Gastric-Resistant' : '2°C–8°C Refrig · 28 Days'}
+            </div>
+            <div style={{ fontSize: '0.66rem', color: '#5f6368', marginTop: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {isDiagnostic ? 'Whatman 903 matrix' : isOral ? 'Sealed with desiccant' : 'Bacteriostatic (BAC)'}
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 3: Transit Tolerance */}
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #dadce0',
+          borderRadius: '8px',
+          padding: '10px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          boxShadow: '0 1px 2px rgba(60, 64, 67, 0.04)'
+        }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '6px',
+            background: '#f1f5f9',
+            color: '#003666',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <ShieldCheck size={16} />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Transit Tolerance
+            </div>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#003666', lineHeight: 1.25, marginTop: '1px' }}>
+              {isDiagnostic ? '≤28 Days Ambient' : isOral ? '15°C–25°C Dry' : 'Up to 30 Days (20°C–25°C)'}
+            </div>
+            <div style={{ fontSize: '0.66rem', color: '#5f6368', marginTop: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {isDiagnostic ? 'Prepaid courier mailer' : isOral ? 'Moisture-proof container' : 'Deep-vacuum lyophilization'}
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 4: Pharmacopeia Standard */}
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #dadce0',
+          borderRadius: '8px',
+          padding: '10px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          boxShadow: '0 1px 2px rgba(60, 64, 67, 0.04)'
+        }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '6px',
+            background: '#e6f4ea',
+            color: '#188038',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <CheckCircle2 size={16} />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Standard
+            </div>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', lineHeight: 1.25, marginTop: '1px' }}>
+              USP / Ph. Eur.
+            </div>
+            <div style={{ fontSize: '0.66rem', color: '#137333', marginTop: '1px', fontWeight: 600 }}>
+              Validated Protocol
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 2. Handling Stepper & Storage Guidelines (Sequential Flow) ── */}
+      <section style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.25rem'
       }}>
         {/* Stepwise Handling Protocol — Linear Row Mode */}
         <div style={{
@@ -1564,7 +1720,7 @@ export default function PreparationTab({
           </div>
         </div>
 
-        {/* Cold-Chain & Beyond-Use Stability — Linear Row Mode (No Chunky Cards) */}
+        {/* Cold-Chain & Beyond-Use Stability — Full Width & Progressive Disclosure */}
         <div style={{
           background: '#ffffff',
           border: '1px solid #dadce0',
@@ -1614,6 +1770,87 @@ export default function PreparationTab({
               USP / Ph. Eur. Validated
             </span>
           </div>
+
+          {/* Standardized Storage Summary Table (Full Width GCP DataTable Style) */}
+          {!isDiagnostic && !isOral && (
+            <div style={{
+              padding: '12px 16px',
+              borderBottom: '1px solid #f1f3f4',
+              overflowX: 'auto',
+              background: '#ffffff'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Standard Stability Matrix
+                </span>
+                <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
+                  Microbiological & Chromatographic Specification
+                </span>
+              </div>
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: '0.72rem',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '6px'
+              }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
+                    <th style={{ padding: '8px 10px', fontWeight: 700, color: '#334155', width: '28%' }}>Product State</th>
+                    <th style={{ padding: '8px 10px', fontWeight: 700, color: '#334155', width: '20%' }}>Recommended Temp</th>
+                    <th style={{ padding: '8px 10px', fontWeight: 700, color: '#334155', width: '20%' }}>Max Stability Period</th>
+                    <th style={{ padding: '8px 10px', fontWeight: 700, color: '#334155', width: '32%' }}>Key Handling Instruction</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>Lyophilized (unopened) — Long-term</td>
+                    <td style={{ padding: '8px 10px' }}>
+                      <span style={{ background: '#e0f2fe', color: '#0284c7', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontSize: '0.68rem' }}>
+                        −20°C (freezer)
+                      </span>
+                    </td>
+                    <td style={{ padding: '8px 10px', color: '#334155', fontWeight: 500 }}>Up to 24 months*</td>
+                    <td style={{ padding: '8px 10px', color: '#64748b' }}>Keep sealed with desiccant; protect from direct light</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>Lyophilized (unopened) — Transit</td>
+                    <td style={{ padding: '8px 10px' }}>
+                      <span style={{ background: '#fef3c7', color: '#b45309', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontSize: '0.68rem' }}>
+                        20°C–25°C (ambient)
+                      </span>
+                    </td>
+                    <td style={{ padding: '8px 10px', color: '#334155', fontWeight: 500 }}>Up to 30 days*</td>
+                    <td style={{ padding: '8px 10px', color: '#64748b' }}>Avoid prolonged heat exposure (&gt;30°C); thermal buffering</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>Reconstituted (bacteriostatic water)</td>
+                    <td style={{ padding: '8px 10px' }}>
+                      <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontSize: '0.68rem' }}>
+                        2°C–8°C (refrigerated)
+                      </span>
+                    </td>
+                    <td style={{ padding: '8px 10px', color: '#334155', fontWeight: 500 }}>Up to 28 days*</td>
+                    <td style={{ padding: '8px 10px', color: '#64748b' }}>Do not freeze; minimize mechanical agitation</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>Reconstituted (sterile water)</td>
+                    <td style={{ padding: '8px 10px' }}>
+                      <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontSize: '0.68rem' }}>
+                        2°C–8°C (refrigerated)
+                      </span>
+                    </td>
+                    <td style={{ padding: '8px 10px', color: '#334155', fontWeight: 500 }}>Single-use / 24–48 h*</td>
+                    <td style={{ padding: '8px 10px', color: '#64748b' }}>Administer immediately; discard unused remaining portion</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style={{ fontSize: '0.66rem', color: '#94a3b8', marginTop: '6px', fontStyle: 'italic' }}>
+                *Subject to peptide-specific degradation kinetics and analytical release specifications.
+              </div>
+            </div>
+          )}
 
           {/* Linear Specification Rows */}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -1704,140 +1941,128 @@ export default function PreparationTab({
               </p>
             </div>
 
-            {/* Line 3: Transit Stability & Courier Delivery Guidelines */}
+            {/* Line 3: Progressive Disclosure Accordion for Transit Stability & Courier Delivery */}
             {!isDiagnostic && !isOral && (
-              <div style={{
-                padding: '12px 16px',
-                borderBottom: '1px solid #f1f3f4',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '6px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <ShieldCheck size={14} color="#003666" />
-                    <strong style={{ fontSize: '0.78rem', color: '#202124', fontWeight: 600 }}>
-                      Transit Stability & Courier Delivery Guidelines
-                    </strong>
-                  </div>
-                  <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    color: '#003666',
-                    background: '#f1f5f9',
-                    padding: '2px 7px',
-                    borderRadius: '4px'
-                  }}>
-                    Up to 30 Days Ambient Transit*
-                  </span>
-                </div>
-                <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45 }}>
-                  <strong style={{ color: '#202124' }}>Vacuum-Sealed Solid-State Preservation:</strong> Lyophilized peptides are deep-vacuum freeze-dried with &lt;1% residual moisture. In the absence of aqueous solvent, hydrolytic cleavage and enzymatic degradation pathways are significantly restricted. Unopened solid-state vials maintain analytical stability at controlled room temperature (20°C–25°C) for <strong>up to 30 days in transit*</strong> without meaningful loss of chromatographic purity.
-                </p>
-
-                {/* Sub-lines in compact GCP table format */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '6px',
-                  marginTop: '4px'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '6px',
-                    fontSize: '0.70rem',
-                    color: '#3c4043',
-                    lineHeight: 1.35,
-                    background: '#f8f9fa',
-                    border: '1px solid #e8eaed',
-                    padding: '6px 8px',
-                    borderRadius: '4px'
-                  }}>
-                    <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span><strong>Customs & Transit:</strong> International transit (5–14 business days) and temporary customs holds are well-tolerated by unopened vials.</span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '6px',
-                    fontSize: '0.70rem',
-                    color: '#3c4043',
-                    lineHeight: 1.35,
-                    background: '#f8f9fa',
-                    border: '1px solid #e8eaed',
-                    padding: '6px 8px',
-                    borderRadius: '4px'
-                  }}>
-                    <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span><strong>Thawed Cold Packs:</strong> Normal upon delivery; phase packs buffer thermal spikes. Thawed packs do not indicate product degradation.</span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '6px',
-                    fontSize: '0.70rem',
-                    color: '#3c4043',
-                    lineHeight: 1.35,
-                    background: '#f8f9fa',
-                    border: '1px solid #e8eaed',
-                    padding: '6px 8px',
-                    borderRadius: '4px'
-                  }}>
-                    <Snowflake size={12} color="#003666" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span><strong>Storage Action:</strong> Place in refrigerator (2°C–8°C) for short-term use, or freezer (−20°C) for long-term storage.</span>
-                  </div>
-                </div>
-
-                {/* Standardized Storage Summary Table */}
-                <div style={{ marginTop: '8px', overflowX: 'auto' }}>
-                  <table style={{
+              <div style={{ borderBottom: '1px solid #f1f3f4' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setIsTransitDetailsOpen(prev => !prev);
+                  }}
+                  style={{
                     width: '100%',
-                    borderCollapse: 'collapse',
-                    fontSize: '0.70rem',
-                    background: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '6px'
-                  }}>
-                    <thead>
-                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
-                        <th style={{ padding: '6px 8px', fontWeight: 700, color: '#334155' }}>Product State</th>
-                        <th style={{ padding: '6px 8px', fontWeight: 700, color: '#334155' }}>Recommended Temp</th>
-                        <th style={{ padding: '6px 8px', fontWeight: 700, color: '#334155' }}>Max Stability Period</th>
-                        <th style={{ padding: '6px 8px', fontWeight: 700, color: '#334155' }}>Key Handling Instruction</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '5px 8px', fontWeight: 600, color: '#0f172a' }}>Lyophilized (unopened) — Long-term</td>
-                        <td style={{ padding: '5px 8px', color: '#0284c7' }}>−20°C (freezer)</td>
-                        <td style={{ padding: '5px 8px', color: '#334155' }}>Up to 24 months*</td>
-                        <td style={{ padding: '5px 8px', color: '#64748b' }}>Keep sealed with desiccant; protect from light</td>
-                      </tr>
-                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '5px 8px', fontWeight: 600, color: '#0f172a' }}>Lyophilized (unopened) — Transit</td>
-                        <td style={{ padding: '5px 8px', color: '#d97706' }}>20°C–25°C (ambient)</td>
-                        <td style={{ padding: '5px 8px', color: '#334155' }}>Up to 30 days*</td>
-                        <td style={{ padding: '5px 8px', color: '#64748b' }}>Avoid prolonged heat exposure (&gt;30°C)</td>
-                      </tr>
-                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '5px 8px', fontWeight: 600, color: '#0f172a' }}>Reconstituted (bacteriostatic water)</td>
-                        <td style={{ padding: '5px 8px', color: '#16a34a' }}>2°C–8°C (refrigerated)</td>
-                        <td style={{ padding: '5px 8px', color: '#334155' }}>Up to 28 days*</td>
-                        <td style={{ padding: '5px 8px', color: '#64748b' }}>Do not freeze; protect from light; minimize agitation</td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: '5px 8px', fontWeight: 600, color: '#0f172a' }}>Reconstituted (sterile water)</td>
-                        <td style={{ padding: '5px 8px', color: '#16a34a' }}>2°C–8°C (refrigerated)</td>
-                        <td style={{ padding: '5px 8px', color: '#334155' }}>Single-use / 24–48 h*</td>
-                        <td style={{ padding: '5px 8px', color: '#64748b' }}>Administer immediately; discard unused portion</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div style={{ fontSize: '0.64rem', color: '#94a3b8', marginTop: '4px', fontStyle: 'italic' }}>
-                    *Subject to product-specific stability data and manufacturer release specifications.
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 16px',
+                    border: 'none',
+                    background: isTransitDetailsOpen ? '#f8f9fa' : '#ffffff',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    gap: '8px',
+                    transition: 'background 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isTransitDetailsOpen) e.currentTarget.style.background = '#f8fafc';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isTransitDetailsOpen) e.currentTarget.style.background = '#ffffff';
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                    <ShieldCheck size={15} color="#003666" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124' }}>
+                      Transit Stability & Courier Delivery Guidelines
+                    </span>
+                    <span style={{
+                      fontSize: '0.66rem',
+                      fontWeight: 700,
+                      color: '#003666',
+                      background: '#f1f5f9',
+                      padding: '2px 7px',
+                      borderRadius: '4px',
+                      flexShrink: 0
+                    }}>
+                      Up to 30 Days Ambient Transit*
+                    </span>
                   </div>
-                </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                    <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
+                      {isTransitDetailsOpen ? 'Hide Logistics' : 'View Logistics'}
+                    </span>
+                    {isTransitDetailsOpen ? <ChevronUp size={14} color="#64748b" /> : <ChevronDown size={14} color="#64748b" />}
+                  </div>
+                </button>
+
+                {isTransitDetailsOpen && (
+                  <div style={{
+                    padding: '12px 16px',
+                    background: '#fafbfc',
+                    borderTop: '1px solid #f1f3f4',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px'
+                  }}>
+                    <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45 }}>
+                      <strong style={{ color: '#202124' }}>Vacuum-Sealed Solid-State Preservation:</strong> Lyophilized peptides are deep-vacuum freeze-dried with &lt;1% residual moisture. In the absence of aqueous solvent, hydrolytic cleavage and enzymatic degradation pathways are significantly restricted. Unopened solid-state vials maintain analytical stability at controlled room temperature (20°C–25°C) for <strong>up to 30 days in transit*</strong> without meaningful loss of chromatographic purity.
+                    </p>
+
+                    {/* Sub-lines in compact GCP table format */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                      gap: '8px',
+                      marginTop: '4px'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '6px',
+                        fontSize: '0.70rem',
+                        color: '#3c4043',
+                        lineHeight: 1.35,
+                        background: '#ffffff',
+                        border: '1px solid #e8eaed',
+                        padding: '8px 10px',
+                        borderRadius: '6px'
+                      }}>
+                        <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <span><strong>Customs & Transit:</strong> International transit (5–14 business days) and temporary customs holds are well-tolerated by unopened vials.</span>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '6px',
+                        fontSize: '0.70rem',
+                        color: '#3c4043',
+                        lineHeight: 1.35,
+                        background: '#ffffff',
+                        border: '1px solid #e8eaed',
+                        padding: '8px 10px',
+                        borderRadius: '6px'
+                      }}>
+                        <Check size={12} color="#188038" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <span><strong>Thawed Cold Packs:</strong> Normal upon delivery; phase packs buffer thermal spikes. Thawed packs do not indicate product degradation.</span>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '6px',
+                        fontSize: '0.70rem',
+                        color: '#3c4043',
+                        lineHeight: 1.35,
+                        background: '#ffffff',
+                        border: '1px solid #e8eaed',
+                        padding: '8px 10px',
+                        borderRadius: '6px'
+                      }}>
+                        <Snowflake size={12} color="#003666" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <span><strong>Storage Action:</strong> Place in refrigerator (2°C–8°C) for short-term use, or freezer (−20°C) for long-term storage.</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

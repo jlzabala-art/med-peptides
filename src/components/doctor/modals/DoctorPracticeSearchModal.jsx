@@ -408,7 +408,7 @@ export default function DoctorPracticeSearchModal({
                 { id: 'all', label: 'Patients & Rx' },
                 { id: 'patients', label: `All Patients (${patientsList.length})` },
                 { id: 'prescriptions', label: `Prescriptions (${prescriptions.length})` },
-                { id: 'products', label: `Practice APIs (${matchingFormulations.length})` }
+                { id: 'products', label: `Formulations (${matchingFormulations.length})` }
               ].map(tab => (
                 <button
                   key={tab.id}

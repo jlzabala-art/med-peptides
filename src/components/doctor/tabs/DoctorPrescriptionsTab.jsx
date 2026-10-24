@@ -21,6 +21,7 @@ import DataTable from '../../ui/DataTable';
 import CopyableId from '../../ui/CopyableId';
 import { resolvePrescriptionParts } from '../../../utils/clinical/clinicalFormulations';
 import ComplementaryHairMineralCard from '../../prescription/ComplementaryHairMineralCard';
+import ReconstitutionGuideCard from '../../prescription/ReconstitutionGuideCard';
 import { isTrichoTestPrescription } from '../../../data/fagronGenomicsTests';
 
 /**
@@ -458,6 +459,52 @@ export default function DoctorPrescriptionsTab({
                   </span>
                 </div>
 
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  {/* View Patient Friendly Guide Button */}
+                  <Link
+                    href={`/rx/${rx.code}?view=patient`}
+                    target="_blank"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '4px 10px',
+                      background: '#eff6ff',
+                      color: '#1d4ed8',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: '6px',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                    title="Ver cómo lo ve el paciente y enlace para compartir"
+                  >
+                    <ExternalLink size={12} />
+                    <span>Vista Paciente / Compartir</span>
+                  </Link>
+
+                  {/* View Full Clinical Dossier Button */}
+                  <Link
+                    href={`/rx/${rx.code}`}
+                    target="_blank"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '4px 10px',
+                      background: '#ffffff',
+                      color: '#003666',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                    title="Abrir expediente clínico completo"
+                  >
+                    <BookOpen size={12} />
+                    <span>Ficha Clínica Completa</span>
+                  </Link>
                 </div>
               </div>
 
@@ -671,6 +718,20 @@ export default function DoctorPrescriptionsTab({
                               )}
                             </div>
                           ))}
+                        </div>
+                      )}
+
+                      {/* Clinical Reconstitution & Syringe Dosage Converter for Injectable Peptides */}
+                      {(part.isInjectable || String(part.title || '').toLowerCase().includes('vial') || String(part.title || '').toLowerCase().includes('peptide') || String(part.schedule || '').toLowerCase().includes('subq') || String(part.schedule || '').toLowerCase().includes('inyect')) && (
+                        <div style={{ marginTop: '8px' }}>
+                          <ReconstitutionGuideCard
+                            productName={part.title}
+                            vialDoseMg={parseFloat(String(part.volume || '5').replace(/[^\d.]/g, '')) || 5}
+                            diluentVolumeMl={2.0}
+                            prescribedDoseMcg={250}
+                            lang="es"
+                            initiallyExpanded={false}
+                          />
                         </div>
                       )}
                     </div>
