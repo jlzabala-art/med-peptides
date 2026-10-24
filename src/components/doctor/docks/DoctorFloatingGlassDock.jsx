@@ -15,7 +15,7 @@ export default function DoctorFloatingGlassDock({
       <div className="doctor-bottom-dock-actions">
         <button
           type="button"
-          className="doctor-dock-btn doctor-dock-btn-primary doctor-dock-mobile-only"
+          className="doctor-dock-btn doctor-dock-btn-primary"
           onClick={onOpenIntake}
           title="Import lab data or create a new electronic prescription"
         >

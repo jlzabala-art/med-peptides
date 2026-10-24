@@ -90,6 +90,7 @@ import { COUNTRIES } from '@/data/countries';
 import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolidator';
 import { calculateTreatmentDates, calculateTreatmentDuration } from '@/utils/clinical/clinicalFormulations';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import DoctorFloatingGlassDock from '@/components/doctor/docks/DoctorFloatingGlassDock';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
 import PrescriptionProtocolAlignmentCard from '@/components/doctor/PrescriptionProtocolAlignmentCard';
 import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
@@ -8942,6 +8943,24 @@ export default function DoctorPublicPortalClient({
 
         </main>
       </div>
+
+      {/* ── Fixed Bottom Actions Dock (Floating Glass Bar for Laptop & Mobile) ── */}
+      <DoctorFloatingGlassDock
+        onOpenIntake={handleOpenNewPrescriptionIntake}
+        onOpenSearch={() => {
+          triggerHaptic('selection');
+          setIsPracticeSearchOpen(true);
+        }}
+        onOpenAtlasAi={() => {
+          triggerHaptic('selection');
+          setIsAtlasAiOpen(true);
+        }}
+        aiUsesRemaining={aiUsesRemaining}
+        onOpenWhatsApp={() => {
+          triggerHaptic('light');
+          setIsRequestInfoOpen(true);
+        }}
+      />
 
       {/* ── Google Cloud Console Standard Unified Footer (100% Full-Width) ── */}
       <PublicUnifiedFooter lang={lang || 'en'} minimal={true} />
