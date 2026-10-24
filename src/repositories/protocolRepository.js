@@ -54,20 +54,14 @@ const cache = createCacheManager(PROTOCOL_CACHE_KEY, PROTOCOL_CACHE_TTL_MS, {
     return protocols.map((p) => ({
       ...p,
       id: p.id,
-      name: p.name || p.title || '',
-      protocol_title: p.protocol_title || p.name || '',
-      slug: p.slug || p.protocol_slug || p.id,
-      protocol_slug: p.protocol_slug || p.slug || p.id,
-      category: p.category || p.therapeutic_category || '',
-      therapeutic_category: p.therapeutic_category || p.category || '',
+      name: p.name || 'Protocol',
+      slug: p.slug || p.id,
+      categoryId: p.categoryId || 'peptide',
       goals: p.goals || [],
-      goal: p.goal || p.primary_goal || '',
       status: p.status || 'active',
-      duration_weeks: p.duration_weeks || p.durationWeeks || 4,
-      durationWeeks: p.durationWeeks || p.duration_weeks || 4,
-      duration: p.duration || `${p.durationWeeks || p.duration_weeks || 4} Weeks`,
-      peptides: p.peptides || [],
-      phases: p.phases || p.phase_blueprints || [],
+      duration_weeks: p.duration_weeks || 8,
+      phases: p.phases || [],
+      bom: p.bom || [],
     }));
   },
 });
@@ -457,7 +451,7 @@ export async function cloneProtocol(sourceProtocolIdOrObject, options = {}) {
     // Format specific adjustments (Pens do not require reconstitution or BAC water)
     const isPen = targetFormat === 'pen' || targetFormat === 'prefilled_pen';
     const adjustedPhases = (rest.phases || []).map(phase => {
-      let updatedPhase = { ...phase };
+      const updatedPhase = { ...phase };
       if (isPen) {
         // Remove reconstitution instructions and supplies
         if (updatedPhase.reconstitution) {

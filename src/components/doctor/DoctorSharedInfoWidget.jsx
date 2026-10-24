@@ -162,10 +162,10 @@ export default function DoctorSharedInfoWidget({
     openDrawer('rx-builder', 'new', {
       initialItems,
       sourceModule: 'shared-protocol',
-      protocolName: protocol.title,
+      protocolName: protocol.name || protocol.title,
       protocolId: protocol.id
     });
-    notifier.info(`Opening Rx Builder for shared protocol "${protocol.title}"`);
+    notifier.info(`Opening Rx Builder for shared protocol "${protocol.name || protocol.title}"`);
   };
 
   const handleCopyLink = (item) => {

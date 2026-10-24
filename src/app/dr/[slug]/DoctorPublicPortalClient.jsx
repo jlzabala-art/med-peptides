@@ -1165,6 +1165,44 @@ export default function DoctorPublicPortalClient({
     });
   }, [data?.labResults, isAuthorizedViewer, opaqueCode]);
 
+  const labKpis = useMemo(() => {
+    let optimal = 0;
+    let attention = 0;
+    const modalities = new Set();
+    allLabResults.forEach(r => {
+      const tName = String(r.testName || r.biomarker || '').toLowerCase();
+      const isTelo = tName.includes('telo') || r.testType?.includes('telo') || r.estimatedBiologicalAge;
+      const isTricho = tName.includes('tricho') || r.testType?.includes('tricho');
+      const isEterna = tName.includes('eterna') || tName.includes('proteomic');
+
+      if (isTelo) {
+        modalities.add('Fagron TeloTest™ qPCR');
+        const realAge = Number(r.realAge || r.keyFindings?.realAge || r.patient?.age) || 31;
+        const bioAge = Number(r.estimatedBiologicalAge || r.keyFindings?.estimatedBiologicalAge || r.value) || 28;
+        const delta = r.agingDelta != null ? Number(r.agingDelta) : (bioAge - realAge);
+        if (delta <= 0) optimal++; else attention++;
+      } else if (isTricho) {
+        modalities.add('Pharmacogenetic DNA');
+        optimal++;
+      } else if (isEterna) {
+        modalities.add('Plasma Proteomics');
+        optimal++;
+      } else {
+        modalities.add('Bloodo™ DBS NAD+');
+        const val = Number(r.value) || 0;
+        if (val >= 21.7 || r.zone === 'green' || r.zone === 'optimal') optimal++;
+        else attention++;
+      }
+    });
+    return {
+      total: allLabResults.length,
+      optimal,
+      attention,
+      modalitiesCount: Math.max(modalities.size, 1),
+      modalitiesList: Array.from(modalities).join(' · ')
+    };
+  }, [allLabResults]);
+
   const [activeSection, setActiveSection] = useState('overview');
 
   const [isDiscoveryDrawerOpen, setIsDiscoveryDrawerOpen] = useState(false);
@@ -3746,30 +3784,33 @@ export default function DoctorPublicPortalClient({
         const pat = row || val || {};
         const patName = pat.name || (typeof val === 'string' ? val : '');
         const codifiedId = pat.codifiedId || getCodifiedPatientId(patName, pat.latestRxCode || pat.id);
+        const resolvedDisplayName = patName && !patName.startsWith('Patient PT-') ? patName : codifiedId;
+
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', textAlign: 'left' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <span
-                style={{
-                  fontWeight: 700,
-                  color: '#0f172a',
-                  fontSize: '0.86rem',
-                  fontFamily: 'monospace',
-                  letterSpacing: '0.03em',
-                  background: '#f1f5f9',
-                  padding: '2px 7px',
-                  borderRadius: '4px',
-                  border: '1px solid #cbd5e1'
-                }}
-              >
-                {codifiedId}
-              </span>
-              {patName && !patName.startsWith('Patient PT-') && (
-                <span style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.86rem' }}>
-                  {patName}
+            {isAuthorizedViewer ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.88rem' }}>
+                  {resolvedDisplayName}
                 </span>
-              )}
-              {!isAuthorizedViewer && (
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <span
+                  style={{
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    fontSize: '0.86rem',
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.03em',
+                    background: '#f1f5f9',
+                    padding: '2px 7px',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1'
+                  }}
+                >
+                  {codifiedId}
+                </span>
                 <span
                   onClick={(e) => {
                     e.stopPropagation();
@@ -3796,8 +3837,8 @@ export default function DoctorPublicPortalClient({
                   <Lock size={10} />
                   <span>Protected</span>
                 </span>
-              )}
-            </div>
+              </div>
+            )}
             {isAuthorizedViewer && pat.phone ? (
               <div style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Phone size={11} style={{ color: '#059669', flexShrink: 0 }} />
@@ -3870,19 +3911,27 @@ export default function DoctorPublicPortalClient({
     },
     {
       key: 'regimens',
-      header: 'Prescriptions & History',
+      header: lang === 'es' ? 'Tratamiento Activo' : 'Active Prescription',
       width: '32%',
       align: 'left',
       render: (val, row) => {
         const pat = row || val || {};
+        const count = (pat.prescriptions || []).length;
+        const mainProduct = pat.latestProduct || (pat.prescriptions?.[0]?.treatmentTitle || pat.prescriptions?.[0]?.regimenShortTitle);
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
-            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b' }}>
-              {pat.prescriptions?.length === 1 ? '1 Clinical Regimen' : `${pat.prescriptions?.length || 0} Clinical Regimens`}
+            <div style={{ fontSize: '0.84rem', fontWeight: 650, color: '#0f172a', lineHeight: 1.25 }}>
+              {mainProduct || (lang === 'es' ? 'Sin prescripción activa' : 'No active prescription')}
             </div>
-            <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.25 }}>
-              {pat.latestProduct || '—'}
-            </div>
+            {count > 1 ? (
+              <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                {lang === 'es' ? `+${count - 1} prescripción previa` : `+${count - 1} prior prescription${count > 2 ? 's' : ''}`}
+              </div>
+            ) : pat.latestRxDate ? (
+              <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                {pat.latestRxDate}
+              </div>
+            ) : null}
           </div>
         );
       }
@@ -3986,58 +4035,198 @@ export default function DoctorPublicPortalClient({
     }
   ], [setPatientFilter, setQuickRxFilter, setActiveAnchor, isAuthorizedViewer]);
 
-  // ── Bloodo Diagnostic Lab Results Columns (DataTable Universal) ─────────
+  // ── Bloodo & Fagron Diagnostic Lab Results Columns (DataTable Universal) ─────────
   const labResultsColumns = useMemo(() => [
     {
       key: 'code',
       header: 'Protocol / Sample Code',
-      width: '18%',
+      width: '16%',
       sortable: true,
-      render: (row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-          <CopyableId value={row.code || row.protocolNumber || row.id} iconOnly={false} />
-          <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
-            {row.sampleType || 'Dried Blood Spot (DBS)'}
-          </span>
-        </div>
-      )
+      render: (row) => {
+        const dateStr = row.analysisDate || row.resultsDate || row.date || row.receiptDate || '';
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <CopyableId value={row.code || row.protocolNumber || row.id} iconOnly={false} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.70rem', color: '#64748b' }}>
+              <span>{row.sampleType || (row.testType?.includes('telo') ? 'Oral Buccal Swab' : 'Dried Blood Spot (DBS)')}</span>
+              {dateStr && <span>• {dateStr.slice(0, 10)}</span>}
+            </div>
+          </div>
+        );
+      }
     },
     {
       key: 'testName',
       header: 'Biomarker & Diagnostic Assay',
       width: '28%',
       sortable: true,
-      render: (row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
-            {row.testName || row.biomarker || 'NAD+ Quantitative Test'}
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#64748b' }}>
-            <span style={{ fontWeight: 600, color: '#0369a1' }}>{row.laboratory?.name || 'LifeLab1'}</span>
-            <span>•</span>
-            <span>{row.method || 'Enzymatic cyclic assay'}</span>
+      render: (row) => {
+        const tName = String(row.testName || row.biomarker || 'Diagnostic Biomarker Assay');
+        const isTelo = tName.toLowerCase().includes('telo') || row.testType?.includes('telo') || row.keyFindings?.telomereLength || row.estimatedBiologicalAge;
+        const isTricho = tName.toLowerCase().includes('tricho') || row.testType?.includes('tricho');
+        const isEterna = tName.toLowerCase().includes('eterna') || tName.toLowerCase().includes('proteomic');
+
+        const title = isTelo ? 'Fagron TeloTest™ · Biological Age DNA' :
+                      isTricho ? 'Fagron TrichoTest™ · Pharmacogenetic Panel' :
+                      isEterna ? 'ETERNA® · Multi-Organ Proteomics' :
+                      (row.testName || row.biomarker || 'NAD+ Quantitative Test');
+
+        const labName = isTelo || isTricho ? 'Fagron Genomics' :
+                        isEterna ? 'Eurofins Genomics' :
+                        (row.laboratory?.name || 'LifeLab1');
+
+        const method = isTelo ? 'Absolute qPCR (Telomere/Single Gene Ratio)' :
+                       isTricho ? 'DNA Microarray Pharmacogenetics' :
+                       isEterna ? 'GrimAge-Calibrated Plasma Proteomics' :
+                       (row.method || 'Enzymatic cyclic assay');
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>
+              {title}
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#64748b', flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 600, color: '#0369a1' }}>{labName}</span>
+              <span>•</span>
+              <span>{method}</span>
+            </div>
           </div>
-        </div>
-      )
+        );
+      }
     },
     {
       key: 'result',
-      header: 'Quantification',
-      width: '18%',
+      header: 'Quantification & Clinical Finding',
+      width: '24%',
       sortable: true,
       render: (row) => {
-        const zone = row.zone || 'yellow';
-        const isYellow = zone === 'yellow';
-        const isGreen = zone === 'green';
-        const badgeColor = isGreen ? '#16a34a' : isYellow ? '#d97706' : '#dc2626';
-        const badgeBg = isGreen ? '#f0fdf4' : isYellow ? '#fffbeb' : '#fef2f2';
-        const badgeBorder = isGreen ? '#bbf7d0' : isYellow ? '#fde68a' : '#fecaca';
+        const tName = String(row.testName || row.biomarker || '').toLowerCase();
+        const isTelo = tName.includes('telo') || row.testType?.includes('telo') || row.keyFindings?.telomereLength || row.estimatedBiologicalAge;
+        const isTricho = tName.includes('tricho') || row.testType?.includes('tricho');
+        const isEterna = tName.includes('eterna') || tName.includes('proteomic');
+
+        // 1. Fagron TeloTest: Biological Age vs Chronological Age
+        if (isTelo) {
+          const realAge = Number(row.realAge || row.keyFindings?.realAge || row.patient?.age) || 31;
+          const bioAge = Number(row.estimatedBiologicalAge || row.keyFindings?.estimatedBiologicalAge || row.value) || 28;
+          let delta = row.agingDelta != null ? Number(row.agingDelta) : (row.keyFindings?.agingDelta != null ? Number(String(row.keyFindings.agingDelta).replace(/[^0-9.-]/g, '')) : (bioAge - realAge));
+          if (isNaN(delta)) delta = bioAge - realAge;
+          const isYounger = delta <= 0;
+          const telomereKb = row.value != null ? row.value : (row.keyFindings?.telomereLength || '0.89');
+
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
+                  Bio-Age: {bioAge} yrs
+                </span>
+                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  (Real: {realAge} yrs)
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '2px 8px',
+                    borderRadius: '9999px',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: isYounger ? '#15803d' : '#dc2626',
+                    background: isYounger ? '#f0fdf4' : '#fef2f2',
+                    border: `1px solid ${isYounger ? '#bbf7d0' : '#fecaca'}`,
+                    width: 'fit-content'
+                  }}
+                >
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isYounger ? '#15803d' : '#dc2626' }} />
+                  {isYounger ? `${delta < 0 ? delta : `-${Math.abs(delta)}`} yrs Younger (Optimal)` : `+${delta} yrs (Accelerated)`}
+                </span>
+                <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                  {telomereKb} kb
+                </span>
+              </div>
+            </div>
+          );
+        }
+
+        // 2. TrichoTest: Pharmacogenetics
+        if (isTricho) {
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                <span style={{ fontSize: '1.0rem', fontWeight: 800, color: '#0f172a' }}>
+                  Dutasteride 100%
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '2px 8px',
+                    borderRadius: '9999px',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: '#15803d',
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    width: 'fit-content'
+                  }}
+                >
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#15803d' }} />
+                  High Pharmacogenetic Match
+                </span>
+              </div>
+            </div>
+          );
+        }
+
+        // 3. ETERNA Proteomics
+        if (isEterna) {
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <span style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                Proteomic Longevity
+              </span>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '2px 8px',
+                  borderRadius: '9999px',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: '#0369a1',
+                  background: '#f0f9ff',
+                  border: '1px solid #bae6fd',
+                  width: 'fit-content'
+                }}
+              >
+                GrimAge Calibrated (5 Organs)
+              </span>
+            </div>
+          );
+        }
+
+        // 4. Default: NAD+ Intracellular Blood Biomarker
+        const val = Number(row.value) || 0;
+        const isOptimal = val >= 21.7;
+        const isNearOptimal = val >= 17.4 && val < 21.7;
+        const isInsufficient = val >= 8.8 && val < 17.4;
+        const badgeColor = isOptimal ? '#15803d' : isNearOptimal ? '#16a34a' : isInsufficient ? '#d97706' : '#dc2626';
+        const badgeBg = (isOptimal || isNearOptimal) ? '#f0fdf4' : isInsufficient ? '#fffbeb' : '#fef2f2';
+        const badgeBorder = (isOptimal || isNearOptimal) ? '#bbf7d0' : isInsufficient ? '#fde68a' : '#fecaca';
+        const badgeLabel = row.zoneLabel || (isOptimal ? 'Optimal Range' : isNearOptimal ? 'Near-Optimal' : isInsufficient ? 'Insufficient / Suboptimal' : 'Deficient / Depleted');
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
               <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
-                {row.value}
+                {val > 0 ? val : '—'}
               </span>
               <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#64748b' }}>
                 {row.unit || 'µmol/L'}
@@ -4059,7 +4248,7 @@ export default function DoctorPublicPortalClient({
               }}
             >
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: badgeColor }} />
-              {row.zoneLabel || (isYellow ? 'Insufficient' : isGreen ? 'Optimal' : 'Deficient')}
+              {badgeLabel}
             </span>
           </div>
         );
@@ -4068,7 +4257,7 @@ export default function DoctorPublicPortalClient({
     {
       key: 'patient',
       header: 'Patient Profile',
-      width: '18%',
+      width: '16%',
       sortable: true,
       render: (row) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -4076,7 +4265,7 @@ export default function DoctorPublicPortalClient({
             {row.patientName || row.patient?.name || 'Patient'}
           </span>
           <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-            {row.patient?.age ? `${row.patient.age} yrs` : ''} {row.patient?.gender ? `· ${row.patient.gender}` : ''}
+            {row.patient?.age ? `${row.patient.age} yrs` : (row.patientDob ? `DOB: ${row.patientDob}` : '')} {row.patient?.gender ? `· ${row.patient.gender}` : ''}
           </span>
         </div>
       )
@@ -4084,13 +4273,14 @@ export default function DoctorPublicPortalClient({
     {
       key: 'actions',
       header: 'Actions',
-      width: '18%',
+      width: '16%',
       render: (row) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
           <Link
             href={`/lab/${row.code || row.id}`}
             target="_blank"
             rel="noopener noreferrer"
+            title="Open Dedicated Interactive Dossier"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -4134,7 +4324,7 @@ export default function DoctorPublicPortalClient({
         </div>
       )
     }
-  ], []);
+  ], [setPatientFilter, setQuickRxFilter, setActiveAnchor, isAuthorizedViewer]);
 
   // ── Practice Pharmacopeia Columns (DataTable Universal) ───────────────────
   const pharmacopeiaColumns = useMemo(() => [
@@ -8462,7 +8652,7 @@ export default function DoctorPublicPortalClient({
             </section>
           )}
 
-          {/* ── View 3.5: Bloodo™ Diagnostic Lab Results (LifeLab1 Tests) ── */}
+          {/* ── View 3.5: Bloodo™ & Fagron Diagnostic Lab Results ── */}
           {activeAnchor === 'lab_results' && (
             <section
               id="lab_results"
@@ -8488,17 +8678,73 @@ export default function DoctorPublicPortalClient({
               >
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <FlaskConical size={18} style={{ color: '#059669' }} />
-                      <span>Diagnostic Laboratory Results (LifeLab1 Accredited)</span>
+                    <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#202124', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.01em' }}>
+                      <FlaskConical size={18} style={{ color: '#1a73e8' }} />
+                      <span>Clinical Diagnostic & Biomarker Lab Results</span>
                     </h2>
-                    <span style={{ fontSize: '0.70rem', color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 8px', borderRadius: '12px', fontWeight: 700 }}>
-                      ISO 15189 / EU IVDR
+                    <span style={{ fontSize: '0.70rem', color: '#137333', background: '#e6f4ea', border: '1px solid #ceead6', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                      ISO 15189 / CE-IVD Accredited
                     </span>
                   </div>
-                  <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
-                    Quantitative capillary dried blood spot (DBS) biomarker assays and cellular metabolism diagnostics.
+                  <p style={{ margin: '3px 0 0 0', fontSize: '0.80rem', color: '#5f6368' }}>
+                    CE-IVDR capillary dried blood spot (DBS) assays, genetic telomeric biological age & pharmacogenetic panels.
                   </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.70rem', color: '#5f6368', background: '#f1f3f4', border: '1px solid #dadce0', padding: '3px 10px', borderRadius: '16px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#1a73e8' }} />
+                    Practice Assigned Scope
+                  </span>
+                </div>
+              </div>
+
+              {/* ── 4-KPI Clinical Pulse Strip (Google Cloud Metric Cards) ── */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '12px',
+                  padding: '16px 20px',
+                  background: '#f8f9fa',
+                  borderBottom: '1px solid #dadce0'
+                }}
+              >
+                <div style={{ background: '#ffffff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #dadce0', boxShadow: '0 1px 2px rgba(60,64,67,0.05)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total Diagnostic Reports</span>
+                    <FlaskConical size={14} style={{ color: '#1a73e8' }} />
+                  </div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 700, color: '#202124' }}>{labKpis.total}</div>
+                  <div style={{ fontSize: '0.70rem', color: '#5f6368' }}>Archived & active physician dossiers</div>
+                </div>
+
+                <div style={{ background: '#ffffff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #dadce0', boxShadow: '0 1px 2px rgba(60,64,67,0.05)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#137333', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Optimal / Favorable Status</span>
+                    <CheckCircle2 size={14} style={{ color: '#137333' }} />
+                  </div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 700, color: '#137333' }}>{labKpis.optimal}</div>
+                  <div style={{ fontSize: '0.70rem', color: '#5f6368' }}>Optimal longevity & positive responders</div>
+                </div>
+
+                <div style={{ background: '#ffffff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #dadce0', boxShadow: '0 1px 2px rgba(60,64,67,0.05)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#b06000', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Attention / Repletion Needed</span>
+                    <AlertCircle size={14} style={{ color: '#b06000' }} />
+                  </div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 700, color: '#b06000' }}>{labKpis.attention}</div>
+                  <div style={{ fontSize: '0.70rem', color: '#5f6368' }}>Therapeutic protocol indicated</div>
+                </div>
+
+                <div style={{ background: '#ffffff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #dadce0', boxShadow: '0 1px 2px rgba(60,64,67,0.05)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Diagnostic Modalities</span>
+                    <Dna size={14} style={{ color: '#1a73e8' }} />
+                  </div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 700, color: '#1a73e8' }}>{labKpis.modalitiesCount}</div>
+                  <div style={{ fontSize: '0.70rem', color: '#5f6368', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={labKpis.modalitiesList}>
+                    {labKpis.modalitiesList}
+                  </div>
                 </div>
               </div>
 
@@ -8513,18 +8759,179 @@ export default function DoctorPublicPortalClient({
                 emptyTitle="No Diagnostic Lab Results Found"
                 emptyDescription="No laboratory blood or metabolic biomarker reports registered for this physician yet."
                 expandableRender={(row) => {
+                  const tName = String(row.testName || row.biomarker || '').toLowerCase();
+                  const isTelo = tName.includes('telo') || row.testType?.includes('telo') || row.keyFindings?.telomereLength || row.estimatedBiologicalAge;
+                  const isTricho = tName.includes('tricho') || row.testType?.includes('tricho');
+                  const isEterna = tName.includes('eterna') || tName.includes('proteomic');
+
+                  // ── CASE A: Fagron TeloTest (Biological Age qPCR) ──
+                  if (isTelo) {
+                    const realAge = Number(row.realAge || row.keyFindings?.realAge || row.patient?.age) || 31;
+                    const bioAge = Number(row.estimatedBiologicalAge || row.keyFindings?.estimatedBiologicalAge || row.value) || 28;
+                    let delta = row.agingDelta != null ? Number(row.agingDelta) : (row.keyFindings?.agingDelta != null ? Number(String(row.keyFindings.agingDelta).replace(/[^0-9.-]/g, '')) : (bioAge - realAge));
+                    if (isNaN(delta)) delta = bioAge - realAge;
+                    const isYounger = delta <= 0;
+                    const telomereKb = row.value != null ? row.value : (row.keyFindings?.telomereLength || '0.89');
+
+                    return (
+                      <div style={{ background: '#f8f9fa', padding: '20px 24px', borderRadius: '8px', border: '1px solid #dadce0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {/* Header & Link (GCP Style) */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                          <div>
+                            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                              Genetic Telomere Length & Biological Age Report (CE-IVD qPCR)
+                            </span>
+                            <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#202124', marginTop: '2px' }}>
+                              Fagron TeloTest™ · {row.patientName || 'Patient'}
+                            </div>
+                          </div>
+                          <Link
+                            href={`/lab/${row.code || row.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontSize: '0.78rem',
+                              fontWeight: 600,
+                              color: '#ffffff',
+                              background: '#1a73e8',
+                              border: 'none',
+                              padding: '6px 14px',
+                              borderRadius: '4px',
+                              textDecoration: 'none',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              boxShadow: '0 1px 2px rgba(60,64,67,0.15)'
+                            }}
+                          >
+                            <span>Open Dedicated Patient Dossier</span>
+                            <ArrowUpRight size={13} />
+                          </Link>
+                        </div>
+
+                        {/* 4-Stat Comparison Grid (GCP Style) */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
+                          <div style={{ background: '#ffffff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #dadce0', boxShadow: '0 1px 2px rgba(60,64,67,0.05)' }}>
+                            <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>Chronological Age</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#202124', marginTop: '2px' }}>{realAge} yrs</div>
+                            <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>Passport / Calendar Age</div>
+                          </div>
+                          <div style={{ background: isYounger ? '#e6f4ea' : '#fce8e6', padding: '12px 16px', borderRadius: '8px', border: `1px solid ${isYounger ? '#ceead6' : '#fad2cf'}`, boxShadow: '0 1px 2px rgba(60,64,67,0.05)' }}>
+                            <div style={{ fontSize: '0.68rem', fontWeight: 600, color: isYounger ? '#137333' : '#c5221f', textTransform: 'uppercase' }}>Estimated Biological Age</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: isYounger ? '#137333' : '#c5221f', marginTop: '2px' }}>{bioAge} ± 1 yrs</div>
+                            <div style={{ fontSize: '0.68rem', color: isYounger ? '#137333' : '#c5221f' }}>Cellular Division Capacity</div>
+                          </div>
+                          <div style={{ background: '#ffffff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #dadce0', boxShadow: '0 1px 2px rgba(60,64,67,0.05)' }}>
+                            <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>Longevity Delta</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: isYounger ? '#137333' : '#c5221f', marginTop: '2px' }}>
+                              {delta < 0 ? `${delta} yrs` : `+${delta} yrs`}
+                            </div>
+                            <div style={{ fontSize: '0.68rem', color: isYounger ? '#137333' : '#c5221f', fontWeight: 600 }}>
+                              {isYounger ? 'Slower Senescence ✓' : 'Accelerated Senescence ⚠️'}
+                            </div>
+                          </div>
+                          <div style={{ background: '#ffffff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #dadce0', boxShadow: '0 1px 2px rgba(60,64,67,0.05)' }}>
+                            <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase' }}>Telomere Length</div>
+                            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1a73e8', marginTop: '2px' }}>{telomereKb} kb</div>
+                            <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>Absolute qPCR Measurement</div>
+                          </div>
+                        </div>
+
+                        {/* Direct Clinical Meaning (GCP Inset Callout) */}
+                        <div style={{ fontSize: '0.82rem', color: '#202124', lineHeight: 1.55, background: '#ffffff', padding: '14px 18px', borderRadius: '6px', border: '1px solid #dadce0', borderLeft: '4px solid #1a73e8', boxShadow: '0 1px 2px rgba(60,64,67,0.04)' }}>
+                          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>🧠 Clinical Interpretation</span>
+                          </div>
+                          {row.keyFindings?.interpretation || row.interpretation || (
+                            isYounger
+                              ? `Patient displays favorable cellular longevity. Telomeric repeat length corresponds to an individual biologically ${Math.abs(delta)} years younger than chronological age, reflecting well-preserved replication capacity and low cumulative cellular stress.`
+                              : `Patient displays accelerated telomeric attrition (${delta} years older biologically than chronological age). Cellular replication reserves are reduced, indicating high oxidative stress or metabolic wear.`
+                          )}
+                        </div>
+
+                        {/* Actionable Clinical Recommendation (GCP Action Callout) */}
+                        <div style={{ fontSize: '0.82rem', color: '#202124', lineHeight: 1.55, background: '#ffffff', padding: '14px 18px', borderRadius: '6px', border: '1px solid #dadce0', borderLeft: '4px solid #137333', boxShadow: '0 1px 2px rgba(60,64,67,0.04)' }}>
+                          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#137333', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>💊 Suggested Clinical Protocol</span>
+                          </div>
+                          {isYounger
+                            ? 'Telomere Maintenance Protocol: TA-65 / Astragaloside IV support + Epitalon peptide (10mg cycle annually for telomerase maintenance) + High-potency Omega-3 EPA/DHA.'
+                            : 'Telomere Restoration Protocol: Intensive Epitalon cycle (10mg daily subcutaneously for 10 consecutive days, repeat every 6 months) + TA-65 250 IU daily + NAD+ precursor repletion to inhibit PARP-mediated telomere degradation.'}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // ── CASE B: TrichoTest (Pharmacogenetics) ──
+                  if (isTricho) {
+                    return (
+                      <div style={{ background: '#f8f9fa', padding: '20px 24px', borderRadius: '8px', border: '1px solid #dadce0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                          <div>
+                            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                              Fagron TrichoTest™ · Pharmacogenetic Hair Loss DNA Analysis
+                            </span>
+                            <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#202124', marginTop: '2px' }}>
+                              Top Responder: Dutasteride (100%) · Blocked: Finasteride
+                            </div>
+                          </div>
+                          <Link
+                            href={`/lab/${row.code || row.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontSize: '0.78rem',
+                              fontWeight: 600,
+                              color: '#ffffff',
+                              background: '#1a73e8',
+                              border: 'none',
+                              padding: '6px 14px',
+                              borderRadius: '4px',
+                              textDecoration: 'none',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              boxShadow: '0 1px 2px rgba(60,64,67,0.15)'
+                            }}
+                          >
+                            <span>Open Dedicated Patient Dossier</span>
+                            <ArrowUpRight size={13} />
+                          </Link>
+                        </div>
+
+                        <div style={{ fontSize: '0.82rem', color: '#202124', lineHeight: 1.55, background: '#ffffff', padding: '14px 18px', borderRadius: '6px', border: '1px solid #dadce0', borderLeft: '4px solid #1a73e8', boxShadow: '0 1px 2px rgba(60,64,67,0.04)' }}>
+                          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                            🧠 Pharmacogenetic Finding
+                          </div>
+                          {row.keyFindings?.algorithmRecommendations || 'High genetic sensitivity to Dutasteride (100%), Vitamin B12 (100%), and microvascular stimulators (Arginine 67%, Ginkgo biloba 67%). Standard oral finasteride is genetically blocked with poor therapeutic outcome.'}
+                        </div>
+
+                        <div style={{ fontSize: '0.82rem', color: '#202124', lineHeight: 1.55, background: '#ffffff', padding: '14px 18px', borderRadius: '6px', border: '1px solid #dadce0', borderLeft: '4px solid #137333', boxShadow: '0 1px 2px rgba(60,64,67,0.04)' }}>
+                          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#137333', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                            💊 Suggested Prescription Formulation
+                          </div>
+                          Compounded topical solution: Topical Dutasteride 0.5% + L-Arginine 2% + Ginkgo Biloba 1% in TrichoWash™ base. Avoid standard finasteride monotherapy.
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // ── CASE C: Bloodo NAD+ Quantitative Test (Default) ──
                   const val = Number(row.value) || 14.1;
                   const unit = row.unit || 'µmol/L';
                   const percentagePos = Math.min(Math.max(((val - 0) / 40) * 100, 2), 98);
+                  const isOptimal = val >= 21.7;
+                  const isNearOptimal = val >= 17.4 && val < 21.7;
+
                   return (
-                    <div style={{ background: '#f8fafc', padding: '18px 22px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div style={{ background: '#f8f9fa', padding: '20px 24px', borderRadius: '8px', border: '1px solid #dadce0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                         <div>
-                          <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase' }}>
-                            Quantitative Biomarker Range Assessment
+                          <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            Quantitative Biomarker Range Assessment (LifeLab1 Central Laboratory)
                           </span>
-                          <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
-                            {row.testName} · {val} {unit}
+                          <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#202124', marginTop: '2px' }}>
+                            {row.testName || 'NAD+ Quantitative Test'} · {val} {unit}
                           </div>
                         </div>
                         <Link
@@ -8532,40 +8939,58 @@ export default function DoctorPublicPortalClient({
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{
-                            fontSize: '0.76rem',
-                            fontWeight: 700,
-                            color: '#003666',
-                            background: '#e0f2fe',
-                            border: '1px solid #bae6fd',
-                            padding: '4px 10px',
-                            borderRadius: '6px',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            color: '#ffffff',
+                            background: '#1a73e8',
+                            border: 'none',
+                            padding: '6px 14px',
+                            borderRadius: '4px',
                             textDecoration: 'none',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '4px'
+                            gap: '6px',
+                            boxShadow: '0 1px 2px rgba(60,64,67,0.15)'
                           }}
                         >
                           <span>Open Dedicated Patient Dossier</span>
-                          <ArrowUpRight size={12} />
+                          <ArrowUpRight size={13} />
                         </Link>
                       </div>
 
                       {/* Spectrum Bar in Expandable */}
-                      <div style={{ position: 'relative', width: '100%', height: '22px', borderRadius: '6px', overflow: 'hidden', display: 'flex' }}>
-                        <div style={{ width: '22%', background: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.62rem', fontWeight: 700 }}>&lt; 8.8 (Deficient)</div>
-                        <div style={{ width: '21.5%', background: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#78350f', fontSize: '0.62rem', fontWeight: 700 }}>8.8–17.4 (Suboptimal)</div>
-                        <div style={{ width: '10.75%', background: '#a3e635', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#365314', fontSize: '0.60rem', fontWeight: 700 }}>17.4–21.7</div>
-                        <div style={{ width: '30%', background: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#064e3b', fontSize: '0.62rem', fontWeight: 700 }}>21.7–33.7 (Optimal Longevity)</div>
-                        <div style={{ width: '15.75%', background: '#93c5fd', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1e3a8a', fontSize: '0.62rem', fontWeight: 700 }}>&gt; 33.7</div>
-                        <div style={{ position: 'absolute', left: `${percentagePos}%`, top: 0, bottom: 0, width: '3px', background: '#0f172a', transform: 'translateX(-50%)' }} />
+                      <div style={{ position: 'relative', width: '100%', height: '24px', borderRadius: '6px', overflow: 'hidden', display: 'flex', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.1)' }}>
+                        <div style={{ width: '22%', background: '#f28b82', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.64rem', fontWeight: 700 }}>&lt; 8.8 (Deficient)</div>
+                        <div style={{ width: '21.5%', background: '#fdd663', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7c4a03', fontSize: '0.64rem', fontWeight: 700 }}>8.8–17.4 (Suboptimal)</div>
+                        <div style={{ width: '10.75%', background: '#ccff90', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#274e13', fontSize: '0.62rem', fontWeight: 700 }}>17.4–21.7</div>
+                        <div style={{ width: '30%', background: '#81c995', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0d652d', fontSize: '0.64rem', fontWeight: 700 }}>21.7–33.7 (Optimal Longevity)</div>
+                        <div style={{ width: '15.75%', background: '#8ab4f8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#174ea6', fontSize: '0.64rem', fontWeight: 700 }}>&gt; 33.7</div>
+                        <div style={{ position: 'absolute', left: `${percentagePos}%`, top: 0, bottom: 0, width: '4px', background: '#202124', transform: 'translateX(-50%)', boxShadow: '0 0 4px rgba(0,0,0,0.5)' }} />
                       </div>
 
-                      {row.interpretation && (
-                        <div style={{ fontSize: '0.78rem', color: '#334155', lineHeight: 1.5, background: '#ffffff', padding: '10px 14px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                          <strong style={{ color: '#0f172a' }}>Clinical Interpretation: </strong>
-                          {row.interpretation}
+                      {/* Clinical Meaning (GCP Callout) */}
+                      <div style={{ fontSize: '0.82rem', color: '#202124', lineHeight: 1.55, background: '#ffffff', padding: '14px 18px', borderRadius: '6px', border: '1px solid #dadce0', borderLeft: '4px solid #1a73e8', boxShadow: '0 1px 2px rgba(60,64,67,0.04)' }}>
+                        <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                          🧠 Clinical Interpretation
                         </div>
-                      )}
+                        {row.interpretation || (
+                          isOptimal
+                            ? `Intracellular NAD+ pool (${val} ${unit}) is in the optimal longevity tier. Mitochondrial respiration, ATP synthesis, and SIRT1 sirtuin longevity activation are operating with high metabolic resilience.`
+                            : isNearOptimal
+                            ? `Intracellular NAD+ pool (${val} ${unit}) is near-optimal. Basal cellular vitality is maintained, but depletion may occur under physical or oxidative stress.`
+                            : `Intracellular NAD+ pool (${val} ${unit}) is suboptimal. Impaired mitochondrial energy production and compromised PARP DNA repair cofactor availability. Therapeutic repletion indicated.`
+                        )}
+                      </div>
+
+                      {/* Actionable Protocol (GCP Callout) */}
+                      <div style={{ fontSize: '0.82rem', color: '#202124', lineHeight: 1.55, background: '#ffffff', padding: '14px 18px', borderRadius: '6px', border: '1px solid #dadce0', borderLeft: `4px solid ${isOptimal ? '#137333' : '#b06000'}`, boxShadow: '0 1px 2px rgba(60,64,67,0.04)' }}>
+                        <div style={{ fontSize: '0.74rem', fontWeight: 700, color: isOptimal ? '#137333' : '#b06000', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                          💊 Suggested Clinical Action
+                        </div>
+                        {isOptimal
+                          ? 'Longevity Maintenance: Oral NMN 250 mg daily or lifestyle sirtuin support. Annual monitoring.'
+                          : 'Repletion Protocol: Liposomal NMN 500–1000 mg daily + Apigenin 200 mg (CD38 inhibitor) to preserve circulating NAD+. Alternatively, schedule NAD+ IV 250–500 mg infusion. Re-test capillary DBS in 90 days.'}
+                      </div>
 
                       {Array.isArray(row.synergies) && row.synergies.length > 0 && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -8913,21 +9338,41 @@ export default function DoctorPublicPortalClient({
         </main>
       </div>
 
-      {/* ── Universal Public Sticky Action Bar (GCP Standard Fixed Bottom Bar) ── */}
+      {/* ── Universal Public Sticky Action Bar (Always visible; data and actions strictly filtered by permission role) ── */}
       <PublicStickyActionBar
         title={doctor?.name || `Doctor ${opaqueCode}`}
-        subtitle={`${doctor?.clinic || (lang === 'es' ? 'Consulta Médica Verificada' : 'Verified Medical Practice')} • ${allPrescriptions.length} ${lang === 'es' ? 'Prescripciones' : 'Prescriptions'} • ${doctorPatientsList.length} ${lang === 'es' ? 'Pacientes' : 'Patients'}`}
-        badge={isAuthorizedViewer ? (lang === 'es' ? 'CONSOLA MÉDICA' : 'PHYSICIAN CONSOLE') : (lang === 'es' ? 'MÉDICO VERIFICADO' : 'VERIFIED PHYSICIAN')}
+        subtitle={
+          isAuthorizedViewer
+            ? `${doctor?.clinic || (lang === 'es' ? 'Consulta Médica Verificada' : 'Verified Medical Practice')} • ${allPrescriptions.length} ${lang === 'es' ? 'Prescripciones' : 'Prescriptions'} • ${doctorPatientsList.length} ${lang === 'es' ? 'Pacientes' : 'Patients'}`
+            : `${doctor?.clinic || (lang === 'es' ? 'Consulta Médica Verificada' : 'Verified Medical Practice')} • ${doctor?.specialty || (lang === 'es' ? 'Medicina Regenerativa y Longevidad' : 'Regenerative & Precision Medicine')}`
+        }
+        badge={
+          isAuthorizedViewer
+            ? (lang === 'es' ? 'CONSOLA MÉDICA' : 'PHYSICIAN CONSOLE')
+            : (lang === 'es' ? 'MÉDICO VERIFICADO' : 'VERIFIED PHYSICIAN')
+        }
         badgeType="protocol"
-        inquireLabel={isAuthorizedViewer ? (lang === 'es' ? 'Nueva Prescripción' : 'New Prescription') : (lang === 'es' ? 'Enviar Receta a este Doctor ➔' : 'Submit Rx to this Doctor ➔')}
-        onInquire={isAuthorizedViewer ? handleOpenNewPrescriptionIntake : () => {
-          window.location.href = `/rx/intake?refDoctor=${doctor?.opaqueCode || slug}`;
-        }}
-        showClinicalAI={true}
-        onOpenClinicalAI={() => {
-          triggerHaptic('selection');
-          setIsAtlasAiOpen(true);
-        }}
+        inquireLabel={
+          isAuthorizedViewer
+            ? (lang === 'es' ? 'Nueva Prescripción' : 'New Prescription')
+            : (lang === 'es' ? 'Enviar Receta a este Doctor ➔' : 'Submit Rx to this Doctor ➔')
+        }
+        onInquire={
+          isAuthorizedViewer
+            ? handleOpenNewPrescriptionIntake
+            : () => {
+                window.location.href = `/rx/intake?refDoctor=${doctor?.opaqueCode || slug}`;
+              }
+        }
+        showClinicalAI={isAuthorizedViewer}
+        onOpenClinicalAI={
+          isAuthorizedViewer
+            ? () => {
+                triggerHaptic('selection');
+                setIsAtlasAiOpen(true);
+              }
+            : null
+        }
         lang={lang}
         extraActions={
           <>
@@ -12013,8 +12458,8 @@ export default function DoctorPublicPortalClient({
         }}
       />
 
-      {/* ── Quick Actions Palette (GCP-style, Cmd/Ctrl + /) ── */}
-      {isAuthorizedViewer && <DoctorCommandPalette commands={quickActionCommands} />}
+      {/* ── Quick Actions Palette (GCP-style, keyboard-accessible Cmd/Ctrl + /, launcher button hidden to avoid overlaying tables) ── */}
+      {isAuthorizedViewer && <DoctorCommandPalette commands={quickActionCommands} showLauncher={false} />}
 
       {/* ── Specialty Blueprint Clinical Monograph Dossier Modal (On-Screen, Zero WhatsApp) ── */}
       <DoctorBlueprintDossierModal

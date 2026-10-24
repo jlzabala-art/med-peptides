@@ -114,12 +114,12 @@ export function generateBreadcrumbJsonLd(items = [], baseUrl = 'https://regenpep
   };
 }
 
-export function generateProtocolJsonLd(protocol, baseUrl = 'https://regenpept.com') {
+export function generateProtocolJsonLd(protocol, _baseUrl = 'https://regenpept.com') {
   if (!protocol) return null;
 
-  const title = protocol.title || protocol.name || 'Clinical Protocol';
-  const description = protocol.description || `Evidence-based clinical protocol for ${protocol.goal || 'cellular optimization'}.`;
-  const targetSystem = protocol.targetSystem || protocol.category || 'Human Longevity';
+  const title = protocol.name || 'Clinical Protocol';
+  const description = protocol.description || `Evidence-based clinical protocol for ${(protocol.goals && protocol.goals[0]) || 'cellular optimization'}.`;
+  const targetSystem = protocol.targetSystem || protocol.categoryId || 'Human Longevity';
 
   return {
     '@context': 'https://schema.org',

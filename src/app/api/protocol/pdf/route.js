@@ -62,7 +62,7 @@ export async function POST(request) {
     };
 
     const drawMiniHeader = () => {
-      page.drawText(sanitize(protocol.name || protocol.title || 'Clinical Protocol Blueprint'), {
+      page.drawText(sanitize(protocol.name || 'Clinical Protocol Blueprint'), {
         x: MARGIN,
         y: y,
         size: 9,
@@ -107,7 +107,7 @@ export async function POST(request) {
     y -= 55;
 
     // ── PROTOCOL TITLE & GOAL ──
-    const titleText = sanitize(protocol.name || protocol.title || 'Clinical Peptide Protocol');
+    const titleText = sanitize(protocol.name || 'Clinical Peptide Protocol');
     page.drawText(titleText, {
       x: MARGIN,
       y,

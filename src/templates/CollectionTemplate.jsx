@@ -77,15 +77,15 @@ export default function CollectionTemplate({
 
   const s = (slug || '').toLowerCase();
 
-  // /collection/peptides → dedicated full-page collection
+  // /collection/peptides → Google Cloud UX BrandCollectionPage (Lotusland Peptides Collection)
   if (s === 'peptides') {
     return (
       <RestrictedCatalogRoute catalogName="products">
-        <ClinicalPortfolioSuiteSwitcher currentSlug="peptides" />
-        <PeptideCollectionPage
-          initialProducts={products || []}
-          onNavigate={(productSlug) => router.push(`/product/${productSlug}`)}
-          onBack={() => router.back()}
+        <BrandCollectionPage
+          brandSlug="peptides"
+          products={products || []}
+          onSelectProduct={handleProductSelect}
+          updateCart={updateCart}
           toggleCompare={toggleCompare}
         />
       </RestrictedCatalogRoute>

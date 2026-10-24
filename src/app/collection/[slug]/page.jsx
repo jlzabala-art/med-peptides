@@ -1,9 +1,9 @@
-/* eslint-disable react-refresh/only-export-components -- Next.js App Router: metadata exports must live in page/layout files */
 import React from 'react';
 import { fetchProductsAction } from '../../../actions/productsActions';
 import CollectionClientWrapper from './CollectionClientWrapper';
 import { sanitizeForClient } from '../../../utils/sanitizeForClient';
 import { adminDb } from '../../../lib/firebaseAdmin';
+import { trackReferralVisitAction } from '@/actions/vialsCatalogActions';
 
 const BASE_URL = 'https://www.atlashealth-services.com';
 
@@ -41,14 +41,14 @@ const BRAND_METADATA = {
     description: 'Explore TeleTest Analytika® accredited clinical diagnostics: High-resolution HLA Immunogenetics & Celiac Predisposition, plus ICP-MS/MS Hair Tissue Mineral & Heavy Metal Toxicology (HTMA). Generalitat de Catalunya E08750211 & ISO 17025 accredited.',
     image: `${BASE_URL}/images/products/teletest/hla-autoinmunidad.svg`,
     section: 'Clinical Laboratory Diagnostics & Pharmacogenomics',
-    keywords: ['TeleTest Analytika', 'HLA Autoinmunidad', 'Mineralograma Cabello', 'HTMA', 'Toxicología Metales Pesados', 'Estudio Genético Celiaquía', 'ISO 17025 Laboratorio']
+    keywords: ['TeleTest Analytika', 'Hair Tissue Mineral Analysis', 'HTMA', 'Heavy Metal Toxicology', 'HLA Autoimmunity', 'Celiac Disease Genetics', 'Omega-3 Index', 'ISO 17025 European Reference Laboratory']
   },
   peptides: {
-    title: 'Precision Research Peptides Catalog | Atlas Health Platform',
-    description: 'Browse our comprehensive catalog of verified analytical peptides (≥99.0% purity). BPC-157, TB-500, GHK-Cu, Epithalon, MOTS-c, and metabolic secretagogues.',
+    title: 'Lotusland Clinical Peptides Portfolio & Lyophilized Vials | Atlas Collection',
+    description: 'Explore the official Lotusland clinical peptide collection: high-purity lyophilized 10R vials (≥99.0% HPLC purity, certified mass spectrometry, endotoxin-tested). BPC-157, TB-500, GHK-Cu, Epithalon, MOTS-c, GLP-1 analogues, and secretagogues.',
     image: `${BASE_URL}/images/og-peptides.png`,
-    section: 'Analytical Research Peptides',
-    keywords: ['Research Peptides', 'BPC-157', 'TB-500', 'GHK-Cu', 'Epithalon', 'Peptides Catalog']
+    section: 'Lyophilized Clinical Peptides & Monographs',
+    keywords: ['Lotusland', 'Research Peptides', 'BPC-157', 'TB-500', 'GHK-Cu', 'Epithalon', 'Peptides Catalog', 'Lyophilized Vials']
   },
   supplements: {
     title: 'Clinical Grade Supplements & Nutraceuticals | Atlas Platform',
@@ -158,6 +158,77 @@ async function fetchTargetedBrandProducts(brandSlug) {
     return Object.values(CLINICAL_SUPPLEMENTS).filter(p => p.id?.startsWith('ultraperson-') || p.slug?.startsWith('ultraperson-'));
   }
 
+  // TeleTest fallback: if Firestore is empty or unreachable, return official clinical registry items
+  if (targetBrand === 'teletest') {
+    try {
+      if (adminDb) {
+        const snap = await adminDb.collection('products').get();
+        const list = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          const str = (d.id + ' ' + (data.name||'') + ' ' + (data.title||'') + ' ' + (data.supplier||'') + ' ' + (data.brand||'') + ' ' + (data.category||'') + ' ' + JSON.stringify(data.keywords||[])).toLowerCase();
+          if (str.includes('teletest') || d.id.startsWith('teletest-') || data.supplierId === 'supplier-teletest') {
+            list.push({ id: d.id, ...data });
+          }
+        });
+        if (list.length > 0) return list;
+      }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] TeleTest Firestore error, falling back to registry:', e.message);
+    }
+
+    const { getTeletestCatalog } = await import('../../../data/teletestRegistry');
+    return getTeletestCatalog();
+  }
+
+  // Lotusland Peptides: strictly filter products & variants supplied by Lotusland
+  if (targetBrand === 'peptides') {
+    try {
+      if (adminDb) {
+        const snap = await adminDb.collection('products').limit(300).get();
+        const list = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          if (data.productType === 'raw_material' || data.category === 'raw_material') return;
+
+          const str = (d.id + ' ' + (data.name||'') + ' ' + (data.title||'') + ' ' + (data.supplier||'') + ' ' + (data.supplierName||'') + ' ' + (data.supplierId||'') + ' ' + (data.brand||'')).toLowerCase();
+          const variants = Array.isArray(data.variants) ? data.variants : [];
+
+          const hasLotusVariant = variants.some(v => {
+            const vSupp = String(v.supplierId || v.supplier || v.supplierName || '').toLowerCase();
+            return vSupp.includes('lotusland') || vSupp === 'supplier-lotusland' || v.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
+          });
+
+          const isLotusDirect = str.includes('lotusland') || data.supplierId === 'supplier-lotusland' || data.supplierId === 'OLlBbQjgrj6tY7GmM2Jo' || (Array.isArray(data.supplierIds) && data.supplierIds.includes('supplier-lotusland'));
+
+          if (isLotusDirect || hasLotusVariant) {
+            const lotusVariants = variants.filter(v => {
+              const vSupp = String(v.supplierId || v.supplier || v.supplierName || '').toLowerCase();
+              return !vSupp || vSupp.includes('lotusland') || vSupp === 'supplier-lotusland' || v.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
+            });
+
+            list.push({
+              id: d.id,
+              ...data,
+              variants: lotusVariants.length > 0 ? lotusVariants : variants,
+              supplierId: 'supplier-lotusland',
+              supplierName: 'Lotusland'
+            });
+          }
+        });
+
+        if (list.length > 0) return list;
+      }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Peptides Firestore error, falling back to registry:', e.message);
+    }
+
+    const { getLotuslandPeptidesCatalog } = await import('../../../data/lotuslandPeptidesRegistry');
+    return getLotuslandPeptidesCatalog();
+  }
+
   if (!adminDb) return [];
   try {
     const snap = await adminDb.collection('products').get();
@@ -189,13 +260,25 @@ async function fetchTargetedBrandProducts(brandSlug) {
   }
 }
 
-export default async function NextCollectionPage({ params }) {
+export default async function NextCollectionPage({ params, searchParams }) {
   const resolvedParams = await params;
+  const resolvedSearch = await searchParams;
   const rawSlug = (resolvedParams?.slug || '').toLowerCase();
   const slug = rawSlug === 'ultraman' ? 'ultraperson' : rawSlug;
 
+  const ref = resolvedSearch?.ref || resolvedSearch?.referral || null;
+  const code = resolvedSearch?.code || ref;
+
+  if (ref) {
+    trackReferralVisitAction({
+      wholesalerId: ref,
+      referralCode: code,
+      collection: slug
+    }).catch(() => {});
+  }
+
   let catalog;
-  if (['colway', 'bloodo', 'ultraperson', 'eterna', 'teletest'].includes(slug)) {
+  if (['colway', 'bloodo', 'ultraperson', 'eterna', 'teletest', 'peptides'].includes(slug)) {
     catalog = await fetchTargetedBrandProducts(slug);
   } else {
     catalog = await fetchProductsAction({ limitCount: 200 });
@@ -204,7 +287,7 @@ export default async function NextCollectionPage({ params }) {
   const safeCatalog = sanitizeForClient(catalog || []);
 
   return (
-    <CollectionClientWrapper serverParams={{ ...resolvedParams, slug }} initialProducts={safeCatalog} />
+    <CollectionClientWrapper serverParams={{ ...resolvedParams, slug }} referralRef={ref} initialProducts={safeCatalog} />
   );
 }
 

@@ -1,6 +1,5 @@
 import { useRouter } from 'next/navigation';
 import { Zap, Layers, ArrowRight, Clock, FlaskConical } from '@/lib/icons';
-/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 
 
@@ -156,10 +155,10 @@ function ProtocolPreviewCard({ protocol, onView }) {
               fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)',
               marginBottom: '0.2rem', lineHeight: 1.25,
             }}>
-              {protocol.title}
+              {protocol.name || protocol.title}
             </h3>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-              {protocol.goal}
+              {(protocol.goals && protocol.goals[0]) || protocol.goal || protocol.categoryId}
             </div>
           </div>
         </div>
@@ -232,7 +231,7 @@ function ProtocolPreviewCard({ protocol, onView }) {
         <button
           id={`protocol-preview-view-${protocol.id}`}
           onClick={handleView}
-          aria-label={`View full ${protocol.title}`}
+          aria-label={`View full ${protocol.name || protocol.title}`}
           style={{
             width: '100%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',

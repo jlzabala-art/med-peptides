@@ -19,7 +19,7 @@
 
 
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import notifier from '../../services/NotificationService';
 
@@ -57,11 +57,7 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
   const [copiedId, setCopiedId] = useState(null);
   const [previewCatalog, setPreviewCatalog] = useState(null);
 
-  useEffect(() => {
-    loadCatalogs();
-  }, [ownerId, ownerType]);
-
-  const loadCatalogs = async () => {
+  const loadCatalogs = useCallback(async () => {
     setLoading(true);
     try {
       let ownedList = [];
@@ -81,7 +77,11 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
     } finally {
       setLoading(false);
     }
-  };
+  }, [ownerId, ownerType]);
+
+  useEffect(() => {
+    loadCatalogs();
+  }, [loadCatalogs]);
 
   const handleDuplicate = async (catalog) => {
     notifier.confirmCritical(`Duplicate "${catalog.title}"?`, async () => {
@@ -340,8 +340,84 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
     );
   }
 
+  const vialsReferralUrl = typeof window !== 'undefined' && ownerId
+    ? `${window.location.origin}/vials?ref=${encodeURIComponent(ownerId)}`
+    : '/vials';
+
   return (
     <div style={containerStyle}>
+      {/* Quick Access: Public White-Label Vials Referral Catalog */}
+      <div style={{
+        backgroundColor: '#f0fdf4',
+        border: '1px solid #bbf7d0',
+        borderRadius: '10px',
+        padding: '14px 18px',
+        marginBottom: '18px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#166534' }}>
+              🧪 Lyophilized Vials Catalog (White-Label • Direct Referral Link)
+            </span>
+          </div>
+          <div style={{ fontSize: '0.8rem', color: '#15803d' }}>
+            Direct public catalog with zero supplier mentions. Every purchase is attributed to you with 24-hour payment coordination.
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(vialsReferralUrl);
+              toast.success('Vials referral link copied to clipboard!');
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '7px 12px',
+              backgroundColor: '#16a34a',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            <Copy size={13} />
+            <span>Copy Link</span>
+          </button>
+
+          <a
+            href={vialsReferralUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '7px 12px',
+              backgroundColor: '#ffffff',
+              color: '#166534',
+              border: '1px solid #bbf7d0',
+              borderRadius: '6px',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              textDecoration: 'none'
+            }}
+          >
+            <span>View Catalog</span>
+            <ExternalLink size={13} />
+          </a>
+        </div>
+      </div>
+
       <div style={actionsBarStyle}>
         <div style={searchContainerStyle}>
           <Search size={16} style={searchIconStyle} />

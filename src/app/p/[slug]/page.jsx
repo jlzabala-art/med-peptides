@@ -9,7 +9,9 @@ import PublicDatasheetView from '../../../components/product/PublicDatasheetView
 import AestheticInjectableDetail from '../../../components/product/layouts/AestheticInjectableDetail';
 import CosmeticsDetail from '../../../components/product/layouts/CosmeticsDetail';
 import EternaGenomicsDetail from '../../../components/product/layouts/EternaGenomicsDetail';
+import TeletestDiagnosticDetail from '../../../components/product/layouts/TeletestDiagnosticDetail';
 import { getClinicalSupplementBySlug } from '../../../data/clinicalSupplementsRegistry';
+import { getTeletestProductBySlug } from '../../../data/teletestRegistry';
 
 export const revalidate = 3600; // ISR: regenerate at most every 60 min
 export const dynamicParams = true; // Allow slugs not in generateStaticParams
@@ -77,6 +79,25 @@ async function getPublicProduct(slug, supplierFilter = null) {
   }
 
   if (!doc) {
+    const teletestProduct = getTeletestProductBySlug(target);
+    if (teletestProduct) {
+      const sanitized = sanitizePublicProduct(teletestProduct, teletestProduct.variants || []);
+      const processedHierarchy = processProductVariants(sanitized.variants || teletestProduct.variants || []);
+      const teleResult = {
+        ...teletestProduct,
+        ...sanitized,
+        isSingleSupplierLocked: true,
+        availableSuppliers: [{ id: 'supplier-teletest', name: 'TeleTest Analytika', isPen: false, isSpray: false }],
+        activeSupplierId: 'supplier-teletest',
+        processedHierarchy,
+      };
+      PUBLIC_PRODUCT_RAM_CACHE.set(cacheKey, {
+        data: teleResult,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      });
+      return teleResult;
+    }
+
     const supplement = getClinicalSupplementBySlug(target);
     if (supplement) {
       const sanitized = sanitizePublicProduct(supplement, supplement.variants || []);
@@ -173,13 +194,14 @@ async function getPublicProduct(slug, supplierFilter = null) {
     raw.category === 'diagnostic_tests' ||
     raw.productType === 'diagnostic' ||
     raw.type === 'diagnostic' ||
-    (raw.id && (raw.id.startsWith('bloodo-') || raw.id.endsWith('-test'))) ||
-    raw.supplierId === 'supplier-bloodo'
+    (raw.id && (raw.id.startsWith('bloodo-') || raw.id.startsWith('teletest-') || raw.id.endsWith('-test'))) ||
+    raw.supplierId === 'supplier-bloodo' ||
+    raw.supplierId === 'supplier-teletest'
   );
 
   const hasLotusland = !isDiagnosticProduct && (rawVariants || []).some(v => matchSupplier(v, 'supplier-lotusland') || matchSupplier(v, 'lotusland'));
   const inherentSupplier = isDiagnosticProduct
-    ? (raw.supplierId || (rawVariants && rawVariants[0]?.supplierId) || 'supplier-bloodo')
+    ? (raw.supplierId || (rawVariants && rawVariants[0]?.supplierId) || (raw.id?.startsWith('teletest-') ? 'supplier-teletest' : 'supplier-bloodo'))
     : (hasLotusland && (!supplierFilter || supplierFilter.toLowerCase() === 'all'))
       ? 'supplier-lotusland'
       : (raw.supplierId || (rawVariants && rawVariants[0]?.supplierId) || (rawVariants && rawVariants[0]?.supplier));
@@ -311,26 +333,40 @@ export async function generateMetadata({ params, searchParams }) {
     typeSuffix = 'Clinical Aesthetics Monograph';
   } else if (isEterna) {
     typeSuffix = 'Precision Genomics & Epigenetics';
+  } else if (slug.toLowerCase().startsWith('teletest-') || (product.supplierId || '').toLowerCase().includes('teletest') || (product.brand || '').toLowerCase().includes('teletest')) {
+    typeSuffix = 'Clinical Genomics & Diagnostics';
   }
 
-  const pageTitle = isEterna
+  const isTeletest = slug.toLowerCase().startsWith('teletest-') ||
+    (product.supplierId || '').toLowerCase().includes('teletest') ||
+    (product.canonicalKey || '').toLowerCase().includes('teletest') ||
+    (product.name || '').toLowerCase().includes('teletest') ||
+    (product.brand || '').toLowerCase().includes('teletest');
+
+  const pageTitle = isTeletest
+    ? `${name} | TeleTest Analytika® ISO 17025 Clinical Diagnostics`
+    : isEterna
     ? 'ETERNA® DNA & Epigenetic Longevity Test | ETERNA DX · Fagron Genomics'
     : (resolvedSocial.title || `${name}${formatSuffix}${doseSuffix} — ${typeSuffix}`);
-  const pageDesc = isEterna
+  const pageDesc = isTeletest
+    ? (product.shortDescription || product.description || 'TeleTest Analytika® accredited clinical diagnostics: High-resolution HLA immunogenetics, heavy metal toxicology, and cellular fatty acid profiling. Generalitat de Catalunya E08750211 & ISO 17025 accredited.')
+    : isEterna
     ? 'Prueba genética y epigenética de alta resolución a partir de saliva (+700.000 SNPs). Mide edad biológica, 5 pilares de salud y sincronización con wearables (Apple, Garmin, Oura).'
     : resolvedSocial.description;
   const rawExplicitImage = product.image || product.image_url || product.imageUrl || product.photo_url || null;
   const explicitProductImage = rawExplicitImage
     ? (rawExplicitImage.startsWith('http') ? rawExplicitImage : `${BASE_URL}${rawExplicitImage.startsWith('/') ? '' : '/'}${rawExplicitImage}`)
     : null;
-  const previewImageUrl = isEterna
+  const previewImageUrl = isTeletest
+    ? (explicitProductImage || `${BASE_URL}/images/products/teletest/mineralograma-cabello.svg`)
+    : isEterna
     ? `${BASE_URL}/images/products/eterna/eterna-kit-box.png`
     : ((isCosmetic && explicitProductImage)
       ? explicitProductImage
       : resolveSocialImage(product, formatParam));
   const isPng = previewImageUrl.toLowerCase().endsWith('.png');
   const imageType = isPng ? 'image/png' : 'image/jpeg';
-  const canonicalUrl = isCosmetic || isAesthetic || isEterna || product.isSingleSupplierLocked
+  const canonicalUrl = isCosmetic || isAesthetic || isEterna || isTeletest || product.isSingleSupplierLocked
     ? `${BASE_URL}/p/${slug}`
     : `${BASE_URL}/p/${slug}${supplierFilter ? `?supplier=${encodeURIComponent(supplierFilter)}` : ''}`;
 
@@ -344,7 +380,13 @@ export async function generateMetadata({ params, searchParams }) {
       title: pageTitle,
       description: pageDesc,
       url: canonicalUrl,
-      siteName: isEterna ? 'ETERNA Diagnostics · Fagron Genomics' : isCosmetic ? 'Colway Clinical Care' : 'Atlas Health Services',
+      siteName: isTeletest
+        ? 'TeleTest Analytika® · ISO 17025 Clinical Reference Lab'
+        : isEterna
+        ? 'ETERNA Diagnostics · Fagron Genomics'
+        : isCosmetic
+        ? 'Colway Clinical Care'
+        : 'Atlas Health Services',
       images: [
         {
           url: previewImageUrl,
@@ -369,7 +411,13 @@ export async function generateMetadata({ params, searchParams }) {
       'og:image:width': '1200',
       'og:image:height': '630',
       'og:image:alt': pageTitle,
-      'article:section': isEterna ? 'Precision Genomics & Epigenetics' : isCosmetic ? 'Dermocosmetic Care' : 'Clinical Reference Documentation',
+      'article:section': isTeletest
+        ? 'Clinical Genomics & Laboratory Diagnostics'
+        : isEterna
+        ? 'Precision Genomics & Epigenetics'
+        : isCosmetic
+        ? 'Dermocosmetic Care'
+        : 'Clinical Reference Documentation',
     },
     robots: { index: true, follow: true },
   };
@@ -541,14 +589,40 @@ export default async function PublicProductRoute({ params, searchParams }) {
     (safeProduct.supplierId || '').toLowerCase().includes('eternadx') || 
     (safeProduct.canonicalKey || '').toLowerCase().includes('eterna') || 
     (safeProduct.name || '').toLowerCase().includes('eterna');
+  const isTeletest = slug.toLowerCase().startsWith('teletest-') ||
+    (safeProduct.supplierId || '').toLowerCase().includes('teletest') ||
+    (safeProduct.canonicalKey || '').toLowerCase().includes('teletest') ||
+    (safeProduct.name || '').toLowerCase().includes('teletest') ||
+    (safeProduct.brand || '').toLowerCase().includes('teletest');
 
   const productName = safeProduct.canonicalName || safeProduct.name || slug;
-  const sectionLabel = isEterna ? 'Genomics & Longevity' : isCosmetics ? 'Cosmetics' : isAesthetic ? 'Aesthetics' : isRawApi ? 'Compounding APIs' : 'Catalog';
+  const sectionLabel = isTeletest ? 'TeleTest Analytika®' : isEterna ? 'Genomics & Longevity' : isCosmetics ? 'Cosmetics' : isAesthetic ? 'Aesthetics' : isRawApi ? 'Compounding APIs' : 'Catalog';
+  const sectionUrl = isTeletest ? '/collection/teletest' : isEterna ? '/c/CAT-MU9L9GBN' : '/catalog';
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
     { name: 'Home', url: '/' },
-    { name: sectionLabel, url: isEterna ? '/c/CAT-MU9L9GBN' : '/catalog' },
+    { name: sectionLabel, url: sectionUrl },
     { name: productName, url: `/p/${slug}` }
   ], BASE_URL);
+
+  if (isTeletest) {
+    return (
+      <>
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        {breadcrumbJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+          />
+        )}
+        <TeletestDiagnosticDetail product={safeProduct} slug={slug} baseUrl={BASE_URL} />
+      </>
+    );
+  }
 
   if (isAesthetic) {
     return (

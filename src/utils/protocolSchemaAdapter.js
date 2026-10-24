@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { SCIENTIFIC_STANDARDS } from '../services/protocol_finder_2_0_protocols_bundle/ScientificStandards';
+import { SCIENTIFIC_STANDARDS } from '../services/protocol_finder_2_0_protocols_bundle/ScientificStandards.js';
 
 /**
  * protocolSchemaAdapter.js
@@ -186,7 +186,7 @@ export function calculateProtocolVersion(protocol, prevProtocol = null) {
     return `${phaseCount}.${compoundCount}.0`;
   }
 
-  let [major, minor, patch] = (prevProtocol.version || '1.0.0').split('.').map(Number);
+  const [major, minor, patch] = (prevProtocol.version || '1.0.0').split('.').map(Number);
 
   // 1. Major change: Compound list change or Phase count change
   const prevCompounds = (prevProtocol.phases || []).flatMap(p => (p.compounds || []).map(c => c.peptide_id));
@@ -292,7 +292,7 @@ export function getRouteSpecificTerm(route = '') {
 export function doseToObject(value, unitHint = 'mg', compoundName = '') {
   if (value == null || value === '') return { amount: 0, unit: unitHint };
 
-  let amount = 0;
+  let amount;
   let unit = (unitHint || 'mg').toLowerCase().trim();
 
   if (typeof value === 'object' && value.amount != null) {
@@ -491,7 +491,7 @@ function normalizePhaseBlueprints(protocol) {
       const injectionsPerWeek = frequencyToInjectionsPerWeek(freqObj);
 
       // Resolve start dose (must be dose per administration!)
-      let startVal = 0;
+      let startVal;
       if (logic.dose_per_administration != null) {
         startVal = logic.dose_per_administration;
       } else if (logic.starting_weekly_dose != null) {
@@ -508,7 +508,7 @@ function normalizePhaseBlueprints(protocol) {
       }
 
       // Resolve end/peak dose (must be dose per administration!)
-      let endVal = 0;
+      let endVal;
       if (logic.peak_dose != null) {
         endVal = logic.peak_dose;
       } else if (logic.max_weekly_dose != null) {
@@ -589,7 +589,7 @@ function normalizeLegacyPhases(protocol) {
       const unitStr = d.dose_unit || d.unit || 'mg';
       const injectionsPerWeek = frequencyToInjectionsPerWeek(freqObj);
 
-      let amount = 0;
+      let amount;
       if (d.dose_per_administration != null) {
         amount = d.dose_per_administration;
       } else if (d.weekly_dose != null) {

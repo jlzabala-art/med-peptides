@@ -340,10 +340,10 @@ export const prescriptionRepository = {
     const draft = {
       status: 'draft',
       sourceProtocolId: protocol.id,
-      sourceProtocolName: protocol.name || protocol.title || '',
+      sourceProtocolName: protocol.name || '',
       sourceProtocolSlug: protocol.slug || '',
       prescriptionLines: lines,
-      notes: overrides.notes || `Prescripción generada desde el Protocolo: ${protocol.name || protocol.title || protocol.id}`,
+      notes: overrides.notes || `Prescripción generada desde el Protocolo: ${protocol.name || protocol.id}`,
       createdAt: serverTimestamp(),
       ...overrides,
     };

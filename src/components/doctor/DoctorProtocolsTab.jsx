@@ -12,6 +12,7 @@ import Pill from "lucide-react/dist/esm/icons/pill";
 import Share2 from "lucide-react/dist/esm/icons/share-2";
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
+// eslint-disable-next-line no-restricted-imports
 import { db } from '../../firebase';
 
 import Card from '../ui/Card';
@@ -57,7 +58,7 @@ export default function DoctorProtocolsTab({ doctorId }) {
     try {
       const clone = {
         ...protocol,
-        protocol_name: (protocol.protocol_name || protocol.title) + ' (Copy)',
+        name: (protocol.name || protocol.title || 'Protocol') + ' (Copy)',
         visibility: 'private',
         authorId: doctorId,
         created_at: new Date(),
@@ -81,7 +82,7 @@ export default function DoctorProtocolsTab({ doctorId }) {
 
   const handleStageProtocolToWorkspace = (protocol) => {
     const peptides = protocol.peptides || protocol.medications || [];
-    const itemsToAdd = (peptides.length > 0 ? peptides : [{ id: protocol.id, canonicalName: protocol.protocol_name || protocol.title }]).map(pep => ({
+    const itemsToAdd = (peptides.length > 0 ? peptides : [{ id: protocol.id, canonicalName: protocol.name || 'Protocol' }]).map(pep => ({
       id: pep.id || `pep_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
       productId: pep.productId || pep.id,
       canonicalName: pep.name || pep.canonicalName || pep.title || 'Protocol Compound',
@@ -94,12 +95,12 @@ export default function DoctorProtocolsTab({ doctorId }) {
 
     addItems(itemsToAdd, activeWorkspaceId);
     setDrawerOpen(true);
-    notifier.success(`Staged ${itemsToAdd.length} item(s) from "${protocol.protocol_name || protocol.title}" into Workspace!`);
+    notifier.success(`Staged ${itemsToAdd.length} item(s) from "${protocol.name || 'Protocol'}" into Workspace!`);
   };
 
   const handleCreateRxFromProtocol = (protocol) => {
     const peptides = protocol.peptides || protocol.medications || [];
-    const initialItems = (peptides.length > 0 ? peptides : [{ id: protocol.id, canonicalName: protocol.protocol_name || protocol.title }]).map(pep => ({
+    const initialItems = (peptides.length > 0 ? peptides : [{ id: protocol.id, canonicalName: protocol.name || 'Protocol' }]).map(pep => ({
       type: 'product',
       id: pep.id || pep.productId,
       productId: pep.productId || pep.id,
@@ -114,7 +115,7 @@ export default function DoctorProtocolsTab({ doctorId }) {
       initialItems,
       sourceModule: 'protocol'
     });
-    notifier.info(`Creating Rx Prescription from protocol "${protocol.protocol_name || protocol.title}"`);
+    notifier.info(`Creating Rx Prescription from protocol "${protocol.name || 'Protocol'}"`);
   };
 
   return (

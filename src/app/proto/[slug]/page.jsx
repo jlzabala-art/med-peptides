@@ -322,12 +322,12 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  const name = protocol.name || protocol.title || 'Clinical Protocol';
-  const category = protocol.category || protocol.goal || protocol.therapeutic_category || 'Clinical Protocol';
-  const desc = (protocol.summary || protocol.description || protocol.clinicalRationale || 'Detailed clinical protocol schedule and administration guidance.').substring(0, 160);
+  const name = protocol.name || 'Clinical Protocol';
+  const category = protocol.categoryId || 'Clinical Protocol';
+  const desc = (protocol.overview_summary || protocol.description || protocol.clinical_rationale || 'Detailed clinical protocol schedule and administration guidance.').substring(0, 160);
 
   // 🎨 Dynamic OpenGraph preview card
-  const ogImageUrl = `${BASE_URL}/api/og-card?type=protocol&title=${encodeURIComponent(name)}&badge=${encodeURIComponent(category)}&subtitle=${encodeURIComponent(`${protocol.durationWeeks || 8} Weeks · Clinical Protocol Guide`)}`;
+  const ogImageUrl = `${BASE_URL}/api/og-card?type=protocol&title=${encodeURIComponent(name)}&badge=${encodeURIComponent(category)}&subtitle=${encodeURIComponent(`${protocol.duration_weeks || 8} Weeks · Clinical Protocol Guide`)}`;
 
   return {
     title: `${name} — Protocol Guide | Atlas App`,
@@ -370,11 +370,11 @@ export default async function PublicProtocolRoute({ params }) {
   }
 
   // Fetch similar protocols by the same therapeutic goal
-  const protocolGoal = protocol.primary_goal || protocol.goal || protocol.category || protocol.therapeutic_category || null;
+  const protocolGoal = (protocol.goals && protocol.goals[0]) || protocol.categoryId || null;
   const similarProtocols = protocolGoal ? await getSimilarProtocols(protocolGoal, slug) : [];
 
   const jsonLd = generateProtocolJsonLd(protocol, BASE_URL);
-  const protocolTitle = protocol.title || protocol.name || slug;
+  const protocolTitle = protocol.name || slug;
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
     { name: 'Home', url: '/' },
     { name: 'Protocols', url: '/protocols' },

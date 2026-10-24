@@ -440,7 +440,18 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
   const matchedDoc = doctors.find(doc => {
     const docSlugNoDr = (doc.nameSlug || '').replace(/^dr[-.]?/, '');
     const isSezginMatch = (cleanSlug.includes('sezgin') || cleanSlug.includes('cagatay')) && (doc.id === 'z3aUIMaYsPViG1JgM95r' || (doc.nameSlug || '').includes('sezgin'));
+    const isSobiaMatch = (cleanSlug.includes('sobia') || cleanSlug.includes('mlsc') || cleanSlug === 'dr-sobia' || cleanSlug === 'dr-sobia-mirza') && 
+                         (doc.id === 'dr-sobia' || (doc.nameSlug || '').includes('sobia') || (doc.name || '').toLowerCase().includes('sobia'));
+    const aliases = Array.isArray(doc.data?.aliases) ? doc.data.aliases : [];
+    const isAliasMatch = aliases.some(a => {
+      const aClean = a.toLowerCase();
+      const aSlug = slugify(a);
+      return aClean === cleanSlug || aSlug === cleanSlug || aSlug.replace(/^dr[-.]?/, '') === normalizedSlug;
+    });
+
     return isSezginMatch ||
+           isSobiaMatch ||
+           isAliasMatch ||
            doc.opaqueCode.toLowerCase() === cleanSlug ||
            doc.id.toLowerCase() === cleanSlug ||
            doc.nameSlug === cleanSlug ||
@@ -1218,26 +1229,32 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       console.warn('Could not load protocols in doctorCache:', pErr);
     }
 
-    // 7.5 Fetch Laboratory Diagnostic Results (Bloodo / LifeLab1 tests)
+    // 7.5 Fetch Laboratory Diagnostic Results (Bloodo / LifeLab1 / Fagron TeloTest / ETERNA tests)
+    // Note: Dr. Çağatay Sezgin has not commissioned diagnostic tests, so he is strictly excluded.
+    // The designated physician commissioning and monitoring these tests is Dr. Sobia Mirza (dr-sobia).
     const labResults = [];
-    try {
-      const labSnap = await adminDb.collection('lab_results').limit(100).get();
-      labSnap.forEach(doc => {
-        const ld = doc.data();
-        const lDocId = (ld.doctorId || '').toLowerCase();
-        const lDocName = (ld.doctorName || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        const isMatch = (doctorId && lDocId === doctorId.toLowerCase()) ||
-                        (isDoctorSezgin && (lDocId === 'z3auimayspvig1jgm95r' || lDocName.includes('sezgin'))) ||
-                        (cleanDoctorQueryNormalized && lDocName.includes(cleanDoctorQueryNormalized));
-        if (isMatch) {
-          labResults.push({
-            id: doc.id,
-            ...ld
-          });
-        }
-      });
-    } catch (labErr) {
-      console.warn('Could not load lab_results in doctorCache:', labErr);
+    const isDoctorSobia = (doctorId === 'dr-sobia') || cleanSlug.includes('sobia') || cleanDoctorQuery.includes('sobia') || (doctorDoc?.displayName || '').toLowerCase().includes('sobia');
+
+    if (!isDoctorSezgin) {
+      try {
+        const labSnap = await adminDb.collection('lab_results').limit(100).get();
+        labSnap.forEach(doc => {
+          const ld = doc.data();
+          const lDocId = (ld.doctorId || ld.doctor?.id || '').toLowerCase();
+          const lDocName = (ld.doctorName || ld.doctor?.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          const isMatch = (doctorId && lDocId === doctorId.toLowerCase()) ||
+                          (isDoctorSobia && (lDocId === 'dr-sobia' || lDocName.includes('sobia'))) ||
+                          (cleanDoctorQueryNormalized && lDocName.includes(cleanDoctorQueryNormalized));
+          if (isMatch) {
+            labResults.push({
+              id: doc.id,
+              ...ld
+            });
+          }
+        });
+      } catch (labErr) {
+        console.warn('Could not load lab_results in doctorCache:', labErr);
+      }
     }
 
     // 8. Enrich each prescription with tailored Atlas Recommendations (Peptides & Colway)

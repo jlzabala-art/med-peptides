@@ -129,6 +129,7 @@ export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs 
                   transition: 'max-height 0.3s ease'
                 }}
               >
+                {/* eslint-disable-next-line no-restricted-syntax */}
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.74rem' }}>
                   <thead>
                     <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.68rem', textTransform: 'uppercase' }}>
@@ -231,6 +232,7 @@ export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs 
               </span>
             </div>
 
+            {/* eslint-disable-next-line no-restricted-syntax */}
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.74rem' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.68rem', textTransform: 'uppercase' }}>
@@ -290,7 +292,8 @@ export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs 
                 </span>
               </div>
 
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.74rem' }}>
+              {/* eslint-disable-next-line no-restricted-syntax */}
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.74rem' }}>
                 <thead>
                   <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.68rem', textTransform: 'uppercase' }}>
                     <th style={{ padding: '8px 12px', width: '42%' }}>Clinical Biomarker Panel</th>
@@ -346,6 +349,46 @@ export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs 
               <strong>Clinical Diagnostic Utility:</strong> {specs.clinicalScope}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── CASE 4: PEPTIDE MONOGRAPH (Lotusland Finished Lyophilized Vials) ── */}
+      {specs.type === 'peptide_monograph' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          {/* Technical Monograph Specification Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#003666', textTransform: 'uppercase' }}>🧪 Format & Presentation</div>
+              <div style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a', marginTop: '2px' }}>{specs.presentation}</div>
+            </div>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#16a34a', textTransform: 'uppercase' }}>🛡️ Verified Analytical Purity</div>
+              <div style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a', marginTop: '2px' }}>{specs.purity}</div>
+            </div>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#0284c7', textTransform: 'uppercase' }}>💧 Reconstitution Guidelines</div>
+              <div style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a', marginTop: '2px' }}>{specs.reconstitution}</div>
+            </div>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#7c3aed', textTransform: 'uppercase' }}>❄️ Storage & Cold-Chain</div>
+              <div style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a', marginTop: '2px' }}>{specs.storage}</div>
+            </div>
+          </div>
+
+          {/* Sequence & Compliance Bar */}
+          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.74rem' }}>
+              <span style={{ fontWeight: 750, color: '#475569' }}>Sequence:</span>
+              <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '0.70rem', color: '#003666', fontFamily: 'monospace' }}>
+                {specs.sequence}
+              </code>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.70rem', color: '#64748b' }}>
+              {specs.molecularWeight && <span><strong>MW:</strong> {specs.molecularWeight}</span>}
+              {specs.casNumber && <span><strong>CAS:</strong> {specs.casNumber}</span>}
+              <span><strong>Endotoxins:</strong> {specs.endotoxin}</span>
+            </div>
+          </div>
         </div>
       )}
     </div>

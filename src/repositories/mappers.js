@@ -127,11 +127,8 @@ export function normalizePrescription(data, id = null) {
  * `protocol.name` — nunca `protocol.protocol_name`, `protocol.title`, etc.
  */
 export function normalizeProtocol(data, id = null) {
-  const resolvedName = safeString(data.name || data.title || data.protocol_name, 'Unnamed Protocol');
-  const resolvedCategory = safeString(
-    data.category || data.therapeutic_category || data.categoryId || (Array.isArray(data.goals) && data.goals[0]) || data.primary_goal,
-    'Regenerative'
-  );
+  const resolvedName = safeString(data.name, 'Unnamed Protocol');
+  const resolvedCategory = safeString(data.categoryId || (Array.isArray(data.goals) && data.goals[0]), 'peptide');
 
   const rawPhases = Array.isArray(data.phases) ? data.phases : (Array.isArray(data.phase_blueprints) ? data.phase_blueprints : []);
   const normalizedPhases = rawPhases.map((ph, idx) => {

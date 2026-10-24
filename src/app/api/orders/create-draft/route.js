@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 /**
  * POST /api/orders/create-draft
- * Creates an incoming draft order from the shared catalog.
+ * Creates an incoming draft order from the shared catalog or public referral links.
  * Triggers unclosable notifications for Admin and Account Managers.
  */
 export async function POST(request) {
@@ -26,6 +27,22 @@ export async function POST(request) {
       currencySymbol = '$',
       totalUnits = 0,
       catalogId = '',
+      catalogCode = '',
+      catalogToken = '',
+      catalogTitle = '',
+      priceTier = 'wholesale',
+      priceTierLabel = 'Direct',
+      priceTierCode = '',
+      priceMarkupPercent = 0,
+      priceSource = 'wholesale',
+      supplierFilter = '',
+      categoryFilter = '',
+      collection = 'vials',
+      wholesalerId = null,
+      referralCode = null,
+      wholesalerName = '',
+      wholesalerEmail = '',
+      paymentMethod = 'payment_link_24h',
       accountManagerName = '',
       accountManagerEmail = '',
       accountManagerId = '',
@@ -108,9 +125,14 @@ export async function POST(request) {
       grandTotal: Number(grandTotal) || 0,
       total: Number(grandTotal || 0),
       totalAmount: Number(grandTotal || 0),
-      paymentMethod: 'bank_transfer', // Default institutional billing
+      paymentMethod: String(paymentMethod || 'payment_link_24h').trim(), // Default: payment link within 24h
       currency: String(currency || 'USD').toUpperCase(),
       currencySymbol: String(currencySymbol || '$'),
+      wholesalerId: wholesalerId ? String(wholesalerId).trim() : null,
+      referralCode: referralCode ? String(referralCode).trim() : (wholesalerId ? String(wholesalerId).trim() : null),
+      wholesalerName: wholesalerName ? String(wholesalerName).trim() : null,
+      wholesalerEmail: wholesalerEmail ? String(wholesalerEmail).trim() : null,
+      collection: String(collection || 'vials').toLowerCase(),
       accountManagerName: String(accountManagerName || '').trim(),
       accountManagerEmail: String(accountManagerEmail || '').trim() || null,
       accountManagerId: String(accountManagerId || '').trim() || null,
@@ -131,14 +153,56 @@ export async function POST(request) {
 
     const orderRef = await adminDb.collection('orders').add(orderDocData);
 
-    // Create high-priority notification for Admin and Account Manager
+    // Update Wholesaler Referral analytics in Firestore if attributed
+    if (orderDocData.wholesalerId) {
+      try {
+        const refDocRef = adminDb.collection('wholesaler_referrals').doc(orderDocData.wholesalerId);
+        const colKey = orderDocData.collection;
+        await refDocRef.set({
+          wholesalerId: orderDocData.wholesalerId,
+          referralCode: orderDocData.referralCode || orderDocData.wholesalerId,
+          ordersCount: FieldValue.increment(1),
+          totalRevenue: FieldValue.increment(orderDocData.grandTotal),
+          totalUnits: FieldValue.increment(orderDocData.totalUnits),
+          [`collections.${colKey}.ordersCount`]: FieldValue.increment(1),
+          [`collections.${colKey}.totalRevenue`]: FieldValue.increment(orderDocData.grandTotal),
+          lastOrderAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        }, { merge: true });
+
+        // Also add to subcollection for individual referral order ledger
+        await refDocRef.collection('orders').doc(orderRef.id).set({
+          orderId: orderRef.id,
+          orderCode,
+          collection: orderDocData.collection,
+          customerName: clientDisplayName,
+          customerEmail: orderDocData.customerEmail,
+          totalUnits: orderDocData.totalUnits,
+          grandTotal: orderDocData.grandTotal,
+          currency: orderDocData.currency,
+          status: 'draft',
+          paymentMethod: orderDocData.paymentMethod,
+          createdAt: now.toISOString()
+        });
+      } catch (refErr) {
+        console.warn('[orders/create-draft] Non-blocking referral tracking update warning:', refErr.message);
+      }
+    }
+
+    // Create high-priority notification for Admin, Wholesaler and Account Manager
+    const isWholesalerOrder = Boolean(orderDocData.wholesalerId);
     const notifData = {
-      title: `🚨 New Order Draft: ${orderCode}`,
-      message: `${clientDisplayName} created a draft order for ${orderDocData.totalUnits} units (${orderDocData.currency} ${orderDocData.grandTotal.toFixed(2)}) via shared catalog. Requires immediate reception acknowledgment.`,
+      title: isWholesalerOrder
+        ? `🚨 Wholesaler Referral Order: ${orderCode} (Send Payment Link <24h)`
+        : `🚨 New Order Draft: ${orderCode}`,
+      message: isWholesalerOrder
+        ? `${clientDisplayName} placed an order via Wholesaler [${orderDocData.wholesalerId}] for ${orderDocData.totalUnits} units (${orderDocData.currency} ${orderDocData.grandTotal.toFixed(2)}). Send secure payment link within 24 hours.`
+        : `${clientDisplayName} created a draft order for ${orderDocData.totalUnits} units (${orderDocData.currency} ${orderDocData.grandTotal.toFixed(2)}) via shared catalog. Requires immediate reception acknowledgment.`,
       type: 'order_draft',
       severity: 'critical',
       orderId: orderRef.id,
       orderCode,
+      wholesalerId: orderDocData.wholesalerId,
       targetRoles: ['admin', 'account_manager', 'wholesaler'],
       accountManagerEmail: orderDocData.accountManagerEmail,
       requiresAcknowledgment: true,

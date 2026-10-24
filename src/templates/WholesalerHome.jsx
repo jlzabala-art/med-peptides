@@ -49,6 +49,7 @@ import CatalogList from '../components/wholesaler/CatalogList';
 import CatalogCreatorFlow from '../components/wholesaler/CatalogCreatorFlow';
 import EmailCampaignBuilder from '../components/wholesaler/EmailCampaignBuilder';
 import DemandForecastingWidget from '../components/wholesaler/DemandForecastingWidget';
+import WholesalerReferralDashboard from '../components/wholesaler/WholesalerReferralDashboard';
 import { Card, MetricCard } from '../components/ui';
 import { LayoutDashboard, Layers, Package, TrendingUp, Settings, LogOut, ChevronRight, ArrowRight, Clock, CheckCircle2, AlertCircle, Truck, Box, BarChart3, Laptop, Bell, MapPin, Paintbrush, Globe, MessageSquare, Brain, Mail, Sparkles, ChevronUp, ChevronDown, ClipboardList, Zap, Users, FileText } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
@@ -835,6 +836,9 @@ export function WholesalerOverviewTab({ uid, onNavigate }) {
           Open Builder <ArrowRight size={14} />
         </button>
       </div>
+
+      {/* Wholesaler Referral Hub & Vials Performance */}
+      <WholesalerReferralDashboard wholesalerId={uid} />
 
       {/* Rx Pipeline Board */}
       <div>

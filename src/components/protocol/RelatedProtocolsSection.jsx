@@ -181,7 +181,7 @@ export function RelatedCard({ id, protocol, matchReason, onClick }) {
             lineHeight: 1.3,
             letterSpacing: '-0.01em',
           }}>
-            {protocol.title || protocol.protocol_title || protocol.name || protocol.protocol_name || 'Unnamed Protocol'}
+            {protocol.name || 'Unnamed Protocol'}
           </h3>
           {(protocol.summary?.goal || protocol.shortDescription || protocol.description) && (
             <p style={{

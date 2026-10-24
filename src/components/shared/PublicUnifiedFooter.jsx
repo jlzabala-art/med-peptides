@@ -6,7 +6,6 @@ import {
   ChevronDown
 } from '@/lib/icons';
 import BrandLogo from '../common/BrandLogo';
-import { triggerHaptic } from '@/utils/haptics';
 import './PublicUnifiedFooter.css';
 
 const FOOTER_SECTIONS = [
@@ -16,10 +15,10 @@ const FOOTER_SECTIONS = [
     titleMobile: 'Therapeutics & Formulations',
     titleEs: 'Terapéutica',
     links: [
-      { label: 'Peptide Therapeutics & GLP-1', labelEs: 'Terapia Peptídica & GLP-1', href: '/collection/peptides' },
+      { label: 'Clinical Peptide Monographs & Incretins', labelEs: 'Monografías Peptídicas Clínicas & Incretinas', href: '/collection/peptides' },
       { label: 'Colway® Native Bio-Collagen', labelEs: 'Colway® Tropocolágeno Nativo', href: '/collection/colway' },
+      { label: 'UltraPerson™ Clinical Nutraceuticals', labelEs: 'UltraPerson™ Nutracéutica Clínica', href: '/collection/ultraperson' },
       { label: 'Pharmaceutical APIs & Compounding', labelEs: 'Materia Prima Farmacéutica & APIs', href: '/collection/research-supplies' },
-      { label: 'Clinical Nutraceuticals & BHRT', labelEs: 'Nutracéutica Clínica & BHRT', href: '/collection/ultraperson' },
     ]
   },
   {
@@ -28,10 +27,10 @@ const FOOTER_SECTIONS = [
     titleMobile: 'Diagnostics & Clinical Pathways',
     titleEs: 'Diagnóstico & Vías',
     links: [
-      { label: 'Bloodo™ Capillary Diagnostics (DBS)', labelEs: 'Diagnóstico Capilar DBS Bloodo™', href: '/collection/bloodo' },
-      { label: 'TeleTest HTMA & Genomics', labelEs: 'TeleTest HTMA & Genómica', href: '/collection/teletest' },
+      { label: 'TeleTest® Laboratory Diagnostics', labelEs: 'TeleTest® Diagnóstico de Laboratorio', href: '/collection/teletest' },
+      { label: 'Bloodo™ Capillary Biomarkers (DBS)', labelEs: 'Diagnóstico Capilar DBS Bloodo™', href: '/collection/bloodo' },
+      { label: 'ETERNA® Epigenetics & Multi-Omics', labelEs: 'ETERNA® Epigenética & Multi-Ómica', href: '/collection/eterna' },
       { label: 'Clinical Protocols Directory', labelEs: 'Directorio de Protocolos Clínicos', href: '/protocols' },
-      { label: 'UltraPerson™ Precision Medicine', labelEs: 'Medicina de Precisión UltraPerson™', href: '/collection/ultraperson' },
     ]
   },
   {

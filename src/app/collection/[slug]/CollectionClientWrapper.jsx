@@ -9,7 +9,7 @@ import { useUIStore } from '../../../stores/uiStore';
 import { useParams } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
-export default function CollectionClientWrapper({ serverParams, initialProducts }) {
+export default function CollectionClientWrapper({ serverParams, referralRef = null, initialProducts }) {
   const params = useParams();
   const slug = serverParams?.slug || params?.slug;
 
@@ -18,8 +18,19 @@ export default function CollectionClientWrapper({ serverParams, initialProducts 
   const { cart, updateCart } = useCart();
   const { activeModal, setActiveModal } = useUIStore();
   
+  // Persist referral in localStorage for seamless attribution
+  useEffect(() => {
+    if (referralRef && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atlas_wholesaler_ref', referralRef);
+      } catch {
+        // Safe fallback
+      }
+    }
+  }, [referralRef]);
+
   // Products from server
-  const [products, setProducts] = useState(initialProducts || []);
+  const [products] = useState(initialProducts || []);
 
   const toggleCompare = (product) => {
     setCompareList(prev => {

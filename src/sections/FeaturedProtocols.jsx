@@ -1,12 +1,7 @@
 import { useRouter } from 'next/navigation';
-import { Clock } from '@/lib/icons';
-import { Layers } from '@/lib/icons';
-import { Activity } from '@/lib/icons';
-import { ArrowRight } from '@/lib/icons';
-import { Flame } from '@/lib/icons';
-import { RefreshCw } from '@/lib/icons';
-import { Eye } from '@/lib/icons';
-import { Loader2 } from '@/lib/icons';
+import { 
+  Clock, Layers, Activity, ArrowRight, Flame, RefreshCw, Eye, Loader2 
+} from '@/lib/icons';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 
@@ -42,7 +37,8 @@ const RECENTLY_UPDATED_IDS = new Set([
 function getProtocolBadge(protocol) {
   const haystack = [
     protocol.id || '', protocol.protocol_id || '', protocol.short_code || '',
-    protocol.category || '', protocol.primary_goal || '',
+    protocol.categoryId || protocol.category || '',
+    (Array.isArray(protocol.goals) ? protocol.goals.join(' ') : (protocol.goals || protocol.primary_goal || '')),
   ].join(' ').toLowerCase();
 
   if ([...MOST_USED_IDS].some(k => haystack.includes(k))) {
@@ -199,7 +195,7 @@ function normalizeBlueprint(bp) {
 
 /* ─── Components ────────────────────────────────────────────── */
 function ProtocolCard({ protocol, onClick, highlighted, className = '', onQuickPreview }) {
-  const displayTitle  = protocol.title       || 'Unnamed Blueprint';
+  const displayTitle  = protocol.name        || protocol.title || 'Unnamed Blueprint';
   const complexity    = protocol.intensity   || null;
   const shortCode     = protocol.short_code  || null;
   const version       = protocol.version     || null;
@@ -209,8 +205,9 @@ function ProtocolCard({ protocol, onClick, highlighted, className = '', onQuickP
   const phaseCount    = protocol.phase_count   ?? getPhaseCount(protocol);
   const compoundCount = protocol.compound_count ?? getCompoundCount(protocol);
   const statusStyle   = getStatusStyle(status);
-  const catColor      = getCategoryColor(protocol.category || '');
-  const category      = humanize(protocol.category || '');
+  const rawCat        = protocol.categoryId  || protocol.category || '';
+  const catColor      = getCategoryColor(rawCat);
+  const category      = humanize(rawCat);
   const badge         = getProtocolBadge(protocol);
 
   return (
@@ -306,7 +303,7 @@ function ProtocolAccordionItem({ protocol, isOpen, onToggle, onClick }) {
     <div className={`protocol-accordion-item ${isOpen ? 'is-open' : ''}`} style={{ borderLeftColor: catColor }}>
       <div className="accordion-trigger" onClick={onToggle}>
         <div className="accordion-header-content">
-          <h3 className="accordion-title">{protocol.title}</h3>
+          <h3 className="accordion-title">{protocol.name || protocol.title}</h3>
           <div className="accordion-mini-stats">
             {duration !== '—' && <span>{duration}</span>}
             {phaseCount && <span>{phaseCount} Phases</span>}
@@ -381,8 +378,10 @@ function matchesSearch(protocol, q) {
   if (!q) return true;
   const needle = q.toLowerCase();
   return [
-    protocol.title || '', protocol.category || '',
-    protocol.primary_goal || '', protocol.tagline || '',
+    protocol.name || protocol.title || '',
+    protocol.categoryId || protocol.category || '',
+    (Array.isArray(protocol.goals) ? protocol.goals.join(' ') : (protocol.goals || protocol.primary_goal || '')),
+    protocol.tagline || '',
     ...(protocol.tags || []),
   ].join(' ').toLowerCase().includes(needle);
 }
@@ -440,7 +439,8 @@ function CategoryAccordion({ category, protocols, isActive, onToggle, onProtocol
 }
 
 export default function FeaturedProtocols({ searchQuery = '' }) {
-  const navigate    = useRouter();
+  const router      = useRouter();
+  const navigate    = router;
   const sectionRef  = useRef(null);
   const sidebarRef  = useRef(null);
   const [activeFilter, setFilter] = useState(() => {
@@ -501,7 +501,7 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
   useEffect(() => { setPage(0); }, [activeFilter, searchQuery]);
 
   const [featured, filterHasResults] = useMemo(() => {
-    let filtered = [];
+    let filtered;
     if (searchQuery) {
       filtered = protocols.filter(p => matchesSearch(p, searchQuery));
     } else {
@@ -633,7 +633,7 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
   const handleCardClick = (id, source = 'filtered') => {
     const protocol = protocols.find(p => p.id === id);
     if (protocol) {
-      trackProtocolView(protocol.title, id, protocol.category, source);
+      trackProtocolView(protocol.name || protocol.title, id, protocol.categoryId || protocol.category, source);
     }
     localStorage.setItem('Atlas Health_last_protocol_id', id);
     const targetSlug = protocol?.slug || protocol?.id || id;

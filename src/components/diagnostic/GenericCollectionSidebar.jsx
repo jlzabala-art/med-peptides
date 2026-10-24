@@ -87,17 +87,17 @@ export default function GenericCollectionSidebar({
           </div>
           <div>
             <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
-              {isPeptides ? 'Atlas Analytical Standard' : 'TeleTest Reference Lab'}
+              {isPeptides ? 'Lotusland Analytical Hub' : 'TeleTest Reference Lab'}
             </div>
             <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
-              {isPeptides ? 'HPLC ≥99.0% Monograph Grade' : 'ISO 17025 Accredited · E08750211'}
+              {isPeptides ? 'HPLC ≥99.0% · EU Lyophilization Hub' : 'ISO 17025 Accredited · E08750211'}
             </div>
           </div>
         </div>
 
         <p style={{ fontSize: '0.78rem', color: '#475569', lineHeight: 1.5, margin: '0 0 1rem 0' }}>
           {isPeptides
-            ? 'Monographs verified via High-Performance Liquid Chromatography (HPLC) and Mass Spectrometry (MS). Each lot includes certified purity and endotoxin analysis.'
+            ? 'Monographs verified via High-Performance Liquid Chromatography (HPLC) and Mass Spectrometry (MS). Sourced and lyophilized under ISO 9001/cGMP conditions at the Lotusland Hub.'
             : 'European reference laboratory accredited by Generalitat de Catalunya and ISO 17025. Specializing in high-precision immunogenetics, celiac HLA, and ICP-MS/MS toxicology.'}
         </p>
 
@@ -108,7 +108,7 @@ export default function GenericCollectionSidebar({
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#334155', fontWeight: 650 }}>
             <Award size={13} color="#0284c7" />
-            <span>{isPeptides ? 'Certified Reference Standard Monograph' : '33-Element ICP-MS/MS & HLA qPCR'}</span>
+            <span>{isPeptides ? 'Certified Reference Standard Monograph' : '36+ Elements ICP-MS/MS & HLA qPCR'}</span>
           </div>
         </div>
       </div>

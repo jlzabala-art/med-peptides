@@ -149,10 +149,10 @@ export default function UniversalProtocolCard({
               fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)',
               marginBottom: '0.2rem', lineHeight: 1.25,
             }}>
-              {protocol.title}
+              {protocol.name || protocol.title}
             </h3>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-              {protocol.goal}
+              {(protocol.goals && protocol.goals[0]) || protocol.goal || protocol.categoryId}
             </div>
           </div>
         </div>

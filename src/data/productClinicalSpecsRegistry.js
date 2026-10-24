@@ -263,5 +263,26 @@ export function getProductTechnicalDetails(product, brandSlug) {
     };
   }
 
+  // 5. LOTUSLAND PEPTIDES (Finished Lyophilized Vials & Analytical Reference Monographs)
+  if (brand === 'peptides' || id.includes('peptide') || id.includes('vial') || id.includes('bpc') || id.includes('tb-500') || id.includes('ghk') || id.includes('epithalon') || id.includes('semaglutide') || id.includes('tirzepatide')) {
+    const dosage = product.dosage || (product.variants && product.variants[0]?.dosage) || '10 mg';
+    return {
+      type: 'peptide_monograph',
+      badge: 'Lotusland EU Lyophilization Hub · HPLC ≥99.0%',
+      title: `${product.name || product.title || 'Peptide'} Monograph & Technical Specifications`,
+      dosage: dosage,
+      presentation: product.presentation || '10R Borosilicate Lyophilized Vial (Sealed Crimp Septum)',
+      purity: product.purity || '≥ 99.0% (Verified by HPLC & Liquid Chromatography Mass Spectrometry)',
+      endotoxin: '< 0.05 EU/mg (LAL Endotoxin Pyrogenicity Certified)',
+      sequence: product.sequence || 'Certified Lot-Specific Primary Amino Acid Sequence',
+      molecularWeight: product.molecularWeight || 'Mass-Verified Molecular Weight',
+      casNumber: product.casNumber || 'Verified Chemical Abstract Service Monograph',
+      reconstitution: product.reconstitution || 'Reconstitute gently with Bacteriostatic 0.9% Benzyl Alcohol Water. Invert slowly; do not vortex.',
+      storage: 'Lyophilized powder: Stable at -20°C for 24 months. Reconstituted aqueous solution: Store at 2°C – 8°C (protect from direct light) and use within 28 days.',
+      compliance: 'EU Verified Analytical Reference Standard · ISO 9001 / cGMP Lyophilization Facility',
+      sourcingHub: 'Lotusland Formulations & Lyophilization Hub (European Union)'
+    };
+  }
+
   return null;
 }

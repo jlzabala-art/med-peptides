@@ -31,6 +31,7 @@ import {
   ChevronDown, Layers, Eye, Lock, LogIn, User, MessageSquare
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
+import { getTeletestCatalog } from '../data/teletestRegistry';
 import '../styles/collection_shared.css';
 
 // Brand configurations with clinical metadata and 4 KPIs (Regla Golden #22)
@@ -138,7 +139,7 @@ const BRAND_CONFIGS = {
     kpis: [
       { label: 'Laboratory Quality', value: 'ISO 17025', sub: 'Generalitat de Catalunya E08750211', icon: Award, color: '#16a34a' },
       { label: 'Analytical Method', value: 'ICP-MS/MS & qPCR', sub: 'High-Resolution Mass Spectrometry', icon: Microscope, color: '#0284c7' },
-      { label: 'Diagnostic Scope', value: '33 Elements & HLA', sub: 'Hair Toxicology & Immunogenetics', icon: Dna, color: '#d97706' },
+      { label: 'Diagnostic Scope', value: '36+ Elements & HLA', sub: 'Hair Toxicology & Immunogenetics', icon: Dna, color: '#d97706' },
       { label: 'Digital Reports', value: 'FNMT Signed', sub: 'Digital Validation 5-7 Workdays', icon: ShieldCheck, color: '#7c3aed' }
     ],
     categories: [
@@ -150,27 +151,27 @@ const BRAND_CONFIGS = {
     ]
   },
   peptides: {
-    name: 'Peptide Therapeutics',
-    title: 'Analytical Research Peptides & Compounding Monographs',
-    tagline: 'High-Purity Reference Standards & Clinical Monographs',
-    badge: 'Analytical Peptides & Compounding Monographs',
+    name: 'Lotusland Peptides',
+    title: 'Lotusland • Clinical Peptide Portfolio',
+    tagline: 'High-Purity Reference Standards & Lyophilized Vials',
+    badge: 'Lotusland EU Lyophilization Hub',
     badgeColor: '#003666',
-    subtitle: 'Comprehensive monograph catalog of verified analytical research peptides and active compounding APIs (≥99.0% HPLC purity, certified mass spectrometry, endotoxin-tested).',
+    subtitle: 'Official monograph collection of verified lyophilized clinical peptides (≥99.0% HPLC purity, certified mass spectrometry, endotoxin-tested < 0.05 EU/mg) in sealed 10R borosilicate vials.',
     heroImage: '/images/og-peptides.png',
     accentColor: '#003666',
     kpis: [
       { label: 'Analytical Purity', value: '≥99.0% HPLC', sub: 'Certified Lot Analysis & Mass Spec', icon: ShieldCheck, color: '#16a34a' },
-      { label: 'Compound Classes', value: 'Peptides & Secretagogues', sub: 'Bioregulators, Incretins & Tropics', icon: FlaskConical, color: '#003666' },
-      { label: 'Form Factor', value: 'Lyophilized Cake', sub: 'Sealed Glass Vials with Septum', icon: Award, color: '#2563eb' },
+      { label: 'Sourcing Hub', value: 'Lotusland EU', sub: 'Verified Lyophilization Logistics', icon: Award, color: '#003666' },
+      { label: 'Form Factor', value: '10R Borosilicate', sub: 'Sealed Lyophilized Cake with Septum', icon: FlaskConical, color: '#2563eb' },
       { label: 'Monograph Specs', value: 'Full COA Included', sub: 'Sequence, MW & Net Peptide Content', icon: FileText, color: '#7c3aed' }
     ],
     categories: [
       { id: 'all', label: 'All Peptides' },
-      { id: 'tissue-repair', label: 'Tissue Repair & Healing' },
-      { id: 'metabolic', label: 'Metabolic & GLP-1' },
-      { id: 'cellular', label: 'Cellular & Mitochondrial' },
+      { id: 'recovery-repair', label: 'Recovery & Tissue Repair' },
+      { id: 'metabolic', label: 'Metabolic & GLP-1/GIP' },
+      { id: 'longevity', label: 'Longevity & Cellular' },
       { id: 'cognitive', label: 'Neuro & Cognitive' },
-      { id: 'cosmetic', label: 'Dermal & Collagen' }
+      { id: 'hormonal', label: 'Hormonal & GH Axis' }
     ]
   }
 };
@@ -183,7 +184,16 @@ function resolveBrandProductImage(product, brandSlug) {
   if (product.image) return product.image;
 
   if (brandSlug === 'peptides') {
-    return '/images/og-peptides.png';
+    if (product.image) return product.image;
+    if (product.image_url) return product.image_url;
+    if (product.imageUrl) return product.imageUrl;
+    const pid = (product.id || product.slug || '').toLowerCase();
+    if (pid.includes('bpc')) return '/images/products/lotusland/bpc-157.png';
+    if (pid.includes('tb-500') || pid.includes('tb500')) return '/images/products/lotusland/tb-500.png';
+    if (pid.includes('ghk')) return '/images/products/lotusland/ghk-cu.png';
+    if (pid.includes('epithalon')) return '/images/products/lotusland/epithalon.png';
+    if (pid.includes('mots')) return '/images/products/lotusland/mots-c.png';
+    return '/images/products/lotusland/bpc-157.png';
   }
 
   const id = (product.id || '').toLowerCase();
@@ -269,15 +279,24 @@ function resolveProductDatasheet(product, brandSlug) {
 }
 
 function resolveProductRegulatoryBadges(product, brandSlug) {
+  if (brandSlug === 'teletest') {
+    return [
+      { label: 'ISO 17025', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'ISO 17025 European Reference Laboratory' },
+      { label: 'Generalitat E08750211', color: '#0369a1', bg: 'rgba(3, 105, 161, 0.12)', border: 'rgba(3, 105, 161, 0.25)', title: 'Departament de Salut de la Generalitat de Catalunya' }
+    ];
+  }
+
   if (brandSlug !== 'colway') {
+    if (brandSlug === 'peptides') {
+      return [
+        { label: 'HPLC ≥99.0%', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'HPLC Verified Analytical Monograph Standard' },
+        { label: 'Lotusland Hub', color: '#003666', bg: 'rgba(0, 54, 102, 0.10)', border: 'rgba(0, 54, 102, 0.25)', title: 'Official Lotusland Lyophilization Logistics Hub' }
+      ];
+    }
     const badgeLabel = brandSlug === 'eterna'
       ? 'CAP / CLIA'
       : (brandSlug === 'ultraperson' || brandSlug === 'ultraman')
       ? 'EU GMP'
-      : brandSlug === 'peptides'
-      ? 'HPLC ≥99.0%'
-      : brandSlug === 'teletest'
-      ? 'ISO 17025'
       : 'CE-IVDR';
     return [
       { label: badgeLabel, color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'Laboratory & Quality Standard' }
@@ -311,7 +330,7 @@ function resolveProductRegulatoryBadges(product, brandSlug) {
 
 export default function BrandCollectionPage({
   brandSlug = 'bloodo',
-  products = [],
+  products: initialProducts = [],
   onSelectProduct,
   updateCart,
   toggleCompare
@@ -322,6 +341,13 @@ export default function BrandCollectionPage({
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const isEs = false; // Force English — Spanish translations preserved for future i18n
 
+  const products = useMemo(() => {
+    if (brandSlug === 'teletest' && (!initialProducts || initialProducts.length === 0)) {
+      return getTeletestCatalog();
+    }
+    return initialProducts || [];
+  }, [brandSlug, initialProducts]);
+
   const brandCategories = useMemo(() => {
     return (config.categories || []).map((cat) => {
       const isAll = cat.id === 'all';
@@ -330,6 +356,12 @@ export default function BrandCollectionPage({
         ? products.length
         : products.filter(p => {
             const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''} ${p.description || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
+            if (brandSlug === 'teletest') {
+              if (catId === 'genomics') return str.includes('genom') || str.includes('hla') || str.includes('celiac') || str.includes('celiaca') || str.includes('gnt') || str.includes('autoimmun');
+              if (catId === 'toxicology') return str.includes('toxic') || str.includes('mineral') || str.includes('htma') || str.includes('hair') || str.includes('cabello') || str.includes('metales') || str.includes('heavy metal');
+              if (catId === 'metabolic') return str.includes('omega') || str.includes('metabol') || str.includes('fatty acid') || str.includes('acidos grasos');
+              if (catId === 'detox') return str.includes('detox') || str.includes('saliva') || str.includes('metabolizer') || str.includes('pharmacogen') || str.includes('farmacogen');
+            }
             return str.includes(catId);
           }).length;
       return {
@@ -338,7 +370,7 @@ export default function BrandCollectionPage({
         count
       };
     });
-  }, [config.categories, products]);
+  }, [config.categories, products, brandSlug]);
 
   const colwayCategories = brandCategories;
 
@@ -372,7 +404,24 @@ export default function BrandCollectionPage({
   const getWhatsAppInquiryUrl = (product = null) => {
     const cleanPhone = process.env.NEXT_PUBLIC_ATLAS_WHATSAPP || '971564179256';
     let text;
-    if (product) {
+    if (brandSlug === 'peptides') {
+      if (product) {
+        text = `Hello Atlas Health Services Medical Affairs, I am inquiring about *${product.name || product.title}* from the Lotusland Peptides Collection. Please provide institutional wholesale pricing, COA and technical specifications.`;
+      } else if (selectedCategory && selectedCategory !== 'all') {
+        text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *Lotusland Peptides (${selectedCategory})* catalog. Please share the wholesale catalog and supply terms.`;
+      } else {
+        text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *Lotusland Peptides Collection* (HPLC ≥99.0% Lyophilized Vials). Please share the wholesale catalog and supply terms.`;
+      }
+    } else if (brandSlug === 'teletest') {
+      if (product) {
+        text = `Hello Atlas Health Services Medical Affairs, I am inquiring about *${product.name || product.title}* from the TeleTest Analytika® Collection (ISO 17025 European Reference Laboratory). Please provide institutional wholesale pricing and clinical technical documentation.`;
+      } else if (selectedCategory && selectedCategory !== 'all') {
+        const catMeta = colwayCategories.find(c => c.id === selectedCategory);
+        text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *TeleTest Analytika® ${catMeta?.label || selectedCategory}* diagnostic panel line. I would like to request clinical protocols and B2B pricing for medical clinics.`;
+      } else {
+        text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *TeleTest Analytika® Clinical Diagnostics Collection* (HTMA Hair Mineral Toxicology, HLA Autoimmunity, Celiac Predisposition, Omega-3 Index, Saliva Metabolizer). Please share the wholesale catalog and laboratory onboarding guidelines.`;
+      }
+    } else if (product) {
       text = `Hello Atlas Health Services Medical Affairs, I am inquiring about *${product.name || product.title}* from the Colway® Collection. Please provide institutional wholesale pricing and clinical technical documentation.`;
     } else if (selectedCategory && selectedCategory !== 'all') {
       const catMeta = colwayCategories.find(c => c.id === selectedCategory);
@@ -497,6 +546,19 @@ export default function BrandCollectionPage({
           if (cat === 'trichology' || cat === 'hair') return str.includes('hair') || str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('szampon') || str.includes('odzywka');
           if (cat === 'nutricosmetics' || cat === 'nutraceutical') return str.includes('colvita') || str.includes('supplement') || str.includes('capsule') || str.includes('suplement');
         }
+        if (brandSlug === 'teletest') {
+          if (cat === 'genomics') return str.includes('genom') || str.includes('hla') || str.includes('celiac') || str.includes('celiaca') || str.includes('gnt') || str.includes('autoimmun');
+          if (cat === 'toxicology') return str.includes('toxic') || str.includes('mineral') || str.includes('htma') || str.includes('hair') || str.includes('cabello') || str.includes('metales') || str.includes('heavy metal');
+          if (cat === 'metabolic') return str.includes('omega') || str.includes('metabol') || str.includes('fatty acid') || str.includes('acidos grasos');
+          if (cat === 'detox') return str.includes('detox') || str.includes('saliva') || str.includes('metabolizer') || str.includes('pharmacogen') || str.includes('farmacogen');
+        }
+        if (brandSlug === 'peptides') {
+          if (cat === 'recovery-repair') return str.includes('recovery') || str.includes('repair') || str.includes('bpc') || str.includes('tb-500') || str.includes('tb500') || str.includes('ghk') || str.includes('healing');
+          if (cat === 'metabolic') return str.includes('metabolic') || str.includes('weight') || str.includes('glp') || str.includes('gip') || str.includes('semaglutide') || str.includes('tirzepatide') || str.includes('aod') || str.includes('tesamorelin');
+          if (cat === 'longevity') return str.includes('longevity') || str.includes('cellular') || str.includes('epithalon') || str.includes('mots') || str.includes('nad');
+          if (cat === 'cognitive') return str.includes('cognitive') || str.includes('neuro') || str.includes('semax') || str.includes('selank') || str.includes('brain');
+          if (cat === 'hormonal') return str.includes('hormon') || str.includes('cjc') || str.includes('ipamorelin') || str.includes('gh') || str.includes('growth hormone');
+        }
         if (brandSlug === 'ultraperson' || brandSlug === 'ultraman') {
           if (cat === 'energy') return str.includes('energy') || str.includes('metabolic') || str.includes('coq10') || str.includes('pqq');
           if (cat === 'cognitive') return str.includes('cognitive') || str.includes('clarity') || str.includes('focus') || str.includes('stress') || str.includes('theanine');
@@ -519,6 +581,24 @@ export default function BrandCollectionPage({
   }, [products, searchQuery, selectedCategory, sortOption]);
 
   const activeSectionContext = useMemo(() => {
+    if (brandSlug === 'teletest') {
+      return {
+        sectionId: selectedCategory,
+        sectionTitle: selectedCategory === 'toxicology'
+          ? 'ICP-MS/MS Hair Tissue Mineral & Heavy Metals Toxicology'
+          : selectedCategory === 'genomics'
+          ? 'High-Resolution HLA Immunogenetics & Celiac Predisposition'
+          : selectedCategory === 'metabolic'
+          ? 'Erythrocyte Membrane Omega-3 Index & Cellular Silent Inflammation'
+          : selectedCategory === 'detox'
+          ? 'Phase I/II Cytochrome P450 Hepatic Detoxification & Pharmacogenetics'
+          : 'TeleTest Analytika® ISO 17025 Clinical Diagnostic Panels',
+        products: filteredProducts.map(p => p.name || p.title),
+        keyActives: 'Accreditation: Generalitat de Catalunya E08750211 · ISO 17025 European Reference Laboratory (Barcelona, EU). FNMT Digitally Signed Certified Reports.',
+        mechanisms: 'Quantitative clinical laboratory determinations utilizing tandem mass spectrometry (ICP-MS/MS), capillary gas chromatography (GC-FID), and high-resolution multiplex real-time PCR.',
+      };
+    }
+
     if (brandSlug !== 'colway') {
       return {
         sectionId: selectedCategory,
@@ -626,11 +706,11 @@ export default function BrandCollectionPage({
   };
 
   const handleProductClick = (product) => {
-    if (onSelectProduct) {
-      onSelectProduct(product.name || product.title);
-    } else {
-      const slug = product.slug || product.id;
+    const slug = product.slug || product.id;
+    if (slug) {
       router.push(`/p/${slug}`);
+    } else if (onSelectProduct) {
+      onSelectProduct(product.name || product.title);
     }
   };
 
@@ -768,11 +848,16 @@ export default function BrandCollectionPage({
                 🧬 {filteredProducts.length} {brandSlug === 'colway' ? 'Formulations' : brandSlug === 'peptides' ? 'Peptides' : 'Items'}
               </span>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: config.accentColor, background: `${config.accentColor}10`, border: `1px solid ${config.accentColor}30`, padding: '3px 9px', borderRadius: '4px' }}>
-                {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : brandSlug === 'peptides' ? '🏛️ Atlas Certified Standards' : brandSlug === 'teletest' ? '🏛️ Generalitat de Catalunya E08750211' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🏛️ PharmaPolis Labs' : '🏛️ LifeLab1 Diagnostics'}
+                {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : brandSlug === 'peptides' ? '🏛️ Lotusland EU Lyophilization Hub' : brandSlug === 'teletest' ? '🏛️ Generalitat de Catalunya E08750211' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🏛️ PharmaPolis Labs' : '🏛️ LifeLab1 Diagnostics'}
               </span>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '3px 9px', borderRadius: '4px' }}>
                 {brandSlug === 'colway' ? '🛡️ ISO 22716 & EU CPNP Compliant' : brandSlug === 'peptides' ? '🛡️ HPLC ≥99.0% & Endotoxin Tested' : brandSlug === 'teletest' ? '🛡️ ISO 17025 Accredited' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🛡️ EU GMP Certified' : '🛡️ CE-IVDR & ISO 15189'}
               </span>
+              {brandSlug === 'peptides' && (
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#003666', background: '#e0f2fe', border: '1px solid #bae6fd', padding: '3px 9px', borderRadius: '4px' }}>
+                  ✨ 10R Sealed Lyophilized Vials
+                </span>
+              )}
               {brandSlug === 'colway' && (
                 <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '3px 9px', borderRadius: '4px' }}>
                   ✨ Native Freshwater Tropocollagen (3D Helix)
@@ -1276,6 +1361,33 @@ export default function BrandCollectionPage({
                 gap: viewMode === 'grid' ? '1.25rem' : '0.75rem',
                 width: '100%'
               }}>
+                {/* Google Cloud UX Table Header (when in table mode) */}
+                {viewMode === 'table' && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '9px 1.25rem',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    color: '#64748b',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em'
+                  }}>
+                    <div style={{ flex: '1 1 360px', minWidth: 0, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <span>{brandSlug === 'peptides' ? 'Compound / Monograph Specification' : 'Resource & Specification'}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexShrink: 0 }}>
+                      <span style={{ width: '130px', textAlign: 'left' }}>{brandSlug === 'peptides' ? 'Sourcing Hub' : 'Accreditation'}</span>
+                      <span style={{ width: '140px', textAlign: 'right' }}>{isEs ? 'Tarifa B2B' : 'Wholesale Tier'}</span>
+                      <span style={{ width: '190px', textAlign: 'right' }}>{isEs ? 'Acciones' : 'Actions'}</span>
+                    </div>
+                  </div>
+                )}
+
                 {filteredProducts.map(product => {
                   const imageSrc = resolveBrandProductImage(product, brandSlug);
                   const displayName = product.canonicalName || product.name || product.title || product.id;
@@ -1284,6 +1396,8 @@ export default function BrandCollectionPage({
                     ? (product.sampleType || 'Capillary Dried Blood Spot (DBS)')
                     : brandSlug === 'colway'
                     ? (product.volume || product.presentation || (product.is_supplement || product.id?.includes('colvita') ? '60 / 120 Capsules (Box)' : 'Dermocosmetic Formulation'))
+                    : brandSlug === 'peptides'
+                    ? (product.dosage ? `${product.dosage} • 10R Lyophilized Vial` : (product.presentation || '10R Lyophilized Vial'))
                     : (product.sampleType || product.presentation || product.volume || 'Clinical Formulation');
                   const isExpanded = !!expandedDetails[product.id];
                   const isAdded = addedItem === product.id;
@@ -1574,7 +1688,7 @@ export default function BrandCollectionPage({
                             ID: <CopyableId value={product.id} maxLength={18} />
                           </span>
                           <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <CheckCircle2 size={12} /> {brandSlug === 'eterna' ? 'Eurofins Genomics' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? 'PharmaPolis Labs' : brandSlug === 'colway' ? 'Colway Dermocosmetics' : brandSlug === 'peptides' ? 'Atlas Analytical' : brandSlug === 'teletest' ? 'TeleTest Reference Lab' : 'LifeLab1'}
+                            <CheckCircle2 size={12} /> {brandSlug === 'eterna' ? 'Eurofins Genomics' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? 'PharmaPolis Labs' : brandSlug === 'colway' ? 'Colway Dermocosmetics' : brandSlug === 'peptides' ? 'Lotusland EU Hub' : brandSlug === 'teletest' ? 'TeleTest Reference Lab' : 'LifeLab1'}
                           </span>
                         </div>
 
