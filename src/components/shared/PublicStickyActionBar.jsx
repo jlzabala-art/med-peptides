@@ -139,14 +139,14 @@ export default function PublicStickyActionBar({
         <div className="public-sticky-action-bar__info">
           <div className="public-sticky-action-bar__meta-row">
             {badge && (
-              <span className={getBadgeClass()}>{badge}</span>
+              React.isValidElement(badge) ? badge : <span className={getBadgeClass()}>{badge}</span>
             )}
-            <div className="public-sticky-action-bar__title" title={title}>
+            <div className="public-sticky-action-bar__title" title={typeof title === 'string' ? title : undefined}>
               {title}
             </div>
           </div>
           {subtitle && (
-            <div className="public-sticky-action-bar__subtitle" title={subtitle}>
+            <div className="public-sticky-action-bar__subtitle" title={typeof subtitle === 'string' ? subtitle : undefined}>
               {subtitle}
             </div>
           )}

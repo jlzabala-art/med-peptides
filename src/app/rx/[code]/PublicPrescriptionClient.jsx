@@ -77,10 +77,11 @@ import PrescriptionModalsContainer from '@/components/prescription/PrescriptionM
 import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
 import { usePrescriptionData, getPosologyText } from '@/hooks/usePrescriptionData';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { fetchAuthorizedPrescriptionAction } from '@/actions/prescriptionsActions';
 
 export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake: _onBackToIntake = null, initialView = null }) {
   const { can, is } = useRoleAccess();
-  const isAuthorizedViewer = Boolean(can('view:patients') || is('doctor') || is('medical_director') || is('admin') || is('clinic'));
+  const isAuthorizedViewer = Boolean(can('view:patients') || is('doctor') || is('medical_director') || is('admin') || is('clinic') || is('account_manager'));
 
   const [currentRx, setCurrentRx] = useState(rx || {});
   const [prevRx, setPrevRx] = useState(rx);
@@ -88,6 +89,23 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     setPrevRx(rx);
     setCurrentRx(rx || {});
   }
+
+  // Authoritative re-fetch: If user is authenticated as Admin/Doctor/Clinic and SSR provided a codified payload,
+  // load the full authoritative prescription document
+  useEffect(() => {
+    if (isAuthorizedViewer && (currentRx?.isCodifiedView || currentRx?.patientName?.startsWith('Patient PT-') || currentRx?.doctorName === 'Licensed Clinical Practice')) {
+      const targetCode = currentRx?.fileNumber || currentRx?.code || currentRx?.id || rx?.fileNumber || rx?.code || rx?.id;
+      if (targetCode) {
+        fetchAuthorizedPrescriptionAction(targetCode).then(fullRx => {
+          if (fullRx && !fullRx.isCodifiedView) {
+            setCurrentRx(fullRx);
+          }
+        }).catch(err => {
+          console.warn('[PublicPrescriptionClient] Authorized re-fetch error:', err);
+        });
+      }
+    }
+  }, [isAuthorizedViewer, currentRx?.isCodifiedView, currentRx?.patientName, currentRx?.doctorName, currentRx?.id, currentRx?.code, currentRx?.fileNumber, rx?.id, rx?.code, rx?.fileNumber]);
 
   const searchParams = useSearchParams();
   const viewParam = initialView || searchParams?.get('view') || searchParams?.get('mode');
@@ -345,20 +363,25 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [showBrochureModal, setShowBrochureModal] = useState(false);
   const [showDocDropdown, setShowDocDropdown] = useState(false);
   const docDropdownRef = useRef(null);
+  const [showPatientDropdown, setShowPatientDropdown] = useState(false);
+  const patientDropdownRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (docDropdownRef.current && !docDropdownRef.current.contains(event.target)) {
         setShowDocDropdown(false);
       }
+      if (patientDropdownRef.current && !patientDropdownRef.current.contains(event.target)) {
+        setShowPatientDropdown(false);
+      }
     }
-    if (showDocDropdown) {
+    if (showDocDropdown || showPatientDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showDocDropdown]);
+  }, [showDocDropdown, showPatientDropdown]);
 
   const isDispensed = useMemo(() => {
     return Boolean(
@@ -444,7 +467,16 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           copyUrl={isPatientView ? patientPublicUrl : publicUrl}
           shortUrl={isPatientView ? patientPublicUrl : publicUrl}
           loginRedirect={isPatientView ? patientPublicUrl : publicUrl}
-          hideTier2={true}
+          hideTier2={false}
+          breadcrumb={doctorPublicUrl ? [
+            { label: clinic || doctorClinic || treatingDoc?.clinic || displayDoctorNameShort || (isEs ? 'Clínica' : 'Clinic'), href: doctorPublicUrl },
+            { label: isEs ? 'Prescripción Médica' : 'Medical Prescription' },
+            { label: `#${rxId || currentRx?.prescriptionNumber || code || 'RX'}` }
+          ] : [
+            { label: isEs ? 'Portal de Pacientes' : 'Patient Portal', href: '/patient' },
+            { label: isEs ? 'Prescripción Médica' : 'Medical Prescription' },
+            { label: `#${rxId || currentRx?.prescriptionNumber || code || 'RX'}` }
+          ]}
           brandHref={doctorPublicUrl}
           brandTitle={isAuthorizedViewer ? (isEs ? `Volver al portal del Dr/a. ${nominalDoctorName}` : `Return to Dr. ${nominalDoctorName}'s Portal`) : (isEs ? 'Portal de Práctica Médica Verificada' : 'Verified Medical Practice Portal')}
           doctorHomeHref={doctorPublicUrl}
@@ -1950,22 +1982,50 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       </div>
 
       {/* ── Google Cloud Console Standard Unified Footer ── */}
-      <PublicUnifiedFooter lang={lang || 'en'} minimal={true} />
+      <PublicUnifiedFooter lang={lang || 'en'} minimal={embedded} />
 
       {/* ── Universal Public Sticky Action Bar (GCP Standard Across All Public Pages) ── */}
       {!embedded && (
         <PublicStickyActionBar
-          title={`${patientName} #${rxId}`}
-          subtitle={`${resolvedFormulaSummary || prescriptionTypeInfo.label} • Dr. ${nominalDoctorName || 'Atlas Clinical'}`}
-          badge={isPatientView ? (isEs ? 'PACIENTE RX' : 'PATIENT RX') : (isEs ? 'RECETA MÉDICA' : 'PRESCRIPTION')}
-          badgeType="protocol"
+          title={
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', minWidth: 0, maxWidth: '100%' }}>
+              <span style={{ fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {patientName || (isEs ? 'Expediente Paciente' : 'Patient Dossier')}
+              </span>
+              <CopyableId value={rxId} />
+            </div>
+          }
+          subtitle={
+            compoundedFormulations.length > 1
+              ? `${isEs ? 'Parte' : 'Part'} ${compoundedFormulations[0]?.index || 1} de ${compoundedFormulations.length}: ${compoundedFormulations[0]?.shortTitle || resolvedFormulaSummary} • Dr. ${displayDoctorNameShort}`
+              : `${resolvedFormulaSummary || prescriptionTypeInfo.label} • Dr. ${nominalDoctorName || displayDoctorNameShort || 'Atlas Clinical'}`
+          }
+          badge={
+            <StatusBadge 
+              status={currentStatus || 'active'} 
+              label={isPatientView ? (isEs ? 'Tratamiento Activo' : 'Active Treatment') : undefined}
+            />
+          }
           inquireLabel={
             isPatientView
-              ? (isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Consultar Prescripción' : 'Inquire Prescription'))
+              ? (isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Pedir Medicación' : 'Order Prescription'))
               : (isEs ? 'Consultar Laboratorio' : 'Inquire Lab Support')
           }
           onInquire={() => setIsInquiryDrawerOpen(true)}
           showClinicalAI={true}
+          onOpenClinicalAI={() => {
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('open-public-atlas-ai', {
+                detail: {
+                  productName: resolvedFormulaSummary || rxId,
+                  category: prescriptionTypeInfo.label,
+                  initialQuery: isEs
+                    ? `¿Cómo debo tomar mi prescripción ${rxId} (${resolvedFormulaSummary}) y qué recomendaciones o interacciones debo seguir?`
+                    : `How should I take my prescription ${rxId} (${resolvedFormulaSummary}) and what instructions or interactions should I follow?`
+                }
+              }));
+            }
+          }}
           showSections={true}
           sectionsCount={4}
           sectionsLabel={isEs ? 'Secciones' : 'Sections'}
@@ -2170,28 +2230,158 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </button>
               </>
             ) : (
-              /* Patient View Supplemental Actions */
-              <>
+              /* Patient View Supplemental Actions — Unified Glassmorphic Patient Menu */
+              <div style={{ position: 'relative' }} ref={patientDropdownRef}>
                 <button
                   type="button"
-                  onClick={() => { triggerHaptic('selection'); setShowBrochureModal(true); }}
-                  className="rx-dock-btn rx-dock-btn-primary"
-                  title={isEs ? 'Ver guía de tratamiento y descargar PDF' : 'View treatment guide & download PDF'}
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    setShowPatientDropdown(prev => !prev);
+                  }}
+                  className="rx-dock-btn rx-dock-btn-secondary"
+                  title={isEs ? 'Guía, autenticidad y opciones del paciente' : 'Regimen guide, QR & patient options'}
                 >
-                  <FileText size={14} color="#ffffff" />
-                  <span>{isEs ? 'Guía de Tratamiento' : 'Treatment Guide'}</span>
+                  <FileText size={14} color="#003666" />
+                  <span className="rx-dock-btn-label-desktop">{isEs ? 'Guía y Opciones' : 'Guide & Options'}</span>
+                  <ChevronDown
+                    size={13}
+                    color="#64748b"
+                    style={{
+                      transform: showPatientDropdown ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.15s ease'
+                    }}
+                  />
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
-                  className="rx-dock-btn rx-dock-btn-secondary"
-                  title={isEs ? 'Verificar autenticidad digital con código QR' : 'Verify authenticity QR code'}
-                >
-                  <QrCode size={14} color="#003666" />
-                  <span className="rx-dock-btn-label-desktop">{isEs ? 'Autenticidad QR' : 'Verify QR'}</span>
-                </button>
-              </>
+                {showPatientDropdown && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 'calc(100% + 12px)',
+                    right: 0,
+                    zIndex: 999,
+                    background: 'rgba(255, 255, 255, 0.96)',
+                    backdropFilter: 'blur(24px) saturate(190%)',
+                    WebkitBackdropFilter: 'blur(24px) saturate(190%)',
+                    borderRadius: '10px',
+                    boxShadow: '0 12px 32px rgba(15, 23, 42, 0.16)',
+                    border: '1px solid #cbd5e1',
+                    padding: '6px',
+                    minWidth: '280px',
+                    maxWidth: 'calc(100vw - 32px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px',
+                    animation: 'fadeIn 0.15s ease-out'
+                  }}>
+                    {/* 1. Official Regimen Guide PDF */}
+                    <button
+                      type="button"
+                      onClick={() => { setShowPatientDropdown(false); setShowBrochureModal(true); }}
+                      className="rx-dock-drop-item"
+                    >
+                      <FileText size={15} color="#1a73e8" />
+                      <div>
+                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Guía de Tratamiento (PDF)' : 'Treatment Routine Guide (PDF)'}</div>
+                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Pauta de administración y descarga para viajes' : 'Daily administration schedule & travel PDF'}</div>
+                      </div>
+                    </button>
+
+                    {/* 2. Official QR Verification */}
+                    <button
+                      type="button"
+                      onClick={() => { setShowPatientDropdown(false); setShowQrModal(true); }}
+                      className="rx-dock-drop-item"
+                    >
+                      <QrCode size={15} color="#0284c7" />
+                      <div>
+                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Verificación Autenticidad QR' : 'Official QR Verification'}</div>
+                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Validación digital farmacéutica EU GMP' : 'EU GMP digital dispensing verification'}</div>
+                      </div>
+                    </button>
+
+                    {/* 3. Multi-Part Phase Switcher (if > 1 phase, e.g. RX-51812-A Morning vs Night) */}
+                    {compoundedFormulations.length > 1 && (
+                      <>
+                        <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
+                        <div style={{ fontSize: '0.66rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8', padding: '2px 8px' }}>
+                          {isEs ? 'Fórmulas del Tratamiento' : 'Regimen Formulas'}
+                        </div>
+                        {compoundedFormulations.map((f, idx) => (
+                          <button
+                            key={f.id || idx}
+                            type="button"
+                            onClick={() => {
+                              setShowPatientDropdown(false);
+                              setSelectedPhase(f.id);
+                              setActiveGcpTab('treatment');
+                              setExpandedPhases(prev => ({ ...prev, [f.id]: true }));
+                              const elem = document.getElementById(f.id) || document.getElementById(`formulation-${idx}`);
+                              if (elem) elem.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="rx-dock-drop-item"
+                          >
+                            <Pill size={15} color={idx === 0 ? '#16a34a' : '#7c3aed'} />
+                            <div>
+                              <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>
+                                {f.title || (isEs ? `Fórmula ${idx + 1}` : `Formula ${idx + 1}`)}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
+                                {f.dosageForm || (isEs ? 'Ver pauta y posología' : 'View formula details')}
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </>
+                    )}
+
+                    {/* 4. WhatsApp Direct Refill Request */}
+                    <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowPatientDropdown(false);
+                        const text = isEs
+                          ? `Hola, soy ${patientName}. Deseo solicitar la reposición de mi prescripción #${rxId} (${resolvedFormulaSummary || 'fórmula magistral'}).\n🔗 Expediente de verificación: ${patientPublicUrl}`
+                          : `Hello, I am ${patientName}. I would like to request a refill for my prescription #${rxId} (${resolvedFormulaSummary || 'compounded formula'}).\n🔗 Verification link: ${patientPublicUrl}`;
+                        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+                      }}
+                      className="rx-dock-drop-item"
+                    >
+                      <MessageCircle size={15} color="#25D366" />
+                      <div>
+                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Pedir Reposición por WhatsApp' : 'Request Refill via WhatsApp'}</div>
+                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Mesa de despacho farmacéutico directo' : 'Direct pharmacy dispensing desk'}</div>
+                      </div>
+                    </button>
+
+                    {/* 5. Contact Doctor/Clinic if phone available */}
+                    {safeDoctorPhone && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowPatientDropdown(false);
+                          const cleanPhone = String(safeDoctorPhone).replace(/[^0-9]/g, '');
+                          const text = isEs
+                            ? `Hola equipo de ${doctorClinic || 'consulta médica'}, soy ${patientName}. Tengo una consulta sobre mi pauta prescrita #${rxId}.\n🔗 Enlace: ${patientPublicUrl}`
+                            : `Hello ${doctorClinic || 'clinical practice'}, I am ${patientName}. I have a question regarding my prescribed regimen #${rxId}.\n🔗 Link: ${patientPublicUrl}`;
+                          window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+                        }}
+                        className="rx-dock-drop-item"
+                      >
+                        <Stethoscope size={15} color="#003666" />
+                        <div>
+                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>
+                            {isEs ? `Contactar Clínica (${doctorClinic || 'Médico'})` : `Message Clinic (${doctorClinic || 'Practice'})`}
+                          </div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
+                            {isEs ? 'Dudas médicas sobre posología o revisión' : 'Clinical dosage or follow-up query'}
+                          </div>
+                        </div>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             )
           }
         />
