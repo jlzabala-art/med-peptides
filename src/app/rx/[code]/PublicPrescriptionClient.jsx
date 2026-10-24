@@ -46,10 +46,22 @@ import {
 } from '@/lib/icons';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { RotateCcw, Home, Loader2, AlertTriangle, MessageCircle } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { RotateCcw, Home, Loader2, AlertTriangle, MessageCircle, Lock } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+
+const DoctorAuthNoticeModal = dynamic(
+  () => import('@/components/doctor/modals/DoctorAuthNoticeModal'),
+  { ssr: false }
+);
+const PatientAuthNoticeModal = dynamic(
+  () => import('@/components/patient/modals/PatientAuthNoticeModal'),
+  { ssr: false }
+);
 
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
+import { verifyPatientAccessKey } from '@/utils/prescriptionToken';
 import toast from 'react-hot-toast';
 import { db } from '@/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
@@ -81,6 +93,7 @@ import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { fetchAuthorizedPrescriptionAction } from '@/actions/prescriptionsActions';
 
 export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake: _onBackToIntake = null, initialView = null }) {
+  const { user } = useAuth();
   const { can, is } = useRoleAccess();
   const isAuthorizedViewer = Boolean(can('view:patients') || is('doctor') || is('medical_director') || is('admin') || is('clinic') || is('account_manager'));
 
@@ -110,7 +123,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
   const searchParams = useSearchParams();
   const viewParam = initialView || searchParams?.get('view') || searchParams?.get('mode');
-  const isPatientView = viewParam === 'patient' || (!isAuthorizedViewer && viewParam !== 'doctor');
+  const defaultIsPatientView = viewParam === 'patient' || (!isAuthorizedViewer && viewParam !== 'doctor');
+  const [overrideView, setOverrideView] = useState(null); // 'patient' | 'doctor' | null
+  const isPatientView = overrideView ? overrideView === 'patient' : defaultIsPatientView;
 
   const [lang, setLang] = useState('en');
   const [copied, setCopied] = useState(false);
@@ -119,6 +134,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [inquiryCustomEntity, setInquiryCustomEntity] = useState(null);
   const [activeGcpTab, setActiveGcpTab] = useState('treatment'); // 'treatment' | 'roadmap' | 'traceability' | 'credentials' | 'patientSharing'
+  const [showDoctorAuthModal, setShowDoctorAuthModal] = useState(false);
+  const [showPatientAuthModal, setShowPatientAuthModal] = useState(false);
 
   const handleOpenInquiry = useCallback((customEntity = null) => {
     setInquiryCustomEntity(customEntity || null);
@@ -143,6 +160,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [showLabelsModal, setShowLabelsModal] = useState(false);
   const [selectedLabelIndex, setSelectedLabelIndex] = useState(0);
   const [showAtlasQuotationModal, setShowAtlasQuotationModal] = useState(false);
+  const [showPatientShareModal, setShowPatientShareModal] = useState(false);
   const [showRxSwitcherModal, setShowRxSwitcherModal] = useState(false);
   const [showPatientRxModal, setShowPatientRxModal] = useState(false);
 
@@ -174,8 +192,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         setActiveGcpTab('credentials');
         setExpandedSections(prev => ({ ...prev, credentials: true }));
       } else if (targetId.includes('patient') || targetId.includes('sharing')) {
-        setActiveGcpTab('patientSharing');
-        setExpandedSections(prev => ({ ...prev, patientSharing: true }));
+        if (isPatientView) {
+          setActiveGcpTab('patientSharing');
+          setExpandedSections(prev => ({ ...prev, patientSharing: true }));
+        } else {
+          setShowPatientShareModal(true);
+        }
+      } else if (targetId.includes('quotation')) {
+        setShowAtlasQuotationModal(true);
       } else {
         setActiveGcpTab('treatment');
       }
@@ -222,12 +246,23 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const publicUrl = `${baseUrl}/rx/${rxId}`;
   const patientPublicUrl = `${baseUrl}/rx/${rxId}?view=patient`;
 
+  // Zero-friction tokenized access for patients entering via doctor-shared WhatsApp / QR
+  const tokenParam = searchParams?.get('k') || searchParams?.get('token') || searchParams?.get('access');
+  const isTokenAuthorized = useMemo(() => {
+    return Boolean(tokenParam && rxId && verifyPatientAccessKey(rxId, tokenParam));
+  }, [tokenParam, rxId]);
+  const isPatientAuthenticated = Boolean(user || isTokenAuthorized);
+
   const [currentStatus, setCurrentStatus] = useState(() => {
     return String(currentRx.status || currentRx.state || currentRx.fagronStatus || currentRx.orderStatus || 'approved').toLowerCase().trim();
   });
   const [isSigning, setIsSigning] = useState(false);
 
   const handleDoctorSignOff = async () => {
+    if (!isAuthorizedViewer) {
+      setShowDoctorAuthModal(true);
+      return;
+    }
     setIsSigning(true);
     triggerHaptic('selection');
     try {
@@ -472,11 +507,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           breadcrumb={doctorPublicUrl ? [
             { label: clinic || doctorClinic || treatingDoc?.clinic || displayDoctorNameShort || (isEs ? 'Clínica' : 'Clinic'), href: doctorPublicUrl },
             { label: isEs ? 'Prescripción Médica' : 'Medical Prescription' },
-            { label: `#${rxId || currentRx?.prescriptionNumber || code || 'RX'}` }
+            { label: `#${rxId || currentRx?.prescriptionNumber || currentRx?.code || 'RX'}` }
           ] : [
             { label: isEs ? 'Portal de Pacientes' : 'Patient Portal', href: '/patient' },
             { label: isEs ? 'Prescripción Médica' : 'Medical Prescription' },
-            { label: `#${rxId || currentRx?.prescriptionNumber || code || 'RX'}` }
+            { label: `#${rxId || currentRx?.prescriptionNumber || currentRx?.code || 'RX'}` }
           ]}
           brandHref={doctorPublicUrl}
           brandTitle={isAuthorizedViewer ? (isEs ? `Volver al portal del Dr/a. ${nominalDoctorName}` : `Return to Dr. ${nominalDoctorName}'s Portal`) : (isEs ? 'Portal de Práctica Médica Verificada' : 'Verified Medical Practice Portal')}
@@ -565,13 +600,42 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     <span>{isAuthorizedViewer ? (isEs ? `Volver a ${nominalDoctorName || 'Portal'}` : `Back to ${nominalDoctorName || 'Portal'}`) : (isEs ? 'Portal Médico' : 'Medical Portal')}</span>
                   </Link>
 
-                  <a
-                    href={`/rx/${rxId}?view=patient`}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('impact');
+                      setShowPatientShareModal(true);
+                    }}
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      background: 'rgba(255,255,255,0.22)',
+                      border: '1px solid rgba(255,255,255,0.40)',
+                      padding: '3px 10px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      transition: 'background 0.15s'
+                    }}
+                    title={isEs ? 'Compartir prescripción segura con el paciente (QR / WhatsApp)' : 'Share secure prescription with patient (QR / WhatsApp)'}
+                  >
+                    <Share2 size={12} color="#ffffff" />
+                    <span>{isEs ? 'Compartir con Paciente' : 'Share with Patient'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setOverrideView('patient');
+                    }}
                     style={{
                       fontSize: '0.72rem',
                       fontWeight: 600,
                       color: '#ffffff',
-                      textDecoration: 'none',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 4,
@@ -579,13 +643,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       borderRadius: '4px',
                       background: 'rgba(255,255,255,0.14)',
                       border: '1px solid rgba(255,255,255,0.25)',
+                      cursor: 'pointer',
                       transition: 'background 0.15s'
                     }}
-                    title={isEs ? 'Ver cómo lo verá el paciente' : 'Preview the patient view'}
+                    title={isEs ? 'Ver cómo lo verá el paciente (0ms switch)' : 'Preview the patient view (0ms switch)'}
                   >
                     <Eye size={12} />
                     <span>{isEs ? 'Vista Paciente' : 'Patient Preview'}</span>
-                  </a>
+                  </button>
                 </div>
               </div>
             ) : isAuthorizedViewer ? (
@@ -618,8 +683,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
-                  <a
-                    href={`/rx/${rxId}`}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setOverrideView('doctor');
+                    }}
                     style={{
                       fontSize: '0.72rem',
                       fontWeight: 650,
@@ -628,16 +697,16 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       border: '1px solid rgba(255,255,255,0.38)',
                       padding: '3px 10px',
                       borderRadius: '4px',
-                      textDecoration: 'none',
+                      cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 5
                     }}
-                    title={isEs ? 'Volver al panel clínico del médico' : 'Switch back to doctor clinical view'}
+                    title={isEs ? 'Volver al panel clínico del médico (0ms switch)' : 'Switch back to doctor clinical view (0ms switch)'}
                   >
                     <Stethoscope size={12} color="#ffffff" />
                     <span>{isEs ? 'Volver a Vista Médico' : 'Return to Doctor View'}</span>
-                  </a>
+                  </button>
 
                   <Link
                     href={doctorPublicUrl}
@@ -686,6 +755,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               doctorPublicUrl={doctorPublicUrl}
               handleCopyLink={handleCopyLink}
               copied={copied}
+              onOpenPatientShare={() => setShowPatientShareModal(true)}
               activeGcpTab={activeGcpTab}
               setActiveGcpTab={setActiveGcpTab}
               compoundedFormulations={compoundedFormulations}
@@ -702,6 +772,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               isEs={isEs}
               rxId={rxId}
               resolvedPrice={resolvedPrice}
+              isAuthenticated={isPatientAuthenticated}
+              onRequireAuth={() => setShowPatientAuthModal(true)}
               onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
             />
 
@@ -1233,8 +1305,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           </div>
         )}
 
-        {/* ── Section 5: Doctor & Clinical Care Hub (Patient View) vs Patient Sharing & Mobile Access (Doctor View) ── */}
-        {(activeGcpTab === 'patientSharing') && (
+        {/* ── Section 5: Doctor & Clinical Care Hub (Dedicated Patient View Support) ── */}
+        {(activeGcpTab === 'patientSharing') && isPatientView && (
         <div id="patient-sharing-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
           <div className="rx-card" style={{
             background: '#ffffff',
@@ -1978,6 +2050,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             onSelectTab={setActiveGcpTab}
             lang={lang}
             isAuthorizedViewer={isAuthorizedViewer}
+            isPatientView={isPatientView}
+            onOpenQuotation={() => setShowAtlasQuotationModal(true)}
           />
         </div>
       </div>
@@ -2009,10 +2083,25 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           }
           inquireLabel={
             isPatientView
-              ? (isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Pedir Medicación' : 'Order Prescription'))
+              ? (
+                  !isPatientAuthenticated ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                      <Lock size={12} color="#fbbf24" />
+                      <span>{isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Pedir Medicación' : 'Order Prescription')}</span>
+                    </span>
+                  ) : (
+                    isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Pedir Medicación' : 'Order Prescription')
+                  )
+                )
               : (isEs ? 'Consultar Laboratorio' : 'Inquire Lab Support')
           }
-          onInquire={() => setIsInquiryDrawerOpen(true)}
+          onInquire={() => {
+            if (isPatientView && !isPatientAuthenticated) {
+              setShowPatientAuthModal(true);
+            } else {
+              setIsInquiryDrawerOpen(true);
+            }
+          }}
           showClinicalAI={true}
           onOpenClinicalAI={() => {
             if (typeof window !== 'undefined') {
@@ -2044,14 +2133,23 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   <button
                     type="button"
                     disabled={isSigning}
-                    onClick={handleDoctorSignOff}
+                    onClick={isAuthorizedViewer ? handleDoctorSignOff : () => setShowDoctorAuthModal(true)}
                     className="rx-dock-btn rx-dock-btn-sign"
-                    title={isEs ? 'Firmar y autorizar formulación magistral' : 'Digitally sign and authorize prescription'}
+                    title={
+                      !isAuthorizedViewer
+                        ? (isEs ? 'Iniciar sesión médica para firmar y autorizar' : 'Sign in as physician to sign & authorize')
+                        : (isEs ? 'Firmar y autorizar formulación magistral' : 'Digitally sign and authorize prescription')
+                    }
                   >
                     {isSigning ? (
                       <>
                         <Loader2 size={14} className="animate-spin" />
                         <span>{isEs ? 'Firmando...' : 'Signing...'}</span>
+                      </>
+                    ) : !isAuthorizedViewer ? (
+                      <>
+                        <Lock size={14} color="#f59e0b" />
+                        <span>{isEs ? 'Firmar (Login Requerido)' : 'Sign (Login Required)'}</span>
                       </>
                     ) : (
                       <>
@@ -2470,12 +2568,15 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         patient={patient}
         patientName={patientName}
         doctorName={displayDoctorNameShort}
+        doctorClinic={doctorClinic}
         compoundedFormulations={compoundedFormulations}
         genomicsData={genomicsData}
         currentStatus={currentStatus}
         publicUrl={publicUrl}
         patientPublicUrl={patientPublicUrl}
         prescriptionLabels={prescriptionLabels}
+        showPatientShareModal={showPatientShareModal}
+        setShowPatientShareModal={setShowPatientShareModal}
         showQrModal={showQrModal}
         setShowQrModal={setShowQrModal}
         handleDownloadQrPng={handleDownloadQrPng}
@@ -2498,6 +2599,25 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             setCurrentRx(prev => ({ ...prev, ...payload.updatedFields }));
           }
         }}
+      />
+
+      {/* ── Google Cloud UX Doctor Authentication Notice Modal ── */}
+      <DoctorAuthNoticeModal
+        isOpen={showDoctorAuthModal}
+        onClose={() => setShowDoctorAuthModal(false)}
+        doctor={{ name: nominalDoctorName || displayDoctorNameShort }}
+        opaqueCode={rxId}
+        resourceName={isEs ? 'Firma facultativa y autorización de dispensación' : 'Physician digital signature & dispensing clearance'}
+      />
+
+      {/* ── Google Cloud UX Patient Authentication Notice Modal ── */}
+      <PatientAuthNoticeModal
+        isOpen={showPatientAuthModal}
+        onClose={() => setShowPatientAuthModal(false)}
+        rxId={rxId}
+        doctorName={nominalDoctorName || displayDoctorNameShort}
+        actionGoal={isDispensed ? 'refill' : 'quotation'}
+        isEs={isEs}
       />
     </div>
   );

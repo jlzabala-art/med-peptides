@@ -818,21 +818,13 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       icon: 'stethoscope'
     });
 
-    list.push({ 
-      id: 'patient-sharing-card', 
-      label: isPatientView
-        ? (isEs ? 'Contacto con Médico' : 'Doctor & Clinic Support')
-        : (isEs ? 'Atención al Paciente' : 'Patient Care Hub'),
-      category: 'patient-sharing',
-      icon: isPatientView ? 'stethoscope' : 'share'
-    });
-
-    if (!isPatientView) {
+    // In Patient View, keep dedicated clinical contact and clinic support
+    if (isPatientView) {
       list.push({ 
-        id: 'atlas-quotation-card', 
-        label: isEs ? 'Cotización Atlas' : 'Compounding Quote',
-        category: 'quotation',
-        icon: 'file'
+        id: 'patient-sharing-card', 
+        label: isEs ? 'Contacto con Médico' : 'Doctor & Clinic Support',
+        category: 'patient-sharing',
+        icon: 'stethoscope'
       });
     }
 

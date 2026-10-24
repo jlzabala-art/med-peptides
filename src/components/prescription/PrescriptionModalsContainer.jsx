@@ -8,6 +8,7 @@ import PrescriptionBrochureModal from '@/components/prescription/PrescriptionBro
 import RequestAtlasQuotationModal from '@/features/prescriptions/components/RequestAtlasQuotationModal';
 import DoctorRxSwitcherModal from '@/components/prescription/DoctorRxSwitcherModal';
 import PatientRxSwitcherModal from '@/components/prescription/PatientRxSwitcherModal';
+import PatientShareModal from '@/components/prescription/PatientShareModal';
 
 /**
  * PrescriptionModalsContainer
@@ -25,12 +26,15 @@ export default function PrescriptionModalsContainer({
   patient = {},
   patientName = '',
   doctorName = '',
+  doctorClinic = '',
   compoundedFormulations = [],
   genomicsData = null,
   currentStatus = 'approved',
   publicUrl = '',
   patientPublicUrl = '',
   prescriptionLabels = [],
+  showPatientShareModal = false,
+  setShowPatientShareModal,
   showQrModal = false,
   setShowQrModal,
   handleDownloadQrPng,
@@ -213,6 +217,17 @@ export default function PrescriptionModalsContainer({
           onRequestRefill={() => setShowAtlasQuotationModal && setShowAtlasQuotationModal(true)}
         />
       )}
+      {/* Dedicated Patient Share Modal (QR, WhatsApp & Safe Link) */}
+      <PatientShareModal
+        isOpen={showPatientShareModal}
+        onClose={() => setShowPatientShareModal && setShowPatientShareModal(false)}
+        rxId={rxId}
+        patientName={patientName}
+        patientPublicUrl={patientPublicUrl}
+        doctorName={doctorName}
+        doctorClinic={doctorClinic}
+        lang={lang}
+      />
     </>
   );
 }

@@ -37,6 +37,7 @@ export default function PrescriptionMasterHeader({
   doctorPublicUrl,
   handleCopyLink,
   copied = false,
+  onOpenPatientShare = null,
   activeGcpTab = 'treatment',
   setActiveGcpTab,
   compoundedFormulations = [],
@@ -98,6 +99,31 @@ export default function PrescriptionMasterHeader({
 
                 {/* Right: Quick Utilities Pinned to Top-Right (Google Cloud UX) */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                  {!isPatientView && onOpenPatientShare && (
+                    <button
+                      type="button"
+                      onClick={onOpenPatientShare}
+                      className="rx-header-action-btn"
+                      title={isEs ? 'Compartir pauta segura con el paciente (QR / WhatsApp)' : 'Share safe regimen with patient (QR / WhatsApp)'}
+                      style={{
+                        height: 32,
+                        padding: '0 10px',
+                        borderRadius: '6px',
+                        border: '1px solid #bbf7d0',
+                        background: '#f0fdf4',
+                        color: '#15803d',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        cursor: 'pointer',
+                        fontSize: '0.74rem',
+                        fontWeight: 650
+                      }}
+                    >
+                      <Share2 size={13} color="#15803d" />
+                      <span>{isEs ? 'Compartir con Paciente' : 'Share with Patient'}</span>
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={handleCopyLink}

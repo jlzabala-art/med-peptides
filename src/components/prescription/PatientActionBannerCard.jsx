@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { Tag, CheckCircle2, Clock, Calendar, MessageSquare, ArrowRight } from '@/lib/icons';
-import { RotateCcw, AlertCircle } from 'lucide-react';
+import { RotateCcw, AlertCircle, Lock } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 
 /**
@@ -12,6 +12,8 @@ import { triggerHaptic } from '@/utils/haptics';
  * - Only shows "Refill Action" if a refill is actually due or requested.
  * - Otherwise displays an active, reassuring clinical status with pending checklist items
  *   harmonized with the doctor's portal.
+ * - Enforces healthcare authentication: when not authenticated, shows lock icon (🔒)
+ *   and triggers frictionless Google Cloud UX quick login.
  */
 export default function PatientActionBannerCard({
   isPatientView = false,
@@ -22,10 +24,10 @@ export default function PatientActionBannerCard({
   currentStatus = 'approved',
   resolvedPrice = null,
   doctorName = '',
-  onOpenInquiry = null
+  onOpenInquiry = null,
+  isAuthenticated = false,
+  onRequireAuth = null
 }) {
-  if (!isPatientView) return null;
-
   // Determine if a refill is actually due (only show refill urgency if truly due)
   const isActuallyRefillDue = useMemo(() => {
     return Boolean(
@@ -39,9 +41,15 @@ export default function PatientActionBannerCard({
     );
   }, [rx, currentStatus]);
 
+  if (!isPatientView) return null;
+
   // Handle CTA click
   const handleAction = () => {
     triggerHaptic('selection');
+    if (!isAuthenticated && onRequireAuth) {
+      onRequireAuth('action');
+      return;
+    }
     if (onOpenInquiry) {
       onOpenInquiry();
     }
@@ -133,8 +141,8 @@ export default function PatientActionBannerCard({
                 whiteSpace: 'nowrap'
               }}
             >
-              <RotateCcw size={14} />
-              <span>{isEs ? 'Solicitar Reposición' : 'Request Refill'}</span>
+              {!isAuthenticated ? <Lock size={14} color="#fef08a" /> : <RotateCcw size={14} />}
+              <span>{isEs ? (!isAuthenticated ? 'Solicitar Reposición (Login)' : 'Solicitar Reposición') : (!isAuthenticated ? 'Request Refill (Login)' : 'Request Refill')}</span>
               <ArrowRight size={14} />
             </button>
           </div>
@@ -343,8 +351,8 @@ export default function PatientActionBannerCard({
               whiteSpace: 'nowrap'
             }}
           >
-            <Tag size={14} />
-            <span>{isEs ? 'Pedir Cotización' : 'Request Quotation'}</span>
+            {!isAuthenticated ? <Lock size={14} color="#fef08a" /> : <Tag size={14} />}
+            <span>{isEs ? (!isAuthenticated ? 'Pedir Cotización (Login)' : 'Pedir Cotización') : (!isAuthenticated ? 'Request Quotation (Login)' : 'Request Quotation')}</span>
             <ArrowRight size={14} />
           </button>
         </div>

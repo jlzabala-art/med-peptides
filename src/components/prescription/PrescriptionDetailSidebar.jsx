@@ -64,7 +64,9 @@ export default function PrescriptionDetailSidebar({
   activeGcpTab = '',
   onSelectTab = null,
   lang = 'en',
-  isAuthorizedViewer = false
+  isAuthorizedViewer = false,
+  isPatientView = false,
+  onOpenQuotation = null
 }) {
   const isEs = lang === 'es';
   const prescriptionCode = rxId || 'RX';
@@ -344,6 +346,90 @@ export default function PrescriptionDetailSidebar({
           </div>
         )}
 
+        {/* Compounding Quote Widget (Doctor / Admin Only) */}
+        {!isPatientView && (
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            padding: '12px 14px',
+            boxShadow: '0 2px 8px rgba(0, 54, 102, 0.04)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '6px',
+                  background: '#eff6ff',
+                  color: '#1d4ed8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <FileText size={15} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 750, color: '#0f172a' }}>
+                    {isEs ? 'Cotización de Elaboración' : 'Compounding Quote'}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                    Atlas Compounding Board
+                  </div>
+                </div>
+              </div>
+              <span style={{
+                fontSize: '0.64rem',
+                fontWeight: 650,
+                padding: '2px 6px',
+                borderRadius: '10px',
+                background: '#eff6ff',
+                color: '#1d4ed8',
+                border: '1px solid #bfdbfe'
+              }}>
+                {isEs ? 'Bajo Demanda' : 'On-Demand'}
+              </span>
+            </div>
+
+            <div style={{ fontSize: '0.72rem', color: '#475569', lineHeight: 1.35 }}>
+              {isEs 
+                ? `${formulations?.length || 1} fórmula(s) lista(s) para cotizar por el laboratorio central.`
+                : `${formulations?.length || 1} compounded formula(s) ready to be quoted by central pharmacy.`}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('impact');
+                if (onOpenQuotation) onOpenQuotation();
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                background: '#0284c7',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '7px',
+                padding: '8px 12px',
+                fontSize: '0.76rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)',
+                transition: 'background 0.15s'
+              }}
+            >
+              <FileText size={13} />
+              <span>{isEs ? 'Solicitar Cotización a Atlas' : 'Request Compounding Quote'}</span>
+            </button>
+          </div>
+        )}
+
         {/* Widget 1: On This Dossier (TOC) */}
         <div style={{
           background: '#ffffff',
@@ -569,6 +655,36 @@ export default function PrescriptionDetailSidebar({
                 <span>{copiedUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy URL')}</span>
               </button>
             </div>
+
+            {/* Compounding Quote Action in Mobile */}
+            {!isPatientView && (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('impact');
+                  setIsMobileDrawerOpen(false);
+                  if (onOpenQuotation) onOpenQuotation();
+                }}
+                style={{
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  background: '#0284c7',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 8px rgba(2, 132, 199, 0.25)'
+                }}
+              >
+                <FileText size={14} />
+                <span>{isEs ? 'Solicitar Cotización a Atlas' : 'Request Compounding Quote'}</span>
+              </button>
+            )}
 
             {/* TOC Sections List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

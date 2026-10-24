@@ -25,6 +25,7 @@ import {
   Dna
 } from '@/lib/icons';
 import ReconstitutionGuideCard from './ReconstitutionGuideCard';
+import CalendarSyncModal from './CalendarSyncModal';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
@@ -61,6 +62,7 @@ export default function PatientPrescriptionGuide({
     }
   });
   const [streakDays, setStreakDays] = useState(4);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
 
   const handleToggleDose = () => {
     triggerHaptic('selection');
@@ -304,22 +306,52 @@ export default function PatientPrescriptionGuide({
             </div>
           </div>
 
-          {/* Quick Doctor Badge */}
-          <div
-            style={{
-              background: '#ffffff',
-              border: '1px solid #cbd5e1',
-              borderRadius: '8px',
-              padding: '6px 12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            <span style={{ fontSize: '1.1rem' }}>👨‍⚕️</span>
-            <div>
-              <div style={{ fontSize: '0.68rem', color: '#64748b' }}>{isEs ? 'Médico Prescriptor' : 'Prescribing Doctor'}</div>
-              <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a' }}>{doctorName || 'Médico Verificado'}</div>
+          {/* Actions & Doctor Cluster */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                setShowCalendarModal(true);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                background: '#ffffff',
+                border: '1px solid #bfdbfe',
+                color: '#1d4ed8',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(29, 78, 216, 0.08)',
+                transition: 'all 0.15s ease'
+              }}
+              title={isEs ? 'Sincronizar recordatorios de toma con tu calendario' : 'Sync dosing reminders with your calendar'}
+            >
+              <Calendar size={14} color="#1d4ed8" />
+              <span>{isEs ? 'Añadir a mi Calendario' : 'Sync to Calendar'}</span>
+            </button>
+
+            {/* Quick Doctor Badge */}
+            <div
+              style={{
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <span style={{ fontSize: '1.1rem' }}>👨‍⚕️</span>
+              <div>
+                <div style={{ fontSize: '0.68rem', color: '#64748b' }}>{isEs ? 'Médico Prescriptor' : 'Prescribing Doctor'}</div>
+                <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a' }}>{doctorName || 'Médico Verificado'}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -1027,6 +1059,17 @@ export default function PatientPrescriptionGuide({
         </div>
       </div>
 
+      {/* ── Google Cloud UX Adherence Calendar Sync Modal ── */}
+      <CalendarSyncModal
+        isOpen={showCalendarModal}
+        onClose={() => setShowCalendarModal(false)}
+        rxId={rxId}
+        patientName={patientName}
+        doctorName={doctorName}
+        compoundedFormulations={compoundedFormulations}
+        patientPublicUrl={patientPublicUrl}
+        isEs={isEs}
+      />
     </div>
   );
 }
