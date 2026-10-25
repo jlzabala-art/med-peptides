@@ -67,7 +67,9 @@ export default function NominalWelcomeBanner({
     setDismissed(true);
     try {
       sessionStorage.setItem(storageKey, 'true');
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   };
 
   const handleInstallClick = async () => {

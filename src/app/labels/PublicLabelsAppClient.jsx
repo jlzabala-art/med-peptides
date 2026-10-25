@@ -271,7 +271,9 @@ export default function PublicLabelsAppClient({
           'usageStats.lastLabelStudioAt': new Date().toISOString(),
           lastActiveAt: new Date().toISOString()
         }).catch(() => {});
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       trackToolUsage('pharmapolis_labels_studio', {
         userId: user.uid,
         email: user.email,
@@ -841,160 +843,308 @@ export default function PublicLabelsAppClient({
       {/* ── 4. Main Independent Label Studio Workspace ── */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {patientQueue.length === 0 ? (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 20px' }}>
-            {/* Prominent Onboarding / Instruction Banner */}
-            <div style={{
-              maxWidth: '640px',
-              width: '100%',
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '24px',
-              marginBottom: '28px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '8px',
-                  background: '#e8f0fe',
-                  color: '#1a73e8',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <Upload size={18} />
+          <div className="pls-gcp-home">
+            {/* ── 4 Google Cloud KPI Metric Cards (Golden Rule #22) ── */}
+            <div className="pls-gcp-kpis">
+              <div className="pls-gcp-kpi-card">
+                <div className="pls-gcp-kpi-top">
+                  <span>{isEs ? "Cola de Impresión" : "Batch Print Queue"}</span>
+                  <Printer size={15} color="#1a73e8" />
                 </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 700, color: '#1e293b' }}>
-                    {isEs ? '¿No encuentras al paciente o su prescripción?' : "Can't find your patient or prescription?"}
-                  </h3>
-                  <p style={{ margin: '3px 0 0 0', fontSize: '0.80rem', color: '#64748b', lineHeight: 1.45 }}>
-                    {isEs
-                      ? 'Carga primero la prescripción (PDF o escaneo). El sistema registrará los datos automáticamente y generará las etiquetas de frasco y de mensajería.'
-                      : 'Please import the prescription first (PDF or scan). The system will automatically parse the patient, active formulas, posology, and generate compliant bottle and shipping labels.'}
-                  </p>
-                </div>
+                <div className="pls-gcp-kpi-val">{patientQueue.length} {isEs ? "Recetas" : "Queued"}</div>
+                <div className="pls-gcp-kpi-sub">{isEs ? "Impresión múltiple A4 y Térmica" : "Multi-label A4 & Thermal ready"}</div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowImport(true)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '9px 18px',
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    background: '#1a73e8',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    boxShadow: '0 1px 2px rgba(26,115,232,0.3)',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#1557b0'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = '#1a73e8'}
-                >
-                  <Upload size={15} />
-                  <span>{isEs ? 'Cargar Prescripción Primero (PDF / Scan)' : 'Import Prescription First (PDF / Scan)'}</span>
-                </button>
+              <div className="pls-gcp-kpi-card">
+                <div className="pls-gcp-kpi-top">
+                  <span>{isEs ? "Formatos de Etiqueta" : "Label Formats"}</span>
+                  <Layers size={15} color="#0d9488" />
+                </div>
+                <div className="pls-gcp-kpi-val">Zebra & A4 PDF</div>
+                <div className="pls-gcp-kpi-sub">{isEs ? "Frasco (75×45 / 90×50) y Envío" : "Bottle (75×45 / 90×50) & Shipping"}</div>
+              </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchOpen(true);
-                    searchInputRef.current?.focus();
-                  }}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '9px 16px',
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    color: '#475569',
-                    background: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#94a3b8';
-                    e.currentTarget.style.color = '#1e293b';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#cbd5e1';
-                    e.currentTarget.style.color = '#475569';
-                  }}
-                >
-                  <Search size={14} />
-                  <span>{isEs ? 'Buscar en Directorio (⌘K)' : 'Search Directory (⌘K)'}</span>
-                </button>
+              <div className="pls-gcp-kpi-card">
+                <div className="pls-gcp-kpi-top">
+                  <span>{isEs ? "Estándar Farmacéutico" : "Compliance Standard"}</span>
+                  <ShieldCheck size={15} color="#16a34a" />
+                </div>
+                <div className="pls-gcp-kpi-val">EU GMP & QR</div>
+                <div className="pls-gcp-kpi-sub">{isEs ? "Trazabilidad y posología verificada" : "Verified posology & QR link"}</div>
+              </div>
+
+              <div className="pls-gcp-kpi-card">
+                <div className="pls-gcp-kpi-top">
+                  <span>{isEs ? "Pacientes de Muestra" : "Ready Clinical Cases"}</span>
+                  <FileText size={15} color="#7c3aed" />
+                </div>
+                <div className="pls-gcp-kpi-val">{FEATURED_PATIENTS.length} {isEs ? "Casos" : "Dossiers"}</div>
+                <div className="pls-gcp-kpi-sub">{isEs ? "Acceso instantáneo en 1 clic" : "1-Click instant label preview"}</div>
               </div>
             </div>
 
-            <EmptyState
-              icon={Layers}
-              title={isEs ? 'Atlas Compounding Label Studio' : 'Atlas Compounding Label Studio'}
-              subtitle={isEs ? 'Busca un paciente o nº de historia clínica (⌘K) para comenzar a diseñar y previsualizar etiquetas de frasco y de envío.' : 'Search for an existing patient or file # (⌘K) to start designing and previewing formula and courier shipping labels.'}
-              action={{
-                label: isEs ? 'Cargar Prescripción' : 'Import Prescription',
-                onClick: () => setShowImport(true)
-              }}
-            />
-
-            {/* Quick Demo Cases */}
-            <div style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', maxWidth: '640px', width: '100%' }}>
-              <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {isEs ? 'O prueba con un paciente de ejemplo:' : 'Or test with a sample patient:'}
-              </span>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
-                {FEATURED_PATIENTS.slice(0, 4).map((p) => (
+            {/* ── Main 2-Column Google Cloud Console Workspace ── */}
+            <div className="pls-gcp-grid">
+              {/* Step 1: Select or Search Existing Patient */}
+              <section className="pls-gcp-card">
+                <div className="pls-gcp-card-header">
+                  <div>
+                    <h2 className="pls-gcp-card-title">
+                      <Search size={17} color="#1a73e8" />
+                      <span>{isEs ? "1. Seleccionar Paciente o Buscar Receta" : "1. Select Patient or Search Prescription"}</span>
+                    </h2>
+                    <p className="pls-gcp-card-subtitle">
+                      {isEs
+                        ? "Haz clic en cualquier paciente de la lista o escribe su nombre / código RX arriba para abrir sus etiquetas."
+                        : "Click any patient below or search by name / RX code above to immediately open and print their labels."}
+                    </p>
+                  </div>
                   <button
-                    key={p.code}
                     type="button"
-                    onClick={() => handleSelectOrAddPatient(p.code, true)}
+                    onClick={() => {
+                      setSearchOpen(true);
+                      searchInputRef.current?.focus();
+                    }}
                     style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '7px 14px',
-                      borderRadius: '8px',
-                      background: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.80rem',
-                      fontWeight: 600,
-                      color: '#1e293b',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#1a73e8';
-                      e.currentTarget.style.color = '#1a73e8';
-                      e.currentTarget.style.background = '#f8fafc';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#cbd5e1';
-                      e.currentTarget.style.color = '#1e293b';
-                      e.currentTarget.style.background = '#ffffff';
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "7px 14px",
+                      fontSize: "0.78rem",
+                      fontWeight: 650,
+                      color: "#1a73e8",
+                      background: "#e8f0fe",
+                      border: "1px solid #d2e3fc",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0
                     }}
                   >
-                    <span>{p.name}</span>
-                    <span style={{ fontSize: '0.70rem', color: '#64748b', fontFamily: 'monospace' }}>#{p.code}</span>
+                    <Search size={13} />
+                    <span>{isEs ? "Buscar (⌘K)" : "Search (⌘K)"}</span>
                   </button>
-                ))}
-              </div>
+                </div>
+
+                {/* Recent Prescriptions (if any) */}
+                {recentPrescriptions.length > 0 && (
+                  <div style={{ borderBottom: "1px solid #dadce0" }}>
+                    <div style={{
+                      padding: "8px 20px",
+                      background: "#f8fafc",
+                      borderBottom: "1px solid #f1f3f4",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      fontSize: "0.70rem",
+                      fontWeight: 700,
+                      color: "#5f6368",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.04em"
+                    }}>
+                      <span>{isEs ? "Consultados Recientemente" : "Recently Opened"}</span>
+                      <button
+                        type="button"
+                        onClick={handleClearRecent}
+                        style={{ border: "none", background: "transparent", color: "#1a73e8", fontSize: "0.70rem", fontWeight: 600, cursor: "pointer" }}
+                      >
+                        {isEs ? "Limpiar" : "Clear"}
+                      </button>
+                    </div>
+                    {recentPrescriptions.map((r) => (
+                      <div
+                        key={"recent-" + r.code}
+                        className="pls-gcp-patient-row"
+                        onClick={() => handleSelectOrAddPatient(r.code, true)}
+                      >
+                        <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "#202124" }}>{r.patientName}</span>
+                            <span style={{ fontSize: "0.72rem", fontFamily: "monospace", fontWeight: 700, color: "#1a73e8", background: "#e8f0fe", padding: "1px 7px", borderRadius: "4px" }}>
+                              #{r.code}
+                            </span>
+                          </div>
+                          <span style={{ fontSize: "0.76rem", color: "#5f6368" }}>{r.title}</span>
+                        </div>
+                        <span style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          padding: "6px 12px",
+                          borderRadius: "6px",
+                          background: "#1a73e8",
+                          color: "#ffffff",
+                          fontSize: "0.76rem",
+                          fontWeight: 650,
+                          flexShrink: 0
+                        }}>
+                          <span>{isEs ? "Abrir Etiqueta" : "Open Label"}</span>
+                          <ChevronRight size={13} />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Featured / Sample Patients Directory */}
+                <div>
+                  <div style={{
+                    padding: "8px 20px",
+                    background: "#f8fafc",
+                    borderBottom: "1px solid #f1f3f4",
+                    fontSize: "0.70rem",
+                    fontWeight: 700,
+                    color: "#5f6368",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em"
+                  }}>
+                    {isEs ? "Recetas Listas para Previsualizar e Imprimir (1 Clic)" : "Ready Prescriptions — Click to Preview & Print"}
+                  </div>
+                  {FEATURED_PATIENTS.map((p) => (
+                    <div
+                      key={p.code}
+                      className="pls-gcp-patient-row"
+                      onClick={() => handleSelectOrAddPatient(p.code, true)}
+                    >
+                      <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                          <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "#202124" }}>{p.name}</span>
+                          <span style={{ fontSize: "0.72rem", fontFamily: "monospace", fontWeight: 700, color: "#1a73e8", background: "#e8f0fe", padding: "1px 7px", borderRadius: "4px" }}>
+                            #{p.code}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: "0.76rem", color: "#5f6368" }}>{p.title}</span>
+                      </div>
+                      <span style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        background: "#ffffff",
+                        border: "1px solid #dadce0",
+                        color: "#1a73e8",
+                        fontSize: "0.76rem",
+                        fontWeight: 650,
+                        flexShrink: 0
+                      }}>
+                        <span>{isEs ? "Abrir Etiqueta" : "Open Label"}</span>
+                        <ChevronRight size={13} />
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Step 2: Upload New Prescription PDF / Image */}
+              <aside style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div className="pls-gcp-card">
+                  <div className="pls-gcp-card-header">
+                    <div>
+                      <h2 className="pls-gcp-card-title">
+                        <Upload size={17} color="#1a73e8" />
+                        <span>{isEs ? "2. ¿Paciente Nuevo? Subir Receta" : "2. New Patient? Upload Prescription"}</span>
+                      </h2>
+                      <p className="pls-gcp-card-subtitle">
+                        {isEs
+                          ? "Sube el PDF o escaneo de la receta para generar automáticamente sus etiquetas."
+                          : "Upload a prescription PDF or scan to automatically extract formulas and generate labels."}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+                    <div
+                      onClick={() => setShowImport(true)}
+                      style={{
+                        border: "1.5px dashed #93c5fd",
+                        background: "#f8fafd",
+                        borderRadius: "8px",
+                        padding: "24px 16px",
+                        textAlign: "center",
+                        cursor: "pointer",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: "8px"
+                      }}
+                    >
+                      <div style={{
+                        width: "40px",
+                        height: "40px",
+                        borderRadius: "8px",
+                        background: "#e8f0fe",
+                        color: "#1a73e8",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      }}>
+                        <Upload size={20} />
+                      </div>
+                      <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "#202124" }}>
+                        {isEs ? "Haz clic para subir PDF o Imagen" : "Click to upload PDF or Scan"}
+                      </div>
+                      <div style={{ fontSize: "0.75rem", color: "#5f6368", maxWidth: "280px", lineHeight: 1.4 }}>
+                        {isEs
+                          ? "Extrae paciente, médico, activos, posología y crea las etiquetas de envase y envío."
+                          : "Automatically extracts patient, physician, actives, posology, and builds bottle & shipping labels."}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowImport(true)}
+                      style={{
+                        width: "100%",
+                        padding: "10px 16px",
+                        fontSize: "0.84rem",
+                        fontWeight: 700,
+                        color: "#ffffff",
+                        background: "#1a73e8",
+                        border: "none",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        boxShadow: "0 1px 2px rgba(26,115,232,0.25)"
+                      }}
+                    >
+                      <Upload size={15} />
+                      <span>{isEs ? "Importar Receta (PDF / Scan)" : "Import Prescription (PDF / Scan)"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick Link to Public Custom Compounding Builder (/compounding) */}
+                <div className="pls-gcp-card" style={{ padding: "16px 20px", background: "#f8fafd", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "#202124", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <Sparkles size={15} color="#7c3aed" />
+                    <span>{isEs ? "Laboratorio de Formulación (/compounding)" : "Custom Compounding Lab (/compounding)"}</span>
+                  </div>
+                  <p style={{ fontSize: "0.75rem", color: "#5f6368", margin: 0, lineHeight: 1.45 }}>
+                    {isEs
+                      ? "¿Quieres configurar una fórmula personalizada en cápsulas veganas HPMC paso a paso?"
+                      : "Need to configure a custom vegan HPMC capsule formula step by step?"}
+                  </p>
+                  <Link
+                    href="/compounding"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      fontSize: "0.78rem",
+                      fontWeight: 700,
+                      color: "#1a73e8",
+                      textDecoration: "none",
+                      marginTop: "2px"
+                    }}
+                  >
+                    <span>{isEs ? "Abrir Configurador de Fórmulas" : "Open Custom Formula Builder"}</span>
+                    <ChevronRight size={14} />
+                  </Link>
+                </div>
+              </aside>
             </div>
           </div>
         ) : isLoadingRx ? (

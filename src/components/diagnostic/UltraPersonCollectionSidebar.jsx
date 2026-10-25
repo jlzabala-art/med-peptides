@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   ShieldCheck,
   Award,
@@ -254,32 +255,56 @@ export default function UltraPersonCollectionSidebar({
         flexDirection: 'column',
         gap: '8px'
       }}>
+        <Link
+          href="/compounding"
+          style={{
+            width: '100%',
+            padding: '9px 12px',
+            borderRadius: '8px',
+            background: '#0f172a',
+            color: '#ffffff',
+            border: 'none',
+            fontSize: '0.78rem',
+            fontWeight: 750,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
+            transition: 'background 0.15s ease',
+            textDecoration: 'none',
+            boxSizing: 'border-box'
+          }}
+        >
+          <FlaskConical size={14} color="#38bdf8" />
+          <span>{isEs ? 'Laboratorio de Formulación Magistral' : 'Request Custom Formulation'}</span>
+          <ChevronRight size={13} color="#94a3b8" />
+        </Link>
+
         {onOpenInquiry && (
           <button
             type="button"
             onClick={onOpenInquiry}
             style={{
               width: '100%',
-              padding: '9px 12px',
+              padding: '8px 12px',
               borderRadius: '8px',
-              background: '#0f172a',
-              color: '#ffffff',
-              border: 'none',
-              fontSize: '0.78rem',
-              fontWeight: 750,
+              background: '#ffffff',
+              color: '#334155',
+              border: '1px solid #cbd5e1',
+              fontSize: '0.76rem',
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '6px',
-              boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
               transition: 'background 0.15s ease'
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = '#1e293b'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = '#0f172a'; }}
           >
-            <FlaskConical size={14} color="#38bdf8" />
-            <span>{isEs ? 'Solicitar Adaptación de Fórmula' : 'Request Custom Formulation'}</span>
+            <Mail size={13} color="#64748b" />
+            <span>{isEs ? 'Consulta Clínica Directa' : 'Clinical Nutraceuticals Inquiry'}</span>
           </button>
         )}
 
