@@ -5,6 +5,7 @@ import DataTable from '@/components/ui/DataTable';
 import StatusBadge from '@/components/ui/StatusBadge';
 import CopyableId from '@/components/ui/CopyableId';
 import EmptyState from '@/components/ui/EmptyState';
+import EngagementBadge from '@/components/ui/EngagementBadge';
 import notifier from '@/services/NotificationService';
 import { 
   FileText, 
@@ -371,8 +372,8 @@ export default function CatalogTrackingTable({ isMobile = false }) {
     },
     {
       key: 'status',
-      label: 'Status',
-      width: '140px',
+      label: 'Status & Engagement',
+      width: '160px',
       render: (row) => {
         const statusVal = row.status || 'generated';
         return (
@@ -385,6 +386,13 @@ export default function CatalogTrackingTable({ isMobile = false }) {
                 </span>
               )}
             </div>
+            <EngagementBadge
+              viewCount={row.viewCount || row.visitsCount || 0}
+              lastViewedAt={row.lastViewedAt || row.lastVisitedAt}
+              sharedAt={row.createdAt || row.generatedAt}
+              status={row.status}
+              size="xs"
+            />
           </div>
         );
       }

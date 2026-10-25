@@ -12,6 +12,7 @@ import StatusBadge from '../../ui/StatusBadge';
 import CopyableId from '../../ui/CopyableId';
 import QuoteQuickActionDropdown from '../../ui/QuoteQuickActionDropdown';
 import PricingTierSelectorCell from '../customers/PricingTierSelectorCell';
+import EngagementBadge from '../../ui/EngagementBadge';
 import { Globe, Mail, Phone, Package, ShoppingBag, Edit2, Check, X, Share2, Eye } from '@/lib/icons';
 
 // ── Inline editable cell ─────────────────────────────────────────────────────
@@ -131,7 +132,20 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace, 
       header: 'Status',
       width: '12%',
       sortable: true,
-      render: (row) => <StatusBadge status={row.status || 'active'} />,
+      render: (row) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          <StatusBadge status={row.status || 'active'} />
+          {(row.lastAssetSharedAt || row.lastAssetViewCount) && (
+            <EngagementBadge
+              viewCount={row.lastAssetViewCount || 0}
+              lastViewedAt={row.lastAssetViewedAt}
+              sharedAt={row.lastAssetSharedAt}
+              status={row.lastAssetReadStatus}
+              size="xs"
+            />
+          )}
+        </div>
+      ),
     },
     {
       key: 'actions',

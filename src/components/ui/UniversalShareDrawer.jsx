@@ -4,6 +4,7 @@ import StandardDrawer from '@/components/ui/StandardDrawer';
 import notifier from '@/services/NotificationService';
 import { Copy, Check, MessageSquare, Mail, QrCode, ExternalLink, Key, Loader2, Sparkles, User, RefreshCw } from 'lucide-react';
 import RecipientHierarchySelector from '@/components/shared/RecipientHierarchySelector';
+import EngagementBadge from '@/components/ui/EngagementBadge';
 import { generateDoctorWelcomeWhatsApp, generateDoctorWelcomeEmail } from '@/data/doctorOnboardingTemplates';
 
 /**
@@ -665,13 +666,22 @@ Here is your direct secure access link to view your active treatment plans, poso
           background: '#ffffff',
           boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
             <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
               <User size={14} color="#003666" /> Destinatario Registrado
             </span>
-            <span style={{ fontSize: '0.70rem', color: '#64748b', background: '#f1f5f9', padding: '2px 6px', borderRadius: 4 }}>
-              Rol: <strong>{recipient.type}</strong>
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <EngagementBadge
+                viewCount={resolvedEntity?.lastAssetViewCount || resolvedEntity?.viewCount || 0}
+                lastViewedAt={resolvedEntity?.lastAssetViewedAt || resolvedEntity?.lastActiveAt || resolvedEntity?.lastLoginAt}
+                sharedAt={resolvedEntity?.lastAssetSharedAt}
+                status={resolvedEntity?.lastAssetReadStatus}
+                size="xs"
+              />
+              <span style={{ fontSize: '0.70rem', color: '#64748b', background: '#f1f5f9', padding: '2px 6px', borderRadius: 4 }}>
+                Rol: <strong>{recipient.type}</strong>
+              </span>
+            </div>
           </div>
           <RecipientHierarchySelector
             value={recipient}

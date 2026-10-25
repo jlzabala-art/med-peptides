@@ -170,6 +170,60 @@ export const KNOWN_CANONICAL_PEPTIDES = {
     aliases: ['epithalon', 'epitalon'],
     category: 'Longevity & Cellular'
   },
+  'cartalax': {
+    canonicalKey: 'cartalax',
+    canonicalName: 'Cartalax (Cartilage Bioregulator)',
+    aliases: ['cartalax', 'cartalax 25mg', 'cartalax peptide', 'cartalax bioregulator'],
+    category: 'Bioregulators & Tissue Repair'
+  },
+  'cardiogen': {
+    canonicalKey: 'cardiogen',
+    canonicalName: 'Cardiogen (Myocardial Bioregulator)',
+    aliases: ['cardiogen', 'cardiogen 25mg', 'cardiogen peptide', 'cardiogen bioregulator'],
+    category: 'Bioregulators & Cardiovascular'
+  },
+  'thymogen': {
+    canonicalKey: 'thymogen',
+    canonicalName: 'Thymogen (Thymus Bioregulator)',
+    aliases: ['thymogen', 'thymogen 25mg', 'thymogen peptide', 'thymogen bioregulator', 'x9lj0ujxdshf8fuppzne'],
+    category: 'Immune & Bioregulators'
+  },
+  'testagen': {
+    canonicalKey: 'testagen',
+    canonicalName: 'Testagen (Testicular Bioregulator)',
+    aliases: ['testagen', 'testagen 25mg', 'testagen peptide', 'testagen bioregulator'],
+    category: 'Endocrine & Bioregulators'
+  },
+  'thymulin': {
+    canonicalKey: 'thymulin',
+    canonicalName: 'Thymulin (Thymic Factor)',
+    aliases: ['thymulin', 'thymulin 10mg', 'thymullin', 'thymullin 10mg', 'facteur thymique serique'],
+    category: 'Immune & Cellular'
+  },
+  'prostamax': {
+    canonicalKey: 'prostamax',
+    canonicalName: 'Prostamax (Prostate Bioregulator)',
+    aliases: ['prostamax', 'prostamax 25mg', 'prostamax peptide', 'prostamax bioregulator'],
+    category: 'Bioregulators & Tissue Repair'
+  },
+  'snap-8': {
+    canonicalKey: 'snap-8',
+    canonicalName: 'SNAP-8 (Acetyl Octapeptide-3)',
+    aliases: ['snap-8', 'snap 8', 'snap8', 'acetyl octapeptide-3'],
+    category: 'Aesthetic & Neuro-Peptides'
+  },
+  'hmg': {
+    canonicalKey: 'hmg',
+    canonicalName: 'HMG (Human Menopausal Gonadotropin)',
+    aliases: ['hmg', 'hmg 75 iu', 'hmg 75iu', 'human menopausal gonadotropin'],
+    category: 'Endocrine & Reproductive'
+  },
+  'kisspeptin-10': {
+    canonicalKey: 'kisspeptin-10',
+    canonicalName: 'Kisspeptin-10 Acetate',
+    aliases: ['kisspeptin-10', 'kisspeptin 10', 'kisspeptin', 'kisspeptin-10 acetate', 'metastin'],
+    category: 'Endocrine & Reproductive'
+  },
   'bacteriostatic-water': {
     canonicalKey: 'bacteriostatic-water',
     canonicalName: 'Bacteriostatic Water (BAC)',

@@ -158,6 +158,7 @@ function isPharmopolisRx(rx) {
 }
 import CopyableId from '../../ui/CopyableId';
 import StatusBadge from '../../ui/StatusBadge';
+import EngagementBadge from '../../ui/EngagementBadge';
 import { normalizeRxStatus, RX_STATUS_LABELS } from '../../../lib/normalizeRxStatus';
 import { serverDuplicatePrescriptionAction } from '../../../actions/prescriptionsActions';
 import { toast } from 'react-hot-toast';
@@ -719,6 +720,14 @@ export const getPrescriptionColumns = (options = {}) => {
               }}
             />
             <ZohoMatchingBadge rx={rx} onOpenMatcher={options?.onOpenZohoMatcher} />
+            {(rx.shareViewCount || rx.lastAssetViewCount || rx.lastSharedAt || rx.lastAssetSharedAt) && (
+              <EngagementBadge
+                viewCount={rx.shareViewCount || rx.lastAssetViewCount || 0}
+                lastViewedAt={rx.lastShareViewedAt || rx.lastAssetViewedAt}
+                sharedAt={rx.lastSharedAt || rx.lastAssetSharedAt}
+                size="xs"
+              />
+            )}
           </div>
         );
       },

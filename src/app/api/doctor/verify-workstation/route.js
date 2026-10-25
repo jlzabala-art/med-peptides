@@ -81,6 +81,46 @@ export async function POST(request) {
             expiresAt: wsExpiresAt
           });
 
+          // Update doctor profile engagement in users collection & emit notification
+          try {
+            let docUserRef = null;
+            if (data.email) {
+              const uSnap = await adminDb.collection('users').where('email', '==', data.email.toLowerCase().trim()).limit(1).get();
+              if (!uSnap.empty) docUserRef = uSnap.docs[0].ref;
+            }
+            if (!docUserRef && doctorSlug) {
+              const uSnap2 = await adminDb.collection('users').where('slug', '==', doctorSlug).limit(1).get();
+              if (!uSnap2.empty) docUserRef = uSnap2.docs[0].ref;
+            }
+            if (docUserRef) {
+              const userSnap = await docUserRef.get();
+              const existingVisits = (userSnap.data()?.lastAssetViewCount || 0) + 1;
+              await docUserRef.set({
+                lastLoginAt: now.toISOString(),
+                lastActiveAt: now.toISOString(),
+                lastAssetViewCount: existingVisits,
+                lastAssetViewedAt: now.toISOString(),
+                lastAssetReadStatus: 'read',
+              }, { merge: true });
+
+              await adminDb.collection('notifications').add({
+                title: 'Acceso Clínico 1-Tap Activado',
+                message: `El Dr. ${userSnap.data()?.displayName || doctorSlug} ha activado su portal médico.`,
+                type: 'doctor_login',
+                link: `/dr/${doctorSlug}`,
+                targetRoles: ['admin', 'medical_director'],
+                read: false,
+                createdAt: now.toISOString(),
+                metadata: {
+                  doctorSlug,
+                  email: data.email,
+                }
+              });
+            }
+          } catch (profileErr) {
+            console.warn('[verify-workstation] Could not update doctor profile engagement:', profileErr.message);
+          }
+
           const response = NextResponse.json({
             authorized: true,
             workstationToken: newWsToken,

@@ -12,6 +12,7 @@ import EternaGenomicsDetail from '../../../components/product/layouts/EternaGeno
 import TeletestDiagnosticDetail from '../../../components/product/layouts/TeletestDiagnosticDetail';
 import { getClinicalSupplementBySlug } from '../../../data/clinicalSupplementsRegistry';
 import { getTeletestProductBySlug } from '../../../data/teletestRegistry';
+import { getLotuslandPeptideBySlug } from '../../../data/lotuslandPeptidesRegistry';
 
 export const revalidate = 3600; // ISR: regenerate at most every 60 min
 export const dynamicParams = true; // Allow slugs not in generateStaticParams
@@ -116,6 +117,26 @@ async function getPublicProduct(slug, supplierFilter = null) {
       });
       return suppResult;
     }
+
+    const lotusPeptide = getLotuslandPeptideBySlug(target);
+    if (lotusPeptide) {
+      const sanitized = sanitizePublicProduct(lotusPeptide, lotusPeptide.variants || []);
+      const processedHierarchy = processProductVariants(sanitized.variants || lotusPeptide.variants || []);
+      const lotusResult = {
+        ...lotusPeptide,
+        ...sanitized,
+        isSingleSupplierLocked: true,
+        availableSuppliers: [{ id: 'supplier-lotusland', name: 'Lotusland Limited', isPen: false, isSpray: false }],
+        activeSupplierId: 'supplier-lotusland',
+        processedHierarchy,
+      };
+      PUBLIC_PRODUCT_RAM_CACHE.set(cacheKey, {
+        data: lotusResult,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      });
+      return lotusResult;
+    }
+
     return null;
   }
 

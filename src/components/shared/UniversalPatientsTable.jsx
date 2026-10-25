@@ -39,6 +39,7 @@ import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import EntityLink from '../ui/EntityLink';
 import ReassignPhysicianModal from '../admin/patients/ReassignPhysicianModal';
 import UniversalShareDrawer from '../ui/UniversalShareDrawer';
+import EngagementBadge from '../ui/EngagementBadge';
 
 function capitalizeName(name) {
   if (!name) return name;
@@ -900,6 +901,17 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
                     <span>No active quote</span>
                   )}
                 </div>
+                {(row.lastAssetSharedAt || row.lastAssetViewCount) && (
+                  <div style={{ marginTop: '3px' }}>
+                    <EngagementBadge
+                      viewCount={row.lastAssetViewCount || 0}
+                      lastViewedAt={row.lastAssetViewedAt}
+                      sharedAt={row.lastAssetSharedAt}
+                      status={row.lastAssetReadStatus}
+                      size="xs"
+                    />
+                  </div>
+                )}
               </div>
             );
           }

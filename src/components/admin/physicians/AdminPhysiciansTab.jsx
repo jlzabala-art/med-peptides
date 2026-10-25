@@ -29,6 +29,7 @@ import { Eye, Edit3, XCircle, Layers, ExternalLink, Key, Share2 } from '@/lib/ic
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import DoctorAccessLinkModal from './DoctorAccessLinkModal';
 import UniversalShareDrawer from '../../ui/UniversalShareDrawer';
+import EngagementBadge from '../../ui/EngagementBadge';
 
 export default function AdminPhysiciansTab() {
   // UI State
@@ -547,6 +548,34 @@ export default function AdminPhysiciansTab() {
           </div>
         </div>
 
+        {/* Engagement en Portal Público */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+            Actividad en Portal
+          </span>
+          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <EngagementBadge
+                viewCount={d.lastAssetViewCount || d.viewCount || 0}
+                lastViewedAt={d.lastAssetViewedAt || d.lastActiveAt || d.lastLoginAt}
+                sharedAt={d.lastAssetSharedAt}
+                status={d.lastAssetReadStatus}
+                size="sm"
+              />
+            </div>
+            {d.lastAssetSharedTitle && (
+              <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                Último recurso: <strong>{d.lastAssetSharedTitle}</strong>
+              </div>
+            )}
+            {d.lastLoginAt && (
+              <div style={{ fontSize: '0.70rem', color: '#475569' }}>
+                Último acceso 1-Tap: {new Date(d.lastLoginAt).toLocaleDateString()}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Quick Actions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', justifyContent: 'center' }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
@@ -606,7 +635,7 @@ export default function AdminPhysiciansTab() {
     {
       key: 'physician',
       header: 'Physician',
-      width: '30%',
+      width: '24%',
       render: (d) => {
         const name = getDoctorName(d);
         return (
@@ -621,16 +650,30 @@ export default function AdminPhysiciansTab() {
     {
       key: 'status',
       header: 'Status',
-      width: '12%',
+      width: '10%',
       render: (d) => {
         const statusStr = d.isArchived ? 'archived' : (d.status || 'active');
         return <StatusChip status={statusStr} />;
       }
     },
     {
+      key: 'portalEngagement',
+      header: 'Portal Activity',
+      width: '14%',
+      align: 'center',
+      render: (d) => (
+        <EngagementBadge
+          viewCount={d.lastAssetViewCount || d.viewCount || 0}
+          lastViewedAt={d.lastAssetViewedAt || d.lastActiveAt || d.lastLoginAt}
+          sharedAt={d.lastAssetSharedAt}
+          status={d.lastAssetReadStatus}
+        />
+      ),
+    },
+    {
       key: 'subscriptionTier',
       header: 'Plan / Tier',
-      width: '12%',
+      width: '10%',
       align: 'center',
       render: (d) => {
         const isPro = d.subscriptionTier === 'advanced' || d.subscriptionTier === 'pro';
@@ -676,7 +719,7 @@ export default function AdminPhysiciansTab() {
     {
       key: 'patients',
       header: 'Patients',
-      width: '12%',
+      width: '10%',
       align: 'center',
       render: (d) => {
         const pts = getPatientsCount(d);
