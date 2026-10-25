@@ -162,42 +162,32 @@ export default function PrescriptionMasterHeader({
             </>
           )}
 
-          {/* PATIENT VIEW ACTIONS */}
+          {/* PATIENT VIEW ACTIONS: Clean GCP copy button without clutter */}
           {isPatientView && (
-            <>
-              {onSyncCalendar && (
-                <button
-                  type="button"
-                  onClick={onSyncCalendar}
-                  className="rx-action-btn-tonal"
-                  title={isEs ? 'Añadir tomas a Google Calendar o Apple Calendar' : 'Sync dosing schedule with your calendar'}
-                >
-                  <Calendar size={13} color="#1d4ed8" />
-                  <span>{isEs ? 'Añadir al Calendario' : 'Sync to Calendar'}</span>
-                </button>
-              )}
-
-              {onOpenInquiry && (
-                <button
-                  type="button"
-                  onClick={onOpenInquiry}
-                  className="rx-action-btn-tonal-green"
-                  title={isEs ? 'Enviar consulta médica a la clínica' : 'Ask physician or clinical team a question'}
-                >
-                  <MessageSquare size={13} />
-                  <span>{isEs ? 'Consultar al Médico' : 'Contact Doctor'}</span>
-                </button>
-              )}
-
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <button
                 type="button"
                 onClick={handleCopyLink}
                 className="rx-action-btn-icon"
                 title={isEs ? 'Copiar enlace de mi prescripción' : 'Copy prescription link'}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#334155',
+                  fontSize: '0.74rem',
+                  fontWeight: 650,
+                  cursor: 'pointer'
+                }}
               >
-                {copied ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
+                {copied ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
+                <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>

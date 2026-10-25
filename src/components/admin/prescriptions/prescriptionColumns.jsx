@@ -164,6 +164,7 @@ import { serverDuplicatePrescriptionAction } from '../../../actions/prescription
 import { toast } from 'react-hot-toast';
 import InlineEditableCell from '../../ui/InlineEditableCell';
 import AppActionGroup from '../../ui/AppActionGroup';
+import UniversalActionCell from '@/components/ui/UniversalActionCell';
 import { prescriptionRepository } from '../../../repositories/prescriptionRepository';
 import notifier from '../../../services/NotificationService';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
@@ -747,26 +748,7 @@ export const getPrescriptionColumns = (options = {}) => {
         const isPharmopolisSupplier = isPharmopolisRx(rx);
 
         const actions = [
-          // ── QUICK ACTION 1: View (Directly Visible) ─────────────────────
-          {
-            type: 'action',
-            label: 'View details',
-            icon: Eye,
-            isPrimary: true,
-            onClick: () => {
-              window.dispatchEvent(new CustomEvent('OPEN_PRESCRIPTION_VIEW', { detail: { rx } }));
-            }
-          },
-          // ── QUICK ACTION 2: Share Public Page (Directly Visible) ─────────
-          {
-            type: 'action',
-            label: 'Share public page',
-            icon: Share2,
-            onClick: () => {
-              window.dispatchEvent(new CustomEvent('OPEN_SHARE_PUBLIC_PAGE', { detail: { rx } }));
-            }
-          },
-          // ── QUICK ACTION 3: Pharmapolis Labels (Directly Visible & Public Module Parity) ───
+          // ── SPECIALIZED ACTION: Pharmapolis Labels ───
           {
             type: 'action',
             label: 'Pharmapolis Labels',
@@ -1048,18 +1030,20 @@ export const getPrescriptionColumns = (options = {}) => {
         ];
 
           return (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              gap: '6px',
-              width: '100%',
-              minWidth: '150px',
-              flexShrink: 0
-            }}>
+            <UniversalActionCell
+              entity={rx}
+              entityType="prescription"
+              onView={() => {
+                window.dispatchEvent(new CustomEvent('OPEN_PRESCRIPTION_VIEW', { detail: { rx } }));
+              }}
+              onShare={() => {
+                window.dispatchEvent(new CustomEvent('OPEN_SHARE_PUBLIC_PAGE', { detail: { rx } }));
+              }}
+              showWorkspace={false}
+              extraActions={actions}
+            >
               <WorkspaceRxToggleButton rx={rx} />
-              <AppActionGroup maxVisible={2} actions={actions} />
-            </div>
+            </UniversalActionCell>
           );
         },
       }

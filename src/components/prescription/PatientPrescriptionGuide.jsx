@@ -265,157 +265,25 @@ export default function PatientPrescriptionGuide({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', marginBottom: '2rem' }}>
       
-      {/* ── Patient Welcome & Quick Orientation Card ─────────────────────────── */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%)',
-          border: '1px solid #bbf7d0',
-          borderRadius: '12px',
-          padding: '16px 20px',
-          boxShadow: '0 2px 8px rgba(22, 163, 74, 0.06)'
+      {/* ── Patient & Physician Unified Greeting Hero (Trust-First Architecture) ── */}
+      <PatientPhysicianGreetingHero
+        patientName={patientName || (isEs ? 'Paciente' : 'Patient')}
+        patientRef={rxId}
+        doctorName={doctorName || (isEs ? 'Dra. Marina Cordeiro Fernandes' : 'Dr. Marina Cordeiro Fernandes')}
+        doctorSpecialty="Longevity & Integrative Medicine"
+        doctorClinic={doctorClinic || 'Atlas Health Services'}
+        doctorNote={rx?.patientInstructions || rx?.doctorNotes || rx?.instructions || ''}
+        formulationsCount={categorizedItems.length}
+        onSyncCalendar={() => setShowCalendarModal(true)}
+        onOpenDoctorContact={() => {
+          if (onOpenDoctorContact) {
+            onOpenDoctorContact();
+          } else if (clinicalInquiryUrl) {
+            window.open(clinicalInquiryUrl, '_blank', 'noopener,noreferrer');
+          }
         }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div
-              style={{
-                width: 42,
-                height: 42,
-                borderRadius: '50%',
-                background: '#16a34a',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.25rem',
-                flexShrink: 0,
-                boxShadow: '0 2px 8px rgba(22, 163, 74, 0.3)'
-              }}
-            >
-              ✓
-            </div>
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#15803d' }}>
-                {isEs ? 'GUÍA CLARA PARA EL PACIENTE' : 'PATIENT-FRIENDLY MEDICATION GUIDE'}
-              </div>
-              <h2 style={{ margin: '2px 0 0 0', fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
-                {isEs ? `Hola, ${patientName || 'Paciente'}` : `Welcome, ${patientName || 'Patient'}`}
-              </h2>
-              <p style={{ margin: '3px 0 0 0', fontSize: '0.78rem', color: '#475569' }}>
-                {isEs
-                  ? `Tu médico ha prescrito ${categorizedItems.length} ${categorizedItems.length === 1 ? 'producto personalizado' : 'productos personalizados'}. A continuación encontrarás qué es cada uno, cómo tomarlo con exactitud y su guía de preparación.`
-                  : `Your physician has prescribed ${categorizedItems.length} custom ${categorizedItems.length === 1 ? 'formulation' : 'formulations'}. Below you will find what each is for, exact administration schedules, and preparation guides.`}
-              </p>
-            </div>
-          </div>
-
-          {/* Actions & Doctor Cluster */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                setShowCalendarModal(true);
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                background: '#ffffff',
-                border: '1px solid #bfdbfe',
-                color: '#1d4ed8',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(29, 78, 216, 0.08)',
-                transition: 'all 0.15s ease'
-              }}
-              title={isEs ? 'Sincronizar recordatorios de toma con tu calendario' : 'Sync dosing reminders with your calendar'}
-            >
-              <Calendar size={14} color="#1d4ed8" />
-              <span>{isEs ? 'Añadir a mi Calendario' : 'Sync to Calendar'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                if (onOpenDoctorContact) {
-                  onOpenDoctorContact();
-                } else if (clinicalInquiryUrl) {
-                  window.open(clinicalInquiryUrl, '_blank', 'noopener,noreferrer');
-                }
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                color: '#15803d',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(21, 128, 61, 0.08)',
-                transition: 'all 0.15s ease'
-              }}
-              title={isEs ? 'Hacer una consulta sobre mi tratamiento a la clínica o médico' : 'Ask physician or clinic about your medication'}
-            >
-              <MessageCircle size={14} color="#15803d" />
-              <span>{isEs ? 'Consultar al Dr.' : 'Contact Doctor'}</span>
-            </button>
-
-            {/* Quick Doctor Badge */}
-            <div
-              style={{
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '8px',
-                padding: '6px 12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              <span style={{ fontSize: '1.1rem' }}>👨‍⚕️</span>
-              <div>
-                <div style={{ fontSize: '0.68rem', color: '#64748b' }}>{isEs ? 'Médico Prescriptor' : 'Prescribing Doctor'}</div>
-                <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a' }}>{doctorName || 'Médico Verificado'}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Doctor's Direct Notes / Instructions to Patient (Clinical Bridge) ── */}
-      {(rx?.doctorNotes || rx?.patientInstructions || rx?.instructions) && (
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '10px',
-          border: '1px solid #bfdbfe',
-          borderLeft: '4px solid #1a73e8',
-          padding: '14px 18px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-          marginBottom: '0.5rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '6px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '1.1rem' }}>📋</span>
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1e40af', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? `Indicaciones Personalizadas de ${doctorName || 'su Médico'}` : `Personalized Instructions from ${doctorName || 'your Physician'}`}
-            </span>
-          </div>
-          <p style={{ margin: 0, fontSize: '0.84rem', color: '#1e293b', lineHeight: 1.5, fontWeight: 500 }}>
-            {rx?.patientInstructions || rx?.doctorNotes || rx?.instructions}
-          </p>
-        </div>
-      )}
+        isEs={isEs}
+      />
 
       {/* ── Item-by-Item Presentation with Differentiated Posology ──────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -1018,6 +886,112 @@ export default function PatientPrescriptionGuide({
             </div>
           </a>
         )}
+      </div>
+
+      {/* ── Official Compounding & Direct Delivery Section (Trust-First Position) ── */}
+      <div
+        className="rx-card patient-compounding-fulfillment-card"
+        style={{
+          background: '#ffffff',
+          borderRadius: '12px',
+          border: '1px solid #bfdbfe',
+          borderLeft: '5px solid #003666',
+          padding: '1.25rem 1.5rem',
+          boxShadow: '0 2px 8px -2px rgba(0, 54, 102, 0.08), 0 1px 3px rgba(0,0,0,0.04)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+          marginTop: '0.5rem',
+          marginBottom: '0.5rem'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ flex: 1, minWidth: '280px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  background: '#eff6ff',
+                  color: '#1e40af',
+                  border: '1px solid #dbeafe',
+                }}
+              >
+                {isEs ? 'Preparación en Laboratorio Homologado' : 'Authorized Pharmaceutical Compounding'}
+              </span>
+              <span style={{ fontSize: '0.70rem', color: '#64748b', fontFamily: 'monospace' }}>
+                Ref: #{rxId}
+              </span>
+            </div>
+            <h3 style={{ margin: '0 0 0.35rem 0', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+              {isEs ? '¿Deseas recibir tu medicación personalizada en casa?' : 'Receive Your Physician-Prescribed Formulations'}
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.80rem', color: '#475569', lineHeight: 1.5, maxWidth: '640px' }}>
+              {isEs
+                ? 'Tu médico ha autorizado la preparación de esta pauta en laboratorio especializado bajo normativa EU GMP cleanroom. Puedes solicitar la dispensación oficial y el envío con control térmico a tu domicilio o clínica.'
+                : 'Your physician has authorized official compounding for this custom formula under certified EU GMP cleanroom standards. Request pharmaceutical preparation with direct cold-chain delivery.'}
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', alignSelf: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                if (onOpenQuotation) onOpenQuotation();
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 18px',
+                borderRadius: '8px',
+                background: '#003666',
+                color: '#ffffff',
+                border: 'none',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <span>{isEs ? 'Solicitar Preparación en Farmacia' : 'Request Official Compounding'}</span>
+              <span>→</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                if (onOpenDoctorContact) {
+                  onOpenDoctorContact();
+                } else if (clinicalInquiryUrl) {
+                  window.open(clinicalInquiryUrl, '_blank', 'noopener,noreferrer');
+                }
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '9px 14px',
+                borderRadius: '8px',
+                background: '#f8fafc',
+                color: '#334155',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.80rem',
+                fontWeight: 650,
+                cursor: 'pointer',
+              }}
+            >
+              <span>{isEs ? 'Preguntar a la Clínica' : 'Ask Clinic a Question'}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* ── Compartir con el Médico & Código QR (Orientado a la Consulta) ── */}

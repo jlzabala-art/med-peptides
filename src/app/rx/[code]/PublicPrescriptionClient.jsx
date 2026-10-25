@@ -82,6 +82,7 @@ import MultiPartOverview from './MultiPartOverview';
 import PatientExperienceHub from '@/components/prescription/PatientExperienceHub';
 import AtlasSynergyRecommendationsSection from '@/components/prescription/AtlasSynergyRecommendationsSection';
 import PrescriptionMasterHeader from '@/components/prescription/PrescriptionMasterHeader';
+import PrescriptionTrustWatermark from '@/components/prescription/PrescriptionTrustWatermark';
 import PatientActionBannerCard from '@/components/prescription/PatientActionBannerCard';
 import CompoundedFormulationsSection from '@/components/prescription/CompoundedFormulationsSection';
 import PatientPrescriptionGuide from '@/components/prescription/PatientPrescriptionGuide';
@@ -604,8 +605,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         />
       )}
 
-      <div className="rx-dossier-inner-container">
-        <div className="pds-content-with-sidebar">
+      <div className="rx-dossier-inner-container" style={{ position: 'relative' }}>
+        {/* ── Background Clinical Trust Watermark (Patient vs Doctor Mode) ── */}
+        <PrescriptionTrustWatermark mode={isPatientView ? 'patient' : 'doctor'} />
+
+        <div className="pds-content-with-sidebar" style={{ position: 'relative', zIndex: 1 }}>
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             
             {/* ── Master Header Card (Google Cloud Console High-Density Resource Header) ─────── */}
@@ -638,19 +642,21 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               setExpandedSections={setExpandedSections}
             />
 
-            {/* ── Patient Action & Refill Banner Card (Patient View Standard) ── */}
-            <PatientActionBannerCard
-              isPatientView={isPatientView}
-              isDispensed={isDispensed}
-              isEs={isEs}
-              rxId={rxId}
-              rx={currentRx}
-              doctorName={displayDoctorNameShort}
-              resolvedPrice={resolvedPrice}
-              isAuthenticated={isPatientAuthenticated}
-              onRequireAuth={() => setShowPatientAuthModal(true)}
-              onOpenInquiry={() => setShowDoctorContactModal(true)}
-            />
+            {/* ── Patient Action & Refill Banner Card (Shown at top ONLY if refill is due or already dispensed) ── */}
+            {(!isPatientView || isDispensed || currentRx?.isRefillDue) && (
+              <PatientActionBannerCard
+                isPatientView={isPatientView}
+                isDispensed={isDispensed}
+                isEs={isEs}
+                rxId={rxId}
+                rx={currentRx}
+                doctorName={displayDoctorNameShort}
+                resolvedPrice={resolvedPrice}
+                isAuthenticated={isPatientAuthenticated}
+                onRequireAuth={() => setShowPatientAuthModal(true)}
+                onOpenInquiry={() => setShowDoctorContactModal(true)}
+              />
+            )}
 
         {/* ── Sequential Roadmap Tab: MultiPartOverview & KPIs ────────────────────── */}
         {activeGcpTab === 'roadmap' && (
