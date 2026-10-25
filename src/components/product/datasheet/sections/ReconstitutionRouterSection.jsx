@@ -1,7 +1,9 @@
 "use client";
 
 import React from 'react';
+import Link from 'next/link';
 import { FlaskConical, CheckCircle2, Droplets } from '@/lib/icons';
+import { Calculator } from 'lucide-react';
 import SpainCompanyResidencyTechnicalSpecs from '../../SpainCompanyResidencyTechnicalSpecs';
 import CompoundingServicesTechnicalSpecs from '../../CompoundingServicesTechnicalSpecs';
 import PeptideSupplyManagementTechnicalSpecs from '../../PeptideSupplyManagementTechnicalSpecs';
@@ -142,7 +144,31 @@ export default function ReconstitutionRouterSection({
               </div>
             </div>
 
-            <div className="pds-section-header-right">
+            <div className="pds-section-header-right" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <Link
+                href={`/calculator?mg=${encodeURIComponent(selectedStrength?.numericValue || selectedStrength?.value || 5)}&name=${encodeURIComponent(product?.name || product?.canonicalName || '')}&slug=${encodeURIComponent(product?.slug || product?.id || '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={lang === 'es' ? 'Abrir en Calculadora Completa con visualizador de jeringa' : 'Open in Full Standalone Calculator with syringe visualizer'}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  color: '#0284c7',
+                  background: 'rgba(2, 132, 199, 0.08)',
+                  border: '1px solid rgba(2, 132, 199, 0.25)',
+                  padding: '4px 9px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Calculator size={13} />
+                <span>{lang === 'es' ? 'Calculadora Completa ↗' : 'Full Calculator ↗'}</span>
+              </Link>
+
               <div className="pds-section-cert-badge">
                 <Droplets size={14} color="#38bdf8" />
                 <span>

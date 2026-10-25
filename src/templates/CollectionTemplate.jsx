@@ -15,6 +15,7 @@ import ClinicalPortfolioSuiteSwitcher from '../components/navigation/ClinicalPor
 import PublicUnifiedHeader from '../components/shared/PublicUnifiedHeader';
 import PublicUnifiedFooter from '../components/shared/PublicUnifiedFooter';
 import PublicStickyActionBar from '../components/shared/PublicStickyActionBar';
+import UnifiedOrderDrawer from '../components/orders/UnifiedOrderDrawer';
 
 
 // Slug → exact category name mapping
@@ -134,6 +135,7 @@ export default function CollectionTemplate({
           showClinicalAI={true}
           lang="en"
         />
+        <UnifiedOrderDrawer lang="en" />
       </RestrictedCatalogRoute>
     );
   }
@@ -246,6 +248,7 @@ export default function CollectionTemplate({
         showClinicalAI={true}
         lang="en"
       />
+      <UnifiedOrderDrawer lang="en" />
     </div>
   );
 }

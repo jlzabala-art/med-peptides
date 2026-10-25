@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 import { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react';
 import { useResponsive } from '../hooks/useResponsive';
@@ -207,10 +208,17 @@ export default function Calculator() {
   });
 
   // ── All state declarations first (prevents TDZ under minification) ──────────
+  const searchParams = useSearchParams();
+  const paramMg = searchParams?.get('mg');
+  const paramMl = searchParams?.get('ml');
+  const paramDose = searchParams?.get('dose') || searchParams?.get('mcg');
+  const paramName = searchParams?.get('name') || searchParams?.get('peptide');
+  const paramSlug = searchParams?.get('slug');
+
   const isMobile = useResponsive('(max-width: 767px)');
-  const [bacWater, setBacWater] = useState('2');
-  const [vialDosageMg, setVialDosageMg] = useState('5');
-  const [desiredDosageMcg, setDesiredDosageMcg] = useState('250');
+  const [bacWater, setBacWater] = useState(paramMl || '2');
+  const [vialDosageMg, setVialDosageMg] = useState(paramMg || '5');
+  const [desiredDosageMcg, setDesiredDosageMcg] = useState(paramDose || '250');
 
   // ── Derived values (useMemo BEFORE useEffect that reads them) ────────────────
   const units = useMemo(
@@ -307,6 +315,40 @@ export default function Calculator() {
               <h2 className="calc-panel__title">Research Parameters</h2>
               <p className="calc-panel__desc">Enter your vial specifications below.</p>
             </div>
+
+            {paramName && (
+              <div style={{
+                marginBottom: '1.25rem',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FlaskConical size={16} style={{ color: '#003666', flexShrink: 0 }} />
+                  <div>
+                    <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#003666', display: 'block' }}>
+                      {paramName}
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      Vial configurado: {vialDosageMg} mg
+                    </span>
+                  </div>
+                </div>
+                {paramSlug && (
+                  <Link
+                    href={`/p/${paramSlug}`}
+                    style={{ fontSize: '0.76rem', fontWeight: 600, color: '#0284c7', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                  >
+                    Ficha Técnica →
+                  </Link>
+                )}
+              </div>
+            )}
 
             <InputField
               label="Peptide Quantity"

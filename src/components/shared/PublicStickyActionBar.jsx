@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, List } from 'lucide-react';
+import { Sparkles, ArrowRight, List, ShoppingBag } from 'lucide-react';
+import { useB2BOrder } from '@/hooks/useB2BOrder';
 import './PublicStickyActionBar.css';
 
 /**
@@ -35,6 +36,7 @@ export default function PublicStickyActionBar({
   extraActions = null,
   children = null,
 }) {
+  const { totalCount, subtotal, openDrawer } = useB2BOrder();
   const [_quota, setQuota] = useState({ remaining: 5, limit: 5 });
   const [tocProgress, setTocProgress] = useState({
     currentProgress: activeSectionIndex || 1,
@@ -193,15 +195,46 @@ export default function PublicStickyActionBar({
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={onInquire}
-            className="public-sticky-action-bar__inquire-btn"
-            aria-label={inquireLabel}
-          >
-            <span>{inquireLabel}</span>
-            <ArrowRight size={14} style={{ flexShrink: 0 }} />
-          </button>
+          {/* Active B2B Order Trigger (when items present) */}
+          {totalCount > 0 ? (
+            <button
+              type="button"
+              onClick={openDrawer}
+              className="public-sticky-action-bar__inquire-btn"
+              style={{
+                background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
+                boxShadow: '0 2px 10px rgba(13, 148, 136, 0.35)',
+                border: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+              aria-label={lang === 'es' ? `Tramitar Pedido (${totalCount})` : `Review Order (${totalCount})`}
+            >
+              <ShoppingBag size={14} style={{ flexShrink: 0 }} />
+              <span style={{
+                background: 'rgba(255, 255, 255, 0.22)',
+                borderRadius: '12px',
+                padding: '1px 6px',
+                fontSize: '0.70rem',
+                fontWeight: 800
+              }}>
+                {totalCount}
+              </span>
+              <span>{lang === 'es' ? `Tramitar Pedido (€${subtotal.toFixed(2)})` : `Review Order (€${subtotal.toFixed(2)})`}</span>
+              <ArrowRight size={14} style={{ flexShrink: 0 }} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onInquire}
+              className="public-sticky-action-bar__inquire-btn"
+              aria-label={inquireLabel}
+            >
+              <span>{inquireLabel}</span>
+              <ArrowRight size={14} style={{ flexShrink: 0 }} />
+            </button>
+          )}
         </div>
       </div>
     </aside>

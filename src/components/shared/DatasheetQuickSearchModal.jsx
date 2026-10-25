@@ -17,14 +17,32 @@ import {
   Layers,
   Check,
   FileText,
+  Activity,
+  Calculator,
+  Compass,
 } from 'lucide-react';
-import { searchAlgoliaProducts } from '@/services/algoliaSearch';
+import { searchAlgoliaProducts, searchAlgoliaFederated } from '@/services/algoliaSearch';
 import { getAllProducts } from '@/repositories/productRepository';
 import { getPeptideScientificData } from '@/utils/knownPeptideData';
 import { triggerHaptic } from '@/utils/haptics';
 
 // ── Google Cloud Clinical Category Classification ───────────────────────────
 function getProductCategoryMeta(product) {
+  // 0. Protocols & Clinical Pathways
+  if (product.isProtocol || product.itemType === 'protocol' || product.phases || product.bom) {
+    return {
+      id: 'protocols',
+      label: 'Clinical Protocols & Therapeutic Pathways',
+      labelEs: 'Protocolos Clínicos y Vías Terapéuticas',
+      icon: Activity,
+      iconColor: '#003666',
+      badgeBg: '#eff6ff',
+      badgeBorder: '#bfdbfe',
+      badgeColor: '#1e40af',
+      order: 0,
+    };
+  }
+
   const cat = (product.category || product.itemType || '').toLowerCase();
   const name = (product.canonicalName || product.name || product.displayName || '').toLowerCase();
 
@@ -128,6 +146,11 @@ function getProductCategoryMeta(product) {
 
 // Format clean readable subtitle instead of raw snake_case
 function formatProductSubtitle(item, isSpanish) {
+  if (item.isProtocol) {
+    const dur = item.duration || (item.durationWeeks ? `${item.durationWeeks} ${isSpanish ? 'Semanas' : 'Weeks'}` : (isSpanish ? 'Vía Clínica' : 'Clinical Pathway'));
+    const goals = Array.isArray(item.goals) ? item.goals.join(' • ') : (item.goal || '');
+    return goals ? `${dur} · ${goals}` : dur;
+  }
   if (item.targetReceptorAxis) return item.targetReceptorAxis;
   if (item.clinicalIndication) return item.clinicalIndication;
   if (item.indication) return item.indication;
@@ -143,6 +166,15 @@ function formatProductSubtitle(item, isSpanish) {
 
 // Format smart clinical specification badge (Dose, CAS, or Format) instead of redundant purity
 function formatProductClinicalBadge(item, isSpanish) {
+  // 0. Protocols
+  if (item.isProtocol) {
+    return {
+      type: 'protocol',
+      text: item.duration || (isSpanish ? 'Guía Clínica' : 'Evidence-Based'),
+      isMono: false,
+    };
+  }
+
   // 1. Clinical Dosage / Concentration (highest operational value for clinicians: e.g. "10mg / Vial", "5mg/ml")
   if (item.dosage && typeof item.dosage === 'string' && item.dosage.trim()) {
     const d = item.dosage.trim();
@@ -298,16 +330,17 @@ function getColwayCategoryMeta(product) {
 export default function DatasheetQuickSearchModal({
   isOpen,
   onClose,
-  currentSupplier = 'Lotusland',
+  currentSupplier = null,
   currentSlug = '',
   lang = 'en',
   collectionScope = null,
   collectionProducts = null,
   collectionTitle = null,
   onSelectCollectionProduct = null,
+  initialQuery = '',
 }) {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialQuery || '');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -321,7 +354,8 @@ export default function DatasheetQuickSearchModal({
 
   // Normalize supplier string for matching
   const cleanCurrentSupplier = useMemo(() => {
-    return (currentSupplier || '').toLowerCase().replace(/[\s-_]/g, '');
+    if (!currentSupplier || currentSupplier === 'all') return null;
+    return currentSupplier.toLowerCase().replace(/[\s-_]/g, '');
   }, [currentSupplier]);
 
   // Load initial fallback catalog (100 products) from local cache repository
@@ -368,13 +402,29 @@ export default function DatasheetQuickSearchModal({
         let rawProducts = [];
 
         if (term.length >= 2) {
-          // 1. Ultra-fast direct Algolia product search (<15ms)
-          const hits = await searchAlgoliaProducts(term, {
-            hitsPerPage: 40,
-            supplier: currentSupplier,
-          });
-          if (hits && hits.length > 0) {
-            rawProducts = hits;
+          // 1. Federated Algolia search across products and protocols (<15ms)
+          try {
+            const fed = await searchAlgoliaFederated(term, ['products', 'protocols'], 30);
+            if (fed) {
+              const hitsProtocols = (fed.protocols || []).map((proto) => ({
+                ...proto,
+                isProtocol: true,
+                canonicalName: proto.name || proto.title || proto.protocol_name,
+                slug: proto.slug || proto.protocol_slug || proto.id,
+                indication: proto.overview_summary || proto.description || (Array.isArray(proto.goals) ? proto.goals.join(', ') : proto.goal || ''),
+                category: 'protocol',
+              }));
+              const hitsProducts = fed.products || [];
+              rawProducts = [...hitsProtocols, ...hitsProducts];
+            }
+          } catch (e) {
+            const hits = await searchAlgoliaProducts(term, {
+              hitsPerPage: 40,
+              supplier: currentSupplier && currentSupplier !== 'all' ? currentSupplier : undefined,
+            }).catch(() => []);
+            if (hits && hits.length > 0) {
+              rawProducts = hits;
+            }
           }
         }
 
@@ -399,19 +449,22 @@ export default function DatasheetQuickSearchModal({
           }
         }
 
-        // Filter by supplier if specified
-        const targetSup = cleanCurrentSupplier || 'lotusland';
-        const finalResults = rawProducts.filter((p) => {
-          const sup = (p.supplierName || p.sourceSupplier || p.supplier || '').toLowerCase().replace(/[\s-_]/g, '');
-          if (!sup) return true;
-          return sup.includes(targetSup) || (targetSup.includes('lotus') && sup.includes('lotus'));
-        });
+        // Filter by supplier if specified (protocols are universal and not supplier-locked)
+        const targetSup = cleanCurrentSupplier;
+        const finalResults = !targetSup
+          ? rawProducts
+          : rawProducts.filter((p) => {
+              if (p.isProtocol) return true;
+              const sup = (p.supplierName || p.sourceSupplier || p.supplier || '').toLowerCase().replace(/[\s-_]/g, '');
+              if (!sup) return true;
+              return sup.includes(targetSup) || (targetSup.includes('lotus') && sup.includes('lotus'));
+            });
 
         // Deduplicate by slug / id
         const seen = new Set();
         const unique = [];
         for (const item of finalResults) {
-          const key = item.slug || item.id || item.name;
+          const key = (item.isProtocol ? 'proto:' : 'prod:') + (item.slug || item.id || item.name);
           if (key && !seen.has(key)) {
             seen.add(key);
             unique.push(item);
@@ -430,7 +483,6 @@ export default function DatasheetQuickSearchModal({
           });
           setExpandedCategories(autoExpanded);
         } else {
-          // Reset to collapsed by default when query is cleared
           setExpandedCategories({});
         }
       } catch (err) {
@@ -439,7 +491,7 @@ export default function DatasheetQuickSearchModal({
         setLoading(false);
       }
     },
-    [cleanCurrentSupplier, currentSupplier, initialCatalog]
+    [cleanCurrentSupplier, currentSupplier, initialCatalog, collectionProducts]
   );
 
   // Debounced search handler for sub-second responsive typing
@@ -454,16 +506,17 @@ export default function DatasheetQuickSearchModal({
   // Open & Focus Management
   useEffect(() => {
     if (isOpen) {
-      setSearchTerm('');
+      const q = initialQuery || '';
+      setSearchTerm(q);
       setSelectedIndex(0);
       setExpandedCategories({});
-      performSearch('');
+      performSearch(q);
       setTimeout(() => inputRef.current?.focus(), 80);
     }
     return () => {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
-  }, [isOpen, performSearch]);
+  }, [isOpen, initialQuery, performSearch]);
 
   // Group items by category and sort ALPHABETICALLY (A-Z) inside each category
   const categorizedGroups = useMemo(() => {
@@ -563,11 +616,21 @@ export default function DatasheetQuickSearchModal({
       onClose();
       return;
     }
+    // Route to Clinical Protocol
+    if (product.isProtocol) {
+      const protoSlug = product.slug || product.protocol_slug || product.id;
+      if (protoSlug) {
+        onClose();
+        router.push(`/proto/${encodeURIComponent(protoSlug)}`);
+      }
+      return;
+    }
+    // Route to Product Datasheet
     const targetSlug = product.slug || product.id;
     if (targetSlug) {
       onClose();
       const queryParams = new URLSearchParams();
-      if (currentSupplier) {
+      if (currentSupplier && currentSupplier !== 'all') {
         queryParams.set('supplier', currentSupplier.toLowerCase());
       }
       const qs = queryParams.toString() ? `?${queryParams.toString()}` : '';
@@ -685,6 +748,92 @@ export default function DatasheetQuickSearchModal({
             ESC
           </div>
         </div>
+
+        {/* Quick Tools & Clinical Shortcuts */}
+        {!searchTerm && (
+          <div
+            style={{
+              padding: '8px 14px',
+              backgroundColor: '#f8fafc',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+            }}
+          >
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', flexShrink: 0 }}>
+              {isSpanish ? 'Accesos Rápidos:' : 'Quick Tools:'}
+            </span>
+            <button
+              type="button"
+              onClick={() => { onClose(); router.push('/calculator'); }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 9px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#003666',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              <Calculator size={13} style={{ color: '#0284c7' }} />
+              {isSpanish ? 'Calculadora de Reconstitución' : 'Reconstitution Calculator'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { onClose(); router.push('/proto'); }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 9px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#003666',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              <Activity size={13} style={{ color: '#16a34a' }} />
+              {isSpanish ? 'Directorio de Protocolos' : 'Protocols Directory'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { onClose(); router.push('/protocol-finder'); }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 9px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#003666',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              <Compass size={13} style={{ color: '#7c3aed' }} />
+              {isSpanish ? 'Protocol Finder Guiado' : 'Guided Protocol Finder'}
+            </button>
+          </div>
+        )}
 
         {/* Category Controls Strip */}
         {categorizedGroups.length > 0 && !loading && (

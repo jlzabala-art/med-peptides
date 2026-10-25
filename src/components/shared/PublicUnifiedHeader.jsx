@@ -39,7 +39,7 @@ export default function PublicUnifiedHeader({
   copyUrl,
   shortUrl,
   // Brand logo destination and title
-  brandHref = '/c/CAT-MU9L9GBN',
+  brandHref = '/',
   brandTitle = 'Atlas Health Services Clinical & Healthcare Intelligence',
   // Doctor home link & details for prescription view
   doctorHomeHref = null,
@@ -386,6 +386,22 @@ function forceCanonicalDomain(urlOrPath) {
                 </Link>
               )}
             </div>
+
+            {/* Center: Global Navigation Links (Desktop) */}
+            <nav className="puh-nav-links" aria-label="Global Public Navigation">
+              <Link href="/collection/peptides" className="puh-nav-link">
+                {isSpanish ? 'Catálogo' : 'Catalog'}
+              </Link>
+              <Link href="/proto" className="puh-nav-link">
+                {isSpanish ? 'Protocolos' : 'Protocols'}
+              </Link>
+              <Link href="/calculator" className="puh-nav-link">
+                {isSpanish ? 'Calculadora' : 'Calculator'}
+              </Link>
+              <Link href="/blog" className="puh-nav-link">
+                {isSpanish ? 'Academia' : 'Academy'}
+              </Link>
+            </nav>
 
             {/* Right: Actions & Tools */}
             <div className="puh-actions-group">

@@ -1199,6 +1199,8 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
   }
 ];
 
+export const PHARMAPOLIS_LABELS_MAP = PHARMAPOLIS_LABELS_REGISTRY;
+
 /**
  * Extracts verified, authoritative clinical parameters from a live prescription object (Firestore single source of truth).
  */
@@ -1221,9 +1223,9 @@ export function getAuthoritativeClinicalData(rx) {
   let doctorLicense = '';
   let clinicName = '';
 
-  // Direct lookup from verified PHARMAPOLIS_LABELS_MAP by fileNumber or prescriptionMatches
+  // Direct lookup from verified PHARMAPOLIS_LABELS_REGISTRY by fileNumber or prescriptionMatches
   const cleanCode = String(fileNumber || rx.code || rx.id || rx.prescriptionNumber || '').replace(/^RX-/i, '').trim().toLowerCase();
-  const labelMatch = PHARMAPOLIS_LABELS_MAP.find(l => {
+  const labelMatch = (PHARMAPOLIS_LABELS_REGISTRY || []).find(l => {
     if (!l) return false;
     const lFile = String(l.fileNumber || '').replace(/^RX-/i, '').trim().toLowerCase();
     if (lFile && (lFile === cleanCode || cleanCode.startsWith(lFile))) return true;

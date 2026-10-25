@@ -1,31 +1,19 @@
-"use client";
+import { redirect } from 'next/navigation';
 
-import React from 'react';
-import ProtocolTemplate from '../../../templates/ProtocolTemplate';
-import { useAuth } from '../../../context/AuthContext';
-import { useShop } from '../../../context/ShopProvider';
-import { useCart } from '../../../context/CartProvider';
-import { useParams } from 'next/navigation';
+export async function generateMetadata({ params }) {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
+  return {
+    title: `${slug ? slug.replace(/-/g, ' ').toUpperCase() : 'Protocol'} - Atlas Clinical Protocol Directory`,
+    description: `View ${slug} clinical protocol details.`
+  };
+}
 
-export default function NextProtocolPage() {
-  const params = useParams();
-  const slug = params?.slug;
-
-  const { isProfessional, isAdmin } = useAuth();
-  const { products, region, setRegion } = useShop();
-  const { cart, updateCart } = useCart();
-
-  return (
-    <ProtocolTemplate 
-      slug={slug}
-      region={region}
-      isProfessional={isProfessional}
-      isAdmin={isAdmin}
-      cart={cart}
-      updateCart={updateCart}
-      setRegion={setRegion}
-      products={products}
-      allFaqs={[]}
-    />
-  );
+export default async function NextProtocolSlugRedirect({ params }) {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
+  if (slug) {
+    redirect(`/proto/${slug}`);
+  }
+  redirect('/proto');
 }

@@ -16,7 +16,7 @@ import { useFirestoreData } from '../hooks/useFirestoreData';
 
 // ⚡ Dynamic Client-Only Lazy Imports for Zero TBT & Optimal LCP
 const Cart = dynamic(() => import('../snippets/Cart'), { ssr: false });
-const SearchModal = dynamic(() => import('../snippets/SearchModal'), { ssr: false });
+const UniversalSearchModal = dynamic(() => import('../components/shared/DatasheetQuickSearchModal'), { ssr: false });
 const AtlasAIDrawer = dynamic(() => import('../components/shared/AtlasAIDrawer'), { ssr: false });
 const GCPImpersonationDock = dynamic(() => import('../components/navigation/GCPImpersonationDock'), { ssr: false });
 const GCPCommandPalette = dynamic(() => import('../components/navigation/GCPCommandPalette'), { ssr: false });
@@ -142,18 +142,10 @@ function StorefrontShell({ children }) {
       
       {activeModal === 'search' && (
         <Suspense fallback={null}>
-          <SearchModal 
+          <UniversalSearchModal 
             isOpen={true}
-            initialQuery={searchQuery}
-            products={products || []}
-            protocolIndex={protocols || []}
-            supplementCatalogue={supplements || []}
+            initialQuery={searchQuery || ''}
             onClose={() => setActiveModal(null)} 
-            onSelectProduct={(p) => {
-               const slug = p.slug || p.id;
-               router.push(`/p/${slug}`);
-               setActiveModal(null);
-            }} 
           />
         </Suspense>
       )}
@@ -165,6 +157,23 @@ function StorefrontShell({ children }) {
 
 export default function GlobalClientWrapper({ children }) {
   const pathname = usePathname();
+  const { isAdmin, activeRole } = useAuth();
+  const isSuperUser = Boolean(isAdmin || activeRole === 'admin');
+  const { setActiveModal } = useUIStore();
+
+  // Universal ⌘K / Ctrl+K keyboard shortcut for public storefront visitors
+  useEffect(() => {
+    if (isSuperUser) return; // Admins utilize GCPCommandPalette for ⌘K
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setActiveModal('search');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSuperUser, setActiveModal]);
+
   const isPortalRoute = PORTAL_PREFIXES.some((prefix) => 
     pathname === prefix || pathname?.startsWith(`${prefix}/`)
   );
@@ -175,7 +184,7 @@ export default function GlobalClientWrapper({ children }) {
       <AppErrorBoundary>
         <Toaster containerStyle={{ zIndex: 99999 }} />
         {children}
-        <GCPCommandPalette />
+        {isSuperUser && <GCPCommandPalette />}
         <PWAInstallPrompt />
       </AppErrorBoundary>
     );
@@ -184,8 +193,8 @@ export default function GlobalClientWrapper({ children }) {
   return (
     <>
       <StorefrontShell>{children}</StorefrontShell>
-      <GCPImpersonationDock />
-      <GCPCommandPalette />
+      {isSuperUser && <GCPImpersonationDock />}
+      {isSuperUser && <GCPCommandPalette />}
     </>
   );
 }

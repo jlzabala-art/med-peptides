@@ -24,6 +24,8 @@ import CopyableId from '../components/ui/CopyableId';
 import StatusBadge from '../components/ui/StatusBadge';
 import TieredPriceShield from '../components/pricing/TieredPriceShield';
 import FrictionFreeUnlockModal from '../components/pricing/FrictionFreeUnlockModal';
+import InlineOrderButton from '../components/orders/InlineOrderButton';
+import UnifiedOrderDrawer from '../components/orders/UnifiedOrderDrawer';
 import { useAuth } from '../context/AuthContext';
 import {
   Search, SlidersHorizontal, LayoutGrid, List, Sparkles, Shield, Activity,
@@ -338,7 +340,7 @@ export default function BrandCollectionPage({
 }) {
   const router = useRouter();
   const config = BRAND_CONFIGS[brandSlug] || BRAND_CONFIGS.bloodo;
-  const { user, isProfessional, loginWithGoogle } = useAuth();
+  const { user, activeRole, isProfessional, loginWithGoogle } = useAuth();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [lang, setLang] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -1584,6 +1586,18 @@ export default function BrandCollectionPage({
                                 </a>
                               );
                             })()}
+
+                            {/* Inline B2B Order / Purchase Action */}
+                            <InlineOrderButton
+                              product={product}
+                              variant={product.variants?.[0] || null}
+                              isEs={isEs}
+                              compact={true}
+                              role={activeRole || 'clinic'}
+                              brandSlug={brandSlug}
+                              onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                            />
+
                             <button
                               type="button"
                               onClick={() => handleProductClick(product)}
@@ -1864,6 +1878,18 @@ export default function BrandCollectionPage({
                                 <span>WhatsApp</span>
                               </a>
                             )}
+
+                            {/* Inline B2B Order / Purchase Action */}
+                            <InlineOrderButton
+                              product={product}
+                              variant={product.variants?.[0] || null}
+                              isEs={isEs}
+                              compact={false}
+                              role={activeRole || 'clinic'}
+                              brandSlug={brandSlug}
+                              onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                            />
+
                             <button
                               type="button"
                               onClick={() => handleProductClick(product)}
@@ -2228,6 +2254,9 @@ export default function BrandCollectionPage({
         onOpenSections={() => setIsMobileSidebarOpen(true)}
         lang={lang}
       />
+
+      {/* ── Unified B2B Order Drawer (Single SSOT across all collections) ── */}
+      <UnifiedOrderDrawer lang={lang} />
     </div>
   );
 }

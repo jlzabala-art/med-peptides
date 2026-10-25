@@ -50,6 +50,35 @@
   transition: padding 0.2s ease;
 }
 
+/* ── Public Desktop Navigation Links ────────────────────────────── */
+.puh-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+}
+
+.puh-nav-link {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  letter-spacing: 0.01em;
+}
+
+.puh-nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 900px) {
+  .puh-nav-links {
+    display: none;
+  }
+}
+
 .puh-brand-row-inner {
   max-width: 1360px;
   margin: 0 auto;

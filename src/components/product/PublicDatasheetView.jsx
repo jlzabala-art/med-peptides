@@ -99,6 +99,8 @@ import { CollectionBadgePill, CollectionCompanionBanner, resolveBrandCollectionI
 import { Mail, Lock } from 'lucide-react';
 import TieredPriceShield from '@/components/pricing/TieredPriceShield';
 import FrictionFreeUnlockModal from '@/components/pricing/FrictionFreeUnlockModal';
+import InlineOrderButton from '@/components/orders/InlineOrderButton';
+import UnifiedOrderDrawer from '@/components/orders/UnifiedOrderDrawer';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
 import { getHumanFormatName } from '../../utils/productVariantProcessing';
@@ -186,7 +188,7 @@ export default function PublicDatasheetView({
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
   const router = useRouter();
 
   const handleOpenInquiry = () => {
@@ -1881,7 +1883,12 @@ export default function PublicDatasheetView({
           slug.includes('strengthening-shampoo') ? '/images/products/colway/shampoo.png' :
           slug.includes('strengthening-conditioner') ? '/images/products/colway/conditioner.png' :
           slug.includes('trichology') ? '/images/products/colway/colway-trichology-banner.jpg' :
-          null
+          slug.includes('bpc') ? '/images/products/lotusland/bpc-157.png' :
+          slug.includes('tb-500') || slug.includes('tb500') ? '/images/products/lotusland/tb-500.png' :
+          slug.includes('ghk') ? '/images/products/lotusland/ghk-cu.png' :
+          slug.includes('epithalon') ? '/images/products/lotusland/epithalon.png' :
+          slug.includes('mots') ? '/images/products/lotusland/mots-c.png' :
+          '/images/products/lotusland/bpc-157.png'
         ));
 
   return (
@@ -2372,7 +2379,7 @@ export default function PublicDatasheetView({
                   </div>
                 </div>
 
-                {/* 4. Base Dock: Tiered Price Shield */}
+                {/* 4. Base Dock: Tiered Price Shield & Unified Order Control */}
                 <div className="pds-square-price-dock">
                   <TieredPriceShield
                     product={product}
@@ -2384,6 +2391,19 @@ export default function PublicDatasheetView({
                     adminSimulationTier={adminSimulationTier}
                     onSelectAdminSimulationTier={setAdminSimulationTier}
                   />
+
+                  {/* 1-Click Order Button for Registered Clinicians */}
+                  <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
+                    <InlineOrderButton
+                      product={product}
+                      variant={selectedStrength || product.variants?.[0] || null}
+                      isEs={lang === 'es'}
+                      compact={false}
+                      role={activeRole || 'clinic'}
+                      brandSlug={product?.brandSlug || (isDiagnosticKit ? 'bloodo' : 'peptides')}
+                      onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                    />
+                  </div>
                 </div>
               </div>
             ) : null
@@ -2438,7 +2458,7 @@ export default function PublicDatasheetView({
                   </div>
                 </div>
 
-                {/* ── Mobile Tiered Price Shield (Google Cloud UX) ── */}
+                {/* ── Mobile Tiered Price Shield & Order Action (Google Cloud UX) ── */}
                 <div style={{
                   background: '#ffffff',
                   borderRadius: '10px',
@@ -2457,6 +2477,17 @@ export default function PublicDatasheetView({
                     onSelectAdminSimulationTier={setAdminSimulationTier}
                   />
 
+                  <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
+                    <InlineOrderButton
+                      product={product}
+                      variant={selectedStrength || product.variants?.[0] || null}
+                      isEs={lang === 'es'}
+                      compact={false}
+                      role={activeRole || 'clinic'}
+                      brandSlug={product?.brandSlug || (isDiagnosticKit ? 'bloodo' : 'peptides')}
+                      onUnlockRequest={() => setIsUnlockModalOpen(true)}
+                    />
+                  </div>
                 </div>
               </div>
             ) : null
@@ -3265,6 +3296,9 @@ export default function PublicDatasheetView({
 
       {/* Institutional Unified Public Footer */}
       <PublicUnifiedFooter lang={lang} />
+
+      {/* ── Unified B2B Order Drawer (Single SSOT across all products) ── */}
+      <UnifiedOrderDrawer lang={lang} />
     </div>
   );
 }
