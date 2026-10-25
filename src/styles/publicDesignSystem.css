@@ -1406,20 +1406,22 @@
    Transforms desktop dialogs/drawers into native mobile bottom sheets
    ══════════════════════════════════════════════════════════════════ */
 
-.atlas-bottom-sheet-overlay {
+.atlas-bottom-sheet-overlay,
+.atlas-copilot-drawer-overlay {
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.22);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
   display: flex;
   justify-content: flex-end;
   align-items: stretch;
   transition: opacity 0.2s ease;
 }
 
-.atlas-bottom-sheet-panel {
+.atlas-bottom-sheet-panel,
+.atlas-copilot-drawer-panel {
   width: 100%;
   max-width: 460px;
   height: 100%;
@@ -1482,6 +1484,7 @@
 /* ── Mobile Layout (< 768px): Unified Bottom Sheet ── */
 @media (max-width: 768px) {
   .atlas-bottom-sheet-overlay,
+  .atlas-copilot-drawer-overlay,
   .atlas-bottom-sheet-modal-overlay {
     align-items: flex-end !important;
     justify-content: center !important;
@@ -1489,6 +1492,7 @@
   }
 
   .atlas-bottom-sheet-panel,
+  .atlas-copilot-drawer-panel,
   .atlas-bottom-sheet-modal-panel {
     max-width: 100% !important;
     width: 100% !important;

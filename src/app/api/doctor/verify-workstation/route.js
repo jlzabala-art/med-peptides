@@ -64,9 +64,15 @@ export async function POST(request) {
           (Array.isArray(data.alternateSlugs) && data.alternateSlugs.some(as => norm(as) === norm(doctorSlug) || as.toUpperCase() === String(doctorSlug).toUpperCase())) ||
           (data.opaqueCode && String(data.opaqueCode).toUpperCase() === String(doctorSlug).toUpperCase());
 
-        if (matchesSlug && !data.used && new Date(data.expiresAt) > now) {
-          // Mark magic token as used
-          await magicDocRef.update({ used: true, usedAt: now.toISOString() });
+        const isUsable = !data.used || data.multiUse || data.isMultiUse;
+        if (matchesSlug && isUsable && new Date(data.expiresAt) > now) {
+          // Mark magic token as used (or track usage for multi-use tokens)
+          await magicDocRef.update({
+            used: true,
+            usedAt: data.usedAt || now.toISOString(),
+            lastUsedAt: now.toISOString(),
+            useCount: (data.useCount || 0) + 1
+          });
 
           // Issue 90-day workstation session token
           const newWsToken = `ws_${crypto.randomBytes(24).toString('hex')}`;

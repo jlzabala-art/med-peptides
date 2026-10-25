@@ -1776,6 +1776,14 @@ export default function DoctorPublicPortalClient({
     } else if (action.type === 'open_labs') {
       setIsAtlasAiOpen(false);
       setActiveAnchor('lab_results');
+    } else if (action.type === 'open_colway_collection') {
+      setIsAtlasAiOpen(false);
+      if (typeof window !== 'undefined') {
+        window.location.href = action.payload || '/collection/colway';
+      }
+    } else if (action.type === 'whatsapp_colway_sample') {
+      setIsAtlasAiOpen(false);
+      handleContactAtlasWhatsApp('Colway Clinical Sample Request - Hair Restoration & Trichology');
     }
   };
 
@@ -6501,6 +6509,12 @@ export default function DoctorPublicPortalClient({
                             )}
                             {bp.dermocosmeticSynergy?.name && (
                               <span
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  triggerHaptic('light');
+                                  setRecCategoryFilter('colway');
+                                  handleSidebarNavigate('recommendations');
+                                }}
                                 style={{
                                   fontSize: '0.66rem',
                                   fontWeight: 650,
@@ -6508,10 +6522,17 @@ export default function DoctorPublicPortalClient({
                                   borderRadius: '4px',
                                   background: '#ecfdf5',
                                   color: '#047857',
-                                  border: '1px solid #a7f3d0'
+                                  border: '1px solid #a7f3d0',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px',
+                                  transition: 'all 0.15s ease'
                                 }}
+                                title={lang === 'es' ? 'Explorar protocolo y productos Colway® en Recomendaciones' : 'Explore Colway® protocols and products in Recommendations'}
                               >
-                                🌿 Colway: {bp.dermocosmeticSynergy.name}
+                                <span>🌿 Colway: {bp.dermocosmeticSynergy.name}</span>
+                                <ArrowUpRight size={10} style={{ opacity: 0.7 }} />
                               </span>
                             )}
                             {bp.diagnosticSynergy?.name && (
@@ -10077,7 +10098,63 @@ export default function DoctorPublicPortalClient({
                       </div>
                     </button>
 
-                    {/* Card 3: Posología & Sinergias */}
+                    {/* Card 3: Colway® Tricología & Colágeno Nativo */}
+                    <button
+                      type="button"
+                      onClick={() => handleSendAtlasAiQuery(
+                        lang === 'es'
+                          ? `¿Cuáles son los protocolos clínicos de Colway® (Tricología Capilar con Baicapil™ 2%, Champú con Diosmina y Tropocolágeno Nativo) para recuperación capilar y post-injerto?`
+                          : `What are the Colway® clinical protocols (Trichology System with Baicapil™ 2%, Diosmin Shampoo, and Native Tropocollagen) for graft survival and follicular recovery?`
+                      )}
+                      disabled={aiLoading || aiUsesRemaining <= 0}
+                      style={{
+                        padding: '12px 14px',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px',
+                        textAlign: 'left',
+                        cursor: aiUsesRemaining <= 0 ? 'default' : 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#f0fdf4';
+                        e.currentTarget.style.borderColor = '#bbf7d0';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#f8fafc';
+                        e.currentTarget.style.borderColor = '#e2e8f0';
+                      }}
+                    >
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        backgroundColor: '#dcfce7',
+                        color: '#16a34a',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <Sparkles size={16} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#00284d', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span>{lang === 'es' ? '🌿 Colway® Tricología & Colágeno' : '🌿 Colway® Trichology & Collagen'}</span>
+                          <ArrowUpRight size={14} color="#16a34a" />
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', lineHeight: 1.35 }}>
+                          {lang === 'es'
+                            ? 'Protocolos post-FUE, Baicapil 2%, Diosmina y tropocolágeno nativo.'
+                            : 'Post-FUE protocols, Baicapil 2%, Diosmin, and native tropocollagen.'}
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Card 4: Posología & Sinergias */}
                     <button
                       type="button"
                       onClick={() => handleSendAtlasAiQuery(

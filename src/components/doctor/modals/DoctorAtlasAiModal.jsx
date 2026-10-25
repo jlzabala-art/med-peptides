@@ -84,76 +84,95 @@ export default function DoctorAtlasAiModal({
 
   return (
     <div
+      className="atlas-copilot-drawer-overlay"
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 70,
-        background: 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(6px)',
+        inset: 0,
+        zIndex: 10000,
+        background: 'rgba(15, 23, 42, 0.25)',
+        backdropFilter: 'blur(2px)',
+        WebkitBackdropFilter: 'blur(2px)',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '16px'
+        justifyContent: 'flex-end',
+        alignItems: 'stretch',
+        transition: 'opacity 0.2s ease'
       }}
       onClick={onClose}
     >
       <div
+        className="atlas-copilot-drawer-panel"
         style={{
-          width: '640px',
-          maxWidth: '100%',
-          maxHeight: '90vh',
+          width: '100%',
+          maxWidth: '460px',
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
           background: '#ffffff',
-          borderRadius: '16px',
-          boxShadow: '0 20px 40px rgba(15, 23, 42, 0.25)',
-          overflow: 'hidden',
-          border: '1px solid #e2e8f0'
+          boxShadow: '-8px 0 32px rgba(15, 23, 42, 0.16)',
+          borderLeft: '1px solid #e2e8f0',
+          animation: 'atlasSlideInRight 0.24s cubic-bezier(0.16, 1, 0.3, 1)',
+          overflow: 'hidden'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
+        {/* Mobile Drag Handle */}
+        <div
+          className="atlas-bottom-sheet-handle"
+          style={{
+            display: 'none',
+            width: '40px',
+            height: '4px',
+            borderRadius: '2px',
+            background: '#cbd5e1',
+            margin: '8px auto 4px',
+            flexShrink: 0
+          }}
+        />
+
+        {/* Header: GCP Navy Clinical Standard */}
         <div style={{
-          padding: '16px 20px',
-          background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+          padding: '14px 18px',
+          background: 'linear-gradient(135deg, #00284d 0%, #001833 100%)',
           color: '#ffffff',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          borderBottom: '1px solid rgba(56, 189, 248, 0.25)',
+          flexShrink: 0
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: 'rgba(255, 255, 255, 0.2)',
+              width: '34px',
+              height: '34px',
+              borderRadius: '8px',
+              background: 'rgba(56, 189, 248, 0.15)',
+              border: '1px solid rgba(56, 189, 248, 0.3)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              color: '#38bdf8'
             }}>
-              <Bot size={20} color="#ffffff" />
+              <Bot size={18} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>
-                  Atlas AI — Clinical Copilot
+                <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.01em' }}>
+                  Atlas AI · Copiloto Clínico
                 </h3>
                 <span style={{
                   fontSize: '0.68rem',
                   fontWeight: 700,
                   padding: '2px 8px',
                   borderRadius: '9999px',
-                  background: aiUsesRemaining > 2 ? '#10b981' : aiUsesRemaining > 0 ? '#f59e0b' : '#ef4444',
-                  color: '#ffffff'
+                  background: aiUsesRemaining > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                  border: `1px solid ${aiUsesRemaining > 0 ? 'rgba(52, 211, 153, 0.4)' : 'rgba(248, 113, 113, 0.4)'}`,
+                  color: aiUsesRemaining > 0 ? '#6ee7b7' : '#fca5a5'
                 }}>
-                  {aiUsesRemaining}/5 uses left
+                  {aiUsesRemaining > 0 ? `${aiUsesRemaining}/5 usos` : '0/5'}
                 </span>
               </div>
-              <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: '2px' }}>
-                Personalized for {doctor?.name || 'Physician'} · {prescriptions.length} Prescriptions Indexed
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '1px' }}>
+                {doctor?.name ? `Dr. ${doctor.name} · ${doctor.clinic || 'Consulta Verificada'}` : 'Inteligencia Médica y Formulación'}
               </div>
             </div>
           </div>
@@ -161,7 +180,7 @@ export default function DoctorAtlasAiModal({
             type="button"
             onClick={onClose}
             style={{
-              background: 'rgba(255, 255, 255, 0.15)',
+              background: 'rgba(255, 255, 255, 0.1)',
               border: 'none',
               borderRadius: '50%',
               width: '30px',
@@ -170,8 +189,10 @@ export default function DoctorAtlasAiModal({
               alignItems: 'center',
               justifyContent: 'center',
               color: '#ffffff',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'background 0.15s ease'
             }}
+            title="Cerrar panel"
           >
             <X size={16} />
           </button>
@@ -198,12 +219,12 @@ export default function DoctorAtlasAiModal({
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '16px 20px',
+          padding: '16px 18px',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          background: '#fdfdfe',
-          maxHeight: '360px'
+          background: '#f8fafc',
+          minHeight: '200px'
         }}>
           {/* Welcome Assistant Message */}
           <div style={{

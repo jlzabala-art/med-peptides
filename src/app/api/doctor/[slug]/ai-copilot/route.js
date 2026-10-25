@@ -214,6 +214,32 @@ function buildDeterministicResponse(query, context) {
     };
   }
 
+  // 5.5. Dedicated Colway® Clinical Biomaterials & Trichology Protocol
+  if (
+    q.includes('colway') ||
+    q.includes('collagen') ||
+    q.includes('colágeno') ||
+    q.includes('colvita') ||
+    q.includes('baicapil') ||
+    q.includes('diosmin') ||
+    q.includes('tricolog') ||
+    q.includes('shampoo') ||
+    q.includes('conditioner') ||
+    q.includes('fue') ||
+    q.includes('dhi') ||
+    q.includes('injerto') ||
+    q.includes('diamond')
+  ) {
+    return {
+      reply: `**Colway® Clinical Biotechnology & Follicular Protocols — ${docName}** (${clinic})\n\n**1. Anti-DHT Trichology System (Pilar Post-Injerto FUE/DHI & Anclaje Folicular):**\n• **Colway Hair Strengthening Shampoo (200 mL):** Enriquecido con **Diosmina micronizada** que estimula el flujo microcirculatorio peribulbar durante el lavado y **Tropocolágeno Nativo 3D** para purificar el ostium folicular sin sulfatos agresivos (SLS/SLES-free).\n• **Colway Hair Strengthening Conditioner (200 mL):** Formulado con **Baicapil™ 2%** (*Scutellaria baicalensis*, germen de trigo y soja) y **Kerascalp™**. Prolonga la fase anágena y refuerza el colágeno XVII peribulbar.\n\n**2. Nutricosmética Sistémica Oral (Soporte Matriz Dérmica):**\n• **Colvita (60 / 120 Cápsulas):** Tropocolágeno liofilizado en frío (-40°C) de agua dulce con triple hélice preservada + microalgas *Fucus vesiculosus* ricas en yodo orgánico y vitamina E natural. Evidencia clínica ITA-TEST #B-89146 (+90% elasticidad cutánea).\n\n**3. Sinergia Epigenética Diamante Azul:**\n• **Blue Diamond Cream & Peeling:** Reactivación de 14 genes de síntesis dérmica (*Matrigenics 14G*) y péptidos VEP-carrier.\n\n🛡️ **Cumplimiento Regulatorio:** Certificado bajo ISO 22716 GMP, Registro Europeo CPNP (Reglamento CE No 1223/2009), MoHAP / Dubai Montaji (EAU) y MoPH (Qatar).`,
+      actions: [
+        { type: 'open_colway_collection', label: `🌿 Ver Colección Colway® Completa`, payload: '/collection/colway' },
+        { type: 'open_synergies', label: `✨ Ver Sinergias con Minoxidil/Dutasteride` },
+        { type: 'whatsapp_colway_sample', label: `💬 Solicitar Muestra Clínica WA` }
+      ]
+    };
+  }
+
   // 6. Specialty Practice Blueprints / Procedures / APIs / Synergies
   if (
     q.includes('blueprint') ||
