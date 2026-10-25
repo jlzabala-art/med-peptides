@@ -23,6 +23,7 @@ import ProductTechnicalDetailsPanel from '../components/collection/ProductTechni
 import CopyableId from '../components/ui/CopyableId';
 import StatusBadge from '../components/ui/StatusBadge';
 import TieredPriceShield from '../components/pricing/TieredPriceShield';
+import { resolvePhysicalCapsuleSize, CAPSULE_BOTTLE_SIZES } from '../services/pharmapolisCostEngine.js';
 import FrictionFreeUnlockModal from '../components/pricing/FrictionFreeUnlockModal';
 import InlineOrderButton from '../components/orders/InlineOrderButton';
 import UnifiedOrderDrawer from '../components/orders/UnifiedOrderDrawer';
@@ -410,6 +411,13 @@ export default function BrandCollectionPage({
   const [activeCurrency, setActiveCurrency] = useState('EUR'); // 'EUR' | 'USD' | 'AED'
   const [adminSimulationTier, setAdminSimulationTier] = useState('clinic'); // 'cost' | 'wholesaler' | 'clinic' | 'retail'
   const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+  const [selectedCapsulesMap, setSelectedCapsulesMap] = useState({});
+
+  const handleCapsuleSelect = (productId, count, e) => {
+    if (e) e.stopPropagation();
+    triggerHaptic('light');
+    setSelectedCapsulesMap(prev => ({ ...prev, [productId]: count }));
+  };
 
   const canonicalUrl = `https://www.atlashealth-services.com/collection/${brandSlug}`;
 
@@ -1802,12 +1810,77 @@ export default function BrandCollectionPage({
                           />
                         )}
 
+                        {/* UltraPerson / Ultraman 3-Tier Capsule Selector & Galenic Spec */}
+                        {(brandSlug === 'ultraperson' || brandSlug === 'ultraman') && (() => {
+                          const currentCaps = selectedCapsulesMap[product.id] || 60;
+                          const physicalCap = resolvePhysicalCapsuleSize(product.activeIngredients || product.ingredients || []);
+
+                          return (
+                            <div style={{ marginBottom: '0.65rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              {/* 1. Galenic Physical Capsule Size Badge */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                                <span style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: 700,
+                                  color: physicalCap.badgeColor,
+                                  background: `${physicalCap.badgeColor}12`,
+                                  border: `1px solid ${physicalCap.badgeColor}30`,
+                                  padding: '2px 7px',
+                                  borderRadius: '5px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}>
+                                  💊 {physicalCap.size} · Vegan HPMC ({physicalCap.totalMg} mg)
+                                </span>
+                                <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 600 }}>
+                                  {currentCaps === 30 ? (isEs ? '15–30 Días' : '15–30 Days') : currentCaps === 60 ? (isEs ? '30–60 Días' : '30–60 Days') : (isEs ? '60–120 Días' : '60–120 Days')}
+                                </span>
+                              </div>
+
+                              {/* 2. 3 Commercial Bottle Size Selector */}
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+                                {CAPSULE_BOTTLE_SIZES.map(b => {
+                                  const isActive = currentCaps === b.count;
+                                  return (
+                                    <button
+                                      key={b.count}
+                                      type="button"
+                                      onClick={(e) => handleCapsuleSelect(product.id, b.count, e)}
+                                      style={{
+                                        padding: '4px 2px',
+                                        fontSize: '0.72rem',
+                                        fontWeight: isActive ? 800 : 600,
+                                        borderRadius: '6px',
+                                        border: isActive ? '1.5px solid #7c3aed' : '1px solid #e2e8f0',
+                                        background: isActive ? '#f5f3ff' : '#ffffff',
+                                        color: isActive ? '#6d28d9' : '#475569',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.15s ease',
+                                        textAlign: 'center'
+                                      }}
+                                    >
+                                      {b.count} caps
+                                      {b.savingsPercent && (
+                                        <span style={{ display: 'block', fontSize: '0.58rem', color: '#16a34a', fontWeight: 800 }}>
+                                          -{b.savingsPercent}%
+                                        </span>
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
                         {/* Tiered Pricing Shield with Lock & Role Authorization (Golden Rule #14 & #22) */}
                         <TieredPriceShield
                           product={product}
                           currency={activeCurrency}
                           compact={false}
                           isEs={isEs}
+                          capsCount={selectedCapsulesMap[product.id] || 60}
                           onUnlockRequest={() => setIsUnlockModalOpen(true)}
                           adminSimulationTier={adminSimulationTier}
                           onSelectAdminSimulationTier={setAdminSimulationTier}

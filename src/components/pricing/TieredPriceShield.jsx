@@ -5,6 +5,7 @@ import { Lock, Unlock, ShieldCheck, Eye, Sparkles } from '@/lib/icons';
 import { useAuth } from '@/context/AuthContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { triggerHaptic } from '@/utils/haptics';
+import { calculatePharmapolisCost } from '@/services/pharmapolisCostEngine.js';
 
 const CURRENCY_RATES = {
   EUR: { symbol: '€', rate: 1.0, position: 'before' },
@@ -15,8 +16,37 @@ const CURRENCY_RATES = {
 /**
  * Resolves all 4 price tiers for a product
  */
-export function resolveProductTierPricing(product) {
+export function resolveProductTierPricing(product, capsCount = 60) {
   if (!product) return null;
+
+  const id = (product.id || product.slug || product.canonicalId || product.name || '').toLowerCase();
+  const brand = (product.brand || product.supplierName || product.supplier || '').toLowerCase();
+  const isUltraPerson = id.includes('ultraperson') || id.includes('ultraman') || brand.includes('ultraperson') || brand.includes('ultraman');
+
+  // Dynamic Pharmapolis Compounding Engine for UltraPerson / Ultraman products
+  if (isUltraPerson && (product.activeIngredients?.length > 0 || product.ingredients?.length > 0)) {
+    try {
+      const report = calculatePharmapolisCost({
+        activeIngredients: product.activeIngredients || product.ingredients,
+        capsPerBottle: capsCount
+      });
+      const tpc = report.totalProductionCostEur;
+      const wholesale = report.finalPricing.netSellingPriceEur; // Pharmapolis price with 15% margin
+      const clinic = Math.round(wholesale * 1.30 * 100) / 100;  // B2B Practitioner
+      const retail = Math.round(clinic * 1.35 * 100) / 100;     // RRP Recommended Retail
+
+      return {
+        cost: tpc,
+        wholesaler: wholesale,
+        clinic: clinic,
+        retail: retail,
+        perCapNet: report.finalPricing.netPerCapEur,
+        capsCount: report.capsPerBottle
+      };
+    } catch (e) {
+      console.warn('[TieredPriceShield] calculatePharmapolisCost error:', e);
+    }
+  }
 
   // Direct AED prices (e.g. from Colway official catalog enrichment)
   let landedCost = null;
@@ -200,7 +230,8 @@ export default function TieredPriceShield({
   isEs = false,
   adminSimulationTier = null,
   onSelectAdminSimulationTier = null,
-  embedded = false
+  embedded = false,
+  capsCount = 60
 }) {
   const { user } = useAuth();
   const { is, can } = useRoleAccess();
@@ -213,7 +244,7 @@ export default function TieredPriceShield({
     } catch (_) {}
   }, []);
 
-  const tiers = useMemo(() => resolveProductTierPricing(product), [product]);
+  const tiers = useMemo(() => resolveProductTierPricing(product, capsCount), [product, capsCount]);
 
   if (!tiers || (!tiers.clinic && !tiers.wholesaler)) {
     return null;
@@ -480,32 +511,36 @@ export default function TieredPriceShield({
         </span>
       </div>
 
-      {/* Blurred Price Teaser */}
-      <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-          <span style={{
-            fontSize: '1.15rem',
-            fontWeight: 850,
-            color: '#94a3b8',
-            filter: 'blur(4px)',
-            userSelect: 'none'
-          }}>
-            €58.00
+      {/* Retail Price for Public Guests + B2B Unlock Teaser */}
+      <div style={{ marginTop: '4px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <div>
+          <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 700, display: 'block', textTransform: 'uppercase' }}>
+            {isEs ? 'PVP Recomendado' : 'Public RRP'}
           </span>
-          <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
-            {isEs ? 'Ex-Works' : 'EXW'}
+          <span style={{ fontSize: '1.15rem', fontWeight: 850, color: '#0f172a' }}>
+            {formatTierPrice(tiers.retail, currency)}
           </span>
+          {tiers.perCapNet && (
+            <span style={{ fontSize: '0.65rem', color: '#64748b', marginLeft: '6px' }}>
+              ({formatTierPrice(tiers.retail / (tiers.capsCount || 60), currency)}/cap)
+            </span>
+          )}
         </div>
 
-        <span style={{ fontSize: '0.68rem', color: '#0d9488', fontWeight: 600, textDecoration: 'underline' }}>
-          {isEs ? 'Ver en 1-Clic →' : '1-Click Access →'}
-        </span>
+        <div style={{ textAlign: 'right' }}>
+          <span style={{ fontSize: '0.60rem', color: '#0d9488', fontWeight: 700, display: 'block' }}>
+            {isEs ? 'B2B Clínica (EXW)' : 'Clinic Tier (EXW)'}
+          </span>
+          <span style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0d9488', filter: 'blur(3.5px)', userSelect: 'none' }}>
+            {formatTierPrice(tiers.clinic, currency)}
+          </span>
+        </div>
       </div>
 
       <p style={{ margin: '4px 0 0 0', fontSize: '0.64rem', color: '#64748b', lineHeight: 1.25 }}>
         {isEs
-          ? 'Acceso directo para centros médicos, clínicas y distribuidores.'
-          : 'Verified access for clinics, doctors and authorized wholesalers.'}
+          ? 'Tarifa reducida disponible para centros médicos, clínicas y distribuidores.'
+          : 'Verified wholesale rates available for clinics, doctors and authorized wholesalers.'}
       </p>
     </div>
   );

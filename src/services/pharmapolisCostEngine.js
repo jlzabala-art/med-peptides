@@ -35,6 +35,69 @@ export const COST_STANDARDS = {
 };
 
 /**
+ * 3 Official Commercial Capsule Bottle Sizes
+ */
+export const CAPSULE_BOTTLE_SIZES = [
+  { count: 30,  label: '30 Caps',  badge: 'Starter / 15-30 Days',  daysSupply: 30 },
+  { count: 60,  label: '60 Caps',  badge: 'Standard / 30-60 Days', daysSupply: 60, isDefault: true },
+  { count: 120, label: '120 Caps', badge: 'Economy / 60-120 Days', daysSupply: 120, savingsPercent: 25 }
+];
+
+/**
+ * Determines the physical galenic HPMC capsule size (Size 1, Size 0, Size 00)
+ * based on the cumulative active milligrams per single capsule.
+ */
+export function resolvePhysicalCapsuleSize(activeIngredients = []) {
+  const totalDoseMg = (activeIngredients || []).reduce((acc, item) => {
+    let mg = Number(item.amount || item.doseMg || item.dose || 0);
+    if (!mg && typeof item.dose === 'string') {
+      const parsed = parseFloat(item.dose.replace(',', '.'));
+      if (!isNaN(parsed)) mg = parsed;
+    }
+    // If given per daily dose (e.g. 2 capsules daily), divide by 2 if perCapsule is specified
+    if (item.perCapsule && typeof item.perCapsule === 'string') {
+      const parsedPerCap = parseFloat(item.perCapsule.replace(',', '.'));
+      if (!isNaN(parsedPerCap)) mg = parsedPerCap;
+    }
+    return acc + mg;
+  }, 0);
+
+  if (totalDoseMg <= 350) {
+    return {
+      size: 'Size 1',
+      code: 'CAP-SZ1',
+      totalMg: Math.round(totalDoseMg),
+      volumeCapacityMl: 0.50,
+      label: 'Size 1 (Small · 0.50 mL)',
+      badgeColor: '#0284c7',
+      description: 'Compact plant-derived HPMC capsule. Ideal for easy swallowing and single/dual co-factor blends.'
+    };
+  }
+
+  if (totalDoseMg <= 550) {
+    return {
+      size: 'Size 0',
+      code: 'CAP-SZ0',
+      totalMg: Math.round(totalDoseMg),
+      volumeCapacityMl: 0.68,
+      label: 'Size 0 (Standard · 0.68 mL)',
+      badgeColor: '#0d9488',
+      description: 'Standard clinical HPMC capsule. Optimized for dual-to-triple active botanical and amino acid matrices.'
+    };
+  }
+
+  return {
+    size: 'Size 00',
+    code: 'CAP-SZ00',
+    totalMg: Math.round(totalDoseMg),
+    volumeCapacityMl: 0.95,
+    label: 'Size 00 (Maxi · 0.95 mL)',
+    badgeColor: '#7c3aed',
+    description: 'High-capacity delayed-release acid-resistant vegan HPMC. Engineered for dense multi-active longevity formulas.'
+  };
+}
+
+/**
  * Fuzzy/Normalized matching to find the API in the Pharmapolis master catalog
  */
 export function resolvePharmapolisApi(ingredientNameOrId, apisCatalog = ULTRAMAN_APIS_MASTER) {
