@@ -43,6 +43,10 @@ import {
 import PharmapolisLabelSvg from '@/components/prescription/PharmapolisLabelSvg';
 import { generateA4BatchPdf } from '@/utils/a4BatchPdfGenerator';
 import { detectOptimalLabelDimensions, CONTAINER_SIZE_PRESETS } from '@/utils/labels/containerDimensionDetector';
+import { useAuth } from '@/context/AuthContext';
+import { doc, updateDoc, increment } from 'firebase/firestore';
+import { db } from '@/firebase';
+import { trackToolUsage } from '@/hooks/useAnalytics';
 
 // Flagship featured cases for instant 1-click access
 const FEATURED_PATIENTS = [
@@ -131,6 +135,7 @@ export default function PublicLabelsAppClient({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
 
   // Patient Batch Queue State with Automatic Container Dimensions
   const [patientQueue, setPatientQueue] = useState(() => {
@@ -253,10 +258,27 @@ export default function PublicLabelsAppClient({
   const docName = currentRx?.doctorName || currentRx?.physician || currentRx?.doctor?.name || currentRx?.treatingDoctor?.name || 'Dr. Marina Cordeiro Fernandes';
   const doctorSlug = getDoctorSlug(currentRx, docName);
 
-  // Hydrate recents from localStorage
+  // Hydrate recents from localStorage and track studio usage on mount
   useEffect(() => {
     setRecentPrescriptions(getRecentPrescriptions());
-  }, []);
+
+    // Track usage in user profile and analytics
+    if (user?.uid) {
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        updateDoc(userRef, {
+          'usageStats.labelStudioVisits': increment(1),
+          'usageStats.lastLabelStudioAt': new Date().toISOString(),
+          lastActiveAt: new Date().toISOString()
+        }).catch(() => {});
+      } catch {}
+      trackToolUsage('pharmapolis_labels_studio', {
+        userId: user.uid,
+        email: user.email,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [user]);
 
   // Save active prescription to recents when loaded
   useEffect(() => {

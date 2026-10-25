@@ -1,8 +1,8 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { useEffect } from 'react';
-import { useAuth, ADMIN_EMAILS } from '../../context/AuthContext';
+import React from 'react';
+import { useAuth, ADMIN_EMAILS, ACCOUNT_MANAGER_EMAILS } from '../../context/AuthContext';
 import AtlasLoadingScreen from '../ui/AtlasLoadingScreen';
 import TabSkeleton from '../ui/TabSkeleton';
 import { Loader2 } from '@/lib/icons';
@@ -23,11 +23,14 @@ export default function ProtectedRoute({ children, allowedRoles, requiredRole })
     (typeof window !== 'undefined' && window.location.search.includes('dev_bypass=1')) ||
     searchParams?.get('dev_bypass') === '1'
   );
-  const isAdmin = isDevBypass || authIsAdmin || activeRole === 'admin' || userProfile?.role === 'admin' || userProfile?.isAdmin === true || (user && ADMIN_EMAILS.includes(user.email?.toLowerCase()));
+  const userEmail = user?.email?.toLowerCase();
+  const isAdmin = isDevBypass || authIsAdmin || activeRole === 'admin' || userProfile?.role === 'admin' || userProfile?.isAdmin === true || (userEmail && ADMIN_EMAILS.includes(userEmail));
+  const isAccountManager = activeRole === 'account_manager' || userProfile?.role === 'account_manager' || (userProfile?.roles && userProfile.roles.includes('account_manager')) || (userEmail && ACCOUNT_MANAGER_EMAILS.includes(userEmail));
 
   const effectiveRoles = allowedRoles || (requiredRole ? [requiredRole] : null);
+  const isRoleAllowed = !effectiveRoles || effectiveRoles.includes(activeRole) || (effectiveRoles.includes('account_manager') && isAccountManager);
   const isUnauthorized = mounted && !loading && !isAdmin && (
-    !user || (effectiveRoles && !effectiveRoles.includes(activeRole))
+    !user || !isRoleAllowed
   );
 
   React.useEffect(() => {
@@ -37,7 +40,8 @@ export default function ProtectedRoute({ children, allowedRoles, requiredRole })
         router.push(target);
       } else {
         // Authenticated user lacks clearance for this area — redirect to their authorized portal
-        const roleHome = activeRole === 'doctor' || activeRole === 'medical_director' ? '/doctor'
+        const roleHome = isAccountManager ? '/admin/prescriptions'
+          : activeRole === 'doctor' || activeRole === 'medical_director' ? '/doctor'
           : activeRole === 'wholesaler' || activeRole === 'wholeseller' ? '/wholesaler'
           : activeRole === 'supplier' ? '/supplier'
           : activeRole === 'clinic' ? '/clinic'
@@ -46,7 +50,7 @@ export default function ProtectedRoute({ children, allowedRoles, requiredRole })
         router.push(roleHome);
       }
     }
-  }, [isUnauthorized, user, activeRole, pathname, router]);
+  }, [isUnauthorized, user, activeRole, isAccountManager, pathname, router]);
 
   if (!mounted || (loading && !isAdmin)) {
     return (

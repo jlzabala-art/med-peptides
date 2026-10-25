@@ -1,6 +1,5 @@
 "use client";
-import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Mail from "lucide-react/dist/esm/icons/mail";
 import Lock from "lucide-react/dist/esm/icons/lock";
 import User from "lucide-react/dist/esm/icons/user";
@@ -17,7 +16,6 @@ import Eye from "lucide-react/dist/esm/icons/eye";
 import EyeOff from "lucide-react/dist/esm/icons/eye-off";
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { useAuth, ADMIN_EMAILS, ACCOUNT_MANAGER_EMAILS } from '../context/AuthContext';
 import { useRegistration } from '../hooks/useRegistration';
 
@@ -419,7 +417,9 @@ export default function AuthPage({ onBack }) {
           storedTarget = sessionStorage.getItem('auth_redirect_target') || localStorage.getItem('auth_redirect_target') || '';
           sessionStorage.removeItem('auth_redirect_target');
           localStorage.removeItem('auth_redirect_target');
-        } catch (e) {}
+        } catch {
+          // ignore session storage access error
+        }
       }
       const targetPath = resolveTargetPortal(userProfile?.role, user?.email, storedTarget || redirectTo);
       if (targetPath) {

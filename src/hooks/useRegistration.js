@@ -7,7 +7,7 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc, arrayUnion } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { getActiveTenantForResolution } from '../utils/resolvePrice';
-import { ADMIN_EMAILS } from '../context/AuthContext';
+import { ADMIN_EMAILS, ACCOUNT_MANAGER_EMAILS } from '../context/AuthContext';
 
 const DEFAULT_ROLE_PERMISSIONS = {
   admin: { read: true, write: true, delete: true, manageUsers: true, manageInventory: true, viewFinances: true, orderB2B: true },
@@ -95,10 +95,15 @@ export function useRegistration() {
       let role = 'professional_pending';
       let professionalStatus = 'pending_review';
       
-      const isAdminEmail = ADMIN_EMAILS.includes(email.trim().toLowerCase());
+      const cleanEmail = email.trim().toLowerCase();
+      const isAdminEmail = ADMIN_EMAILS.includes(cleanEmail);
+      const isAccountManagerEmail = ACCOUNT_MANAGER_EMAILS.includes(cleanEmail);
 
       if (isAdminEmail || accountType === 'admin') {
         role = 'admin';
+        professionalStatus = 'approved';
+      } else if (isAccountManagerEmail || accountType === 'account_manager') {
+        role = 'account_manager';
         professionalStatus = 'approved';
       } else if (invitationRoles.length > 0) {
         role = invitationRoles[0]; // Set primary role to the first in array
@@ -115,10 +120,12 @@ export function useRegistration() {
         professionalStatus = 'pending_review';
       }
 
-      const assignedRoles = invitationRoles.length > 0 ? invitationRoles : [role];
+      const assignedRoles = (isAccountManagerEmail || accountType === 'account_manager')
+        ? ['account_manager', 'sales_agent', 'wholesaler', 'staff']
+        : (invitationRoles.length > 0 ? invitationRoles : [role]);
 
       // ── B2B Auto-Linking for Physician Invitations ──
-      let initialPhysicianIds = [];
+      const initialPhysicianIds = [];
       if (role === 'patient' || role === 'guest') {
         try {
           const relsQ = query(
@@ -257,6 +264,49 @@ export function useRegistration() {
       };
       
       await setDoc(doc(db, 'users', cred.user.uid), profile);
+
+      // Enqueue Admin WhatsApp notification to +34654314490 on every new user registration
+      try {
+        const notifQueueId = `outbox_reg_${cred.user.uid}_${Date.now()}`;
+        const adminPhone = '+34654314490';
+        const roleBadge = (role || 'User').toUpperCase();
+        const regMsg = `👤 *NUEVO REGISTRO EN ATLAS HEALTH SERVICES*
+
+📝 *Nombre:* ${fullName || 'Usuario'}
+✉️ *Email:* ${cleanEmail}
+💼 *Rol Asignado:* ${roleBadge}
+🏢 *Organización:* ${institution || extraFields.institution || 'N/A'}
+🌍 *País:* ${extraFields.country || 'N/A'}
+🆔 *UID:* ${cred.user.uid}
+🕒 *Fecha:* ${new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })}
+
+🔗 *Gestionar Usuario:*
+👉 https://www.atlashealth-services.com/admin/users`;
+
+        await setDoc(doc(db, 'operations_queue', notifQueueId), {
+          id: notifQueueId,
+          topic: 'send_whatsapp_notification',
+          idempotencyKey: `notif_reg_${cred.user.uid}`,
+          payload: {
+            to: adminPhone,
+            phone: adminPhone,
+            message: regMsg,
+            type: 'user_registration',
+            userId: cred.user.uid,
+            email: cleanEmail,
+            role,
+            roles: assignedRoles,
+            timestamp: new Date().toISOString()
+          },
+          status: 'pending',
+          attempts: 0,
+          maxRetries: 3,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      } catch (notifErr) {
+        console.warn('[useRegistration] Could not enqueue WhatsApp registration notification:', notifErr.message);
+      }
 
       // If there was an invitation, mark it as accepted securely via Cloud Function
       if (invitationId) {
