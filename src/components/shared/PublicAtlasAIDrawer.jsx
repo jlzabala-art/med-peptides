@@ -349,9 +349,7 @@ ${contextAnchor.mechanisms}
           ...newMsgList,
           {
             sender: 'bot',
-            text: lang === 'es'
-              ? 'Has alcanzado el límite de 5 consultas gratuitas de invitado. Inicia sesión o solicita una cuenta o suscripción profesional para acceso clínico ilimitado.'
-              : 'You have reached the limit of 5 free guest research inquiries. Please sign in or subscribe for unlimited clinical access.',
+            text: 'You have reached the limit of 5 free guest research inquiries. Please sign in or subscribe for unlimited clinical access.',
             isQuotaExceeded: true,
             timestamp: new Date().toISOString(),
           },
@@ -1449,10 +1447,10 @@ ${contextAnchor.mechanisms}
                                   fontSize: '0.68rem',
                                   fontWeight: 600,
                                 }}
-                                title={lang === 'es' ? 'Copiar respuesta' : 'Copy answer'}
+                                title="Copy answer"
                               >
                                 {copiedIndex === idx ? <Check size={11} color="#16a34a" /> : <Copy size={11} />}
-                                <span>{copiedIndex === idx ? (lang === 'es' ? 'Copiado' : 'Copied') : (lang === 'es' ? 'Copiar' : 'Copy')}</span>
+                                <span>{copiedIndex === idx ? 'Copied' : 'Copy'}</span>
                               </button>
 
                               {(cleanText.toLowerCase().includes('reconstit') || cleanText.toLowerCase().includes('bac water') || cleanText.toLowerCase().includes('dilu') || cleanText.toLowerCase().includes('jeringa')) && (
@@ -1469,10 +1467,10 @@ ${contextAnchor.mechanisms}
                                     fontWeight: 650,
                                     fontSize: '0.68rem',
                                   }}
-                                  title={lang === 'es' ? 'Abrir Calculadora de Reconstitución' : 'Open Reconstitution Calculator'}
+                                  title="Open Reconstitution Calculator"
                                 >
                                   <Calculator size={11} />
-                                  <span>{lang === 'es' ? 'Calculadora' : 'Calculator'}</span>
+                                  <span>Calculator</span>
                                 </a>
                               )}
                             </div>
@@ -1489,7 +1487,7 @@ ${contextAnchor.mechanisms}
                                   fontWeight: 700,
                                 }}
                               >
-                                ⚡ {lang === 'es' ? 'Caché (0 Cuota)' : 'Cached (0 Quota)'}
+                                ⚡ Cached (0 Quota)
                               </span>
                             )}
                           </div>

@@ -557,7 +557,7 @@ export default function Calculator() {
         aiCategory="Peptide Reconstitution"
         aiContextQuery={
           vialDosageMg && bacWater && desiredDosageMcg
-            ? `Tengo un vial de ${vialDosageMg} mg de péptido y lo reconstituyo con ${bacWater} ml de agua bacteriostática. Para una dosis de ${desiredDosageMcg} mcg (${units} unidades), ¿cuál es la técnica correcta de administración y conservación en frío?`
+            ? `I have a ${vialDosageMg} mg vial of peptide and I am reconstituting it with ${bacWater} ml of bacteriostatic water. For a target dose of ${desiredDosageMcg} mcg (${units} units on a U-100 syringe), what is the correct administration technique, syringe graduation, and cold-chain storage guidance?`
             : undefined
         }
         drawerProps={{

@@ -69,7 +69,7 @@ export default function PublicStickyActionBar({
     const setOnline = () => setIsOnline(true);
     const setOffline = () => {
       setIsOnline(false);
-      toast(lang === 'es' ? 'Modo sin conexión · Datos en caché disponibles' : 'Offline mode · Cached data available', {
+      toast('Offline Mode · Local Clinical Cache Active', {
         icon: '⚡',
         duration: 3500,
       });
@@ -218,7 +218,7 @@ export default function PublicStickyActionBar({
 
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(currentUrl);
-      toast.success(lang === 'es' ? 'Enlace clínico copiado al portapapeles ✓' : 'Clinical link copied to clipboard ✓');
+      toast.success('Clinical link copied to clipboard ✓');
     }
   };
 
@@ -271,7 +271,7 @@ export default function PublicStickyActionBar({
           }}
         >
           <WifiOff size={12} color="#f59e0b" />
-          <span>{lang === 'es' ? 'Modo sin conexión · Caché local activa' : 'Offline Mode · Local Cache Active'}</span>
+          <span>Offline Mode · Local Cache Active</span>
         </div>
       )}
 
@@ -304,8 +304,8 @@ export default function PublicStickyActionBar({
               type="button"
               onClick={handleShare}
               className="public-sticky-action-bar__share-btn"
-              title={lang === 'es' ? 'Compartir ficha clínica' : 'Share clinical monograph'}
-              aria-label={lang === 'es' ? 'Compartir' : 'Share'}
+              title="Share clinical monograph"
+              aria-label="Share"
               style={{
                 width: '38px',
                 height: '38px',
@@ -330,12 +330,12 @@ export default function PublicStickyActionBar({
                 type="button"
                 onClick={handleOpenSections}
                 className="public-sticky-action-bar__sections-btn"
-                title={lang === 'es' ? 'Ver índice de secciones' : 'View page sections outline'}
-                aria-label={lang === 'es' ? 'Secciones' : 'Sections'}
+                title="View page sections outline"
+                aria-label="Sections"
               >
                 <List size={15} className="public-sticky-action-bar__sections-icon" />
                 <span className="public-sticky-action-bar__sections-label">
-                  {sectionsLabel || (lang === 'es' ? 'Secciones' : 'Sections')}
+                  {sectionsLabel || 'Sections'}
                 </span>
                 {tocProgress.totalSections > 0 && (
                   <span className="public-sticky-action-bar__sections-pill">
@@ -351,7 +351,7 @@ export default function PublicStickyActionBar({
                 type="button"
                 onClick={handleOpenAI}
                 className="public-sticky-action-bar__ai-btn"
-                title={lang === 'es' ? `Consultar con Atlas AI sobre ${title}` : `Consult Atlas AI regarding ${title}`}
+                title={`Consult Atlas AI regarding ${title}`}
                 aria-label="Atlas AI"
               >
                 <Sparkles size={14} className="public-sticky-action-bar__sparkle-icon" />
@@ -374,7 +374,7 @@ export default function PublicStickyActionBar({
                   alignItems: 'center',
                   gap: '8px'
                 }}
-                aria-label={lang === 'es' ? `Tramitar Pedido (${totalCount})` : `Review Order (${totalCount})`}
+                aria-label={`Review Order (${totalCount})`}
               >
                 <ShoppingBag size={14} style={{ flexShrink: 0 }} />
                 <span style={{
@@ -386,7 +386,7 @@ export default function PublicStickyActionBar({
                 }}>
                   {totalCount}
                 </span>
-                <span>{lang === 'es' ? `Tramitar Pedido (€${subtotal.toFixed(2)})` : `Review Order (€${subtotal.toFixed(2)})`}</span>
+                <span>Review Order (€{subtotal.toFixed(2)})</span>
                 <ArrowRight size={14} style={{ flexShrink: 0 }} />
               </button>
             ) : (
