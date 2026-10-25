@@ -49,6 +49,10 @@ const getTabComponent = async (tabId) => {
     case 'workspace':
     case 'workspaces':         return (await import('../../../components/admin/AdminProductsTab')).default;
     case 'pricing-engine':     return (await import('../../../components/admin/AdminPricingEngineTab')).default;
+    case 'ultraman-apis':
+    case 'pharmapolis-apis':
+    case 'supplement-apis':
+    case 'compounding-apis':   return (await import('../../../components/admin/catalog/AdminUltramanApisTab')).default;
     case 'prices':
     case 'pricing-visibility': return (await import('../../../components/admin/AdminPricesTab')).default;
     case 'competitors':        return (await import('../../../components/admin/AdminCompetitorsTab')).default;
