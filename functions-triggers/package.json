@@ -21,7 +21,7 @@
     "node": "22"
   },
   "scripts": {
-    "build": "rm -rf src && cp -R ../functions/src ./src && cp -R ../functions/emailTemplates ./emailTemplates",
+    "build": "rm -rf src emailTemplates && cp -R ../functions/src ./src && cp -R ../functions/emailTemplates ./emailTemplates",
     "serve": "npm run build && firebase emulators:start --only functions:triggers",
     "deploy": "npm run build && firebase deploy --only functions:triggers"
   }

@@ -1,6 +1,6 @@
 /**
  * src/data/clinicalSupplementsRegistry.js
- * Comprehensive Clinical Nutraceutical Registry for UltraPerson by PharmaPolis
+ * Comprehensive Clinical Nutraceutical Registry for UltraPerson™
  * Precision compounded oral formulations in acid-resistant vegan HPMC capsules.
  */
 
@@ -11,7 +11,7 @@ export const CLINICAL_SUPPLEMENTS = {
     canonicalKey: 'ultraperson-energy-metabolic-vitality',
     name: 'UltraPerson Energy & Metabolic Vitality',
     canonicalName: 'UltraPerson Energy & Metabolic Vitality',
-    brand: 'UltraPerson by PharmaPolis',
+    brand: 'UltraPerson™ Precision',
     category: 'Precision Nutraceuticals',
     therapeutic_category: 'Mitochondrial Biogenesis & Co-factor Fortification',
     type: 'supplement',
@@ -103,7 +103,7 @@ export const CLINICAL_SUPPLEMENTS = {
     canonicalKey: 'ultraperson-stress-resilience-emotional-balance',
     name: 'UltraPerson Stress Resilience & Emotional Balance',
     canonicalName: 'UltraPerson Stress Resilience & Emotional Balance',
-    brand: 'UltraPerson by PharmaPolis',
+    brand: 'UltraPerson™ Precision',
     category: 'Precision Nutraceuticals',
     therapeutic_category: 'HPA Axis Adaptation & Cortisol Homeostasis',
     type: 'supplement',
@@ -150,7 +150,7 @@ export const CLINICAL_SUPPLEMENTS = {
     canonicalKey: 'ultraperson-sleep-quality-restoration',
     name: 'UltraPerson Sleep Quality & Restoration (Melatonin-Free)',
     canonicalName: 'UltraPerson Sleep Quality & Restoration (Melatonin-Free)',
-    brand: 'UltraPerson by PharmaPolis',
+    brand: 'UltraPerson™ Precision',
     category: 'Precision Nutraceuticals',
     therapeutic_category: 'Non-Hormonal Circadian Sleep Support & GABA Modulation',
     type: 'supplement',
@@ -200,7 +200,7 @@ export const CLINICAL_SUPPLEMENTS = {
     canonicalKey: 'ultraperson-immune-strength-defense',
     name: 'UltraPerson Immune Strength & Defense',
     canonicalName: 'UltraPerson Immune Strength & Defense',
-    brand: 'UltraPerson by PharmaPolis',
+    brand: 'UltraPerson™ Precision',
     category: 'Precision Nutraceuticals',
     therapeutic_category: 'Innate & Adaptive Immunomodulation',
     type: 'supplement',
@@ -250,7 +250,7 @@ export const CLINICAL_SUPPLEMENTS = {
     canonicalKey: 'ultraperson-longevity-cellular-renewal',
     name: 'UltraPerson Longevity & Cellular Renewal',
     canonicalName: 'UltraPerson Longevity & Cellular Renewal',
-    brand: 'UltraPerson by PharmaPolis',
+    brand: 'UltraPerson™ Precision',
     category: 'Precision Nutraceuticals',
     therapeutic_category: 'Sirtuin Activation & Senolytic Longevity',
     type: 'supplement',
@@ -289,6 +289,62 @@ export const CLINICAL_SUPPLEMENTS = {
         price: 89,
         currency: 'EUR',
         batchCode: 'AS-PHA-LN60-2610'
+      }
+    ]
+  },
+
+  'ultraperson-cognitive-clarity-focus': {
+    id: 'ultraperson-cognitive-clarity-focus',
+    slug: 'ultraperson-cognitive-clarity-focus',
+    canonicalKey: 'ultraperson-cognitive-clarity-focus',
+    name: 'UltraPerson Cognitive Clarity & Focus',
+    canonicalName: 'UltraPerson Cognitive Clarity & Focus',
+    brand: 'UltraPerson™ Precision',
+    category: 'Precision Nutraceuticals',
+    therapeutic_category: 'Nootropic Synaptic Plasticity & Neuro-Metabolic Focus',
+    type: 'supplement',
+    productType: 'supplement',
+    is_supplement: true,
+    isSupplement: true,
+    dosageForm: 'Oral Route (Acid-Resistant Vegan HPMC Capsules)',
+    dispensingForm: 'Delayed-Release Acid-Resistant Vegetable Capsules',
+    supplierName: 'Atlas Compounding Network',
+    supplier: 'Atlas Compounding Network',
+    supplierId: 'supplier-atlas-compounding',
+    status: 'active',
+    rating: 4.9,
+    reviewsCount: 42,
+    leadTimeDays: 2,
+    purity: 'EU GMP Pharmacopeia Grade',
+    description:
+      'Sharpens mental performance, executive attention, and working memory. Formulated in delayed-release acid-resistant vegan HPMC capsules Delivering standardized Bacopa monnieri (55% bacosides), L-Theanine (Suntheanine®), Pycnogenol® pine bark extract, and Citicoline for optimal acetylcholine synthesis and cerebral microcirculation.',
+    shortDescription:
+      'Nootropic & Focus Matrix (Bacopa Monnieri 320mg + L-Theanine 150mg + Citicoline 100mg + Pycnogenol® 30mg).',
+    activeIngredients: [
+      { name: 'Bacopa Monnieri Extract (55% Bacosides A/B)', dose: '320 mg', target: 'Synaptic Plasticity & Cholinergic Transmission' },
+      { name: 'L-Theanine (Suntheanine® ≥98%)', dose: '150 mg', target: 'Alpha Wave Induction & Calm Focus' },
+      { name: 'Citicoline Sodium (Cognizin®)', dose: '100 mg', target: 'Acetylcholine & Neuronal Membrane Synthesis' },
+      { name: 'Maritime Pine Bark Extract (Pycnogenol® 95% OPC)', dose: '30 mg', target: 'Cerebral Microvascular Perfusion & Nitric Oxide' }
+    ],
+    mechanism:
+      'Bacopa bacosides facilitate protein kinase activity in hippocampal neurons and enhance synaptic receptor density. L-Theanine antagonizes excitotoxic glutamate pathways and elevates alpha-band brain waves (8–12 Hz), while Citicoline donates choline for immediate acetylcholine neurotransmitter production and neuroprotection.',
+    dosingInstructions:
+      'Take 2 capsules once daily in the morning with water alongside breakfast. Protocol duration: 3 months (180 capsules total).',
+    vehicle: 'Acid-resistant vegan HPMC capsules. 0% allergens, non-GMO, titanium dioxide free.',
+    variants: [
+      {
+        id: 'var-up-cog-180',
+        name: '180 Capsules (2 daily / 90 Days)',
+        strength: '180 Capsules (2 daily / 90 Days)',
+        dose: '180 Capsules (2 daily / 90 Days)',
+        presentation: 'bottle_(180_acid-resistant_hpmc_caps)',
+        format: 'bottle',
+        supplierId: 'supplier-atlas-compounding',
+        supplierName: 'Atlas Compounding Network',
+        stock: 'in_stock',
+        price: 52.55,
+        currency: 'EUR',
+        batchCode: 'AS-PHA-CG180-2610'
       }
     ]
   },

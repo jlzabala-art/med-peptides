@@ -13,9 +13,7 @@ import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import PackageSearch from "lucide-react/dist/esm/icons/package-search";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import FileUp from "lucide-react/dist/esm/icons/file-up";
 import FileText from "lucide-react/dist/esm/icons/file-text";
-import ImportPrescriptionModal from "../../../features/prescriptions/components/ImportPrescriptionModal";
 import DocumentPreviewModal from "../ui/DocumentPreviewModal";
 /**
  * PatientPrescriptionPanel.jsx
@@ -334,7 +332,6 @@ const sLabel = {
 export default function PatientPrescriptionPanel({ patientUid, onAddToCart }) {
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading]             = useState(true);
-  const [isImportOpen, setIsImportOpen]   = useState(false);
   const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
   const navigate                          = useRouter();
 
@@ -460,18 +457,6 @@ export default function PatientPrescriptionPanel({ patientUid, onAddToCart }) {
             </div>
           </div>
         </div>
-        <button 
-          onClick={() => setIsImportOpen(true)}
-          title="Import Data (Rx & Lab Results)"
-          style={{
-            display: 'flex', alignItems: 'center', gap: '6px',
-            padding: '6px 12px', borderRadius: '8px',
-            backgroundColor: '#e0f2fe', color: '#0369a1',
-            border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700
-          }}
-        >
-          <FileUp size={14} /> Import Data
-        </button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -484,12 +469,6 @@ export default function PatientPrescriptionPanel({ patientUid, onAddToCart }) {
           />
         ))}
       </div>
-
-      <ImportPrescriptionModal
-        isOpen={isImportOpen}
-        onClose={() => setIsImportOpen(false)}
-        context={{ patientId: patientUid }}
-      />
 
       <DocumentPreviewModal
         isOpen={!!previewPdfUrl}

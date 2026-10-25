@@ -42,6 +42,8 @@ export default function User360Drawer({
   const [sharedLinks, setSharedLinks] = useState([]);
   const [isLoadingLinks, setIsLoadingLinks] = useState(false);
   const [isSharingLotus, setIsSharingLotus] = useState(false);
+  const [lotusMarkup, setLotusMarkup] = useState(15);
+  const [selectedCatalogCollection, setSelectedCatalogCollection] = useState('peptides');
 
   // Form State
   const [formData, setFormData] = useState({
@@ -51,6 +53,8 @@ export default function User360Drawer({
     status: 'active',
     pricingChannel: 'clinic',
     customDiscountPct: 0,
+    atlasMarkupPct: 35,
+    wholesalerMarginPct: 25,
     clinicName: '',
     phone: '',
     zohoContactId: '',
@@ -72,6 +76,8 @@ export default function User360Drawer({
         || user.name 
         || '';
 
+      const isWs = user.role === 'wholesaler' || user.role === 'wholeseller';
+
       setFormData({
         displayName: resolvedName,
         firstName: user.firstName || '',
@@ -79,15 +85,17 @@ export default function User360Drawer({
         email: user.email || user.contactEmail || '',
         role: user.role || (user.roles && user.roles[0]) || 'patient',
         status: user.status || (user.approved ? 'active' : 'pending'),
-        pricingChannel: user.pricingChannel || user.priceTier || (user.role === 'wholesaler' ? 'wholesale' : user.role === 'doctor' ? 'clinic' : 'retail'),
+        pricingChannel: user.pricingChannel || user.priceTier || (isWs ? 'wholesale' : user.role === 'doctor' ? 'clinic' : 'retail'),
         customDiscountPct: user.customDiscountPct || user.discount || 0,
+        atlasMarkupPct: user.atlasMarkupPct ?? user.priceMarkupPercent ?? (isWs ? 35 : 40),
+        wholesalerMarginPct: user.wholesalerMarginPct ?? user.resellerDiscountPct ?? (isWs ? 25 : 15),
         clinicName: user.clinicName || user.practiceName || user.institution || '',
         phone: user.phone || user.phoneNumber || '',
         zohoContactId: user.zohoContactId || user.zohoId || '',
         permissions: {
           useClinicalAI: user.permissions?.useClinicalAI ?? true,
           canRecommend: user.permissions?.canRecommend ?? true,
-          canBulkOrder: user.permissions?.canBulkOrder ?? (user.role === 'wholesaler' || user.role === 'clinic'),
+          canBulkOrder: user.permissions?.canBulkOrder ?? (isWs || user.role === 'clinic'),
           viewCostPrice: user.permissions?.viewCostPrice ?? (user.role === 'admin'),
           manageStaff: user.permissions?.manageStaff ?? (user.role === 'clinic' || user.role === 'admin'),
           trackCommission: user.permissions?.trackCommission ?? true
@@ -139,13 +147,34 @@ export default function User360Drawer({
     if (activeTab === 'catalogs' && user) {
       fetchSharedLinks();
     }
+    if (user) {
+      const isWs = user.role === 'wholesaler' || user.role === 'wholeseller';
+      setLotusMarkup(Number(user.customDiscountPct || user.priceMarkupPercent || (isWs ? 15 : 30)));
+    }
   }, [activeTab, user]);
 
-  const handleShareLotusland = async () => {
+  const CATALOG_COLLECTIONS = [
+    { id: 'peptides', label: 'Lotusland Peptides (Lyophilized Vials)', supplierId: 'supplier-lotusland', catalogueFilter: 'peptides', icon: '🧪' },
+    { id: 'ultraperson', label: 'UltraPerson™ Precision Nutraceuticals', supplierId: 'supplier-pharmapolis', catalogueFilter: 'ultraperson', icon: '🌿' },
+    { id: 'colway', label: 'Colway® Bioactive Tropocollagen', supplierId: 'supplier-colway', catalogueFilter: 'colway', icon: '✨' },
+    { id: 'bloodo', label: 'Bloodo™ CE-IVDR Capillary Diagnostics', supplierId: 'supplier-bloodo', catalogueFilter: 'bloodo', icon: '🩸' },
+    { id: 'eterna', label: 'ETERNA® Multi-Omics Longevity', supplierId: 'supplier-eterna', catalogueFilter: 'eterna', icon: '🧬' },
+    { id: 'all', label: 'Master Portfolio (All Clinical Lines)', supplierId: null, catalogueFilter: 'all', icon: '🏛️' }
+  ];
+
+  const handleShareCatalog = async (actionType = 'whatsapp') => {
     const userId = user?.id || user?.uid;
     const fullName = formData.displayName || 'Doctor / Partner';
     const phone = formData.phone || '';
     const email = formData.email || '';
+    const isWs = formData.role === 'wholesaler' || formData.role === 'wholeseller' || user?.role === 'wholesaler' || user?.role === 'wholeseller';
+    
+    // Compounded effective double markup: Atlas markup over cost + Wholesaler margin to client
+    const atlasMarkup = Number(formData.atlasMarkupPct || 35);
+    const wsMargin = Number(formData.wholesalerMarginPct || 25);
+    const effectiveMarkup = Math.round(((1 + atlasMarkup / 100) * (1 + wsMargin / 100) - 1) * 100);
+
+    const colConfig = CATALOG_COLLECTIONS.find(c => c.id === selectedCatalogCollection) || CATALOG_COLLECTIONS[0];
 
     setIsSharingLotus(true);
     try {
@@ -153,17 +182,18 @@ export default function User360Drawer({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          supplierId: 'supplier-lotusland',
-          catalogueFilter: 'RegenPept',
+          supplierId: colConfig.supplierId,
+          catalogueFilter: colConfig.catalogueFilter,
+          category: colConfig.id,
           recipientUserId: userId,
           recipientName: fullName,
           recipientPhone: phone,
           recipientEmail: email,
-          recipientType: formData.role || 'clinic',
-          priceSource: formData.pricingChannel || 'clinic',
-          priceMarkupPercent: Number(formData.customDiscountPct || user?.priceMarkupPercent || 30),
+          recipientType: isWs ? 'wholesaler' : (formData.role || 'clinic'),
+          priceSource: isWs ? 'wholeseller' : (formData.pricingChannel || 'clinic'),
+          priceMarkupPercent: effectiveMarkup,
           currency: user?.currency || 'USD',
-          channel: 'whatsapp',
+          channel: actionType === 'whatsapp' ? 'whatsapp' : 'clipboard',
           sentBy: 'Atlas Commercial Desk'
         })
       });
@@ -173,19 +203,22 @@ export default function User360Drawer({
 
       const shortUrl = data.shortUrl || data.shareableUrl;
       const cleanPhone = phone.replace(/[^\d]/g, '');
-      const message = `Hola ${fullName}, te comparto el catálogo clínico oficial de formulaciones analíticas de Lotusland / RegenPept:\n\n🔗 ${shortUrl}\n\nQuedo a tu disposición para cualquier cotización o pedido.`;
+      const message = `Hello ${fullName}, here is your customized ${colConfig.label} B2B wholesale catalog with configured practice margins (+${effectiveMarkup}%):\n\n🔗 ${shortUrl}\n\nPlease let me know if you need any adjustments or bulk orders.`;
 
-      if (cleanPhone) {
+      if (actionType === 'copy') {
+        await navigator.clipboard.writeText(shortUrl);
+        notifier.success(`Catalog link copied (+${effectiveMarkup}% total margin): ${shortUrl}`);
+      } else if (actionType === 'whatsapp' && cleanPhone) {
         window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
-        notifier.success(`Enlace corto generado y WhatsApp abierto: ${shortUrl}`);
+        notifier.success(`WhatsApp link generated and opened: ${shortUrl}`);
       } else {
         await navigator.clipboard.writeText(message);
-        notifier.success(`Enlace corto copiado al portapapeles: ${shortUrl}`);
+        notifier.success(`Message and link copied to clipboard: ${shortUrl}`);
       }
 
       await fetchSharedLinks();
     } catch (err) {
-      console.error('Error sharing Lotusland catalog:', err);
+      console.error('Error sharing catalog:', err);
       notifier.error(err.message || 'Error generating catalog link');
     } finally {
       setIsSharingLotus(false);
@@ -210,8 +243,10 @@ export default function User360Drawer({
         status: formData.status,
         pricingChannel: formData.pricingChannel,
         priceTier: formData.pricingChannel,
-        customDiscountPct: Number(formData.customDiscountPct || 0),
-        priceMarkupPercent: Number(formData.customDiscountPct || 0),
+        atlasMarkupPct: Number(formData.atlasMarkupPct || 35),
+        wholesalerMarginPct: Number(formData.wholesalerMarginPct || 25),
+        priceMarkupPercent: Number(formData.atlasMarkupPct || 35),
+        customDiscountPct: Number(formData.wholesalerMarginPct || 0),
         clinicName: formData.clinicName,
         phone: formData.phone,
         zohoContactId: formData.zohoContactId,
@@ -431,15 +466,15 @@ export default function User360Drawer({
           </div>
         )}
 
-        {/* Tab 2: Pricing & Commercial Channels */}
+        {/* Tab 2: Pricing & Double Margin Engine */}
         {activeTab === 'pricing' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div style={{ padding: '0.85rem', backgroundColor: '#f0f9ff', borderRadius: '10px', border: '1px solid #bae6fd' }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0369a1', marginBottom: '0.25rem' }}>
-                Multi-Channel Pricing Tier Assignment
+              <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0369a1', marginBottom: '0.25rem' }}>
+                Double Margin Engine & Pricing Channels (Admin Control)
               </div>
               <div style={{ fontSize: '0.74rem', color: '#475569', lineHeight: 1.4 }}>
-                Determines which catalog prices this user sees across all peptide compounds and protocols.
+                Control both the Atlas gross markup over supplier base cost and the practice margin allocated to this partner.
               </div>
             </div>
 
@@ -452,29 +487,92 @@ export default function User360Drawer({
                 onChange={(e) => setFormData(prev => ({ ...prev, pricingChannel: e.target.value }))}
                 style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', fontWeight: 600 }}
               >
-                <option value="wholesale">Wholesale B2B (Cost + 30-35%) — Minimum Order Volumes</option>
-                <option value="clinic">Clinic / Doctor (Cost + 50-55%) — Practice Use</option>
-                <option value="retail">Retail / Patient (Cost + 80-100%) — Public Price</option>
-                <option value="cost">Acquisition Cost (Cost + 0%) — Internal Admin Only</option>
+                <option value="wholesale">Wholesale B2B Distributor (COGS + Custom Atlas Margin)</option>
+                <option value="clinic">Clinic / Doctor (Direct Practice Use)</option>
+                <option value="retail">Retail / Patient (Public Reference Price)</option>
+                <option value="cost">Acquisition Cost (Cost + 0% — Internal Admin Only)</option>
               </select>
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>
-                Custom Account Discount (% Override):
-              </label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.customDiscountPct}
-                  onChange={(e) => setFormData(prev => ({ ...prev, customDiscountPct: e.target.value }))}
-                  style={{ width: '120px', padding: '0.6rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
-                />
-                <span style={{ fontSize: '0.85rem', color: '#64748b' }}>% off assigned channel catalog prices</span>
+            {/* Double Margin Inputs */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ background: '#f8fafc', padding: '0.85rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.25rem' }}>
+                  1. Atlas Margin over Cost:
+                </label>
+                <div style={{ fontSize: '0.70rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                  Gross markup retained by Atlas over supplier COGS
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <input
+                    type="number"
+                    min="0"
+                    max="300"
+                    value={formData.atlasMarkupPct}
+                    onChange={(e) => setFormData(prev => ({ ...prev, atlasMarkupPct: Number(e.target.value) }))}
+                    style={{ width: '90px', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: 700 }}
+                  />
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0284c7' }}>% over COGS</span>
+                </div>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '0.85rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.25rem' }}>
+                  2. Wholesaler Reseller Margin:
+                </label>
+                <div style={{ fontSize: '0.70rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                  Margin allocated to wholesaler when selling to clinics
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <input
+                    type="number"
+                    min="0"
+                    max="200"
+                    value={formData.wholesalerMarginPct}
+                    onChange={(e) => setFormData(prev => ({ ...prev, wholesalerMarginPct: Number(e.target.value) }))}
+                    style={{ width: '90px', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: 700 }}
+                  />
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#16a34a' }}>% to clinics</span>
+                </div>
               </div>
             </div>
+
+            {/* Live Double Margin Waterfall Simulation */}
+            {(() => {
+              const sampleCost = 20.00;
+              const atlasMarkup = Number(formData.atlasMarkupPct || 35);
+              const wsMargin = Number(formData.wholesalerMarginPct || 25);
+              const b2bPrice = sampleCost * (1 + atlasMarkup / 100);
+              const atlasProfit = b2bPrice - sampleCost;
+              const finalClinicPrice = b2bPrice * (1 + wsMargin / 100);
+              const wsProfit = finalClinicPrice - b2bPrice;
+              const totalChainMarkup = Math.round(((finalClinicPrice / sampleCost) - 1) * 100);
+
+              return (
+                <div style={{ padding: '0.9rem 1rem', background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.6rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>⚡ Live Price Waterfall (Sample €20.00 Reference Item)</span>
+                    <span style={{ color: '#0284c7', fontWeight: 700 }}>+{totalChainMarkup}% Combined Margin</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem', textAlign: 'center' }}>
+                    <div style={{ padding: '0.5rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '0.68rem', color: '#64748b' }}>Supplier Cost (COGS)</div>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#475569' }}>€{sampleCost.toFixed(2)}</div>
+                    </div>
+                    <div style={{ padding: '0.5rem', background: '#f0f9ff', borderRadius: '6px', border: '1px solid #bae6fd' }}>
+                      <div style={{ fontSize: '0.68rem', color: '#0369a1' }}>Atlas Wholesale B2B</div>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0284c7' }}>€{b2bPrice.toFixed(2)}</div>
+                      <div style={{ fontSize: '0.64rem', color: '#16a34a' }}>+€{atlasProfit.toFixed(2)} Atlas profit</div>
+                    </div>
+                    <div style={{ padding: '0.5rem', background: '#f0f4f8', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                      <div style={{ fontSize: '0.68rem', color: '#166534' }}>Downstream Clinic Price</div>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#16a34a' }}>€{finalClinicPrice.toFixed(2)}</div>
+                      <div style={{ fontSize: '0.64rem', color: '#15803d' }}>+€{wsProfit.toFixed(2)} Wholesaler profit</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -601,7 +699,7 @@ export default function User360Drawer({
         {/* Tab 5: Shared Catalogs & Client Activity */}
         {activeTab === 'catalogs' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* Action Banner: Send Lotusland Catalog */}
+            {/* Action Banner: Multi-Catalog B2B Sharing */}
             <div style={{
               padding: '1rem',
               borderRadius: '12px',
@@ -609,45 +707,109 @@ export default function User360Drawer({
               border: '1px solid #bbf7d0',
               display: 'flex',
               flexDirection: 'column',
-              gap: '0.75rem'
+              gap: '0.85rem'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <div>
                   <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#166534', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <MessageSquare size={16} /> Compartir Catálogo Lotusland
+                    <MessageSquare size={16} /> Multi-Portfolio B2B Document Sharing
                   </div>
                   <div style={{ fontSize: '0.76rem', color: '#334155', marginTop: '0.2rem', lineHeight: 1.4 }}>
-                    Genera un enlace corto (<code style={{ color: '#166534', fontWeight: 700 }}>/c/CAT-...</code>) con vista previa de WhatsApp y registra la trazabilidad del cliente.
+                    Generate tracked short links (<code style={{ color: '#166534', fontWeight: 700 }}>/c/CAT-...</code>) with tailored wholesale double-margins and automated order attribution.
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleShareLotusland}
-                  disabled={isSharingLotus}
-                  style={{
-                    padding: '0.55rem 1rem',
-                    backgroundColor: '#16a34a',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
-                    cursor: isSharingLotus ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    boxShadow: '0 2px 4px rgba(22,163,74,0.3)',
-                    flexShrink: 0
-                  }}
-                >
-                  <Send size={14} /> {isSharingLotus ? 'Generando...' : 'Enviar por WhatsApp'}
-                </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleShareCatalog('copy')}
+                    disabled={isSharingLotus}
+                    style={{
+                      padding: '0.55rem 0.85rem',
+                      backgroundColor: '#ffffff',
+                      color: '#166534',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: '8px',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      cursor: isSharingLotus ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                      flexShrink: 0
+                    }}
+                  >
+                    <Copy size={14} /> {isSharingLotus ? 'Generating...' : 'Copy Link'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleShareCatalog('whatsapp')}
+                    disabled={isSharingLotus}
+                    style={{
+                      padding: '0.55rem 1rem',
+                      backgroundColor: '#16a34a',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      cursor: isSharingLotus ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      boxShadow: '0 2px 4px rgba(22,163,74,0.3)',
+                      flexShrink: 0
+                    }}
+                  >
+                    <Send size={14} /> {isSharingLotus ? 'Generating...' : 'Share via WhatsApp'}
+                  </button>
+                </div>
               </div>
 
-              <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                <span>Destinatario: <strong>{formData.displayName || 'Valued Partner'}</strong></span>
-                <span>Canal: <strong>{formData.pricingChannel.toUpperCase()}</strong></span>
-                <span>Teléfono: <strong>{formData.phone || 'No registrado'}</strong></span>
+              {/* Multi-Catalog Collection Selector */}
+              <div>
+                <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#166534', display: 'block', marginBottom: '0.35rem' }}>
+                  Select Clinical Portfolio to Share:
+                </span>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {CATALOG_COLLECTIONS.map(col => {
+                    const isSelected = selectedCatalogCollection === col.id;
+                    return (
+                      <button
+                        key={col.id}
+                        type="button"
+                        onClick={() => setSelectedCatalogCollection(col.id)}
+                        style={{
+                          padding: '0.35rem 0.65rem',
+                          borderRadius: '6px',
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          border: isSelected ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
+                          backgroundColor: isSelected ? '#16a34a' : '#ffffff',
+                          color: isSelected ? '#ffffff' : '#334155',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <span>{col.icon}</span>
+                        <span>{col.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Double Margin Summary Bar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', paddingTop: '0.35rem', borderTop: '1px dashed #bbf7d0', fontSize: '0.72rem', color: '#64748b' }}>
+                <span>Recipient: <strong>{formData.displayName || 'Valued Partner'}</strong></span>
+                <span>Atlas Margin: <strong style={{ color: '#0284c7' }}>+{formData.atlasMarkupPct}%</strong></span>
+                <span>Wholesaler Margin: <strong style={{ color: '#16a34a' }}>+{formData.wholesalerMarginPct}%</strong></span>
+                <span>Effective Combined: <strong style={{ color: '#166534' }}>+{Math.round(((1 + Number(formData.atlasMarkupPct || 35) / 100) * (1 + Number(formData.wholesalerMarginPct || 25) / 100) - 1) * 100)}%</strong></span>
               </div>
             </div>
 

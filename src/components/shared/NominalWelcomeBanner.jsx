@@ -20,13 +20,20 @@ export default function NominalWelcomeBanner({
   role = 'doctor', // 'doctor' | 'patient' | 'wholesaler' | 'client'
   clinicName = '',
   verifiedBy = 'Atlas Health Services',
-  sessionDuration = '90 días',
+  sessionDuration = '90 days',
   storageKey = 'atlas_welcome_banner_dismissed',
+  lang = 'en'
 }) {
+  const isEs = lang === 'es';
   const [dismissed, setDismissed] = useState(true);
   const [pwaPrompt, setPwaPrompt] = useState(null);
   const [showPwaInstructions, setShowPwaInstructions] = useState(false);
   const [isIos, setIsIos] = useState(false);
+
+  const cleanVerifiedBy = useMemo(() => {
+    if (!verifiedBy) return 'Atlas Health Services';
+    return String(verifiedBy).replace(/^(Dr\.?\s*)+/i, 'Dr. ').trim();
+  }, [verifiedBy]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -130,20 +137,20 @@ export default function NominalWelcomeBanner({
             }}
           >
             <ShieldCheck size={14} color="#86efac" />
-            <span>ACCESO VERIFICADO</span>
+            <span>{isEs ? 'ACCESO VERIFICADO' : 'VERIFIED ACCESS'}</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span>
-              Bienvenido/a, <strong>{cleanTitle}</strong>
+              {isEs ? 'Bienvenido/a,' : 'Welcome,'} <strong>{cleanTitle}</strong>
             </span>
             <span style={{ opacity: 0.6 }}>•</span>
             <span style={{ opacity: 0.9, fontSize: '0.76rem' }}>
               {isDoc
-                ? `Sesión clínica activa por ${sessionDuration} sin contraseña`
+                ? (isEs ? `Sesión clínica activa por ${sessionDuration} sin contraseña` : `Active clinical session for ${sessionDuration} passwordless`)
                 : isPatient
-                ? `Expediente digital certificado por ${verifiedBy}`
-                : `Catálogo mayorista oficial con márgenes B2B autorizados`}
+                ? (isEs ? `Expediente digital certificado por ${cleanVerifiedBy}` : `Digital clinical dossier certified by ${cleanVerifiedBy}`)
+                : (isEs ? `Catálogo mayorista oficial con márgenes B2B autorizados` : `Official wholesale catalog with authorized B2B margins`)}
             </span>
           </div>
         </div>
@@ -153,7 +160,7 @@ export default function NominalWelcomeBanner({
           <button
             type="button"
             onClick={handleInstallClick}
-            title="Añadir icono a la pantalla de inicio de tu smartphone"
+            title={isEs ? 'Añadir icono a la pantalla de inicio de tu smartphone' : 'Add icon to smartphone home screen'}
             style={{
               background: 'rgba(255,255,255,0.15)',
               border: '1px solid rgba(255,255,255,0.3)',
@@ -170,13 +177,13 @@ export default function NominalWelcomeBanner({
             }}
           >
             <Smartphone size={13} color="#93c5fd" />
-            <span>📲 Añadir a Inicio</span>
+            <span>{isEs ? '📲 Añadir a Inicio' : '📲 Add to Home Screen'}</span>
           </button>
 
           <button
             type="button"
             onClick={handleDismiss}
-            title="Ocultar aviso de bienvenida"
+            title={isEs ? 'Ocultar aviso de bienvenida' : 'Dismiss welcome notice'}
             style={{
               background: 'transparent',
               border: 'none',

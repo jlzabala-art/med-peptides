@@ -133,8 +133,8 @@ export function getPublicAiPreset({
       return {
         category: category || (isEs ? 'Cotización Institucional' : 'Institutional Quotation'),
         query: isEs
-          ? '¿Cuáles son los términos de custodia en cadena de frío, tiempos de entrega y condiciones institucionales de esta cotización?'
-          : 'What are the cold-chain custody terms, delivery lead times, and institutional conditions for this quotation?'
+          ? '¿Cuáles son los tiempos de entrega, embalaje y condiciones institucionales de esta cotización?'
+          : 'What are the packaging standards, delivery lead times, and institutional conditions for this quotation?'
       };
 
     case AI_PAGE_PRESETS.CALCULATOR:

@@ -450,9 +450,9 @@ export const COMPOUND_INQUIRIES_REGISTRY = {
     es: [
       '¿Qué estándares EU GMP y Farmacopea Europea (Ph. Eur.) rigen la formulación magistral?',
       '¿Qué formas farmacéuticas y concentraciones personalizadas pueden formularse para clínicas?',
-      '¿Cuál es el plazo habitual de entrega bajo cadena de frío (5 a 7 días hábiles) en UAE y GCC?',
+      '¿Cuál es el plazo habitual de entrega express (5 a 7 días hábiles) en UAE y GCC?',
       '¿Cómo funciona la facturación flexible (Tarifa B2B Clínica vs Factura RRP Directa al Paciente)?',
-      '¿Qué embalaje isotérmico certificado garantiza la cadena de frío durante el transporte aéreo?'
+      '¿Qué embalaje protector garantiza la integridad del producto durante el transporte aéreo?'
     ]
   },
 
@@ -790,7 +790,7 @@ function generateDynamicCompoundInquiries(contextAnchor, lang = 'en') {
     return [
       `¿Cuál es el mecanismo de acción y afinidad sobre ${targetAxis} de ${name}?`,
       `¿Cuál es el volumen óptimo de dilución y técnica de reconstitución para ${name}?`,
-      `¿Cuáles son las pautas de estabilidad térmica y cadena de frío (liofilizado vs reconstituido)?`,
+      `¿Cuáles son las pautas de estabilidad térmica y conservación (liofilizado vs reconstituido)?`,
       `¿Qué evidencia avalan las publicaciones clínicas indexadas sobre ${name}?`,
       `¿Cuáles son los estándares analíticos de pureza (RP-HPLC y espectrometría de masas) certificados?`
     ];
@@ -1154,7 +1154,7 @@ export function getContextualAndPopularSuggestions({
         },
         {
           label: isEs ? 'Excursión Térmica' : 'Thermal Excursion Impact',
-          query: isEs ? '¿Qué impacto tiene en la estabilidad si el vial sufre una interrupción transitoria de cadena de frío?' : 'What happens if the reconstituted vial experiences room temperature exposure during travel?'
+          query: isEs ? '¿Qué impacto tiene en la estabilidad si el vial sufre una variación transitoria de temperatura?' : 'What happens if the reconstituted vial experiences room temperature exposure during travel?'
         }
       ];
     } else if (turnContext.includes('mechanism') || turnContext.includes('receptor') || turnContext.includes('affinity') || turnContext.includes('pathway') || turnContext.includes('cascade')) {

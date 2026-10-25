@@ -66,6 +66,30 @@ export async function POST(request) {
     const now = new Date();
     const orderCode = `PO-DRAFT-${now.getFullYear().toString().slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
 
+    // Auto-resolve wholesaler attribution from shared catalog link if not directly passed
+    let effectiveWholesalerId = wholesalerId ? String(wholesalerId).trim() : null;
+    let effectiveWholesalerName = wholesalerName ? String(wholesalerName).trim() : null;
+    let effectiveWholesalerEmail = wholesalerEmail ? String(wholesalerEmail).trim() : null;
+    let effectiveReferralCode = referralCode ? String(referralCode).trim() : (effectiveWholesalerId || null);
+
+    if (!effectiveWholesalerId && catalogId && adminDb) {
+      try {
+        const linkSnap = await adminDb.collection('shared_catalog_links').doc(String(catalogId).trim()).get();
+        if (linkSnap.exists) {
+          const lData = linkSnap.data();
+          const isWs = lData.recipientType === 'wholesaler' || lData.recipientType === 'wholeseller' || Boolean(lData.wholesalerId);
+          if (isWs) {
+            effectiveWholesalerId = lData.recipientUserId || lData.wholesalerId || null;
+            effectiveWholesalerName = lData.recipientName || lData.wholesalerName || null;
+            effectiveWholesalerEmail = lData.recipientEmail || lData.wholesalerEmail || null;
+            effectiveReferralCode = effectiveReferralCode || effectiveWholesalerId || String(catalogId).trim();
+          }
+        }
+      } catch (wsLookupErr) {
+        console.warn('[create-draft] Could not auto-resolve wholesaler from catalog link:', wsLookupErr.message);
+      }
+    }
+
     const formattedItems = cartItems.map(item => {
       const isBulk = item.quantity >= 10 && item.tier10UnitPrice && item.tier10UnitPrice > 0;
       const unitPrice = isBulk ? item.tier10UnitPrice : item.price;
@@ -128,10 +152,10 @@ export async function POST(request) {
       paymentMethod: String(paymentMethod || 'payment_link_24h').trim(), // Default: payment link within 24h
       currency: String(currency || 'USD').toUpperCase(),
       currencySymbol: String(currencySymbol || '$'),
-      wholesalerId: wholesalerId ? String(wholesalerId).trim() : null,
-      referralCode: referralCode ? String(referralCode).trim() : (wholesalerId ? String(wholesalerId).trim() : null),
-      wholesalerName: wholesalerName ? String(wholesalerName).trim() : null,
-      wholesalerEmail: wholesalerEmail ? String(wholesalerEmail).trim() : null,
+      wholesalerId: effectiveWholesalerId,
+      referralCode: effectiveReferralCode,
+      wholesalerName: effectiveWholesalerName,
+      wholesalerEmail: effectiveWholesalerEmail,
       collection: String(collection || 'vials').toLowerCase(),
       accountManagerName: String(accountManagerName || '').trim(),
       accountManagerEmail: String(accountManagerEmail || '').trim() || null,

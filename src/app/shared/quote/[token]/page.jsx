@@ -4,7 +4,7 @@ import {
   ShieldCheck, 
   Clock, 
   FileText, 
-  Snowflake, 
+  Package, 
   CheckCircle2, 
   AlertTriangle,
   Building2,
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }) {
   const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
 
   let title = 'Official Medical Quotation • Institutional Reference';
-  let description = 'Official verified quotation with locked channel pricing, cold-chain logistics, and certificate of analysis verification.';
+  let description = 'Official verified quotation with locked channel pricing, pharmaceutical packaging, and certificate of analysis verification.';
 
   if (verification?.valid && verification.payload) {
     const payload = verification.payload;
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }) {
     }
     const count = payload.items?.length || 0;
     const currency = payload.currency || 'USD';
-    description = `Verified institutional quotation${count > 0 ? ` (${count} items)` : ''} in ${currency}. Direct cold-chain delivery terms, batch traceability, and analytical assays.`;
+    description = `Verified institutional quotation${count > 0 ? ` (${count} items)` : ''} in ${currency}. Priority medical delivery terms, batch traceability, and analytical assays.`;
   }
 
   const previewImage = `${BASE_URL}/og-catalog.png`;
@@ -262,7 +262,7 @@ export default async function SharedQuotePage({ params }) {
             {quote.coldChainFee > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '260px', fontSize: '0.875rem', color: '#0284c7' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Snowflake size={14} /> Cold Chain Logistics:
+                  <Package size={14} /> Priority Logistics:
                 </span>
                 <strong>{quote.coldChainFee.toFixed(2)} {quote.currency}</strong>
               </div>

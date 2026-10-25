@@ -1027,13 +1027,13 @@ export default function AdminQuotationsTab() {
             </div>
           </div>
 
-          {/* Destino y Cadena de Frío */}
+          {/* Destino y Logística */}
           <div style={{ backgroundColor: 'white', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Logistics & Cold Chain
+              Logistics & Dispatch
             </span>
             <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#0284c7' }}>
-              ❄️ 2-8°C Cold Chain • {locationLabel}
+              📦 Express Logistics • {locationLabel}
             </span>
           </div>
         </div>

@@ -483,7 +483,7 @@ export default function SharedCatalogClientView({
           showDosage: true,
           showPresentation: true,
           showPurity: true,
-          shippingNote: 'Commercial Terms: Ex-Works (EXW). Cold-chain packaging included; international freight, transit insurance, import duties, and destination taxes are excluded.',
+          shippingNote: 'Commercial Terms: Ex-Works (EXW). Standard analytical packaging included; international freight, transit insurance, import duties, and destination taxes are excluded.',
           supplierFilter: catalogMeta?.supplierId || null,
           category: catalogMeta?.category || null,
           accountManagerName: catalogMeta?.accountManagerName && catalogMeta.accountManagerName !== 'Atlas Commercial Desk' ? catalogMeta.accountManagerName : null,
@@ -769,6 +769,9 @@ export default function SharedCatalogClientView({
           accountManagerName: (catalogMeta?.accountManagerName && catalogMeta.accountManagerName !== 'Atlas Commercial Desk') ? catalogMeta.accountManagerName : '',
           accountManagerEmail: (catalogMeta?.accountManagerEmail && catalogMeta.accountManagerEmail !== 'orders@atlas-solutions.com') ? catalogMeta.accountManagerEmail : '',
           accountManagerId: catalogMeta?.accountManagerId || '',
+          wholesalerId: catalogMeta?.wholesalerId || ((catalogMeta?.recipientType === 'wholesaler' || catalogMeta?.recipientType === 'wholeseller') ? catalogMeta?.recipientUserId : null),
+          wholesalerName: catalogMeta?.wholesalerName || ((catalogMeta?.recipientType === 'wholesaler' || catalogMeta?.recipientType === 'wholeseller') ? catalogMeta?.recipientName : ''),
+          wholesalerEmail: catalogMeta?.wholesalerEmail || ((catalogMeta?.recipientType === 'wholesaler' || catalogMeta?.recipientType === 'wholeseller') ? catalogMeta?.recipientEmail : ''),
           source: 'shared_catalog'
         })
       });
@@ -2097,7 +2100,7 @@ export default function SharedCatalogClientView({
                 </div>
 
                 <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.45, margin: '6px 0 16px' }}>
-                  Apply for verified clinic pricing, clinical dosing documentation, cold-chain logistics, and automated prescription replenishment.
+                  Apply for verified clinic pricing, clinical dosing documentation, priority medical logistics, and automated prescription replenishment.
                 </p>
 
                 {registerError && (

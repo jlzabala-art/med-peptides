@@ -185,6 +185,8 @@ export default function PrescriptionModalsContainer({
       {/* Request to Atlas Quotation Modal */}
       <RequestAtlasQuotationModal
         rx={rx}
+        doctorName={doctorName}
+        doctorClinic={doctorClinic}
         isOpen={showAtlasQuotationModal}
         onClose={() => setShowAtlasQuotationModal && setShowAtlasQuotationModal(false)}
       />

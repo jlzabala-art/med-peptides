@@ -728,8 +728,8 @@ export default function PublicLabelsAppClient({
     const shareData = {
       title: `${patientName} • #${rxCode} Compounding Label`,
       text: isEs
-        ? `🏷️ Pharmapolis Label Studio • Paciente: ${patientName} • Prescripción: #${rxCode} • Fórmula${partInfo}: ${formulaTitle}`
-        : `🏷️ Pharmapolis Label Studio • Patient: ${patientName} • Prescription: #${rxCode} • Formula${partInfo}: ${formulaTitle}`,
+        ? `🏷️ Atlas Compounding Studio • Paciente: ${patientName} • Prescripción: #${rxCode} • Fórmula${partInfo}: ${formulaTitle}`
+        : `🏷️ Atlas Compounding Studio • Patient: ${patientName} • Prescription: #${rxCode} • Formula${partInfo}: ${formulaTitle}`,
       url: url,
     };
 
@@ -793,6 +793,7 @@ export default function PublicLabelsAppClient({
           patientQueue={patientQueue}
           onSelectPatient={handleSelectOrAddPatient}
           onClearRecent={handleClearRecent}
+          onOpenImport={() => setShowImport(true)}
           formatResultDate={formatResultDate}
           isEs={isEs}
           highlightedIndex={highlightedIndex}
@@ -840,17 +841,115 @@ export default function PublicLabelsAppClient({
       {/* ── 4. Main Independent Label Studio Workspace ── */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {patientQueue.length === 0 ? (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 20px' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 20px' }}>
+            {/* Prominent Onboarding / Instruction Banner */}
+            <div style={{
+              maxWidth: '640px',
+              width: '100%',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '24px',
+              marginBottom: '28px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '8px',
+                  background: '#e8f0fe',
+                  color: '#1a73e8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Upload size={18} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 700, color: '#1e293b' }}>
+                    {isEs ? '¿No encuentras al paciente o su prescripción?' : "Can't find your patient or prescription?"}
+                  </h3>
+                  <p style={{ margin: '3px 0 0 0', fontSize: '0.80rem', color: '#64748b', lineHeight: 1.45 }}>
+                    {isEs
+                      ? 'Carga primero la prescripción (PDF o escaneo). El sistema registrará los datos automáticamente y generará las etiquetas de frasco y de mensajería.'
+                      : 'Please import the prescription first (PDF or scan). The system will automatically parse the patient, active formulas, posology, and generate compliant bottle and shipping labels.'}
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowImport(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '9px 18px',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    background: '#1a73e8',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(26,115,232,0.3)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#1557b0'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#1a73e8'}
+                >
+                  <Upload size={15} />
+                  <span>{isEs ? 'Cargar Prescripción Primero (PDF / Scan)' : 'Import Prescription First (PDF / Scan)'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchOpen(true);
+                    searchInputRef.current?.focus();
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '9px 16px',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    color: '#475569',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#94a3b8';
+                    e.currentTarget.style.color = '#1e293b';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#cbd5e1';
+                    e.currentTarget.style.color = '#475569';
+                  }}
+                >
+                  <Search size={14} />
+                  <span>{isEs ? 'Buscar en Directorio (⌘K)' : 'Search Directory (⌘K)'}</span>
+                </button>
+              </div>
+            </div>
+
             <EmptyState
               icon={Layers}
-              title={isEs ? 'Compounding Label Studio • Pharmapolis' : 'Compounding Label Studio • Pharmapolis'}
-              subtitle={isEs ? 'Busca un paciente o nº de historia clínica (⌘K) para comenzar a diseñar y previsualizar etiquetas de frasco y de envío.' : 'Search for a patient or file # (⌘K) to start designing and previewing formula and courier shipping labels.'}
+              title={isEs ? 'Atlas Compounding Label Studio' : 'Atlas Compounding Label Studio'}
+              subtitle={isEs ? 'Busca un paciente o nº de historia clínica (⌘K) para comenzar a diseñar y previsualizar etiquetas de frasco y de envío.' : 'Search for an existing patient or file # (⌘K) to start designing and previewing formula and courier shipping labels.'}
               action={{
-                label: isEs ? 'Buscar Prescripción (⌘K)' : 'Search Prescriptions (⌘K)',
-                onClick: () => {
-                  setSearchOpen(true);
-                  searchInputRef.current?.focus();
-                }
+                label: isEs ? 'Cargar Prescripción' : 'Import Prescription',
+                onClick: () => setShowImport(true)
               }}
             />
 

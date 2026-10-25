@@ -285,10 +285,10 @@ export default function CompoundingServicesTechnicalSpecs({
 
           {activeStep === 5 && (
             <div className="step-detail-content">
-              <div className="step-detail-tag">Etapa 5 · Cadena de Frío & Logística</div>
+              <div className="step-detail-tag">Etapa 5 · Logística & Despacho</div>
               <h4>Distribución Internacional Directa (Clínica o Paciente)</h4>
               <p>
-                El importador coordina el transporte aéreo con acumuladores de frío calibrados (-20°C o 2°C–8°C según estabilidad de la molécula) y registro continuo de temperatura hasta el destino.
+                El importador coordina el transporte aéreo con embalaje especializado y trazabilidad hasta el destino.
               </p>
               <ul className="step-bullets">
                 <li><CheckCircle2 size={16} /> <strong>Tarifa Estándar de Envío:</strong> 200 a 400 AED (aprox. 50–100 EUR / 55–110 USD).</li>

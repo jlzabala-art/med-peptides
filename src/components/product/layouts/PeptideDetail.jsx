@@ -1246,7 +1246,7 @@ export default function PeptideDetail({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#1e40af', fontSize: '0.78rem', fontWeight: 800 }}>
                       <Snowflake size={14} color="#2563eb" />
-                      <span>Guaranteed Cold Chain</span>
+                      <span>Temperature Controlled Shipping</span>
                     </div>
                     <span style={{ fontSize: '0.68rem', fontWeight: 800, background: '#dbeafe', color: '#1e40af', padding: '2px 6px', borderRadius: '10px' }}>
                       2°C - 8°C · 24-48h Delivery

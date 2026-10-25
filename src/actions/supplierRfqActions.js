@@ -438,16 +438,55 @@ export async function serverCreateAtlasQuotationRequest({
       logger.warn('[supplierRfqActions] Could not write in-app notification', { error: notifErr.message });
     }
 
-    // 3. Mark Prescription with active quotation status
+    // 3. Mark Prescription with active quotation status and update doctor record in DB
     try {
-      await rxSnap.ref.update({
+      const rxUpdates = {
         quotationStatus: 'requested',
         quoteRequestId,
         lastQuotationRequestId: docRef.id,
         updatedAt: new Date(),
-      });
+      };
+
+      if (requesterName) {
+        rxUpdates['doctorName'] = requesterName.trim();
+        rxUpdates['treatingDoctor'] = requesterName.trim();
+        rxUpdates['doctor.name'] = requesterName.trim();
+      }
+      if (requesterEmail) {
+        rxUpdates['doctor.email'] = requesterEmail.trim();
+      }
+      if (requesterPhone) {
+        rxUpdates['doctor.phone'] = requesterPhone.trim();
+      }
+
+      await rxSnap.ref.update(rxUpdates);
+
+      // Also sync doctor user document if registered
+      const resolvedDocId = rxData.doctorId || rxData.doctor?.id || rxData.doctorUserId || null;
+      if (resolvedDocId) {
+        await adminDb.collection('users').doc(resolvedDocId).set({
+          displayName: requesterName || undefined,
+          name: requesterName || undefined,
+          email: requesterEmail || undefined,
+          phone: requesterPhone || undefined,
+          updatedAt: new Date().toISOString()
+        }, { merge: true }).catch(() => {});
+      } else if (requesterEmail) {
+        const docUserSnap = await adminDb.collection('users')
+          .where('email', '==', requesterEmail.toLowerCase().trim())
+          .limit(1)
+          .get()
+          .catch(() => null);
+        if (docUserSnap && !docUserSnap.empty) {
+          await docUserSnap.docs[0].ref.update({
+            displayName: requesterName || docUserSnap.docs[0].data().displayName,
+            phone: requesterPhone || docUserSnap.docs[0].data().phone,
+            updatedAt: new Date().toISOString()
+          }).catch(() => {});
+        }
+      }
     } catch (rxUpdateErr) {
-      logger.warn('[supplierRfqActions] Could not update prescription quotationStatus', { error: rxUpdateErr.message });
+      logger.warn('[supplierRfqActions] Could not update prescription quotationStatus or doctor details', { error: rxUpdateErr.message });
     }
 
     logger.info('[supplierRfqActions] Created Doctor-to-Atlas quotation request with notification', {

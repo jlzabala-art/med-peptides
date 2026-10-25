@@ -49,12 +49,12 @@ const HELP_TOPICS = [
     descEn: 'Difference between formula label and parcel box shipping label.',
     contentEs: `
 • **Etiqueta de Frasco / Producto (Frontal / Trasera):** Se adhiere directamente al vial, bote o gotero. Contiene los principios activos (APIs), dosis exacta, lote analítico, posología y QR de trazabilidad.
-• **Etiqueta de Envío (Shipping Package):** Se utiliza en el exterior del paquete de transporte (DHL / mensajería). Incluye los datos de origen (Pharmapolis / Atlas), dirección de destino, aviso de cadena de frío (2-8°C o Temperatura ambiente) y declaración aduanera conforme.
+• **Etiqueta de Envío (Shipping Package):** Se utiliza en el exterior del paquete de transporte (DHL / mensajería). Incluye los datos de origen (Pharmapolis / Atlas), dirección de destino, aviso de almacenamiento y declaración aduanera conforme.
 • **Cómo cambiar:** En el desplegable de variantes, selecciona **"Etiqueta de Envío"** o activa el modo comparativa.
     `,
     contentEn: `
 • **Vial / Product Label (Front / Back):** Affixed directly to vial, bottle, or dropper. Contains Active Pharmaceutical Ingredients (APIs), dosage, batch lot, instructions, and verification QR.
-• **Shipping Package Label:** Used on the outer courier parcel (DHL Express). Includes sender (Pharmapolis / Atlas), delivery address, cold chain storage flag (2-8°C / ambient), and customs declaration.
+• **Shipping Package Label:** Used on the outer courier parcel (DHL Express). Includes sender (Pharmapolis / Atlas), delivery address, storage condition flag, and customs declaration.
 • **How to switch:** Select **"Shipping Label"** in the variant selector or enable the compare mode.
     `
   },
@@ -138,8 +138,8 @@ export default function LabelsAtlasDock({
           : 'For Zebra or thermal roll printers: select the individual label and click "Export > Zebra ZPL" or export 600 DPI PNG matching your exact roll millimeter measurements.';
       } else if (q.includes('envio') || q.includes('paquete') || q.includes('shipping') || q.includes('dhl') || q.includes('caja')) {
         response = isEs
-          ? 'Para etiquetas de envío de Pharmapolis: cambia el selector de variante a "Etiqueta de Envío". Esto generará el formato exterior con dirección de entrega, remitente Pharmapolis/Atlas, indicador de cadena de frío y código de seguimiento.'
-          : 'For Pharmapolis courier labels: switch the variant selector to "Shipping Label". This creates the outer parcel format with delivery address, cold chain badge, and customs notes.';
+          ? 'Para etiquetas de envío de Pharmapolis: cambia el selector de variante a "Etiqueta de Envío". Esto generará el formato exterior con dirección de entrega, remitente Pharmapolis/Atlas, indicador de almacenamiento y código de seguimiento.'
+          : 'For Pharmapolis courier labels: switch the variant selector to "Shipping Label". This creates the outer parcel format with delivery address, storage condition badge, and customs notes.';
       } else if (q.includes('borrar') || q.includes('quitar') || q.includes('delete') || q.includes('remove') || q.includes('eliminar')) {
         response = isEs
           ? 'Ahora puedes borrar cualquier paciente de la cola haciendo clic en el icono "×" de su tarjeta en la barra de lote. Si borras el último, la pantalla volverá al estado limpio para que puedas empezar de nuevo.'

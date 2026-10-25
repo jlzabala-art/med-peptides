@@ -249,7 +249,7 @@ export default function PeptideAnalyticalSpecsCard({
             </h4>
           </div>
           <span className="stability-badge-gold">
-            <Clock size={12} /> {lang === 'es' ? 'Protocolo de Cadena de Frío' : 'Validated Cold-Chain Protocol'}
+            <Clock size={12} /> {lang === 'es' ? 'Protocolo de Estabilidad Térmica' : 'Thermal Stability Protocol'}
           </span>
         </div>
 

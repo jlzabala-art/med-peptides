@@ -21,7 +21,7 @@ Welcome to **Atlas Health Services**, your specialized compounding pharmacy and 
 We provide prescribing physicians with:
 • **Individualized Magistral Formulations**: Custom USP-grade compounding (liposomal transdermal creams, oral capsules, sublingual troches).
 • **Regenerative Bioactive Peptides & BHRT**: Scientifically validated endocrine and longevity protocols.
-• **Nominal Patient Dossiers & Refills**: Seamless 1-click digital prescriptions and cold-chain pharmacy dispensing directly to your patients.
+• **Nominal Patient Dossiers & Refills**: Seamless 1-click digital prescriptions and direct delivery to your clinic or patients.
 
 🔑 **Your Secure 1-Tap Clinical Portal Access**:
 👉 ${accessUrl}
@@ -50,7 +50,7 @@ export function generateDoctorWelcomeEmail({
 On behalf of Atlas Health Services, we are delighted to welcome you to our international network of precision medicine and longevity practitioners.
 
 ### About Atlas Health Services
-Atlas Health Services bridges specialized clinical compounding pharmacy with evidence-based longevity therapies. Through our accredited compounding laboratories and certified cold-chain logistics, we deliver:
+Atlas Health Services bridges specialized clinical compounding pharmacy with evidence-based longevity therapies. Through our dedicated compounding laboratories and international delivery network, we deliver:
 
 1. **Individualized Magistral Compounding**:
    Custom-tailored galenic formulas prepared under strict European and USP pharmacopeia standards (e.g., Pentravan® liposomal transdermal dispensers, personalized bioidentical hormone titration, synergistic co-factors).

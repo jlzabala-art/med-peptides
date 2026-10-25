@@ -391,7 +391,7 @@ export default function PublicQuotationPage() {
                 Quotation Approved & Order Confirmed!
               </h2>
               <p style={{ fontSize: '0.88rem', color: '#475569', maxWidth: '480px', margin: '0 auto 16px' }}>
-                Your order is currently being routed to the compounding laboratory under strict refrigerated cold chain protocol.
+                Your order is currently being routed to the compounding laboratory under verified pharmaceutical protocol.
               </p>
               {quotation.salesOrderNumber && (
                 <div style={{ display: 'inline-block', backgroundColor: '#f0fdf4', padding: '6px 14px', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '0.84rem', fontWeight: 700, color: '#166534' }}>
@@ -486,7 +486,7 @@ export default function PublicQuotationPage() {
         <>
           <PublicStickyActionBar
             title={quotation?.quotationNumber ? `Quotation ${quotation.quotationNumber}` : `Quotation #${String(token).slice(0, 8)}`}
-            subtitle={`${quotation?.clientName || 'Institutional Client'} • Total: ${quotation?.currency || '$'}${Number(quotation?.total || 0).toFixed(2)} • Cold-Chain Logistics Included`}
+            subtitle={`${quotation?.clientName || 'Institutional Client'} • Total: ${quotation?.currency || '$'}${Number(quotation?.total || 0).toFixed(2)} • Priority Logistics Included`}
             badge={quotation?.status ? quotation.status.toUpperCase() : 'OFFICIAL QUOTE'}
             badgeType="protocol"
             inquireLabel={quotation?.status === 'approved' ? 'Order Confirmed ✓' : 'Approve & Confirm ➔'}
@@ -496,7 +496,7 @@ export default function PublicQuotationPage() {
             }}
             showClinicalAI={true}
             aiCategory="Commercial Quotation"
-            aiContextQuery={`What cold-chain shipping logistics, batch analytical CoA documentation, and delivery lead times apply to quotation ${quotation?.quotationNumber || token}?`}
+            aiContextQuery={`What shipping logistics, batch analytical CoA documentation, and delivery lead times apply to quotation ${quotation?.quotationNumber || token}?`}
             extraActions={
               <button
                 type="button"

@@ -897,7 +897,7 @@ export default async function SharedCatalogPage({ params }) {
     readyStockCount: readyStockVariants,
     coaVerifiedCount,
 
-    // 3. Clinical & Analytical Benchmarks (Institutional SLAs - STRICT zero cold chain)
+    // 3. Clinical & Analytical Benchmarks (Institutional SLAs)
     isCompounding: false,
     formulasTitle: 'Active Formulations',
     formulasSubtitle: 'Lyophilized peptide formulations',
@@ -905,10 +905,10 @@ export default async function SharedCatalogPage({ params }) {
     purityValue: '≥99.2%',
     purityBadge: 'Dual HPLC',
     puritySubtitle: 'Dual-wavelength HPLC & MS',
-    dispatchTitle: 'Zero Cold-Chain',
-    dispatchSlaValue: 'Zero Cold-Chain',
-    dispatchBadge: 'Ambient Stable',
-    dispatchSubtitle: 'Lyophilized peptide cake',
+    dispatchTitle: 'Dispatch SLA',
+    dispatchSlaValue: '24-48h Dispatch',
+    dispatchBadge: 'Express Transit',
+    dispatchSubtitle: 'Lyophilized formulation packaging',
     traceabilityTitle: 'Batch Traceability',
     traceabilityValue: '100% CoA',
     traceabilityBadge: 'Batch Trace',

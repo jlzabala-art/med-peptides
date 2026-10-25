@@ -153,13 +153,16 @@ module.exports.onOrderCreatedForRx = onDocumentCreated(
                 total:       totalStr,
               });
 
-              await transporter.sendMail({
+              const { sanitizeTestEmail } = require('../lib/safetyEmailGuard');
+              const safeDoctorMail = sanitizeTestEmail({
                 from: `"Atlas Health" <${gmailUser.value()}>`,
                 to:   doctorEmail,
                 subject,
                 html,
-              });
-              console.log(`[onOrderCreatedForRx] Doctor email sent to ${doctorEmail}`);
+              }, 'doctor');
+
+              await transporter.sendMail(safeDoctorMail);
+              console.log(`[onOrderCreatedForRx] Safe email dispatched (originally for doctor ${doctorEmail})`);
             }
           }
         }

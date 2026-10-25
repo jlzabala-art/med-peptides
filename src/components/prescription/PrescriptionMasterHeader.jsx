@@ -85,8 +85,8 @@ export default function PrescriptionMasterHeader({
             <div style={{ fontSize: '0.74rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span>
                 {isEs
-                  ? 'Dossier clínico digital · Pauta posológica · Certificado EU GMP'
-                  : 'Digital clinical dossier · Posology regimen · EU GMP Certified'}
+                  ? 'Dossier clínico digital · Pauta posológica · Grado EU GMP'
+                  : 'Digital clinical dossier · Posology regimen · EU GMP Standards'}
               </span>
               {doctorName && (
                 <span style={{ color: '#94a3b8' }}>• {doctorName}</span>

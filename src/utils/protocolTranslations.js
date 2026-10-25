@@ -211,8 +211,8 @@ export const PROTOCOL_I18N = {
     colVialsNeeded: 'Viales Requeridos',
     colConcentration: 'Concentración Activa',
     colTotalUnits: 'Unidades Totales del Ciclo',
-    coldChainStorage: 'Cadena de Frío & Verificación de Almacenamiento',
-    coldChainDesc: 'Todas las formulaciones liofilizadas requieren conservación refrigerada a 2°C – 8°C (o -20°C para estabilidad prolongada). Proteger de la luz directa.',
+    coldChainStorage: 'Conservación & Almacenamiento Clínico',
+    coldChainDesc: 'Formulaciones analíticas con especificaciones de conservación protegidas de la luz y humedad directa.',
 
     // Section 5: Administration Guidance & Precision Notes
     sec5Title: 'Guía de Administración & Notas de Precisión',

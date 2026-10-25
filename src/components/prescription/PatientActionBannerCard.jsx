@@ -208,8 +208,8 @@ export default function PatientActionBannerCard({
               </div>
               <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>
                 {isEs 
-                  ? 'Tratamiento verificado y activo. Siga la pauta de administración diaria indicada en este expediente.'
-                  : 'Treatment verified and in active administration. Follow the daily posology schedule outlined in this dossier.'}
+                  ? 'Tratamiento activo. Siga la pauta de administración diaria indicada en este expediente.'
+                  : 'Active treatment plan. Follow the daily administration schedule outlined in this dossier.'}
               </div>
             </div>
           </div>

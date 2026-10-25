@@ -510,7 +510,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
                     </td>
                   </tr>
                   <tr>
-                    <td data-label={t.paramCol}>{lang === 'es' ? 'Almacenamiento y Cadena de Frío' : lang === 'fr' ? 'Stockage et Chaîne du Froid' : 'Storage & Cold Chain'}</td>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Condiciones de Almacenamiento' : lang === 'fr' ? 'Conditions de Stockage' : 'Storage Conditions'}</td>
                     <td data-label={t.methodCol}>Validated Stability Protocol</td>
                     <td data-label={t.resultCol}>-20°C ({lang === 'es' ? 'Liofilizado' : 'Lyophilized'}) · 2°C–8°C ({lang === 'es' ? 'Líquido' : 'Liquid'})</td>
                     <td data-label={t.statusCol}>

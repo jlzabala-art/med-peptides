@@ -107,9 +107,9 @@ export function useQuotationsContextBridge({
         summary: `Quotation Focus: #${qNum} for ${client} (${activeQ.category?.toUpperCase() || 'CLIENT'}). Grand Total: $${grandTotal.toFixed(2)}, Margin: ${margin}%, Status: ${status}. Items: ${items.length} (${items.slice(0, 3).map(i => i.name).join(', ')}). Valid: ${days} days remaining.`,
         quickActions: [
           { label: '💡 Estrategia de Margen', prompt: `Analiza la cotización #${qNum} de $${grandTotal.toFixed(2)} para ${client} (margen actual: ${margin}%). ¿Es un precio competitivo y rentable según su categoría?` },
-          { label: '✉️ Redactar Propuesta Comercial', prompt: `Redacta un mensaje profesional para enviar por WhatsApp o email a ${client} resumiendo la cotización #${qNum} con las condiciones de envío y cadena de frío.` },
+          { label: '✉️ Redactar Propuesta Comercial', prompt: `Redacta un mensaje profesional para enviar por WhatsApp o email a ${client} resumiendo la cotización #${qNum} con las condiciones de envío y entrega.` },
           { label: '🔄 Convertir a Pedido', prompt: `¿Cuáles son los pasos y requisitos de stock para convertir la cotización #${qNum} a Sales Order y emitir las órdenes de compra a proveedores?` },
-          { label: '❄️ Verificación de Logística', prompt: `Verifica los requisitos de cadena de frío refrigerada (2-8°C) y destino de entrega para la cotización #${qNum}` }
+          { label: '📦 Verificación de Logística', prompt: `Verifica los requisitos de embalaje, mensajería y destino de entrega para la cotización #${qNum}` }
         ]
       };
     } else {

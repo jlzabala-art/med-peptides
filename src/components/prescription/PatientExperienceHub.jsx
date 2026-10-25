@@ -35,9 +35,11 @@ export default function PatientExperienceHub({
   doctorPhone = '',
   patientPublicUrl = '',
   onOpenQuotation = null,
+  onOpenDoctorContact = null,
   patientName: propPatientName = null,
   doctorName: propDoctorName = null,
-  isAuthorizedViewer = false
+  isAuthorizedViewer = false,
+  clinicalInquiries = []
 }) {
   const isEs = lang === 'es';
   const [showAdvantageDetails, setShowAdvantageDetails] = useState(false);
@@ -119,26 +121,6 @@ export default function PatientExperienceHub({
     const text = JSON.stringify(items).toLowerCase();
     return text.includes('peptide') || text.includes('vial') || text.includes('sc') || text.includes('subcutaneous') || text.includes('injection') || text.includes('bpc') || text.includes('tb-') || text.includes('semax') || text.includes('selank') || text.includes('nad');
   }, [rx]);
-
-  // Clinical inquiry WhatsApp URL
-  const clinicalInquiryUrl = useMemo(() => {
-    const cleanPhone = String(doctorPhone || '+97143498800').replace(/[^0-9]/g, '');
-    const patientDoctorIntro = isAuthorizedViewer ? (isEs ? `, paciente del ${doctorName}` : `, patient of ${doctorName}`) : '';
-    const msg = isEs
-      ? `Estimado equipo médico de ${clinicName},\nSoy ${patientName}${patientDoctorIntro}. Me comunico en relación a mi prescripción #${rxCode}.\nTengo la siguiente consulta sobre mi pauta de administración:\n\n[Escriba su consulta aquí]\n\n🔗 Enlace de mi prescripción: ${patientPublicUrl}`
-      : `Dear ${clinicName} clinical team,\nI am ${patientName}${patientDoctorIntro}. I am contacting you regarding my prescription #${rxCode}.\nI have the following question regarding my administration protocol:\n\n[Type your clinical question here]\n\n🔗 My prescription link: ${patientPublicUrl}`;
-    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-  }, [doctorPhone, clinicName, patientName, doctorName, rxCode, isEs, patientPublicUrl, isAuthorizedViewer]);
-
-  // Refill WhatsApp / Action URL
-  const refillRequestUrl = useMemo(() => {
-    const cleanPhone = String(doctorPhone || '+97143498800').replace(/[^0-9]/g, '');
-    const docPrescribedIntro = isAuthorizedViewer ? (isEs ? ` prescrita por el ${doctorName}` : ` prescribed by ${doctorName}`) : '';
-    const msg = isEs
-      ? `Estimado equipo de ${clinicName},\nSoy ${patientName}. Mi prescripción #${rxCode}${docPrescribedIntro} está finalizando su ciclo y deseo solicitar un refill / continuación del tratamiento magistral.\n🔗 Expediente: ${patientPublicUrl}`
-      : `Dear ${clinicName} team,\nI am ${patientName}. My prescription #${rxCode}${docPrescribedIntro} is completing its cycle and I would like to request a refill / continuation of my compounded therapy.\n🔗 Dossier: ${patientPublicUrl}`;
-    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-  }, [doctorPhone, clinicName, patientName, doctorName, rxCode, isEs, patientPublicUrl, isAuthorizedViewer]);
 
   // ────────────────────────────────────────────────────────────────────────────
   // RENDER A: DOCTOR / CLINIC ADMIN VIEW (Disclosure of The Patient View)
@@ -586,17 +568,123 @@ export default function PatientExperienceHub({
         </div>
       </div>
 
+      {/* 1.5 Active Clinical Desk Inquiries & Certified Physician Responses */}
+      {clinicalInquiries && clinicalInquiries.length > 0 && (
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #dadce0',
+          borderRadius: '8px',
+          padding: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MessageCircle size={15} />
+              </div>
+              <strong style={{ fontSize: '0.84rem', color: '#202124' }}>
+                {isEs ? 'Consultas Médicas en Curso & Respuestas Certificadas' : 'Active Clinical Desk Inquiries & Certified Physician Responses'}
+              </strong>
+            </div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#1a73e8', background: '#e8f0fe', padding: '2px 8px', borderRadius: '10px' }}>
+              {clinicalInquiries.length} {clinicalInquiries.length === 1 ? (isEs ? 'registro' : 'entry') : (isEs ? 'registros' : 'entries')}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {clinicalInquiries.map((inq) => {
+              const isAnswered = inq.status === 'answered' || Boolean(inq.doctorResponse);
+              return (
+                <div
+                  key={inq.id}
+                  style={{
+                    border: isAnswered ? '1px solid #bbf7d0' : '1px solid #e2e8f0',
+                    background: isAnswered ? '#f0fdf4' : '#f8fafc',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        background: inq.priority === 'urgent' ? '#fee2e2' : '#f1f5f9',
+                        color: inq.priority === 'urgent' ? '#b91c1c' : '#475569'
+                      }}>
+                        {inq.topic || 'Clinical Query'}
+                      </span>
+                      <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                        {inq.createdAt ? new Date(inq.createdAt).toLocaleDateString(isEs ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
+                      </span>
+                    </div>
+
+                    {isAnswered ? (
+                      <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Check size={13} /> {isEs ? 'Respuesta Certificada' : 'Certified Physician Reply'}
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: '0.70rem', fontWeight: 650, color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#0284c7' }} />
+                        {isEs ? 'En Revisión Médica' : 'Under Physician Review'}
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ fontSize: '0.76rem', color: '#1e293b', fontStyle: 'italic', background: '#ffffff', padding: '8px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                    &ldquo;{inq.message}&rdquo;
+                  </div>
+
+                  {isAnswered && inq.doctorResponse && (
+                    <div style={{ background: '#ffffff', border: '1px solid #86efac', borderRadius: '6px', padding: '10px 12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                        <Stethoscope size={14} color="#16a34a" />
+                        <strong style={{ fontSize: '0.74rem', color: '#166534' }}>
+                          {inq.doctorName || propDoctorName || 'Physician'}
+                        </strong>
+                        {inq.respondedAt && (
+                          <span style={{ fontSize: '0.68rem', color: '#15803d' }}>
+                            • {new Date(inq.respondedAt).toLocaleDateString(isEs ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '0.76rem', color: '#14532d', lineHeight: 1.45, whiteSpace: 'pre-wrap' }}>
+                        {inq.doctorResponse}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* 2. Interactive Action Toolbar: Contact Doctor, Request Refill, Quotation */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
         gap: '12px'
       }}>
-        {/* Controlled Doctor Inquiry */}
-        <a
-          href={clinicalInquiryUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* Direct In-App Clinical Desk Inquiry */}
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic('selection');
+            if (onOpenDoctorContact) {
+              onOpenDoctorContact('posology');
+            }
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -605,8 +693,9 @@ export default function PatientExperienceHub({
             background: '#ffffff',
             border: '1px solid #dadce0',
             borderRadius: '8px',
-            textDecoration: 'none',
             color: '#202124',
+            cursor: 'pointer',
+            textAlign: 'left',
             transition: 'all 0.15s ease',
             boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
           }}
@@ -617,20 +706,26 @@ export default function PatientExperienceHub({
             <MessageCircle size={18} />
           </div>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: '0.80rem', fontWeight: 600, color: '#137333' }}>
-              {isEs ? 'Consultar al Médico' : 'Ask Prescribing Doctor'}
+            <div style={{ fontSize: '0.80rem', fontWeight: 650, color: '#137333' }}>
+              {isEs ? 'Mesa Clínica del Médico' : 'Direct Doctor Clinical Desk'}
             </div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {isEs ? 'Aclarar pauta o reportar tolerancia' : 'Clarify dosage or tolerance'}
+              {isEs ? 'Aclarar pauta, horarios o tolerancia' : 'Clarify dosage, schedule or tolerance'}
             </div>
           </div>
-        </a>
+        </button>
 
-        {/* 1-Click Smart Refill */}
-        <a
-          href={refillRequestUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* In-App Direct Prescription Cycle Refill */}
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic('selection');
+            if (onOpenDoctorContact) {
+              onOpenDoctorContact('refill');
+            } else if (onOpenQuotation) {
+              onOpenQuotation();
+            }
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -639,8 +734,9 @@ export default function PatientExperienceHub({
             background: '#ffffff',
             border: '1px solid #dadce0',
             borderRadius: '8px',
-            textDecoration: 'none',
             color: '#202124',
+            cursor: 'pointer',
+            textAlign: 'left',
             transition: 'all 0.15s ease',
             boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
           }}
@@ -651,14 +747,14 @@ export default function PatientExperienceHub({
             <RotateCcw size={18} />
           </div>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: '0.80rem', fontWeight: 600, color: '#1a73e8' }}>
-              {isEs ? 'Solicitar Refill / Continuación' : '1-Click Refill Request'}
+            <div style={{ fontSize: '0.80rem', fontWeight: 650, color: '#1a73e8' }}>
+              {isEs ? 'Solicitar Refill / Continuación' : 'Clinical Refill Request'}
             </div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {isEs ? 'Renovar pauta para el siguiente ciclo' : 'Order continuation supply'}
             </div>
           </div>
-        </a>
+        </button>
 
         {/* Request Quotation (if handler provided) */}
         {onOpenQuotation && (

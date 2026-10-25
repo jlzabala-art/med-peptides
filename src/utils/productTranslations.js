@@ -223,7 +223,7 @@ export const UI_I18N = {
     solventText: 'Extraiga el volumen de Agua Bacteriostática (BAC con 0.9% de alcohol bencílico) indicado por su médico, utilizando una jeringa estéril de reconstitución. Inserte la aguja en ángulo de 45° a través del septo y deje que el líquido resbale suavemente por la pared interna de vidrio. Nunca proyecte el chorro directamente sobre el liofilizado para preservar la conformación molecular terciaria. Nota: El volumen indicado en la guía es de referencia; su médico prescriptor determina el volumen final de reconstitución y la dosis adecuada para su protocolo específico.',
     dissolutionStep: '3. Homogeneización Molecular Suave',
     dissolutionText: 'Haga girar el vial lentamente con un movimiento circular entre las palmas o sobre una superficie plana hasta que la solución quede totalmente transparente y cristalina. No agite vigorosamente ni use agitador vórtex; el cizallamiento violento desnaturaliza las cadenas peptídicas.',
-    storageStep: '4. Cadena de Frío y Estabilidad Clínica',
+    storageStep: '4. Conservación y Estabilidad Clínica',
     storageText: 'Almacene la solución reconstituida de inmediato en refrigeración vertical entre 2°C y 8°C (36°F a 46°F), protegida de la luz solar y radiación UV. Gracias al agente bacteriostático de grado médico, el péptido reconstituido mantiene su potencia y esterilidad clínica durante el período indicado en la documentación de su producto (típicamente 28–30 días).',
     provenanceNoticeTitle: 'Monografía Clínica y Analítica',
     provenanceNoticeDesc: `Especificaciones farmacéuticas y analíticas verificadas para ${BRAND_CONFIG.name}. Todos los lotes se someten a pruebas analíticas certificadas en doble etapa (RP-HPLC y ESI-MS).`,

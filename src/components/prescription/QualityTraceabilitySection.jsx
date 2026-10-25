@@ -84,7 +84,7 @@ export default function QualityTraceabilitySection({
               fontSize: '0.72rem', 
               fontWeight: 600 
             }}>
-              ✓ {isEs ? 'Lote Verificado & Liberado' : 'Batch Released & Verified'}
+              ✓ {isEs ? 'Lote Aprobado & Liberado' : 'Batch Approved & Released'}
             </span>
           </div>
         </div>
@@ -211,8 +211,8 @@ export default function QualityTraceabilitySection({
                     {isEs ? 'Identidad Molecular (ESI-MS / MALDI-TOF)' : 'Molecular Identity (ESI-MS / MALDI-TOF)'}
                   </td>
                   <td style={{ padding: '10px 14px', color: '#5f6368' }}>Ph. Eur. 2.2.43</td>
-                  <td style={{ padding: '10px 14px', color: '#3c4043' }}>MW ± 1.0 Da del teórico</td>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>Match Confirmado (100%)</td>
+                  <td style={{ padding: '10px 14px', color: '#3c4043' }}>{isEs ? 'MW ± 1.0 Da del teórico' : 'MW ± 1.0 Da of theoretical'}</td>
+                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>{isEs ? 'Match Confirmado (100%)' : 'Confirmed Match (100%)'}</td>
                   <td style={{ padding: '10px 14px' }}>
                     <StatusBadge status="approved" />
                   </td>
@@ -233,8 +233,8 @@ export default function QualityTraceabilitySection({
                     {isEs ? 'Control de Esterilidad & Bioburden' : 'Sterility & Bioburden Assay'}
                   </td>
                   <td style={{ padding: '10px 14px', color: '#5f6368' }}>Ph. Eur. 2.6.1 / 2.6.12</td>
-                  <td style={{ padding: '10px 14px', color: '#3c4043' }}>0 CFU / Ausencia Total</td>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>Negativo (0 CFU/g)</td>
+                  <td style={{ padding: '10px 14px', color: '#3c4043' }}>{isEs ? '0 CFU / Ausencia Total' : '0 CFU / Total Absence'}</td>
+                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>{isEs ? 'Negativo (0 CFU/g)' : 'Negative (0 CFU/g)'}</td>
                   <td style={{ padding: '10px 14px' }}>
                     <StatusBadge status="approved" />
                   </td>
@@ -244,8 +244,8 @@ export default function QualityTraceabilitySection({
                     {isEs ? 'Uniformidad de Masa y Contenido' : 'Uniformity of Dosage & Mass'}
                   </td>
                   <td style={{ padding: '10px 14px', color: '#5f6368' }}>Ph. Eur. 2.9.40</td>
-                  <td style={{ padding: '10px 14px', color: '#3c4043' }}>Desviación &lt; 5.0% (AV &lt; 15.0)</td>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>AV = 2.1 (Conforme)</td>
+                  <td style={{ padding: '10px 14px', color: '#3c4043' }}>{isEs ? 'Desviación < 5.0% (AV < 15.0)' : 'Deviation < 5.0% (AV < 15.0)'}</td>
+                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>{isEs ? 'AV = 2.1 (Conforme)' : 'AV = 2.1 (Compliant)'}</td>
                   <td style={{ padding: '10px 14px' }}>
                     <StatusBadge status="approved" />
                   </td>
@@ -274,7 +274,7 @@ export default function QualityTraceabilitySection({
             <ShieldCheck size={18} color="#0284c7" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
               <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0f172a' }}>
-                {isEs ? 'Cadena de Frío y Conservación' : 'Cold Chain & Storage Conditions'}
+                {isEs ? 'Pautas de Conservación' : 'Storage & Handling Conditions'}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', lineHeight: 1.45 }}>
                 {isEs 

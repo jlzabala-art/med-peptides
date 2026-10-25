@@ -2234,7 +2234,7 @@ export default function EternaGenomicsDetail({
                     </div>
                     <p className="eterna-science-card-text" style={{ margin: 0, fontSize: '0.82rem', lineHeight: 1.55 }}>
                       {isEs 
-                        ? 'Dispositivo de recolección de saliva con marcado CE-IVDR y tampón conservante que estabiliza el ADN a temperatura ambiente durante 24 meses, eliminando la necesidad de cadena de frío en el transporte.' 
+                        ? 'Dispositivo de recolección de saliva con marcado CE-IVDR y tampón conservante que estabiliza el ADN a temperatura ambiente durante 24 meses, simplificando el transporte y conservación.' 
                         : 'CE-IVDR compliant saliva collection funnel and preservation buffer maintaining high molecular weight DNA integrity at room temperature for up to 24 months without cold-chain transit.'}
                     </p>
                   </div>

@@ -24,7 +24,7 @@ export default function UltraPersonCollectionSidebar({
   onSelectCategory = () => {},
   totalCount = 0,
   onOpenInquiry = null,
-  onOpenAi: _onOpenAi = null
+  onOpenAi = null
 }) {
   const isEs = lang === 'es';
   const [copied, setCopied] = useState(false);
@@ -87,10 +87,10 @@ export default function UltraPersonCollectionSidebar({
           </div>
           <div>
             <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0f172a' }}>
-              PharmaPolis Labs
+              UltraPerson™ Clinical Formulas
             </div>
             <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-              EU GMP · ISO Accredited
+              Atlas Compounding Network · EU GMP
             </div>
           </div>
         </div>
@@ -244,7 +244,7 @@ export default function UltraPersonCollectionSidebar({
         )}
       </div>
 
-      {/* ── 4. Quick Actions (Share Link & Inquire) ── */}
+      {/* ── 4. Quick Actions (Formulation Inquiries & AI Consultation) ── */}
       <div style={{
         background: '#f8fafc',
         borderRadius: '14px',
@@ -262,7 +262,7 @@ export default function UltraPersonCollectionSidebar({
               width: '100%',
               padding: '9px 12px',
               borderRadius: '8px',
-              background: '#7c3aed',
+              background: '#0f172a',
               color: '#ffffff',
               border: 'none',
               fontSize: '0.78rem',
@@ -272,11 +272,42 @@ export default function UltraPersonCollectionSidebar({
               alignItems: 'center',
               justifyContent: 'center',
               gap: '6px',
-              boxShadow: '0 2px 6px rgba(124, 58, 237, 0.25)'
+              boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
+              transition: 'background 0.15s ease'
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#1e293b'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#0f172a'; }}
           >
-            <Mail size={14} />
-            <span>{isEs ? 'Consultar con PharmaPolis' : 'Inquire PharmaPolis Formulations'}</span>
+            <FlaskConical size={14} color="#38bdf8" />
+            <span>{isEs ? 'Solicitar Adaptación de Fórmula' : 'Request Custom Formulation'}</span>
+          </button>
+        )}
+
+        {onOpenAi && (
+          <button
+            type="button"
+            onClick={onOpenAi}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              background: '#ffffff',
+              color: '#0284c7',
+              border: '1px solid #bae6fd',
+              fontSize: '0.76rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#f0f9ff'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; }}
+          >
+            <Sparkles size={13} color="#0284c7" />
+            <span>{isEs ? 'Consultar con Atlas AI' : 'Consult Atlas AI Copilot'}</span>
           </button>
         )}
 
@@ -288,7 +319,7 @@ export default function UltraPersonCollectionSidebar({
             padding: '8px 12px',
             borderRadius: '8px',
             background: '#ffffff',
-            color: '#334155',
+            color: '#475569',
             border: '1px solid #cbd5e1',
             fontSize: '0.74rem',
             fontWeight: 650,

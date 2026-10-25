@@ -88,7 +88,7 @@ export default function LabelsHeader({
           </div>
           <div className="pls-brand-text">
             <span className="pls-brand-title">Compounding Label Studio</span>
-            <span className="pls-brand-subtitle">Pharmapolis • Atlas Health</span>
+            <span className="pls-brand-subtitle">Atlas Health Services • Compounding Studio</span>
           </div>
         </Link>
 

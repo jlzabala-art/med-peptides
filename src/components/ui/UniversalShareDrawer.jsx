@@ -359,7 +359,7 @@ Le damos la bienvenida a **Atlas Health Services**, su plataforma de formulació
 Ponemos a su disposición:
 • **Fórmulas Magistrales a Medida**: Preparadas según farmacopea europea y USP (cremas transdérmicas liposomales Pentravan®, cápsulas orales, trociscos sublinguales).
 • **Péptidos Bioactivos & BHRT**: Protocolos endocrinos y de longevidad celular clínicamente validados.
-• **Expedientes Nominales y Dispensación en Cadena de Frío**: Recetas digitales en 1 clic y entrega directa a sus pacientes.
+• **Expedientes Nominales y Dispensación Directa**: Recetas digitales en 1 clic y entrega directa a sus pacientes.
 
 🔑 **Su Enlace de Acceso 1-Tap al Portal Médico**:
 👉 ${effectiveUrl}

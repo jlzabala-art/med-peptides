@@ -10,6 +10,7 @@ import {
   Check,
   ExternalLink,
   ChevronRight,
+  ChevronDown,
   Calculator,
   Calendar,
   Layers,
@@ -43,6 +44,7 @@ export default function ColwayCollectionSidebar({
   const isEs = false; // Force English — Spanish translations preserved for future i18n
   const [copied, setCopied] = useState(false);
   const [calcDuration, setCalcDuration] = useState('3m'); // '1m' | '3m'
+  const [isPillarsOpen, setIsPillarsOpen] = useState(false);
   const [internalActiveProtocolId, setInternalActiveProtocolId] = useState(null);
   const activeProtocolId = externalActiveProtocolId !== null ? externalActiveProtocolId : internalActiveProtocolId;
 
@@ -188,63 +190,7 @@ export default function ColwayCollectionSidebar({
       gridColumn: '1',
       order: 1
     }}>
-      {/* ── 1. THE 3 SCIENTIFIC PILLARS (Section 1 in Sidebar) ── */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        padding: '1.15rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-            <Sparkles size={14} color="#0d9488" />
-            <h5 style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? 'Los 3 Pilares Científicos' : 'The 3 Scientific Pillars'}
-            </h5>
-          </div>
-          <span style={{ fontSize: '0.66rem', color: '#0d9488', fontWeight: 700, background: '#f0fdfa', border: '1px solid #a7f3d0', padding: '1px 6px', borderRadius: '4px' }}>
-            ISO 22716
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {/* Pillar 01 */}
-          <div style={{ padding: '8px 10px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0d9488', background: 'rgba(13, 148, 136, 0.1)', padding: '1px 5px', borderRadius: '4px' }}>01</span>
-              <strong style={{ fontSize: '0.76rem', color: '#0f172a' }}>{isEs ? 'Triple Hélice 3D Intacta' : 'Intact 3D Triple Helix'}</strong>
-            </div>
-            <p style={{ fontSize: '0.72rem', color: '#64748b', margin: 0, lineHeight: 1.35 }}>
-              {isEs ? 'Tropocolágeno nativo biológicamente activo con 100% de afinidad y bioasimilación celular.' : 'Bioactive native freshwater tropocollagen preserving 3D tertiary structure with 100% human cellular affinity.'}
-            </p>
-          </div>
-
-          {/* Pillar 02 */}
-          <div style={{ padding: '8px 10px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7', background: 'rgba(2, 132, 199, 0.1)', padding: '1px 5px', borderRadius: '4px' }}>02</span>
-              <strong style={{ fontSize: '0.76rem', color: '#0f172a' }}>{isEs ? 'Neocolagénesis a 110 Días' : '110-Day Neocollagenesis'}</strong>
-            </div>
-            <p style={{ fontSize: '0.72rem', color: '#64748b', margin: 0, lineHeight: 1.35 }}>
-              {isEs ? 'Estudio ITA-TEST #B-89146: estimula fibroblastos dérmicos para reactivar síntesis de colágeno (+90% firmeza).' : 'ITA-TEST Warsaw study #B-89146: triggers dermal fibroblasts for endogenous neocollagenesis (+90% confirmed firming).'}
-            </p>
-          </div>
-
-          {/* Pillar 03 */}
-          <div style={{ padding: '8px 10px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#7c3aed', background: 'rgba(124, 58, 237, 0.1)', padding: '1px 5px', borderRadius: '4px' }}>03</span>
-              <strong style={{ fontSize: '0.76rem', color: '#0f172a' }}>{isEs ? 'Liofilización Criogénica (-40°C)' : 'Sub-Zero Freeze-Drying (-40°C)'}</strong>
-            </div>
-            <p style={{ fontSize: '0.72rem', color: '#64748b', margin: 0, lineHeight: 1.35 }}>
-              {isEs ? 'Sublimación al vacío que preserva péptidos señal vivos en Colvita sin desnaturalización proteica.' : 'Cryogenic vacuum sublimation retaining living signal peptides in Colvita without denaturation, with Baltic Fucus & Vit E.'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* -- 2. CATEGORIAS & FORMULACIONES (Google Cloud Console Navigation Tree) -- */}
+      {/* ── 1. CATEGORIAS & FORMULACIONES (Google Cloud Console Navigation Tree) ── */}
       <div style={{
         background: '#ffffff',
         borderRadius: '14px',
@@ -329,8 +275,81 @@ export default function ColwayCollectionSidebar({
         </nav>
       </div>
 
+      {/* ── 2. THE 3 SCIENTIFIC PILLARS (Progressive Disclosure) ── */}
+      <div style={{
+        background: '#ffffff',
+        borderRadius: '14px',
+        border: '1px solid #e2e8f0',
+        padding: '1.15rem',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+      }}>
+        <div
+          onClick={() => setIsPillarsOpen(!isPillarsOpen)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            userSelect: 'none'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+            <Sparkles size={14} color="#0d9488" />
+            <h5 style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isEs ? 'Los 3 Pilares Científicos' : 'The 3 Scientific Pillars'}
+            </h5>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.66rem', color: '#0d9488', fontWeight: 700, background: '#f0fdfa', border: '1px solid #a7f3d0', padding: '1px 6px', borderRadius: '4px' }}>
+              ISO 22716
+            </span>
+            <ChevronDown size={14} style={{ color: '#64748b', transform: isPillarsOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+          </div>
+        </div>
 
-      {/* -- 4. ACREDITACION & REGISTROS INTERNACIONALES (EU, UAE & Qatar) -- */}
+        {isPillarsOpen ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '0.75rem' }}>
+            {/* Pillar 01 */}
+            <div style={{ padding: '8px 10px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0d9488', background: 'rgba(13, 148, 136, 0.1)', padding: '1px 5px', borderRadius: '4px' }}>01</span>
+                <strong style={{ fontSize: '0.76rem', color: '#0f172a' }}>{isEs ? 'Triple Hélice 3D Intacta' : 'Intact 3D Triple Helix'}</strong>
+              </div>
+              <p style={{ fontSize: '0.72rem', color: '#64748b', margin: 0, lineHeight: 1.35 }}>
+                {isEs ? 'Tropocolágeno nativo biológicamente activo con 100% de afinidad y bioasimilación celular.' : 'Bioactive native freshwater tropocollagen preserving 3D tertiary structure with 100% human cellular affinity.'}
+              </p>
+            </div>
+
+            {/* Pillar 02 */}
+            <div style={{ padding: '8px 10px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7', background: 'rgba(2, 132, 199, 0.1)', padding: '1px 5px', borderRadius: '4px' }}>02</span>
+                <strong style={{ fontSize: '0.76rem', color: '#0f172a' }}>{isEs ? 'Neocolagénesis a 110 Días' : '110-Day Neocollagenesis'}</strong>
+              </div>
+              <p style={{ fontSize: '0.72rem', color: '#64748b', margin: 0, lineHeight: 1.35 }}>
+                {isEs ? 'Estudio ITA-TEST #B-89146: estimula fibroblastos dérmicos para reactivar síntesis de colágeno (+90% firmeza).' : 'ITA-TEST Warsaw study #B-89146: triggers dermal fibroblasts for endogenous neocollagenesis (+90% confirmed firming).'}
+              </p>
+            </div>
+
+            {/* Pillar 03 */}
+            <div style={{ padding: '8px 10px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#7c3aed', background: 'rgba(124, 58, 237, 0.1)', padding: '1px 5px', borderRadius: '4px' }}>03</span>
+                <strong style={{ fontSize: '0.76rem', color: '#0f172a' }}>{isEs ? 'Liofilización Criogénica (-40°C)' : 'Sub-Zero Freeze-Drying (-40°C)'}</strong>
+              </div>
+              <p style={{ fontSize: '0.72rem', color: '#64748b', margin: 0, lineHeight: 1.35 }}>
+                {isEs ? 'Sublimación al vacío que preserva péptidos señal vivos en Colvita sin desnaturalización proteica.' : 'Cryogenic vacuum sublimation retaining living signal peptides in Colvita without denaturation, with Baltic Fucus & Vit E.'}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <p style={{ fontSize: '0.72rem', color: '#64748b', margin: '0.5rem 0 0', lineHeight: 1.35 }}>
+            {isEs ? 'Triple hélice activa, estudio ITA-TEST #B-89146 y liofilización criogénica a -40°C.' : '3D intact tropocollagen, 110-day neocollagenesis (ITA-TEST #B-89146), and freeze-dried signal peptides.'}
+          </p>
+        )}
+      </div>
+
+      {/* ── 3. ACREDITACION & REGISTROS INTERNACIONALES (EU, UAE & Qatar) ── */}
       <div style={{
         background: '#ffffff',
         borderRadius: '14px',

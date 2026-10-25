@@ -92,6 +92,7 @@ import { consolidateMultiPartPrescriptions } from '@/utils/prescriptionConsolida
 import { calculateTreatmentDates, calculateTreatmentDuration } from '@/utils/clinical/clinicalFormulations';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import '@/styles/publicDesignSystem.css';
 import DoctorAiMessageRenderer from '@/components/doctor/DoctorAiMessageRenderer';
 import PrescriptionProtocolAlignmentCard from '@/components/doctor/PrescriptionProtocolAlignmentCard';
 import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
@@ -9750,303 +9751,529 @@ export default function DoctorPublicPortalClient({
 
 
 
-      {/* ── Atlas AI Clinical Copilot Modal (Doctor-Personalized Practice Intelligence) ─────── */}
+      {/* ── Unified Atlas AI Clinical Copilot Slide-Over Drawer (Rule #23 Mobile-First & Consistent Side Drawer) ── */}
       {isAtlasAiOpen && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 70,
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(6px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px'
-          }}
+          className="atlas-bottom-sheet-overlay"
           onClick={() => setIsAtlasAiOpen(false)}
         >
           <div
-            style={{
-              width: '680px',
-              maxWidth: '100%',
-              maxHeight: '90vh',
-              display: 'flex',
-              flexDirection: 'column',
-              background: '#ffffff',
-              borderRadius: '16px',
-              boxShadow: '0 20px 40px rgba(15, 23, 42, 0.25)',
-              overflow: 'hidden',
-              border: '1px solid #e2e8f0'
-            }}
+            className="atlas-bottom-sheet-panel"
             onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '460px',
+            }}
           >
-            {/* Header */}
-            <div style={{
-              padding: '16px 20px',
-              background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Bot size={20} color="#ffffff" />
-                </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>
-                      Atlas AI — Clinical & Practice Copilot
-                    </h3>
-                    <span style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                      padding: '2px 8px',
-                      borderRadius: '9999px',
-                      background: aiUsesRemaining > 2 ? '#10b981' : aiUsesRemaining > 0 ? '#f59e0b' : '#ef4444',
-                      color: '#ffffff'
-                    }}>
-                      {aiUsesRemaining}/5 uses left
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.73rem', opacity: 0.94, marginTop: '2px' }}>
-                    Personalized for {isAuthorizedViewer ? doctor.name : `Practice ${opaqueCode}`} · <strong>{doctorPatientsList.length} Unique Patients</strong> ({soldPatientsCount} Sold · {unacceptedPatientsCount} Unaccepted) · <strong>{allPrescriptions.length} Prescriptions</strong>
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsAtlasAiOpen(false)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.15)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '30px',
-                  height: '30px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ffffff',
-                  cursor: 'pointer'
-                }}
-              >
-                <X size={16} />
-              </button>
-            </div>
+            {/* Mobile Drag Handle (Visible only on mobile devices <768px) */}
+            <div className="atlas-bottom-sheet-handle" />
 
-            {/* Privacy Guarantee Banner */}
-            <div style={{
-              padding: '8px 16px',
-              background: !isAuthorizedViewer ? '#eff6ff' : '#f8fafc',
-              borderBottom: '1px solid #e2e8f0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '0.72rem',
-              color: !isAuthorizedViewer ? '#1e40af' : '#475569'
-            }}>
-              <ShieldCheck size={14} color={!isAuthorizedViewer ? '#2563eb' : '#6366f1'} />
-              <span>
-                {!isAuthorizedViewer ? (
-                  <><strong>DHA & HIPAA Privacy Active:</strong> Physician and patient identities are de-identified (<code>{opaqueCode}</code>, <code>PT-XXXX</code>). Register or sign in to practice portal for nominal files.</>
-                ) : (
-                  <><strong>Isolated Practice Graph:</strong> Dedicated to {doctor.name} ({doctor.clinic || doctor.specialty || 'Clinical Practice'}). Full global practice context remains active regardless of table filters.</>
-                )}
-              </span>
-            </div>
-
-            {/* Message Area */}
-            <div style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '16px 20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-              background: '#fdfdfe',
-              maxHeight: '420px'
-            }}>
-              {/* Personalized Practice Briefing Welcome Card */}
-              <div style={{
-                alignSelf: 'flex-start',
-                width: '100%',
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '14px 16px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-              }}>
-                <div style={{ fontSize: '0.72rem', color: '#4f46e5', fontWeight: 700, marginBottom: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                    <Bot size={13} /> Atlas Clinical & Practice Intelligence — Live Briefing
+            {/* Header: Dark Navy Clinical Gradient */}
+            <div
+              style={{
+                background: 'linear-gradient(135deg, #00284d 0%, #001833 100%)',
+                color: '#ffffff',
+                padding: '16px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                borderBottom: '1px solid rgba(56, 189, 248, 0.25)',
+                flexShrink: 0
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sparkles size={18} color="#38bdf8" />
+                  <span style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.01em', color: '#ffffff' }}>
+                    Atlas AI
                   </span>
-                  <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
-                    {isAuthorizedViewer ? (
-                      `${doctor.specialty || 'Regenerative & Compounding Medicine'} ${doctor.clinic ? `· ${doctor.clinic}` : ''}`
-                    ) : (
-                      `Accredited Practice · ID: ${opaqueCode}`
-                    )}
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: '9999px',
+                    background: 'rgba(56, 189, 248, 0.15)',
+                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                    color: '#7dd3fc'
+                  }}>
+                    {lang === 'es' ? 'Copiloto Clínico' : 'Clinical Copilot'}
                   </span>
                 </div>
-
-                <div style={{ fontSize: '0.80rem', color: '#1e293b', lineHeight: 1.5 }}>
-                  Welcome{isAuthorizedViewer ? <>, <strong>{doctor.name}</strong></> : <> to <strong>Practice {opaqueCode}</strong></>}. I am synchronized with your complete practice graph (independent of any active table filter):
-                </div>
-
-                {/* 4-Box Real-Data Practice Snapshot */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
-                  gap: '8px',
-                  marginTop: '10px',
-                  marginBottom: '12px'
-                }}>
-                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px' }}>
-                    <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Unique Patients</div>
-                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>{doctorPatientsList.length}</div>
-                    <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
-                      <strong style={{ color: '#15803d' }}>{soldPatientsCount}</strong> Sold · <strong style={{ color: '#b45309' }}>{unacceptedPatientsCount}</strong> Unaccepted
-                    </div>
-                  </div>
-
-                  <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '8px 10px' }}>
-                    <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#15803d', textTransform: 'uppercase' }}>Sold & Invoiced</div>
-                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#15803d' }}>{quickCounts.active} Rx</div>
-                    <div style={{ fontSize: '0.65rem', color: '#166534' }}>
-                      Confirmed & dispensed orders
-                    </div>
-                  </div>
-
-                  <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '8px 10px' }}>
-                    <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#b45309', textTransform: 'uppercase' }}>Unaccepted Offers</div>
-                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#b45309' }}>{quickCounts.proposals} Rx</div>
-                    <div style={{ fontSize: '0.65rem', color: '#92400e' }}>
-                      Ready for 1-click conversion
-                    </div>
-                  </div>
-
-                  <div style={{ background: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: '8px', padding: '8px 10px' }}>
-                    <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#4338ca', textTransform: 'uppercase' }}>
-                      {doctorTopApis.length > 0 ? 'Your Top APIs' : 'Specialty Blueprints'}
-                    </div>
-                    <div style={{ fontSize: '0.73rem', fontWeight: 700, color: '#312e81', marginTop: '2px', lineHeight: 1.3 }}>
-                      {doctorTopApis.length > 0
-                        ? doctorTopApis.slice(0, 3).map((a) => `${a.name} (${a.count})`).join(', ')
-                        : `${doctorSpecialtyIntel.primaryBlueprints.length} ${doctorSpecialtyIntel.primaryMeta?.shortLabel || 'Specialty'} Protocols`}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Clear Explanation of What Atlas AI Does for This Doctor */}
-                <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  padding: '9px 12px',
-                  fontSize: '0.74rem',
-                  color: '#334155',
-                  lineHeight: 1.5
-                }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
-                    How I can assist your practice right now ({aiUsesRemaining} session credits):
-                  </div>
-                  <div>• <strong>Specialty Practice Blueprints ({doctorSpecialtyIntel.primaryMeta?.shortLabel || doctor.specialty}):</strong> Recommend ready-to-prescribe compounding formulas, peptides, native collagen, and diagnostics matched to your clinical procedures ({(doctorSpecialtyIntel.webPracticeProfile?.detectedProcedures || []).slice(0, 3).join(', ') || 'clinical specialty'}).</div>
-                  <div>• <strong>Patient & Rx Lookup:</strong> {!isAuthorizedViewer ? 'Ask about any patient by Rx code to inspect active compounding formulas and clinical posology.' : 'Ask about any patient by name or Rx code to inspect their exact formula, invoice status, and phone.'}</div>
-                  <div>• <strong>Commercial Conversion & Renewals:</strong> Identify your <strong>{quickCounts.proposals} Unaccepted Offers</strong> ({unacceptedPatientsCount} patients) and <strong>{soldPatientsCount} Sold Customers</strong> due for 30/90-day refills.</div>
+                <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px', fontWeight: 500 }}>
+                  {isAuthorizedViewer
+                    ? `${doctor.name} · ${doctor.clinic || 'Practice Intelligence'}`
+                    : (lang === 'es' ? 'Inteligencia de Consulta y Pacientes' : 'Practice & Patient Intelligence')}
                 </div>
               </div>
 
-              {/* Chat Thread */}
-              {aiMessages.map((msg, idx) => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div
-                  key={idx}
                   style={{
-                    alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                    maxWidth: '90%',
-                    background: msg.role === 'user' ? '#4f46e5' : '#ffffff',
-                    color: msg.role === 'user' ? '#ffffff' : '#1e293b',
-                    border: msg.role === 'user' ? 'none' : '1px solid #e2e8f0',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    height: '24px',
+                    padding: '0 8px',
                     borderRadius: '12px',
-                    padding: '12px 14px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                    backgroundColor: aiUsesRemaining > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.2)',
+                    border: `1px solid ${aiUsesRemaining > 0 ? 'rgba(52, 211, 153, 0.35)' : 'rgba(248, 113, 113, 0.4)'}`,
+                    color: aiUsesRemaining > 0 ? '#6ee7b7' : '#fca5a5',
+                    fontSize: '0.70rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.02em',
+                    whiteSpace: 'nowrap'
                   }}
                 >
-                  <div style={{
-                    fontSize: '0.68rem',
-                    color: msg.role === 'user' ? '#e0e7ff' : '#6366f1',
-                    fontWeight: 700,
-                    marginBottom: '4px'
-                  }}>
-                    {msg.role === 'user' ? 'You' : `Atlas Copilot · ${isAuthorizedViewer ? doctor.name : opaqueCode}`} · {msg.time}
-                  </div>
-                  {msg.role === 'user' ? (
-                    <div style={{
-                      fontSize: '0.80rem',
-                      lineHeight: 1.55,
-                      whiteSpace: 'pre-line'
-                    }}>
-                      {msg.content}
-                    </div>
-                  ) : (
-                    <DoctorAiMessageRenderer
-                      content={msg.content}
-                      onExecuteAction={handleExecuteAiAction}
-                    />
-                  )}
-                  {msg.role === 'assistant' && Array.isArray(msg.actions) && msg.actions.length > 0 && (
-                    <div style={{
-                      marginTop: '10px',
-                      paddingTop: '8px',
-                      borderTop: '1px solid #f1f5f9',
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '6px'
-                    }}>
-                      {msg.actions.map((act, aIdx) => (
-                        <button
-                          key={aIdx}
-                          type="button"
-                          onClick={() => handleExecuteAiAction(act)}
-                          style={{
-                            padding: '5px 10px',
-                            borderRadius: '6px',
-                            border: '1px solid #c7d2fe',
-                            background: '#eef2ff',
-                            color: '#4338ca',
-                            fontSize: '0.72rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                          <span>{act.label}</span>
-                          <ArrowUpRight size={12} />
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: aiUsesRemaining > 0 ? '#10b981' : '#ef4444',
+                      boxShadow: aiUsesRemaining > 0 ? '0 0 6px #10b981' : '0 0 6px #ef4444'
+                    }}
+                  />
+                  <span>{aiUsesRemaining > 0 ? `${aiUsesRemaining}/5` : '0/5'}</span>
                 </div>
-              ))}
+
+                <button
+                  type="button"
+                  onClick={() => setIsAtlasAiOpen(false)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    transition: 'background 0.15s ease'
+                  }}
+                  title={lang === 'es' ? 'Cerrar' : 'Close'}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Context Anchor Pill Banner (Minimal, Non-Intrusive) */}
+            <div style={{
+              padding: '8px 16px',
+              backgroundColor: '#f8fafc',
+              borderBottom: '1px solid #e2e8f0',
+              fontSize: '0.74rem',
+              color: '#475569',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '8px',
+              flexShrink: 0
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ShieldCheck size={14} color="#16a34a" />
+                <span>
+                  {isAuthorizedViewer
+                    ? (lang === 'es' ? `Contexto activo: ${doctorPatientsList.length} pacientes · ${doctor.clinic || 'Consulta médica'}` : `Active context: ${doctorPatientsList.length} patients · ${doctor.clinic || 'Practice'}`)
+                    : (lang === 'es' ? `Contexto clínico verificado · DHA / HIPAA` : `Verified Clinical Context · DHA / HIPAA`)}
+                </span>
+              </div>
+              {aiMessages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setAiMessages([])}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#64748b',
+                    fontSize: '0.70rem',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  {lang === 'es' ? 'Reiniciar' : 'Clear'}
+                </button>
+              )}
+            </div>
+
+            {/* Scrollable Chat / Action Cards Area */}
+            <div
+              style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                backgroundColor: '#ffffff'
+              }}
+            >
+              {aiMessages.length === 0 ? (
+                /* ── Zero-Clutter Clean Initial Screen ── */
+                <div style={{ padding: '8px 4px 16px' }}>
+                  {/* Doctor Friendly Greeting */}
+                  <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+                    <div style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '12px',
+                      backgroundColor: '#eff6ff',
+                      color: '#0284c7',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '12px',
+                      border: '1px solid #bae6fd'
+                    }}>
+                      <Bot size={22} color="#0284c7" />
+                    </div>
+                    <h3 style={{
+                      margin: '0 0 6px 0',
+                      fontSize: '1.05rem',
+                      fontWeight: 800,
+                      color: '#0f172a',
+                      letterSpacing: '-0.01em'
+                    }}>
+                      {isAuthorizedViewer
+                        ? (lang === 'es' ? `Hola, Dr. ${doctor.name} 👋` : `Hello, Dr. ${doctor.name} 👋`)
+                        : (lang === 'es' ? 'Asistente Clínico Atlas AI 👋' : 'Atlas AI Clinical Assistant 👋')}
+                    </h3>
+                    <p style={{
+                      margin: 0,
+                      fontSize: '0.80rem',
+                      color: '#64748b',
+                      lineHeight: 1.45
+                    }}>
+                      {lang === 'es'
+                        ? '¿En qué puedo ayudarte hoy con tus pacientes, formulaciones magistrales o renovaciones?'
+                        : 'How can I assist you today with your patients, compounding regimens, or renewals?'}
+                    </p>
+                  </div>
+
+                  {/* 4 Clean Clinical Action Cards */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{
+                      fontSize: '0.70rem',
+                      fontWeight: 800,
+                      color: '#94a3b8',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      marginBottom: '2px'
+                    }}>
+                      {lang === 'es' ? 'Acciones Clínicas Rápidas:' : 'Suggested Clinical Actions:'}
+                    </div>
+
+                    {/* Card 1: Formular Prescripción */}
+                    <button
+                      type="button"
+                      onClick={() => handleSendAtlasAiQuery(
+                        lang === 'es'
+                          ? `¿Cómo formular una prescripción o posología para mi especialidad (${doctorSpecialtyIntel.primaryMeta?.shortLabel || doctor.specialty || 'medicina regenerativa'})?`
+                          : `How can I structure a compounding prescription or posology for my specialty (${doctorSpecialtyIntel.primaryMeta?.shortLabel || doctor.specialty || 'regenerative medicine'})?`
+                      )}
+                      disabled={aiLoading || aiUsesRemaining <= 0}
+                      style={{
+                        padding: '12px 14px',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px',
+                        textAlign: 'left',
+                        cursor: aiUsesRemaining <= 0 ? 'default' : 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#f0f9ff';
+                        e.currentTarget.style.borderColor = '#bae6fd';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#f8fafc';
+                        e.currentTarget.style.borderColor = '#e2e8f0';
+                      }}
+                    >
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        backgroundColor: '#e0f2fe',
+                        color: '#0284c7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <Pill size={16} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#00284d', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span>{lang === 'es' ? 'Formular Prescripción' : 'Formulate Prescription'}</span>
+                          <ArrowUpRight size={14} color="#0284c7" />
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', lineHeight: 1.35 }}>
+                          {lang === 'es'
+                            ? 'Asistencia para principios activos, vehículos TrichoSol y dosificación.'
+                            : 'Assistance structuring compounding formulas, TrichoSol vehicle, and dosing.'}
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Card 2: Consultar Pacientes */}
+                    <button
+                      type="button"
+                      onClick={() => handleSendAtlasAiQuery(
+                        lang === 'es'
+                          ? `Muéstrame un resumen clínico de los tratamientos activos y posologías de mis pacientes.`
+                          : `Provide a clinical overview of active formulas and posologies across my patients.`
+                      )}
+                      disabled={aiLoading || aiUsesRemaining <= 0}
+                      style={{
+                        padding: '12px 14px',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px',
+                        textAlign: 'left',
+                        cursor: aiUsesRemaining <= 0 ? 'default' : 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#f0fdf4';
+                        e.currentTarget.style.borderColor = '#bbf7d0';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#f8fafc';
+                        e.currentTarget.style.borderColor = '#e2e8f0';
+                      }}
+                    >
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        backgroundColor: '#dcfce7',
+                        color: '#16a34a',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <Users size={16} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#00284d', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span>{lang === 'es' ? 'Consultar Pacientes' : 'Lookup Patients & Dossiers'}</span>
+                          <ArrowUpRight size={14} color="#16a34a" />
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', lineHeight: 1.35 }}>
+                          {lang === 'es'
+                            ? `Ver fórmulas activas de tus ${doctorPatientsList.length} pacientes y posología.`
+                            : `Review active regimens and posology across your ${doctorPatientsList.length} patients.`}
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Card 3: Posología & Sinergias */}
+                    <button
+                      type="button"
+                      onClick={() => handleSendAtlasAiQuery(
+                        lang === 'es'
+                          ? `¿Cuáles son las sinergias recomendadas, vehículos y concentraciones de principios activos más eficaces?`
+                          : `What are the recommended synergies, vehicles, and active concentrations for clinical compounding?`
+                      )}
+                      disabled={aiLoading || aiUsesRemaining <= 0}
+                      style={{
+                        padding: '12px 14px',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px',
+                        textAlign: 'left',
+                        cursor: aiUsesRemaining <= 0 ? 'default' : 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#faf5ff';
+                        e.currentTarget.style.borderColor = '#e9d5ff';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#f8fafc';
+                        e.currentTarget.style.borderColor = '#e2e8f0';
+                      }}
+                    >
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        backgroundColor: '#f3e8ff',
+                        color: '#9333ea',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <FlaskConical size={16} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#00284d', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span>{lang === 'es' ? 'Posología & Sinergias' : 'Posology & Synergies'}</span>
+                          <ArrowUpRight size={14} color="#9333ea" />
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', lineHeight: 1.35 }}>
+                          {lang === 'es'
+                            ? 'Dudas sobre Dutasteride, Latanoprost, péptidos y compatibilidad.'
+                            : 'Dosage guidelines, Dutasteride, Latanoprost, and peptide synergies.'}
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Card 4: Pacientes para Renovación */}
+                    <button
+                      type="button"
+                      onClick={() => handleSendAtlasAiQuery(
+                        lang === 'es'
+                          ? `¿Qué pacientes tienen prescripciones próximas a renovación o refill a 30/90 días?`
+                          : `Which patients are approaching 30 or 90-day refill milestones for renewal?`
+                      )}
+                      disabled={aiLoading || aiUsesRemaining <= 0}
+                      style={{
+                        padding: '12px 14px',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px',
+                        textAlign: 'left',
+                        cursor: aiUsesRemaining <= 0 ? 'default' : 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#fffbeb';
+                        e.currentTarget.style.borderColor = '#fde68a';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#f8fafc';
+                        e.currentTarget.style.borderColor = '#e2e8f0';
+                      }}
+                    >
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        backgroundColor: '#fef3c7',
+                        color: '#d97706',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <RotateCw size={16} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#00284d', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span>{lang === 'es' ? 'Pacientes para Renovación' : 'Renewal Candidates'}</span>
+                          <ArrowUpRight size={14} color="#d97706" />
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', lineHeight: 1.35 }}>
+                          {lang === 'es'
+                            ? `Identificar pacientes listos para refill o nuevo ciclo (${soldPatientsCount} vendidos).`
+                            : `Identify candidates ready for 30/90-day refills (${soldPatientsCount} active).`}
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Chat Messages */
+                aiMessages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                      maxWidth: '85%',
+                      background: msg.role === 'user'
+                        ? 'linear-gradient(135deg, #003666 0%, #002244 100%)'
+                        : '#ffffff',
+                      color: msg.role === 'user' ? '#ffffff' : '#1e293b',
+                      border: msg.role === 'user' ? 'none' : '1px solid #e2e8f0',
+                      borderRadius: msg.role === 'user' ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
+                      padding: '12px 14px',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '0.68rem',
+                      color: msg.role === 'user' ? '#7dd3fc' : '#0284c7',
+                      fontWeight: 700,
+                      marginBottom: '4px'
+                    }}>
+                      {msg.role === 'user' ? (lang === 'es' ? 'Tú' : 'You') : 'Atlas AI'} · {msg.time}
+                    </div>
+                    {msg.role === 'user' ? (
+                      <div style={{
+                        fontSize: '0.84rem',
+                        lineHeight: 1.5,
+                        whiteSpace: 'pre-line'
+                      }}>
+                        {msg.content}
+                      </div>
+                    ) : (
+                      <DoctorAiMessageRenderer
+                        content={msg.content}
+                        onExecuteAction={handleExecuteAiAction}
+                      />
+                    )}
+                    {msg.role === 'assistant' && Array.isArray(msg.actions) && msg.actions.length > 0 && (
+                      <div style={{
+                        marginTop: '10px',
+                        paddingTop: '8px',
+                        borderTop: '1px solid #f1f5f9',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '6px'
+                      }}>
+                        {msg.actions.map((act, aIdx) => (
+                          <button
+                            key={aIdx}
+                            type="button"
+                            onClick={() => handleExecuteAiAction(act)}
+                            style={{
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #bae6fd',
+                              background: '#f0f9ff',
+                              color: '#0284c7',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <span>{act.label}</span>
+                            <ArrowUpRight size={12} />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
 
               {aiLoading && (
                 <div style={{
                   alignSelf: 'flex-start',
                   padding: '10px 14px',
-                  background: '#f1f5f9',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
                   borderRadius: '12px',
                   display: 'flex',
                   alignItems: 'center',
@@ -10054,8 +10281,8 @@ export default function DoctorPublicPortalClient({
                   fontSize: '0.78rem',
                   color: '#475569'
                 }}>
-                  <Loader2 size={14} className="animate-spin" />
-                  <span>Analyzing {isAuthorizedViewer ? `${doctor.name}'s` : 'practice'} {doctorPatientsList.length} patients & {allPrescriptions.length} prescriptions...</span>
+                  <Loader2 size={14} className="animate-spin" color="#0284c7" />
+                  <span>{lang === 'es' ? 'Analizando tu consulta clínica...' : 'Analyzing clinical practice data...'}</span>
                 </div>
               )}
 
@@ -10072,9 +10299,9 @@ export default function DoctorPublicPortalClient({
                   gap: '8px'
                 }}>
                   <div>
-                    <strong>Session Quota Reached (5/5):</strong> You have utilized all 5 clinical intelligence queries allocated to this session.
+                    <strong>{lang === 'es' ? 'Límite de Sesión Alcanzado (5/5):' : 'Session Quota Reached (5/5):'}</strong> {lang === 'es' ? 'Has utilizado las 5 consultas de demostración clínica asignadas a esta sesión.' : 'You have utilized all 5 clinical queries allocated to this session.'}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div>
                     <button
                       type="button"
                       onClick={() => handleContactAtlasWhatsApp('Atlas AI Quota Extended Consultation')}
@@ -10100,30 +10327,23 @@ export default function DoctorPublicPortalClient({
               )}
             </div>
 
-            {/* Personalized Quick Suggestion Chips */}
-            {aiUsesRemaining > 0 && (
+            {/* Quick Suggestion Chips (when chat has messages) */}
+            {aiMessages.length > 0 && aiUsesRemaining > 0 && (
               <div style={{
-                padding: '10px 16px',
+                padding: '8px 14px',
                 background: '#f8fafc',
                 borderTop: '1px solid #f1f5f9',
                 display: 'flex',
-                gap: '8px',
-                overflowX: 'auto'
+                gap: '6px',
+                overflowX: 'auto',
+                flexShrink: 0
               }}>
-                {(allPrescriptions.length === 0
-                  ? [
-                      `🧬 Specialty Blueprints for ${doctorSpecialtyIntel.primaryMeta?.shortLabel || 'My Practice'}`,
-                      `⚡ Ready-to-prescribe compounding formulas`,
-                      `🔬 Peptide & Native Collagen synergies`,
-                      `🩸 Pre-protocol Bloodo diagnostic panels`
-                    ]
-                  : [
-                      `🧬 Specialty Blueprints for ${doctorSpecialtyIntel.primaryMeta?.shortLabel || 'My Practice'}`,
-                      `🟢 My ${quickCounts.active} Sold & Invoiced orders`,
-                      `⏳ Convert ${quickCounts.proposals} Unaccepted Offers`,
-                      `🔄 Patients due for renewal`
-                    ]
-                ).map((chip, cIdx) => (
+                {[
+                  lang === 'es' ? '💊 Nueva prescripción' : '💊 New prescription',
+                  lang === 'es' ? '👥 Mis pacientes' : '👥 My patients',
+                  lang === 'es' ? '🔄 Renovaciones' : '🔄 Due for renewal',
+                  lang === 'es' ? '🔬 Sinergias' : '🔬 Synergies'
+                ].map((chip, cIdx) => (
                   <button
                     key={cIdx}
                     type="button"
@@ -10131,7 +10351,7 @@ export default function DoctorPublicPortalClient({
                     disabled={aiLoading}
                     style={{
                       whiteSpace: 'nowrap',
-                      padding: '5px 10px',
+                      padding: '4px 10px',
                       borderRadius: '9999px',
                       border: '1px solid #cbd5e1',
                       background: '#ffffff',
@@ -10147,18 +10367,21 @@ export default function DoctorPublicPortalClient({
               </div>
             )}
 
-            {/* Input Bar */}
+            {/* Input Bar Fixed Bottom */}
             <div style={{
               padding: '12px 16px',
               borderTop: '1px solid #e2e8f0',
               background: '#ffffff',
               display: 'flex',
               gap: '8px',
-              alignItems: 'center'
+              alignItems: 'center',
+              flexShrink: 0
             }}>
               <input
                 type="text"
-                placeholder={aiUsesRemaining > 0 ? `Ask about any of your ${doctorPatientsList.length} patients, ${allPrescriptions.length} prescriptions, renewals, or APIs...` : "Session limit reached. Contact Atlas Support on WhatsApp."}
+                placeholder={aiUsesRemaining > 0
+                  ? (lang === 'es' ? 'Pregunta sobre pacientes, fórmulas o protocolos...' : 'Ask about patients, formulas, or protocols...')
+                  : (lang === 'es' ? 'Límite de sesión alcanzado' : 'Session limit reached')}
                 value={aiInput}
                 onChange={(e) => setAiInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -10170,9 +10393,9 @@ export default function DoctorPublicPortalClient({
                 disabled={aiLoading || aiUsesRemaining <= 0}
                 style={{
                   flex: 1,
-                  height: '40px',
+                  height: '42px',
                   padding: '0 14px',
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   border: '1px solid #cbd5e1',
                   fontSize: '0.82rem',
                   outline: 'none',
@@ -10184,11 +10407,11 @@ export default function DoctorPublicPortalClient({
                 onClick={() => handleSendAtlasAiQuery()}
                 disabled={!aiInput.trim() || aiLoading || aiUsesRemaining <= 0}
                 style={{
-                  height: '40px',
-                  padding: '0 18px',
-                  borderRadius: '8px',
+                  height: '42px',
+                  padding: '0 16px',
+                  borderRadius: '10px',
                   border: 'none',
-                  background: !aiInput.trim() || aiLoading || aiUsesRemaining <= 0 ? '#cbd5e1' : '#4f46e5',
+                  background: !aiInput.trim() || aiLoading || aiUsesRemaining <= 0 ? '#cbd5e1' : '#003666',
                   color: '#ffffff',
                   fontSize: '0.80rem',
                   fontWeight: 600,
@@ -10199,7 +10422,7 @@ export default function DoctorPublicPortalClient({
                 }}
               >
                 <Send size={14} />
-                <span>Ask</span>
+                <span>{lang === 'es' ? 'Enviar' : 'Send'}</span>
               </button>
             </div>
           </div>

@@ -73,12 +73,19 @@ module.exports = (gmailUser, gmailAppPass) => onDocumentCreated(
       );
     });
 
+    const { sanitizeTestEmail } = require("../lib/safetyEmailGuard");
+
     const customerEmail = orderData.customer?.email;
     if (customerEmail && isDeliverableEmail(customerEmail)) {
       const { subject: clientSubject, html: clientHtml } = buildClientConfirmationEmail(orderData);
-      sendPromises.push(
-        transporter.sendMail({ from: fromAddress, to: customerEmail, subject: clientSubject, html: clientHtml })
-      );
+      const safeMail = sanitizeTestEmail({
+        from: fromAddress,
+        to: customerEmail,
+        subject: clientSubject,
+        html: clientHtml
+      }, 'customer/wholesaler/patient');
+
+      sendPromises.push(transporter.sendMail(safeMail));
     }
 
     await Promise.all(sendPromises);

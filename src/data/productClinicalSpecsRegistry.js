@@ -100,6 +100,30 @@ const DIAGNOSTIC_SPECS_DB = {
 
 // ── UltraPerson Standardized Actives DB ──
 const ULTRAPERSON_ACTIVES_DB = {
+  'ultraperson-cognitive-clarity-focus': {
+    title: 'Nootropic Bacopa, L-Theanine & Pine Bark Clarity Matrix',
+    actives: [
+      { name: 'Bacopa Monnieri Extract (55% Bacosides A/B)', amount: '320 mg', role: 'Enhances synaptic transmission & visual information processing' },
+      { name: 'L-Theanine (Suntheanine® ≥98%)', amount: '150 mg', role: 'Modulates glutamate receptors; promotes calm focus (alpha waves)' },
+      { name: 'Maritime Pine Bark Extract (Pycnogenol® 95% OPC)', amount: '30 mg', role: 'Microvascular cerebral perfusion & endothelial nitric oxide support' },
+      { name: 'Citicoline Sodium (Cognizin®)', amount: '100 mg', role: 'Precursor to acetylcholine & phosphatidylcholine neuronal membranes' }
+    ],
+    capsuleSpecs: 'Delayed-Release Acid-Resistant Vegan HPMC (Size 00) · 100% Plant-Derived',
+    purity: 'Non-GMO · 0% Allergens · Titanium Dioxide Free · Tested for Heavy Metals (< 0.01 ppm)',
+    synergy: 'Formulated for clinical synergy with Semax and Selank nootropic protocols'
+  },
+  'ultraperson-cognitive-clarity': {
+    title: 'Nootropic Bacopa, L-Theanine & Pine Bark Clarity Matrix',
+    actives: [
+      { name: 'Bacopa Monnieri Extract (55% Bacosides A/B)', amount: '320 mg', role: 'Enhances synaptic transmission & visual information processing' },
+      { name: 'L-Theanine (Suntheanine® ≥98%)', amount: '150 mg', role: 'Modulates glutamate receptors; promotes calm focus (alpha waves)' },
+      { name: 'Maritime Pine Bark Extract (Pycnogenol® 95% OPC)', amount: '30 mg', role: 'Microvascular cerebral perfusion & endothelial nitric oxide support' },
+      { name: 'Citicoline Sodium (Cognizin®)', amount: '100 mg', role: 'Precursor to acetylcholine & phosphatidylcholine neuronal membranes' }
+    ],
+    capsuleSpecs: 'Delayed-Release Acid-Resistant Vegan HPMC (Size 00) · 100% Plant-Derived',
+    purity: 'Non-GMO · 0% Allergens · Titanium Dioxide Free · Tested for Heavy Metals (< 0.01 ppm)',
+    synergy: 'Formulated for clinical synergy with Semax and Selank nootropic protocols'
+  },
   'ultraperson-energy-metabolic-vitality': {
     title: 'Mitochondrial CoQ10 & PQQ Vitality Complex',
     actives: [
@@ -203,7 +227,7 @@ export function getProductTechnicalDetails(product, brandSlug) {
 
     return {
       type: 'nutraceutical',
-      badge: 'PharmaPolis Precision Actives per Dose',
+      badge: 'Atlas Precision Actives per Dose',
       title: suppData?.title || 'Standardized Active Clinical Compounds',
       actives: suppData?.actives || [
         { name: 'Standardized Bioactive Extract', amount: 'Clinical Dose', role: 'Targeted physiological modulation' }
@@ -212,7 +236,7 @@ export function getProductTechnicalDetails(product, brandSlug) {
       purity: suppData?.purity || '0% Allergens · Non-GMO · Titanium Dioxide Free · Tested < 0.01 ppm Heavy Metals',
       synergy: suppData?.synergy || 'Formulated for synergy with targeted peptide protocols',
       compliance: 'Manufactured under European GMP / cGMP Standards',
-      manufacturer: 'PharmaPolis Compounding Labs (European Union)'
+      manufacturer: 'Atlas Clinical Compounding Network (European Union)'
     };
   }
 

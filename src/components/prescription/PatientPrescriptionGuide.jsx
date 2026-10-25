@@ -47,7 +47,8 @@ export default function PatientPrescriptionGuide({
   rxId = '',
   patientPublicUrl = '',
   rx = {},
-  onOpenDoctorContact = null
+  onOpenDoctorContact = null,
+  onOpenQuotation = null
 }) {
   // Adherence tracking in local storage
   const todayKey = useMemo(() => {
@@ -94,14 +95,6 @@ export default function PatientPrescriptionGuide({
   };
 
   // WhatsApp clinical inquiry URL
-  const clinicalInquiryUrl = useMemo(() => {
-    const cleanPhone = String(doctorPhone || '+97143498800').replace(/[^0-9]/g, '');
-    const msg = isEs
-      ? `Estimado equipo médico de ${doctorClinic || 'la clínica'},\nSoy ${patientName || 'Paciente'}. Me comunico en relación a mi prescripción #${rxId}.\nTengo una consulta sobre la posología o forma de administración:\n\n[Escriba su consulta aquí]\n\n🔗 Enlace de mi receta: ${patientPublicUrl}`
-      : `Dear ${doctorClinic || 'clinical'} team,\nI am ${patientName || 'Patient'}. I am contacting you regarding my prescription #${rxId}.\nI have a question about my dosage or administration protocol:\n\n[Type your question here]\n\n🔗 My prescription: ${patientPublicUrl}`;
-    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-  }, [doctorPhone, doctorClinic, patientName, rxId, isEs, patientPublicUrl]);
-
   // Classification & Categorization helper for each formulation
   const categorizedItems = useMemo(() => {
     return (compoundedFormulations || []).map((formulation, idx) => {
@@ -277,9 +270,7 @@ export default function PatientPrescriptionGuide({
         onSyncCalendar={() => setShowCalendarModal(true)}
         onOpenDoctorContact={() => {
           if (onOpenDoctorContact) {
-            onOpenDoctorContact();
-          } else if (clinicalInquiryUrl) {
-            window.open(clinicalInquiryUrl, '_blank', 'noopener,noreferrer');
+            onOpenDoctorContact('posology');
           }
         }}
         isEs={isEs}
@@ -745,11 +736,15 @@ export default function PatientPrescriptionGuide({
           gap: '12px'
         }}
       >
-        {/* WhatsApp Clinical Inquiry */}
-        <a
-          href={clinicalInquiryUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* Direct Physician Clinical Desk */}
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic('selection');
+            if (onOpenDoctorContact) {
+              onOpenDoctorContact('posology');
+            }
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -758,12 +753,13 @@ export default function PatientPrescriptionGuide({
             background: '#ffffff',
             border: '1px solid #cbd5e1',
             borderRadius: '8px',
-            textDecoration: 'none',
             color: '#202124',
+            cursor: 'pointer',
+            textAlign: 'left',
             transition: 'all 0.15s ease',
             boxShadow: '0 1px 3px rgba(60,64,67,0.05)'
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#25D366'; e.currentTarget.style.backgroundColor = '#f0fdf4'; }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#137333'; e.currentTarget.style.backgroundColor = '#f0fdf4'; }}
           onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.backgroundColor = '#ffffff'; }}
         >
           <div
@@ -771,8 +767,8 @@ export default function PatientPrescriptionGuide({
               width: 36,
               height: 36,
               borderRadius: '8px',
-              background: '#25D366',
-              color: '#ffffff',
+              background: '#e6f4ea',
+              color: '#137333',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -782,24 +778,24 @@ export default function PatientPrescriptionGuide({
             <MessageCircle size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#166534' }}>
-              {isEs ? 'Consultar Duda al Médico' : 'Ask Doctor via WhatsApp'}
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#137333' }}>
+              {isEs ? 'Mesa Clínica del Médico' : 'Direct Doctor Clinical Desk'}
             </div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368' }}>
-              {isEs ? 'Aclarar pauta o reportar tolerancia' : 'Clarify dosage or tolerance'}
+              {isEs ? 'Aclarar pauta, horarios o tolerancia' : 'Clarify dosage, schedule or tolerance'}
             </div>
           </div>
-        </a>
+        </button>
 
-        {/* Request Refill */}
-        <a
-          href={`https://wa.me/${String(doctorPhone || '+97143498800').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-            isEs
-              ? `Estimado equipo de ${doctorClinic || 'la clínica'},\nSoy ${patientName}. Mi prescripción #${rxId} está por terminar y deseo solicitar la renovación / refill de mi tratamiento.`
-              : `Dear ${doctorClinic || 'clinical'} team,\nI am ${patientName}. My prescription #${rxId} is completing its cycle and I would like to request a refill.`
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* In-App Direct Prescription Cycle Refill */}
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic('selection');
+            if (onOpenDoctorContact) {
+              onOpenDoctorContact('refill');
+            }
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -808,8 +804,9 @@ export default function PatientPrescriptionGuide({
             background: '#ffffff',
             border: '1px solid #cbd5e1',
             borderRadius: '8px',
-            textDecoration: 'none',
             color: '#202124',
+            cursor: 'pointer',
+            textAlign: 'left',
             transition: 'all 0.15s ease',
             boxShadow: '0 1px 3px rgba(60,64,67,0.05)'
           }}
@@ -829,17 +826,17 @@ export default function PatientPrescriptionGuide({
               flexShrink: 0
             }}
           >
-            <RotateCcw size={20} />
+            <RotateCcw size={18} />
           </div>
           <div>
             <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1a73e8' }}>
-              {isEs ? 'Solicitar Refill / Renovación' : 'Request Refill / Renewal'}
+              {isEs ? 'Solicitar Refill / Continuación' : 'Clinical Refill Request'}
             </div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368' }}>
-              {isEs ? 'Pedir nuevo ciclo de tratamiento' : 'Order next treatment supply'}
+              {isEs ? 'Renovar pauta para el siguiente ciclo' : 'Order continuation supply'}
             </div>
           </div>
-        </a>
+        </button>
 
         {/* Doctor Phone Direct Call */}
         {doctorPhone && (
@@ -969,9 +966,7 @@ export default function PatientPrescriptionGuide({
               onClick={() => {
                 triggerHaptic('selection');
                 if (onOpenDoctorContact) {
-                  onOpenDoctorContact();
-                } else if (clinicalInquiryUrl) {
-                  window.open(clinicalInquiryUrl, '_blank', 'noopener,noreferrer');
+                  onOpenDoctorContact('posology');
                 }
               }}
               style={{
@@ -1065,31 +1060,31 @@ export default function PatientPrescriptionGuide({
             <span>🔗 {isEs ? 'Copiar Enlace' : 'Copy Link'}</span>
           </button>
 
-          <a
-            href={`https://wa.me/?text=${encodeURIComponent(
-              isEs
-                ? `Hola Doctor, le comparto mi prescripción médica #${rxId}: ${patientPublicUrl}`
-                : `Hello Doctor, here is my medical prescription #${rxId}: ${patientPublicUrl}`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              if (onOpenDoctorContact) {
+                onOpenDoctorContact('general');
+              }
+            }}
             style={{
               height: '34px',
               padding: '0 14px',
               borderRadius: '6px',
               border: 'none',
-              background: '#25D366',
+              background: '#003666',
               color: '#ffffff',
               fontSize: '0.76rem',
               fontWeight: 700,
-              textDecoration: 'none',
+              cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px'
             }}
           >
-            <span>💬 {isEs ? 'Compartir por WhatsApp' : 'Share via WhatsApp'}</span>
-          </a>
+            <span>🩺 {isEs ? 'Mesa Clínica Digital' : 'Atlas Clinical Desk'}</span>
+          </button>
         </div>
       </div>
 

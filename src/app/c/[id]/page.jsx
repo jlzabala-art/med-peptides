@@ -52,7 +52,7 @@ export async function generateMetadata({ params, searchParams }) {
           title = cleanRecipientName 
             ? `📦 Catálogo Comercial Mayorista B2B • ${cleanRecipientName}`
             : '📦 Catálogo Comercial Mayorista B2B • Atlas Solutions';
-          description = 'Condiciones comerciales mayoristas, catálogo de viales con márgenes de distribución vinculados y logística internacional en cadena de frío.';
+          description = 'Condiciones comerciales mayoristas, catálogo de viales con márgenes de distribución vinculados y logística internacional verificada.';
           ogImageUrl = `${appUrl}/og-catalog.png`;
         } else if (isProto) {
           title = cleanRecipientName
@@ -181,8 +181,9 @@ export default async function ShortCatalogRoute({ params }) {
           console.warn('[ShortCatalogRoute] Could not update visit count:', updateErr.message);
         }
 
-        if (isProto) {
-          const rawTarget = d.targetUrl || '/proto';
+        // If targetUrl exists (protocols, doctor portal, wholesaler portal, or intake), redirect smoothly
+        if (d.targetUrl && (isProto || isDoctor || isWholesaler || d.targetUrl.startsWith('/dr/') || d.targetUrl.startsWith('/wholesaler') || d.targetUrl.startsWith('/rx/'))) {
+          const rawTarget = d.targetUrl;
           const sep = rawTarget.includes('?') ? '&' : '?';
           const targetUrl = `${rawTarget}${sep}tc=${encodeURIComponent(id)}`;
           redirect(targetUrl);

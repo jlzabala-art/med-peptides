@@ -24,6 +24,8 @@ import {
   Clock,
   Syringe,
   Mail,
+  ArrowUpRight,
+  Bot,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
@@ -1310,19 +1312,35 @@ ${contextAnchor.mechanisms}
                           style={{
                             background: '#f8fafc',
                             border: '1px solid #e2e8f0',
-                            borderRadius: '8px',
-                            padding: '9px 12px',
-                            fontSize: '0.78rem',
-                            color: '#003666',
+                            borderRadius: '10px',
+                            padding: '10px 14px',
+                            fontSize: '0.80rem',
+                            color: '#00284d',
                             fontWeight: 600,
                             textAlign: 'left',
                             cursor: isBlocked || isLoading ? 'default' : 'pointer',
                             transition: 'all 0.15s ease',
                             lineHeight: 1.4,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '10px'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isBlocked && !isLoading) {
+                              e.currentTarget.style.background = '#f0f9ff';
+                              e.currentTarget.style.borderColor = '#bae6fd';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isBlocked && !isLoading) {
+                              e.currentTarget.style.background = '#f8fafc';
+                              e.currentTarget.style.borderColor = '#e2e8f0';
+                            }
                           }}
                         >
-                          <span style={{ color: '#0d9488', marginRight: '6px', fontWeight: 800 }}>→</span>
-                          {q}
+                          <span style={{ flex: 1 }}>{q}</span>
+                          <ArrowUpRight size={14} color="#0284c7" style={{ flexShrink: 0 }} />
                         </button>
                       ))}
                     </div>

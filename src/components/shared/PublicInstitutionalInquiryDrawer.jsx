@@ -406,6 +406,49 @@ const INQUIRY_TOPICS_BLOODO = [
   }
 ];
 
+const INQUIRY_TOPICS_ULTRAPERSON = [
+  {
+    id: 'wholesale_clinic',
+    labelEn: 'Wholesale Pricing & Practitioner Dispensary Accounts',
+    labelEs: 'Tarifas Mayoristas y Cuentas para Dispensario Médico',
+    icon: Building2,
+    placeholderEn: 'Inquire about clinic volume discounts, recurring practitioner fulfillment, or wholesale account onboarding...',
+    placeholderEs: 'Consulte sobre descuentos por volumen para clínicas, suministro recurrente a consultas o alta de cuenta mayorista...'
+  },
+  {
+    id: 'formulation_specs',
+    labelEn: 'Active Compound Synergies & Galenic Specifications',
+    labelEs: 'Sinergias de Principios Activos y Especificaciones Galénicas',
+    icon: FlaskConical,
+    placeholderEn: 'Ask regarding standardized extracts, bio-enhanced delivery (phytosomes, CoQ10/PQQ, Ashwagandha KSM-66), excipients, or vegan HPMC capsules...',
+    placeholderEs: 'Consulte sobre extractos estandarizados, biodisponibilidad optimizada (fitosomas, CoQ10/PQQ, Ashwagandha KSM-66), excipientes o cápsulas HPMC...'
+  },
+  {
+    id: 'quality_testing',
+    labelEn: 'EU GMP Quality, Heavy Metals & Purity Verification',
+    labelEs: 'Certificación EU GMP, Metales Pesados y Verificación de Pureza',
+    icon: ShieldCheck,
+    placeholderEn: 'Request third-party analytical assay verification, microbiological release testing (USP <61>/<62>), or elemental purity certificates...',
+    placeholderEs: 'Solicite certificados analíticos de terceros, ensayos microbiológicos (USP <61>/<62>) o análisis de pureza elemental...'
+  },
+  {
+    id: 'protocol_integration',
+    labelEn: 'Clinical Protocol Integration & Longevity Stacking',
+    labelEs: 'Integración en Protocolos Clínicos y Sinergias de Longevidad',
+    icon: Sparkles,
+    placeholderEn: 'Inquire about clinical integration with regenerative therapies, peptide stacks, biomarker monitoring, or patient dosing schedules...',
+    placeholderEs: 'Consulte sobre integración clínica con terapias regenerativas, sinergia con péptidos, monitorización o pautas de dosificación...'
+  },
+  {
+    id: 'general_nutraceutical',
+    labelEn: 'General Nutraceutical & Supplement Inquiry',
+    labelEs: 'Consulta General sobre Suplementación y Nutracéuticos',
+    icon: Mail,
+    placeholderEn: 'How can the UltraPerson™ scientific and clinical formulation desk assist your practice?',
+    placeholderEs: '¿En qué puede asistirle el equipo científico y de formulación clínica de UltraPerson™?'
+  }
+];
+
 export default function PublicInstitutionalInquiryDrawer({
   isOpen = false,
   onClose,
@@ -433,6 +476,21 @@ export default function PublicInstitutionalInquiryDrawer({
     const rxId = String(initialEntity?.rxId || initialEntity?.prescriptionNumber || '').toLowerCase();
 
     // Priority check for explicit brand collection or brand name
+    if (
+      rawBrand.includes('ultraperson') ||
+      rawBrand.includes('ultraman') ||
+      rawSupplier.includes('ultraperson') ||
+      rawSupplier.includes('pharmapolis') ||
+      rawSlug.includes('ultraperson') ||
+      rawSlug.includes('ultraman') ||
+      rawName.includes('ultraperson') ||
+      rawName.includes('ultraman') ||
+      propBrandType === 'ultraperson' ||
+      propBrandType === 'ultraman'
+    ) {
+      return 'ultraperson';
+    }
+
     if (
       rawBrand.includes('colway') ||
       rawSupplier.includes('colway') ||
@@ -542,9 +600,10 @@ export default function PublicInstitutionalInquiryDrawer({
       return 'bloodo';
     }
     return 'peptides';
-  }, [initialEntity, contextType]);
+  }, [initialEntity, contextType, propBrandType]);
 
   const activeTopics = useMemo(() => {
+    if (brandType === 'ultraperson' || brandType === 'ultraman') return INQUIRY_TOPICS_ULTRAPERSON;
     if (brandType === 'trichotest') return INQUIRY_TOPICS_TRICHOTEST;
     if (brandType === 'nutrigen') return INQUIRY_TOPICS_NUTRIGEN;
     if (brandType === 'hormone' || brandType === 'hormones') return INQUIRY_TOPICS_HORMONES;
@@ -557,6 +616,7 @@ export default function PublicInstitutionalInquiryDrawer({
   const [topic, setTopic] = useState(() => {
     if (initialEntity?.inquiryGoal === 'renewal') return 'prescription_renewal';
     if (initialEntity?.inquiryGoal === 'quotation') return 'quotation_request';
+    if (brandType === 'ultraperson' || brandType === 'ultraman') return 'wholesale_clinic';
     if (brandType === 'trichotest') return 'genomics_correlation';
     if (brandType === 'nutrigen') return 'genomics_correlation';
     if (brandType === 'hormone' || brandType === 'hormones') return 'endocrine_biomarkers';
@@ -587,6 +647,9 @@ export default function PublicInstitutionalInquiryDrawer({
     if (initialEntity?.inquiryGoal === 'quotation') {
       return lang === 'es' ? 'Solicitud de Cotización de Prescripción' : 'Prescription Quotation Request';
     }
+    if (brandType === 'ultraperson' || brandType === 'ultraman') {
+      return lang === 'es' ? 'Consulta UltraPerson™ y Nutracéuticos Clínicos' : 'UltraPerson™ Clinical Nutraceuticals Inquiry';
+    }
     if (brandType === 'trichotest') {
       return lang === 'es' ? 'Consulta TrichoTest™ y Protocolo Capilar' : 'TrichoTest™ Protocol & Clinical Inquiry';
     }
@@ -615,6 +678,11 @@ export default function PublicInstitutionalInquiryDrawer({
     const docName = initialEntity?.doctorName || 'Dr. Haytham Salem';
     const clinicName = initialEntity?.clinic || 'Arthregen Clinic';
 
+    if (brandType === 'ultraperson' || brandType === 'ultraman') {
+      return lang === 'es'
+        ? 'Mesa Oficial UltraPerson™ • Fórmulas Magistrales y Nutracéuticos EU GMP'
+        : 'Official UltraPerson™ Clinical Desk • EU GMP Nutraceuticals & Formulations';
+    }
     if (brandType === 'trichotest') {
       return lang === 'es'
         ? `Mesa Oficial TrichoTest™ • ${docName} (${clinicName}) & Atlas Services`
@@ -650,6 +718,11 @@ export default function PublicInstitutionalInquiryDrawer({
   }, [brandType, lang, initialEntity]);
 
   const successDesc = useMemo(() => {
+    if (brandType === 'ultraperson' || brandType === 'ultraman') {
+      return lang === 'es'
+        ? 'Su consulta sobre UltraPerson™ ha sido remitida a la Mesa Científica y de Formulación. Un especialista en nutracéutica clínica le responderá en 24 horas laborables.'
+        : 'Your UltraPerson inquiry has been securely routed to the Clinical & Formulation Affairs Desk. A nutraceutical specialist will follow up within 24 business hours.';
+    }
     if (
       brandType === 'prescription' ||
       brandType === 'nutrigen' ||
@@ -1113,8 +1186,15 @@ export default function PublicInstitutionalInquiryDrawer({
                     <FlaskConical size={18} style={{ color: '#2563eb', flexShrink: 0, marginTop: '2px' }} />
                     <div style={{ flex: 1, minWidth: 0, lineHeight: 1.4 }}>
                       <div style={{ fontWeight: 800, fontSize: '0.86rem', color: '#1e3a8a', wordBreak: 'break-word', whiteSpace: 'normal' }}>
-                        {attachedEntity.name}
+                        {attachedEntity.name || attachedEntity.brandName || attachedEntity.title || attachedEntity.canonicalName || (lang === 'es' ? 'Recurso Clínico' : 'Clinical Resource')}
                       </div>
+                      {attachedEntity.catalogCount ? (
+                        <div style={{ fontSize: '0.74rem', color: '#3b82f6', fontWeight: 600, marginTop: '2px' }}>
+                          {lang === 'es' 
+                            ? `${attachedEntity.catalogCount} Fórmulas Clínicas en el Catálogo` 
+                            : `${attachedEntity.catalogCount} Clinical Formulations in Catalog`}
+                        </div>
+                      ) : null}
                       {attachedEntity.strength && (
                         <div style={{ fontSize: '0.74rem', color: '#3b82f6', fontWeight: 600, marginTop: '2px' }}>
                           {lang === 'es' ? 'Dosis/Concentración:' : 'Strength/Dose:'} {attachedEntity.strength}
@@ -1360,7 +1440,7 @@ export default function PublicInstitutionalInquiryDrawer({
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Dr. Carlos Méndez"
+                    placeholder={lang === 'es' ? 'Dr. Carlos Méndez' : 'Dr. Alexander Wright, MD'}
                     style={{
                       width: '100%',
                       padding: '0.5rem 0.65rem',

@@ -87,6 +87,19 @@ export async function POST(request) {
           console.warn('[syncInquiryToZohoBigin] Background sync warning:', err.message);
         });
 
+        // Asynchronously enrich patient and prescription in Firestore with phone/email
+        const attachedRxCode = attachedEntity?.rxId || attachedEntity?.code || attachedEntity?.id || '';
+        const attachedPatientId = attachedEntity?.patientId || '';
+        enrichPatientFromInquiry({
+          rxCode: attachedRxCode,
+          patientId: attachedPatientId,
+          patientName: inquiryRecord.name,
+          email: inquiryRecord.email,
+          phone: inquiryRecord.phone
+        }).catch(err => {
+          console.warn('[enrichPatientFromInquiry] Warning:', err.message);
+        });
+
         // Attribute inquiry and newsletter conversion to tracked datasheet short link & user profile
         const trackingCode = body.trackingCode || body.shortCode || body.tc || body.code || '';
         if (trackingCode) {
@@ -315,4 +328,90 @@ async function syncInquiryToZohoBigin(inquiry, inquiryId) {
     }
   }
 }
+
+/**
+ * Enriches Prescription and Patient documents with verified phone & email
+ * collected during clinical inquiries.
+ */
+async function enrichPatientFromInquiry({ rxCode, patientId, patientName, email, phone }) {
+  if (!adminDb) return;
+  const isPlaceholderEmail = !email || email.includes('paciente@atlas-rx.com') || email.includes('ejemplo@email.com');
+  const validEmail = isPlaceholderEmail ? null : email.toLowerCase().trim();
+  const validPhone = phone && phone.trim().length >= 7 ? phone.trim() : null;
+
+  if (!validEmail && !validPhone) return;
+
+  const enrichment = {
+    updatedAt: new Date().toISOString()
+  };
+  if (validPhone) {
+    enrichment.patientPhone = validPhone;
+    enrichment['patient.phone'] = validPhone;
+  }
+  if (validEmail) {
+    enrichment.patientEmail = validEmail;
+    enrichment['patient.email'] = validEmail;
+  }
+
+  let resolvedPatientId = patientId;
+
+  // 1. Enrich Prescription doc if rxCode provided
+  if (rxCode) {
+    try {
+      const rxDoc = await adminDb.collection('prescriptions').doc(rxCode).get();
+      if (rxDoc.exists) {
+        await rxDoc.ref.set(enrichment, { merge: true });
+        if (!resolvedPatientId && rxDoc.data()?.patientId) {
+          resolvedPatientId = rxDoc.data().patientId;
+        }
+      } else {
+        const qSnap = await adminDb.collection('prescriptions')
+          .where('code', '==', rxCode)
+          .limit(1)
+          .get();
+        if (!qSnap.empty) {
+          const doc = qSnap.docs[0];
+          await doc.ref.set(enrichment, { merge: true });
+          if (!resolvedPatientId && doc.data()?.patientId) {
+            resolvedPatientId = doc.data().patientId;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[enrichPatientFromInquiry] Prescription update warning:', err.message);
+    }
+  }
+
+  // 2. Enrich Patient doc
+  const patientUpdates = {
+    updatedAt: new Date().toISOString()
+  };
+  if (validPhone) patientUpdates.phone = validPhone;
+  if (validEmail) patientUpdates.email = validEmail;
+
+  if (resolvedPatientId) {
+    try {
+      await adminDb.collection('patients').doc(resolvedPatientId).set(patientUpdates, { merge: true });
+      return;
+    } catch (pErr) {
+      console.warn('[enrichPatientFromInquiry] Patient doc direct update warning:', pErr.message);
+    }
+  }
+
+  // 3. Fallback: search patient by name if available and not generic
+  if (patientName && !patientName.toLowerCase().startsWith('patient pt-') && patientName !== 'Paciente') {
+    try {
+      const pSnap = await adminDb.collection('patients')
+        .where('name', '==', patientName)
+        .limit(1)
+        .get();
+      if (!pSnap.empty) {
+        await pSnap.docs[0].ref.set(patientUpdates, { merge: true });
+      }
+    } catch (nameErr) {
+      console.warn('[enrichPatientFromInquiry] Patient search by name warning:', nameErr.message);
+    }
+  }
+}
+
 

@@ -123,7 +123,7 @@ export default function PeptideSupplyManagementTechnicalSpecs({
       },
       {
         q: '¿Cómo se garantiza que los péptidos no pierdan actividad biológica en tránsito?',
-        a: 'Todos los envíos se empaquetan en contenedores isotérmicos validados con acumuladores de frío de cambio de fase y sensores de temperatura continuos. Esto garantiza que la cadena de frío (2°C–8°C o -20°C según formulación) se mantenga ininterrumpida hasta la entrega final.'
+        a: 'Todos los envíos se empaquetan en contenedores analíticos aislados de grado farmacéutico que protegen la estabilidad física y molecular de las formulaciones liofilizadas durante todo el trayecto de mensajería aérea express hasta la entrega final.'
       }
     ];
   }, [isEn]);
@@ -143,7 +143,7 @@ export default function PeptideSupplyManagementTechnicalSpecs({
             <Clock size={14} /> {isEn ? 'Express 24–48h Dispatch' : 'Despacho Express 24–48h'}
           </span>
           <span className="sup-tag sup-tag-cold">
-            <ThermometerSnowflake size={14} /> {isEn ? 'Validated Cold-Chain Transit' : 'Cadena de Frío Validada'}
+            <ShieldCheck size={14} /> {isEn ? 'Validated Analytical Transit' : 'Tránsito Analítico Validado'}
           </span>
         </div>
 

@@ -954,7 +954,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                     Your order request has been successfully registered in our operations platform.
                   </p>
                   <p style={{ margin: '0 0 8px 0' }}>
-                    Within a maximum of <strong>24 hours</strong>, you will receive a secure payment link via <strong>email ({submittedOrder.customerEmail})</strong> and <strong>WhatsApp</strong> to complete your payment and confirm immediate cold-chain dispatch.
+                    Within a maximum of <strong>24 hours</strong>, you will receive a secure payment link via <strong>email ({submittedOrder.customerEmail})</strong> and <strong>WhatsApp</strong> to complete your payment and confirm immediate dispatch.
                   </p>
                   <div style={{ fontSize: '0.78rem', color: '#166534', borderTop: '1px dashed #bbf7d0', paddingTop: '8px', marginTop: '8px' }}>
                     Reserved allocation: <strong>{submittedOrder.totalUnits} vials</strong> for a total amount of <strong>${submittedOrder.grandTotal.toFixed(2)} USD</strong>.

@@ -1302,7 +1302,7 @@ export default function InteractiveReconstitutionGuide({
                 </span>
               </div>
               <div className="irg-sum-item">
-                <span className="irg-sum-label">{isEs ? 'Cadena de Frío' : 'Cold-Chain Storage'}</span>
+                <span className="irg-sum-label">{isEs ? 'Almacenamiento' : 'Storage Conditions'}</span>
                 <span className="irg-sum-val font-semibold text-sky-900">2°C – 8°C ({isEs ? 'Posición vertical' : 'Upright'})</span>
               </div>
             </div>

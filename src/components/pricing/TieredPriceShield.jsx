@@ -166,7 +166,11 @@ export function resolveProductTierPricing(product, capsCount = 60) {
       // 4. Colway Official Cosmeceuticals
       else if (id.includes('diamond-cream')) clinicPrice = 64.00;
       else if (id.includes('diamond-peeling') || id.includes('diamond-exfoliat')) clinicPrice = 34.00;
-      else if (id.includes('colvita')) clinicPrice = 31.00;
+      else if (id.includes('colvita')) {
+        clinicPrice = capsCount === 120 ? 56.00 : 31.00;
+        wholesalePrice = capsCount === 120 ? 46.00 : 25.00;
+        retailPrice = capsCount === 120 ? 112.00 : 64.00;
+      }
       else if (id.includes('vege')) clinicPrice = 25.00;
       else if (id.includes('shampoo')) clinicPrice = 29.00;
       else if (id.includes('conditioner')) clinicPrice = 29.00;
@@ -241,7 +245,9 @@ export default function TieredPriceShield({
     try {
       const stored = localStorage.getItem('atlas_b2b_verified_preview');
       if (stored) setLocalPreview(JSON.parse(stored));
-    } catch (_) {}
+    } catch (e) {
+      // Safe localStorage fallback
+    }
   }, []);
 
   const tiers = useMemo(() => resolveProductTierPricing(product, capsCount), [product, capsCount]);
@@ -316,33 +322,41 @@ export default function TieredPriceShield({
   // ── CASE 1: COMPACT LIST VIEW ──
   if (compact) {
     if (!isAuthenticated) {
+      const publicRetailPrice = formatTierPrice(tiers.retail, currency);
       return (
-        <button
-          type="button"
+        <div
           onClick={(e) => {
             e.stopPropagation();
             triggerHaptic('light');
             if (onUnlockRequest) onUnlockRequest();
           }}
-          style={{
+          style={{ textAlign: 'right', marginRight: '6px', cursor: 'pointer' }}
+          title={isEs ? "PVP de referencia. Clic para ver tarifa clínica B2B" : "RRP reference. Click to view practitioner B2B discount"}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 650, textTransform: 'uppercase' }}>
+              {isEs ? 'PVP' : 'RRP'}
+            </span>
+            <strong style={{ fontSize: '0.90rem', color: '#0f172a' }}>
+              {publicRetailPrice}
+            </strong>
+          </div>
+          <span style={{
+            fontSize: '0.62rem',
+            color: '#0d9488',
+            fontWeight: 750,
+            background: '#f0fdfa',
+            border: '1px solid #99f6e4',
+            padding: '1px 5px',
+            borderRadius: '4px',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '5px',
-            padding: '3px 8px',
-            borderRadius: '5px',
-            background: 'rgba(241, 245, 249, 0.9)',
-            border: '1px solid #cbd5e1',
-            color: '#475569',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.15s ease'
-          }}
-          title={isEs ? "Ver tarifas según perfil" : "View role-based pricing"}
-        >
-          <Lock size={12} color="#0d9488" />
-          <span>{isEs ? 'Tarifas' : 'Pricing'}</span>
-        </button>
+            gap: '3px',
+            marginTop: '1px'
+          }}>
+            <Lock size={9} /> {isEs ? 'B2B: hasta -45%' : 'B2B: -45% Off'}
+          </span>
+        </div>
       );
     }
 

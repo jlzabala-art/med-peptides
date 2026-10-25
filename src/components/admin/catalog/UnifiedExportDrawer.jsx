@@ -295,7 +295,7 @@ export default function UnifiedExportDrawer({
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: '#1e293b', fontWeight: 600 }}>
             <ShieldCheck size={15} color="#16a34a" />
-            <span>Commercial Terms: <strong>Ex-Works (EXW) · Full Temperature Traceability</strong></span>
+            <span>Commercial Terms: <strong>Ex-Works (EXW) · Verified Analytical Packaging</strong></span>
           </div>
         </div>
 

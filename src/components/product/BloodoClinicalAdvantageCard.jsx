@@ -54,7 +54,7 @@ export default function BloodoClinicalAdvantageCard({ lang = 'en' }) {
       icon: Thermometer,
       accentColor: '#059669',
       titleEn: '14-Day Ambient Thermal Stability',
-      titleEs: 'Estabilidad de 14 Días Sin Cadena de Frío',
+      titleEs: 'Estabilidad de 14 Días a Temperatura Ambiente',
       highlightEn: 'No Dry Ice or Centrifuge Required',
       highlightEs: 'Fijación Celular Inmediata',
       descEn: 'Desiccated blood on Whatman 903 cards instantly inactivates cellular degrading enzymes (CD38, esterases). Samples remain analytically stable for 14 days at room temperature during postal transit.',

@@ -47,7 +47,7 @@ import {
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { RotateCcw, Home, Loader2, AlertTriangle, MessageCircle, Lock } from 'lucide-react';
+import { RotateCcw, RefreshCw, Home, Loader2, AlertTriangle, MessageCircle, Lock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const DoctorAuthNoticeModal = dynamic(
@@ -142,6 +142,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [showPatientAuthModal, setShowPatientAuthModal] = useState(false);
   const [showCalendarSyncModal, setShowCalendarSyncModal] = useState(false);
   const [showDoctorContactModal, setShowDoctorContactModal] = useState(false);
+  const [doctorContactTopic, setDoctorContactTopic] = useState('posology');
 
   const handleOpenInquiry = useCallback((customEntity = null) => {
     setInquiryCustomEntity(customEntity || null);
@@ -254,6 +255,32 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const baseUrl = 'https://www.atlashealth-services.com';
   const publicUrl = `${baseUrl}/rx/${rxId}`;
   const patientPublicUrl = `${baseUrl}/rx/${rxId}?view=patient`;
+
+  const [clinicalInquiries, setClinicalInquiries] = useState([]);
+  const [, setInquiriesLoading] = useState(false);
+
+  const fetchClinicalInquiries = useCallback(async () => {
+    const code = rxId || currentRx?.id || currentRx?.code;
+    if (!code) return;
+    try {
+      setInquiriesLoading(true);
+      const res = await fetch(`/api/prescriptions/${encodeURIComponent(code)}/inquiry`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.inquiries)) {
+          setClinicalInquiries(data.inquiries);
+        }
+      }
+    } catch (err) {
+      console.warn('[PublicPrescriptionClient] Error loading inquiries:', err);
+    } finally {
+      setInquiriesLoading(false);
+    }
+  }, [rxId, currentRx?.id, currentRx?.code]);
+
+  useEffect(() => {
+    fetchClinicalInquiries();
+  }, [fetchClinicalInquiries]);
 
   // Zero-friction tokenized access for patients entering via doctor-shared WhatsApp / QR
   const tokenParam = searchParams?.get('k') || searchParams?.get('token') || searchParams?.get('access');
@@ -594,12 +621,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           onSwitchRx={() => setShowRxSwitcherModal(true)}
           banner={
             <NominalWelcomeBanner
-              recipientName={patientName || 'Paciente'}
+              recipientName={patientName || (isEs ? 'Paciente' : 'Patient')}
               role="patient"
               clinicName={clinic || doctorClinic || treatingDoc?.clinic}
-              verifiedBy={nominalDoctorName ? `Dr. ${nominalDoctorName}` : 'Atlas Health Services'}
-              sessionDuration="90 días"
+              verifiedBy={nominalDoctorName || 'Atlas Health Services'}
+              sessionDuration={isEs ? '90 días' : '90 days'}
               storageKey={`atlas_welcome_rx_${rxId}`}
+              lang={lang}
             />
           }
         />
@@ -1279,9 +1307,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     doctorPhone={safeDoctorPhone}
                     patientPublicUrl={patientPublicUrl}
                     onOpenQuotation={() => setShowAtlasQuotationModal(true)}
+                    onOpenDoctorContact={(topicKey) => {
+                      setDoctorContactTopic(topicKey || 'posology');
+                      setShowDoctorContactModal(true);
+                    }}
                     patientName={patientName}
                     doctorName={displayDoctorNameShort}
                     isAuthorizedViewer={isAuthorizedViewer}
+                    clinicalInquiries={clinicalInquiries}
                   />
 
                   <div style={{
@@ -1375,34 +1408,32 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {/* WhatsApp Action */}
-                        <a
-                          href={`https://wa.me/${String(safeDoctorPhone || '+97143498800').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                            isEs
-                              ? `Estimado equipo médico de ${doctorClinic},\nSoy ${patientName}${isAuthorizedViewer ? `, paciente del ${nominalDoctorName}` : ''}. Me pongo en contacto en relación a mi prescripción médica #${rxId}.\n🔗 Consulta de seguimiento: ${patientPublicUrl}`
-                              : `Dear ${doctorClinic} clinical team,\nI am ${patientName}${isAuthorizedViewer ? `, patient of ${nominalDoctorName}` : ''}. I am contacting you regarding my prescription #${rxId}.\n🔗 Clinical follow-up inquiry: ${patientPublicUrl}`
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        {/* Atlas In-App Clinical Desk Inquiry */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDoctorContactTopic('posology');
+                            setShowDoctorContactModal(true);
+                          }}
                           style={{
-                            background: '#25D366',
+                            background: '#003666',
                             color: '#ffffff',
                             border: 'none',
                             borderRadius: '8px',
                             padding: '10px 16px',
                             fontSize: '0.82rem',
                             fontWeight: 700,
-                            textDecoration: 'none',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: '8px',
                             cursor: 'pointer',
-                            boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)'
+                            boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)'
                           }}
                         >
-                          <span>💬 {isEs ? 'Contactar por WhatsApp con la Clínica' : 'Contact Clinic / Doctor on WhatsApp'}</span>
-                        </a>
+                          <Stethoscope size={16} />
+                          <span>{isEs ? 'Mesa Clínica Digital (Consultar al Médico)' : 'Atlas Clinical Desk (Consult Physician)'}</span>
+                        </button>
 
                         {/* Call Clinic Action */}
                         {doctorPhone && (
@@ -1469,6 +1500,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     patientName={patientName}
                     doctorName={displayDoctorNameShort}
                     isAuthorizedViewer={isAuthorizedViewer}
+                    clinicalInquiries={clinicalInquiries}
                   />
 
                   <div style={{
@@ -1919,6 +1951,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             rxId={rxId}
             patientName={patientName}
             patient={patient}
+            rx={currentRx}
             doctorName={doctorName}
             doctorTitle={doctorSpecialty}
             doctorLicense={doctorLicense}
@@ -1934,6 +1967,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             isAuthorizedViewer={isAuthorizedViewer}
             isPatientView={isPatientView}
             onOpenQuotation={() => setShowAtlasQuotationModal(true)}
+            onPatientContactUpdated={({ phone, email }) => {
+              setCurrentRx(prev => ({
+                ...prev,
+                patientPhone: phone || prev?.patientPhone,
+                patientEmail: email || prev?.patientEmail,
+                patient: {
+                  ...(prev?.patient || {}),
+                  phone: phone || prev?.patient?.phone,
+                  email: email || prev?.patient?.email
+                }
+              }));
+            }}
           />
         </div>
       </div>
@@ -2353,51 +2398,44 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       </>
                     )}
 
-                    {/* 4. WhatsApp Direct Refill Request */}
+                    {/* 4. In-App Direct Prescription Cycle Refill */}
                     <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
                     <button
                       type="button"
                       onClick={() => {
                         setShowPatientDropdown(false);
-                        const text = isEs
-                          ? `Hola, soy ${patientName}. Deseo solicitar la reposición de mi prescripción #${rxId} (${resolvedFormulaSummary || 'fórmula magistral'}).\n🔗 Expediente de verificación: ${patientPublicUrl}`
-                          : `Hello, I am ${patientName}. I would like to request a refill for my prescription #${rxId} (${resolvedFormulaSummary || 'compounded formula'}).\n🔗 Verification link: ${patientPublicUrl}`;
-                        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+                        setDoctorContactTopic('refill');
+                        setShowDoctorContactModal(true);
                       }}
                       className="rx-dock-drop-item"
                     >
-                      <MessageCircle size={15} color="#25D366" />
+                      <RefreshCw size={15} color="#0284c7" />
                       <div>
-                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Pedir Reposición por WhatsApp' : 'Request Refill via WhatsApp'}</div>
-                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Mesa de despacho farmacéutico directo' : 'Direct pharmacy dispensing desk'}</div>
+                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Solicitar Reposición de Ciclo' : 'Request Cycle Refill'}</div>
+                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Mesa clínica digital segura' : 'Secure practice clinical desk'}</div>
                       </div>
                     </button>
 
-                    {/* 5. Contact Doctor/Clinic if phone available */}
-                    {safeDoctorPhone && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowPatientDropdown(false);
-                          const cleanPhone = String(safeDoctorPhone).replace(/[^0-9]/g, '');
-                          const text = isEs
-                            ? `Hola equipo de ${doctorClinic || 'consulta médica'}, soy ${patientName}. Tengo una consulta sobre mi pauta prescrita #${rxId}.\n🔗 Enlace: ${patientPublicUrl}`
-                            : `Hello ${doctorClinic || 'clinical practice'}, I am ${patientName}. I have a question regarding my prescribed regimen #${rxId}.\n🔗 Link: ${patientPublicUrl}`;
-                          window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
-                        }}
-                        className="rx-dock-drop-item"
-                      >
-                        <Stethoscope size={15} color="#003666" />
-                        <div>
-                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>
-                            {isEs ? `Contactar Clínica (${doctorClinic || 'Médico'})` : `Message Clinic (${doctorClinic || 'Practice'})`}
-                          </div>
-                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
-                            {isEs ? 'Dudas médicas sobre posología o revisión' : 'Clinical dosage or follow-up query'}
-                          </div>
+                    {/* 5. In-App Direct Clinician Consultation */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowPatientDropdown(false);
+                        setDoctorContactTopic('posology');
+                        setShowDoctorContactModal(true);
+                      }}
+                      className="rx-dock-drop-item"
+                    >
+                      <Stethoscope size={15} color="#003666" />
+                      <div>
+                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>
+                          {isEs ? `Consultar con ${displayDoctorNameShort || 'Médico'}` : `Message ${displayDoctorNameShort || 'Physician'}`}
                         </div>
-                      </button>
-                    )}
+                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
+                          {isEs ? 'Dudas médicas sobre posología o revisión' : 'Clinical dosage or follow-up query'}
+                        </div>
+                      </div>
+                    </button>
 
                     {/* 6. Submit New Prescription / Lab Report (Frictionless Ingestion) */}
                     <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
@@ -2563,10 +2601,27 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         doctorClinic={doctorClinic}
         doctorPhone={currentRx?.doctorPhone || '+97143498800'}
         patientName={patientName}
-        patientEmail={patient?.email || ''}
+        patientEmail={patient?.email || currentRx?.patientEmail || ''}
+        patientPhone={patient?.phone || currentRx?.patientPhone || ''}
         patientPublicUrl={patientPublicUrl}
         compoundedFormulations={compoundedFormulations}
+        initialTopic={doctorContactTopic}
         isEs={isEs}
+        onInquirySubmitted={() => {
+          fetchClinicalInquiries();
+        }}
+        onContactSaved={({ phone, email }) => {
+          setCurrentRx(prev => ({
+            ...prev,
+            patientPhone: phone || prev?.patientPhone,
+            patientEmail: email || prev?.patientEmail,
+            patient: {
+              ...(prev?.patient || {}),
+              phone: phone || prev?.patient?.phone,
+              email: email || prev?.patient?.email
+            }
+          }));
+        }}
       />
     </div>
   );

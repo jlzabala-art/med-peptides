@@ -685,7 +685,7 @@ export default function UnifiedOrderDrawer({ lang = 'es' }) {
                     </label>
                     <textarea
                       rows={2}
-                      placeholder={isEs ? 'Lote específico, cadena de frío, referencia interna...' : 'Batch number request, cold-chain specifications...'}
+                      placeholder={isEs ? 'Lote específico, horario de entrega, referencia interna...' : 'Batch number request, delivery hours, internal reference...'}
                       value={form.deliveryNotes}
                       onChange={(e) => setForm({ ...form, deliveryNotes: e.target.value })}
                       style={{

@@ -101,7 +101,7 @@ export const NAVIGATION_REGISTRY = [
     items: [
       {
         id: 'customers',
-        label: 'Customers',
+        label: 'Customers & Accounts (CRM)',
         icon: Users2,
         roles: ['admin', 'sales'],
         // Unified: Clinics/Doctors, Wholesalers (B2B), Individual Patients, CRM
@@ -262,7 +262,7 @@ export const NAVIGATION_REGISTRY = [
     roles: ['admin', 'supplier', 'patient'],
     items: [
       { id: 'documents',    label: 'Documents',    icon: FileText,      roles: ['admin', 'supplier', 'patient'] },
-      { id: 'users',        label: 'Users',        icon: Users,         roles: ['admin'] },
+      { id: 'users',        label: 'Security & Access (IAM)', icon: ShieldCheck, roles: ['admin'] },
       { id: 'invitations',  label: 'Invitations',  icon: Mail,          roles: ['admin'] },
       { id: 'settings',     label: 'Settings',     icon: Settings,      roles: ['admin'] },
       { id: 'views',        label: 'Views',        icon: Eye,           roles: ['admin'] },

@@ -1,6 +1,12 @@
+'use client';
+
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, CheckCircle2, Activity, AlertCircle, ArrowLeft, Check, Stethoscope, Building2, Calendar, User, Pill, FlaskConical, Dna, FileText } from 'lucide-react';
+import {
+  Upload, X, CheckCircle2, Activity, AlertCircle, ArrowLeft, Check,
+  Stethoscope, Building2, Calendar, User, Pill, FlaskConical, Dna, FileText,
+  Trash2, Plus, Eye, Edit3, ChevronDown, ChevronUp, Layers, Sparkles
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { collection, doc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
@@ -11,14 +17,26 @@ import AIContextBadge from '../../../components/ui/AIContextBadge';
 import { processPrescriptionZohoOnImport } from '../../../actions/zohoAutoIngestMatcher';
 import ClinicPicker from '../../../components/admin/patients/ClinicPicker';
 import PhysicianPicker from '../../../components/admin/patients/PhysicianPicker';
+import PharmapolisLabelSvg from '../../../components/prescription/PharmapolisLabelSvg';
+import AlgoliaIngredientSearchInput from './AlgoliaIngredientSearchInput';
 
 /**
- * @param {string}   [persistEndpoint] - When set (e.g. '/api/labels/import'), the built
- *   prescription docs are POSTed to this server route instead of being written with the
- *   client Firestore SDK. Used by the public Label Studio (Account Managers) where no
- *   authenticated Atlas session exists, so Atlas validation is skipped server-side.
- * @param {Function} [onImported] - Called with an array of `{ id, code, patientName }`
- *   for each created prescription.
+ * ImportPrescriptionModal
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Central Unified Prescription & Laboratory Protocol Import Engine.
+ *
+ * Capabilities:
+ *  - Multimodal AI Extraction with Silent Real-Time Failover Router
+ *  - Dual Document Support: Compounded Medical Prescriptions & Lab Biomarkers (Bloodo NAD+)
+ *  - Interactive Master-Detail Review & Edit Station:
+ *      * Direct Algolia Catalog Search for Active Ingredients
+ *      * Exceptional Fallback for Unmapped Custom APIs (Placeholders)
+ *      * Full Posology & Dispensing Format Editing
+ *      * Real-Time Vector SVG Label Preview before confirming import
+ *  - Dual Persistence Pathways:
+ *      * Authenticated Admin / Physician Direct Firestore SDK
+ *      * Public / Account Manager Safe Server Route (/api/labels/import)
+ *  - Mobile & Laptop Responsive (Google Cloud Console UX Standard)
  */
 export default function ImportPrescriptionModal({ 
   isOpen, 
@@ -33,16 +51,29 @@ export default function ImportPrescriptionModal({
   const [uploading, setUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [reviewData, setReviewData] = useState(null);
+  const [activeTab, setActiveTab] = useState('editor'); // 'editor' | 'preview'
+  const [previewBlockIdx, setPreviewBlockIdx] = useState(0);
+  const [expandedBlocks, setExpandedBlocks] = useState({ 0: true });
 
   const resetState = () => {
     setUploading(false);
     setIsSaving(false);
     setReviewData(null);
+    setActiveTab('editor');
+    setPreviewBlockIdx(0);
+    setExpandedBlocks({ 0: true });
   };
 
   const handleClose = () => {
     resetState();
     onClose();
+  };
+
+  const toggleBlockExpanded = (idx) => {
+    setExpandedBlocks(prev => ({
+      ...prev,
+      [idx]: !prev[idx]
+    }));
   };
 
   const onDrop = useCallback(async (acceptedFiles) => {
@@ -51,7 +82,7 @@ export default function ImportPrescriptionModal({
     
     try {
       setUploading(true);
-      toast.loading('Analyzing prescription via AI...', { id: 'upload-toast' });
+      toast.loading('Analyzing document with Atlas AI...', { id: 'upload-toast' });
 
       const formData = new FormData();
       formData.append('file', file);
@@ -62,12 +93,13 @@ export default function ImportPrescriptionModal({
       });
 
       if (!res.ok) {
-        throw new Error('Failed to analyze document');
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to analyze document');
       }
 
       const extractedData = await res.json();
       
-      // If parent supplied explicit callback (e.g. dedicated wizard), delegate immediately
+      // If parent supplied explicit callback, delegate immediately
       if (onExtractionComplete) {
         onExtractionComplete(extractedData);
         toast.success('Extraction complete!', { id: 'upload-toast' });
@@ -75,12 +107,11 @@ export default function ImportPrescriptionModal({
         return;
       }
 
-      // Detect whether document is a Laboratory Biomarker Protocol (Bloodo / LifeLab1 / NAD+) or Prescription
+      // Detect whether document is a Laboratory Biomarker Protocol (Bloodo / DBS) or Prescription
       const isLab = extractedData.documentType === 'LabResult' || !!extractedData.labResult;
       const lr = extractedData.labResult || {};
-      const pCode = lr.patientCode || extractedData.patient?.code || extractedData.fileNumber || '';
+      const pCode = lr.patientCode || extractedData.patient?.code || extractedData.fileNumber || extractedData.prescriptionNumber || '';
 
-      // Prioritize Genetic result date / report date over import date
       const geneticReportDate = lr.protocolDate || 
                                 lr.analysisDate || 
                                 extractedData.fagronDetails?.reportDate || 
@@ -96,6 +127,38 @@ export default function ImportPrescriptionModal({
       const clinicName = extractedData.doctor?.clinicName || extractedData.clinic || (isLab ? 'Shamma Clinic by Novomed LLC' : '');
       const doctorName = (typeof extractedData.doctor === 'object' ? extractedData.doctor?.name : extractedData.doctor) || context.doctorName || (isLab ? 'Dr. Çağatay Sezgin, MD, FISHRS' : '');
 
+      // Normalize extracted formulation blocks
+      const rawBlocks = (extractedData.formulationBlocks && extractedData.formulationBlocks.length > 0)
+        ? extractedData.formulationBlocks
+        : [{
+            treatmentType: extractedData.treatmentTitle || 'Compounded Pharmaceutical Formula',
+            treatmentProgram: extractedData.clinicalCategory || 'Compounding',
+            dispensingForm: extractedData.dispensingForm || 'Magistral Solution',
+            volume: extractedData.volume || '100 mL',
+            posology: extractedData.posology || '',
+            items: Array.isArray(extractedData.ingredients) ? extractedData.ingredients : []
+          }];
+
+      const normalizedBlocks = rawBlocks.map((b, bIdx) => {
+        const rawItems = Array.isArray(b.items) ? b.items : (Array.isArray(b.ingredients) ? b.ingredients : []);
+        return {
+          treatmentType: b.treatmentType || b.phaseName || b.treatmentProgram || `Formula ${bIdx + 1}`,
+          treatmentProgram: b.treatmentProgram || 'Compounding',
+          dispensingForm: b.dispensingForm || 'Magistral Solution',
+          volume: b.volume || '100 mL',
+          posology: b.posology || extractedData.posology || '',
+          items: rawItems.map((it, itIdx) => ({
+            id: `item_${bIdx}_${itIdx}_${Date.now()}`,
+            name: it.name || it.activeIngredient || '',
+            dose: it.dose || it.strength || it.dosage || '',
+            isVehicleOrBase: !!it.isVehicleOrBase,
+            productId: it.productId || null,
+            sku: it.sku || '',
+            isPlaceholder: !!it._isPlaceholder
+          }))
+        };
+      });
+
       setReviewData({
         isLabResult: isLab,
         extractedData,
@@ -106,7 +169,7 @@ export default function ImportPrescriptionModal({
         labUnit: lr.unit || 'µmol/L',
         labZone: lr.zone || 'yellow',
         labZoneLabel: lr.zoneLabel || 'Insufficient / Suboptimal',
-        protocolNumber: lr.protocolNumber || extractedData.prescriptionNumber || '',
+        protocolNumber: pCode || lr.protocolNumber || extractedData.prescriptionNumber || '',
         sampleType: lr.sampleType || 'Dried Blood Spot (DBS)',
         collectionDate: lr.collectionDate || '',
         receiptDate: lr.receiptDate || '',
@@ -123,14 +186,24 @@ export default function ImportPrescriptionModal({
         doctorName,
         doctorId: extractedData.matchedDoctor?.id || (isLab ? 'z3aUIMaYsPViG1JgM95r' : ''),
         doctorLicense: extractedData.doctor?.licenseNumber || extractedData.doctorLicense || '',
-        mfgDate: geneticReportDate,
+        mfgDate: geneticReportDate || new Date().toISOString().split('T')[0],
         prescriptionDate: extractedData.prescriptionDate || geneticReportDate || '',
         testName: isLab ? (lr.testName || 'Bloodo NAD+ Test') : (extractedData.fagronDetails?.testName || extractedData.documentType || 'TrichoTest'),
         boxId: extractedData.fagronDetails?.boxId || (isLab ? lr.protocolNumber : ''),
-        blocks: extractedData.formulationBlocks || []
+        blocks: normalizedBlocks
       });
 
-      toast.success(isLab ? '¡Analítica de laboratorio detectada! Revisa los valores.' : 'Extraction complete! Review details before saving.', { id: 'upload-toast' });
+      // Expand all blocks by default
+      const initialExpanded = {};
+      normalizedBlocks.forEach((_, idx) => { initialExpanded[idx] = true; });
+      setExpandedBlocks(initialExpanded);
+
+      toast.success(
+        isLab
+          ? '¡Analítica de laboratorio detectada! Revisa los valores.'
+          : 'Extracción completada. Revisa los datos y previsualiza las etiquetas.',
+        { id: 'upload-toast' }
+      );
     } catch (error) {
       console.error("Upload error:", error);
       toast.error(error.message || 'Failed to analyze document', { id: 'upload-toast' });
@@ -139,12 +212,81 @@ export default function ImportPrescriptionModal({
     }
   }, [context, onExtractionComplete]);
 
+  // Block updates
+  const handleUpdateBlockField = (blockIdx, field, value) => {
+    setReviewData(prev => {
+      if (!prev) return prev;
+      const nextBlocks = [...prev.blocks];
+      if (!nextBlocks[blockIdx]) return prev;
+      nextBlocks[blockIdx] = {
+        ...nextBlocks[blockIdx],
+        [field]: value
+      };
+      return { ...prev, blocks: nextBlocks };
+    });
+  };
+
+  // Ingredient updates
+  const handleUpdateIngredient = (blockIdx, itemIdx, changes) => {
+    setReviewData(prev => {
+      if (!prev) return prev;
+      const nextBlocks = [...prev.blocks];
+      const curBlock = nextBlocks[blockIdx];
+      if (!curBlock || !curBlock.items) return prev;
+      const nextItems = [...curBlock.items];
+      nextItems[itemIdx] = {
+        ...nextItems[itemIdx],
+        ...changes
+      };
+      nextBlocks[blockIdx] = { ...curBlock, items: nextItems };
+      return { ...prev, blocks: nextBlocks };
+    });
+  };
+
+  // Add ingredient
+  const handleAddIngredient = (blockIdx) => {
+    setReviewData(prev => {
+      if (!prev) return prev;
+      const nextBlocks = [...prev.blocks];
+      const curBlock = nextBlocks[blockIdx];
+      if (!curBlock) return prev;
+      const newItem = {
+        id: `custom_item_${Date.now()}`,
+        name: '',
+        dose: '',
+        isVehicleOrBase: false,
+        productId: null,
+        sku: '',
+        isPlaceholder: false
+      };
+      nextBlocks[blockIdx] = {
+        ...curBlock,
+        items: [...(curBlock.items || []), newItem]
+      };
+      return { ...prev, blocks: nextBlocks };
+    });
+  };
+
+  // Delete ingredient
+  const handleDeleteIngredient = (blockIdx, itemIdx) => {
+    setReviewData(prev => {
+      if (!prev) return prev;
+      const nextBlocks = [...prev.blocks];
+      const curBlock = nextBlocks[blockIdx];
+      if (!curBlock || !curBlock.items) return prev;
+      const nextItems = curBlock.items.filter((_, idx) => idx !== itemIdx);
+      nextBlocks[blockIdx] = { ...curBlock, items: nextItems };
+      return { ...prev, blocks: nextBlocks };
+    });
+  };
+
+  // Confirm and persist import
   const handleConfirmImport = async () => {
     if (!reviewData) return;
     try {
       setIsSaving(true);
 
-      // ── Handle Laboratory Result Import (Bloodo / Biomarkers) ──
+      // ── 1. Laboratory Biomarker DBS Path ──
       if (reviewData.isLabResult) {
         toast.loading('Saving Lab Result to Atlas...', { id: 'save-toast' });
         const cleanCode = String(reviewData.protocolNumber || Date.now()).trim();
@@ -223,176 +365,165 @@ export default function ImportPrescriptionModal({
         return;
       }
 
+      // ── 2. Clinical Prescription Path (Single or Multi-Phase) ──
       toast.loading('Saving prescription to Atlas & generating labels...', { id: 'save-toast' });
 
-      const { extractedData, patientName, clinicName, clinicId, doctorName, doctorId, doctorLicense, mfgDate, prescriptionDate } = reviewData;
+      const {
+        patientName,
+        clinicName,
+        clinicId,
+        doctorName,
+        doctorId,
+        doctorLicense,
+        mfgDate,
+        prescriptionDate,
+        protocolNumber,
+        blocks
+      } = reviewData;
 
-      // Handle multi-formulation blocks (e.g., Trichotest → TrichoSol + TrichoOil)
-      const blocks = extractedData.formulationBlocks && extractedData.formulationBlocks.length > 0 
-        ? extractedData.formulationBlocks 
-        : [{ 
-            treatmentType: null,
-            treatmentProgram: null,
-            ingredients: extractedData.ingredients || [],
-            posology: extractedData.posology || '',
-            volume: null,
-            dispensingForm: null
-          }];
-
+      const effectiveBlocks = Array.isArray(blocks) && blocks.length > 0 ? blocks : [];
       let totalNewPlaceholders = 0;
       let totalMatchedCatalog = 0;
-      const sessionId = blocks.length > 1 ? crypto.randomUUID() : null;
+      const sessionId = effectiveBlocks.length > 1 ? crypto.randomUUID() : null;
       const pendingDocs = [];
       const created = [];
 
-      for (const block of blocks) {
-        const blockIngredients = Array.isArray(block.items) ? block.items : (Array.isArray(block.ingredients) ? block.ingredients : []);
-        const resolved = await resolveIngredients(
-          blockIngredients,
-          { supplierHint: 'Fagron Iberia', importSource: 'fagron_genomics' }
-        );
+      for (let bIdx = 0; bIdx < effectiveBlocks.length; bIdx++) {
+        const block = effectiveBlocks[bIdx];
+        const blockItems = Array.isArray(block.items) ? block.items : [];
+        const mappedItems = [];
 
-        const blockNewPlaceholders = resolved.filter(r => r.isPlaceholder && r.isNew).length;
-        const blockMatched = resolved.filter(r => !r.isPlaceholder).length;
-        totalNewPlaceholders += blockNewPlaceholders;
-        totalMatchedCatalog += blockMatched;
+        for (let itIdx = 0; itIdx < blockItems.length; itIdx++) {
+          const item = blockItems[itIdx];
+          let prodId = item.productId || null;
+          let prodSku = item.sku || '';
+          let isPlace = !!item.isPlaceholder;
+          let matchedName = item.name;
 
-        const anyUnresolved = resolved.some(r => !r.productId || r.isPlaceholder);
+          // If not linked to catalog yet, attempt Algolia/Genomics resolution
+          if (!prodId && item.name) {
+            try {
+              const res = await resolveIngredients([{ name: item.name, dose: item.dose }], {
+                supplierHint: 'Fagron Iberia',
+                importSource: 'fagron_genomics'
+              });
+              if (res && res[0]) {
+                prodId = res[0].productId || null;
+                matchedName = res[0].matchedName || item.name;
+                isPlace = res[0].isPlaceholder;
+                prodSku = res[0].matchedProduct?.sku || '';
+              }
+            } catch (err) {
+              console.warn('[ImportPrescriptionModal] Resolve fallback error for item:', item.name);
+            }
+          }
 
-        const mappedItems = resolved.map((r, idx) => ({
-          id: `ai_item_${Date.now()}_${idx}`,
-          productId: r.productId || null,
-          variantId: null,
-          productName: r.matchedName || r.original?.name || '',
-          drugName: r.matchedName || r.original?.name || '',
-          sku: '',
-          activeIngredient: r.original?.activeIngredient || r.original?.name || '',
-          concentration: r.original?.dose || r.original?.strength || '',
-          dosage: r.original?.dose || r.original?.dosage || '',
-          dose: r.original?.dose || '',
-          isVehicleOrBase: !!r.original?.isVehicleOrBase,
-          quantity: r.original?.quantity || 1,
-          price: 0,
-          instructions: block.posology || extractedData.posology || '',
-          _aiRawName: r.original?.name,
-          _aiRawDose: r.original?.dose,
-          _isPlaceholder: r.isPlaceholder,
-          _needsProductMapping: !r.productId || r.isPlaceholder,
-          _matchScore: r.score,
-          status: 'Pending',
-        }));
+          if (isPlace) totalNewPlaceholders++;
+          if (prodId && !isPlace) totalMatchedCatalog++;
 
-        const cleanPatientName = patientName || 'Unknown Patient';
-        const cleanDoctorName = doctorName || 'Unknown Doctor';
+          mappedItems.push({
+            id: `ai_item_${Date.now()}_${bIdx}_${itIdx}`,
+            productId: prodId,
+            variantId: null,
+            productName: matchedName || item.name,
+            drugName: matchedName || item.name,
+            sku: prodSku,
+            activeIngredient: item.name,
+            concentration: item.dose || '',
+            dosage: item.dose || '',
+            dose: item.dose || '',
+            isVehicleOrBase: !!item.isVehicleOrBase,
+            quantity: 1,
+            price: 0,
+            instructions: block.posology || '',
+            _aiRawName: item.name,
+            _aiRawDose: item.dose,
+            _isPlaceholder: isPlace,
+            _needsProductMapping: !prodId || isPlace,
+            status: 'Pending'
+          });
+        }
+
+        const cleanPatientName = patientName.trim() || 'Unknown Patient';
+        const cleanDoctorName = doctorName.trim() || 'Unknown Doctor';
+        const rawCode = String(protocolNumber || reviewData.patientCode || reviewData.boxId || Date.now()).trim();
+        const baseCode = rawCode.replace(/^#/, '');
+        const cleanCode = effectiveBlocks.length > 1 ? `${baseCode}-${bIdx + 1}` : baseCode;
 
         const newRx = {
           ...prescriptionSchema,
           ...context,
+          code: cleanCode,
+          rxCode: cleanCode,
+          fileNumber: cleanCode,
           patientName: cleanPatientName,
-          patient: typeof extractedData.patient === 'object' ? {
-            ...extractedData.patient,
-            name: cleanPatientName
-          } : { name: cleanPatientName },
+          patient: typeof reviewData.extractedData?.patient === 'object' ? {
+            ...reviewData.extractedData.patient,
+            name: cleanPatientName,
+            code: cleanCode
+          } : { name: cleanPatientName, code: cleanCode },
           doctorName: cleanDoctorName,
           doctorId: doctorId || null,
-          doctor: typeof extractedData.doctor === 'object' ? {
-            ...extractedData.doctor,
+          doctor: typeof reviewData.extractedData?.doctor === 'object' ? {
+            ...reviewData.extractedData.doctor,
             name: cleanDoctorName,
             id: doctorId || null,
             licenseNumber: doctorLicense || null
           } : { name: cleanDoctorName, id: doctorId || null },
           clinicName: clinicName || null,
           clinicId: clinicId || null,
-          doctorLicense: doctorLicense || extractedData.doctor?.licenseNumber || null,
+          doctorLicense: doctorLicense || null,
           sourceType: 'fagron_genomics',
           source: 'fagron',
           status: 'draft',
-          validationStatus: anyUnresolved ? 'Needs Review' : 'Ready',
+          validationStatus: mappedItems.some(i => i._needsProductMapping) ? 'Needs Review' : 'Ready',
           sessionId,
-          treatmentProgram: block.treatmentProgram || extractedData.fagronDetails?.testName || 'TrichoTest',
-          treatmentType: block.treatmentType || null,
+          treatmentProgram: block.treatmentProgram || 'Compounding',
+          treatmentType: block.treatmentType || 'Compounding Formula',
+          treatmentTitle: block.treatmentType || 'Compounding Formula',
           importSource: 'fagron_genomics',
-          posology: block.posology || extractedData.posology || '',
+          posology: block.posology || '',
           clinicalIndication: block.posology || '',
-          volume: block.volume || null,
-          dispensingForm: block.dispensingForm || null,
+          volume: block.volume || '100 mL',
+          dispensingForm: block.dispensingForm || 'Magistral Solution',
+          prescriptionDate: mfgDate || prescriptionDate || new Date().toISOString().split('T')[0],
           items: mappedItems,
           prescriptionLines: mappedItems,
-          formulationBlocks: blocks,
-          isMultiPart: blocks.length > 1,
-          totalParts: blocks.length,
-          parts: blocks.length > 1 ? blocks.map((b, bIdx) => ({
-            partNumber: bIdx + 1,
-            title: b.treatmentType || b.treatmentProgram || `Part ${bIdx + 1}`,
-            treatmentType: b.treatmentType || null,
-            volume: b.volume || null,
-            dispensingForm: b.dispensingForm || null,
-            posology: b.posology || '',
-            items: Array.isArray(b.items) ? b.items : (Array.isArray(b.ingredients) ? b.ingredients : []),
-            totalParts: blocks.length
-          })) : null,
-          // Authoritative manufacturing / genetic result dates (Rule: never use import date)
-          mfgDate: mfgDate || null,
-          prodDate: mfgDate || null,
-          prescriptionDate: prescriptionDate || mfgDate || null,
-          geneticResultDate: mfgDate || null,
-          dateIssued: prescriptionDate || mfgDate || null,
-          fagron: extractedData.fagronDetails ? {
-            boxId: extractedData.fagronDetails.boxId || null,
-            testName: extractedData.fagronDetails.testName || 'TrichoTest',
-            reportDate: mfgDate || extractedData.fagronDetails.reportDate || null,
-            geneticBiomarkers: extractedData.fagronDetails.geneticBiomarkers || []
-          } : null,
           createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-          aiExtraction: {
-            completeness: extractedData.completeness || 0,
-            missing: extractedData.missing || [],
-            rawDate: extractedData.date || null,
-            extractedAt: new Date().toISOString(),
-            matchSummary: {
-              total: resolved.length,
-              matched: blockMatched,
-              newPlaceholders: blockNewPlaceholders,
-            },
-          },
+          updatedAt: serverTimestamp()
         };
 
         if (persistEndpoint) {
-          const { createdAt: _c, updatedAt: _u, ...serializable } = newRx;
-          pendingDocs.push(serializable);
-          continue;
-        }
+          pendingDocs.push(newRx);
+        } else {
+          const docRef = await addDoc(collection(db, 'prescriptions'), newRx);
+          created.push({ id: docRef.id, code: cleanCode, patientName: cleanPatientName });
 
-        const docRef = await addDoc(collection(db, 'prescriptions'), newRx);
-        created.push({ id: docRef.id, code: docRef.id, patientName: cleanPatientName });
-        
-        syncPrescriptionToAlgolia({ ...newRx, id: docRef.id }).catch(err => {
-          console.warn('[ImportPrescriptionModal] Algolia rx sync error:', err);
-        });
-        if (newRx.patient?.id || newRx.patient?.name) {
-          syncPatientToAlgolia({
-            id: newRx.patient.id || newRx.patientId || docRef.id,
-            name: newRx.patient.name || newRx.patientName,
-            ...newRx.patient
+          // Non-blocking Algolia synchronization
+          syncPrescriptionToAlgolia({ ...newRx, id: docRef.id }).catch(err => {
+            console.warn('[ImportPrescriptionModal] Algolia rx sync error:', err);
+          });
+          if (newRx.patient?.name) {
+            syncPatientToAlgolia({
+              id: docRef.id,
+              name: newRx.patient.name,
+              code: newRx.code,
+              doctorName: newRx.doctorName,
+              clinicName: newRx.clinicName
+            }).catch(err => {
+              console.warn('[ImportPrescriptionModal] Algolia patient sync error:', err);
+            });
+          }
+
+          // Zoho auto-ingest pipeline
+          processPrescriptionZohoOnImport({
+            prescriptionId: docRef.id,
+            rxData: newRx,
+            userEmail: 'import_modal'
           }).catch(err => {
-            console.warn('[ImportPrescriptionModal] Algolia patient sync error:', err);
+            console.warn('[ImportPrescriptionModal] Zoho auto-ingest error:', err);
           });
         }
-
-        processPrescriptionZohoOnImport({
-          prescriptionId: docRef.id,
-          rxData: newRx,
-          userEmail: 'import_modal'
-        }).then(zohoRes => {
-          if (zohoRes?.status === 'auto_created_and_linked') {
-            toast.success(`✨ Zoho Books: ${zohoRes.createdCount} APIs auto-creados (100% sincronizado)`);
-          } else if (zohoRes?.status === 'partial_match') {
-            toast(`ℹ️ Zoho Books: Matching parcial (${zohoRes.percent}%). Pendiente de revisión manual.`);
-          }
-        }).catch(err => {
-          console.warn('[ImportPrescriptionModal] Zoho auto-ingest error:', err);
-        });
       }
 
       if (persistEndpoint && pendingDocs.length > 0) {
@@ -408,14 +539,14 @@ export default function ImportPrescriptionModal({
         created.push(...(saveJson.created || []));
       }
 
-      const baseMsg = blocks.length > 1
-        ? `${blocks.length} formulaciones importadas (${blocks.map(b => b.treatmentType || 'Form.').join(', ')})`
+      const baseMsg = effectiveBlocks.length > 1
+        ? `${effectiveBlocks.length} formulaciones importadas (${effectiveBlocks.map(b => b.treatmentType).join(', ')})`
         : 'Prescripción importada con éxito';
       const matchMsg = totalMatchedCatalog > 0
         ? ` · ${totalMatchedCatalog} API${totalMatchedCatalog > 1 ? 's' : ''} en catálogo`
         : '';
       const placeholderMsg = totalNewPlaceholders > 0
-        ? ` · ${totalNewPlaceholders} placeholder${totalNewPlaceholders > 1 ? 's' : ''} creado${totalNewPlaceholders > 1 ? 's' : ''}`
+        ? ` · ${totalNewPlaceholders} personalizado${totalNewPlaceholders > 1 ? 's' : ''}`
         : '';
 
       toast.success(`${baseMsg}${matchMsg}${placeholderMsg}`, { id: 'save-toast' });
@@ -440,12 +571,17 @@ export default function ImportPrescriptionModal({
 
   if (!isOpen) return null;
 
+  const currentPreviewBlock = reviewData?.blocks?.[previewBlockIdx] || reviewData?.blocks?.[0] || {};
+  const currentPreviewIngredients = (currentPreviewBlock.items || []).map(it => {
+    return `${it.name || ''} ${it.dose || ''}`.trim();
+  }).filter(Boolean);
+
   return (
     <div style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(15, 23, 42, 0.65)',
-      backdropFilter: 'blur(5px)',
+      backgroundColor: 'rgba(15, 23, 42, 0.70)',
+      backdropFilter: 'blur(6px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -457,7 +593,8 @@ export default function ImportPrescriptionModal({
         backgroundColor: '#ffffff',
         borderRadius: '16px',
         width: '100%',
-        maxWidth: reviewData ? '680px' : '520px',
+        maxWidth: reviewData ? '920px' : '520px',
+        maxHeight: '92vh',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         display: 'flex',
         flexDirection: 'column',
@@ -466,7 +603,7 @@ export default function ImportPrescriptionModal({
         transition: 'max-width 0.2s ease',
         border: '1px solid #e2e8f0'
       }}>
-        {/* Header */}
+        {/* Header (GCP Style) */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -477,17 +614,17 @@ export default function ImportPrescriptionModal({
           gap: '1rem'
         }}>
           <AIContextBadge
-            title={reviewData ? (reviewData.isLabResult ? 'Review & Confirm Lab Result' : 'Review & Confirm Prescription') : title}
+            title={reviewData ? (reviewData.isLabResult ? 'Review & Confirm Lab Result' : 'Review, Edit & Previsualize Prescription') : title}
             subtitle={reviewData 
               ? (reviewData.isLabResult
                   ? 'Verifica los biomarcadores, paciente y médico antes de archivar en la sección de analíticas.'
-                  : 'Verifica y edita la clínica, médico prescriptor y fecha del resultado antes de importar.')
+                  : 'Revisa y edita los principios activos vinculados a Algolia, y previsualiza las etiquetas antes de importar.')
               : 'Multimodal AI parses clinical scripts, lab reports, and doctor signatures into official records'}
             contextPill={reviewData?.isLabResult 
               ? `Biomarker: ${reviewData.labBiomarker || 'NAD+'} · #${reviewData.protocolNumber || 'Lab'}` 
               : (reviewData?.testName ? `${reviewData.testName}${reviewData.boxId ? ` · #${reviewData.boxId}` : ''}` : (context?.patientName ? `Patient: ${context.patientName}` : "Target: Official Rx Engine"))}
             accentColor={reviewData?.isLabResult ? "#2563eb" : "#0d9488"}
-            model="Gemini 3.5 Flash • Multimodal"
+            model="Gemini 2.5 Flash • Resilient Router"
           />
           <button 
             onClick={handleClose}
@@ -506,13 +643,15 @@ export default function ImportPrescriptionModal({
           </button>
         </div>
 
-        {/* Body */}
-        <div style={{ padding: '1.5rem' }}>
+        {/* Body Container */}
+        <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1 }}>
           {reviewData ? (
-            /* ── Step 2: Extraction Review & Editable Summary ── */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            /* ── Step 2: Extraction Review, Interactive Editor & Preview ── */
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+              {/* Mode Specific Banners */}
               {reviewData.isLabResult ? (
-                /* ── Laboratory Result DBS Banner ── */
+                /* Lab DBS Banner */
                 <div style={{
                   background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)',
                   border: '1px solid #bfdbfe',
@@ -526,15 +665,9 @@ export default function ImportPrescriptionModal({
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{
-                      width: '42px',
-                      height: '42px',
-                      borderRadius: '10px',
-                      background: '#2563eb',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
+                      width: '42px', height: '42px', borderRadius: '10px',
+                      background: '#2563eb', color: '#ffffff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                     }}>
                       <FlaskConical size={22} />
                     </div>
@@ -560,10 +693,7 @@ export default function ImportPrescriptionModal({
                       {reviewData.labValue} <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>{reviewData.labUnit}</span>
                     </div>
                     <span style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      padding: '2px 8px',
-                      borderRadius: '999px',
+                      fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '999px',
                       background: (reviewData.labZone === 'green' || reviewData.labZone === 'optimal' || reviewData.labZone === 'light_green') ? '#dcfce7' : '#fef3c7',
                       color: (reviewData.labZone === 'green' || reviewData.labZone === 'optimal') ? '#15803d' : '#b45309'
                     }}>
@@ -572,346 +702,547 @@ export default function ImportPrescriptionModal({
                   </div>
                 </div>
               ) : (
+                /* Top GCP Tab Strip for Prescriptions: Editor vs. Label Preview */
                 <div style={{
-                  background: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  fontSize: '0.82rem',
-                  color: '#166534'
+                  borderBottom: '1px solid #e2e8f0',
+                  paddingBottom: '8px',
+                  flexWrap: 'wrap',
+                  gap: '8px'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
-                    <CheckCircle2 size={16} color="#16a34a" />
-                    <span>Datos extraídos con éxito del documento</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('editor')}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '8px 14px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: activeTab === 'editor' ? '#e0f2fe' : 'transparent',
+                        color: activeTab === 'editor' ? '#0369a1' : '#64748b',
+                        fontWeight: activeTab === 'editor' ? 700 : 600,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <Edit3 size={14} />
+                      <span>1. Datos Clínicos &amp; Fórmulas</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('preview')}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '8px 14px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: activeTab === 'preview' ? '#e0f2fe' : 'transparent',
+                        color: activeTab === 'preview' ? '#0369a1' : '#64748b',
+                        fontWeight: activeTab === 'preview' ? 700 : 600,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <Eye size={14} />
+                      <span>2. Previsualizar Etiquetas</span>
+                      <span style={{
+                        fontSize: '0.68rem',
+                        background: activeTab === 'preview' ? '#0284c7' : '#94a3b8',
+                        color: '#ffffff',
+                        padding: '1px 6px',
+                        borderRadius: '999px',
+                        fontWeight: 700
+                      }}>
+                        {reviewData.blocks.length}
+                      </span>
+                    </button>
                   </div>
+
                   {reviewData.extractedData?.confidenceScore && (
-                    <span style={{ fontSize: '0.74rem', background: '#dcfce7', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
-                      {reviewData.extractedData.confidenceScore}% Precisión
+                    <span style={{
+                      fontSize: '0.72rem',
+                      background: '#dcfce7',
+                      color: '#15803d',
+                      padding: '3px 8px',
+                      borderRadius: '4px',
+                      fontWeight: 700,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <CheckCircle2 size={12} />
+                      {reviewData.extractedData.confidenceScore}% Precisión OCR
                     </span>
                   )}
                 </div>
               )}
 
-              {/* Lab Biomarker Quantitative Edit Row */}
-              {reviewData.isLabResult && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                      Valor Cuantitativo
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={reviewData.labValue}
-                      onChange={(e) => setReviewData(prev => ({ ...prev, labValue: e.target.value }))}
-                      style={{ width: '100%', height: '36px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 10px', fontSize: '0.88rem', fontWeight: 700, boxSizing: 'border-box' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                      Unidad
-                    </label>
-                    <input
-                      type="text"
-                      value={reviewData.labUnit}
-                      onChange={(e) => setReviewData(prev => ({ ...prev, labUnit: e.target.value }))}
-                      style={{ width: '100%', height: '36px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 10px', fontSize: '0.88rem', boxSizing: 'border-box' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                      Rango / Zona
-                    </label>
-                    <select
-                      value={reviewData.labZone}
-                      onChange={(e) => {
-                        const z = e.target.value;
-                        const labels = {
-                          yellow: 'Insufficient / Suboptimal',
-                          green: 'Optimal / Longevity Range',
-                          light_green: 'Near-Optimal',
-                          red: 'Deficient / Depleted'
-                        };
-                        setReviewData(prev => ({ ...prev, labZone: z, labZoneLabel: labels[z] || z }));
-                      }}
-                      style={{ width: '100%', height: '36px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 8px', fontSize: '0.84rem', boxSizing: 'border-box', background: '#fff' }}
-                    >
-                      <option value="yellow">Yellow (Insufficient / Suboptimal)</option>
-                      <option value="green">Green (Optimal / Longevity)</option>
-                      <option value="light_green">Light Green (Near-Optimal)</option>
-                      <option value="red">Red (Deficient / Depleted)</option>
-                    </select>
-                  </div>
-                </div>
-              )}
+              {/* ── TAB 1: Clinical Identification & Formulation Editor ── */}
+              {activeTab === 'editor' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-              {/* Patient Fields */}
-              {reviewData.isLabResult ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
-                  <div style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                      <User size={13} color="#64748b" />
-                      <span>Nombre del Paciente / Patient Name</span>
-                      <span style={{ color: '#dc2626' }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={reviewData.patientName}
-                      onChange={(e) => setReviewData(prev => ({ ...prev, patientName: e.target.value }))}
-                      style={{
-                        width: '100%',
-                        height: '38px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        padding: '0 12px',
-                        fontSize: '0.88rem',
-                        color: '#0f172a',
-                        boxSizing: 'border-box'
-                      }}
-                      placeholder="Nombre del Paciente"
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                      Código Muestra
-                    </label>
-                    <input
-                      type="text"
-                      value={reviewData.patientCode}
-                      onChange={(e) => setReviewData(prev => ({ ...prev, patientCode: e.target.value }))}
-                      style={{ width: '100%', height: '38px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 10px', fontSize: '0.84rem', boxSizing: 'border-box' }}
-                      placeholder="ej. DBUQEQ842449"
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                      Edad / Sexo
-                    </label>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      <input
-                        type="number"
-                        value={reviewData.patientAge}
-                        onChange={(e) => setReviewData(prev => ({ ...prev, patientAge: e.target.value }))}
-                        style={{ width: '55px', height: '38px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 6px', fontSize: '0.84rem', boxSizing: 'border-box' }}
-                        placeholder="Edad"
-                      />
-                      <select
-                        value={reviewData.patientGender}
-                        onChange={(e) => setReviewData(prev => ({ ...prev, patientGender: e.target.value }))}
-                        style={{ flex: 1, height: '38px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 6px', fontSize: '0.84rem', boxSizing: 'border-box', background: '#fff' }}
-                      >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                    <User size={13} color="#64748b" />
-                    <span>Nombre del Paciente / Patient Name</span>
-                    <span style={{ color: '#dc2626' }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={reviewData.patientName}
-                    onChange={(e) => setReviewData(prev => ({ ...prev, patientName: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      height: '38px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      padding: '0 12px',
-                      fontSize: '0.88rem',
-                      color: '#0f172a',
-                      boxSizing: 'border-box'
-                    }}
-                    placeholder="Nombre y Apellidos del Paciente"
-                  />
-                </div>
-              )}
-
-              {/* 2-Column: Clinic & Prescribing Doctor */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
-                {/* Clinic with ClinicPicker */}
-                <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                    <Building2 size={13} color="#64748b" />
-                    <span>Clínica / Clinic</span>
-                    <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, textTransform: 'none' }}>(Elegir o cambiar)</span>
-                  </label>
-                  <ClinicPicker
-                    value={reviewData.clinicId || ''}
-                    clinicName={reviewData.clinicName || ''}
-                    allowCustom={true}
-                    placeholder="Seleccionar o buscar clínica en Atlas..."
-                    onChange={({ clinicId, clinicName }) => {
-                      setReviewData(prev => ({
-                        ...prev,
-                        clinicId: clinicId || '',
-                        clinicName: clinicName || '',
-                      }));
-                    }}
-                  />
-                </div>
-
-                {/* Prescribing Doctor with PhysicianPicker */}
-                <div>
-                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Stethoscope size={13} color="#64748b" />
-                      <span>Médico Prescriptor / Doctor</span>
-                      <span style={{ color: '#dc2626' }}>*</span>
-                    </div>
-                    {(reviewData.clinicName || reviewData.clinicId) && (
-                      <span style={{ fontSize: '0.66rem', color: '#1a73e8', fontWeight: 600, textTransform: 'none' }}>
-                        Filtrado por clínica
-                      </span>
-                    )}
-                  </label>
-                  <PhysicianPicker
-                    value={reviewData.doctorId || ''}
-                    physicianName={reviewData.doctorName || ''}
-                    clinicId={reviewData.clinicId || ''}
-                    clinicName={reviewData.clinicName || ''}
-                    strictClinic={Boolean(reviewData.clinicId || reviewData.clinicName)}
-                    allowCustom={true}
-                    placeholder="Elegir doctor de la clínica o escribir..."
-                    onChange={({ doctorId, doctorName, license }) => {
-                      setReviewData(prev => ({
-                        ...prev,
-                        doctorId: doctorId || '',
-                        doctorName: doctorName || '',
-                        doctorLicense: license || prev.doctorLicense
-                      }));
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Dates & Clinical specific review */}
-              {reviewData.isLabResult ? (
-                /* Lab Result Dates */
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-                  <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                      <Calendar size={13} color="#64748b" />
-                      <span>Fecha de Recogida / Collection Date</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={reviewData.collectionDate}
-                      onChange={(e) => setReviewData(prev => ({ ...prev, collectionDate: e.target.value }))}
-                      style={{ width: '100%', height: '38px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 12px', fontSize: '0.88rem', boxSizing: 'border-box' }}
-                      placeholder="YYYY-MM-DD"
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                      <Calendar size={13} color="#059669" />
-                      <span>Fecha de Análisis / Report Date</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={reviewData.analysisDate}
-                      onChange={(e) => setReviewData(prev => ({ ...prev, analysisDate: e.target.value }))}
-                      style={{ width: '100%', height: '38px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 12px', fontSize: '0.88rem', boxSizing: 'border-box' }}
-                      placeholder="YYYY-MM-DD"
-                    />
-                  </div>
-                </div>
-              ) : (
-                /* Prescription Manufacturing / Genetic Result Date */
-                <div>
-                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Calendar size={13} color="#64748b" />
-                      <span>Fecha de Fabricación / Genetic Result Date</span>
-                      <span style={{ color: '#dc2626' }}>*</span>
-                    </div>
-                    <span style={{ fontSize: '0.66rem', color: '#059669', fontWeight: 600, textTransform: 'none' }}>
-                      Tomada del informe genético (no fecha de importación)
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    value={reviewData.mfgDate}
-                    onChange={(e) => setReviewData(prev => ({ ...prev, mfgDate: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      height: '38px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      padding: '0 12px',
-                      fontSize: '0.88rem',
-                      color: '#0f172a',
-                      boxSizing: 'border-box'
-                    }}
-                    placeholder="YYYY-MM-DD o DD-MM-YYYY (ej. 2025-12-15)"
-                  />
-                </div>
-              )}
-
-              {/* Lab Result Interpretation OR Extracted Formulations Preview */}
-              {reviewData.isLabResult ? (
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
-                    Interpretación Clínica del Laboratorio
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={reviewData.interpretation || ''}
-                    onChange={(e) => setReviewData(prev => ({ ...prev, interpretation: e.target.value }))}
-                    style={{ width: '100%', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '8px 12px', fontSize: '0.82rem', resize: 'vertical', boxSizing: 'border-box' }}
-                    placeholder="Interpretación médica o notas del informe..."
-                  />
-                </div>
-              ) : (
-                Array.isArray(reviewData.blocks) && reviewData.blocks.length > 0 && (
+                  {/* Section A: Identification & Attributions */}
                   <div style={{
-                    background: '#f8fafc',
+                    background: '#ffffff',
                     border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    padding: '10px 12px'
+                    borderRadius: '10px',
+                    padding: '14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
-                      <Pill size={14} color="#0d9488" />
-                      <span>Formulaciones detectadas ({reviewData.blocks.length}):</span>
+                    <div style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', color: '#475569', letterSpacing: '0.04em' }}>
+                      Identificación Clínica del Paciente y Médico
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      {reviewData.blocks.map((b, idx) => {
-                        const count = Array.isArray(b.items) ? b.items.length : (Array.isArray(b.ingredients) ? b.ingredients.length : 0);
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                      {/* Patient Name */}
+                      <div>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                          <User size={13} color="#64748b" />
+                          <span>Nombre del Paciente / Patient Name</span>
+                          <span style={{ color: '#dc2626' }}>*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={reviewData.patientName}
+                          onChange={(e) => setReviewData(prev => ({ ...prev, patientName: e.target.value }))}
+                          style={{
+                            width: '100%', height: '38px', borderRadius: '6px',
+                            border: '1px solid #cbd5e1', padding: '0 12px',
+                            fontSize: '0.88rem', color: '#0f172a', boxSizing: 'border-box'
+                          }}
+                          placeholder="Nombre y Apellidos del Paciente"
+                        />
+                      </div>
+
+                      {/* File Number / Prescription Code */}
+                      <div>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                          <FileText size={13} color="#64748b" />
+                          <span>Nº Historia / Protocolo / Rx #</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={reviewData.protocolNumber}
+                          onChange={(e) => setReviewData(prev => ({ ...prev, protocolNumber: e.target.value }))}
+                          style={{
+                            width: '100%', height: '38px', borderRadius: '6px',
+                            border: '1px solid #cbd5e1', padding: '0 12px',
+                            fontSize: '0.88rem', color: '#0f172a', boxSizing: 'border-box'
+                          }}
+                          placeholder="ej. 51861 o BOX01399AATRI"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Clinic & Prescribing Doctor with Pickers */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                      {/* Clinic */}
+                      <div>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                          <Building2 size={13} color="#64748b" />
+                          <span>Clínica / Centro Médico</span>
+                        </label>
+                        <ClinicPicker
+                          value={reviewData.clinicId || ''}
+                          clinicName={reviewData.clinicName || ''}
+                          allowCustom={true}
+                          placeholder="Seleccionar o buscar clínica en Atlas..."
+                          onChange={({ clinicId, clinicName }) => {
+                            setReviewData(prev => ({
+                              ...prev,
+                              clinicId: clinicId || '',
+                              clinicName: clinicName || '',
+                            }));
+                          }}
+                        />
+                      </div>
+
+                      {/* Doctor */}
+                      <div>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                          <Stethoscope size={13} color="#64748b" />
+                          <span>Médico Prescriptor</span>
+                          <span style={{ color: '#dc2626' }}>*</span>
+                        </label>
+                        <PhysicianPicker
+                          value={reviewData.doctorId || ''}
+                          physicianName={reviewData.doctorName || ''}
+                          clinicId={reviewData.clinicId || ''}
+                          clinicName={reviewData.clinicName || ''}
+                          strictClinic={Boolean(reviewData.clinicId || reviewData.clinicName)}
+                          allowCustom={true}
+                          placeholder="Elegir doctor de la clínica o escribir..."
+                          onChange={({ doctorId, doctorName, license }) => {
+                            setReviewData(prev => ({
+                              ...prev,
+                              doctorId: doctorId || '',
+                              doctorName: doctorName || '',
+                              doctorLicense: license || prev.doctorLicense
+                            }));
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Manufacturing / Report Date */}
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Calendar size={13} color="#64748b" />
+                          <span>Fecha de Fabricación / Informe Genético</span>
+                          <span style={{ color: '#dc2626' }}>*</span>
+                        </div>
+                        <span style={{ fontSize: '0.66rem', color: '#059669', fontWeight: 600 }}>
+                          Tomada del informe o firma médica (no fecha de subida)
+                        </span>
+                      </label>
+                      <input
+                        type="text"
+                        value={reviewData.mfgDate}
+                        onChange={(e) => setReviewData(prev => ({ ...prev, mfgDate: e.target.value }))}
+                        style={{
+                          width: '100%', height: '38px', borderRadius: '6px',
+                          border: '1px solid #cbd5e1', padding: '0 12px',
+                          fontSize: '0.88rem', color: '#0f172a', boxSizing: 'border-box'
+                        }}
+                        placeholder="YYYY-MM-DD (ej. 2025-12-15)"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Section B: Formulation Blocks & Algolia Ingredients Editor */}
+                  {!reviewData.isLabResult && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Pill size={16} color="#0d9488" />
+                          <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+                            Formulaciones y Principios Activos ({reviewData.blocks.length})
+                          </span>
+                        </div>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                          Busca cada principio activo en Algolia para vincularlo al catálogo oficial.
+                        </span>
+                      </div>
+
+                      {reviewData.blocks.map((block, bIdx) => {
+                        const isExpanded = !!expandedBlocks[bIdx];
                         return (
-                          <div key={idx} style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            background: '#ffffff',
-                            border: '1px solid #cbd5e1',
-                            borderRadius: '6px',
-                            padding: '6px 10px',
-                            fontSize: '0.78rem'
-                          }}>
-                            <span style={{ fontWeight: 600, color: '#0f172a' }}>
-                              Parte {idx + 1}: {b.treatmentType || b.treatmentProgram || `Fórmula ${idx + 1}`}
-                            </span>
-                            <span style={{ fontSize: '0.72rem', background: '#e2e8f0', color: '#475569', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                              {count} principio{count === 1 ? '' : 's'} activo{count === 1 ? '' : 's'}
-                            </span>
+                          <div
+                            key={bIdx}
+                            style={{
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '10px',
+                              background: '#ffffff',
+                              overflow: 'hidden',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                            }}
+                          >
+                            {/* Block Header Accordion Bar */}
+                            <div
+                              onClick={() => toggleBlockExpanded(bIdx)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '12px 14px',
+                                background: '#f8fafc',
+                                borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none',
+                                cursor: 'pointer',
+                                userSelect: 'none'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span style={{
+                                  background: '#0d9488',
+                                  color: '#ffffff',
+                                  fontSize: '0.70rem',
+                                  fontWeight: 800,
+                                  padding: '2px 8px',
+                                  borderRadius: '4px'
+                                }}>
+                                  FÓRMULA {bIdx + 1}
+                                </span>
+                                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
+                                  {block.treatmentType || `Formulación ${bIdx + 1}`}
+                                </span>
+                                {block.volume && (
+                                  <span style={{ fontSize: '0.72rem', color: '#64748b', background: '#e2e8f0', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                                    {block.volume}
+                                  </span>
+                                )}
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600 }}>
+                                  {(block.items || []).length} activo{(block.items || []).length === 1 ? '' : 's'}
+                                </span>
+                                {isExpanded ? <ChevronUp size={16} color="#64748b" /> : <ChevronDown size={16} color="#64748b" />}
+                              </div>
+                            </div>
+
+                            {/* Block Content */}
+                            {isExpanded && (
+                              <div style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {/* Formula Title, Form, Volume */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+                                  <div>
+                                    <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#475569', marginBottom: '3px', textTransform: 'uppercase' }}>
+                                      Nombre de la Fórmula
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={block.treatmentType}
+                                      onChange={(e) => handleUpdateBlockField(bIdx, 'treatmentType', e.target.value)}
+                                      style={{ width: '100%', height: '34px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 8px', fontSize: '0.82rem', boxSizing: 'border-box' }}
+                                      placeholder="ej. TrichoSol Solución Tópica"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#475569', marginBottom: '3px', textTransform: 'uppercase' }}>
+                                      Forma Galénica
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={block.dispensingForm}
+                                      onChange={(e) => handleUpdateBlockField(bIdx, 'dispensingForm', e.target.value)}
+                                      style={{ width: '100%', height: '34px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 8px', fontSize: '0.82rem', boxSizing: 'border-box' }}
+                                      placeholder="ej. Solución Tópica, Cápsulas"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#475569', marginBottom: '3px', textTransform: 'uppercase' }}>
+                                      Volumen / Envase
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={block.volume}
+                                      onChange={(e) => handleUpdateBlockField(bIdx, 'volume', e.target.value)}
+                                      style={{ width: '100%', height: '34px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 8px', fontSize: '0.82rem', boxSizing: 'border-box' }}
+                                      placeholder="ej. 100 mL o 60 Cápsulas"
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Posology Instructions */}
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#475569', marginBottom: '3px', textTransform: 'uppercase' }}>
+                                    Posología e Instrucciones de Uso
+                                  </label>
+                                  <textarea
+                                    rows={2}
+                                    value={block.posology}
+                                    onChange={(e) => handleUpdateBlockField(bIdx, 'posology', e.target.value)}
+                                    style={{ width: '100%', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '6px 10px', fontSize: '0.80rem', resize: 'vertical', boxSizing: 'border-box' }}
+                                    placeholder="ej. Aplicar 1 mL cada 24 horas sobre el cuero cabelludo seco..."
+                                  />
+                                </div>
+
+                                {/* Active Ingredients Table with Algolia Picker */}
+                                <div>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                    <label style={{ fontSize: '0.70rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                      Principios Activos (Búsqueda Algolia / Catálogo)
+                                    </label>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleAddIngredient(bIdx)}
+                                      style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        padding: '4px 8px',
+                                        borderRadius: '4px',
+                                        border: '1px solid #0d9488',
+                                        background: '#f0fdfa',
+                                        color: '#0f766e',
+                                        fontSize: '0.72rem',
+                                        fontWeight: 700,
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      <Plus size={12} />
+                                      <span>Añadir Principio Activo</span>
+                                    </button>
+                                  </div>
+
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {(block.items || []).map((item, itIdx) => (
+                                      <div
+                                        key={item.id || itIdx}
+                                        style={{
+                                          display: 'grid',
+                                          gridTemplateColumns: 'minmax(200px, 2fr) minmax(110px, 1fr) auto auto',
+                                          gap: '8px',
+                                          alignItems: 'center',
+                                          background: '#f8fafc',
+                                          padding: '8px',
+                                          borderRadius: '6px',
+                                          border: '1px solid #e2e8f0'
+                                        }}
+                                      >
+                                        {/* Algolia Search Input */}
+                                        <AlgoliaIngredientSearchInput
+                                          value={item.name}
+                                          productId={item.productId}
+                                          sku={item.sku}
+                                          isPlaceholder={item.isPlaceholder}
+                                          onChange={({ name, productId, sku, isPlaceholder }) => {
+                                            handleUpdateIngredient(bIdx, itIdx, {
+                                              name,
+                                              productId,
+                                              sku,
+                                              isPlaceholder
+                                            });
+                                          }}
+                                        />
+
+                                        {/* Dose / Concentration */}
+                                        <input
+                                          type="text"
+                                          value={item.dose || ''}
+                                          onChange={(e) => handleUpdateIngredient(bIdx, itIdx, { dose: e.target.value })}
+                                          placeholder="Dosis (ej. 5% o 2 mg)"
+                                          style={{
+                                            height: '36px',
+                                            borderRadius: '6px',
+                                            border: '1px solid #cbd5e1',
+                                            padding: '0 8px',
+                                            fontSize: '0.82rem',
+                                            boxSizing: 'border-box'
+                                          }}
+                                        />
+
+                                        {/* Vehicle / Base Checkbox */}
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.72rem', color: '#475569', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                                          <input
+                                            type="checkbox"
+                                            checked={!!item.isVehicleOrBase}
+                                            onChange={(e) => handleUpdateIngredient(bIdx, itIdx, { isVehicleOrBase: e.target.checked })}
+                                          />
+                                          <span>Base</span>
+                                        </label>
+
+                                        {/* Delete Action */}
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteIngredient(bIdx, itIdx)}
+                                          title="Eliminar principio activo"
+                                          style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            color: '#ef4444',
+                                            cursor: 'pointer',
+                                            padding: '4px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                          }}
+                                        >
+                                          <Trash2 size={15} />
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
                     </div>
-                  </div>
-                )
+                  )}
+                </div>
               )}
 
-              {/* Bottom Actions */}
+              {/* ── TAB 2: Live Vector SVG Label Preview ── */}
+              {activeTab === 'preview' && !reviewData.isLabResult && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Phase selector tabs if multi-block */}
+                  {reviewData.blocks.length > 1 && (
+                    <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+                      {reviewData.blocks.map((b, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setPreviewBlockIdx(idx)}
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '6px',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            border: previewBlockIdx === idx ? '1px solid #0284c7' : '1px solid #cbd5e1',
+                            background: previewBlockIdx === idx ? '#e0f2fe' : '#ffffff',
+                            color: previewBlockIdx === idx ? '#0369a1' : '#475569',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Fase {idx + 1}: {b.treatmentType || `Fórmula ${idx + 1}`}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* SVG Container Mockup */}
+                  <div style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '24px 16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '14px'
+                  }}>
+                    <div style={{
+                      maxWidth: '460px',
+                      width: '100%',
+                      background: '#ffffff',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                      border: '1px solid #cbd5e1'
+                    }}>
+                      <PharmapolisLabelSvg
+                        labelData={{
+                          patientName: reviewData.patientName,
+                          code: reviewData.protocolNumber || 'RX-PENDING',
+                          productName: currentPreviewBlock.treatmentType || 'Compounded Pharmaceutical Formula',
+                          ingredients: currentPreviewIngredients,
+                          directions: currentPreviewBlock.posology || 'Aplicar según prescripción médica.',
+                          prescriberName: reviewData.doctorName || 'Prescribing Physician',
+                          date: reviewData.mfgDate || new Date().toISOString().split('T')[0],
+                          volume: currentPreviewBlock.volume || '100 mL'
+                        }}
+                        variant="backQr"
+                        widthMm={75}
+                        heightMm={45}
+                      />
+                    </div>
+
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'center', maxWidth: '420px', lineHeight: 1.4 }}>
+                      Previsualización en tiempo real de la etiqueta reglamentaria (75 mm × 45 mm) con principios activos, posología, lote, código QR y datos del médico.
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom Actions Bar */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -919,7 +1250,8 @@ export default function ImportPrescriptionModal({
                 gap: '12px',
                 marginTop: '10px',
                 paddingTop: '12px',
-                borderTop: '1px solid #e2e8f0'
+                borderTop: '1px solid #e2e8f0',
+                flexWrap: 'wrap'
               }}>
                 <button
                   type="button"
@@ -940,40 +1272,65 @@ export default function ImportPrescriptionModal({
                   }}
                 >
                   <ArrowLeft size={14} />
-                  <span>Volver a Subir</span>
+                  <span>Subir Otro Documento</span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={handleConfirmImport}
-                  disabled={isSaving || !reviewData.patientName.trim()}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 20px',
-                    borderRadius: '6px',
-                    border: 'none',
-                    background: isSaving ? '#94a3b8' : (reviewData.isLabResult ? '#2563eb' : '#1a73e8'),
-                    color: '#ffffff',
-                    fontSize: '0.86rem',
-                    fontWeight: 700,
-                    cursor: isSaving ? 'not-allowed' : 'pointer',
-                    boxShadow: reviewData.isLabResult ? '0 1px 3px rgba(37,99,235,0.3)' : '0 1px 3px rgba(26,115,232,0.3)'
-                  }}
-                >
-                  {isSaving ? (
-                    <>
-                      <Activity size={14} className="spin" />
-                      <span>Guardando en Atlas...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Check size={16} />
-                      <span>{reviewData.isLabResult ? 'Confirmar e Importar Informe de Laboratorio' : 'Confirmar e Importar Prescripción'}</span>
-                    </>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {activeTab === 'editor' && !reviewData.isLabResult && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('preview')}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '8px 14px',
+                        borderRadius: '6px',
+                        border: '1px solid #0284c7',
+                        background: '#e0f2fe',
+                        color: '#0369a1',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Eye size={14} />
+                      <span>Ver Etiqueta</span>
+                    </button>
                   )}
-                </button>
+
+                  <button
+                    type="button"
+                    onClick={handleConfirmImport}
+                    disabled={isSaving || !reviewData.patientName.trim()}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 22px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: isSaving ? '#94a3b8' : (reviewData.isLabResult ? '#2563eb' : '#1a73e8'),
+                      color: '#ffffff',
+                      fontSize: '0.86rem',
+                      fontWeight: 700,
+                      cursor: isSaving ? 'not-allowed' : 'pointer',
+                      boxShadow: reviewData.isLabResult ? '0 1px 3px rgba(37,99,235,0.3)' : '0 1px 3px rgba(26,115,232,0.3)'
+                    }}
+                  >
+                    {isSaving ? (
+                      <>
+                        <Activity size={14} className="spin" />
+                        <span>Guardando en Atlas...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check size={16} />
+                        <span>{reviewData.isLabResult ? 'Confirmar e Importar Analítica' : 'Confirmar e Importar Prescripción'}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
@@ -1001,13 +1358,13 @@ export default function ImportPrescriptionModal({
                     <Activity size={48} color="#0ea5e9" style={{ marginBottom: '16px', animation: 'pulse 2s infinite' }} />
                     <h3 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1rem' }}>Processing Document...</h3>
                     <p style={{ margin: 0, color: '#64748b', textAlign: 'center', fontSize: '0.85rem' }}>
-                      Please wait while Gemini analyzes the document.
+                      Please wait while Atlas Multimodal AI extracts clinical formulas and attributions.
                     </p>
                   </>
                 ) : (
                   <>
                     <Upload size={48} color={isDragActive ? '#0ea5e9' : '#94a3b8'} style={{ marginBottom: '16px' }} />
-                    <h3 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1rem' }}>Drag & Drop or Click to Upload</h3>
+                    <h3 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1rem' }}>Drag &amp; Drop or Click to Upload</h3>
                     <p style={{ margin: 0, color: '#64748b', textAlign: 'center', fontSize: '0.85rem', marginBottom: '16px' }}>
                       Supported formats: PDF, PNG, JPG, JPEG
                     </p>
@@ -1072,7 +1429,7 @@ export default function ImportPrescriptionModal({
               }}>
                 <AlertCircle size={18} color="#64748b" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: '1.5' }}>
-                  <strong>Note:</strong> {note || 'Uploaded files will be analyzed by AI, allowing you to review prescriptions or laboratory results before creating official records.'}
+                  <strong>Acceso Clínico:</strong> {note || 'Módulo exclusivo para médicos colegiados y administradores de Atlas. Los archivos se procesan mediante IA multimodal para permitir la revisión y edición de fórmulas antes de generar registros oficiales.'}
                 </div>
               </div>
             </>

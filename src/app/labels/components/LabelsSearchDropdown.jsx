@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Check, Plus, X } from '@/lib/icons';
+import { Search, Check, Plus, X, Upload } from '@/lib/icons';
 
 export default function LabelsSearchDropdown({
   searchQuery,
@@ -12,6 +12,7 @@ export default function LabelsSearchDropdown({
   patientQueue,
   onSelectPatient,
   onClearRecent,
+  onOpenImport,
   formatResultDate,
   isEs,
   highlightedIndex = -1
@@ -62,8 +63,45 @@ export default function LabelsSearchDropdown({
 
       {/* Items List */}
       {itemsToRender.length === 0 && !isSearching ? (
-        <div className="pls-search-empty-state">
-          {isEs ? 'No se encontraron registros.' : 'No matching records found.'}
+        <div className="pls-search-empty-state" style={{ padding: '24px 18px', textAlign: 'center', background: '#f8fafc', borderRadius: '8px', margin: '8px' }}>
+          <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1e293b', marginBottom: '6px' }}>
+            {isEs ? 'Paciente o prescripción no encontrados' : 'Patient or prescription not found'}
+          </div>
+          <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.45, maxWidth: '380px', margin: '0 auto 14px' }}>
+            {isEs
+              ? 'Para diseñar y generar las etiquetas, es necesario cargar primero la prescripción del paciente (PDF o escaneo). El sistema extraerá automáticamente sus fórmulas.'
+              : 'To design and generate labels, please import the patient prescription first (PDF or scan). The system will automatically extract and match their formulas.'}
+          </div>
+          {onOpenImport && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onOpenImport();
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                color: '#ffffff',
+                background: '#1a73e8',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(26,115,232,0.3)',
+                transition: 'background 0.15s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#1557b0'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#1a73e8'}
+            >
+              <Upload size={14} />
+              <span>{isEs ? 'Cargar Prescripción Primero' : 'Import Prescription First (PDF / Scan)'}</span>
+            </button>
+          )}
         </div>
       ) : (
         itemsToRender.map((item, index) => {

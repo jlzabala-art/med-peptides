@@ -25,7 +25,7 @@
     "deploy:cron": "npm run build:cron && npx firebase-tools deploy --only functions:cron",
     "build:finance": "rm -rf functions-finance/src && cp -R functions/src functions-finance/src && cp -R functions/emailTemplates functions-finance/emailTemplates",
     "deploy:finance": "npm run build:finance && npx firebase-tools deploy --only functions:finance",
-    "build:triggers": "rm -rf functions-triggers/src && cp -R functions/src functions-triggers/src && cp -R functions/emailTemplates functions-triggers/emailTemplates",
+    "build:triggers": "rm -rf functions-triggers/src functions-triggers/emailTemplates && cp -R functions/src functions-triggers/src && cp -R functions/emailTemplates functions-triggers/emailTemplates",
     "deploy:triggers": "npm run build:triggers && npx firebase-tools deploy --only functions:triggers"
   },
   "dependencies": {

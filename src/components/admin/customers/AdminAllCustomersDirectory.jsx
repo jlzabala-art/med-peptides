@@ -49,6 +49,34 @@ function getCustomerTypeMeta(type = '') {
 }
 
 /**
+ * Universal name resolution helper for Customers & Users (prevents "Unnamed Account")
+ */
+export function resolveCustomerDisplayName(c) {
+  if (!c) return 'Unnamed Account';
+  const nameCandidate = (
+    c.name ||
+    c.displayName ||
+    c.fullName ||
+    c.companyName ||
+    c.legalName ||
+    ([c.firstName, c.lastName].filter(Boolean).join(' ')) ||
+    c.patientName ||
+    c.doctorName ||
+    c.contactName
+  );
+  if (nameCandidate && nameCandidate.trim() !== '') {
+    return nameCandidate.trim();
+  }
+  if (c.email && typeof c.email === 'string') {
+    return c.email.split('@')[0];
+  }
+  if (c.contactEmail && typeof c.contactEmail === 'string') {
+    return c.contactEmail.split('@')[0];
+  }
+  return 'Unnamed Account';
+}
+
+/**
  * AdminAllCustomersDirectory
  * ─────────────────────────────────────────────────────────────────────────────
  * Authoritative Unified Customers Directory (SSOT).
@@ -75,18 +103,22 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
 
     // 1. Existing in 'customers'
     rawCustomers.forEach(c => {
-      if (c && c.id) map.set(c.id, { ...c });
+      if (c && c.id) {
+        const resolved = resolveCustomerDisplayName(c);
+        map.set(c.id, { ...c, name: resolved });
+      }
     });
 
     // 2. Supplement clinics if not yet migrated
     rawClinics.forEach(cl => {
       if (!cl || !cl.id) return;
       if (!map.has(cl.id)) {
+        const resolved = resolveCustomerDisplayName(cl);
         map.set(cl.id, {
           id: cl.id,
           customerType: 'clinic',
-          name: cl.name || cl.legalName || 'Clinic Partner',
-          companyName: cl.name,
+          name: resolved !== 'Unnamed Account' ? resolved : (cl.name || cl.legalName || 'Clinic Partner'),
+          companyName: cl.name || cl.companyName || cl.legalName,
           email: cl.email,
           phone: cl.phone,
           country: cl.country,
@@ -105,10 +137,11 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
     rawWholesalers.forEach(ws => {
       if (!ws || !ws.id) return;
       if (!map.has(ws.id)) {
+        const resolved = resolveCustomerDisplayName(ws);
         map.set(ws.id, {
           id: ws.id,
           customerType: 'wholesaler',
-          name: ws.companyName || ws.name || 'Wholesale Partner',
+          name: resolved !== 'Unnamed Account' ? resolved : (ws.companyName || ws.name || 'Wholesale Partner'),
           companyName: ws.companyName || ws.name,
           email: ws.contactEmail || ws.email,
           phone: ws.contactPhone || ws.phone,
@@ -335,7 +368,7 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flexWrap: 'wrap' }}>
               <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {row.name || row.companyName || 'Unnamed Account'}
+                {resolveCustomerDisplayName(row)}
               </span>
               <CopyableId value={row.id} iconOnly={true} />
               {hasBooks && (

@@ -478,7 +478,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         `  • Total Sterile Vials: ${supplySummary.totalVials}`,
         `  • Scheduled Injections: ${supplySummary.totalInjections} Micro-doses`,
         `  • Reconstitution Solvent: ${supplySummary.compounds.length * 2.0} mL Bacteriostatic 0.9% Benzyl Alcohol Water`,
-        `  • Cold Chain Stability: 28 Days refrigerated (2°C – 8°C)`,
+        `  • Formulation Stability: 28 Days post-reconstitution`,
         ``,
         `[4] TITRATION & DOSING TIMELINE`,
         phasesList || '  Consult phased timeline in the verified clinical engine',

@@ -35,14 +35,17 @@ const DEFAULT_TIER_WATERFALLS = {
     'gemini-flash-latest',
     'gemini-2.0-flash',
     'gemini-2.5-flash-lite',
-    'gemini-flash-lite-latest'
+    'gemini-flash-lite-latest',
+    'gemini-1.5-flash'
   ],
   [AI_TIER.REASONING]: [
     'gemini-2.5-flash',
+    'gemini-flash-latest',
     'gemini-2.5-pro',
     'gemini-pro-latest',
-    'gemini-flash-latest',
-    'gemini-2.0-flash'
+    'gemini-2.0-flash',
+    'gemini-1.5-pro',
+    'gemini-1.5-flash'
   ],
   [AI_TIER.LITE]: [
     'gemini-2.5-flash-lite',

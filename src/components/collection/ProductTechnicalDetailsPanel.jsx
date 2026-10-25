@@ -19,7 +19,7 @@ import {
 } from '@/lib/icons';
 import { getProductTechnicalDetails } from '@/data/productClinicalSpecsRegistry';
 
-export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs = false }) {
+export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs = false, datasheet = null, onViewProduct = null }) {
   const specs = getProductTechnicalDetails(product, brandSlug);
   const [showFullInci, setShowFullInci] = useState(false);
 
@@ -221,13 +221,14 @@ export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs 
       {/* ── CASE 2: NUTRACEUTICAL (Ultraman / UltraPerson Supplements) ── */}
       {specs.type === 'nutraceutical' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-          {/* Actives Table */}
-          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-            <div style={{ padding: '8px 12px', background: '#f5f3ff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#6b21a8', textTransform: 'uppercase' }}>
-                ⚡ {isEs ? 'Principios Activos Estandarizados por Dosis Diaria' : 'Standardized Active Principles per Daily Dose'}
+          {/* Actives Table (Google Cloud Console Standard) */}
+          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+            <div style={{ padding: '9px 14px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Sparkles size={13} color="#0284c7" />
+                <span>{isEs ? 'Composición Activa Estandarizada por Dosis' : 'Standardized Active Principles per Daily Dose'}</span>
               </span>
-              <span style={{ fontSize: '0.68rem', color: '#7c3aed', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.68rem', color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
                 High Bioavailability
               </span>
             </div>
@@ -235,22 +236,22 @@ export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs 
             {/* eslint-disable-next-line no-restricted-syntax */}
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.74rem' }}>
               <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.68rem', textTransform: 'uppercase' }}>
-                  <th style={{ padding: '8px 12px', width: '38%' }}>Standardized Bioactive Compound</th>
-                  <th style={{ padding: '8px 12px', width: '22%' }}>Clinical Amount</th>
-                  <th style={{ padding: '8px 12px', width: '40%' }}>Biological Action & Target</th>
+                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  <th style={{ padding: '8px 14px', width: '38%', fontWeight: 700 }}>{isEs ? 'Principio Activo Estandarizado' : 'Standardized Bioactive Compound'}</th>
+                  <th style={{ padding: '8px 14px', width: '22%', fontWeight: 700 }}>{isEs ? 'Cantidad Clínica' : 'Clinical Amount'}</th>
+                  <th style={{ padding: '8px 14px', width: '40%', fontWeight: 700 }}>{isEs ? 'Mecanismo y Diana Biológica' : 'Biological Action & Target'}</th>
                 </tr>
               </thead>
               <tbody>
                 {specs.actives.map((act, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>
+                  <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9', background: idx % 2 === 0 ? '#ffffff' : '#fafafa' }}>
+                    <td style={{ padding: '9px 14px', fontWeight: 750, color: '#0f172a' }}>
                       {act.name}
                     </td>
-                    <td style={{ padding: '8px 12px', fontWeight: 800, color: '#7c3aed' }}>
+                    <td style={{ padding: '9px 14px', fontWeight: 800, color: '#0284c7', fontVariantNumeric: 'tabular-nums' }}>
                       {act.amount}
                     </td>
-                    <td style={{ padding: '8px 12px', color: '#475569' }}>
+                    <td style={{ padding: '9px 14px', color: '#475569', lineHeight: 1.4 }}>
                       {act.role}
                     </td>
                   </tr>
@@ -259,19 +260,28 @@ export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs 
             </table>
           </div>
 
-          {/* Delivery & Purity Highlights */}
+          {/* Delivery & Purity Highlights (Clean GCP Cards) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '8px' }}>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px' }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#7c3aed', textTransform: 'uppercase' }}>💊 Delivery Technology</div>
-              <div style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a', marginTop: '2px' }}>{specs.capsuleSpecs}</div>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 14px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Layers size={12} color="#0284c7" />
+                <span>{isEs ? 'Tecnología de Liberación' : 'Delivery Technology'}</span>
+              </div>
+              <div style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a', marginTop: '4px', lineHeight: 1.4 }}>{specs.capsuleSpecs}</div>
             </div>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px' }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#16a34a', textTransform: 'uppercase' }}>🛡️ Clean Label Standard</div>
-              <div style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a', marginTop: '2px' }}>{specs.purity}</div>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 14px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <ShieldCheck size={12} color="#16a34a" />
+                <span>{isEs ? 'Estándar Clean Label' : 'Clean Label Standard'}</span>
+              </div>
+              <div style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a', marginTop: '4px', lineHeight: 1.4 }}>{specs.purity}</div>
             </div>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px' }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#0284c7', textTransform: 'uppercase' }}>🔗 Peptide Protocol Synergy</div>
-              <div style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a', marginTop: '2px' }}>{specs.synergy}</div>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 14px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Zap size={12} color="#7c3aed" />
+                <span>{isEs ? 'Sinergia con Protocolos Peptídicos' : 'Peptide Protocol Synergy'}</span>
+              </div>
+              <div style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a', marginTop: '4px', lineHeight: 1.4 }}>{specs.synergy}</div>
             </div>
           </div>
         </div>
@@ -389,6 +399,80 @@ export default function ProductTechnicalDetailsPanel({ product, brandSlug, isEs 
               <span><strong>Endotoxins:</strong> {specs.endotoxin}</span>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Action Footer: PDF Datasheet Download & Full Product Monograph ── */}
+      {(datasheet || onViewProduct) && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px',
+          paddingTop: '0.85rem',
+          borderTop: '1px solid #e2e8f0',
+          marginTop: '0.25rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {datasheet && (
+              <a
+                href={datasheet.url}
+                download={datasheet.filename}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`Download official datasheet: ${datasheet.title}`}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #fed7aa',
+                  background: '#fff7ed',
+                  color: '#ea580c',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <FileText size={13} color="#ea580c" />
+                <span>{isEs ? 'Descargar Ficha Técnica PDF' : 'Download Technical Datasheet (PDF)'}</span>
+                {datasheet.size && <span style={{ fontSize: '0.66rem', opacity: 0.8 }}>({datasheet.size})</span>}
+              </a>
+            )}
+          </div>
+
+          {onViewProduct && (
+            <button
+              type="button"
+              onClick={onViewProduct}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#0f172a',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc';
+                e.currentTarget.style.borderColor = '#94a3b8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.borderColor = '#cbd5e1';
+              }}
+            >
+              <span>{isEs ? 'Ver Ficha Completa del Producto →' : 'View Full Product Monograph →'}</span>
+            </button>
+          )}
         </div>
       )}
     </div>
