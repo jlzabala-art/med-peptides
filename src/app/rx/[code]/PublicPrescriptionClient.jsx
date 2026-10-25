@@ -68,6 +68,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
@@ -587,6 +588,16 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           ]}
           onImportRx={() => { window.location.href = `/rx/intake?from=${rxId}&fromRole=doctor`; }}
           onSwitchRx={() => setShowRxSwitcherModal(true)}
+          banner={
+            <NominalWelcomeBanner
+              recipientName={patientName || 'Paciente'}
+              role="patient"
+              clinicName={clinic || doctorClinic || treatingDoc?.clinic}
+              verifiedBy={nominalDoctorName ? `Dr. ${nominalDoctorName}` : 'Atlas Health Services'}
+              sessionDuration="90 días"
+              storageKey={`atlas_welcome_rx_${rxId}`}
+            />
+          }
         />
       )}
 

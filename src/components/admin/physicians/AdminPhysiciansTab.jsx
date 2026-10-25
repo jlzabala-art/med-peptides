@@ -25,7 +25,7 @@ import EmptyState from '../../ui/EmptyState';
 import AppActionGroup from '../../ui/AppActionGroup';
 import MobileDoctorCard from './mobile/MobileDoctorCard';
 import MobileActionSheet from '../../ui/MobileActionSheet';
-import { Eye, Edit3, XCircle, Layers, ExternalLink, Key, Share2 } from '@/lib/icons';
+import { Eye, Edit3, XCircle, Layers, ExternalLink, Key, Share2, MessageCircle } from '@/lib/icons';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import DoctorAccessLinkModal from './DoctorAccessLinkModal';
 import UniversalShareDrawer from '../../ui/UniversalShareDrawer';
@@ -940,6 +940,37 @@ export default function AdminPhysiciansTab() {
             >
               <Share2 size={14} />
             </button>
+            {(d.phone || d.mobile) && (
+              <button
+                type="button"
+                onClick={() => {
+                  const cleanPhone = (d.phone || d.mobile).replace(/[^\d+]/g, '').replace('+', '');
+                  const slug = getDoctorSlug(d);
+                  const name = getDoctorName(d);
+                  const directUrl = `https://www.atlashealth-services.com/dr/${encodeURIComponent(slug)}`;
+                  const msg = encodeURIComponent(`🩺 *Atlas Health Services — Acceso Clínico 1-Tap*\n\nEstimado/a Dr. ${name},\n\nPuede acceder a su portal médico verificado y expedientes clínicos nominales en el siguiente enlace:\n\n👉 ${directUrl}\n\n_Atlas Health Services — Operaciones Clínicas_`);
+                  window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+                  notifier.success(`WhatsApp directo abierto para Dr. ${name} ✓`);
+                }}
+                title={`Envío Rápido por WhatsApp a ${d.phone || d.mobile}`}
+                style={{
+                  width: '30px',
+                  height: '30px',
+                  borderRadius: '6px',
+                  border: '1px solid #86efac',
+                  backgroundColor: '#f0fdf4',
+                  color: '#16a34a',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 0,
+                  flexShrink: 0
+                }}
+              >
+                <MessageCircle size={14} />
+              </button>
+            )}
             <AppActionGroup actions={actions} maxVisible={1} />
           </div>
         );

@@ -34,7 +34,7 @@ import BulkActionsBar from '../ui/BulkActionsBar';
 import InlineEditableCell from '../ui/InlineEditableCell';
 import { usePatientActions } from '../../hooks/usePatientActions';
 import { usePatientExport } from '../../hooks/usePatientExport';
-import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert, Clock, DollarSign, Stethoscope, Layers, Share2 } from '@/lib/icons';
+import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert, Clock, DollarSign, Stethoscope, Layers, Share2, MessageCircle } from '@/lib/icons';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import EntityLink from '../ui/EntityLink';
 import ReassignPhysicianModal from '../admin/patients/ReassignPhysicianModal';
@@ -958,6 +958,20 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
                       setSharePatient(row);
                     }
                   },
+                  ...(row.phone ? [{
+                    type: 'whatsapp_quick',
+                    label: 'WhatsApp Directo',
+                    icon: MessageCircle,
+                    tooltip: `Enviar enlace por WhatsApp a ${row.phone}`,
+                    onClick: () => {
+                      const clean = String(row.phone).replace(/[^\d+]/g, '').replace('+', '');
+                      const rxCode = row.lastRxCode || (Array.isArray(row.prescriptions) && row.prescriptions[0]) || '';
+                      const url = rxCode ? `https://www.atlashealth-services.com/rx/${encodeURIComponent(rxCode)}` : 'https://www.atlashealth-services.com/rx/intake';
+                      const msg = encodeURIComponent(`🏥 *Atlas Clinical Platform — Expediente de Paciente*\n\nEstimado/a ${row.name || 'paciente'},\n\nPuede acceder a su expediente clínico digitalizado y posología activa en el siguiente enlace:\n\n👉 ${url}\n\n🔒 Portal confidencial Atlas Health Services.`);
+                      window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
+                      notifier.success(`WhatsApp directo abierto para ${row.name} ✓`);
+                    }
+                  }] : []),
                   {
                     type: 'workspace',
                     label: 'Workspace',

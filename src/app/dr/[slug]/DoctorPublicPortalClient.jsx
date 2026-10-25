@@ -80,6 +80,7 @@ import MobileActionSheet from '@/components/ui/MobileActionSheet';
 import EmptyState from '@/components/ui/EmptyState';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import NominalWelcomeBanner from '@/components/shared/NominalWelcomeBanner';
 import ClinicalIntelligenceBanner from '@/components/doctor/ClinicalIntelligenceBanner';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
 import { getFagronClinicalMonograph, resolveApiClinicalData } from '@/data/fagronClinicalMonographs';
@@ -5057,6 +5058,15 @@ export default function DoctorPublicPortalClient({
         onImportRx={handleOpenNewPrescriptionIntake}
         onSwitchRx={() => handleSidebarNavigate('prescriptions')}
         rxSwitcherCount={quickCounts.pending}
+        banner={
+          <NominalWelcomeBanner
+            recipientName={isAuthorizedViewer ? (doctor?.name || 'Doctor') : (doctor?.clinic || `Doctor #${doctor?.opaqueCode || slug}`)}
+            role="doctor"
+            clinicName={doctor?.clinic}
+            sessionDuration="90 días"
+            storageKey={`atlas_welcome_doctor_${slug}`}
+          />
+        }
       />
 
       {/* ── Portal Layout with Left Collapsible Clinical Rail (GCP Standard) ── */}

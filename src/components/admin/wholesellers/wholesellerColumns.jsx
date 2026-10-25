@@ -13,7 +13,7 @@ import CopyableId from '../../ui/CopyableId';
 import QuoteQuickActionDropdown from '../../ui/QuoteQuickActionDropdown';
 import PricingTierSelectorCell from '../customers/PricingTierSelectorCell';
 import EngagementBadge from '../../ui/EngagementBadge';
-import { Globe, Mail, Phone, Package, ShoppingBag, Edit2, Check, X, Share2, Eye } from '@/lib/icons';
+import { Globe, Mail, Phone, Package, ShoppingBag, Edit2, Check, X, Share2, Eye, MessageCircle } from '@/lib/icons';
 
 // ── Inline editable cell ─────────────────────────────────────────────────────
 function InlineEditableCell({ value, onSave, placeholder = '—' }) {
@@ -180,6 +180,23 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace, 
           >
             <Share2 size={14} />
           </button>
+          {(row.contactPhone || row.phone) && (
+            <button
+              type="button"
+              onClick={() => {
+                const clean = String(row.contactPhone || row.phone).replace(/[^\d+]/g, '').replace('+', '');
+                const name = row.companyName || row.name || 'Distribuidor';
+                const url = `https://www.atlashealth-services.com/vials?ref=${encodeURIComponent(row.id || '')}`;
+                const msg = encodeURIComponent(`📦 *Atlas Solutions — Catálogo Mayorista B2B*\n\nEstimado/a ${name},\n\nAdjuntamos su acceso verificado al catálogo de viales con márgenes de distribución vinculados:\n\n👉 ${url}\n\n_Atlas Solutions B2B Operations_`);
+                window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
+              }}
+              className="gcp-action-thumb-btn thumb-whatsapp"
+              title={`Enviar Catálogo por WhatsApp a ${row.contactPhone || row.phone}`}
+              style={{ color: '#16a34a', borderColor: '#86efac' }}
+            >
+              <MessageCircle size={14} />
+            </button>
+          )}
           <QuoteQuickActionDropdown 
             size="sm" 
             variant="thumbnail" 
