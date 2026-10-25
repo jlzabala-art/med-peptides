@@ -101,7 +101,8 @@ export default function PublicUnifiedHeader({
     pathname?.startsWith('/c/') ||
     pathname?.startsWith('/shared/') ||
     pathname?.startsWith('/rx/') ||
-    pathname?.startsWith('/proto');
+    pathname?.startsWith('/proto') ||
+    pathname?.startsWith('/compounding');
   const effectiveHideAccountManager = hideAccountManager || isPublicProductOrCatalogPage;
 
   const [isScrolled, setIsScrolled] = useState(false);

@@ -55,7 +55,8 @@ const PORTAL_PREFIXES = [
   '/b2b',
   '/rfq',
   '/medical',
-  '/pricing'
+  '/pricing',
+  '/compounding'
 ];
 
 function StorefrontShell({ children }) {
