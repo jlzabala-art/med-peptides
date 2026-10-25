@@ -26,6 +26,7 @@ import {
 } from '@/lib/icons';
 import ReconstitutionGuideCard from './ReconstitutionGuideCard';
 import CalendarSyncModal from './CalendarSyncModal';
+import PatientPhysicianGreetingHero from './PatientPhysicianGreetingHero';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
