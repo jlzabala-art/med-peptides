@@ -120,7 +120,7 @@ export default function CompoundedFormulationsSection({
       )}
 
       {compoundedFormulations.map((formulation, fIdx) => {
-        const isPhaseExpanded = expandedPhases[formulation.id] !== false;
+        const isPhaseExpanded = Boolean(expandedPhases[formulation.id]);
         const phaseNumber = formulation.index || (fIdx + 1);
         const phaseLabel = prescriptionLabels.find(l => 
           l.phaseNumber === phaseNumber || 
@@ -156,7 +156,14 @@ export default function CompoundedFormulationsSection({
                 cursor: 'pointer',
                 userSelect: 'none',
                 flexWrap: 'wrap',
-                gap: '12px'
+                gap: '12px',
+                transition: 'background 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!isPhaseExpanded) e.currentTarget.style.background = '#f8fafc';
+              }}
+              onMouseLeave={(e) => {
+                if (!isPhaseExpanded) e.currentTarget.style.background = '#ffffff';
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 320px' }}>
@@ -252,7 +259,7 @@ export default function CompoundedFormulationsSection({
               </div>
             </div>
 
-            {(compoundedFormulations.length <= 1 || isPhaseExpanded) && (
+            {isPhaseExpanded && (
               <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {/* Sub-Section 1: Compounding Vehicle / Base Carrier */}
                 <div style={{

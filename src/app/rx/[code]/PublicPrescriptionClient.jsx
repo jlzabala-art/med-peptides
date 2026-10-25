@@ -181,6 +181,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       if (targetId.startsWith('formulation') || targetId.includes('phase') || targetId === 'formula-card') {
         setActiveGcpTab('treatment');
         setExpandedSections(prev => ({ ...prev, formulations: true }));
+        if (targetId.startsWith('formulation')) {
+          setExpandedPhases(prev => ({ ...prev, [targetId]: true }));
+        }
       } else if (targetId === 'genomics-card' || targetId.includes('genomic')) {
         setActiveGcpTab('genomics');
         setExpandedSections(prev => ({ ...prev, genomics: true }));
