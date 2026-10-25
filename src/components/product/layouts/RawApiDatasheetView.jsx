@@ -635,6 +635,8 @@ export default function RawApiDatasheetView({ product, slug, baseUrl = 'https://
         inquireLabel="Inquire Raw API"
         onInquire={() => setIsInquiryOpen(true)}
         showClinicalAI={true}
+        aiCategory="Raw API Compounding"
+        aiContextQuery={`What are the formulation guidelines, solubility, compatible excipients, and quality standards for bulk API ${productName} (CAS: ${casNumber})?`}
         showSections={true}
         sectionsCount={3}
         sectionsLabel="Sections"

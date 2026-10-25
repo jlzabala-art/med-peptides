@@ -73,7 +73,15 @@ export default function CatalogStickyActionBar({
 
   const handleOpenAI = () => {
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
+      window.dispatchEvent(new CustomEvent('open-public-atlas-ai', {
+        detail: {
+          productName: catalogTitle,
+          category: badgeText || 'Shared Catalog',
+          initialQuery: lang === 'es'
+            ? `¿Qué condiciones comerciales, tiempos de entrega y especificaciones de lote aplican a este catálogo de ${catalogTitle}?`
+            : `What institutional pricing terms, delivery lead times, and batch specifications apply to ${catalogTitle}?`
+        }
+      }));
     }
   };
 

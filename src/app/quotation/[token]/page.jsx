@@ -6,6 +6,8 @@ import { fetchPublicQuotationByTokenAction, approvePublicQuotationAction } from 
 import { FileText, CheckCircle2, Clock, ShieldCheck, Download, AlertTriangle, Snowflake, Building2, User, Sparkles, Phone, Mail, Share2, Tag, ExternalLink, QrCode } from 'lucide-react';
 import StatusBadge from '../../../components/ui/StatusBadge';
 import { triggerHaptic } from '@/utils/haptics';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 
 export default function PublicQuotationPage() {
   const params = useParams();
@@ -232,6 +234,7 @@ export default function PublicQuotationPage() {
 
           {/* Desktop Table View */}
           <div className="quote-desktop-table" style={{ overflowX: 'auto' }}>
+            {/* eslint-disable-next-line no-restricted-syntax */}
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ textAlign: 'left', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.74rem' }}>
@@ -477,6 +480,50 @@ export default function PublicQuotationPage() {
           }
         `}</style>
       </div>
+
+      {/* ── Persistent Sticky Bottom Action Bar (GCP Standard) ── */}
+      {quotation && (
+        <>
+          <PublicStickyActionBar
+            title={quotation?.quotationNumber ? `Quotation ${quotation.quotationNumber}` : `Quotation #${String(token).slice(0, 8)}`}
+            subtitle={`${quotation?.clientName || 'Institutional Client'} • Total: ${quotation?.currency || '$'}${Number(quotation?.total || 0).toFixed(2)} • Cold-Chain Logistics Included`}
+            badge={quotation?.status ? quotation.status.toUpperCase() : 'OFFICIAL QUOTE'}
+            badgeType="protocol"
+            inquireLabel={quotation?.status === 'approved' ? 'Order Confirmed ✓' : 'Approve & Confirm ➔'}
+            onInquire={() => {
+              const el = document.getElementById('approval-section') || document.querySelector('form');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+            showClinicalAI={true}
+            aiCategory="Commercial Quotation"
+            aiContextQuery={`What cold-chain shipping logistics, batch analytical CoA documentation, and delivery lead times apply to quotation ${quotation?.quotationNumber || token}?`}
+            extraActions={
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                className="public-sticky-action-bar__sections-btn"
+                title="Download Official PDF"
+              >
+                <Download size={14} />
+                <span>PDF</span>
+              </button>
+            }
+            lang="en"
+          />
+
+          <PublicAtlasAIDrawer
+            contextType="catalog"
+            contextAnchor={{
+              name: `Quotation ${quotation?.quotationNumber || token}`,
+              client: quotation?.clientName,
+              total: quotation?.total,
+              itemsCount: quotation?.items?.length || 0
+            }}
+            hideFloatingTrigger={true}
+            lang="en"
+          />
+        </>
+      )}
     </div>
   );
 }

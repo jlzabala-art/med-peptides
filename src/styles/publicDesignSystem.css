@@ -1401,4 +1401,144 @@
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   GOOGLE CLOUD UX MOBILE BOTTOM SHEET TOKENS & UTILITIES
+   Transforms desktop dialogs/drawers into native mobile bottom sheets
+   ══════════════════════════════════════════════════════════════════ */
+
+.atlas-bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  transition: opacity 0.2s ease;
+}
+
+.atlas-bottom-sheet-panel {
+  width: 100%;
+  max-width: 460px;
+  height: 100%;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 32px rgba(0, 24, 48, 0.25);
+  border-left: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.atlas-bottom-sheet-handle {
+  display: none;
+}
+
+/* Modal variant overlay (centered on desktop, bottom sheet on mobile) */
+.atlas-bottom-sheet-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: atlasFadeIn 0.2s ease-out;
+}
+
+.atlas-bottom-sheet-modal-panel {
+  width: 100%;
+  max-width: 560px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: atlasScaleIn 0.2s ease-out;
+}
+
+@keyframes atlasFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes atlasScaleIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes atlasSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* ── Mobile Layout (< 768px): Unified Bottom Sheet ── */
+@media (max-width: 768px) {
+  .atlas-bottom-sheet-overlay,
+  .atlas-bottom-sheet-modal-overlay {
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  .atlas-bottom-sheet-panel,
+  .atlas-bottom-sheet-modal-panel {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 88dvh !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    border-top: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25) !important;
+    animation: atlasSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    overscroll-behavior: contain;
+  }
+
+  .atlas-bottom-sheet-handle {
+    display: block;
+    width: 44px;
+    height: 5px;
+    background: #cbd5e1;
+    border-radius: 999px;
+    margin: 10px auto 6px auto;
+    flex-shrink: 0;
+  }
+
+  /* Safe area inset support at bottom for iOS home bar */
+  .atlas-bottom-sheet-footer,
+  .atlas-bottom-sheet-input-bar {
+    padding-bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
+  }
+
+  /* Prevent automatic iOS Safari zoom by enforcing 16px font size on inputs */
+  .atlas-bottom-sheet-panel input,
+  .atlas-bottom-sheet-panel textarea,
+  .atlas-bottom-sheet-panel select,
+  .atlas-bottom-sheet-modal-panel input,
+  .atlas-bottom-sheet-modal-panel textarea,
+  .atlas-bottom-sheet-modal-panel select {
+    font-size: 16px !important;
+  }
+
+  /* Minimum 44x44px touch targets on mobile actions */
+  .atlas-touch-target-44 {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+
 

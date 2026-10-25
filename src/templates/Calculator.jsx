@@ -12,6 +12,7 @@ import { jsPDF } from 'jspdf';
 import { motion } from 'framer-motion';
 import { trackToolUsage } from '../hooks/useAnalytics';
 import { FlaskConical, Download, BookOpen, ChevronRight, AlertCircle } from '@/lib/icons';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 
 
 
@@ -538,6 +539,40 @@ export default function Calculator() {
         </div>
 
       </div>
+
+      {/* ── Persistent Floating Sticky Action Bar (GCP Standard) ── */}
+      <PublicStickyActionBar
+        title={units !== '—' ? `Result: ${units} Units (U-100 Syringe)` : 'Precision Peptide Calculator'}
+        subtitle={
+          vialDosageMg && bacWater && desiredDosageMcg
+            ? `Vial: ${vialDosageMg}mg • Water: ${bacWater}ml • Desired: ${desiredDosageMcg}mcg`
+            : 'Interactive Syringe & Reconstitution Volume Engine'
+        }
+        badge="Dosing Engine"
+        badgeType="protocol"
+        inquireLabel="Export PDF Report"
+        onInquire={handleExport}
+        showClinicalAI={true}
+        aiPreset="calculator"
+        aiCategory="Peptide Reconstitution"
+        aiContextQuery={
+          vialDosageMg && bacWater && desiredDosageMcg
+            ? `Tengo un vial de ${vialDosageMg} mg de péptido y lo reconstituyo con ${bacWater} ml de agua bacteriostática. Para una dosis de ${desiredDosageMcg} mcg (${units} unidades), ¿cuál es la técnica correcta de administración y conservación en frío?`
+            : undefined
+        }
+        drawerProps={{
+          contextType: 'catalog',
+          contextAnchor: {
+            name: 'Precision Peptide Calculator',
+            mg: vialDosageMg,
+            ml: bacWater,
+            doseMcg: desiredDosageMcg,
+            calculatedUnits: units
+          },
+          hideFloatingTrigger: true
+        }}
+        lang="en"
+      />
     </div>
   );
 }

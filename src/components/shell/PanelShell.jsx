@@ -10,7 +10,6 @@ import { useNotificationContext } from '../../context/NotificationContext';
 import IOSPushBanner from '../ui/IOSPushBanner';
 import OfflineSyncProvider from '../shared/OfflineSyncProvider';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
-import ProfessionalWelcomeOverlay from '../ui/ProfessionalWelcomeOverlay';
 import AtlasAIDrawer from '../shared/AtlasAIDrawer';
 
 const GlobalQuickCreateHandler = dynamic(() => import('../shared/GlobalQuickCreateHandler'), { ssr: false });
@@ -114,7 +113,6 @@ export default function PanelShell({
         `}</style>
         <IOSPushBanner />
         <PushNotificationPrompt />
-        <ProfessionalWelcomeOverlay />
         <IncomingOrderAcknowledgmentModal />
         <PortalLayout
           sidebarNavGroups={sidebarNavGroups}

@@ -281,6 +281,17 @@ function resolveProductDatasheet(product, brandSlug) {
   return null;
 }
 
+function getItemUnitLabel(slug, count, isEs) {
+  const isOne = count === 1;
+  if (slug === 'colway' || slug === 'ultraperson' || slug === 'ultraman') {
+    return isOne ? (isEs ? 'formulación' : 'formulation') : (isEs ? 'formulaciones' : 'formulations');
+  }
+  if (slug === 'peptides') {
+    return isOne ? (isEs ? 'péptido' : 'peptide') : (isEs ? 'péptidos' : 'peptides');
+  }
+  return isOne ? (isEs ? 'prueba' : 'test') : (isEs ? 'pruebas' : 'tests');
+}
+
 function resolveProductRegulatoryBadges(product, brandSlug) {
   if (brandSlug === 'teletest') {
     return [
@@ -881,7 +892,7 @@ export default function BrandCollectionPage({
       </header>
 
       {/* ── 4. 4 KPIs Grid + Scope Switcher (Regla Golden #22) ── */}
-      <section style={{ maxWidth: '1440px', margin: '-1.25rem auto 2.5rem', padding: '0 clamp(1rem, 3vw, 2rem)' }}>
+      <section style={{ maxWidth: '1440px', margin: '-1.0rem auto 1.5rem', padding: '0 clamp(1rem, 3vw, 2rem)' }}>
         {/* Scope Indicator Bar */}
         <div style={{
           display: 'flex',
@@ -889,7 +900,7 @@ export default function BrandCollectionPage({
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: '0.75rem',
-          marginBottom: '0.75rem'
+          marginBottom: '0.65rem'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{
@@ -907,14 +918,14 @@ export default function BrandCollectionPage({
             }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: scopeMode === 'filtered' ? '#0284c7' : '#94a3b8' }} />
               {scopeMode === 'filtered' 
-                ? (isEs ? `Resultados Filtrados (${filteredProducts.length} ${brandSlug === 'colway' ? 'formulaciones' : 'pruebas'})` : `Matching Active Filters (${filteredProducts.length} items)`)
-                : (isEs ? `Colección Completa (${products.length} ${brandSlug === 'colway' ? 'formulaciones' : 'pruebas'})` : `Entire Collection (${products.length} items)`)}
+                ? (isEs ? `Resultados Filtrados (${filteredProducts.length} ${getItemUnitLabel(brandSlug, filteredProducts.length, true)})` : `Matching Active Filters (${filteredProducts.length} items)`)
+                : (isEs ? `Colección Completa (${products.length} ${getItemUnitLabel(brandSlug, products.length, true)})` : `Entire Collection (${products.length} items)`)}
             </span>
           </div>
         </div>
 
-        {/* 4 Cards Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+        {/* 4 Cards Grid - Compact GCP Layout */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
           {config.kpis.map((kpi, idx) => {
             const Icon = kpi.icon;
             return (
@@ -923,18 +934,18 @@ export default function BrandCollectionPage({
                 style={{
                   background: '#ffffff',
                   border: '1px solid #e2e8f0',
-                  borderRadius: '12px',
-                  padding: '1.25rem 1.5rem',
+                  borderRadius: '10px',
+                  padding: '0.85rem 1.15rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1rem',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                  gap: '0.85rem',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
                 }}
               >
                 <div style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '10px',
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '8px',
                   background: `${kpi.color}15`,
                   display: 'flex',
                   alignItems: 'center',
@@ -942,16 +953,16 @@ export default function BrandCollectionPage({
                   color: kpi.color,
                   flexShrink: 0
                 }}>
-                  <Icon size={22} />
+                  <Icon size={19} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '2px' }}>
+                  <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '2px' }}>
                     {kpi.label}
                   </div>
-                  <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
                     {kpi.value}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '1px' }}>
                     {kpi.sub}
                   </div>
                 </div>
@@ -970,7 +981,18 @@ export default function BrandCollectionPage({
           ) : brandSlug === 'eterna' ? (
             <EternaCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
           ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? (
-            <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => setIsInquiryDrawerOpen(true)} />
+            <UltraPersonCollectionSidebar
+              lang={lang}
+              categories={brandCategories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={(catId) => {
+                setSelectedCategory(catId);
+                const el = document.getElementById('colway-main-content');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              totalCount={products.length}
+              onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+            />
           ) : brandSlug === 'colway' ? (
             <ColwayCollectionSidebar
               lang={lang}
@@ -1195,9 +1217,7 @@ export default function BrandCollectionPage({
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
-                    {filteredProducts.length} {filteredProducts.length === 1 
-                      ? (brandSlug === 'colway' ? (isEs ? 'formulación' : 'formulation') : (isEs ? 'test' : 'test')) 
-                      : (brandSlug === 'colway' ? (isEs ? 'formulaciones' : 'formulations') : (isEs ? 'tests' : 'tests'))}
+                    {filteredProducts.length} {getItemUnitLabel(brandSlug, filteredProducts.length, isEs)}
                   </span>
 
                   {/* Incoterm EXW Badge */}
@@ -1375,27 +1395,18 @@ export default function BrandCollectionPage({
               }}>
                 {/* Google Cloud UX Table Header (when in table mode) */}
                 {viewMode === 'table' && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '9px 1.25rem',
-                    background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    color: '#64748b',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em'
-                  }}>
-                    <div style={{ flex: '1 1 360px', minWidth: 0, display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <span>{brandSlug === 'peptides' ? 'Compound / Monograph Specification' : 'Resource & Specification'}</span>
+                  <div className="gcp-collection-table-header">
+                    <div>
+                      <span>{brandSlug === 'peptides' ? 'Compound / Specification' : 'Resource & Specification'}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexShrink: 0 }}>
-                      <span style={{ width: '130px', textAlign: 'left' }}>{brandSlug === 'peptides' ? 'Sourcing Hub' : 'Accreditation'}</span>
-                      <span style={{ width: '140px', textAlign: 'right' }}>{isEs ? 'Tarifa B2B' : 'Wholesale Tier'}</span>
-                      <span style={{ width: '190px', textAlign: 'right' }}>{isEs ? 'Acciones' : 'Actions'}</span>
+                    <div>
+                      <span>{isEs ? 'Acreditación & Formato' : 'Accreditation & Format'}</span>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span>{isEs ? 'Tarifa B2B (EXW)' : 'Wholesale Tier'}</span>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span>{isEs ? 'Acciones' : 'Actions'}</span>
                     </div>
                   </div>
                 )}
@@ -1429,24 +1440,17 @@ export default function BrandCollectionPage({
                           boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
                         }}
                       >
-                        <div style={{
-                          padding: '1rem 1.25rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          flexWrap: 'wrap',
-                          gap: '1rem'
-                        }}>
-                          {/* Left: Thumbnail & Essential Identifiers */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 360px', minWidth: 0 }}>
+                        <div className="gcp-collection-table-row">
+                          {/* Col 1: Thumbnail, Commercial Name & Description */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 0 }}>
                             <div
                               onClick={() => handleProductClick(product)}
                               style={{
-                                width: '70px',
-                                height: '70px',
+                                width: '64px',
+                                height: '64px',
                                 borderRadius: '8px',
                                 background: 'radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%)',
-                                border: '1px solid #f1f5f9',
+                                border: '1px solid #e2e8f0',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -1457,77 +1461,86 @@ export default function BrandCollectionPage({
                               <img
                                 src={imageSrc}
                                 alt={displayName}
-                                style={{ maxHeight: '56px', maxWidth: '85%', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.06))' }}
+                                style={{ maxHeight: '50px', maxWidth: '85%', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.06))' }}
                               />
                             </div>
                             <div style={{ minWidth: 0, flex: 1 }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                                <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
-                                  <CopyableId value={product.id} maxLength={18} />
-                                </span>
-                                {resolveProductRegulatoryBadges(product, brandSlug).map((rb, idx) => (
-                                  <span
-                                    key={idx}
-                                    title={rb.title}
-                                    style={{
-                                      fontSize: '0.64rem',
-                                      fontWeight: 800,
-                                      padding: '2px 6px',
-                                      borderRadius: '4px',
-                                      background: rb.bg,
-                                      color: rb.color,
-                                      border: `1px solid ${rb.border}`,
-                                      whiteSpace: 'nowrap'
-                                    }}
-                                  >
-                                    {rb.label}
-                                  </span>
-                                ))}
-                                <span style={{ fontSize: '0.70rem', color: '#0d9488', fontWeight: 650 }}>
-                                  {sampleType}
-                                </span>
-                                {brandSlug === 'colway' && (product.routine_badge || product.step_number != null) && (
-                                  <span style={{
-                                    fontSize: '0.66rem',
-                                    fontWeight: 700,
-                                    padding: '2px 7px',
-                                    borderRadius: '4px',
-                                    background: '#f0fdfa',
-                                    color: '#0d9488',
-                                    border: '1px solid #99f6e4'
-                                  }}>
-                                    {product.routine_badge || `Step ${product.step_number}`}
-                                  </span>
-                                )}
-                              </div>
                               <h3
                                 onClick={() => handleProductClick(product)}
                                 style={{
-                                  fontSize: '0.98rem',
+                                  fontSize: '0.94rem',
                                   fontWeight: 800,
                                   color: '#0f172a',
                                   margin: '0 0 3px 0',
                                   lineHeight: 1.3,
                                   cursor: 'pointer'
                                 }}
+                                onMouseEnter={(e) => { e.currentTarget.style.color = '#0284c7'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.color = '#0f172a'; }}
                               >
                                 {displayName}
                               </h3>
-                              <p style={{
-                                fontSize: '0.78rem',
-                                color: '#64748b',
-                                margin: 0,
-                                whiteSpace: isExpanded ? 'normal' : 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis'
-                              }}>
-                                {desc}
-                              </p>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.70rem', color: '#64748b' }}>
+                                <CopyableId value={product.id} maxLength={16} />
+                              </div>
+                              {desc && (
+                                <p style={{
+                                  fontSize: '0.75rem',
+                                  color: '#64748b',
+                                  margin: '2px 0 0 0',
+                                  whiteSpace: isExpanded ? 'normal' : 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis'
+                                }}>
+                                  {desc}
+                                </p>
+                              )}
                             </div>
                           </div>
 
-                          {/* Right: Actions & Tiered Pricing */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                          {/* Col 2: Regulatory Badges & Posology / Presentation */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                              {resolveProductRegulatoryBadges(product, brandSlug).map((rb, idx) => (
+                                <span
+                                  key={idx}
+                                  title={rb.title}
+                                  style={{
+                                    fontSize: '0.64rem',
+                                    fontWeight: 800,
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    background: rb.bg,
+                                    color: rb.color,
+                                    border: `1px solid ${rb.border}`,
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {rb.label}
+                                </span>
+                              ))}
+                              {brandSlug === 'colway' && (product.routine_badge || product.step_number != null) && (
+                                <span style={{
+                                  fontSize: '0.64rem',
+                                  fontWeight: 700,
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  background: '#f0fdfa',
+                                  color: '#0d9488',
+                                  border: '1px solid #99f6e4'
+                                }}>
+                                  {product.routine_badge || `Step ${product.step_number}`}
+                                </span>
+                              )}
+                            </div>
+                            <span style={{ fontSize: '0.72rem', color: '#0d9488', fontWeight: 650, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <Sparkles size={11} color="#0d9488" />
+                              <span>{sampleType}</span>
+                            </span>
+                          </div>
+
+                          {/* Col 3: Wholesale Tier Price & Details Toggle */}
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
                             <TieredPriceShield
                               product={product}
                               currency={activeCurrency}
@@ -1544,19 +1557,22 @@ export default function BrandCollectionPage({
                                 background: 'none',
                                 border: 'none',
                                 color: '#64748b',
-                                fontSize: '0.74rem',
+                                fontSize: '0.72rem',
                                 fontWeight: 600,
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '3px',
-                                padding: '6px 8px'
+                                padding: '2px 4px'
                               }}
                             >
                               <span>{isExpanded ? (isEs ? 'Menos' : 'Less') : (isEs ? 'Detalles' : 'Details')}</span>
-                              <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                              <ChevronDown size={12} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                             </button>
+                          </div>
 
+                          {/* Col 4: Procurement Actions (Stepper + Order + View) */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px', flexWrap: 'wrap' }}>
                             {(() => {
                               const doc = resolveProductDatasheet(product, brandSlug);
                               if (!doc) return null;
@@ -1568,26 +1584,25 @@ export default function BrandCollectionPage({
                                   rel="noopener noreferrer"
                                   title={`Download official datasheet: ${doc.title}`}
                                   style={{
-                                    padding: '6px 10px',
+                                    padding: '5px 8px',
                                     borderRadius: '6px',
                                     border: '1px solid #fed7aa',
                                     background: '#fff7ed',
                                     color: '#ea580c',
-                                    fontSize: '0.74rem',
+                                    fontSize: '0.72rem',
                                     fontWeight: 700,
                                     textDecoration: 'none',
                                     display: 'inline-flex',
                                     alignItems: 'center',
-                                    gap: '4px'
+                                    gap: '3px'
                                   }}
                                 >
-                                  <FileText size={13} color="#ea580c" />
-                                  <span>PDF ↓</span>
+                                  <FileText size={12} color="#ea580c" />
+                                  <span>PDF</span>
                                 </a>
                               );
                             })()}
 
-                            {/* Inline B2B Order / Purchase Action */}
                             <InlineOrderButton
                               product={product}
                               variant={product.variants?.[0] || null}
@@ -1602,17 +1617,18 @@ export default function BrandCollectionPage({
                               type="button"
                               onClick={() => handleProductClick(product)}
                               style={{
-                                padding: '6px 14px',
+                                padding: '5px 10px',
+                                height: '28px',
                                 borderRadius: '6px',
                                 border: '1px solid #cbd5e1',
                                 background: '#ffffff',
                                 color: '#0f172a',
-                                fontSize: '0.75rem',
+                                fontSize: '0.74rem',
                                 fontWeight: 700,
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '5px',
+                                gap: '4px',
                                 transition: 'all 0.15s ease'
                               }}
                               onMouseEnter={(e) => {
@@ -1623,9 +1639,10 @@ export default function BrandCollectionPage({
                                 e.currentTarget.style.backgroundColor = '#ffffff';
                                 e.currentTarget.style.borderColor = '#cbd5e1';
                               }}
+                              title={isEs ? 'Ver ficha técnica completa' : 'View full product monograph'}
                             >
-                              <Eye size={13} style={{ color: '#0284c7' }} />
-                              <span>{isEs ? 'Ver Producto' : 'View Product'}</span>
+                              <Eye size={12} style={{ color: '#0284c7' }} />
+                              <span>{isEs ? 'Ver' : 'View'}</span>
                             </button>
                           </div>
                         </div>
@@ -2005,7 +2022,19 @@ export default function BrandCollectionPage({
               ) : brandSlug === 'eterna' ? (
                 <EternaCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
               ) : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? (
-                <UltraPersonCollectionSidebar lang={lang} onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }} />
+                <UltraPersonCollectionSidebar
+                  lang={lang}
+                  categories={brandCategories}
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={(catId) => {
+                    setSelectedCategory(catId);
+                    setIsMobileSidebarOpen(false);
+                    const el = document.getElementById('colway-main-content');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  totalCount={products.length}
+                  onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }}
+                />
               ) : brandSlug === 'colway' ? (
                 <ColwayCollectionSidebar
                   lang={lang}
@@ -2241,9 +2270,29 @@ export default function BrandCollectionPage({
       {/* ── Persistent Google Cloud Console Sticky Bottom Action Bar ── */}
       <PublicStickyActionBar
         title={config.name || (isEs ? 'Colección Lotusland Peptides' : 'Lotusland Peptides Collection')}
-        subtitle={`${filteredProducts.length} ${isEs ? 'Monografías y Referencias' : 'Reference Peptides & Monographs'} • HPLC ≥99.0%`}
-        badge={brandSlug === 'peptides' ? 'HPLC ≥99.0%' : (config.badge || 'Clinical Portfolio')}
-        badgeType={brandSlug === 'peptides' ? 'teal' : 'default'}
+        subtitle={
+          (brandSlug === 'ultraperson' || brandSlug === 'ultraman')
+            ? `${filteredProducts.length} ${isEs ? 'Formulaciones Clínicas' : 'Targeted Formulations'} • Vegan HPMC · EU GMP`
+            : brandSlug === 'colway'
+            ? `${filteredProducts.length} ${isEs ? 'Formulaciones de Tropocolágeno' : 'Tropocollagen Formulations'} • EU CPNP · ISO 22716`
+            : (brandSlug === 'bloodo' || brandSlug === 'eterna' || brandSlug === 'teletest')
+            ? `${filteredProducts.length} ${isEs ? 'Paneles Diagnósticos y Biomarcadores' : 'Diagnostic Biomarker Panels'} • ISO 15189 / CE-IVDR`
+            : `${filteredProducts.length} ${isEs ? 'Monografías y Referencias' : 'Reference Peptides & Monographs'} • HPLC ≥99.0%`
+        }
+        badge={
+          (brandSlug === 'ultraperson' || brandSlug === 'ultraman')
+            ? 'Nutraceuticals'
+            : brandSlug === 'peptides'
+            ? 'HPLC ≥99.0%'
+            : (config.badge || 'Clinical Portfolio')
+        }
+        badgeType={
+          (brandSlug === 'ultraperson' || brandSlug === 'ultraman')
+            ? 'protocol'
+            : brandSlug === 'peptides'
+            ? 'teal'
+            : 'default'
+        }
         inquireLabel={isEs ? 'Consultar Catálogo' : 'Inquire Catalog'}
         onInquire={() => setIsInquiryDrawerOpen(true)}
         showClinicalAI={true}

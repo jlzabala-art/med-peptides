@@ -731,7 +731,9 @@ export default function PublicPrescriptionIntakeClient() {
           setCurrentPhase(2);
         }
       }
-    } catch (_) {}
+    } catch (_err) {
+      // ignore storage read error
+    }
   }, []);
 
   useEffect(() => {
@@ -745,7 +747,9 @@ export default function PublicPrescriptionIntakeClient() {
         batchMeta,
         timestamp: Date.now()
       }));
-    } catch (_) {}
+    } catch (_err) {
+      // ignore storage write error
+    }
   }, [currentPhase, draftRxList, activeDraftIndex, publishedRxList, activeRxIndex, batchMeta]);
 
   // Multi-document staging handlers
@@ -924,7 +928,7 @@ export default function PublicPrescriptionIntakeClient() {
       setCurrentPhase(2);
     } catch (err) {
       console.error('[PublicPrescriptionIntake] Error:', err);
-      let rawMsg = String(err?.message || '');
+      const rawMsg = String(err?.message || '');
       let cleanMsg = 'Failed to scan and digitize documents';
 
       if (/503|UNAVAILABLE|high demand|saturad|peak demand|capacity|spikes in demand|temporarily|busy/i.test(rawMsg)) {
@@ -1248,7 +1252,9 @@ export default function PublicPrescriptionIntakeClient() {
     setQuotationStatus('idle');
     try {
       sessionStorage.removeItem(STORAGE_SESSION_KEY);
-    } catch (_) {}
+    } catch (_err) {
+      // ignore storage remove error
+    }
   };
 
   // Dropzone hook for Phase 1
@@ -2423,6 +2429,12 @@ export default function PublicPrescriptionIntakeClient() {
               }
         }
         showClinicalAI={true}
+        aiCategory="Prescription Digitalization"
+        aiContextQuery={
+          isEs
+            ? '¿Cómo interpreta el digitalizador multimodal de Atlas las recetas manuscritas o analíticas y qué pautas de seguridad farmacológica verifica?'
+            : 'How does the Atlas multimodal AI digitize handwritten prescriptions and lab reports, and what safety checks does it perform?'
+        }
         lang={lang}
       />
     </div>

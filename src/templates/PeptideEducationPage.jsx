@@ -3,6 +3,7 @@
  
 import React, { useMemo } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 
 /**
  * PeptideEducationPage
@@ -246,6 +247,29 @@ export default function PeptideEducationPage() {
           }
         }
       `}</style>
+
+      {/* ── Persistent Floating Sticky Action Bar (GCP Standard) ── */}
+      <PublicStickyActionBar
+        title="What Are Peptides? • Scientific Primer"
+        subtitle="Cellular Signaling, Biological Chains & Reconstitution Fundamentals"
+        badge="Academic Guide"
+        badgeType="protocol"
+        inquireLabel="Explore Clinical Catalog ➔"
+        onInquire={() => {
+          if (typeof window !== 'undefined') window.location.href = '/collection/peptides';
+        }}
+        showClinicalAI={true}
+        aiPreset="education"
+        drawerProps={{
+          contextType: 'catalog',
+          contextAnchor: {
+            name: 'What Are Peptides? • Scientific Primer',
+            category: 'Academic Education'
+          },
+          hideFloatingTrigger: true
+        }}
+        lang="en"
+      />
     </div>
   );
 }

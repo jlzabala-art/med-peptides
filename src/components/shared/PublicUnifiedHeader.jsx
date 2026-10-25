@@ -387,21 +387,23 @@ function forceCanonicalDomain(urlOrPath) {
               )}
             </div>
 
-            {/* Center: Global Navigation Links (Desktop) */}
-            <nav className="puh-nav-links" aria-label="Global Public Navigation">
-              <Link href="/collection/peptides" className="puh-nav-link">
-                {isSpanish ? 'Catálogo' : 'Catalog'}
-              </Link>
-              <Link href="/proto" className="puh-nav-link">
-                {isSpanish ? 'Protocolos' : 'Protocols'}
-              </Link>
-              <Link href="/calculator" className="puh-nav-link">
-                {isSpanish ? 'Calculadora' : 'Calculator'}
-              </Link>
-              <Link href="/blog" className="puh-nav-link">
-                {isSpanish ? 'Academia' : 'Academy'}
-              </Link>
-            </nav>
+            {/* Center: Global Navigation Links (Desktop - hidden in doctor/clinical portal view to prevent collision) */}
+            {!doctorHomeHref && (
+              <nav className="puh-nav-links" aria-label="Global Public Navigation">
+                <Link href="/collection/peptides" className="puh-nav-link">
+                  {isSpanish ? 'Catálogo' : 'Catalog'}
+                </Link>
+                <Link href="/proto" className="puh-nav-link">
+                  {isSpanish ? 'Protocolos' : 'Protocols'}
+                </Link>
+                <Link href="/calculator" className="puh-nav-link">
+                  {isSpanish ? 'Calculadora' : 'Calculator'}
+                </Link>
+                <Link href="/blog" className="puh-nav-link">
+                  {isSpanish ? 'Academia' : 'Academy'}
+                </Link>
+              </nav>
+            )}
 
             {/* Right: Actions & Tools */}
             <div className="puh-actions-group">

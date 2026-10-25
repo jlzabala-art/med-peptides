@@ -11,12 +11,37 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY ||
   process.env.GOOGLE_GENAI_API_KEY || 
   '';
 
+export const SANDBOX_QUERY_LIMIT = 5;
+
+// High-efficiency in-memory query cache to guarantee visitors never exhaust quota on repeated/common queries
+const queryCache = new Map();
+const CACHE_MAX_ENTRIES = 500;
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+function getCachedQuery(key) {
+  const hit = queryCache.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.timestamp > CACHE_TTL_MS) {
+    queryCache.delete(key);
+    return null;
+  }
+  return hit.data;
+}
+
+function setCachedQuery(key, data) {
+  if (queryCache.size >= CACHE_MAX_ENTRIES) {
+    const oldestKey = queryCache.keys().next().value;
+    queryCache.delete(oldestKey);
+  }
+  queryCache.set(key, { data, timestamp: Date.now() });
+}
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   if (searchParams.get('scope') === 'public_sandbox') {
-    const quota = peekRateLimit(req, { limit: 5, tier: 'ai-public-sandbox' });
+    const quota = peekRateLimit(req, { limit: SANDBOX_QUERY_LIMIT, tier: 'ai-public-sandbox' });
     return NextResponse.json({
-      limit: 5,
+      limit: SANDBOX_QUERY_LIMIT,
       remaining: quota.remaining,
       used: quota.count,
       allowed: quota.allowed,
@@ -27,13 +52,44 @@ export async function GET(req) {
 
 export async function POST(req) {
   const body = await req.json().catch(() => ({}));
-  const isPublicSandbox = body?.scope === 'public_sandbox';
+  
+  // Authenticated users (doctors, clinics, wholesalers, patients, admins) are never rate-limited under public sandbox
+  const currentUser = body?.currentUser || body?.context?.currentUser;
+  const hasAuthHeader = Boolean(req.headers.get('authorization'));
+  const isAuthenticated = Boolean(currentUser?.uid || currentUser?.role || hasAuthHeader);
+  const isPublicSandbox = (body?.scope === 'public_sandbox') && !isAuthenticated;
 
-  // For public sandbox visitors (datasheets & public shared catalogs): 5 queries per 24h per IP
+  // Extract query early for cache evaluation (Cached queries consume 0 quota)
+  const { message: rawMessage, context = {}, history = [] } = body;
+  const message = sanitizeText(rawMessage, 2000);
+  if (!message) {
+    return NextResponse.json({ error: 'Valid message text is required (max 2000 chars)' }, { status: 400 });
+  }
+
+  const { contextAnchor } = context;
+  const entityIdentifier = contextAnchor?.slug || contextAnchor?.name || contextAnchor?.code || 'global';
+  const queryCacheKey = `${entityIdentifier}:${message.trim().toLowerCase()}`;
+
+  // 1. Quota-free cache lookup: If answered previously for this resource, return 0-latency reply without consuming quota
+  const cachedHit = getCachedQuery(queryCacheKey);
+  if (cachedHit) {
+    const quota = isPublicSandbox 
+      ? peekRateLimit(req, { limit: SANDBOX_QUERY_LIMIT, tier: 'ai-public-sandbox' }) 
+      : { remaining: 999, count: 0 };
+
+    return NextResponse.json({
+      ...cachedHit,
+      cached: true,
+      remaining: isPublicSandbox ? quota.remaining : undefined,
+      limit: isPublicSandbox ? SANDBOX_QUERY_LIMIT : undefined,
+    });
+  }
+
+  // 2. Rate limit evaluation for uncached public queries
   let sandboxRateInfo = null;
   if (isPublicSandbox) {
     sandboxRateInfo = checkRateLimit(req, {
-      limit: 5,
+      limit: SANDBOX_QUERY_LIMIT,
       windowMs: 24 * 60 * 60 * 1000,
       tier: 'ai-public-sandbox',
     });
@@ -41,8 +97,8 @@ export async function POST(req) {
       return NextResponse.json(
         {
           error: 'QUOTA_EXCEEDED',
-          message: 'Guest research inquiry limit reached (5/5). Please sign in or register for unlimited professional access.',
-          limit: 5,
+          message: `Guest research inquiry limit reached (${SANDBOX_QUERY_LIMIT}/${SANDBOX_QUERY_LIMIT}). Please sign in or register for unlimited professional access.`,
+          limit: SANDBOX_QUERY_LIMIT,
           remaining: 0,
           requiresRegistration: true,
         },
@@ -51,18 +107,12 @@ export async function POST(req) {
     }
   }
 
-  const rateInfo = checkRateLimit(req, { limit: 25, windowMs: 60 * 1000, tier: 'ai-chat' });
+  const rateInfo = checkRateLimit(req, { limit: 30, windowMs: 60 * 1000, tier: 'ai-chat' });
   if (!rateInfo.allowed) {
     return rateLimitExceededResponse(rateInfo);
   }
 
   try {
-    const { message: rawMessage, context = {}, history = [] } = body;
-
-    const message = sanitizeText(rawMessage, 2000);
-    if (!message) {
-      return NextResponse.json({ error: 'Valid message text is required (max 2000 chars)' }, { status: 400 });
-    }
 
     const {
       goal,
@@ -141,7 +191,7 @@ export async function POST(req) {
 
       const pubmedContextText = clinicalEvidenceArticles.length > 0
         ? `\nRECOGNIZED PEER-REVIEWED SCIENTIFIC LITERATURE (NIH PubMed):\n` +
-          clinicalEvidenceArticles.map((a, i) => 
+          clinicalEvidenceArticles.map((a) => 
             `- [PubMed PMID: ${a.pmid}] "${a.title}" (${a.journal}, ${a.pubdate})`
           ).join('\n') + '\n'
         : '';
@@ -627,11 +677,23 @@ CRITICAL OPERATING RULES:
 - NEVER output external web URLs (other than biomedical literature citation tags like \`[PubMed: PMID · Source]\`). Keep users safely within the platform's public ecosystem.
 5. STRICT COMMERCIAL CONFIDENTIALITY:
 - NEVER disclose or discuss internal distributor costs, dollar margins, wholesale markups, or client-specific negotiated rates. Focus purely on technical, clinical, and statutory specifications.
-6. TECHNICAL PRECISION & STRUCTURE:
+6. TECHNICAL PRECISION & PREDICTIVE CLINICAL STRUCTURE:
 - Format answers with clean structure:
   - Start with a clear topical header (e.g. "**Clinical Protocol Overview:**", "**Receptor Signaling & Kinetics:**", or "**Law 14/2013 Statutory Framework:**").
+  - When discussing dosage, posology, reconstitution, or compound specifications, start with a high-density summary:
+    [CLINICAL_HIGHLIGHTS]
+    • Dose & Route: <concise dose & route, e.g. 250 mcg SubQ>
+    • Dilution: <e.g. 2.0 mL BAC Water (2.5 mg/mL)>
+    • Frequency: <e.g. Daily / Morning Fasting>
+    • Storage: <e.g. Refrigerated 2–8°C for 28 days>
+    [/CLINICAL_HIGHLIGHTS]
   - Use clean bullet points with bold parameters (e.g. "• **Target Receptor**: ...", "• **Statutory Basis**: ...", "• **Dilution Architecture**: ...").
-  - Conclude with a helpful follow-up inquiry or recommendation.
+  - ALWAYS conclude every single response with 2 to 3 predictive next-step questions to anticipate what the user will need next:
+    [PREDICTED_NEXT_STEPS]
+    • <Predictive Next Step 1>
+    • <Predictive Next Step 2>
+    • <Predictive Next Step 3>
+    [/PREDICTED_NEXT_STEPS]
 
 ${activeEntityContext}
 
@@ -660,16 +722,17 @@ TONE & ROLE GOVERNANCE:
 GUIDELINES:
 1. Always respond strictly in English. All clinical explanations, dosage guidance, pharmacology notes, and recommendations must be in English.
 2. Provide structured, scientifically accurate explanations using markdown (bullet points, bold highlights, clear headers).
-3. If an Active Pinned Entity (Patient, Prescription, or Product) is present, prioritize answering in direct reference to this entity and suggest tailored clinical considerations.
-4. If recommending compounds to a doctor or clinical operator, provide one-click action links using the format [Add to Workspace](action:workspace:CompoundName:Dosage) (e.g. [Add BPC-157 to Workspace](action:workspace:BPC-157:5mg)). This renders an interactive 1-click button for the user.
-5. If the user asks about catalog peptides, mention specific relevant compounds from the catalog with links if appropriate:
+3. When applicable, provide [CLINICAL_HIGHLIGHTS] at the top and conclude with [PREDICTED_NEXT_STEPS].
+4. If an Active Pinned Entity (Patient, Prescription, or Product) is present, prioritize answering in direct reference to this entity and suggest tailored clinical considerations.
+5. If recommending compounds to a doctor or clinical operator, provide one-click action links using the format [Add to Workspace](action:workspace:CompoundName:Dosage) (e.g. [Add BPC-157 to Workspace](action:workspace:BPC-157:5mg)). This renders an interactive 1-click button for the user.
+6. If the user asks about catalog peptides, mention specific relevant compounds from the catalog with links if appropriate:
    - Recovery & Repair: [BPC-157](/product/bpc-157), [TB-500](/product/tb-500), [GHK-Cu](/product/ghk-cu)
    - Metabolic & Weight: [Tirzepatide](/product/tirzepatide), [Semaglutide](/product/semaglutide), [AOD-9604](/product/aod-9604)
    - Cognitive & Focus: [Semax](/product/semax), [Selank](/product/selank), [Dihexa](/product/dihexa)
    - Longevity: [Epithalon](/product/epithalon), [GHK-Cu](/product/ghk-cu), [CJC-1295](/product/cjc-1295)
    - Sleep: [DSIP](/product/dsip), [Epitalon](/product/epitalon)
-6. For reconstitution and dosage calculations, emphasize standard dilution with bacteriostatic water (e.g. 2mL of BAC water per 5mg/10mg vial).
-7. Always keep advice grounded in scientific research standards and remind users that compounds are for professional research protocols.`;
+7. For reconstitution and dosage calculations, emphasize standard dilution with bacteriostatic water (e.g. 2mL of BAC water per 5mg/10mg vial).
+8. Always keep advice grounded in scientific research standards and remind users that compounds are for professional research protocols.`;
     }
 
     if (GEMINI_API_KEY) {
@@ -708,13 +771,19 @@ GUIDELINES:
         });
 
         if (replyText) {
+          // Cache verified inference result to ensure visitors never deplete quota on repeated searches
+          setCachedQuery(queryCacheKey, {
+            reply: replyText,
+            sources: isPublicSandbox ? clinicalEvidenceArticles : undefined,
+          });
+
           const res = NextResponse.json({
             reply: replyText,
             goal,
             model: modelUsed || 'gemini-resilient-router',
             timestamp: new Date().toISOString(),
             remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
-            limit: isPublicSandbox ? 5 : undefined,
+            limit: isPublicSandbox ? SANDBOX_QUERY_LIMIT : undefined,
             sources: isPublicSandbox ? clinicalEvidenceArticles : undefined,
           });
           return applyRateLimitHeaders(res, rateInfo);

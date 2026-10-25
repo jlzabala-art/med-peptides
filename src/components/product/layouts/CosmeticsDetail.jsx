@@ -2318,6 +2318,12 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
         inquireLabel={lang === 'es' ? 'Consultar Producto' : 'Inquire Product'}
         onInquire={() => setIsInquiryDrawerOpen(true)}
         showClinicalAI={true}
+        aiCategory={lang === 'es' ? 'Cosmecéutica Avanzada' : 'Advanced Cosmeceuticals'}
+        aiContextQuery={
+          lang === 'es'
+            ? `¿Qué sinergias biológicas, modo de aplicación dérmica y beneficios celulares tiene ${name}?`
+            : `What are the biological synergies, dermal application routine, and cellular benefits of ${name}?`
+        }
         onOpenClinicalAI={() => setIsAIDrawerOpen(true)}
         showSections={true}
         sectionsCount={tocSections.length}

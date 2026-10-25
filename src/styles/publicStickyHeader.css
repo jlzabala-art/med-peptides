@@ -55,6 +55,12 @@
   display: flex;
   align-items: center;
   gap: 1.15rem;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.puh-brand-group:has(.puh-doctor-home-btn) ~ .puh-nav-links {
+  display: none;
 }
 
 .puh-nav-link {
@@ -73,10 +79,40 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .puh-nav-links {
     display: none;
   }
+
+  /* Compact GCP Utility Toolbar Icons (< 1200px) */
+  .puh-btn-ghost .puh-btn-label,
+  .puh-btn-contact .puh-btn-label,
+  .puh-btn-import-rx .puh-btn-label,
+  .puh-btn-rx-switcher .puh-btn-label {
+    display: none;
+  }
+
+  .puh-btn-ghost,
+  .puh-btn-contact,
+  .puh-btn-import-rx,
+  .puh-btn-rx-switcher {
+    padding: 0 0.55rem;
+    min-width: 32px;
+    justify-content: center;
+  }
+}
+
+.puh-doctor-home-btn {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.puh-doctor-home-btn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .puh-brand-row-inner {

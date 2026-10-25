@@ -76,35 +76,20 @@ export default function CalendarSyncModal({
     <div
       role="dialog"
       aria-modal="true"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 10000,
-        background: 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(6px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '16px'
-      }}
+      className="atlas-bottom-sheet-modal-overlay"
       onClick={onClose}
     >
       <div
+        className="atlas-bottom-sheet-modal-panel"
         style={{
           width: '100%',
           maxWidth: '460px',
-          background: '#ffffff',
-          borderRadius: '16px',
-          boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.08)',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          border: '1px solid #e2e8f0',
-          position: 'relative',
-          animation: 'fadeInScale 0.18s ease-out'
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Mobile Drag Handle */}
+        <div className="atlas-bottom-sheet-handle" />
+
         {/* Header Ribbon */}
         <div
           style={{

@@ -18,7 +18,16 @@ import {
   FlaskConical,
   BookOpen,
   ExternalLink,
+  Copy,
+  Check,
+  Calculator,
+  Clock,
+  Syringe,
+  Mail,
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
+import { triggerHaptic } from '@/utils/haptics';
 import {
   getSuggestedInquiriesForProduct,
   getContextualAndPopularSuggestions,
@@ -32,12 +41,42 @@ import {
  * 
  * Strict Guardrails:
  * 1. Strictly in English at all times.
- * 2. Hard rate-limit of 5 queries per IP / 24h.
+ * 2. Rate-limit with intelligent caching to guarantee repeated searches never deplete quota.
  * 3. Session isolation via sessionStorage (no cross-user query bleed).
  * 4. Zero outbound hyperlinks away from the platform.
- * 5. Registration CTA trigger once the 5 queries are exhausted.
+ * 5. Registration CTA trigger once the free guest queries are exhausted.
  * 6. Live integration with Recognized Clinical Sources (NIH PubMed & Clinical Compendiums).
  */
+
+function parseAiResponseParts(text) {
+  if (!text) return { cleanText: '', highlights: [], predictedSteps: [] };
+
+  let highlights = [];
+  const hlMatch = text.match(/\[CLINICAL_HIGHLIGHTS\]([\s\S]*?)\[\/CLINICAL_HIGHLIGHTS\]/i);
+  if (hlMatch) {
+    highlights = hlMatch[1]
+      .split('\n')
+      .map(l => l.replace(/^[•\-*]\s*/, '').trim())
+      .filter(Boolean);
+  }
+
+  let predictedSteps = [];
+  const psMatch = text.match(/\[PREDICTED_NEXT_STEPS\]([\s\S]*?)\[\/PREDICTED_NEXT_STEPS\]/i);
+  if (psMatch) {
+    predictedSteps = psMatch[1]
+      .split('\n')
+      .map(l => l.replace(/^[•\-*]\s*/, '').trim())
+      .filter(Boolean);
+  }
+
+  const cleanText = text
+    .replace(/\[CLINICAL_HIGHLIGHTS\][\s\S]*?\[\/CLINICAL_HIGHLIGHTS\]/gi, '')
+    .replace(/\[PREDICTED_NEXT_STEPS\][\s\S]*?\[\/PREDICTED_NEXT_STEPS\]/gi, '')
+    .trim();
+
+  return { cleanText, highlights, predictedSteps };
+}
+
 export default function PublicAtlasAIDrawer({
   contextType = 'monograph', // 'monograph' | 'catalog'
   contextAnchor = null,     // { name, cas, purity, molecular, sequence, details, slug }
@@ -63,20 +102,26 @@ export default function PublicAtlasAIDrawer({
   const handleOpenDrawer = () => {
     setInternalIsOpen(true);
   };
+  const { user, activeRole } = useAuth();
+  const isAuthenticated = Boolean(user?.uid || user?.email);
+  const [copiedIndex, setCopiedIndex] = useState(null);
+
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [remaining, setRemaining] = useState(5);
-  const [limit, setLimit] = useState(5);
+  const [remaining, setRemaining] = useState(isAuthenticated ? 999 : 5);
+  const [limit, setLimit] = useState(isAuthenticated ? 999 : 5);
   const [isBlocked, setIsBlocked] = useState(false);
   const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'evidence'
   const [clinicalSources, setClinicalSources] = useState([]);
   const [isLoadingSources, setIsLoadingSources] = useState(false);
+  const [leadEmail, setLeadEmail] = useState('');
+  const [isUnlockingBonus, setIsUnlockingBonus] = useState(false);
   const messagesEndRef = useRef(null);
 
   const sessionKey = `atlas_ai_public_${storageKey}`;
 
-  // 1. Load isolated session chat history
+  // 1. Load isolated session chat history & check bonus
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem(sessionKey);
@@ -86,10 +131,51 @@ export default function PublicAtlasAIDrawer({
           setMessages(parsed);
         }
       }
+      if (sessionStorage.getItem(`${sessionKey}_bonus_unlocked`)) {
+        setLimit(30);
+        setRemaining(25);
+        setIsBlocked(false);
+      }
     } catch {
       // Ignore sessionStorage parsing errors
     }
   }, [sessionKey]);
+
+  const handleUnlockBonus = async (e) => {
+    e.preventDefault();
+    if (!leadEmail.trim() || !leadEmail.includes('@')) {
+      toast.error('Please enter a valid clinical or professional email.');
+      return;
+    }
+    setIsUnlockingBonus(true);
+    triggerHaptic('impact');
+    try {
+      await fetch('/api/portal/inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Atlas AI Practitioner Lead',
+          email: leadEmail.trim(),
+          topic: 'Atlas AI Quota Unlock (+25 Inquiries)',
+          message: `Practitioner lead requested +25 bonus inquiries unlock for: ${contextAnchor?.name || 'General Catalog'}`,
+          contextType: 'ai_quota_unlock_lead',
+        })
+      });
+      setLimit(30);
+      setRemaining(25);
+      setIsBlocked(false);
+      sessionStorage.setItem(`${sessionKey}_bonus_unlocked`, 'true');
+      toast.success('✓ +25 Inquiries unlocked! Scientific access granted for your session.');
+    } catch {
+      setLimit(30);
+      setRemaining(25);
+      setIsBlocked(false);
+      sessionStorage.setItem(`${sessionKey}_bonus_unlocked`, 'true');
+      toast.success('✓ +25 Inquiries unlocked! Scientific access granted for your session.');
+    } finally {
+      setIsUnlockingBonus(false);
+    }
+  };
 
   // Global event listener to open drawer with pre-filled inquiry from publication cards
   useEffect(() => {
@@ -234,12 +320,14 @@ ${contextAnchor.mechanisms}
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          scope: 'public_sandbox',
+          scope: isAuthenticated ? 'authenticated' : 'public_sandbox',
+          currentUser: isAuthenticated ? { uid: user.uid, email: user.email, role: activeRole } : null,
           message: query,
           context: {
             screenScope: contextType || (contextType === 'monograph' ? 'product_monograph' : 'catalog_portfolio'),
             contextAnchor,
             catalogInventory,
+            currentUser: isAuthenticated ? { uid: user.uid, email: user.email, role: activeRole } : null,
           },
           history: newMsgList.slice(-6),
         }),
@@ -253,7 +341,7 @@ ${contextAnchor.mechanisms}
         if (typeof window !== 'undefined') {
           window.dispatchEvent(
             new CustomEvent('atlas-quota-updated', {
-              detail: { remaining: 0, limit: 5 },
+              detail: { remaining: 0, limit: limit || 5 },
             })
           );
         }
@@ -261,7 +349,9 @@ ${contextAnchor.mechanisms}
           ...newMsgList,
           {
             sender: 'bot',
-            text: 'You have reached the limit of 5 free research inquiries. Please sign in or create an authorized institutional account for unlimited access.',
+            text: lang === 'es'
+              ? 'Has alcanzado el límite de 5 consultas gratuitas de invitado. Inicia sesión o solicita una cuenta o suscripción profesional para acceso clínico ilimitado.'
+              : 'You have reached the limit of 5 free guest research inquiries. Please sign in or subscribe for unlimited clinical access.',
             isQuotaExceeded: true,
             timestamp: new Date().toISOString(),
           },
@@ -269,18 +359,22 @@ ${contextAnchor.mechanisms}
         return;
       }
 
-      if (typeof data.remaining === 'number') {
+      if (typeof data.remaining === 'number' && !isAuthenticated) {
         setRemaining(data.remaining);
         if (typeof window !== 'undefined') {
           window.dispatchEvent(
             new CustomEvent('atlas-quota-updated', {
-              detail: { remaining: data.remaining, limit: 5 },
+              detail: { remaining: data.remaining, limit: data.limit || limit || 5 },
             })
           );
         }
         if (data.remaining <= 0) {
           setIsBlocked(true);
         }
+      }
+
+      if (typeof data.limit === 'number' && !isAuthenticated) {
+        setLimit(data.limit);
       }
 
       if (Array.isArray(data.sources) && data.sources.length > 0) {
@@ -293,6 +387,7 @@ ${contextAnchor.mechanisms}
         {
           sender: 'bot',
           text: botReply,
+          cached: Boolean(data.cached),
           timestamp: new Date().toISOString(),
         },
       ]);
@@ -409,7 +504,7 @@ ${contextAnchor.mechanisms}
                 }}
               >
                 <BookOpen size={11} color="#2563eb" />
-                {part.replace(/[\[\]]/g, '')}
+                {part.replace(/[[\]]/g, '')}
               </span>
             );
           }
@@ -916,34 +1011,22 @@ ${contextAnchor.mechanisms}
         </button>
       )}
 
-      {/* ── Slide-Over Drawer ── */}
+      {/* ── Slide-Over Drawer / Mobile Bottom Sheet ── */}
       {isOpen && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 10000,
-            display: 'flex',
-            justifyContent: 'flex-end',
-            backgroundColor: 'rgba(15, 23, 42, 0.45)',
-            backdropFilter: 'blur(3px)',
-            transition: 'opacity 0.2s ease',
-          }}
+          className="atlas-bottom-sheet-overlay"
           onClick={handleClose}
         >
           <div
+            className="atlas-bottom-sheet-panel"
             onClick={(e) => e.stopPropagation()}
             style={{
-              width: '100%',
-              maxWidth: '430px',
-              height: '100%',
-              backgroundColor: '#ffffff',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '-8px 0 32px rgba(0, 24, 48, 0.25)',
-              borderLeft: '1px solid #e2e8f0',
+              maxWidth: '440px',
             }}
           >
+            {/* Mobile Drag Handle (Visible only on mobile devices) */}
+            <div className="atlas-bottom-sheet-handle" />
+
             {/* Header */}
             <div
               style={{
@@ -977,9 +1060,19 @@ ${contextAnchor.mechanisms}
                     height: '26px',
                     padding: '0 10px',
                     borderRadius: '13px',
-                    backgroundColor: isBlocked ? 'rgba(239, 68, 68, 0.2)' : 'rgba(56, 189, 248, 0.12)',
-                    border: `1px solid ${isBlocked ? 'rgba(248, 113, 113, 0.4)' : 'rgba(56, 189, 248, 0.28)'}`,
-                    color: isBlocked ? '#fca5a5' : '#e0f2fe',
+                    backgroundColor: isAuthenticated
+                      ? 'rgba(16, 185, 129, 0.15)'
+                      : isBlocked
+                      ? 'rgba(239, 68, 68, 0.2)'
+                      : 'rgba(56, 189, 248, 0.12)',
+                    border: `1px solid ${
+                      isAuthenticated
+                        ? 'rgba(52, 211, 153, 0.4)'
+                        : isBlocked
+                        ? 'rgba(248, 113, 113, 0.4)'
+                        : 'rgba(56, 189, 248, 0.28)'
+                    }`,
+                    color: isAuthenticated ? '#6ee7b7' : isBlocked ? '#fca5a5' : '#e0f2fe',
                     fontSize: '0.72rem',
                     fontWeight: 700,
                     letterSpacing: '0.02em',
@@ -993,16 +1086,28 @@ ${contextAnchor.mechanisms}
                       width: '6px',
                       height: '6px',
                       borderRadius: '50%',
-                      backgroundColor: isBlocked ? '#ef4444' : '#38bdf8',
-                      boxShadow: isBlocked ? '0 0 6px #ef4444' : '0 0 6px #38bdf8',
+                      backgroundColor: isAuthenticated ? '#10b981' : isBlocked ? '#ef4444' : '#38bdf8',
+                      boxShadow: isAuthenticated
+                        ? '0 0 6px #10b981'
+                        : isBlocked
+                        ? '0 0 6px #ef4444'
+                        : '0 0 6px #38bdf8',
                     }}
                   />
-                  <span style={{ fontFamily: 'monospace', fontWeight: 800 }}>
-                    {isBlocked ? '0/5' : `${remaining}/${limit}`}
-                  </span>
-                  <span style={{ opacity: 0.85, fontSize: '0.66rem', textTransform: 'uppercase' }}>
-                    QUERIES
-                  </span>
+                  {isAuthenticated ? (
+                    <span style={{ fontWeight: 800 }}>
+                      {lang === 'es' ? 'Acceso Ilimitado' : 'Unlimited Access'}
+                    </span>
+                  ) : (
+                    <>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 800 }}>
+                        {isBlocked ? `0/${limit}` : `${remaining}/${limit}`}
+                      </span>
+                      <span style={{ opacity: 0.85, fontSize: '0.66rem', textTransform: 'uppercase' }}>
+                        {lang === 'es' ? 'CONSULTAS' : 'QUERIES'}
+                      </span>
+                    </>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -1225,31 +1330,242 @@ ${contextAnchor.mechanisms}
                     </div>
                   </div>
                 ) : (
-                  messages.map((m, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start',
-                        maxWidth: m.sender === 'user' ? '82%' : '96%',
-                        background: m.sender === 'user'
-                          ? 'linear-gradient(135deg, #003666 0%, #002244 100%)'
-                          : '#ffffff',
-                        color: m.sender === 'user' ? '#ffffff' : '#1e293b',
-                        border: m.sender === 'user' ? 'none' : '1px solid #e2e8f0',
-                        borderRadius: m.sender === 'user' ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
-                        padding: m.sender === 'user' ? '10px 14px' : '13px 14px',
-                        boxShadow: m.sender === 'user'
-                          ? '0 2px 6px rgba(0, 54, 102, 0.18)'
-                          : '0 2px 8px -2px rgba(0, 54, 102, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)',
-                      }}
-                    >
-                      {m.sender === 'user' ? (
-                        <div style={{ fontSize: '0.86rem', lineHeight: 1.4, fontWeight: 500 }}>{m.text}</div>
-                      ) : (
-                        renderSafeBotText(m.text)
-                      )}
-                    </div>
-                  ))
+                  messages.map((m, idx) => {
+                    if (m.sender === 'user') {
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            alignSelf: 'flex-end',
+                            maxWidth: '82%',
+                            background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
+                            color: '#ffffff',
+                            borderRadius: '14px 14px 2px 14px',
+                            padding: '10px 14px',
+                            boxShadow: '0 2px 6px rgba(0, 54, 102, 0.18)',
+                            fontSize: '0.86rem',
+                            lineHeight: 1.4,
+                            fontWeight: 500,
+                          }}
+                        >
+                          {m.text}
+                        </div>
+                      );
+                    }
+
+                    const { cleanText, highlights, predictedSteps } = parseAiResponseParts(m.text);
+
+                    return (
+                      <React.Fragment key={idx}>
+                        <div
+                          style={{
+                            alignSelf: 'flex-start',
+                            maxWidth: '96%',
+                            background: '#ffffff',
+                            color: '#1e293b',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '14px 14px 14px 2px',
+                            padding: '13px 14px',
+                            boxShadow: '0 2px 8px -2px rgba(0, 54, 102, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)',
+                          }}
+                        >
+                          {/* ── Executive Clinical Highlights (Structured KPI Grid) ── */}
+                          {highlights && highlights.length > 0 && (
+                            <div
+                              style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                                gap: '6px',
+                                marginBottom: '10px',
+                                padding: '8px 10px',
+                                background: '#f8fafc',
+                                borderRadius: '8px',
+                                border: '1px solid #e2e8f0',
+                              }}
+                            >
+                              {highlights.map((hl, hIdx) => {
+                                const [label, val] = hl.includes(':') ? hl.split(':') : ['', hl];
+                                const labelLower = label.toLowerCase();
+                                const Icon = labelLower.includes('dilu') || labelLower.includes('vol') ? Droplets
+                                  : labelLower.includes('dosis') || labelLower.includes('dose') ? Syringe
+                                  : labelLower.includes('frec') || labelLower.includes('sched') || labelLower.includes('time') ? Clock
+                                  : labelLower.includes('temp') || labelLower.includes('stor') || labelLower.includes('conserv') ? Thermometer
+                                  : FlaskConical;
+
+                                return (
+                                  <div key={hIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                                    <Icon size={13} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />
+                                    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
+                                      <span style={{ color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', fontSize: '0.62rem' }}>
+                                        {label.trim() || 'PARÁMETRO'}
+                                      </span>
+                                      <span style={{ color: '#003666', fontWeight: 800, fontFamily: 'monospace', fontSize: '0.74rem' }}>
+                                        {val?.trim() || hl}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* ── Main Analytical Body with High-Fidelity Highlights ── */}
+                          {renderSafeBotText(cleanText)}
+
+                          {/* ── Action Strip: Copy Summary & Quick Links ── */}
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              marginTop: '10px',
+                              paddingTop: '6px',
+                              borderTop: '1px solid #f1f5f9',
+                              fontSize: '0.70rem',
+                              color: '#64748b',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (navigator?.clipboard?.writeText) {
+                                    navigator.clipboard.writeText(cleanText).catch(() => {});
+                                  }
+                                  setCopiedIndex(idx);
+                                  toast.success(lang === 'es' ? 'Resumen copiado ✓' : 'Summary copied ✓');
+                                  setTimeout(() => setCopiedIndex(null), 2000);
+                                }}
+                                style={{
+                                  background: 'transparent',
+                                  border: 'none',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  color: '#64748b',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  fontSize: '0.68rem',
+                                  fontWeight: 600,
+                                }}
+                                title={lang === 'es' ? 'Copiar respuesta' : 'Copy answer'}
+                              >
+                                {copiedIndex === idx ? <Check size={11} color="#16a34a" /> : <Copy size={11} />}
+                                <span>{copiedIndex === idx ? (lang === 'es' ? 'Copiado' : 'Copied') : (lang === 'es' ? 'Copiar' : 'Copy')}</span>
+                              </button>
+
+                              {(cleanText.toLowerCase().includes('reconstit') || cleanText.toLowerCase().includes('bac water') || cleanText.toLowerCase().includes('dilu') || cleanText.toLowerCase().includes('jeringa')) && (
+                                <a
+                                  href="/calculator"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    color: '#0284c7',
+                                    textDecoration: 'none',
+                                    fontWeight: 650,
+                                    fontSize: '0.68rem',
+                                  }}
+                                  title={lang === 'es' ? 'Abrir Calculadora de Reconstitución' : 'Open Reconstitution Calculator'}
+                                >
+                                  <Calculator size={11} />
+                                  <span>{lang === 'es' ? 'Calculadora' : 'Calculator'}</span>
+                                </a>
+                              )}
+                            </div>
+
+                            {m.cached && (
+                              <span
+                                style={{
+                                  fontSize: '0.62rem',
+                                  color: '#0d9488',
+                                  background: '#f0fdfa',
+                                  padding: '1px 6px',
+                                  borderRadius: '4px',
+                                  border: '1px solid #ccfbf1',
+                                  fontWeight: 700,
+                                }}
+                              >
+                                ⚡ {lang === 'es' ? 'Caché (0 Cuota)' : 'Cached (0 Quota)'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* ── Predictive Next-Step Chips (Anticipated Questions) ── */}
+                        {predictedSteps && predictedSteps.length > 0 && (
+                          <div
+                            style={{
+                              alignSelf: 'flex-start',
+                              maxWidth: '96%',
+                              marginTop: '-2px',
+                              marginBottom: '6px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '5px',
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: '0.66rem',
+                                fontWeight: 800,
+                                color: '#0d9488',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.03em',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                paddingLeft: '4px',
+                              }}
+                            >
+                              <Sparkles size={11} color="#0d9488" />
+                              <span>{lang === 'es' ? 'Siguientes Pasos Predictivos:' : 'Predictive Next Steps:'}</span>
+                            </div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                              {predictedSteps.map((step, sIdx) => (
+                                <button
+                                  key={sIdx}
+                                  type="button"
+                                  disabled={isLoading || isBlocked}
+                                  onClick={() => handleSendMessage(step)}
+                                  style={{
+                                    background: '#f0fdfa',
+                                    border: '1px solid #99f6e4',
+                                    color: '#0f766e',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 650,
+                                    padding: '4px 10px',
+                                    borderRadius: '16px',
+                                    cursor: isLoading || isBlocked ? 'default' : 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    transition: 'all 0.15s ease',
+                                    boxShadow: '0 1px 2px rgba(13, 148, 136, 0.08)',
+                                    textAlign: 'left',
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = '#ccfbf1';
+                                    e.currentTarget.style.borderColor = '#0d9488';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = '#f0fdfa';
+                                    e.currentTarget.style.borderColor = '#99f6e4';
+                                  }}
+                                >
+                                  <ArrowRight size={10} color="#0d9488" />
+                                  <span>{step}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </React.Fragment>
+                    );
+                  })
                 )}
 
                 {isLoading && (
@@ -1447,6 +1763,60 @@ ${contextAnchor.mechanisms}
                 <div style={{ fontSize: '0.74rem', color: '#78350f', lineHeight: 1.4 }}>
                   You have utilized all 5 free analytical inquiries for this IP. Access unlimited clinical intelligence and full compendium tools with a verified professional account.
                 </div>
+
+                {/* Instant Soft Lead Gate: Unlock +25 bonus inquiries */}
+                <form
+                  onSubmit={handleUnlockBonus}
+                  style={{
+                    display: 'flex',
+                    gap: '6px',
+                    marginTop: '2px',
+                    background: '#ffffff',
+                    padding: '4px',
+                    borderRadius: '8px',
+                    border: '1px solid #fcd34d',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                  }}
+                >
+                  <input
+                    type="email"
+                    value={leadEmail}
+                    onChange={(e) => setLeadEmail(e.target.value)}
+                    placeholder="Work email to unlock +25 queries..."
+                    style={{
+                      flex: 1,
+                      border: 'none',
+                      outline: 'none',
+                      fontSize: '0.78rem',
+                      padding: '6px 8px',
+                      color: '#0f172a',
+                      background: 'transparent'
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={isUnlockingBonus || !leadEmail.trim()}
+                    style={{
+                      background: '#0d9488',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '6px 12px',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      cursor: isUnlockingBonus || !leadEmail.trim() ? 'default' : 'pointer',
+                      opacity: !leadEmail.trim() ? 0.6 : 1,
+                      whiteSpace: 'nowrap',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <Mail size={12} />
+                    <span>{isUnlockingBonus ? 'Unlocking...' : 'Unlock +25'}</span>
+                  </button>
+                </form>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -1482,6 +1852,7 @@ ${contextAnchor.mechanisms}
 
             {/* Input Box */}
             <div
+              className="atlas-bottom-sheet-input-bar"
               style={{
                 padding: '14px 16px',
                 borderTop: '1px solid #e2e8f0',
@@ -1493,7 +1864,7 @@ ${contextAnchor.mechanisms}
                   e.preventDefault();
                   handleSendMessage();
                 }}
-                style={{ display: 'flex', gap: '8px' }}
+                style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}
               >
                 <input
                   type="text"
@@ -1507,6 +1878,7 @@ ${contextAnchor.mechanisms}
                   }
                   style={{
                     flex: 1,
+                    minHeight: '44px',
                     padding: '10px 14px',
                     borderRadius: '8px',
                     border: '1px solid #cbd5e1',
@@ -1519,20 +1891,18 @@ ${contextAnchor.mechanisms}
                 <button
                   type="submit"
                   disabled={isLoading || isBlocked || !message.trim()}
+                  className="atlas-touch-target-44"
                   style={{
                     backgroundColor: isBlocked || !message.trim() ? '#94a3b8' : '#003666',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '8px',
-                    padding: '0 16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    padding: '0 18px',
                     cursor: isBlocked || !message.trim() ? 'default' : 'pointer',
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  <Send size={15} />
+                  <Send size={16} />
                 </button>
               </form>
               <div

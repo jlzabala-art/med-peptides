@@ -199,7 +199,9 @@ export default function DoctorRxSwitcherModal({
         if (typeof window !== 'undefined') {
           try {
             localStorage.setItem(storageKey, JSON.stringify({ data: results, timestamp: Date.now() }));
-          } catch {}
+          } catch {
+            /* ignore localStorage errors */
+          }
         }
       }
     } catch (err) {
@@ -362,37 +364,21 @@ export default function DoctorRxSwitcherModal({
     <div
       ref={overlayRef}
       onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
-      style={{
-        position: 'fixed', inset: 0,
-        background: 'rgba(32,33,36,0.60)',
-        backdropFilter: 'blur(4px)',
-        zIndex: 10000,
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        paddingTop: '3.5vh',
-        paddingBottom: '3.5vh',
-        overflowY: 'auto'
-      }}
+      className="atlas-bottom-sheet-modal-overlay"
     >
       <div
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
+        className="atlas-bottom-sheet-modal-panel"
         style={{
-          background: '#ffffff',
-          borderRadius: '12px',
-          boxShadow: '0 24px 64px rgba(60,64,67,0.3)',
-          border: '1px solid #dadce0',
           width: '100%',
           maxWidth: 880, // Roomy GCP Dialog
-          margin: '0 16px',
-          display: 'flex',
-          flexDirection: 'column',
-          maxHeight: '92vh',
-          animation: 'gcpModalIn 0.2s cubic-bezier(0.4,0,0.2,1)'
         }}
       >
+        {/* Mobile Drag Handle */}
+        <div className="atlas-bottom-sheet-handle" />
+
         <style>{`
           @keyframes gcpModalIn { from { opacity:0; transform:translateY(-10px) scale(0.98); } to { opacity:1; transform:translateY(0) scale(1); } }
           @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }

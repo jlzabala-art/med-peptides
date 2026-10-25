@@ -133,6 +133,8 @@ export default function CollectionTemplate({
           inquireLabel="Inquire Catalog"
           onInquire={() => { if (typeof window !== 'undefined') window.location.href = '/contact'; }}
           showClinicalAI={true}
+          aiCategory="Supplements & Longevity"
+          aiContextQuery="What are the clinical synergies, recommended daily doses, and cofactor combinations across this longevity supplements portfolio?"
           lang="en"
         />
         <UnifiedOrderDrawer lang="en" />
@@ -246,6 +248,8 @@ export default function CollectionTemplate({
         inquireLabel="Inquire Catalog"
         onInquire={() => { if (typeof window !== 'undefined') window.location.href = '/contact'; }}
         showClinicalAI={true}
+        aiCategory="Peptide Portfolio"
+        aiContextQuery={`Which bioactive formulations in the ${categoryName} catalog are most recommended for clinical integration and batch synthesis?`}
         lang="en"
       />
       <UnifiedOrderDrawer lang="en" />

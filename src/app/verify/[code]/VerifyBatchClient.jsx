@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 
 export default function VerifyBatchClient({ code, verification, baseUrl }) {
   const [copied, setCopied] = useState(false);
@@ -137,6 +139,7 @@ export default function VerifyBatchClient({ code, verification, baseUrl }) {
               🔬 Analytical Testing Specifications (CoA)
             </h3>
             <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+              {/* eslint-disable-next-line no-restricted-syntax */}
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                 <thead>
                   <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', textAlign: 'left' }}>
@@ -230,6 +233,43 @@ export default function VerifyBatchClient({ code, verification, baseUrl }) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Persistent Bottom Action Bar (GCP Standard) */}
+      <div className="verify-no-print" style={{ width: '100%' }}>
+        <PublicStickyActionBar
+          title={verification?.productName || `Batch ${code}`}
+          subtitle={`Lot: ${verification?.batchNumber || code} • Purity: ${verification?.purity || '≥99.0%'} • EU GMP Verified`}
+          badge="Batch Authenticity"
+          badgeType="protocol"
+          inquireLabel="Print Official CoA"
+          onInquire={handlePrint}
+          showClinicalAI={true}
+          aiCategory="Batch CoA Verification"
+          aiContextQuery={`Explain the analytical Certificate of Analysis (CoA), HPLC chromatography purity (${verification?.purity || '≥99%'}), and endotoxin test standards for ${verification?.productName || 'this lot'} (Lot: ${verification?.batchNumber || code}).`}
+          extraActions={
+            verification?.productSlug ? (
+              <Link
+                href={`/p/${verification.productSlug}`}
+                className="public-sticky-action-bar__sections-btn"
+                style={{ textDecoration: 'none' }}
+              >
+                <span>View Product</span>
+              </Link>
+            ) : null
+          }
+          lang="en"
+        />
+        <PublicAtlasAIDrawer
+          contextType="product"
+          contextAnchor={{
+            name: verification?.productName || code,
+            batch: verification?.batchNumber || code,
+            purity: verification?.purity
+          }}
+          hideFloatingTrigger={true}
+          lang="en"
+        />
       </div>
     </div>
   );

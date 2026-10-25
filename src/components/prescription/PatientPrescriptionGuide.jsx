@@ -44,7 +44,9 @@ export default function PatientPrescriptionGuide({
   doctorPhone = '',
   patientName = '',
   rxId = '',
-  patientPublicUrl = ''
+  patientPublicUrl = '',
+  rx = {},
+  onOpenDoctorContact = null
 }) {
   // Adherence tracking in local storage
   const todayKey = useMemo(() => {
@@ -335,6 +337,37 @@ export default function PatientPrescriptionGuide({
               <span>{isEs ? 'Añadir a mi Calendario' : 'Sync to Calendar'}</span>
             </button>
 
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                if (onOpenDoctorContact) {
+                  onOpenDoctorContact();
+                } else if (clinicalInquiryUrl) {
+                  window.open(clinicalInquiryUrl, '_blank', 'noopener,noreferrer');
+                }
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                color: '#15803d',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(21, 128, 61, 0.08)',
+                transition: 'all 0.15s ease'
+              }}
+              title={isEs ? 'Hacer una consulta sobre mi tratamiento a la clínica o médico' : 'Ask physician or clinic about your medication'}
+            >
+              <MessageCircle size={14} color="#15803d" />
+              <span>{isEs ? 'Consultar al Dr.' : 'Contact Doctor'}</span>
+            </button>
+
             {/* Quick Doctor Badge */}
             <div
               style={{
@@ -356,6 +389,32 @@ export default function PatientPrescriptionGuide({
           </div>
         </div>
       </div>
+
+      {/* ── Doctor's Direct Notes / Instructions to Patient (Clinical Bridge) ── */}
+      {(rx?.doctorNotes || rx?.patientInstructions || rx?.instructions) && (
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '10px',
+          border: '1px solid #bfdbfe',
+          borderLeft: '4px solid #1a73e8',
+          padding: '14px 18px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          marginBottom: '0.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '1.1rem' }}>📋</span>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1e40af', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isEs ? `Indicaciones Personalizadas de ${doctorName || 'su Médico'}` : `Personalized Instructions from ${doctorName || 'your Physician'}`}
+            </span>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.84rem', color: '#1e293b', lineHeight: 1.5, fontWeight: 500 }}>
+            {rx?.patientInstructions || rx?.doctorNotes || rx?.instructions}
+          </p>
+        </div>
+      )}
 
       {/* ── Item-by-Item Presentation with Differentiated Posology ──────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

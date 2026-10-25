@@ -5612,35 +5612,6 @@ export default function DoctorPublicPortalClient({
 
             {/* Consolidated Header Actions (Clean Physician Command Center) */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              {/* Quick Search Trigger (⌘K) */}
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  setIsPracticeSearchOpen(true);
-                }}
-                style={{
-                  height: '34px',
-                  padding: '0 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #dadce0',
-                  background: '#ffffff',
-                  color: '#3c4043',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
-                }}
-                title="Search patients, prescriptions, formulations (⌘K)"
-              >
-                <Search size={14} style={{ color: '#5f6368' }} />
-                <span>Search</span>
-                <kbd style={{ fontSize: '0.66rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '1px 5px', color: '#64748b' }}>⌘K</kbd>
-              </button>
-
               {/* Notifications Icon & Flyout Dropdown (Pending Clinical Actions) */}
               <div style={{ position: 'relative' }} ref={notifMenuRef}>
                 <button
@@ -5882,53 +5853,6 @@ export default function DoctorPublicPortalClient({
                   </div>
                 )}
               </div>
-
-              {/* Doctor Avatar / Profile Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  if (isAuthorizedViewer) {
-                    setIsCredentialsModalOpen(true);
-                  } else {
-                    setIsClaimModalOpen(true);
-                  }
-                }}
-                style={{
-                  height: '34px',
-                  padding: '0 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #dadce0',
-                  background: '#ffffff',
-                  color: '#3c4043',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
-                }}
-                title={isAuthorizedViewer ? `Verified Physician: ${doctor.name}` : 'Sign in to practice portal'}
-              >
-                <div
-                  style={{
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #003666 0%, #0d9488 100%)',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.68rem',
-                    fontWeight: 750
-                  }}
-                >
-                  {isAuthorizedViewer ? (doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D') : <Shield size={10} color="#ffffff" />}
-                </div>
-                <span style={{ fontSize: '0.74rem', fontWeight: 650, color: '#0f172a' }}>
-                  {isAuthorizedViewer ? doctor.name?.split(' ').slice(0, 2).join(' ') : 'Practice ID'}
-                </span>
-              </button>
 
               {/* Primary Action Button: New Prescription */}
               <button
@@ -9364,49 +9288,22 @@ export default function DoctorPublicPortalClient({
                 window.location.href = `/rx/intake?refDoctor=${doctor?.opaqueCode || slug}`;
               }
         }
-        showClinicalAI={isAuthorizedViewer}
-        onOpenClinicalAI={
+        showClinicalAI={true}
+        aiCategory={isAuthorizedViewer ? 'Physician Console' : 'Doctor Practice'}
+        aiContextQuery={
           isAuthorizedViewer
-            ? () => {
-                triggerHaptic('selection');
-                setIsAtlasAiOpen(true);
-              }
-            : null
+            ? (lang === 'es'
+                ? `Copiloto clínico para ${doctor?.name || 'médico'}: ¿Cómo estructurar un nuevo protocolo o prescripción de longevidad para mis pacientes?`
+                : `Clinical copilot for ${doctor?.name || 'physician'}: How can I structure a new longevity regimen or compounding prescription for my patients?`)
+            : (lang === 'es'
+                ? `¿Qué áreas de especialidad, tratamientos y protocolos médicos ofrece la consulta del Dr/a. ${doctor?.name || 'este especialista'}?`
+                : `What medical specialties, treatments, and clinical protocols does ${doctor?.name || 'this specialist'} provide?`)
         }
+        onOpenClinicalAI={() => {
+          triggerHaptic('selection');
+          setIsAtlasAiOpen(true);
+        }}
         lang={lang}
-        extraActions={
-          <>
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                setIsPracticeSearchOpen(true);
-              }}
-              className="public-sticky-action-bar__sections-btn"
-              title={lang === 'es' ? 'Buscar paciente o receta (⌘K)' : 'Quickly find any patient or prescription (⌘K)'}
-            >
-              <Search size={14} style={{ color: '#003666' }} />
-              <span className="public-sticky-action-bar__sections-label">
-                {lang === 'es' ? 'Buscar Paciente / Rx (⌘K)' : 'Find Patient / Rx (⌘K)'}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                setIsRequestInfoOpen(true);
-              }}
-              className="public-sticky-action-bar__sections-btn"
-              title={lang === 'es' ? 'Asistencia médica directa por WhatsApp' : 'Direct clinical assistance via WhatsApp'}
-            >
-              <MessageCircle size={14} style={{ color: '#16a34a' }} />
-              <span className="public-sticky-action-bar__sections-label" style={{ color: '#166534' }}>
-                WhatsApp
-              </span>
-            </button>
-          </>
-        }
       />
 
       {/* ── Google Cloud Console Standard Unified Footer (100% Full-Width) ── */}

@@ -87,6 +87,8 @@ import PatientPrescriptionGuide from '@/components/prescription/PatientPrescript
 import RoadmapMilestonesSection from '@/components/prescription/RoadmapMilestonesSection';
 import QualityTraceabilitySection from '@/components/prescription/QualityTraceabilitySection';
 import PrescriptionModalsContainer from '@/components/prescription/PrescriptionModalsContainer';
+import CalendarSyncModal from '@/components/prescription/CalendarSyncModal';
+import PrescriptionDoctorContactModal from '@/components/prescription/PrescriptionDoctorContactModal';
 import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
 import { usePrescriptionData, getPosologyText } from '@/hooks/usePrescriptionData';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
@@ -136,6 +138,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [activeGcpTab, setActiveGcpTab] = useState('treatment'); // 'treatment' | 'roadmap' | 'traceability' | 'credentials' | 'patientSharing'
   const [showDoctorAuthModal, setShowDoctorAuthModal] = useState(false);
   const [showPatientAuthModal, setShowPatientAuthModal] = useState(false);
+  const [showCalendarSyncModal, setShowCalendarSyncModal] = useState(false);
+  const [showDoctorContactModal, setShowDoctorContactModal] = useState(false);
 
   const handleOpenInquiry = useCallback((customEntity = null) => {
     setInquiryCustomEntity(customEntity || null);
@@ -252,6 +256,42 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     return Boolean(tokenParam && rxId && verifyPatientAccessKey(rxId, tokenParam));
   }, [tokenParam, rxId]);
   const isPatientAuthenticated = Boolean(user || isTokenAuthorized);
+
+  // Daily Adherence Tracking for Patient View
+  const todayAdherenceKey = useMemo(() => {
+    const d = new Date();
+    return `atlas_rx_adh_${rxId}_${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, [rxId]);
+
+  const [hasLoggedDoseToday, setHasLoggedDoseToday] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const d = new Date();
+      const k = `atlas_rx_adh_${rxId}_${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return Boolean(localStorage.getItem(k));
+    } catch {
+      return false;
+    }
+  });
+
+  const handleToggleDoseToday = () => {
+    triggerHaptic('selection');
+    const nextState = !hasLoggedDoseToday;
+    setHasLoggedDoseToday(nextState);
+    if (typeof window !== 'undefined') {
+      try {
+        if (nextState) {
+          localStorage.setItem(todayAdherenceKey, JSON.stringify({ takenAt: new Date().toISOString() }));
+          toast.success(isEs ? '¡Dosis de hoy registrada! Cumplimiento al día ✓' : 'Today’s dose logged! Adherence on track ✓', { icon: '💊' });
+        } else {
+          localStorage.removeItem(todayAdherenceKey);
+          toast(isEs ? 'Registro de dosis cancelado' : 'Dose log removed');
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+  };
 
   const [currentStatus, setCurrentStatus] = useState(() => {
     return String(currentRx.status || currentRx.state || currentRx.fagronStatus || currentRx.orderStatus || 'approved').toLowerCase().trim();
@@ -547,196 +587,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           ]}
           onImportRx={() => { window.location.href = `/rx/intake?from=${rxId}&fromRole=doctor`; }}
           onSwitchRx={() => setShowRxSwitcherModal(true)}
-          banner={
-            !isPatientView && isAuthorizedViewer ? (
-              <div className="rx-mode-subbanner" style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: 10,
-                padding: '6px 20px',
-                background: 'linear-gradient(90deg, #003666 0%, #1a73e8 100%)',
-                borderBottom: '1px solid rgba(255,255,255,0.12)',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.18)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{
-                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    width: 22, height: 22, borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.18)',
-                    flexShrink: 0
-                  }}>
-                    <Stethoscope size={12} color="#ffffff" />
-                  </span>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                    {isEs ? 'Vista Médico — Panel Clínico' : 'Doctor View — Clinical Panel'}
-                  </span>
-                  <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.85)', fontWeight: 400 }} className="rx-banner-desc">
-                    {isEs ? `· Paciente: ${patientName}` : `· Patient: ${patientName}`}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
-                  <Link
-                    href={doctorPublicUrl}
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 650,
-                      color: '#ffffff',
-                      background: 'rgba(255,255,255,0.20)',
-                      border: '1px solid rgba(255,255,255,0.35)',
-                      padding: '3px 10px',
-                      borderRadius: '4px',
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 5,
-                      transition: 'background 0.15s'
-                    }}
-                    title={isAuthorizedViewer ? (isEs ? `Volver al portal de ${nominalDoctorName}` : `Return to ${nominalDoctorName}'s Portal`) : (isEs ? 'Volver al portal médico' : 'Return to medical portal')}
-                  >
-                    <ArrowLeft size={12} color="#ffffff" />
-                    <span>{isAuthorizedViewer ? (isEs ? `Volver a ${nominalDoctorName || 'Portal'}` : `Back to ${nominalDoctorName || 'Portal'}`) : (isEs ? 'Portal Médico' : 'Medical Portal')}</span>
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('impact');
-                      setShowPatientShareModal(true);
-                    }}
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: '#ffffff',
-                      background: 'rgba(255,255,255,0.22)',
-                      border: '1px solid rgba(255,255,255,0.40)',
-                      padding: '3px 10px',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 5,
-                      transition: 'background 0.15s'
-                    }}
-                    title={isEs ? 'Compartir prescripción segura con el paciente (QR / WhatsApp)' : 'Share secure prescription with patient (QR / WhatsApp)'}
-                  >
-                    <Share2 size={12} color="#ffffff" />
-                    <span>{isEs ? 'Compartir con Paciente' : 'Share with Patient'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('selection');
-                      setOverrideView('patient');
-                    }}
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      color: '#ffffff',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 4,
-                      padding: '3px 10px',
-                      borderRadius: '4px',
-                      background: 'rgba(255,255,255,0.14)',
-                      border: '1px solid rgba(255,255,255,0.25)',
-                      cursor: 'pointer',
-                      transition: 'background 0.15s'
-                    }}
-                    title={isEs ? 'Ver cómo lo verá el paciente (0ms switch)' : 'Preview the patient view (0ms switch)'}
-                  >
-                    <Eye size={12} />
-                    <span>{isEs ? 'Vista Paciente' : 'Patient Preview'}</span>
-                  </button>
-                </div>
-              </div>
-            ) : isAuthorizedViewer ? (
-              <div className="rx-mode-subbanner" style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: 10,
-                padding: '6px 20px',
-                background: 'linear-gradient(90deg, #0d9488 0%, #0284c7 100%)',
-                borderBottom: '1px solid rgba(255,255,255,0.12)',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.18)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{
-                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    width: 22, height: 22, borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.18)',
-                    flexShrink: 0
-                  }}>
-                    <User size={12} color="#ffffff" />
-                  </span>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                    {isEs ? 'Modo Previsualización Paciente' : 'Patient Preview Mode'}
-                  </span>
-                  <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.85)', fontWeight: 400 }} className="rx-banner-desc">
-                    {isEs ? 'Dossier simplificado tal como lo visualiza el paciente' : 'Simplified dossier as seen by patient'}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('selection');
-                      setOverrideView('doctor');
-                    }}
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 650,
-                      color: '#ffffff',
-                      background: 'rgba(255,255,255,0.22)',
-                      border: '1px solid rgba(255,255,255,0.38)',
-                      padding: '3px 10px',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 5
-                    }}
-                    title={isEs ? 'Volver al panel clínico del médico (0ms switch)' : 'Switch back to doctor clinical view (0ms switch)'}
-                  >
-                    <Stethoscope size={12} color="#ffffff" />
-                    <span>{isEs ? 'Volver a Vista Médico' : 'Return to Doctor View'}</span>
-                  </button>
-
-                  <Link
-                    href={doctorPublicUrl}
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      color: '#ffffff',
-                      background: 'rgba(255,255,255,0.14)',
-                      border: '1px solid rgba(255,255,255,0.25)',
-                      padding: '3px 10px',
-                      borderRadius: '4px',
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 5
-                    }}
-                  >
-                    <ArrowLeft size={12} color="#ffffff" />
-                    <span>{isAuthorizedViewer ? (isEs ? `Portal Dr. ${nominalDoctorName || ''}` : `${nominalDoctorName || ''} Portal`) : (isEs ? 'Portal Médico' : 'Doctor Portal')}</span>
-                  </Link>
-                </div>
-              </div>
-            ) : null
-          }
         />
       )}
-
-      <style>{`
-        @media (min-width: 640px) { .rx-banner-desc { display: inline !important; } }
-      `}</style>
 
       <div className="rx-dossier-inner-container">
         <div className="pds-content-with-sidebar">
@@ -748,6 +600,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               rxId={rxId}
               isEs={isEs}
               isPatientView={isPatientView}
+              isAuthorizedViewer={isAuthorizedViewer}
+              onSwitchView={(mode) => {
+                triggerHaptic('selection');
+                setOverrideView(mode);
+              }}
               currentStatus={currentStatus}
               currentStatusMeta={currentStatusMeta}
               setCurrentStatus={setCurrentStatus}
@@ -756,6 +613,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               handleCopyLink={handleCopyLink}
               copied={copied}
               onOpenPatientShare={() => setShowPatientShareModal(true)}
+              onOpenInquiry={() => setShowDoctorContactModal(true)}
+              onSyncCalendar={() => setShowCalendarSyncModal(true)}
               activeGcpTab={activeGcpTab}
               setActiveGcpTab={setActiveGcpTab}
               compoundedFormulations={compoundedFormulations}
@@ -771,10 +630,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               isDispensed={isDispensed}
               isEs={isEs}
               rxId={rxId}
+              rx={currentRx}
+              doctorName={displayDoctorNameShort}
               resolvedPrice={resolvedPrice}
               isAuthenticated={isPatientAuthenticated}
               onRequireAuth={() => setShowPatientAuthModal(true)}
-              onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+              onOpenInquiry={() => setShowDoctorContactModal(true)}
             />
 
         {/* ── Sequential Roadmap Tab: MultiPartOverview & KPIs ────────────────────── */}
@@ -803,6 +664,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               rxId={rxId}
               patientPublicUrl={patientPublicUrl}
               onOpenQuotation={() => setShowAtlasQuotationModal(true)}
+              onOpenDoctorContact={() => setShowDoctorContactModal(true)}
             />
           ) : (
             <CompoundedFormulationsSection
@@ -2329,28 +2191,66 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </button>
               </>
             ) : (
-              /* Patient View Supplemental Actions — Unified Glassmorphic Patient Menu */
-              <div style={{ position: 'relative' }} ref={patientDropdownRef}>
+              /* Patient View Supplemental Actions — Adherence + Direct Doctor Bridge + Options */
+              <>
+                <button
+                  type="button"
+                  onClick={handleToggleDoseToday}
+                  className="rx-dock-btn"
+                  style={{
+                    background: hasLoggedDoseToday ? '#f0fdf4' : '#ffffff',
+                    border: hasLoggedDoseToday ? '1px solid #bbf7d0' : '1px solid #cbd5e1',
+                    color: hasLoggedDoseToday ? '#15803d' : '#334155',
+                    fontWeight: 650
+                  }}
+                  title={isEs ? 'Registrar o cancelar la toma de medicación de hoy' : 'Toggle today’s dose confirmation'}
+                >
+                  {hasLoggedDoseToday ? <CheckCircle2 size={14} color="#16a34a" /> : <Pill size={14} color="#0284c7" />}
+                  <span className="rx-dock-btn-label-desktop">
+                    {hasLoggedDoseToday ? (isEs ? 'Dosis de hoy: Tomada ✓' : 'Today: Dose Logged ✓') : (isEs ? 'Marcar toma de hoy' : 'Log Today’s Dose')}
+                  </span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
                     triggerHaptic('selection');
-                    setShowPatientDropdown(prev => !prev);
+                    setShowDoctorContactModal(true);
                   }}
-                  className="rx-dock-btn rx-dock-btn-secondary"
-                  title={isEs ? 'Guía, autenticidad y opciones del paciente' : 'Regimen guide, QR & patient options'}
+                  className="rx-dock-btn"
+                  style={{
+                    background: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    color: '#1d4ed8',
+                    fontWeight: 650
+                  }}
+                  title={isEs ? `Consultar a ${nominalDoctorName || displayDoctorNameShort}` : `Ask ${nominalDoctorName || displayDoctorNameShort} a question`}
                 >
-                  <FileText size={14} color="#003666" />
-                  <span className="rx-dock-btn-label-desktop">{isEs ? 'Guía y Opciones' : 'Guide & Options'}</span>
-                  <ChevronDown
-                    size={13}
-                    color="#64748b"
-                    style={{
-                      transform: showPatientDropdown ? 'rotate(180deg)' : 'none',
-                      transition: 'transform 0.15s ease'
-                    }}
-                  />
+                  <MessageSquare size={14} color="#1d4ed8" />
+                  <span className="rx-dock-btn-label-desktop">{isEs ? 'Consultar al Dr.' : 'Contact Doctor'}</span>
                 </button>
+
+                <div style={{ position: 'relative' }} ref={patientDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setShowPatientDropdown(prev => !prev);
+                    }}
+                    className="rx-dock-btn rx-dock-btn-secondary"
+                    title={isEs ? 'Guía, autenticidad y opciones del paciente' : 'Regimen guide, QR & patient options'}
+                  >
+                    <FileText size={14} color="#003666" />
+                    <span className="rx-dock-btn-label-desktop">{isEs ? 'Guía y Opciones' : 'Guide & Options'}</span>
+                    <ChevronDown
+                      size={13}
+                      color="#64748b"
+                      style={{
+                        transform: showPatientDropdown ? 'rotate(180deg)' : 'none',
+                        transition: 'transform 0.15s ease'
+                      }}
+                    />
+                  </button>
 
                 {showPatientDropdown && (
                   <div style={{
@@ -2502,8 +2402,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   </div>
                 )}
               </div>
-            )
-          }
+            </>
+          )
+        }
         />
       )}
 
@@ -2617,6 +2518,34 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         rxId={rxId}
         doctorName={nominalDoctorName || displayDoctorNameShort}
         actionGoal={isDispensed ? 'refill' : 'quotation'}
+        isEs={isEs}
+      />
+
+      {/* ── Google Cloud Calendar Synchronization Modal ── */}
+      <CalendarSyncModal
+        isOpen={showCalendarSyncModal}
+        onClose={() => setShowCalendarSyncModal(false)}
+        rxId={rxId}
+        patientName={patientName}
+        doctorName={displayDoctorNameShort}
+        compoundedFormulations={compoundedFormulations}
+        patientPublicUrl={patientPublicUrl}
+        isEs={isEs}
+      />
+
+      {/* ── Google Cloud UX Doctor-Patient Communication Bridge Modal ── */}
+      <PrescriptionDoctorContactModal
+        isOpen={showDoctorContactModal}
+        onClose={() => setShowDoctorContactModal(false)}
+        rxId={rxId}
+        rx={currentRx}
+        doctorName={nominalDoctorName || displayDoctorNameShort}
+        doctorClinic={doctorClinic}
+        doctorPhone={currentRx?.doctorPhone || '+97143498800'}
+        patientName={patientName}
+        patientEmail={patient?.email || ''}
+        patientPublicUrl={patientPublicUrl}
+        compoundedFormulations={compoundedFormulations}
         isEs={isEs}
       />
     </div>

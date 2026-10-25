@@ -79,6 +79,7 @@ import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMo
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import PublicClinicalJsonLd from '@/components/shared/PublicClinicalJsonLd';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import CorporateResidencyInquiryDrawer from '@/components/portal/CorporateResidencyInquiryDrawer';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
@@ -1893,6 +1894,18 @@ export default function PublicDatasheetView({
 
   return (
     <div className="public-datasheet-root">
+      {/* ── Schema.org Clinical Structured Data (Rich Snippets) ── */}
+      <PublicClinicalJsonLd
+        name={product?.name || name}
+        description={product?.description || product?.summary || ''}
+        category={category}
+        casNumber={product?.casNumber || product?.cas}
+        purity={product?.purity}
+        molecularWeight={product?.molecularWeight}
+        sequence={product?.sequence}
+        indications={product?.indications || []}
+      />
+
       {/* ── Fixed Executive Navigation (Tier 1 Only on Product Page) ── */}
       <PublicUnifiedHeader
         track={isDiagnosticKit ? 'diagnostics' : isCosmeticProduct ? 'cosmetics' : isSupplementProduct ? 'supplements' : isCorporateService ? 'corporate' : 'peptides'}
@@ -3269,6 +3282,16 @@ export default function PublicDatasheetView({
         }
         onInquire={handleOpenInquiry}
         showClinicalAI={true}
+        aiCategory={isDiagnosticKit ? 'Diagnostic Test' : (isPeptideCompound ? 'Peptide Monograph' : 'Product Datasheet')}
+        aiContextQuery={
+          isDiagnosticKit
+            ? (lang === 'es'
+                ? `¿Qué biomarcadores mide el test ${product?.name || slug}, cómo se realiza la toma capilar y qué relevancia clínica tiene?`
+                : `What biomarkers does ${product?.name || slug} measure, how is capillary sampling done, and what is its clinical utility?`)
+            : (lang === 'es'
+                ? `¿Cuáles son las aplicaciones clínicas, dianas biológicas, pureza HPLC y posología documentada de ${product?.canonicalName || product?.name || slug}?`
+                : `What are the clinical applications, biological targets, HPLC purity, and documented posology for ${product?.canonicalName || product?.name || slug}?`)
+        }
         showSections={true}
         sectionsCount={isPeptideCompound ? 5 : tocSections.length}
         sectionsLabel={lang === 'es' ? 'Secciones' : 'Sections'}

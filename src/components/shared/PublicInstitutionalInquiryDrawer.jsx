@@ -861,20 +861,7 @@ export default function PublicInstitutionalInquiryDrawer({
 
   return (
     <div 
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        zIndex: 2000,
-        display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'stretch',
-        backgroundColor: 'rgba(15, 23, 42, 0.45)',
-        backdropFilter: 'blur(3px)',
-        transition: 'opacity 0.2s ease-in-out'
-      }}
+      className="atlas-bottom-sheet-overlay"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -882,21 +869,17 @@ export default function PublicInstitutionalInquiryDrawer({
       aria-modal="true"
       aria-label="Institutional Inquiry Drawer"
     >
-      {/* ── Slide-over Container (GCP Drawer Design) ── */}
+      {/* ── Slide-over Container (GCP Drawer Design) / Mobile Bottom Sheet ── */}
       <div
+        className="atlas-bottom-sheet-panel"
         style={{
-          width: '100%',
           maxWidth: '520px',
-          height: '100%',
-          backgroundColor: '#ffffff',
-          boxShadow: '-8px 0 32px rgba(0, 54, 102, 0.2)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          animation: 'pdsSlideInRight 0.24s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Mobile Drag Handle */}
+        <div className="atlas-bottom-sheet-handle" />
+
         {/* Drawer Header */}
         <div
           style={{
@@ -1601,6 +1584,7 @@ export default function PublicInstitutionalInquiryDrawer({
 
               {/* Action Buttons Sticky Footer (Google Cloud Drawer Standard) */}
               <div
+                className="atlas-bottom-sheet-footer"
                 style={{
                   position: 'sticky',
                   bottom: '-1.4rem',

@@ -114,6 +114,29 @@ export default function FilterDrawer({
           from { transform: translateX(100%); }
           to { transform: translateX(0); }
         }
+        @keyframes slide-up-sheet {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+          .col-drawer-overlay {
+            align-items: flex-end;
+            justify-content: center;
+          }
+          .col-drawer-content {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            max-height: 85dvh;
+            border-radius: 20px 20px 0 0;
+            border-left: none;
+            border-top: 1px solid var(--border-light, #EBF2F8);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+            animation: slide-up-sheet 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+          }
+        }
       `}</style>
     </div>
   );

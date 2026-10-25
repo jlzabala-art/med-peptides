@@ -6,6 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import ClinicalGanttTimeline from '../../../components/protocol/ClinicalGanttTimeline';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import PublicClinicalJsonLd from '@/components/shared/PublicClinicalJsonLd';
 import { 
   generateDynamicReconData, 
   generateDynamicSupplySummary, 
@@ -789,6 +790,15 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
 
   return (
     <div className="public-datasheet-root">
+      {/* ── Schema.org Clinical Structured Data (Rich Snippets) ── */}
+      <PublicClinicalJsonLd
+        type="MedicalGuideline"
+        name={displayName}
+        description={protocol?.description || protocol?.summary || ''}
+        category={protocol?.goal || 'Clinical Protocols'}
+        indications={protocol?.indications || []}
+      />
+
       {/* ── Fixed 2-Tier Sticky Executive Navigation ── */}
       <PublicUnifiedHeader
         track="protocols"
@@ -1486,6 +1496,12 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
           </button>
         }
         showClinicalAI={true}
+        aiCategory="Clinical Protocol"
+        aiContextQuery={
+          lang === 'es'
+            ? `¿Cuál es el fundamento clínico, cronobiología por fases, compuestos y biomarcadores de seguimiento del protocolo ${displayName}?`
+            : `What is the clinical rationale, phased chronobiology, compounded formulations, and monitoring biomarkers for ${displayName}?`
+        }
         showSections={true}
         sectionsCount={tocSections.length}
         activeSectionIndex={tocSections.findIndex(s => s.id === effectiveActiveSection) + 1}

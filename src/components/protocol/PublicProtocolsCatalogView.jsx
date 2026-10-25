@@ -1352,6 +1352,12 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         inquireLabel={lang === 'es' ? 'Consultar Directorio' : 'Inquire Directory'}
         onInquire={() => setIsInquiryDrawerOpen(true)}
         showClinicalAI={true}
+        aiCategory="Protocols Directory"
+        aiContextQuery={
+          lang === 'es'
+            ? 'Busco un protocolo clínico en el compendio de Atlas para un paciente con objetivo de [escriba aquí objetivo, ej: longevidad, recuperación tisular o metabolismo]. ¿Cuáles son los más recomendados y con qué sinergias?'
+            : 'I am looking for an Atlas clinical protocol for a patient targeting [specify goal, e.g. longevity, tissue repair, or metabolic optimization]. What are the recommended pathways and synergies?'
+        }
         showSections={true}
         sectionsCount={GOAL_BUCKETS.length}
         sectionsLabel={lang === 'es' ? 'Objetivos & Filtros' : 'Goals & Filters'}
