@@ -1540,5 +1540,87 @@
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   CLINICAL PRINT STYLESHEET (Healthcare & Patient Dossier Standard)
+   Hides all floating, interactive, and sticky UI for pure paper charts
+   ══════════════════════════════════════════════════════════════════ */
+@media print {
+  /* Hide all floating UI, navigation headers, drawers and action bars */
+  .public-sticky-action-bar,
+  .atlas-ai-public-fab,
+  .atlas-bottom-sheet-overlay,
+  .atlas-bottom-sheet-modal-overlay,
+  .public-reading-progress-bar,
+  .puh-header-root,
+  .puh-unified-header,
+  .no-print,
+  button,
+  .public-sticky-action-bar__actions,
+  .atlas-loading-bar {
+    display: none !important;
+  }
+
+  /* Reset layout to full printable width without background ink bleed */
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .public-datasheet-root,
+  .pds-page-shell,
+  .pds-page-shell-inner {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    background: #ffffff !important;
+  }
+
+  /* Clean up card shadows and enforce sharp borders for laser printers */
+  .pds-hero-card,
+  .proto-biomarker-executive-card,
+  .gcp-card,
+  .pds-section-card {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Retain clinical charts, graphs, and table structures across page breaks */
+  table, tr, td, th {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Clean link presentations without ugly URL parentheticals */
+  a {
+    text-decoration: none !important;
+    color: inherit !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ACCESSIBILITY: PREFERS-REDUCED-MOTION
+   Disables non-essential motion for vestibular sensitivity (WCAG 2.1)
+   ══════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
 
 

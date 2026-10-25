@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { Sparkles, ArrowRight, List, ShoppingBag, Share2, WifiOff } from 'lucide-react';
+import { Sparkles, ArrowRight, List, ShoppingBag, Share2, WifiOff, ArrowUp, QrCode, X, Copy, Check } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useB2BOrder } from '@/hooks/useB2BOrder';
 import { getPublicAiPreset } from '@/config/publicAiPresets';
 import { triggerHaptic } from '@/utils/haptics';
@@ -56,6 +57,9 @@ export default function PublicStickyActionBar({
   const [_quota, setQuota] = useState({ remaining: 5, limit: 5 });
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isOnline, setIsOnline] = useState(true);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [copiedQrUrl, setCopiedQrUrl] = useState(false);
   const [tocProgress, setTocProgress] = useState({
     currentProgress: activeSectionIndex || 1,
     totalSections: sectionsCount || 0,
@@ -82,7 +86,7 @@ export default function PublicStickyActionBar({
     };
   }, [lang]);
 
-  // Track reading scroll progress (0 to 100%)
+  // Track reading scroll progress (0 to 100%) and Back-to-Top visibility
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const handleScroll = () => {
@@ -91,6 +95,7 @@ export default function PublicStickyActionBar({
         const progress = Math.min(100, Math.max(0, (window.scrollY / totalHeight) * 100));
         setScrollProgress(progress);
       }
+      setShowBackToTop(window.scrollY > 500);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -222,6 +227,23 @@ export default function PublicStickyActionBar({
     }
   };
 
+  const handleScrollToTop = () => {
+    triggerHaptic('light');
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleCopyQrUrl = () => {
+    triggerHaptic('selection');
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(typeof window !== 'undefined' ? window.location.href : '');
+      setCopiedQrUrl(true);
+      toast.success('Direct URL copied to clipboard ✓');
+      setTimeout(() => setCopiedQrUrl(false), 2000);
+    }
+  };
+
   const getBadgeClass = () => {
     if (badgeType === 'diagnostic') return 'public-sticky-action-bar__badge public-sticky-action-bar__badge--diagnostic';
     if (badgeType === 'protocol') return 'public-sticky-action-bar__badge public-sticky-action-bar__badge--protocol';
@@ -324,6 +346,58 @@ export default function PublicStickyActionBar({
               <Share2 size={15} />
             </button>
 
+            {/* Desktop to Mobile QR Bridge Button */}
+            <button
+              type="button"
+              onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
+              className="public-sticky-action-bar__qr-btn"
+              title="Open on Mobile / Scan QR Code"
+              aria-label="Scan QR Code"
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#475569',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                flexShrink: 0
+              }}
+            >
+              <QrCode size={16} />
+            </button>
+
+            {/* Smart Back to Top Micro-Button */}
+            {showBackToTop && (
+              <button
+                type="button"
+                onClick={handleScrollToTop}
+                className="public-sticky-action-bar__back-to-top-btn"
+                title="Scroll back to top"
+                aria-label="Back to Top"
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#f8fafc',
+                  color: '#003666',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  flexShrink: 0
+                }}
+              >
+                <ArrowUp size={16} />
+              </button>
+            )}
+
             {/* Page Outline / Sections Trigger (Mobile & Desktop) */}
             {hasSectionsOutline && (
               <button
@@ -407,6 +481,100 @@ export default function PublicStickyActionBar({
       {/* Dynamic Lazy-Loaded Atlas AI Drawer (zero initial bundle overhead) */}
       {showClinicalAI && mountAiDrawer && (
         <PublicAtlasAIDrawer lang={lang} {...drawerProps} />
+      )}
+
+      {/* ── Desktop to Mobile QR Bridge Modal ── */}
+      {showQrModal && (
+        <div
+          className="atlas-bottom-sheet-modal-overlay"
+          onClick={() => setShowQrModal(false)}
+        >
+          <div
+            className="atlas-bottom-sheet-modal-panel"
+            style={{ maxWidth: '380px', padding: '24px', alignItems: 'center', textAlign: 'center', position: 'relative' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="atlas-bottom-sheet-handle" />
+            <button
+              type="button"
+              onClick={() => setShowQrModal(false)}
+              aria-label="Close"
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#64748b'
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+              <QrCode size={22} />
+            </div>
+
+            <h3 style={{ margin: '0 0 6px 0', fontSize: '1.1rem', fontWeight: 800, color: '#003666' }}>
+              Scan on Smartphone
+            </h3>
+            <p style={{ margin: '0 0 16px 0', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>
+              Open camera on your mobile device to seamlessly view and share this clinical document.
+            </p>
+
+            <div style={{ padding: '12px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
+              <QRCodeSVG
+                value={typeof window !== 'undefined' ? window.location.href : 'https://regenpept.com'}
+                size={180}
+                level="H"
+                includeMargin={true}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', marginTop: '16px', width: '100%' }}>
+              <button
+                type="button"
+                onClick={handleCopyQrUrl}
+                style={{
+                  flex: 1,
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#f8fafc',
+                  color: '#0f172a',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                {copiedQrUrl ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
+                <span>{copiedQrUrl ? 'Copied ✓' : 'Copy URL'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowQrModal(false)}
+                style={{
+                  flex: 1,
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#003666',
+                  color: '#ffffff',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

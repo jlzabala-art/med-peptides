@@ -115,6 +115,7 @@ export default function ClinicalSynergySection({
             <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
               <Link
                 href={rec.url}
+                prefetch={true}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',

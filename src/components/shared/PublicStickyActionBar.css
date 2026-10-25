@@ -399,3 +399,21 @@ body.has-sticky-bottom-bar .atlas-ai-public-fab {
   display: none !important;
 }
 
+/* ── Secondary Utilities: Share, QR Bridge & Back-to-Top ── */
+.public-sticky-action-bar__share-btn:hover,
+.public-sticky-action-bar__qr-btn:hover,
+.public-sticky-action-bar__back-to-top-btn:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #003666 !important;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  /* QR modal is a desktop-to-mobile bridge; hide button on phone screens */
+  .public-sticky-action-bar__qr-btn {
+    display: none !important;
+  }
+}
+
+
