@@ -34,10 +34,11 @@ import BulkActionsBar from '../ui/BulkActionsBar';
 import InlineEditableCell from '../ui/InlineEditableCell';
 import { usePatientActions } from '../../hooks/usePatientActions';
 import { usePatientExport } from '../../hooks/usePatientExport';
-import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert, Clock, DollarSign, Stethoscope, Layers } from '@/lib/icons';
+import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert, Clock, DollarSign, Stethoscope, Layers, Share2 } from '@/lib/icons';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import EntityLink from '../ui/EntityLink';
 import ReassignPhysicianModal from '../admin/patients/ReassignPhysicianModal';
+import UniversalShareDrawer from '../ui/UniversalShareDrawer';
 
 function capitalizeName(name) {
   if (!name) return name;
@@ -82,6 +83,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [mobileActionPatient, setMobileActionPatient] = useState(null);
   const [reassignModal, setReassignModal] = useState({ isOpen: false, patients: [] });
+  const [sharePatient, setSharePatient] = useState(null);
 
   const { is, role } = useRoleAccess();
   const isAdmin = is('admin') || role === 'admin';
@@ -721,6 +723,14 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button
+                  onClick={() => setSharePatient(row)}
+                  className="gcp-btn-secondary"
+                  style={{ fontSize: '0.75rem', padding: '3px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  title="Compartir Expediente / Portal de Paciente"
+                >
+                  <Share2 size={12} /> Share Portal
+                </button>
+                <button
                   onClick={() => openDrawer('rx-builder', 'new', {
                     initialPatient: { id: row.id, name: row.name, email: row.email },
                     sourceModule: 'patients-table',
@@ -928,6 +938,15 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
                     }
                   },
                   {
+                    type: 'share',
+                    label: 'Share Portal',
+                    icon: Share2,
+                    tooltip: 'Compartir Expediente / Portal de Paciente',
+                    onClick: () => {
+                      setSharePatient(row);
+                    }
+                  },
+                  {
                     type: 'workspace',
                     label: 'Workspace',
                     icon: Layers,
@@ -1014,6 +1033,12 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
           clearSelection();
           router.refresh();
         }}
+      />
+      <UniversalShareDrawer
+        isOpen={Boolean(sharePatient)}
+        onClose={() => setSharePatient(null)}
+        entityType="patient"
+        entity={sharePatient}
       />
     </DataModule>
   );

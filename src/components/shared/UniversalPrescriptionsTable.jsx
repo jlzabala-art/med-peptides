@@ -23,6 +23,7 @@ import DataModule from '../ui/DataModule';
 import { useAuth } from '../../context/AuthContext';
 import PrescriptionIntakeWorkspace from '../../features/prescriptions/components/PrescriptionIntakeWorkspace';
 import ShareIntakeWhatsAppModal from './ShareIntakeWhatsAppModal';
+import UniversalShareDrawer from '../ui/UniversalShareDrawer';
 import PrimarySplitButton from '../ui/PrimarySplitButton';
 import AIQuickActionButton from '../ui/AIQuickActionButton';
 import SourceSelectorModal from '../../features/prescriptions/SourceSelectorModal';
@@ -1736,13 +1737,14 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
           />
         )}
 
-        <ShareIntakeWhatsAppModal
+        <UniversalShareDrawer
           isOpen={isShareIntakeWhatsAppOpen}
           onClose={() => {
             setIsShareIntakeWhatsAppOpen(false);
             setSelectedShareRx(null);
           }}
-          rx={selectedShareRx}
+          entityType="prescription"
+          entity={selectedShareRx}
         />
 
         <LabelsModal />

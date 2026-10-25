@@ -1,32 +1,45 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import StandardDrawer from '@/components/ui/StandardDrawer';
 import notifier from '@/services/NotificationService';
-import { Copy, Check, MessageSquare, Mail, QrCode, ExternalLink, User } from 'lucide-react';
+import { Copy, Check, MessageSquare, Mail, QrCode, ExternalLink, Key, Loader2, Sparkles, User, RefreshCw } from 'lucide-react';
+import RecipientHierarchySelector from '@/components/shared/RecipientHierarchySelector';
+import { generateDoctorWelcomeWhatsApp, generateDoctorWelcomeEmail } from '@/data/doctorOnboardingTemplates';
 
 /**
  * UniversalShareDrawer
  * 
- * Reusable, parameterized component to share ANY resource (Catalogs, PriceLists, 
- * Quotations, Prescriptions, Protocols, Lab Reports, or Generic Links) across all portals.
+ * Unified, polymorphic and parameterizable drawer to share ANY resource across all portals:
+ * - Doctors (Public Profile / 1-Tap Magic Token Onboarding)
+ * - Prescriptions (Digital Dossier, Multipart Fagron Genomics, Posology)
+ * - Wholesalers / Customers (B2B Catalog, /vials?ref=[id], Price tiers)
+ * - Patients (Personalized Clinical Portal, Rx Intake)
+ * - Custom / Generic links (Catalogs, PriceLists, Protocols, Lab Reports)
  * 
  * Complies with AGENTS.md Golden Rules:
- * - Golden Rule #1 & #2: Zero heavy initial load; queries users on-demand with limit(30)
+ * - Golden Rule #1 & #2: Zero heavy initial load; queries on-demand
  * - Golden Rule #4: Uses StandardDrawer without context-breaking modals
- * - Golden Rule #8 & #15: Uses CSS variables & semantic colors
+ * - Golden Rule #8 & #15: GCP-inspired UX, CSS variables & semantic colors
+ * - Golden Rule #11: IDs & links are copy-on-click
  */
-import RecipientHierarchySelector from '@/components/shared/RecipientHierarchySelector';
-
 export default function UniversalShareDrawer({
   isOpen,
   onClose,
+  // Polymorphic props
+  entityType = null, // 'doctor' | 'prescription' | 'wholesaler' | 'patient' | 'catalog' | 'custom'
+  entity = null,
+  doctor = null,
+  rx = null,
+  customer = null,
+  patient = null,
+  // Direct/generic props (for backwards compatibility)
   shareUrl: incomingShareUrl = '',
   docUrl = '',
-  docType = 'document',
-  title = null,
-  subtitle = null,
-  itemName = '',
-  itemCount = 0,
+  docType: incomingDocType = 'document',
+  title: incomingTitle = null,
+  subtitle: incomingSubtitle = null,
+  itemName: incomingItemName = '',
+  itemCount: incomingItemCount = 0,
   recipientName: initialRecipientName = '',
   recipientEmail: initialRecipientEmail = '',
   recipientPhone: initialRecipientPhone = '',
@@ -37,15 +50,39 @@ export default function UniversalShareDrawer({
   allowedRoles = ['doctor', 'wholeseller', 'account_manager', 'patient', 'custom'],
   customMessageTemplate = null,
   assetMeta = {},
+  onSuccess = null,
 }) {
-  const shareUrl = incomingShareUrl || docUrl || '';
-  const [copied, setCopied] = useState(false);
-  const [showQr, setShowQr] = useState(false);
+  // 1. Resolve Effective Entity & Entity Type
+  const resolvedEntityType = useMemo(() => {
+    if (entityType) return entityType;
+    if (doctor) return 'doctor';
+    if (rx) return 'prescription';
+    if (customer) return 'wholesaler';
+    if (patient) return 'patient';
+    return 'custom';
+  }, [entityType, doctor, rx, customer, patient]);
+
+  const resolvedEntity = useMemo(() => {
+    return entity || doctor || rx || customer || patient || null;
+  }, [entity, doctor, rx, customer, patient]);
+
+  // Origin for URL construction
+  const origin = typeof window !== 'undefined'
+    ? window.location.origin
+    : (process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com');
+
+  // 1-Tap Access state for Doctor onboarding
+  const [useMagicLink, setUseMagicLink] = useState(true);
+  const [magicLinkDuration, setMagicLinkDuration] = useState(24);
+  const [isGeneratingMagicLink, setIsGeneratingMagicLink] = useState(false);
+  const [magicLinkData, setMagicLinkData] = useState(null);
+
+  // Language state
   const [messageLang, setMessageLang] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('share_message_lang') || 'en';
+      return localStorage.getItem('share_message_lang') || 'es';
     }
-    return 'en';
+    return 'es';
   });
 
   const handleLanguageChange = (lang) => {
@@ -55,77 +92,203 @@ export default function UniversalShareDrawer({
     }
   };
 
-  // Recipient selection state managed via RecipientHierarchySelector
+  // Derive initial values based on entityType
+  const derivedDefaults = useMemo(() => {
+    let type = incomingDocType;
+    let recType = 'doctor';
+    let name = initialRecipientName;
+    let email = initialRecipientEmail;
+    let phone = initialRecipientPhone;
+    let company = '';
+    let recId = null;
+    let defaultUrl = incomingShareUrl || docUrl || '';
+    let autoTitle = incomingTitle;
+    let autoSubtitle = incomingSubtitle;
+    let label = incomingItemName;
+
+    if (resolvedEntityType === 'doctor' && resolvedEntity) {
+      const d = resolvedEntity;
+      type = 'doctor';
+      recType = 'doctor';
+      recId = d.id || null;
+      name = d.displayName || [d.firstName, d.lastName].filter(Boolean).join(' ') || d.name || 'Doctor';
+      email = d.email || d.secondaryEmail || '';
+      phone = d.phone || d.mobile || '';
+      company = d.clinicName || d.clinic || '';
+      const slug = d.slug || d.id || '';
+      defaultUrl = `${origin}/dr/${encodeURIComponent(slug)}`;
+      autoTitle = autoTitle || `Compartir Perfil Médico / Acceso 1-Tap`;
+      autoSubtitle = autoSubtitle || `Enlace directo al perfil público y credencial 1-Tap para ${name}`;
+      label = label || `Dr. ${name}`;
+    } else if (resolvedEntityType === 'prescription' && resolvedEntity) {
+      const p = resolvedEntity;
+      type = 'prescription';
+      recType = 'patient';
+      recId = p.patientId || p.patient?.id || null;
+      name = p.patient?.name || p.patientName || 'Patient';
+      email = p.patient?.email || p.patientEmail || '';
+      phone = p.patient?.phone || p.patientPhone || '';
+      const rxCode = p.prescriptionNumber || p.code || p.id || '';
+      defaultUrl = rxCode ? `${origin}/rx/${encodeURIComponent(rxCode)}` : `${origin}/rx/intake`;
+      autoTitle = autoTitle || `Compartir Expediente de Prescripción`;
+      autoSubtitle = autoSubtitle || `Expediente clínico #${rxCode} verificado con pautas posológicas`;
+      label = label || `Prescripción #${rxCode}`;
+    } else if (resolvedEntityType === 'wholesaler' && resolvedEntity) {
+      const w = resolvedEntity;
+      type = 'wholesaler';
+      recType = 'wholeseller';
+      recId = w.id || null;
+      name = w.name || w.companyName || w.legalName || 'Wholesaler';
+      email = w.contactEmail || w.email || '';
+      phone = w.contactPhone || w.phone || '';
+      company = w.companyName || w.company || '';
+      defaultUrl = `${origin}/vials?ref=${encodeURIComponent(w.id || '')}`;
+      autoTitle = autoTitle || `Compartir Catálogo Mayorista B2B`;
+      autoSubtitle = autoSubtitle || `Catálogo de viales con margen y comisiones para ${name}`;
+      label = label || name;
+    } else if (resolvedEntityType === 'patient' && resolvedEntity) {
+      const pt = resolvedEntity;
+      type = 'patient';
+      recType = 'patient';
+      recId = pt.id || null;
+      name = pt.name || `${pt.firstName || ''} ${pt.lastName || ''}`.trim() || 'Patient';
+      email = pt.email || '';
+      phone = pt.phone || '';
+      const lastRx = pt.lastRxCode || (Array.isArray(pt.prescriptions) && pt.prescriptions[0]) || '';
+      defaultUrl = lastRx ? `${origin}/rx/${encodeURIComponent(lastRx)}` : `${origin}/rx/intake`;
+      autoTitle = autoTitle || `Compartir Portal de Paciente`;
+      autoSubtitle = autoSubtitle || `Acceso directo al portal clínico y recetas activas de ${name}`;
+      label = label || name;
+    }
+
+    return {
+      type,
+      recType,
+      recId,
+      name,
+      email,
+      phone,
+      company,
+      defaultUrl,
+      autoTitle: autoTitle || `Share ${type.toUpperCase()}`,
+      autoSubtitle: autoSubtitle || 'Seleccione el destinatario y comparta vía WhatsApp, Email o Enlace.',
+      label,
+    };
+  }, [resolvedEntityType, resolvedEntity, incomingDocType, initialRecipientName, initialRecipientEmail, initialRecipientPhone, incomingShareUrl, docUrl, incomingTitle, incomingSubtitle, incomingItemName, origin]);
+
+  // Recipient state
   const [recipient, setRecipient] = useState({
-    type: 'doctor',
-    id: null,
-    name: initialRecipientName || '',
-    company: '',
-    email: initialRecipientEmail || '',
-    phone: initialRecipientPhone || '',
+    type: derivedDefaults.recType,
+    id: derivedDefaults.recId,
+    name: derivedDefaults.name,
+    company: derivedDefaults.company,
+    email: derivedDefaults.email,
+    phone: derivedDefaults.phone,
     notes: '',
   });
 
-  const targetName = recipient.name;
-  const targetPhone = recipient.phone;
-  const targetEmail = recipient.email;
-  const targetType = recipient.type;
+  // Re-sync recipient when derivedDefaults change
+  useEffect(() => {
+    setRecipient({
+      type: derivedDefaults.recType,
+      id: derivedDefaults.recId,
+      name: derivedDefaults.name,
+      company: derivedDefaults.company,
+      email: derivedDefaults.email,
+      phone: derivedDefaults.phone,
+      notes: '',
+    });
+    setMagicLinkData(null);
+  }, [derivedDefaults]);
 
+  // UI state
+  const [copied, setCopied] = useState(false);
+  const [showQr, setShowQr] = useState(false);
   const [activeLogId, setActiveLogId] = useState(logId);
   const [activeShortUrl, setActiveShortUrl] = useState(null);
 
   // Sync activeLogId if logId prop changes
-  React.useEffect(() => {
+  useEffect(() => {
     setActiveLogId(logId);
   }, [logId]);
 
-  // Reset active tracked code if recipient changes
-  React.useEffect(() => {
+  // Reset active tracked code if recipient or entity changes
+  useEffect(() => {
     setActiveLogId(null);
     setActiveShortUrl(null);
   }, [recipient.id, recipient.email, recipient.phone, recipient.name]);
 
-  const markAsSentInCrm = async (targetId, channel = 'link') => {
-    const idToUpdate = targetId || activeLogId;
-    if (!idToUpdate) return;
+  // Base raw share URL before tracking
+  const rawShareUrl = useMemo(() => {
+    if (resolvedEntityType === 'doctor' && useMagicLink && magicLinkData?.accessUrl) {
+      return magicLinkData.accessUrl;
+    }
+    return derivedDefaults.defaultUrl || incomingShareUrl || docUrl || '';
+  }, [resolvedEntityType, useMagicLink, magicLinkData, derivedDefaults.defaultUrl, incomingShareUrl, docUrl]);
+
+  // Handle generating Doctor 1-Tap Magic Link
+  const handleGenerateDoctorMagicLink = async () => {
+    if (resolvedEntityType !== 'doctor' || !resolvedEntity) return;
+    const d = resolvedEntity;
+    const slug = d.slug || d.id || '';
+    if (!slug) {
+      notifier.error('Doctor profile has no slug or ID');
+      return;
+    }
+
+    setIsGeneratingMagicLink(true);
     try {
-      await fetch('/api/catalog/tracking-logs', {
-        method: 'PATCH',
+      const res = await fetch('/api/doctor/request-magic-link', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          id: idToUpdate, 
-          status: 'sent', 
-          sharedWith: targetName, 
-          sharedPhone: targetPhone,
-          targetType,
+        body: JSON.stringify({
+          doctorSlug: slug,
+          phone: recipient.phone || d.phone || d.mobile || '',
+          email: recipient.email || d.email || '',
+          rememberDevice: true,
+          expiresInHours: Number(magicLinkDuration) || 24,
         }),
       });
-    } catch {
-      // Non-blocking background CRM status update
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to generate 1-Tap magic link');
+
+      setMagicLinkData(data);
+      setActiveShortUrl(null);
+      setActiveLogId(null);
+      notifier.success(`1-Tap Access link generated (${magicLinkDuration}h validity) ✓`);
+    } catch (err) {
+      console.error('Error generating 1-tap link:', err);
+      notifier.error(err.message || 'Could not generate 1-Tap link');
+    } finally {
+      setIsGeneratingMagicLink(false);
     }
   };
 
-  // Helper to ensure universal tracking record exists and returns tracked URL
+  // Ensure universal tracking record exists and guarantees user role enrollment
   const getTrackedUrl = async (channel = 'link') => {
     if (activeShortUrl) return activeShortUrl;
-    if (!shareUrl) return '';
+    if (!rawShareUrl) return '';
     let currentLogId = activeLogId;
 
-    if (!currentLogId && (targetName || targetEmail || targetPhone)) {
+    if (!currentLogId && (recipient.name || recipient.email || recipient.phone)) {
       try {
         const res = await fetch('/api/shares', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            assetType: docType,
-            assetTitle: itemName || `${docType.toUpperCase()}`,
+            assetType: derivedDefaults.type,
+            assetTitle: derivedDefaults.label || `${derivedDefaults.type.toUpperCase()}`,
             assetMeta: {
-              shareUrl,
-              itemCount,
+              shareUrl: rawShareUrl,
+              itemCount: incomingItemCount,
+              entityType: resolvedEntityType,
+              entityId: resolvedEntity?.id || null,
               ...assetMeta,
             },
             recipient: {
               type: recipient.type,
+              role: recipient.type === 'wholeseller' ? 'wholesaler' : recipient.type,
               id: recipient.id,
               name: recipient.name,
               company: recipient.company,
@@ -134,7 +297,7 @@ export default function UniversalShareDrawer({
             },
             notes: recipient.notes,
             deliveryChannel: channel,
-            shareUrl,
+            shareUrl: rawShareUrl,
           }),
         });
 
@@ -146,121 +309,254 @@ export default function UniversalShareDrawer({
           }
           if (data.shortUrl) {
             setActiveShortUrl(data.shortUrl);
+            onSuccess?.(data);
             return data.shortUrl;
           }
         }
       } catch (err) {
         console.warn('Could not create universal tracking log:', err);
       }
-    } else if (currentLogId) {
-      markAsSentInCrm(currentLogId, channel);
     }
 
     if (currentLogId) {
-      const separator = shareUrl.includes('?') ? '&' : '?';
-      return `${shareUrl}${separator}sid=${currentLogId}`;
+      const separator = rawShareUrl.includes('?') ? '&' : '?';
+      return `${rawShareUrl}${separator}sid=${currentLogId}`;
     }
 
-    return shareUrl;
+    return rawShareUrl;
+  };
+
+  // Compose clinical / commercial message text
+  const composeMessageText = (effectiveUrl = rawShareUrl) => {
+    if (customMessageTemplate) {
+      return customMessageTemplate({
+        targetName: recipient.name,
+        targetType: recipient.type,
+        shareUrl: effectiveUrl,
+        itemName: derivedDefaults.label,
+        itemCount: incomingItemCount,
+        accountManagerEmail,
+        lang: messageLang,
+        entity: resolvedEntity,
+      });
+    }
+
+    const isEs = messageLang === 'es';
+
+    // 1. Doctor Profile / 1-Tap Access Template
+    if (resolvedEntityType === 'doctor') {
+      const docName = recipient.name || 'Doctor';
+      const cleanTitle = docName.startsWith('Dr.') ? docName : `Dr. ${docName}`;
+
+      if (isEs) {
+        return `🩺 *Atlas Health Services — Acceso Clínico 1-Tap*
+
+Estimado/a ${cleanTitle},
+
+Le damos la bienvenida a **Atlas Health Services**, su plataforma de formulación magistral individualizada y medicina regenerativa de precisión.
+
+Ponemos a su disposición:
+• **Fórmulas Magistrales a Medida**: Preparadas según farmacopea europea y USP (cremas transdérmicas liposomales Pentravan®, cápsulas orales, trociscos sublinguales).
+• **Péptidos Bioactivos & BHRT**: Protocolos endocrinos y de longevidad celular clínicamente validados.
+• **Expedientes Nominales y Dispensación en Cadena de Frío**: Recetas digitales en 1 clic y entrega directa a sus pacientes.
+
+🔑 **Su Enlace de Acceso 1-Tap al Portal Médico**:
+👉 ${effectiveUrl}
+
+⏱️ *Validez*: **${magicLinkDuration} horas** desde el envío.
+💻 *Autorización*: Al abrir el enlace, su dispositivo queda autorizado durante **90 días** sin necesidad de contraseña.
+
+_Atlas Health Services — Operaciones Clínicas y Formulación Magistral_
+_Madrid · Dubái · Doha · Zúrich_`;
+      }
+
+      return generateDoctorWelcomeWhatsApp({
+        doctorName: cleanTitle,
+        accessUrl: effectiveUrl,
+        durationHours: magicLinkDuration,
+      });
+    }
+
+    // 2. Prescription Dossier Template
+    if (resolvedEntityType === 'prescription' && resolvedEntity) {
+      const p = resolvedEntity;
+      const rxCode = p.prescriptionNumber || p.code || p.id || '';
+      const patientName = recipient.name || p.patient?.name || 'Estimado/a paciente';
+      const doctorName = p.doctor?.name || p.doctorName || 'Equipo Médico';
+      const isMultiPart = Boolean(p._isSessionGroup || (p._sessionMembers && p._sessionMembers.length > 1));
+      const partsCount = p._sessionCount || p._sessionMembers?.length || (p.totalParts || 0);
+      const testName = p.fagron?.testName || 'NutriGen';
+
+      if (isMultiPart) {
+        const partsList = (p._sessionMembers || []).map((m, idx) => {
+          const partNum = m.partNumber || idx + 1;
+          const items = m.prescriptionLines || m.items || [];
+          const itemNames = items.slice(0, 3).map(i => i.productName || i.name).filter(Boolean);
+          const moreCount = items.length > 3 ? ` +${items.length - 3} más` : '';
+          return isEs
+            ? `• Parte ${partNum} (${items.length} activos): ${itemNames.join(', ')}${moreCount}`
+            : `• Part ${partNum} (${items.length} active ingredients): ${itemNames.join(', ')}${moreCount}`;
+        }).join('\n');
+
+        if (isEs) {
+          return `📋 *Atlas Clinical Platform — Expediente Integral Fagron ${testName}*
+
+Estimado/a ${patientName},
+
+Puede acceder a su prescripción genética multiparte digitalizada (#${rxCode}), que incluye *${partsCount} fórmulas magistrales secuenciales* con su pauta posológica completa:
+
+${partsList}
+
+🔗 ${effectiveUrl}
+
+🔒 Prescrito y verificado por ${doctorName}.`;
+        }
+
+        return `📋 *Atlas Clinical Platform — Comprehensive Fagron ${testName} Dossier*
+
+Dear ${patientName},
+
+You can access your verified multi-part genetic prescription (#${rxCode}), which includes *${partsCount} sequential compounded formulations* with customized administration schedules:
+
+${partsList}
+
+🔗 ${effectiveUrl}
+
+🔒 Prescribed & clinically verified by ${doctorName}.`;
+      }
+
+      if (isEs) {
+        return `📋 *Atlas Clinical Platform — Expediente de Prescripción Digital*
+
+Estimado/a ${patientName},
+
+Puede acceder a su prescripción médica digitalizada (#${rxCode}), pautas de administración, calendario de dosificación y verificación clínica a través del siguiente enlace seguro:
+
+🔗 ${effectiveUrl}
+
+🔒 Verificado por ${doctorName}.`;
+      }
+
+      return `📋 *Atlas Clinical Platform — Digital Prescription Dossier*
+
+Dear ${patientName},
+
+You can access your verified digital prescription (#${rxCode}), administration protocol, posology schedule, and clinical verification via the following secure link:
+
+🔗 ${effectiveUrl}
+
+🔒 Prescribed & verified by ${doctorName}.`;
+    }
+
+    // 3. Wholesaler / Customer B2B Template
+    if (resolvedEntityType === 'wholesaler') {
+      const clientName = recipient.name || 'Estimado/a Colaborador/a';
+      if (isEs) {
+        return `📦 *Atlas Solutions — Catálogo Comercial Mayorista B2B*
+
+Estimado/a ${clientName},
+
+Adjuntamos las condiciones comerciales mayoristas y el catálogo de viales y formulaciones con márgenes de distribución vinculados:
+
+🔗 ${effectiveUrl}
+
+Para consultas sobre volúmenes o pedidos oficiales, contacte con: ${accountManagerEmail}`;
+      }
+      return `📦 *Atlas Solutions — B2B Wholesale Commercial Catalog*
+
+Dear ${clientName},
+
+Please find your wholesale commercial conditions and verified catalog link with distributor margins:
+
+🔗 ${effectiveUrl}
+
+For order inquiries or volume logistics: ${accountManagerEmail}`;
+    }
+
+    // 4. Patient Portal Template
+    if (resolvedEntityType === 'patient') {
+      const ptName = recipient.name || 'Estimado/a paciente';
+      if (isEs) {
+        return `🏥 *Atlas Clinical Platform — Portal de Paciente*
+
+Estimado/a ${ptName},
+
+Aquí tiene su enlace directo para consultar sus tratamientos activos, pautas posológicas y solicitar renovaciones de forma segura:
+
+🔗 ${effectiveUrl}
+
+🔒 Portal confidencial Atlas Health Services.`;
+      }
+      return `🏥 *Atlas Clinical Platform — Patient Care Portal*
+
+Dear ${ptName},
+
+Here is your direct secure access link to view your active treatment plans, posology guidelines, and request refills:
+
+🔗 ${effectiveUrl}
+
+🔒 Confidential Atlas Health Services Patient Portal.`;
+    }
+
+    // 5. Generic Fallback
+    const greeting = recipient.name ? (isEs ? `Estimado/a ${recipient.name},\n\n` : `Dear ${recipient.name},\n\n`) : '';
+    const desc = derivedDefaults.label ? `"${derivedDefaults.label}"` : (isEs ? `documento oficial` : `official document`);
+    if (isEs) {
+      return `${greeting}Adjuntamos el enlace seguro para acceder a ${desc}:\n\n🔗 ${effectiveUrl}\n\nPara cualquier consulta, contacte con: ${accountManagerEmail}`;
+    }
+    return `${greeting}Please find the secure link for ${desc}:\n\n🔗 ${effectiveUrl}\n\nFor questions, please contact: ${accountManagerEmail}`;
   };
 
   const handleCopyLink = async () => {
-    if (!shareUrl) {
+    if (!rawShareUrl) {
       notifier.error('Share URL not available.');
       return;
     }
     const finalUrl = await getTrackedUrl();
     await navigator.clipboard.writeText(finalUrl);
     setCopied(true);
-    notifier.success(targetName ? `Tracked link copied for ${targetName} ✓` : 'Direct link copied to clipboard ✓');
+    notifier.success(recipient.name ? `Enlace trazado copiado para ${recipient.name} ✓` : 'Enlace copiado al portapapeles ✓');
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const composeMessageText = (effectiveUrl = shareUrl) => {
-    if (customMessageTemplate) {
-      return customMessageTemplate({ targetName, targetType, shareUrl: effectiveUrl, itemName, itemCount, accountManagerEmail, lang: messageLang });
-    }
-
-    const isEs = messageLang === 'es';
-    const greeting = targetName
-      ? (isEs ? `Estimado/a ${targetName},\n\n` : `Dear ${targetName},\n\n`)
-      : '';
-    const desc = itemName ? `"${itemName}"` : (isEs ? `documento oficial ${docType.toUpperCase()}` : `official ${docType.toUpperCase()}`);
-    const countInfo = itemCount ? (isEs ? ` (${itemCount} artículos)` : ` (${itemCount} items)`) : '';
-
-    let roleIntro = '';
-    if (isEs) {
-      if (targetType === 'wholeseller') {
-        roleIntro = `Adjuntamos las condiciones comerciales mayoristas y documentación solicitada para ${desc}${countInfo}:`;
-      } else if (targetType === 'patient') {
-        roleIntro = `Aquí tiene su plan clínico y documentación para ${desc}:`;
-      } else if (targetType === 'account_manager') {
-        roleIntro = `Traspaso interno para seguimiento de cuenta sobre ${desc}${countInfo}:`;
-      } else {
-        roleIntro = `Adjuntamos el documento ${desc}${countInfo} de ATLAS SOLUTIONS en el siguiente enlace seguro:`;
-      }
-      return `${greeting}${roleIntro}\n\n🔗 ${effectiveUrl}\n\nPara cualquier consulta o pedido, responda directamente o contacte con: ${accountManagerEmail}`;
-    }
-
-    if (targetType === 'wholeseller') {
-      roleIntro = `Please find your requested wholesale commercial terms and documentation for ${desc}${countInfo}:`;
-    } else if (targetType === 'patient') {
-      roleIntro = `Here is your clinical plan and documentation for ${desc}:`;
-    } else if (targetType === 'account_manager') {
-      roleIntro = `Internal handover for account follow-up on ${desc}${countInfo}:`;
-    } else {
-      roleIntro = `Please find your requested ${desc}${countInfo} from ATLAS SOLUTIONS at the following secure link:`;
-    }
-
-    return `${greeting}${roleIntro}\n\n🔗 ${effectiveUrl}\n\nFor inquiries or orders, please reply directly or contact: ${accountManagerEmail}`;
-  };
-
   const handleShareWhatsApp = async () => {
-    if (!shareUrl) return;
-    const finalUrl = await getTrackedUrl();
-    const cleanPhone = (targetPhone || '').replace(/[^\d+]/g, '');
+    if (!rawShareUrl) return;
+    const finalUrl = await getTrackedUrl('whatsapp');
+    const cleanPhone = (recipient.phone || '').replace(/[^\d+]/g, '');
     const msg = composeMessageText(finalUrl);
 
     const phoneParam = cleanPhone.replace('+', '');
-    const waUrl = phoneParam 
-      ? `https://wa.me/${phoneParam}?text=${encodeURIComponent(msg)}` 
+    const waUrl = phoneParam
+      ? `https://wa.me/${phoneParam}?text=${encodeURIComponent(msg)}`
       : `https://wa.me/?text=${encodeURIComponent(msg)}`;
 
     window.open(waUrl, '_blank');
-    notifier.success('WhatsApp opened with tracked link ✓');
+    notifier.success('WhatsApp abierto con enlace trazado ✓');
   };
 
   const handleShareEmail = async () => {
-    if (!shareUrl) return;
-    const finalUrl = await getTrackedUrl();
-    const recipient = targetEmail || initialRecipientEmail;
-    const name = targetName || initialRecipientName;
-    const subject = `ATLAS SOLUTIONS — ${itemName || docType.toUpperCase()}${name ? ` for ${name}` : ''}`;
+    if (!rawShareUrl) return;
+    const finalUrl = await getTrackedUrl('email');
+    const recEmail = recipient.email || initialRecipientEmail;
+    const recName = recipient.name || initialRecipientName;
+    const subject = `ATLAS SOLUTIONS — ${derivedDefaults.label || derivedDefaults.type.toUpperCase()}${recName ? ` for ${recName}` : ''}`;
     const body = composeMessageText(finalUrl);
 
-    const mailtoUrl = `mailto:${encodeURIComponent(recipient || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailtoUrl = `mailto:${encodeURIComponent(recEmail || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoUrl, '_blank');
-    notifier.success('Email composer opened with tracked link ✓');
+    notifier.success('Cliente de correo abierto con plantilla oficial ✓');
   };
 
-  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=${encodeURIComponent(shareUrl || '')}`;
-
-  const roleTabDefinitions = [
-    { key: 'doctor', label: 'Doctor / Clinic', icon: '🩺' },
-    { key: 'wholeseller', label: 'Wholesaler', icon: '📦' },
-    { key: 'patient', label: 'Patient', icon: '👤' },
-    { key: 'account_manager', label: 'Account Mgr', icon: '👔' },
-    { key: 'custom', label: 'Direct / Custom', icon: '✍️' },
-  ].filter(t => allowedRoles.includes(t.key));
+  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=${encodeURIComponent(rawShareUrl || '')}`;
 
   return (
     <StandardDrawer
       isOpen={isOpen}
       onClose={onClose}
       zIndex={100050}
-      width={isMobile ? '100%' : '520px'}
-      title={title || `Share ${docType.toUpperCase()}`}
-      subtitle={subtitle || 'Select recipient on-demand and share via WhatsApp, Email or Link.'}
+      width={isMobile ? '100%' : '530px'}
+      title={derivedDefaults.autoTitle}
+      subtitle={derivedDefaults.autoSubtitle}
       footer={
         <button
           type="button"
@@ -268,7 +564,7 @@ export default function UniversalShareDrawer({
           style={{
             width: '100%',
             padding: '10px 18px',
-            background: '#003666',
+            background: 'var(--color-primary, #003666)',
             color: '#fff',
             border: 'none',
             borderRadius: 8,
@@ -277,13 +573,91 @@ export default function UniversalShareDrawer({
             cursor: 'pointer',
           }}
         >
-          Done
+          Hecho / Cerrar
         </button>
       }
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        
-        {/* Hierarchical Recipient Selector (2-step: Type -> Contact) */}
+
+        {/* Doctor-Specific: 1-Tap Access Magic Link Config */}
+        {resolvedEntityType === 'doctor' && (
+          <div style={{
+            background: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            borderRadius: 10,
+            padding: '12px 14px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Key size={16} color="#16a34a" />
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#166534' }}>
+                  Acceso Seguro 1-Tap (Sin Contraseña)
+                </span>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', cursor: 'pointer', color: '#166534', fontWeight: 600 }}>
+                <input
+                  type="checkbox"
+                  checked={useMagicLink}
+                  onChange={(e) => setUseMagicLink(e.target.checked)}
+                />
+                Activar 1-Tap
+              </label>
+            </div>
+
+            {useMagicLink && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingTop: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: '0.73rem', color: '#15803d' }}>Validez enlace:</span>
+                  <select
+                    value={magicLinkDuration}
+                    onChange={(e) => setMagicLinkDuration(Number(e.target.value))}
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '3px 8px',
+                      borderRadius: 6,
+                      border: '1px solid #86efac',
+                      background: '#ffffff',
+                      fontWeight: 600,
+                      color: '#166534',
+                    }}
+                  >
+                    <option value={24}>24 horas</option>
+                    <option value={72}>72 horas (3 días)</option>
+                    <option value={168}>7 días</option>
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleGenerateDoctorMagicLink}
+                  disabled={isGeneratingMagicLink}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: '#16a34a',
+                    color: '#ffffff',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(22, 163, 74, 0.2)'
+                  }}
+                >
+                  {isGeneratingMagicLink ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                  {magicLinkData ? 'Regenerar Token' : 'Generar Token'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Hierarchical Recipient Selector (Type -> Search/Edit Contact) */}
         <div style={{
           border: '1px solid #e2e8f0',
           borderRadius: 10,
@@ -291,6 +665,14 @@ export default function UniversalShareDrawer({
           background: '#ffffff',
           boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
         }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <User size={14} color="#003666" /> Destinatario Registrado
+            </span>
+            <span style={{ fontSize: '0.70rem', color: '#64748b', background: '#f1f5f9', padding: '2px 6px', borderRadius: 4 }}>
+              Rol: <strong>{recipient.type}</strong>
+            </span>
+          </div>
           <RecipientHierarchySelector
             value={recipient}
             onChange={(rec) => setRecipient(rec)}
@@ -310,7 +692,7 @@ export default function UniversalShareDrawer({
           boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
         }}>
           <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
-            🌐 Message Language
+            🌐 Idioma del Mensaje / Language
           </span>
           <div style={{ display: 'flex', gap: 4, background: '#f1f5f9', padding: '3px', borderRadius: 6 }}>
             <button
@@ -322,7 +704,7 @@ export default function UniversalShareDrawer({
                 fontWeight: messageLang === 'es' ? 700 : 500,
                 borderRadius: 4,
                 border: 'none',
-                background: messageLang === 'es' ? '#003666' : 'transparent',
+                background: messageLang === 'es' ? 'var(--color-primary, #003666)' : 'transparent',
                 color: messageLang === 'es' ? '#ffffff' : '#64748b',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease'
@@ -339,7 +721,7 @@ export default function UniversalShareDrawer({
                 fontWeight: messageLang === 'en' ? 700 : 500,
                 borderRadius: 4,
                 border: 'none',
-                background: messageLang === 'en' ? '#003666' : 'transparent',
+                background: messageLang === 'en' ? 'var(--color-primary, #003666)' : 'transparent',
                 color: messageLang === 'en' ? '#ffffff' : '#64748b',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease'
@@ -371,9 +753,9 @@ export default function UniversalShareDrawer({
               <MessageSquare size={19} />
             </div>
             <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#14532d' }}>Share via WhatsApp</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#14532d' }}>Compartir por WhatsApp</div>
               <div style={{ fontSize: '0.73rem', color: '#15803d' }}>
-                {targetPhone ? `Direct chat to ${targetPhone}` : 'Opens chat composer with pre-filled link & details'}
+                {recipient.phone ? `Chat directo a ${recipient.phone}` : 'Abre WhatsApp con mensaje oficial pre-rellenado'}
               </div>
             </div>
           </div>
@@ -400,9 +782,9 @@ export default function UniversalShareDrawer({
               <Mail size={19} />
             </div>
             <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e3a8a' }}>Send via Email</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e3a8a' }}>Enviar por Correo Electrónico</div>
               <div style={{ fontSize: '0.73rem', color: '#1d4ed8' }}>
-                {targetEmail ? `Pre-addressed to ${targetEmail}` : 'Opens default email composer with official signature'}
+                {recipient.email ? `Dirigido a ${recipient.email}` : 'Abre el cliente de correo con plantilla y firma'}
               </div>
             </div>
           </div>
@@ -418,7 +800,7 @@ export default function UniversalShareDrawer({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Copy size={15} color="#003666" /> Direct Link
+              <Copy size={15} color="var(--color-primary, #003666)" /> Enlace Directo Trazado
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <button
@@ -426,7 +808,7 @@ export default function UniversalShareDrawer({
                 onClick={handleCopyLink}
                 style={{
                   padding: '5px 12px',
-                  background: copied ? '#16a34a' : '#003666',
+                  background: copied ? '#16a34a' : 'var(--color-primary, #003666)',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: 6,
@@ -440,7 +822,7 @@ export default function UniversalShareDrawer({
                 }}
               >
                 {copied ? <Check size={13} /> : <Copy size={13} />}
-                {copied ? 'Copied!' : 'Copy Link'}
+                {copied ? '¡Copiado!' : 'Copiar Enlace'}
               </button>
             </div>
           </div>
@@ -456,7 +838,7 @@ export default function UniversalShareDrawer({
             maxHeight: 52,
             overflowY: 'auto',
           }}>
-            {shareUrl || 'No share URL generated'}
+            {rawShareUrl || 'Generando enlace...'}
           </div>
         </div>
 
@@ -472,11 +854,11 @@ export default function UniversalShareDrawer({
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <QrCode size={16} color="#003666" />
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>Scan Mobile QR Code</span>
+              <QrCode size={16} color="var(--color-primary, #003666)" />
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>Código QR para Móvil</span>
             </div>
             <span style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>
-              {showQr ? 'Hide QR' : 'Show QR'}
+              {showQr ? 'Ocultar QR' : 'Mostrar QR'}
             </span>
           </div>
 
@@ -490,7 +872,7 @@ export default function UniversalShareDrawer({
                 />
               </div>
               <div style={{ fontSize: '0.71rem', color: '#64748b', marginTop: 6, textAlign: 'center' }}>
-                Scan with any smartphone camera to open and view the document instantly.
+                Escanee con la cámara de cualquier smartphone para abrir el enlace directamente.
               </div>
             </div>
           )}

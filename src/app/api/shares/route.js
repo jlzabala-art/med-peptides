@@ -186,6 +186,19 @@ export async function POST(request) {
     const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
     const shortUrl = `${origin}/c/${shareCode}`;
 
+    // Determine canonical role from recipient type, assetType or explicit role
+    let targetRole = 'patient';
+    const rawType = (recipient.role || recipient.type || assetType || '').toLowerCase();
+    if (rawType.includes('doctor') || rawType.includes('physician') || rawType.includes('clinic')) {
+      targetRole = 'doctor';
+    } else if (rawType.includes('wholesal') || rawType.includes('b2b') || rawType.includes('distributor')) {
+      targetRole = 'wholesaler';
+    } else if (rawType.includes('patient')) {
+      targetRole = 'patient';
+    } else if (rawType.includes('account_manager')) {
+      targetRole = 'account_manager';
+    }
+
     const docData = {
       shareCode,
       shortUrl,
@@ -194,9 +207,11 @@ export async function POST(request) {
       assetMeta: {
         ...assetMeta,
         shareUrl: shareUrl || assetMeta.shareUrl || null,
+        targetRole,
       },
       recipient: {
-        type: recipient.type || 'external',
+        type: recipient.type || targetRole,
+        role: targetRole,
         id: recipient.id || null,
         name: recipient.name || 'Unnamed Recipient',
         company: recipient.company || '',
@@ -233,7 +248,8 @@ export async function POST(request) {
         recipientName: recipient.name || 'Valued Partner',
         recipientEmail: recipient.email || null,
         recipientPhone: recipient.phone || null,
-        recipientType: recipient.type || 'doctor',
+        recipientType: recipient.type || targetRole,
+        recipientRole: targetRole,
         targetUrl: shareUrl || (isProto ? '/proto' : '/catalog'),
         shortUrl,
         channel: deliveryChannel,
@@ -246,11 +262,39 @@ export async function POST(request) {
       console.warn('[POST /api/shares] Could not mirror to shared_catalog_links:', linkErr.message);
     }
 
-    // Mirror into recipient user profile subcollection
-    if (recipient.id) {
-      try {
+    // Ensure recipient is registered/updated in `users` collection with the canonical role
+    let resolvedUserId = recipient.id || null;
+    try {
+      if (resolvedUserId) {
+        const userRef = adminDb.collection('users').doc(resolvedUserId);
+        const userSnap = await userRef.get();
+        const existingData = userSnap.exists ? userSnap.data() : {};
+
+        const existingRoles = Array.isArray(existingData.roles) 
+          ? existingData.roles 
+          : (existingData.role ? [existingData.role] : []);
+        const updatedRoles = Array.from(new Set([...existingRoles, targetRole]));
+
+        const updatePayload = {
+          role: existingData.role || targetRole,
+          roles: updatedRoles,
+          lastAssetSharedAt: new Date().toISOString(),
+          lastAssetSharedTitle: assetTitle,
+          lastSharedCode: shareCode,
+          updatedAt: new Date().toISOString(),
+        };
+
+        if (!existingData.displayName && recipient.name) updatePayload.displayName = recipient.name;
+        if (!existingData.email && recipient.email) updatePayload.email = recipient.email;
+        if (!existingData.phone && recipient.phone) updatePayload.phone = recipient.phone;
+        if (!existingData.company && recipient.company) updatePayload.company = recipient.company;
+        if (!existingData.status) updatePayload.status = 'active';
+
+        await userRef.set(updatePayload, { merge: true });
+
+        // Record in user subcollection
         const subcoll = isProto ? 'shared_protocols' : 'shared_assets';
-        await adminDb.collection('users').doc(recipient.id).collection(subcoll).doc(shareCode).set({
+        await userRef.collection(subcoll).doc(shareCode).set({
           shareCode,
           shortUrl,
           assetType,
@@ -262,15 +306,107 @@ export async function POST(request) {
           viewCount: 0,
           createdAt: new Date().toISOString(),
         });
+      } else if (recipient.email || recipient.phone) {
+        // Recipient ID not provided: find existing user by email or phone, or create new user
+        let matchedDoc = null;
+        if (recipient.email) {
+          const emailSnap = await adminDb.collection('users')
+            .where('email', '==', recipient.email.toLowerCase().trim())
+            .limit(1)
+            .get();
+          if (!emailSnap.empty) {
+            matchedDoc = emailSnap.docs[0];
+          }
+        }
 
-        await adminDb.collection('users').doc(recipient.id).set({
-          lastAssetSharedAt: new Date().toISOString(),
-          lastAssetSharedTitle: assetTitle,
-          lastSharedCode: shareCode,
-        }, { merge: true });
-      } catch (userErr) {
-        console.warn('[POST /api/shares] Could not write to user subcollection:', userErr.message);
+        if (!matchedDoc && recipient.phone) {
+          const cleanPhone = recipient.phone.replace(/[^\d+]/g, '');
+          const phoneSnap = await adminDb.collection('users')
+            .where('phone', '==', cleanPhone)
+            .limit(1)
+            .get();
+          if (!phoneSnap.empty) {
+            matchedDoc = phoneSnap.docs[0];
+          }
+        }
+
+        if (matchedDoc) {
+          resolvedUserId = matchedDoc.id;
+          const existingData = matchedDoc.data();
+          const existingRoles = Array.isArray(existingData.roles) 
+            ? existingData.roles 
+            : (existingData.role ? [existingData.role] : []);
+          const updatedRoles = Array.from(new Set([...existingRoles, targetRole]));
+
+          await adminDb.collection('users').doc(resolvedUserId).set({
+            role: existingData.role || targetRole,
+            roles: updatedRoles,
+            lastAssetSharedAt: new Date().toISOString(),
+            lastAssetSharedTitle: assetTitle,
+            lastSharedCode: shareCode,
+            updatedAt: new Date().toISOString(),
+          }, { merge: true });
+
+          const subcoll = isProto ? 'shared_protocols' : 'shared_assets';
+          await adminDb.collection('users').doc(resolvedUserId).collection(subcoll).doc(shareCode).set({
+            shareCode,
+            shortUrl,
+            assetType,
+            assetTitle,
+            targetUrl: shareUrl || (isProto ? '/proto' : '/catalog'),
+            deliveryChannel,
+            status: 'sent',
+            readStatus: 'unread',
+            viewCount: 0,
+            createdAt: new Date().toISOString(),
+          });
+        } else {
+          // Register new user record in `users`
+          const newUserRef = adminDb.collection('users').doc();
+          resolvedUserId = newUserRef.id;
+          await newUserRef.set({
+            role: targetRole,
+            roles: [targetRole],
+            displayName: recipient.name || 'Valued User',
+            email: recipient.email ? recipient.email.toLowerCase().trim() : null,
+            phone: recipient.phone ? recipient.phone.trim() : null,
+            company: recipient.company || null,
+            status: 'active',
+            source: 'universal_share_drawer_enrollment',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            lastAssetSharedAt: new Date().toISOString(),
+            lastAssetSharedTitle: assetTitle,
+            lastSharedCode: shareCode,
+          });
+
+          const subcoll = isProto ? 'shared_protocols' : 'shared_assets';
+          await newUserRef.collection(subcoll).doc(shareCode).set({
+            shareCode,
+            shortUrl,
+            assetType,
+            assetTitle,
+            targetUrl: shareUrl || (isProto ? '/proto' : '/catalog'),
+            deliveryChannel,
+            status: 'sent',
+            readStatus: 'unread',
+            viewCount: 0,
+            createdAt: new Date().toISOString(),
+          });
+        }
+
+        // Update the main shared_records doc with the newly resolved recipient user ID
+        if (resolvedUserId) {
+          await docRef.set({
+            recipient: {
+              ...docData.recipient,
+              id: resolvedUserId,
+            }
+          }, { merge: true });
+        }
       }
+    } catch (userSyncErr) {
+      console.warn('[POST /api/shares] Could not sync user role or subcollection:', userSyncErr.message);
     }
 
     return NextResponse.json({

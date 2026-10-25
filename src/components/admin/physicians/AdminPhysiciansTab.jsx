@@ -25,9 +25,10 @@ import EmptyState from '../../ui/EmptyState';
 import AppActionGroup from '../../ui/AppActionGroup';
 import MobileDoctorCard from './mobile/MobileDoctorCard';
 import MobileActionSheet from '../../ui/MobileActionSheet';
-import { Eye, Edit3, XCircle, Layers, ExternalLink, Key } from '@/lib/icons';
+import { Eye, Edit3, XCircle, Layers, ExternalLink, Key, Share2 } from '@/lib/icons';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import DoctorAccessLinkModal from './DoctorAccessLinkModal';
+import UniversalShareDrawer from '../../ui/UniversalShareDrawer';
 
 export default function AdminPhysiciansTab() {
   // UI State
@@ -36,6 +37,7 @@ export default function AdminPhysiciansTab() {
   const [actionDoctor, setActionDoctor] = useState(null);
   const [mobileActionDoctor, setMobileActionDoctor] = useState(null);
   const [accessModalDoctor, setAccessModalDoctor] = useState(null);
+  const [shareDoctor, setShareDoctor] = useState(null);
 
   const handleMobileQuickAction = React.useCallback((action, doctor) => {
     if (action === 'menu') {
@@ -563,7 +565,7 @@ export default function AdminPhysiciansTab() {
             <button
               type="button"
               className="btn btn-outline btn-sm"
-              onClick={() => setAccessModalDoctor(d)}
+              onClick={() => setShareDoctor(d)}
               style={{
                 fontSize: '0.78rem',
                 display: 'inline-flex',
@@ -574,9 +576,9 @@ export default function AdminPhysiciansTab() {
                 background: '#e8f0fe',
                 fontWeight: 700
               }}
-              title="Generate 1-Tap Access link for WhatsApp or Email"
+              title="Compartir enlace trazado / Acceso 1-Tap para WhatsApp o Email"
             >
-              <Key size={13} /> 1-Tap Access (WhatsApp / Email)
+              <Share2 size={13} /> Compartir Perfil / Acceso 1-Tap
             </button>
             <button
               type="button"
@@ -778,6 +780,12 @@ export default function AdminPhysiciansTab() {
             }
           },
           {
+            type: 'share_doctor',
+            label: 'Compartir Perfil / Acceso 1-Tap',
+            icon: Share2,
+            onClick: () => setShareDoctor(d)
+          },
+          {
             type: 'view_public_page',
             label: 'View Public Page',
             icon: ExternalLink,
@@ -867,6 +875,27 @@ export default function AdminPhysiciansTab() {
               }}
             >
               <Layers size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShareDoctor(d)}
+              title={`Compartir Perfil Médico / Acceso 1-Tap para Dr. ${getDoctorName(d)}`}
+              style={{
+                width: '30px',
+                height: '30px',
+                borderRadius: '6px',
+                border: '1px solid #fed7aa',
+                backgroundColor: '#fff7ed',
+                color: '#ea580c',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 0,
+                flexShrink: 0
+              }}
+            >
+              <Share2 size={14} />
             </button>
             <AppActionGroup actions={actions} maxVisible={1} />
           </div>
@@ -1115,11 +1144,15 @@ export default function AdminPhysiciansTab() {
         ]}
       />
 
-      {/* 1-Tap Access Link Modal for WhatsApp / Email */}
-      <DoctorAccessLinkModal
-        isOpen={Boolean(accessModalDoctor)}
-        onClose={() => setAccessModalDoctor(null)}
-        doctor={accessModalDoctor}
+      {/* Universal Share Drawer (Polymorphic: Doctor profile & 1-Tap onboarding) */}
+      <UniversalShareDrawer
+        isOpen={Boolean(shareDoctor || accessModalDoctor)}
+        onClose={() => {
+          setShareDoctor(null);
+          setAccessModalDoctor(null);
+        }}
+        entityType="doctor"
+        entity={shareDoctor || accessModalDoctor}
       />
     </>
   );
