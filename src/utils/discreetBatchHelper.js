@@ -83,6 +83,23 @@ export const DISCREET_PRODUCT_CODES = {
   'klow-peptide': 'KLW',
   'adipotide-2mg': 'AD',
   'aicar-50-mg': 'AC',
+  cartalax: 'CT',
+  'cartalax-25mg': 'CT',
+  cardiogen: 'CD',
+  'cardiogen-25mg': 'CD',
+  thymogen: 'TG',
+  'thymogen-25mg': 'TG',
+  testagen: 'TS',
+  'testagen-25mg': 'TS',
+  thymulin: 'TU',
+  'thymulin-10mg': 'TU',
+  prostamax: 'PX',
+  'prostamax-25mg': 'PX',
+  snap8: 'S8',
+  'snap-8': 'S8',
+  'snap-8-10mg': 'S8',
+  hmg: 'HG',
+  'hmg-75iu': 'HG',
 };
 
 export const SUPPLIER_CODES = {

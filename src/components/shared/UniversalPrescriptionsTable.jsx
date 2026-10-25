@@ -1312,6 +1312,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         icon={FileText}
 
         mobileOverflowActions={[
+          { label: 'Pharmapolis Labels Studio', icon: Tag, onClick: () => window.open('/labels', '_blank') },
           { label: 'Share Intake Portal', icon: Share2, onClick: () => setIsShareIntakeWhatsAppOpen(true) },
           { label: 'Import from AI', icon: Sparkles, onClick: () => setIsIntakeOpen(true) },
           { label: 'From Clinical Protocol', icon: Stethoscope, onClick: () => setIsProtocolSearchOpen(true) },
@@ -1320,6 +1321,42 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         ]}
         actions={!readOnly ? (
           <div className="prescriptions-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* Secondary Action: Pharmapolis Label Studio */}
+            <button
+              type="button"
+              onClick={() => window.open('/labels', '_blank')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                height: '36px',
+                padding: '0 14px',
+                borderRadius: '6px',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#0f172a',
+                fontWeight: 600,
+                fontSize: '0.84rem',
+                cursor: 'pointer',
+                transition: 'background 0.15s ease, border-color 0.15s ease, color 0.15s ease',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.08)',
+                whiteSpace: 'nowrap',
+                fontFamily: 'inherit'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#f1f5f9';
+                e.currentTarget.style.borderColor = '#94a3b8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#f8fafc';
+                e.currentTarget.style.borderColor = '#cbd5e1';
+              }}
+              title="Abrir el estudio y generador de etiquetas de Pharmapolis para envíos y frascos"
+            >
+              <Tag size={15} style={{ color: '#0284c7' }} />
+              <span>Pharmapolis Labels Studio</span>
+            </button>
+
             {/* Secondary Action: Share Intake Portal (Google Cloud Console standard) */}
             <button
               type="button"

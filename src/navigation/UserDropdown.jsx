@@ -354,9 +354,9 @@ export default function UserDropdown({
             </>
           )}
 
-          {['admin', 'clinic', 'doctor', 'compounding_pharmacy', 'wholesaler', 'supplier'].includes(
+          {(['admin', 'clinic', 'doctor', 'compounding_pharmacy', 'wholesaler', 'supplier', 'account_manager'].includes(
             baseRole
-          ) &&
+          ) || (Array.isArray(authUserProfile?.roles) && authUserProfile.roles.length > 1)) &&
             (() => {
               let options = [];
               if (baseRole === 'admin') {
@@ -369,17 +369,22 @@ export default function UserDropdown({
                   'compounding_pharmacy',
                   'clinic',
                   'doctor',
+                  'account_manager',
                   'sales_agent',
                   'staff',
                   'patient',
                   'guest',
                 ];
+              } else if (Array.isArray(authUserProfile?.roles) && authUserProfile.roles.length > 1) {
+                options = Array.from(new Set([...authUserProfile.roles, 'guest']));
               } else if (baseRole === 'clinic' || baseRole === 'compounding_pharmacy') {
                 options = [baseRole, 'clinic', 'doctor', 'staff', 'patient', 'guest'];
               } else if (baseRole === 'doctor') {
                 options = ['doctor', 'staff', 'patient', 'guest'];
               } else if (baseRole === 'wholesaler' || baseRole === 'supplier') {
                 options = [baseRole, 'guest'];
+              } else if (baseRole === 'account_manager') {
+                options = ['account_manager', 'sales_agent', 'wholesaler', 'staff', 'guest'];
               }
 
               const ROLE_SWITCH_METADATA = {
@@ -390,6 +395,14 @@ export default function UserDropdown({
                   bgLight: 'rgba(239, 68, 68, 0.05)',
                   borderLight: 'rgba(239, 68, 68, 0.12)',
                   borderActive: 'var(--color-danger)',
+                },
+                account_manager: {
+                  label: 'Account Manager',
+                  icon: <Users size={13} />,
+                  color: '#475569',
+                  bgLight: 'rgba(71, 85, 105, 0.05)',
+                  borderLight: 'rgba(71, 85, 105, 0.12)',
+                  borderActive: '#475569',
                 },
                 medical_director: {
                   label: 'Medical Director',

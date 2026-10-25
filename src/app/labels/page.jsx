@@ -10,29 +10,29 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-ser
 
 export async function generateMetadata({ searchParams }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const code = (resolvedSearchParams?.rx || resolvedSearchParams?.code || '51812').trim();
-  const isEditing = resolvedSearchParams?.edit === 'true' || resolvedSearchParams?.edit === '1';
-  const lang = resolvedSearchParams?.lang === 'es' ? 'es' : 'en';
-  const isEs = lang === 'es';
+  const hasExplicitParam = Boolean(resolvedSearchParams?.rx || resolvedSearchParams?.code);
+  const code = hasExplicitParam ? (resolvedSearchParams?.rx || resolvedSearchParams?.code || '').trim() : '';
 
   let patientName = '';
   let rxCode = code;
 
-  // Try to load basic info for attractive metadata
-  try {
-    const rx = await getPrescriptionData(code);
-    if (rx) {
-      patientName = rx.patient?.name || rx.patientName || '';
-      rxCode = rx.fileNumber || rx.code || code;
-    } else {
-      const regMatch = PHARMAPOLIS_LABELS_REGISTRY.find(item => item.fileNumber === code);
-      if (regMatch) {
-        patientName = regMatch.patientName || '';
-        rxCode = regMatch.fileNumber || code;
+  // Try to load basic info for attractive metadata if code is present
+  if (code) {
+    try {
+      const rx = await getPrescriptionData(code);
+      if (rx) {
+        patientName = rx.patient?.name || rx.patientName || '';
+        rxCode = rx.fileNumber || rx.code || code;
+      } else {
+        const regMatch = PHARMAPOLIS_LABELS_REGISTRY.find(item => item.fileNumber === code);
+        if (regMatch) {
+          patientName = regMatch.patientName || '';
+          rxCode = regMatch.fileNumber || code;
+        }
       }
+    } catch {
+      // fallback
     }
-  } catch (err) {
-    // fallback
   }
 
   const title = patientName 
@@ -90,75 +90,57 @@ export async function generateMetadata({ searchParams }) {
 
 export default async function PublicLabelsPage({ searchParams }) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const rawCodesParam = (resolvedSearchParams?.rx || resolvedSearchParams?.code || '51812').trim();
+  const hasExplicitParam = Boolean(resolvedSearchParams?.rx || resolvedSearchParams?.code);
+  const rawCodesParam = (resolvedSearchParams?.rx || resolvedSearchParams?.code || '').trim();
   const codes = rawCodesParam.split(',').map(c => c.trim()).filter(Boolean);
-  const primaryCode = codes[0] || '51812';
+  const primaryCode = codes[0] || '';
   const initialEditMode = resolvedSearchParams?.edit === 'true' || resolvedSearchParams?.edit === '1';
   const initialPhaseIdx = Number(resolvedSearchParams?.phase) ? Math.max(0, Number(resolvedSearchParams.phase) - 1) : 0;
   const initialLang = resolvedSearchParams?.lang === 'es' ? 'es' : 'en';
 
   const initialQueue = [];
 
-  for (const c of codes) {
-    try {
-      let itemRx = await getPrescriptionData(c);
-      if (!itemRx) {
-        const regMatch = PHARMAPOLIS_LABELS_REGISTRY.find(item => item.fileNumber === c);
-        if (regMatch) {
-          itemRx = {
-            id: regMatch.fileNumber || c,
-            fileNumber: regMatch.fileNumber || c,
-            code: regMatch.fileNumber || c,
-            patientName: regMatch.patientName || 'Patient',
-            patient: { name: regMatch.patientName || 'Patient' },
-            doctorName: regMatch.doctorName || 'Treating Physician',
-            clinicName: regMatch.clinicName || 'Atlas Partner Clinic',
-            treatmentTitle: regMatch.productTitle || regMatch.productName || 'Compounded Protocol',
-            status: 'approved'
-          };
+  if (hasExplicitParam && codes.length > 0) {
+    for (const c of codes) {
+      try {
+        let itemRx = await getPrescriptionData(c);
+        if (!itemRx) {
+          const regMatch = PHARMAPOLIS_LABELS_REGISTRY.find(item => item.fileNumber === c);
+          if (regMatch) {
+            itemRx = {
+              id: regMatch.fileNumber || c,
+              fileNumber: regMatch.fileNumber || c,
+              code: regMatch.fileNumber || c,
+              patientName: regMatch.patientName || 'Patient',
+              patient: { name: regMatch.patientName || 'Patient' },
+              doctorName: regMatch.doctorName || 'Treating Physician',
+              clinicName: regMatch.clinicName || 'Atlas Partner Clinic',
+              treatmentTitle: regMatch.productTitle || regMatch.productName || 'Compounded Protocol',
+              status: 'approved'
+            };
+          }
         }
+        if (itemRx) {
+          const itemLabels = getPharmapolisLabelsForPrescription(itemRx);
+          initialQueue.push({
+            code: c,
+            rx: itemRx,
+            labels: itemLabels || []
+          });
+        }
+      } catch (err) {
+        console.warn(`[PublicLabelsPage] Error loading rx code ${c}:`, err.message);
       }
-      if (itemRx) {
-        const itemLabels = getPharmapolisLabelsForPrescription(itemRx);
-        initialQueue.push({
-          code: c,
-          rx: itemRx,
-          labels: itemLabels || []
-        });
-      }
-    } catch (err) {
-      console.warn(`[PublicLabelsPage] Error loading rx code ${c}:`, err.message);
     }
   }
 
-  // Fallback to default registry if empty
-  if (initialQueue.length === 0 && PHARMAPOLIS_LABELS_REGISTRY.length > 0) {
-    const regDefault = PHARMAPOLIS_LABELS_REGISTRY[0];
-    const defaultRx = {
-      id: regDefault.fileNumber || '51812',
-      fileNumber: regDefault.fileNumber || '51812',
-      code: regDefault.fileNumber || '51812',
-      patientName: regDefault.patientName || 'Patient',
-      patient: { name: regDefault.patientName || 'Patient' },
-      doctorName: regDefault.doctorName || 'Treating Physician',
-      clinicName: regDefault.clinicName || 'Atlas Partner Clinic',
-      treatmentTitle: regDefault.productTitle || 'Compounded Pharmaceutical Protocol',
-      status: 'approved'
-    };
-    initialQueue.push({
-      code: regDefault.fileNumber || '51812',
-      rx: defaultRx,
-      labels: getPharmapolisLabelsForPrescription(defaultRx)
-    });
-  }
-
-  const primaryItem = initialQueue[0] || {};
+  const primaryItem = initialQueue[0] || null;
 
   return (
     <PublicLabelsAppClient
-      initialRx={primaryItem.rx}
-      initialLabels={primaryItem.labels || []}
-      initialCode={primaryItem.code || primaryCode}
+      initialRx={primaryItem?.rx || null}
+      initialLabels={primaryItem?.labels || []}
+      initialCode={primaryItem?.code || primaryCode || ''}
       initialQueue={initialQueue}
       initialEditMode={initialEditMode}
       initialLabelIndex={initialPhaseIdx}

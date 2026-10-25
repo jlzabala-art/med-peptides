@@ -15,6 +15,7 @@ import LabelsMetaStrip from './components/LabelsMetaStrip';
 import LabelsOffscreenRenderer from './components/LabelsOffscreenRenderer';
 import LabelsWorkspaceSkeleton from './components/LabelsWorkspaceSkeleton';
 import LabelsErrorBoundary from './components/LabelsErrorBoundary';
+import LabelsAtlasDock from './components/LabelsAtlasDock';
 import {
   Search,
   Check,
@@ -116,12 +117,13 @@ const LABEL_VARIANT_OPTIONS = [
   { id: 'backQr', labelEs: 'Trasera con QR', labelEn: 'Back with QR' },
   { id: 'front', labelEs: 'Frontal sin QR', labelEn: 'Front without QR' },
   { id: 'frontWithQr', labelEs: 'Frontal con QR', labelEn: 'Front with QR' },
+  { id: 'shipping', labelEs: 'Etiqueta de Envío', labelEn: 'Shipping Label' },
 ];
 
 export default function PublicLabelsAppClient({
-  initialRx,
+  initialRx = null,
   initialLabels = [],
-  initialCode = '51812',
+  initialCode = '',
   initialQueue = [],
   initialEditMode = true,
   initialLabelIndex = 0,
@@ -168,7 +170,7 @@ export default function PublicLabelsAppClient({
       });
       const firstOpt = detectOptimalLabelDimensions(enrichedLabels[0] || initialRx);
       return [{
-        code: String(initialCode || initialRx?.fileNumber || initialRx?.code || '51812'),
+        code: String(initialCode || initialRx?.fileNumber || initialRx?.code || ''),
         rx: initialRx,
         labels: enrichedLabels,
         selectedPartIndex: (initialLabelIndex != null && initialLabelIndex !== 0) ? initialLabelIndex : 'all',
@@ -304,13 +306,7 @@ export default function PublicLabelsAppClient({
         }
       }
 
-      // If page was loaded without any ?rx or ?code in URL, restore last active prescription
-      const currentUrlParams = new URLSearchParams(window.location.search);
-      const hasRxInUrl = currentUrlParams.has('rx') || currentUrlParams.has('code');
-      const savedActiveRx = localStorage.getItem(ACTIVE_RX_KEY);
-      if (!hasRxInUrl && savedActiveRx && savedActiveRx !== activeCode) {
-        handleSelectOrAddPatient(savedActiveRx, true);
-      }
+      // Saved formats restored per patient code
     } catch { /* storage unavailable */ }
   }, []);
 
@@ -505,13 +501,28 @@ export default function PublicLabelsAppClient({
     updateUrlWithQueue(patientQueue, idx);
   };
 
-  // Remove a patient from the queue
+  // Remove a patient from the queue (supports deleting even when 1 is remaining)
   const handleRemoveFromQueue = (idxToRemove, e) => {
     if (e) e.stopPropagation();
-    if (patientQueue.length <= 1) return; // Keep at least one patient active
 
     const nextQueue = patientQueue.filter((_, i) => i !== idxToRemove);
     setPatientQueue(nextQueue);
+
+    if (nextQueue.length === 0) {
+      setActiveQueueIndex(0);
+      setCurrentRx(null);
+      setLabels([]);
+      setActiveCode('');
+      setLabelIndex(0);
+      if (typeof window !== 'undefined') {
+        const newUrl = `/labels${lang ? `?lang=${lang}` : ''}`;
+        window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+        try {
+          localStorage.removeItem(ACTIVE_RX_KEY);
+        } catch { /* storage unavailable */ }
+      }
+      return;
+    }
 
     let nextActiveIdx = activeQueueIndex;
     if (activeQueueIndex >= nextQueue.length) {
@@ -807,19 +818,63 @@ export default function PublicLabelsAppClient({
       {/* ── 4. Main Independent Label Studio Workspace ── */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {patientQueue.length === 0 ? (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 20px' }}>
             <EmptyState
               icon={Layers}
-              title={isEs ? 'No hay pacientes en el lote' : 'No patients in batch'}
-              subtitle={isEs ? 'Busca una prescripción o importa una para comenzar a diseñar y previsualizar etiquetas.' : 'Search for a prescription or import one to get started designing labels.'}
+              title={isEs ? 'Compounding Label Studio • Pharmapolis' : 'Compounding Label Studio • Pharmapolis'}
+              subtitle={isEs ? 'Busca un paciente o nº de historia clínica (⌘K) para comenzar a diseñar y previsualizar etiquetas de frasco y de envío.' : 'Search for a patient or file # (⌘K) to start designing and previewing formula and courier shipping labels.'}
               action={{
-                label: isEs ? 'Buscar Prescripciones (⌘K)' : 'Search Prescriptions (⌘K)',
+                label: isEs ? 'Buscar Prescripción (⌘K)' : 'Search Prescriptions (⌘K)',
                 onClick: () => {
                   setSearchOpen(true);
                   searchInputRef.current?.focus();
                 }
               }}
             />
+
+            {/* Quick Demo Cases */}
+            <div style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', maxWidth: '640px', width: '100%' }}>
+              <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                {isEs ? 'O prueba con un paciente de ejemplo:' : 'Or test with a sample patient:'}
+              </span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+                {FEATURED_PATIENTS.slice(0, 4).map((p) => (
+                  <button
+                    key={p.code}
+                    type="button"
+                    onClick={() => handleSelectOrAddPatient(p.code, true)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '7px 14px',
+                      borderRadius: '8px',
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.80rem',
+                      fontWeight: 600,
+                      color: '#1e293b',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#1a73e8';
+                      e.currentTarget.style.color = '#1a73e8';
+                      e.currentTarget.style.background = '#f8fafc';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#cbd5e1';
+                      e.currentTarget.style.color = '#1e293b';
+                      e.currentTarget.style.background = '#ffffff';
+                    }}
+                  >
+                    <span>{p.name}</span>
+                    <span style={{ fontSize: '0.70rem', color: '#64748b', fontFamily: 'monospace' }}>#{p.code}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         ) : isLoadingRx ? (
           <LabelsWorkspaceSkeleton isEs={isEs} />
@@ -875,6 +930,18 @@ export default function PublicLabelsAppClient({
           const first = Array.isArray(created) ? created[0] : null;
           if (first?.id || first?.code) handleSelectPatient(first.id || first.code);
         }}
+      />
+
+      {/* ── Fixed Bottom Atlas Copilot Dock (GCP Sticky Dock) ── */}
+      <LabelsAtlasDock
+        isEs={isEs}
+        patientQueue={patientQueue}
+        activeRx={currentRx}
+        onOpenSearch={() => {
+          setSearchOpen(true);
+          searchInputRef.current?.focus();
+        }}
+        onAddFeaturedPatient={(code) => handleSelectOrAddPatient(code, true)}
       />
     </div>
   );

@@ -45,18 +45,16 @@ export default function LabelsBatchBar({
                 {partInfo}
               </span>
 
-              {/* Remove button if more than 1 patient */}
-              {patientQueue.length > 1 && (
-                <button
-                  type="button"
-                  className="pls-batch-pill-remove"
-                  title={isEs ? `Quitar a ${pName} del lote` : `Remove ${pName} from batch`}
-                  onClick={(e) => onRemoveFromQueue(qIdx, e)}
-                  aria-label="Remove patient"
-                >
-                  <X size={12} />
-                </button>
-              )}
+              {/* Remove button (always enabled, even for single patient) */}
+              <button
+                type="button"
+                className="pls-batch-pill-remove"
+                title={isEs ? `Quitar a ${pName} del lote` : `Remove ${pName} from batch`}
+                onClick={(e) => onRemoveFromQueue(qIdx, e)}
+                aria-label="Remove patient"
+              >
+                <X size={12} />
+              </button>
             </div>
           );
         })}

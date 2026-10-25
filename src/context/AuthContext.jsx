@@ -411,12 +411,21 @@ export function AuthProvider({ children, serverUser = null }) {
 
   const baseRole = (ADMIN_EMAILS.includes(user?.email?.toLowerCase()) ? 'admin' : (userProfile?.role || 'guest')).toLowerCase();
 
+  const userRolesList = useMemo(() => {
+    const list = Array.isArray(userProfile?.roles) && userProfile.roles.length > 0
+      ? [...userProfile.roles]
+      : [baseRole];
+    if (!list.includes(baseRole)) list.push(baseRole);
+    return list;
+  }, [userProfile?.roles, baseRole]);
+
   // Synchronously compute the activeRole to prevent route-guard race conditions
   const activeRole = useMemo(() => {
     if (!userProfile && !user) return 'guest';
     const stored = manualActiveRole;
     if (stored) {
       const canKeep = baseRole === 'admin' ||
+                      userRolesList.includes(stored) ||
                       (baseRole === 'clinic' && ['clinic', 'doctor', 'staff', 'guest'].includes(stored)) ||
                       (baseRole === 'compounding_pharmacy' && ['compounding_pharmacy', 'clinic', 'doctor', 'staff', 'guest'].includes(stored)) ||
                       (baseRole === 'wholesaler' && ['wholesaler', 'guest'].includes(stored)) ||
@@ -425,14 +434,16 @@ export function AuthProvider({ children, serverUser = null }) {
       if (canKeep) return stored;
     }
     return baseRole;
-  }, [userProfile, user, manualActiveRole, baseRole]);
+  }, [userProfile, user, manualActiveRole, baseRole, userRolesList]);
 
   const switchActiveRole = (newRole) => {
     const allowed = baseRole === 'admin' ||
+                    userRolesList.includes(newRole) ||
                     (baseRole === 'clinic' && ['clinic', 'doctor', 'staff', 'guest'].includes(newRole)) ||
                     (baseRole === 'compounding_pharmacy' && ['compounding_pharmacy', 'clinic', 'doctor', 'staff', 'guest'].includes(newRole)) ||
                     (baseRole === 'wholesaler' && ['wholesaler', 'guest'].includes(newRole)) ||
-                    (baseRole === 'supplier' && ['supplier', 'guest'].includes(newRole));
+                    (baseRole === 'supplier' && ['supplier', 'guest'].includes(newRole)) ||
+                    newRole === 'guest';
     if (allowed) {
       setManualActiveRole(newRole);
       sessionStorage.setItem('activeRole', newRole);
@@ -506,6 +517,7 @@ export function AuthProvider({ children, serverUser = null }) {
     const docSnap = await getDoc(docRef);
     let profile = null;
     const isAdmin = ADMIN_EMAILS.includes(safeEmail);
+    const isAccountManager = ACCOUNT_MANAGER_EMAILS.includes(safeEmail);
 
     if (docSnap.exists()) {
       profile = docSnap.data();
@@ -521,21 +533,35 @@ export function AuthProvider({ children, serverUser = null }) {
         } catch (e) {
           console.warn('[AuthContext] Could not update profile to admin:', e);
         }
+      } else if (isAccountManager && (profile.role !== 'account_manager' || !profile.approved)) {
+        profile = {
+          ...profile,
+          role: 'account_manager',
+          approved: true,
+          professionalStatus: 'approved'
+        };
+        try {
+          await updateDoc(docRef, { role: 'account_manager', approved: true, professionalStatus: 'approved' });
+        } catch (e) {
+          console.warn('[AuthContext] Could not update profile to account_manager:', e);
+        }
       }
       setUserProfile(profile);
-    } else if (isAdmin) {
+    } else if (isAdmin || isAccountManager) {
+      const assignedRole = isAdmin ? 'admin' : 'account_manager';
       profile = {
         email: safeEmail,
-        role: 'admin',
+        role: assignedRole,
+        roles: isAccountManager ? ['account_manager', 'sales_agent', 'wholesaler', 'staff'] : [assignedRole],
         approved: true,
         professionalStatus: 'approved',
-        userType: 'admin',
+        userType: 'professional',
         createdAt: new Date().toISOString()
       };
       try {
         await setDoc(docRef, profile);
       } catch (e) {
-        console.warn('[AuthContext] Could not create admin profile:', e);
+        console.warn('[AuthContext] Could not create profile:', e);
       }
       setUserProfile(profile);
     }
