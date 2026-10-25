@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, X, Printer, Upload, Share2, Check } from '@/lib/icons';
+import { Search, X, Printer, Upload, Share2, Check, ChevronDown, User } from '@/lib/icons';
+import { useAuth } from '@/context/AuthContext';
+import UserDropdown from '@/navigation/UserDropdown';
 
 export default function LabelsHeader({
   searchBoxRef,
@@ -24,6 +26,35 @@ export default function LabelsHeader({
   onKeyDownSearch,
   children
 }) {
+  const { user, userProfile, activeRole, logout, isProfessional, isAdmin } = useAuth();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  // Derived user display details
+  const userDisplayName = user?.displayName || (userProfile?.firstName ? `${userProfile.firstName} ${userProfile?.lastName || ''}`.trim() : null) || user?.email?.split('@')[0] || 'User';
+  const userInitials = (() => {
+    if (userProfile?.firstName && userProfile?.lastName) {
+      return (userProfile.firstName.trim().charAt(0) + userProfile.lastName.trim().charAt(0)).toUpperCase();
+    }
+    if (user?.displayName) {
+      const parts = user.displayName.trim().split(' ').filter(Boolean);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return user.displayName.slice(0, 2).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.slice(0, 2).toUpperCase();
+    }
+    return 'U';
+  })();
+
+  const rawRole = activeRole || userProfile?.role || 'staff';
+  const roleDisplay = rawRole === 'account_manager' ? 'Account Manager'
+    : rawRole === 'admin' ? 'Admin'
+    : rawRole === 'compounding_pharmacy' ? 'Compounding Pharmacy'
+    : rawRole === 'wholesaler' ? 'Wholesaler'
+    : rawRole.charAt(0).toUpperCase() + rawRole.slice(1);
+
   const totalLabelsInBatch = patientQueue.reduce((acc, pItem) => {
     const count = (pItem.selectedPartIndex != null && pItem.selectedPartIndex !== 'all')
       ? 1
@@ -168,6 +199,92 @@ export default function LabelsHeader({
             >
               ES
             </button>
+          </div>
+
+          {/* Authenticated Operator Profile (GCP Console UX) */}
+          <div className="pls-user-profile-wrap" style={{ position: 'relative' }}>
+            {user ? (
+              <button
+                type="button"
+                onClick={() => setIsUserMenuOpen(prev => !prev)}
+                className="pls-user-profile-btn"
+                title={`${userDisplayName} (${roleDisplay})`}
+                aria-expanded={isUserMenuOpen}
+                aria-haspopup="menu"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '24px',
+                  padding: '3px 10px 3px 4px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #003666 0%, #0284c7 100%)',
+                    color: '#ffffff',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 1px 3px rgba(0, 54, 102, 0.25)'
+                  }}
+                >
+                  {userInitials}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.15 }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {userDisplayName}
+                  </span>
+                  <span style={{ fontSize: '0.64rem', fontWeight: 650, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                    {roleDisplay}
+                  </span>
+                </div>
+                <ChevronDown size={13} color="#64748b" style={{ transform: isUserMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+              </button>
+            ) : (
+              <Link
+                href="/login?redirect=/labels"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  background: '#003666',
+                  color: '#ffffff',
+                  fontSize: '0.78rem',
+                  fontWeight: 650,
+                  textDecoration: 'none'
+                }}
+              >
+                <User size={14} />
+                <span>{isEs ? 'Iniciar Sesión' : 'Sign In'}</span>
+              </Link>
+            )}
+
+            {isUserMenuOpen && user && (
+              <UserDropdown
+                user={user}
+                userProfile={userProfile}
+                isProfessional={isProfessional}
+                isAdmin={isAdmin}
+                onClose={() => setIsUserMenuOpen(false)}
+                onLogout={async () => {
+                  setIsUserMenuOpen(false);
+                  if (logout) await logout();
+                  window.location.href = '/login';
+                }}
+              />
+            )}
           </div>
         </div>
       </header>

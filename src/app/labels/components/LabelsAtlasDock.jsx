@@ -176,13 +176,13 @@ export default function LabelsAtlasDock({
             onClick={() => setIsOpen((prev) => !prev)}
             aria-expanded={isOpen}
             aria-controls="pls-atlas-help-drawer"
-            title={isEs ? "Abrir Asistente Atlas AI y Guía de Uso (?)" : "Open Atlas AI Assistant & Guide (?)"}
+            title={isEs ? "Abrir Atlas AI y Guía de Uso (?)" : "Open Atlas AI & Guide (?)"}
           >
             <span className="pls-dock-sparkle-icon">
               <Sparkles size={15} />
             </span>
             <span className="pls-dock-title">
-              <strong>Atlas AI</strong> · {isEs ? 'Guía del Estudio' : 'Studio Assistant'}
+              <strong>Atlas AI</strong>
             </span>
             <span className="pls-dock-badge">
               {isEs ? 'Ayuda en vivo' : 'Live Help'}
@@ -275,7 +275,7 @@ export default function LabelsAtlasDock({
                 </div>
                 <div>
                   <h3 id="pls-atlas-drawer-title" className="pls-atlas-drawer-title">
-                    Atlas AI · {isEs ? 'Asistente de Etiquetas Pharmapolis' : 'Pharmapolis Labels Studio Assistant'}
+                    Atlas AI
                   </h3>
                   <p className="pls-atlas-drawer-subtitle">
                     {isEs 
@@ -359,9 +359,97 @@ export default function LabelsAtlasDock({
                 <h4>{isEs ? selectedTopicData.titleEs : selectedTopicData.titleEn}</h4>
                 <p className="pls-atlas-topic-desc">{isEs ? selectedTopicData.descEs : selectedTopicData.descEn}</p>
                 <div className="pls-atlas-markdown-content">
-                  <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', fontSize: '0.85rem', lineHeight: 1.5, margin: 0, color: '#334155' }}>
-                    {isEs ? selectedTopicData.contentEs.trim() : selectedTopicData.contentEn.trim()}
-                  </pre>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {(isEs ? selectedTopicData.contentEs : selectedTopicData.contentEn)
+                      .trim()
+                      .split('\n')
+                      .map(line => line.trim())
+                      .filter(Boolean)
+                      .map((line, lIdx) => {
+                        const cleanLine = line.replace(/^[•\-*]\s*/, '').trim();
+                        // Step matching
+                        const stepMatch = cleanLine.match(/^\*\*([^*]+):(?:\*\*|\s*\*)\s*(.*)$/);
+                        if (stepMatch) {
+                          const title = stepMatch[1];
+                          const body = stepMatch[2];
+                          const isWarning = title.toLowerCase().includes('rojo') || title.toLowerCase().includes('red') || title.toLowerCase().includes('aviso');
+                          const isSuccess = title.toLowerCase().includes('verde') || title.toLowerCase().includes('green');
+
+                          return (
+                            <div
+                              key={lIdx}
+                              style={{
+                                background: isWarning ? '#fef2f2' : isSuccess ? '#f0fdf4' : '#f8fafc',
+                                border: `1px solid ${isWarning ? '#fecaca' : isSuccess ? '#bbf7d0' : '#e2e8f0'}`,
+                                borderLeft: `4px solid ${isWarning ? '#dc2626' : isSuccess ? '#16a34a' : '#1a73e8'}`,
+                                borderRadius: '8px',
+                                padding: '10px 14px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '4px'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{
+                                  fontSize: '0.82rem',
+                                  fontWeight: 700,
+                                  color: isWarning ? '#991b1b' : isSuccess ? '#166534' : '#0f172a'
+                                }}>
+                                  {title}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
+                                {body.split('**').map((part, pIdx) => {
+                                  if (pIdx % 2 === 1) {
+                                    return <strong key={pIdx} style={{ color: '#0f172a' }}>{part}</strong>;
+                                  }
+                                  if (part.includes('⌘K')) {
+                                    const sub = part.split('⌘K');
+                                    return (
+                                      <React.Fragment key={pIdx}>
+                                        {sub[0]}
+                                        <kbd style={{
+                                          padding: '1px 5px',
+                                          background: '#ffffff',
+                                          border: '1px solid #cbd5e1',
+                                          borderRadius: '4px',
+                                          fontSize: '0.74rem',
+                                          fontFamily: 'monospace',
+                                          fontWeight: 650,
+                                          boxShadow: '0 1px 1px rgba(0,0,0,0.06)'
+                                        }}>⌘K</kbd>
+                                        {sub[1]}
+                                      </React.Fragment>
+                                    );
+                                  }
+                                  return part;
+                                })}
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        // Regular bullet point
+                        return (
+                          <div
+                            key={lIdx}
+                            style={{
+                              padding: '8px 12px',
+                              background: '#f8fafc',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '6px',
+                              fontSize: '0.82rem',
+                              color: '#334155',
+                              lineHeight: 1.45
+                            }}
+                          >
+                            {cleanLine.split('**').map((part, pIdx) => (
+                              pIdx % 2 === 1 ? <strong key={pIdx} style={{ color: '#0f172a' }}>{part}</strong> : part
+                            ))}
+                          </div>
+                        );
+                      })}
+                  </div>
                 </div>
               </div>
 
