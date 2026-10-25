@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ShieldCheck, Smartphone, X, Sparkles, Check, ArrowUpRight } from 'lucide-react';
 
 /**
