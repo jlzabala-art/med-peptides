@@ -30,6 +30,7 @@ import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import DoctorAccessLinkModal from './DoctorAccessLinkModal';
 import UniversalShareDrawer from '../../ui/UniversalShareDrawer';
 import EngagementBadge from '../../ui/EngagementBadge';
+import UniversalActionCell from '../../ui/UniversalActionCell';
 
 export default function AdminPhysiciansTab() {
   // UI State
@@ -872,107 +873,13 @@ export default function AdminPhysiciansTab() {
           }
         ];
         return (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }} onClick={e => e.stopPropagation()}>
-            <a
-              href={`/dr/${encodeURIComponent(getDoctorSlug(d))}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={`View public page of Dr. ${getDoctorName(d)}`}
-              style={{
-                width: '30px',
-                height: '30px',
-                borderRadius: '6px',
-                border: '1px solid #bbf7d0',
-                backgroundColor: '#f0fdf4',
-                color: '#16a34a',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 0,
-                flexShrink: 0,
-                textDecoration: 'none'
-              }}
-            >
-              <ExternalLink size={14} />
-            </a>
-            <button
-              type="button"
-              onClick={() => {
-                useWorkspaceStore.getState().loadUserIntoWorkspace(d, { role: 'doctor' });
-              }}
-              title={`Cargar Dr. ${getDoctorName(d)} en Workspace`}
-              style={{
-                width: '30px',
-                height: '30px',
-                borderRadius: '6px',
-                border: '1px solid #bfdbfe',
-                backgroundColor: '#eff6ff',
-                color: '#1d4ed8',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 0,
-                flexShrink: 0
-              }}
-            >
-              <Layers size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setShareDoctor(d)}
-              title={`Compartir Perfil Médico / Acceso 1-Tap para Dr. ${getDoctorName(d)}`}
-              style={{
-                width: '30px',
-                height: '30px',
-                borderRadius: '6px',
-                border: '1px solid #fed7aa',
-                backgroundColor: '#fff7ed',
-                color: '#ea580c',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 0,
-                flexShrink: 0
-              }}
-            >
-              <Share2 size={14} />
-            </button>
-            {(d.phone || d.mobile) && (
-              <button
-                type="button"
-                onClick={() => {
-                  const cleanPhone = (d.phone || d.mobile).replace(/[^\d+]/g, '').replace('+', '');
-                  const slug = getDoctorSlug(d);
-                  const name = getDoctorName(d);
-                  const directUrl = `https://www.atlashealth-services.com/dr/${encodeURIComponent(slug)}`;
-                  const msg = encodeURIComponent(`🩺 *Atlas Health Services — Acceso Clínico 1-Tap*\n\nEstimado/a Dr. ${name},\n\nPuede acceder a su portal médico verificado y expedientes clínicos nominales en el siguiente enlace:\n\n👉 ${directUrl}\n\n_Atlas Health Services — Operaciones Clínicas_`);
-                  window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
-                  notifier.success(`WhatsApp directo abierto para Dr. ${name} ✓`);
-                }}
-                title={`Envío Rápido por WhatsApp a ${d.phone || d.mobile}`}
-                style={{
-                  width: '30px',
-                  height: '30px',
-                  borderRadius: '6px',
-                  border: '1px solid #86efac',
-                  backgroundColor: '#f0fdf4',
-                  color: '#16a34a',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: 0,
-                  flexShrink: 0
-                }}
-              >
-                <MessageCircle size={14} />
-              </button>
-            )}
-            <AppActionGroup actions={actions} maxVisible={1} />
-          </div>
+          <UniversalActionCell
+            entity={d}
+            entityType="doctor"
+            viewHref={`/dr/${encodeURIComponent(getDoctorSlug(d))}`}
+            onShare={() => setShareDoctor(d)}
+            extraActions={actions}
+          />
         );
       }
     }

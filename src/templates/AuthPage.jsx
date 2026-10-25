@@ -66,7 +66,9 @@ export default function AuthPage({ onBack }) {
     if (type === 'customer' || role === 'customer') return 'customer';
     return '';
   });
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => {
+    return searchParams.get('email') || '';
+  });
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -131,19 +133,16 @@ export default function AuthPage({ onBack }) {
     const isAccountManager = cleanRole === 'account_manager' || ACCOUNT_MANAGER_EMAILS.includes(cleanEmail);
     const isUserAdmin = cleanRole === 'admin' || ADMIN_EMAILS.includes(cleanEmail);
 
+    if (explicitRedirect && !explicitRedirect.startsWith('/auth') && !explicitRedirect.startsWith('/login') && explicitRedirect !== '/customer') {
+      return explicitRedirect;
+    }
+
     if (isAccountManager) {
       return '/admin/prescriptions';
     }
 
     if (isUserAdmin) {
-      if (explicitRedirect && explicitRedirect.startsWith('/admin')) {
-        return explicitRedirect;
-      }
       return '/admin';
-    }
-
-    if (explicitRedirect && !explicitRedirect.startsWith('/auth') && !explicitRedirect.startsWith('/login') && explicitRedirect !== '/customer') {
-      return explicitRedirect;
     }
 
     if (cleanRole === 'doctor' || cleanRole === 'medical_director' || cleanRole === 'fagron_doctor') return '/doctor';

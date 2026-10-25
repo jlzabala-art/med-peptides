@@ -40,6 +40,7 @@ import EntityLink from '../ui/EntityLink';
 import ReassignPhysicianModal from '../admin/patients/ReassignPhysicianModal';
 import UniversalShareDrawer from '../ui/UniversalShareDrawer';
 import EngagementBadge from '../ui/EngagementBadge';
+import UniversalActionCell from '../ui/UniversalActionCell';
 
 function capitalizeName(name) {
   if (!name) return name;
@@ -923,75 +924,39 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
           align: 'right',
           isAction: true,
           render: (row) => (
-            <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-              <AppActionGroup
-                maxVisible={3}
-                actions={[
-                  {
-                    type: 'view',
-                    tooltip: 'View Patient Chart',
-                    onClick: () => {
-                      openDrawer('patient', row.id, { initialTab: 'overview', patient: row });
-                      const params = new URLSearchParams(searchParams);
-                      params.set('drawer', 'patient');
-                      params.set('drawerId', row.id);
-                      params.set('tab', 'overview');
-                      router.push(`${pathname}?${params.toString()}`);
-                    }
-                  },
-                  {
-                    type: 'create_prescription',
-                    tooltip: 'New Prescription (Rx)',
-                    onClick: () => {
-                      openDrawer('rx-builder', 'new', {
-                        initialPatient: { id: row.id, name: row.name, email: row.email },
-                        sourceModule: 'patients-table',
-                      });
-                    }
-                  },
-                  {
-                    type: 'share',
-                    label: 'Share Portal',
-                    icon: Share2,
-                    tooltip: 'Compartir Expediente / Portal de Paciente',
-                    onClick: () => {
-                      setSharePatient(row);
-                    }
-                  },
-                  ...(row.phone ? [{
-                    type: 'whatsapp_quick',
-                    label: 'WhatsApp Directo',
-                    icon: MessageCircle,
-                    tooltip: `Enviar enlace por WhatsApp a ${row.phone}`,
-                    onClick: () => {
-                      const clean = String(row.phone).replace(/[^\d+]/g, '').replace('+', '');
-                      const rxCode = row.lastRxCode || (Array.isArray(row.prescriptions) && row.prescriptions[0]) || '';
-                      const url = rxCode ? `https://www.atlashealth-services.com/rx/${encodeURIComponent(rxCode)}` : 'https://www.atlashealth-services.com/rx/intake';
-                      const msg = encodeURIComponent(`🏥 *Atlas Clinical Platform — Expediente de Paciente*\n\nEstimado/a ${row.name || 'paciente'},\n\nPuede acceder a su expediente clínico digitalizado y posología activa en el siguiente enlace:\n\n👉 ${url}\n\n🔒 Portal confidencial Atlas Health Services.`);
-                      window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
-                      notifier.success(`WhatsApp directo abierto para ${row.name} ✓`);
-                    }
-                  }] : []),
-                  {
-                    type: 'workspace',
-                    label: 'Workspace',
-                    icon: Layers,
-                    tooltip: 'Cargar Paciente en Workspace',
-                    onClick: () => {
-                      useWorkspaceStore.getState().loadUserIntoWorkspace(row, { role: 'patient' });
-                    }
-                  },
-                  ...(canReassignDoctor ? [{
-                    label: 'Reassign Doctor',
-                    icon: Stethoscope,
-                    tooltip: 'Reassign Doctor & Clinic (Admin Only)',
-                    onClick: () => {
-                      setReassignModal({ isOpen: true, patients: [row] });
-                    }
-                  }] : [])
-                ]}
-              />
-            </div>
+            <UniversalActionCell
+              entity={row}
+              entityType="patient"
+              onView={() => {
+                openDrawer('patient', row.id, { initialTab: 'overview', patient: row });
+                const params = new URLSearchParams(searchParams);
+                params.set('drawer', 'patient');
+                params.set('drawerId', row.id);
+                params.set('tab', 'overview');
+                router.push(`${pathname}?${params.toString()}`);
+              }}
+              onShare={() => setSharePatient(row)}
+              extraActions={[
+                {
+                  type: 'create_prescription',
+                  tooltip: 'New Prescription (Rx)',
+                  onClick: () => {
+                    openDrawer('rx-builder', 'new', {
+                      initialPatient: { id: row.id, name: row.name, email: row.email },
+                      sourceModule: 'patients-table',
+                    });
+                  }
+                },
+                ...(canReassignDoctor ? [{
+                  label: 'Reassign Doctor',
+                  icon: Stethoscope,
+                  tooltip: 'Reassign Doctor & Clinic (Admin Only)',
+                  onClick: () => {
+                    setReassignModal({ isOpen: true, patients: [row] });
+                  }
+                }] : [])
+              ]}
+            />
           )
         }
       ]}

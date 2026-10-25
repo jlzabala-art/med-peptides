@@ -13,7 +13,8 @@ import CopyableId from '../../ui/CopyableId';
 import QuoteQuickActionDropdown from '../../ui/QuoteQuickActionDropdown';
 import PricingTierSelectorCell from '../customers/PricingTierSelectorCell';
 import EngagementBadge from '../../ui/EngagementBadge';
-import { Globe, Mail, Phone, Package, ShoppingBag, Edit2, Check, X, Share2, Eye, MessageCircle } from '@/lib/icons';
+import UniversalActionCell from '@/components/ui/UniversalActionCell';
+import { Globe, Mail, Phone, Package, ShoppingBag, Edit2, Check, X, FileText } from '@/lib/icons';
 
 // ── Inline editable cell ─────────────────────────────────────────────────────
 function InlineEditableCell({ value, onSave, placeholder = '—' }) {
@@ -153,50 +154,20 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace, 
       width: '28%',
       align: 'right',
       render: (row) => (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '5px' }} onClick={e => e.stopPropagation()}>
-          <button
-            type="button"
-            onClick={() => onLoadToWorkspace?.(row)}
-            className="gcp-action-thumb-btn thumb-workspace"
-            title="Cargar Distribuidor en Workspace Comercial (Pre-seleccionado)"
-            style={{ color: '#003666', borderColor: '#cbd5e1' }}
-          >
-            <span style={{ fontSize: '13px', fontWeight: 800 }}>🗂️</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onShareDatasheet?.(row)}
-            className="gcp-action-thumb-btn thumb-datasheet"
-            title="Compartir Ficha Técnica Individual (Enlace Único con Rastreabilidad)"
-            style={{ color: '#0284c7', borderColor: '#bae6fd' }}
-          >
-            <span style={{ fontSize: '13px', fontWeight: 800 }}>📄</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onSharePage?.(row)}
-            className="gcp-action-thumb-btn thumb-share"
-            title="Compartir Catálogo B2B Completo con margen verificado"
-          >
-            <Share2 size={14} />
-          </button>
-          {(row.contactPhone || row.phone) && (
-            <button
-              type="button"
-              onClick={() => {
-                const clean = String(row.contactPhone || row.phone).replace(/[^\d+]/g, '').replace('+', '');
-                const name = row.companyName || row.name || 'Distribuidor';
-                const url = `https://www.atlashealth-services.com/vials?ref=${encodeURIComponent(row.id || '')}`;
-                const msg = encodeURIComponent(`📦 *Atlas Solutions — Catálogo Mayorista B2B*\n\nEstimado/a ${name},\n\nAdjuntamos su acceso verificado al catálogo de viales con márgenes de distribución vinculados:\n\n👉 ${url}\n\n_Atlas Solutions B2B Operations_`);
-                window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
-              }}
-              className="gcp-action-thumb-btn thumb-whatsapp"
-              title={`Enviar Catálogo por WhatsApp a ${row.contactPhone || row.phone}`}
-              style={{ color: '#16a34a', borderColor: '#86efac' }}
-            >
-              <MessageCircle size={14} />
-            </button>
-          )}
+        <UniversalActionCell
+          entity={row}
+          entityType="wholesaler"
+          onView={() => onOpenWorkspace?.(row)}
+          onShare={() => onSharePage?.(row)}
+          onWorkspace={() => onLoadToWorkspace?.(row)}
+          extraActions={[
+            {
+              label: 'Ficha Técnica Individual',
+              icon: FileText,
+              onClick: () => onShareDatasheet?.(row),
+            },
+          ]}
+        >
           <QuoteQuickActionDropdown 
             size="sm" 
             variant="thumbnail" 
@@ -207,15 +178,7 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace, 
               wholesalerName: row.companyName || row.name 
             }} 
           />
-          <button
-            type="button"
-            onClick={() => onOpenWorkspace?.(row)}
-            className="gcp-action-thumb-btn thumb-profile"
-            title="Abrir Perfil 360° del Distribuidor"
-          >
-            <Eye size={14} />
-          </button>
-        </div>
+        </UniversalActionCell>
       ),
     },
   ];
