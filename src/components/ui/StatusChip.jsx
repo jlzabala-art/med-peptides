@@ -31,7 +31,7 @@ export default function StatusChip({ status, customLabel, style = {}, variant = 
     bg = '#fef7e0';
     border = '#feefc3';
     color = '#b06000';
-  } else if (['error', 'rejected', 'disputed', 'failed', 'cancelled', 'suspended', 'inactive', 'expired', 'caducada', 'revoked', 'out of stock', 'out_of_stock', 'quote_unconfirmed', 'unconfirmed', 'declined', 'lost'].includes(s)) {
+  } else if (['error', 'rejected', 'disputed', 'failed', 'cancelled', 'suspended', 'expired', 'caducada', 'revoked', 'out of stock', 'out_of_stock', 'quote_unconfirmed', 'unconfirmed', 'declined', 'lost'].includes(s)) {
     bg = '#fce8e6';
     border = '#fad2cf';
     color = '#c5221f';
@@ -39,7 +39,7 @@ export default function StatusChip({ status, customLabel, style = {}, variant = 
     bg = '#e8f0fe';
     border = '#d2e3fc';
     color = '#1a73e8';
-  } else if (['archived', 'hidden', 'disabled', 'unknown', 'registered_only', 'registered', 'lead'].includes(s)) {
+  } else if (['inactive', 'archived', 'hidden', 'disabled', 'unknown', 'registered_only', 'registered', 'lead'].includes(s)) {
     bg = '#f1f3f4';
     border = '#dadce0';
     color = '#5f6368';

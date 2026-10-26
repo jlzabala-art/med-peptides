@@ -519,9 +519,6 @@ function resolveProductRegulatoryBadges(product, brandSlug) {
     ];
   }
 
-  const id = (product.id || product.slug || '').toLowerCase();
-  const name = (product.name || product.title || '').toLowerCase();
-
   // All Colway products registered in European Union (Regulation EC No 1223/2009 & CPNP)
   const badges = [
     { label: '🇪🇺 EU CPNP Reg.', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'European Union CPNP & Regulation (EC) No 1223/2009 Registered' }
@@ -713,7 +710,6 @@ export default function BrandCollectionPage({
   }, []);
 
   const breadcrumbs = [
-    { label: 'Home', path: '/' },
     { label: 'Collections', path: '/collection/peptides' },
     { label: config.name }
   ];
@@ -1260,8 +1256,8 @@ export default function BrandCollectionPage({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <div role="group" aria-label={isEs ? 'Alcance de métricas' : 'Metrics scope'} className="gcp-scope-switch">
               {[
-                { id: 'filtered', label: isEs ? 'Filtrado' : 'Filtered' },
-                { id: 'global', label: isEs ? 'Global' : 'Entire collection' }
+                { id: 'filtered', label: isEs ? `Filtrado (${filteredProducts.length})` : `Filtered (${filteredProducts.length})` },
+                { id: 'global', label: isEs ? `Todo (${products.length})` : `All (${products.length})` }
               ].map(opt => (
                 <button
                   key={opt.id}
@@ -1999,8 +1995,8 @@ export default function BrandCollectionPage({
                               >
                                 {displayName}
                               </h3>
-                              {/* Clinical therapeutic category / short active focus (clean clinical glance, no tech IDs) */}
-                              {(product.therapeutic_category || product.shortDescription) ? (
+                              {/* Clinical therapeutic category / short active focus (clean clinical glance, no duplicate text) */}
+                              {product.therapeutic_category ? (
                                 <p style={{
                                   fontSize: '0.73rem',
                                   color: '#0284c7',
@@ -2010,7 +2006,19 @@ export default function BrandCollectionPage({
                                   overflow: 'hidden',
                                   textOverflow: 'ellipsis'
                                 }}>
-                                  {product.therapeutic_category || product.shortDescription}
+                                  {product.therapeutic_category}
+                                </p>
+                              ) : (product.shortDescription && product.shortDescription.toLowerCase().trim() !== desc.toLowerCase().trim()) ? (
+                                <p style={{
+                                  fontSize: '0.73rem',
+                                  color: '#0284c7',
+                                  fontWeight: 650,
+                                  margin: '0 0 2px 0',
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis'
+                                }}>
+                                  {product.shortDescription}
                                 </p>
                               ) : null}
                               {desc && (

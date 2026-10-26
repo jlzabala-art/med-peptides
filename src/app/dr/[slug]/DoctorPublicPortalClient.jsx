@@ -1239,19 +1239,53 @@ export default function DoctorPublicPortalClient({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDiscoveryDrawerOpen, isCredentialsModalOpen, isServicesModalOpen]);
 
-  // Filter Tasks
+  // Filter Tasks (Consolidated per Patient/Prescription to prevent duplicates)
   const filteredTasks = useMemo(() => {
-    const seenPatientType = new Set();
-    return allTasks.filter(t => {
-      // 1. Exclude tasks that have already been signed or approved
-      if (t.isSigned || t.status === 'approved' || t.status === 'completed') return false;
+    const validTasks = allTasks.filter(t => !t.isSigned && t.status !== 'approved' && t.status !== 'completed');
 
-      // 2. Deduplicate: A patient must only have ONE task of a specific type (e.g. 1 approval task, even if multi-part)
-      const patientKey = String(t.patientName || '').toLowerCase().trim();
-      const dedupKey = `${t.type || 'approval'}_${patientKey}_${t.code || t.rxId || t.id}`;
-      if (seenPatientType.has(dedupKey)) return false;
-      seenPatientType.add(dedupKey);
+    // When viewing "all", consolidate per patient + rx so patients don't appear twice
+    let taskPool = validTasks;
+    if (taskFilter === 'all') {
+      const patientRxMap = new Map();
+      const PRIORITY_SCORE = {
+        approval: 5,
+        tolerance_check: 4,
+        tolerance_checkin: 4,
+        refill: 3,
+        cycles: 3,
+        titration: 3,
+        proposal_followup: 2,
+        followup: 2,
+        portal_inactive: 1
+      };
 
+      validTasks.forEach(t => {
+        const patientKey = String(t.patientName || '').toLowerCase().trim();
+        const rxKey = String(t.code || t.rxId || t.treatmentTitle || '').toLowerCase().trim();
+        const groupKey = `${patientKey}_${rxKey}`;
+
+        const existing = patientRxMap.get(groupKey);
+        if (!existing) {
+          patientRxMap.set(groupKey, { ...t });
+        } else {
+          const currentScore = PRIORITY_SCORE[existing.type] || 0;
+          const newScore = PRIORITY_SCORE[t.type] || 0;
+
+          if (t.type === 'portal_inactive') {
+            existing.hasPortalInactive = true;
+            existing.portalTask = t;
+          } else if (existing.type === 'portal_inactive') {
+            const upgraded = { ...t, hasPortalInactive: true, portalTask: existing };
+            patientRxMap.set(groupKey, upgraded);
+          } else if (newScore > currentScore) {
+            patientRxMap.set(groupKey, { ...t, hasPortalInactive: existing.hasPortalInactive, portalTask: existing.portalTask });
+          }
+        }
+      });
+      taskPool = Array.from(patientRxMap.values());
+    }
+
+    return taskPool.filter(t => {
       if (taskFilter !== 'all') {
         if (taskFilter === 'refill') {
           if (t.type !== 'refill' && t.type !== 'cycles') return false;

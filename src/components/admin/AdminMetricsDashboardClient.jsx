@@ -454,29 +454,34 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
             >
               {/* Preset Selector */}
               {isMedicalDirectorRole ? (
-                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#f0fdf4', color: '#0d9488', border: '1px solid #99f6e4', fontSize: '0.8rem', fontWeight: 700 }}>
-                  <span className="admin-hero-role-full">🩺 Pure Clinical Oversight Mode</span>
-                  <span className="admin-hero-role-short">🩺 Clinical Oversight</span>
+                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.45rem 0.85rem', minHeight: '38px', borderRadius: '6px', backgroundColor: '#ffffff', color: '#202124', border: '1px solid #dadce0', fontSize: '0.8rem', fontWeight: 600 }}>
+                  <Activity size={15} style={{ color: '#0d9488' }} />
+                  <span className="admin-hero-role-full">Clinical Oversight Mode</span>
+                  <span className="admin-hero-role-short">Clinical Oversight</span>
                 </div>
               ) : isDoctorRole ? (
-                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd', fontSize: '0.8rem', fontWeight: 700 }}>
-                  <span className="admin-hero-role-full">🩺 Physician Practice Mode (Assigned Patients Only)</span>
-                  <span className="admin-hero-role-short">🩺 Physician Practice</span>
+                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.45rem 0.85rem', minHeight: '38px', borderRadius: '6px', backgroundColor: '#ffffff', color: '#202124', border: '1px solid #dadce0', fontSize: '0.8rem', fontWeight: 600 }}>
+                  <Activity size={15} style={{ color: '#1a73e8' }} />
+                  <span className="admin-hero-role-full">Physician Practice Mode</span>
+                  <span className="admin-hero-role-short">Physician Practice</span>
                 </div>
               ) : isPatientRole ? (
-                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#6b21a8', border: '1px solid #e9d5ff', fontSize: '0.8rem', fontWeight: 700 }}>
-                  <span className="admin-hero-role-full">👤 Patient Personal Health Mode</span>
-                  <span className="admin-hero-role-short">👤 Patient Mode</span>
+                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.45rem 0.85rem', minHeight: '38px', borderRadius: '6px', backgroundColor: '#ffffff', color: '#202124', border: '1px solid #dadce0', fontSize: '0.8rem', fontWeight: 600 }}>
+                  <UserCheck size={15} style={{ color: '#7c3aed' }} />
+                  <span className="admin-hero-role-full">Patient Personal Health Mode</span>
+                  <span className="admin-hero-role-short">Patient Mode</span>
                 </div>
               ) : isSupplierRole ? (
-                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#ffedd5', color: '#c2410c', border: '1px solid #fed7aa', fontSize: '0.8rem', fontWeight: 700 }}>
-                  <span className="admin-hero-role-full">📦 Supplier Control Room Mode (Scoped RFQs & Orders)</span>
-                  <span className="admin-hero-role-short">📦 Supplier Mode</span>
+                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.45rem 0.85rem', minHeight: '38px', borderRadius: '6px', backgroundColor: '#ffffff', color: '#202124', border: '1px solid #dadce0', fontSize: '0.8rem', fontWeight: 600 }}>
+                  <PackageSearch size={15} style={{ color: '#c2410c' }} />
+                  <span className="admin-hero-role-full">Supplier Control Room Mode</span>
+                  <span className="admin-hero-role-short">Supplier Mode</span>
                 </div>
               ) : (
-                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#003666', border: '1px solid #bae6fd', fontSize: '0.8rem', fontWeight: 700 }}>
-                  <span className="admin-hero-role-full">🛡️ Executive Role View: {effectiveRole?.toUpperCase() || 'ADMIN'}</span>
-                  <span className="admin-hero-role-short">🛡️ Role: {effectiveRole?.toUpperCase() || 'ADMIN'}</span>
+                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.45rem 0.85rem', minHeight: '38px', borderRadius: '6px', backgroundColor: '#ffffff', color: '#202124', border: '1px solid #dadce0', fontSize: '0.8rem', fontWeight: 600 }}>
+                  <ShieldCheck size={15} style={{ color: '#1a73e8' }} />
+                  <span className="admin-hero-role-full">Role: {effectiveRole?.toUpperCase() || 'ADMIN'}</span>
+                  <span className="admin-hero-role-short">Role: {effectiveRole?.toUpperCase() || 'ADMIN'}</span>
                 </div>
               )}
 
@@ -752,8 +757,15 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
                             </div>
                             <div className={styles.aiWorkspaceMetricChip}>
                               <span className={styles.aiMetricLabel}>{(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? 'Safety Index' : 'Est. Impact'}</span>
-                              <strong className={styles.aiMetricVal} style={{ color: (isMedicalDirectorRole || currentRolePreset === 'Clinical') ? '#10b981' : '#0284c7' }}>
-                                {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? '99.8% Optimal' : `${formatAEDtoDual(24000, '+')} / mo`}
+                              <strong className={styles.aiMetricVal} style={{ color: (isMedicalDirectorRole || currentRolePreset === 'Clinical') ? '#10b981' : '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? (
+                                  '99.8% Optimal'
+                                ) : (
+                                  <>
+                                    {formatAEDtoDual(24000, '+')}
+                                    <span style={{ fontSize: '0.78em', color: '#64748b', fontWeight: 500 }}>/ mo</span>
+                                  </>
+                                )}
                               </strong>
                             </div>
                           </div>

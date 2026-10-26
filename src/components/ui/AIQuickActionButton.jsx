@@ -33,10 +33,10 @@ export default function AIQuickActionButton({
 
   const variantStyles = {
     subtle: {
-      background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
-      color: '#4f46e5',
-      border: '1px solid rgba(99, 102, 241, 0.3)',
-      boxShadow: '0 1px 2px rgba(99, 102, 241, 0.08)'
+      background: '#f8fafd',
+      color: '#1a73e8',
+      border: '1px solid #c2e7ff',
+      boxShadow: '0 1px 2px rgba(26, 115, 232, 0.08)'
     },
     outline: {
       background: '#ffffff',

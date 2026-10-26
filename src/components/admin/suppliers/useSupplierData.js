@@ -161,6 +161,26 @@ export function useSupplierData({ initialData } = {}) {
         }));
       }
 
+      // Compute resilient live KPIs if server meta was empty
+      setServerKpis(prev => {
+        if (prev?.activeSuppliers > 0 && prev?.totalSKUs > 0) return prev;
+        const activeSuppliers = list.filter(s => (s.productsSupplied || 0) > 0 || (s.variantsSupplied || 0) > 0).length;
+        const totalSKUs = list.reduce((acc, s) => acc + (s.variantsSupplied || s.productsSupplied || 0), 0);
+        const topEntry = list.reduce((best, s) => (s.productsSupplied || 0) > (best?.productsSupplied || 0) ? s : best, null);
+        const totalProds = list.reduce((a, s) => a + (s.productsSupplied || 0), 0);
+        const topSupplierShare = topEntry && totalProds > 0
+          ? Math.round((topEntry.productsSupplied / totalProds) * 100)
+          : 0;
+        const avgSkusPerSupplier = activeSuppliers > 0 ? Math.round(totalSKUs / activeSuppliers) : 0;
+        return {
+          activeSuppliers,
+          totalSKUs,
+          topSupplierShare,
+          topSupplierName: topEntry?.companyName || topEntry?.name || '',
+          avgSkusPerSupplier
+        };
+      });
+
       _supplierCache.data = list;
       _supplierCache.ts = Date.now();
 

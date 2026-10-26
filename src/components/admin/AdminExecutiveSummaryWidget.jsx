@@ -36,11 +36,11 @@ const TIME_RANGES = [
 
 const DOMAIN_FILTERS = [
   { id: 'all', label: 'All Domains (5 Tiers)' },
-  { id: 'products', label: '🏷️ Products (Pharmacy)' },
-  { id: 'sales', label: '💼 Sales (Finance)' },
-  { id: 'procurement', label: '📦 Procurement (Supplier)' },
-  { id: 'clinical', label: '🩺 Clinical (Doctor)' },
-  { id: 'wholesale', label: '🌐 Wholesaler (Admin)' },
+  { id: 'products', label: 'Products (Pharmacy)' },
+  { id: 'sales', label: 'Sales (Finance)' },
+  { id: 'procurement', label: 'Procurement (Supplier)' },
+  { id: 'clinical', label: 'Clinical (Doctor)' },
+  { id: 'wholesale', label: 'Wholesale (Admin)' },
 ];
 
 export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = {} }) {
@@ -116,7 +116,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.lowStockAlerts || 0} Alerts`,
         icon: AlertTriangle,
         route: '/admin/products?filter=low_stock',
-        styleClass: styles.alertIcon,
+        styleClass: Number(metrics.lowStockAlerts) > 0 ? styles.alertIcon : styles.iconNeutral,
         isAlert: Number(metrics.lowStockAlerts) > 0,
       },
       {
@@ -247,7 +247,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.pendingPrescriptions || 0} Pending`,
         icon: FileText,
         route: '/admin/prescriptions?status=pending',
-        styleClass: styles.alertIcon,
+        styleClass: Number(metrics.pendingPrescriptions) > 0 ? styles.alertIcon : styles.iconNeutral,
         isAlert: Number(metrics.pendingPrescriptions) > 0,
       },
       {
@@ -302,7 +302,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.pendingApprovals || 0} Approvals`,
         icon: AlertTriangle,
         route: '/admin/approvals?status=pending',
-        styleClass: styles.alertIcon,
+        styleClass: Number(metrics.pendingApprovals) > 0 ? styles.alertIcon : styles.iconNeutral,
         isAlert: Number(metrics.pendingApprovals) > 0,
       },
       {

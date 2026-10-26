@@ -137,30 +137,14 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
-/* Color Accent Coding aligned with roles.css (Golden Rule #15) */
-.bayProducts {
-  border-left: 5px solid #f59e0b; /* Role: Pharmacist / Catalog Amber */
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0.03) 0%, transparent 100%);
-}
-
-.baySales {
-  border-left: 5px solid #16a34a; /* Role: Finance Green */
-  background: linear-gradient(180deg, rgba(22, 163, 74, 0.03) 0%, transparent 100%);
-}
-
-.bayProcurement {
-  border-left: 5px solid #c2410c; /* Role: Supplier / Wholesaler Commercial Orange */
-  background: linear-gradient(180deg, rgba(194, 65, 12, 0.03) 0%, transparent 100%);
-}
-
-.bayClinical {
-  border-left: 5px solid #0d9488; /* Role: Doctor Medical Teal */
-  background: linear-gradient(180deg, rgba(13, 148, 136, 0.03) 0%, transparent 100%);
-}
-
+/* Google Cloud Console Standard Card Styling (Monochrome & Sober) */
+.bayProducts,
+.baySales,
+.bayProcurement,
+.bayClinical,
 .bayWholesale {
-  border-left: 5px solid #003666; /* Role: Admin Deep Corporate Blue */
-  background: linear-gradient(180deg, rgba(0, 54, 102, 0.03) 0%, transparent 100%);
+  border-left: 1px solid var(--border, #dadce0);
+  background: #ffffff;
 }
 
 /* Domain Bay Header */
@@ -181,7 +165,9 @@
 .bayIconBadge {
   width: 28px;
   height: 28px;
-  border-radius: 8px;
+  border-radius: 6px;
+  background: #f1f3f4;
+  color: #5f6368;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -191,8 +177,8 @@
 .bayTitle {
   font-size: 0.84rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--text-main);
+  letter-spacing: 0.01em;
+  color: var(--text-main, #202124);
   margin: 0;
   display: flex;
   align-items: center;
@@ -201,18 +187,25 @@
 
 .bayRoleBadge {
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   padding: 2px 7px;
   border-radius: 4px;
+  background: #f1f3f4;
+  color: #5f6368;
+  border: 1px solid #dadce0;
 }
 
-.badgeProducts { background: #fef3c7; color: #b45309; }
-.badgeSales { background: #dcfce7; color: #15803d; }
-.badgeProcurement { background: #ffedd5; color: #c2410c; }
-.badgeClinical { background: #ccfbf1; color: #0f766e; }
-.badgeWholesale { background: #eff6ff; color: #003666; }
+.badgeProducts,
+.badgeSales,
+.badgeProcurement,
+.badgeClinical,
+.badgeWholesale {
+  background: #f1f3f4;
+  color: #5f6368;
+  border: 1px solid #dadce0;
+}
 
 .baySummaryPill {
   font-size: 0.7rem;
@@ -299,12 +292,20 @@
   flex-shrink: 0;
 }
 
-.iconPharmacist { background: rgba(245, 158, 11, 0.12); color: #d97706; }
-.iconFinance { background: rgba(22, 163, 74, 0.12); color: #16a34a; }
-.iconSupplier { background: rgba(194, 65, 12, 0.12); color: #c2410c; }
-.iconDoctor { background: rgba(13, 148, 136, 0.12); color: #0d9488; }
-.iconAdmin { background: rgba(0, 54, 102, 0.12); color: #003666; }
-.alertIcon { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+.iconPharmacist,
+.iconFinance,
+.iconSupplier,
+.iconDoctor,
+.iconAdmin,
+.iconNeutral {
+  background: #f1f3f4;
+  color: #5f6368;
+}
+
+.alertIcon {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
 
 .cardContent {
   display: flex;
