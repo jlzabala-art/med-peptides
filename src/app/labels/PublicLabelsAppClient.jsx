@@ -1105,7 +1105,7 @@ export default function PublicLabelsAppClient({
       )}
 
       {/* ── 4. Main Independent Label Studio Workspace ── */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingBottom: '48px' }}>
         {patientQueue.length === 0 ? (
           <div className="pls-gcp-home">
             {/* ── 4 Google Cloud KPI Metric Cards (Golden Rule #22) ── */}
@@ -1159,37 +1159,29 @@ export default function PublicLabelsAppClient({
                     </h2>
                     <p className="pls-gcp-card-subtitle">
                       {isEs
-                        ? "Haz clic en cualquier paciente de la lista o escribe su nombre / código RX arriba para abrir sus etiquetas."
-                        : "Click any patient below or search by name / RX code above to immediately open and print their labels."}
+                        ? "Haz clic en cualquier paciente de la lista o escribe su nombre / código RX en el buscador superior para abrir sus etiquetas."
+                        : "Click any patient below or search by name / RX code in top search bar to immediately open and print their labels."}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    className="pls-gcp-header-search-btn"
-                    onClick={() => {
-                      setSearchOpen(true);
-                      searchInputRef.current?.focus();
-                    }}
+                  <div
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
                       gap: "6px",
-                      padding: "7px 14px",
-                      fontSize: "0.78rem",
+                      padding: "5px 10px",
+                      fontSize: "0.74rem",
                       fontWeight: 650,
-                      color: "#1a73e8",
-                      background: "#e8f0fe",
-                      border: "1px solid #d2e3fc",
+                      color: "#5f6368",
+                      background: "#f1f5f9",
                       borderRadius: "6px",
-                      cursor: "pointer",
                       whiteSpace: "nowrap",
                       flexShrink: 0
                     }}
                   >
-                    <Search size={13} />
-                    <span>{isEs ? "Buscar" : "Search"}</span>
-                    <span className="pls-desktop-only-kbd">(⌘K)</span>
-                  </button>
+                    <span>{isEs ? "Pulsa" : "Press"}</span>
+                    <kbd style={{ padding: '1px 5px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 700 }}>⌘K</kbd>
+                    <span>{isEs ? "para buscar" : "to search"}</span>
+                  </div>
                 </div>
 
                 {/* Recent Prescriptions (if any) */}
@@ -1252,7 +1244,7 @@ export default function PublicLabelsAppClient({
                   </div>
                 )}
 
-                {/* Featured / Sample Patients Directory */}
+                {/* Featured / Sample Patients Directory (Deduplicated against recents) */}
                 <div>
                   <div style={{
                     padding: "8px 20px",
@@ -1266,7 +1258,9 @@ export default function PublicLabelsAppClient({
                   }}>
                     {isEs ? "Recetas Listas para Previsualizar e Imprimir (1 Clic)" : "Ready Prescriptions — Click to Preview & Print"}
                   </div>
-                  {FEATURED_PATIENTS.map((p) => (
+                  {FEATURED_PATIENTS
+                    .filter(p => !recentPrescriptions.some(r => String(r.code).toUpperCase() === String(p.code).toUpperCase()))
+                    .map((p) => (
                     <div
                       key={p.code}
                       className="pls-gcp-patient-row"

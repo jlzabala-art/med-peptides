@@ -1231,71 +1231,81 @@
   }
 }
 
-/* ── Fixed Bottom Atlas Dock (GCP Standard) ── */
+/* ── Google Cloud Console Standard Bottom Status Bar ── */
 .pls-atlas-bottom-dock {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 60;
-  background: #ffffff;
-  border-top: 1px solid #dadce0;
-  box-shadow: 0 -2px 12px rgba(60,64,67,0.08);
-  padding: 6px 16px;
+  height: 32px !important;
+  max-height: 32px !important;
+  background: #f8fafc;
+  border-top: 1px solid #cbd5e1;
+  box-shadow: 0 -1px 4px rgba(15, 23, 42, 0.05);
+  padding: 0 16px !important;
   backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .pls-dock-content {
+  width: 100%;
   max-width: 1440px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  height: 32px;
+  overflow: hidden;
+  white-space: nowrap;
+  flex-wrap: nowrap !important;
 }
 
 .pls-dock-trigger-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
-  border-radius: 20px;
-  padding: 5px 12px;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 2px 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   color: #1e293b;
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: 0.74rem;
+  font-weight: 700;
   flex-shrink: 0;
+  height: 24px;
 }
 
 .pls-dock-trigger-btn:hover,
 .pls-dock-trigger-btn.active {
-  background: #eff6ff;
-  border-color: #1a73e8;
+  background: #e8f0fe;
+  border-color: #d2e3fc;
   color: #1a73e8;
-  box-shadow: 0 1px 4px rgba(26,115,232,0.18);
 }
 
 .pls-dock-sparkle-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #1a73e8 0%, #7c3aed 100%);
-  color: #ffffff;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: #e8f0fe;
+  color: #1a73e8;
 }
 
 .pls-dock-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 6px;
+  font-size: 0.62rem;
+  font-weight: 750;
+  padding: 1px 5px;
   background: #e0f2fe;
   color: #0369a1;
-  border-radius: 10px;
+  border-radius: 3px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -1304,30 +1314,41 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap !important;
   overflow-x: auto;
+  scrollbar-width: none;
+}
+.pls-dock-quick-pills::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .pls-dock-quick-pills {
+    display: none !important;
+  }
 }
 
 .pls-dock-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 14px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   color: #475569;
-  font-size: 0.75rem;
+  font-size: 0.70rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+  height: 22px;
 }
 
 .pls-dock-pill:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
-  color: #0f172a;
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1a73e8;
 }
 
 .pls-dock-right-meta {
@@ -1338,26 +1359,75 @@
 }
 
 .pls-dock-status-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #16a34a;
   box-shadow: 0 0 0 2px rgba(22,163,74,0.2);
 }
 
 .pls-dock-status-text {
-  font-size: 0.75rem;
-  color: #64748b;
-  font-weight: 500;
+  font-size: 0.72rem;
+  color: #475569;
+  font-weight: 600;
 }
 
 .pls-dock-shortcut {
-  font-size: 0.70rem;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: #64748b;
+  font-size: 0.68rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: #475569;
+  font-family: monospace;
+}
+
+.pls-dock-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 1.05rem;
+  line-height: 1;
+  padding: 0 4px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.pls-dock-close-btn:hover {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+/* Floating mini button when bottom status bar is dismissed */
+.pls-dock-mini-fab {
+  position: fixed;
+  bottom: 12px;
+  right: 16px;
+  z-index: 60;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 8px rgba(15,23,42,0.12);
+  color: #1a73e8;
+  font-size: 0.72rem;
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pls-dock-mini-fab:hover {
+  background: #e8f0fe;
+  border-color: #1a73e8;
+  box-shadow: 0 3px 12px rgba(26,115,232,0.25);
 }
 
 /* ── Atlas Help Drawer ── */

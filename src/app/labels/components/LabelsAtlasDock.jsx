@@ -105,6 +105,14 @@ export default function LabelsAtlasDock({
   onAddFeaturedPatient
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return localStorage.getItem('pls_dock_dismissed_v1') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [activeTopic, setActiveTopic] = useState('workflow');
   const [userQuery, setUserQuery] = useState('');
   const [aiAnswer, setAiAnswer] = useState(null);
@@ -167,94 +175,129 @@ export default function LabelsAtlasDock({
   return (
     <>
       {/* ── Fixed Bottom Bar (GCP Sticky Dock) ── */}
-      <footer className="pls-atlas-bottom-dock" role="region" aria-label="Atlas AI Assistant Dock">
-        <div className="pls-dock-content">
-          {/* Brand Pill Trigger */}
-          <button
-            type="button"
-            className={`pls-dock-trigger-btn ${isOpen ? 'active' : ''}`}
-            onClick={() => setIsOpen((prev) => !prev)}
-            aria-expanded={isOpen}
-            aria-controls="pls-atlas-help-drawer"
-            title={isEs ? "Abrir Atlas AI y Guía de Uso (?)" : "Open Atlas AI & Guide (?)"}
-          >
-            <span className="pls-dock-sparkle-icon">
-              <Sparkles size={15} />
-            </span>
-            <span className="pls-dock-title">
-              <strong>Atlas AI</strong>
-            </span>
-            <span className="pls-dock-badge">
-              {isEs ? 'Ayuda en vivo' : 'Live Help'}
-            </span>
-            {isOpen ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-          </button>
-
-          {/* Quick Contextual Action Chips */}
-          <div className="pls-dock-quick-pills">
+      {isDismissed ? (
+        <button
+          type="button"
+          className="pls-dock-mini-fab"
+          onClick={() => {
+            setIsDismissed(false);
+            setIsOpen(true);
+            try {
+              localStorage.removeItem('pls_dock_dismissed_v1');
+            } catch (err) {
+              console.warn('Storage unavailable:', err);
+            }
+          }}
+          title={isEs ? 'Abrir ayuda de Atlas AI (?)' : 'Open Atlas AI Help (?)'}
+        >
+          <Sparkles size={13} />
+          <span>{isEs ? 'Ayuda (?)' : 'Help (?)'}</span>
+        </button>
+      ) : (
+        <footer className="pls-atlas-bottom-dock" role="region" aria-label="Atlas AI Assistant Dock">
+          <div className="pls-dock-content">
+            {/* Brand Pill Trigger */}
             <button
               type="button"
-              className="pls-dock-pill"
-              onClick={() => {
-                setActiveTopic('workflow');
-                setIsOpen(true);
-              }}
+              className={`pls-dock-trigger-btn ${isOpen ? 'active' : ''}`}
+              onClick={() => setIsOpen((prev) => !prev)}
+              aria-expanded={isOpen}
+              aria-controls="pls-atlas-help-drawer"
+              title={isEs ? "Abrir Atlas AI y Guía de Uso (?)" : "Open Atlas AI & Guide (?)"}
             >
-              <Layers size={12} />
-              <span>{isEs ? '¿Cómo empezar?' : 'How to start?'}</span>
+              <span className="pls-dock-sparkle-icon">
+                <Sparkles size={12} />
+              </span>
+              <span className="pls-dock-title">
+                <strong>Atlas Copilot</strong>
+              </span>
+              <span className="pls-dock-badge">
+                {isEs ? 'Guía' : 'Guide'}
+              </span>
             </button>
 
-            <button
-              type="button"
-              className="pls-dock-pill"
-              onClick={() => {
-                setActiveTopic('shipping');
-                setIsOpen(true);
-              }}
-            >
-              <Truck size={12} />
-              <span>{isEs ? 'Etiquetas de Envío' : 'Shipping Labels'}</span>
-            </button>
+            {/* Quick Contextual Action Chips (single line, hidden on mobile) */}
+            <div className="pls-dock-quick-pills">
+              <button
+                type="button"
+                className="pls-dock-pill"
+                onClick={() => {
+                  setActiveTopic('workflow');
+                  setIsOpen(true);
+                }}
+              >
+                <Layers size={11} />
+                <span>{isEs ? '¿Cómo empezar?' : 'How to start?'}</span>
+              </button>
 
-            <button
-              type="button"
-              className="pls-dock-pill"
-              onClick={() => {
-                setActiveTopic('legibility');
-                setIsOpen(true);
-              }}
-            >
-              <ShieldCheck size={12} />
-              <span>{isEs ? 'Normativa pt' : 'EU GMP pt'}</span>
-            </button>
+              <button
+                type="button"
+                className="pls-dock-pill"
+                onClick={() => {
+                  setActiveTopic('shipping');
+                  setIsOpen(true);
+                }}
+              >
+                <Truck size={11} />
+                <span>{isEs ? 'Etiquetas de Envío' : 'Shipping Labels'}</span>
+              </button>
 
-            <button
-              type="button"
-              className="pls-dock-pill"
-              onClick={() => {
-                setActiveTopic('printing');
-                setIsOpen(true);
-              }}
-            >
-              <Printer size={12} />
-              <span>{isEs ? 'Impresoras Zebra / A4' : 'Zebra / A4 Print'}</span>
-            </button>
+              <button
+                type="button"
+                className="pls-dock-pill"
+                onClick={() => {
+                  setActiveTopic('legibility');
+                  setIsOpen(true);
+                }}
+              >
+                <ShieldCheck size={11} />
+                <span>{isEs ? 'Normativa pt' : 'EU GMP pt'}</span>
+              </button>
+
+              <button
+                type="button"
+                className="pls-dock-pill"
+                onClick={() => {
+                  setActiveTopic('printing');
+                  setIsOpen(true);
+                }}
+              >
+                <Printer size={11} />
+                <span>{isEs ? 'Impresoras Zebra / A4' : 'Zebra / A4 Print'}</span>
+              </button>
+            </div>
+
+            {/* Right Status Badge */}
+            <div className="pls-dock-right-meta">
+              <span className="pls-dock-status-dot" aria-hidden="true" />
+              <span className="pls-dock-status-text">
+                {patientQueue.length > 0 
+                  ? `${patientQueue.length} ${patientQueue.length === 1 ? (isEs ? 'paciente activo' : 'active patient') : (isEs ? 'pacientes activos' : 'active patients')}`
+                  : (isEs ? 'Listo para buscar' : 'Ready to search')}
+              </span>
+              <span className="pls-dock-shortcut" title={isEs ? 'Atajo de teclado' : 'Keyboard shortcut'}>
+                <strong>?</strong>
+              </span>
+              <button
+                type="button"
+                className="pls-dock-close-btn"
+                onClick={() => {
+                  setIsDismissed(true);
+                  try {
+                    localStorage.setItem('pls_dock_dismissed_v1', 'true');
+                  } catch (err) {
+                    console.warn('Storage unavailable:', err);
+                  }
+                }}
+                title={isEs ? 'Ocultar barra de estado' : 'Dismiss status bar'}
+                aria-label="Dismiss status bar"
+              >
+                ×
+              </button>
+            </div>
           </div>
-
-          {/* Right Status Badge */}
-          <div className="pls-dock-right-meta">
-            <span className="pls-dock-status-dot" aria-hidden="true" />
-            <span className="pls-dock-status-text">
-              {patientQueue.length > 0 
-                ? `${patientQueue.length} ${patientQueue.length === 1 ? (isEs ? 'paciente activo' : 'active patient') : (isEs ? 'pacientes activos' : 'active patients')}`
-                : (isEs ? 'Listo para buscar' : 'Ready to search')}
-            </span>
-            <span className="pls-dock-shortcut" title={isEs ? 'Atajo de teclado' : 'Keyboard shortcut'}>
-              {isEs ? 'Pulsa' : 'Press'} <strong>?</strong>
-            </span>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
 
       {/* ── Slide-Over Help Drawer / Modal ── */}
       {isOpen && (
