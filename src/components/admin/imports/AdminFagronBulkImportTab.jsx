@@ -25,6 +25,7 @@ import { functions, db, storage } from '../../../firebase';
 import { useAuth } from '../../../context/AuthContext';
 import { createPatient } from '../../../services/patientLinkService';
 import { resolveIngredients } from '../../../services/apiIngredientMatcher';
+import { syncPrescriptionToAlgolia, syncPatientToAlgolia } from '../../../services/algoliaSyncService';
 import {
   UploadCloud, FileText, Loader2, Save, X, CheckCircle, AlertTriangle,
   ShieldCheck, ShieldAlert, Users, ClipboardList
@@ -354,8 +355,24 @@ export default function AdminFagronBulkImportTab() {
           }]
         };
 
-        await addDoc(collection(db, 'prescriptions'), rxDoc);
+        const docRef = await addDoc(collection(db, 'prescriptions'), rxDoc);
         saved++;
+
+        // Non-blocking Algolia synchronization
+        syncPrescriptionToAlgolia({ ...rxDoc, id: docRef.id }).catch(err => {
+          console.warn('[AdminFagronBulkImportTab] Algolia prescription sync error:', err);
+        });
+        if (rxDoc.patient?.name) {
+          syncPatientToAlgolia({
+            id: rxDoc.patientId || docRef.id,
+            name: rxDoc.patient.name,
+            code: rxDoc.code,
+            doctorName: rxDoc.doctorName,
+            clinicName: rxDoc.clinicName
+          }).catch(err => {
+            console.warn('[AdminFagronBulkImportTab] Algolia patient sync error:', err);
+          });
+        }
       } catch (err) {
         console.error('Error saving prescription:', err);
         errors++;

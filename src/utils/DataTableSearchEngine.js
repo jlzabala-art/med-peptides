@@ -48,40 +48,68 @@ export class DataTableSearchEngine {
     }
   }
 
-  // ─── Strategy 1: Local Fuzzy Search (Fuse.js) ─────────────────────────────
+  // ─── Strategy 1: Local Search (Fuzzy + Substring Normalization) ───────────
 
   static _localSearch(data, query, columns, searchConfig) {
     if (!data || data.length === 0) return [];
+    const rawQuery = (query || '').trim();
+    if (!rawQuery) return data;
+
+    const normalizeStr = (s) =>
+      String(s ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+
+    const normalizedQuery = normalizeStr(rawQuery);
+    const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
 
     // Determine searchable keys from searchConfig or column definitions
     let keys = searchConfig.keys;
     if (!keys || keys.length === 0) {
-      keys = columns
-        .filter(col => col.key && col.key !== 'actions')
+      const colKeys = columns
+        .filter(col => col.key && col.key !== 'actions' && col.key !== 'selection')
         .map(col => col.key);
-    }
-
-    // Last-resort fallback: stringify all values
-    if (keys.length === 0) {
-      return data.filter(row =>
-        Object.values(row).some(val =>
-          String(val).toLowerCase().includes(query.toLowerCase())
-        )
-      );
+      const commonKeys = ['name', 'fullName', 'displayName', 'patientName', 'doctorName', 'clinicName', 'code', 'prescriptionCode', 'fileNumber', 'title', 'email', 'id'];
+      keys = Array.from(new Set([...colKeys, ...commonKeys]));
     }
 
     const fuseOptions = {
       keys,
       threshold: searchConfig.threshold ?? 0.35,  // 0.0 = exact, 1.0 = anything
       ignoreLocation: true,                         // match anywhere in string
+      isCaseSensitive: false,
       useExtendedSearch: false,
       includeScore: true,
-      minMatchCharLength: 2,
+      minMatchCharLength: 1,
       ...searchConfig.fuseOptions,
     };
 
     const fuse = new Fuse(data, fuseOptions);
-    return fuse.search(query).map(result => result.item);
+    const fuseResults = fuse.search(rawQuery).map(result => result.item);
+
+    // If Fuse found results, return them
+    if (fuseResults.length > 0) {
+      return fuseResults;
+    }
+
+    // Zero-miss fallback: strictly case-insensitive & diacritic-insensitive token matching
+    return data.filter(row => {
+      const rowText = normalizeStr(
+        keys
+          .map(k => {
+            const val = row[k];
+            if (typeof val === 'object' && val !== null) {
+              return Object.values(val).join(' ');
+            }
+            return val;
+          })
+          .filter(Boolean)
+          .join(' ') + ' ' + Object.values(row).map(v => (typeof v === 'string' || typeof v === 'number' ? v : '')).join(' ')
+      );
+      return queryTokens.every(token => rowText.includes(token));
+    });
   }
 
   // ─── Strategy 2: Semantic AI Search (Gemini via Firebase Function) ─────────

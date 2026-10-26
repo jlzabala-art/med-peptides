@@ -239,5 +239,50 @@ module.exports.onPrescriptionCreated = onDocumentCreated(
     } catch (err) {
       console.error('[onPrescriptionCreated] Error stamping prices:', err);
     }
+
+    // ── B. Automatic Algolia Sync ─────────────────────────────────────────────
+    try {
+      const { algoliasearch } = require('algoliasearch');
+      const APP_ID = process.env.ALGOLIA_APP_ID || process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'G722EVODUJ';
+      const ADMIN_KEY = process.env.ALGOLIA_ADMIN_KEY || 'b3a78c3cf33841e6676a0da714800e0f';
+      if (APP_ID && ADMIN_KEY) {
+        const client = algoliasearch(APP_ID, ADMIN_KEY);
+        const rawLines = Array.isArray(rxData.items) && rxData.items.length > 0 
+          ? rxData.items 
+          : (Array.isArray(rxData.prescriptionLines) ? rxData.prescriptionLines : []);
+        const productNames = rawLines.map(i => i.name || i.productName || i.title).filter(Boolean);
+        const slimItems = rawLines.slice(0, 30).map(i => ({
+          name: String(i.name || i.productName || i.title || '').substring(0, 80),
+          dosage: String(i.dosage || i.dose || '').substring(0, 40),
+          quantity: Number(i.quantity || 1)
+        }));
+
+        await client.saveObjects({
+          indexName: 'prescriptions',
+          objects: [{
+            objectID: rxId,
+            id: rxId,
+            code: rxData.code || rxData.prescriptionCode || rxData.fileNumber || (`RX-${rxId.slice(0, 8).toUpperCase()}`),
+            prescriptionCode: rxData.prescriptionCode || rxData.code || (`RX-${rxId.slice(0, 8).toUpperCase()}`),
+            patientName: rxData.patientName || rxData.patient?.name || '',
+            patientId: rxData.patientId || rxData.patient?.id || '',
+            doctorName: rxData.doctorName || rxData.doctor?.name || '',
+            doctorId: rxData.doctorId || rxData.physicianId || '',
+            status: (rxData.status || 'draft').toLowerCase(),
+            date: rxData.date || rxData.dateIssued || rxData.prescriptionDate || '',
+            dateIssued: rxData.dateIssued || rxData.date || '',
+            items: slimItems,
+            searchableItems: productNames.slice(0, 30),
+            itemCount: rawLines.length,
+            total: Number(rxData.total || rxData.amount || 0),
+            source: rxData.source || 'portal',
+            createdAt_ts: Date.now()
+          }]
+        });
+        console.log(`✅ [onPrescriptionCreated] Synced Rx ${rxId} to Algolia successfully`);
+      }
+    } catch (algoliaErr) {
+      console.warn(`[onPrescriptionCreated] Algolia sync non-fatal error for Rx ${rxId}:`, algoliaErr.message);
+    }
   }
 );

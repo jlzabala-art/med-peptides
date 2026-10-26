@@ -16,6 +16,7 @@ import {
 } from 'firebase/firestore';
 import * as fb from '../../firebase';
 const db = fb?.db;
+import { syncPrescriptionToAlgolia, removeObjectFromAlgolia } from '../../services/algoliaSyncService';
 
 export function usePrescriptions(options = {}) {
   const {
@@ -39,6 +40,10 @@ export function usePrescriptions(options = {}) {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+    // Non-blocking Algolia synchronization
+    syncPrescriptionToAlgolia({ ...data, id: ref.id }).catch((err) => {
+      console.warn('[usePrescriptions] Algolia add sync error:', err);
+    });
     refetch();
     return ref.id;
   }, [refetch]);
@@ -48,11 +53,19 @@ export function usePrescriptions(options = {}) {
       ...updates,
       updatedAt: serverTimestamp(),
     });
+    // Non-blocking Algolia synchronization
+    syncPrescriptionToAlgolia({ ...updates, id }).catch((err) => {
+      console.warn('[usePrescriptions] Algolia update sync error:', err);
+    });
     refetch();
   }, [refetch]);
 
   const deletePrescription = useCallback(async (id) => {
     await deleteDoc(doc(db, 'prescriptions', id));
+    // Non-blocking Algolia synchronization
+    removeObjectFromAlgolia('prescriptions', id).catch((err) => {
+      console.warn('[usePrescriptions] Algolia delete sync error:', err);
+    });
     refetch();
   }, [refetch]);
 

@@ -119,6 +119,12 @@ export async function POST(request) {
         ? record.items 
         : (Array.isArray(record.prescriptionLines) ? record.prescriptionLines : []);
       const productNames = rawLines.map((i) => i.name || i.productName || i.title).filter(Boolean);
+      const slimItems = rawLines.slice(0, 30).map((i) => ({
+        name: String(i.name || i.productName || i.title || '').substring(0, 80),
+        dosage: String(i.dosage || i.dose || '').substring(0, 40),
+        quantity: Number(i.quantity || 1),
+        partTitle: i.partTitle ? String(i.partTitle).substring(0, 60) : undefined
+      }));
 
       const rawDate = record.date || record.dateIssued;
       let formattedDate = record.dateFormatted || '';
@@ -140,7 +146,6 @@ export async function POST(request) {
       }
 
       formattedRecord = {
-        ...record,
         objectID: targetId,
         id: targetId,
         code: record.code || record.prescriptionCode || `RX-${targetId.slice(0, 6).toUpperCase()}`,
@@ -157,8 +162,8 @@ export async function POST(request) {
         sessionId: record.sessionId || record.rxGroupId || '',
         partNumber: record.partNumber || null,
         totalParts: record.totalParts || null,
-        items: rawLines,
-        searchableItems: productNames,
+        items: slimItems,
+        searchableItems: productNames.slice(0, 30),
         itemCount: rawLines.length,
         total: Number(record.total || record.amount || 0),
         source: record.source || 'portal',
