@@ -34,13 +34,12 @@ import {
   Search, SlidersHorizontal, LayoutGrid, List, Sparkles, Shield, Activity,
   Zap, HeartPulse, Check, ArrowRight, ExternalLink, Dna,
   Droplets, Microscope, FileText, FlaskConical, Award, ShieldCheck, CheckCircle2, ChevronRight,
-  ChevronDown, Layers, Eye, Lock, LogIn, User, MessageSquare
+  ChevronDown, Layers, Eye, Lock, LogIn, User, MessageSquare, BookOpen, Package, Mail
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import { getTeletestCatalog } from '../data/teletestRegistry';
 import ClinicalWorksExplorer from '../components/collection/ClinicalWorksExplorer';
 import { getWorksByClinicalArea, getWorksByBrand } from '../data/clinicalWorksRegistry';
-import { BookOpen, Package } from '@/lib/icons';
 import '../styles/collection_shared.css';
 
 // Brand configurations with clinical metadata and 4 KPIs (Regla Golden #22)
