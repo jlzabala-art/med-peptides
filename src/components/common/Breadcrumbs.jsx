@@ -7,49 +7,74 @@ import { ChevronRight, Home } from '@/lib/icons';
 /**
  * Premium Breadcrumbs Component
  * Designed with a clean, medical-pharmaceutical aesthetic.
+ * Conforms to GCP UI standards & accessible color contrast.
  * @param {Array} items - List of objects { label, path }
+ * @param {string} theme - 'light' | 'dark' (defaults to 'light')
  */
-const Breadcrumbs = ({ items }) => {
+const Breadcrumbs = ({ items, theme = 'light' }) => {
   if (!items || items.length === 0) return null;
+
+  const isDark = theme === 'dark';
 
   return (
     <nav
-      className="breadcrumbs-nav"
+      className={`breadcrumbs-nav breadcrumbs-${theme}`}
       aria-label="Breadcrumb"
       style={{
         display: 'flex',
         alignItems: 'center',
         padding: '0.25rem 0',
-        marginBottom: '1.25rem',
+        marginBottom: '0.75rem',
         overflowX: 'auto',
         whiteSpace: 'nowrap',
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
         WebkitOverflowScrolling: 'touch',
-        opacity: 0.65,
       }}
     >
       <style>{`
         .breadcrumbs-nav::-webkit-scrollbar { display: none; }
-        .breadcrumb-item {
+        .breadcrumbs-light .breadcrumb-item {
+          display: flex;
+          align-items: center;
+          color: #64748b;
+          font-size: 0.74rem;
+          font-weight: 500;
+          transition: color 0.15s ease;
+          text-decoration: none;
+        }
+        .breadcrumbs-light .breadcrumb-link:hover {
+          color: #003666;
+        }
+        .breadcrumbs-light .breadcrumb-current {
+          color: #0f172a;
+          font-weight: 650;
+        }
+        .breadcrumbs-light .breadcrumb-separator {
+          margin: 0 0.35rem;
+          color: #94a3b8;
+          flex-shrink: 0;
+        }
+
+        .breadcrumbs-dark .breadcrumb-item {
           display: flex;
           align-items: center;
           color: rgba(255,255,255,0.7);
-          font-size: 0.72rem;
+          font-size: 0.74rem;
           font-weight: 400;
           transition: color 0.15s ease;
           text-decoration: none;
         }
-        .breadcrumb-link:hover {
-          color: rgba(255,255,255,1);
+        .breadcrumbs-dark .breadcrumb-link:hover {
+          color: #ffffff;
         }
-        .breadcrumb-current {
-          color: rgba(255,255,255,0.85);
-          font-weight: 500;
+        .breadcrumbs-dark .breadcrumb-current {
+          color: rgba(255,255,255,0.95);
+          font-weight: 600;
         }
-        .breadcrumb-separator {
-          margin: 0 0.4rem;
-          color: rgba(255,255,255,0.25);
+        .breadcrumbs-dark .breadcrumb-separator {
+          margin: 0 0.35rem;
+          color: rgba(255,255,255,0.35);
           flex-shrink: 0;
         }
       `}</style>
