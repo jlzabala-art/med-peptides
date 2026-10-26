@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { Sparkles, ArrowRight, List, ShoppingBag, Share2, WifiOff, ArrowUp, QrCode, X, Copy, Check } from 'lucide-react';
+import { Sparkles, ArrowRight, MoreVertical, List, ShoppingBag, Share2, WifiOff, ArrowUp, QrCode, X, Copy, Check } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useB2BOrder } from '@/hooks/useB2BOrder';
 import { getPublicAiPreset } from '@/config/publicAiPresets';
@@ -52,8 +52,13 @@ export default function PublicStickyActionBar({
   sectionsLabel = null,
   extraActions = null,
   compactMobile = false,
+  /** Mobile: show only ONE primary CTA (`.is-primary`) + a "⋮" menu holding every other action */
+  overflowMobile = false,
+  /** When false, Inquire goes into the overflow menu (another `.is-primary` element is the CTA) */
+  inquireIsPrimary = true,
   children = null,
 }) {
+  const [overflowOpen, setOverflowOpen] = useState(false);
   const { totalCount, subtotal, openDrawer } = useB2BOrder();
   const [_quota, setQuota] = useState({ remaining: 5, limit: 5 });
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -298,7 +303,18 @@ export default function PublicStickyActionBar({
         </div>
       )}
 
-      <aside className={`public-sticky-action-bar${compactMobile ? ' public-sticky-action-bar--compact' : ''}`} aria-label="Quick Actions">
+      {overflowMobile && overflowOpen && (
+        <div
+          className="public-sticky-action-bar__overflow-backdrop"
+          onClick={() => setOverflowOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`public-sticky-action-bar${compactMobile ? ' public-sticky-action-bar--compact' : ''}${overflowMobile ? ' public-sticky-action-bar--overflow' : ''}${overflowOpen ? ' is-overflow-open' : ''}${inquireIsPrimary ? '' : ' inquire-in-overflow'}`}
+        aria-label="Quick Actions"
+      >
         <div className="public-sticky-action-bar__container">
           {/* Left: Entity Context Identity */}
           <div className="public-sticky-action-bar__info">
@@ -319,6 +335,17 @@ export default function PublicStickyActionBar({
 
           {/* Right: Actions Cluster */}
           <div className="public-sticky-action-bar__actions">
+            {overflowMobile && (
+              <button
+                type="button"
+                className="public-sticky-action-bar__overflow-toggle"
+                onClick={() => { triggerHaptic('selection'); setOverflowOpen(prev => !prev); }}
+                aria-label={lang === 'es' ? 'Más acciones' : 'More actions'}
+                aria-expanded={overflowOpen}
+              >
+                {overflowOpen ? <X size={18} /> : <MoreVertical size={18} />}
+              </button>
+            )}
             {extraActions}
             {children}
 
@@ -468,7 +495,7 @@ export default function PublicStickyActionBar({
               <button
                 type="button"
                 onClick={onInquire}
-                className="public-sticky-action-bar__inquire-btn"
+                className={`public-sticky-action-bar__inquire-btn${inquireIsPrimary ? ' is-primary' : ''}`}
                 aria-label={inquireLabel}
               >
                 <span>{inquireLabel}</span>

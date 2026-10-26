@@ -77,43 +77,30 @@ export default function CompoundedFormulationsSection({
             <button
               type="button"
               onClick={() => {
-                const allOpen = {};
-                compoundedFormulations.forEach(f => { allOpen[f.id] = true; });
-                if (setExpandedPhases) setExpandedPhases(allOpen);
-                if (setSelectedPhase) setSelectedPhase('all');
+                const areAllOpen = compoundedFormulations.every(f => Boolean(expandedPhases[f.id]));
+                const updatedPhases = {};
+                compoundedFormulations.forEach(f => { updatedPhases[f.id] = !areAllOpen; });
+                if (setExpandedPhases) setExpandedPhases(updatedPhases);
+                if (setSelectedPhase) setSelectedPhase(areAllOpen ? null : 'all');
               }}
               style={{
                 background: '#ffffff',
                 border: '1px solid #dadce0',
-                borderRadius: '4px',
-                padding: '4px 10px',
-                fontSize: '0.72rem',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                fontSize: '0.74rem',
                 fontWeight: 600,
                 color: '#1a73e8',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                minHeight: '36px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
               }}
             >
-              {isEs ? 'Expandir Todo' : 'Expand All'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const allClosed = {};
-                compoundedFormulations.forEach(f => { allClosed[f.id] = false; });
-                if (setExpandedPhases) setExpandedPhases(allClosed);
-              }}
-              style={{
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                borderRadius: '4px',
-                padding: '4px 10px',
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                color: '#5f6368',
-                cursor: 'pointer'
-              }}
-            >
-              {isEs ? 'Colapsar Todo' : 'Collapse All'}
+              {compoundedFormulations.every(f => Boolean(expandedPhases[f.id])) 
+                ? (isEs ? 'Colapsar Todo' : 'Collapse All') 
+                : (isEs ? 'Expandir Todo' : 'Expand All')}
             </button>
           </div>
         </div>

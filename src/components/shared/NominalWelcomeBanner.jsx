@@ -96,6 +96,8 @@ export default function NominalWelcomeBanner({
 
   return (
     <div
+      className="nwb-root"
+      data-nwb
       style={{
         background: isDoc
           ? 'linear-gradient(90deg, #002244 0%, #003666 60%, #004b87 100%)'
@@ -111,6 +113,12 @@ export default function NominalWelcomeBanner({
         borderBottom: '1px solid rgba(255,255,255,0.12)',
       }}
     >
+      <style>{`
+        @media (max-width: 768px) {
+          .nwb-root .nwb-tagline { display: none; }
+          .nwb-root button { min-height: 44px; min-width: 44px; justify-content: center; }
+        }
+      `}</style>
       <div
         style={{
           maxWidth: '1280px',
@@ -146,8 +154,8 @@ export default function NominalWelcomeBanner({
             <span>
               {isEs ? 'Bienvenido/a,' : 'Welcome,'} <strong>{cleanTitle}</strong>
             </span>
-            <span style={{ opacity: 0.6 }}>•</span>
-            <span style={{ opacity: 0.9, fontSize: '0.76rem' }}>
+            <span className="nwb-tagline" style={{ opacity: 0.6 }}>•</span>
+            <span className="nwb-tagline" style={{ opacity: 0.9, fontSize: '0.76rem' }}>
               {isDoc
                 ? (isEs ? `Sesión clínica activa por ${sessionDuration} sin contraseña` : `Active clinical session for ${sessionDuration} passwordless`)
                 : isPatient
@@ -179,7 +187,7 @@ export default function NominalWelcomeBanner({
             }}
           >
             <Smartphone size={13} color="#93c5fd" />
-            <span>{isEs ? '📲 Añadir a Inicio' : '📲 Add to Home Screen'}</span>
+            <span>{isEs ? 'Añadir a Inicio' : 'Add to Home Screen'}</span>
           </button>
 
           <button

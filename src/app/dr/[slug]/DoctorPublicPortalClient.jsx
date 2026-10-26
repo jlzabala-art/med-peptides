@@ -5072,7 +5072,7 @@ export default function DoctorPublicPortalClient({
             recipientName={isAuthorizedViewer ? (doctor?.name || 'Doctor') : (doctor?.clinic || `Doctor #${doctor?.opaqueCode || slug}`)}
             role="doctor"
             clinicName={doctor?.clinic}
-            sessionDuration="90 días"
+            sessionDuration="90 days"
             storageKey={`atlas_welcome_doctor_${slug}`}
           />
         }
@@ -5483,13 +5483,13 @@ export default function DoctorPublicPortalClient({
                   }
                 }}
                 style={{
-                  height: '28px',
-                  padding: '0 8px',
-                  borderRadius: '4px',
+                  height: '34px',
+                  padding: '0 10px',
+                  borderRadius: '6px',
                   border: '1px solid #cbd5e1',
                   background: '#f8fafc',
                   color: '#334155',
-                  fontSize: '0.72rem',
+                  fontSize: '0.74rem',
                   fontWeight: 600,
                   cursor: 'pointer',
                   display: 'inline-flex',
@@ -5500,12 +5500,12 @@ export default function DoctorPublicPortalClient({
               >
                 {isAuthorizedViewer ? (
                   <>
-                    <ShieldCheck size={12} style={{ color: '#0d9488' }} />
+                    <ShieldCheck size={13} style={{ color: '#0d9488' }} />
                     <span>Info</span>
                   </>
                 ) : (
                   <>
-                    <Lock size={12} style={{ color: '#0284c7' }} />
+                    <Lock size={13} style={{ color: '#0284c7' }} />
                     <span>Sign In</span>
                   </>
                 )}
@@ -5516,22 +5516,22 @@ export default function DoctorPublicPortalClient({
                 className="gcp-mobile-nav-trigger"
                 onClick={() => setIsMobileSidebarOpen(true)}
                 style={{
-                  height: '28px',
-                  padding: '0 8px',
-                  borderRadius: '4px',
+                  height: '34px',
+                  padding: '0 12px',
+                  borderRadius: '6px',
                   border: '1px solid #1a73e8',
                   background: '#e8f0fe',
                   color: '#1a73e8',
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
+                  fontSize: '0.76rem',
+                  fontWeight: 650,
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '5px'
                 }}
                 title="Open Navigation Menu"
               >
-                <Menu size={13} />
+                <Menu size={14} />
                 <span>Menu</span>
               </button>
             </div>
@@ -5570,9 +5570,9 @@ export default function DoctorPublicPortalClient({
                 <h1 style={{ fontSize: '1.22rem', fontWeight: 700, color: '#202124', margin: 0 }}>
                   {activeAnchor === 'overview' && 'Practice Overview'}
                   {activeAnchor === 'search' && 'Practice Search'}
-                  {activeAnchor === 'tasks' && `Pending Actions (${filteredTasks.length})`}
-                  {activeAnchor === 'prescriptions' && `Prescriptions (${filteredPrescriptions.length})`}
-                  {activeAnchor === 'patients' && `Patients (${doctorPatientsList.length})`}
+                  {activeAnchor === 'tasks' && 'Pending Actions'}
+                  {activeAnchor === 'prescriptions' && 'Prescriptions'}
+                  {activeAnchor === 'patients' && 'Patients'}
                   {activeAnchor === 'recommendations' && 'Specialty Blueprints & Rx Synergies'}
                   {activeAnchor === 'lab_results' && `Lab Diagnostics (${allLabResults.length})`}
                   {activeAnchor === 'analytics' && 'Practice Analytics'}
@@ -5582,7 +5582,7 @@ export default function DoctorPublicPortalClient({
 
                 {/* Unified 1-Click Segmented Switcher for Prescriptions / Patients / Pending Actions */}
                 {(['prescriptions', 'patients', 'tasks'].includes(activeAnchor)) && (
-                  <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '3px', borderRadius: '8px', gap: '2px', border: '1px solid #e2e8f0' }}>
+                  <div role="tablist" aria-label="Portal sections" style={{ display: 'flex', maxWidth: '100%', overflowX: 'auto', background: '#f1f5f9', padding: '3px', borderRadius: '8px', gap: '2px', border: '1px solid #e2e8f0' }}>
                     {[
                       { id: 'prescriptions', label: 'Prescriptions', count: allPrescriptions.length },
                       { id: 'patients', label: 'Patients', count: uniquePatientsCount },
@@ -5593,9 +5593,14 @@ export default function DoctorPublicPortalClient({
                         <button
                           key={tab.id}
                           type="button"
+                          role="tab"
+                          aria-selected={isTabActive}
                           onClick={() => handleSidebarNavigate(tab.id)}
                           style={{
-                            padding: '4px 10px',
+                            padding: '4px 12px',
+                            minHeight: '36px',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0,
                             borderRadius: '6px',
                             border: 'none',
                             background: isTabActive ? '#ffffff' : 'transparent',
@@ -9296,6 +9301,8 @@ export default function DoctorPublicPortalClient({
 
       {/* ── Universal Public Sticky Action Bar (Always visible; data and actions strictly filtered by permission role) ── */}
       <PublicStickyActionBar
+        compactMobile={true}
+        overflowMobile={true}
         title={doctor?.name || `Doctor ${opaqueCode}`}
         subtitle={
           isAuthorizedViewer

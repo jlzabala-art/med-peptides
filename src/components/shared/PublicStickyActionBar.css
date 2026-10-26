@@ -433,3 +433,81 @@ body.has-sticky-bottom-bar .atlas-ai-public-fab {
     --atlas-sticky-bar-height: 76px;
   }
 }
+
+/* ── Mobile overflow variant: ONE primary CTA + "⋮" menu (GCP/Material single-primary pattern) ── */
+.public-sticky-action-bar__overflow-toggle,
+.public-sticky-action-bar__overflow-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .public-sticky-action-bar--overflow .public-sticky-action-bar__info {
+    display: none;
+  }
+
+  .public-sticky-action-bar--overflow .public-sticky-action-bar__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .public-sticky-action-bar--overflow .public-sticky-action-bar__overflow-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    cursor: pointer;
+    flex-shrink: 0;
+    order: 99;
+  }
+
+  /* Collapsed: hide everything except the primary CTA and the toggle */
+  .public-sticky-action-bar--overflow:not(.is-overflow-open) .public-sticky-action-bar__actions > *:not(.is-primary):not(.public-sticky-action-bar__overflow-toggle) {
+    display: none !important;
+  }
+
+  .public-sticky-action-bar--overflow.inquire-in-overflow:not(.is-overflow-open) .public-sticky-action-bar__inquire-btn {
+    display: none !important;
+  }
+
+  .public-sticky-action-bar--overflow .is-primary {
+    flex: 1;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  /* Expanded: sheet above the bar listing every action, 44px touch targets */
+  .public-sticky-action-bar--overflow.is-overflow-open .public-sticky-action-bar__actions {
+    flex-wrap: wrap;
+  }
+
+  .public-sticky-action-bar--overflow.is-overflow-open .public-sticky-action-bar__actions > *:not(.public-sticky-action-bar__overflow-toggle) {
+    flex: 1 1 calc(50% - 8px);
+    min-height: 44px;
+    width: auto !important;
+    justify-content: center;
+  }
+
+  .public-sticky-action-bar--overflow.is-overflow-open .public-sticky-action-bar__qr-btn {
+    display: inline-flex !important;
+  }
+
+  .public-sticky-action-bar__overflow-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    z-index: 9998;
+  }
+
+  :root:has(.public-sticky-action-bar--overflow) {
+    --atlas-sticky-bar-height: 76px;
+  }
+}

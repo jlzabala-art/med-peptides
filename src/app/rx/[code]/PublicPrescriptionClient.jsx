@@ -2052,6 +2052,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             }
           }}
           lang={lang}
+          overflowMobile={true}
+          inquireIsPrimary={isPatientView}
           extraActions={
             !isPatientView ? (
               /* Doctor View Supplemental Actions */
@@ -2218,7 +2220,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     const waBase = cleanPhone ? `https://wa.me/${cleanPhone.replace('+', '')}` : 'https://wa.me/';
                     window.open(`${waBase}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
                   }}
-                  className="rx-dock-btn"
+                  className="rx-dock-btn is-primary"
                   style={{
                     background: '#16a34a',
                     color: '#ffffff',

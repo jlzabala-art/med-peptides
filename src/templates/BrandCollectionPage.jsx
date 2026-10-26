@@ -633,8 +633,12 @@ export default function BrandCollectionPage({
     const shown = isFiltered ? filteredProducts.length : products.length;
     const total = products.length;
     const realCategories = brandCategories.filter(c => c.id !== 'all' && c.id !== 'bundles');
+    // Si hay búsqueda activa o categoría seleccionada, contar categorías únicas presentes en filteredProducts
+    const filteredCategoriesCount = isFiltered && searchQuery.trim()
+      ? new Set(filteredProducts.map(p => (p.category || p.clinical_line || 'other').toLowerCase())).size
+      : realCategories.length;
     const activeCategoryLabel = selectedCategory === 'all'
-      ? null
+      ? (searchQuery.trim() ? `${filteredCategoriesCount}` : null)
       : (brandCategories.find(c => c.id === selectedCategory)?.label || selectedCategory);
     const coverage = total > 0 ? Math.round((shown / total) * 100) : 0;
     const attribute = (config.kpis && (config.kpis[1] || config.kpis[0])) || null;
@@ -1133,6 +1137,167 @@ export default function BrandCollectionPage({
               width: '100%'
             }}
           >
+            {/* Google Cloud Filter Bar */}
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '1rem 1.25rem',
+              marginBottom: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+            }}>
+              {/* Row 1: Search Input (Google Cloud Standard - Regla #7) + Actions */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+                <div style={{ flex: '1 1 320px', maxWidth: '640px', minWidth: 0 }}>
+                  <GlobalSearchBar
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder={`Search in ${config.name} (e.g. ${brandSlug === 'colway' ? 'collagen, cream' : brandSlug === 'peptides' ? 'BPC-157, GHK-Cu' : brandSlug === 'teletest' ? 'HLA, metals' : 'NAD+, cortisol'})...`}
+                    resultCount={filteredProducts.length}
+                    namespace={`collection-${brandSlug}`}
+                    size="lg"
+                    filters={[
+                      selectedCategory !== 'all' && {
+                        key: 'category',
+                        label: isEs ? 'Categoría' : 'Category',
+                        value: config.categories?.find(c => c.id === selectedCategory)?.label || selectedCategory,
+                        onRemove: () => setSelectedCategory('all')
+                      }
+                    ].filter(Boolean)}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
+                    {filteredProducts.length} {getItemUnitLabel(brandSlug, filteredProducts.length, isEs)}
+                  </span>
+
+                  {/* Incoterm EXW Badge */}
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: '#0d9488',
+                    background: '#f0fdfa',
+                    border: '1px solid #ccfbf1',
+                    padding: '3px 7px',
+                    borderRadius: '5px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    📦 Terms: <strong>EXW</strong>
+                  </span>
+
+                  {/* Multi-Currency Selector */}
+                  <select
+                    value={activeCurrency}
+                    onChange={(e) => setActiveCurrency(e.target.value)}
+                    style={{
+                      padding: '5px 8px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      color: '#003666',
+                      background: '#fff',
+                      cursor: 'pointer'
+                    }}
+                    title="Select display currency"
+                  >
+                    <option value="EUR">EUR (€)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="AED">AED (د.إ)</option>
+                  </select>
+
+                  {/* B2B Pricing Access Pill */}
+                  {!user ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setIsUnlockModalOpen(true);
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 9px',
+                        borderRadius: '6px',
+                        background: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        color: '#0d9488',
+                        fontSize: '0.74rem',
+                        fontWeight: 750,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Lock size={12} />
+                      <span>{isEs ? 'Tarifas' : 'Pricing'}</span>
+                    </button>
+                  ) : (
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '3px 8px',
+                      borderRadius: '5px',
+                      background: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      color: '#16a34a',
+                      fontSize: '0.70rem',
+                      fontWeight: 750
+                    }}>
+                      <ShieldCheck size={12} />
+                      <span>{isEs ? 'Tarifas Activas' : 'Pricing Active'}</span>
+                    </span>
+                  )}
+
+                  <select
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value)}
+                    style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', color: '#334155', background: '#fff' }}
+                  >
+                    <option value="featured">{isEs ? 'Destacados' : 'Featured'}</option>
+                    <option value="name-asc">{isEs ? 'Nombre A-Z' : 'Name A-Z'}</option>
+                    <option value="name-desc">{isEs ? 'Nombre Z-A' : 'Name Z-A'}</option>
+                  </select>
+
+                  <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      title="Grid View"
+                      style={{ padding: '6px 10px', background: viewMode === 'grid' ? '#f1f5f9' : '#ffffff', border: 'none', cursor: 'pointer', color: viewMode === 'grid' ? '#0f172a' : '#94a3b8' }}
+                    >
+                      <LayoutGrid size={16} />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('table')}
+                      title="Master-Detail List"
+                      style={{ padding: '6px 10px', background: viewMode === 'table' ? '#f1f5f9' : '#ffffff', border: 'none', cursor: 'pointer', color: viewMode === 'table' ? '#0f172a' : '#94a3b8' }}
+                    >
+                      <List size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 2: Reset (Regla #24/#29) — chips activos viven dentro del GlobalSearchBar */}
+              {(selectedCategory !== 'all' || searchQuery.trim()) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+                    style={{ minHeight: '44px', padding: '0 4px', background: 'none', border: 'none', color: '#0369a1', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    {isEs ? 'Limpiar filtros' : 'Clear filters'}
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Mobile Categories Navigation Strip (Golden Rule #23) */}
             <div className="gcp-mobile-categories-strip" style={{
               flexDirection: 'column',
@@ -1301,167 +1466,6 @@ export default function BrandCollectionPage({
                 })}
               </div>
             )}
-
-            {/* Google Cloud Filter Bar */}
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '1rem 1.25rem',
-              marginBottom: '1.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-            }}>
-              {/* Row 1: Search Input (Google Cloud Standard - Regla #7) + Actions */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-                <div style={{ flex: '1 1 320px', maxWidth: '640px', minWidth: 0 }}>
-                  <GlobalSearchBar
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    placeholder={`Search in ${config.name} (e.g. ${brandSlug === 'colway' ? 'collagen, cream' : brandSlug === 'peptides' ? 'BPC-157, GHK-Cu' : brandSlug === 'teletest' ? 'HLA, metals' : 'NAD+, cortisol'})...`}
-                    resultCount={filteredProducts.length}
-                    namespace={`collection-${brandSlug}`}
-                    size="lg"
-                    filters={[
-                      selectedCategory !== 'all' && {
-                        key: 'category',
-                        label: isEs ? 'Categoría' : 'Category',
-                        value: config.categories?.find(c => c.id === selectedCategory)?.label || selectedCategory,
-                        onRemove: () => setSelectedCategory('all')
-                      }
-                    ].filter(Boolean)}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b' }}>
-                    {filteredProducts.length} {getItemUnitLabel(brandSlug, filteredProducts.length, isEs)}
-                  </span>
-
-                  {/* Incoterm EXW Badge */}
-                  <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    color: '#0d9488',
-                    background: '#f0fdfa',
-                    border: '1px solid #ccfbf1',
-                    padding: '3px 7px',
-                    borderRadius: '5px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    📦 Terms: <strong>EXW</strong>
-                  </span>
-
-                  {/* Multi-Currency Selector */}
-                  <select
-                    value={activeCurrency}
-                    onChange={(e) => setActiveCurrency(e.target.value)}
-                    style={{
-                      padding: '5px 8px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      color: '#003666',
-                      background: '#fff',
-                      cursor: 'pointer'
-                    }}
-                    title="Select display currency"
-                  >
-                    <option value="EUR">EUR (€)</option>
-                    <option value="USD">USD ($)</option>
-                    <option value="AED">AED (د.إ)</option>
-                  </select>
-
-                  {/* B2B Pricing Access Pill */}
-                  {!user ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('light');
-                        setIsUnlockModalOpen(true);
-                      }}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '5px',
-                        padding: '4px 9px',
-                        borderRadius: '6px',
-                        background: '#f8fafc',
-                        border: '1px solid #cbd5e1',
-                        color: '#0d9488',
-                        fontSize: '0.74rem',
-                        fontWeight: 750,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <Lock size={12} />
-                      <span>{isEs ? 'Tarifas' : 'Pricing'}</span>
-                    </button>
-                  ) : (
-                    <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: '3px 8px',
-                      borderRadius: '5px',
-                      background: '#f0fdf4',
-                      border: '1px solid #bbf7d0',
-                      color: '#16a34a',
-                      fontSize: '0.70rem',
-                      fontWeight: 750
-                    }}>
-                      <ShieldCheck size={12} />
-                      <span>{isEs ? 'Tarifas Activas' : 'Pricing Active'}</span>
-                    </span>
-                  )}
-
-                  <select
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value)}
-                    style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', color: '#334155', background: '#fff' }}
-                  >
-                    <option value="featured">{isEs ? 'Destacados' : 'Featured'}</option>
-                    <option value="name-asc">{isEs ? 'Nombre A-Z' : 'Name A-Z'}</option>
-                    <option value="name-desc">{isEs ? 'Nombre Z-A' : 'Name Z-A'}</option>
-                  </select>
-
-                  <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
-                    <button
-                      onClick={() => setViewMode('grid')}
-                      title="Grid View"
-                      style={{ padding: '6px 10px', background: viewMode === 'grid' ? '#f1f5f9' : '#ffffff', border: 'none', cursor: 'pointer', color: viewMode === 'grid' ? '#0f172a' : '#94a3b8' }}
-                    >
-                      <LayoutGrid size={16} />
-                    </button>
-                    <button
-                      onClick={() => setViewMode('table')}
-                      title="Master-Detail List"
-                      style={{ padding: '6px 10px', background: viewMode === 'table' ? '#f1f5f9' : '#ffffff', border: 'none', cursor: 'pointer', color: viewMode === 'table' ? '#0f172a' : '#94a3b8' }}
-                    >
-                      <List size={16} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 2: Reset (Regla #24/#29) — chips activos viven dentro del GlobalSearchBar */}
-              {(selectedCategory !== 'all' || searchQuery.trim()) && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                    style={{ minHeight: '44px', padding: '0 4px', background: 'none', border: 'none', color: '#0369a1', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}
-                  >
-                    {isEs ? 'Limpiar filtros' : 'Clear filters'}
-                  </button>
-                </div>
-              )}
-            </div>
 
             {/* Empty State (Regla #20/#29) */}
             {filteredProducts.length === 0 ? (

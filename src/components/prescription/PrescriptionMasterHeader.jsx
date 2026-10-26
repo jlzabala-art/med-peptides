@@ -77,7 +77,6 @@ export default function PrescriptionMasterHeader({
               ) : (
                 <StatusBadge 
                   status={currentStatus || 'active'} 
-                  label={isEs ? 'Tratamiento Activo' : 'Active Treatment'} 
                 />
               )}
             </div>
@@ -127,12 +126,12 @@ export default function PrescriptionMasterHeader({
 
           {/* DOCTOR VIEW ACTIONS */}
           {!isPatientView && (
-            <>
+            <div className="rx-gcp-header-actions-cluster">
               {onOpenPatientShare && (
                 <button
                   type="button"
                   onClick={onOpenPatientShare}
-                  className="rx-action-btn-tonal-green"
+                  className="rx-action-btn-tonal-green rx-action-btn-desktop-only"
                   title={isEs ? 'Compartir pauta segura con el paciente (QR / WhatsApp)' : 'Share safe regimen with patient (QR / WhatsApp)'}
                 >
                   <Share2 size={13} />
@@ -143,7 +142,7 @@ export default function PrescriptionMasterHeader({
               {doctorPublicUrl && rxId && (
                 <Link
                   href={`${doctorPublicUrl}${String(doctorPublicUrl).includes('?') ? '&' : '?'}represcribe=${encodeURIComponent(String(rxId))}`}
-                  className="rx-action-btn-primary"
+                  className="rx-action-btn-primary rx-action-btn-desktop-only"
                   title={isEs ? 'Renovar o modificar esta pauta en el constructor' : 'Renew or adjust regimen in prescription builder'}
                 >
                   <RotateCw size={13} />
@@ -154,12 +153,12 @@ export default function PrescriptionMasterHeader({
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="rx-action-btn-icon"
+                className="rx-action-btn-icon rx-action-btn-desktop-only"
                 title={isEs ? 'Copiar enlace permanente' : 'Copy permanent link'}
               >
                 {copied ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
               </button>
-            </>
+            </div>
           )}
 
           {/* PATIENT VIEW ACTIONS: Clean GCP copy button without clutter */}
