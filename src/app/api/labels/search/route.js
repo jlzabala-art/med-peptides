@@ -21,6 +21,15 @@ export async function GET(request) {
     const results = [];
     const seenCodes = new Set();
 
+    // Normalize codes for deduplication: strip RX- prefix, whitespace, lowercase
+    // This prevents duplicates like 'RX-51864' vs '51864' from different sources
+    const normalizeCode = (raw) => {
+      return String(raw || '')
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/^rx-/, '');
+    };
+
     // Helper to format/extract date cleanly
     const extractDate = (raw) => {
       if (!raw) return null;
@@ -48,7 +57,7 @@ export async function GET(request) {
       ];
 
       for (const item of topCases) {
-        seenCodes.add(item.code.toLowerCase());
+        seenCodes.add(normalizeCode(item.code));
         results.push({
           id: item.code,
           code: item.code,
@@ -77,8 +86,8 @@ export async function GET(request) {
         pMatches.some(m => m.includes(qLower)) ||
         patMatches.some(m => m.includes(qLower));
 
-      if (isMatch && !seenCodes.has(item.fileNumber?.toLowerCase())) {
-        seenCodes.add(item.fileNumber?.toLowerCase());
+      if (isMatch && !seenCodes.has(normalizeCode(item.fileNumber))) {
+        seenCodes.add(normalizeCode(item.fileNumber));
         results.push({
           id: item.fileNumber || item.id,
           code: item.fileNumber,
@@ -102,8 +111,8 @@ export async function GET(request) {
       const rxHits = algoliaRes.prescriptions || [];
       for (const hit of rxHits) {
         const code = hit.code || hit.fileNumber || hit.prescriptionNumber || hit.objectID;
-        if (code && !seenCodes.has(String(code).toLowerCase())) {
-          seenCodes.add(String(code).toLowerCase());
+        if (code && !seenCodes.has(normalizeCode(code))) {
+          seenCodes.add(normalizeCode(code));
           results.push({
             id: hit.objectID || code,
             code: String(code),
@@ -127,12 +136,12 @@ export async function GET(request) {
         const snap = await adminDb.collection('prescriptions').limit(150).get();
         snap.forEach(docSnap => {
           const d = docSnap.data();
-          const code = d.fileNumber || d.code || d.prescriptionNumber || docSnap.id;
+          const code = d.code || d.fileNumber || d.prescriptionNumber || docSnap.id;
           const pName = String(d.patientName || d.patient?.name || '').toLowerCase();
-          const cLower = String(code).toLowerCase();
+          const cNorm = normalizeCode(code);
 
-          if ((pName.includes(qLower) || cLower.includes(qLower)) && !seenCodes.has(cLower)) {
-            seenCodes.add(cLower);
+          if ((pName.includes(qLower) || String(code).toLowerCase().includes(qLower)) && !seenCodes.has(cNorm)) {
+            seenCodes.add(cNorm);
             results.push({
               id: docSnap.id,
               code: String(code),
