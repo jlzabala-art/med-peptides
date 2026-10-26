@@ -1296,7 +1296,8 @@ export function getAuthoritativeClinicalData(rx) {
     const isEldose = String(patientName || '').toLowerCase().includes('eldose') || String(rx.id || '').toLowerCase().includes('6f8qzc');
     doctorName = isEldose ? 'Dr. Çağatay Sezgin, MD, FISHRS' : 'Dr. Sezgin Cagatay';
     doctorLicense = isEldose ? 'DHA 00208953-005' : 'DHA-00013060-006';
-    clinicName = isEldose ? 'Hortman Clinics · Jumeirah 1, Dubai' : 'Hortman Clinics, Dubai';
+    // Dr. Sezgin takes tests under his personal name only; clinicName on labels is optional and omitted by default
+    clinicName = '';
   }
 
   const isHaytham = !isSezgin && (
@@ -1336,7 +1337,7 @@ export function getAuthoritativeClinicalData(rx) {
     clinicName = (clinicName && clinicName !== 'Licensed Clinical Practice') ? clinicName : 'NOVA Clinic · Dubai Healthcare City, Dubai, UAE';
   }
 
-  if (!clinicName) {
+  if (!clinicName && !isSezgin) {
     clinicName = 'Licensed Clinical Practice';
   }
 
@@ -1352,85 +1353,164 @@ export function getAuthoritativeClinicalData(rx) {
     fileNumber: fileNumber ? fileNumber.trim() : null,
     doctorName: doctorName ? doctorName.trim() : null,
     doctorLicense: doctorLicense ? doctorLicense.trim() : null,
-    clinicName: clinicName ? clinicName.trim() : null,
+    clinicName: clinicName !== undefined && clinicName !== null ? String(clinicName).trim() : '',
     targetRxUrl
   };
 }
 
 /**
+ * Helper: Identifies whether an ingredient entry represents a compounding vehicle/base rather than an active API.
+ */
+function isVehicleIngredient(item) {
+  if (!item || typeof item !== 'object') return false;
+  if (item.isVehicle || item.isVehicleOrBase || item._isVehicleOrBase || item.itemType === 'vehicle_base') {
+    return true;
+  }
+  const n = String(item.drugName || item.drug || item.name || item.productName || item.activeIngredient || '').toLowerCase();
+  const f = String(item.dosageForm || item.form || item.category || '').toLowerCase();
+  return (
+    f.includes('vehicle') ||
+    n.includes('vehicle') ||
+    n.includes('vehículo') ||
+    n.includes('trichosol') ||
+    n.includes('trichooil') ||
+    n.includes('trichofoam') ||
+    n.includes('pentravan') ||
+    n.includes('pomade base') ||
+    n.includes('ointment base') ||
+    n.includes('capsule base')
+  );
+}
+
+/**
+ * Helper: Identifies placeholder strings that should never be treated as real active ingredients.
+ */
+function isPlaceholderIngredientName(name) {
+  const n = String(name || '').trim().toLowerCase();
+  return (
+    !n ||
+    n === 'api' ||
+    n === 'active api' ||
+    n === 'active ingredient' ||
+    n === 'active compounded formulation' ||
+    n === 'personalized compounded active formula' ||
+    n === 'compounded pharmaceutical protocol'
+  );
+}
+
+/**
+ * Helper: Extracts and normalizes non-vehicle active pharmaceutical ingredients from any block or prescription object.
+ */
+function extractCleanApisFromSource(source) {
+  if (!source || typeof source !== 'object') return [];
+  const rawList =
+    (Array.isArray(source.apis) && source.apis.length > 0 ? source.apis : null) ||
+    (Array.isArray(source.items) && source.items.length > 0 ? source.items : null) ||
+    (Array.isArray(source.activeIngredients) && source.activeIngredients.length > 0 ? source.activeIngredients : null) ||
+    (Array.isArray(source.ingredients) && source.ingredients.length > 0 ? source.ingredients : null) ||
+    (Array.isArray(source.compounds) && source.compounds.length > 0 ? source.compounds : null) ||
+    (Array.isArray(source.prescriptionLines) && source.prescriptionLines.length > 0 ? source.prescriptionLines : null) ||
+    [];
+
+  const cleaned = [];
+  for (const item of rawList) {
+    if (!item) continue;
+    if (typeof item === 'string') {
+      const trimmed = item.replace(/^[•*-]\s*/, '').trim();
+      if (!isPlaceholderIngredientName(trimmed) && !/trichosol|trichooil|pentravan|vehicle|vehículo/i.test(trimmed)) {
+        cleaned.push({
+          name: trimmed.replace(/\s*\bTM\b/g, '™'),
+          drugName: trimmed.replace(/\s*\bTM\b/g, '™'),
+          activeIngredient: trimmed.replace(/\s*\bTM\b/g, '™'),
+          dose: '',
+          dosage: '',
+          strength: '',
+          isVehicleOrBase: false
+        });
+      }
+      continue;
+    }
+
+    if (isVehicleIngredient(item)) continue;
+
+    let rawName = String(item.drugName || item.drug || item.name || item.productName || item.activeIngredient || item.api || '').trim();
+    if (isPlaceholderIngredientName(rawName)) continue;
+
+    rawName = rawName.replace(/\s*\bTM\b/g, '™');
+    let rawDose = String(item.dosage || item.dose || item.strength || item.concentration || '').trim();
+    if (rawDose === '—' || rawDose === '-') rawDose = '';
+
+    cleaned.push({
+      ...item,
+      name: rawName,
+      drugName: rawName,
+      activeIngredient: item.activeIngredient ? String(item.activeIngredient).replace(/\s*\bTM\b/g, '™') : rawName,
+      dose: rawDose,
+      dosage: rawDose,
+      strength: rawDose,
+      isVehicleOrBase: false
+    });
+  }
+
+  return cleaned;
+}
+
+/**
+ * Helper: Extracts compounding vehicle from block/rx or infers the proper galenic vehicle from clinical cues.
+ */
+function extractVehicleFromSource(block, rx, volumeStr = '', dosageFormStr = '', directionsStr = '', titleStr = '') {
+  const directVeh = block?.vehicle || block?.vehicleBase || block?.compoundingVehicle;
+  const directVehName = typeof directVeh === 'string' ? directVeh.trim() : (directVeh?.name || directVeh?.activeIngredient || '').trim();
+
+  const rawList = block?.items || block?.apis || block?.ingredients || block?.prescriptionLines || [];
+  const vehItem = Array.isArray(rawList) ? rawList.find(it => isVehicleIngredient(it)) : null;
+  const vehItemName = vehItem ? String(vehItem.name || vehItem.drugName || vehItem.activeIngredient || '').trim() : '';
+
+  const corpus = `${directVehName} ${vehItemName} ${dosageFormStr} ${directionsStr} ${titleStr}`.toLowerCase();
+  const volClean = String(volumeStr || block?.volume || '').trim();
+
+  if (corpus.includes('trichosol')) {
+    return `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${volClean && !volClean.toLowerCase().includes('cap') ? `, ${volClean}` : ', 100 mL'})`;
+  }
+  if (corpus.includes('trichooil')) {
+    return `TrichoOil™ (100% Natural Scalp Compounding Vehicle${volClean && !volClean.toLowerCase().includes('cap') ? `, ${volClean}` : ', 30 mL'})`;
+  }
+  if (corpus.includes('pentravan')) {
+    return 'Pentravan® Liposomal Transdermal Cream Vehicle';
+  }
+  if (corpus.includes('pomade') || corpus.includes('pomada') || corpus.includes('ointment') || corpus.includes('diltiazem')) {
+    return 'Hypoallergenic Non-Irritating Base (Fragrance & Alcohol Free, q.s. 30 g)';
+  }
+
+  if (directVehName && !/vegetable capsules/i.test(directVehName)) {
+    return directVehName;
+  }
+  if (vehItemName) {
+    return vehItemName;
+  }
+
+  const isTopicalCue = /\b(scalp|hair|shampoo|topical|apply|massage|wash|lotion|solution|drops|cream|gel|oil|serum)\b/i.test(corpus);
+  if (isTopicalCue) {
+    if (/\b(oil|massage|washing your hair|pre-wash)\b/i.test(corpus)) {
+      return `TrichoOil™ (100% Natural Scalp Compounding Vehicle${volClean && !volClean.toLowerCase().includes('cap') ? `, ${volClean}` : ', 30 mL'})`;
+    }
+    return `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${volClean && !volClean.toLowerCase().includes('cap') ? `, ${volClean}` : ', 100 mL'})`;
+  }
+
+  if (directVehName) return directVehName;
+
+  const rxVeh = typeof rx?.vehicle === 'string' ? rx.vehicle : rx?.vehicle?.name;
+  if (rxVeh) return rxVeh;
+
+  return 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.';
+}
+
+/**
  * Finds all Pharmapolis label records associated with a given prescription object.
- * Guaranteed to return full clinical data and unique QR codes.
+ * Guaranteed to return full clinical data, self-healing any stale/incomplete saved labels, and unique QR codes.
  */
 export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = null) {
   if (!rx) return [];
-
-  // ⚡ Priority 0: Authoritative saved Firestore pharmacyLabels (from manual label editor)
-  if (Array.isArray(rx.pharmacyLabels) && rx.pharmacyLabels.length > 0) {
-    const auth = getAuthoritativeClinicalData(rx);
-    const formatIsoDate = (d, fallback = '05-10-2026') => {
-      if (!d) return fallback;
-      if (typeof d === 'object' && (d._seconds || d.seconds)) {
-        const s = d._seconds ?? d.seconds;
-        const dt = new Date(s * 1000);
-        return `${String(dt.getDate()).padStart(2, '0')}-${String(dt.getMonth() + 1).padStart(2, '0')}-${dt.getFullYear()}`;
-      }
-      if (typeof d === 'string') {
-        const m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
-        if (m) return `${m[3]}-${m[2]}-${m[1]}`;
-        const dClean = d.replace(/T.*$/, '');
-        if (dClean.includes('/')) return dClean.replace(/\//g, '-');
-        return dClean;
-      }
-      return fallback;
-    };
-
-    const fallbackUrl = `https://www.atlashealth-services.com/rx/${encodeURIComponent(rx.prescriptionNumber || rx.code || rx.id || 'RX')}`;
-
-    return rx.pharmacyLabels.map((lbl, idx) => {
-      const phaseNum = lbl.phaseNumber || (idx + 1);
-      const rawApis = lbl.apis || lbl.items || lbl.activeIngredients || [];
-      const activeIngredientsList = Array.isArray(rawApis) && rawApis.length > 0
-        ? rawApis.map(a => typeof a === 'string' ? a : `${a.name || a.drugName || a.activeIngredient || 'API'} ${a.dose || a.dosage || a.strength || ''}`.trim())
-        : (Array.isArray(lbl.activeIngredientsList) ? lbl.activeIngredientsList : []);
-
-      return {
-        ...lbl,
-        id: lbl.id || `pharm-label-${idx + 1}`,
-        phaseNumber: phaseNum,
-        patientName: (lbl.patientName || rx.patientName || rx.patient?.name || auth.patientName || 'PATIENT RECORD').toUpperCase(),
-        fileNumber: lbl.fileNumber || rx.fileNumber || rx.code || rx.prescriptionNumber || rx.id || '51857',
-        rxCode: lbl.rxCode || rx.code || rx.prescriptionNumber || rx.id,
-        doctorName: lbl.doctorName || auth.doctorName || rx.doctorName || 'Dr. Marina Cordeiro Fernandes',
-        clinicName: lbl.clinicName || auth.clinicName || rx.clinicName || 'NOVA Clinic Day Surgery Center, Dubai',
-        doctorLicense: lbl.doctorLicense || auth.doctorLicense || rx.doctorLicense || 'DHA-91105367',
-        batchCode: lbl.batchCode || rx.batchCode || rx.dispensingBatch || 'PHARM-2026-B948',
-        lote: lbl.lote || rx.lote || '2609-PLV',
-        volume: lbl.volume || lbl.netContent || lbl.size || rx.volume || '100 mL',
-        productTitle: lbl.productTitle || lbl.productName || lbl.title || 'Compounded Pharmaceutical Protocol',
-        vehicle: lbl.vehicle || lbl.compoundingVehicle || rx.vehicle || 'Vegetable capsules. Gluten-free, lactose-free, colorant-free.',
-        prodDate: formatIsoDate(
-          lbl.prodDate || 
-          lbl.mfgDate || 
-          rx.fagron?.reportDate || 
-          rx.fagronDetails?.reportDate || 
-          rx.geneticResultDate || 
-          rx.reportDate || 
-          rx.prescriptionDate || 
-          rx.mfgDate || 
-          rx.prodDate || 
-          rx.dateIssued || 
-          rx.issuedDate || 
-          rx.date, 
-          '05-10-2026'
-        ),
-        expDate: formatIsoDate(lbl.expDate || rx.expDate || rx.expiryDate, '04-10-2027'),
-        storage: lbl.storage || rx.storage || 'Store at room temperature (15°C - 25°C)',
-        warnings: lbl.warnings || rx.warnings || 'For external / patient use only. Keep out of reach of children.',
-        activeIngredientsList,
-        targetRxUrl: lbl.targetRxUrl || fallbackUrl
-      };
-    });
-  }
 
   const rxId = String(rx.id || '').trim().toUpperCase();
   const rxNum = String(rx.prescriptionNumber || '').trim().toUpperCase();
@@ -1441,22 +1521,6 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
   const patientName = String(rx.patient?.name || rx.patientName || '').toLowerCase();
 
   const auth = getAuthoritativeClinicalData(rx);
-
-  // If custom modified labels were previously saved to Firebase for this prescription, prioritize them!
-  if (rx.pharmacyLabels && Array.isArray(rx.pharmacyLabels) && rx.pharmacyLabels.length > 0) {
-    return rx.pharmacyLabels.map(lbl => ({
-      ...lbl,
-      patientName: auth.patientName || lbl.patientName,
-      doctorName: auth.doctorName || lbl.doctorName,
-      doctorLicense: auth.doctorLicense || lbl.doctorLicense,
-      clinicName: auth.clinicName || lbl.clinicName,
-      pharmacy: lbl.pharmacyName || lbl.pharmacy || rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'PHARMAPOLIS',
-      pharmacyName: lbl.pharmacyName || lbl.pharmacy || rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'PHARMAPOLIS',
-      pharmacyAddress: lbl.pharmacyAddress || rx.pharmacyAddress || rx.dispensingPharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
-      expDate: lbl.expDate || rx.expDate || rx.expiryDate || '04-10-2027',
-      labelMarkdown: lbl.labelMarkdown || rx.labelMarkdown || null
-    }));
-  }
 
   const matches = PHARMAPOLIS_LABELS_REGISTRY.filter(item => {
     // Cross-patient safety guard: if prescription has a patient name, do not match a registry item intended for someone else
@@ -1532,14 +1596,14 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
 
   const rxExpDate = formatIsoDate(rx.expDate || rx.expiryDate, computeDefaultExpiry(rxProdDate));
 
-  // If explicit formulations are passed (from PublicPrescriptionClient compoundedFormulations),
-  // map every formulation directly so apis, vehicle, route, and posology match 100%!
+  // Build authoritative derived labels first (used directly or to self-heal incomplete saved pharmacyLabels)
+  let derivedLabels = [];
+
   if (explicitFormulations && Array.isArray(explicitFormulations) && explicitFormulations.length >= 1) {
-    return explicitFormulations.map((form, fIdx) => {
+    derivedLabels = explicitFormulations.map((form, fIdx) => {
       const phaseNum = form.index || (fIdx + 1);
       const partCode = form.extra?.partCode ? String(form.extra.partCode).toUpperCase() : null;
 
-      // Match by exact partCode first (e.g. RX-50957-A vs RX-50957-B), then by phaseNumber, then by active ingredient overlap, then title
       const regMatch = matches.find(m => 
         partCode && m.prescriptionMatches.some(pm => pm.toUpperCase() === partCode)
       ) || matches.find(m => 
@@ -1562,26 +1626,27 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         m.productName && form.title && m.productName.toLowerCase().includes(form.title.toLowerCase().slice(0, 10))
       );
 
+      const cleanFormApis = extractCleanApisFromSource(form);
       let formulaText = form.formula || '';
-      if (!formulaText && form.apis && Array.isArray(form.apis)) {
-        formulaText = form.apis
-          .filter(a => !a.isVehicle && !a.isVehicleOrBase && a.itemType !== 'vehicle_base')
+      if (!formulaText && cleanFormApis.length > 0) {
+        formulaText = cleanFormApis
           .map(a => `${a.name || a.activeIngredient || ''} ${a.dosage || a.dose || ''}`.trim())
           .filter(Boolean)
           .join(' + ');
       }
 
       if (regMatch) {
+        const isSezginDoc = /sezgin|cagatay|çağatay/i.test(String(auth.doctorName || regMatch.doctorName || ''));
         return {
           ...regMatch,
           phaseNumber: phaseNum,
           patientName: auth.patientName || regMatch.patientName,
           doctorName: (auth.doctorName && !auth.doctorName.toLowerCase().includes('miguel')) ? auth.doctorName : regMatch.doctorName,
           doctorLicense: auth.doctorLicense || regMatch.doctorLicense,
-          clinicName: auth.clinicName || regMatch.clinicName,
+          clinicName: isSezginDoc ? '' : (auth.clinicName !== undefined && auth.clinicName !== null ? auth.clinicName : regMatch.clinicName),
           fileNumber: auth.fileNumber || regMatch.fileNumber,
           targetRxUrl: auth.targetRxUrl || regMatch.targetRxUrl,
-          apis: (form?.apis && form.apis.length > 0) ? form.apis : (regMatch.apis || rx.items || rx.prescriptionLines || []),
+          apis: cleanFormApis.length > 0 ? cleanFormApis : (regMatch.apis || extractCleanApisFromSource(rx)),
           formula: formulaText || regMatch.formula || '',
           vehicle: regMatch.vehicle || form?.vehicle || null,
           prodDate: rxProdDate || regMatch.prodDate,
@@ -1589,13 +1654,14 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         };
       }
 
-      // Generate dynamic label for this phase / formulation
       const pName = form.title || form.treatmentTitle || form.productName || form.name || rx.formulaName || `Phase ${phaseNum} Compounded Protocol`;
       const pForm = form.route || form.dosageForm || (form.volume?.includes('Cap') ? 'Oral Route (Plant-Based Capsules)' : (form.volume?.includes('g') ? 'Topical Pomade / Ointment' : 'Topical Solution'));
       const pVol = form.volume || (form.volume?.includes('g') ? '30 g' : '100 mL');
 
-      const directionsText = form.posology?.regimen || form.instructions || form.directions || (form.posology?.steps ? form.posology.steps.map(s => s.text).join(' ') : (rx.posology?.notes || 'Take / apply as directed by prescribing physician.'));
+      const directionsText = form.posology?.regimen || form.instructions || form.directions || (form.posology?.steps ? form.posology.steps.map(s => s.text || s).join(' ') : (rx.posology?.notes || 'Take / apply as directed by prescribing physician.'));
       const warningsText = form.warnings || rx.posology?.notes || 'For patient use as prescribed. Keep out of reach of children.';
+      const resolvedVehicle = extractVehicleFromSource(form, rx, pVol, pForm, directionsText, pName);
+      const isSezginDoc = /sezgin|cagatay|çağatay/i.test(String(auth.doctorName || ''));
 
       return {
         id: `${rx.id || 'rx'}-phase-${phaseNum}`,
@@ -1610,8 +1676,8 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
         pharmacy: 'Pharmapolis Compounding Pharmacy',
         formula: formulaText,
-        apis: form.apis || rx.items || rx.prescriptionLines || [],
-        vehicle: form.vehicle || null,
+        apis: cleanFormApis.length > 0 ? cleanFormApis : extractCleanApisFromSource(rx),
+        vehicle: resolvedVehicle,
         directions: directionsText,
         warnings: warningsText,
         prodDate: rxProdDate,
@@ -1619,84 +1685,260 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         storage: form.storage || rx.storage || 'Store at room temperature',
         doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
         doctorLicense: auth.doctorLicense || 'DHA Registered',
-        clinicName: auth.clinicName || 'NOVA Clinic Day Surgery Center, Dubai',
+        clinicName: isSezginDoc ? '' : (auth.clinicName !== undefined && auth.clinicName !== null ? auth.clinicName : ''),
         batchCode: `PHARM-2026-${String(auth.fileNumber || 'B948').slice(-6).toUpperCase()}`,
         lote: `2609-P${String(phaseNum)}`,
         targetRxUrl: auth.targetRxUrl
       };
     });
+  } else if (matches.length > 0) {
+    derivedLabels = matches.map(m => {
+      const isSezginDoc = /sezgin|cagatay|çağatay/i.test(String(auth.doctorName || m.doctorName || ''));
+      return {
+        ...m,
+        patientName: auth.patientName || m.patientName,
+        doctorName: auth.doctorName || m.doctorName,
+        doctorLicense: auth.doctorLicense || m.doctorLicense,
+        clinicName: isSezginDoc ? '' : (auth.clinicName !== undefined && auth.clinicName !== null ? auth.clinicName : m.clinicName),
+        fileNumber: auth.fileNumber || m.fileNumber,
+        targetRxUrl: auth.targetRxUrl || m.targetRxUrl,
+        pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacy || 'PHARMAPOLIS',
+        pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacyName || m.pharmacy || 'PHARMAPOLIS',
+        pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || m.pharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
+        expDate: rx.expDate || rx.expiryDate || m.expDate || rxExpDate,
+        labelMarkdown: rx.labelMarkdown || m.labelMarkdown || null,
+        apis: m.apis || extractCleanApisFromSource(rx),
+        formula: m.formula || ''
+      };
+    });
+  } else {
+    // Fallback: dynamically construct label items from multi-part blocks (parts, formulationBlocks, phases, formulations)
+    // IMPORTANT: Never treat rx.items / rx.prescriptionLines directly as separate bottles unless grouped by formulationIndex!
+    let rawBlocks = null;
+    if (Array.isArray(rx.parts) && rx.parts.length > 0) {
+      rawBlocks = rx.parts;
+    } else if (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length > 0) {
+      rawBlocks = rx.formulationBlocks;
+    } else if (Array.isArray(rx.phases) && rx.phases.length > 0) {
+      rawBlocks = rx.phases;
+    } else if (Array.isArray(rx.treatmentPhases) && rx.treatmentPhases.length > 0) {
+      rawBlocks = rx.treatmentPhases;
+    } else if (Array.isArray(rx.formulations) && rx.formulations.length > 0) {
+      rawBlocks = rx.formulations;
+    } else {
+      const flatLines = rx.items || rx.prescriptionLines || rx.compounds || rx.products || [];
+      if (Array.isArray(flatLines) && flatLines.length > 0) {
+        const distinctBlockIndices = Array.from(new Set(flatLines.map(l => l?.formulationIndex || l?.phaseNumber).filter(Boolean)));
+        if (distinctBlockIndices.length > 1) {
+          rawBlocks = distinctBlockIndices.map((bIdx, i) => {
+            const groupLines = flatLines.filter(l => (l?.formulationIndex || l?.phaseNumber) === bIdx);
+            const firstLine = groupLines[0] || {};
+            return {
+              phaseNumber: i + 1,
+              title: firstLine.formulationBlock || `Phase ${i + 1} Compounded Protocol`,
+              dispensingForm: firstLine.dosageForm || rx.dispensingForm,
+              volume: firstLine.blockVolume || firstLine.presentation || rx.volume,
+              posology: firstLine.patientInstructions || firstLine.instructions,
+              items: groupLines
+            };
+          });
+        } else {
+          rawBlocks = [rx];
+        }
+      } else {
+        rawBlocks = [rx];
+      }
+    }
+
+    derivedLabels = rawBlocks.map((p, idx) => {
+      const phaseNum = p.phaseNumber || p.index || (idx + 1);
+      let blockApis = extractCleanApisFromSource(p);
+      if (blockApis.length === 0 && rawBlocks.length === 1) {
+        blockApis = extractCleanApisFromSource(rx);
+      } else if (blockApis.length === 0 && Array.isArray(rx.items)) {
+        const filteredByPhase = rx.items.filter(it => (it.formulationIndex || it.phaseNumber) === phaseNum);
+        blockApis = extractCleanApisFromSource({ items: filteredByPhase });
+      }
+
+      // Directions text
+      const rawPos = p.instructions || p.directions || p.sig || (typeof p.posology === 'string' ? p.posology : p.posology?.regimen) || p.regimen || (Array.isArray(rx.posology?.steps) ? rx.posology.steps[idx] : null) || (typeof rx.posology === 'string' ? rx.posology : rx.posology?.regimen) || rx.instructions || 'Take / apply as directed by prescribing physician.';
+      const directionsText = String(rawPos).replace(/^phase\s*\d+\s*:\s*/i, '').trim();
+
+      // Product Title
+      const pName = p.productTitle || p.productName || p.title || p.phaseTitle || p.treatmentType || p.phaseName || (rawBlocks.length === 1 ? (rx.treatmentType || rx.title || rx.medicationName) : null) || `Phase ${phaseNum} Compounded Protocol`;
+
+      // Volume (Strict precedence: explicit volume first, never overwriting mL/g with Capsules!)
+      const explicitVol = p.volume || p.netContent || p.size || p.packaging?.volume || p.vehicle?.volume || (rawBlocks.length === 1 ? rx.volume : null);
+      const isTopicalCue = /\b(scalp|hair|shampoo|topical|apply|massage|wash|lotion|solution|drops|cream|gel|oil|pomade|ointment|trichosol|trichooil|pentravan)\b/i.test(
+        `${pName} ${p.dispensingForm || ''} ${p.dosageForm || ''} ${p.vehicle?.name || p.vehicle || ''} ${directionsText}`
+      );
+      const pVol = explicitVol
+        ? String(explicitVol).trim()
+        : (p.quantity || p.count
+            ? `${p.quantity || p.count} ${isTopicalCue ? 'mL' : 'Capsules'}`
+            : (isTopicalCue ? (/\b(oil|massage|washing your hair)\b/i.test(`${pName} ${directionsText}`) ? '30 mL' : '100 mL') : '90 Capsules (3 Months)'));
+
+      // Dosage Form
+      const pForm = p.dosageForm || p.dispensingForm || p.format || p.presentation || p.form || p.route || (isTopicalCue ? (/\boil\b/i.test(`${pName} ${p.vehicle?.name || ''}`) ? 'Topical Scalp Oil' : 'Topical Scalp Solution') : (rawBlocks.length === 1 && rx.dispensingForm ? rx.dispensingForm : 'Oral Route (Plant-Based Capsules)'));
+
+      // Formula text
+      let formulaText = p.formula || p.composition || '';
+      if (!formulaText && blockApis.length > 0) {
+        formulaText = blockApis
+          .map(a => `${a.name || a.drugName || a.activeIngredient || ''} ${a.dosage || a.dose || a.strength || ''}`.trim())
+          .filter(Boolean)
+          .join(' + ');
+      }
+
+      const resolvedVehicle = extractVehicleFromSource(p, rx, pVol, pForm, directionsText, pName);
+      const warningsText = p.warnings || p.cautions || rx.warnings || (isTopicalCue ? 'For topical scalp use only. Keep out of reach of children.' : 'For patient use only. Keep out of reach of children.');
+      const activeIngredientsList = blockApis.map(a => `${a.name || a.drugName || a.activeIngredient || 'API'} ${a.dose || a.dosage || a.strength || ''}`.trim());
+
+      return {
+        id: `${rx.id || 'rx'}-label-${idx}`,
+        phaseNumber: phaseNum,
+        patientName: auth.patientName || 'Patient Record',
+        fileNumber: auth.fileNumber || '51857',
+        rxCode: rx.code || rx.prescriptionNumber || rx.id || auth.fileNumber,
+        productName: pName,
+        productTitle: pName,
+        subTitle: p.subTitle || `Phase ${phaseNum}: Clinical Protocol Administration`,
+        dosageForm: pForm,
+        volume: pVol,
+        dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+        pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'Pharmapolis Compounding Pharmacy',
+        pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'PHARMAPOLIS',
+        pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
+        formula: formulaText,
+        apis: blockApis,
+        activeIngredientsList,
+        vehicle: resolvedVehicle,
+        directions: directionsText,
+        warnings: warningsText,
+        prodDate: rxProdDate,
+        expDate: rx.expDate || rx.expiryDate || rxExpDate,
+        labelMarkdown: rx.labelMarkdown || p.labelMarkdown || null,
+        storage: p.storage || rx.storage || 'Store at room temperature (15°C - 25°C)',
+        doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
+        doctorLicense: auth.doctorLicense || 'DHA Registered',
+        clinicName: auth.clinicName !== undefined && auth.clinicName !== null ? auth.clinicName : '',
+        batchCode: `PHARM-2026-${String(auth.fileNumber || 'B948').slice(-6).toUpperCase()}`,
+        lote: `2609-P${String(idx + 1)}`,
+        targetRxUrl: auth.targetRxUrl
+      };
+    });
   }
 
-  if (matches.length > 0) {
-    return matches.map(m => ({
-      ...m,
-      patientName: auth.patientName || m.patientName,
-      doctorName: auth.doctorName || m.doctorName,
-      doctorLicense: auth.doctorLicense || m.doctorLicense,
-      clinicName: auth.clinicName || m.clinicName,
-      fileNumber: auth.fileNumber || m.fileNumber,
-      targetRxUrl: auth.targetRxUrl || m.targetRxUrl,
-      pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacy || 'PHARMAPOLIS',
-      pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacyName || m.pharmacy || 'PHARMAPOLIS',
-      pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || m.pharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
-      expDate: rx.expDate || rx.expiryDate || m.expDate || rxExpDate,
-      labelMarkdown: rx.labelMarkdown || m.labelMarkdown || null,
-      apis: m.apis || rx.items || rx.prescriptionLines || [],
-      formula: m.formula || ''
-    }));
+  // ⚡ Priority 0 (Self-Healing): Authoritative saved Firestore pharmacyLabels merged with derived clinical data
+  if (Array.isArray(rx.pharmacyLabels) && rx.pharmacyLabels.length > 0) {
+    const fallbackUrl = `https://www.atlashealth-services.com/rx/${encodeURIComponent(rx.prescriptionNumber || rx.code || rx.id || 'RX')}`;
+
+    return rx.pharmacyLabels.map((lbl, idx) => {
+      const derived = derivedLabels[idx] || derivedLabels[0] || {};
+      const phaseNum = lbl.phaseNumber || derived.phaseNumber || (idx + 1);
+
+      // 1. Self-heal Active Ingredients (apis & formula) if saved label had empty or placeholder ingredients
+      const savedCleanApis = extractCleanApisFromSource(lbl);
+      const derivedCleanApis = extractCleanApisFromSource(derived);
+      const hasValidSavedApis = savedCleanApis.length > 0;
+      const effectiveApis = hasValidSavedApis ? savedCleanApis : derivedCleanApis;
+
+      const activeIngredientsList = effectiveApis.length > 0
+        ? effectiveApis.map(a => `${a.name || a.drugName || a.activeIngredient || 'API'} ${a.dose || a.dosage || a.strength || ''}`.trim())
+        : (Array.isArray(lbl.activeIngredientsList) && lbl.activeIngredientsList.filter(x => !isPlaceholderIngredientName(x)).length > 0
+            ? lbl.activeIngredientsList.filter(x => !isPlaceholderIngredientName(x))
+            : (derived.activeIngredientsList || []));
+
+      const effectiveFormula = (lbl.formula && !isPlaceholderIngredientName(lbl.formula))
+        ? lbl.formula
+        : (derived.formula || activeIngredientsList.join(' + '));
+
+      // 2. Detect if this formulation is actually Topical / Scalp / Non-Oral
+      const effectiveDirections = lbl.directions || lbl.instructions || derived.directions || '';
+      const isDerivedTopical = /\b(scalp|hair|shampoo|topical|apply|massage|wash|lotion|solution|drops|cream|gel|oil|pomade|ointment|trichosol|trichooil|pentravan)\b/i.test(
+        `${derived.productTitle || ''} ${derived.dosageForm || ''} ${derived.vehicle?.name || derived.vehicle || ''} ${effectiveDirections}`
+      );
+
+      // 3. Self-heal Product Title if saved title is generic "Phase X Compounded Protocol"
+      const isGenericSavedTitle = !lbl.productTitle || /^phase\s*\d+\s*compounded\s*protocol$/i.test(String(lbl.productTitle).trim()) || String(lbl.productTitle).trim().toLowerCase() === 'compounded pharmaceutical protocol';
+      const effectiveTitle = (!isGenericSavedTitle ? lbl.productTitle : (derived.productTitle || lbl.productTitle || lbl.productName)) || 'Compounded Pharmaceutical Protocol';
+
+      // 4. Self-heal Volume if saved volume was corrupted by the old "90 Capsules (3 Months)" bug on a topical product
+      const isCorruptedCapsuleVol = isDerivedTopical && /capsules/i.test(String(lbl.volume || ''));
+      const effectiveVolume = (!isCorruptedCapsuleVol && (lbl.volume || lbl.netContent || lbl.size))
+        ? (lbl.volume || lbl.netContent || lbl.size)
+        : (derived.volume || rx.volume || '100 mL');
+
+      // 5. Self-heal Dosage Form if saved dosageForm was defaulted to "Oral Route (Plant-Based Capsules)" on a topical product
+      const isCorruptedOralForm = isDerivedTopical && /oral|capsule/i.test(String(lbl.dosageForm || ''));
+      const effectiveDosageForm = (!isCorruptedOralForm && lbl.dosageForm)
+        ? lbl.dosageForm
+        : (derived.dosageForm || lbl.dosageForm || 'Topical Scalp Solution');
+
+      // 6. Self-heal Vehicle if saved vehicle is missing or defaulted to "Vegetable capsules..." on a topical product
+      const rawSavedVeh = typeof lbl.vehicle === 'string' ? lbl.vehicle : (lbl.vehicle?.name || lbl.compoundingVehicle || '');
+      const isCorruptedCapsuleVeh = isDerivedTopical && (!rawSavedVeh || /vegetable capsules/i.test(rawSavedVeh));
+      const effectiveVehicle = (!isCorruptedCapsuleVeh && rawSavedVeh)
+        ? rawSavedVeh
+        : (derived.vehicle || extractVehicleFromSource(derived, rx, effectiveVolume, effectiveDosageForm, effectiveDirections, effectiveTitle));
+
+      // 7. Clean Doctor License (prevent duplicate "License: License: ...")
+      const rawLicense = lbl.doctorLicense || auth.doctorLicense || rx.doctorLicense || derived.doctorLicense || 'DHA-91105367';
+      const cleanLicense = String(rawLicense).replace(/^license\s*:\s*/i, '').trim();
+
+      // 8. If core clinical fields were self-healed, clear stale labelMarkdown so editor regenerates it cleanly
+      const wasHealed = !hasValidSavedApis || isCorruptedCapsuleVol || isCorruptedOralForm || isCorruptedCapsuleVeh || isGenericSavedTitle;
+      const effectiveMarkdown = wasHealed ? null : (lbl.labelMarkdown || rx.labelMarkdown || null);
+
+      return {
+        ...derived,
+        ...lbl,
+        id: lbl.id || derived.id || `pharm-label-${idx + 1}`,
+        phaseNumber: phaseNum,
+        patientName: (lbl.patientName || rx.patientName || rx.patient?.name || auth.patientName || 'PATIENT RECORD').toUpperCase(),
+        fileNumber: lbl.fileNumber || rx.fileNumber || rx.code || rx.prescriptionNumber || rx.id || '51857',
+        rxCode: lbl.rxCode || rx.code || rx.prescriptionNumber || rx.id,
+        doctorName: lbl.doctorName !== undefined && lbl.doctorName !== null ? lbl.doctorName : (auth.doctorName || rx.doctorName || derived.doctorName || 'Dr. Marina Cordeiro Fernandes'),
+        clinicName: lbl.clinicName !== undefined && lbl.clinicName !== null
+          ? String(lbl.clinicName).trim()
+          : (/sezgin|cagatay|çağatay/i.test(String(lbl.doctorName || auth.doctorName || rx.doctorName || derived.doctorName || ''))
+              ? ''
+              : (auth.clinicName !== undefined && auth.clinicName !== null ? auth.clinicName : (rx.clinicName || derived.clinicName || ''))),
+        doctorLicense: cleanLicense,
+        batchCode: lbl.batchCode || rx.batchCode || rx.dispensingBatch || derived.batchCode || 'PHARM-2026-B948',
+        lote: lbl.lote || rx.lote || derived.lote || '2609-PLV',
+        volume: effectiveVolume,
+        dosageForm: effectiveDosageForm,
+        productTitle: effectiveTitle,
+        productName: effectiveTitle,
+        vehicle: effectiveVehicle,
+        formula: effectiveFormula,
+        apis: effectiveApis,
+        activeIngredientsList,
+        directions: effectiveDirections,
+        prodDate: formatIsoDate(
+          lbl.prodDate || 
+          lbl.mfgDate || 
+          rx.fagron?.reportDate || 
+          rx.fagronDetails?.reportDate || 
+          rx.geneticResultDate || 
+          rx.reportDate || 
+          rx.prescriptionDate || 
+          rx.mfgDate || 
+          rx.prodDate || 
+          rx.dateIssued || 
+          rx.issuedDate || 
+          rx.date, 
+          '05-10-2026'
+        ),
+        expDate: formatIsoDate(lbl.expDate || rx.expDate || rx.expiryDate || derived.expDate, '04-10-2027'),
+        storage: lbl.storage || rx.storage || derived.storage || 'Store at room temperature (15°C - 25°C)',
+        warnings: lbl.warnings || rx.warnings || derived.warnings || 'For external / patient use only. Keep out of reach of children.',
+        labelMarkdown: effectiveMarkdown,
+        targetRxUrl: lbl.targetRxUrl || derived.targetRxUrl || fallbackUrl
+      };
+    });
   }
 
-  // Fallback: dynamically construct label items from rx parts, formulationBlocks, phases, compounds, or items
-  const rawItems = (Array.isArray(rx.parts) && rx.parts.length > 0) 
-    ? rx.parts 
-    : (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length > 0)
-      ? rx.formulationBlocks
-      : (rx.phases || rx.treatmentPhases || rx.formulations || rx.compounds || rx.items || rx.products || (rx.product ? [rx.product] : [rx]));
-
-  return rawItems.map((p, idx) => {
-    const pName = p.name || p.productName || p.title || p.phaseTitle || rx.title || rx.medicationName || `Phase ${idx + 1} Compounded Protocol`;
-    const pForm = p.dosageForm || p.format || p.presentation || p.form || 'Oral Route (Plant-Based Capsules)';
-    const pVol = p.volume || p.quantity || p.pack_size || p.count ? `${p.quantity || p.count || 90} Capsules (3 Months)` : '90 Capsules (3 Months)';
-    
-    // Formula text
-    let formulaText = p.formula || p.composition || '';
-    if (!formulaText && p.apis && Array.isArray(p.apis)) {
-      formulaText = p.apis.map(a => `${a.name || a.api || ''} ${a.dosage || a.dose || ''}`.trim()).filter(Boolean).join(' + ');
-    }
-    if (!formulaText && p.ingredients && Array.isArray(p.ingredients)) {
-      formulaText = p.ingredients.map(i => `${i.name || ''} ${i.dose || ''}`.trim()).filter(Boolean).join(' + ');
-    }
-
-    const directionsText = p.instructions || p.directions || p.sig || p.posology || p.regimen || rx.instructions || 'Take / apply as directed by prescribing physician.';
-    const warningsText = p.warnings || p.cautions || rx.warnings || 'For external / patient use only. Keep out of reach of children.';
-
-    return {
-      id: `${rx.id || 'rx'}-label-${idx}`,
-      phaseNumber: p.phaseNumber || idx + 1,
-      patientName: auth.patientName || 'Patient Record',
-      fileNumber: auth.fileNumber || '51857',
-      productName: pName,
-      productTitle: pName,
-      subTitle: p.subTitle || `Phase ${idx + 1}: Clinical Protocol Administration`,
-      dosageForm: pForm,
-      volume: pVol,
-      dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
-      pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'Pharmapolis Compounding Pharmacy',
-      pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'PHARMAPOLIS',
-      pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
-      formula: formulaText,
-      directions: directionsText,
-      warnings: warningsText,
-      prodDate: rxProdDate,
-      expDate: rx.expDate || rx.expiryDate || rxExpDate,
-      labelMarkdown: rx.labelMarkdown || p.labelMarkdown || null,
-      storage: p.storage || rx.storage || 'Store at room temperature',
-      doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
-      doctorLicense: auth.doctorLicense || 'DHA Registered',
-      clinicName: auth.clinicName || 'NOVA Clinic Day Surgery Center, Dubai',
-      batchCode: `PHARM-2026-${String(auth.fileNumber || 'B948').slice(-6).toUpperCase()}`,
-      lote: `2609-P${String(idx + 1)}`,
-      targetRxUrl: auth.targetRxUrl
-    };
-  });
+  return derivedLabels;
 }

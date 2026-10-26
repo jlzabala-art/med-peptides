@@ -12,7 +12,10 @@ export async function GET(request, { params }) {
     const { slug } = await params;
     const cleanSlug = decodeURIComponent(slug || '').trim();
 
-    const data = await getDoctorPortalData(cleanSlug);
+    const url = new URL(request.url);
+    const forceRefresh = url.searchParams.get('fresh') === '1' || url.searchParams.get('force') === '1';
+
+    const data = await getDoctorPortalData(cleanSlug, { forceRefresh });
 
     if (!data || !data.success) {
       return Response.json({ success: false, error: 'Physician profile not found' }, { status: 404 });
@@ -20,7 +23,7 @@ export async function GET(request, { params }) {
 
     return Response.json(data, {
       headers: {
-        'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=600'
+        'Cache-Control': forceRefresh ? 'no-store' : 'public, s-maxage=60, stale-while-revalidate=300'
       }
     });
   } catch (error) {

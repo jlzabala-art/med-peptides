@@ -2124,6 +2124,8 @@ export default function DoctorPublicPortalClient({
     const signingKey = taskOrRx.id || codesToSign[0];
     setSigningTaskId(signingKey);
 
+    const isTolerance = taskOrRx.type === 'tolerance_check' || taskOrRx.type === 'tolerance_checkin';
+
     try {
       // Sign each prescription via the update-status API
       for (const code of codesToSign) {
@@ -2132,14 +2134,18 @@ export default function DoctorPublicPortalClient({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             prescriptionNumber: code,
-            status: 'approved',
-            reason: 'Physician electronic sign-off and dispensing authorization via Doctor Portal',
+            status: isTolerance ? undefined : 'approved',
+            taskType: taskOrRx.type || 'approval',
+            toleranceCheckCompleted: isTolerance,
+            reason: isTolerance
+              ? 'Physician clinical tolerance check-in verified & completed via Doctor Portal'
+              : 'Physician electronic sign-off and dispensing authorization via Doctor Portal',
             updatedBy: doctor?.name || 'Treating Physician'
           })
         });
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || `Failed to sign prescription ${code}`);
+          throw new Error(errData.error || `Failed to process prescription ${code}`);
         }
       }
 
@@ -2150,10 +2156,12 @@ export default function DoctorPublicPortalClient({
           if (codesToSign.includes(rx.code) || codesToSign.includes(rx.prescriptionNumber) || codesToSign.includes(rx.id)) {
             return {
               ...rx,
-              status: 'approved',
-              state: 'approved',
-              signedAt: new Date().toISOString(),
-              signedBy: doctor?.name || 'Treating Physician'
+              status: isTolerance ? rx.status : 'approved',
+              state: isTolerance ? rx.state : 'approved',
+              toleranceCheckCompleted: isTolerance ? true : rx.toleranceCheckCompleted,
+              toleranceCheckedAt: isTolerance ? new Date().toISOString() : rx.toleranceCheckedAt,
+              signedAt: isTolerance ? rx.signedAt : new Date().toISOString(),
+              signedBy: isTolerance ? rx.signedBy : (doctor?.name || 'Treating Physician')
             };
           }
           return rx;
@@ -2166,17 +2174,20 @@ export default function DoctorPublicPortalClient({
               ...t,
               status: 'approved',
               isSigned: true,
+              toleranceCheckCompleted: true,
               priority: 'routine',
-              title: `${t.title} — Authorized`,
-              description: `Digitally signed & authorized for compounding release by ${doctor?.name || 'Treating Physician'}.`
+              title: isTolerance ? `${t.title} — Verified & Completed` : `${t.title} — Authorized`,
+              description: isTolerance
+                ? `Clinical tolerance check completed by ${doctor?.name || 'Treating Physician'}.`
+                : `Digitally signed & authorized for compounding release by ${doctor?.name || 'Treating Physician'}.`
             };
           }
           return t;
         });
 
         // Recompute KPIs
-        const newActive = updatedPrescriptions.filter(p => ['approved', 'active'].includes((p.status || '').toLowerCase())).length;
-        const newPending = updatedTasks.filter(t => t.type === 'approval' && !t.isSigned).length;
+        const newActive = updatedPrescriptions.filter(p => ['approved', 'active', 'ordered', 'delivered', 'completed', 'dispensed'].includes((p.status || '').toLowerCase())).length;
+        const newPending = updatedTasks.filter(t => !t.isSigned && t.status !== 'approved' && !t.toleranceCheckCompleted).length;
 
         return {
           ...prev,
@@ -2200,15 +2211,17 @@ export default function DoctorPublicPortalClient({
             ...prev,
             data: {
               ...(prev.data || {}),
-              status: 'approved',
-              isSigned: true
+              status: isTolerance ? prev.data.status : 'approved',
+              isSigned: true,
+              toleranceCheckCompleted: isTolerance ? true : prev.data.toleranceCheckCompleted
             },
             prescription: prev.prescription ? {
               ...prev.prescription,
-              status: 'approved',
-              state: 'approved',
-              signedAt: new Date().toISOString(),
-              signedBy: doctor?.name || 'Treating Physician'
+              status: isTolerance ? prev.prescription.status : 'approved',
+              state: isTolerance ? prev.prescription.state : 'approved',
+              toleranceCheckCompleted: isTolerance ? true : prev.prescription.toleranceCheckCompleted,
+              signedAt: isTolerance ? prev.prescription.signedAt : new Date().toISOString(),
+              signedBy: isTolerance ? prev.prescription.signedBy : (doctor?.name || 'Treating Physician')
             } : null
           };
         }
@@ -2216,11 +2229,30 @@ export default function DoctorPublicPortalClient({
       });
 
       triggerHaptic('success');
-      toast.success(
-        codesToSign.length > 1
-          ? `${codesToSign.length} prescriptions signed & authorized for compounding ✓`
-          : `Prescription #${codesToSign[0]} signed & authorized for compounding ✓`
-      );
+      if (isTolerance) {
+        toast.success(
+          `Tolerance check-in for ${taskOrRx.patientName || 'patient'} marked as verified & completed ✓`
+        );
+      } else {
+        toast.success(
+          codesToSign.length > 1
+            ? `${codesToSign.length} prescriptions signed & authorized for compounding ✓`
+            : `Prescription #${codesToSign[0]} signed & authorized for compounding ✓`
+        );
+      }
+
+      // Non-blocking background re-fetch to ensure sync with server
+      const targetSlug = opaqueCode || doctor?.slug || slug;
+      if (targetSlug) {
+        fetch(`/api/doctor/${encodeURIComponent(targetSlug)}?fresh=1`)
+          .then(res => res.ok ? res.json() : null)
+          .then(freshJson => {
+            if (freshJson && freshJson.success) {
+              setData(freshJson);
+            }
+          })
+          .catch(() => {});
+      }
     } catch (err) {
       console.error('Error signing off prescription:', err);
       toast.error('Signing error: ' + (err.message || 'Please try again'));
@@ -6357,7 +6389,10 @@ export default function DoctorPublicPortalClient({
                     {filteredTasks.slice(0, 5).map((t) => {
                       const isProposalTask = t.type === 'proposal_followup';
                       const isPortalTask = t.type === 'portal_inactive';
-                      const isApprovalTask = t.type === 'approval' || (!t.type && !isProposalTask && !isPortalTask);
+                      const isToleranceTask = t.type === 'tolerance_check' || t.type === 'tolerance_checkin';
+                      const isRefillTask = t.type === 'refill' || t.type === 'cycles';
+                      const isApprovalTask = t.type === 'approval' || (!t.type && !isProposalTask && !isPortalTask && !isToleranceTask && !isRefillTask);
+                      const isSigning = signingTaskId === (t.id || t.code);
                       const codifiedId = getCodifiedPatientId(t.patientName, t.code);
                       const displayPatient = isAuthorizedViewer ? t.patientName : codifiedId;
                       const patientPhone = (t.patientPhone || t.patient?.phone || '').replace(/[^0-9+]/g, '');
@@ -6372,9 +6407,9 @@ export default function DoctorPublicPortalClient({
                         ? { label: 'Offer Pending Checkout', bg: '#fffbeb', color: '#b45309', border: '#fde68a' }
                         : isPortalTask
                         ? { label: 'Portal Invite Pending', bg: '#f5f3ff', color: '#7c3aed', border: '#ddd6fe' }
-                        : t.type === 'refill'
+                        : isRefillTask
                         ? { label: 'Refill Due', bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4' }
-                        : t.type === 'tolerance_check'
+                        : isToleranceTask
                         ? { label: 'Tolerance Check', bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' }
                         : { label: 'Awaiting Rx Approval', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' };
 
@@ -6441,9 +6476,85 @@ export default function DoctorPublicPortalClient({
                                 <MessageCircle size={13} />
                                 <span>{isPortalTask ? 'Invite Portal' : 'Send Reminder'}</span>
                               </a>
+                            ) : isToleranceTask ? (
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                <a
+                                  href={waUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    padding: '6px 10px',
+                                    borderRadius: '5px',
+                                    background: '#f0fdf4',
+                                    border: '1px solid #bbf7d0',
+                                    color: '#15803d',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    textDecoration: 'none',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                  title="Send check-in message via WhatsApp"
+                                >
+                                  <MessageCircle size={13} />
+                                  <span>WhatsApp</span>
+                                </a>
+                                <button
+                                  type="button"
+                                  disabled={isSigning}
+                                  onClick={(e) => handleSignOffPrescription(t, e)}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    padding: '6px 10px',
+                                    borderRadius: '5px',
+                                    background: '#ffffff',
+                                    border: '1px solid #99f6e4',
+                                    color: '#0f766e',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    cursor: isSigning ? 'wait' : 'pointer',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                  title="Mark tolerance check as verified and complete"
+                                >
+                                  {isSigning ? (
+                                    <Loader2 size={13} className="animate-spin" />
+                                  ) : (
+                                    <Check size={13} />
+                                  )}
+                                  <span>Complete</span>
+                                </button>
+                              </div>
+                            ) : isRefillTask ? (
+                              <Link
+                                href={t.actionUrl || `/rx/${t.code}`}
+                                target="_blank"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  padding: '6px 12px',
+                                  borderRadius: '5px',
+                                  background: '#f0fdfa',
+                                  border: '1px solid #99f6e4',
+                                  color: '#0f766e',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  textDecoration: 'none',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                <ExternalLink size={13} />
+                                <span>Issue Refill</span>
+                              </Link>
                             ) : (
                               <button
                                 type="button"
+                                disabled={isSigning}
                                 onClick={(e) => handleSignOffPrescription(t, e)}
                                 style={{
                                   display: 'inline-flex',
@@ -6456,12 +6567,21 @@ export default function DoctorPublicPortalClient({
                                   color: '#ffffff',
                                   fontSize: '0.72rem',
                                   fontWeight: 700,
-                                  cursor: 'pointer',
+                                  cursor: isSigning ? 'wait' : 'pointer',
                                   whiteSpace: 'nowrap'
                                 }}
                               >
-                                <CheckCircle2 size={13} />
-                                <span>Approve</span>
+                                {isSigning ? (
+                                  <>
+                                    <Loader2 size={13} className="animate-spin" />
+                                    <span>Signing...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle2 size={13} />
+                                    <span>Approve</span>
+                                  </>
+                                )}
                               </button>
                             )}
                           </div>

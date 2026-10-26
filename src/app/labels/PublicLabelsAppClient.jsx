@@ -1431,6 +1431,43 @@ export default function PublicLabelsAppClient({
                   selectedPreset: cfg.preset
                 });
               }}
+              onLabelDataChange={(partIdx, updatedLabel) => {
+                setLabels(prev => {
+                  const next = [...prev];
+                  next[partIdx] = { ...(next[partIdx] || {}), ...updatedLabel };
+                  return next;
+                });
+                setPatientQueue(prev => {
+                  const next = [...prev];
+                  if (!next[activeQueueIndex]) return prev;
+                  const pItem = { ...next[activeQueueIndex] };
+                  const pLabels = Array.isArray(pItem.labels) ? [...pItem.labels] : [];
+                  pLabels[partIdx] = { ...(pLabels[partIdx] || {}), ...updatedLabel };
+                  pItem.labels = pLabels;
+                  next[activeQueueIndex] = pItem;
+                  return next;
+                });
+              }}
+              onPrescriptionUpdated={({ updatedFields, item }) => {
+                if (Array.isArray(updatedFields?.pharmacyLabels)) {
+                  setLabels(updatedFields.pharmacyLabels);
+                  setPatientQueue(prev => {
+                    const next = [...prev];
+                    if (!next[activeQueueIndex]) return prev;
+                    next[activeQueueIndex] = {
+                      ...next[activeQueueIndex],
+                      labels: updatedFields.pharmacyLabels
+                    };
+                    return next;
+                  });
+                } else if (item) {
+                  setLabels(prev => {
+                    const next = [...prev];
+                    next[labelIndex] = { ...(next[labelIndex] || {}), ...item };
+                    return next;
+                  });
+                }
+              }}
               initialEditMode={isEditing}
               isStandalone={true}
               isEs={isEs}

@@ -469,32 +469,43 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
 
 ## 40. Ingesta Clínica de Prescripciones y Validación de Etiquetas (EU GMP Integrity Rule)
 - **Cero Contaminación Cruzada en Recetas Multifase**: Cuando una prescripción contenga múltiples frascos, fases o momentos de administración (ej. Mañana vs Noche, o Fase 1 vs Fase 2), cada fase DEBE tener su propio bloque completamente aislado de posología, lote, duración y excipientes. Prohibido arrastrar las instrucciones de la Fase 1 a la Fase 2.
-- **Aritmética Obligatoria de Unidades (Posology Math)**:
-  - Nunca asumir cantidades por defecto (como "90 cápsulas" o "1 cápsula diaria").
-  - Las unidades totales DEBEN calcularse matemáticamente: `Unidades = (Tomas al día) × (Días de tratamiento)`.
-  - Ejemplo: 2 tomas/día (almuerzo + cena) × 60 días = **120 cápsulas (2 Meses)**. 1 toma/día × 60 días = **60 cápsulas (2 Meses)**.
+- **Extracción Universal de Principios Activos (`apis` / `items` / `activeIngredients` — Invariante de Contenido)**:
+  - Está terminantemente prohibido que una etiqueta farmacéutica se imprima con textos placeholder como `• Personalized Compounded Active Formula` o `Active Compounded Formulation` cuando la prescripción tiene ingredientes en cualquiera de sus estructuras (`formulationBlocks[].items`, `phases[].apis`, `parts[].ingredients`, `rx.items`, `rx.activeIngredients`, `rx.compounds` o `rx.prescriptionLines`).
+  - Todo generador de etiquetas (`getPharmapolisLabelsForPrescription`, `usePrescriptionData`) DEBE usar los extractores canónicos (`extractCleanApisFromSource` y `extractVehicleFromSource`) para separar automáticamente los principios activos reales de los vehículos galénicos (`TrichoSol™`, `TrichoOil™`, `Pentravan®`, cápsulas vegetales) e inyectar siempre el arreglo `apis` limpio y el campo `vehicle` en cada etiqueta.
+- **Auto-Reparación Obligatoria de `rx.pharmacyLabels` (Self-Healing Priority 0 Invariant)**:
+  - Nunca confiar ciegamente en `rx.pharmacyLabels` guardado en Firestore como única fuente sin validación. Si un registro de `rx.pharmacyLabels` contiene placeholders, carece de `apis`, o presenta volúmenes/vehículos corruptos (como `"90 Capsules"` o `"Oral Route"` en una fórmula tópica), el sistema DEBE auto-reparar (`self-heal`) los ingredientes, vehículo, volumen y vía cruzándolos en tiempo real con `rx.formulationBlocks` / `rx.phases` / `rx.parts`, preservando únicamente las ediciones manuales legítimas del usuario (como nombre de médico, clínica o licencia).
+- **Coherencia Estricta entre Vía de Administración, Vehículo y Advertencias (`CAUTION`)**:
+  - Jamás mostrar vehículos de cápsulas orales ni advertencias `FOR ORAL ADMINISTRATION ONLY` en formulaciones de uso tópico o capilar (`Topical Solution`, `Topical Oil`, `TrichoSol™`, `TrichoOil™`, `apply onto the scalp`, `massage`, `wash with shampoo`). Las fórmulas capilares/tópicas DEBEN mostrar siempre `CAUTION: FOR TOPICAL SCALP USE ONLY • KEEP OUT OF REACH OF CHILDREN`.
+- **Aritmética Obligatoria de Unidades y Preservación de Volumen Líquido (Posology & Volume Math)**:
+  - Nunca asumir cantidades por defecto (como "90 cápsulas" o "1 cápsula diaria") ni sobrescribir volúmenes líquidos (`100 mL`, `30 mL`, `50 g`) con conteos de cápsulas.
+  - Si el bloque o fase define un volumen en `mL` o `g` (o la forma galénica es solución, aceite, espuma, loción o crema), se DEBE respetar íntegramente dicho volumen neto (`100 mL`, `30 mL`).
+  - Para formas sólidas orales (cápsulas/comprimidos), las unidades totales DEBEN calcularse matemáticamente: `Unidades = (Tomas al día) × (Días de tratamiento)`. Ejemplo: 2 tomas/día × 60 días = **120 cápsulas (2 Meses)**.
 - **Coherencia Temporal Regulatoria (EU GMP)**:
   - La fecha de fabricación o dispensación (`Mfg Date`) NUNCA puede ser anterior a la fecha en que el médico firmó la receta (`Prescription Date`). Fabricar una fórmula magistral individualizada antes de la fecha de la receta es una infracción regulatoria grave.
   - La fecha de caducidad (`Exp Date`) debe calcularse hacia adelante a partir de la fecha real de dispensación/elaboración (típicamente +1 año).
 - **Fidelidad de Excipientes y Requisitos de Formulación**:
-  - Si la prescripción estipula requisitos como *"Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives"*, este texto DEBE vincularse fielmente al campo `base` / `vehicle` de la etiqueta. Prohibido reemplazarlo por textos genéricos como *"Micronized Compounded Hard Capsules Base"*.
-- **Atribución Médica Exacta**:
-  - En informes genómicos o diagnósticos (como TrichoTest de Fagron), identificar siempre al médico prescriptor u ordenante real indicado en el informe (ej. Dr. Sezgin Cagatay en Hortman Clinics) con su número de licencia DHA, no al director de la clínica ni al personal de laboratorio.
+  - Si la prescripción estipula requisitos como *"Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives"*, este texto DEBE vincularse fielmente al campo `base` / `vehicle` de la etiqueta (solo para fórmulas orales en cápsulas). Prohibido reemplazarlo por textos genéricos como *"Micronized Compounded Hard Capsules Base"*.
+- **Atribución Médica Exacta, Clínica Opcional en Etiqueta y Aislamiento de Firebase**:
+  - En informes genómicos o diagnósticos (como TrichoTest de Fagron), identificar siempre al médico prescriptor u ordenante real indicado en el informe con su número de licencia, limpiando cualquier prefijo redundante (`License: License:` → `License:`).
+  - **Clínica Opcional en Etiquetas (Caso Dr. Çağatay Sezgin / `Novomed - Jumeirah 1`)**: El nombre de la clínica es opcional en la generación de etiquetas. Para el **Dr. Çağatay Sezgin**, aunque su clínica asociada en el directorio sea `Novomed - Jumeirah 1`, sus tests y recetas se emiten exclusivamente bajo su nombre personal, por lo que en todas las etiquetas solo debe figurar el nombre del doctor y su licencia (`Rx: Dr. Çağatay Sezgin, MD, FISHRS • (License: DHA 00208953-005)`), sin añadir el nombre de la clínica salvo que el operador lo escriba explícitamente.
+  - **Aislamiento de Ediciones de Clínica en Label Studio**: Si en la pantalla de etiquetas (`PharmacyLabelsModal` / `labelsRepository`) se edita o se borra el nombre de la clínica para que no aparezca en la etiqueta impresa, dicho cambio se aplica exclusivamente al objeto de la etiqueta (`pharmacyLabels[]`) y **NUNCA debe sobrescribir ni alterar la clínica asociada al médico o a la prescripción en Firebase** (`users`, `clinics`, `treatingClinic`, `treatingDoctor`).
 
 ## 41. Integridad Tipográfica y Prohibición de Solapes en Etiquetas Farmacéuticas (Zero-Overlap Label Invariant — Golden Rule)
 - **Prohibición Total de Solapes Verticales (Zero-Overlap Invariant)**:
   - En ninguna etiqueta farmacéutica (SVG o PDF, Delivery o Standard) se permite que un bloque de texto colisione o solape con otro bloque, línea divisoria o pie de página regulatorio.
+  - En la **Columna Izquierda (bajo el QR)**, está prohibido apilar bloques redundantes que provoquen cortes contra la barra azul inferior: solo se muestran `NET CONTENT` y `STORAGE CONDITIONS` (el lote `Batch` ya figura en el pie de página).
   - El contenedor de instrucciones de uso / posología (`posBox`) DEBE tener un **tope estricto de seguridad (Hard Clamp)**:
     `posBoxY + posBoxHeight <= maxPosBoxBottom` (donde `maxPosBoxBottom = bCautionDividerY - 12px`).
-  - Bajo ninguna circunstancia `posBox` puede cruzar hacia abajo sobre la advertencia de precaución (`CAUTION: FOR ... USE ONLY`), la firma del médico (`Rx: Dr...`) o la monografía regulatoria.
+  - Bajo ninguna circunstancia `posBox` puede cruzar hacia abajo sobre la advertencia de precaución (`CAUTION: FOR ... USE ONLY`) o la firma del médico (`Rx: Dr...`).
 - **Escalado Responsivo por Tiers de Altura de Etiqueta**:
   - Toda etiqueta debe ajustar dinámicamente sus tamaños tipográficos y saltos de línea según la relación de aspecto física del lienzo:
     1. **Standard Height (HEIGHT ≥ 850 px, ej. 75×45 mm / 900 px canvas)**: Tipografía generosa (ingredientes 25–34 px, posología 21–28 px).
     2. **Medium Height (HEIGHT 720–850 px, ej. 100×50 mm / 750 px canvas)**: Tipografía calibrada (ingredientes 21–28 px, posología 18–23 px).
     3. **Short Height (HEIGHT < 720 px, ej. 90×38 mm / 633 px canvas)**: Tipografía compacta (ingredientes 19–25 px, posología 17–21 px).
-- **Estructuración a Dos Columnas para Fórmulas Complejas (≥ 3 Principios Activos)**:
-  - Cuando una prescripción contenga 3 o más principios activos (APIs), NUNCA deben encadenarse en un único párrafo continuo con guiones.
-  - Deben renderizarse en una cuadrícula clínica estructurada a **dos columnas** con viñetas individuales (`• Nombre Dosis`), maximizando la legibilidad médica y ahorrando altura vertical para la posología y advertencias.
+- **Estructuración Inteligente de Columnas para Principios Activos (1 Columna para 1–3 APIs, 2 Columnas para ≥ 4 APIs)**:
+  - Para **1 a 3 principios activos (APIs)**, se DEBE renderizar en **una sola columna de ancho completo** con tipografía grande (`26–34 px`), evitando partir en dos líneas concentraciones complejas como `Prostaquinon™ 3% (30 mg/mL)`.
+  - Cuando una prescripción contenga **4 o más principios activos (APIs)**, deben renderizarse en una cuadrícula clínica estructurada a **dos columnas** con viñetas individuales (`• Nombre Dosis`), maximizando la legibilidad y ahorrando altura vertical.
+  - El resaltador de dosis (`renderIngredientLine`) DEBE destacar en azul clínico (`#0284c7`) tanto concentraciones simples (`10 mg/mL`) como compuestas con paréntesis (`3% (30 mg/mL)`).
 - **Idioma Estándar Obligatorio**:
   - Todas las etiquetas, textos de posología, encabezados, advertencias, especificaciones técnicas y hojas de lote A4 DEBEN generarse **exclusivamente en inglés**.
 - **Márgenes de Seguridad para Guillotina (Bleed Safety)**:

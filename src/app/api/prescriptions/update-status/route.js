@@ -36,8 +36,9 @@ export async function POST(request) {
     const body = await request.json();
     const { prescriptionId, prescriptionNumber, status, newStatus, reason, updatedBy } = body;
 
-    const targetStatusRaw = newStatus || status;
-    if (!targetStatusRaw) {
+    const isToleranceAction = Boolean(body.toleranceCheckCompleted || body.toleranceChecked || body.taskType === 'tolerance_check');
+    const targetStatusRaw = newStatus || status || (isToleranceAction ? 'current' : null);
+    if (!targetStatusRaw && !isToleranceAction) {
       return NextResponse.json(
         { error: 'Status is required' },
         { status: 400 }
@@ -46,7 +47,7 @@ export async function POST(request) {
 
     const normalizedStatus = String(targetStatusRaw).toLowerCase().trim();
 
-    if (!ALL_VALID_STATUSES.includes(normalizedStatus)) {
+    if (normalizedStatus !== 'current' && !ALL_VALID_STATUSES.includes(normalizedStatus)) {
       return NextResponse.json(
         { 
           error: `Invalid status "${targetStatusRaw}". Allowed statuses are: ${ALL_VALID_STATUSES.join(', ')}`,
@@ -131,40 +132,47 @@ export async function POST(request) {
 
     const existingData = docSnap.data() || {};
     const previousStatus = existingData.status || existingData.state || 'draft';
-    const isNowDispensed = DISPENSED_STATUSES.includes(normalizedStatus);
+    const finalStatus = (normalizedStatus && normalizedStatus !== 'current') ? normalizedStatus : previousStatus;
+    const isNowDispensed = DISPENSED_STATUSES.includes(finalStatus);
 
     const historyEntry = {
       from: previousStatus,
-      to: normalizedStatus,
+      to: finalStatus,
       timestamp: new Date().toISOString(),
-      reason: reason || 'Manual clinical status quick-action update',
+      reason: reason || (isToleranceAction ? 'Clinical tolerance check-in verified & completed' : 'Manual clinical status quick-action update'),
       updatedBy: updatedBy || 'Treating Physician / Clinic Administrator'
     };
 
     const updatePayload = {
-      status: normalizedStatus,
-      state: normalizedStatus,
-      orderStatus: normalizedStatus,
-      fagronStatus: normalizedStatus,
+      status: finalStatus,
+      state: finalStatus,
+      orderStatus: finalStatus,
+      fagronStatus: finalStatus,
       isDispensed: isNowDispensed,
       updatedAt: new Date().toISOString(),
       statusHistory: FieldValue.arrayUnion(historyEntry)
     };
 
-    if (['approved', 'ordered', 'active', 'delivered', 'completed', 'dispensed'].includes(normalizedStatus)) {
+    if (isToleranceAction) {
+      updatePayload.toleranceCheckCompleted = true;
+      updatePayload.toleranceCheckedAt = new Date().toISOString();
+      updatePayload.toleranceCheckedBy = updatedBy || 'Treating Physician';
+    }
+
+    if (['approved', 'ordered', 'active', 'delivered', 'completed', 'dispensed'].includes(finalStatus)) {
       updatePayload.isTreatmentProposal = false;
       updatePayload.orderStatus = isNowDispensed ? 'Delivered' : 'Ordered';
     }
 
-    if (normalizedStatus === 'approved') {
+    if (finalStatus === 'approved') {
       updatePayload.isSigned = true;
       updatePayload.signedAt = new Date().toISOString();
-      updatePayload.signedBy = updatedBy || 'Compounding Studio Specialist';
+      updatePayload.signedBy = updatedBy || 'Treating Physician';
       updatePayload.approvalStatus = 'approved';
       updatePayload.doctorApproval = {
         approved: true,
         approvedAt: new Date().toISOString(),
-        approvedBy: updatedBy || 'Compounding Studio Specialist',
+        approvedBy: updatedBy || 'Treating Physician',
         source: 'clinical_label_desk'
       };
     }
@@ -189,17 +197,27 @@ export async function POST(request) {
       }
       if (typeof invalidateDoctorCache === 'function') {
         invalidateDoctorCache();
+        if (existingData.doctorId) invalidateDoctorCache(existingData.doctorId);
+        if (existingData.doctorSlug) invalidateDoctorCache(existingData.doctorSlug);
+        if (existingData.treatingDoctor?.id) invalidateDoctorCache(existingData.treatingDoctor.id);
+        if (existingData.treatingDoctor?.name) invalidateDoctorCache(existingData.treatingDoctor.name);
+        if (existingData.doctorName) invalidateDoctorCache(existingData.doctorName);
       }
-    } catch (_) {}
+    } catch (cacheErr) {
+      console.warn('[update-status] Cache invalidation notice:', cacheErr?.message);
+    }
 
     return NextResponse.json({
       success: true,
       id: docRef.id,
       prescriptionNumber: existingData.prescriptionNumber || prescriptionNumber || docRef.id,
       previousStatus,
-      newStatus: normalizedStatus,
+      newStatus: finalStatus,
       isDispensed: isNowDispensed,
-      message: `Prescription status successfully updated to "${normalizedStatus}"`
+      toleranceCheckCompleted: isToleranceAction ? true : existingData.toleranceCheckCompleted,
+      message: isToleranceAction
+        ? `Tolerance check successfully completed for prescription #${existingData.prescriptionNumber || prescriptionNumber || docRef.id}`
+        : `Prescription status successfully updated to "${finalStatus}"`
     });
   } catch (error) {
     console.error('[update-status] Error:', error);

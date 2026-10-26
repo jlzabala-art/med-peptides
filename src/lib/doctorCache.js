@@ -5,16 +5,26 @@ import { resolveDoctorSpecialtyIntelligence } from '@/services/specialtyBlueprin
 import { sanitizePrescriptionCode } from '@/lib/prescriptionSanitizer';
 
 // ── In-Memory RAM Cache (Golden Rule #2) ─────────────────────────────────────
-// Layer 1: 0ms RAM cache with 10-minute TTL
-export const DOCTOR_RAM_CACHE = new Map();
-export const DOCTOR_DIRECTORY_CACHE = {
-  expiresAt: 0,
-  doctors: []
-};
-export const DOCTORS_WITH_RX_CACHE = {
-  expiresAt: 0,
-  doctors: []
-};
+// Layer 1: 0ms RAM cache with 10-minute TTL, shared via globalThis across Server Components & API routes
+if (!globalThis.__DOCTOR_RAM_CACHE__) {
+  globalThis.__DOCTOR_RAM_CACHE__ = new Map();
+}
+if (!globalThis.__DOCTOR_DIRECTORY_CACHE__) {
+  globalThis.__DOCTOR_DIRECTORY_CACHE__ = {
+    expiresAt: 0,
+    doctors: []
+  };
+}
+if (!globalThis.__DOCTORS_WITH_RX_CACHE__) {
+  globalThis.__DOCTORS_WITH_RX_CACHE__ = {
+    expiresAt: 0,
+    doctors: []
+  };
+}
+
+export const DOCTOR_RAM_CACHE = globalThis.__DOCTOR_RAM_CACHE__;
+export const DOCTOR_DIRECTORY_CACHE = globalThis.__DOCTOR_DIRECTORY_CACHE__;
+export const DOCTORS_WITH_RX_CACHE = globalThis.__DOCTORS_WITH_RX_CACHE__;
 
 export const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -28,6 +38,18 @@ export function invalidateDoctorCache(slugOrId = null) {
   } else {
     const key = String(slugOrId).toLowerCase().trim();
     DOCTOR_RAM_CACHE.delete(key);
+    for (const [k, v] of DOCTOR_RAM_CACHE.entries()) {
+      const doc = v?.data?.doctor;
+      if (
+        k.includes(key) ||
+        doc?.id?.toLowerCase() === key ||
+        doc?.opaqueCode?.toLowerCase() === key ||
+        doc?.slug?.toLowerCase() === key ||
+        (doc?.name && slugify(doc.name) === key)
+      ) {
+        DOCTOR_RAM_CACHE.delete(k);
+      }
+    }
   }
 }
 
@@ -703,7 +725,10 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         notes: d.notes || d.clinicalNotes || '',
         ingestionStage: d.ingestionStage || null,
         reviewEtaHours: d.reviewEtaHours || 24,
-        validationStatus: d.validationStatus || null
+        validationStatus: d.validationStatus || null,
+        toleranceCheckCompleted: Boolean(d.toleranceCheckCompleted),
+        toleranceCheckedAt: d.toleranceCheckedAt || null,
+        toleranceCheckedBy: d.toleranceCheckedBy || null
       });
     }
   });
@@ -918,7 +943,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     // Clinical Action 5: Post-Delivery Tolerance & Symptom Check-in (7-14 days after dispensing)
     const toleranceKey = `${patientKey}_tolerance`;
     const isDeliveredOrRecent = (rxStatus === 'delivered' || (isRxSold(rx) && rxAgeDays >= 7 && rxAgeDays <= 21));
-    if (isDeliveredOrRecent && !seenPatientTasks.has(toleranceKey)) {
+    const isToleranceCompleted = Boolean(rx.toleranceCheckCompleted || rx.toleranceCheckedAt);
+    if (isDeliveredOrRecent && !isToleranceCompleted && !seenPatientTasks.has(toleranceKey)) {
       seenPatientTasks.add(toleranceKey);
       const rawDocName = (cleanDoctorName || 'Khalid Shukri').replace(/^Dr\.?\s*/i, '').trim();
       clinicalTasks.push({

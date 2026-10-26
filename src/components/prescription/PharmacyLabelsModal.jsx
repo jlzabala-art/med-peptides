@@ -87,7 +87,8 @@ export default function PharmacyLabelsModal({
   hideShippingLabel = false,
   onPrescriptionUpdated = null,
   onLabelIndexChange = null,
-  onConfigChange = null
+  onConfigChange = null,
+  onLabelDataChange = null
 }) {
   const [selectedProductIdx, setSelectedProductIdx] = useState(typeof initialLabelIndex === 'number' ? initialLabelIndex : 0);
   const [activeVariant, setActiveVariantState] = useState(() => {
@@ -210,6 +211,7 @@ export default function PharmacyLabelsModal({
       [selectedProductIdx]: updated
     }));
     setMarkdownText(newMd);
+    onLabelDataChange?.(selectedProductIdx, updated);
   };
 
   const handleApisFieldChange = (rawText) => {
@@ -252,6 +254,7 @@ export default function PharmacyLabelsModal({
       [selectedProductIdx]: updated
     }));
     setMarkdownText(newMd);
+    onLabelDataChange?.(selectedProductIdx, updated);
   };
 
   const handleMarkdownChange = (newMd) => {
@@ -263,6 +266,7 @@ export default function PharmacyLabelsModal({
       [selectedProductIdx]: parsed
     }));
     setApisEditorText(formatApisForEditor(parsed));
+    onLabelDataChange?.(selectedProductIdx, parsed);
   };
 
   const handleResetOriginal = () => {
@@ -2600,15 +2604,18 @@ export default function PharmacyLabelsModal({
                         physicianName={currentItem.doctorName || currentItem.physician || ''}
                         clinicId={currentItem.clinicId || ''}
                         clinicName={currentItem.clinicName || ''}
-                        strictClinic={Boolean(currentItem.clinicId || currentItem.clinicName)}
+                        strictClinic={false}
                         allowCustom={true}
                         placeholder={isEs ? "Seleccionar o escribir doctor..." : "Select or type doctor..."}
                         onChange={({ doctorId, doctorName, license }) => {
+                          const isSezginSelected = /sezgin|cagatay|çağatay/i.test(String(doctorName || ''));
                           const updated = {
                             ...currentItem,
                             doctorName: doctorName || '',
                             doctorId: doctorId || '',
-                            doctorLicense: license || currentItem.doctorLicense || ''
+                            doctorLicense: license || currentItem.doctorLicense || '',
+                            // Dr. Sezgin requests only his name on labels without clinic name by default
+                            ...(isSezginSelected ? { clinicName: '', clinicId: '' } : {})
                           };
                           const newMd = labelToMarkdown(updated);
                           updated.labelMarkdown = newMd;
@@ -2617,16 +2624,53 @@ export default function PharmacyLabelsModal({
                             [selectedProductIdx]: updated
                           }));
                           setMarkdownText(newMd);
+                          onLabelDataChange?.(selectedProductIdx, updated);
                         }}
                       />
                     </div>
 
                     <div className="gcp-col-6 gcp-field-wrap">
-                      <label className="gcp-form-label">
-                        <span>{isEs ? 'Clínica' : 'Clinic'}</span>
-                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, textTransform: 'none', marginLeft: '4px' }}>
-                          {isEs ? '(Opcional · Elegir de Atlas)' : '(Optional · Select from Atlas)'}
-                        </span>
+                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span>{isEs ? 'Clínica en Etiqueta' : 'Clinic on Label'}</span>
+                          <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500, textTransform: 'none', marginLeft: '4px' }}>
+                            {isEs ? '(Opcional · No altera datos del médico en Firebase)' : '(Optional · Label-only, does not alter doctor record)'}
+                          </span>
+                        </div>
+                        {currentItem.clinicName ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = {
+                                ...currentItem,
+                                clinicName: '',
+                                clinicId: '',
+                                showClinicOnLabel: false
+                              };
+                              const newMd = labelToMarkdown(updated);
+                              updated.labelMarkdown = newMd;
+                              setEditedOverrides(prev => ({
+                                ...prev,
+                                [selectedProductIdx]: updated
+                              }));
+                              setMarkdownText(newMd);
+                              onLabelDataChange?.(selectedProductIdx, updated);
+                            }}
+                            style={{
+                              border: '1px solid #fecaca',
+                              background: '#fef2f2',
+                              color: '#dc2626',
+                              borderRadius: '4px',
+                              fontSize: '0.64rem',
+                              fontWeight: 700,
+                              padding: '1px 6px',
+                              cursor: 'pointer'
+                            }}
+                            title={isEs ? 'Ocultar clínica en la etiqueta impresa' : 'Omit clinic from printed label'}
+                          >
+                            {isEs ? 'Omitir en etiqueta ×' : 'Omit on label ×'}
+                          </button>
+                        ) : null}
                       </label>
                       <ClinicPicker
                         value={currentItem.clinicId || ''}
@@ -2636,7 +2680,8 @@ export default function PharmacyLabelsModal({
                           const updated = {
                             ...currentItem,
                             clinicName: clinicName || '',
-                            clinicId: clinicId || ''
+                            clinicId: clinicId || '',
+                            showClinicOnLabel: Boolean(clinicName)
                           };
                           const newMd = labelToMarkdown(updated);
                           updated.labelMarkdown = newMd;
@@ -2645,8 +2690,9 @@ export default function PharmacyLabelsModal({
                             [selectedProductIdx]: updated
                           }));
                           setMarkdownText(newMd);
+                          onLabelDataChange?.(selectedProductIdx, updated);
                         }}
-                        placeholder={isEs ? "Seleccionar clínica de Atlas..." : "Select clinic from Atlas..."}
+                        placeholder={isEs ? "Sin clínica en etiqueta (Opcional)..." : "No clinic on label (Optional)..."}
                       />
                     </div>
 

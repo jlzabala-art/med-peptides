@@ -60,7 +60,7 @@ function wrapDirections(text, firstLineMaxChars = 44, otherLinesMaxChars = 56) {
  * (e.g., 500 mcg, 25 mg, 4%, etc.) is rendered in bold dark blue (#0284c7) for instant recognition.
  */
 function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a') {
-  const match = String(line).match(/^(.*?\s+)([\d.,]+\s*(?:mcg|mg|g|%|iu|fu|spu|ml|capsules?|drops?)(?:\s*\([^)]+\))?)\s*$/i);
+  const match = String(line).match(/^(.*?\s+)([\d.,]+[\s\u00A0]*(?:mcg|mg|g|%|iu|fu|spu|ml|capsules?|drops?)(?:[\s\u00A0]*\/[\s\u00A0]*(?:ml|g|cap|dose))?(?:[\s\u00A0]*(?:topical|oral))?(?:[\s\u00A0]*\([^)]+\))?)\s*$/i);
   if (match) {
     const namePart = match[1];
     const dosePart = match[2];
@@ -230,7 +230,11 @@ export default function PharmapolisLabelSvg({
   const expDate = formatLabelDate(labelData.expDate, '04-10-2027');
   const storage = labelData.storage || 'Store at room temperature';
   const doctorName = labelData.doctorName !== undefined && labelData.doctorName !== null ? String(labelData.doctorName).trim() : (labelData.physician || '');
-  const clinicName = labelData.clinicName !== undefined && labelData.clinicName !== null ? String(labelData.clinicName).trim() : (labelData.clinic || '');
+  const rawClinicName = labelData.clinicName !== undefined && labelData.clinicName !== null ? String(labelData.clinicName).trim() : (labelData.clinic || '');
+  // Clinic name on printed labels is strictly optional; omit placeholders, and if showClinicOnLabel === false, omit it
+  const clinicName = (labelData.showClinicOnLabel === false || /^licensed\s+clinical\s+practice$/i.test(rawClinicName) || /^centro\s+m[eé]dico\s+prescriptor$/i.test(rawClinicName))
+    ? ''
+    : rawClinicName;
   const doctorLicense = labelData.doctorLicense !== undefined && labelData.doctorLicense !== null ? String(labelData.doctorLicense).trim() : (labelData.license || '');
   const batchCode = labelData.batchCode || 'PHARM-2026-B948';
   const lote = labelData.lote || '2609-PLV';
@@ -261,18 +265,45 @@ export default function PharmapolisLabelSvg({
 
   // Extract active ingredients list for Block 2 (Back Label)
   const activeIngredientsList = React.useMemo(() => {
-    if (Array.isArray(labelData.apis) && labelData.apis.length > 0) {
-      const filtered = labelData.apis.filter(a => {
-        const n = (a.drugName || a.drug || a.name || a.productName || a.activeIngredient || '').toLowerCase();
+    const rawApisSource =
+      (Array.isArray(labelData.apis) && labelData.apis.length > 0 ? labelData.apis : null) ||
+      (Array.isArray(labelData.items) && labelData.items.length > 0 ? labelData.items : null) ||
+      (Array.isArray(labelData.activeIngredients) && labelData.activeIngredients.length > 0 ? labelData.activeIngredients : null) ||
+      (Array.isArray(labelData.activeIngredientsList) && labelData.activeIngredientsList.length > 0 ? labelData.activeIngredientsList : null);
+
+    if (rawApisSource && rawApisSource.length > 0) {
+      const filtered = rawApisSource.filter(a => {
+        if (!a) return false;
+        if (typeof a === 'string') {
+          const sLower = a.trim().toLowerCase();
+          return (
+            Boolean(sLower) &&
+            sLower !== 'api' &&
+            sLower !== 'active api' &&
+            sLower !== 'active compounded formulation' &&
+            sLower !== 'personalized compounded active formula' &&
+            !sLower.includes('trichosol') &&
+            !sLower.includes('trichooil') &&
+            !sLower.includes('pentravan') &&
+            !sLower.includes('vehicle')
+          );
+        }
+        const n = (a.drugName || a.drug || a.name || a.productName || a.activeIngredient || '').toLowerCase().trim();
         const f = (a.dosageForm || a.form || '').toLowerCase();
+        const isPlaceholder = !n || n === 'api' || n === 'active api' || n === 'active compounded formulation' || n === 'personalized compounded active formula';
         const isVeh = a.isVehicle || a.isVehicleOrBase || a._isVehicleOrBase || a.itemType === 'vehicle_base' || f.includes('vehicle') || n.includes('vehicle') || n.includes('trichosol') || n.includes('trichooil') || n.includes('pentravan') || n.includes('pomade base') || n.includes('ointment base');
-        return !isVeh;
+        return !isVeh && !isPlaceholder;
       });
       if (filtered.length > 0) {
         return filtered.map(a => {
-          let name = String(a.drugName || a.drug || a.name || a.productName || a.activeIngredient || 'API').trim();
+          if (typeof a === 'string') {
+            return a.replace(/^[•*-]\s*/, '').replace(/\s*\bTM\b/g, '™').trim();
+          }
+          let name = String(a.drugName || a.drug || a.name || a.productName || a.activeIngredient || 'API')
+            .replace(/\s*\bTM\b/g, '™')
+            .trim();
           let dose = a.dosage || a.dose || a.strength || a.concentration || '';
-          if (dose) {
+          if (dose && dose !== '—' && dose !== '-') {
             dose = String(dose)
               .replace(/Tópico/gi, 'Topical')
               .replace(/Oral/gi, 'Oral')
@@ -280,6 +311,7 @@ export default function PharmapolisLabelSvg({
               .replace(/Dose to calibrate/gi, '3% Topical')
               .trim();
           } else {
+            dose = '';
             const nLower = name.toLowerCase();
             if (nLower.includes('prostaquinon')) dose = '3% Topical';
             else if (nLower.includes('minoxidil')) dose = '5% Topical';
@@ -287,7 +319,6 @@ export default function PharmapolisLabelSvg({
           }
 
           // Anti-duplication engine: if name already ends with concentration/dosage that dose repeats
-          // Example: name = "Diltiazem Hydrochloride 2%", dose = "2% (0.6 g)" -> "Diltiazem Hydrochloride 2% (0.6 g)"
           if (dose) {
             const trailingDoseMatch = name.match(/\s+([0-9]+(?:\.[0-9]+)?\s*(?:%|mg|mcg|g|iu|fu|spu))\s*$/i);
             if (trailingDoseMatch) {
@@ -307,28 +338,45 @@ export default function PharmapolisLabelSvg({
     }
     if (formula) {
       const parts = formula.split(/\s*(?:\+|\bin\b)\s*/i).map(p => p.trim()).filter(Boolean);
-      const nonVehParts = parts.filter(p => !p.toLowerCase().includes('vehicle') && !p.toLowerCase().includes('trichosol') && !p.toLowerCase().includes('trichooil') && !p.toLowerCase().includes('pentravan') && !p.toLowerCase().includes('base'));
+      const nonVehParts = parts.filter(p => {
+        const pl = p.toLowerCase();
+        return !pl.includes('vehicle') && !pl.includes('trichosol') && !pl.includes('trichooil') && !pl.includes('pentravan') && !pl.includes('base') && pl !== 'active compounded formulation' && pl !== 'personalized compounded active formula';
+      });
       if (nonVehParts.length > 0) {
-        return nonVehParts.map(p => p.replace(/Tópico/gi, 'Topical').replace(/Oral/gi, 'Oral'));
+        return nonVehParts.map(p => p.replace(/\bTM\b/g, '™').replace(/Tópico/gi, 'Topical').replace(/Oral/gi, 'Oral'));
       }
     }
     return ['Personalized Compounded Active Formula'];
-  }, [labelData.apis, formula]);
+  }, [labelData.apis, labelData.items, labelData.activeIngredients, labelData.activeIngredientsList, formula]);
 
   const formulaLower = (formula || '').toLowerCase();
   const dFormLower = (labelData.dosageForm || '').toLowerCase();
   const pNameLower = (labelData.productName || productTitle || '').toLowerCase();
+  const dirLower = (directions || '').toLowerCase();
+  const rawVehStr = (typeof labelData.vehicle === 'string' ? labelData.vehicle : labelData.vehicle?.name) || '';
+  const rawVehLower = rawVehStr.toLowerCase();
 
-  const isPomadeOrOintment = formulaLower.includes('pomade') || formulaLower.includes('pomada') || formulaLower.includes('ointment') || formulaLower.includes('diltiazem') || dFormLower.includes('ointment') || dFormLower.includes('pomade');
-  const isHormone = formulaLower.includes('testosterone') || formulaLower.includes('estradiol') || formulaLower.includes('progesterone') || formulaLower.includes('pentravan') || pNameLower.includes('testosterone') || pNameLower.includes('estradiol') || pNameLower.includes('hormone');
-  const isOral = dFormLower.includes('oral') || dFormLower.includes('capsule') || formulaLower.includes('capsule') || formulaLower.includes('nattokinase') || formulaLower.includes('serrapeptase');
+  const isPomadeOrOintment = formulaLower.includes('pomade') || formulaLower.includes('pomada') || formulaLower.includes('ointment') || formulaLower.includes('diltiazem') || dFormLower.includes('ointment') || dFormLower.includes('pomade') || pNameLower.includes('pomade') || pNameLower.includes('ointment');
+  const isHormone = formulaLower.includes('testosterone') || formulaLower.includes('estradiol') || formulaLower.includes('progesterone') || formulaLower.includes('pentravan') || pNameLower.includes('testosterone') || pNameLower.includes('estradiol') || pNameLower.includes('hormone') || rawVehLower.includes('pentravan');
+  const isTopicalScalp = !isPomadeOrOintment && !isHormone && (
+    /\b(scalp|shampoo|trichosol|trichooil|trichofoam)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`) ||
+    /\b(leave the solution on your scalp|washing your hair|wash your scalp|apply.*scalp|topical scalp)\b/i.test(dirLower)
+  );
+  const isTrichoOil = isTopicalScalp && /\b(trichooil|scalp oil|washing your hair|pre-wash|massage.*minutes)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
+  const isOral = !isPomadeOrOintment && !isHormone && !isTopicalScalp && (
+    dFormLower.includes('oral') || dFormLower.includes('capsule') || formulaLower.includes('capsule') || formulaLower.includes('nattokinase') || formulaLower.includes('serrapeptase') || /\btake\s+\d+\s*cap/i.test(dirLower)
+  );
 
-  let vehicleName = (typeof labelData.vehicle === 'string' ? labelData.vehicle : labelData.vehicle?.name) || 
-                      (labelData.apis?.find(a => a.itemType === 'vehicle_base' || a.isVehicleOrBase)?.name) ||
+  const validSavedVehicle = (isTopicalScalp && /vegetable capsules/i.test(rawVehStr)) ? '' : rawVehStr;
+  const cleanVolForVeh = (isTopicalScalp && /capsule/i.test(String(volume || ''))) ? (isTrichoOil ? '30 mL' : '100 mL') : volume;
+
+  let vehicleName = validSavedVehicle || 
+                      (labelData.apis?.find(a => a?.itemType === 'vehicle_base' || a?.isVehicleOrBase)?.name) ||
+                      (labelData.items?.find(a => a?.itemType === 'vehicle_base' || a?.isVehicleOrBase)?.name) ||
                       (isPomadeOrOintment ? 'Hypoallergenic Non-Irritating Base (Fragrance & Alcohol Free, q.s. 30 g)' :
                       (isHormone ? 'Pentravan® Liposomal Transdermal Cream Vehicle' :
-                      (formulaLower.includes('trichosol') || pNameLower.includes('trichosol') ? `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${volume ? `, ${volume}` : ''})` : 
-                      (formulaLower.includes('trichooil') || pNameLower.includes('trichooil') ? `TrichoOil™ (100% Natural Scalp Compounding Vehicle${volume ? `, ${volume}` : ''})` : 
+                      (isTrichoOil || formulaLower.includes('trichooil') || pNameLower.includes('trichooil') ? `TrichoOil™ (100% Natural Scalp Compounding Vehicle${cleanVolForVeh ? `, ${cleanVolForVeh}` : ''})` :
+                      (isTopicalScalp || formulaLower.includes('trichosol') || pNameLower.includes('trichosol') ? `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${cleanVolForVeh ? `, ${cleanVolForVeh}` : ''})` : 
                       (isOral ? 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.' : 'Galenic Compounding Vehicle q.s.')))));
 
   if (isOral && vehicleName.toLowerCase().includes('micronized compounded hard capsules')) {
@@ -674,39 +722,34 @@ export default function PharmapolisLabelSvg({
             <rect x="0" y="0" width={leftColWidth} height={colHeight} rx="8" />
           </clipPath>
 
-          {/* Dispensing & Technical Packaging Specs */}
+          {/* Dispensing & Technical Packaging Specs (Streamlined & High-Legibility, Zero Clipping) */}
           {(() => {
-            const volLines = wrapLines(volume, 16);
-            const batchLines = wrapLines(batchCode, 15);
-            const storageLines = wrapLines(storage, 17);
+            const effectiveVol = cleanVolForVeh || volume || '100 mL';
+            const volLines = wrapLines(effectiveVol, 15);
+            const storageLines = wrapLines(storage, 16);
 
-            // Explicit vertical coordinates guaranteeing zero overlap
-            const volTitleY = isShort ? 28 : 34;
-            const firstVolLineY = volTitleY + (isShort ? 14 : 18);
-            const volLineGap = isShort ? 15 : 18;
-            const volBlockBottom = firstVolLineY + ((volLines.length - 1) * volLineGap) + (isShort ? 6 : 8);
+            // Explicit vertical coordinates with generous font sizing (batch is already in footer)
+            const volTitleY = isShort ? 30 : 38;
+            const firstVolLineY = volTitleY + (isShort ? 17 : 22);
+            const volLineGap = isShort ? 18 : 22;
+            const volBlockBottom = firstVolLineY + ((volLines.length - 1) * volLineGap) + (isShort ? 8 : 12);
 
-            const batchTitleY = volBlockBottom + (isShort ? 14 : 18);
-            const firstBatchLineY = batchTitleY + (isShort ? 14 : 18);
-            const batchLineGap = isShort ? 15 : 18;
-            const batchBlockBottom = firstBatchLineY + ((batchLines.length - 1) * batchLineGap) + (isShort ? 6 : 8);
-
-            const storageTitleY = batchBlockBottom + (isShort ? 14 : 18);
-            const firstStorageLineY = storageTitleY + (isShort ? 14 : 17);
-            const storageLineGap = isShort ? 14 : 17;
-            const storageBlockBottom = firstStorageLineY + ((storageLines.length - 1) * storageLineGap) + (isShort ? 8 : 12);
+            const storageTitleY = volBlockBottom + (isShort ? 16 : 24);
+            const firstStorageLineY = storageTitleY + (isShort ? 16 : 20);
+            const storageLineGap = isShort ? 16 : 19;
+            const storageBlockBottom = firstStorageLineY + ((storageLines.length - 1) * storageLineGap) + (isShort ? 10 : 14);
 
             return (
-              <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${qrY + backQrSize + (isShort ? 36 : 44)})`}>
+              <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${qrY + backQrSize + (isShort ? 34 : 42)})`}>
                 {/* Header badge */}
-                <rect x="-4" y="0" width={leftColWidth - 20} height={isShort ? 18 : 20} fill="#f0f9ff" stroke="#bae6fd" strokeWidth="1" rx="4" />
-                <text x="4" y={isShort ? 13 : 14} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 9.5 : 10.5} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                <rect x="-4" y="0" width={leftColWidth - 20} height={isShort ? 20 : 24} fill="#f0f9ff" stroke="#bae6fd" strokeWidth="1.2" rx="4" />
+                <text x="4" y={isShort ? 14 : 17} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10.5 : 12} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
                   DISPENSING SPECS
                 </text>
 
                 {/* 1. NET CONTENT */}
                 <g>
-                  <text x="0" y={volTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
+                  <text x="0" y={volTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 11 : 12.5} fontWeight="800" fill="#475569" letterSpacing="0.4">
                     NET CONTENT
                   </text>
                   {volLines.map((vLine, vIdx) => (
@@ -715,7 +758,7 @@ export default function PharmapolisLabelSvg({
                       x="0"
                       y={firstVolLineY + (vIdx * volLineGap)}
                       fontFamily="Arial, Helvetica, sans-serif"
-                      fontSize={isShort ? 13 : 15}
+                      fontSize={isShort ? 16 : 19}
                       fontWeight="900"
                       fill="#0f172a"
                     >
@@ -724,29 +767,9 @@ export default function PharmapolisLabelSvg({
                   ))}
                 </g>
 
-                {/* 2. DISPENSING BATCH */}
+                {/* 2. STORAGE CONDITIONS */}
                 <g>
-                  <text x="0" y={batchTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
-                    DISPENSING BATCH
-                  </text>
-                  {batchLines.map((bLine, bIdx) => (
-                    <text
-                      key={`bch-${bIdx}`}
-                      x="0"
-                      y={firstBatchLineY + (bIdx * batchLineGap)}
-                      fontFamily="monospace"
-                      fontSize={isShort ? 12 : 14}
-                      fontWeight="900"
-                      fill="#003666"
-                    >
-                      {bLine}
-                    </text>
-                  ))}
-                </g>
-
-                {/* 3. STORAGE */}
-                <g>
-                  <text x="0" y={storageTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11} fontWeight="800" fill="#64748b" letterSpacing="0.4">
+                  <text x="0" y={storageTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 11 : 12.5} fontWeight="800" fill="#475569" letterSpacing="0.4">
                     STORAGE CONDITIONS
                   </text>
                   {storageLines.map((sLine, sIdx) => (
@@ -755,7 +778,7 @@ export default function PharmapolisLabelSvg({
                       x="0"
                       y={firstStorageLineY + (sIdx * storageLineGap)}
                       fontFamily="Arial, Helvetica, sans-serif"
-                      fontSize={isShort ? 11 : 13}
+                      fontSize={isShort ? 13 : 15}
                       fontWeight="700"
                       fill="#0f172a"
                     >
@@ -764,15 +787,15 @@ export default function PharmapolisLabelSvg({
                   ))}
                 </g>
 
-                {/* 4. CLINICAL STORAGE & HANDLING MONOGRAPH BADGE */}
-                <g transform={`translate(0, ${storageBlockBottom + (isShort ? 8 : 12)})`}>
+                {/* 3. CLINICAL STORAGE & HANDLING MONOGRAPH BADGE */}
+                <g transform={`translate(0, ${storageBlockBottom + (isShort ? 8 : 14)})`}>
                   <line x1="0" y1="0" x2={leftColWidth - 28} y2="0" stroke="#e2e8f0" strokeWidth="1.2" />
-                  <rect x="-4" y={isShort ? 6 : 8} width={leftColWidth - 20} height={isShort ? 42 : 48} fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1.2" rx="4" />
+                  <rect x="-4" y={isShort ? 6 : 8} width={leftColWidth - 20} height={isShort ? 44 : 52} fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.2" rx="4" />
                   
-                  <text x="4" y={isShort ? 22 : 26} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 8.5 : 10} fontWeight="700" fill="#64748b" letterSpacing="0.2">
+                  <text x="4" y={isShort ? 23 : 28} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11.5} fontWeight="800" fill="#334155" letterSpacing="0.2">
                     PROTECT FROM LIGHT
                   </text>
-                  <text x="4" y={isShort ? 36 : 42} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 8 : 9.5} fontWeight="700" fill="#0284c7" letterSpacing="0.3">
+                  <text x="4" y={isShort ? 39 : 46} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 9.5 : 11} fontWeight="800" fill="#0284c7" letterSpacing="0.3">
                     15°C–25°C • ROOM TEMP.
                   </text>
                 </g>
@@ -834,9 +857,8 @@ export default function PharmapolisLabelSvg({
             const formulaTitleText = hasFormulaTitle ? rawTitle : '';
 
             // Multi-API layout strategy:
-            // If ingCount >= 3 and innerUsableWidth >= 700: Structured Dual-Column Clinical Bulleted Grid
-            // Else: Single-Column Prominent Bulleted Flow
-            const isMultiColumn = ingCount >= 3 && innerUsableWidth >= 700;
+            // Only split into 2 columns when ingCount >= 4 so 1–3 ingredient formulas enjoy full-width single-line typography
+            const isMultiColumn = ingCount >= 4 && innerUsableWidth >= 700;
             const halfColCount = Math.ceil(ingCount / 2);
             const col1Items = isMultiColumn ? activeIngredientsList.slice(0, halfColCount) : [];
             const col2Items = isMultiColumn ? activeIngredientsList.slice(halfColCount) : [];
@@ -850,59 +872,58 @@ export default function PharmapolisLabelSvg({
             const col2Lines = isMultiColumn ? col2Items.flatMap(it => wrapLines(`• ${it}`, multiColMaxChars)) : [];
             const multiColMaxLines = Math.max(col1Lines.length, col2Lines.length);
 
-            // Sparsity detection: allows short formulas to boost typography and use space
-            const isUltraSparse = ingCount <= 2 && (directions.length < 90);
-            const isSparse = ingCount <= 3 && (directions.length < 130);
+            // Sparsity detection: allows 1–3 ingredient formulas to boost typography and use space
+            const isUltraSparse = ingCount <= 2 && (directions.length < 95);
+            const isSparse = ingCount <= 3 && (directions.length < 145);
 
-            // Single column ingredients: if ingCount <= 2, give each its own bullet line
+            // Single column ingredients (1–3 items): prominent high-legibility font sizing
             const ingFontSize = isShort
-              ? (isUltraSparse ? 24 : isSparse ? 22 : 19)
+              ? (isUltraSparse ? 24 : isSparse ? 21 : 19)
               : isMediumHeight
-                ? (isUltraSparse ? 26 : isSparse ? 24 : 21)
-                : (isUltraSparse ? 32 : isSparse ? 28 : 24);
-            const ingLineGap = Math.round(ingFontSize * 1.34);
-            const ingMaxChars = Math.max(20, Math.floor((innerUsableWidth - 48) / (ingFontSize * 0.70)));
+                ? (isUltraSparse ? 26 : isSparse ? 23 : 21)
+                : (isUltraSparse ? 31 : isSparse ? 26 : 24);
+            const ingLineGap = Math.round(ingFontSize * 1.32);
+            const ingMaxChars = Math.max(24, Math.floor((innerUsableWidth - 48) / (ingFontSize * 0.65)));
             const singleIngLines = activeIngredientsList.flatMap(it => wrapLines(`• ${it}`, ingMaxChars));
             const ingLines = singleIngLines.length > 0 ? singleIngLines : wrapLines(`• ${activeIngredientsList.join(' — ')}`, ingMaxChars);
             const ingLineCount = isMultiColumn ? multiColMaxLines : ingLines.length;
 
             const baseFontSize = isShort
-              ? (isUltraSparse ? 17 : isSparse ? 15 : 14)
+              ? (isUltraSparse ? 17 : isSparse ? 15.5 : 14.5)
               : isMediumHeight
-                ? (isUltraSparse ? 18 : isSparse ? 16 : 15)
-                : (isUltraSparse ? 22 : isSparse ? 19 : 17);
+                ? (isUltraSparse ? 18.5 : isSparse ? 17 : 15.5)
+                : (isUltraSparse ? 22 : isSparse ? 19.5 : 18);
             const baseLineGap = Math.round(baseFontSize * 1.32);
-            const baseMaxChars = Math.max(24, Math.floor((innerUsableWidth - 48) / (baseFontSize * 0.68)));
+            const baseMaxChars = Math.max(26, Math.floor((innerUsableWidth - 48) / (baseFontSize * 0.65)));
             const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, baseMaxChars);
 
             // Directions font scaling & wrapping
             const posFontSize = isShort
-              ? (isUltraSparse ? 22 : isSparse ? 20 : 17)
+              ? (isUltraSparse ? 22 : isSparse ? 20 : 17.5)
               : isMediumHeight
-                ? (isUltraSparse ? 24 : isSparse ? 21 : 18)
-                : (isUltraSparse ? 29 : isSparse ? 25 : 21);
+                ? (isUltraSparse ? 24 : isSparse ? 21 : 18.5)
+                : (isUltraSparse ? 28 : isSparse ? 24 : 21);
             const posLineGap = Math.round(posFontSize * 1.32);
-            const posMaxChars = Math.max(22, Math.floor((innerUsableWidth - 64) / (posFontSize * 0.70)));
+            const posMaxChars = Math.max(24, Math.floor((innerUsableWidth - 64) / (posFontSize * 0.68)));
             const posologyLines = wrapLines(directions, posMaxChars);
 
-            // Bottom-anchored Caution & Regulatory Monograph coordinates
-            const bottomMargin = isShort ? 10 : isMediumHeight ? 12 : 16;
-            const bMonographsY = colHeight - bottomMargin;
-            const bRxY = bMonographsY - (isShort ? 14 : isMediumHeight ? 16 : 19);
-            const bCautionY = bRxY - (isShort ? 15 : isMediumHeight ? 17 : 20);
-            const bCautionDividerY = bCautionY - (isShort ? 10 : isMediumHeight ? 11 : 13);
+            // Bottom-anchored Caution & Prescriber coordinates (crisp 2-line footer block, zero low-contrast clutter)
+            const bottomMargin = isShort ? 12 : isMediumHeight ? 14 : 18;
+            const bRxY = colHeight - bottomMargin;
+            const bCautionY = bRxY - (isShort ? 18 : isMediumHeight ? 21 : 25);
+            const bCautionDividerY = bCautionY - (isShort ? 12 : isMediumHeight ? 14 : 17);
 
             // Maximum allowed Y coordinate for the bottom edge of posBox (zero overlap guarantee)
             const maxPosBoxBottom = bCautionDividerY - (isShort ? 10 : isMediumHeight ? 12 : 14);
 
             // Formula title height if present
-            const formulaTitleFontSize = isShort ? 15 : isMediumHeight ? 17 : 20;
+            const formulaTitleFontSize = isShort ? 16 : isMediumHeight ? 18 : 21;
             const formulaTitleH = formulaTitleText ? (formulaTitleFontSize + 12) : 0;
 
             // Typographical baseline offsets with safe font cap-height clearance (Zero overlap)
             const ingHeaderTitleY = (formulaTitleText ? formulaTitleH + 6 : 0) + (isShort ? 12 : isMediumHeight ? 14 : 16);
             const firstIngLineY = ingHeaderTitleY + (isShort ? 10 : isMediumHeight ? 12 : 16) + Math.round((isMultiColumn ? multiColFontSize : ingFontSize) * 0.82);
-            const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * (isMultiColumn ? multiColLineGap : ingLineGap)) + (isUltraSparse ? 16 : isSparse ? 12 : 10) + Math.round(baseFontSize * 0.82);
+            const firstBaseLineY = firstIngLineY + ((ingLineCount - 1) * (isMultiColumn ? multiColLineGap : ingLineGap)) + (isUltraSparse ? 15 : isSparse ? 12 : 10) + Math.round(baseFontSize * 0.82);
             const ingBlockH = firstBaseLineY + ((baseLines.length - 1) * baseLineGap) + 8;
 
             const posHeaderTitleY = isShort ? 16 : isMediumHeight ? 18 : 22;
@@ -915,11 +936,11 @@ export default function PharmapolisLabelSvg({
             const verticalSurplus = Math.max(0, totalAvailableSpace - totalContentNeeded);
 
             // Expand posBoxHeight to absorb surplus space naturally
-            const extraBoxPad = Math.min(80, Math.round(verticalSurplus * 0.40));
+            const extraBoxPad = Math.min(72, Math.round(verticalSurplus * 0.38));
             const posBoxHeight = basePosBoxHeight + extraBoxPad;
 
-            const topIngredientsY = isShort ? 8 : isMediumHeight ? 10 : Math.max(12, Math.min(24, Math.round(verticalSurplus * 0.20)));
-            const midPad = isShort ? 10 : isMediumHeight ? 12 : Math.max(14, Math.min(42, Math.round(verticalSurplus * 0.40)));
+            const topIngredientsY = isShort ? 8 : isMediumHeight ? 10 : Math.max(12, Math.min(22, Math.round(verticalSurplus * 0.18)));
+            const midPad = isShort ? 10 : isMediumHeight ? 12 : Math.max(12, Math.min(36, Math.round(verticalSurplus * 0.36)));
 
             // Absolute hard clamp: posBoxY + posBoxHeight CAN NEVER EXCEED maxPosBoxBottom
             let posBoxY = topIngredientsY + ingBlockH + midPad;
@@ -927,12 +948,13 @@ export default function PharmapolisLabelSvg({
               posBoxY = maxPosBoxBottom - posBoxHeight;
             }
 
+            const cleanDoctorLicense = doctorLicense ? String(doctorLicense).replace(/^license\s*:\s*/i, '').trim() : '';
             const rxParts = [];
             if (doctorName) rxParts.push(`Rx: ${doctorName}`);
             if (clinicName) rxParts.push(clinicName);
-            if (doctorLicense) rxParts.push(`(${doctorLicense})`);
+            if (cleanDoctorLicense) rxParts.push(`(License: ${cleanDoctorLicense})`);
             const rxFullText = rxParts.length > 0 ? rxParts.join(' • ') : (doctorName ? `Rx: ${doctorName}` : 'Rx: Licensed Clinical Practice');
-            const rxFontSize = isShort ? (rxFullText.length > 65 ? 12 : 14) : isMediumHeight ? (rxFullText.length > 65 ? 13 : 15) : (rxFullText.length > 70 ? 15 : 17);
+            const rxFontSize = isShort ? (rxFullText.length > 68 ? 13.5 : 15.5) : isMediumHeight ? (rxFullText.length > 68 ? 15 : 17) : (rxFullText.length > 72 ? 16.5 : 19);
 
             return (
               <>
@@ -947,7 +969,7 @@ export default function PharmapolisLabelSvg({
                     </g>
                   ) : null}
 
-                  <text x="0" y={ingHeaderTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                  <text x="0" y={ingHeaderTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13.5 : 15.5} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
                     ACTIVE COMPOUNDED INGREDIENTS
                   </text>
                   
@@ -1007,10 +1029,10 @@ export default function PharmapolisLabelSvg({
                   ))}
                 </g>
 
-                {/* Block 4: Mandatory Precaution & Prescriber (Bottom Anchored) */}
+                {/* Block 4: Mandatory Precaution & Prescriber (High-Contrast Bottom Anchored) */}
                 <g transform="translate(24, 0)">
-                  <line x1="0" y1={bCautionDividerY} x2={innerUsableWidth} y2={bCautionDividerY} stroke="#e2e8f0" strokeWidth="1.8" />
-                  <text x="0" y={bCautionY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="800" fill="#b91c1c" letterSpacing="0.4">
+                  <line x1="0" y1={bCautionDividerY} x2={innerUsableWidth} y2={bCautionDividerY} stroke="#cbd5e1" strokeWidth="1.8" />
+                  <text x="0" y={bCautionY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 15.5 : 19} fontWeight="900" fill="#b91c1c" letterSpacing="0.4">
                     {cautionText}
                   </text>
                   <text
@@ -1018,20 +1040,10 @@ export default function PharmapolisLabelSvg({
                     y={bRxY}
                     fontFamily="Arial, Helvetica, sans-serif"
                     fontSize={rxFontSize}
-                    fontWeight="600"
-                    fill="#475569"
+                    fontWeight="700"
+                    fill="#1e293b"
                   >
                     {rxFullText}
-                  </text>
-                  <text
-                    x="0"
-                    y={bMonographsY}
-                    fontFamily="Arial, Helvetica, sans-serif"
-                    fontSize={isShort ? 11 : 13}
-                    fontWeight="600"
-                    fill="#94a3b8"
-                  >
-                    Compound prepared in compliance with EU GMP &amp; Pharmacopoeia monographs.
                   </text>
                 </g>
               </>

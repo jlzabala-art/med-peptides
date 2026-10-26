@@ -272,12 +272,9 @@ export const labelsRepository = {
       }
     }
 
-    if (currentItem.clinicName) {
-      updatePayload.clinicName = currentItem.clinicName;
-      if (existingData?.treatingClinic && typeof existingData.treatingClinic === 'object') {
-        updatePayload['treatingClinic.name'] = currentItem.clinicName;
-      }
-    }
+    // NOTE: Clinic name on labels is strictly optional and label-scoped (stored inside pharmacyLabels[]).
+    // Editing or clearing clinicName in the Label Studio must NEVER overwrite the doctor's or prescription's
+    // master clinic association in Firebase (treatingClinic, treatingDoctor.clinic, clinicName).
 
     if (currentItem.productTitle || currentItem.productName || currentItem.title) {
       const fullTitle = currentItem.productTitle || currentItem.productName || currentItem.title;

@@ -17,8 +17,9 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     title: 'Dr. Çağatay Sezgin, MD, FISHRS',
     specialty: 'Hair Transplant Surgeon / Specialist General Surgery',
     mainArea: 'Hair Restoration Surgery',
-    clinic: 'Shamma Clinic by Novomed LLC / Novomed Clinics',
-    clinicName: 'Shamma Clinic by Novomed LLC / Novomed Clinics',
+    clinic: 'Novomed - Jumeirah 1',
+    clinicName: 'Novomed - Jumeirah 1',
+    labelClinicName: '', // Dr. Sezgin requests only his name on labels/tests without clinic name by default
     clinicId: 'shamma-novomed-dubai',
     address: 'Street 10C, Villa 41, Jumeirah 1, Behind Jumeirah Plaza',
     city: 'Dubai',

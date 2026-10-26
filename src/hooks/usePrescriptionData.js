@@ -142,9 +142,13 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
 
   const clinic = isHaytham 
     ? 'Arthregen Clinic' 
-    : (isMarina 
-        ? (authClinical.clinicName || treatingDoc.clinicName || treatingDoc.clinic || 'NOVA Clinic · Dubai Healthcare City, Dubai, UAE')
-        : (authClinical.clinicName || treatingDoc.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : (isEs ? 'Centro Médico Prescriptor' : 'Licensed Clinical Practice'))));
+    : (isSezgin
+        ? ''
+        : (isMarina 
+            ? (authClinical.clinicName || treatingDoc.clinicName || treatingDoc.clinic || 'NOVA Clinic · Dubai Healthcare City, Dubai, UAE')
+            : (authClinical.clinicName !== undefined && authClinical.clinicName !== null
+                ? authClinical.clinicName
+                : (treatingDoc.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : '')))));
   const doctorClinic = clinic;
   const doctorSpecialty = isHaytham 
     ? 'Consultant Orthopedic Surgeon & Regenerative Medicine Specialist' 
@@ -518,26 +522,67 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       };
     };
 
-    // ⚡ Priority 0: If authoritative pharmacyLabels are saved in Firestore (e.g. from manual label editor)
+    // ⚡ Priority 0: If authoritative pharmacyLabels are saved in Firestore (with self-healing from formulationBlocks / phases / parts)
     if (Array.isArray(rx.pharmacyLabels) && rx.pharmacyLabels.length > 0) {
       return rx.pharmacyLabels.map((lbl, idx) => {
-        const rawPartApis = lbl.apis || lbl.items || lbl.activeIngredients || [];
-        const partApis = rawPartApis.map(a => ({
-          ...a,
-          name: a.name || a.drugName || a.productName || a.activeIngredient || 'Active API',
-          dose: a.dose || a.dosage || a.strength || '—',
-          dosage: a.dosage || a.dose || a.strength || '—'
+        const fallbackBlock = (Array.isArray(rx.formulationBlocks) ? rx.formulationBlocks[idx] : null)
+          || (Array.isArray(rx.phases) ? rx.phases[idx] : null)
+          || (Array.isArray(rx.parts) ? rx.parts[idx] : null)
+          || {};
+
+        const isVehItem = (it) => {
+          if (!it || typeof it !== 'object') return false;
+          if (it.isVehicle || it.isVehicleOrBase || it._isVehicleOrBase || it.itemType === 'vehicle_base') return true;
+          const n = String(it.name || it.drugName || it.productName || it.activeIngredient || '').toLowerCase();
+          return n.includes('trichosol') || n.includes('trichooil') || n.includes('pentravan') || n.includes('vehicle') || n.includes('vehículo') || n.includes('pomade base') || n.includes('ointment base');
+        };
+
+        const rawSavedApis = (lbl.apis || lbl.items || lbl.activeIngredients || []).filter(a => {
+          if (!a) return false;
+          const n = String(typeof a === 'string' ? a : (a.name || a.drugName || a.productName || a.activeIngredient || '')).trim().toLowerCase();
+          return n && n !== 'active api' && n !== 'api' && n !== 'active compounded formulation' && n !== 'personalized compounded active formula' && !isVehItem(a);
+        });
+
+        const fallbackBlockApis = (fallbackBlock.apis || fallbackBlock.items || []).filter(a => a && !isVehItem(a));
+        const effectiveRawApis = rawSavedApis.length > 0 ? rawSavedApis : fallbackBlockApis;
+
+        const partApis = effectiveRawApis.map(a => ({
+          ...(typeof a === 'object' ? a : {}),
+          name: typeof a === 'string' ? a : (a.name || a.drugName || a.productName || a.activeIngredient || 'Active API'),
+          dose: typeof a === 'string' ? '—' : (a.dose || a.dosage || a.strength || '—'),
+          dosage: typeof a === 'string' ? '—' : (a.dosage || a.dose || a.strength || '—')
         }));
+
+        const fbVehName = typeof fallbackBlock.vehicle === 'string' ? fallbackBlock.vehicle : (fallbackBlock.vehicle?.name || fallbackBlock.vehicle?.activeIngredient || '');
+        const rawSavedVeh = typeof lbl.vehicle === 'string' ? lbl.vehicle : (lbl.vehicle?.name || lbl.compoundingVehicle || '');
+        const isTopicalBlock = /\b(scalp|hair|shampoo|topical|apply|massage|wash|lotion|solution|drops|cream|gel|oil|pomade|ointment|trichosol|trichooil|pentravan)\b/i.test(
+          `${fallbackBlock.treatmentType || ''} ${fallbackBlock.dispensingForm || ''} ${fbVehName} ${lbl.directions || fallbackBlock.posology || ''}`
+        );
+
+        const resolvedVehName = (isTopicalBlock && (!rawSavedVeh || /vegetable capsules/i.test(rawSavedVeh)))
+          ? (fbVehName || 'TrichoSol™ (Fagron)')
+          : (rawSavedVeh || fbVehName || rx.vehicle || 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.');
+
+        const resolvedForm = (isTopicalBlock && (!lbl.dosageForm || /oral|capsule/i.test(lbl.dosageForm)))
+          ? (fallbackBlock.dispensingForm || fallbackBlock.dosageForm || (isEs ? 'Solución Tópica' : 'Topical Scalp Solution'))
+          : (lbl.format || lbl.dosageForm || fallbackBlock.dispensingForm || (isEs ? 'Cápsulas Orales (Vegetales)' : 'Oral Capsules (Vegetable)'));
+
+        const resolvedVol = (isTopicalBlock && /capsules/i.test(String(lbl.volume || '')))
+          ? (fallbackBlock.volume || rx.volume || '100 mL')
+          : (lbl.volume || lbl.netContent || lbl.size || fallbackBlock.volume || rx.volume);
+
+        const isGenericTitle = !lbl.productTitle || /^phase\s*\d+\s*compounded\s*protocol$/i.test(String(lbl.productTitle).trim());
+        const resolvedTitle = (!isGenericTitle ? (lbl.productTitle || lbl.productName || lbl.title) : (fallbackBlock.treatmentType || fallbackBlock.title || lbl.productTitle)) || (isEs ? `Fórmula Fase ${idx + 1}` : `Formula Phase ${idx + 1}`);
 
         const vehicleData = buildVehicleData({
           index: lbl.phaseNumber || (idx + 1),
           totalCount: rx.pharmacyLabels.length,
-          vehicleName: lbl.vehicle || lbl.compoundingVehicle || rx.vehicle || 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.',
-          treatmentTitle: lbl.productTitle || lbl.productName || lbl.title || (isEs ? `Fórmula Fase ${idx + 1}` : `Formula Phase ${idx + 1}`),
-          dosageForm: lbl.format || lbl.dosageForm || (isEs ? 'Cápsulas Orales (Vegetales)' : 'Oral Capsules (Vegetable)'),
-          route: lbl.route || (isEs ? 'Vía Oral' : 'Oral Route'),
-          volume: lbl.volume || lbl.netContent || lbl.size || rx.volume,
-          customPosology: lbl.directions || lbl.posology || lbl.instructions || rx.dosageInstructions,
+          vehicleName: resolvedVehName,
+          treatmentTitle: resolvedTitle,
+          dosageForm: resolvedForm,
+          route: lbl.route || (isTopicalBlock ? (isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application') : (isEs ? 'Vía Oral' : 'Oral Route')),
+          volume: resolvedVol,
+          customPosology: lbl.directions || lbl.posology || lbl.instructions || fallbackBlock.posology || rx.dosageInstructions,
           apis: partApis
         });
 
@@ -545,18 +590,55 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
         if (lbl.accentBg) vehicleData.accentBg = lbl.accentBg;
         if (lbl.borderAccent) vehicleData.borderAccent = lbl.borderAccent;
         if (lbl.badge) vehicleData.badgeText = lbl.badge;
-        if (lbl.productTitle || lbl.productName || lbl.title) {
-          const fullTitle = lbl.productTitle || lbl.productName || lbl.title;
-          vehicleData.title = fullTitle;
-          vehicleData.shortTitle = fullTitle.split('·')[0].split('(')[0].trim();
+        if (resolvedTitle) {
+          vehicleData.title = resolvedTitle;
+          vehicleData.shortTitle = resolvedTitle.split('·')[0].split('(')[0].trim();
         }
-        if (lbl.directions || lbl.posology || lbl.instructions) {
-          const posVal = lbl.directions || lbl.posology || lbl.instructions;
+        const posVal = lbl.directions || lbl.posology || lbl.instructions || fallbackBlock.posology;
+        if (posVal) {
           vehicleData.posology.regimen = posVal;
           vehicleData.posology.timing = posVal;
         }
 
         return vehicleData;
+      });
+    }
+
+    // If the prescription explicitly defines multi-vehicle formulationBlocks (e.g., BOX03535AATRI)
+    if (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length >= 1) {
+      return rx.formulationBlocks.map((b, idx) => {
+        const rawBlockItems = b.apis || b.items || [];
+        const activeItems = rawBlockItems.filter(it => {
+          if (!it) return false;
+          if (it.isVehicle || it.isVehicleOrBase || it._isVehicleOrBase || it.itemType === 'vehicle_base') return false;
+          const n = String(it.name || it.drugName || it.activeIngredient || '').toLowerCase();
+          return !n.includes('trichosol') && !n.includes('trichooil') && !n.includes('pentravan') && !n.includes('vehicle');
+        });
+        const vehItem = rawBlockItems.find(it => it && (it.isVehicle || it.isVehicleOrBase || it._isVehicleOrBase || it.itemType === 'vehicle_base'));
+        const vehName = (typeof b.vehicle === 'string' ? b.vehicle : (b.vehicle?.name || b.vehicle?.activeIngredient)) || vehItem?.name || 'TrichoSol™ (Fagron)';
+
+        const partApis = activeItems.map(a => ({
+          ...a,
+          name: a.name || a.drugName || a.productName || a.activeIngredient || 'Active API',
+          dose: a.dose || a.dosage || a.strength || '—',
+          dosage: a.dosage || a.dose || a.strength || '—'
+        }));
+
+        const isTopical = /\b(scalp|hair|topical|solution|oil|trichosol|trichooil|pentravan|pomade|ointment|cream)\b/i.test(
+          `${b.dispensingForm || ''} ${b.treatmentType || ''} ${vehName} ${b.posology || ''}`
+        );
+
+        return buildVehicleData({
+          index: b.phaseNumber || b.index || (idx + 1),
+          totalCount: rx.formulationBlocks.length,
+          vehicleName: vehName,
+          treatmentTitle: b.treatmentType || b.title || b.phaseName || (isEs ? `Fórmula Fase ${idx + 1}` : `Formula Phase ${idx + 1}`),
+          dosageForm: b.dispensingForm || b.dosageForm || (isTopical ? (isEs ? 'Solución Tópica' : 'Topical Scalp Solution') : (isEs ? 'Cápsulas Orales' : 'Oral Capsules')),
+          route: b.route || (isTopical ? (isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application') : (isEs ? 'Vía Oral' : 'Oral Route')),
+          volume: b.volume || b.vehicle?.volume || rx.volume || '100 mL',
+          customPosology: typeof b.posology === 'string' ? b.posology : (b.posology?.regimen || b.instructions || ''),
+          apis: partApis
+        });
       });
     }
 
