@@ -64,7 +64,12 @@ export const TESTOSTERONE_ENANTHATE_NORMA_PRODUCT = {
   type: 'finished_product',
   status: 'published',
   rxRequired: true,
+  requiresPrescription: true,
   prescriptionOnly: true,
+  isProfessional: true,
+  professional_use_only: true,
+  priceVisibility: 'registered_doctors_only',
+  requiresDoctorAuthForPricing: true,
   atcCode: 'G03BA03',
   therapeuticClass: 'Androgens, 3-oxoandrosten (4) derivatives',
   imageUrl: '/images/products/norma/testosterone-enanthate-norma-250mg.svg',
@@ -83,7 +88,7 @@ export const TESTOSTERONE_ENANTHATE_NORMA_PRODUCT = {
     }
   ],
   pricing: {
-    retail: 38.00,
+    retail: null,
     wholesale: 24.50,
     clinic: 21.00,
     master: 18.00
@@ -288,8 +293,12 @@ export const TESTOSTERONE_ENANTHATE_NORMA_PRODUCT = {
       sku: 'NORMA-TE-250-1AMP',
       barcode: '5201247380108',
       stock: 450,
+      isProfessional: true,
+      requiresPrescription: true,
+      professional_use_only: true,
+      priceVisibility: 'registered_doctors_only',
       pricing: {
-        retail: 38.00,
+        retail: null,
         wholesale: 24.50,
         clinic: 21.00,
         master: 18.00

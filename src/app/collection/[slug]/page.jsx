@@ -23,6 +23,20 @@ const BRAND_METADATA = {
     section: 'Medical Cosmeceuticals & Follicular Trichology',
     keywords: ['MCG Cosmetics', 'Kapigen', 'Procapil', 'Anti-Hair Loss', 'Biotinyl-GHK', 'Oleanolic Acid', 'Apigenin', 'Trichology Spray']
   },
+  norma: {
+    title: 'Norma Hellas® Pharmaceuticals • Testosterone Enanthate & TRT | Atlas Clinical Collection',
+    description: 'Explore Norma Hellas S.A. pharmaceutical formulations: Testosterone Enanthate/Norma® 250 mg/ml sterile oily depot solution for intramuscular TRT. EU GMP batch-certified by EVER Pharma Jena GmbH.',
+    image: `${BASE_URL}/images/products/norma/testosterone-enanthate-norma-250mg.svg`,
+    section: 'Hormone Replacement Therapy (TRT) & Endocrinology',
+    keywords: ['Norma Hellas', 'Testosterone Enanthate', 'TRT', 'Hormone Replacement Therapy', 'G03BA03', 'EVER Pharma', 'Hypogonadism']
+  },
+  hormones: {
+    title: 'Hormone Replacement Therapy (TRT & BHRT) & Endocrinology | Atlas Clinical Collection',
+    description: 'Prescription endocrine optimization and Testosterone Replacement Therapy (TRT): Norma® Testosterone Enanthate 250 mg/ml, bioidentical hormones, and endocrine blood telemetry.',
+    image: `${BASE_URL}/images/products/norma/testosterone-enanthate-norma-250mg.svg`,
+    section: 'Clinical Endocrinology & Hormone Optimization',
+    keywords: ['Hormone Therapy', 'TRT', 'BHRT', 'Testosterone Enanthate', 'Norma Hellas', 'Endocrinology', 'Hypogonadism']
+  },
   bloodo: {
     title: 'Bloodo™ Capillary Blood Diagnostics | CE-IVDR Test Kits | Atlas Collection',
     description: 'Discover Bloodo™ precision Dried Blood Spot (DBS) tests: NAD+ Intracellular, Testosterone+, HbA1c 90-Day, Diurnal Cortisol CAR, Omega-3/6 Ratio & Vitamin D3. ISO 15189 accredited lab analysis.',

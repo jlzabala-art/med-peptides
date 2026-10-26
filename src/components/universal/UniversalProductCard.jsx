@@ -48,7 +48,14 @@ export default function UniversalProductCard({
   const displayTitle = product?.displayName || product?.name || 'Unknown Product';
   const displayCategory = product?.category || 'Research Supplies';
   const displayDesc = product?.desc || product?.description || '';
-  const price = product?.price || 0; // In a real app, calculate based on selectedVariantIdx
+  const price = product?.price || product?.pricing?.clinic || product?.pricing?.wholesale || 0;
+  const isDoctorsOnlyPricing = Boolean(
+    product?.priceVisibility === 'registered_doctors_only' ||
+    product?.requiresDoctorAuthForPricing ||
+    product?.category === 'hormone'
+  );
+  const canViewDoctorPrice = role === 'doctor' || role === 'professional' || role === 'wholesaler' || userProfile?.role === 'admin';
+  const showPrice = role !== 'patient' && (!isDoctorsOnlyPricing || canViewDoctorPrice) && price > 0;
 
   const imagePath = `/assets/vials/${displayTitle.toLowerCase().replace(/[^a-z0-9]/g, '')}.png`;
 
@@ -224,12 +231,24 @@ export default function UniversalProductCard({
               </div>
             )}
           </div>
-          {/* Price (hide for patients unless explicit) */}
-          {role !== 'patient' && (
+          {/* Price (gated for registered doctors when priceVisibility === 'registered_doctors_only') */}
+          {showPrice ? (
             <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1.1rem' }}>
               ${price.toFixed(2)}
             </div>
-          )}
+          ) : isDoctorsOnlyPricing ? (
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '3px 8px',
+              borderRadius: '6px',
+              background: '#fff7ed',
+              color: '#ea580c',
+              border: '1px solid #ffedd5'
+            }}>
+              Solo Médicos Registrados
+            </span>
+          ) : null}
         </div>
 
         <p style={{ 

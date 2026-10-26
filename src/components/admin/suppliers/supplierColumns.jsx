@@ -204,6 +204,12 @@ export const getSupplierColumns = ({
     setSortConfig({ key, direction });
   };
 
+  const resolveRecord = (val, row) => {
+    if (row && typeof row === 'object' && (row.id || row.name || row.companyName)) return row;
+    if (val && typeof val === 'object' && (val.id || val.name || val.companyName)) return val;
+    return row && typeof row === 'object' ? row : (val && typeof val === 'object' ? val : {});
+  };
+
   return [
     {
       key: 'companyName',
@@ -213,24 +219,28 @@ export const getSupplierColumns = ({
           Supplier {sortConfig.key === 'name' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
         </span>
       ),
-      render: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <InlineEditableCell
-            value={row.name || row.companyName || row.displayName || ''}
-            type="text"
-            onSave={(val) => {
-              if (!val || val.trim() === '') return;
-              // Write all three aliases so rename cascade fires in handleUpdate
-              onUpdateField(row.id, 'name',        val.trim());
-              onUpdateField(row.id, 'companyName', val.trim());
-              onUpdateField(row.id, 'displayName', val.trim());
-            }}
-            placeholder="Supplier name"
-            style={{ fontWeight: 700 }}
-          />
-          <CopyableId value={row.id} iconOnly={true} />
-        </div>
-      ),
+      render: (val, row) => {
+        const item = resolveRecord(val, row);
+        const name = item.name || item.companyName || item.displayName || (typeof val === 'string' ? val : '') || item.id || '';
+        const id = item.id || '';
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <InlineEditableCell
+              value={name}
+              type="text"
+              onSave={(newVal) => {
+                if (!newVal || newVal.trim() === '') return;
+                onUpdateField(id, 'name', newVal.trim());
+                onUpdateField(id, 'companyName', newVal.trim());
+                onUpdateField(id, 'displayName', newVal.trim());
+              }}
+              placeholder="Supplier name"
+              style={{ fontWeight: 700 }}
+            />
+            {id && <CopyableId value={id} iconOnly={true} />}
+          </div>
+        );
+      },
     },
 
     {
@@ -241,40 +251,50 @@ export const getSupplierColumns = ({
           Country {sortConfig.key === 'country' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
         </span>
       ),
-      render: (row) => (
-        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          <InlineEditableCell
-            value={row.country || ''}
-            onSave={(val) => onUpdateField(row.id, 'country', val)}
-            placeholder="N/A"
-          />
-        </div>
-      ),
+      render: (val, row) => {
+        const item = resolveRecord(val, row);
+        const countryVal = item.country || (typeof val === 'string' ? val : '') || '';
+        return (
+          <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <InlineEditableCell
+              value={countryVal}
+              onSave={(newVal) => onUpdateField(item.id, 'country', newVal)}
+              placeholder="N/A"
+            />
+          </div>
+        );
+      },
     },
 
     {
       key: 'categoryIds',
       width: '16%',
       header: 'Categories',
-      render: (row) => (
-        <CategoryPills
-          categoryIds={row.categoryIds || (row.categoryId ? [row.categoryId] : [])}
-          allCategories={allCategories}
-          onSave={(newIds) => onUpdateField(row.id, 'categoryIds', newIds)}
-        />
-      ),
+      render: (val, row) => {
+        const item = resolveRecord(val, row);
+        const rawCats = item.categoryIds || (Array.isArray(val) ? val : (item.categoryId ? [item.categoryId] : []));
+        const categoryIds = Array.isArray(rawCats) ? rawCats : [];
+        return (
+          <CategoryPills
+            categoryIds={categoryIds}
+            allCategories={allCategories}
+            onSave={(newIds) => onUpdateField(item.id, 'categoryIds', newIds)}
+          />
+        );
+      },
     },
 
     {
       key: 'status',
       width: '14%',
       header: <span>Status</span>,
-      render: (row) => {
-        const isB2BActive = row.statusB2B === 'active' || (!row.statusB2B && row.status === 'active');
-        const isB2CActive = row.statusB2C === 'active';
+      render: (val, row) => {
+        const item = resolveRecord(val, row);
+        const isB2BActive = item.statusB2B === 'active' || (!item.statusB2B && item.status === 'active');
+        const isB2CActive = item.statusB2C === 'active';
         return (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-            <StatusBadge status={isB2BActive ? 'active' : (row.statusB2B || row.status || 'inactive')} />
+            <StatusBadge status={isB2BActive ? 'active' : (item.statusB2B || item.status || 'inactive')} />
             {isB2CActive && (
               <span style={{ fontSize: '0.65rem', background: '#eff6ff', color: '#2563eb', padding: '1px 5px', borderRadius: '4px', fontWeight: 600 }} title="B2C Enabled">
                 +B2C
@@ -293,15 +313,15 @@ export const getSupplierColumns = ({
           Items {sortConfig.key === 'variantsSupplied' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
         </span>
       ),
-      render: (row) => {
-        // Phase 7: variants is the atomic unit — show as primary metric
-        const variants  = row.variantsSupplied  ?? row.analytics?.totalVariants  ?? null;
-        const products  = row.productsSupplied  ?? row.analytics?.totalProducts  ?? 0;
+      render: (val, row) => {
+        const item = resolveRecord(val, row);
+        const variants = item.variantsSupplied ?? item.analytics?.totalVariants ?? (typeof val === 'number' ? val : null);
+        const products = item.productsSupplied ?? item.analytics?.totalProducts ?? 0;
 
         return (
           <div
             style={{ display: 'flex', flexDirection: 'column', gap: '2px', cursor: 'pointer' }}
-            onClick={(e) => { e.stopPropagation(); onAction?.('view-catalog', row); }}
+            onClick={(e) => { e.stopPropagation(); onAction?.('view-catalog', item); }}
             title="Click to view catalog"
           >
             {/* Variants — PRIMARY (bold, linked) */}
@@ -337,56 +357,59 @@ export const getSupplierColumns = ({
       key: 'actions',
       width: '16%',
       header: 'Actions',
-      render: (supplier) => (
-        <AppActionGroup
-          maxVisible={3}
-          actions={[
-            {
-              label: 'AI Procurement Intelligence',
-              type: 'sparkles',
-              onClick: (e) => {
-                e.stopPropagation();
-                openSupplierAI({
-                  id: supplier.id,
-                  name: supplier.name || supplier.companyName || supplier.displayName,
-                  country: supplier.country,
-                  statusB2B: supplier.statusB2B,
-                  statusB2C: supplier.statusB2C,
-                  variantsSupplied: supplier.variantsSupplied ?? supplier.analytics?.totalVariants,
-                  productsSupplied: supplier.productsSupplied ?? supplier.analytics?.totalProducts,
-                  categoryIds: supplier.categoryIds,
-                  leadTime: supplier.leadTime,
-                  minOrder: supplier.minOrder,
-                  certifications: supplier.certifications,
-                  rfqCount: supplier.rfqCount ?? supplier.analytics?.rfqCount,
-                  orderCount: supplier.orderCount ?? supplier.analytics?.orderCount,
-                  totalSpend: supplier.totalSpend ?? supplier.analytics?.totalSpend,
-                  reliabilityScore: supplier.reliabilityScore,
-                });
+      render: (val, row) => {
+        const supplier = resolveRecord(val, row);
+        return (
+          <AppActionGroup
+            maxVisible={3}
+            actions={[
+              {
+                label: 'AI Procurement Intelligence',
+                type: 'sparkles',
+                onClick: (e) => {
+                  e.stopPropagation();
+                  openSupplierAI({
+                    id: supplier.id,
+                    name: supplier.name || supplier.companyName || supplier.displayName,
+                    country: supplier.country,
+                    statusB2B: supplier.statusB2B,
+                    statusB2C: supplier.statusB2C,
+                    variantsSupplied: supplier.variantsSupplied ?? supplier.analytics?.totalVariants,
+                    productsSupplied: supplier.productsSupplied ?? supplier.analytics?.totalProducts,
+                    categoryIds: supplier.categoryIds,
+                    leadTime: supplier.leadTime,
+                    minOrder: supplier.minOrder,
+                    certifications: supplier.certifications,
+                    rfqCount: supplier.rfqCount ?? supplier.analytics?.rfqCount,
+                    orderCount: supplier.orderCount ?? supplier.analytics?.orderCount,
+                    totalSpend: supplier.totalSpend ?? supplier.analytics?.totalSpend,
+                    reliabilityScore: supplier.reliabilityScore,
+                  });
+                },
               },
-            },
-            {
-              label: 'View Catalog',
-              type: 'inventory',
-              onClick: (e) => { e.stopPropagation(); onAction?.('view-catalog', supplier); },
-            },
-            {
-              label: 'View Details',
-              type: 'edit',
-              onClick: (e) => { e.stopPropagation(); onAction?.('edit', supplier); },
-            },
-            supplier.statusB2B === 'active'
-              ? { label: 'Suspend B2B', type: 'pause',     danger: true, onClick: (e) => { e.stopPropagation(); onAction?.('suspend-b2b', supplier); } }
-              : { label: 'Activate B2B', type: 'activate',               onClick: (e) => { e.stopPropagation(); onAction?.('activate-b2b', supplier); } },
-            {
-              label: 'Archive Supplier',
-              type: 'archive',
-              danger: true,
-              onClick: (e) => { e.stopPropagation(); onAction?.('archive', supplier); },
-            },
-          ]}
-        />
-      ),
+              {
+                label: 'View Catalog',
+                type: 'inventory',
+                onClick: (e) => { e.stopPropagation(); onAction?.('view-catalog', supplier); },
+              },
+              {
+                label: 'View Details',
+                type: 'edit',
+                onClick: (e) => { e.stopPropagation(); onAction?.('edit', supplier); },
+              },
+              supplier.statusB2B === 'active'
+                ? { label: 'Suspend B2B', type: 'pause', danger: true, onClick: (e) => { e.stopPropagation(); onAction?.('suspend-b2b', supplier); } }
+                : { label: 'Activate B2B', type: 'activate', onClick: (e) => { e.stopPropagation(); onAction?.('activate-b2b', supplier); } },
+              {
+                label: 'Archive Supplier',
+                type: 'archive',
+                danger: true,
+                onClick: (e) => { e.stopPropagation(); onAction?.('archive', supplier); },
+              },
+            ]}
+          />
+        );
+      },
     },
   ];
 };

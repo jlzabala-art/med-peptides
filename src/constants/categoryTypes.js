@@ -7,6 +7,7 @@
 
 export const CATEGORY_TYPES = {
   PEPTIDE:               'peptide',              // All peptides (monotherapies and blends)
+  HORMONE:               'hormone',              // Hormone Replacement Therapy (TRT / BHRT / Endocrinology)
   SUPPLEMENT:            'supplement',           // Capsules, nutraceuticals, oral supplements
   DIAGNOSTIC_TEST:       'diagnostic_test',      // Capillary blood tests, DBS biomarkers, diagnostic panels
   GENOMICS_BIOMARKERS:   'genomics_biomarkers',  // DNA genetic panels, genomic saliva tests (Fagron, Eterna)
@@ -20,6 +21,7 @@ export const VALID_CATEGORIES = new Set(Object.values(CATEGORY_TYPES));
 
 export const CATEGORY_LABELS = {
   peptide:               'Peptide',
+  hormone:               'Hormone Therapy & TRT',
   supplement:            'Supplement & Nutraceutical',
   diagnostic_test:       'Diagnostic Test',
   diagnostic:            'Diagnostic Test',
@@ -40,6 +42,19 @@ export const CATEGORY_ALIASES = {
   'peptide combination':       'peptide',
   'peptide_combination':       'peptide',
   'blend':                     'peptide',
+
+  // Hormones & TRT / BHRT -> all resolved to 'hormone'
+  'hormone':                   'hormone',
+  'hormones':                  'hormone',
+  'hormone_therapy':           'hormone',
+  'hormone therapy':           'hormone',
+  'trt':                       'hormone',
+  'hrt':                       'hormone',
+  'bhrt':                      'hormone',
+  'androgens':                 'hormone',
+  'androgens_trt':             'hormone',
+  'testosterone':              'hormone',
+  'endocrinology':             'hormone',
 
   // Supplements & Consumables
   'supplement':                'supplement',

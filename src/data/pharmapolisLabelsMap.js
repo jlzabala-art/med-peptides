@@ -1127,6 +1127,72 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03049AATEL'
   },
 
+  // ── Tausifuzzaman Khaleequzza: BOX03535AATRI (Fagron TrichoTest™ Multi-Vehicle Protocol) ──
+  {
+    id: 'box03535-trichosol-part1',
+    prescriptionMatches: ['BOX03535AATRI', 'BOX03535', 'RX-BOX03535AATRI', 'TRICHOTEST-03535'],
+    patientMatches: ['tausifuzzaman', 'khaleequzza'],
+    phaseNumber: 1,
+    patientName: 'Tausifuzzaman Khaleequzza',
+    fileNumber: 'BOX03535AATRI',
+    productName: 'Precision Compounded Topical Solution in TrichoSol™',
+    productTitle: 'Precision Compounded Topical Solution in TrichoSol™',
+    subTitle: 'Phase 1: Targeted 5α-Reductase & PGD2 Follicular Therapy (100 mL)',
+    dosageForm: 'Topical Scalp Solution',
+    volume: '100 mL',
+    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    formula: 'Prostaquinon™ 3% (30 mg/mL) + Spironolactone 1% (10 mg/mL) + IGrantine-F1™ 0.25% (2.5 mg/mL)',
+    apis: [
+      { name: 'Prostaquinon™', drugName: 'Prostaquinon™', activeIngredient: 'Prostaquinon™', dose: '3% (30 mg/mL)', dosage: '3% (30 mg/mL)', strength: '3% (30 mg/mL)' },
+      { name: 'Spironolactone', drugName: 'Spironolactone', activeIngredient: 'Spironolactone', dose: '1% (10 mg/mL)', dosage: '1% (10 mg/mL)', strength: '1% (10 mg/mL)' },
+      { name: 'IGrantine-F1™', drugName: 'IGrantine-F1™', activeIngredient: 'IGrantine-F1™', dose: '0.25% (2.5 mg/mL)', dosage: '0.25% (2.5 mg/mL)', strength: '0.25% (2.5 mg/mL)' }
+    ],
+    vehicle: 'TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle, 100 mL)',
+    directions: 'Apply at night before bedtime. Leave the solution on your scalp for as long as possible. Wash your scalp the next day.',
+    warnings: 'For topical scalp use only. Keep out of reach of children.',
+    prodDate: '16-06-2026',
+    expDate: '16-06-2027',
+    storage: 'Store at room temperature (15°C - 25°C)',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: '',
+    batchCode: 'PHARM-2026-5AATRI',
+    lote: '2606-TK1',
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03535AATRI'
+  },
+  {
+    id: 'box03535-trichooil-part2',
+    prescriptionMatches: ['BOX03535AATRI', 'BOX03535', 'RX-BOX03535AATRI', 'TRICHOTEST-03535'],
+    patientMatches: ['tausifuzzaman', 'khaleequzza'],
+    phaseNumber: 2,
+    patientName: 'Tausifuzzaman Khaleequzza',
+    fileNumber: 'BOX03535AATRI',
+    productName: 'Scalp Care & Hygiene Pre-Wash Nutrient in TrichoOil™',
+    productTitle: 'Scalp Care & Hygiene Pre-Wash Nutrient in TrichoOil™',
+    subTitle: 'Phase 2: Scalp Care & Lipid Conditioning (30 mL)',
+    dosageForm: 'Topical Scalp Oil',
+    volume: '30 mL',
+    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    formula: 'Vitamin E (Tocopherol) 3.5% (35 mg/mL)',
+    apis: [
+      { name: 'Vitamin E (Tocopherol)', drugName: 'Vitamin E (Tocopherol)', activeIngredient: 'Vitamin E (Tocopherol)', dose: '3.5% (35 mg/mL)', dosage: '3.5% (35 mg/mL)', strength: '3.5% (35 mg/mL)' }
+    ],
+    vehicle: 'TrichoOil™ (100% Natural Scalp Compounding Vehicle, 30 mL)',
+    directions: '1-2 times / week, massage for 3-5 minutes and leave it on for 10 min before washing your hair.',
+    warnings: 'For topical scalp use only. Keep out of reach of children.',
+    prodDate: '16-06-2026',
+    expDate: '16-06-2027',
+    storage: 'Store at room temperature (15°C - 25°C)',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: '',
+    batchCode: 'PHARM-2026-5AATRI',
+    lote: '2606-TK2',
+    targetRxUrl: 'https://www.atlashealth-services.com/rx/BOX03535AATRI'
+  },
+
   // ── Fatima Yousef Al-mohannadi (Qatar / The Masters Medical Center Doha) ──
   {
     id: 'fatima-almohannadi-trichowash',
@@ -1353,7 +1419,9 @@ export function getAuthoritativeClinicalData(rx) {
     fileNumber: fileNumber ? fileNumber.trim() : null,
     doctorName: doctorName ? doctorName.trim() : null,
     doctorLicense: doctorLicense ? doctorLicense.trim() : null,
-    clinicName: clinicName !== undefined && clinicName !== null ? String(clinicName).trim() : '',
+    // By default, do NOT display clinicName on printed compounding labels (only doctorName + license)
+    clinicName: '',
+    sourceClinicName: clinicName !== undefined && clinicName !== null ? String(clinicName).trim() : '',
     targetRxUrl
   };
 }
@@ -1636,14 +1704,14 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       }
 
       if (regMatch) {
-        const isSezginDoc = /sezgin|cagatay|çağatay/i.test(String(auth.doctorName || regMatch.doctorName || ''));
         return {
           ...regMatch,
           phaseNumber: phaseNum,
           patientName: auth.patientName || regMatch.patientName,
           doctorName: (auth.doctorName && !auth.doctorName.toLowerCase().includes('miguel')) ? auth.doctorName : regMatch.doctorName,
           doctorLicense: auth.doctorLicense || regMatch.doctorLicense,
-          clinicName: isSezginDoc ? '' : (auth.clinicName !== undefined && auth.clinicName !== null ? auth.clinicName : regMatch.clinicName),
+          clinicName: '',
+          showClinicOnLabel: false,
           fileNumber: auth.fileNumber || regMatch.fileNumber,
           targetRxUrl: auth.targetRxUrl || regMatch.targetRxUrl,
           apis: cleanFormApis.length > 0 ? cleanFormApis : (regMatch.apis || extractCleanApisFromSource(rx)),
@@ -1661,7 +1729,6 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       const directionsText = form.posology?.regimen || form.instructions || form.directions || (form.posology?.steps ? form.posology.steps.map(s => s.text || s).join(' ') : (rx.posology?.notes || 'Take / apply as directed by prescribing physician.'));
       const warningsText = form.warnings || rx.posology?.notes || 'For patient use as prescribed. Keep out of reach of children.';
       const resolvedVehicle = extractVehicleFromSource(form, rx, pVol, pForm, directionsText, pName);
-      const isSezginDoc = /sezgin|cagatay|çağatay/i.test(String(auth.doctorName || ''));
 
       return {
         id: `${rx.id || 'rx'}-phase-${phaseNum}`,
@@ -1685,32 +1752,31 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         storage: form.storage || rx.storage || 'Store at room temperature',
         doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
         doctorLicense: auth.doctorLicense || 'DHA Registered',
-        clinicName: isSezginDoc ? '' : (auth.clinicName !== undefined && auth.clinicName !== null ? auth.clinicName : ''),
+        clinicName: '',
+        showClinicOnLabel: false,
         batchCode: `PHARM-2026-${String(auth.fileNumber || 'B948').slice(-6).toUpperCase()}`,
         lote: `2609-P${String(phaseNum)}`,
         targetRxUrl: auth.targetRxUrl
       };
     });
   } else if (matches.length > 0) {
-    derivedLabels = matches.map(m => {
-      const isSezginDoc = /sezgin|cagatay|çağatay/i.test(String(auth.doctorName || m.doctorName || ''));
-      return {
-        ...m,
-        patientName: auth.patientName || m.patientName,
-        doctorName: auth.doctorName || m.doctorName,
-        doctorLicense: auth.doctorLicense || m.doctorLicense,
-        clinicName: isSezginDoc ? '' : (auth.clinicName !== undefined && auth.clinicName !== null ? auth.clinicName : m.clinicName),
-        fileNumber: auth.fileNumber || m.fileNumber,
-        targetRxUrl: auth.targetRxUrl || m.targetRxUrl,
-        pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacy || 'PHARMAPOLIS',
-        pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacyName || m.pharmacy || 'PHARMAPOLIS',
-        pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || m.pharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
-        expDate: rx.expDate || rx.expiryDate || m.expDate || rxExpDate,
-        labelMarkdown: rx.labelMarkdown || m.labelMarkdown || null,
-        apis: m.apis || extractCleanApisFromSource(rx),
-        formula: m.formula || ''
-      };
-    });
+    derivedLabels = matches.map(m => ({
+      ...m,
+      patientName: auth.patientName || m.patientName,
+      doctorName: auth.doctorName || m.doctorName,
+      doctorLicense: auth.doctorLicense || m.doctorLicense,
+      clinicName: '',
+      showClinicOnLabel: false,
+      fileNumber: auth.fileNumber || m.fileNumber,
+      targetRxUrl: auth.targetRxUrl || m.targetRxUrl,
+      pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacy || 'PHARMAPOLIS',
+      pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacyName || m.pharmacy || 'PHARMAPOLIS',
+      pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || m.pharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
+      expDate: rx.expDate || rx.expiryDate || m.expDate || rxExpDate,
+      labelMarkdown: rx.labelMarkdown || m.labelMarkdown || null,
+      apis: m.apis || extractCleanApisFromSource(rx),
+      formula: m.formula || ''
+    }));
   } else {
     // Fallback: dynamically construct label items from multi-part blocks (parts, formulationBlocks, phases, formulations)
     // IMPORTANT: Never treat rx.items / rx.prescriptionLines directly as separate bottles unless grouped by formulationIndex!
@@ -1821,7 +1887,8 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         storage: p.storage || rx.storage || 'Store at room temperature (15°C - 25°C)',
         doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
         doctorLicense: auth.doctorLicense || 'DHA Registered',
-        clinicName: auth.clinicName !== undefined && auth.clinicName !== null ? auth.clinicName : '',
+        clinicName: '',
+        showClinicOnLabel: false,
         batchCode: `PHARM-2026-${String(auth.fileNumber || 'B948').slice(-6).toUpperCase()}`,
         lote: `2609-P${String(idx + 1)}`,
         targetRxUrl: auth.targetRxUrl
@@ -1899,11 +1966,8 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         fileNumber: lbl.fileNumber || rx.fileNumber || rx.code || rx.prescriptionNumber || rx.id || '51857',
         rxCode: lbl.rxCode || rx.code || rx.prescriptionNumber || rx.id,
         doctorName: lbl.doctorName !== undefined && lbl.doctorName !== null ? lbl.doctorName : (auth.doctorName || rx.doctorName || derived.doctorName || 'Dr. Marina Cordeiro Fernandes'),
-        clinicName: lbl.clinicName !== undefined && lbl.clinicName !== null
-          ? String(lbl.clinicName).trim()
-          : (/sezgin|cagatay|çağatay/i.test(String(lbl.doctorName || auth.doctorName || rx.doctorName || derived.doctorName || ''))
-              ? ''
-              : (auth.clinicName !== undefined && auth.clinicName !== null ? auth.clinicName : (rx.clinicName || derived.clinicName || ''))),
+        clinicName: lbl.showClinicOnLabel === true ? String(lbl.clinicName || '').trim() : '',
+        showClinicOnLabel: lbl.showClinicOnLabel === true,
         doctorLicense: cleanLicense,
         batchCode: lbl.batchCode || rx.batchCode || rx.dispensingBatch || derived.batchCode || 'PHARM-2026-B948',
         lote: lbl.lote || rx.lote || derived.lote || '2609-PLV',

@@ -187,7 +187,7 @@ export default function AdminSuppliersTabClient({ initialData }) {
         resultCount={totalItems}
         namespace="admin-suppliers"
         filters={[
-          { key: 'hasProducts', label: 'Has Products', value: filters?.hasProducts ? 'Yes' : 'No', onRemove: () => setFilters(prev => ({ ...prev, hasProducts: !prev.hasProducts })) },
+          ...(filters?.hasProducts ? [{ key: 'hasProducts', label: 'Has Products', value: 'Yes', onRemove: () => setFilters(prev => ({ ...prev, hasProducts: false })) }] : []),
           // One chip per selected supplier — value resolved from ID → human name
           ...(filters?.supplierIds || []).map(sid => ({
             key: `supplier-${sid}`,
@@ -217,7 +217,6 @@ export default function AdminSuppliersTabClient({ initialData }) {
             values: filters?.supplierIds || [],
             // value = supplier ID (e.g. "supplier-bloodo"), label = human name
             options: suppliers
-              .filter(s => (s.productsSupplied || 0) > 0 || (s.variantsSupplied || 0) > 0)
               .map(s => ({ label: s.companyName || s.name || s.id, value: s.id }))
               .filter((v, i, arr) => v.value && arr.findIndex(x => x.value === v.value) === i)
               .sort((a, b) => a.label.localeCompare(b.label)),
@@ -227,7 +226,7 @@ export default function AdminSuppliersTabClient({ initialData }) {
             key: 'hasProducts',
             label: 'Has Products',
             multiSelect: false,
-            values: [filters?.hasProducts ? 'yes' : 'no'],
+            values: filters?.hasProducts ? ['yes'] : [],
             options: [
               { label: 'Yes', value: 'yes' },
               { label: 'No',  value: 'no' },
@@ -263,6 +262,7 @@ export default function AdminSuppliersTabClient({ initialData }) {
         columns={getSupplierColumns({
           sortConfig,
           setSortConfig,
+          allCategories: categoryOptions,
           onUpdateField: (id, field, value) => handleUpdate(id, { [field]: value }),
           supplierOptions: suppliers
             .filter(s => (s.productsSupplied || 0) > 0 || (s.variantsSupplied || 0) > 0)

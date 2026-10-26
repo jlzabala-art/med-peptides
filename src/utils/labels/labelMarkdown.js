@@ -87,7 +87,9 @@ pharmacyAddress: ${pharmacyAddress}
 doctor: ${doctor}
 clinic: ${clinic}
 license: ${license}
-storage: ${storage}${item.shippingTitle ? `
+storage: ${storage}${typeof item.customHeaderBadge === 'string' ? `
+headerBadge: ${item.customHeaderBadge}` : ''}${item.showHeaderBadge !== undefined ? `
+showHeaderBadge: ${item.showHeaderBadge}` : ''}${item.shippingTitle ? `
 shippingTitle: ${item.shippingTitle}` : ''}${item.deliveryTitle ? `
 deliveryTitle: ${item.deliveryTitle}` : ''}
 status: ${item.approvalStatus || 'draft'}
@@ -158,10 +160,15 @@ export function parseMarkdownToLabel(mdText, baseItem = {}) {
           result.doctorName = val;
         } else if (['clinic', 'clinicname', 'clinica', 'centro', 'centromedico', 'hospital'].includes(normKey)) {
           result.clinicName = val;
+          result.showClinicOnLabel = Boolean(val);
         } else if (['license', 'doctorlicense', 'licencia', 'colegiado', 'numcolegiado', 'dha'].includes(normKey)) {
           result.doctorLicense = val;
         } else if (['storage', 'conservacion', 'almacenamiento', 'temperatura', 'condicionesconservacion'].includes(normKey)) {
           result.storage = val;
+        } else if (['headerbadge', 'customheaderbadge', 'insignia', 'badge', 'timingslot'].includes(normKey)) {
+          result.customHeaderBadge = val;
+        } else if (['showheaderbadge', 'mostrarinsignia', 'showbadge'].includes(normKey)) {
+          result.showHeaderBadge = val.toLowerCase() !== 'false' && val.toLowerCase() !== 'no' && val !== '0';
         } else if (['shippingtitle', 'shippingname', 'nombreaduana', 'nombreenvio', 'customstitle'].includes(normKey)) {
           result.shippingTitle = val;
           result.shippingName = val;

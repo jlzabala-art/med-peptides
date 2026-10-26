@@ -210,6 +210,67 @@
   border-color: #bdc1c6;
 }
 
+/* ── GCP Horizontal Resource Tabs Bar ──────────────────────────────────────── */
+.rx-gcp-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-top: 1px solid #f1f3f4;
+  margin: 0 -18px;
+  padding: 0 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.rx-gcp-tabs-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.rx-gcp-tab-btn {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  padding: 10px 12px 9px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #5f6368;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  border-radius: 6px 6px 0 0;
+}
+
+.rx-gcp-tab-btn:hover:not(.is-active) {
+  color: #202124;
+  background: #f8fafc;
+}
+
+.rx-gcp-tab-btn.is-active {
+  color: #0284c7;
+  font-weight: 700;
+  border-bottom-color: #0284c7;
+}
+
+.rx-gcp-tab-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #64748b;
+  line-height: 1.25;
+}
+
+.rx-gcp-tab-badge.is-active {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
 .pds-sidebar-desktop {
   display: none !important;
 }
@@ -218,7 +279,7 @@
   .pds-sidebar-desktop {
     display: flex !important;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 0.85rem;
     position: sticky;
     top: 80px;
     width: 100%;
@@ -737,6 +798,15 @@
     padding: 0.875rem 1rem !important;
     border-radius: 8px !important;
     margin-bottom: 0.75rem !important;
+  }
+
+  .rx-card.rx-gcp-header-card {
+    padding-bottom: 0 !important;
+  }
+
+  .rx-gcp-tabs-bar {
+    margin: 0 -1rem;
+    padding: 0 0.75rem;
   }
 
   .rx-master-header-grid {

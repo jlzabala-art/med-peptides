@@ -86,15 +86,22 @@ export default function ProductGridCard({
       });
   }, [products, product.name, product.category]);
 
+  const isDoctorsOnlyPricing = Boolean(
+    product.priceVisibility === 'registered_doctors_only' ||
+    product.requiresDoctorAuthForPricing ||
+    product.category === 'hormone'
+  );
+
   const priceLabel = useMemo(() => {
     if (!products || product.category === 'Research Supplies') return null;
+    if (isDoctorsOnlyPricing && !isProfessional) return null;
     if (productVariants.length === 0) return null;
     const idx = Math.min(selectedStrengthIdx, productVariants.length - 1);
     const variant = productVariants[idx];
     const { resolved } = resolveAndFormatPrice(variant);
     if (resolved.perUnit != null) return `$${resolved.perUnit.toFixed(0)} USD`;
     return null;
-  }, [productVariants, selectedStrengthIdx, products, product.category]);
+  }, [productVariants, selectedStrengthIdx, products, product.category, isDoctorsOnlyPricing, isProfessional]);
 
   const selectedVariant = productVariants[Math.min(selectedStrengthIdx, productVariants.length - 1)] || null;
   const itemKey = selectedVariant

@@ -42,34 +42,29 @@ export async function fetchSupplierInitialDataAction(pageSize = 50) {
       itemsSourced,                                  // ← was "totalVariants", now matches KPI
     };
 
-    // Fetch ALL suppliers ordered by name (variantsSupplied index may not exist for all docs)
-    // The client hook enriches productsSupplied/variantsSupplied from the stats API
-    let querySnapshot;
-    try {
-      // Prefer ordering by most variants first so data-rich suppliers appear at top
-      querySnapshot = await collRef
-        .orderBy('variantsSupplied', 'desc')
-        .limit(pageSize)
-        .get();
-    } catch {
-      // Fallback: no index → order by companyName
-      querySnapshot = await collRef
-        .orderBy('companyName')
-        .limit(pageSize)
-        .get();
-    }
+    // Query suppliers directly from Firestore without orderBy constraint that drops docs missing fields
+    const querySnapshot = await collRef.limit(pageSize).get();
 
-    const suppliers = querySnapshot.docs.map(docSnap => {
-      const data = serializeFirestoreData(docSnap.data());
-      const rawName = data.companyName || data.name || data.displayName || data.legalName;
-      const resolvedName = rawName || docSnap.id.replace(/^supplier-/, '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-      return {
-        id: docSnap.id,
-        ...data,
-        companyName: resolvedName,
-        name: resolvedName,
-      };
-    });
+    const suppliers = querySnapshot.docs
+      .map(docSnap => {
+        const data = serializeFirestoreData(docSnap.data());
+        const rawName = data.name || data.companyName || data.displayName || data.legalName;
+        const resolvedName = rawName || (docSnap.id.startsWith('supplier-') ? docSnap.id.replace(/^supplier-/, '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '');
+        return {
+          id: docSnap.id,
+          ...data,
+          name: resolvedName,
+          companyName: resolvedName,
+          displayName: resolvedName,
+          country: data.country || data.originCountry || data.headquarters || data.location || (data.warehouses?.[0]?.country) || (data.facilitySites?.[0]?.country) || '',
+          categoryIds: data.categoryIds || (data.categoryId ? [data.categoryId] : []) || [],
+          status: data.status || data.statusB2B || 'active',
+          statusB2B: data.statusB2B || data.status || 'active',
+          variantsSupplied: Number(data.variantsSupplied ?? data.analytics?.variantsSupplied ?? data.analytics?.totalVariants ?? 0),
+          productsSupplied: Number(data.productsSupplied ?? data.analytics?.productsSupplied ?? data.analytics?.totalProducts ?? 0),
+        };
+      })
+      .filter(s => Boolean(s.name && s.name.trim() !== '') || Boolean(s.companyName && s.companyName.trim() !== '') || s.email || s.website);
 
     return {
       kpis,

@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { 
   Stethoscope, 
@@ -12,9 +12,12 @@ import {
   Calendar,
   MessageSquare,
   ShieldCheck,
-  Eye
+  Eye,
+  FlaskConical,
+  Dna,
+  RotateCw
 } from '@/lib/icons';
-import { RotateCw } from 'lucide-react';
+import { triggerHaptic } from '@/utils/haptics';
 import PrescriptionStatusQuickAction from './PrescriptionStatusQuickAction';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -27,6 +30,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
  * - High-density resource identity (Title, #ID Copy-on-click, Status Badge)
  * - GCP Segmented Switcher (Doctor View ↔ Patient Preview for authorized clinical viewers)
  * - Role-tailored action hierarchy (No button redundancy, clear CTA hierarchy)
+ * - GCP Horizontal Resource Tabs Bar (Formulations, Genomics, Roadmap, EU GMP Quality, Synergies, Credentials)
  */
 export default function PrescriptionMasterHeader({
   rx,
@@ -38,18 +42,83 @@ export default function PrescriptionMasterHeader({
   currentStatus = 'approved',
   _currentStatusMeta = {},
   setCurrentStatus,
-  doctorName = '',
   doctorPublicUrl = '',
   handleCopyLink,
   copied = false,
   onOpenPatientShare = null,
-  onOpenInquiry = null,
-  onSyncCalendar = null
+  activeGcpTab = 'treatment',
+  setActiveGcpTab = null,
+  compoundedFormulations = [],
+  genomicsData = null,
+  atlasRecs = null
 }) {
+  const hasRecommendations = Boolean(
+    atlasRecs?.peptide ||
+    atlasRecs?.supplement ||
+    atlasRecs?.diagnostic ||
+    atlasRecs?.colway ||
+    atlasRecs?.teletestHairMineral
+  );
+
+  const gcpTabs = useMemo(() => {
+    const tabs = [
+      {
+        id: 'treatment',
+        label: isEs ? 'Fórmulas y Posología' : 'Formulations & Posology',
+        icon: FlaskConical,
+        badge: compoundedFormulations?.length > 0 ? String(compoundedFormulations.length) : null
+      }
+    ];
+
+    if (genomicsData) {
+      tabs.push({
+        id: 'genomics',
+        label: isEs ? 'Guía Genómica' : 'Genomics Guidance',
+        icon: Dna
+      });
+    }
+
+    tabs.push({
+      id: 'roadmap',
+      label: isEs ? 'Roadmap 90 Días' : '90-Day Roadmap',
+      icon: Calendar
+    });
+
+    tabs.push({
+      id: 'traceability',
+      label: isEs ? 'Calidad EU GMP' : 'EU GMP Quality',
+      icon: ShieldCheck
+    });
+
+    if (hasRecommendations) {
+      tabs.push({
+        id: 'recommendations',
+        label: isEs ? 'Sinergias Atlas' : 'Atlas Synergies',
+        icon: Sparkles
+      });
+    }
+
+    tabs.push({
+      id: 'credentials',
+      label: isEs ? 'Acreditación' : 'Credentials',
+      icon: Stethoscope
+    });
+
+    if (isPatientView) {
+      tabs.push({
+        id: 'patientSharing',
+        label: isEs ? 'Soporte Clínico' : 'Clinic Support',
+        icon: MessageSquare
+      });
+    }
+
+    return tabs;
+  }, [isEs, compoundedFormulations?.length, genomicsData, hasRecommendations, isPatientView]);
+
   return (
-    <div className="rx-card rx-gcp-header-card">
+    <div className="rx-card rx-gcp-header-card" style={{ paddingBottom: setActiveGcpTab ? '0' : undefined }}>
       {/* ── Main GCP Resource Header Row ────────────────────────────────────── */}
-      <div className="rx-gcp-header-main-row">
+      <div className="rx-gcp-header-main-row" style={{ paddingBottom: setActiveGcpTab ? '12px' : undefined }}>
         {/* Left: Identity & Metadata */}
         <div className="rx-gcp-header-left">
           <div className={`rx-gcp-header-icon ${isPatientView ? 'patient' : ''}`}>
@@ -87,9 +156,6 @@ export default function PrescriptionMasterHeader({
                   ? 'Dossier clínico digital · Pauta posológica · Grado EU GMP'
                   : 'Digital clinical dossier · Posology regimen · EU GMP Standards'}
               </span>
-              {doctorName && (
-                <span style={{ color: '#94a3b8' }}>• {doctorName}</span>
-              )}
             </div>
           </div>
         </div>
@@ -198,7 +264,7 @@ export default function PrescriptionMasterHeader({
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '8px',
-          marginTop: '10px',
+          marginBottom: setActiveGcpTab ? '10px' : '0',
           padding: '6px 12px',
           borderRadius: '6px',
           background: '#f0fdf4',
@@ -230,6 +296,41 @@ export default function PrescriptionMasterHeader({
           >
             {isEs ? 'Volver a Vista Médico →' : 'Return to Doctor View →'}
           </button>
+        </div>
+      )}
+
+      {/* ── GCP Resource Horizontal Tabs Bar ──────────────────────────────────── */}
+      {setActiveGcpTab && (
+        <div
+          className="rx-gcp-tabs-bar"
+          role="tablist"
+          aria-label={isEs ? 'Secciones de la prescripción' : 'Prescription sections'}
+        >
+          {gcpTabs.map((tab) => {
+            const isActive = activeGcpTab === tab.id;
+            const TabIcon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setActiveGcpTab(tab.id);
+                }}
+                className={`rx-gcp-tab-btn ${isActive ? 'is-active' : ''}`}
+              >
+                <TabIcon size={14} style={{ flexShrink: 0 }} />
+                <span>{tab.label}</span>
+                {tab.badge && (
+                  <span className={`rx-gcp-tab-badge ${isActive ? 'is-active' : ''}`}>
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

@@ -55,6 +55,53 @@ function wrapDirections(text, firstLineMaxChars = 44, otherLinesMaxChars = 56) {
 }
 
 /**
+ * Computes the default clinical header badge text (e.g. "PART 1 OF 2 · 🌙 NIGHT / BEDTIME" or "PART 2 OF 2 · 1-2×/WK · PRE-WASH").
+ */
+export function computeDefaultHeaderBadge(labelData = {}, fallbackPartIndex = 0, fallbackTotalParts = 1) {
+  const effectiveTotalParts = labelData.totalParts || fallbackTotalParts || 1;
+  const effectivePartIdx = labelData.partIndex ?? labelData.phaseIndex ?? fallbackPartIndex ?? 0;
+  const rawPart = labelData.partLabel || labelData.partTag || (effectiveTotalParts > 1 ? `Part ${Number(effectivePartIdx) + 1} of ${effectiveTotalParts}` : '');
+  let partBadge = '';
+  if (rawPart) {
+    const match = String(rawPart).match(/part\s*(\d+)(?:\s*(?:\/|of)\s*(\d+))?/i);
+    if (match) {
+      const pNum = match[1];
+      const pTot = match[2] || String(effectiveTotalParts || 2);
+      partBadge = `PART ${pNum} OF ${pTot}`;
+    } else {
+      partBadge = String(rawPart).toUpperCase().trim();
+    }
+  }
+
+  const corpus = `${labelData.timeOfDay || ''} ${labelData.productTitle || ''} ${labelData.productName || ''} ${labelData.subTitle || ''} ${labelData.directions || ''} ${labelData.instructions || ''} ${labelData.partLabel || ''} ${labelData.formula || ''}`.toLowerCase();
+  const isMorning = /\b(morning|breakfast|mañana|desayuno|matutina|am\b)/i.test(corpus);
+  const isBedtime = /\b(bedtime|before bed|night|sleep|sueño|dormir|nocturna)\b/i.test(corpus);
+  const isEvening = /\b(evening|dinner|afternoon|lunch.*dinner|vespertina|tarde|cena|pm\b)/i.test(corpus);
+  const isPreWash = /\b(pre-wash|before washing|antes de lavar)\b/i.test(corpus);
+  const isWeekly = /\b(1-2\s*times\s*\/\s*week|1-2\s*times\s+per\s+week|times\s*\/\s*week|times\s+per\s+week|weekly|semanal)\b/i.test(corpus);
+
+  let timeOfDay = '';
+  if (isMorning && !isBedtime && !isEvening) timeOfDay = 'MORNING';
+  else if (isBedtime) timeOfDay = 'NIGHT / BEDTIME';
+  else if (isEvening) timeOfDay = 'EVENING';
+  else if (isPreWash && isWeekly) timeOfDay = '1-2×/WK · PRE-WASH';
+  else if (isPreWash) timeOfDay = 'PRE-WASH';
+  else if (isWeekly) timeOfDay = '1-2× / WEEK';
+  else if (/\b(daily|once daily|diaria)\b/i.test(corpus)) timeOfDay = 'ONCE DAILY';
+
+  const timeIcon = timeOfDay === 'MORNING'
+    ? '☀️ '
+    : (timeOfDay.includes('NIGHT') || timeOfDay.includes('BEDTIME')
+        ? '🌙 '
+        : (timeOfDay === 'EVENING' ? '🌅 ' : ''));
+
+  if (partBadge && timeOfDay) return `${partBadge} · ${timeIcon}${timeOfDay}`;
+  if (partBadge) return partBadge;
+  if (timeOfDay) return `${timeIcon}${timeOfDay}`;
+  return '';
+}
+
+/**
  * Renders an active ingredient line with tabular/high-contrast dosage formatting.
  * The molecule name is rendered in slate-800 (#1e293b), while the strength/dosage
  * (e.g., 500 mcg, 25 mg, 4%, etc.) is rendered in bold dark blue (#0284c7) for instant recognition.
@@ -147,24 +194,33 @@ export default function PharmapolisLabelSvg({
     }
   }
 
-  // Detect clinical Time of Day (Morning, Evening, Night / Bedtime)
+  // Detect clinical Time of Day / Regimen Timing (Morning, Evening, Night / Bedtime, Pre-Wash / Weekly)
   const timeOfDay = React.useMemo(() => {
     const corpus = `${labelData.timeOfDay || ''} ${labelData.productTitle || ''} ${labelData.productName || ''} ${labelData.subTitle || ''} ${labelData.directions || ''} ${labelData.instructions || ''} ${labelData.partLabel || ''} ${labelData.formula || ''}`.toLowerCase();
     
     const isMorning = /\b(morning|breakfast|mañana|desayuno|matutina|am\b)/i.test(corpus);
     const isBedtime = /\b(bedtime|before bed|night|sleep|sueño|dormir|nocturna)\b/i.test(corpus);
     const isEvening = /\b(evening|dinner|afternoon|lunch.*dinner|vespertina|tarde|cena|pm\b)/i.test(corpus);
+    const isPreWash = /\b(pre-wash|before washing|antes de lavar)\b/i.test(corpus);
+    const isWeekly = /\b(1-2\s*times\s*\/\s*week|1-2\s*times\s+per\s+week|times\s*\/\s*week|times\s+per\s+week|weekly|semanal)\b/i.test(corpus);
 
     if (isMorning && !isBedtime && !isEvening) return 'MORNING';
     if (isBedtime) return 'NIGHT / BEDTIME';
     if (isEvening) return 'EVENING';
+    if (isPreWash && isWeekly) return '1-2×/WK · PRE-WASH';
+    if (isPreWash) return 'PRE-WASH';
+    if (isWeekly) return '1-2× / WEEK';
     if (/\b(daily|once daily|diaria)\b/i.test(corpus)) return 'ONCE DAILY';
     return '';
   }, [labelData]);
 
-  // Unified Header Badge: Replaces technical FILE # with clinical Time of Day / Part indicator
-  const headerBadgeText = React.useMemo(() => {
-    const timeIcon = timeOfDay === 'MORNING' ? '☀️ ' : (timeOfDay.includes('NIGHT') || timeOfDay.includes('BEDTIME') ? '🌙 ' : (timeOfDay === 'EVENING' ? '🌅 ' : ''));
+  // Unified Header Badge: Supports show/hide toggle (`showHeaderBadge`) and custom text override (`customHeaderBadge`)
+  const autoHeaderBadgeText = React.useMemo(() => {
+    const timeIcon = timeOfDay === 'MORNING'
+      ? '☀️ '
+      : (timeOfDay.includes('NIGHT') || timeOfDay.includes('BEDTIME')
+          ? '🌙 '
+          : (timeOfDay === 'EVENING' ? '🌅 ' : ''));
     if (partBadge && timeOfDay) {
       return `${partBadge} · ${timeIcon}${timeOfDay}`;
     }
@@ -173,19 +229,28 @@ export default function PharmapolisLabelSvg({
     return '';
   }, [partBadge, timeOfDay]);
 
+  const headerBadgeText = React.useMemo(() => {
+    if (labelData.showHeaderBadge === false) return '';
+    if (typeof labelData.customHeaderBadge === 'string') {
+      return labelData.customHeaderBadge.trim();
+    }
+    return autoHeaderBadgeText;
+  }, [labelData.showHeaderBadge, labelData.customHeaderBadge, autoHeaderBadgeText]);
+
   // Clinical Color Theme for Time of Day & Part indicator
   const badgeTheme = React.useMemo(() => {
-    if (timeOfDay === 'MORNING') {
+    const effectiveUpper = (headerBadgeText || timeOfDay || '').toUpperCase();
+    if (effectiveUpper.includes('MORNING') || effectiveUpper.includes('MAÑANA')) {
       return { fill: '#b45309', text: '#ffffff', border: '#d97706', accent: '#f59e0b', icon: '☀️' }; // Warm amber gold
     }
-    if (timeOfDay.includes('NIGHT') || timeOfDay.includes('BEDTIME')) {
+    if (effectiveUpper.includes('NIGHT') || effectiveUpper.includes('BEDTIME') || effectiveUpper.includes('NOCHE')) {
       return { fill: '#1e1b4b', text: '#ffffff', border: '#312e81', accent: '#6366f1', icon: '🌙' }; // Midnight indigo
     }
-    if (timeOfDay === 'EVENING') {
+    if (effectiveUpper.includes('EVENING') || effectiveUpper.includes('TARDE')) {
       return { fill: '#0f766e', text: '#ffffff', border: '#14b8a6', accent: '#2dd4bf', icon: '🌅' }; // Evening teal
     }
     return { fill: '#003666', text: '#ffffff', border: '#0284c7', accent: '#38bdf8', icon: '' }; // Clinical dispensary navy
-  }, [timeOfDay]);
+  }, [headerBadgeText, timeOfDay]);
 
   // Header badge sizing and right-aligned position (guaranteed zero overlap with patientName)
   const badgeCharCount = headerBadgeText.length;
@@ -231,10 +296,11 @@ export default function PharmapolisLabelSvg({
   const storage = labelData.storage || 'Store at room temperature';
   const doctorName = labelData.doctorName !== undefined && labelData.doctorName !== null ? String(labelData.doctorName).trim() : (labelData.physician || '');
   const rawClinicName = labelData.clinicName !== undefined && labelData.clinicName !== null ? String(labelData.clinicName).trim() : (labelData.clinic || '');
-  // Clinic name on printed labels is strictly optional; omit placeholders, and if showClinicOnLabel === false, omit it
-  const clinicName = (labelData.showClinicOnLabel === false || /^licensed\s+clinical\s+practice$/i.test(rawClinicName) || /^centro\s+m[eé]dico\s+prescriptor$/i.test(rawClinicName))
-    ? ''
-    : rawClinicName;
+  // By default, do NOT show clinic name on the printed label (only doctorName + license).
+  // It is only rendered if explicitly enabled via showClinicOnLabel === true.
+  const clinicName = (labelData.showClinicOnLabel === true && rawClinicName && !/^licensed\s+clinical\s+practice$/i.test(rawClinicName) && !/^centro\s+m[eé]dico\s+prescriptor$/i.test(rawClinicName))
+    ? rawClinicName
+    : '';
   const doctorLicense = labelData.doctorLicense !== undefined && labelData.doctorLicense !== null ? String(labelData.doctorLicense).trim() : (labelData.license || '');
   const batchCode = labelData.batchCode || 'PHARM-2026-B948';
   const lote = labelData.lote || '2609-PLV';
@@ -297,10 +363,24 @@ export default function PharmapolisLabelSvg({
       if (filtered.length > 0) {
         return filtered.map(a => {
           if (typeof a === 'string') {
-            return a.replace(/^[•*-]\s*/, '').replace(/\s*\bTM\b/g, '™').trim();
+            return a
+              .replace(/^[•*-]\s*/, '')
+              .replace(/\s*\bTM\b/g, '™')
+              .replace(/\bTocoferol\b/gi, 'Tocopherol')
+              .replace(/\bBiotina\b/gi, 'Biotin')
+              .replace(/\bEspironolactona\b/gi, 'Spironolactone')
+              .replace(/\bMelatonina\b/gi, 'Melatonin')
+              .replace(/\bCafeína\b/gi, 'Caffeine')
+              .replace(/Tópico/gi, 'Topical')
+              .trim();
           }
           let name = String(a.drugName || a.drug || a.name || a.productName || a.activeIngredient || 'API')
             .replace(/\s*\bTM\b/g, '™')
+            .replace(/\bTocoferol\b/gi, 'Tocopherol')
+            .replace(/\bBiotina\b/gi, 'Biotin')
+            .replace(/\bEspironolactona\b/gi, 'Spironolactone')
+            .replace(/\bMelatonina\b/gi, 'Melatonin')
+            .replace(/\bCafeína\b/gi, 'Caffeine')
             .trim();
           let dose = a.dosage || a.dose || a.strength || a.concentration || '';
           if (dose && dose !== '—' && dose !== '-') {

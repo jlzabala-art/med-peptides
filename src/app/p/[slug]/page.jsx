@@ -14,6 +14,7 @@ import { getClinicalSupplementBySlug } from '../../../data/clinicalSupplementsRe
 import { getTeletestProductBySlug } from '../../../data/teletestRegistry';
 import { getLotuslandPeptideBySlug } from '../../../data/lotuslandPeptidesRegistry';
 import { getMcgProductBySlug } from '../../../data/mcgInciRegistry';
+import { getNormaProductBySlug } from '../../../data/normaHellasRegistry';
 
 export const revalidate = 3600; // ISR: regenerate at most every 60 min
 export const dynamicParams = true; // Allow slugs not in generateStaticParams
@@ -157,6 +158,36 @@ async function getPublicProduct(slug, supplierFilter = null) {
       return mcgResult;
     }
 
+    const normaProduct = getNormaProductBySlug(target);
+    if (normaProduct) {
+      const sanitized = sanitizePublicProduct(normaProduct, normaProduct.variants || []);
+      const processedHierarchy = processProductVariants(sanitized.variants || []);
+      const normaResult = {
+        ...sanitized,
+        priceVisibility: 'registered_doctors_only',
+        requiresDoctorAuthForPricing: true,
+        isProfessional: true,
+        requiresPrescription: true,
+        professional_use_only: true,
+        atcCode: normaProduct.atcCode,
+        coaData: normaProduct.coaData,
+        composition: normaProduct.composition,
+        indications: normaProduct.indications,
+        contraindications: normaProduct.contraindications,
+        posology: normaProduct.posology,
+        pharmacokinetics: normaProduct.pharmacokinetics,
+        isSingleSupplierLocked: true,
+        availableSuppliers: [{ id: 'supplier-norma-hellas', name: 'NORMA HELLAS S.A.', isPen: false, isSpray: false }],
+        activeSupplierId: 'supplier-norma-hellas',
+        processedHierarchy,
+      };
+      PUBLIC_PRODUCT_RAM_CACHE.set(cacheKey, {
+        data: normaResult,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      });
+      return normaResult;
+    }
+
     return null;
   }
 
@@ -296,6 +327,7 @@ async function getPublicProduct(slug, supplierFilter = null) {
 
   const result = {
     ...sanitized,
+    ...(raw.coaData ? { coaData: raw.coaData } : {}),
     isSingleSupplierLocked: Boolean(raw.isSingleSupplierLocked),
     availableSuppliers: allAvailableSuppliers,
     activeSupplierId: raw.supplierId || targetSupplier,

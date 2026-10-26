@@ -2,8 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { collection, getDocs, getDoc, updateDoc, doc, setDoc, query, limit, where, writeBatch, orderBy } from 'firebase/firestore';
-import * as fb from '../../../firebase';
-const db = fb?.db;
+import { db } from '../../../firebase';
 import toast from 'react-hot-toast';
 
 // ── In-memory cache (Layer 1) ─────────────────────────────────────────────────
@@ -14,7 +13,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 export function useSupplierData({ initialData } = {}) {
   const searchParams = useSearchParams();
   const [suppliers, setSuppliers] = useState(initialData?.suppliers || []);
-  const [loading, setLoading] = useState(!initialData?.suppliers);
+  const [loading, setLoading] = useState(!initialData?.suppliers?.length);
   const [searchTerm, setSearchTerm] = useState(searchParams?.get('search') || '');
   const [algoliaSuppliers, setAlgoliaSuppliers] = useState(null);
   
@@ -26,7 +25,7 @@ export function useSupplierData({ initialData } = {}) {
     category: [],
     status: [],
     supplierIds: [],          // Multi-select: array of canonical IDs (e.g. ['supplier-bloodo'])
-    hasProducts: true,        // Default: show only suppliers with products
+    hasProducts: false,       // Default: show all suppliers without blocking unlinked suppliers
     productCategory: [],      // Filter by product category (Peptides, DNA Test, etc.)
   });
 
@@ -98,8 +97,7 @@ export function useSupplierData({ initialData } = {}) {
   }, [initialData?.kpis]);
 
 
-  // Fetch all suppliers from `suppliers` collection (source of truth)
-  // and merge in server-computed product/variant counts.
+  // Fetch all suppliers from `suppliers` collection in Firestore directly
   const fetchAllSuppliers = async (forceRefresh = false) => {
     const now = Date.now();
 
@@ -110,19 +108,19 @@ export function useSupplierData({ initialData } = {}) {
       return;
     }
 
-    // ── Layer 2: localStorage cache ───────────────────────────────────────────
+    // ── Layer 2: localStorage cache (v2) ─────────────────────────────────────
     if (!forceRefresh && typeof window !== 'undefined') {
       try {
-        const cachedStr = localStorage.getItem('__rg_suppliers_cache');
+        const cachedStr = localStorage.getItem('__rg_suppliers_cache_v2');
         if (cachedStr) {
           const parsed = JSON.parse(cachedStr);
-          if (parsed && (now - parsed.ts) < CACHE_TTL_MS * 6) {
+          if (parsed && (now - parsed.ts) < CACHE_TTL_MS * 6 && parsed.data?.length > 0 && parsed.data[0]?.name) {
             _supplierCache.data = parsed.data;
             _supplierCache.ts = parsed.ts;
             setSuppliers(parsed.data);
             setLoading(false);
 
-            // Background revalidation — keeps UI snappy
+            // Background revalidation
             setTimeout(() => fetchAllSuppliers(true), 500);
             return;
           }
@@ -132,36 +130,46 @@ export function useSupplierData({ initialData } = {}) {
 
     setLoading(true);
     try {
-      // ── Layer 3: Firestore `suppliers` collection ────────────────────────────
-      // Only read supplier metadata docs — never download products or variants
+      // ── Layer 3: Firestore `suppliers` collection (Direct Firebase Connection) ──
       const q = query(collection(db, 'suppliers'), limit(200));
       const snap = await getDocs(q);
       let list = snap.docs.map(d => {
         const data = d.data();
-        const rawName = data.companyName || data.name || data.displayName || data.legalName;
-        const resolvedName = rawName || d.id.replace(/^supplier-/, '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const rawName = data.name || data.companyName || data.displayName || data.legalName;
+        const resolvedName = rawName || (d.id.startsWith('supplier-') ? d.id.replace(/^supplier-/, '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '');
         return {
           id: d.id,
           ...data,
+          name: resolvedName,
           companyName: resolvedName,
-          name: resolvedName
+          displayName: resolvedName,
+          country: data.country || data.originCountry || data.headquarters || data.location || (data.warehouses?.[0]?.country) || (data.facilitySites?.[0]?.country) || '',
+          categoryIds: data.categoryIds || (data.categoryId ? [data.categoryId] : []) || [],
+          status: data.status || data.statusB2B || 'active',
+          statusB2B: data.statusB2B || data.status || 'active',
+          variantsSupplied: Number(data.variantsSupplied ?? data.analytics?.variantsSupplied ?? data.analytics?.totalVariants ?? 0),
+          productsSupplied: Number(data.productsSupplied ?? data.analytics?.productsSupplied ?? data.analytics?.totalProducts ?? 0),
         };
       });
 
-      // ── Layer 4: Merge server-side stats (products + variants per supplier) ──
-      // The API route does the heavy lifting on the server using Admin SDK
-      const stats = await fetchServerStats(forceRefresh);
-      if (stats.length > 0) {
-        const statsMap = Object.fromEntries(stats.map(s => [s.id, s]));
-        list = list.map(supplier => ({
-          ...supplier,
-          productsSupplied: statsMap[supplier.id]?.productsSupplied ?? supplier.productsSupplied ?? 0,
-          variantsSupplied: statsMap[supplier.id]?.variantsSupplied ?? supplier.variantsSupplied ?? 0,
-          productCategories: statsMap[supplier.id]?.productCategories ?? supplier.productCategories ?? [],
-        }));
-      }
+      // Filter out ghost empty records with no identity
+      list = list.filter(s => Boolean(s.name && s.name.trim() !== '') || Boolean(s.companyName && s.companyName.trim() !== '') || s.email || s.website);
 
-      // Compute resilient live KPIs if server meta was empty
+      // ── Layer 4: Merge server-side stats if available ──
+      try {
+        const stats = await fetchServerStats(forceRefresh);
+        if (stats.length > 0) {
+          const statsMap = Object.fromEntries(stats.map(s => [s.id, s]));
+          list = list.map(supplier => ({
+            ...supplier,
+            productsSupplied: statsMap[supplier.id]?.productsSupplied ?? supplier.productsSupplied ?? 0,
+            variantsSupplied: statsMap[supplier.id]?.variantsSupplied ?? supplier.variantsSupplied ?? 0,
+            productCategories: statsMap[supplier.id]?.productCategories ?? supplier.productCategories ?? [],
+          }));
+        }
+      } catch (_) { /* stats are optional enhancement */ }
+
+      // Compute live KPIs
       setServerKpis(prev => {
         if (prev?.activeSuppliers > 0 && prev?.totalSKUs > 0) return prev;
         const activeSuppliers = list.filter(s => (s.productsSupplied || 0) > 0 || (s.variantsSupplied || 0) > 0).length;
@@ -186,10 +194,10 @@ export function useSupplierData({ initialData } = {}) {
 
       if (typeof window !== 'undefined') {
         try {
-          const trimmedList = list.slice(0, 25);
+          const trimmedList = list.slice(0, 50);
           const serialized = JSON.stringify({ data: trimmedList, ts: Date.now() });
           if (serialized.length < 100000) {
-            localStorage.setItem('__rg_suppliers_cache', serialized);
+            localStorage.setItem('__rg_suppliers_cache_v2', serialized);
           }
         } catch (e) {}
       }
@@ -204,10 +212,8 @@ export function useSupplierData({ initialData } = {}) {
   };
 
   useEffect(() => {
-    if (!initialData?.suppliers) {
-      fetchAllSuppliers();
-    }
-  }, [initialData?.suppliers]);
+    fetchAllSuppliers();
+  }, []);
 
   const [isSearching, setIsSearching] = useState(false);
 

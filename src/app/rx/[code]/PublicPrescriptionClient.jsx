@@ -664,6 +664,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               activeGcpTab={activeGcpTab}
               setActiveGcpTab={setActiveGcpTab}
               compoundedFormulations={compoundedFormulations}
+              genomicsData={genomicsData}
               atlasRecs={atlasRecs}
               setExpandedPhases={setExpandedPhases}
               setSelectedPhase={setSelectedPhase}

@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye, Pill, ChevronLeft, ChevronRight, Share2, AlertTriangle } from '@/lib/icons';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { labelsRepository } from '@/repositories/labelsRepository';
-import PharmapolisLabelSvg from './PharmapolisLabelSvg';
+import PharmapolisLabelSvg, { computeDefaultHeaderBadge } from './PharmapolisLabelSvg';
 import { getCustomsFriendlySuggestions, findCustomsRisks } from '@/utils/labels/customsNaming';
 import { formatApisForEditor, labelToMarkdown, parseMarkdownToLabel } from '@/utils/labels/labelMarkdown';
 import ClinicPicker from '@/components/admin/patients/ClinicPicker';
@@ -2203,25 +2203,25 @@ export default function PharmacyLabelsModal({
                   </div>
                 </div>
 
-                {/* Editor Action Buttons: Save to Atlas, Download .md, Reset */}
+                {/* Editor Action Buttons: Save, Download .md, Reset */}
                 <div className="gcp-editor-actions-wrap">
-                  {/* SAVE TO ATLAS BUTTON */}
+                  {/* SAVE BUTTON */}
                   <button
                     type="button"
                     onClick={() => handleSaveToFirebase()}
                     disabled={isSavingToFirebase}
                     className={`gcp-editor-save-btn ${firebaseSaveSuccess ? 'is-success' : ''}`}
-                    title={isEs ? 'Guardar cambios directamente en Atlas (base de datos oficial)' : 'Save changes directly to Atlas'}
+                    title={isEs ? 'Guardar' : 'Save'}
                   >
                     {firebaseSaveSuccess ? (
                       <>
                         <Check size={13} color="#137333" />
-                        <span>{isEs ? 'Guardado en Atlas ✓' : 'Saved to Atlas ✓'}</span>
+                        <span>{isEs ? 'Guardado ✓' : 'Saved ✓'}</span>
                       </>
                     ) : (
                       <>
                         <Database size={13} />
-                        <span>{isSavingToFirebase ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar en Atlas' : 'Save to Atlas')}</span>
+                        <span>{isSavingToFirebase ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar' : 'Save')}</span>
                       </>
                     )}
                   </button>
@@ -2351,7 +2351,7 @@ export default function PharmacyLabelsModal({
                                 }}
                               >
                                 {isActive ? <Check size={13} color="#ffffff" /> : <span style={{ opacity: 0.6 }}>•</span>}
-                                <span>Parte {idx + 1}: {cleanPartTitle}{vol}</span>
+                                <span>{isEs ? 'Parte' : 'Part'} {idx + 1}: {cleanPartTitle}{vol}</span>
                               </button>
                             );
                           })}
@@ -2426,6 +2426,194 @@ export default function PharmacyLabelsModal({
                         placeholder="60 Caps / 100 mL"
                       />
                     </div>
+
+                    {/* Row 1.5: Header Timing / Part Badge (Optional — Show/Hide on Print, Edit Text, or Nullify) */}
+                    {(() => {
+                      const autoBadge = computeDefaultHeaderBadge(currentItem, selectedProductIdx, labels.length);
+                      const isBadgeVisible = currentItem.showHeaderBadge !== false;
+                      const currentBadgeVal = typeof currentItem.customHeaderBadge === 'string' ? currentItem.customHeaderBadge : autoBadge;
+                      const partPrefix = labels.length > 1 ? `PART ${selectedProductIdx + 1} OF ${labels.length}` : '';
+                      const quickTimings = [
+                        { label: '🌙 NIGHT / BEDTIME', value: partPrefix ? `${partPrefix} · 🌙 NIGHT / BEDTIME` : '🌙 NIGHT / BEDTIME' },
+                        { label: '☀️ MORNING', value: partPrefix ? `${partPrefix} · ☀️ MORNING` : '☀️ MORNING' },
+                        { label: '🌅 EVENING', value: partPrefix ? `${partPrefix} · 🌅 EVENING` : '🌅 EVENING' },
+                        { label: '1-2×/WK · PRE-WASH', value: partPrefix ? `${partPrefix} · 1-2×/WK · PRE-WASH` : '1-2×/WK · PRE-WASH' },
+                        { label: 'ONCE DAILY', value: partPrefix ? `${partPrefix} · ONCE DAILY` : 'ONCE DAILY' },
+                        ...(partPrefix ? [{ label: isEs ? `Solo ${partPrefix}` : `Only ${partPrefix}`, value: partPrefix }] : [])
+                      ];
+
+                      return (
+                        <div className="gcp-col-12 gcp-field-wrap" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px' }}>
+                          <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              <span>{isEs ? 'Insignia Superior (Parte / Cuándo tomar o aplicar)' : 'Top Header Badge (Part / When to take or apply)'}</span>
+                              <span style={{
+                                fontSize: '0.65rem',
+                                fontWeight: 700,
+                                padding: '2px 7px',
+                                borderRadius: '999px',
+                                background: isBadgeVisible && currentBadgeVal ? '#dcfce7' : '#f1f5f9',
+                                color: isBadgeVisible && currentBadgeVal ? '#166534' : '#475569',
+                                border: `1px solid ${isBadgeVisible && currentBadgeVal ? '#86efac' : '#cbd5e1'}`
+                              }}>
+                                {isBadgeVisible && currentBadgeVal
+                                  ? (isEs ? '✓ Visible al imprimir' : '✓ Visible on print')
+                                  : (isEs ? 'Oculto al imprimir (Anulado)' : 'Hidden on print (Disabled)')}
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const nextShow = !isBadgeVisible;
+                                  setEditedOverrides(prev => {
+                                    const base = prev[selectedProductIdx] || labels[selectedProductIdx] || {};
+                                    const nextItem = {
+                                      ...base,
+                                      showHeaderBadge: nextShow,
+                                      customHeaderBadge: nextShow && !base.customHeaderBadge ? autoBadge : base.customHeaderBadge
+                                    };
+                                    nextItem.labelMarkdown = labelToMarkdown(nextItem);
+                                    return { ...prev, [selectedProductIdx]: nextItem };
+                                  });
+                                }}
+                                style={{
+                                  border: `1px solid ${isBadgeVisible ? '#cbd5e1' : '#2563eb'}`,
+                                  background: isBadgeVisible ? '#ffffff' : '#eff6ff',
+                                  color: isBadgeVisible ? '#334155' : '#1d4ed8',
+                                  borderRadius: '4px',
+                                  fontSize: '0.68rem',
+                                  fontWeight: 700,
+                                  padding: '3px 8px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {isBadgeVisible
+                                  ? (isEs ? '👁️ Ocultar al imprimir' : '👁️ Hide on print')
+                                  : (isEs ? '👁️ Mostrar al imprimir' : '👁️ Show on print')}
+                              </button>
+
+                              {(isBadgeVisible && currentBadgeVal) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditedOverrides(prev => {
+                                      const base = prev[selectedProductIdx] || labels[selectedProductIdx] || {};
+                                      const nextItem = {
+                                        ...base,
+                                        showHeaderBadge: false,
+                                        customHeaderBadge: ''
+                                      };
+                                      nextItem.labelMarkdown = labelToMarkdown(nextItem);
+                                      return { ...prev, [selectedProductIdx]: nextItem };
+                                    });
+                                  }}
+                                  style={{
+                                    border: '1px solid #fca5a5',
+                                    background: '#fef2f2',
+                                    color: '#dc2626',
+                                    borderRadius: '4px',
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    padding: '3px 8px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title={isEs ? 'Anular y quitar este recuadro de la etiqueta impresa' : 'Clear and remove this badge from printed label'}
+                                >
+                                  {isEs ? 'Anular ×' : 'Clear ×'}
+                                </button>
+                              )}
+
+                              {(typeof currentItem.customHeaderBadge === 'string' || currentItem.showHeaderBadge === false) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditedOverrides(prev => {
+                                      const base = prev[selectedProductIdx] || labels[selectedProductIdx] || {};
+                                      const nextItem = {
+                                        ...base,
+                                        showHeaderBadge: true,
+                                        customHeaderBadge: null
+                                      };
+                                      nextItem.labelMarkdown = labelToMarkdown(nextItem);
+                                      return { ...prev, [selectedProductIdx]: nextItem };
+                                    });
+                                  }}
+                                  style={{
+                                    border: '1px solid #bfdbfe',
+                                    background: '#eff6ff',
+                                    color: '#1d4ed8',
+                                    borderRadius: '4px',
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    padding: '3px 8px',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  {isEs ? '↺ Auto' : '↺ Auto'}
+                                </button>
+                              )}
+                            </div>
+                          </label>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <input
+                              type="text"
+                              value={isBadgeVisible ? currentBadgeVal : ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setEditedOverrides(prev => {
+                                  const base = prev[selectedProductIdx] || labels[selectedProductIdx] || {};
+                                  const nextItem = {
+                                    ...base,
+                                    customHeaderBadge: val,
+                                    showHeaderBadge: Boolean(val.trim())
+                                  };
+                                  nextItem.labelMarkdown = labelToMarkdown(nextItem);
+                                  return { ...prev, [selectedProductIdx]: nextItem };
+                                });
+                              }}
+                              className="gcp-form-input"
+                              style={{ flex: '1 1 260px', opacity: isBadgeVisible ? 1 : 0.65 }}
+                              placeholder={isEs ? 'Sin insignia al imprimir (escribe ej. PART 1 OF 2 · 🌙 NIGHT / BEDTIME)' : 'No badge on print (type e.g. PART 1 OF 2 · 🌙 NIGHT / BEDTIME)'}
+                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                              {quickTimings.map((qt) => (
+                                <button
+                                  key={qt.label}
+                                  type="button"
+                                  onClick={() => {
+                                    setEditedOverrides(prev => {
+                                      const base = prev[selectedProductIdx] || labels[selectedProductIdx] || {};
+                                      const nextItem = {
+                                        ...base,
+                                        customHeaderBadge: qt.value,
+                                        showHeaderBadge: true
+                                      };
+                                      nextItem.labelMarkdown = labelToMarkdown(nextItem);
+                                      return { ...prev, [selectedProductIdx]: nextItem };
+                                    });
+                                  }}
+                                  style={{
+                                    padding: '4px 8px',
+                                    borderRadius: '5px',
+                                    border: (isBadgeVisible && currentBadgeVal === qt.value) ? '1.5px solid #003666' : '1px solid #cbd5e1',
+                                    background: (isBadgeVisible && currentBadgeVal === qt.value) ? '#003666' : '#ffffff',
+                                    color: (isBadgeVisible && currentBadgeVal === qt.value) ? '#ffffff' : '#334155',
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  {qt.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {/* Row 2: Product Title / Formula (12 cols - full width so complete formula title is 100% visible) */}
                     <div className="gcp-col-12 gcp-field-wrap">
@@ -2608,14 +2796,15 @@ export default function PharmacyLabelsModal({
                         allowCustom={true}
                         placeholder={isEs ? "Seleccionar o escribir doctor..." : "Select or type doctor..."}
                         onChange={({ doctorId, doctorName, license }) => {
-                          const isSezginSelected = /sezgin|cagatay|çağatay/i.test(String(doctorName || ''));
                           const updated = {
                             ...currentItem,
                             doctorName: doctorName || '',
                             doctorId: doctorId || '',
                             doctorLicense: license || currentItem.doctorLicense || '',
-                            // Dr. Sezgin requests only his name on labels without clinic name by default
-                            ...(isSezginSelected ? { clinicName: '', clinicId: '' } : {})
+                            // By default, only Doctor's name appears on the label (no clinic name)
+                            clinicName: '',
+                            clinicId: '',
+                            showClinicOnLabel: false
                           };
                           const newMd = labelToMarkdown(updated);
                           updated.labelMarkdown = newMd;
@@ -3234,14 +3423,14 @@ export default function PharmacyLabelsModal({
               </button>
             )}
 
-            {/* Save to Firebase Action (visible when in Edit mode) */}
+            {/* Save Action (visible when in Edit mode) */}
             {isEditing && (
               <button
                 type="button"
                 className="gcp-btn-secondary"
                 onClick={() => handleSaveToFirebase()}
                 disabled={isSavingToFirebase}
-                title={isEs ? 'Guardar cambios en Firebase' : 'Save changes to Firebase'}
+                title={isEs ? 'Guardar' : 'Save'}
                 style={{
                   background: firebaseSaveSuccess ? '#e6f4ea' : '#ffffff',
                   color: firebaseSaveSuccess ? '#137333' : '#1a73e8',
@@ -3250,7 +3439,7 @@ export default function PharmacyLabelsModal({
                 }}
               >
                 {firebaseSaveSuccess ? <Check size={14} color="#137333" /> : <Database size={14} />}
-                <span>{firebaseSaveSuccess ? (isEs ? 'Guardado ✓' : 'Saved ✓') : (isSavingToFirebase ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar Cambios' : 'Save Changes'))}</span>
+                <span>{firebaseSaveSuccess ? (isEs ? 'Guardado ✓' : 'Saved ✓') : (isSavingToFirebase ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar' : 'Save'))}</span>
               </button>
             )}
 

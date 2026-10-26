@@ -13,7 +13,7 @@ export default async function AdminSuppliersTab(props) {
   let error = null;
 
   try {
-    initialData = await fetchSupplierInitialDataAction(20);
+    initialData = await fetchSupplierInitialDataAction(50);
   } catch (e) {
     console.error('[AdminSuppliersTab] Failed to fetch initial supplier data:', e);
     error = e.message;

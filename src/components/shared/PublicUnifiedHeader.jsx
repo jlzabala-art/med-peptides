@@ -389,7 +389,7 @@ function forceCanonicalDomain(urlOrPath) {
             </div>
 
             {/* Center: Global Navigation Links (Desktop - hidden in doctor/clinical portal view to prevent collision) */}
-            {!doctorHomeHref && (
+            {!doctorHomeHref && !isDoctorView && (
               <nav className="puh-nav-links" aria-label="Global Public Navigation">
                 <Link href="/collection/peptides" className="puh-nav-link">
                   {isSpanish ? 'Catálogo' : 'Catalog'}
