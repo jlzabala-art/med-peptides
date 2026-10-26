@@ -308,6 +308,32 @@ export default function BloodoDiagnosticOverviewCard({
             <span>{isEs ? 'Informe Clínico Muestra (PDF)' : 'Sample Clinical Report (PDF)'}</span>
           </a>
 
+          {/* Direct Sample Collection Instructions (IFU) */}
+          <a
+            href="/docs/bloodo-nad-ifu.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            download="Bloodo_NAD_IFU.pdf"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              background: '#f0fdfa',
+              color: '#0d9488',
+              border: '1px solid #99f6e4',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              transition: 'all 0.15s ease'
+            }}
+            title={isEs ? 'Descargar instrucciones oficiales de toma de muestra (IFU PDF)' : 'Download official sample collection instructions (IFU PDF)'}
+          >
+            <Download size={13} />
+            <span>{isEs ? 'Instrucciones Muestreo (PDF)' : 'Collection Guide (PDF)'}</span>
+          </a>
+
           {/* Direct Catalog PDF */}
           <a
             href={catalogPdf}

@@ -263,7 +263,63 @@ export default function BloodoLabStandardsDownloadsSection({
             </a>
           </div>
 
-          {/* Card B: Bloodo 2026 Comprehensive Catalog */}
+          {/* Card B: Official Sample Collection Instructions (IFU) */}
+          <div style={{
+            border: '1.5px solid #99f6e4',
+            background: 'linear-gradient(135deg, #f0fdfa 0%, #ffffff 100%)',
+            borderRadius: '10px',
+            padding: '1.1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            gap: '10px'
+          }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' }}>
+                <span style={{ fontSize: '0.64rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {isEs ? 'Instrucciones de Uso (IFU)' : 'Instructions For Use (IFU)'}
+                </span>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0f766e', background: '#ccfbf1', padding: '2px 6px', borderRadius: '4px', border: '1px solid #99f6e4' }}>
+                  CE-IVDR
+                </span>
+              </div>
+              <h4 style={{ margin: '0 0 4px 0', fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                {isEs ? 'Instrucciones de Toma de Muestra (PDF)' : 'Sample Collection Instructions (PDF)'}
+              </h4>
+              <p style={{ fontSize: '0.76rem', color: '#475569', lineHeight: '1.45', margin: 0 }}>
+                {isEs 
+                  ? 'Guía oficial ilustrada para la extracción capilar en dedo, saturación correcta de los círculos de la tarjeta Whatman 903, secado de 3 horas y envío prepagado.'
+                  : 'Official instructions for collecting a blood sample using the Bloodo NAD+ Test Kit (puncture, spot saturation, 3-hour drying, and return protocol).'}
+              </p>
+            </div>
+
+            <a
+              href="/docs/bloodo-nad-ifu.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              download="Bloodo_NAD_IFU.pdf"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                padding: '8px 14px',
+                background: '#0d9488',
+                color: '#ffffff',
+                borderRadius: '6px',
+                textDecoration: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                boxShadow: '0 1px 3px rgba(13, 148, 136, 0.25)',
+                transition: 'background 0.15s ease'
+              }}
+            >
+              <Download size={14} />
+              <span>{isEs ? 'Descargar Instrucciones de Toma de Muestra (PDF)' : 'Download Sample Collection Instructions (PDF)'}</span>
+            </a>
+          </div>
+
+          {/* Card C: Bloodo 2026 Comprehensive Catalog */}
           <div style={{
             border: '1px solid #e2e8f0',
             background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',

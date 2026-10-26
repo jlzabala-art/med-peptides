@@ -2453,6 +2453,108 @@ export default function DiagnosticTestTechnicalSpecs({
             </div>
           </div>
 
+          {/* ── Official Instructions for Use (IFU): How to Collect Your NAD+ Blood Sample ── */}
+          <div 
+            style={{
+              marginTop: '1.25rem',
+              marginBottom: '1.5rem',
+              background: 'linear-gradient(135deg, #f0fdfa 0%, #ffffff 100%)',
+              border: '1.5px solid #99f6e4',
+              borderRadius: '12px',
+              padding: '1.25rem 1.5rem',
+              boxShadow: '0 2px 8px rgba(13, 148, 136, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '14px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', maxWidth: '650px' }}>
+              <div style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '8px',
+                background: '#0d9488',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                marginTop: '2px'
+              }}>
+                <FileText size={20} />
+              </div>
+              <div>
+                <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '2px' }}>
+                  {isEs ? 'DOCUMENTO CLÍNICO OFICIAL · CE-IVDR IFU' : 'OFFICIAL CLINICAL DOCUMENT · CE-IVDR IFU'}
+                </span>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                  {isNad 
+                    ? (isEs ? 'Cómo Recoger Tu Muestra de Sangre de NAD+' : 'How to Collect Your NAD+ Blood Sample')
+                    : (isEs ? `Cómo Recoger Tu Muestra de Sangre (${product?.name || 'Bloodo'})` : `How to Collect Your Blood Sample (${product?.name || 'Bloodo'})`)}
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.80rem', color: '#475569', lineHeight: '1.5' }}>
+                  {isEs 
+                    ? 'Instrucciones oficiales para la toma de muestra de sangre capilar utilizando el kit de prueba Bloodo NAD+ (Guía de uso CE-IVDR con pasos de punción, secado y envío).' 
+                    : 'Official instructions for collecting a blood sample using the Bloodo NAD+ Test Kit (CE-IVDR validated Instructions for Use with puncture, drying, and return protocol).'}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <a
+                href={isNad ? '/docs/bloodo-nad-ifu.pdf' : '/docs/bloodo-nad-lab-protocol-dark-red.pdf'}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '7px',
+                  background: '#0d9488',
+                  color: '#ffffff',
+                  padding: '9px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.80rem',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 5px rgba(13, 148, 136, 0.25)',
+                  transition: 'background 0.15s ease'
+                }}
+              >
+                <Download size={15} />
+                <span>
+                  {isEs 
+                    ? 'Descargar Instrucciones de Toma de Muestra (PDF)' 
+                    : 'Download Sample Collection Instructions (PDF)'}
+                </span>
+              </a>
+
+              <a
+                href="https://bloodo.com/wp-content/uploads/2025/08/Bloodo_NAD_IFU.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: '#ffffff',
+                  color: '#475569',
+                  border: '1px solid #cbd5e1',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  textDecoration: 'none'
+                }}
+                title={isEs ? 'Enlace directo al servidor oficial de Bloodo' : 'Direct link to official Bloodo source'}
+              >
+                <span>bloodo.com</span>
+                <ExternalLink size={12} />
+              </a>
+            </div>
+          </div>
+
           {/* Cortisol Dual-Sample Diurnal Cadence (When isCortisol is true) */}
           {isCortisol && (
             <div className="dts-cortisol-cadence-card">
