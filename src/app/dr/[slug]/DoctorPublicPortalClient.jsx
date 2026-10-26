@@ -1241,7 +1241,17 @@ export default function DoctorPublicPortalClient({
 
   // Filter Tasks
   const filteredTasks = useMemo(() => {
+    const seenPatientType = new Set();
     return allTasks.filter(t => {
+      // 1. Exclude tasks that have already been signed or approved
+      if (t.isSigned || t.status === 'approved' || t.status === 'completed') return false;
+
+      // 2. Deduplicate: A patient must only have ONE task of a specific type (e.g. 1 approval task, even if multi-part)
+      const patientKey = String(t.patientName || '').toLowerCase().trim();
+      const dedupKey = `${t.type || 'approval'}_${patientKey}_${t.code || t.rxId || t.id}`;
+      if (seenPatientType.has(dedupKey)) return false;
+      seenPatientType.add(dedupKey);
+
       if (taskFilter !== 'all') {
         if (taskFilter === 'refill') {
           if (t.type !== 'refill' && t.type !== 'cycles') return false;
@@ -6218,6 +6228,8 @@ export default function DoctorPublicPortalClient({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {filteredTasks.slice(0, 5).map((t) => {
                       const isProposalTask = t.type === 'proposal_followup';
+                      const isPortalTask = t.type === 'portal_inactive';
+                      const isApprovalTask = t.type === 'approval' || (!t.type && !isProposalTask && !isPortalTask);
                       const codifiedId = getCodifiedPatientId(t.patientName, t.code);
                       const displayPatient = isAuthorizedViewer ? t.patientName : codifiedId;
                       const patientPhone = (t.patientPhone || t.patient?.phone || '').replace(/[^0-9+]/g, '');
@@ -6227,6 +6239,16 @@ export default function DoctorPublicPortalClient({
                       const waUrl = patientPhone
                         ? `https://wa.me/${patientPhone}?text=${encodeURIComponent(rawMsg)}`
                         : `https://wa.me/?text=${encodeURIComponent(rawMsg)}`;
+
+                      const taskBadge = isProposalTask
+                        ? { label: 'Offer Pending Checkout', bg: '#fffbeb', color: '#b45309', border: '#fde68a' }
+                        : isPortalTask
+                        ? { label: 'Portal Invite Pending', bg: '#f5f3ff', color: '#7c3aed', border: '#ddd6fe' }
+                        : t.type === 'refill'
+                        ? { label: 'Refill Due', bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4' }
+                        : t.type === 'tolerance_check'
+                        ? { label: 'Tolerance Check', bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' }
+                        : { label: 'Awaiting Rx Approval', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' };
 
                       return (
                         <div
@@ -6253,21 +6275,21 @@ export default function DoctorPublicPortalClient({
                                   fontWeight: 700,
                                   padding: '1px 6px',
                                   borderRadius: '4px',
-                                  background: isProposalTask ? '#fffbeb' : '#eff6ff',
-                                  color: isProposalTask ? '#b45309' : '#1d4ed8',
-                                  border: `1px solid ${isProposalTask ? '#fde68a' : '#bfdbfe'}`
+                                  background: taskBadge.bg,
+                                  color: taskBadge.color,
+                                  border: `1px solid ${taskBadge.border}`
                                 }}
                               >
-                                {isProposalTask ? 'Offer Pending Checkout' : 'Awaiting Rx Approval'}
+                                {taskBadge.label}
                               </span>
                             </div>
                             <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {t.treatmentTitle || t.code} {t.daysPending ? `· ${t.daysPending} days pending` : ''}
+                              {t.treatmentTitle || t.code} {t.pendingCount && t.pendingCount > 1 ? `· ${t.pendingCount} Formulations` : ''} {t.daysPending ? `· ${t.daysPending} days pending` : ''}
                             </div>
                           </div>
 
                           <div style={{ flexShrink: 0 }}>
-                            {isProposalTask ? (
+                            {isProposalTask || isPortalTask ? (
                               <a
                                 href={waUrl}
                                 target="_blank"
@@ -6278,18 +6300,18 @@ export default function DoctorPublicPortalClient({
                                   gap: '5px',
                                   padding: '6px 12px',
                                   borderRadius: '5px',
-                                  background: '#f0fdf4',
-                                  border: '1px solid #bbf7d0',
-                                  color: '#15803d',
+                                  background: isPortalTask ? '#f5f3ff' : '#f0fdf4',
+                                  border: `1px solid ${isPortalTask ? '#ddd6fe' : '#bbf7d0'}`,
+                                  color: isPortalTask ? '#7c3aed' : '#15803d',
                                   fontSize: '0.72rem',
                                   fontWeight: 700,
                                   textDecoration: 'none',
                                   whiteSpace: 'nowrap'
                                 }}
-                                title="Send WhatsApp follow-up reminder to patient"
+                                title={isPortalTask ? "Send patient portal invite via WhatsApp" : "Send WhatsApp follow-up reminder to patient"}
                               >
                                 <MessageCircle size={13} />
-                                <span>Send Reminder</span>
+                                <span>{isPortalTask ? 'Invite Portal' : 'Send Reminder'}</span>
                               </a>
                             ) : (
                               <button

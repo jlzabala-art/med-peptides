@@ -221,6 +221,7 @@ export default function PublicLabelsAppClient({
   const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [isApprovingRx, setIsApprovingRx] = useState(false);
 
   const searchBoxRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -596,6 +597,58 @@ export default function PublicLabelsAppClient({
     }
   };
 
+  // Direct 1-Click Prescription Approval for Compounding & Label Specialists (Reimi / Kasia)
+  const handleApprovePrescription = async () => {
+    const code = cleanRxCode || activeCode;
+    if (!code) return;
+    setIsApprovingRx(true);
+    const toastId = toast.loading(isEs ? `Aprobando receta #${code}...` : `Approving prescription #${code}...`);
+    try {
+      const res = await fetch('/api/prescriptions/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prescriptionId: currentRx?.id || code,
+          prescriptionNumber: code,
+          status: 'approved',
+          reason: 'Authorized for compounding & label release by Compounding Label Specialist (Reimi / Kasia Studio)',
+          updatedBy: user?.displayName || user?.email || 'Compounding Studio Specialist'
+        })
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || 'Failed to approve prescription');
+      }
+
+      // Update currentRx state locally
+      setCurrentRx(prev => prev ? { ...prev, status: 'approved', state: 'approved', isSigned: true } : prev);
+
+      // Update in patientQueue
+      setPatientQueue(prevQueue => prevQueue.map(p => {
+        if (p.code === code || p.code === activeCode) {
+          return {
+            ...p,
+            rx: p.rx ? { ...p.rx, status: 'approved', state: 'approved', isSigned: true } : p.rx
+          };
+        }
+        return p;
+      }));
+
+      toast.success(
+        isEs 
+          ? `Receta #${code} aprobada y autorizada para formulación ✓`
+          : `Prescription #${code} approved & authorized for compounding release ✓`,
+        { id: toastId }
+      );
+    } catch (err) {
+      console.error('Error approving prescription in Label Studio:', err);
+      toast.error(err.message || 'Error approving prescription', { id: toastId });
+    } finally {
+      setIsApprovingRx(false);
+    }
+  };
+
   // Generate and download A4 Multi-Patient Batch PDF
   const handleDownloadA4BatchPdf = async () => {
     if (!patientQueue.length) return;
@@ -827,6 +880,9 @@ export default function PublicLabelsAppClient({
           docName={docName}
           labels={labels}
           labelIndex={labelIndex}
+          rxStatus={currentRx?.status || currentRx?.state || 'approved'}
+          isApproving={isApprovingRx}
+          onApprovePrescription={handleApprovePrescription}
           onSelectLabelPart={(idx) => {
             setLabelIndex(idx);
             const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${idx + 1}&edit=true&lang=${lang}`;

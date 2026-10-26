@@ -63,35 +63,62 @@ export async function POST(request) {
       );
     }
 
-    // Locate document in Firestore
+    // Locate document in Firestore with resilient identifiers
     let docRef = null;
     let docSnap = null;
 
-    if (prescriptionId) {
-      docRef = adminDb.collection('prescriptions').doc(prescriptionId);
-      docSnap = await docRef.get();
-    }
+    const rawId = prescriptionId || prescriptionNumber;
+    const cleanId = String(rawId || '').replace(/^#/, '').trim();
+    const noRxId = cleanId.replace(/^RX-/i, '').trim();
+    const withRxId = noRxId.startsWith('RX-') ? noRxId : `RX-${noRxId}`;
 
-    if ((!docSnap || !docSnap.exists) && prescriptionNumber) {
-      const qSnap = await adminDb.collection('prescriptions')
-        .where('prescriptionNumber', '==', prescriptionNumber)
-        .limit(1)
-        .get();
-      if (!qSnap.empty) {
-        docRef = qSnap.docs[0].ref;
-        docSnap = qSnap.docs[0];
+    // 1. Direct document ID lookups
+    const idCandidates = [prescriptionId, cleanId, noRxId, withRxId].filter(Boolean);
+    for (const cand of idCandidates) {
+      const snap = await adminDb.collection('prescriptions').doc(cand).get();
+      if (snap.exists) {
+        docRef = snap.ref;
+        docSnap = snap;
+        break;
       }
     }
 
-    if ((!docSnap || !docSnap.exists) && prescriptionId) {
-      // Try uppercase / trimmed search
-      const qSnap = await adminDb.collection('prescriptions')
-        .where('prescriptionCode', '==', prescriptionId)
-        .limit(1)
-        .get();
-      if (!qSnap.empty) {
-        docRef = qSnap.docs[0].ref;
-        docSnap = qSnap.docs[0];
+    // 2. Query lookups across prescriptionNumber, code, and fileNumber
+    if (!docSnap || !docSnap.exists) {
+      const queryValues = [cleanId, noRxId, withRxId, prescriptionNumber, prescriptionId].filter(Boolean);
+      for (const val of queryValues) {
+        // Match prescriptionNumber
+        let qSnap = await adminDb.collection('prescriptions')
+          .where('prescriptionNumber', '==', val)
+          .limit(1)
+          .get();
+        if (!qSnap.empty) {
+          docRef = qSnap.docs[0].ref;
+          docSnap = qSnap.docs[0];
+          break;
+        }
+
+        // Match code
+        qSnap = await adminDb.collection('prescriptions')
+          .where('code', '==', val)
+          .limit(1)
+          .get();
+        if (!qSnap.empty) {
+          docRef = qSnap.docs[0].ref;
+          docSnap = qSnap.docs[0];
+          break;
+        }
+
+        // Match fileNumber
+        qSnap = await adminDb.collection('prescriptions')
+          .where('fileNumber', '==', val)
+          .limit(1)
+          .get();
+        if (!qSnap.empty) {
+          docRef = qSnap.docs[0].ref;
+          docSnap = qSnap.docs[0];
+          break;
+        }
       }
     }
 
@@ -127,6 +154,19 @@ export async function POST(request) {
     if (['approved', 'ordered', 'active', 'delivered', 'completed', 'dispensed'].includes(normalizedStatus)) {
       updatePayload.isTreatmentProposal = false;
       updatePayload.orderStatus = isNowDispensed ? 'Delivered' : 'Ordered';
+    }
+
+    if (normalizedStatus === 'approved') {
+      updatePayload.isSigned = true;
+      updatePayload.signedAt = new Date().toISOString();
+      updatePayload.signedBy = updatedBy || 'Compounding Studio Specialist';
+      updatePayload.approvalStatus = 'approved';
+      updatePayload.doctorApproval = {
+        approved: true,
+        approvedAt: new Date().toISOString(),
+        approvedBy: updatedBy || 'Compounding Studio Specialist',
+        source: 'clinical_label_desk'
+      };
     }
 
     if (body.invoiceRef) {

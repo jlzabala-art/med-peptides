@@ -849,124 +849,163 @@ export default function BrandCollectionPage({
       {/* ── 2. Atlas Clinical Portfolio Suites Navigation Bar ── */}
       <ClinicalPortfolioSuiteSwitcher currentSlug={brandSlug} />
 
-      {/* ── 3. Breadcrumbs Bar ── */}
-      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0.85rem clamp(1rem, 3vw, 2rem) 0' }}>
-        <Breadcrumbs items={breadcrumbs} />
+      {/* ── 3. Breadcrumbs Bar (GCP Light Theme - Regla #17) ── */}
+      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0.65rem clamp(1rem, 3vw, 2rem) 0' }}>
+        <Breadcrumbs items={breadcrumbs} theme="light" />
       </div>
 
-      {/* ── 3. Google Cloud Hero Header ── */}
+      {/* ── 3. Google Cloud Authoritative Service Header ── */}
       <header style={{
         background: '#ffffff',
         borderBottom: '1px solid #e2e8f0',
-        marginTop: '0.5rem',
-        padding: 'clamp(1.25rem, 2.5vw, 2.0rem) 0 clamp(1.0rem, 2vw, 1.5rem)'
+        marginTop: '0.25rem',
+        padding: 'clamp(0.75rem, 1.5vw, 1.15rem) 0'
       }}>
         <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 clamp(1rem, 3vw, 2rem)', width: '100%' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', width: '100%' }}>
             
-            {/* GCP Service Eyebrow Badge Strip */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: `${config.badgeColor}12`,
-                border: `1px solid ${config.badgeColor}30`,
-                color: config.badgeColor,
-                padding: '3px 10px',
-                borderRadius: '4px',
-                fontSize: '0.68rem',
-                fontWeight: 750,
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase'
-              }}>
-                <Sparkles size={11} />
-                <span>{config.badge}</span>
+            {/* GCP Service Eyebrow + Certifications Badge Strip */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: `${config.badgeColor}12`,
+                  border: `1px solid ${config.badgeColor}30`,
+                  color: config.badgeColor,
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontSize: '0.66rem',
+                  fontWeight: 750,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase'
+                }}>
+                  <Sparkles size={11} />
+                  <span>{config.badge}</span>
+                </div>
+                <span className="gcp-hero-iso" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  color: '#64748b',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontSize: '0.66rem',
+                  fontWeight: 650
+                }}>
+                  {brandSlug === 'colway' ? 'EU CPNP Reg. · ISO 22716' : 'ISO Accredited · European Lab'}
+                </span>
               </div>
-              <span className="gcp-hero-iso" style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                color: '#64748b',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                fontSize: '0.68rem',
-                fontWeight: 650
-              }}>
-                {brandSlug === 'colway' ? 'EU CPNP Reg. · ISO 22716' : 'ISO Accredited · European Lab'}
-              </span>
+
+              {/* Action buttons on desktop header (Clinical Desk) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsInquiryDrawerOpen(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '3px 10px',
+                    borderRadius: '6px',
+                    background: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    color: '#003666',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Mail size={12} />
+                  <span>{isEs ? 'Mesa Clínica' : 'Clinical Desk'}</span>
+                </button>
+              </div>
             </div>
 
             {/* GCP Authoritative Title & Domain Subtitle */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               <h1 style={{
-                fontSize: 'clamp(1.45rem, 3.2vw, 2.35rem)',
-                fontWeight: 850,
+                fontSize: 'clamp(1.15rem, 2.2vw, 1.65rem)',
+                fontWeight: 800,
                 color: '#003666',
-                letterSpacing: '-0.03em',
+                letterSpacing: '-0.025em',
                 margin: 0,
-                lineHeight: 1.18,
+                lineHeight: 1.2,
                 textWrap: 'balance'
               }}>
                 {config.title}
               </h1>
               {config.tagline && (
                 <div style={{
-                  fontSize: 'clamp(0.85rem, 1.4vw, 1.05rem)',
+                  fontSize: 'clamp(0.78rem, 1.2vw, 0.92rem)',
                   fontWeight: 650,
                   color: config.accentColor || '#0d9488',
-                  letterSpacing: '-0.015em',
-                  marginTop: '2px'
+                  letterSpacing: '-0.01em'
                 }}>
                   {config.tagline}
                 </div>
               )}
             </div>
 
-            {/* Subtitle / Descriptive Scope */}
-            <p
-              className="gcp-hero-desc"
-              data-expanded={isHeroExpanded ? 'true' : 'false'}
-              style={{
-                fontSize: 'clamp(0.82rem, 1.1vw, 0.94rem)',
-                color: '#475569',
-                lineHeight: 1.55,
-                margin: '2px 0 0 0',
-                fontWeight: 450,
-                maxWidth: '1150px'
-              }}
-            >
-              {config.subtitle}
-            </p>
-            <button
-              type="button"
-              className="gcp-hero-desc-toggle"
-              onClick={() => setIsHeroExpanded(v => !v)}
-              aria-expanded={isHeroExpanded}
-            >
-              {isHeroExpanded ? (isEs ? 'Ver menos' : 'Show less') : (isEs ? 'Ver más' : 'Show more')}
-            </button>
+            {/* Subtitle / Descriptive Scope with Inline Details Toggle */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap' }}>
+              <p
+                className="gcp-hero-desc"
+                data-expanded={isHeroExpanded ? 'true' : 'false'}
+                style={{
+                  fontSize: 'clamp(0.78rem, 1.0vw, 0.88rem)',
+                  color: '#475569',
+                  lineHeight: 1.45,
+                  margin: 0,
+                  fontWeight: 450,
+                  maxWidth: '1150px'
+                }}
+              >
+                {config.subtitle}
+              </p>
+              <button
+                type="button"
+                className="gcp-hero-desc-toggle"
+                onClick={() => setIsHeroExpanded(v => !v)}
+                aria-expanded={isHeroExpanded}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#0369a1',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '2px'
+                }}
+              >
+                {isHeroExpanded ? (isEs ? '• Ocultar' : '• Less') : (isEs ? '• Detalles' : '• Details')}
+              </button>
+            </div>
 
             {/* Architecture Metadata Badges (GCP Standard) — scroll horizontal en móvil */}
-            <div className="gcp-hero-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '0.25rem' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#334155', background: '#f8fafc', border: '1px solid #cbd5e1', padding: '3px 9px', borderRadius: '4px' }}>
+            <div className="gcp-hero-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '0.15rem' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#334155', background: '#f8fafc', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: '4px' }}>
                 🧬 {filteredProducts.length} {brandSlug === 'colway' ? 'Formulations' : brandSlug === 'peptides' ? 'Peptides' : 'Items'}
               </span>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: config.accentColor, background: `${config.accentColor}10`, border: `1px solid ${config.accentColor}30`, padding: '3px 9px', borderRadius: '4px' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: config.accentColor, background: `${config.accentColor}10`, border: `1px solid ${config.accentColor}30`, padding: '2px 8px', borderRadius: '4px' }}>
                 {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : brandSlug === 'peptides' ? '🏛️ Lotusland EU Lyophilization Hub' : brandSlug === 'teletest' ? '🏛️ Generalitat de Catalunya E08750211' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🏛️ Atlas Compounding Network' : '🏛️ LifeLab1 Diagnostics'}
               </span>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '3px 9px', borderRadius: '4px' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
                 {brandSlug === 'colway' ? '🛡️ ISO 22716 & EU CPNP Compliant' : brandSlug === 'peptides' ? '🛡️ HPLC ≥99.0% & Endotoxin Tested' : brandSlug === 'teletest' ? '🛡️ ISO 17025 Accredited' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🛡️ EU GMP Certified' : '🛡️ CE-IVDR & ISO 15189'}
               </span>
               {brandSlug === 'peptides' && (
-                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#003666', background: '#e0f2fe', border: '1px solid #bae6fd', padding: '3px 9px', borderRadius: '4px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#003666', background: '#e0f2fe', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
                   ✨ 10R Sealed Lyophilized Vials
                 </span>
               )}
               {brandSlug === 'colway' && (
-                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '3px 9px', borderRadius: '4px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '4px' }}>
                   ✨ Native Freshwater Tropocollagen (3D Helix)
                 </span>
               )}
@@ -975,19 +1014,11 @@ export default function BrandCollectionPage({
         </div>
       </header>
 
-      {/* ── 4. 4 KPIs Grid + Scope Switcher (Regla Golden #22) ── */}
-      <section style={{ maxWidth: '1440px', margin: '-1.0rem auto 1.5rem', padding: '0 clamp(1rem, 3vw, 2rem)' }}>
-        {/* Scope Indicator Bar */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '0.75rem',
-          marginBottom: '0.65rem'
-        }}>
+      {/* ── 4. Unified Metric Ribbon & Scope Switcher (Regla Golden #22) ── */}
+      <section style={{ maxWidth: '1440px', margin: '0.65rem auto 1.0rem', padding: '0 clamp(1rem, 3vw, 2rem)' }}>
+        <div className="gcp-metric-ribbon">
+          {/* Left: Scope Switcher (Regla #22): filtrado vs base global */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            {/* Scope Switcher (Regla #22): filtrado vs base global */}
             <div role="group" aria-label={isEs ? 'Alcance de métricas' : 'Metrics scope'} className="gcp-scope-switch">
               {[
                 { id: 'filtered', label: isEs ? 'Filtrado' : 'Filtered' },
@@ -1004,17 +1035,18 @@ export default function BrandCollectionPage({
                 </button>
               ))}
             </div>
+
             <span style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              padding: '3px 10px',
+              gap: '5px',
+              padding: '3px 8px',
               borderRadius: '6px',
               background: scopeMode === 'filtered' ? '#e0f2fe' : '#f1f5f9',
               border: '1px solid',
               borderColor: scopeMode === 'filtered' ? '#bae6fd' : '#e2e8f0',
               color: scopeMode === 'filtered' ? '#0369a1' : '#64748b',
-              fontSize: '0.74rem',
+              fontSize: '0.72rem',
               fontWeight: 700
             }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: scopeMode === 'filtered' ? '#0284c7' : '#94a3b8' }} />
@@ -1023,53 +1055,24 @@ export default function BrandCollectionPage({
                 : (isEs ? `Colección Completa (${products.length} ${getItemUnitLabel(brandSlug, products.length, true)})` : `Entire Collection (${products.length} items)`)}
             </span>
           </div>
-        </div>
 
-        {/* 4 Cards Grid - Compact GCP Layout */}
-        <div className="gcp-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
-          {kpiCards.map((kpi, idx) => {
-            const Icon = kpi.icon;
-            return (
-              <div
-                key={idx}
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '10px',
-                  padding: brandSlug === 'colway' ? '0.65rem 0.95rem' : '0.85rem 1.15rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: brandSlug === 'colway' ? '0.70rem' : '0.85rem',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-                }}
-              >
-                <div style={{
-                  width: brandSlug === 'colway' ? '32px' : '38px',
-                  height: brandSlug === 'colway' ? '32px' : '38px',
-                  borderRadius: '8px',
-                  background: '#eff6ff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#003666',
-                  flexShrink: 0
-                }}>
-                  <Icon size={brandSlug === 'colway' ? 16 : 19} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '1px' }}>
-                    {kpi.label}
+          {/* Right: 4 Micro-Metric Items (GCP Style) */}
+          <div className="gcp-metric-items">
+            {kpiCards.map((kpi, idx) => {
+              const Icon = kpi.icon;
+              return (
+                <div key={idx} className="gcp-metric-item" title={`${kpi.label}: ${kpi.sub}`}>
+                  <div className="gcp-metric-item-icon">
+                    <Icon size={14} />
                   </div>
-                  <div style={{ fontSize: brandSlug === 'colway' ? '0.96rem' : '1.05rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
-                    {kpi.value}
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
-                    {kpi.sub}
+                  <div className="gcp-metric-item-content">
+                    <span className="gcp-metric-item-value">{kpi.value}</span>
+                    <span className="gcp-metric-item-label">{kpi.label}</span>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -1340,7 +1343,7 @@ export default function BrandCollectionPage({
                     borderRadius: '4px',
                     fontWeight: 800
                   }}>
-                    {colwayCategories.length}
+                    {brandCategories?.length || config.categories?.length || 0}
                   </span>
                 </button>
 

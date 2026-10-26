@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User, FileText, Stethoscope, Search, ExternalLink, Check, Copy } from '@/lib/icons';
+import { User, FileText, Stethoscope, Search, ExternalLink, Check, Copy, ShieldCheck, Clock, CheckCircle2 } from '@/lib/icons';
 
 export default function LabelsMetaStrip({
   isEs,
@@ -15,8 +15,14 @@ export default function LabelsMetaStrip({
   labels,
   labelIndex,
   onSelectLabelPart,
-  onQuickSearchPatient
+  onQuickSearchPatient,
+  rxStatus = 'approved',
+  isApproving = false,
+  onApprovePrescription = null
 }) {
+  const normStatus = String(rxStatus || '').toLowerCase();
+  const isApproved = ['approved', 'active', 'completed', 'delivered', 'dispensed'].includes(normStatus);
+
   return (
     <div className="pls-context-strip">
       <div className="pls-meta-row">
@@ -91,6 +97,62 @@ export default function LabelsMetaStrip({
               <ExternalLink size={11} style={{ opacity: 0.6 }} />
             </a>
           </div>
+        </div>
+
+        <span className="pls-meta-divider" aria-hidden="true" />
+
+        {/* Clinical Approval Status & Quick Action (Reimi / Kasia Studio Empowerment) */}
+        <div className="pls-meta-item pls-meta-status" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <span className="pls-meta-icon" style={{
+            background: isApproved ? '#e6f4ea' : '#fef3c7',
+            color: isApproved ? '#137333' : '#b45309'
+          }}>
+            {isApproved ? <ShieldCheck size={13} /> : <Clock size={13} />}
+          </span>
+          <div className="pls-meta-text">
+            <span className="pls-meta-k">{isEs ? 'Estado' : 'Status'}:</span>
+            <span style={{
+              fontSize: '0.74rem',
+              fontWeight: 750,
+              color: isApproved ? '#137333' : '#b45309',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              {isApproved
+                ? (isEs ? 'Aprobada ✓' : 'Approved ✓')
+                : (isEs ? 'Pendiente' : 'Pending')}
+            </span>
+          </div>
+
+          {!isApproved && onApprovePrescription && (
+            <button
+              type="button"
+              className="pls-meta-action-btn-approve"
+              disabled={isApproving}
+              onClick={onApprovePrescription}
+              title={isEs ? 'Aprobar y autorizar prescripción para formulación y etiquetado' : 'Approve and authorize prescription for compounding and labels'}
+              style={{
+                marginLeft: '4px',
+                height: '24px',
+                padding: '0 8px',
+                borderRadius: '4px',
+                background: '#1a73e8',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '0.70rem',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                cursor: isApproving ? 'wait' : 'pointer',
+                boxShadow: '0 1px 2px rgba(26,115,232,0.25)'
+              }}
+            >
+              <CheckCircle2 size={11} />
+              <span>{isApproving ? (isEs ? 'Aprobando...' : 'Approving...') : (isEs ? 'Aprobar Receta' : 'Approve Rx')}</span>
+            </button>
+          )}
         </div>
 
         {/* Formula Parts Switcher (Part 1 / Part 2) with Full Explicit Titles */}
