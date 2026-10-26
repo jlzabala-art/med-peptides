@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Layers, X, CheckCircle, ShieldCheck } from '@/lib/icons';
+import { Layers, X, CheckCircle, ShieldCheck, Share2, Check } from '@/lib/icons';
 
 export default function LabelsBatchBar({
   patientQueue,
@@ -10,6 +10,8 @@ export default function LabelsBatchBar({
   onSwitchActivePatient,
   onRemoveFromQueue,
   onBatchApprove,
+  onShareBatch,
+  copiedShareLink = false,
   isBatchApproving = false,
   totalLabeledCount = 0,
   isPatientFullyLabeled = null,
@@ -22,7 +24,7 @@ export default function LabelsBatchBar({
 
   return (
     <section className="pls-batch-bar" aria-label="Patient Batch Queue">
-      <div className="pls-batch-info-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+      <div className="pls-batch-info-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <Layers size={16} color="#1a73e8" />
           <span style={{ fontWeight: 700, fontSize: '0.82rem', color: '#1e293b' }}>
@@ -42,23 +44,42 @@ export default function LabelsBatchBar({
           </span>
         </div>
 
-        {/* 1-Click Batch Approval for all pending prescriptions in queue (Reimi / Kasia Studio) */}
-        {pendingApprovalCount > 0 && onBatchApprove && (
-          <button
-            type="button"
-            onClick={onBatchApprove}
-            disabled={isBatchApproving}
-            className="pls-batch-approve-btn"
-            title={isEs ? 'Aprobar y firmar todas las recetas pendientes del lote' : 'Batch approve and sign all pending prescriptions'}
-          >
-            <ShieldCheck size={13} />
-            <span>
-              {isBatchApproving
-                ? (isEs ? 'Aprobando lote...' : 'Authorizing...')
-                : (isEs ? `✔ Aprobar ${pendingApprovalCount} pendientes` : `✔ Authorize ${pendingApprovalCount} pending`)}
-            </span>
-          </button>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto', flexWrap: 'nowrap' }}>
+          {/* Share entire batch link */}
+          {patientQueue.length > 0 && onShareBatch && (
+            <button
+              type="button"
+              onClick={() => onShareBatch(false)}
+              className={`pls-batch-share-btn ${copiedShareLink ? 'copied' : ''}`}
+              title={isEs ? 'Compartir enlace con todo el lote de recetas precargadas' : 'Share link with all preloaded batch prescriptions'}
+            >
+              {copiedShareLink ? <Check size={13} color="#16a34a" /> : <Share2 size={13} />}
+              <span>
+                {copiedShareLink
+                  ? (isEs ? 'Lote copiado ✓' : 'Batch Link Copied ✓')
+                  : (isEs ? `Compartir lote (${patientQueue.length})` : `Share Batch (${patientQueue.length})`)}
+              </span>
+            </button>
+          )}
+
+          {/* 1-Click Batch Approval for all pending prescriptions in queue (Reimi / Kasia Studio) */}
+          {pendingApprovalCount > 0 && onBatchApprove && (
+            <button
+              type="button"
+              onClick={onBatchApprove}
+              disabled={isBatchApproving}
+              className="pls-batch-approve-btn"
+              title={isEs ? 'Aprobar y firmar todas las recetas pendientes del lote' : 'Batch approve and sign all pending prescriptions'}
+            >
+              <ShieldCheck size={13} />
+              <span>
+                {isBatchApproving
+                  ? (isEs ? 'Aprobando lote...' : 'Authorizing...')
+                  : (isEs ? `✔ Aprobar ${pendingApprovalCount} pendientes` : `✔ Authorize ${pendingApprovalCount} pending`)}
+              </span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Fluid multiline list of patient cards */}

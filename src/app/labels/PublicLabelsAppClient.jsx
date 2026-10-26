@@ -1008,6 +1008,40 @@ export default function PublicLabelsAppClient({
     }
   };
 
+  // Share all prescriptions in the batch queue as a single deep-link
+  const handleShareBatch = async () => {
+    if (typeof window === 'undefined' || !patientQueue.length) return;
+    const origin = window.location.origin;
+    const allCodes = patientQueue.map(p => p.code).filter(Boolean).join(',');
+    const batchUrl = `${origin}/labels?rx=${encodeURIComponent(allCodes)}&edit=true&lang=${lang}`;
+    const names = patientQueue.map(p => p.rx?.patientName || p.code).join(', ');
+
+    const shareData = {
+      title: `Atlas Compounding Studio • ${patientQueue.length} Prescriptions`,
+      text: isEs
+        ? `🏷️ Atlas Compounding Studio • Lote de ${patientQueue.length} prescripciones: ${names}`
+        : `🏷️ Atlas Compounding Studio • Batch of ${patientQueue.length} prescriptions: ${names}`,
+      url: batchUrl,
+    };
+
+    if (navigator?.share && typeof navigator.canShare === 'function' && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.warn('Web Share API batch error:', err);
+        }
+      }
+    }
+
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(batchUrl);
+      setCopiedShareLink(true);
+      setTimeout(() => setCopiedShareLink(false), 2500);
+    }
+  };
+
   // Copy prescription code
   const handleCopyCode = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -1066,6 +1100,8 @@ export default function PublicLabelsAppClient({
           onSwitchActivePatient={handleSwitchActivePatient}
           onRemoveFromQueue={handleRemoveFromQueue}
           onBatchApprove={handleBatchApprove}
+          onShareBatch={handleShareBatch}
+          copiedShareLink={copiedShareLink}
           isBatchApproving={isBatchApproving}
           totalLabeledCount={totalLabeledCount}
           isPatientFullyLabeled={isPatientFullyLabeled}
