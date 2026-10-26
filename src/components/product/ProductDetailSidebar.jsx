@@ -86,9 +86,13 @@ export default function ProductDetailSidebar({
     return () => window.removeEventListener('open-datasheet-toc', handleExternalOpen);
   }, []);
 
-  // Real-time ScrollSpy via IntersectionObserver (only when not in controlled single-section mode)
+  // Real-time ScrollSpy via IntersectionObserver
   useEffect(() => {
-    if (onSelectSection || typeof window === 'undefined' || !availableSections.length) return;
+    if (typeof window === 'undefined' || !availableSections.length) return;
+
+    // Detect if sections are present in the DOM (continuous document flow)
+    const elementsInDom = availableSections.map(sec => document.getElementById(sec.id)).filter(Boolean);
+    if (elementsInDom.length < 2) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -107,15 +111,14 @@ export default function ProductDetailSidebar({
       }
     );
 
-    availableSections.forEach((sec) => {
-      const el = document.getElementById(sec.id);
-      if (el) observer.observe(el);
+    elementsInDom.forEach((el) => {
+      observer.observe(el);
     });
 
     return () => observer.disconnect();
-  }, [availableSections, onSelectSection]);
+  }, [availableSections]);
 
-  const currentActiveId = activeSection || activeId || availableSections[0]?.id || '';
+  const currentActiveId = activeId || activeSection || availableSections[0]?.id || '';
   const [filterQuery, setFilterQuery] = useState('');
   const filterInputRef = useRef(null);
 
@@ -159,21 +162,25 @@ export default function ProductDetailSidebar({
 
     triggerHaptic('light');
 
-    if (onSelectSection) {
-      onSelectSection(targetId);
-      setIsMobileDrawerOpen(false);
-      return;
-    }
-
     const el = document.getElementById(targetId);
     if (el) {
       setActiveId(targetId);
       setIsMobileDrawerOpen(false);
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const yOffset = -80;
+      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
 
       if (typeof window !== 'undefined' && window.history?.replaceState) {
         window.history.replaceState(null, '', `#${targetId}`);
       }
+      if (onSelectSection) onSelectSection(targetId);
+      return;
+    }
+
+    if (onSelectSection) {
+      onSelectSection(targetId);
+      setIsMobileDrawerOpen(false);
+      return;
     }
   };
 

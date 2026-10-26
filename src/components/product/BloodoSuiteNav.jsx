@@ -382,7 +382,7 @@ export default function BloodoSuiteNav({
           <span>{isEs ? 'ECOSISTEMA DE BIOMARCADORES DBS • BLOODÔ BIOINFORMATICS' : 'DBS BIOMARKER ECOSYSTEM • BLOODÔ BIOINFORMATICS'}</span>
         </div>
         <h2 className="bloodo-suite-section__title">
-          {isEs ? 'Otros Paneles Diagnósticos (Suite Bloodo™)' : 'Other Diagnostic Panels (Bloodo™ Suite)'}
+          {isEs ? '6. Suite Diagnóstica Bloodo™ (6 Paneles DBS)' : '6. Bloodo™ Diagnostic Suite (All 6 DBS Panels)'}
         </h2>
         <p className="bloodo-suite-section__subtitle">
           {isEs

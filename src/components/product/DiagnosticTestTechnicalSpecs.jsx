@@ -2128,8 +2128,8 @@ export default function DiagnosticTestTechnicalSpecs({
             <div className="pds-section-header-meta-row">
               <span className="pds-section-header-category">
                 {isCollectionOnly 
-                  ? (isEs ? 'PROTOCOLO DE MUESTREO Y RECOGIDA' : 'STANDARDIZED SPECIMEN SAMPLING & PROTOCOL')
-                  : (isEs ? 'ESPECIFICACIONES ANALÍTICAS & BIOMARCADORES' : 'ANALYTICAL SPECIFICATIONS & BIOMARKERS')}
+                  ? (isEs ? 'SECCIÓN 4 · PROTOCOLO DE MUESTREO DBS' : 'SECTION 4 · SPECIMEN SAMPLING GUIDE')
+                  : (isEs ? 'SECCIÓN 3 · RANGOS Y BIOMARCADORES' : 'SECTION 3 · REFERENCE RANGES & BIOMARKERS')}
               </span>
               <span className="pds-section-badge" style={{ background: '#f0fdfa', color: '#0d9488', borderColor: '#ccfbf1' }}>
                 <CheckCircle2 size={11} /> {isHairSample ? (isEs ? 'MÉTODO CERTIFICADO HTMA' : 'CERTIFIED HTMA METHOD') : isSalivaSample ? (isEs ? 'FROTIS BUCAL / ADN GENÉTICO' : 'CERTIFIED BUCCAL DNA') : (isEs ? 'MÉTODO CERTIFICADO DBS' : 'CERTIFIED DBS METHOD')}
@@ -2137,8 +2137,8 @@ export default function DiagnosticTestTechnicalSpecs({
             </div>
             <h3 className="pds-section-header-title">
               {isCollectionOnly
-                ? (isEs ? 'Protocolo de Extracción y Preparación Preanalítica' : 'Standardized Specimen Collection & Pre-Analytical Protocol')
-                : (isEs ? 'Monografía Analítica y Cuantificación de Biomarcadores' : 'Analytical Monograph & Biomarker Quantification Protocol')}
+                ? (isEs ? '4. ¿Cómo se Realiza? (Toma de Muestra DBS)' : '4. How It Works (Sampling Guide)')
+                : (isEs ? '3. ¿Qué Dice el Resultado? (Rangos y Biomarcadores)' : '3. Reference Ranges & Biomarkers')}
             </h3>
           </div>
         </div>

@@ -64,6 +64,8 @@ import BloodoNadFaqCard from './BloodoNadFaqCard';
 import BloodoSuiteNav, { isBloodoProduct } from './BloodoSuiteNav';
 import BloodoClinicalAdvantageCard from './BloodoClinicalAdvantageCard';
 import BloodoDiagnosticOverviewCard from './BloodoDiagnosticOverviewCard';
+import BloodoWhenToTestSection from './BloodoWhenToTestSection';
+import BloodoLabStandardsDownloadsSection from './BloodoLabStandardsDownloadsSection';
 import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
 import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
 import FdaRegulatoryBadge from './FdaRegulatoryBadge';
@@ -1372,7 +1374,8 @@ export default function PublicDatasheetView({
         { id: 'diagnostic-specs', label: lang === 'es' ? '3. ¿Qué Dice el Resultado? (Rango)' : '3. Reference Ranges & Biomarkers', icon: Activity },
         { id: 'collection-protocol', label: lang === 'es' ? '4. ¿Cómo se Realiza? (Toma de Muestra)' : '4. How It Works (Sampling Guide)', icon: Droplets },
         { id: 'specs-section', label: lang === 'es' ? '5. Acreditación ISO y Descargas' : '5. Lab Standards & Clinical Downloads', icon: ShieldCheck },
-        { id: 'bloodo-suite', label: lang === 'es' ? '6. Suite Diagnóstica Bloodo™' : '6. Bloodo™ Diagnostic Suite', icon: Layers }
+        { id: 'bloodo-suite', label: lang === 'es' ? '6. Suite Diagnóstica Bloodo™' : '6. Bloodo™ Diagnostic Suite', icon: Layers },
+        { id: 'clinical-synergy', label: lang === 'es' ? '7. Recomendaciones Atlas' : '7. Atlas Recommendations', icon: Sparkles }
       ];
     }
 
@@ -2623,9 +2626,72 @@ export default function PublicDatasheetView({
             />
           </div>
         )}
+
+        {isBloodoDiagnostic && (
+          <>
+            {/* ── Section 2: When to Take This Test ── */}
+            <BloodoWhenToTestSection
+              product={product}
+              lang={lang}
+              onSelectSection={handleSelectSection}
+              onUnlockRequest={() => setIsUnlockModalOpen(true)}
+            />
+
+            {/* ── Section 3: Reference Ranges & Biomarkers ── */}
+            <section id="diagnostic-specs" className="pds-section-card" style={{ marginTop: '1.5rem', marginBottom: '1.75rem' }}>
+              <DiagnosticTestTechnicalSpecs
+                product={product}
+                selectedDose={selectedStrength?.name || 'Standard'}
+                supplierName={displaySupplierName}
+                lang={lang}
+                activeSection="diagnostic-specs"
+              />
+            </section>
+
+            {/* ── Section 4: How It Works (Sampling Guide) ── */}
+            <section id="collection-protocol" className="pds-section-card" style={{ marginTop: '1.5rem', marginBottom: '1.75rem' }}>
+              <DiagnosticTestTechnicalSpecs
+                product={product}
+                selectedDose={selectedStrength?.name || 'Standard'}
+                supplierName={displaySupplierName}
+                lang={lang}
+                activeSection="collection-protocol"
+              />
+            </section>
+
+            {/* ── Section 5: Lab Standards & Clinical Downloads ── */}
+            <BloodoLabStandardsDownloadsSection
+              product={product}
+              lang={lang}
+              onSelectSection={handleSelectSection}
+              onUnlockRequest={() => setIsUnlockModalOpen(true)}
+            />
+
+            {/* ── Section 6: Bloodo™ Diagnostic Suite ── */}
+            <section id="bloodo-suite" className="pds-section-card" style={{ marginTop: '1.5rem', marginBottom: '1.75rem' }}>
+              <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
+            </section>
+
+            {/* ── Section 7: Atlas Recommendations & Companion Protocols ── */}
+            <div id="clinical-synergy" style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '1.5rem', marginBottom: '1.75rem' }}>
+              <ClinicalSynergySection product={product} slug={slug || product?.slug} lang={lang} />
+              <BloodoRelatedPeptidesSection product={product} lang={lang} />
+              <BloodoClinicalAdvantageCard lang={lang} />
+            </div>
+          </>
+        )}
         </div>
       ) : (
         <div className="pds-single-section-view">
+
+          {effectiveActiveSection === 'when-to-test' && (
+            <BloodoWhenToTestSection
+              product={product}
+              lang={lang}
+              onSelectSection={handleSelectSection}
+              onUnlockRequest={() => setIsUnlockModalOpen(true)}
+            />
+          )}
 
           {effectiveActiveSection === 'presentations-matrix' && (
             <PresentationsMatrixSection
@@ -2702,17 +2768,28 @@ export default function PublicDatasheetView({
       {/* ── Block 3: Analytical Certificate & Molecular Profile (Elevated Top-Level Section) ── */}
       {effectiveActiveSection === 'specs-section' && !isCorporateService && !isCosmeticProduct && (
         <section id="specs-section" className="pds-traceability-wrapper">
-          <ProductTraceabilityCard
-            product={product}
-            baseUrl={baseUrl}
-            lang={lang}
-            monographUrl={dynamicPublicUrl}
-            batchCode={effectiveBatchCode}
-          />
-          {(isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) && (
-            <div style={{ marginTop: '20px' }}>
-              <BloodoNadFaqCard product={product} lang={lang} />
-            </div>
+          {isBloodoDiagnostic ? (
+            <BloodoLabStandardsDownloadsSection
+              product={product}
+              lang={lang}
+              onSelectSection={handleSelectSection}
+              onUnlockRequest={() => setIsUnlockModalOpen(true)}
+            />
+          ) : (
+            <>
+              <ProductTraceabilityCard
+                product={product}
+                baseUrl={baseUrl}
+                lang={lang}
+                monographUrl={dynamicPublicUrl}
+                batchCode={effectiveBatchCode}
+              />
+              {(isDiagnosticKit || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) && (
+                <div style={{ marginTop: '20px' }}>
+                  <BloodoNadFaqCard product={product} lang={lang} />
+                </div>
+              )}
+            </>
           )}
         </section>
       )}

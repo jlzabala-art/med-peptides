@@ -37,10 +37,12 @@ export default function ClinicalSynergySection({
             <span>Atlas Recommendations</span>
           </div>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0', letterSpacing: '-0.02em' }}>
-            Atlas Recommendations
+            {isEs ? '7. Recomendaciones Atlas y Protocolos Sinergistas' : '7. Atlas Recommendations & Companion Protocols'}
           </h2>
           <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
-            Recommended companion therapies, formulations, and co-factors to optimize clinical outcomes.
+            {isEs 
+              ? 'Terapias complementarias, péptidos calibrados y cofactores formulados para optimizar los resultados clínicos basándose en biomarcadores.' 
+              : 'Recommended companion therapies, calibrated peptides, and co-factors to optimize clinical outcomes based on biomarker targets.'}
           </p>
         </div>
       </div>
