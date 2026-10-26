@@ -48,5 +48,15 @@ export const SUPPORTED_COLLECTIONS = {
     unitNoun: 'Laboratory Panel',
     pluralNoun: 'Laboratory Panels',
     deliveryPledge: 'Includes patient specimen kit, refrigerated courier transport, and laboratory analysis.'
+  },
+  mcg: {
+    slug: 'mcg',
+    name: 'MCG Cosmetics',
+    title: 'MCG Medical Cosmeceutical Group • Follicular Trichology',
+    badge: 'ISO 22716 & Procapil® Certified',
+    description: 'Specialized clinical trichology serums, 5% Procapil® peptide formulations, and anti-androgenic scalp treatments.',
+    unitNoun: 'Pack',
+    pluralNoun: 'Packs',
+    deliveryPledge: 'Direct warehouse fulfillment with authenticated batch quality assurance.'
   }
 };

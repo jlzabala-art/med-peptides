@@ -3,9 +3,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  ChevronDown
+  ChevronDown,
+  FlaskConical,
+  Microscope,
+  Briefcase,
+  Globe
 } from '@/lib/icons';
 import BrandLogo from '../common/BrandLogo';
+import { triggerHaptic } from '@/utils/haptics';
 import './PublicUnifiedFooter.css';
 
 const FOOTER_SECTIONS = [
@@ -14,6 +19,7 @@ const FOOTER_SECTIONS = [
     title: 'Therapeutics',
     titleMobile: 'Therapeutics & Formulations',
     titleEs: 'Terapéutica',
+    icon: FlaskConical,
     links: [
       { label: 'Clinical Peptide Monographs & Incretins', labelEs: 'Monografías Peptídicas Clínicas & Incretinas', href: '/collection/peptides' },
       { label: 'Colway® Native Bio-Collagen', labelEs: 'Colway® Tropocolágeno Nativo', href: '/collection/colway' },
@@ -26,6 +32,7 @@ const FOOTER_SECTIONS = [
     title: 'Diagnostics & Pathways',
     titleMobile: 'Diagnostics & Clinical Pathways',
     titleEs: 'Diagnóstico & Vías',
+    icon: Microscope,
     links: [
       { label: 'TeleTest® Laboratory Diagnostics', labelEs: 'TeleTest® Diagnóstico de Laboratorio', href: '/collection/teletest' },
       { label: 'Bloodo™ Capillary Biomarkers (DBS)', labelEs: 'Diagnóstico Capilar DBS Bloodo™', href: '/collection/bloodo' },
@@ -38,6 +45,7 @@ const FOOTER_SECTIONS = [
     title: 'Practitioner & Ops',
     titleMobile: 'Practitioner & Clinical Ops',
     titleEs: 'Portal Médico & B2B',
+    icon: Briefcase,
     links: [
       { label: 'Physician & Clinic Portal (/dr)', labelEs: 'Portal Médico Facultativo (/dr)', href: '/login' },
       { label: 'Digital Compounding E-Rx', labelEs: 'Prescripción Electrónica (E-Rx)', href: '/rx/intake' },
@@ -64,6 +72,19 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
       ...prev,
       [id]: !prev[id]
     }));
+  };
+
+  const handleLanguageChange = (nextLang) => {
+    triggerHaptic('light');
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atlas_portal_lang', nextLang);
+        localStorage.setItem('atlas_catalog_lang', nextLang);
+      } catch (_e) {}
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', nextLang);
+      window.location.href = url.toString();
+    }
   };
 
   const linkStyle = {
@@ -115,22 +136,26 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
           </div>
 
           {/* Columns 2-4: Curated Directories */}
-          {FOOTER_SECTIONS.map((section) => (
-            <div key={section.id}>
-              <div className="public-footer-title">
-                {isEs ? section.titleEs : section.title}
+          {FOOTER_SECTIONS.map((section) => {
+            const SectionIcon = section.icon;
+            return (
+              <div key={section.id}>
+                <div className="public-footer-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <SectionIcon size={14} style={{ color: '#5f6368', flexShrink: 0 }} />
+                  <span>{isEs ? section.titleEs : section.title}</span>
+                </div>
+                <ul className="public-footer-links">
+                  {section.links.map((link, idx) => (
+                    <li key={idx}>
+                      <Link href={link.href} style={linkStyle}>
+                        {isEs ? link.labelEs : link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="public-footer-links">
-                {section.links.map((link, idx) => (
-                  <li key={idx}>
-                    <Link href={link.href} style={linkStyle}>
-                      {isEs ? link.labelEs : link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+            );
+          })}
 
         </div>
 
@@ -150,6 +175,7 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
           <div className="public-footer-mobile-accordions">
             {FOOTER_SECTIONS.map((section) => {
               const isOpen = Boolean(openMobileSections[section.id]);
+              const SectionIcon = section.icon;
               return (
                 <div key={section.id} className="gcp-footer-accordion-item">
                   <button
@@ -158,9 +184,12 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
                     className={`gcp-footer-accordion-header ${isOpen ? 'active' : ''}`}
                     aria-expanded={isOpen}
                   >
-                    <span className="gcp-footer-accordion-title">
-                      {isEs ? section.titleEs : section.titleMobile}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <SectionIcon size={14} style={{ color: '#5f6368', flexShrink: 0 }} />
+                      <span className="gcp-footer-accordion-title">
+                        {isEs ? section.titleEs : section.titleMobile}
+                      </span>
+                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span className="gcp-footer-accordion-badge">
                         {section.links.length}
@@ -194,6 +223,41 @@ export default function PublicUnifiedFooter({ lang = 'en', minimal = false }) {
         <div className="public-footer-bottom">
           <div className="public-footer-copyright">
             © 2026 <strong style={{ color: '#202124' }}>Atlas Health Services</strong>. {isEs ? 'Todos los derechos reservados.' : 'All rights reserved.'}
+          </div>
+
+          <div className="public-footer-legal-links">
+            <Link href="/privacy" className="public-footer-legal-link">
+              {isEs ? 'Privacidad' : 'Privacy Policy'}
+            </Link>
+            <span className="public-footer-separator">•</span>
+            <Link href="/terms" className="public-footer-legal-link">
+              {isEs ? 'Términos' : 'Terms of Service'}
+            </Link>
+            <span className="public-footer-separator">•</span>
+            <Link href="/regulatory" className="public-footer-legal-link">
+              {isEs ? 'Estándares Regulatorios (CPNP / CE-IVDR)' : 'Regulatory (CPNP / CE-IVDR)'}
+            </Link>
+          </div>
+
+          <div className="public-footer-lang-switcher" aria-label="Language selector">
+            <Globe size={13} style={{ color: '#5f6368', flexShrink: 0 }} />
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('en')}
+              className={`public-footer-lang-btn ${!isEs ? 'active' : ''}`}
+              title="Switch to English"
+            >
+              EN
+            </button>
+            <span className="public-footer-lang-divider">|</span>
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('es')}
+              className={`public-footer-lang-btn ${isEs ? 'active' : ''}`}
+              title="Cambiar a Español"
+            >
+              ES
+            </button>
           </div>
         </div>
 

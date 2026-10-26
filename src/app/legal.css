@@ -1,0 +1,181 @@
+/* Google Cloud Platform (GCP) Console UX Legal & Regulatory Pages */
+
+.gcp-legal-wrapper {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Google Sans", Inter, Helvetica, Arial, sans-serif;
+  color: #202124;
+}
+
+.gcp-legal-container {
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.25rem 1.5rem 4rem;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+/* Header & Meta */
+.gcp-legal-header {
+  margin-bottom: 2rem;
+}
+
+.gcp-legal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background-color: #e8f0fe;
+  border: 1px solid #d2e3fc;
+  color: #1a73e8;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.gcp-legal-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #202124;
+  margin: 0.85rem 0 0.45rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.gcp-legal-subtitle {
+  font-size: 14.5px;
+  color: #5f6368;
+  line-height: 1.55;
+  margin: 0;
+  max-width: 780px;
+}
+
+/* Section Cards */
+.gcp-legal-card {
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 1.75rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.04);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.gcp-legal-card:hover {
+  border-color: #bdc1c6;
+  box-shadow: 0 2px 6px rgba(60, 64, 67, 0.08);
+}
+
+.gcp-legal-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.gcp-legal-section-icon {
+  color: #5f6368;
+  flex-shrink: 0;
+}
+
+.gcp-legal-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #202124;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.gcp-legal-p {
+  font-size: 13.5px;
+  color: #3c4043;
+  line-height: 1.65;
+  margin: 0 0 0.85rem;
+}
+
+.gcp-legal-p:last-child {
+  margin-bottom: 0;
+}
+
+.gcp-legal-list {
+  margin: 0.5rem 0 0.85rem 1.25rem;
+  padding: 0;
+  color: #3c4043;
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+
+.gcp-legal-list li {
+  margin-bottom: 0.35rem;
+}
+
+/* Contact & Action CTA Box */
+.gcp-legal-contact-box {
+  background: #f8f9fa;
+  border: 1px solid #e8eaed;
+  border-radius: 6px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.gcp-legal-contact-text {
+  font-size: 13px;
+  color: #5f6368;
+  line-height: 1.5;
+  max-width: 580px;
+}
+
+.gcp-legal-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #1a73e8;
+  color: #ffffff !important;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-decoration: none !important;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  min-height: 38px;
+}
+
+.gcp-legal-contact-btn:hover {
+  background-color: #174ea6;
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+}
+
+@media (max-width: 767px) {
+  .gcp-legal-container {
+    padding: 1.25rem 1rem 3rem;
+  }
+  
+  .gcp-legal-title {
+    font-size: 21px;
+  }
+  
+  .gcp-legal-card {
+    padding: 1.25rem;
+  }
+  
+  .gcp-legal-contact-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .gcp-legal-contact-btn {
+    width: 100%;
+  }
+}

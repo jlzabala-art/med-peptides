@@ -38,6 +38,9 @@ import {
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import { getTeletestCatalog } from '../data/teletestRegistry';
+import ClinicalWorksExplorer from '../components/collection/ClinicalWorksExplorer';
+import { getWorksByClinicalArea, getWorksByBrand } from '../data/clinicalWorksRegistry';
+import { BookOpen, Package } from '@/lib/icons';
 import '../styles/collection_shared.css';
 
 // Brand configurations with clinical metadata and 4 KPIs (Regla Golden #22)
@@ -179,10 +182,165 @@ const BRAND_CONFIGS = {
       { id: 'cognitive', label: 'Neuro & Cognitive' },
       { id: 'hormonal', label: 'Hormonal & GH Axis' }
     ]
+  },
+  'hair-treatments': {
+    name: 'Hair Treatments & Clinical Trichology',
+    title: 'Hair Treatments & Clinical Trichology • Integrated Follicular Protocols',
+    tagline: 'Colway® Scalp Stem Cells, Bioactive Copper Peptides & HTMA Diagnostics',
+    badge: 'Integrated Clinical Trichology & Scalp Regeneration',
+    badgeColor: '#0d9488',
+    subtitle: 'Comprehensive multi-modal trichological ecosystem uniting Colway® Baicapil™ stem cell topicals & native tropocollagen, Lotusland GHK-Cu & Zinc Thymulin peptide mesotherapy, and TeleTest® HTMA intracellular trace element diagnostics.',
+    heroImage: '/images/products/colway/colway-trichology-banner.jpg',
+    accentColor: '#0d9488',
+    isAreaCollection: true,
+    kpis: [
+      { label: 'Hair Loss Arrest', value: '−60.6%', sub: 'Documented in 84-Day Baicapil In-Vivo RCT', icon: Zap, color: '#0d9488' },
+      { label: 'Density & Anagen', value: '+49% Density', sub: 'Anagen/Telogen Ratio Improved 2.3 ➔ 4.7', icon: Sparkles, color: '#2563eb' },
+      { label: 'Bioactive Peptides', value: 'GHK-Cu & ZT', sub: 'VEGF Follicular Angiogenesis & Pigment', icon: Dna, color: '#7c3aed' },
+      { label: 'Regulatory & Lab', value: 'EU CPNP & ISO', sub: 'CPNP Cosmetic Reg. & ISO 17025 HTMA Lab', icon: ShieldCheck, color: '#16a34a' }
+    ],
+    categories: [
+      { id: 'all', label: 'All Treatments & Diagnostics' },
+      { id: 'colway-trichology', label: 'Colway® Topical Trichology' },
+      { id: 'peptides', label: 'Bioactive Peptides (GHK-Cu)' },
+      { id: 'diagnostic', label: 'HTMA Hair Mineral Diagnostics' },
+      { id: 'nutricosmetics', label: 'Systemic Matrix (Colvita)' },
+      { id: 'bundles', label: 'Clinical Protocol Bundles' }
+    ]
+  },
+  'weight-loss': {
+    name: 'Weight Loss & Metabolic Health',
+    title: 'Weight Loss & Metabolic Health • Incretin Agonists & Body Composition',
+    tagline: 'Dual/Triple GLP-1/GIP Incretins, Selective Lipolysis & HbA1c Telemetry',
+    badge: 'Clinical Incretin Agonists & Metabolic Architecture',
+    badgeColor: '#16a34a',
+    subtitle: 'Comprehensive medical weight management ecosystem integrating dual/triple incretin mimetics (Tirzepatide, Semaglutide, Retatrutide), visceral lipolytic peptides (Tesamorelin, AOD-9604), and CE-IVDR capillary glycation diagnostics (Bloodo™ HbA1c).',
+    heroImage: '/images/products/bloodo/nad.jpg',
+    accentColor: '#16a34a',
+    isAreaCollection: true,
+    kpis: [
+      { label: 'Weight Reduction', value: 'Up to −20.9%', sub: 'SURMOUNT-1 Phase 3 Tirzepatide (72w)', icon: Zap, color: '#16a34a' },
+      { label: 'Visceral Fat Loss', value: '−18% to −24%', sub: 'Selective VAT Reduction via Tesamorelin', icon: Sparkles, color: '#2563eb' },
+      { label: 'Lean Mass Sparing', value: 'Zero Sarcopenia', sub: 'Preserves Skeletal Muscle & Bone Density', icon: ShieldCheck, color: '#0d9488' },
+      { label: 'Glycation Control', value: 'HbA1c & CE-IVDR', sub: '90-Day Integrated Insulin Sensitivity', icon: Microscope, color: '#dc2626' }
+    ],
+    categories: [
+      { id: 'all', label: 'All Formulations & Tests' },
+      { id: 'dual-incretins', label: 'Dual & Triple Agonists (Tirzepatide / Retatrutide)' },
+      { id: 'glp1', label: 'GLP-1 Agonists (Semaglutide)' },
+      { id: 'lipolytic', label: 'Visceral Lipolysis (Tesamorelin / AOD-9604)' },
+      { id: 'metabolic-diagnostics', label: 'Metabolic Diagnostics (Bloodo™ HbA1c)' }
+    ]
+  },
+  'tissue-repair': {
+    name: 'Tissue Repair & Rapid Recovery',
+    title: 'Tissue Repair & Rapid Recovery • Musculoskeletal & Dermal Regeneration',
+    tagline: 'Angiogenesis Peptides, Tendon-Bone Healing & Native Tropocollagen',
+    badge: 'Cellular Reconstruction & Musculoskeletal Desk',
+    badgeColor: '#2563eb',
+    subtitle: 'Accelerated regenerative recovery combining microvascular angiogenesis peptides (BPC-157, TB-500, KPV), native freshwater fish tropocollagen matrix (Colway®), and musculoskeletal mineral balancing.',
+    heroImage: '/images/og-protocols.png',
+    accentColor: '#2563eb',
+    isAreaCollection: true,
+    kpis: [
+      { label: 'Collagen Synthesis', value: '3x Type I/III', sub: 'Organized Extracellular Matrix Remodeling', icon: Sparkles, color: '#2563eb' },
+      { label: 'Microvascular Growth', value: 'VEGF / VEGFR2', sub: 'Early Revascularization of Ischemic Tissue', icon: Zap, color: '#16a34a' },
+      { label: 'Analytical Standard', value: 'HPLC ≥99.0%', sub: 'Certified Mass Spectrometry & Low Endotoxin', icon: ShieldCheck, color: '#003666' },
+      { label: 'Tissue Sparing', value: 'Anti-Fibrotic', sub: 'Prevents Disorganized Scarring & Adhesions', icon: Award, color: '#7c3aed' }
+    ],
+    categories: [
+      { id: 'all', label: 'All Repair Formulations' },
+      { id: 'peptides', label: 'Regenerative Peptides (BPC-157 / TB-500)' },
+      { id: 'collagen', label: 'Tropocollagen & Dermal Matrix (Colway®)' },
+      { id: 'oral-matrix', label: 'Systemic Matrix Repair (Colvita)' }
+    ]
+  },
+  'longevity-cellular': {
+    name: 'Cellular Longevity & Epigenetics',
+    title: 'Cellular Longevity & Telomeres • Biological Age Reversal & Multi-Omics',
+    tagline: 'Telomerase Activation, Mitochondrial Biogenesis & Senolytic Clearance',
+    badge: 'Biogerontology & Multi-Omics Architecture',
+    badgeColor: '#0369a1',
+    subtitle: 'Precision biogerontology platform combining telomerase-activating peptides (Epithalon), mitochondrial hormetins (MOTS-c), targeted senolytics (FOXO4-DRI), ETERNA® 700k Multi-Omics, and Bloodo™ intracellular NAD+ telemetry.',
+    heroImage: '/images/products/eterna/eterna-kit-box.png',
+    accentColor: '#0369a1',
+    isAreaCollection: true,
+    kpis: [
+      { label: 'Telomerase Activity', value: 'hTERT Induction', sub: 'Supera el Límite de Hayflick en +33%', icon: Sparkles, color: '#0369a1' },
+      { label: 'Multi-Omics Scope', value: '+700k SNPs & Clocks', sub: 'Proteómica de Edad Biológica por Órganos', icon: Dna, color: '#7c3aed' },
+      { label: 'Mitochondrial Bioenergetics', value: 'MOTS-c & AMPK', sub: 'Mimetismo Celular del Ejercicio Físico', icon: Zap, color: '#16a34a' },
+      { label: 'Diagnostic Precision', value: 'CE-IVDR NAD+', sub: 'Medición Intracelular en Sangre Seca (DBS)', icon: Microscope, color: '#e11d48' }
+    ],
+    categories: [
+      { id: 'all', label: 'All Longevity Therapies' },
+      { id: 'telomeres', label: 'Telomeres & Biogerontology (Epithalon)' },
+      { id: 'mitochondrial', label: 'Mitochondrial Bioenergetics (MOTS-c)' },
+      { id: 'diagnostics', label: 'Multi-Omics & NAD+ (ETERNA / Bloodo)' },
+      { id: 'supplements', label: 'Cellular Supplements (UltraPerson)' }
+    ]
+  },
+  'neuro-performance': {
+    name: 'Neuro-Performance, Focus & Sleep',
+    title: 'Neuro-Performance & Sleep • BDNF Nootropics & Delta Architecture',
+    tagline: 'Neurotrophic BDNF Peptides, Non-Sedative Anxiolysis & Sleep Normalization',
+    badge: 'Clinical Neuro-Cognitive & Circadian Desk',
+    badgeColor: '#7c3aed',
+    subtitle: 'Comprehensive brain optimization suite uniting neurotrophic cognitive peptides (Semax, Selank), slow-wave sleep inducers (DSIP), Bloodo™ diurnal cortisol telemetry, and UltraPerson™ botanical adaptogens.',
+    heroImage: '/images/longevity_supps.png',
+    accentColor: '#7c3aed',
+    isAreaCollection: true,
+    kpis: [
+      { label: 'Neurotrophic Upregulation', value: '3x BDNF / NGF', sub: 'Plasticidad Sináptica y Memoria de Trabajo', icon: Dna, color: '#7c3aed' },
+      { label: 'Anxiolytic Modulation', value: 'GABAérgica Pura', sub: 'Ansiólisis sin Sedación ni Tolerancia (Selank)', icon: ShieldCheck, color: '#0284c7' },
+      { label: 'Delta Sleep Time', value: '+59% Fase III/IV', sub: 'Arquitectura del Sueño Profundo Restaurador', icon: Sparkles, color: '#16a34a' },
+      { label: 'Endocrine Telemetry', value: 'Cortisol CAR', sub: 'Curva Circadiana Suprarrenal en 4 Puntos', icon: Microscope, color: '#ea580c' }
+    ],
+    categories: [
+      { id: 'all', label: 'All Neuro & Sleep Formulations' },
+      { id: 'nootropics', label: 'Neurotrophic Nootropics (Semax / Selank)' },
+      { id: 'sleep', label: 'Circadian & Sleep (DSIP)' },
+      { id: 'diagnostics', label: 'Endocrine Telemetry (Bloodo™ Cortisol)' },
+      { id: 'botanicals', label: 'Botanical Neuro-Supplements (UltraPerson)' }
+    ]
+  },
+  'dermal-aesthetics': {
+    name: 'Dermal Aesthetics & Skin Barrier',
+    title: 'Dermal Aesthetics & Epigenetic Skin Barrier • VEP Peptides & Tropocollagen',
+    tagline: 'Epigenetic mRNA Neocollagenesis, Triple-Helix Tropocollagen & GHK-Cu',
+    badge: 'Advanced Medical Dermocosmetics & Skin Architecture',
+    badgeColor: '#0284c7',
+    subtitle: 'Cellular dermocosmetics and skin rejuvenation uniting Colway® Blue Diamond epigenetic peptides, biologically active freshwater tropocollagen, and Lotusland GHK-Cu copper remodeling peptides.',
+    heroImage: '/images/products/colway/colway-dermatology-clinic-hero-v2.jpg',
+    accentColor: '#0284c7',
+    isAreaCollection: true,
+    kpis: [
+      { label: 'Active Tropocollagen', value: 'Triple-Helix 100%', sub: 'Estructura Cuaternaria de Sostén Dérmico', icon: Sparkles, color: '#0284c7' },
+      { label: 'Extracellular Remodeling', value: 'Decorina & GHK-Cu', sub: 'Upregulación de Síntesis de Colágeno I/III', icon: Award, color: '#16a34a' },
+      { label: 'Transdermal Carrier', value: 'VEP-Carrier', sub: 'Permeación a través del Estrato Córneo', icon: Zap, color: '#7c3aed' },
+      { label: 'Regulatory Standard', value: 'EU CPNP Reg.', sub: 'Reglamento (CE) 1223/2009 & GMP Cosmético', icon: ShieldCheck, color: '#003666' }
+    ],
+    categories: [
+      { id: 'all', label: 'All Dermal Formulations' },
+      { id: 'epigenetic', label: 'Epigenetic & Blue Diamond (Colway®)' },
+      { id: 'copper-peptides', label: 'Copper Peptides (GHK-Cu)' },
+      { id: 'native-collagen', label: 'Native Tropocollagen & Vege' },
+      { id: 'oral-matrix', label: 'Inside-Out Nutricosmetics (Colvita)' }
+    ]
   }
 };
 
 BRAND_CONFIGS.ultraman = BRAND_CONFIGS.ultraperson;
+BRAND_CONFIGS['hair-treatment'] = BRAND_CONFIGS['hair-treatments'];
+BRAND_CONFIGS['trichology'] = BRAND_CONFIGS['hair-treatments'];
+BRAND_CONFIGS['hair'] = BRAND_CONFIGS['hair-treatments'];
+BRAND_CONFIGS['weight'] = BRAND_CONFIGS['weight-loss'];
+BRAND_CONFIGS['metabolic'] = BRAND_CONFIGS['weight-loss'];
+BRAND_CONFIGS['repair'] = BRAND_CONFIGS['tissue-repair'];
+BRAND_CONFIGS['recovery'] = BRAND_CONFIGS['tissue-repair'];
+BRAND_CONFIGS['longevity'] = BRAND_CONFIGS['longevity-cellular'];
+BRAND_CONFIGS['neuro'] = BRAND_CONFIGS['neuro-performance'];
+BRAND_CONFIGS['cognitive'] = BRAND_CONFIGS['neuro-performance'];
+BRAND_CONFIGS['dermal'] = BRAND_CONFIGS['dermal-aesthetics'];
 
 function resolveBrandProductImage(product, brandSlug) {
   if (product.image_url) return product.image_url;
@@ -212,6 +370,18 @@ function resolveBrandProductImage(product, brandSlug) {
     if (id.includes('detox') || id.includes('metabolizer') || name.includes('detox')) return '/images/products/teletest/metabolizer-detox.svg';
     if (id.includes('tox') || id.includes('pesados')) return '/images/products/teletest/heavy-metals.svg';
     return '/images/products/teletest/mineralograma-cabello.svg';
+  }
+
+  if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology') {
+    if (id.includes('shampoo') || name.includes('shampoo')) return '/images/products/colway/shampoo.png';
+    if (id.includes('conditioner') || name.includes('conditioner')) return '/images/products/colway/conditioner.png';
+    if (id.includes('colvita') || name.includes('colvita')) return '/images/products/colway/colvita.png';
+    if (id.includes('trichology') || name.includes('trichology')) return '/images/products/colway/bundle-colway-trichology.jpg';
+    if (id.includes('ghk') || name.includes('ghk')) return '/images/products/lotusland/ghk-cu.png';
+    if (id.includes('tb-500') || id.includes('tb500')) return '/images/products/lotusland/tb-500.png';
+    if (id.includes('bpc-157') || id.includes('bpc157') || id.includes('bpc')) return '/images/products/lotusland/bpc-157.png';
+    if (id.includes('teletest') || id.includes('mineral') || id.includes('cabello') || id.includes('htma')) return '/images/products/teletest/mineralograma-cabello.svg';
+    return '/images/products/colway/bundle-colway-trichology.jpg';
   }
 
   if (brandSlug === 'colway') {
@@ -286,6 +456,9 @@ function resolveProductDatasheet(product, brandSlug) {
 
 function getItemUnitLabel(slug, count, isEs) {
   const isOne = count === 1;
+  if (slug === 'hair-treatments' || slug === 'hair' || slug === 'trichology') {
+    return isOne ? (isEs ? 'tratamiento' : 'treatment') : (isEs ? 'tratamientos' : 'treatments');
+  }
   if (slug === 'colway' || slug === 'ultraperson' || slug === 'ultraman') {
     return isOne ? (isEs ? 'formulación' : 'formulation') : (isEs ? 'formulaciones' : 'formulations');
   }
@@ -296,6 +469,32 @@ function getItemUnitLabel(slug, count, isEs) {
 }
 
 function resolveProductRegulatoryBadges(product, brandSlug) {
+  const id = (product.id || product.slug || '').toLowerCase();
+  const name = (product.name || product.title || '').toLowerCase();
+
+  if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology') {
+    if (id.includes('shampoo') || name.includes('shampoo') || id.includes('conditioner') || name.includes('conditioner') || id.includes('colway')) {
+      return [
+        { label: '🇪🇺 EU CPNP Reg.', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'European Union CPNP & Regulation (EC) No 1223/2009 Registered' },
+        { label: 'Baicapil™ 2%', color: '#0369a1', bg: 'rgba(3, 105, 161, 0.12)', border: 'rgba(3, 105, 161, 0.25)', title: 'Patented Hair Follicle Stem Cell Activator' }
+      ];
+    }
+    if (id.includes('ghk') || id.includes('tb-500') || id.includes('bpc') || product.category === 'peptides') {
+      return [
+        { label: 'HPLC ≥99.0%', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'HPLC Verified Analytical Monograph Standard' },
+        { label: 'Lotusland Hub', color: '#003666', bg: 'rgba(0, 54, 102, 0.10)', border: 'rgba(0, 54, 102, 0.25)', title: 'Official Lotusland Lyophilization Logistics Hub' }
+      ];
+    }
+    if (id.includes('teletest') || id.includes('mineral') || id.includes('htma')) {
+      return [
+        { label: 'ISO 17025', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'ISO 17025 European Reference Laboratory' },
+        { label: 'Generalitat E08750211', color: '#0369a1', bg: 'rgba(3, 105, 161, 0.12)', border: 'rgba(3, 105, 161, 0.25)', title: 'Departament de Salut de la Generalitat de Catalunya' }
+      ];
+    }
+    return [
+      { label: 'Clinical Grade', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'Clinical Formulation Standard' }
+    ];
+  }
   if (brandSlug === 'teletest') {
     return [
       { label: 'ISO 17025', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'ISO 17025 European Reference Laboratory' },
@@ -398,6 +597,34 @@ export default function BrandCollectionPage({
   const colwayCategories = brandCategories;
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [activeMainTab, setActiveMainTab] = useState('products'); // 'products' | 'works' | 'protocols'
+
+  const collectionWorks = useMemo(() => {
+    const areaMap = {
+      'hair-treatments': 'hair-treatments',
+      'hair-treatment': 'hair-treatments',
+      'trichology': 'hair-treatments',
+      'hair': 'hair-treatments',
+      'weight-loss': 'weight-loss',
+      'weight': 'weight-loss',
+      'metabolic': 'weight-loss',
+      'tissue-repair': 'tissue-repair',
+      'repair': 'tissue-repair',
+      'recovery': 'tissue-repair',
+      'longevity-cellular': 'longevity-cellular',
+      'longevity': 'longevity-cellular',
+      'neuro-performance': 'neuro-performance',
+      'neuro': 'neuro-performance',
+      'cognitive': 'neuro-performance',
+      'dermal-aesthetics': 'dermal-aesthetics',
+      'dermal': 'dermal-aesthetics'
+    };
+    if (areaMap[brandSlug]) {
+      return getWorksByClinicalArea(areaMap[brandSlug]);
+    }
+    return getWorksByBrand(brandSlug);
+  }, [brandSlug]);
+
   const [viewMode, setViewMode] = useState('table'); // 'table' (rows/lines - GCP UX) | 'grid'
   const [sortOption, setSortOption] = useState('featured');
   const [addedItem, setAddedItem] = useState(null);
@@ -444,6 +671,12 @@ export default function BrandCollectionPage({
         text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *TeleTest Analytika® ${catMeta?.label || selectedCategory}* diagnostic panel line. I would like to request clinical protocols and B2B pricing for medical clinics.`;
       } else {
         text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *TeleTest Analytika® Clinical Diagnostics Collection* (HTMA Hair Mineral Toxicology, HLA Autoimmunity, Celiac Predisposition, Omega-3 Index, Saliva Metabolizer). Please share the wholesale catalog and laboratory onboarding guidelines.`;
+      }
+    } else if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology') {
+      if (product) {
+        text = `Hello Atlas Health Services Medical Affairs, I am inquiring about *${product.name || product.title}* from the Hair Treatments & Clinical Trichology Collection. Please provide clinical protocols, B2B pricing and technical dossier.`;
+      } else {
+        text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *Hair Treatments & Clinical Trichology Collection* (Colway® Baicapil™ stem cells, GHK-Cu copper peptides & TeleTest® HTMA diagnostics). Please share the wholesale catalog and clinical application protocols.`;
       }
     } else if (product) {
       text = `Hello Atlas Health Services Medical Affairs, I am inquiring about *${product.name || product.title}* from the Colway® Collection. Please provide institutional wholesale pricing and clinical technical documentation.`;
@@ -564,6 +797,12 @@ export default function BrandCollectionPage({
       const cat = selectedCategory.toLowerCase();
       list = list.filter(p => {
         const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''} ${p.description || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
+        if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology') {
+          if (cat === 'colway-trichology') return (str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('colway')) && !str.includes('colvita');
+          if (cat === 'peptides') return str.includes('ghk') || str.includes('tb-500') || str.includes('tb500') || str.includes('bpc') || str.includes('peptide') || p.category === 'peptides';
+          if (cat === 'diagnostic') return str.includes('htma') || str.includes('teletest') || str.includes('mineral') || str.includes('cabello');
+          if (cat === 'nutricosmetics') return str.includes('colvita') || str.includes('capsule');
+        }
         if (brandSlug === 'colway') {
           if (cat === 'epigenetic') return str.includes('diamond') || str.includes('diament') || str.includes('peeling') || str.includes('epigenetic');
           if (cat === 'native-dermal') return (str.includes('vege') || str.includes('wash') || str.includes('lip') || str.includes('dermal')) && !str.includes('diamond');
@@ -1140,6 +1379,179 @@ export default function BrandCollectionPage({
               width: '100%'
             }}
           >
+            {/* Google Cloud Main Navigation Tabs: Products / Works / Protocols */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderBottom: '2px solid #e2e8f0',
+              marginBottom: '1.25rem',
+              paddingBottom: '0',
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch'
+            }}>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setActiveMainTab('products');
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '7px',
+                  padding: '9px 16px',
+                  border: 'none',
+                  borderBottom: activeMainTab === 'products' ? `3px solid ${config.accentColor || '#0d9488'}` : '3px solid transparent',
+                  background: 'none',
+                  color: activeMainTab === 'products' ? (config.accentColor || '#0d9488') : '#64748b',
+                  fontSize: '0.86rem',
+                  fontWeight: activeMainTab === 'products' ? 800 : 600,
+                  cursor: 'pointer',
+                  marginBottom: '-2px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Package size={16} />
+                <span>{isEs ? 'Catálogo & Formulaciones' : 'Formulations & Products'}</span>
+                <span style={{
+                  fontSize: '0.70rem',
+                  padding: '2px 7px',
+                  borderRadius: '12px',
+                  background: activeMainTab === 'products' ? `${config.accentColor || '#0d9488'}18` : '#f1f5f9',
+                  color: activeMainTab === 'products' ? (config.accentColor || '#0d9488') : '#64748b',
+                  fontWeight: 700
+                }}>
+                  {filteredProducts.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setActiveMainTab('works');
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '7px',
+                  padding: '9px 16px',
+                  border: 'none',
+                  borderBottom: activeMainTab === 'works' ? `3px solid ${config.accentColor || '#0d9488'}` : '3px solid transparent',
+                  background: 'none',
+                  color: activeMainTab === 'works' ? (config.accentColor || '#0d9488') : '#64748b',
+                  fontSize: '0.86rem',
+                  fontWeight: activeMainTab === 'works' ? 800 : 600,
+                  cursor: 'pointer',
+                  marginBottom: '-2px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <BookOpen size={16} />
+                <span>{isEs ? 'Trabajos & Evidencia Clínica' : 'Clinical Works & Evidence'}</span>
+                <span style={{
+                  fontSize: '0.70rem',
+                  padding: '2px 7px',
+                  borderRadius: '12px',
+                  background: activeMainTab === 'works' ? '#ecfdf5' : '#f1f5f9',
+                  color: activeMainTab === 'works' ? '#047857' : '#64748b',
+                  border: activeMainTab === 'works' ? '1px solid #a7f3d0' : 'none',
+                  fontWeight: 700
+                }}>
+                  {collectionWorks.length}
+                </span>
+              </button>
+
+              {(brandSlug === 'colway' || brandSlug === 'hair-treatments' || brandSlug === 'weight-loss' || brandSlug === 'tissue-repair') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setActiveMainTab('protocols');
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '7px',
+                    padding: '9px 16px',
+                    border: 'none',
+                    borderBottom: activeMainTab === 'protocols' ? `3px solid ${config.accentColor || '#0d9488'}` : '3px solid transparent',
+                    background: 'none',
+                    color: activeMainTab === 'protocols' ? (config.accentColor || '#0d9488') : '#64748b',
+                    fontSize: '0.86rem',
+                    fontWeight: activeMainTab === 'protocols' ? 800 : 600,
+                    cursor: 'pointer',
+                    marginBottom: '-2px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <Layers size={16} />
+                  <span>{isEs ? 'Protocolos de Aplicación' : 'Application Protocols'}</span>
+                </button>
+              )}
+            </div>
+
+            {activeMainTab === 'works' && (
+              <ClinicalWorksExplorer
+                works={collectionWorks}
+                isEs={isEs}
+                accentColor={config.accentColor || '#0d9488'}
+                title={isEs ? `Trabajos Científicos & Evidencia • ${config.name}` : `Clinical Research & Evidence Dossiers • ${config.name}`}
+                subtitle={isEs ? 'Ensayos clínicos controlados, monografías analíticas y evaluaciones regulatorias.' : 'Controlled clinical trials, analytical monographs, and regulatory evaluations.'}
+              />
+            )}
+
+            {activeMainTab === 'protocols' && (
+              <div style={{ marginBottom: '2rem' }}>
+                {(brandSlug === 'hair-treatments' || brandSlug === 'colway') && (
+                  <ColwayTrichologyStemCellShowcase lang={lang} />
+                )}
+                {brandSlug === 'weight-loss' && (
+                  <div style={{
+                    background: '#ffffff',
+                    borderRadius: '16px',
+                    border: '1px solid #e2e8f0',
+                    padding: '1.75rem',
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.03)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(22, 163, 74, 0.12)', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Zap size={20} />
+                      </div>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                          {isEs ? 'Protocolo de Recomposición Metabólica en 3 Fases' : 'Atlas 3-Phase Metabolic Recomposition Protocol'}
+                        </h3>
+                        <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+                          {isEs ? 'Titulación progresiva de incretinas, preservación muscular con tesamorelina y monitorización HbA1c.' : 'Progressive incretin titration, visceral fat lipolysis with tesamorelin, and HbA1c telemetry.'}
+                        </p>
+                      </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px' }}>
+                        <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase' }}>{isEs ? 'Fase I (Semanas 1–4)' : 'Phase I (Weeks 1–4)'}</span>
+                        <h4 style={{ margin: '4px 0 6px', fontSize: '0.90rem', fontWeight: 750, color: '#0f172a' }}>{isEs ? 'Calibración & Adaptación' : 'Calibration & Adaptation'}</h4>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.45 }}>{isEs ? 'Test Bloodo™ HbA1c basal. Inicio con microdosis semanal de Tirzepatida 2.5 mg + UltraPerson CoQ10.' : 'Baseline Bloodo™ HbA1c DBS test. Initiate low-dose Tirzepatide 2.5 mg/week + UltraPerson CoQ10.'}</p>
+                      </div>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px' }}>
+                        <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase' }}>{isEs ? 'Fase II (Semanas 5–12)' : 'Phase II (Weeks 5–12)'}</span>
+                        <h4 style={{ margin: '4px 0 6px', fontSize: '0.90rem', fontWeight: 750, color: '#0f172a' }}>{isEs ? 'Déficit & Lipólisis Visceral' : 'Deficit & Visceral Lipolysis'}</h4>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.45 }}>{isEs ? 'Titulación a Tirzepatida 5–7.5 mg. Adición de Tesamorelina o AOD-9604 para proteger masa magra.' : 'Titration to Tirzepatide 5–7.5 mg. Addition of Tesamorelin or AOD-9604 to preserve lean mass.'}</p>
+                      </div>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px' }}>
+                        <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase' }}>{isEs ? 'Fase III (Semanas 13+)' : 'Phase III (Weeks 13+)'}</span>
+                        <h4 style={{ margin: '4px 0 6px', fontSize: '0.90rem', fontWeight: 750, color: '#0f172a' }}>{isEs ? 'Fijación de Set-Point' : 'Set-Point Maintenance'}</h4>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.45 }}>{isEs ? 'Segundo test HbA1c. Espaciamiento progresivo de dosis y transición a MOTS-c mitocondrial.' : 'Follow-up HbA1c test. Dose tapering and transition to mitochondrial MOTS-c maintenance.'}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeMainTab === 'products' && (
+              <>
             {/* Google Cloud Filter Bar */}
             <div style={{
               background: '#ffffff',
@@ -2167,6 +2579,8 @@ export default function BrandCollectionPage({
                   );
                 })}
               </div>
+            )}
+              </>
             )}
           </main>
         </div>

@@ -19,7 +19,90 @@ import {
 // Curated Portfolios organized by scientific domain (GCP Taxonomy Standard)
 export const PORTFOLIO_GROUPS = [
   {
-    category: 'Biomaterials & Dermocosmetics',
+    category: 'Clinical Specialties & Areas (Especialidades)',
+    items: [
+      {
+        id: 'hair-treatments',
+        slug: 'hair-treatments',
+        aliases: ['hair-treatments', 'hair-treatment', 'trichology', 'hair'],
+        href: '/collection/hair-treatments',
+        name: 'Hair Treatments & Trichology',
+        shortName: 'Hair Treatments',
+        domain: 'Scalp Stem Cells, Copper Peptides & HTMA Diagnostics',
+        subdomain: 'Colway® Baicapil™ · GHK-Cu · TeleTest® ICP-MS/MS',
+        icon: Sparkles,
+        color: '#0d9488',
+        badge: 'Clinical Area'
+      },
+      {
+        id: 'weight-loss',
+        slug: 'weight-loss',
+        aliases: ['weight-loss', 'weight', 'metabolic', 'metabolic-weight'],
+        href: '/collection/weight-loss',
+        name: 'Weight Loss & Metabolic Health',
+        shortName: 'Weight Loss',
+        domain: 'Incretin Agonists, Lipolysis & Glycation Telemetry',
+        subdomain: 'Tirzepatide · Semaglutide · Tesamorelin · Bloodo™ HbA1c',
+        icon: Zap,
+        color: '#16a34a',
+        badge: 'Clinical Area'
+      },
+      {
+        id: 'tissue-repair',
+        slug: 'tissue-repair',
+        aliases: ['tissue-repair', 'recovery', 'repair'],
+        href: '/collection/tissue-repair',
+        name: 'Tissue Repair & Rapid Recovery',
+        shortName: 'Tissue Repair',
+        domain: 'Musculoskeletal Healing, Angiogenesis & Tendon Repair',
+        subdomain: 'BPC-157 · TB-500 · Colway Native Tropocollagen',
+        icon: Shield,
+        color: '#2563eb',
+        badge: 'Clinical Area'
+      },
+      {
+        id: 'longevity-cellular',
+        slug: 'longevity-cellular',
+        aliases: ['longevity-cellular', 'longevity', 'anti-aging'],
+        href: '/collection/longevity-cellular',
+        name: 'Cellular Longevity & Telomeres',
+        shortName: 'Cellular Longevity',
+        domain: 'Telomerase Activation, Epigenetics & Multi-Omics',
+        subdomain: 'Epithalon · MOTS-c · ETERNA® DX · Bloodo™ NAD+',
+        icon: Activity,
+        color: '#0369a1',
+        badge: 'Clinical Area'
+      },
+      {
+        id: 'neuro-performance',
+        slug: 'neuro-performance',
+        aliases: ['neuro-performance', 'neuro', 'cognitive'],
+        href: '/collection/neuro-performance',
+        name: 'Neuro-Performance & Sleep',
+        shortName: 'Neuro & Sleep',
+        domain: 'BDNF Nootropics, Anxiolysis & Delta Sleep Architecture',
+        subdomain: 'Semax · Selank · DSIP · Bloodo™ Cortisol CAR',
+        icon: Dna,
+        color: '#7c3aed',
+        badge: 'Clinical Area'
+      },
+      {
+        id: 'dermal-aesthetics',
+        slug: 'dermal-aesthetics',
+        aliases: ['dermal-aesthetics', 'dermal', 'skin'],
+        href: '/collection/dermal-aesthetics',
+        name: 'Dermal Aesthetics & Barrier',
+        shortName: 'Dermal Aesthetics',
+        domain: 'Epigenetic Neocollagenesis, VEP Peptides & Matrix',
+        subdomain: 'Blue Diamond · GHK-Cu · Tropocollagen · Colvita',
+        icon: Sparkles,
+        color: '#0284c7',
+        badge: 'Clinical Area'
+      }
+    ]
+  },
+  {
+    category: 'Biomaterials & Dermocosmetics (Fabricantes)',
     items: [
       {
         id: 'colway',

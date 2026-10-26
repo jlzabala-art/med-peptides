@@ -9,6 +9,7 @@
  */
 
 import { COLWAY_PRODUCTS_INCI_REGISTRY } from './colwayInciRegistry';
+import { MCG_PRODUCTS_INCI_REGISTRY } from './mcgInciRegistry';
 import { CLINICAL_SUPPLEMENTS } from './clinicalSupplementsRegistry';
 
 // ── Diagnostic Tests Clinical Analytical Registry (Bloodo, TeleTest, Eterna) ──
@@ -215,6 +216,26 @@ export function getProductTechnicalDetails(product, brandSlug) {
       clinicalFocus: inciData?.clinical_focus_dossier || null,
       compliance: 'EU CPNP Registered · ISO 22716 Cosmetics GMP · Dermatologically Tested',
       manufacturer: 'Colway sp.j. (Koleczkowo, Poland / European Union)'
+    };
+  }
+
+  // 1B. MCG COSMETICS (Medical Cosmeceuticals & Follicular Trichology)
+  if (brand === 'mcg' || brand === 'mcg cosmetics' || id.startsWith('mcg-') || slug.startsWith('mcg-') || slug.includes('kapigen')) {
+    const registryKey = Object.keys(MCG_PRODUCTS_INCI_REGISTRY).find(k =>
+      id.includes(k) || slug.includes(k) || k.includes(id) || k.includes(slug)
+    );
+    const inciData = registryKey ? MCG_PRODUCTS_INCI_REGISTRY[registryKey] : null;
+
+    return {
+      type: 'inci',
+      badge: 'Official INCI · Medical Cosmeceutical (EC) 1223/2009',
+      title: 'Full INCI Ingredients & Trichological Peptide Formulation',
+      keyActives: inciData?.key_actives_summary || '5% Procapil® (Biotinyl-GHK, Oleanolic Acid, Apigenin), Biotin, Panthenol, Phytokeratin & Menthol',
+      ingredients: inciData?.ingredients || [],
+      applicationTip: inciData?.application_tip || null,
+      clinicalFocus: inciData?.clinical_focus_dossier || null,
+      compliance: 'ISO 22716 Cosmetics GMP · EU & US FDA Compliant · Dermatologically Evaluated',
+      manufacturer: 'MCG Medical Cosmeceutical Group (MCG Cosmetics)'
     };
   }
 

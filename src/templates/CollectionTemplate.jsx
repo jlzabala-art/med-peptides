@@ -162,9 +162,34 @@ export default function CollectionTemplate({
     );
   }
 
-  // Dedicated brand collections: /collection/colway, /collection/bloodo, /collection/ultraperson, /collection/eterna, /collection/teletest, /collection/ultraman
-  const normalizedBrand = (s === 'ultraman') ? 'ultraperson' : s;
-  if (normalizedBrand === 'colway' || normalizedBrand === 'bloodo' || normalizedBrand === 'ultraperson' || normalizedBrand === 'eterna' || normalizedBrand === 'teletest') {
+  // Normalize brand or clinical area slug
+  const AREA_SLUG_MAP = {
+    'ultraman': 'ultraperson',
+    'hair-treatment': 'hair-treatments',
+    'trichology': 'hair-treatments',
+    'hair': 'hair-treatments',
+    'weight': 'weight-loss',
+    'metabolic': 'weight-loss',
+    'metabolic-weight': 'weight-loss',
+    'repair': 'tissue-repair',
+    'recovery': 'tissue-repair',
+    'healing': 'tissue-repair',
+    'longevity': 'longevity-cellular',
+    'anti-aging': 'longevity-cellular',
+    'neuro': 'neuro-performance',
+    'cognitive': 'neuro-performance',
+    'dermal': 'dermal-aesthetics',
+    'skin': 'dermal-aesthetics'
+  };
+
+  const normalizedBrand = AREA_SLUG_MAP[s] || s;
+  const SUPPORTED_COLLECTION_PAGES = [
+    'colway', 'bloodo', 'ultraperson', 'eterna', 'teletest',
+    'hair-treatments', 'weight-loss', 'tissue-repair',
+    'longevity-cellular', 'neuro-performance', 'dermal-aesthetics'
+  ];
+
+  if (SUPPORTED_COLLECTION_PAGES.includes(normalizedBrand)) {
     return (
       <RestrictedCatalogRoute catalogName="products">
         <BrandCollectionPage

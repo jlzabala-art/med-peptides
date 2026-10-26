@@ -24,6 +24,8 @@ export function formatCommercialSupplierName(rawNameOrId) {
   if (s.includes('nplabs') || s.includes('np labs')) return 'NP Labs';
   if (s.includes('bloodo')) return 'Bloodo';
   if (s.includes('fagron')) return 'Fagron Iberia';
+  if (s.includes('colway')) return 'Colway® Laboratories';
+  if (s.includes('mcg')) return 'MCG Cosmetics';
 
   return rawNameOrId;
 }

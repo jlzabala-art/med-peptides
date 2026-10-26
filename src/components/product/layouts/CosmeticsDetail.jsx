@@ -26,8 +26,10 @@ import HairProtocolsSidebarWidget from '@/components/product/HairProtocolsSideba
 import CosmeticsSidebarWidget from '@/components/product/CosmeticsSidebarWidget';
 import ColwayProtocolInfogram from '@/components/product/ColwayProtocolInfogram';
 import ColwayTrichologyStemCellShowcase from '@/components/product/ColwayTrichologyStemCellShowcase';
+import McgTrichologyProcapilShowcase from '@/components/product/McgTrichologyProcapilShowcase';
 import ColwayActiveIngredientsShowcase from '@/components/product/ColwayActiveIngredientsShowcase';
 import { getColwayProductData, getColwayProductSafety } from '@/data/colwayInciRegistry';
+import { getMcgProductData, getMcgProductSafety } from '@/data/mcgInciRegistry';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import ImageModal from '@/snippets/ImageModal';
 import { CollectionBadgePill, CollectionCompanionBanner } from '@/components/product/CollectionBannerWidget';
@@ -832,9 +834,14 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const slug = product?.slug || product?.id || '';
   const productUrl = typeof window !== 'undefined' ? window.location.href : '';
 
+  const isMcg = brand?.toLowerCase().includes('mcg') || slug?.toLowerCase().includes('mcg') || slug?.toLowerCase().includes('kapigen');
+
   const colwayData = useMemo(() => {
+    if (isMcg) {
+      return getMcgProductData(slug) || getMcgProductData(name) || getMcgProductData(product?.id);
+    }
     return getColwayProductData(slug) || getColwayProductData(name) || getColwayProductData(product?.id) || getColwayProductData(product?.title);
-  }, [slug, name, product]);
+  }, [isMcg, slug, name, product]);
 
   const ingredients = useMemo(() => {
     if (Array.isArray(colwayData?.ingredients) && colwayData.ingredients.length > 0) {
@@ -864,7 +871,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const hairProtocols = product?.associated_protocols || [];
   const warnings = product?.warnings || [];
 
-  const isHairProduct = slug?.includes('shampoo') || slug?.includes('conditioner') || slug?.includes('trichology') || name?.toLowerCase().includes('shampoo') || name?.toLowerCase().includes('conditioner') || name?.toLowerCase().includes('trichology') || category?.toLowerCase().includes('hair') || category?.toLowerCase().includes('trichology');
+  const isHairProduct = isMcg || slug?.includes('shampoo') || slug?.includes('conditioner') || slug?.includes('trichology') || slug?.includes('kapigen') || slug?.includes('procapil') || name?.toLowerCase().includes('shampoo') || name?.toLowerCase().includes('conditioner') || name?.toLowerCase().includes('trichology') || name?.toLowerCase().includes('kapigen') || category?.toLowerCase().includes('hair') || category?.toLowerCase().includes('trichology');
   const isShampoo = slug?.includes('shampoo') || name?.toLowerCase().includes('shampoo');
   const isNutricosmetic = slug?.includes('colvita') || name?.toLowerCase().includes('colvita') || category?.toLowerCase().includes('nutricosmetic') || category?.toLowerCase().includes('supplement');
   const isLip = slug?.includes('lip') || slug?.includes('labial') || slug?.includes('pomadka') || name?.toLowerCase().includes('lip') || name?.toLowerCase().includes('labial') || name?.toLowerCase().includes('pomadka');
@@ -874,8 +881,11 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const isBlueDiamond = !isHairProduct && !isLip && !isWashGel && !isNutricosmetic && !isVege && !isPeeling;
 
   const productSafety = useMemo(() => {
+    if (isMcg) {
+      return colwayData?.safety_precautions || getMcgProductSafety(slug) || getMcgProductSafety(name) || getMcgProductSafety(product?.id) || null;
+    }
     return colwayData?.safety_precautions || getColwayProductSafety(slug) || getColwayProductSafety(name) || getColwayProductSafety(product?.id) || null;
-  }, [colwayData, slug, name, product]);
+  }, [isMcg, colwayData, slug, name, product]);
 
   const effectiveWarnings = useMemo(() => {
     if (productSafety?.warnings?.length > 0) return productSafety.warnings;
@@ -1057,7 +1067,11 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
       { id: 'overview', label: isNutricosmetic ? 'Nutraceutical Overview' : 'Formulation Overview', icon: Layers }
     ];
     if (isHairProduct) {
-      list.push({ id: 'stem-cell-monograph', label: 'Baicapil™ 2% Monograph', icon: Sparkles });
+      list.push({ 
+        id: 'stem-cell-monograph', 
+        label: isMcg ? 'Procapil® 5% Monograph' : 'Baicapil™ 2% Monograph', 
+        icon: Sparkles 
+      });
     } else if (colwayData) {
       list.push({ id: 'active-ingredients-showcase', label: isNutricosmetic ? 'Bioactive Monograph' : 'Active Compounds Monograph', icon: Sparkles });
     }
@@ -1197,7 +1211,14 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: '5rem' }}>
       <PublicUnifiedHeader track="products" lang={lang} copyUrl={productUrl} inquiryContextType="product" inquiryEntity={{ name, slug, category }} hideTier2={true} hideAiButton={true} hideContactButton={true}
-        breadcrumb={[{ label: 'Catalog', href: '/catalog' }, { label: isHairProduct ? 'Colway® Trichology' : isNutricosmetic ? 'Colway® Nutricosmetics' : 'Colway® Clinical Skincare', href: '/collection/colway' }, { label: name }]} />
+        breadcrumb={[
+          { label: 'Catalog', href: '/catalog' }, 
+          { 
+            label: isMcg ? 'MCG Cosmetics • Trichology' : isHairProduct ? 'Colway® Trichology' : isNutricosmetic ? 'Colway® Nutricosmetics' : 'Colway® Clinical Skincare', 
+            href: isMcg ? '/collection/mcg' : '/collection/colway' 
+          }, 
+          { label: name }
+        ]} />
 
       <PublicPageShell>
         {effectiveActiveSection === 'overview' && (
@@ -1543,10 +1564,14 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               </div>
             )}
 
-            {/* BAICAPIL 2% & STEM CELL ACTIVATION TECHNICAL MONOGRAPH (PHOTO + DOWNLOADABLE PDF + CLINICAL METRICS) - ONLY FOR HAIR PRODUCTS */}
+            {/* STEM CELL ACTIVATION TECHNICAL MONOGRAPH - BAICAPIL 2% (COLWAY) OR PROCAPIL 5% (MCG) */}
             {effectiveActiveSection === 'stem-cell-monograph' && isHairProduct && (
               <div id="stem-cell-monograph" style={{ scrollMarginTop: '80px' }}>
-                <ColwayTrichologyStemCellShowcase lang={lang} />
+                {isMcg ? (
+                  <McgTrichologyProcapilShowcase lang={lang} />
+                ) : (
+                  <ColwayTrichologyStemCellShowcase lang={lang} />
+                )}
               </div>
             )}
 
@@ -2051,7 +2076,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                       </div>
                       <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.25rem' }}>
                         {isHairProduct
-                          ? (isShampoo ? 'Colway Strengthening Hair Conditioner (200 mL)' : 'Colway Strengthening Hair Shampoo (250 mL)')
+                          ? (isMcg ? 'Colway Strengthening Hair Shampoo (250 mL)' : isShampoo ? 'Colway Strengthening Hair Conditioner (200 mL)' : 'Colway Strengthening Hair Shampoo (250 mL)')
                           : isNutricosmetic
                           ? 'Colway Blue Diamond Cellular Rejuvenation Cream (50 mL)'
                           : (slug.includes('cream')
@@ -2062,7 +2087,9 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                       </div>
                       <div style={{ fontSize: '0.74rem', color: '#94a3b8', lineHeight: 1.5 }}>
                         {isHairProduct
-                          ? (isShampoo
+                          ? (isMcg
+                              ? 'Pre-cleanse scalp with sulfate-free physiological pH 5.5 shampoo to remove sebum blockages and maximize Procapil® peptide penetration.'
+                              : isShampoo
                               ? 'Apply conditioner immediately after shampoo to seal cuticles and anchor hair shafts (+24% tensile strength).'
                               : 'Pre-cleanse with shampoo to clear follicular ostia and activate microcirculation with Baicapil™ 2%.')
                           : isNutricosmetic
@@ -2075,7 +2102,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                       </div>
                     </div>
                     <Link
-                      href={`/p/${isHairProduct ? (isShampoo ? 'colway-strengthening-conditioner' : 'colway-strengthening-shampoo') : isNutricosmetic ? 'colway-blue-diamond-cream' : (slug.includes('cream') ? 'colway-blue-diamond-peeling' : (slug.includes('peeling') ? 'colway-blue-diamond-cream' : (slug.includes('wash') ? 'colway-collagen-vege' : 'colway-collagen-wash-gel')))}`}
+                      href={`/p/${isHairProduct ? (isMcg ? 'colway-strengthening-shampoo' : isShampoo ? 'colway-strengthening-conditioner' : 'colway-strengthening-shampoo') : isNutricosmetic ? 'colway-blue-diamond-cream' : (slug.includes('cream') ? 'colway-blue-diamond-peeling' : (slug.includes('peeling') ? 'colway-blue-diamond-cream' : (slug.includes('wash') ? 'colway-collagen-vege' : 'colway-collagen-wash-gel')))}`}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -2283,7 +2310,12 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               : isLip
                 ? 'Colway Labial Restoration System · Post-Filler Vermilion Protocol'
                 : 'Colway Dermo-Renewal Ritual · GHK-Cu Skin Rejuvenation Protocol',
-          suggestedQuestions: isHairProduct ? [
+          suggestedQuestions: isMcg ? [
+            'What is the mechanism of 5% Procapil® (Biotinyl-GHK, Oleanolic Acid, Apigenin)?',
+            'How does MCG Kapigen compare to synthetic minoxidil without rebound shedding?',
+            'What is the recommended application protocol for post-hair transplant maintenance?',
+            'How do Biotin, Panthenol, and Phytokeratin increase hair tensile strength?'
+          ] : isHairProduct ? [
             'What is the clinical evidence for Caffeine in androgenetic alopecia?',
             'How does Zinc PCA inhibit 5-alpha reductase at the scalp?',
             'What is the recommended contact time for optimal active absorption?',
@@ -2312,7 +2344,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
       {/* PERSISTENT GOOGLE CLOUD STICKY BOTTOM ACTION BAR */}
       <PublicStickyActionBar
         title={name}
-        subtitle={`${volumeText} • ${isHairProduct ? 'Colway Hair Strengthening System' : isNutricosmetic ? 'Colway Oral Nutricosmetics' : (slug.includes('vege') || slug.includes('wash-gel')) ? 'Colway Native Dermal Collagen Line' : 'Colway Blue Diamond Cellular Line'} • ${isNutricosmetic ? 'EU Reg. 1169/2011' : 'EU Reg. 1223/2009'}`}
+        subtitle={`${volumeText} • ${isMcg ? 'MCG Kapigen Trichology System' : isHairProduct ? 'Colway Hair Strengthening System' : isNutricosmetic ? 'Colway Oral Nutricosmetics' : (slug.includes('vege') || slug.includes('wash-gel')) ? 'Colway Native Dermal Collagen Line' : 'Colway Blue Diamond Cellular Line'} • ${isNutricosmetic ? 'EU Reg. 1169/2011' : 'EU Reg. 1223/2009'}`}
         badge={lang === 'es' ? 'COSMECÉUTICO' : 'COSMECEUTICAL'}
         badgeType="default"
         inquireLabel={lang === 'es' ? 'Consultar Producto' : 'Inquire Product'}

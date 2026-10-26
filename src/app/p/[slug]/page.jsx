@@ -13,6 +13,7 @@ import TeletestDiagnosticDetail from '../../../components/product/layouts/Telete
 import { getClinicalSupplementBySlug } from '../../../data/clinicalSupplementsRegistry';
 import { getTeletestProductBySlug } from '../../../data/teletestRegistry';
 import { getLotuslandPeptideBySlug } from '../../../data/lotuslandPeptidesRegistry';
+import { getMcgProductBySlug } from '../../../data/mcgInciRegistry';
 
 export const revalidate = 3600; // ISR: regenerate at most every 60 min
 export const dynamicParams = true; // Allow slugs not in generateStaticParams
@@ -135,6 +136,25 @@ async function getPublicProduct(slug, supplierFilter = null) {
         expiresAt: Date.now() + CACHE_TTL_MS,
       });
       return lotusResult;
+    }
+
+    const mcgProduct = getMcgProductBySlug(target);
+    if (mcgProduct) {
+      const sanitized = sanitizePublicProduct(mcgProduct, mcgProduct.variants || []);
+      const processedHierarchy = processProductVariants(sanitized.variants || mcgProduct.variants || []);
+      const mcgResult = {
+        ...mcgProduct,
+        ...sanitized,
+        isSingleSupplierLocked: true,
+        availableSuppliers: [{ id: 'supplier-mcg', name: 'MCG Cosmetics', isPen: false, isSpray: true }],
+        activeSupplierId: 'supplier-mcg',
+        processedHierarchy,
+      };
+      PUBLIC_PRODUCT_RAM_CACHE.set(cacheKey, {
+        data: mcgResult,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      });
+      return mcgResult;
     }
 
     return null;
@@ -406,7 +426,7 @@ export async function generateMetadata({ params, searchParams }) {
         : isEterna
         ? 'ETERNA Diagnostics · Fagron Genomics'
         : isCosmetic
-        ? 'Colway Clinical Care'
+        ? ((product.brand || '').toLowerCase().includes('mcg') ? 'MCG Cosmetics' : 'Colway Clinical Care')
         : 'Atlas Health Services',
       images: [
         {
@@ -604,7 +624,7 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const catLower = (safeProduct.category || '').toLowerCase();
   const typeLower = (safeProduct.type || safeProduct.productType || '').toLowerCase();
   const isAesthetic = catLower === 'aesthetic injectables' || catLower === 'aesthetic injectable' || safeProduct.is_aesthetic_injectable === true;
-  const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || catLower === 'trichology_hair_care' || catLower === 'nutricosmetics' || safeProduct.is_cosmetic === true || slug.toLowerCase().startsWith('colway-');
+  const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || catLower === 'trichology_hair_care' || catLower === 'nutricosmetics' || safeProduct.is_cosmetic === true || slug.toLowerCase().startsWith('colway-') || slug.toLowerCase().startsWith('mcg-');
   const isRawApi = typeLower === 'raw_api' || typeLower === 'raw_material' || catLower === 'raw_material' || catLower === 'compounding_material' || safeProduct.is_raw_api === true;
   const isEterna = slug.toLowerCase().includes('eterna') || 
     (safeProduct.supplierId || '').toLowerCase().includes('eternadx') || 
@@ -617,8 +637,8 @@ export default async function PublicProductRoute({ params, searchParams }) {
     (safeProduct.brand || '').toLowerCase().includes('teletest');
 
   const productName = safeProduct.canonicalName || safeProduct.name || slug;
-  const sectionLabel = isTeletest ? 'TeleTest Analytika®' : isEterna ? 'Genomics & Longevity' : isCosmetics ? 'Cosmetics' : isAesthetic ? 'Aesthetics' : isRawApi ? 'Compounding APIs' : 'Catalog';
-  const sectionUrl = isTeletest ? '/collection/teletest' : isEterna ? '/c/CAT-MU9L9GBN' : '/catalog';
+  const sectionLabel = isTeletest ? 'TeleTest Analytika®' : isEterna ? 'Genomics & Longevity' : isCosmetics ? ((safeProduct.brand || '').toLowerCase().includes('mcg') ? 'MCG Trichology' : 'Cosmetics') : isAesthetic ? 'Aesthetics' : isRawApi ? 'Compounding APIs' : 'Catalog';
+  const sectionUrl = isTeletest ? '/collection/teletest' : isEterna ? '/c/CAT-MU9L9GBN' : isCosmetics ? ((safeProduct.brand || '').toLowerCase().includes('mcg') ? '/collection/mcg' : '/collection/colway') : '/catalog';
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
     { name: 'Home', url: '/' },
     { name: sectionLabel, url: sectionUrl },

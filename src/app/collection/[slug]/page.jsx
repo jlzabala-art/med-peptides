@@ -16,6 +16,13 @@ const BRAND_METADATA = {
     section: 'Clinical Nutriceuticals, Dermocosmetics & Follicular Trichology',
     keywords: ['Colway', 'Native Collagen', 'Colvita', 'Blue Diamond Cream', 'Blue Diamond Peeling', 'Trichology Shampoo', 'Conditioner', 'Baicapil', 'Tropocollagen']
   },
+  mcg: {
+    title: 'MCG Cosmetics • Follicular Trichology & 5% Procapil® Anti-Hair Loss | Atlas Clinical Collection',
+    description: 'Explore MCG Cosmetics medical cosmeceuticals and intensive trichology treatments. Patented 5% Procapil® peptide formulations, botanical DHT blockers, and hair follicle revitalizers.',
+    image: `${BASE_URL}/images/products/colway/colway-dermatology-clinic-hero-v2.jpg`,
+    section: 'Medical Cosmeceuticals & Follicular Trichology',
+    keywords: ['MCG Cosmetics', 'Kapigen', 'Procapil', 'Anti-Hair Loss', 'Biotinyl-GHK', 'Oleanolic Acid', 'Apigenin', 'Trichology Spray']
+  },
   bloodo: {
     title: 'Bloodo™ Capillary Blood Diagnostics | CE-IVDR Test Kits | Atlas Collection',
     description: 'Discover Bloodo™ precision Dried Blood Spot (DBS) tests: NAD+ Intracellular, Testosterone+, HbA1c 90-Day, Diurnal Cortisol CAR, Omega-3/6 Ratio & Vitamin D3. ISO 15189 accredited lab analysis.',
@@ -64,11 +71,64 @@ const BRAND_METADATA = {
     image: `${BASE_URL}/images/og-protocols.png`,
     section: 'Clinical Protocols',
     keywords: ['Peptide Protocols', 'Longevity Protocols', 'Tissue Repair Pathways']
+  },
+  'hair-treatments': {
+    title: 'Hair Treatments & Clinical Trichology | Colway® & Peptide Protocols | Atlas Collection',
+    description: 'Explore the integrated clinical hair treatment collection: Colway® Baicapil™ anti-loss shampoo & conditioner, native tropocollagen Colvita, lyophilized GHK-Cu copper peptides, and TeleTest® HTMA trace mineral diagnostics.',
+    image: `${BASE_URL}/images/products/colway/colway-trichology-banner.jpg`,
+    section: 'Clinical Trichology & Follicular Hair Treatments',
+    keywords: ['Hair Treatments', 'Trichology', 'Colway Shampoo', 'Colway Conditioner', 'Baicapil', 'GHK-Cu', 'Copper Peptides', 'HTMA', 'Hair Loss', 'Alopecia']
+  },
+  'weight-loss': {
+    title: 'Weight Loss & Metabolic Health | Incretin Agonists & Glycation Telemetry | Atlas Collection',
+    description: 'Evidence-based clinical weight management: Dual/triple incretins (Tirzepatide, Semaglutide, Retatrutide), visceral fat lipolytics (Tesamorelin, AOD-9604), and CE-IVDR Bloodo™ HbA1c 90-day telemetry.',
+    image: `${BASE_URL}/images/products/bloodo/nad.jpg`,
+    section: 'Clinical Metabolic Health & Weight Optimization',
+    keywords: ['Weight Loss', 'Metabolic Health', 'Tirzepatide', 'Semaglutide', 'Retatrutide', 'Tesamorelin', 'AOD-9604', 'HbA1c', 'GLP-1', 'GIP']
+  },
+  'tissue-repair': {
+    title: 'Tissue Repair & Rapid Recovery | BPC-157, TB-500 & Native Tropocollagen | Atlas Collection',
+    description: 'Advanced cellular reconstruction and musculoskeletal recovery: BPC-157, TB-500, KPV, Colway biologically active freshwater fish tropocollagen, and TeleTest® mineral balance.',
+    image: `${BASE_URL}/images/og-protocols.png`,
+    section: 'Cellular Reconstruction & Musculoskeletal Recovery',
+    keywords: ['Tissue Repair', 'BPC-157', 'TB-500', 'Tendon Healing', 'Tropocollagen', 'Wound Healing', 'Recovery']
+  },
+  'longevity-cellular': {
+    title: 'Cellular Longevity & Telomeres | Epithalon, MOTS-c & Multi-Omics | Atlas Collection',
+    description: 'Biological age reversal and telomerase activation: Epithalon, MOTS-c, FOXO4-DRI senolytics, ETERNA® 700k SNP Multi-Omics, and Bloodo™ intracellular NAD+ test kits.',
+    image: `${BASE_URL}/images/products/eterna/eterna-kit-box.png`,
+    section: 'Cellular Longevity & Epigenetics',
+    keywords: ['Longevity', 'Epithalon', 'MOTS-c', 'Telomeres', 'ETERNA Multi-Omics', 'NAD+ Intracellular', 'Senolytics']
+  },
+  'neuro-performance': {
+    title: 'Neuro-Performance, Focus & Sleep Optimization | Semax, Selank & DSIP | Atlas Collection',
+    description: 'Cognitive enhancement and sleep architecture: Semax (BDNF up-regulation), Selank (GABA anxiolysis without sedation), DSIP (delta sleep peptide), and Bloodo™ Diurnal Cortisol CAR.',
+    image: `${BASE_URL}/images/longevity_supps.png`,
+    section: 'Neuro-Performance & Sleep Architecture',
+    keywords: ['Neuro-Performance', 'Semax', 'Selank', 'DSIP', 'Nootropics', 'BDNF', 'Cortisol CAR', 'Sleep Optimization']
+  },
+  'dermal-aesthetics': {
+    title: 'Dermal Aesthetics & Epigenetic Skin Barrier | Blue Diamond & GHK-Cu | Atlas Collection',
+    description: 'Clinical dermocosmetics and extracellular matrix neocollagenesis: Colway® Blue Diamond epigenetic VEP peptides, freshwater fish tropocollagen, and GHK-Cu copper peptides.',
+    image: `${BASE_URL}/images/products/colway/colway-dermatology-clinic-hero-v2.jpg`,
+    section: 'Clinical Dermocosmetics & Skin Barrier',
+    keywords: ['Dermal Aesthetics', 'Blue Diamond', 'Colway', 'GHK-Cu', 'Decorin', 'VEP Peptides', 'Tropocollagen']
   }
 };
 
 // Aliases for seamless routing and brand discovery
 BRAND_METADATA.ultraman = BRAND_METADATA.ultraperson;
+BRAND_METADATA['hair-treatment'] = BRAND_METADATA['hair-treatments'];
+BRAND_METADATA['trichology'] = BRAND_METADATA['hair-treatments'];
+BRAND_METADATA['hair'] = BRAND_METADATA['hair-treatments'];
+BRAND_METADATA['weight'] = BRAND_METADATA['weight-loss'];
+BRAND_METADATA['metabolic'] = BRAND_METADATA['weight-loss'];
+BRAND_METADATA['repair'] = BRAND_METADATA['tissue-repair'];
+BRAND_METADATA['recovery'] = BRAND_METADATA['tissue-repair'];
+BRAND_METADATA['longevity'] = BRAND_METADATA['longevity-cellular'];
+BRAND_METADATA['neuro'] = BRAND_METADATA['neuro-performance'];
+BRAND_METADATA['cognitive'] = BRAND_METADATA['neuro-performance'];
+BRAND_METADATA['dermal'] = BRAND_METADATA['dermal-aesthetics'];
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
@@ -230,6 +290,206 @@ async function fetchTargetedBrandProducts(brandSlug) {
     return getLotuslandPeptidesCatalog();
   }
 
+  // Hair Treatments Collection: Colway Trichology + Lotusland Peptides (GHK-Cu, TB-500, BPC-157) + TeleTest HTMA
+  if (targetBrand === 'hair-treatments' || targetBrand === 'hair-treatment' || targetBrand === 'trichology' || targetBrand === 'hair') {
+    try {
+      if (adminDb) {
+        const snap = await adminDb.collection('products').get();
+        const list = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          const id = (d.id || '').toLowerCase();
+          const name = (data.name || data.title || '').toLowerCase();
+          const str = (id + ' ' + name + ' ' + (data.supplier||'') + ' ' + (data.category||'') + ' ' + JSON.stringify(data.keywords||[])).toLowerCase();
+
+          const isColwayTrich = str.includes('colway') && (str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('colvita'));
+          const isHairPeptide = id.includes('ghk') || name.includes('ghk') || id.includes('tb-500') || id.includes('tb500') || (id.includes('bpc-157') && !id.includes('nasal'));
+          const isHtma = id.includes('teletest') && (str.includes('cabello') || str.includes('hair') || str.includes('htma') || str.includes('mineralograma'));
+
+          if (isColwayTrich || isHairPeptide || isHtma) {
+            list.push({ id: d.id, ...data });
+          }
+        });
+        if (list.length > 0) return list;
+      }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Hair Treatments Firestore error, falling back to registries:', e.message);
+    }
+
+    const fallbackList = [];
+    try {
+      const { COLWAY_PRODUCTS_INCI_REGISTRY } = await import('../../../data/colwayInciRegistry');
+      const trichKeys = ['colway-strengthening-shampoo', 'colway-strengthening-conditioner', 'colway-trichology', 'colway-colvita'];
+      trichKeys.forEach(k => {
+        if (COLWAY_PRODUCTS_INCI_REGISTRY[k]) {
+          fallbackList.push({ id: k, ...COLWAY_PRODUCTS_INCI_REGISTRY[k], supplier: 'Colway', brand: 'Colway' });
+        }
+      });
+    } catch (err) {}
+
+    try {
+      const { getLotuslandPeptidesCatalog } = await import('../../../data/lotuslandPeptidesRegistry');
+      const peps = getLotuslandPeptidesCatalog();
+      peps.forEach(p => {
+        const pid = (p.id || '').toLowerCase();
+        if (pid.includes('ghk') || pid.includes('tb-500') || pid === 'bpc-157-5mg') {
+          fallbackList.push(p);
+        }
+      });
+    } catch (err) {}
+
+    try {
+      const { getTeletestCatalog } = await import('../../../data/teletestRegistry');
+      const tests = getTeletestCatalog();
+      tests.forEach(t => {
+        const tid = (t.id || '').toLowerCase();
+        if (tid.includes('cabello') || tid.includes('htma')) {
+          fallbackList.push(t);
+        }
+      });
+    } catch (err) {}
+
+    return fallbackList;
+  }
+
+  // Weight Loss & Metabolic Optimization Collection: Incretins + Lipolytics + Bloodo HbA1c
+  if (targetBrand === 'weight-loss' || targetBrand === 'weight' || targetBrand === 'metabolic') {
+    try {
+      if (adminDb) {
+        const snap = await adminDb.collection('products').get();
+        const list = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          const id = (d.id || '').toLowerCase();
+          const name = (data.name || data.title || '').toLowerCase();
+          const str = (id + ' ' + name + ' ' + (data.category||'') + ' ' + JSON.stringify(data.keywords||[])).toLowerCase();
+
+          const isIncretinOrLipolytic = id.includes('semaglutide') || id.includes('tirzepatide') || id.includes('retatrutide') || id.includes('tesamorelin') || id.includes('aod') || id.includes('cagrilintide') || id.includes('mots');
+          const isMetabolicTest = id.includes('bloodo-hba1c') || str.includes('hba1c') || str.includes('glycat');
+          const isMetabolicSupp = (id.includes('ultraperson') || id.includes('ultraman')) && (str.includes('coq10') || str.includes('energy') || str.includes('metabolic'));
+
+          if (isIncretinOrLipolytic || isMetabolicTest || isMetabolicSupp) {
+            list.push({ id: d.id, ...data });
+          }
+        });
+        if (list.length > 0) return list;
+      }
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Weight Loss Firestore error:', e.message);
+    }
+
+    const fallbackList = [];
+    try {
+      const { getLotuslandPeptidesCatalog } = await import('../../../data/lotuslandPeptidesRegistry');
+      const peps = getLotuslandPeptidesCatalog();
+      peps.forEach(p => {
+        const pid = (p.id || '').toLowerCase();
+        if (pid.includes('semaglutide') || pid.includes('tirzepatide') || pid.includes('retatrutide') || pid.includes('tesamorelin') || pid.includes('aod') || pid.includes('mots')) {
+          fallbackList.push(p);
+        }
+      });
+    } catch (err) {}
+    return fallbackList;
+  }
+
+  // Tissue Repair & Rapid Recovery: BPC-157, TB-500, Tropocollagen
+  if (targetBrand === 'tissue-repair' || targetBrand === 'repair' || targetBrand === 'recovery') {
+    try {
+      if (adminDb) {
+        const snap = await adminDb.collection('products').get();
+        const list = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          const id = (d.id || '').toLowerCase();
+          const name = (data.name || data.title || '').toLowerCase();
+          const str = (id + ' ' + name + ' ' + (data.category||'')).toLowerCase();
+
+          const isRepairPeptide = id.includes('bpc') || id.includes('tb-500') || id.includes('tb500') || id.includes('kpv');
+          const isColwayRepair = str.includes('colway') && (str.includes('colvita') || str.includes('vege') || str.includes('wash'));
+
+          if (isRepairPeptide || isColwayRepair) {
+            list.push({ id: d.id, ...data });
+          }
+        });
+        if (list.length > 0) return list;
+      }
+    } catch (e) {}
+
+    const fallbackList = [];
+    try {
+      const { getLotuslandPeptidesCatalog } = await import('../../../data/lotuslandPeptidesRegistry');
+      const peps = getLotuslandPeptidesCatalog();
+      peps.forEach(p => {
+        const pid = (p.id || '').toLowerCase();
+        if (pid.includes('bpc') || pid.includes('tb-500')) fallbackList.push(p);
+      });
+    } catch (err) {}
+    return fallbackList;
+  }
+
+  // Cellular Longevity & Telomeres: Epithalon, MOTS-c, ETERNA, Bloodo NAD+
+  if (targetBrand === 'longevity-cellular' || targetBrand === 'longevity') {
+    try {
+      if (adminDb) {
+        const snap = await adminDb.collection('products').get();
+        const list = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          const id = (d.id || '').toLowerCase();
+          const str = (id + ' ' + (data.name||'') + ' ' + (data.title||'')).toLowerCase();
+
+          const isLongevity = id.includes('epithalon') || id.includes('mots') || id.includes('foxo') || id.includes('nad') || id.includes('eterna') || str.includes('longevity');
+          if (isLongevity) list.push({ id: d.id, ...data });
+        });
+        if (list.length > 0) return list;
+      }
+    } catch (e) {}
+  }
+
+  // Neuro-Performance & Sleep: Semax, Selank, DSIP, Cortisol
+  if (targetBrand === 'neuro-performance' || targetBrand === 'neuro' || targetBrand === 'cognitive') {
+    try {
+      if (adminDb) {
+        const snap = await adminDb.collection('products').get();
+        const list = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          const id = (d.id || '').toLowerCase();
+          const str = (id + ' ' + (data.name||'') + ' ' + (data.title||'')).toLowerCase();
+
+          const isNeuro = id.includes('semax') || id.includes('selank') || id.includes('dsip') || str.includes('cortisol') || str.includes('focus') || str.includes('sleep');
+          if (isNeuro) list.push({ id: d.id, ...data });
+        });
+        if (list.length > 0) return list;
+      }
+    } catch (e) {}
+  }
+
+  // Dermal Aesthetics: Colway Blue Diamond, GHK-Cu, Colvita
+  if (targetBrand === 'dermal-aesthetics' || targetBrand === 'dermal') {
+    try {
+      if (adminDb) {
+        const snap = await adminDb.collection('products').get();
+        const list = [];
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
+          const id = (d.id || '').toLowerCase();
+          const str = (id + ' ' + (data.name||'') + ' ' + (data.title||'')).toLowerCase();
+
+          const isDermal = id.includes('diamond') || id.includes('ghk') || id.includes('vege') || id.includes('colvita') || str.includes('dermal') || str.includes('peeling');
+          if (isDermal) list.push({ id: d.id, ...data });
+        });
+        if (list.length > 0) return list;
+      }
+    } catch (e) {}
+  }
+
   if (!adminDb) return [];
   try {
     const snap = await adminDb.collection('products').get();
@@ -282,8 +542,18 @@ export default async function NextCollectionPage({ params, searchParams }) {
     }).catch(() => {});
   }
 
+  const ALL_TARGETED_SLUGS = [
+    'colway', 'bloodo', 'ultraperson', 'eterna', 'teletest', 'peptides',
+    'hair-treatments', 'hair-treatment', 'trichology', 'hair',
+    'weight-loss', 'weight', 'metabolic',
+    'tissue-repair', 'repair', 'recovery',
+    'longevity-cellular', 'longevity',
+    'neuro-performance', 'neuro', 'cognitive',
+    'dermal-aesthetics', 'dermal'
+  ];
+
   let catalog;
-  if (['colway', 'bloodo', 'ultraperson', 'eterna', 'teletest', 'peptides'].includes(slug)) {
+  if (ALL_TARGETED_SLUGS.includes(slug)) {
     catalog = await fetchTargetedBrandProducts(slug);
   } else {
     catalog = await fetchProductsAction({ limitCount: 200 });
