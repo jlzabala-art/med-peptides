@@ -82,6 +82,7 @@ const ROLE_ACTION_PERMISSIONS = Object.freeze({
     'view:patients', 'edit:patients',
     'view:prescriptions', 'create:prescriptions', 'edit:prescriptions', 'export:prescriptions',
     'view:original_prescriptions',
+    'view:labels', 'create:labels', 'export:labels',
   ],
 
   patient_coordinator: [
