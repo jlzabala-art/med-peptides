@@ -26,7 +26,8 @@ import { resolvePhysicalCapsuleSize, CAPSULE_BOTTLE_SIZES, calculatePharmapolisC
 import { triggerHaptic } from '../utils/haptics';
 import {
   FlaskConical, ShieldCheck, Award, Zap, Search, X, Plus, Minus, Download, Sparkles,
-  Trash2, Pill, Brain, Moon, Leaf, HeartPulse, AlertTriangle, CheckCircle2, Send, Link2, RotateCcw, Dna
+  Trash2, Pill, Brain, Moon, Leaf, HeartPulse, AlertTriangle, CheckCircle2, Send, Link2, RotateCcw, Dna,
+  Sun, Layers, TrendingUp, Sliders
 } from '@/lib/icons';
 import '../styles/compoundingPage.css';
 
@@ -37,6 +38,83 @@ const MAX_CAPS_PER_DAY = 4;      // above this the regimen is impractical
 const MAX_ACTIVES = 8;
 const MIN_DOSE = 0.1;
 const MAX_DOSE = 2000;
+
+/* ─── Clinical Synergy & Chronobiology Knowledge Base ─────────────────────── */
+const CLINICAL_SYNERGIES = [
+  {
+    actives: ['Resveratrol', 'Coenzyme Q10 (Ubiquinol)'],
+    title: 'Sirtuin & Mitochondrial Synergy',
+    desc: 'CoQ10 boosts cellular electron transport chain while Resveratrol activates SIRT1 longevity deacetylases.',
+    type: 'synergy'
+  },
+  {
+    actives: ['Vitamin C (Ascorbic Acid)', 'N-Acetylcysteine (NAC)'],
+    title: 'Intracellular Glutathione Synthesis',
+    desc: 'NAC provides rate-limiting cysteine while Vitamin C recycles oxidized GSSG into active glutathione.',
+    type: 'synergy'
+  },
+  {
+    actives: ['Vitamin C (Ascorbic Acid)', 'Zinc (Gluconate)'],
+    title: 'Epithelial Barrier & Immune Priming',
+    desc: 'Synergistic enzymatic cofactors for neutrophil activation, mucosal repair and antioxidant protection.',
+    type: 'synergy'
+  },
+  {
+    actives: ['Ginkgo Biloba', 'Panax Ginseng Extract'],
+    title: 'Cerebrovascular & Adaptogenic Synergy',
+    desc: 'Improves cerebral microperfusion and neuronal oxygenation without cardiovascular tachycardia.',
+    type: 'synergy'
+  },
+  {
+    actives: ['Alpha-Lipoic Acid', 'Coenzyme Q10 (Ubiquinol)'],
+    title: 'Universal Redox Cycling',
+    desc: 'ALA regenerates lipophilic ubiquinol and hydrophilic ascorbic acid, preventing free radical cascades.',
+    type: 'synergy'
+  },
+  {
+    actives: ['Magnesium (Glycinate)', 'Melatonin'],
+    title: 'Circadian GABAergic Sedation',
+    desc: 'Magnesium modulates NMDA receptors to potentiate pineal melatonin sleep induction.',
+    type: 'synergy'
+  }
+];
+
+const CHRONO_OPPOSING = [
+  {
+    dayActives: ['Panax Ginseng Extract', 'Ginkgo Biloba', 'Coenzyme Q10 (Ubiquinol)', 'Green Tea Extract (EGCG)'],
+    nightActives: ['Melatonin', 'Valerian Root Extract', 'Magnesium (Glycinate)'],
+    warning: {
+      en: 'Opposing chronobiological signals detected (stimulating morning actives paired with nocturnal relaxants). We recommend splitting into a Dual Day/Night Protocol.',
+      es: 'Se detectaron señales cronobiológicas opuestas (activos estimulantes combinados con inductores de sueño). Recomendamos dividir la fórmula en Protocolo Día/Noche.'
+    }
+  }
+];
+
+const THERAPEUTIC_RANGES = {
+  'resveratrol': { min: 50, standard: 250, max: 500, step: 25 },
+  'coenzyme q10 (ubiquinol)': { min: 30, standard: 100, max: 300, step: 10 },
+  'alpha-lipoic acid': { min: 100, standard: 300, max: 600, step: 25 },
+  'piperine': { min: 2.5, standard: 5, max: 10, step: 0.5 },
+  'ginkgo biloba': { min: 40, standard: 120, max: 240, step: 20 },
+  'panax ginseng extract': { min: 50, standard: 200, max: 400, step: 25 },
+  'vitamin b complex methylated': { min: 25, standard: 50, max: 100, step: 5 },
+  'bitter melon extract': { min: 100, standard: 250, max: 500, step: 25 },
+  'green tea extract (egcg)': { min: 50, standard: 200, max: 400, step: 25 },
+  'magnesium (glycinate)': { min: 100, standard: 300, max: 600, step: 50 },
+  'valerian root extract': { min: 50, standard: 200, max: 400, step: 25 },
+  'melatonin': { min: 0.5, standard: 1, max: 5, step: 0.5 },
+  'vitamin c (ascorbic acid)': { min: 100, standard: 250, max: 1000, step: 50 },
+  'n-acetylcysteine (nac)': { min: 100, standard: 300, max: 600, step: 50 },
+  'zinc (gluconate)': { min: 10, standard: 30, max: 50, step: 5 }
+};
+
+function getTherapeuticRange(name) {
+  const norm = String(name || '').toLowerCase();
+  for (const [key, val] of Object.entries(THERAPEUTIC_RANGES)) {
+    if (norm.includes(key)) return val;
+  }
+  return { min: 25, standard: 100, max: 500, step: 25 };
+}
 
 /* ─── Base blueprints (resolved against the live API catalog by name) ─────── */
 const BLUEPRINTS = [
@@ -133,7 +211,20 @@ const T = {
     reset: 'Reset',
     added: 'added', removed: 'removed', already: 'is already in your formula',
     disclaimer: 'Compounded formulations are prepared on request under pharmaceutical supervision. They are not intended to diagnose, treat, cure or prevent any disease. Consult your physician before use.',
-    actives: 'actives'
+    actives: 'actives',
+    channelB2B: 'Clinic Wholesale (B2B)',
+    channelRRP: 'Patient RRP',
+    b2bDesc: 'EU GMP wholesale cost for dispensing practices',
+    rrpDesc: 'Suggested patient retail with practice dispensing margin',
+    marginLabel: 'Practice Gross Margin',
+    splitProtocol: 'Split into Day/Night Protocol',
+    splitProtocolDesc: 'Opposing chronobiology or high active load detected. Split into morning and evening phases.',
+    recombineProtocol: 'Recombine into Single Formula',
+    phase1Title: 'Phase 1: Morning Focus',
+    phase2Title: 'Phase 2: Evening Repair',
+    allPhases: 'All Actives',
+    synergyDetected: 'Clinical Synergy Verified',
+    addSynergyActive: 'Add complementary active'
   },
   es: {
     badge: 'Atlas Compounding Network · EU GMP',
@@ -176,7 +267,20 @@ const T = {
     reset: 'Reiniciar',
     added: 'añadido', removed: 'eliminado', already: 'ya está en tu fórmula',
     disclaimer: 'Las fórmulas magistrales se elaboran bajo pedido y supervisión farmacéutica. No están destinadas a diagnosticar, tratar, curar ni prevenir enfermedades. Consulta a tu médico antes de usarlas.',
-    actives: 'activos'
+    actives: 'activos',
+    channelB2B: 'Precio Mayorista Clínica (B2B)',
+    channelRRP: 'PVP Paciente Sugerido',
+    b2bDesc: 'Coste mayorista EU GMP para consultas médicas',
+    rrpDesc: 'Precio de venta al paciente con margen de dispensación',
+    marginLabel: 'Margen Bruto de la Consulta',
+    splitProtocol: 'Dividir en Protocolo Día/Noche',
+    splitProtocolDesc: 'Cronobiología opuesta o alta carga activa detectada. Divide en fase matutina y nocturna.',
+    recombineProtocol: 'Recombinar en Fórmula Única',
+    phase1Title: 'Fase 1: Enfoque Matutino',
+    phase2Title: 'Fase 2: Reparación Nocturna',
+    allPhases: 'Todos los Activos',
+    synergyDetected: 'Sinergia Clínica Verificada',
+    addSynergyActive: 'Añadir activo complementario'
   }
 };
 
@@ -229,6 +333,10 @@ export default function CompoundingPage() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [pricingChannel, setPricingChannel] = useState('b2b'); // 'b2b' | 'patient_rrp'
+  const [isSplitProtocol, setIsSplitProtocol] = useState(false);
+  const [activePhaseTab, setActivePhaseTab] = useState('all'); // 'all' | 'phase1' | 'phase2'
+  const [blueprintViewMode, setBlueprintViewMode] = useState('chips'); // 'chips' | 'grid'
   const hydratedRef = useRef(false);
   const searchWrapRef = useRef(null);
 
@@ -384,6 +492,95 @@ export default function CompoundingPage() {
     }
   }, [items, galenics, capsPerBottle, catalog]);
 
+  /* ─── Clinical Intelligence Recommender (Phase 2 & 5) ─────────────────── */
+  const activeSynergies = useMemo(() => {
+    if (items.length < 2) return [];
+    const itemNamesNorm = items.map(i => normalize(i.name));
+    return CLINICAL_SYNERGIES.filter(syn => {
+      return syn.actives.every(act => itemNamesNorm.some(n => n.includes(normalize(act)) || normalize(act).includes(n)));
+    });
+  }, [items]);
+
+  const chronoWarning = useMemo(() => {
+    if (items.length < 2) return null;
+    const itemNamesNorm = items.map(i => normalize(i.name));
+    for (const rule of CHRONO_OPPOSING) {
+      const hasDay = rule.dayActives.some(d => itemNamesNorm.some(n => n.includes(normalize(d))));
+      const hasNight = rule.nightActives.some(n => itemNamesNorm.some(m => m.includes(normalize(n))));
+      if (hasDay && hasNight) {
+        return rule.warning[lang] || rule.warning.en;
+      }
+    }
+    return null;
+  }, [items, lang]);
+
+  const synergySuggestions = useMemo(() => {
+    if (items.length >= MAX_ACTIVES) return [];
+    const itemNamesNorm = items.map(i => normalize(i.name));
+    const suggestions = [];
+    CLINICAL_SYNERGIES.forEach(syn => {
+      const present = syn.actives.filter(act => itemNamesNorm.some(n => n.includes(normalize(act))));
+      const missing = syn.actives.filter(act => !itemNamesNorm.some(n => n.includes(normalize(act))));
+      if (present.length > 0 && missing.length > 0) {
+        missing.forEach(missName => {
+          const apiObj = findApiByName(catalog, missName);
+          if (apiObj && !suggestions.some(s => s.api.id === apiObj.id)) {
+            suggestions.push({
+              api: apiObj,
+              reason: syn.title,
+              pairedWith: present.join(', ')
+            });
+          }
+        });
+      }
+    });
+    return suggestions.slice(0, 2);
+  }, [items, catalog]);
+
+  const splitData = useMemo(() => {
+    if (!isSplitProtocol || !items.length) {
+      return null;
+    }
+    const morningItems = [];
+    const eveningItems = [];
+
+    items.forEach(i => {
+      const norm = normalize(i.name);
+      const isEvening = norm.includes('melatonin') || norm.includes('valerian') || norm.includes('magnesium');
+      if (isEvening) {
+        eveningItems.push(i);
+      } else {
+        morningItems.push(i);
+      }
+    });
+
+    if (morningItems.length === 0 || eveningItems.length === 0) {
+      const half = Math.ceil(items.length / 2);
+      return {
+        phase1: items.slice(0, half),
+        phase2: items.slice(half)
+      };
+    }
+
+    return {
+      phase1: morningItems,
+      phase2: eveningItems
+    };
+  }, [isSplitProtocol, items]);
+
+  const toggleSplitProtocol = useCallback(() => {
+    triggerHaptic('medium');
+    setIsSplitProtocol(prev => {
+      const next = !prev;
+      if (next) {
+        toast.success(lang === 'es' ? 'Fórmula dividida en Protocolo Día/Noche ✓' : 'Split into Day/Night Protocol ✓');
+      } else {
+        toast(lang === 'es' ? 'Fórmula unificada en fase única' : 'Recombined into single formula');
+      }
+      return next;
+    });
+  }, [lang]);
+
   /* ─── Search ──────────────────────────────────────────────────────────── */
   const searchResults = useMemo(() => {
     const q = normalize(query.trim());
@@ -520,42 +717,91 @@ export default function CompoundingPage() {
       </header>
 
       <main className="cmp-container cmp-main">
-        {/* ── Step 1: Blueprints ── */}
+        {/* ── Step 1: Blueprints (High-Density Chips + Grid Toggle) ── */}
         <section className="cmp-card" aria-labelledby="cmp-step1">
           <div className="cmp-step-head">
             <span className="cmp-step-num">1</span>
-            <div>
+            <div style={{ flex: 1 }}>
               <h2 id="cmp-step1">{t.step1}</h2>
               <p>{t.step1Hint}</p>
             </div>
+            <button
+              type="button"
+              className="cmp-ghost-btn"
+              onClick={() => {
+                triggerHaptic('light');
+                setBlueprintViewMode(prev => prev === 'chips' ? 'grid' : 'chips');
+              }}
+              style={{ fontSize: '0.72rem' }}
+            >
+              <Sliders size={12} />
+              <span>{blueprintViewMode === 'chips' ? (lang === 'es' ? 'Ver Tarjetas' : 'View Grid') : (lang === 'es' ? 'Ver Chips' : 'View Chips')}</span>
+            </button>
           </div>
-          <div className="cmp-blueprints">
-            {BLUEPRINTS.map(bp => {
-              const Icon = bp.icon;
-              const isActive = activeBlueprint === bp.id;
-              return (
-                <button
-                  key={bp.id}
-                  type="button"
-                  className={`cmp-bp ${isActive ? 'is-active' : ''}`}
-                  style={{ '--bp-color': bp.color }}
-                  onClick={() => applyBlueprint(bp)}
-                  aria-pressed={isActive}
-                >
-                  <span className="cmp-bp-icon"><Icon size={18} /></span>
-                  <span className="cmp-bp-text">
-                    <strong>{bp.label[lang] || bp.label.en}</strong>
-                    <small>{bp.desc[lang] || bp.desc.en}</small>
+
+          {blueprintViewMode === 'chips' ? (
+            <div>
+              <div className="cmp-bp-chips">
+                {BLUEPRINTS.map(bp => {
+                  const Icon = bp.icon;
+                  const isActive = activeBlueprint === bp.id;
+                  return (
+                    <button
+                      key={bp.id}
+                      type="button"
+                      className={`cmp-bp-chip ${isActive ? 'is-active' : ''}`}
+                      style={{ '--bp-color': bp.color }}
+                      onClick={() => applyBlueprint(bp)}
+                      aria-pressed={isActive}
+                    >
+                      <span className="cmp-bp-chip-icon"><Icon size={14} /></span>
+                      <span>{bp.label[lang] || bp.label.en}</span>
+                      {isActive && <CheckCircle2 size={13} />}
+                    </button>
+                  );
+                })}
+              </div>
+              {activeBlueprint && activeBlueprint !== 'blank' && (
+                <div className="cmp-bp-active-callout">
+                  <span>
+                    <strong>{BLUEPRINTS.find(b => b.id === activeBlueprint)?.label[lang] || ''}:</strong>{' '}
+                    {BLUEPRINTS.find(b => b.id === activeBlueprint)?.desc[lang] || ''}
                   </span>
-                  {isActive && <CheckCircle2 size={16} className="cmp-bp-check" />}
-                </button>
-              );
-            })}
-          </div>
+                  <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                    {items.length} {t.actives}
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="cmp-blueprints">
+              {BLUEPRINTS.map(bp => {
+                const Icon = bp.icon;
+                const isActive = activeBlueprint === bp.id;
+                return (
+                  <button
+                    key={bp.id}
+                    type="button"
+                    className={`cmp-bp ${isActive ? 'is-active' : ''}`}
+                    style={{ '--bp-color': bp.color }}
+                    onClick={() => applyBlueprint(bp)}
+                    aria-pressed={isActive}
+                  >
+                    <span className="cmp-bp-icon"><Icon size={18} /></span>
+                    <span className="cmp-bp-text">
+                      <strong>{bp.label[lang] || bp.label.en}</strong>
+                      <small>{bp.desc[lang] || bp.desc.en}</small>
+                    </span>
+                    {isActive && <CheckCircle2 size={16} className="cmp-bp-check" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         <div className="cmp-grid">
-          {/* ── Step 2: Actives ── */}
+          {/* ── Step 2: Actives with Live Clinical Recommender & Dosage Controls ── */}
           <section className="cmp-card" aria-labelledby="cmp-step2">
             <div className="cmp-step-head">
               <span className="cmp-step-num">2</span>
@@ -563,12 +809,60 @@ export default function CompoundingPage() {
                 <h2 id="cmp-step2">{t.step2}</h2>
                 <p>{t.step2Hint}</p>
               </div>
-              {items.length > 0 && (
-                <button type="button" className="cmp-ghost-btn" onClick={resetAll}>
-                  <RotateCcw size={13} /> {t.reset}
-                </button>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {items.length > 0 && (
+                  <button
+                    type="button"
+                    className="cmp-ghost-btn"
+                    onClick={toggleSplitProtocol}
+                    style={{
+                      background: isSplitProtocol ? '#eff6ff' : 'transparent',
+                      color: isSplitProtocol ? '#1d4ed8' : '#475569',
+                      borderColor: isSplitProtocol ? '#bfdbfe' : 'var(--cmp-border)'
+                    }}
+                    title={isSplitProtocol ? t.recombineProtocol : t.splitProtocol}
+                  >
+                    <Layers size={13} />
+                    <span>{isSplitProtocol ? (lang === 'es' ? '1 Fase' : 'Single') : (lang === 'es' ? 'Día/Noche' : 'Day/Night')}</span>
+                  </button>
+                )}
+                {items.length > 0 && (
+                  <button type="button" className="cmp-ghost-btn" onClick={resetAll}>
+                    <RotateCcw size={13} /> {t.reset}
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Phase 5 Tab Selector if Split Protocol is active */}
+            {isSplitProtocol && splitData && (
+              <div className="cmp-phase-tabs">
+                <button
+                  type="button"
+                  className={`cmp-phase-tab ${activePhaseTab === 'all' ? 'is-active' : ''}`}
+                  onClick={() => setActivePhaseTab('all')}
+                >
+                  <Layers size={13} />
+                  <span>{t.allPhases} ({items.length})</span>
+                </button>
+                <button
+                  type="button"
+                  className={`cmp-phase-tab ${activePhaseTab === 'phase1' ? 'is-active' : ''}`}
+                  onClick={() => setActivePhaseTab('phase1')}
+                >
+                  <Sun size={13} style={{ color: '#ea580c' }} />
+                  <span>{t.phase1Title} ({splitData.phase1.length})</span>
+                </button>
+                <button
+                  type="button"
+                  className={`cmp-phase-tab ${activePhaseTab === 'phase2' ? 'is-active' : ''}`}
+                  onClick={() => setActivePhaseTab('phase2')}
+                >
+                  <Moon size={13} style={{ color: '#6366f1' }} />
+                  <span>{t.phase2Title} ({splitData.phase2.length})</span>
+                </button>
+              </div>
+            )}
 
             {/* Search */}
             <div className="cmp-search" ref={searchWrapRef}>
@@ -618,39 +912,146 @@ export default function CompoundingPage() {
               </div>
             ) : (
               <ul className="cmp-items">
-                {items.map((i, idx) => (
-                  <li key={i.apiId} className="cmp-item">
-                    <span className="cmp-item-idx">{idx + 1}</span>
-                    <div className="cmp-item-info">
-                      <strong>{i.name}</strong>
-                      <small>{i.spec}</small>
-                    </div>
-                    <div className="cmp-dose">
-                      <button type="button" onClick={() => stepDose(i.apiId, -1)} aria-label="Decrease dose"><Minus size={14} /></button>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        min={MIN_DOSE}
-                        max={MAX_DOSE}
-                        step="any"
-                        value={i.doseMg}
-                        onChange={(e) => updateDose(i.apiId, e.target.value)}
-                        onBlur={() => commitDose(i.apiId)}
-                        aria-label={`${i.name} ${t.perDay}`}
-                      />
-                      <button type="button" onClick={() => stepDose(i.apiId, 1)} aria-label="Increase dose"><Plus size={14} /></button>
-                      <span className="cmp-dose-unit">{t.perDay}</span>
-                    </div>
-                    <button type="button" className="cmp-item-remove" onClick={() => removeActive(i.apiId)} aria-label={`Remove ${i.name}`}>
-                      <Trash2 size={15} />
-                    </button>
-                  </li>
-                ))}
+                {items
+                  .filter(i => {
+                    if (!isSplitProtocol || activePhaseTab === 'all' || !splitData) return true;
+                    if (activePhaseTab === 'phase1') return splitData.phase1.some(p => p.apiId === i.apiId);
+                    if (activePhaseTab === 'phase2') return splitData.phase2.some(p => p.apiId === i.apiId);
+                    return true;
+                  })
+                  .map((i, idx) => {
+                    const range = getTherapeuticRange(i.name);
+                    return (
+                      <li key={i.apiId} className="cmp-item">
+                        <span className="cmp-item-idx">{idx + 1}</span>
+                        <div className="cmp-item-info">
+                          <strong>{i.name}</strong>
+                          <small>{i.spec}</small>
+                        </div>
+                        <div className="cmp-dose">
+                          <button type="button" onClick={() => stepDose(i.apiId, -1)} aria-label="Decrease dose"><Minus size={14} /></button>
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            min={MIN_DOSE}
+                            max={MAX_DOSE}
+                            step="any"
+                            value={i.doseMg}
+                            onChange={(e) => updateDose(i.apiId, e.target.value)}
+                            onBlur={() => commitDose(i.apiId)}
+                            aria-label={`${i.name} ${t.perDay}`}
+                          />
+                          <button type="button" onClick={() => stepDose(i.apiId, 1)} aria-label="Increase dose"><Plus size={14} /></button>
+                          <span className="cmp-dose-unit">{t.perDay}</span>
+                        </div>
+                        <button type="button" className="cmp-item-remove" onClick={() => removeActive(i.apiId)} aria-label={`Remove ${i.name}`}>
+                          <Trash2 size={15} />
+                        </button>
+
+                        {/* Phase 3 Dosage Slider & Presets */}
+                        <div style={{ gridColumn: '1 / -1', marginTop: '4px', paddingTop: '6px', borderTop: '1px dashed #e2e8f0' }}>
+                          <div className="cmp-dose-slider-row">
+                            <input
+                              type="range"
+                              min={range.min}
+                              max={range.max}
+                              step={range.step}
+                              value={Number(i.doseMg) || range.standard}
+                              onChange={(e) => updateDose(i.apiId, Number(e.target.value))}
+                              className="cmp-dose-slider"
+                              aria-label={`${i.name} dosage range slider`}
+                            />
+                            <div className="cmp-dose-presets">
+                              <button
+                                type="button"
+                                className={`cmp-dose-preset-btn ${Number(i.doseMg) === range.min ? 'is-active' : ''}`}
+                                onClick={() => updateDose(i.apiId, range.min)}
+                              >
+                                Min ({range.min}mg)
+                              </button>
+                              <button
+                                type="button"
+                                className={`cmp-dose-preset-btn ${Number(i.doseMg) === range.standard ? 'is-active' : ''}`}
+                                onClick={() => updateDose(i.apiId, range.standard)}
+                              >
+                                Std ({range.standard}mg)
+                              </button>
+                              <button
+                                type="button"
+                                className={`cmp-dose-preset-btn ${Number(i.doseMg) === range.max ? 'is-active' : ''}`}
+                                onClick={() => updateDose(i.apiId, range.max)}
+                              >
+                                Max ({range.max}mg)
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
               </ul>
             )}
 
+            {/* Phase 2: Live Clinical Intelligence Recommender Card */}
+            {items.length > 0 && (activeSynergies.length > 0 || chronoWarning || synergySuggestions.length > 0) && (
+              <div className="cmp-intel-card">
+                <div className="cmp-intel-head">
+                  <span className="cmp-intel-title">
+                    <Sparkles size={14} />
+                    <span>Atlas Clinical Intelligence</span>
+                  </span>
+                  {activeSynergies.length > 0 && (
+                    <span className="cmp-intel-badge">
+                      {activeSynergies.length} {lang === 'es' ? 'Sinergias' : 'Synergies'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Synergies */}
+                {activeSynergies.map((syn, sIdx) => (
+                  <div key={sIdx} className="cmp-intel-desc">
+                    <strong>⚡ {syn.title}:</strong> {syn.desc}
+                  </div>
+                ))}
+
+                {/* Chrono Warning */}
+                {chronoWarning && (
+                  <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '8px 10px', fontSize: '0.74rem', color: '#92400e', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                    <span>🌓 {chronoWarning}</span>
+                    {!isSplitProtocol && (
+                      <button
+                        type="button"
+                        onClick={toggleSplitProtocol}
+                        className="cmp-split-btn"
+                      >
+                        <Layers size={12} />
+                        <span>{t.splitProtocol}</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Synergy Suggestions */}
+                {synergySuggestions.map((sug, sgIdx) => (
+                  <div key={sgIdx} className="cmp-intel-suggest">
+                    <span>
+                      <strong>+ Synergy Opportunity:</strong> Add {sug.api.name} to amplify {sug.pairedWith} ({sug.reason}).
+                    </span>
+                    <button
+                      type="button"
+                      className="cmp-intel-add-btn"
+                      onClick={() => addActive(sug.api)}
+                    >
+                      <Plus size={11} />
+                      <span>{lang === 'es' ? 'Añadir' : 'Add'}</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Bottle size */}
-            <div className="cmp-bottle">
+            <div className="cmp-bottle" style={{ marginTop: '16px' }}>
               <span className="cmp-label">{t.bottle}</span>
               <div className="cmp-bottle-options" role="radiogroup" aria-label={t.bottle}>
                 {CAPSULE_BOTTLE_SIZES.map(b => (
@@ -711,40 +1112,76 @@ export default function CompoundingPage() {
                   <div><dt>{t.actives}</dt><dd>{items.length} / {MAX_ACTIVES}</dd></div>
                 </dl>
 
+                {isSplitProtocol && splitData && (
+                  <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6d28d9', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                      Dual-Phase Chronobiological Schedule
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#4c1d95', lineHeight: 1.4 }}>
+                      • <strong>Phase 1 (Morning):</strong> {splitData.phase1.map(i => i.name).join(', ') || 'None'}<br />
+                      • <strong>Phase 2 (Evening):</strong> {splitData.phase2.map(i => i.name).join(', ') || 'None'}
+                    </div>
+                  </div>
+                )}
+
                 {galenics.tooMany ? (
                   <div className="cmp-alert is-warn"><AlertTriangle size={15} /> <span>{t.warnTooMany}</span></div>
                 ) : (
                   <div className="cmp-alert is-ok"><CheckCircle2 size={15} /> <span>{t.ok}</span></div>
                 )}
 
+                {/* Phase 4: Live Channel Pricing Switcher */}
                 {costEstimate && (
-                  <div style={{
-                    background: '#f8fafc',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '10px',
-                    padding: '12px 14px',
-                    marginBottom: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '8px'
-                  }}>
-                    <div>
-                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        {lang === 'es' ? 'Estimación de Lote Magistral' : 'Estimated Compounded Batch'}
+                  <div className="cmp-pricing-card">
+                    <div className="cmp-channel-switch" role="tablist">
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={pricingChannel === 'b2b'}
+                        className={`cmp-channel-btn ${pricingChannel === 'b2b' ? 'is-active' : ''}`}
+                        onClick={() => { setPricingChannel('b2b'); triggerHaptic('selection'); }}
+                      >
+                        {t.channelB2B}
+                      </button>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={pricingChannel === 'patient_rrp'}
+                        className={`cmp-channel-btn ${pricingChannel === 'patient_rrp' ? 'is-active' : ''}`}
+                        onClick={() => { setPricingChannel('patient_rrp'); triggerHaptic('selection'); }}
+                      >
+                        {t.channelRRP}
+                      </button>
+                    </div>
+
+                    <div className="cmp-pricing-row">
+                      <div>
+                        <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          {pricingChannel === 'b2b' ? t.b2bDesc : t.rrpDesc}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '2px' }}>
+                          {capsPerBottle} caps · ~€{((pricingChannel === 'b2b' ? costEstimate.finalPricing.netPerCapEur : costEstimate.finalPricing.netPerCapEur * 1.85) * galenics.capsPerDay).toFixed(2)}/{lang === 'es' ? 'día' : 'day'}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '2px' }}>
-                        {capsPerBottle} caps · ~€{(costEstimate.finalPricing.netPerCapEur * galenics.capsPerDay).toFixed(2)}/{lang === 'es' ? 'día' : 'day'}
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '1.30rem', fontWeight: 800, color: '#0f172a' }}>
+                          €{(pricingChannel === 'b2b' ? costEstimate.finalPricing.netSellingPriceEur : costEstimate.finalPricing.netSellingPriceEur * 1.85).toFixed(2)}
+                        </div>
+                        <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
+                          {lang === 'es' ? 'por frasco (sin IVA)' : 'per bottle (ex. VAT)'}
+                        </div>
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
-                        €{costEstimate.finalPricing.netSellingPriceEur.toFixed(2)}
+
+                    {pricingChannel === 'patient_rrp' && (
+                      <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.70rem', color: '#16a34a', fontWeight: 650 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <TrendingUp size={12} />
+                          {t.marginLabel}
+                        </span>
+                        <span>+€{(costEstimate.finalPricing.netSellingPriceEur * 0.85).toFixed(2)} (+46%)</span>
                       </div>
-                      <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>
-                        {lang === 'es' ? 'por frasco (sin IVA)' : 'per bottle (ex. VAT)'}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 )}
               </>

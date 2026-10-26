@@ -2448,6 +2448,8 @@ export default function DoctorPublicPortalClient({
         // Derive high-signal title and details following GCP UX standards
         const codeDisplay = t.code || (t.codes && t.codes[0]) || null;
         const medicationSummary = rxMatch?.treatmentTitle || rxMatch?.items?.map(i => i.name).filter(Boolean).slice(0, 2).join(' + ') || null;
+        const parts = resolvePrescriptionParts(rxMatch || t);
+        const isMultiPart = Array.isArray(parts) && parts.length > 1;
 
         if (t.type === 'portal_inactive') {
           const treatmentName = t.treatmentTitle || medicationSummary || 'Atlas Patient Portal';
@@ -2474,6 +2476,26 @@ export default function DoctorPublicPortalClient({
                   <Globe size={11} />
                   Portal Inactive
                 </span>
+                {isMultiPart && (
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      background: '#faf5ff',
+                      color: '#7e22ce',
+                      border: '1px solid #e9d5ff'
+                    }}
+                    title={parts.map(p => `${p.phase || p.title}: ${(p.apis || []).map(a => `${a.name} ${a.dose || ''}`).join(', ')}`).join(' | ')}
+                  >
+                    <Layers size={11} />
+                    <span>{parts.length} Phases: {parts.map(p => p.phase || p.title || 'Phase').join(' + ')}</span>
+                  </span>
+                )}
               </div>
               <div style={{ fontSize: '0.73rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span>Prescription confirmed</span>
@@ -2488,7 +2510,7 @@ export default function DoctorPublicPortalClient({
           const treatmentName = t.treatmentTitle || medicationSummary || 'Delivered Regimen';
           return (
             <div style={{ textAlign: 'left', width: '100%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                 <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.86rem' }}>
                   {treatmentName}
                 </span>
@@ -2509,9 +2531,52 @@ export default function DoctorPublicPortalClient({
                   <Activity size={11} />
                   {t.daysAgo ? `Check-in (Day ${t.daysAgo})` : 'Tolerance Check-in'}
                 </span>
+                {isMultiPart && (
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      background: '#faf5ff',
+                      color: '#7e22ce',
+                      border: '1px solid #e9d5ff'
+                    }}
+                    title={parts.map(p => `${p.phase || p.title}: ${(p.apis || []).map(a => `${a.name} ${a.dose || ''}`).join(', ')}`).join(' | ')}
+                  >
+                    <Layers size={11} />
+                    <span>{parts.length} Phases: {parts.map(p => p.phase || p.title || 'Phase').join(' + ')}</span>
+                  </span>
+                )}
+                {t.hasPortalInactive && (
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.68rem',
+                      fontWeight: 650,
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      background: '#f0f9ff',
+                      color: '#0284c7',
+                      border: '1px solid #bae6fd'
+                    }}
+                  >
+                    <Globe size={11} />
+                    Portal Inactive
+                  </span>
+                )}
               </div>
-              <div style={{ fontSize: '0.73rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>Treatment delivered</span>
+              <div style={{ fontSize: '0.73rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                {isMultiPart ? (
+                  <span>{parts.map(p => `${p.phase || p.title}${p.vehicle ? ` in ${p.vehicle}` : ''}`).join(' • ')}</span>
+                ) : (
+                  <span>Treatment delivered</span>
+                )}
                 <span>•</span>
                 <span style={{ color: '#0d9488', fontWeight: 600 }}>Verify patient tolerance &amp; response</span>
               </div>
@@ -2632,7 +2697,7 @@ export default function DoctorPublicPortalClient({
 
           return (
             <div
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', width: '100%' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'flex-end', width: '100%', flexWrap: 'wrap' }}
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -2661,6 +2726,35 @@ export default function DoctorPublicPortalClient({
                 {isPortal ? <Globe size={13} /> : (isTolerance ? <Activity size={13} /> : <MessageCircle size={13} />)}
                 <span className="btn-label">{isPortal ? 'Invite Portal' : (isTolerance ? 'Check-in' : 'Follow-up')}</span>
               </button>
+
+              {t.hasPortalInactive && t.portalTask && !isPortal && (
+                <button
+                  type="button"
+                  onClick={() => setFollowUpModalTask(t.portalTask)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    padding: '5px 8px',
+                    borderRadius: '4px',
+                    background: '#f0f9ff',
+                    border: '1px solid #bae6fd',
+                    color: '#0284c7',
+                    cursor: 'pointer',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    flexShrink: 0,
+                    transition: 'all 0.12s',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                  }}
+                  title="Send 1-Click Patient Portal Invitation"
+                  aria-label="Invite to Portal"
+                >
+                  <Globe size={12} />
+                  <span className="btn-label">Invite</span>
+                </button>
+              )}
 
               <Link
                 href={t.actionUrl || `/rx/${t.code}`}
@@ -6952,7 +7046,7 @@ export default function DoctorPublicPortalClient({
           {activeAnchor === 'tasks' && (
             <section id="tasks" style={{ marginBottom: '32px' }}>
               {/* ── Google Cloud Console Standard: 4 Queue KPI Metric Cards (Golden Rule #22) ── */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', marginBottom: '14px' }}>
                 {/* KPI 1: Total Queue */}
                 <div
                   onClick={() => {
@@ -6963,22 +7057,22 @@ export default function DoctorPublicPortalClient({
                     background: '#ffffff',
                     border: `1.5px solid ${taskFilter === 'all' ? '#1a73e8' : '#e2e8f0'}`,
                     borderRadius: '8px',
-                    padding: '12px 16px',
+                    padding: '10px 12px',
                     cursor: 'pointer',
                     boxShadow: taskFilter === 'all' ? '0 2px 6px rgba(26,115,232,0.15)' : '0 1px 2px rgba(60,64,67,0.06)',
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       Total Queue
                     </span>
-                    <Clock size={15} style={{ color: '#1a73e8' }} />
+                    <Clock size={14} style={{ color: '#1a73e8' }} />
                   </div>
-                  <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a' }}>
+                  <div style={{ fontSize: '1.30rem', fontWeight: 700, color: '#0f172a' }}>
                     {taskCounts.all}
                   </div>
-                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
                     All clinical action items
                   </div>
                 </div>
@@ -6993,22 +7087,22 @@ export default function DoctorPublicPortalClient({
                     background: '#ffffff',
                     border: `1.5px solid ${taskFilter === 'portal_inactive' ? '#0284c7' : '#e2e8f0'}`,
                     borderRadius: '8px',
-                    padding: '12px 16px',
+                    padding: '10px 12px',
                     cursor: 'pointer',
                     boxShadow: taskFilter === 'portal_inactive' ? '0 2px 6px rgba(2,132,199,0.15)' : '0 1px 2px rgba(60,64,67,0.06)',
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 650, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       Portal Inactive
                     </span>
-                    <Globe size={15} style={{ color: '#0284c7' }} />
+                    <Globe size={14} style={{ color: '#0284c7' }} />
                   </div>
-                  <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a' }}>
+                  <div style={{ fontSize: '1.30rem', fontWeight: 700, color: '#0f172a' }}>
                     {taskCounts.portal_inactive}
                   </div>
-                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
                     Unclaimed patient portals
                   </div>
                 </div>
@@ -7023,22 +7117,22 @@ export default function DoctorPublicPortalClient({
                     background: '#ffffff',
                     border: `1.5px solid ${taskFilter === 'proposal_followup' ? '#b45309' : '#e2e8f0'}`,
                     borderRadius: '8px',
-                    padding: '12px 16px',
+                    padding: '10px 12px',
                     cursor: 'pointer',
                     boxShadow: taskFilter === 'proposal_followup' ? '0 2px 6px rgba(180,83,9,0.15)' : '0 1px 2px rgba(60,64,67,0.06)',
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Proposal Follow-ups
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 650, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Follow-ups
                     </span>
-                    <MessageCircle size={15} style={{ color: '#b45309' }} />
+                    <MessageCircle size={14} style={{ color: '#b45309' }} />
                   </div>
-                  <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a' }}>
+                  <div style={{ fontSize: '1.30rem', fontWeight: 700, color: '#0f172a' }}>
                     {taskCounts.proposal_followup}
                   </div>
-                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
                     Awaiting patient checkout
                   </div>
                 </div>
@@ -7053,22 +7147,22 @@ export default function DoctorPublicPortalClient({
                     background: '#ffffff',
                     border: `1.5px solid ${taskFilter === 'refill' ? '#0d9488' : '#e2e8f0'}`,
                     borderRadius: '8px',
-                    padding: '12px 16px',
+                    padding: '10px 12px',
                     cursor: 'pointer',
                     boxShadow: taskFilter === 'refill' ? '0 2px 6px rgba(13,148,136,0.15)' : '0 1px 2px rgba(60,64,67,0.06)',
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 650, color: '#0d9488', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 650, color: '#0d9488', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       Checks &amp; Refills
                     </span>
-                    <Activity size={15} style={{ color: '#0d9488' }} />
+                    <Activity size={14} style={{ color: '#0d9488' }} />
                   </div>
-                  <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a' }}>
+                  <div style={{ fontSize: '1.30rem', fontWeight: 700, color: '#0f172a' }}>
                     {taskCounts.refill + taskCounts.titration + taskCounts.tolerance_check}
                   </div>
-                  <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
                     Adherence &amp; tolerance reviews
                   </div>
                 </div>
@@ -7099,10 +7193,10 @@ export default function DoctorPublicPortalClient({
                   <div>
                     <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <Clock size={18} style={{ color: '#1a73e8' }} />
-                      <span>Action Queue · Pending Follow-ups &amp; Unaccepted Offers</span>
+                      <span>Action Queue · Clinical Monitoring &amp; Patient Follow-ups</span>
                     </h2>
                     <div style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span>This queue only lists pending proposals awaiting patient checkout. Confirmed orders do not require follow-up tasks.</span>
+                      <span>Prioritized clinical actions, tolerance check-ins, patient portal access &amp; proposal follow-ups.</span>
                       {quickCounts.active > 0 && (
                         <button
                           type="button"
@@ -7232,7 +7326,14 @@ export default function DoctorPublicPortalClient({
                 onRowClick={handleRowClickTask}
                 emptyTitle="All Patient Care Tasks Up to Date"
                 emptyDescription="There are no pending protocol titrations, phase adjustments, or refill authorizations requiring physician action."
-                expandableRender={(task) => (
+                expandableRender={(task) => {
+                  const rxMatch = allPrescriptions.find(
+                    (p) => p.code === task.code || p.id === task.rxId || (p.code && task.codes?.includes(p.code))
+                  );
+                  const parts = resolvePrescriptionParts(rxMatch || task);
+                  const isMultiPart = Array.isArray(parts) && parts.length > 1;
+
+                  return (
                   <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -7268,6 +7369,23 @@ export default function DoctorPublicPortalClient({
                         }}>
                           {task.type === 'proposal_followup' ? (task.daysAgo ? `Offer Unaccepted (${task.daysAgo}d)` : 'Offer Unaccepted') : (task.isSigned || task.status === 'approved' ? 'Signed & Authorized' : 'Pending Authorization')}
                         </span>
+                        {isMultiPart && (
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: '#faf5ff',
+                            color: '#7e22ce',
+                            border: '1px solid #e9d5ff'
+                          }}>
+                            <Layers size={11} />
+                            Multi-Part Compounding Protocol ({parts.length} Phases)
+                          </span>
+                        )}
                       </div>
                       <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
                         Trigger: {task.type === 'proposal_followup' ? 'Patient Conversion & Re-engagement Monitor' : 'Automated Chronobiological Protocol Monitor'}
@@ -7276,6 +7394,58 @@ export default function DoctorPublicPortalClient({
                     <p style={{ margin: '0 0 12px 0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
                       {task.description}
                     </p>
+
+                    {isMultiPart && (
+                      <div style={{ margin: '12px 0 16px 0' }}>
+                        <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+                          Prescribed Chronobiological Phases &amp; Formulations
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px' }}>
+                          {parts.map((part, pIdx) => (
+                            <div
+                              key={pIdx}
+                              style={{
+                                background: '#ffffff',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '6px',
+                                padding: '12px 14px',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                <span style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: 700,
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  background: pIdx === 0 ? '#eff6ff' : '#faf5ff',
+                                  color: pIdx === 0 ? '#1d4ed8' : '#7e22ce',
+                                  border: `1px solid ${pIdx === 0 ? '#bfdbfe' : '#e9d5ff'}`
+                                }}>
+                                  Phase {pIdx + 1}: {part.phase || (pIdx === 0 ? 'Morning' : 'Evening')}
+                                </span>
+                                {part.vehicle && (
+                                  <span style={{ fontSize: '0.70rem', color: '#64748b', background: '#f1f5f9', padding: '1px 6px', borderRadius: '3px' }}>
+                                    {part.vehicle}
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.80rem', marginBottom: '4px' }}>
+                                {part.title || part.name || `Phase ${pIdx + 1} Regimen`}
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#334155', marginBottom: '6px', lineHeight: 1.4 }}>
+                                <strong>Active APIs:</strong> {(part.apis || []).map(a => `${a.name} ${a.dose || ''}`).join(', ') || 'Custom compounding actives'}
+                              </div>
+                              {part.posology && (
+                                <div style={{ fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic', background: '#f8fafc', padding: '4px 8px', borderRadius: '4px' }}>
+                                  Directions: {part.posology}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {task.type === 'proposal_followup' && (
                       <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 14px', marginBottom: '12px' }}>
@@ -7385,8 +7555,9 @@ export default function DoctorPublicPortalClient({
                       </div>
                     </div>
                   </div>
-                )}
-              />
+                  );
+                }}
+                />
             </div>
           </section>
         )}
