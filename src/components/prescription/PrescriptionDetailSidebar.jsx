@@ -31,7 +31,8 @@ import {
   Mail,
   MessageCircle,
   Edit2,
-  Loader2
+  Loader2,
+  Send
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '@/utils/haptics';
@@ -329,52 +330,61 @@ export default function PrescriptionDetailSidebar({
     return List;
   };
 
+  const formulaSections = useMemo(() => {
+    return availableSections.filter(sec => sec.category === 'formula');
+  }, [availableSections]);
+
+  const moduleSections = useMemo(() => {
+    return availableSections.filter(sec => sec.category !== 'formula');
+  }, [availableSections]);
+
   return (
     <>
-      {/* ── DESKTOP STICKY SIDEBAR (Hidden on mobile via CSS) ── */}
+      {/* ── DESKTOP STICKY SIDEBAR (Google Cloud Console High-Density Layout) ── */}
       <div 
         className="pds-sidebar-desktop"
         style={{
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.15rem'
+          gap: '0.85rem'
         }}
       >
-        {/* Patient Identity & Direct Contact Card (GCP Standard with Frictionless Enrichment) */}
+        {/* 1. Unified Clinical Context Card (Patient + Prescribing Physician in 1 GCP Properties Card) */}
         <div style={{
           background: '#ffffff',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
+          borderRadius: '8px',
+          border: '1px solid #dadce0',
           padding: '12px 14px',
-          boxShadow: '0 2px 8px rgba(0, 54, 102, 0.04)',
+          boxShadow: '0 1px 2px 0 rgba(60, 64, 67, 0.06)',
           display: 'flex',
           flexDirection: 'column',
           gap: '10px'
         }}>
-          {/* Main header row: Avatar + Name + Edit Pencil */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+          {/* Patient Header Row: Compact Avatar + Name + Subtle Inline Edit Trigger */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
             <div style={{
-              width: '38px',
-              height: '38px',
+              width: '34px',
+              height: '34px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-              color: '#ffffff',
+              background: '#e8f0fe',
+              color: '#1a73e8',
+              border: '1px solid #c2e7ff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 700,
-              fontSize: '0.88rem',
+              fontSize: '0.82rem',
               flexShrink: 0
             }}>
               {patientName?.charAt(0) || 'P'}
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.64rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   <span>{isEs ? 'Paciente' : 'Patient'}</span>
                   {!isAuthorizedViewer && (
-                    <span style={{ fontSize: '0.60rem', background: '#f1f5f9', color: '#475569', padding: '1px 5px', borderRadius: '3px', fontWeight: 700, letterSpacing: '0.02em' }}>
+                    <span style={{ fontSize: '0.58rem', background: '#f1f5f9', color: '#475569', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
                       🔒 DHA/HIPAA
                     </span>
                   )}
@@ -393,18 +403,19 @@ export default function PrescriptionDetailSidebar({
                     style={{
                       background: 'none',
                       border: 'none',
-                      padding: '2px 4px',
-                      color: isEditingContact ? '#0284c7' : '#94a3b8',
+                      padding: '1px 4px',
+                      color: isEditingContact ? '#0284c7' : '#64748b',
                       cursor: 'pointer',
                       borderRadius: '4px',
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
                       gap: '3px',
-                      fontSize: '0.68rem',
-                      fontWeight: 600
+                      fontSize: '0.66rem',
+                      fontWeight: 600,
+                      flexShrink: 0
                     }}
                   >
-                    <Edit2 size={12} />
+                    <Edit2 size={11} style={{ opacity: 0.75, flexShrink: 0 }} />
                     <span>{isEs ? (patientPhone || patientEmail ? 'Editar' : '+ Contacto') : (patientPhone || patientEmail ? 'Edit' : '+ Contact')}</span>
                   </button>
                 )}
@@ -413,20 +424,16 @@ export default function PrescriptionDetailSidebar({
               <div 
                 title={patientName || 'Patient'}
                 style={{ 
-                  fontSize: '0.88rem', 
-                  fontWeight: 750, 
-                  color: '#0f172a', 
+                  fontSize: '0.86rem', 
+                  fontWeight: 700, 
+                  color: '#202124', 
                   whiteSpace: 'normal', 
                   wordBreak: 'break-word', 
-                  lineHeight: 1.32,
-                  marginTop: '1px'
+                  lineHeight: 1.3,
+                  marginTop: '2px'
                 }}
               >
                 {patientName || 'Patient'}
-              </div>
-
-              <div style={{ fontSize: '0.70rem', color: '#0284c7', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                <span>Ref: {prescriptionCode}</span>
               </div>
             </div>
           </div>
@@ -437,11 +444,11 @@ export default function PrescriptionDetailSidebar({
               background: '#f8fafc',
               border: '1px solid #f1f5f9',
               borderRadius: '6px',
-              padding: '6px 8px',
+              padding: '5px 8px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '4px',
-              fontSize: '0.72rem',
+              gap: '3px',
+              fontSize: '0.71rem',
               color: '#334155'
             }}>
               {patientPhone && (
@@ -459,55 +466,18 @@ export default function PrescriptionDetailSidebar({
             </div>
           )}
 
-          {/* Missing contact notice for clinical staff */}
-          {isAuthorizedViewer && !isEditingContact && !patientPhone && !patientEmail && (
-            <div style={{
-              background: '#fffbeb',
-              border: '1px solid #fef3c7',
-              borderRadius: '6px',
-              padding: '6px 8px',
-              fontSize: '0.68rem',
-              color: '#92400e',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '6px'
-            }}>
-              <span>{isEs ? 'Sin teléfono ni email registrado.' : 'No phone or email recorded.'}</span>
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('selection');
-                  setIsEditingContact(true);
-                }}
-                style={{
-                  background: '#f59e0b',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '2px 6px',
-                  fontSize: '0.64rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                {isEs ? '+ Añadir' : '+ Add'}
-              </button>
-            </div>
-          )}
-
           {/* Inline Edit Micro-Panel (Golden Rule #5 with explicit ✔️ and ❌) */}
           {isEditingContact && (
             <div style={{
               background: '#f8fafc',
               border: '1px solid #cbd5e1',
-              borderRadius: '8px',
+              borderRadius: '6px',
               padding: '8px 10px',
               display: 'flex',
               flexDirection: 'column',
               gap: '6px'
             }}>
-              <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+              <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                 {isEs ? 'Datos de Contacto del Paciente' : 'Patient Contact Info'}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -520,7 +490,7 @@ export default function PrescriptionDetailSidebar({
                   style={{
                     width: '100%',
                     padding: '4px 6px',
-                    fontSize: '0.74rem',
+                    fontSize: '0.73rem',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     background: '#ffffff'
@@ -537,7 +507,7 @@ export default function PrescriptionDetailSidebar({
                   style={{
                     width: '100%',
                     padding: '4px 6px',
-                    fontSize: '0.74rem',
+                    fontSize: '0.73rem',
                     borderRadius: '4px',
                     border: '1px solid #cbd5e1',
                     background: '#ffffff'
@@ -587,35 +557,63 @@ export default function PrescriptionDetailSidebar({
             </div>
           )}
 
-          {/* Quick WhatsApp Send Button (The frictionless delivery trigger) */}
-          {isAuthorizedViewer && !showWhatsAppPrompt && (
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                handleSendWhatsApp();
-              }}
-              style={{
-                width: '100%',
-                padding: '7px 10px',
-                borderRadius: '6px',
-                background: '#25D366',
-                color: '#ffffff',
-                border: 'none',
-                fontWeight: 700,
-                fontSize: '0.74rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                boxShadow: '0 1px 3px rgba(37, 211, 102, 0.25)',
-                transition: 'background 0.2s ease'
-              }}
-            >
-              <MessageCircle size={14} />
-              <span>{isEs ? 'Enviar Pauta por WhatsApp' : 'Send Regimen via WhatsApp'}</span>
-            </button>
+          {/* Tonal Secondary Action Row (No competing neon buttons; clean GCP secondary actions) */}
+          {isAuthorizedViewer && !isEditingContact && !showWhatsAppPrompt && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {!patientPhone && !patientEmail && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    setIsEditingContact(true);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '5px 8px',
+                    borderRadius: '6px',
+                    background: '#f8fafc',
+                    color: '#334155',
+                    border: '1px solid #dadce0',
+                    fontWeight: 600,
+                    fontSize: '0.70rem',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Phone size={11} color="#64748b" />
+                  <span>{isEs ? '+ Añadir contacto' : '+ Add contact'}</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  handleSendWhatsApp();
+                }}
+                style={{
+                  flex: 1,
+                  padding: '5px 8px',
+                  borderRadius: '6px',
+                  background: '#f0fdf4',
+                  color: '#15803d',
+                  border: '1px solid #bbf7d0',
+                  fontWeight: 650,
+                  fontSize: '0.70rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '5px',
+                  transition: 'background 0.15s ease'
+                }}
+              >
+                <MessageCircle size={12} color="#16a34a" />
+                <span>{isEs ? 'Enviar por WhatsApp' : 'Send via WhatsApp'}</span>
+              </button>
+            </div>
           )}
 
           {/* Prompt when WhatsApp clicked but phone was missing */}
@@ -623,7 +621,7 @@ export default function PrescriptionDetailSidebar({
             <form onSubmit={handlePromptSubmitWhatsApp} style={{
               background: '#f0fdf4',
               border: '1px solid #bbf7d0',
-              borderRadius: '8px',
+              borderRadius: '6px',
               padding: '8px 10px',
               display: 'flex',
               flexDirection: 'column',
@@ -643,7 +641,7 @@ export default function PrescriptionDetailSidebar({
                   padding: '5px 8px',
                   borderRadius: '4px',
                   border: '1px solid #86efac',
-                  fontSize: '0.75rem',
+                  fontSize: '0.74rem',
                   background: '#ffffff',
                   boxSizing: 'border-box'
                 }}
@@ -671,7 +669,7 @@ export default function PrescriptionDetailSidebar({
                     padding: '3px 10px',
                     borderRadius: '4px',
                     border: 'none',
-                    background: '#25D366',
+                    background: '#16a34a',
                     color: '#ffffff',
                     fontSize: '0.68rem',
                     fontWeight: 700,
@@ -689,85 +687,82 @@ export default function PrescriptionDetailSidebar({
           )}
 
           {!isAuthorizedViewer && (
-            <div style={{ fontSize: '0.66rem', color: '#64748b', lineHeight: 1.3, background: '#f8fafc', padding: '5px 7px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: '0.65rem', color: '#64748b', lineHeight: 1.3, background: '#f8fafc', padding: '5px 7px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
               <span style={{ color: '#003666', fontWeight: 600 }}>Privacy Protected:</span> Nominal record restricted.{' '}
               <Link href={`/login?redirect=/rx/${prescriptionCode}`} style={{ color: '#003666', fontWeight: 700, textDecoration: 'underline' }}>
                 Doctor Sign in
               </Link>
             </div>
           )}
+
+          {/* Embedded Prescribing Physician Row (Single Unified Card, Divided by Hairline) */}
+          {doctorName && (
+            <div style={{
+              borderTop: '1px solid #f1f5f9',
+              paddingTop: '9px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '8px'
+            }}>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {isAuthorizedViewer ? (isEs ? 'Médico Prescriptor' : 'Prescribing Physician') : (isEs ? 'Práctica Médica' : 'Medical Practice')}
+                </div>
+                <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#202124', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '1px' }}>
+                  {isAuthorizedViewer 
+                    ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`)
+                    : (isEs ? 'Práctica Médica Verificada' : 'Verified Clinical Practice')}
+                </div>
+                <div style={{ fontSize: '0.68rem', color: '#5f6368', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {isAuthorizedViewer ? (doctorTitle || (isEs ? 'Facultativo Colegiado' : 'Licensed Physician')) : (isEs ? 'Acreditación Oficial DHA' : 'Official DHA Accreditation')}
+                </div>
+              </div>
+              {doctorPublicUrl && (
+                <Link
+                  href={doctorPublicUrl}
+                  title={isAuthorizedViewer ? (isEs ? `Ir al portal de ${doctorName}` : `Go to ${doctorName}'s Portal`) : (isEs ? 'Ir al portal de la práctica' : 'Go to practice portal')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    background: '#f8fafc',
+                    border: '1px solid #dadce0',
+                    color: '#003666',
+                    fontSize: '0.68rem',
+                    fontWeight: 650,
+                    textDecoration: 'none',
+                    flexShrink: 0
+                  }}
+                >
+                  <span>Portal</span>
+                  <ExternalLink size={11} />
+                </Link>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Treating Physician Card (Google Cloud Parent Context) */}
-        {doctorName && (
-          <div style={{
-            background: '#ffffff',
-            borderRadius: '12px',
-            border: '1px solid #e2e8f0',
-            padding: '12px 14px',
-            boxShadow: '0 2px 8px rgba(0, 54, 102, 0.04)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '10px'
-          }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isAuthorizedViewer ? (isEs ? 'Médico Prescriptor' : 'Prescribing Physician') : (isEs ? 'Práctica Médica' : 'Medical Practice')}
-              </div>
-              <div style={{ fontSize: '0.86rem', fontWeight: 750, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '1px' }}>
-                {isAuthorizedViewer 
-                  ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`)
-                  : (isEs ? 'Práctica Médica Verificada' : 'Verified Clinical Practice')}
-              </div>
-              <div style={{ fontSize: '0.70rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {isAuthorizedViewer ? (doctorTitle || (isEs ? 'Facultativo Colegiado' : 'Licensed Physician')) : (isEs ? 'Acreditación Oficial DHA' : 'Official DHA Accreditation')}
-              </div>
-            </div>
-            {doctorPublicUrl && (
-              <Link
-                href={doctorPublicUrl}
-                title={isAuthorizedViewer ? (isEs ? `Ir al portal de ${doctorName}` : `Go to ${doctorName}'s Portal`) : (isEs ? 'Ir al portal de la práctica' : 'Go to practice portal')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '5px 10px',
-                  borderRadius: '6px',
-                  background: '#f8fafc',
-                  border: '1px solid #dadce0',
-                  color: '#003666',
-                  fontSize: '0.72rem',
-                  fontWeight: 650,
-                  textDecoration: 'none',
-                  flexShrink: 0
-                }}
-              >
-                <span>{isEs ? 'Portal' : 'Portal'}</span>
-                <ChevronRight size={13} />
-              </Link>
-            )}
-          </div>
-        )}
-
-        {/* Compounding Quote Widget (Doctor / Admin Only) */}
+        {/* 2. Compounding Quote Widget (Single Primary Sidebar CTA for Doctor / Admin) */}
         {!isPatientView && (
           <div style={{
             background: '#ffffff',
-            borderRadius: '12px',
-            border: '1px solid #e2e8f0',
-            padding: '12px 14px',
-            boxShadow: '0 2px 8px rgba(0, 54, 102, 0.04)',
+            borderRadius: '8px',
+            border: '1px solid #dadce0',
+            padding: '11px 14px',
+            boxShadow: '0 1px 2px 0 rgba(60, 64, 67, 0.06)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px'
+            gap: '8px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                 <div style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: '6px',
+                  width: 24,
+                  height: 24,
+                  borderRadius: '5px',
                   background: '#eff6ff',
                   color: '#1d4ed8',
                   display: 'flex',
@@ -775,21 +770,16 @@ export default function PrescriptionDetailSidebar({
                   justifyContent: 'center',
                   flexShrink: 0
                 }}>
-                  <FileText size={15} />
+                  <FileText size={13} />
                 </div>
-                <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 750, color: '#0f172a' }}>
-                    {isEs ? 'Cotización de Elaboración' : 'Compounding Quote'}
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                    {isEs ? 'Gestionado por Atlas Services' : 'Managed by Atlas Services'}
-                  </div>
+                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#202124' }}>
+                  {isEs ? 'Cotización Magistral' : 'Compounding Quote'}
                 </div>
               </div>
               <span style={{
-                fontSize: '0.64rem',
+                fontSize: '0.62rem',
                 fontWeight: 650,
-                padding: '2px 6px',
+                padding: '1px 6px',
                 borderRadius: '10px',
                 background: '#eff6ff',
                 color: '#1d4ed8',
@@ -799,10 +789,10 @@ export default function PrescriptionDetailSidebar({
               </span>
             </div>
 
-            <div style={{ fontSize: '0.72rem', color: '#475569', lineHeight: 1.35 }}>
+            <div style={{ fontSize: '0.70rem', color: '#5f6368', lineHeight: 1.35 }}>
               {isEs 
-                ? `${formulations?.length || 1} fórmula(s) lista(s) para cotización, gestionada directamente por Atlas Services.`
-                : `${formulations?.length || 1} compounded formula(s) ready for review, managed directly by Atlas Services.`}
+                ? `${formulations?.length || 1} fórmula(s) magistral(es) lista(s) para valoración por Atlas Services.`
+                : `${formulations?.length || 1} compounded formula(s) ready for review by Atlas Services.`}
             </div>
 
             <button
@@ -816,151 +806,152 @@ export default function PrescriptionDetailSidebar({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '6px',
-                background: '#0284c7',
+                background: '#003666',
                 color: '#ffffff',
                 border: 'none',
-                borderRadius: '7px',
-                padding: '8px 12px',
-                fontSize: '0.76rem',
+                borderRadius: '6px',
+                padding: '7px 12px',
+                fontSize: '0.74rem',
                 fontWeight: 700,
                 cursor: 'pointer',
-                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)',
                 transition: 'background 0.15s'
               }}
             >
               <FileText size={13} />
-              <span>{isEs ? 'Solicitar Cotización a Atlas Services' : 'Request Compounding Quote'}</span>
+              <span>{isEs ? 'Solicitar Cotización' : 'Request Compounding Quote'}</span>
             </button>
           </div>
         )}
 
-        {/* Widget 1: On This Dossier (TOC) */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '14px',
-          border: '1px solid #e2e8f0',
-          padding: '1.15rem',
-          boxShadow: '0 4px 16px rgba(0, 54, 102, 0.05)'
-        }}>
+        {/* 3. Google Cloud Minimalist "ON THIS PAGE" Rail Navigation (Grouped: Formulas vs Dossier Modules) */}
+        <nav
+          aria-label={isEs ? 'En este dossier' : 'On this dossier'}
+          style={{
+            padding: '4px 2px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}
+        >
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '0.85rem',
-            paddingBottom: '0.65rem',
-            borderBottom: '1px solid #f1f5f9'
+            paddingLeft: '4px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              <List size={14} color="#0284c7" />
-              <span>{isEs ? 'EN ESTE DOSSIER' : 'ON THIS DOSSIER'}</span>
-            </div>
-            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0369a1', background: '#e0f2fe', padding: '1px 6px', borderRadius: '4px' }}>
-              {availableSections.length} {isEs ? 'Secciones' : 'Sections'}
+            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {isEs ? 'EN ESTE DOSSIER' : 'ON THIS DOSSIER'}
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {availableSections.map((sec, idx) => {
-              const isActive = activeId === sec.id;
-              const IconComp = getSectionIcon(sec.id, sec.icon);
-              return (
-                <button
-                  key={sec.id}
-                  type="button"
-                  onClick={() => scrollTo(sec.id)}
-                  title={sec.label}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    padding: '8px 10px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: isActive ? '#f0f9ff' : 'transparent',
-                    color: isActive ? '#0284c7' : '#475569',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                    gap: '6px'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', minWidth: 0, flex: 1 }}>
-                    <span style={{ fontSize: '0.70rem', color: isActive ? '#0284c7' : '#94a3b8', fontFamily: 'monospace', marginTop: '2px', flexShrink: 0 }}>
-                      {idx + 1}
-                    </span>
-                    <IconComp size={15} color={isActive ? (sec.accentColor || '#0284c7') : '#94a3b8'} style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <span style={{ 
-                        fontSize: '0.78rem',
-                        fontWeight: isActive ? 750 : 550,
-                        color: isActive ? '#0284c7' : '#334155',
-                        lineHeight: 1.35,
-                        wordBreak: 'break-word',
-                        whiteSpace: 'normal'
+          {/* Group A: Active Regimen Formulations */}
+          {formulaSections.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '0 0 4px 10px' }}>
+                {isEs ? 'Fórmulas Prescritas' : 'Compounded Formulas'}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', borderLeft: '2px solid #e2e8f0', marginLeft: '4px' }}>
+                {formulaSections.map((sec) => {
+                  const isActive = activeGcpTab === 'treatment' && activeId === sec.id;
+                  const IconComp = getSectionIcon(sec.id, sec.icon);
+                  return (
+                    <button
+                      key={sec.id}
+                      type="button"
+                      onClick={() => scrollTo(sec.id)}
+                      title={sec.label}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                         gap: '7px',
+                        width: '100%',
+                        padding: '5px 8px 5px 10px',
+                        marginLeft: '-2px',
+                        border: 'none',
+                        borderLeft: isActive ? '2px solid #0284c7' : '2px solid transparent',
+                        background: isActive ? 'rgba(2, 132, 199, 0.06)' : 'transparent',
+                        color: isActive ? '#0284c7' : '#3c4043',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        borderRadius: '0 6px 6px 0'
+                      }}
+                    >
+                      <IconComp size={13} color={isActive ? '#0284c7' : '#64748b'} style={{ flexShrink: 0, marginTop: '2px' }} />
+                      <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                        <span style={{
+                          fontSize: '0.75rem',
+                          fontWeight: isActive ? 700 : 500,
+                          color: isActive ? '#0284c7' : '#3c4043',
+                          lineHeight: 1.3,
+                          wordBreak: 'break-word'
+                        }}>
+                          {sec.label}
+                        </span>
+                        {sec.badge && (
+                          <span style={{ fontSize: '0.64rem', color: isActive ? '#0369a1' : '#64748b', fontWeight: 500 }}>
+                            {sec.badge}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Group B: Dossier Sections / Tabs */}
+          {moduleSections.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '0 0 4px 10px' }}>
+                {isEs ? 'Módulos del Expediente' : 'Dossier Modules'}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', borderLeft: '2px solid #e2e8f0', marginLeft: '4px' }}>
+                {moduleSections.map((sec) => {
+                  const mappedTab = SECTION_TO_TAB[sec.id];
+                  const isActive = (mappedTab && activeGcpTab === mappedTab) || activeId === sec.id;
+                  const IconComp = getSectionIcon(sec.id, sec.icon);
+                  return (
+                    <button
+                      key={sec.id}
+                      type="button"
+                      onClick={() => scrollTo(sec.id)}
+                      title={sec.label}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '7px',
+                        width: '100%',
+                        padding: '5px 8px 5px 10px',
+                        marginLeft: '-2px',
+                        border: 'none',
+                        borderLeft: isActive ? '2px solid #0284c7' : '2px solid transparent',
+                        background: isActive ? 'rgba(2, 132, 199, 0.06)' : 'transparent',
+                        color: isActive ? '#0284c7' : '#5f6368',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        borderRadius: '0 6px 6px 0'
+                      }}
+                    >
+                      <IconComp size={13} color={isActive ? '#0284c7' : '#94a3b8'} style={{ flexShrink: 0 }} />
+                      <span style={{
+                        fontSize: '0.74rem',
+                        fontWeight: isActive ? 700 : 500,
+                        color: isActive ? '#0284c7' : '#3c4043',
+                        lineHeight: 1.3,
+                        wordBreak: 'break-word'
                       }}>
                         {sec.label}
                       </span>
-                      {sec.badge && (
-                        <span style={{
-                          alignSelf: 'flex-start',
-                          fontSize: '0.66rem',
-                          fontWeight: 650,
-                          padding: '1px 6px',
-                          borderRadius: '4px',
-                          background: isActive ? '#e0f2fe' : '#f1f5f9',
-                          color: isActive ? '#0369a1' : '#64748b',
-                          lineHeight: 1.3
-                        }}>
-                          {sec.badge}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {isActive && <ChevronRight size={14} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-
-
-        {/* Widget 3: EU GMP Quality & Verification Seal (GCP Standard) */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '8px',
-          border: '1px solid #dadce0',
-          padding: '1rem',
-          boxShadow: 'none'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <ShieldCheck size={16} color="#137333" />
-            <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#137333', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? 'Trazabilidad & Calidad' : 'Traceability & Quality'}
-            </span>
-          </div>
-          <div style={{ fontSize: '0.75rem', color: '#5f6368', lineHeight: 1.4 }}>
-            {isEs 
-              ? 'Elaboración individualizada en salas blancas bajo normativa EU GMP. Materias primas y vehículos con control analítico HPLC.'
-              : 'Compounded under cleanroom EU GMP standards with verified batch release and HPLC analytical verification.'}
-          </div>
-          <div style={{
-            marginTop: '8px',
-            padding: '5px 8px',
-            borderRadius: '4px',
-            background: '#e6f4ea',
-            border: '1px solid #ceead6',
-            color: '#137333',
-            fontSize: '0.70rem',
-            fontWeight: 600,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px'
-          }}>
-            <span>✓ Pharmapolis &amp; Fagron Standard</span>
-          </div>
-        </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </nav>
 
       </div>
 
