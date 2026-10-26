@@ -14,7 +14,9 @@ import {
   ChevronRight,
   CheckCircle2,
   FlaskConical,
-  ExternalLink
+  ExternalLink,
+  FileText,
+  Download
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import TieredPriceShield from '@/components/pricing/TieredPriceShield';
@@ -43,6 +45,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     icon: Activity,
     subtitleEn: 'UHPLC • NAD⁺ & NADH',
     subtitleEs: 'UHPLC • NAD⁺ y NADH',
+    reportPdf: '/docs/bloodo-report-nad.pdf',
+    brochurePdf: '/docs/bloodo-product-catalog-2026.pdf',
     synergyWithOthersEn: 'Establishes baseline mitochondrial redox capacity to guide peptide dosing.',
     synergyWithOthersEs: 'Determina la capacidad redox mitocondrial basal para calibrar dosis de péptidos.'
   },
@@ -64,6 +68,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     icon: Zap,
     subtitleEn: 'LC-MS/MS • SHBG & FAI',
     subtitleEs: 'LC-MS/MS • SHBG y FAI',
+    reportPdf: '/docs/bloodo-report-testosterone-male.pdf',
+    brochurePdf: '/docs/bloodo-product-catalog-2026.pdf',
     synergyWithOthersEn: 'Assesses endocrine recovery without suppression during secretagogue protocols.',
     synergyWithOthersEs: 'Evalúa la reactivación endógena sin atrofia en protocolos con secretagogos.'
   },
@@ -85,6 +91,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     icon: Clock,
     subtitleEn: 'CAR Rhythm • AM/PM Diurnal',
     subtitleEs: 'Ritmo CAR • Diurno AM/PM',
+    reportPdf: '/docs/bloodo-report-cortisol-am-pm.pdf',
+    brochurePdf: '/docs/bloodo-product-catalog-2026.pdf',
     synergyWithOthersEn: 'Differentiates primary mitochondrial fatigue from secondary adrenal exhaustion.',
     synergyWithOthersEs: 'Distingue la fatiga mitocondrial pura del agotamiento suprarrenal secundario.'
   },
@@ -106,6 +114,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     icon: Droplet,
     subtitleEn: 'Affinity • 90-Day Glycation',
     subtitleEs: 'Afinidad • Glicación 90 Días',
+    reportPdf: '/docs/bloodo-report-hba1c.pdf',
+    brochurePdf: '/docs/bloodo-product-catalog-2026.pdf',
     synergyWithOthersEn: 'Direct biomarker verification for GLP-1/GIP and MOTS-c metabolic protocols.',
     synergyWithOthersEs: 'Verificación directa de biomarcadores para protocolos con GLP-1/GIP y MOTS-c.'
   },
@@ -127,6 +137,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     icon: ShieldCheck,
     subtitleEn: 'GC-MS • Index & AA/EPA',
     subtitleEs: 'GC-MS • Índice y AA/EPA',
+    reportPdf: '/docs/bloodo-report-omega-ratio.pdf',
+    brochurePdf: '/docs/bloodo-product-catalog-2026.pdf',
     synergyWithOthersEn: 'Monitors microvascular inflammation and cellular membrane repair alongside BPC/TB.',
     synergyWithOthersEs: 'Monitoriza la inflamación microvascular y reparación celular junto a BPC-157 y TB-500.'
   },
@@ -148,6 +160,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     icon: Sun,
     subtitleEn: 'Isotope Dilution • 25(OH)D',
     subtitleEs: 'Dilución Isotópica • 25(OH)D',
+    reportPdf: '/docs/bloodo-report-vitamin-d.pdf',
+    brochurePdf: '/docs/bloodo-product-catalog-2026.pdf',
     synergyWithOthersEn: 'Essential co-factor for thymic peptide efficacy (Thymosin Alpha-1, LL-37).',
     synergyWithOthersEs: 'Cofactor indispensable para la eficacia de péptidos tímicos (Tα1 y LL-37).'
   }
@@ -441,6 +455,61 @@ export default function BloodoSuiteNav({
                   compact={false}
                   onUnlockRequest={() => setIsUnlockModalOpen(true)}
                 />
+              </div>
+
+              {/* Dual Downloads: Official Sample Clinical Report & Brochure */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '0.75rem' }}>
+                <a
+                  href={test.reportPdf}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    fontSize: '0.71rem',
+                    fontWeight: 700,
+                    padding: '6px 4px',
+                    borderRadius: '6px',
+                    background: '#f0fdfa',
+                    color: '#0d9488',
+                    border: '1px solid #99f6e4',
+                    textDecoration: 'none',
+                    textAlign: 'center',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={isEs ? `Ver informe clínico de muestra de ${test.nameEs}` : `View sample clinical report for ${test.nameEn}`}
+                >
+                  <FileText size={12} />
+                  <span>{isEs ? 'Informe Muestra' : 'Sample Report'}</span>
+                </a>
+                <a
+                  href={test.brochurePdf}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    fontSize: '0.71rem',
+                    fontWeight: 600,
+                    padding: '6px 4px',
+                    borderRadius: '6px',
+                    background: '#ffffff',
+                    color: '#475569',
+                    border: '1px solid #cbd5e1',
+                    textDecoration: 'none',
+                    textAlign: 'center',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={isEs ? 'Descargar catálogo / brochure 2026' : 'Download catalog / brochure 2026'}
+                >
+                  <Download size={12} />
+                  <span>{isEs ? 'Brochure' : 'Brochure'}</span>
+                </a>
               </div>
 
               <div className="bloodo-suite-card__footer">

@@ -322,7 +322,6 @@ export default function TieredPriceShield({
   // ── CASE 1: COMPACT LIST VIEW ──
   if (compact) {
     if (!isAuthenticated) {
-      const publicRetailPrice = formatTierPrice(tiers.retail, currency);
       return (
         <div
           onClick={(e) => {
@@ -331,30 +330,21 @@ export default function TieredPriceShield({
             if (onUnlockRequest) onUnlockRequest();
           }}
           style={{ textAlign: 'right', marginRight: '6px', cursor: 'pointer' }}
-          title={isEs ? "PVP de referencia. Clic para ver tarifa clínica B2B" : "RRP reference. Click to view practitioner B2B discount"}
+          title={isEs ? "Inicie sesión o regístrese para ver precios" : "Sign in or register to view pricing"}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 650, textTransform: 'uppercase' }}>
-              {isEs ? 'PVP' : 'RRP'}
-            </span>
-            <strong style={{ fontSize: '0.90rem', color: '#0f172a' }}>
-              {publicRetailPrice}
-            </strong>
-          </div>
           <span style={{
-            fontSize: '0.62rem',
+            fontSize: '0.64rem',
             color: '#0d9488',
             fontWeight: 750,
             background: '#f0fdfa',
             border: '1px solid #99f6e4',
-            padding: '1px 5px',
+            padding: '2px 7px',
             borderRadius: '4px',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '3px',
-            marginTop: '1px'
+            gap: '4px'
           }}>
-            <Lock size={9} /> {isEs ? 'B2B: hasta -45%' : 'B2B: -45% Off'}
+            <Lock size={10} /> {isEs ? 'Ver precio (registro)' : 'Sign In for Price'}
           </span>
         </div>
       );
@@ -525,30 +515,45 @@ export default function TieredPriceShield({
         </span>
       </div>
 
-      {/* Retail Price for Public Guests + B2B Unlock Teaser */}
-      <div style={{ marginTop: '4px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+      {/* Gated Message — NO price amounts displayed to unregistered users */}
+      <div style={{
+        marginTop: '8px',
+        padding: '8px 10px',
+        background: '#ffffff',
+        borderRadius: '6px',
+        border: '1px dashed #cbd5e1',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '8px'
+      }}>
         <div>
-          <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 700, display: 'block', textTransform: 'uppercase' }}>
-            {isEs ? 'PVP Recomendado' : 'Public RRP'}
-          </span>
-          <span style={{ fontSize: '1.15rem', fontWeight: 850, color: '#0f172a' }}>
-            {formatTierPrice(tiers.retail, currency)}
-          </span>
-          {tiers.perCapNet && (
-            <span style={{ fontSize: '0.65rem', color: '#64748b', marginLeft: '6px' }}>
-              ({formatTierPrice(tiers.retail / (tiers.capsCount || 60), currency)}/cap)
-            </span>
-          )}
+          <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+            {isEs ? 'Precios disponibles tras iniciar sesión' : 'Pricing available for registered accounts'}
+          </div>
+          <div style={{ fontSize: '0.66rem', color: '#64748b', marginTop: '1px' }}>
+            {isEs 
+              ? 'Tarifas B2B de clínica, laboratorio y venta directa reservadas.'
+              : 'Verified wholesale B2B and clinical pricing restricted to registered users.'}
+          </div>
         </div>
-
-        <div style={{ textAlign: 'right' }}>
-          <span style={{ fontSize: '0.60rem', color: '#0d9488', fontWeight: 700, display: 'block' }}>
-            {isEs ? 'B2B Clínica (EXW)' : 'Clinic Tier (EXW)'}
-          </span>
-          <span style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0d9488', filter: 'blur(3.5px)', userSelect: 'none' }}>
-            {formatTierPrice(tiers.clinic, currency)}
-          </span>
-        </div>
+        <button
+          type="button"
+          style={{
+            fontSize: '0.70rem',
+            fontWeight: 700,
+            color: '#ffffff',
+            background: '#0d9488',
+            border: 'none',
+            padding: '5px 9px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            flexShrink: 0
+          }}
+        >
+          {isEs ? 'Ver Precios' : 'Sign In'}
+        </button>
       </div>
 
       <p style={{ margin: '4px 0 0 0', fontSize: '0.64rem', color: '#64748b', lineHeight: 1.25 }}>

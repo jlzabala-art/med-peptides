@@ -39,7 +39,8 @@ import {
   ClipboardList,
   ChevronDown,
   Clock,
-  Dna
+  Dna,
+  Calendar
 } from '@/lib/icons';
 import ImageModal from '@/snippets/ImageModal';
 import { 
@@ -62,6 +63,7 @@ import BloodoRelatedPeptidesSection from './BloodoRelatedPeptidesSection';
 import BloodoNadFaqCard from './BloodoNadFaqCard';
 import BloodoSuiteNav, { isBloodoProduct } from './BloodoSuiteNav';
 import BloodoClinicalAdvantageCard from './BloodoClinicalAdvantageCard';
+import BloodoDiagnosticOverviewCard from './BloodoDiagnosticOverviewCard';
 import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
 import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
 import FdaRegulatoryBadge from './FdaRegulatoryBadge';
@@ -1363,7 +1365,18 @@ export default function PublicDatasheetView({
       ];
     }
 
-    if (isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) {
+    if (isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) {
+      return [
+        { id: 'overview', label: lang === 'es' ? '1. ¿Qué es y Para Qué Sirve?' : '1. What It Is & Why Measure It', icon: Sparkles },
+        { id: 'when-to-test', label: lang === 'es' ? '2. ¿Cuándo Hacerse el Test?' : '2. When to Take This Test', icon: Calendar },
+        { id: 'diagnostic-specs', label: lang === 'es' ? '3. ¿Qué Dice el Resultado? (Rango)' : '3. Reference Ranges & Biomarkers', icon: Activity },
+        { id: 'collection-protocol', label: lang === 'es' ? '4. ¿Cómo se Realiza? (Toma de Muestra)' : '4. How It Works (Sampling Guide)', icon: Droplets },
+        { id: 'specs-section', label: lang === 'es' ? '5. Acreditación ISO y Descargas' : '5. Lab Standards & Clinical Downloads', icon: ShieldCheck },
+        { id: 'bloodo-suite', label: lang === 'es' ? '6. Suite Diagnóstica Bloodo™' : '6. Bloodo™ Diagnostic Suite', icon: Layers }
+      ];
+    }
+
+    if (isDiagnosticKit) {
       // Determine collection protocol label based on actual specimen type
       const sType = (product?.sampleType || '').toLowerCase();
       const isHairSample = sType.includes('hair') || sType.includes('cabello') || sType.includes('capilar') || (product?.slug || '').includes('htma') || (product?.slug || '').includes('mineralograma');
@@ -1374,12 +1387,9 @@ export default function PublicDatasheetView({
       return [
         { id: 'overview', label: lang === 'es' ? 'Descripción y Presentaciones' : 'Overview & Presentations', icon: FileText },
         { id: 'diagnostic-specs', label: lang === 'es' ? 'Especificaciones y Biomarcadores' : 'Analytical Specs & Biomarkers', icon: Activity },
-        { id: 'collection-protocol', label: collectionLabelEs, icon: Droplets },
-        { id: 'specs-section', label: lang === 'es' ? 'Calidad, Trazabilidad y FAQs' : 'Lab Quality, Standards & FAQs', icon: ShieldCheck },
-        { id: 'clinical-synergy', label: lang === 'es' ? 'Recomendaciones y Protocolos' : 'Atlas Recommendations & Protocols', icon: Sparkles },
-        ...(isBloodoDiagnostic ? [
-          { id: 'bloodo-suite', label: lang === 'es' ? 'Suite Diagnóstica Bloodo™' : 'Bloodo™ Diagnostic Suite', icon: Layers }
-        ] : [])
+        { id: 'collection-protocol', label: lang === 'es' ? collectionLabelEs : collectionLabelEn, icon: Droplets },
+        { id: 'specs-section', label: lang === 'es' ? 'Calidad, Trazabilidad y Descargas' : 'Lab Quality, Standards & Downloads', icon: ShieldCheck },
+        { id: 'clinical-synergy', label: lang === 'es' ? 'Recomendaciones y Protocolos' : 'Atlas Recommendations & Protocols', icon: Sparkles }
       ];
     }
 
@@ -2524,7 +2534,14 @@ export default function PublicDatasheetView({
             />
           </div>
         )}
-        {description && (
+        {isBloodoDiagnostic ? (
+          <BloodoDiagnosticOverviewCard
+            product={product}
+            lang={lang}
+            onUnlockRequest={() => setIsUnlockModalOpen(true)}
+            onSelectSection={handleSelectSection}
+          />
+        ) : description && (
           <div className="pds-description-card" style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <h2 className="pds-section-heading" style={{ margin: 0 }}>
