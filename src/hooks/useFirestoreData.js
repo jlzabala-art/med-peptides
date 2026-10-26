@@ -87,7 +87,10 @@ export function useFirestoreData() {
         });
         return [...new Set(list.filter(Boolean).map((s) => s.toLowerCase().trim()))];
       } catch (err) {
-        console.warn('[useFirestoreData] Active B2C suppliers check failed:', err);
+        // Unauthenticated/public visitors can't read these collections — expected, stay silent.
+        if (err?.code !== 'permission-denied') {
+          console.warn('[useFirestoreData] Active B2C suppliers check failed:', err);
+        }
         return [];
       }
     },

@@ -51,6 +51,7 @@ export default function PublicStickyActionBar({
   activeSectionIndex = null,
   sectionsLabel = null,
   extraActions = null,
+  compactMobile = false,
   children = null,
 }) {
   const { totalCount, subtotal, openDrawer } = useB2BOrder();
@@ -297,7 +298,7 @@ export default function PublicStickyActionBar({
         </div>
       )}
 
-      <aside className="public-sticky-action-bar" aria-label="Quick Actions">
+      <aside className={`public-sticky-action-bar${compactMobile ? ' public-sticky-action-bar--compact' : ''}`} aria-label="Quick Actions">
         <div className="public-sticky-action-bar__container">
           {/* Left: Entity Context Identity */}
           <div className="public-sticky-action-bar__info">

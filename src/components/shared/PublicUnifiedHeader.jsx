@@ -400,6 +400,9 @@ function forceCanonicalDomain(urlOrPath) {
                 <Link href="/calculator" className="puh-nav-link">
                   {isSpanish ? 'Calculadora' : 'Calculator'}
                 </Link>
+                <Link href="/compounding" className="puh-nav-link">
+                  {isSpanish ? 'Formulación' : 'Compounding'}
+                </Link>
                 <Link href="/blog" className="puh-nav-link">
                   {isSpanish ? 'Academia' : 'Academy'}
                 </Link>

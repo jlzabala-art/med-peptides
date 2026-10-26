@@ -1635,3 +1635,107 @@
 }
 
 
+
+/* ─────────────────────────────────────────────────────────────
+   FASE 1 · Hero compacto + KPIs + Scope Switcher (GCP UX, mobile-first)
+   ───────────────────────────────────────────────────────────── */
+.gcp-hero-desc-toggle {
+  display: none;
+}
+
+.gcp-scope-switch {
+  display: inline-flex;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.gcp-scope-switch button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: #475569;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.gcp-scope-switch button + button {
+  border-left: 1px solid #cbd5e1;
+}
+
+.gcp-scope-switch button[data-active='true'] {
+  background: #e0f2fe;
+  color: #003666;
+}
+
+@media (max-width: 768px) {
+  /* Oculta chips redundantes (el detalle vive en la lista) */
+  .gcp-hero-iso {
+    display: none !important;
+  }
+
+  /* Descripción: 2 líneas + "Ver más" */
+  .gcp-hero-desc[data-expanded='false'] {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .gcp-hero-desc-toggle {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    min-height: 44px;
+    margin-top: -0.5rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #0369a1;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* Chips de metadatos: una sola fila con scroll horizontal */
+  .gcp-hero-badges {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-right: calc(-1 * clamp(1rem, 3vw, 2rem));
+    padding-right: clamp(1rem, 3vw, 2rem);
+  }
+
+  .gcp-hero-badges::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gcp-hero-badges > span {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  /* KPIs: carrusel horizontal con snap en lugar de 4 tarjetas apiladas */
+  .gcp-kpi-grid {
+    display: flex !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-right: calc(-1 * clamp(1rem, 3vw, 2rem));
+    padding-right: clamp(1rem, 3vw, 2rem);
+  }
+
+  .gcp-kpi-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gcp-kpi-grid > div {
+    flex: 0 0 72%;
+    scroll-snap-align: start;
+  }
+}

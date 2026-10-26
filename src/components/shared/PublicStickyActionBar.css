@@ -417,3 +417,19 @@ body.has-sticky-bottom-bar .atlas-ai-public-fab {
 }
 
 
+
+/* ── Fase 4 · Variante compacta móvil: solo acciones (sin título duplicado) ── */
+@media (max-width: 768px) {
+  .public-sticky-action-bar--compact .public-sticky-action-bar__info {
+    display: none;
+  }
+
+  .public-sticky-action-bar--compact .public-sticky-action-bar__share-btn {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  :root:has(.public-sticky-action-bar--compact) {
+    --atlas-sticky-bar-height: 76px;
+  }
+}

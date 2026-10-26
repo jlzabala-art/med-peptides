@@ -22,6 +22,8 @@ import GenericCollectionSidebar from '../components/diagnostic/GenericCollection
 import ProductTechnicalDetailsPanel from '../components/collection/ProductTechnicalDetailsPanel';
 import CopyableId from '../components/ui/CopyableId';
 import StatusBadge from '../components/ui/StatusBadge';
+import GlobalSearchBar from '../components/ui/GlobalSearchBar';
+import EmptyState from '../components/ui/EmptyState';
 import TieredPriceShield from '../components/pricing/TieredPriceShield';
 import { resolvePhysicalCapsuleSize, CAPSULE_BOTTLE_SIZES } from '../services/pharmapolisCostEngine.js';
 import FrictionFreeUnlockModal from '../components/pricing/FrictionFreeUnlockModal';
@@ -401,6 +403,7 @@ export default function BrandCollectionPage({
   const [addedItem, setAddedItem] = useState(null);
   const [expandedDetails, setExpandedDetails] = useState({});
   const [scopeMode, setScopeMode] = useState('filtered'); // 'filtered' | 'global'
+  const [isHeroExpanded, setIsHeroExpanded] = useState(false); // Fase 1: descripción colapsable en móvil
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
@@ -600,6 +603,63 @@ export default function BrandCollectionPage({
 
     return list;
   }, [products, searchQuery, selectedCategory, sortOption]);
+
+  // ── Fase 2 · Sincronización de filtros con la URL (?q=...&cat=...) (Reglas #24/#29) ──
+  const [isUrlHydrated, setIsUrlHydrated] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    const cat = params.get('cat');
+    if (q) setSearchQuery(q);
+    if (cat) setSelectedCategory(cat);
+    setIsUrlHydrated(true);
+  }, []);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !isUrlHydrated) return;
+    const params = new URLSearchParams(window.location.search);
+    if (searchQuery.trim()) params.set('q', searchQuery.trim()); else params.delete('q');
+    if (selectedCategory !== 'all') params.set('cat', selectedCategory); else params.delete('cat');
+    const qs = params.toString();
+    const next = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`;
+    if (next !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
+      window.history.replaceState(null, '', next);
+    }
+  }, [searchQuery, selectedCategory, isUrlHydrated]);
+
+  // ── Fase 3 · KPIs calculados según el alcance (Filtered vs Entire collection) (Regla #22) ──
+  const kpiCards = useMemo(() => {
+    const isFiltered = scopeMode === 'filtered';
+    const shown = isFiltered ? filteredProducts.length : products.length;
+    const total = products.length;
+    const realCategories = brandCategories.filter(c => c.id !== 'all' && c.id !== 'bundles');
+    const activeCategoryLabel = selectedCategory === 'all'
+      ? null
+      : (brandCategories.find(c => c.id === selectedCategory)?.label || selectedCategory);
+    const coverage = total > 0 ? Math.round((shown / total) * 100) : 0;
+    const attribute = (config.kpis && (config.kpis[1] || config.kpis[0])) || null;
+    return [
+      {
+        label: isEs ? 'Elementos' : 'Items',
+        value: String(shown),
+        sub: isFiltered ? (isEs ? 'Coinciden con los filtros' : 'Matching active filters') : (isEs ? 'Colección completa' : 'Entire collection'),
+        icon: Layers
+      },
+      {
+        label: isEs ? 'Categorías' : 'Categories',
+        value: isFiltered && activeCategoryLabel ? activeCategoryLabel : String(realCategories.length),
+        sub: isFiltered && activeCategoryLabel ? (isEs ? 'Categoría activa' : 'Active category') : (isEs ? 'Líneas disponibles' : 'Available lines'),
+        icon: SlidersHorizontal
+      },
+      {
+        label: isEs ? 'Cobertura' : 'Coverage',
+        value: `${isFiltered ? coverage : 100}%`,
+        sub: isEs ? `de ${total} en la colección` : `of ${total} in collection`,
+        icon: Activity
+      },
+      ...(attribute ? [{ label: attribute.label, value: attribute.value, sub: attribute.sub, icon: attribute.icon || ShieldCheck }] : [])
+    ];
+  }, [scopeMode, filteredProducts.length, products.length, brandCategories, selectedCategory, config, isEs]);
 
   const activeSectionContext = useMemo(() => {
     if (brandSlug === 'teletest') {
@@ -819,7 +879,7 @@ export default function BrandCollectionPage({
                 <Sparkles size={11} />
                 <span>{config.badge}</span>
               </div>
-              <span style={{
+              <span className="gcp-hero-iso" style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
@@ -862,19 +922,31 @@ export default function BrandCollectionPage({
             </div>
 
             {/* Subtitle / Descriptive Scope */}
-            <p style={{
-              fontSize: 'clamp(0.82rem, 1.1vw, 0.94rem)',
-              color: '#475569',
-              lineHeight: 1.55,
-              margin: '2px 0 0 0',
-              fontWeight: 450,
-              maxWidth: '1150px'
-            }}>
+            <p
+              className="gcp-hero-desc"
+              data-expanded={isHeroExpanded ? 'true' : 'false'}
+              style={{
+                fontSize: 'clamp(0.82rem, 1.1vw, 0.94rem)',
+                color: '#475569',
+                lineHeight: 1.55,
+                margin: '2px 0 0 0',
+                fontWeight: 450,
+                maxWidth: '1150px'
+              }}
+            >
               {config.subtitle}
             </p>
+            <button
+              type="button"
+              className="gcp-hero-desc-toggle"
+              onClick={() => setIsHeroExpanded(v => !v)}
+              aria-expanded={isHeroExpanded}
+            >
+              {isHeroExpanded ? (isEs ? 'Ver menos' : 'Show less') : (isEs ? 'Ver más' : 'Show more')}
+            </button>
 
-            {/* Architecture Metadata Badges (GCP Standard) */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '0.25rem' }}>
+            {/* Architecture Metadata Badges (GCP Standard) — scroll horizontal en móvil */}
+            <div className="gcp-hero-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '0.25rem' }}>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#334155', background: '#f8fafc', border: '1px solid #cbd5e1', padding: '3px 9px', borderRadius: '4px' }}>
                 🧬 {filteredProducts.length} {brandSlug === 'colway' ? 'Formulations' : brandSlug === 'peptides' ? 'Peptides' : 'Items'}
               </span>
@@ -910,7 +982,24 @@ export default function BrandCollectionPage({
           gap: '0.75rem',
           marginBottom: '0.65rem'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* Scope Switcher (Regla #22): filtrado vs base global */}
+            <div role="group" aria-label={isEs ? 'Alcance de métricas' : 'Metrics scope'} className="gcp-scope-switch">
+              {[
+                { id: 'filtered', label: isEs ? 'Filtrado' : 'Filtered' },
+                { id: 'global', label: isEs ? 'Global' : 'Entire collection' }
+              ].map(opt => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  aria-pressed={scopeMode === opt.id}
+                  data-active={scopeMode === opt.id ? 'true' : 'false'}
+                  onClick={() => setScopeMode(opt.id)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
             <span style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -933,8 +1022,8 @@ export default function BrandCollectionPage({
         </div>
 
         {/* 4 Cards Grid - Compact GCP Layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
-          {config.kpis.map((kpi, idx) => {
+        <div className="gcp-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
+          {kpiCards.map((kpi, idx) => {
             const Icon = kpi.icon;
             return (
               <div
@@ -954,11 +1043,11 @@ export default function BrandCollectionPage({
                   width: brandSlug === 'colway' ? '32px' : '38px',
                   height: brandSlug === 'colway' ? '32px' : '38px',
                   borderRadius: '8px',
-                  background: `${kpi.color}15`,
+                  background: '#eff6ff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: kpi.color,
+                  color: '#003666',
                   flexShrink: 0
                 }}>
                   <Icon size={brandSlug === 'colway' ? 16 : 19} />
@@ -1227,59 +1316,23 @@ export default function BrandCollectionPage({
             }}>
               {/* Row 1: Search Input (Google Cloud Standard - Regla #7) + Actions */}
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 320px', maxWidth: '540px' }}>
-                  <div style={{ position: 'relative', width: '100%' }}>
-                    <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-                    <input
-                      id="catalog-search-input"
-                      type="text"
-                      placeholder={`Search in ${config.name} (e.g. ${brandSlug === 'colway' ? 'collagen, cream' : brandSlug === 'peptides' ? 'BPC-157, GHK-Cu' : brandSlug === 'teletest' ? 'HLA, metals' : 'NAD+, cortisol'})... ⌘K`}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.65rem 2.2rem 0.65rem 2.5rem',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '8px',
-                        fontSize: '0.88rem',
-                        color: '#0f172a',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery('')}
-                        style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem' }}
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-
-                  {selectedCategory !== 'all' && (
-                    <span style={{
-                      fontSize: '0.74rem',
-                      fontWeight: 700,
-                      color: config.accentColor || '#003666',
-                      background: `${config.accentColor || '#003666'}15`,
-                      border: `1px solid ${config.accentColor || '#003666'}30`,
-                      padding: '4px 10px',
-                      borderRadius: '9999px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      <span>{selectedCategory}</span>
-                      <button
-                        onClick={() => setSelectedCategory('all')}
-                        style={{ background: 'none', border: 'none', color: config.accentColor || '#003666', cursor: 'pointer', padding: 0, fontSize: '0.8rem', lineHeight: 1 }}
-                      >
-                        ✕
-                      </button>
-                    </span>
-                  )}
+                <div style={{ flex: '1 1 320px', maxWidth: '640px', minWidth: 0 }}>
+                  <GlobalSearchBar
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder={`Search in ${config.name} (e.g. ${brandSlug === 'colway' ? 'collagen, cream' : brandSlug === 'peptides' ? 'BPC-157, GHK-Cu' : brandSlug === 'teletest' ? 'HLA, metals' : 'NAD+, cortisol'})...`}
+                    resultCount={filteredProducts.length}
+                    namespace={`collection-${brandSlug}`}
+                    size="lg"
+                    filters={[
+                      selectedCategory !== 'all' && {
+                        key: 'category',
+                        label: isEs ? 'Categoría' : 'Category',
+                        value: config.categories?.find(c => c.id === selectedCategory)?.label || selectedCategory,
+                        onRemove: () => setSelectedCategory('all')
+                      }
+                    ].filter(Boolean)}
+                  />
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
@@ -1396,62 +1449,29 @@ export default function BrandCollectionPage({
                 </div>
               </div>
 
-              {/* Row 2: Active Filter Chip (categories now live in the sidebar) */}
-              {selectedCategory !== 'all' && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', alignItems: 'center' }}>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '4px 12px',
-                    borderRadius: '16px',
-                    background: `${config.accentColor}12`,
-                    border: `1px solid ${config.accentColor}40`,
-                    color: config.accentColor,
-                    fontSize: '0.78rem',
-                    fontWeight: 600
-                  }}>
-                    {config.categories.find(c => c.id === selectedCategory)?.label || selectedCategory}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedCategory('all')}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: config.accentColor,
-                        cursor: 'pointer',
-                        fontSize: '0.85rem',
-                        fontWeight: 700,
-                        padding: '0 2px',
-                        lineHeight: 1
-                      }}
-                      aria-label="Clear category filter"
-                    >
-                      ✕
-                    </button>
-                  </span>
+              {/* Row 2: Reset (Regla #24/#29) — chips activos viven dentro del GlobalSearchBar */}
+              {(selectedCategory !== 'all' || searchQuery.trim()) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+                    style={{ minHeight: '44px', padding: '0 4px', background: 'none', border: 'none', color: '#0369a1', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    {isEs ? 'Limpiar filtros' : 'Clear filters'}
+                  </button>
                 </div>
               )}
             </div>
 
-            {/* Empty State */}
+            {/* Empty State (Regla #20/#29) */}
             {filteredProducts.length === 0 ? (
-              <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '4rem 2rem', textAlign: 'center' }}>
-                <FlaskConical size={48} color="#94a3b8" style={{ margin: '0 auto 1rem' }} />
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem' }}>
-                  {isEs 
-                    ? (brandSlug === 'colway' ? 'No se encontraron formulaciones' : 'No se encontraron resultados')
-                    : (brandSlug === 'colway' ? 'No Colway formulations found' : 'No diagnostic panels found')}
-                </h3>
-                <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0 0 1.5rem' }}>
-                  {isEs ? 'Prueba limpiando los filtros o utilizando otros términos de búsqueda.' : 'Try adjusting your search criteria or resetting filters.'}
-                </p>
-                <button
-                  onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                  style={{ padding: '8px 18px', borderRadius: '8px', background: config.accentColor, color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  {isEs ? 'Limpiar Filtros' : 'Clear Filters'}
-                </button>
+              <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <EmptyState
+                  icon={FlaskConical}
+                  title={isEs ? 'No hay resultados para estos filtros' : 'No results for these filters'}
+                  subtitle={isEs ? 'Prueba limpiando los filtros o utilizando otros términos de búsqueda.' : 'Try adjusting your search criteria or resetting filters.'}
+                  action={{ label: isEs ? 'Limpiar filtros' : 'Clear filters', onClick: () => { setSearchQuery(''); setSelectedCategory('all'); } }}
+                />
               </div>
             ) : (
               <div style={{
@@ -2499,7 +2519,8 @@ export default function BrandCollectionPage({
         onInquire={() => setIsInquiryDrawerOpen(true)}
         showClinicalAI={true}
         onOpenClinicalAI={() => setIsAtlasAiOpen(true)}
-        showSections={true}
+        compactMobile={true}
+        showSections={false}
         sectionsCount={brandCategories?.length || 0}
         sectionsLabel={isEs ? 'Categorías' : 'Categories'}
         onOpenSections={() => setIsMobileSidebarOpen(true)}
