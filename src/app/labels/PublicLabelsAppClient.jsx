@@ -901,6 +901,7 @@ export default function PublicLabelsAppClient({
                   </div>
                   <button
                     type="button"
+                    className="pls-gcp-header-search-btn"
                     onClick={() => {
                       setSearchOpen(true);
                       searchInputRef.current?.focus();
@@ -922,7 +923,8 @@ export default function PublicLabelsAppClient({
                     }}
                   >
                     <Search size={13} />
-                    <span>{isEs ? "Buscar (⌘K)" : "Search (⌘K)"}</span>
+                    <span>{isEs ? "Buscar" : "Search"}</span>
+                    <span className="pls-desktop-only-kbd">(⌘K)</span>
                   </button>
                 </div>
 
@@ -1052,14 +1054,17 @@ export default function PublicLabelsAppClient({
                       </p>
                     </div>
                   </div>
-                  <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-                    <div
+                  <div className="pls-gcp-upload-body" style={{ padding: "16px 20px" }}>
+                    <button
+                      type="button"
+                      className="pls-gcp-upload-zone"
                       onClick={() => setShowImport(true)}
                       style={{
+                        width: "100%",
                         border: "1.5px dashed #93c5fd",
                         background: "#f8fafd",
                         borderRadius: "8px",
-                        padding: "24px 16px",
+                        padding: "18px 16px",
                         textAlign: "center",
                         cursor: "pointer",
                         display: "flex",
@@ -1069,8 +1074,8 @@ export default function PublicLabelsAppClient({
                       }}
                     >
                       <div style={{
-                        width: "40px",
-                        height: "40px",
+                        width: "36px",
+                        height: "36px",
                         borderRadius: "8px",
                         background: "#e8f0fe",
                         color: "#1a73e8",
@@ -1078,40 +1083,32 @@ export default function PublicLabelsAppClient({
                         alignItems: "center",
                         justifyContent: "center"
                       }}>
-                        <Upload size={20} />
+                        <Upload size={18} />
                       </div>
-                      <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "#202124" }}>
-                        {isEs ? "Haz clic para subir PDF o Imagen" : "Click to upload PDF or Scan"}
+                      <div style={{ fontSize: "0.86rem", fontWeight: 700, color: "#202124" }}>
+                        {isEs ? "Subir Receta (PDF o Escaneo)" : "Upload Prescription (PDF or Scan)"}
                       </div>
-                      <div style={{ fontSize: "0.75rem", color: "#5f6368", maxWidth: "280px", lineHeight: 1.4 }}>
+                      <div style={{ fontSize: "0.74rem", color: "#5f6368", maxWidth: "300px", lineHeight: 1.4 }}>
                         {isEs
-                          ? "Extrae paciente, médico, activos, posología y crea las etiquetas de envase y envío."
-                          : "Automatically extracts patient, physician, actives, posology, and builds bottle & shipping labels."}
+                          ? "Extrae paciente, médico, activos y posología para generar las etiquetas automáticamente."
+                          : "Automatically extracts patient, physician, actives, and posology to build bottle & shipping labels."}
                       </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowImport(true)}
-                      style={{
-                        width: "100%",
-                        padding: "10px 16px",
-                        fontSize: "0.84rem",
+                      <span style={{
+                        marginTop: "4px",
+                        padding: "7px 14px",
+                        fontSize: "0.78rem",
                         fontWeight: 700,
                         color: "#ffffff",
                         background: "#1a73e8",
-                        border: "none",
                         borderRadius: "6px",
-                        cursor: "pointer",
                         display: "inline-flex",
                         alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
+                        gap: "6px",
                         boxShadow: "0 1px 2px rgba(26,115,232,0.25)"
-                      }}
-                    >
-                      <Upload size={15} />
-                      <span>{isEs ? "Importar Receta (PDF / Scan)" : "Import Prescription (PDF / Scan)"}</span>
+                      }}>
+                        <Upload size={14} />
+                        <span>{isEs ? "Seleccionar archivo..." : "Select PDF or Image..."}</span>
+                      </span>
                     </button>
                   </div>
                 </div>

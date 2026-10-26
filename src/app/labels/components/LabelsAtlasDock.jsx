@@ -249,8 +249,8 @@ export default function LabelsAtlasDock({
                 ? `${patientQueue.length} ${patientQueue.length === 1 ? (isEs ? 'paciente activo' : 'active patient') : (isEs ? 'pacientes activos' : 'active patients')}`
                 : (isEs ? 'Listo para buscar' : 'Ready to search')}
             </span>
-            <span className="pls-dock-shortcut" title="Atajo de teclado">
-              Presiona <strong>?</strong>
+            <span className="pls-dock-shortcut" title={isEs ? 'Atajo de teclado' : 'Keyboard shortcut'}>
+              {isEs ? 'Pulsa' : 'Press'} <strong>?</strong>
             </span>
           </div>
         </div>

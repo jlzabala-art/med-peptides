@@ -732,9 +732,24 @@
   .pls-search-badge {
     display: none !important;
   }
+  .pls-btn-share .pls-btn-share-label {
+    display: none !important;
+  }
   .pls-btn-share {
-    padding: 6px 8px !important;
-    font-size: 0.74rem !important;
+    width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+  }
+  .pls-user-profile-text {
+    display: none !important;
+  }
+  .pls-user-profile-btn {
+    padding: 3px 6px 3px 3px !important;
+    gap: 4px !important;
+  }
+  .pls-desktop-only-kbd {
+    display: none !important;
   }
   .pls-context-strip {
     padding: 8px 12px !important;
@@ -1080,13 +1095,66 @@
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 768px) {
+  .pls-gcp-home {
+    padding: 14px 12px 68px;
+    gap: 14px;
+  }
   .pls-gcp-kpis {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .pls-gcp-kpi-card {
+    padding: 10px 12px;
+    gap: 2px;
+  }
+  .pls-gcp-kpi-val {
+    font-size: clamp(0.98rem, 0.85rem + 1.2vw, 1.18rem);
+  }
+  .pls-gcp-kpi-sub {
+    font-size: 0.68rem;
+    line-height: 1.25;
+  }
+  .pls-gcp-card-header {
+    padding: 12px 14px;
   }
   .pls-gcp-patient-row {
-    flex-direction: column;
-    align-items: flex-start;
+    padding: 10px 14px;
+    flex-direction: row;
+    align-items: safe center;
+  }
+  .pls-gcp-upload-body {
+    padding: 12px 14px !important;
+  }
+  .pls-gcp-upload-zone {
+    padding: 14px 12px !important;
+  }
+  /* Compact 1-Line Bottom Dock on Mobile (GCP Console UX) */
+  .pls-atlas-bottom-dock {
+    padding: 6px 12px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+  .pls-dock-content {
+    gap: 8px;
+  }
+  .pls-dock-quick-pills {
+    flex: 1 1 0%;
+    min-inline-size: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .pls-dock-quick-pills::-webkit-scrollbar {
+    display: none;
+  }
+  .pls-dock-right-meta {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .pls-dock-badge {
+    display: none;
   }
 }
 

@@ -108,8 +108,8 @@ export default function LabelsHeader({
               aria-expanded={searchOpen}
               aria-controls="pls-search-results-listbox"
               placeholder={isEs
-                ? "Buscar paciente o nº historia (Selección múltiple: puedes añadir varios)... (⌘K)"
-                : "Search patient or file # (Multi-selection: add multiple to batch)... (⌘K)"}
+                ? "Buscar paciente, receta o nº historia..."
+                : "Search patient, prescription or file #..."}
             />
             {searchQuery && (
               <button
@@ -178,9 +178,10 @@ export default function LabelsHeader({
               color: copiedShareLink ? '#137333' : '#3c4043'
             }}
             title={isEs ? 'Compartir enlace público del estudio' : 'Share public studio link'}
+            aria-label={isEs ? 'Compartir enlace público del estudio' : 'Share public studio link'}
           >
             {copiedShareLink ? <Check size={14} color="#137333" /> : <Share2 size={14} />}
-            <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
+            <span className="pls-btn-share-label">{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
           </button>
 
           {/* Language Switcher */}
@@ -240,7 +241,7 @@ export default function LabelsHeader({
                 >
                   {userInitials}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.15 }}>
+                <div className="pls-user-profile-text" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.15 }}>
                   <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {userDisplayName}
                   </span>
