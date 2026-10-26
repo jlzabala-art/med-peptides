@@ -95,7 +95,7 @@ export function detectOptimalLabelDimensions(item) {
       widthMm: isLarge ? 100 : 75,
       heightMm: isLarge ? 50 : 45,
       id: isLarge ? '100x50' : '75x45',
-      reason: `Bote ${count} Cápsulas (${isLarge ? '100×50mm' : '75×45mm'})`,
+      reason: `Bottle ${count} Capsules (${isLarge ? '100×50mm' : '75×45mm'})`,
       containerTag: `${count} Caps Jar`
     };
   }
@@ -106,7 +106,7 @@ export function detectOptimalLabelDimensions(item) {
       widthMm: 100,
       heightMm: 50,
       id: '100x50',
-      reason: 'Frasco Solución / Champú 250mL (100×50mm)',
+      reason: 'Solution / Shampoo Bottle 250mL (100×50mm)',
       containerTag: '250mL Bottle'
     };
   }
@@ -116,7 +116,7 @@ export function detectOptimalLabelDimensions(item) {
       widthMm: 100,
       heightMm: 50,
       id: '100x50',
-      reason: 'Frasco Solución 200mL (100×50mm)',
+      reason: 'Solution Bottle 200mL (100×50mm)',
       containerTag: '200mL Bottle'
     };
   }
@@ -126,7 +126,7 @@ export function detectOptimalLabelDimensions(item) {
       widthMm: 100,
       heightMm: 50,
       id: '100x50',
-      reason: 'Frasco Solución (100×50mm)',
+      reason: 'Solution Bottle (100×50mm)',
       containerTag: '120mL-150mL Bottle'
     };
   }
@@ -136,7 +136,7 @@ export function detectOptimalLabelDimensions(item) {
       widthMm: 100,
       heightMm: 50,
       id: '100x50',
-      reason: 'Frasco Solución 100mL (100×50mm)',
+      reason: 'Solution Bottle 100mL (100×50mm)',
       containerTag: '100mL Bottle'
     };
   }
@@ -147,7 +147,7 @@ export function detectOptimalLabelDimensions(item) {
       widthMm: 75,
       heightMm: 45,
       id: '75x45',
-      reason: 'Dispensador / Bote Crema 90mL (75×45mm)',
+      reason: 'Dispenser / Cream Jar 90mL (75×45mm)',
       containerTag: '90mL Dispenser'
     };
   }
@@ -165,7 +165,7 @@ export function detectOptimalLabelDimensions(item) {
       widthMm: 75,
       heightMm: 45,
       id: '75x45',
-      reason: 'Gotero / Frasco 30mL (75×45mm)',
+      reason: 'Dropper / Bottle 30mL (75×45mm)',
       containerTag: '30mL Dropper'
     };
   }
@@ -183,7 +183,7 @@ export function detectOptimalLabelDimensions(item) {
       widthMm: 70,
       heightMm: 35,
       id: '70x35',
-      reason: 'Tarro Pomada / Crema (70×35mm)',
+      reason: 'Pomade / Cream Jar (70×35mm)',
       containerTag: 'Pomade Jar'
     };
   }
@@ -199,7 +199,7 @@ export function detectOptimalLabelDimensions(item) {
       widthMm: 90,
       heightMm: 38,
       id: '90x38',
-      reason: 'Vial Inyectable / Ampolla (90×38mm)',
+      reason: 'Injectable Vial / Ampoule (90×38mm)',
       containerTag: 'Vial'
     };
   }
@@ -209,7 +209,7 @@ export function detectOptimalLabelDimensions(item) {
     widthMm: 75,
     heightMm: 45,
     id: '75x45',
-    reason: 'Estándar Clínico (75×45mm)',
+    reason: 'Clinical Standard (75×45mm)',
     containerTag: 'Standard Delivery'
   };
 }
