@@ -62,6 +62,17 @@ const FEATURED_PATIENTS = [
 const RECENT_KEY = 'pls_recent_prescriptions_v1';
 const QUEUE_STORAGE_KEY = 'pls_patient_queue_formats_v2';
 const ACTIVE_RX_KEY = 'pls_last_active_rx_code';
+const LABELED_STORAGE_KEY = 'pls_labeled_parts_v1';
+
+function getInitialLabeledSet() {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(LABELED_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
 
 function getRecentPrescriptions() {
   if (typeof window === 'undefined') return [];
@@ -222,6 +233,8 @@ export default function PublicLabelsAppClient({
   const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [isApprovingRx, setIsApprovingRx] = useState(false);
+  const [isBatchApproving, setIsBatchApproving] = useState(false);
+  const [labeledMap, setLabeledMap] = useState(getInitialLabeledSet);
 
   const searchBoxRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -649,6 +662,195 @@ export default function PublicLabelsAppClient({
     }
   };
 
+  // Labeled tracking across whole batch queue (Quality checklist)
+  const isPartLabeled = (code, partIdx = 0) => {
+    if (!code) return false;
+    return Boolean(labeledMap[`${String(code).toUpperCase()}_${partIdx}`]);
+  };
+
+  const isPatientFullyLabeled = (pItem) => {
+    if (!pItem?.code) return false;
+    const labelsCount = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels.length : 1;
+    for (let i = 0; i < labelsCount; i++) {
+      if (!isPartLabeled(pItem.code, i)) return false;
+    }
+    return true;
+  };
+
+  const totalLabeledCount = React.useMemo(() => {
+    let count = 0;
+    patientQueue.forEach(pItem => {
+      const labelsCount = Array.isArray(pItem.labels) && pItem.labels.length > 0 ? pItem.labels.length : 1;
+      const partsToCheck = (pItem.selectedPartIndex != null && pItem.selectedPartIndex !== 'all')
+        ? [pItem.selectedPartIndex]
+        : Array.from({ length: labelsCount }, (_, i) => i);
+      partsToCheck.forEach(partIdx => {
+        if (isPartLabeled(pItem.code, partIdx)) count++;
+      });
+    });
+    return count;
+  }, [patientQueue, labeledMap]);
+
+  const handleToggleLabeled = (code = cleanRxCode || activeCode, partIdx = labelIndex) => {
+    if (!code) return;
+    const key = `${String(code).toUpperCase()}_${partIdx}`;
+    setLabeledMap(prev => {
+      const next = { ...prev, [key]: !prev[key] };
+      try {
+        localStorage.setItem(LABELED_STORAGE_KEY, JSON.stringify(next));
+      } catch { /* storage unavailable */ }
+      const newStatus = next[key];
+      if (newStatus) {
+        toast.success(
+          isEs
+            ? `Frasco #${code} (Parte ${partIdx + 1}) marcado como etiquetado ✓`
+            : `Bottle #${code} (Part ${partIdx + 1}) marked as labeled ✓`,
+          { duration: 2000 }
+        );
+      }
+      return next;
+    });
+  };
+
+  // Batch Approval for entire Patient Queue (Reimi / Kasia Studio)
+  const handleBatchApprove = async () => {
+    const unapproved = patientQueue.filter(p => {
+      const st = p.rx?.status || p.rx?.state;
+      return st !== 'approved' && !p.rx?.isSigned;
+    });
+
+    if (unapproved.length === 0) {
+      toast.success(isEs ? 'Todas las recetas del lote ya están autorizadas ✓' : 'All prescriptions in batch are already authorized ✓');
+      return;
+    }
+
+    setIsBatchApproving(true);
+    const toastId = toast.loading(isEs ? `Aprobando ${unapproved.length} recetas en lote...` : `Batch approving ${unapproved.length} prescriptions...`);
+
+    try {
+      const results = await Promise.allSettled(
+        unapproved.map(p => {
+          const code = String(p.code || p.rx?.fileNumber || '').trim();
+          return fetch('/api/prescriptions/update-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prescriptionId: p.rx?.id || code,
+              prescriptionNumber: code,
+              status: 'approved',
+              reason: 'Batch authorized for compounding & label release by Compounding Studio Specialist (Reimi / Kasia)',
+              updatedBy: user?.displayName || user?.email || 'Compounding Studio Specialist'
+            })
+          }).then(res => res.json());
+        })
+      );
+
+      const approvedCodes = new Set(unapproved.map(p => String(p.code).trim()));
+
+      // Update patientQueue
+      setPatientQueue(prevQueue => prevQueue.map(p => {
+        if (approvedCodes.has(String(p.code).trim())) {
+          return {
+            ...p,
+            rx: p.rx ? { ...p.rx, status: 'approved', state: 'approved', isSigned: true } : p.rx
+          };
+        }
+        return p;
+      }));
+
+      // Update currentRx if in batch
+      if (approvedCodes.has(String(cleanRxCode).trim()) || approvedCodes.has(String(activeCode).trim())) {
+        setCurrentRx(prev => prev ? { ...prev, status: 'approved', state: 'approved', isSigned: true } : prev);
+      }
+
+      const successful = results.filter(r => r.status === 'fulfilled' && r.value?.success).length;
+      toast.success(
+        isEs 
+          ? `¡${successful} de ${unapproved.length} recetas autorizadas para formulación! ✓`
+          : `Successfully authorized ${successful} of ${unapproved.length} prescriptions! ✓`,
+        { id: toastId }
+      );
+    } catch (err) {
+      console.error('Error during batch approval:', err);
+      toast.error(isEs ? 'Error en aprobación en lote' : 'Error during batch approval', { id: toastId });
+    } finally {
+      setIsBatchApproving(false);
+    }
+  };
+
+  // Laboratory Hotkeys for Reimi & Kasia (A: Approve, L: Toggle Labeled, ArrowRight/Left: Switch, 1-4: Variant)
+  useEffect(() => {
+    const handleKeyDownBench = (e) => {
+      // Do nothing if typing in an input, textarea, or contentEditable
+      const tag = e.target.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) {
+        return;
+      }
+      // If search or import modal is open, don't hijack
+      if (searchOpen || showImport) {
+        return;
+      }
+
+      // 'a' or 'A': Approve active prescription if not approved
+      if ((e.key === 'a' || e.key === 'A') && !e.metaKey && !e.ctrlKey) {
+        const isAppr = currentRx?.status === 'approved' || currentRx?.state === 'approved' || currentRx?.isSigned;
+        if (!isAppr && !isApprovingRx) {
+          e.preventDefault();
+          handleApprovePrescription();
+        }
+      }
+
+      // 'l' or 'L': Toggle labeled status
+      if ((e.key === 'l' || e.key === 'L') && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        handleToggleLabeled(cleanRxCode || activeCode, labelIndex);
+      }
+
+      // ArrowRight: next part or next patient
+      if (e.key === 'ArrowRight' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        if (labels.length > 1 && labelIndex < labels.length - 1) {
+          const nextIdx = labelIndex + 1;
+          setLabelIndex(nextIdx);
+          const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${nextIdx + 1}&edit=true&lang=${lang}`;
+          window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+        } else if (patientQueue.length > 1 && activeQueueIndex < patientQueue.length - 1) {
+          handleSwitchActivePatient(activeQueueIndex + 1);
+        }
+      }
+
+      // ArrowLeft: prev part or prev patient
+      if (e.key === 'ArrowLeft' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        if (labels.length > 1 && labelIndex > 0) {
+          const prevIdx = labelIndex - 1;
+          setLabelIndex(prevIdx);
+          const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${prevIdx + 1}&edit=true&lang=${lang}`;
+          window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+        } else if (patientQueue.length > 1 && activeQueueIndex > 0) {
+          handleSwitchActivePatient(activeQueueIndex - 1);
+        }
+      }
+
+      // 1, 2, 3, 4: switch variant
+      const variantMap = { '1': 'backQr', '2': 'front', '3': 'frontWithQr', '4': 'shipping' };
+      if (variantMap[e.key] && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        handleUpdatePatientConfig(activeQueueIndex, { variant: variantMap[e.key] });
+        const vNames = {
+          backQr: isEs ? 'Trasera con QR' : 'Back with QR',
+          front: isEs ? 'Frontal' : 'Front',
+          frontWithQr: isEs ? 'Frontal con QR' : 'Front with QR',
+          shipping: isEs ? 'Etiqueta de Envío' : 'Shipping Label'
+        };
+        toast(isEs ? `Variante: ${vNames[variantMap[e.key]]}` : `Variant: ${vNames[variantMap[e.key]]}`, { icon: '🏷️', duration: 1500 });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDownBench);
+    return () => window.removeEventListener('keydown', handleKeyDownBench);
+  }, [searchOpen, showImport, currentRx, isApprovingRx, cleanRxCode, activeCode, labelIndex, labels, patientQueue, activeQueueIndex, isEs, lang]);
+
   // Generate and download A4 Multi-Patient Batch PDF
   const handleDownloadA4BatchPdf = async () => {
     if (!patientQueue.length) return;
@@ -863,6 +1065,10 @@ export default function PublicLabelsAppClient({
           totalBatchLabelsCount={totalBatchLabelsCount}
           onSwitchActivePatient={handleSwitchActivePatient}
           onRemoveFromQueue={handleRemoveFromQueue}
+          onBatchApprove={handleBatchApprove}
+          isBatchApproving={isBatchApproving}
+          totalLabeledCount={totalLabeledCount}
+          isPatientFullyLabeled={isPatientFullyLabeled}
           isEs={isEs}
         />
       )}
@@ -883,6 +1089,8 @@ export default function PublicLabelsAppClient({
           rxStatus={currentRx?.status || currentRx?.state || 'approved'}
           isApproving={isApprovingRx}
           onApprovePrescription={handleApprovePrescription}
+          isCurrentLabeled={isPartLabeled(cleanRxCode || activeCode, labelIndex)}
+          onToggleLabeled={() => handleToggleLabeled(cleanRxCode || activeCode, labelIndex)}
           onSelectLabelPart={(idx) => {
             setLabelIndex(idx);
             const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${idx + 1}&edit=true&lang=${lang}`;

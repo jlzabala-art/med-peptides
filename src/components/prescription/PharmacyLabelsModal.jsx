@@ -15,6 +15,28 @@ import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
  * Optical Print Legibility Pill Badge
  * Alarms with warning red when font size drops below 6.0 pt legal pharmaceutical threshold.
  */
+function getFormattedDate(d = new Date()) {
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+function getOffsetDate(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return getFormattedDate(d);
+}
+
+function generateAutoLot(code) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const cleanCode = String(code || '01').replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase();
+  return `LOT-${year}${month}${day}-${cleanCode || 'A1'}`;
+}
+
 function FontLegibilityPill({ pt = 0, isEs = false, compact = false, threshold = 4.0 }) {
   const isAlarm = pt < threshold;
   return (
@@ -106,6 +128,7 @@ export default function PharmacyLabelsModal({
   const [isSavingToFirebase, setIsSavingToFirebase] = useState(false);
   const [firebaseSaveSuccess, setFirebaseSaveSuccess] = useState(false);
   const [firebaseSaveError, setFirebaseSaveError] = useState(null);
+  const [showCustomsTitleSuggestions, setShowCustomsTitleSuggestions] = useState(false);
 
   // Sync selected index when opened or changed from outside
   React.useEffect(() => {
@@ -2351,9 +2374,31 @@ export default function PharmacyLabelsModal({
                     </div>
 
                     <div className="gcp-col-3 gcp-field-wrap">
-                      <label className="gcp-form-label">
-                        <span>{isEs ? 'Lote (Batch)' : 'Dispensing Batch'}</span>
-                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span>{isEs ? 'Lote (Batch)' : 'Dispensing Batch'}</span>
+                          <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newLot = generateAutoLot(currentItem.fileNumber || currentItem.rxCode || currentItem.code);
+                            handleFieldChange('batchCode', newLot);
+                          }}
+                          style={{
+                            border: '1px solid #a7f3d0',
+                            background: '#ecfdf5',
+                            color: '#047857',
+                            borderRadius: '4px',
+                            fontSize: '0.66rem',
+                            fontWeight: 750,
+                            padding: '1px 6px',
+                            cursor: 'pointer'
+                          }}
+                          title={isEs ? 'Generar código de lote con fecha de hoy' : 'Generate batch code with today date'}
+                        >
+                          ⚡ {isEs ? 'Lote Hoy' : 'Auto LOT'}
+                        </button>
                       </label>
                       <input
                         type="text"
@@ -2381,12 +2426,58 @@ export default function PharmacyLabelsModal({
                     {/* Row 2: Product Title / Formula (12 cols - full width so complete formula title is 100% visible) */}
                     <div className="gcp-col-12 gcp-field-wrap">
                       <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <span>{isEs ? 'Título Producto / Fórmula' : 'Product Title / Formula'}</span>
                           <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                          <button
+                            type="button"
+                            onClick={() => setShowCustomsTitleSuggestions(!showCustomsTitleSuggestions)}
+                            style={{
+                              border: '1px solid #d2e3fc',
+                              background: '#e8f0fe',
+                              color: '#1a73e8',
+                              borderRadius: '4px',
+                              fontSize: '0.64rem',
+                              fontWeight: 700,
+                              padding: '1px 6px',
+                              cursor: 'pointer'
+                            }}
+                            title={isEs ? 'Ver sugerencias seguras para aduanas' : 'View customs-safe name suggestions'}
+                          >
+                            🛡️ {isEs ? 'Sugerencias Aduanas' : 'Customs Names'}
+                          </button>
                         </div>
                         <FontLegibilityPill pt={titlePt} isEs={isEs} compact={true} threshold={legalThreshold} />
                       </label>
+                      {showCustomsTitleSuggestions && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px', padding: '8px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569', width: '100%' }}>
+                            {isEs ? 'Nombres recomendados no medicinales (para evitar retención en aduanas):' : 'Recommended non-medicinal names (to prevent customs hold):'}
+                          </span>
+                          {getCustomsFriendlySuggestions(currentItem).map((s) => (
+                            <button
+                              key={`title-sug-${s}`}
+                              type="button"
+                              onClick={() => {
+                                handleFieldChange('productTitle', s);
+                                setShowCustomsTitleSuggestions(false);
+                              }}
+                              style={{
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                border: '1px solid #cbd5e1',
+                                background: '#ffffff',
+                                color: '#1e293b',
+                                fontSize: '0.72rem',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              + {s}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                       <input
                         type="text"
                         value={currentItem.productTitle || currentItem.productName || ''}
@@ -2614,9 +2705,28 @@ export default function PharmacyLabelsModal({
                     </div>
 
                     <div className="gcp-col-3 gcp-field-wrap">
-                      <label className="gcp-form-label">
-                        <span>{isEs ? 'Fecha Fabricación (Mfg)' : 'Mfg Date'}</span>
-                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span>{isEs ? 'Fecha Fabricación (Mfg)' : 'Mfg Date'}</span>
+                          <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleFieldChange('prodDate', getFormattedDate())}
+                          style={{
+                            border: '1px solid #bfdbfe',
+                            background: '#eff6ff',
+                            color: '#1d4ed8',
+                            borderRadius: '4px',
+                            fontSize: '0.64rem',
+                            fontWeight: 750,
+                            padding: '1px 5px',
+                            cursor: 'pointer'
+                          }}
+                          title={isEs ? 'Fijar fecha de hoy' : 'Set to today'}
+                        >
+                          {isEs ? 'Hoy' : 'Today'}
+                        </button>
                       </label>
                       <input
                         type="text"
@@ -2628,9 +2738,38 @@ export default function PharmacyLabelsModal({
                     </div>
 
                     <div className="gcp-col-3 gcp-field-wrap">
-                      <label className="gcp-form-label">
-                        <span>{isEs ? 'Fecha Caducidad (Exp)' : 'Expiry Date'}</span>
-                        <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span>{isEs ? 'Fecha Caducidad (Exp)' : 'Expiry Date'}</span>
+                          <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                        </div>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                          {[
+                            { label: '+30d', days: 30, title: '+30 días' },
+                            { label: '+60d', days: 60, title: '+60 días' },
+                            { label: '+90d', days: 90, title: '+90 días' },
+                            { label: '+180d', days: 180, title: '+180 días' },
+                          ].map((preset) => (
+                            <button
+                              key={preset.days}
+                              type="button"
+                              onClick={() => handleFieldChange('expDate', getOffsetDate(preset.days))}
+                              style={{
+                                border: '1px solid #cbd5e1',
+                                background: '#f8fafc',
+                                color: '#334155',
+                                borderRadius: '3px',
+                                fontSize: '0.62rem',
+                                fontWeight: 750,
+                                padding: '1px 4px',
+                                cursor: 'pointer'
+                              }}
+                              title={preset.title}
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                        </div>
                       </label>
                       <input
                         type="text"

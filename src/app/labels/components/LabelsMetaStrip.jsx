@@ -18,7 +18,9 @@ export default function LabelsMetaStrip({
   onQuickSearchPatient,
   rxStatus = 'approved',
   isApproving = false,
-  onApprovePrescription = null
+  onApprovePrescription = null,
+  isCurrentLabeled = false,
+  onToggleLabeled = null
 }) {
   const normStatus = String(rxStatus || '').toLowerCase();
   const isApproved = ['approved', 'active', 'completed', 'delivered', 'dispensed'].includes(normStatus);
@@ -153,6 +155,19 @@ export default function LabelsMetaStrip({
               <span>{isApproving ? (isEs ? 'Aprobando...' : 'Approving...') : (isEs ? 'Aprobar Receta' : 'Approve Rx')}</span>
             </button>
           )}
+
+          {/* Quality Checklist: Toggle Labeled & Verified Status */}
+          {onToggleLabeled && (
+            <button
+              type="button"
+              onClick={onToggleLabeled}
+              className={`pls-meta-btn-labeled ${isCurrentLabeled ? 'is-labeled' : ''}`}
+              title={isEs ? 'Marcar o desmarcar este frasco como etiquetado / verificado (Atajo: L)' : 'Toggle bottle labeled / verified status (Hotkey: L)'}
+            >
+              <span>{isCurrentLabeled ? '✓' : '○'}</span>
+              <span>{isCurrentLabeled ? (isEs ? 'Etiquetado ✓' : 'Labeled ✓') : (isEs ? 'Marcar Etiquetado' : 'Mark Labeled')}</span>
+            </button>
+          )}
         </div>
 
         {/* Formula Parts Switcher (Part 1 / Part 2) with Full Explicit Titles */}
@@ -192,6 +207,18 @@ export default function LabelsMetaStrip({
             </div>
           </>
         )}
+
+        {/* Bench Laboratory Hotkeys Tip (Reimi & Kasia Quick Guide) */}
+        <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.67rem', color: '#64748b' }}>
+          <span style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px', fontWeight: 800, color: '#334155' }}>⌨️ A</span>
+          <span>{isEs ? 'Aprobar' : 'Approve'}</span>
+          <span style={{ opacity: 0.4 }}>·</span>
+          <span style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px', fontWeight: 800, color: '#334155' }}>L</span>
+          <span>{isEs ? 'Etiquetar' : 'Label'}</span>
+          <span style={{ opacity: 0.4 }}>·</span>
+          <span style={{ background: '#f1f5f9', padding: '1px 5px', borderRadius: '3px', fontWeight: 800, color: '#334155' }}>1-4</span>
+          <span>{isEs ? 'Variante' : 'Variant'}</span>
+        </div>
       </div>
     </div>
   );
