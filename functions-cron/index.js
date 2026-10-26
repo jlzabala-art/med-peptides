@@ -36,3 +36,7 @@ exports.sendReminders = sendReminders.sendReminders;
 // -- Backups --
 exports.scheduledFirestoreExport = require('./src/triggers/scheduled_backups').scheduledFirestoreExport;
 
+// -- Algolia Zero-Drift Auto-Sync --
+exports.nightlyAlgoliaPrescriptionSync = require('./src/scheduled/algoliaPrescriptionSync').nightlyAlgoliaPrescriptionSync;
+
+
