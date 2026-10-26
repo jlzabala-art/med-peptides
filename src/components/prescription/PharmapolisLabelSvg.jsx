@@ -32,7 +32,10 @@ function wrapLines(text, maxChars = 60) {
  */
 function wrapDirections(text, firstLineMaxChars = 44, otherLinesMaxChars = 56) {
   if (!text) return [];
-  const clean = String(text).replace(/^directions\s*(for\s*use)?:\s*/i, '').trim();
+  const clean = String(text)
+    .replace(/^\[[^\]]+\]:\s*/i, '')
+    .replace(/^(?:(?:directions\s*(?:for\s*use)?|indicaciones(?:\s*de\s*uso)?|posolog[íi]a|instrucciones|instructions):\s*)+/i, '')
+    .trim();
   const words = clean.split(/\s+/);
   const lines = [];
   let current = '';
@@ -265,6 +268,9 @@ export default function PharmapolisLabelSvg({
   const rawDirections = labelData.directions || labelData.instructions || 'Take / apply as directed by prescribing physician.';
   const directions = React.useMemo(() => {
     let d = String(rawDirections).trim();
+    // Normalize and remove redundant prefixes like "[Anti-hair loss]: " or "Directions for use: "
+    d = d.replace(/^\[[^\]]+\]:\s*/i, '').trim();
+    d = d.replace(/^(?:(?:directions\s*(?:for\s*use)?|indicaciones(?:\s*de\s*uso)?|posolog[íi]a|instrucciones|instructions):\s*)+/i, '').trim();
     // Normalize and remove redundant trailing "as prescribed"
     d = d.replace(/[,.]?\s*as\s+prescribed\.?$/i, '').trim();
     if (d && !d.endsWith('.')) d += '.';
@@ -307,7 +313,10 @@ export default function PharmapolisLabelSvg({
   const volume = labelData.volume || labelData.netVolume || labelData.size || labelData.netContent || labelData.totalVolume || labelData.quantity || '100 mL';
   
   // Dynamic Dispensing Pharmacy Name & Address
-  const rawPharmacyName = (labelData.pharmacyName || labelData.pharmacy || labelData.dispensingPharmacy || 'PHARMAPOLIS').trim();
+  let rawPharmacyName = (labelData.pharmacyName || labelData.pharmacy || labelData.dispensingPharmacy || 'Pharmapolis Compounding Pharmacy').trim();
+  if (/^pharmapolis(\s*compounding\s*pharmacy|\s*lab)?$/i.test(rawPharmacyName) || rawPharmacyName.toUpperCase() === 'PHARMAPOLIS' || rawPharmacyName.toUpperCase() === 'PHARMAPOLISLAB') {
+    rawPharmacyName = 'Pharmapolis Compounding Pharmacy';
+  }
   const pharmacyName = rawPharmacyName.toUpperCase();
   const pharmacyAddress = labelData.pharmacyAddress || labelData.dispensaryAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria';
   const dynHeaderTitleSize = pharmacyName.length > 26 
@@ -437,15 +446,31 @@ export default function PharmapolisLabelSvg({
   const rawVehLower = rawVehStr.toLowerCase();
 
   const isPomadeOrOintment = formulaLower.includes('pomade') || formulaLower.includes('pomada') || formulaLower.includes('ointment') || formulaLower.includes('diltiazem') || dFormLower.includes('ointment') || dFormLower.includes('pomade') || pNameLower.includes('pomade') || pNameLower.includes('ointment');
-  const isHormone = formulaLower.includes('testosterone') || formulaLower.includes('estradiol') || formulaLower.includes('progesterone') || formulaLower.includes('pentravan') || pNameLower.includes('testosterone') || pNameLower.includes('estradiol') || pNameLower.includes('hormone') || rawVehLower.includes('pentravan');
-  const isTopicalScalp = !isPomadeOrOintment && !isHormone && (
-    /\b(scalp|shampoo|trichosol|trichooil|trichofoam)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`) ||
-    /\b(leave the solution on your scalp|washing your hair|wash your scalp|apply.*scalp|topical scalp)\b/i.test(dirLower)
+  const isScalpTreatment = /\b(trichosol|trichowash|trichooil|trichofoam|scalp|hair|cabello|cuero cabelludo|shampoo|17-?a|17-?alpha|alfatradiol|igrantine)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
+  const isHormone = !isScalpTreatment && (formulaLower.includes('testosterone') || formulaLower.includes('estradiol') || formulaLower.includes('progesterone') || formulaLower.includes('pentravan') || pNameLower.includes('testosterone') || pNameLower.includes('estradiol') || pNameLower.includes('hormone') || rawVehLower.includes('pentravan'));
+  
+  // Prioritize explicit Oral determination before generic topical scalp cues
+  const isOral = !isPomadeOrOintment && !isHormone && (
+    dFormLower.includes('oral') ||
+    dFormLower.includes('capsule') ||
+    dFormLower.includes('cápsul') ||
+    formulaLower.includes('capsule') ||
+    formulaLower.includes('cápsul') ||
+    formulaLower.includes('nattokinase') ||
+    formulaLower.includes('serrapeptase') ||
+    /\b(take|swallow|ingest|tome|ingerir)\b/i.test(dirLower) ||
+    /\b(with water|with food|with breakfast|with meal|with lunch|with dinner|on empty stomach)\b/i.test(dirLower) ||
+    /\b\d+\s*(?:capsule|cap|cápsula)s?\s*(?:daily|per day|a day|al día|once daily)/i.test(dirLower) ||
+    /caps/i.test(String(volume || ''))
   );
+
+  const isTopicalScalp = !isPomadeOrOintment && !isHormone && !isOral && (
+    /\b(shampoo|trichosol|trichooil|trichofoam)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`) ||
+    /\b(leave the solution on your scalp|washing your hair|wash your scalp|apply.*scalp|topical scalp|massage.*rinse)\b/i.test(dirLower) ||
+    (/\b(scalp|hair)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${rawVehLower}`) && !isOral)
+  );
+
   const isTrichoOil = isTopicalScalp && /\b(trichooil|scalp oil|washing your hair|pre-wash|massage.*minutes)\b/i.test(`${formulaLower} ${dFormLower} ${pNameLower} ${dirLower} ${rawVehLower}`);
-  const isOral = !isPomadeOrOintment && !isHormone && !isTopicalScalp && (
-    dFormLower.includes('oral') || dFormLower.includes('capsule') || formulaLower.includes('capsule') || formulaLower.includes('nattokinase') || formulaLower.includes('serrapeptase') || /\btake\s+\d+\s*cap/i.test(dirLower)
-  );
 
   const validSavedVehicle = (isTopicalScalp && /vegetable capsules/i.test(rawVehStr)) ? '' : rawVehStr;
   const cleanVolForVeh = (isTopicalScalp && /capsule/i.test(String(volume || ''))) ? (isTrichoOil ? '30 mL' : '100 mL') : volume;
@@ -471,13 +496,15 @@ export default function PharmapolisLabelSvg({
     }
   }
 
-  let cautionText = 'CAUTION: FOR TOPICAL SCALP USE ONLY • KEEP OUT OF REACH OF CHILDREN';
+  let cautionText = 'CAUTION: FOR PATIENT USE AS PRESCRIBED • KEEP OUT OF REACH OF CHILDREN';
   if (isPomadeOrOintment) {
     cautionText = 'CAUTION: FOR TOPICAL / PERIANAL USE ONLY • KEEP OUT OF REACH OF CHILDREN';
   } else if (isHormone) {
     cautionText = 'CAUTION: FOR TRANSDERMAL / TOPICAL USE ONLY • KEEP OUT OF REACH OF CHILDREN';
   } else if (isOral) {
     cautionText = 'CAUTION: FOR ORAL USE ONLY • TAKE WITH WATER • KEEP OUT OF REACH OF CHILDREN';
+  } else if (isTopicalScalp) {
+    cautionText = 'CAUTION: FOR TOPICAL SCALP USE ONLY • KEEP OUT OF REACH OF CHILDREN';
   }
 
   // ───────────────────────────────────────────────────────────────────────────

@@ -86,16 +86,52 @@ export function detectOptimalLabelDimensions(item) {
     .join(' ')
     .toLowerCase();
 
-  // 1. Solution Bottles: 100 mL, 120 mL, 150 mL, 200 mL, 250 mL or TrichoSol
-  if (
-    corpus.includes('100 ml') ||
-    corpus.includes('100ml') ||
-    corpus.includes('120 ml') ||
-    corpus.includes('150 ml') ||
-    corpus.includes('200 ml') ||
-    corpus.includes('250 ml') ||
-    corpus.includes('trichosol')
-  ) {
+  // 1. Capsules & Oral Jars (Prioritize explicit capsule detection)
+  const capMatch = corpus.match(/(\d+)\s*(?:caps|c[aá]psulas?)/i);
+  if (capMatch) {
+    const count = parseInt(capMatch[1], 10);
+    const isLarge = count >= 120;
+    return {
+      widthMm: isLarge ? 100 : 75,
+      heightMm: isLarge ? 50 : 45,
+      id: isLarge ? '100x50' : '75x45',
+      reason: `Bote ${count} Cápsulas (${isLarge ? '100×50mm' : '75×45mm'})`,
+      containerTag: `${count} Caps Jar`
+    };
+  }
+
+  // 2. Large Solution / Shampoo Bottles: 250 mL, 200 mL, 150 mL, 120 mL, 100 mL
+  if (corpus.includes('250 ml') || corpus.includes('250ml') || corpus.includes('trichowash')) {
+    return {
+      widthMm: 100,
+      heightMm: 50,
+      id: '100x50',
+      reason: 'Frasco Solución / Champú 250mL (100×50mm)',
+      containerTag: '250mL Bottle'
+    };
+  }
+
+  if (corpus.includes('200 ml') || corpus.includes('200ml')) {
+    return {
+      widthMm: 100,
+      heightMm: 50,
+      id: '100x50',
+      reason: 'Frasco Solución 200mL (100×50mm)',
+      containerTag: '200mL Bottle'
+    };
+  }
+
+  if (corpus.includes('150 ml') || corpus.includes('150ml') || corpus.includes('120 ml') || corpus.includes('120ml')) {
+    return {
+      widthMm: 100,
+      heightMm: 50,
+      id: '100x50',
+      reason: 'Frasco Solución (100×50mm)',
+      containerTag: '120mL-150mL Bottle'
+    };
+  }
+
+  if (corpus.includes('100 ml') || corpus.includes('100ml') || corpus.includes('trichosol')) {
     return {
       widthMm: 100,
       heightMm: 50,
@@ -105,20 +141,18 @@ export function detectOptimalLabelDimensions(item) {
     };
   }
 
-  // 2. High Capsule Count: >= 120 capsules (e.g. 180 Capsules bottle, 240 Capsules)
-  const capMatch = corpus.match(/(\d+)\s*(?:caps|c[aá]psulas?)/i);
-  if (capMatch && parseInt(capMatch[1], 10) >= 120) {
-    const count = parseInt(capMatch[1], 10);
+  // 3. Medium Dispenser / BHRT Cream Jars (e.g. 90 mL transdermal dispenser)
+  if (corpus.includes('90 ml') || corpus.includes('90ml') || corpus.includes('pentravan')) {
     return {
-      widthMm: 100,
-      heightMm: 50,
-      id: '100x50',
-      reason: `Bote ${count} Cápsulas (100×50mm)`,
-      containerTag: `${count} Caps Jar`
+      widthMm: 75,
+      heightMm: 45,
+      id: '75x45',
+      reason: 'Dispensador / Bote Crema 90mL (75×45mm)',
+      containerTag: '90mL Dispenser'
     };
   }
 
-  // 3. Small Vials, Eye Droppers & 30 mL bottles (e.g. TrichoOil 30 mL)
+  // 4. Small Vials, Eye Droppers & 30 mL bottles (e.g. TrichoOil 30 mL)
   if (
     corpus.includes('30 ml') ||
     corpus.includes('30ml') ||

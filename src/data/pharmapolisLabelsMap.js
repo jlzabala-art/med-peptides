@@ -689,7 +689,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
   {
     id: 'saeed-night-formula',
     prescriptionMatches: ['RX-20261002-N5BH', 'RX-20261002-IKE7'],
-    patientMatches: ['saeed musallam', 'almazrouei'],
+    patientMatches: ['saeed musallam', 'saeed almazrouei'],
     phaseNumber: 1,
     patientName: 'Saeed Musallam Mefleh Khamis Almazrouei',
     fileNumber: 'BOX03492AANUT',
@@ -1196,7 +1196,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
   // ── Fatima Yousef Al-mohannadi (Qatar / The Masters Medical Center Doha) ──
   {
     id: 'fatima-almohannadi-trichowash',
-    prescriptionMatches: ['BOX03088AATRI', 'BOX03088', 'RX-BOX03088AATRI', 'RX-QA-MASTERS-FATIMA', 'FATIMA-ALMOHANNADI'],
+    prescriptionMatches: ['51890', 'RX-51890', 'BOX03088AATRI', 'BOX03088', 'RX-BOX03088AATRI', 'RX-QA-MASTERS-FATIMA', 'FATIMA-ALMOHANNADI'],
     patientMatches: ['fatima', 'yousef', 'al-mohannadi', 'mohannadi'],
     phaseNumber: 1,
     partLabel: 'Refill #1 · Scalp Hygiene & Cleansing Base (250 mL)',
@@ -1208,7 +1208,8 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     dosageForm: 'Topical Scalp Wash / Shampoo (TrichoWash™)',
     volume: '250 mL',
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
-    pharmacy: 'PharmapolisLab',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    pharmacyName: 'Pharmapolis Compounding Pharmacy',
     pharmacyEmail: 'pharmapolisplovdiv@gmail.com',
     formula: 'Fagron TrichoWash™ 250 mL Sulfate-Free Dermocompatible Cleansing Base',
     vehicle: { name: 'TrichoWash™ (Sulfate-Free Dermocompatible Scalp Wash, 250 mL)', volume: '250 mL' },
@@ -1231,7 +1232,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
   },
   {
     id: 'fatima-almohannadi-capsules',
-    prescriptionMatches: ['BOX03088AATRI', 'BOX03088', 'RX-BOX03088AATRI', 'RX-QA-MASTERS-FATIMA', 'FATIMA-ALMOHANNADI'],
+    prescriptionMatches: ['51890', 'RX-51890', 'BOX03088AATRI', 'BOX03088', 'RX-BOX03088AATRI', 'RX-QA-MASTERS-FATIMA', 'FATIMA-ALMOHANNADI'],
     patientMatches: ['fatima', 'yousef', 'al-mohannadi', 'mohannadi'],
     phaseNumber: 2,
     partLabel: 'Refill #1 · Oral Trichology Capsules (60 Caps)',
@@ -1243,7 +1244,8 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     dosageForm: 'Oral Route (Vegetable Capsules)',
     volume: '60 Capsules',
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
-    pharmacy: 'PharmapolisLab',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    pharmacyName: 'Pharmapolis Compounding Pharmacy',
     pharmacyEmail: 'pharmapolisplovdiv@gmail.com',
     formula: 'Clinical Trichology Synergistic Micronutrient Blend',
     directions: 'Directions: Take one capsule daily.',
@@ -1534,38 +1536,52 @@ function extractVehicleFromSource(block, rx, volumeStr = '', dosageFormStr = '',
   const vehItem = Array.isArray(rawList) ? rawList.find(it => isVehicleIngredient(it)) : null;
   const vehItemName = vehItem ? String(vehItem.name || vehItem.drugName || vehItem.activeIngredient || '').trim() : '';
 
-  const corpus = `${directVehName} ${vehItemName} ${dosageFormStr} ${directionsStr} ${titleStr}`.toLowerCase();
-  const volClean = String(volumeStr || block?.volume || '').trim();
+  const corpus = `${directVehName} ${vehItemName} ${dosageFormStr} ${directionsStr} ${titleStr} ${rx?.dispensingForm || ''}`.toLowerCase();
+  const volClean = String(volumeStr || block?.volume || rx?.volume || '').trim();
 
-  if (corpus.includes('trichosol')) {
-    return `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${volClean && !volClean.toLowerCase().includes('cap') ? `, ${volClean}` : ', 100 mL'})`;
-  }
-  if (corpus.includes('trichooil')) {
-    return `TrichoOil™ (100% Natural Scalp Compounding Vehicle${volClean && !volClean.toLowerCase().includes('cap') ? `, ${volClean}` : ', 30 mL'})`;
-  }
-  if (corpus.includes('pentravan')) {
-    return 'Pentravan® Liposomal Transdermal Cream Vehicle';
-  }
-  if (corpus.includes('pomade') || corpus.includes('pomada') || corpus.includes('ointment') || corpus.includes('diltiazem')) {
-    return 'Hypoallergenic Non-Irritating Base (Fragrance & Alcohol Free, q.s. 30 g)';
-  }
-
-  if (directVehName && !/vegetable capsules/i.test(directVehName)) {
+  // 1. Direct custom vehicle if explicitly provided
+  if (directVehName && !/vegetable capsules/i.test(directVehName) && !/galenic compounding/i.test(directVehName)) {
     return directVehName;
   }
   if (vehItemName) {
     return vehItemName;
   }
 
-  const isTopicalCue = /\b(scalp|hair|shampoo|topical|apply|massage|wash|lotion|solution|drops|cream|gel|oil|serum)\b/i.test(corpus);
+  // 2. Specific topical bases (TrichoSol, TrichoWash, TrichoOil, Pentravan, Pomades)
+  if (corpus.includes('trichosol')) {
+    return `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${volClean && !volClean.toLowerCase().includes('cap') ? `, ${volClean}` : ', 100 mL'})`;
+  }
+  if (corpus.includes('trichooil')) {
+    return `TrichoOil™ (100% Natural Scalp Compounding Vehicle${volClean && !volClean.toLowerCase().includes('cap') ? `, ${volClean}` : ', 30 mL'})`;
+  }
+  if (corpus.includes('trichowash')) {
+    return `TrichoWash™ (Sulfate-Free Dermocompatible Scalp Wash${volClean && !volClean.toLowerCase().includes('cap') ? `, ${volClean}` : ', 250 mL'})`;
+  }
+  if (corpus.includes('pentravan') || corpus.includes('estradiol') || corpus.includes('testosterone') || corpus.includes('progesterone') || corpus.includes('bhrt')) {
+    return 'Pentravan® Liposomal Transdermal Cream Vehicle';
+  }
+  if (corpus.includes('pomade') || corpus.includes('pomada') || corpus.includes('ointment') || corpus.includes('diltiazem')) {
+    return 'Hypoallergenic Non-Irritating Base (Fragrance & Alcohol Free, q.s. 30 g)';
+  }
+
+  // 3. Oral capsules & ingestion (Strictly prior to generic topical cues to prevent anti-hair loss oral capsules becoming TrichoSol!)
+  const isOralCue = /\b(oral|capsule|c[aá]psula|tablet|comprimido|take|swallow|ingest|tome|ingerir|with water|with food|with breakfast|with lunch|with dinner|on empty stomach)\b/i.test(corpus) ||
+    /caps/i.test(volClean);
+  if (isOralCue) {
+    if (corpus.includes('nattokinase') || corpus.includes('serrapeptase') || corpus.includes('enteric')) {
+      return 'Acid-Resistant Vegetable Enteric Capsule Base';
+    }
+    return 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.';
+  }
+
+  // 4. Topical solution / Scalp applications
+  const isTopicalCue = /\b(scalp|shampoo|topical|apply|massage|wash|lotion|solution|drops|cream|gel|oil|serum)\b/i.test(corpus);
   if (isTopicalCue) {
     if (/\b(oil|massage|washing your hair|pre-wash)\b/i.test(corpus)) {
       return `TrichoOil™ (100% Natural Scalp Compounding Vehicle${volClean && !volClean.toLowerCase().includes('cap') ? `, ${volClean}` : ', 30 mL'})`;
     }
     return `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${volClean && !volClean.toLowerCase().includes('cap') ? `, ${volClean}` : ', 100 mL'})`;
   }
-
-  if (directVehName) return directVehName;
 
   const rxVeh = typeof rx?.vehicle === 'string' ? rx.vehicle : rx?.vehicle?.name;
   if (rxVeh) return rxVeh;
@@ -1592,6 +1608,13 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
 
   const matches = PHARMAPOLIS_LABELS_REGISTRY.filter(item => {
     // Cross-patient safety guard: if prescription has a patient name, do not match a registry item intended for someone else
+    if (patientName && item.patientName) {
+      const pFirst = patientName.trim().split(/\s+/)[0]?.toLowerCase();
+      const iFirst = String(item.patientName).trim().split(/\s+/)[0]?.toLowerCase();
+      if (pFirst && iFirst && pFirst.length >= 3 && iFirst.length >= 3 && pFirst !== iFirst && !patientName.includes(iFirst) && !String(item.patientName).toLowerCase().includes(pFirst)) {
+        return false;
+      }
+    }
     if (patientName && item.patientMatches && item.patientMatches.length > 0) {
       const patientMatchesThisItem = item.patientMatches.some(p => patientName.includes(p));
       if (!patientMatchesThisItem) return false;
@@ -1769,8 +1792,8 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       showClinicOnLabel: false,
       fileNumber: auth.fileNumber || m.fileNumber,
       targetRxUrl: auth.targetRxUrl || m.targetRxUrl,
-      pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacy || 'PHARMAPOLIS',
-      pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacyName || m.pharmacy || 'PHARMAPOLIS',
+      pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacy || 'Pharmapolis Compounding Pharmacy',
+      pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || m.pharmacyName || m.pharmacy || 'Pharmapolis Compounding Pharmacy',
       pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || m.pharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
       expDate: rx.expDate || rx.expiryDate || m.expDate || rxExpDate,
       labelMarkdown: rx.labelMarkdown || m.labelMarkdown || null,
@@ -1791,6 +1814,8 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       rawBlocks = rx.treatmentPhases;
     } else if (Array.isArray(rx.formulations) && rx.formulations.length > 0) {
       rawBlocks = rx.formulations;
+    } else if (Array.isArray(rx.compoundedProducts) && rx.compoundedProducts.length > 0) {
+      rawBlocks = rx.compoundedProducts;
     } else {
       const flatLines = rx.items || rx.prescriptionLines || rx.compounds || rx.products || [];
       if (Array.isArray(flatLines) && flatLines.length > 0) {
@@ -1827,25 +1852,59 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       }
 
       // Directions text
-      const rawPos = p.instructions || p.directions || p.sig || (typeof p.posology === 'string' ? p.posology : p.posology?.regimen) || p.regimen || (Array.isArray(rx.posology?.steps) ? rx.posology.steps[idx] : null) || (typeof rx.posology === 'string' ? rx.posology : rx.posology?.regimen) || rx.instructions || 'Take / apply as directed by prescribing physician.';
+      const rawPos = p.instructions || p.directions || p.sig || (typeof p.posology === 'string' ? p.posology : (p.posology?.summary || p.posology?.instructions || p.posology?.regimen)) || p.regimen || (Array.isArray(rx.posology?.steps) ? rx.posology.steps[idx] : null) || (typeof rx.posology === 'string' ? rx.posology : (rx.posology?.summary || rx.posology?.instructions || rx.posology?.regimen)) || rx.instructions || 'Take / apply as directed by prescribing physician.';
       const directionsText = String(rawPos).replace(/^phase\s*\d+\s*:\s*/i, '').trim();
 
       // Product Title
       const pName = p.productTitle || p.productName || p.title || p.phaseTitle || p.treatmentType || p.phaseName || (rawBlocks.length === 1 ? (rx.treatmentType || rx.title || rx.medicationName) : null) || `Phase ${phaseNum} Compounded Protocol`;
 
-      // Volume (Strict precedence: explicit volume first, never overwriting mL/g with Capsules!)
-      const explicitVol = p.volume || p.netContent || p.size || p.packaging?.volume || p.vehicle?.volume || (rawBlocks.length === 1 ? rx.volume : null);
-      const isTopicalCue = /\b(scalp|hair|shampoo|topical|apply|massage|wash|lotion|solution|drops|cream|gel|oil|pomade|ointment|trichosol|trichooil|pentravan)\b/i.test(
-        `${pName} ${p.dispensingForm || ''} ${p.dosageForm || ''} ${p.vehicle?.name || p.vehicle || ''} ${directionsText}`
+      // Route & Volume Detection (Strict hierarchy: Hormone/Transdermal vs Pomade vs Oral vs Topical)
+      const blockSpecificText = `${pName} ${p.dispensingForm || ''} ${p.dosageForm || ''} ${p.vehicle?.name || p.vehicle || ''} ${directionsText}`.toLowerCase();
+      const globalText = `${blockSpecificText} ${rawBlocks.length === 1 ? `${rx.dispensingForm || ''} ${rx.treatmentType || ''}` : ''}`.toLowerCase();
+
+      const isHormoneCue = /\b(estradiol|testosterone|progesterone|bhrt|transdermal|pentravan)\b/i.test(globalText);
+      const isPomadeCue = !isHormoneCue && /\b(pomade|pomada|ointment|ung[uü]ento|diltiazem)\b/i.test(globalText);
+      const isOralCue = !isHormoneCue && !isPomadeCue && (
+        /\b(oral|capsule|c[aá]psula|comprimido|tablet|swallow|ingest|tome|ingerir|with water|with food|with breakfast|with lunch|with dinner|on empty stomach)\b/i.test(globalText) ||
+        /\btake\s+\d+\s*(?:cap|c[aá]psula|pill|tablet|dose)/i.test(globalText)
       );
-      const pVol = explicitVol
-        ? String(explicitVol).trim()
-        : (p.quantity || p.count
-            ? `${p.quantity || p.count} ${isTopicalCue ? 'mL' : 'Capsules'}`
-            : (isTopicalCue ? (/\b(oil|massage|washing your hair)\b/i.test(`${pName} ${directionsText}`) ? '30 mL' : '100 mL') : '90 Capsules (3 Months)'));
+      const isTopicalCue = !isHormoneCue && !isPomadeCue && !isOralCue && /\b(scalp|shampoo|topical|apply|massage|wash|lotion|solution|drops|gel|oil|trichosol|trichooil|trichowash)\b/i.test(globalText);
+      const isScalpWash = isTopicalCue && (
+        /\b(shampoo|cleanser|cleansing|trichowash)\b/i.test(`${pName} ${p.dosageForm || ''}`) ||
+        (/\bwash\b/i.test(`${pName} ${p.dosageForm || ''}`) && !/leave.*wash/i.test(directionsText)) ||
+        /\b(?:massage\s+for\s+\d+\s*min.*rinse|rinse\s+thoroughly)\b/i.test(directionsText)
+      );
+
+      const explicitVol = p.volume || p.netContent || p.size || p.packaging?.volume || p.vehicle?.volume || (rawBlocks.length === 1 ? rx.volume : null);
+      let pVol = explicitVol ? String(explicitVol).trim() : null;
+      if (!pVol) {
+        if (p.quantity || p.count) {
+          pVol = `${p.quantity || p.count} ${isOralCue ? 'Capsules' : (isPomadeCue ? 'g' : 'mL')}`;
+        } else if (isOralCue) {
+          pVol = rx.duration?.includes('90') || rx.duration?.includes('3') ? '90 Capsules (3 Months)' : '60 Capsules (2 Months)';
+        } else if (isHormoneCue) {
+          pVol = '90 mL (3 Months)';
+        } else if (isPomadeCue) {
+          pVol = '30 g';
+        } else if (isScalpWash) {
+          pVol = '250 mL';
+        } else if (isTopicalCue) {
+          const isOil = /\boil\b/i.test(blockSpecificText) || (/\b(massage|washing your hair)\b/i.test(blockSpecificText) && !blockSpecificText.includes('rinse'));
+          pVol = isOil ? '30 mL' : (blockSpecificText.includes('wash') || blockSpecificText.includes('250') ? '250 mL' : '100 mL');
+        } else {
+          pVol = '90 Capsules (3 Months)';
+        }
+      }
 
       // Dosage Form
-      const pForm = p.dosageForm || p.dispensingForm || p.format || p.presentation || p.form || p.route || (isTopicalCue ? (/\boil\b/i.test(`${pName} ${p.vehicle?.name || ''}`) ? 'Topical Scalp Oil' : 'Topical Scalp Solution') : (rawBlocks.length === 1 && rx.dispensingForm ? rx.dispensingForm : 'Oral Route (Plant-Based Capsules)'));
+      let pForm = p.dosageForm || p.dispensingForm || p.format || p.presentation || p.form || p.route;
+      if (!pForm || (pForm === 'Topical Scalp Solution' && isOralCue)) {
+        if (isOralCue) pForm = rx.dispensingForm || 'Oral Route (Plant-Based Capsules)';
+        else if (isHormoneCue) pForm = 'Topical Transdermal Cream (Pentravan®)';
+        else if (isPomadeCue) pForm = 'Topical Compounded Pomade / Ointment';
+        else if (isTopicalCue) pForm = /\boil\b/i.test(blockSpecificText) ? 'Topical Scalp Oil' : (isScalpWash ? 'Topical Scalp Wash / Shampoo (TrichoWash™)' : 'Topical Scalp Solution (TrichoSol™)');
+        else pForm = rx.dispensingForm || 'Compounded Pharmaceutical Protocol';
+      }
 
       // Formula text
       let formulaText = p.formula || p.composition || '';
@@ -1857,7 +1916,23 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       }
 
       const resolvedVehicle = extractVehicleFromSource(p, rx, pVol, pForm, directionsText, pName);
-      const warningsText = p.warnings || p.cautions || rx.warnings || (isTopicalCue ? 'For topical scalp use only. Keep out of reach of children.' : 'For patient use only. Keep out of reach of children.');
+      
+      let warningsText = p.warnings || p.cautions || (rawBlocks.length === 1 ? rx.warnings : null);
+      if (!warningsText) {
+        if (isOralCue) {
+          warningsText = 'Take with water. Store in a cool, dry place. Keep out of reach of children.';
+        } else if (isHormoneCue) {
+          warningsText = 'For transdermal / topical use only. Wash hands after application. Keep out of reach of children.';
+        } else if (isPomadeCue) {
+          warningsText = 'For topical / perianal use only. Keep out of reach of children.';
+        } else if (isScalpWash) {
+          warningsText = 'For topical scalp wash only. Rinse thoroughly with water. Avoid contact with eyes.';
+        } else if (isTopicalCue) {
+          warningsText = 'For topical scalp use only. Keep out of reach of children.';
+        } else {
+          warningsText = 'For patient use as prescribed. Keep out of reach of children.';
+        }
+      }
       const activeIngredientsList = blockApis.map(a => `${a.name || a.drugName || a.activeIngredient || 'API'} ${a.dose || a.dosage || a.strength || ''}`.trim());
 
       return {
@@ -1872,8 +1947,8 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         dosageForm: pForm,
         volume: pVol,
         dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
-        pharmacy: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'Pharmapolis Compounding Pharmacy',
-        pharmacyName: rx.pharmacyName || rx.pharmacy || rx.dispensingPharmacy || 'PHARMAPOLIS',
+        pharmacy: 'Pharmapolis Compounding Pharmacy',
+        pharmacyName: 'Pharmapolis Compounding Pharmacy',
         pharmacyAddress: rx.pharmacyAddress || rx.dispensingPharmacyAddress || '1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria',
         formula: formulaText,
         apis: blockApis,
