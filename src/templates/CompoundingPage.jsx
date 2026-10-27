@@ -322,8 +322,15 @@ export default function CompoundingPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [pricingChannel, setPricingChannel] = useState('b2b'); // 'b2b' | 'patient_rrp'
   const [isSplitProtocol, setIsSplitProtocol] = useState(false);
-  const [activePhaseTab, setActivePhaseTab] = useState('all'); // 'all' | 'phase1' | 'phase2'
-  const [blueprintViewMode, setBlueprintViewMode] = useState('chips'); // 'chips' | 'grid'
+  const [blueprintViewMode, setBlueprintViewMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('cmp_bp_view_mode');
+        if (stored === 'chips' || stored === 'grid') return stored;
+      } catch { /* ignore */ }
+    }
+    return 'grid'; // Default 'grid' per user preference
+  });
   const [isGoalsWizardOpen, setIsGoalsWizardOpen] = useState(false);
   const hydratedRef = useRef(false);
   const searchWrapRef = useRef(null);
@@ -768,7 +775,11 @@ export default function CompoundingPage() {
                 className="cmp-ghost-btn"
                 onClick={() => {
                   triggerHaptic('light');
-                  setBlueprintViewMode(prev => prev === 'chips' ? 'grid' : 'chips');
+                  setBlueprintViewMode(prev => {
+                    const next = prev === 'chips' ? 'grid' : 'chips';
+                    try { localStorage.setItem('cmp_bp_view_mode', next); } catch { /* ignore */ }
+                    return next;
+                  });
                 }}
                 style={{ fontSize: '0.72rem' }}
               >
