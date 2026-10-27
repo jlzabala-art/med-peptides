@@ -86,9 +86,16 @@ export default function ProductDetailSidebar({
     return () => window.removeEventListener('open-datasheet-toc', handleExternalOpen);
   }, []);
 
-  // Real-time ScrollSpy via IntersectionObserver
+  // Sync activeSection prop
   useEffect(() => {
-    if (typeof window === 'undefined' || !availableSections.length) return;
+    if (activeSection) {
+      setActiveId(activeSection);
+    }
+  }, [activeSection]);
+
+  // Real-time ScrollSpy via IntersectionObserver (only in continuous-scroll mode, not when onSelectSection is active)
+  useEffect(() => {
+    if (onSelectSection || typeof window === 'undefined' || !availableSections.length) return;
 
     // Detect if sections are present in the DOM (continuous document flow)
     const elementsInDom = availableSections.map(sec => document.getElementById(sec.id)).filter(Boolean);
@@ -116,9 +123,9 @@ export default function ProductDetailSidebar({
     });
 
     return () => observer.disconnect();
-  }, [availableSections]);
+  }, [availableSections, onSelectSection]);
 
-  const currentActiveId = activeId || activeSection || availableSections[0]?.id || '';
+  const currentActiveId = activeSection || activeId || availableSections[0]?.id || '';
   const [filterQuery, setFilterQuery] = useState('');
   const filterInputRef = useRef(null);
 
@@ -162,6 +169,17 @@ export default function ProductDetailSidebar({
 
     triggerHaptic('light');
 
+    if (onSelectSection) {
+      setActiveId(targetId);
+      setIsMobileDrawerOpen(false);
+      if (typeof window !== 'undefined' && window.history?.replaceState) {
+        window.history.replaceState(null, '', `#${targetId}`);
+      }
+      onSelectSection(targetId);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     const el = document.getElementById(targetId);
     if (el) {
       setActiveId(targetId);
@@ -173,13 +191,6 @@ export default function ProductDetailSidebar({
       if (typeof window !== 'undefined' && window.history?.replaceState) {
         window.history.replaceState(null, '', `#${targetId}`);
       }
-      if (onSelectSection) onSelectSection(targetId);
-      return;
-    }
-
-    if (onSelectSection) {
-      onSelectSection(targetId);
-      setIsMobileDrawerOpen(false);
       return;
     }
   };

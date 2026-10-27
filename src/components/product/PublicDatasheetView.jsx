@@ -66,6 +66,7 @@ import BloodoClinicalAdvantageCard from './BloodoClinicalAdvantageCard';
 import BloodoDiagnosticOverviewCard from './BloodoDiagnosticOverviewCard';
 import BloodoWhenToTestSection from './BloodoWhenToTestSection';
 import BloodoLabStandardsDownloadsSection from './BloodoLabStandardsDownloadsSection';
+import BloodoSectionStepBar from './BloodoSectionStepBar';
 import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
 import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
 import FdaRegulatoryBadge from './FdaRegulatoryBadge';
@@ -2519,8 +2520,8 @@ export default function PublicDatasheetView({
             ) : null
           }
         />
-        {/* ── Block 4.1: Google Cloud UX Clinical Specimen Dossier Banner (Bloodo / Diagnostic Kits) ── */}
-        {(isBloodoDiagnostic || isDiagnosticKit) && (
+        {/* ── Block 4.1: Google Cloud UX Clinical Specimen Dossier Banner (Non-Bloodo Diagnostic Kits) ── */}
+        {(!isBloodoDiagnostic && isDiagnosticKit) && (
           <div style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
             <DiagnosticReportVisualPreview
               activeTest={
@@ -2538,12 +2539,19 @@ export default function PublicDatasheetView({
           </div>
         )}
         {isBloodoDiagnostic ? (
-          <BloodoDiagnosticOverviewCard
-            product={product}
-            lang={lang}
-            onUnlockRequest={() => setIsUnlockModalOpen(true)}
-            onSelectSection={handleSelectSection}
-          />
+          <>
+            <BloodoDiagnosticOverviewCard
+              product={product}
+              lang={lang}
+              onUnlockRequest={() => setIsUnlockModalOpen(true)}
+              onSelectSection={handleSelectSection}
+            />
+            <BloodoSectionStepBar
+              currentSectionId="overview"
+              lang={lang}
+              onSelectSection={handleSelectSection}
+            />
+          </>
         ) : description && (
           <div className="pds-description-card" style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -2585,7 +2593,7 @@ export default function PublicDatasheetView({
             onSelectSection={handleSelectSection}
           />
         )}
-        {(isDiagnosticKit || isBloodoDiagnostic) && (
+        {(isDiagnosticKit && !isBloodoDiagnostic) && (
           <div style={{ marginTop: '24px' }}>
             <PresentationsMatrixSection
               product={product}
@@ -2626,71 +2634,24 @@ export default function PublicDatasheetView({
             />
           </div>
         )}
-
-        {isBloodoDiagnostic && (
-          <>
-            {/* ── Section 2: When to Take This Test ── */}
-            <BloodoWhenToTestSection
-              product={product}
-              lang={lang}
-              onSelectSection={handleSelectSection}
-              onUnlockRequest={() => setIsUnlockModalOpen(true)}
-            />
-
-            {/* ── Section 3: Reference Ranges & Biomarkers ── */}
-            <section id="diagnostic-specs" className="pds-section-card" style={{ marginTop: '1.5rem', marginBottom: '1.75rem' }}>
-              <DiagnosticTestTechnicalSpecs
-                product={product}
-                selectedDose={selectedStrength?.name || 'Standard'}
-                supplierName={displaySupplierName}
-                lang={lang}
-                activeSection="diagnostic-specs"
-              />
-            </section>
-
-            {/* ── Section 4: How It Works (Sampling Guide) ── */}
-            <section id="collection-protocol" className="pds-section-card" style={{ marginTop: '1.5rem', marginBottom: '1.75rem' }}>
-              <DiagnosticTestTechnicalSpecs
-                product={product}
-                selectedDose={selectedStrength?.name || 'Standard'}
-                supplierName={displaySupplierName}
-                lang={lang}
-                activeSection="collection-protocol"
-              />
-            </section>
-
-            {/* ── Section 5: Lab Standards & Clinical Downloads ── */}
-            <BloodoLabStandardsDownloadsSection
-              product={product}
-              lang={lang}
-              onSelectSection={handleSelectSection}
-              onUnlockRequest={() => setIsUnlockModalOpen(true)}
-            />
-
-            {/* ── Section 6: Bloodo™ Diagnostic Suite ── */}
-            <section id="bloodo-suite" className="pds-section-card" style={{ marginTop: '1.5rem', marginBottom: '1.75rem' }}>
-              <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
-            </section>
-
-            {/* ── Section 7: Atlas Recommendations & Companion Protocols ── */}
-            <div id="clinical-synergy" style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '1.5rem', marginBottom: '1.75rem' }}>
-              <ClinicalSynergySection product={product} slug={slug || product?.slug} lang={lang} />
-              <BloodoRelatedPeptidesSection product={product} lang={lang} />
-              <BloodoClinicalAdvantageCard lang={lang} />
-            </div>
-          </>
-        )}
         </div>
       ) : (
         <div className="pds-single-section-view">
 
           {effectiveActiveSection === 'when-to-test' && (
-            <BloodoWhenToTestSection
-              product={product}
-              lang={lang}
-              onSelectSection={handleSelectSection}
-              onUnlockRequest={() => setIsUnlockModalOpen(true)}
-            />
+            <>
+              <BloodoWhenToTestSection
+                product={product}
+                lang={lang}
+                onSelectSection={handleSelectSection}
+                onUnlockRequest={() => setIsUnlockModalOpen(true)}
+              />
+              <BloodoSectionStepBar
+                currentSectionId="when-to-test"
+                lang={lang}
+                onSelectSection={handleSelectSection}
+              />
+            </>
           )}
 
           {effectiveActiveSection === 'presentations-matrix' && (
@@ -2769,12 +2730,19 @@ export default function PublicDatasheetView({
       {effectiveActiveSection === 'specs-section' && !isCorporateService && !isCosmeticProduct && (
         <section id="specs-section" className="pds-traceability-wrapper">
           {isBloodoDiagnostic ? (
-            <BloodoLabStandardsDownloadsSection
-              product={product}
-              lang={lang}
-              onSelectSection={handleSelectSection}
-              onUnlockRequest={() => setIsUnlockModalOpen(true)}
-            />
+            <>
+              <BloodoLabStandardsDownloadsSection
+                product={product}
+                lang={lang}
+                onSelectSection={handleSelectSection}
+                onUnlockRequest={() => setIsUnlockModalOpen(true)}
+              />
+              <BloodoSectionStepBar
+                currentSectionId="specs-section"
+                lang={lang}
+                onSelectSection={handleSelectSection}
+              />
+            </>
           ) : (
             <>
               <ProductTraceabilityCard
@@ -3010,12 +2978,26 @@ export default function PublicDatasheetView({
                 <BloodoClinicalAdvantageCard lang={lang} />
               </>
             )}
+            {isBloodoDiagnostic && (
+              <BloodoSectionStepBar
+                currentSectionId="clinical-synergy"
+                lang={lang}
+                onSelectSection={handleSelectSection}
+              />
+            )}
           </div>
         )}
 
         {/* ── Block 6: Bloodo™ Diagnostic Suite Switcher (All 6 Clinical DBS Tests) ── */}
         {effectiveActiveSection === 'bloodo-suite' && isBloodoDiagnostic && (
-          <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
+          <section id="bloodo-suite" className="pds-section-card">
+            <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
+            <BloodoSectionStepBar
+              currentSectionId="bloodo-suite"
+              lang={lang}
+              onSelectSection={handleSelectSection}
+            />
+          </section>
         )}
 
         {/* ── Block 7: In-Office Clinical Advantage (Legacy fallback) ── */}
@@ -3026,6 +3008,24 @@ export default function PublicDatasheetView({
         {/* Diagnostic kit specific sub-sections */}
         {(effectiveActiveSection === 'diagnostic-specs' || effectiveActiveSection === 'collection-protocol' || ['biomarker-simulator', 'pre-analytical-prep', 'kit-contents'].includes(effectiveActiveSection)) && (
           <section id={effectiveActiveSection} className="pds-section-card">
+            {/* Show Specimen Dossier Report Preview exclusively in Section 3 (diagnostic-specs) */}
+            {isBloodoDiagnostic && effectiveActiveSection === 'diagnostic-specs' && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <DiagnosticReportVisualPreview
+                  activeTest={
+                    slug?.includes('cortisol') ? 'cortisol' :
+                    slug?.includes('testosterone') || slug?.includes('testosterona') ? 'testosterone' :
+                    slug?.includes('hba1c') || slug?.includes('hemoglobin') || slug?.includes('glucose') || slug?.includes('glucosa') ? 'hba1c' :
+                    slug?.includes('omega') || slug?.includes('lipid') ? 'omega' :
+                    slug?.includes('vitamin') || slug?.includes('vitd') || slug?.includes('vit-d') ? 'vitd' : 'nad'
+                  }
+                  lang={lang}
+                  hideSelector={true}
+                  hideWorkflow={true}
+                  variant="gcp"
+                />
+              </div>
+            )}
             <DiagnosticTestTechnicalSpecs
               product={product}
               selectedDose={selectedStrength?.name || 'Standard'}
@@ -3033,6 +3033,13 @@ export default function PublicDatasheetView({
               lang={lang}
               activeSection={effectiveActiveSection}
             />
+            {isBloodoDiagnostic && (
+              <BloodoSectionStepBar
+                currentSectionId={effectiveActiveSection}
+                lang={lang}
+                onSelectSection={handleSelectSection}
+              />
+            )}
           </section>
         )}
 
