@@ -1425,12 +1425,23 @@
   width: 100%;
   max-width: 460px;
   height: 100%;
+  margin-left: auto;
   background: #ffffff;
   display: flex;
   flex-direction: column;
   box-shadow: -8px 0 32px rgba(0, 24, 48, 0.25);
   border-left: 1px solid #e2e8f0;
   overflow: hidden;
+  animation: atlasSlideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes atlasSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .atlas-bottom-sheet-handle {

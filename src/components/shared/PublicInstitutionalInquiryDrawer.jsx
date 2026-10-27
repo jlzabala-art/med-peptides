@@ -24,6 +24,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 import { getCachedDetectedCountry, getDetectedCountry } from '@/utils/geoIp';
+import '@/styles/publicDesignSystem.css';
 
 const INQUIRY_TOPICS_PEPTIDES = [
   {
@@ -947,6 +948,7 @@ export default function PublicInstitutionalInquiryDrawer({
         className="atlas-bottom-sheet-panel"
         style={{
           maxWidth: '520px',
+          marginLeft: 'auto',
         }}
         onClick={(e) => e.stopPropagation()}
       >

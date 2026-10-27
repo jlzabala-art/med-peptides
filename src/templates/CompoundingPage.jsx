@@ -24,6 +24,7 @@ import { getUltramanApis } from '../repositories/ultramanApiRepository';
 import { ULTRAMAN_APIS_MASTER } from '../data/ultramanApisMaster';
 import { getClinicalDosageProfile, getDoseAssessment } from '../data/clinicalDosageRegistry';
 import { resolvePhysicalCapsuleSize, CAPSULE_BOTTLE_SIZES, calculatePharmapolisCost } from '../services/pharmapolisCostEngine';
+import CompoundingGoalWizard from '../components/compounding/CompoundingGoalWizard';
 import { triggerHaptic } from '../utils/haptics';
 import {
   FlaskConical, ShieldCheck, Award, Zap, Search, X, Plus, Minus, Download, Sparkles,
@@ -31,6 +32,7 @@ import {
   Sun, Layers, TrendingUp, Sliders
 } from '@/lib/icons';
 import '../styles/compoundingPage.css';
+import '@/styles/publicDesignSystem.css';
 
 /* ─── Galenic constants ──────────────────────────────────────────────────── */
 const MAX_FILL_MG = { 'Size 1': 350, 'Size 0': 550, 'Size 00': 750 };
@@ -151,21 +153,24 @@ const BLUEPRINTS = [
 const T = {
   en: {
     badge: 'Atlas Compounding Network · EU GMP',
+    regulatoryBadge: '100% Authorized Food Supplements · EU Directive 2002/46/EC',
+    goalsWizardBtn: '🎯 Personalize by Health Goals',
+    goalsWizardSub: 'Take a 30s clinical questionnaire to receive 3 tailored formulas based on your goals',
     title: 'Custom Compounding Lab',
     subtitle: 'Design a personalized formula in acid-resistant vegan HPMC capsules. Pick a base, adjust the actives, and request your official batch quotation — in under 2 minutes.',
     kpis: [
       { label: 'EU GMP Certified', value: 'Pharma Grade', sub: 'No stearates, fillers or allergens' },
-      { label: 'Active Library', value: '118 APIs', sub: 'Pharmacopeial & branded actives' },
+      { label: 'Nutraceutical Library', value: '118 Actives', sub: 'Food Supplements (EU 2002/46/EC)' },
       { label: 'Smart Galenics', value: 'Size 1 · 0 · 00', sub: 'Automatic capsule sizing' },
       { label: 'Batch Release', value: '48–72h', sub: 'Compounded on demand' }
     ],
-    step1: 'Choose a base', step1Hint: 'Start from a clinical blueprint or a blank formula.',
+    step1: 'Choose a base', step1Hint: 'Start from a clinical blueprint, health goals wizard, or blank formula.',
     step2: 'Adjust your actives', step2Hint: 'Daily dose per active, in milligrams.',
     step3: 'Review & request', step3Hint: 'Galenic summary of your formula.',
-    searchPh: 'Search 118 actives (e.g. CoQ10, Magnesium, NAC)…',
+    searchPh: 'Search 118 food supplement actives (e.g. CoQ10, Magnesium, NAC)…',
     noResults: 'No actives match your search.',
     emptyTitle: 'Your formula is empty',
-    emptySub: 'Choose a blueprint above or search an active to add it.',
+    emptySub: 'Choose a blueprint above, launch the Goals Wizard, or search an active to add it.',
     perDay: 'mg / day',
     bottle: 'Bottle size',
     capsule: 'Capsule',
@@ -189,7 +194,7 @@ const T = {
     ok: 'Galenically viable formula',
     reset: 'Reset',
     added: 'added', removed: 'removed', already: 'is already in your formula',
-    disclaimer: 'Compounded formulations are prepared on request under pharmaceutical supervision. They are not intended to diagnose, treat, cure or prevent any disease. Consult your physician before use.',
+    disclaimer: 'All active ingredients are authorized food supplements conforming to EU Directive 2002/46/EC and Regulation (EC) 1925/2006. Compounded formulations are prepared on request under pharmaceutical supervision. They are not intended to diagnose, treat, cure or prevent any disease. Consult your physician before use.',
     actives: 'actives',
     channelB2B: 'Clinic Wholesale (B2B)',
     channelRRP: 'Patient RRP',
@@ -207,21 +212,24 @@ const T = {
   },
   es: {
     badge: 'Atlas Compounding Network · EU GMP',
+    regulatoryBadge: '100% Complementos Alimenticios Autorizados · Directiva UE 2002/46/CE',
+    goalsWizardBtn: '🎯 Diseñar según Objetivos de Salud',
+    goalsWizardSub: 'Cuestionario clínico de 30s para generar 3 fórmulas personalizadas según tus objetivos',
     title: 'Laboratorio de Formulación Magistral',
     subtitle: 'Diseña una fórmula personalizada en cápsulas veganas HPMC gastrorresistentes. Elige una base, ajusta los activos y solicita tu cotización oficial de lote — en menos de 2 minutos.',
     kpis: [
       { label: 'Certificación EU GMP', value: 'Grado Farma', sub: 'Sin estearatos, rellenos ni alérgenos' },
-      { label: 'Biblioteca de Activos', value: '118 APIs', sub: 'Activos farmacopeicos y de marca' },
+      { label: 'Catálogo Nutracéutico', value: '118 Activos', sub: 'Complementos Alimenticios (UE 2002/46/CE)' },
       { label: 'Galénica Inteligente', value: 'Size 1 · 0 · 00', sub: 'Cálculo automático de cápsula' },
       { label: 'Liberación de Lote', value: '48–72h', sub: 'Elaborado bajo demanda' }
     ],
-    step1: 'Elige una base', step1Hint: 'Parte de una fórmula clínica o de una fórmula en blanco.',
+    step1: 'Elige una base', step1Hint: 'Parte de una fórmula clínica, el asistente de objetivos o una fórmula en blanco.',
     step2: 'Ajusta tus activos', step2Hint: 'Dosis diaria de cada activo, en miligramos.',
     step3: 'Revisa y solicita', step3Hint: 'Resumen galénico de tu fórmula.',
-    searchPh: 'Busca entre 118 activos (ej. CoQ10, Magnesio, NAC)…',
+    searchPh: 'Busca entre 118 activos nutracéuticos (ej. CoQ10, Magnesio, NAC)…',
     noResults: 'Ningún activo coincide con tu búsqueda.',
     emptyTitle: 'Tu fórmula está vacía',
-    emptySub: 'Elige una base arriba o busca un activo para añadirlo.',
+    emptySub: 'Elige una base arriba, inicia el Asistente por Objetivos o busca un activo para añadirlo.',
     perDay: 'mg / día',
     bottle: 'Tamaño del frasco',
     capsule: 'Cápsula',
@@ -245,7 +253,7 @@ const T = {
     ok: 'Fórmula galénicamente viable',
     reset: 'Reiniciar',
     added: 'añadido', removed: 'eliminado', already: 'ya está en tu fórmula',
-    disclaimer: 'Las fórmulas magistrales se elaboran bajo pedido y supervisión farmacéutica. No están destinadas a diagnosticar, tratar, curar ni prevenir enfermedades. Consulta a tu médico antes de usarlas.',
+    disclaimer: 'Todos los activos son complementos alimenticios autorizados bajo la Directiva UE 2002/46/CE y el Reglamento (CE) 1925/2006. Las fórmulas magistrales se elaboran bajo pedido y supervisión farmacéutica. No están destinadas a diagnosticar, tratar, curar ni prevenir enfermedades. Consulta a tu médico antes de usarlas.',
     actives: 'activos',
     channelB2B: 'Precio Mayorista Clínica (B2B)',
     channelRRP: 'PVP Paciente Sugerido',
@@ -316,6 +324,7 @@ export default function CompoundingPage() {
   const [isSplitProtocol, setIsSplitProtocol] = useState(false);
   const [activePhaseTab, setActivePhaseTab] = useState('all'); // 'all' | 'phase1' | 'phase2'
   const [blueprintViewMode, setBlueprintViewMode] = useState('chips'); // 'chips' | 'grid'
+  const [isGoalsWizardOpen, setIsGoalsWizardOpen] = useState(false);
   const hydratedRef = useRef(false);
   const searchWrapRef = useRef(null);
 
@@ -388,6 +397,36 @@ export default function CompoundingPage() {
     setItems(resolved);
     if (bp.id !== 'blank') setFormulaName(bp.label[lang] || bp.label.en);
     else setFormulaName('');
+  }, [catalog, lang]);
+
+  const handleApplyProposal = useCallback((proposal) => {
+    if (!proposal || !proposal.items || !proposal.items.length) return;
+    triggerHaptic('success');
+    const resolved = proposal.items.map(propItem => {
+      const api = catalog.find(a => a.id === propItem.apiId)
+        || catalog.find(a => normalize(a.name) === normalize(propItem.apiId.replace(/^pharmapolis-/, '')))
+        || findApiByName(catalog, propItem.apiId);
+      return api ? {
+        apiId: api.id,
+        name: api.name,
+        spec: api.spec,
+        doseMg: clampDose(propItem.doseMg)
+      } : null;
+    }).filter(Boolean);
+
+    if (resolved.length > 0) {
+      setItems(resolved);
+      setFormulaName(proposal.name || '');
+      if (proposal.capsPerBottle) setCapsPerBottle(proposal.capsPerBottle);
+      setIsSplitProtocol(Boolean(proposal.isSplit));
+      setActiveBlueprint('blank');
+      toast.success(
+        lang === 'es'
+          ? `Fórmula cargada con éxito: ${proposal.name} (${resolved.length} activos)`
+          : `Formula loaded successfully: ${proposal.name} (${resolved.length} actives)`,
+        { id: 'cmp-loaded-wizard' }
+      );
+    }
   }, [catalog, lang]);
 
   const addActive = useCallback((api) => {
@@ -614,8 +653,8 @@ export default function CompoundingPage() {
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold'); doc.setFontSize(17);
       doc.text('Atlas Health · Custom Compounding', 14, 13);
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5);
-      doc.text('EU GMP · Acid-resistant vegan HPMC capsules', 14, 21);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+      doc.text(lang === 'es' ? 'Complementos Alimenticios · Directiva UE 2002/46/CE · Cápsulas veganas HPMC' : 'EU Directive 2002/46/EC Food Supplements · EU GMP · Vegan HPMC capsules', 14, 21);
       doc.text(new Date().toLocaleDateString(), 196, 21, { align: 'right' });
 
       doc.setTextColor(15, 23, 42);
@@ -625,7 +664,10 @@ export default function CompoundingPage() {
       let y = 54;
       doc.setFontSize(10); doc.setFillColor(241, 245, 249);
       doc.rect(14, y - 6, 182, 9, 'F');
-      doc.text('#', 17, y); doc.text('Active ingredient', 26, y); doc.text('Specification', 110, y); doc.text('mg/day', 194, y, { align: 'right' });
+      doc.text('#', 17, y);
+      doc.text(lang === 'es' ? 'Activo Nutracéutico' : 'Nutraceutical Active', 26, y);
+      doc.text(lang === 'es' ? 'Especificación' : 'Specification', 110, y);
+      doc.text('mg/day', 194, y, { align: 'right' });
       doc.setFont('helvetica', 'normal');
       items.forEach((i, idx) => {
         y += 9;
@@ -651,7 +693,7 @@ export default function CompoundingPage() {
 
       y += 14;
       doc.setFontSize(8.5); doc.setTextColor(100, 116, 139);
-      doc.text(doc.splitTextToSize(T.en.disclaimer, 182), 14, y);
+      doc.text(doc.splitTextToSize(lang === 'es' ? T.es.disclaimer : T.en.disclaimer, 182), 14, y);
       doc.text(doc.splitTextToSize(`Formula link: ${window.location.href}`, 182), 14, 285);
 
       doc.save(`atlas-formula-${Date.now()}.pdf`);
@@ -678,7 +720,10 @@ export default function CompoundingPage() {
       {/* ── Hero ── */}
       <header className="cmp-hero">
         <div className="cmp-container">
-          <span className="cmp-badge"><FlaskConical size={13} /> {t.badge}</span>
+          <div className="cmp-hero-badges">
+            <span className="cmp-badge"><FlaskConical size={13} /> {t.badge}</span>
+            <span className="cmp-badge is-regulatory"><ShieldCheck size={13} /> {t.regulatoryBadge}</span>
+          </div>
           <h1 className="cmp-title">{t.title}</h1>
           <p className="cmp-subtitle">{t.subtitle}</p>
 
@@ -706,18 +751,31 @@ export default function CompoundingPage() {
               <h2 id="cmp-step1">{t.step1}</h2>
               <p>{t.step1Hint}</p>
             </div>
-            <button
-              type="button"
-              className="cmp-ghost-btn"
-              onClick={() => {
-                triggerHaptic('light');
-                setBlueprintViewMode(prev => prev === 'chips' ? 'grid' : 'chips');
-              }}
-              style={{ fontSize: '0.72rem' }}
-            >
-              <Sliders size={12} />
-              <span>{blueprintViewMode === 'chips' ? (lang === 'es' ? 'Ver Tarjetas' : 'View Grid') : (lang === 'es' ? 'Ver Chips' : 'View Chips')}</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="cmp-goals-wizard-btn"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setIsGoalsWizardOpen(true);
+                }}
+              >
+                <Sparkles size={14} />
+                <span>{t.goalsWizardBtn}</span>
+              </button>
+              <button
+                type="button"
+                className="cmp-ghost-btn"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setBlueprintViewMode(prev => prev === 'chips' ? 'grid' : 'chips');
+                }}
+                style={{ fontSize: '0.72rem' }}
+              >
+                <Sliders size={12} />
+                <span>{blueprintViewMode === 'chips' ? (lang === 'es' ? 'Ver Tarjetas' : 'View Grid') : (lang === 'es' ? 'Ver Chips' : 'View Chips')}</span>
+              </button>
+            </div>
           </div>
 
           {blueprintViewMode === 'chips' ? (
@@ -890,6 +948,18 @@ export default function CompoundingPage() {
                 <FlaskConical size={28} />
                 <strong>{t.emptyTitle}</strong>
                 <span>{t.emptySub}</span>
+                <button
+                  type="button"
+                  className="cmp-goals-wizard-btn"
+                  style={{ marginTop: '10px' }}
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    setIsGoalsWizardOpen(true);
+                  }}
+                >
+                  <Sparkles size={14} />
+                  <span>{t.goalsWizardBtn}</span>
+                </button>
               </div>
             ) : (
               <ul className="cmp-items">
@@ -1249,7 +1319,23 @@ export default function CompoundingPage() {
                 <Link2 size={14} /> {t.copy}
               </button>
             </div>
-            <p className="cmp-ai-hint"><Sparkles size={13} /> {t.ai} → <em>Atlas AI</em></p>
+            <p
+              className="cmp-ai-hint"
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                triggerHaptic('selection');
+                window.dispatchEvent(new CustomEvent('open-public-atlas-ai', {
+                  detail: {
+                    productName: displayName,
+                    category: 'compounding',
+                    initialQuery: aiContextQuery
+                  }
+                }));
+              }}
+              title={lang === 'es' ? 'Abrir Atlas AI' : 'Open Atlas AI'}
+            >
+              <Sparkles size={13} /> {t.ai} → <em>Atlas AI</em>
+            </p>
           </aside>
         </div>
 
@@ -1270,6 +1356,14 @@ export default function CompoundingPage() {
           catalogCount: items.length
         }}
         lang={lang}
+      />
+
+      <CompoundingGoalWizard
+        isOpen={isGoalsWizardOpen}
+        onClose={() => setIsGoalsWizardOpen(false)}
+        catalog={catalog}
+        lang={lang}
+        onApplyProposal={handleApplyProposal}
       />
 
       <PublicUnifiedFooter lang={lang} />

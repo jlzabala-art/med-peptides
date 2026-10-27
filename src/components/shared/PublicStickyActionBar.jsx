@@ -9,6 +9,7 @@ import { getPublicAiPreset } from '@/config/publicAiPresets';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import './PublicStickyActionBar.css';
+import '@/styles/publicDesignSystem.css';
 
 const PublicAtlasAIDrawer = dynamic(
   () => import('./PublicAtlasAIDrawer'),

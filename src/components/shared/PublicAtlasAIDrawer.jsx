@@ -34,6 +34,7 @@ import {
   getSuggestedInquiriesForProduct,
   getContextualAndPopularSuggestions,
 } from '@/data/compoundSuggestedInquiries';
+import '@/styles/publicDesignSystem.css';
 
 /**
  * PublicAtlasAIDrawer
@@ -1027,6 +1028,7 @@ ${contextAnchor.mechanisms}
             onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: '440px',
+              marginLeft: 'auto',
             }}
           >
             {/* Mobile Drag Handle (Visible only on mobile devices) */}
