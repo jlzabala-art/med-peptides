@@ -290,6 +290,22 @@
   color: #7c3aed;
   font-weight: 700;
 }
+.cmp-dose-preset-btn.cmp-dose-preset-std.is-active {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+  font-weight: 750;
+}
+.cmp-dose-advice-row {
+  margin-top: 6px;
+  padding: 6px 9px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #edf2f7;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
 /* ── Phase 4: Channel Pricing Switcher (B2B vs Patient RRP) ── */
 .cmp-pricing-card {

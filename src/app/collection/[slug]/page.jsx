@@ -135,6 +135,7 @@ BRAND_METADATA.ultraman = BRAND_METADATA.ultraperson;
 BRAND_METADATA['hair-treatment'] = BRAND_METADATA['hair-treatments'];
 BRAND_METADATA['trichology'] = BRAND_METADATA['hair-treatments'];
 BRAND_METADATA['hair'] = BRAND_METADATA['hair-treatments'];
+BRAND_METADATA['trichotest'] = BRAND_METADATA['hair-treatments'];
 BRAND_METADATA['weight'] = BRAND_METADATA['weight-loss'];
 BRAND_METADATA['metabolic'] = BRAND_METADATA['weight-loss'];
 BRAND_METADATA['repair'] = BRAND_METADATA['tissue-repair'];
@@ -305,7 +306,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
   }
 
   // Hair Treatments Collection: Colway Trichology + Lotusland Peptides (GHK-Cu, TB-500, BPC-157) + TeleTest HTMA
-  if (targetBrand === 'hair-treatments' || targetBrand === 'hair-treatment' || targetBrand === 'trichology' || targetBrand === 'hair') {
+  if (targetBrand === 'hair-treatments' || targetBrand === 'hair-treatment' || targetBrand === 'trichology' || targetBrand === 'hair' || targetBrand === 'trichotest') {
     try {
       if (adminDb) {
         const snap = await adminDb.collection('products').get();
@@ -558,7 +559,7 @@ export default async function NextCollectionPage({ params, searchParams }) {
 
   const ALL_TARGETED_SLUGS = [
     'colway', 'bloodo', 'ultraperson', 'eterna', 'teletest', 'peptides',
-    'hair-treatments', 'hair-treatment', 'trichology', 'hair',
+    'hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest',
     'weight-loss', 'weight', 'metabolic',
     'tissue-repair', 'repair', 'recovery',
     'longevity-cellular', 'longevity',

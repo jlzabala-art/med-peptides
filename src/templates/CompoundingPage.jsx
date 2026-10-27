@@ -22,6 +22,7 @@ import PublicStickyActionBar from '../components/shared/PublicStickyActionBar';
 import PublicInstitutionalInquiryDrawer from '../components/shared/PublicInstitutionalInquiryDrawer';
 import { getUltramanApis } from '../repositories/ultramanApiRepository';
 import { ULTRAMAN_APIS_MASTER } from '../data/ultramanApisMaster';
+import { getClinicalDosageProfile, getDoseAssessment } from '../data/clinicalDosageRegistry';
 import { resolvePhysicalCapsuleSize, CAPSULE_BOTTLE_SIZES, calculatePharmapolisCost } from '../services/pharmapolisCostEngine';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -90,30 +91,8 @@ const CHRONO_OPPOSING = [
   }
 ];
 
-const THERAPEUTIC_RANGES = {
-  'resveratrol': { min: 50, standard: 250, max: 500, step: 25 },
-  'coenzyme q10 (ubiquinol)': { min: 30, standard: 100, max: 300, step: 10 },
-  'alpha-lipoic acid': { min: 100, standard: 300, max: 600, step: 25 },
-  'piperine': { min: 2.5, standard: 5, max: 10, step: 0.5 },
-  'ginkgo biloba': { min: 40, standard: 120, max: 240, step: 20 },
-  'panax ginseng extract': { min: 50, standard: 200, max: 400, step: 25 },
-  'vitamin b complex methylated': { min: 25, standard: 50, max: 100, step: 5 },
-  'bitter melon extract': { min: 100, standard: 250, max: 500, step: 25 },
-  'green tea extract (egcg)': { min: 50, standard: 200, max: 400, step: 25 },
-  'magnesium (glycinate)': { min: 100, standard: 300, max: 600, step: 50 },
-  'valerian root extract': { min: 50, standard: 200, max: 400, step: 25 },
-  'melatonin': { min: 0.5, standard: 1, max: 5, step: 0.5 },
-  'vitamin c (ascorbic acid)': { min: 100, standard: 250, max: 1000, step: 50 },
-  'n-acetylcysteine (nac)': { min: 100, standard: 300, max: 600, step: 50 },
-  'zinc (gluconate)': { min: 10, standard: 30, max: 50, step: 5 }
-};
-
 function getTherapeuticRange(name) {
-  const norm = String(name || '').toLowerCase();
-  for (const [key, val] of Object.entries(THERAPEUTIC_RANGES)) {
-    if (norm.includes(key)) return val;
-  }
-  return { min: 25, standard: 100, max: 500, step: 25 };
+  return getClinicalDosageProfile(name);
 }
 
 /* ─── Base blueprints (resolved against the live API catalog by name) ─────── */
@@ -421,8 +400,10 @@ export default function CompoundingPage() {
         toast.error(t.warnMax, { id: 'cmp-max' });
         return prev;
       }
-      toast.success(`${api.name} ${t.added}`, { id: `cmp-add-${api.id}` });
-      return [...prev, { apiId: api.id, name: api.name, spec: api.spec, doseMg: 100 }];
+      const dosageProfile = getClinicalDosageProfile(api.name);
+      const defaultDose = dosageProfile.standard || 100;
+      toast.success(`${api.name} ${t.added} (${defaultDose} mg)`, { id: `cmp-add-${api.id}` });
+      return [...prev, { apiId: api.id, name: api.name, spec: api.spec, doseMg: defaultDose }];
     });
     if (!activeBlueprint) setActiveBlueprint('blank');
     setQuery('');
@@ -921,6 +902,7 @@ export default function CompoundingPage() {
                   })
                   .map((i, idx) => {
                     const range = getTherapeuticRange(i.name);
+                    const assessment = getDoseAssessment(i.name, i.doseMg, lang);
                     return (
                       <li key={i.apiId} className="cmp-item">
                         <span className="cmp-item-idx">{idx + 1}</span>
@@ -966,24 +948,86 @@ export default function CompoundingPage() {
                                 type="button"
                                 className={`cmp-dose-preset-btn ${Number(i.doseMg) === range.min ? 'is-active' : ''}`}
                                 onClick={() => updateDose(i.apiId, range.min)}
+                                title={lang === 'es' ? 'Dosis Mínima Eficaz' : 'Minimum Effective Dose'}
                               >
                                 Min ({range.min}mg)
                               </button>
                               <button
                                 type="button"
-                                className={`cmp-dose-preset-btn ${Number(i.doseMg) === range.standard ? 'is-active' : ''}`}
+                                className={`cmp-dose-preset-btn cmp-dose-preset-std ${Number(i.doseMg) === range.standard ? 'is-active' : ''}`}
                                 onClick={() => updateDose(i.apiId, range.standard)}
+                                title={lang === 'es' ? 'Dosis Clínica Recomendada' : 'Standard Clinical Dose'}
                               >
-                                Std ({range.standard}mg)
+                                ⭐ Std ({range.standard}mg)
                               </button>
                               <button
                                 type="button"
                                 className={`cmp-dose-preset-btn ${Number(i.doseMg) === range.max ? 'is-active' : ''}`}
                                 onClick={() => updateDose(i.apiId, range.max)}
+                                title={lang === 'es' ? 'Dosis Terapéutica Máxima' : 'Maximum Therapeutic Dose'}
                               >
                                 Max ({range.max}mg)
                               </button>
                             </div>
+                          </div>
+
+                          {/* Clinical Smart Dose Advice Strip */}
+                          <div className="cmp-dose-advice-row">
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', flexWrap: 'wrap' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                <span
+                                  className="cmp-dose-status-badge"
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px',
+                                    fontSize: '0.62rem',
+                                    fontWeight: 750,
+                                    background: `${assessment.color}15`,
+                                    color: assessment.color,
+                                    border: `1px solid ${assessment.color}35`
+                                  }}
+                                >
+                                  {assessment.status === 'optimal' ? <CheckCircle2 size={10} /> : <AlertTriangle size={10} />}
+                                  {assessment.badgeText}
+                                </span>
+                                {range.indication && (
+                                  <span style={{ fontSize: '0.68rem', fontWeight: 650, color: '#334155' }}>
+                                    • {range.indication[lang] || range.indication.es || range.indication.en}
+                                  </span>
+                                )}
+                              </div>
+                              {Number(i.doseMg) !== range.standard && (
+                                <button
+                                  type="button"
+                                  onClick={() => updateDose(i.apiId, range.standard)}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#0d9488',
+                                    fontSize: '0.64rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    padding: 0,
+                                    textDecoration: 'underline'
+                                  }}
+                                >
+                                  {lang === 'es' ? `Sugerir ${range.standard} mg` : `Apply ${range.standard} mg`}
+                                </button>
+                              )}
+                            </div>
+
+                            <p style={{ margin: '3px 0 0', fontSize: '0.69rem', color: '#64748b', lineHeight: 1.35 }}>
+                              {range.clinicalRationale ? (range.clinicalRationale[lang] || range.clinicalRationale.es || range.clinicalRationale.en) : assessment.message}
+                            </p>
+
+                            {range.yieldNote && (
+                              <div style={{ fontSize: '0.64rem', color: '#0369a1', fontWeight: 600, marginTop: '2px' }}>
+                                💡 {range.yieldNote[lang] || range.yieldNote.es || range.yieldNote.en}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </li>

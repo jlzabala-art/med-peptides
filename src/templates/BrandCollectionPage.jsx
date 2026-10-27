@@ -332,6 +332,7 @@ BRAND_CONFIGS.ultraman = BRAND_CONFIGS.ultraperson;
 BRAND_CONFIGS['hair-treatment'] = BRAND_CONFIGS['hair-treatments'];
 BRAND_CONFIGS['trichology'] = BRAND_CONFIGS['hair-treatments'];
 BRAND_CONFIGS['hair'] = BRAND_CONFIGS['hair-treatments'];
+BRAND_CONFIGS['trichotest'] = BRAND_CONFIGS['hair-treatments'];
 BRAND_CONFIGS['weight'] = BRAND_CONFIGS['weight-loss'];
 BRAND_CONFIGS['metabolic'] = BRAND_CONFIGS['weight-loss'];
 BRAND_CONFIGS['repair'] = BRAND_CONFIGS['tissue-repair'];
@@ -371,7 +372,7 @@ function resolveBrandProductImage(product, brandSlug) {
     return '/images/products/teletest/mineralograma-cabello.svg';
   }
 
-  if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology') {
+  if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology' || brandSlug === 'trichotest') {
     if (id.includes('shampoo') || name.includes('shampoo')) return '/images/products/colway/shampoo.png';
     if (id.includes('conditioner') || name.includes('conditioner')) return '/images/products/colway/conditioner.png';
     if (id.includes('colvita') || name.includes('colvita')) return '/images/products/colway/colvita.png';
@@ -455,7 +456,7 @@ function resolveProductDatasheet(product, brandSlug) {
 
 function getItemUnitLabel(slug, count, isEs) {
   const isOne = count === 1;
-  if (slug === 'hair-treatments' || slug === 'hair' || slug === 'trichology') {
+  if (slug === 'hair-treatments' || slug === 'hair' || slug === 'trichology' || slug === 'trichotest') {
     return isOne ? (isEs ? 'tratamiento' : 'treatment') : (isEs ? 'tratamientos' : 'treatments');
   }
   if (slug === 'colway' || slug === 'ultraperson' || slug === 'ultraman') {
@@ -471,7 +472,7 @@ function resolveProductRegulatoryBadges(product, brandSlug) {
   const id = (product.id || product.slug || '').toLowerCase();
   const name = (product.name || product.title || '').toLowerCase();
 
-  if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology') {
+  if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology' || brandSlug === 'trichotest') {
     if (id.includes('shampoo') || name.includes('shampoo') || id.includes('conditioner') || name.includes('conditioner') || id.includes('colway')) {
       return [
         { label: '🇪🇺 EU CPNP Reg.', color: '#15803d', bg: 'rgba(22, 163, 74, 0.12)', border: 'rgba(22, 163, 74, 0.25)', title: 'European Union CPNP & Regulation (EC) No 1223/2009 Registered' },
@@ -601,6 +602,7 @@ export default function BrandCollectionPage({
       'hair-treatment': 'hair-treatments',
       'trichology': 'hair-treatments',
       'hair': 'hair-treatments',
+      'trichotest': 'hair-treatments',
       'weight-loss': 'weight-loss',
       'weight': 'weight-loss',
       'metabolic': 'weight-loss',
@@ -668,7 +670,7 @@ export default function BrandCollectionPage({
       } else {
         text = `Hello Atlas Health Services Medical Affairs, I am reviewing the *TeleTest Analytika® Clinical Diagnostics Collection* (HTMA Hair Mineral Toxicology, HLA Autoimmunity, Celiac Predisposition, Omega-3 Index, Saliva Metabolizer). Please share the wholesale catalog and laboratory onboarding guidelines.`;
       }
-    } else if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology') {
+    } else if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology' || brandSlug === 'trichotest') {
       if (product) {
         text = `Hello Atlas Health Services Medical Affairs, I am inquiring about *${product.name || product.title}* from the Hair Treatments & Clinical Trichology Collection. Please provide clinical protocols, B2B pricing and technical dossier.`;
       } else {
@@ -792,7 +794,7 @@ export default function BrandCollectionPage({
       const cat = selectedCategory.toLowerCase();
       list = list.filter(p => {
         const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''} ${p.description || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
-        if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology') {
+        if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology' || brandSlug === 'trichotest') {
           if (cat === 'colway-trichology') return (str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('colway')) && !str.includes('colvita');
           if (cat === 'peptides') return str.includes('ghk') || str.includes('tb-500') || str.includes('tb500') || str.includes('bpc') || str.includes('peptide') || p.category === 'peptides';
           if (cat === 'diagnostic') return str.includes('htma') || str.includes('teletest') || str.includes('mineral') || str.includes('cabello');
@@ -1134,8 +1136,33 @@ export default function BrandCollectionPage({
                 </span>
               </div>
 
-              {/* Action buttons on desktop header (Clinical Desk) */}
+              {/* Action buttons on desktop header (Clinical Desk & TrichoTest PDF) */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {(brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology' || brandSlug === 'trichotest') && (
+                  <a
+                    href="/api/collection/trichotest/pdf"
+                    download="Atlas-TrichoTest-Tratamientos-Capilares-Dossier-Clinico.pdf"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '3px 10px',
+                      borderRadius: '6px',
+                      background: '#f0fdf4',
+                      border: '1px solid #86efac',
+                      color: '#15803d',
+                      fontSize: '0.74rem',
+                      fontWeight: 750,
+                      cursor: 'pointer',
+                      textDecoration: 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={isEs ? 'Descargar Dossier Clínico TrichoTest™ en PDF' : 'Download TrichoTest™ Clinical PDF Dossier'}
+                  >
+                    <Download size={12} />
+                    <span>{isEs ? 'Dossier PDF TrichoTest' : 'TrichoTest PDF Dossier'}</span>
+                  </a>
+                )}
                 <button
                   type="button"
                   onClick={() => setIsInquiryDrawerOpen(true)}
@@ -1458,7 +1485,7 @@ export default function BrandCollectionPage({
                 </span>
               </button>
 
-              {(brandSlug === 'colway' || brandSlug === 'hair-treatments' || brandSlug === 'weight-loss' || brandSlug === 'tissue-repair') && (
+              {(brandSlug === 'colway' || brandSlug === 'hair-treatments' || brandSlug === 'trichology' || brandSlug === 'hair' || brandSlug === 'trichotest' || brandSlug === 'weight-loss' || brandSlug === 'tissue-repair') && (
                 <button
                   type="button"
                   onClick={() => {
@@ -1499,7 +1526,7 @@ export default function BrandCollectionPage({
 
             {activeMainTab === 'protocols' && (
               <div style={{ marginBottom: '2rem' }}>
-                {(brandSlug === 'hair-treatments' || brandSlug === 'colway') && (
+                {(brandSlug === 'hair-treatments' || brandSlug === 'colway' || brandSlug === 'trichology' || brandSlug === 'hair' || brandSlug === 'trichotest') && (
                   <ColwayTrichologyStemCellShowcase lang={lang} />
                 )}
                 {brandSlug === 'weight-loss' && (

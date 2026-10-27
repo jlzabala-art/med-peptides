@@ -24,7 +24,7 @@ export const PORTFOLIO_GROUPS = [
       {
         id: 'hair-treatments',
         slug: 'hair-treatments',
-        aliases: ['hair-treatments', 'hair-treatment', 'trichology', 'hair'],
+        aliases: ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'],
         href: '/collection/hair-treatments',
         name: 'Hair Treatments & Trichology',
         shortName: 'Hair Treatments',
