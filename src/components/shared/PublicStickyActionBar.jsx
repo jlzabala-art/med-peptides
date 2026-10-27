@@ -60,7 +60,7 @@ export default function PublicStickyActionBar({
 }) {
   const [overflowOpen, setOverflowOpen] = useState(false);
   const { totalCount, subtotal, openDrawer } = useB2BOrder();
-  const [_quota, setQuota] = useState({ remaining: 5, limit: 5 });
+  const [quota, setQuota] = useState({ remaining: 5, limit: 5 });
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isOnline, setIsOnline] = useState(true);
   const [showBackToTop, setShowBackToTop] = useState(false);
