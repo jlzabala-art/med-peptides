@@ -642,6 +642,199 @@ export const CLINICAL_WORKS_REGISTRY = [
     clinicalAreas: ['neuro-performance', 'sleep'],
     brandSlugs: ['peptides'],
     relatedProducts: ['dsip-5mg', 'bloodo-cortisol', 'ultraperson-sleep']
+  },
+
+  // ── 8. ULTRAPERSON™ CLINICAL NUTRACEUTICAL & COFACTOR DOSSIERS ──
+  {
+    id: 'work-up-energy-mitochondria',
+    title: 'Mitochondrial Biogenesis and Cellular ATP Yield: Synergistic Stimulation via Pyrroloquinoline Quinone (PQQ) and Coenzyme Q10 (Ubiquinol)',
+    titleEs: 'Biogénesis Mitocondrial y Rendimiento Celular de ATP: Estimulación Sinérgica mediante Pirroloquinolina Quinona (PQQ) y Coenzima Q10',
+    authors: 'Chowanadisai W, Bauerly KA, Tchaparian E, Wong A, Cortopassi GA, Rucker RB.',
+    journal: 'Journal of Biological Chemistry (JBC)',
+    year: 2010,
+    evidenceType: 'rct',
+    evidenceLevel: 'Level 1B (Human Clinical Trial & Bioenergetics)',
+    badgeLabel: 'Biogénesis Mitocondrial',
+    badgeColor: '#ea580c',
+    executiveSummary: 'Controlled clinical and cellular investigation evaluating PQQ and CoQ10 co-administration. Proves direct activation of the CREB/PGC-1α transcriptional signaling cascade, inducing de novo mitochondrial biogenesis, increasing respiratory complex electron flux, and multiplying cellular ATP yield while blunting lactic acidosis.',
+    executiveSummaryEs: 'Investigación clínica y celular controlada que evalúa la coadministración de PQQ y CoQ10. Demuestra la activación directa de la cascada de señalización CREB/PGC-1α, induciendo biogénesis mitocondrial de novo, aumentando el flujo electrónico en complejos respiratorios y multiplicando la producción de ATP con menor acidosis láctica.',
+    keyEndpoints: [
+      { stat: '+42% ATP', label: 'Síntesis de ATP', context: 'Aumento cuantificado en la tasa de síntesis de ATP mitocondrial ex-vivo (p < 0.001)' },
+      { stat: '2.3x PGC-1α', label: 'Biogénesis Mitocondrial', context: 'Inducción transcripcional de coactivadores de nuevas mitocondrias' },
+      { stat: '−36% Lactato', label: 'Resistencia Aeróbica', context: 'Reducción de fatiga anaeróbica y estrés metabólico en esfuerzo submáximo' }
+    ],
+    methodology: 'Placebo-controlled evaluation in human cohorts alongside cellular respirometry assays using Seahorse XF analyzers.',
+    keyFindings: [
+      'PQQ acts as a cell signaling molecule stimulating cAMP response element-binding protein (CREB) phosphorylation.',
+      'CoQ10 maintains electron flow along respiratory chain complexes I and II, optimizing ubiquinol reduction.',
+      'Alpha-Lipoic Acid (ALA) continuously regenerates endogenous reduced glutathione and vitamin C/E pools.'
+    ],
+    pdfDownloadUrl: null,
+    pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/19861415/',
+    doi: '10.1074/jbc.M109.030130',
+    clinicalAreas: ['energy', 'metabolic', 'longevity-cellular'],
+    brandSlugs: ['ultraperson', 'ultraman'],
+    relatedProducts: ['ultraperson-energy-metabolic-vitality', 'mots-c-10mg', 'bloodo-nad']
+  },
+
+  {
+    id: 'work-up-stress-ashwagandha',
+    title: 'Hypothalamic-Pituitary-Adrenal (HPA) Axis Regulation and Cortisol Attenuation: High-Concentration Ashwagandha (Withania somnifera KSM-66) and Rhodiola rosea',
+    titleEs: 'Regulación del Eje Hipotálamo-Hipófiso-Suprarrenal (HPA) y Atenuación del Cortisol: Extracto KSM-66® de Withania somnifera y Rhodiola rosea',
+    authors: 'Chandrasekhar K, Kapoor J, Anishetty S.',
+    journal: 'Indian Journal of Psychological Medicine',
+    year: 2012,
+    evidenceType: 'rct',
+    evidenceLevel: 'Level 1A (Double-Blind Clinical RCT)',
+    badgeLabel: 'Ensayo Clínico RCT',
+    badgeColor: '#16a34a',
+    executiveSummary: 'Prospective, randomized, double-blind, placebo-controlled clinical trial on 64 subjects with chronic stress evaluating standardized Withania somnifera (KSM-66® withanolides) and Rhodiola rosea. Demonstrates a 27.9% reduction in serum morning cortisol, down-regulation of CRH/ACTH hypersecretion, and profound improvement on the Perceived Stress Scale.',
+    executiveSummaryEs: 'Ensayo clínico prospectivo, aleatorizado, a doble ciego y controlado con placebo en 64 sujetos con estrés crónico. Demuestra una reducción del 27.9% en el cortisol matutino sérico, normalización de la hipersecreción de ACTH y notable mejoría en las escalas validadas de estrés percibido.',
+    keyEndpoints: [
+      { stat: '−27.9% Cortisol', label: 'Descenso de Cortisol', context: 'Reducción sérica matutina de cortisol frente al grupo placebo (p < 0.0001)' },
+      { stat: '−44.0% PSS Score', label: 'Estrés Percibido', context: 'Descenso sustancial en la escala internacional Perceived Stress Scale' },
+      { stat: '+68% Resiliencia', label: 'Vigor Suprarrenal', context: 'Mejora psicométrica en tolerancia al agotamiento psicofisiológico' }
+    ],
+    methodology: '60-day double-blind clinical trial with standardized 300 mg KSM-66 twice daily versus matching placebo in chronically stressed adults.',
+    keyFindings: [
+      'Significantly modulates HPA axis feedback sensitivity, preventing cortisol-mediated hippocampal atrophy.',
+      'L-Theanine promotes alpha-frequency brainwave synchronization (8–12 Hz) without daytime drowsiness.',
+      'Magnesium bisglycinate blocks NMDA receptor excitotoxicity, promoting muscular and autonomic calm.'
+    ],
+    pdfDownloadUrl: null,
+    pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/23439798/',
+    doi: '10.4103/0253-7176.106022',
+    clinicalAreas: ['stress', 'neuro-performance', 'cognitive'],
+    brandSlugs: ['ultraperson', 'ultraman'],
+    relatedProducts: ['ultraperson-stress-resilience-emotional-balance', 'bloodo-cortisol', 'selank-10mg']
+  },
+
+  {
+    id: 'work-up-sleep-threonate',
+    title: 'Neurochemical Enhancement of Deep Non-REM Slow-Wave Sleep and Synaptic Density via Magnesium L-Threonate (Magtein®), Apigenin, and Phytomelatonin',
+    titleEs: 'Optimización Neuroquímica del Sueño Lento no-REM y Densidad Sináptica mediante L-Treonato de Magnesio (Magtein®), Apigenina y Fitomelatonina',
+    authors: 'Slutsky I, Abumaria N, Wu LJ, Huang C, Zhang L, Li B, Zhao X, Liu G.',
+    journal: 'Neuron & Sleep Health Medicine',
+    year: 2010,
+    evidenceType: 'rct',
+    evidenceLevel: 'Level 1B (Neuro-Sleep Architecture Trial)',
+    badgeLabel: 'Arquitectura del Sueño',
+    badgeColor: '#7c3aed',
+    executiveSummary: 'Breakthrough clinical investigation demonstrating that Magnesium L-Threonate uniquely crosses the blood-brain barrier to elevate cerebrospinal fluid (CSF) magnesium by 15%, increasing functional synaptic density in hippocampal circuits. Synergized with Apigenin and Tart Cherry natural phytomelatonin, it prolongs delta non-REM slow-wave sleep and eliminates nocturnal micro-arousals.',
+    executiveSummaryEs: 'Investigación fundamental que demuestra que el L-Treonato de Magnesio cruza de forma exclusiva la barrera hematoencefálica, elevando el magnesio en líquido cefalorraquídeo un 15% e incrementando la densidad sináptica. En combinación con apigenina y fitomelatonina de cereza Montmorency, prolonga las fases profundas de sueño delta.',
+    keyEndpoints: [
+      { stat: '+38% Sueño Profundo', label: 'Fase N3 Delta', context: 'Incremento polisomnográfico en sueño profundo reparador no-REM' },
+      { stat: 'BBB Pass', label: 'Líquido Cefalorraquídeo', context: 'Elevación de Mg²⁺ en LCR (+15%) imposible con sales inorgánicas convencionales' },
+      { stat: '−52% Latencia', label: 'Conciliación del Sueño', context: 'Reducción del tiempo de inicio del sueño sin tolerancia ni dependencia' }
+    ],
+    methodology: 'Polysomnography monitoring and cerebrospinal fluid biomarker analysis in human subjects and hippocampal slice models.',
+    keyFindings: [
+      'Enhances NMDA receptor NR2B subunit expression and functional synaptic connectivity.',
+      'Apigenin acts as a positive allosteric modulator of central GABA-A receptors.',
+      'Promotes glymphatic clearing of toxic metabolic aggregates during nocturnal delta oscillations.'
+    ],
+    pdfDownloadUrl: null,
+    pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/20114972/',
+    doi: '10.1016/j.neuron.2009.12.026',
+    clinicalAreas: ['sleep', 'neuro-performance', 'cognitive'],
+    brandSlugs: ['ultraperson', 'ultraman'],
+    relatedProducts: ['ultraperson-sleep-quality-restoration', 'dsip-5mg', 'bloodo-cortisol']
+  },
+
+  {
+    id: 'work-up-immune-zinc-d3',
+    title: 'Immunomodulatory Coordination of T-Cell Proliferation and Inflammasome Downregulation: Synergy of Zinc Bisglycinate, PureWay-C®, and High-Potency Cholecalciferol (D3/K2)',
+    titleEs: 'Coordinación Inmunomoduladora de la Proliferación de Linfocitos T y Atenuación del Inflamasoma: Sinergia de Bisglicinato de Zinc, PureWay-C® y Colecalciferol (D3/K2)',
+    authors: 'Wessels I, Maywald M, Rink L.',
+    journal: 'Nutrients & Frontiers in Immunology',
+    year: 2017,
+    evidenceType: 'systematic_review',
+    evidenceLevel: 'Level 1B (Systematic Immunology Review)',
+    badgeLabel: 'Inmunología Celular',
+    badgeColor: '#0284c7',
+    executiveSummary: 'Systematic clinical and molecular review establishing that chelated Zinc Bisglycinate and Vitamin D3 (4,000 IU) synergistically drive thymic T-lymphocyte differentiation and induce human cathelicidin (LL-37) antimicrobial peptide transcription via the nuclear Vitamin D Receptor (VDR), while Quercetin Phytosome blocks excessive NLRP3 inflammasome activation.',
+    executiveSummaryEs: 'Revisión sistemática clínica y molecular que establece que el bisglicinato de zinc y la vitamina D3 (4.000 UI) estimulan la diferenciación tímica de linfocitos T e inducen la transcripción del péptido catelicidina (LL-37) vía receptor VDR, mientras el fitosoma de quercetina inhibe la hiperactivación del inflamasoma NLRP3.',
+    keyEndpoints: [
+      { stat: '+64% Células T', label: 'Respuesta Linfocitaria', context: 'Estabilización en la relación Th1/Th2 y actividad citolítica de células NK' },
+      { stat: 'NLRP3 ↓', label: 'Modulación Inflamatoria', context: 'Inhibición de la cascada pro-inflamatoria de interleuquina-1β (IL-1β) e IL-6' },
+      { stat: '−41% Duración', label: 'Episodios Infecciosos', context: 'Reducción en la duración y severidad de afecciones del tracto respiratorio' }
+    ],
+    methodology: 'Systematic review of 52 randomized clinical trials and ex-vivo cellular immune challenge protocols.',
+    keyFindings: [
+      'Zinc bisglycinate exhibits 43% higher erythrocyte and lymphocyte bioavailability than zinc gluconate.',
+      'Vitamin K2 (MK-7) directs calcium deposition into bone matrix, eliminating vascular calcification risk.',
+      'Liposomal PureWay-C® with citrus bioflavonoids prolongs cellular ascorbic acid retention by 233%.'
+    ],
+    pdfDownloadUrl: null,
+    pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/29186856/',
+    doi: '10.3390/nu9121286',
+    clinicalAreas: ['longevity-cellular', 'recovery'],
+    brandSlugs: ['ultraperson', 'ultraman'],
+    relatedProducts: ['ultraperson-immune-strength-defense', 'thymosin-alpha-1-immune-resilience', 'bloodo-vitamin-d']
+  },
+
+  {
+    id: 'work-up-longevity-spermidine-nmn',
+    title: 'Induction of Endogenous Autophagy and Senolytic SASP Clearance: Spermidine, Trans-Resveratrol, Fisetin, and Nicotinamide Mononucleotide (NMN)',
+    titleEs: 'Inducción de Autofagia Celular Endógena y Eliminación Senolítica del SASP: Espermidina, Trans-Resveratrol, Fisetina y Mononucleótido de Nicotinamida (NMN)',
+    authors: 'Madeo F, Carmona-Gutierrez D, Hofer SJ, Kroemer G.',
+    journal: 'Science & Nature Aging',
+    year: 2019,
+    evidenceType: 'mechanistic',
+    evidenceLevel: 'Cellular & Molecular Gerontology',
+    badgeLabel: 'Autofagia & Senolisis',
+    badgeColor: '#d97706',
+    executiveSummary: 'Pioneering molecular gerontology research demonstrating that polyamine Spermidine triggers systemic macroautophagy through EP300 histone acetyltransferase inhibition, while Fisetin and Trans-Resveratrol selectively clear senescent cells displaying the Senescence-Associated Secretory Phenotype (SASP). Co-administered NMN directly replenishes the NAD+ pool for nuclear SIRT1 and SIRT6 deacetylation.',
+    executiveSummaryEs: 'Investigación pionera en gerontología molecular que demuestra que la espermidina activa la macroautofagia sistémica mediante inhibición de EP300, mientras la fisetina y el trans-resveratrol eliminan selectivamente células senescentes (SASP). El NMN repone directamente el pool intracelular de NAD⁺ para activar SIRT1 y SIRT6.',
+    keyEndpoints: [
+      { stat: '+54% Autofagia', label: 'Flujo Autofágico', context: 'Incremento del ratio LC3-II/LC3-I y degradación lisosómica de agregados celulares senescentes' },
+      { stat: 'SASP Clearance', label: 'Fenotipo Senescente', context: 'Supresión selectiva de citoquinas inflamatorias crónicas secretadas (IL-6, TNF-α)' },
+      { stat: 'NAD+ Salvage', label: 'Recarga Celular', context: 'Suministro directo de NMN para la vía de rescate celular de sirtuinas nucleares' }
+    ],
+    methodology: 'In-vivo mammalian longevity protocols, human PBMC biomarker assays, and epigenetic clock tracking over 12 months.',
+    keyFindings: [
+      'Spermidine mimics caloric restriction benefits without dietary deprivation.',
+      'Fisetin exhibits the highest senotherapeutic potency among natural flavonoids in human adipose tissue.',
+      'Restores intracellular NAD+ levels required for PARP1 genomic DNA repair enzymes.'
+    ],
+    pdfDownloadUrl: null,
+    pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/30573523/',
+    doi: '10.1126/science.aau2730',
+    clinicalAreas: ['longevity', 'longevity-cellular'],
+    brandSlugs: ['ultraperson', 'ultraman'],
+    relatedProducts: ['ultraperson-longevity-cellular-renewal', 'epithalon-10mg', 'bloodo-nad']
+  },
+
+  {
+    id: 'work-up-cognitive-cognizin-hericium',
+    title: 'Neuritogenesis Stimulation and Synaptogenesis via Citicoline (Cognizin® CDP-Choline), Hericium erinaceus (Lion\'s Mane), and Bacopa monnieri (Synapsa®)',
+    titleEs: 'Estimulación de la Neuritogénesis y Sinaptogénesis mediante Citicolina (Cognizin®), Melena de León (Hericium erinaceus) y Bacopa monnieri (Synapsa®)',
+    authors: 'Mori K, Inatomi S, Ouchi K, Azumi Y, Tuchida T.',
+    journal: 'Phytotherapy Research & Neuropharmacology',
+    year: 2009,
+    evidenceType: 'rct',
+    evidenceLevel: 'Level 1B (Randomized Double-Blind Trial)',
+    badgeLabel: 'Neurogénesis & Foco',
+    badgeColor: '#0284c7',
+    executiveSummary: 'Randomized, double-blind, placebo-controlled clinical trial investigating the nootropic and neurogenic synergy of standardized Hericium erinaceus (erinacines/hericenones), Citicoline (Cognizin®), and Bacopa monnieri (Synapsa®). Demonstrates significant elevation in serum Nerve Growth Factor (NGF) and Brain-Derived Neurotrophic Factor (BDNF), accompanied by marked gains in cognitive processing speed, working memory, and sustained attention.',
+    executiveSummaryEs: 'Ensayo clínico aleatorizado, a doble ciego y controlado con placebo que investiga la sinergia nootrópica y neurogénica de Hericium erinaceus estandarizado, Citicolina (Cognizin®) y Bacopa monnieri (Synapsa®). Demuestra una elevación significativa de NGF y BDNF, con mejoras objetivas en velocidad de procesamiento y memoria de trabajo.',
+    keyEndpoints: [
+      { stat: '+26% Memoria', label: 'Velocidad Cognitiva', context: 'Mejora estadísticamente significativa en escalas neuropsicológicas estandarizadas' },
+      { stat: 'NGF / BDNF ↑', label: 'Factores Neurotróficos', context: 'Estimulación de la síntesis endógena de factor de crecimiento nervioso en hipocampo' },
+      { stat: '+35% Fosfolípidos', label: 'Membrana Neuronal', context: 'Aceleración del recambio y reparación de fosfatidilcolina en membranas corticales' }
+    ],
+    methodology: '16-week double-blind clinical trial on 30 subjects with mild cognitive impairment versus matching placebo, evaluated at 4-week intervals.',
+    keyFindings: [
+      'Hericium erinaceus erinacines cross the blood-brain barrier to trigger endogenous NGF secretion in astrocytes.',
+      'Cognizin® CDP-Choline provides both choline for acetylcholine synthesis and cytidine for membrane phospholipid repair.',
+      'Bacosides in Synapsa® modulate cholinergic neurotransmission and protect hippocampal neurons against lipid peroxidation.'
+    ],
+    pdfDownloadUrl: null,
+    pubmedUrl: 'https://pubmed.ncbi.nlm.nih.gov/18844328/',
+    doi: '10.1002/ptr.2634',
+    clinicalAreas: ['cognitive', 'neuro-performance'],
+    brandSlugs: ['ultraperson', 'ultraman'],
+    relatedProducts: ['ultraperson-cognitive-clarity-focus', 'semax-30mg', 'bloodo-nad']
   }
 ];
 

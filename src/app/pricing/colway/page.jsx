@@ -75,10 +75,11 @@ const FALLBACK_COLWAY_PRODUCTS = [
     image: '/images/products/colway/shampoo.png',
     keyActives: 'Native Fish Tropocollagen, Caffeine, Niacinamide, Zinc PCA, Diosmin',
     clinicalFocus: 'Pre-transplant scalp optimization, follicular ostium cleansing, post-FUE maintenance (Day 10+).',
-    landedCostAed: 100,
-    wholesalePriceAed: 115,
-    clinicPriceAed: 145,
-    retailPriceAed: 180,
+    exWorksCostUsd: 32.69,
+    landedCostAed: 120,
+    wholesalePriceAed: 138,
+    clinicPriceAed: 174,
+    retailPriceAed: 216,
     stockStatus: 'In Stock (Dubai)'
   },
   {
@@ -92,10 +93,11 @@ const FALLBACK_COLWAY_PRODUCTS = [
     image: '/images/products/colway/conditioner.png',
     keyActives: 'Native Collagen, Hydrolyzed Keratin, D-Panthenol, Argan Oil, Cotton Seed Oil',
     clinicalFocus: 'Cuticular barrier restoration, tensile strength enhancement (+24%), shock-loss mitigation.',
-    landedCostAed: 100,
-    wholesalePriceAed: 115,
-    clinicPriceAed: 145,
-    retailPriceAed: 180,
+    exWorksCostUsd: 32.69,
+    landedCostAed: 120,
+    wholesalePriceAed: 138,
+    clinicPriceAed: 174,
+    retailPriceAed: 216,
     stockStatus: 'In Stock (Dubai)'
   },
   {

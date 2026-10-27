@@ -116,6 +116,7 @@ export default function PharmacyLabelsModal({
   const [compareMode, setCompareMode] = useState(!hideShippingLabel); // show Delivery + Shipping side by side only if shipping label is enabled
   const [shippingDraft, setShippingDraft] = useState(null); // null = not editing
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
+  const [colorMode, setColorMode] = useState('monochrome'); // 'monochrome' (default for thermal/laser print contrast) | 'color' (screen preview)
   const [showCutGuides, setShowCutGuides] = useState(false); // Scissor cut lines & crop marks toggle (default false for clean label)
   const [zoomLevel, setZoomLevel] = useState('fit'); // 'fit' | 1 | 1.5 | 2
 
@@ -658,8 +659,6 @@ export default function PharmacyLabelsModal({
         return;
       }
 
-      const imgData = await svgElementToImageData(svgElement, dimensions.widthMm, dimensions.heightMm, Math.max(dpi, 600));
-
       const { jsPDF } = await import('jspdf');
       const isLandscape = dimensions.widthMm >= dimensions.heightMm;
       const pdf = new jsPDF({
@@ -669,7 +668,26 @@ export default function PharmacyLabelsModal({
         compress: true
       });
 
-      pdf.addImage(imgData, 'PNG', 0, 0, dimensions.widthMm, dimensions.heightMm, undefined, 'SLOW');
+      // Attempt native vector SVG-to-PDF export via svg2pdf.js for pure vector typography & crispness
+      let vectorSuccess = false;
+      try {
+        const { svg2pdf } = await import('svg2pdf.js');
+        await svg2pdf(svgElement, pdf, {
+          x: 0,
+          y: 0,
+          width: dimensions.widthMm,
+          height: dimensions.heightMm
+        });
+        vectorSuccess = true;
+      } catch (vecErr) {
+        console.warn('Native svg2pdf vector export failed, falling back to 600 DPI raster:', vecErr);
+      }
+
+      // Fallback to high-DPI raster image if vector export encounters any environment issue
+      if (!vectorSuccess) {
+        const imgData = await svgElementToImageData(svgElement, dimensions.widthMm, dimensions.heightMm, Math.max(dpi, 600));
+        pdf.addImage(imgData, 'PNG', 0, 0, dimensions.widthMm, dimensions.heightMm, undefined, 'SLOW');
+      }
 
       // Standardized Clinical File Naming Engine (Supplier + Patient + Rx + Part + Size + Specs)
       const rawSupplier = currentItem.pharmacy || currentItem.supplier || 'Pharmapolis';
@@ -753,6 +771,7 @@ export default function PharmacyLabelsModal({
                 variant={variantKey}
                 widthMm={dimensions.widthMm}
                 heightMm={dimensions.heightMm}
+                colorMode={colorMode}
                 showCutGuides={false}
               />
             );
@@ -846,8 +865,23 @@ export default function PharmacyLabelsModal({
             const container = document.getElementById(`pharmapolis-bulk-label-${globalIdx}`);
             const svgEl = container?.querySelector('svg');
             if (svgEl) {
-              const imgData = await svgElementToImageData(svgEl, STICKER_W, STICKER_H, 600);
-              pdf.addImage(imgData, 'PNG', x, y, STICKER_W, STICKER_H, undefined, 'SLOW');
+              let vecDone = false;
+              try {
+                const { svg2pdf } = await import('svg2pdf.js');
+                await svg2pdf(svgEl, pdf, {
+                  x,
+                  y,
+                  width: STICKER_W,
+                  height: STICKER_H
+                });
+                vecDone = true;
+              } catch (vecErr) {
+                console.warn('A4 sticker vector export fallback to raster:', vecErr);
+              }
+              if (!vecDone) {
+                const imgData = await svgElementToImageData(svgEl, STICKER_W, STICKER_H, 600);
+                pdf.addImage(imgData, 'PNG', x, y, STICKER_W, STICKER_H, undefined, 'SLOW');
+              }
               pdf.setDrawColor(226, 232, 240);
               pdf.setLineWidth(0.2);
               pdf.roundedRect(x, y, STICKER_W, STICKER_H, 1.5, 1.5, 'S');
@@ -874,8 +908,23 @@ export default function PharmacyLabelsModal({
           const container = document.getElementById(`pharmapolis-bulk-label-${idx}`);
           const svgEl = container?.querySelector('svg');
           if (svgEl) {
-            const imgData = await svgElementToImageData(svgEl, dimensions.widthMm, dimensions.heightMm, Math.max(dpi, 600));
-            pdf.addImage(imgData, 'PNG', 0, 0, dimensions.widthMm, dimensions.heightMm, undefined, 'SLOW');
+            let vecDone = false;
+            try {
+              const { svg2pdf } = await import('svg2pdf.js');
+              await svg2pdf(svgEl, pdf, {
+                x: 0,
+                y: 0,
+                width: dimensions.widthMm,
+                height: dimensions.heightMm
+              });
+              vecDone = true;
+            } catch (vecErr) {
+              console.warn('Bulk label vector export fallback to raster:', vecErr);
+            }
+            if (!vecDone) {
+              const imgData = await svgElementToImageData(svgEl, dimensions.widthMm, dimensions.heightMm, Math.max(dpi, 600));
+              pdf.addImage(imgData, 'PNG', 0, 0, dimensions.widthMm, dimensions.heightMm, undefined, 'SLOW');
+            }
           }
         }
 
@@ -2009,6 +2058,22 @@ export default function PharmacyLabelsModal({
                     <option value={300}>300 DPI (Standard)</option>
                     <option value={600}>600 DPI (Micro-Print)</option>
                     <option value={1200}>1200 DPI (Ultra HD)</option>
+                  </select>
+                </div>
+
+                {/* Field 3b: Palette & Contrast Mode (Thermal Monochrome vs Screen Color) */}
+                <div className="gcp-toolbar-control">
+                  <label htmlFor="gcp-label-colormode" className="gcp-toolbar-label">
+                    {isEs ? 'Paleta:' : 'Palette:'}
+                  </label>
+                  <select
+                    id="gcp-label-colormode"
+                    value={colorMode}
+                    onChange={(e) => setColorMode(e.target.value)}
+                    className="gcp-toolbar-select"
+                  >
+                    <option value="monochrome">{isEs ? '🖨️ Térmica / Grises (Alto Contraste)' : '🖨️ Thermal / Grayscale (High Contrast)'}</option>
+                    <option value="color">{isEs ? '🎨 Color Pantalla (Azul / Ámbar)' : '🎨 Screen Color (Blue / Amber)'}</option>
                   </select>
                 </div>
 
@@ -3234,6 +3299,7 @@ export default function PharmacyLabelsModal({
                   variant={activeVariant}
                   widthMm={dimensions.widthMm}
                   heightMm={dimensions.heightMm}
+                  colorMode={colorMode}
                   showCutGuides={showCutGuides}
                 />
               </div>
@@ -3267,6 +3333,7 @@ export default function PharmacyLabelsModal({
                         variant={otherVariant}
                         widthMm={dimensions.widthMm}
                         heightMm={dimensions.heightMm}
+                        colorMode={colorMode}
                         showCutGuides={false}
                       />
                     </div>
@@ -3508,6 +3575,7 @@ export default function PharmacyLabelsModal({
                 widthMm={exportFormat === 'pdf_a4' ? 75 : dimensions.widthMm}
                 heightMm={exportFormat === 'pdf_a4' ? 45 : dimensions.heightMm}
                 dpi={Math.max(dpi, 300)}
+                colorMode={colorMode}
                 showCutGuides={showCutGuides}
               />
             </div>

@@ -144,7 +144,9 @@ export function useSupplierData({ initialData } = {}) {
           companyName: resolvedName,
           displayName: resolvedName,
           country: data.country || data.originCountry || data.headquarters || data.location || (data.warehouses?.[0]?.country) || (data.facilitySites?.[0]?.country) || '',
-          categoryIds: data.categoryIds || (data.categoryId ? [data.categoryId] : []) || [],
+          categoryIds: (Array.isArray(data.categoryIds) && data.categoryIds.length > 0)
+            ? data.categoryIds
+            : ((Array.isArray(data.categories) && data.categories.length > 0) ? data.categories : (data.categoryId ? [data.categoryId] : [])),
           status: data.status || data.statusB2B || 'active',
           statusB2B: data.statusB2B || data.status || 'active',
           variantsSupplied: Number(data.variantsSupplied ?? data.analytics?.variantsSupplied ?? data.analytics?.totalVariants ?? 0),
@@ -160,12 +162,19 @@ export function useSupplierData({ initialData } = {}) {
         const stats = await fetchServerStats(forceRefresh);
         if (stats.length > 0) {
           const statsMap = Object.fromEntries(stats.map(s => [s.id, s]));
-          list = list.map(supplier => ({
-            ...supplier,
-            productsSupplied: statsMap[supplier.id]?.productsSupplied ?? supplier.productsSupplied ?? 0,
-            variantsSupplied: statsMap[supplier.id]?.variantsSupplied ?? supplier.variantsSupplied ?? 0,
-            productCategories: statsMap[supplier.id]?.productCategories ?? supplier.productCategories ?? [],
-          }));
+          list = list.map(supplier => {
+            const serverProdCats = statsMap[supplier.id]?.productCategories ?? [];
+            const mergedCategoryIds = (supplier.categoryIds && supplier.categoryIds.length > 0)
+              ? supplier.categoryIds
+              : serverProdCats;
+            return {
+              ...supplier,
+              categoryIds: mergedCategoryIds,
+              productsSupplied: statsMap[supplier.id]?.productsSupplied ?? supplier.productsSupplied ?? 0,
+              variantsSupplied: statsMap[supplier.id]?.variantsSupplied ?? supplier.variantsSupplied ?? 0,
+              productCategories: serverProdCats.length > 0 ? serverProdCats : (supplier.productCategories ?? []),
+            };
+          });
         }
       } catch (_) { /* stats are optional enhancement */ }
 

@@ -461,12 +461,17 @@ ${diagSpecs}
 ${contextAnchor?.details ? `- Additional Test Specs: ${JSON.stringify(contextAnchor.details)}\n` : ''}
 ${pubmedContextText}`;
 
-        systemPrompt = `You are Atlas Diagnostic Clinical Laboratory Specialist, an authoritative clinical AI advisor specializing in CE-IVDR certified capillary Dried Blood Spot (DBS) testing, intracellular & endocrine biomarker analytics (LifeLab1), reference ranges, sample collection protocols, and diagnostic-guided therapeutic protocols.
+        const diagnosticPlatformKnowledge = publicPlatformKnowledge
+          .replace(/##\s*4\.\s*INSTITUTIONAL CORPORATE, COMPOUNDING[\s\S]*?(?=##|\n\n\n|$)/i, '')
+          .replace(/- \[European Pharmaceutical Compounding[\s\S]*?(?=- \[|\n\n|$)/gi, '')
+          .replace(/kasia@mediluxeme\.com/gi, '');
+
+        systemPrompt = `You are Atlas Diagnostic Clinical Laboratory Specialist, an authoritative clinical AI advisor specializing in CE-IVDR certified capillary Dried Blood Spot (DBS) testing, intracellular & endocrine biomarker analytics (LifeLab1 Central Lab, Vilnius, Lithuania), reference ranges, sample collection protocols, and diagnostic-guided therapeutic protocols.
 
 CRITICAL OPERATING RULES:
-1. STRICT DIAGNOSTIC & BIOMARKER SCOPE:
-   - Answer inquiries exclusively about the active diagnostic test (sample collection procedure, drying protocol, sample postal return, biological stability, analytical assay methodology, biomarker reference ranges, clinical precautions, and protocol calibration).
-   - UNDER NO CIRCUMSTANCES mention peptide reconstitution, bacteriostatic (BAC) water, syringes, or subcutaneous injections for this test kit.
+1. STRICT DIAGNOSTIC & BIOMARKER SCOPE (ABSOLUTE PROHIBITION ON COMPOUNDING & INJECTIONS):
+   - Answer inquiries exclusively about the active diagnostic test (sample collection procedure, Whatman 903 drying protocol, sample mailer return, 14-day room temperature stability, analytical assay methodology, biomarker reference ranges, clinical precautions, and protocol calibration).
+   - UNDER NO CIRCUMSTANCES mention compounding pharmacies, magistral compounding, European Compounding Service, kasia@mediluxeme.com, peptide reconstitution, bacteriostatic (BAC) water, syringes, needles, or subcutaneous injections for this test kit. This product is strictly a non-invasive capillary dried blood spot (DBS) diagnostic test kit analyzed by LifeLab1 Central Laboratory.
 2. EVIDENCE-BASED PROTOCOL GUIDANCE:
    - When asked how to interpret or act upon test results, correlate biomarker levels with evidence-based clinical protocols:
      ${primaryProtocols}
@@ -477,7 +482,7 @@ CRITICAL OPERATING RULES:
 
 ${activeEntityContext}
 
-${publicPlatformKnowledge}
+${diagnosticPlatformKnowledge}
 `;
       } else if (isCosmetic) {
         const prodName = String(contextAnchor?.name || '').toLowerCase();

@@ -109,20 +109,20 @@ export function computeDefaultHeaderBadge(labelData = {}, fallbackPartIndex = 0,
  * The molecule name is rendered in slate-800 (#1e293b), while the strength/dosage
  * (e.g., 500 mcg, 25 mg, 4%, etc.) is rendered in bold dark blue (#0284c7) for instant recognition.
  */
-function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a') {
+function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a', isMono = true) {
   const match = String(line).match(/^(.*?\s+)([\d.,]+[\s\u00A0]*(?:mcg|mg|g|%|iu|fu|spu|ml|capsules?|drops?)(?:[\s\u00A0]*\/[\s\u00A0]*(?:ml|g|cap|dose))?(?:[\s\u00A0]*(?:topical|oral))?(?:[\s\u00A0]*\([^)]+\))?)\s*$/i);
   if (match) {
     const namePart = match[1];
     const dosePart = match[2];
     return (
-      <text key={key} x={x} y={y} fontFamily="Arial, Helvetica, sans-serif" fontSize={fontSize}>
-        <tspan fontWeight="700" fill="#1e293b">{namePart}</tspan>
-        <tspan fontWeight="900" fill="#0284c7">{dosePart}</tspan>
+      <text key={key} x={x} y={y} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={fontSize} textRendering="geometricPrecision">
+        <tspan fontWeight="700" fill={isMono ? '#000000' : '#1e293b'}>{namePart}</tspan>
+        <tspan fontWeight="900" fill={isMono ? '#000000' : '#0284c7'}>{dosePart}</tspan>
       </text>
     );
   }
   return (
-    <text key={key} x={x} y={y} fontFamily="Arial, Helvetica, sans-serif" fontSize={fontSize} fontWeight="800" fill={defaultFill}>
+    <text key={key} x={x} y={y} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={fontSize} fontWeight="800" fill={isMono ? '#000000' : defaultFill} textRendering="geometricPrecision">
       {line}
     </text>
   );
@@ -147,8 +147,11 @@ export default function PharmapolisLabelSvg({
   widthMm = 75,
   heightMm = 45,
   showCutGuides = false,
+  colorMode = 'monochrome', // 'monochrome' (pure black / grayscale high-contrast for thermal & laser printing) | 'color' (preview)
   svgRef = null
 }) {
+  const isMono = colorMode === 'monochrome';
+
   // Base coordinates: 1500 px base width, dynamic responsive height
   const WIDTH = 1500;
   const HEIGHT = Math.round((heightMm / widthMm) * 1500) || 900;
@@ -219,29 +222,40 @@ export default function PharmapolisLabelSvg({
 
   // Unified Header Badge: Supports show/hide toggle (`showHeaderBadge`) and custom text override (`customHeaderBadge`)
   const autoHeaderBadgeText = React.useMemo(() => {
-    const timeIcon = timeOfDay === 'MORNING'
-      ? '☀️ '
-      : (timeOfDay.includes('NIGHT') || timeOfDay.includes('BEDTIME')
-          ? '🌙 '
-          : (timeOfDay === 'EVENING' ? '🌅 ' : ''));
+    const timeIcon = isMono
+      ? ''
+      : (timeOfDay === 'MORNING'
+          ? '☀️ '
+          : (timeOfDay.includes('NIGHT') || timeOfDay.includes('BEDTIME')
+              ? '🌙 '
+              : (timeOfDay === 'EVENING' ? '🌅 ' : '')));
     if (partBadge && timeOfDay) {
       return `${partBadge} · ${timeIcon}${timeOfDay}`;
     }
     if (partBadge) return partBadge;
     if (timeOfDay) return `${timeIcon}${timeOfDay}`;
     return '';
-  }, [partBadge, timeOfDay]);
+  }, [isMono, partBadge, timeOfDay]);
 
   const headerBadgeText = React.useMemo(() => {
     if (labelData.showHeaderBadge === false) return '';
+    let raw = '';
     if (typeof labelData.customHeaderBadge === 'string') {
-      return labelData.customHeaderBadge.trim();
+      raw = labelData.customHeaderBadge.trim();
+    } else {
+      raw = autoHeaderBadgeText;
     }
-    return autoHeaderBadgeText;
-  }, [labelData.showHeaderBadge, labelData.customHeaderBadge, autoHeaderBadgeText]);
+    if (isMono && raw) {
+      return raw.replace(/[☀️🌙🌅]/g, '').replace(/\s*·\s*·\s*/g, ' · ').trim();
+    }
+    return raw;
+  }, [labelData.showHeaderBadge, labelData.customHeaderBadge, autoHeaderBadgeText, isMono]);
 
   // Clinical Color Theme for Time of Day & Part indicator
   const badgeTheme = React.useMemo(() => {
+    if (isMono) {
+      return { fill: '#000000', text: '#ffffff', border: '#000000', accent: '#000000', icon: '' };
+    }
     const effectiveUpper = (headerBadgeText || timeOfDay || '').toUpperCase();
     if (effectiveUpper.includes('MORNING') || effectiveUpper.includes('MAÑANA')) {
       return { fill: '#b45309', text: '#ffffff', border: '#d97706', accent: '#f59e0b', icon: '☀️' }; // Warm amber gold
@@ -253,7 +267,7 @@ export default function PharmapolisLabelSvg({
       return { fill: '#0f766e', text: '#ffffff', border: '#14b8a6', accent: '#2dd4bf', icon: '🌅' }; // Evening teal
     }
     return { fill: '#003666', text: '#ffffff', border: '#0284c7', accent: '#38bdf8', icon: '' }; // Clinical dispensary navy
-  }, [headerBadgeText, timeOfDay]);
+  }, [isMono, headerBadgeText, timeOfDay]);
 
   // Header badge sizing and right-aligned position (guaranteed zero overlap with patientName)
   const badgeCharCount = headerBadgeText.length;
@@ -513,7 +527,7 @@ export default function PharmapolisLabelSvg({
   const renderCutGuides = () => {
     if (!showCutGuides) return null;
     return (
-      <g className="pharmacy-cut-guides" pointerEvents="none">
+      <g className="pharmacy-cut-guides" pointerEvents="none" shapeRendering="crispEdges">
         {/* Perimeter Solid Fine Hairline Border - Strictly No Dashed Strokes */}
         <rect
           x="3"
@@ -521,27 +535,27 @@ export default function PharmapolisLabelSvg({
           width={WIDTH - 6}
           height={HEIGHT - 6}
           fill="none"
-          stroke="#cbd5e1"
+          stroke={isMono ? '#000000' : '#cbd5e1'}
           strokeWidth="1.5"
           rx="2"
         />
 
         {/* 4 Professional Corner Crop Marks (Standard Imprenta) */}
         {/* Top-Left */}
-        <line x1="0" y1="0" x2="38" y2="0" stroke="#475569" strokeWidth="3" />
-        <line x1="0" y1="0" x2="0" y2="38" stroke="#475569" strokeWidth="3" />
+        <line x1="0" y1="0" x2="38" y2="0" stroke={isMono ? '#000000' : '#475569'} strokeWidth="3" />
+        <line x1="0" y1="0" x2="0" y2="38" stroke={isMono ? '#000000' : '#475569'} strokeWidth="3" />
 
         {/* Top-Right */}
-        <line x1={WIDTH} y1="0" x2={WIDTH - 38} y2="0" stroke="#475569" strokeWidth="3" />
-        <line x1={WIDTH} y1="0" x2={WIDTH} y2="38" stroke="#475569" strokeWidth="3" />
+        <line x1={WIDTH} y1="0" x2={WIDTH - 38} y2="0" stroke={isMono ? '#000000' : '#475569'} strokeWidth="3" />
+        <line x1={WIDTH} y1="0" x2={WIDTH} y2="38" stroke={isMono ? '#000000' : '#475569'} strokeWidth="3" />
 
         {/* Bottom-Left */}
-        <line x1="0" y1={HEIGHT} x2="38" y2={HEIGHT} stroke="#475569" strokeWidth="3" />
-        <line x1="0" y1={HEIGHT} x2="0" y2={HEIGHT - 38} stroke="#475569" strokeWidth="3" />
+        <line x1="0" y1={HEIGHT} x2="38" y2={HEIGHT} stroke={isMono ? '#000000' : '#475569'} strokeWidth="3" />
+        <line x1="0" y1={HEIGHT} x2="0" y2={HEIGHT - 38} stroke={isMono ? '#000000' : '#475569'} strokeWidth="3" />
 
         {/* Bottom-Right */}
-        <line x1={WIDTH} y1={HEIGHT} x2={WIDTH - 38} y2={HEIGHT} stroke="#475569" strokeWidth="3" />
-        <line x1={WIDTH} y1={HEIGHT} x2={WIDTH} y2={HEIGHT - 38} stroke="#475569" strokeWidth="3" />
+        <line x1={WIDTH} y1={HEIGHT} x2={WIDTH - 38} y2={HEIGHT} stroke={isMono ? '#000000' : '#475569'} strokeWidth="3" />
+        <line x1={WIDTH} y1={HEIGHT} x2={WIDTH} y2={HEIGHT - 38} stroke={isMono ? '#000000' : '#475569'} strokeWidth="3" />
       </g>
     );
   };
@@ -595,6 +609,8 @@ export default function PharmapolisLabelSvg({
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         width="100%"
         height="100%"
+        textRendering="geometricPrecision"
+        shapeRendering="crispEdges"
         style={{ display: 'block', background: '#ffffff', borderRadius: '4px' }}
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -607,7 +623,7 @@ export default function PharmapolisLabelSvg({
           fontFamily="Georgia, 'Times New Roman', Garamond, serif"
           fontSize={headerFontSize}
           fontStyle="italic"
-          fill="#1e293b"
+          fill={isMono ? '#000000' : '#1e293b'}
         >
           {pharmacyContact}
         </text>
@@ -740,6 +756,8 @@ export default function PharmapolisLabelSvg({
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         width="100%"
         height="100%"
+        textRendering="geometricPrecision"
+        shapeRendering="crispEdges"
         style={{ display: 'block', background: '#ffffff', borderRadius: '4px' }}
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -747,22 +765,22 @@ export default function PharmapolisLabelSvg({
 
         {/* ── HEADER ── */}
         <g transform={`translate(60, ${headerY})`}>
-          <text x="0" y="34" fontFamily="Arial, Helvetica, sans-serif" fontSize={dynHeaderTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">{pharmacyName}</text>
-          <text x="0" y="62" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#475569">{pharmacyAddress}</text>
+          <text x="0" y="34" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={dynHeaderTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">{pharmacyName}</text>
+          <text x="0" y="62" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={headerSubSize} fontWeight="500" fill={isMono ? '#333333' : '#475569'}>{pharmacyAddress}</text>
         </g>
 
         {/* EU GMP CERTIFIED BADGE */}
         <g transform={`translate(1440, ${headerY + 2})`}>
-          <rect x="-330" y="0" width="330" height={isShort ? 40 : 46} fill="#f8fafc" stroke="#003666" strokeWidth="2" rx="6" />
-          <text x="-165" y={isShort ? 26 : 30} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="800" fill="#003666" letterSpacing="0.6">
+          <rect x="-330" y="0" width="330" height={isShort ? 40 : 46} fill={isMono ? '#ffffff' : '#f8fafc'} stroke={isMono ? '#000000' : '#003666'} strokeWidth="2.2" rx="6" />
+          <text x="-165" y={isShort ? 26 : 30} textAnchor="middle" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="800" fill={isMono ? '#000000' : '#003666'} letterSpacing="0.6">
             EU GMP CERTIFIED DISPENSARY
           </text>
         </g>
 
         {/* ── PATIENT BOX ── */}
         <g transform={`translate(60, ${patientBoxY})`}>
-          <rect x="0" y="0" width="1380" height={patientBoxHeight} fill="#f8fafc" stroke="#000000" strokeWidth="2.2" rx="4" />
-          <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
+          <rect x="0" y="0" width="1380" height={patientBoxHeight} fill={isMono ? '#ffffff' : '#f8fafc'} stroke="#000000" strokeWidth="2.2" rx="4" />
+          <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
             PATIENT: <tspan fontWeight="800" fontSize={patientNameFontSize}>{patientName}</tspan>
           </text>
           {headerBadgeText ? (
@@ -772,7 +790,7 @@ export default function PharmapolisLabelSvg({
                 x={Math.round(badgeWidth / 2)}
                 y={isShort ? 25 : 29}
                 textAnchor="middle"
-                fontFamily="Arial, Helvetica, sans-serif"
+                fontFamily="Arial, Helvetica, -apple-system, sans-serif"
                 fontSize={badgeFontSize}
                 fontWeight="900"
                 fill={badgeTheme.text || "#ffffff"}
@@ -787,7 +805,7 @@ export default function PharmapolisLabelSvg({
         {/* ── TWO-COLUMN WORKSPACE ── */}
         {/* LEFT COLUMN: COMPACT SNUG QR CODE + TECHNICAL DISPENSING SPECS (Zero dead space around QR) */}
         <g transform={`translate(60, ${colY})`}>
-          <rect x="0" y="0" width={leftColWidth} height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" rx="8" />
+          <rect x="0" y="0" width={leftColWidth} height={colHeight} fill="#ffffff" stroke={isMono ? '#000000' : '#cbd5e1'} strokeWidth="2" rx="8" />
           
           {/* Snug QR Code with balanced 27px side margins */}
           <svg x={qrX} y={qrY} width={backQrSize} height={backQrSize} viewBox={`0 0 ${backQrSize} ${backQrSize}`}>
@@ -795,7 +813,7 @@ export default function PharmapolisLabelSvg({
               value={targetRxUrl}
               size={backQrSize}
               level="M"
-              fgColor="#003666"
+              fgColor={isMono ? '#000000' : '#003666'}
               bgColor="#ffffff"
             />
           </svg>
@@ -805,13 +823,13 @@ export default function PharmapolisLabelSvg({
             x={Math.round(leftColWidth / 2)}
             y={qrY + backQrSize + (isShort ? 16 : 20)}
             textAnchor="middle"
-            fontFamily="Arial, Helvetica, sans-serif"
+            fontFamily="Arial, Helvetica, -apple-system, sans-serif"
             fontSize={isShort ? 12 : 14}
             fontWeight="900"
-            fill="#003666"
+            fill={isMono ? '#000000' : '#003666'}
             letterSpacing="0.4"
           >
-            <tspan fill="#16a34a" fontWeight="900">✔ </tspan>SCAN FOR REFILL
+            <tspan fill={isMono ? '#000000' : '#16a34a'} fontWeight="900">✔ </tspan>SCAN FOR REFILL
           </text>
 
           {/* Hairline Divider */}
@@ -820,7 +838,7 @@ export default function PharmapolisLabelSvg({
             y1={qrY + backQrSize + (isShort ? 20 : 24)}
             x2={leftColWidth - 14}
             y2={qrY + backQrSize + (isShort ? 20 : 24)}
-            stroke="#e2e8f0"
+            stroke={isMono ? '#cccccc' : '#e2e8f0'}
             strokeWidth="1.5"
           />
 
@@ -849,14 +867,14 @@ export default function PharmapolisLabelSvg({
             return (
               <g clipPath="url(#pls-left-col-clip)" transform={`translate(14, ${qrY + backQrSize + (isShort ? 34 : 42)})`}>
                 {/* Header badge */}
-                <rect x="-4" y="0" width={leftColWidth - 20} height={isShort ? 20 : 24} fill="#f0f9ff" stroke="#bae6fd" strokeWidth="1.2" rx="4" />
-                <text x="4" y={isShort ? 14 : 17} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10.5 : 12} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                <rect x="-4" y="0" width={leftColWidth - 20} height={isShort ? 20 : 24} fill={isMono ? '#000000' : '#f0f9ff'} stroke={isMono ? '#000000' : '#bae6fd'} strokeWidth="1.2" rx="4" />
+                <text x="4" y={isShort ? 14 : 17} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10.5 : 12} fontWeight="900" fill={isMono ? '#ffffff' : '#0284c7'} letterSpacing="0.8">
                   DISPENSING SPECS
                 </text>
 
                 {/* 1. NET CONTENT */}
                 <g>
-                  <text x="0" y={volTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 11 : 12.5} fontWeight="800" fill="#475569" letterSpacing="0.4">
+                  <text x="0" y={volTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 11 : 12.5} fontWeight="800" fill={isMono ? '#333333' : '#475569'} letterSpacing="0.4">
                     NET CONTENT
                   </text>
                   {volLines.map((vLine, vIdx) => (
@@ -864,10 +882,10 @@ export default function PharmapolisLabelSvg({
                       key={`vol-${vIdx}`}
                       x="0"
                       y={firstVolLineY + (vIdx * volLineGap)}
-                      fontFamily="Arial, Helvetica, sans-serif"
+                      fontFamily="Arial, Helvetica, -apple-system, sans-serif"
                       fontSize={isShort ? 16 : 19}
                       fontWeight="900"
-                      fill="#0f172a"
+                      fill="#000000"
                     >
                       {vLine}
                     </text>
@@ -876,7 +894,7 @@ export default function PharmapolisLabelSvg({
 
                 {/* 2. STORAGE CONDITIONS */}
                 <g>
-                  <text x="0" y={storageTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 11 : 12.5} fontWeight="800" fill="#475569" letterSpacing="0.4">
+                  <text x="0" y={storageTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 11 : 12.5} fontWeight="800" fill={isMono ? '#333333' : '#475569'} letterSpacing="0.4">
                     STORAGE CONDITIONS
                   </text>
                   {storageLines.map((sLine, sIdx) => (
@@ -884,10 +902,10 @@ export default function PharmapolisLabelSvg({
                       key={`stg-${sIdx}`}
                       x="0"
                       y={firstStorageLineY + (sIdx * storageLineGap)}
-                      fontFamily="Arial, Helvetica, sans-serif"
+                      fontFamily="Arial, Helvetica, -apple-system, sans-serif"
                       fontSize={isShort ? 13 : 15}
                       fontWeight="700"
-                      fill="#0f172a"
+                      fill="#000000"
                     >
                       {sLine}
                     </text>
@@ -896,13 +914,13 @@ export default function PharmapolisLabelSvg({
 
                 {/* 3. CLINICAL STORAGE & HANDLING MONOGRAPH BADGE */}
                 <g transform={`translate(0, ${storageBlockBottom + (isShort ? 8 : 14)})`}>
-                  <line x1="0" y1="0" x2={leftColWidth - 28} y2="0" stroke="#e2e8f0" strokeWidth="1.2" />
-                  <rect x="-4" y={isShort ? 6 : 8} width={leftColWidth - 20} height={isShort ? 44 : 52} fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.2" rx="4" />
+                  <line x1="0" y1="0" x2={leftColWidth - 28} y2="0" stroke={isMono ? '#cccccc' : '#e2e8f0'} strokeWidth="1.2" />
+                  <rect x="-4" y={isShort ? 6 : 8} width={leftColWidth - 20} height={isShort ? 44 : 52} fill={isMono ? '#ffffff' : '#f8fafc'} stroke={isMono ? '#000000' : '#cbd5e1'} strokeWidth="1.2" rx="4" />
                   
-                  <text x="4" y={isShort ? 23 : 28} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 10 : 11.5} fontWeight="800" fill="#334155" letterSpacing="0.2">
+                  <text x="4" y={isShort ? 23 : 28} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 10 : 11.5} fontWeight="800" fill={isMono ? '#000000' : '#334155'} letterSpacing="0.2">
                     PROTECT FROM LIGHT
                   </text>
-                  <text x="4" y={isShort ? 39 : 46} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 9.5 : 11} fontWeight="800" fill="#0284c7" letterSpacing="0.3">
+                  <text x="4" y={isShort ? 39 : 46} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 9.5 : 11} fontWeight="800" fill={isMono ? '#000000' : '#0284c7'} letterSpacing="0.3">
                     15°C–25°C • ROOM TEMP.
                   </text>
                 </g>
@@ -913,7 +931,7 @@ export default function PharmapolisLabelSvg({
 
         {/* RIGHT COLUMN: EXPANDED HIGH-LEGIBILITY CLINICAL WORKSPACE (Width 1125 px) */}
         <g transform={`translate(${rightColX}, ${colY})`}>
-          <rect x="0" y="0" width={rightColWidth} height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" rx="8" />
+          <rect x="0" y="0" width={rightColWidth} height={colHeight} fill="#ffffff" stroke={isMono ? '#000000' : '#cbd5e1'} strokeWidth="2" rx="8" />
 
           {/* Clip path strictly bounding right column */}
           <clipPath id="pls-right-col-clip">
@@ -1069,14 +1087,14 @@ export default function PharmapolisLabelSvg({
                 <g transform={`translate(24, ${topIngredientsY})`}>
                   {formulaTitleText ? (
                     <g>
-                      <text x="0" y={formulaTitleFontSize} fontFamily="Arial, Helvetica, sans-serif" fontSize={formulaTitleFontSize} fontWeight="900" fill="#003666" letterSpacing="0.4">
+                      <text x="0" y={formulaTitleFontSize} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={formulaTitleFontSize} fontWeight="900" fill={isMono ? '#000000' : '#003666'} letterSpacing="0.4">
                         {formulaTitleText}
                       </text>
-                      <line x1="0" y1={formulaTitleFontSize + 6} x2={innerUsableWidth} y2={formulaTitleFontSize + 6} stroke="#e2e8f0" strokeWidth="1.2" />
+                      <line x1="0" y1={formulaTitleFontSize + 6} x2={innerUsableWidth} y2={formulaTitleFontSize + 6} stroke={isMono ? '#000000' : '#e2e8f0'} strokeWidth="1.2" />
                     </g>
                   ) : null}
 
-                  <text x="0" y={ingHeaderTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13.5 : 15.5} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                  <text x="0" y={ingHeaderTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 13.5 : 15.5} fontWeight="900" fill={isMono ? '#000000' : '#0284c7'} letterSpacing="0.8">
                     ACTIVE COMPOUNDED INGREDIENTS
                   </text>
                   
@@ -1084,16 +1102,16 @@ export default function PharmapolisLabelSvg({
                     <g>
                       {/* Column 1 */}
                       {col1Lines.map((line, lIdx) => 
-                        renderIngredientLine(line, 0, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing1-${lIdx}`)
+                        renderIngredientLine(line, 0, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing1-${lIdx}`, '#000000', isMono)
                       )}
                       {/* Column 2 */}
                       {col2Lines.map((line, lIdx) => 
-                        renderIngredientLine(line, colWidth + 36, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing2-${lIdx}`)
+                        renderIngredientLine(line, colWidth + 36, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing2-${lIdx}`, '#000000', isMono)
                       )}
                     </g>
                   ) : (
                     ingLines.map((line, lIdx) => 
-                      renderIngredientLine(line, 0, firstIngLineY + (lIdx * ingLineGap), ingFontSize, `ing-${lIdx}`)
+                      renderIngredientLine(line, 0, firstIngLineY + (lIdx * ingLineGap), ingFontSize, `ing-${lIdx}`, '#000000', isMono)
                     )
                   )}
 
@@ -1102,10 +1120,10 @@ export default function PharmapolisLabelSvg({
                       key={`base-${bIdx}`}
                       x="0"
                       y={firstBaseLineY + (bIdx * baseLineGap)}
-                      fontFamily="Arial, Helvetica, sans-serif"
+                      fontFamily="Arial, Helvetica, -apple-system, sans-serif"
                       fontSize={baseFontSize}
                       fontWeight="700"
-                      fill="#0369a1"
+                      fill={isMono ? '#222222' : '#0369a1'}
                     >
                       {bLine}
                     </text>
@@ -1114,11 +1132,11 @@ export default function PharmapolisLabelSvg({
 
                 {/* Block 3: DEDICATED CLINICAL POSOLOGY & DIRECTIONS (Harmoniously Weighted & High-Contrast) */}
                 <g transform={`translate(24, ${posBoxY})`}>
-                  <rect x="0" y="0" width={innerUsableWidth} height={posBoxHeight} fill="#f0f9ff" stroke="#0284c7" strokeWidth="2" rx="6" />
-                  <rect x="0" y="0" width="8" height={posBoxHeight} fill={badgeTheme.fill || '#0284c7'} rx="4" />
+                  <rect x="0" y="0" width={innerUsableWidth} height={posBoxHeight} fill={isMono ? '#ffffff' : '#f0f9ff'} stroke={isMono ? '#000000' : '#0284c7'} strokeWidth={isMono ? '2.5' : '2'} rx="6" />
+                  <rect x="0" y="0" width="8" height={posBoxHeight} fill={isMono ? '#000000' : (badgeTheme.fill || '#0284c7')} rx="4" />
                   
-                  <text x="22" y={posHeaderTitleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill="#0369a1" letterSpacing="0.8">
-                    {badgeTheme.icon ? `${badgeTheme.icon} ` : ''}DIRECTIONS FOR USE / PRESCRIBED POSOLOGY
+                  <text x="22" y={posHeaderTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill={isMono ? '#000000' : '#0369a1'} letterSpacing="0.8">
+                    {(!isMono && badgeTheme.icon) ? `${badgeTheme.icon} ` : ''}DIRECTIONS FOR USE / PRESCRIBED POSOLOGY
                   </text>
 
                   {posologyLines.map((pLine, pIdx) => (
@@ -1126,10 +1144,10 @@ export default function PharmapolisLabelSvg({
                       key={`pos-${pIdx}`}
                       x="22"
                       y={firstPosLineY + (pIdx * posLineGap)}
-                      fontFamily="Arial, Helvetica, sans-serif"
+                      fontFamily="Arial, Helvetica, -apple-system, sans-serif"
                       fontSize={posFontSize + 1}
                       fontWeight="800"
-                      fill="#0f172a"
+                      fill={isMono ? '#000000' : '#0f172a'}
                     >
                       {pLine}
                     </text>
@@ -1138,17 +1156,17 @@ export default function PharmapolisLabelSvg({
 
                 {/* Block 4: Mandatory Precaution & Prescriber (High-Contrast Bottom Anchored) */}
                 <g transform="translate(24, 0)">
-                  <line x1="0" y1={bCautionDividerY} x2={innerUsableWidth} y2={bCautionDividerY} stroke="#cbd5e1" strokeWidth="1.8" />
-                  <text x="0" y={bCautionY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 15.5 : 19} fontWeight="900" fill="#b91c1c" letterSpacing="0.4">
+                  <line x1="0" y1={bCautionDividerY} x2={innerUsableWidth} y2={bCautionDividerY} stroke={isMono ? '#000000' : '#cbd5e1'} strokeWidth="1.8" />
+                  <text x="0" y={bCautionY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 15.5 : 19} fontWeight="900" fill={isMono ? '#000000' : '#b91c1c'} letterSpacing="0.4">
                     {cautionText}
                   </text>
                   <text
                     x="0"
                     y={bRxY}
-                    fontFamily="Arial, Helvetica, sans-serif"
+                    fontFamily="Arial, Helvetica, -apple-system, sans-serif"
                     fontSize={rxFontSize}
                     fontWeight="700"
-                    fill="#1e293b"
+                    fill={isMono ? '#000000' : '#1e293b'}
                   >
                     {rxFullText}
                   </text>
@@ -1163,11 +1181,11 @@ export default function PharmapolisLabelSvg({
 
         {/* ── FOOTER ROW: COMPACT EU GMP SPECS (Dates on left, Dispensary Monograph on right) ── */}
         <g transform={`translate(60, ${footerTextY})`}>
-          <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
+          <text x="0" y="0" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
             Mfg: <tspan fontWeight="400">{prodDate}</tspan> • Exp: <tspan fontWeight="400">{expDate}</tspan>
           </text>
-          <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#475569">
-            Batch: <tspan fontWeight="800" fill="#003666">{batchCode}</tspan> • <tspan fontWeight="500" fill="#0f172a">EU GMP Monograph</tspan>
+          <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={footerFontSize} fontWeight="700" fill={isMono ? '#333333' : '#475569'}>
+            Batch: <tspan fontWeight="800" fill={isMono ? '#000000' : '#003666'}>{batchCode}</tspan> • <tspan fontWeight="500" fill="#000000">EU GMP Monograph</tspan>
           </text>
         </g>
 
@@ -1231,6 +1249,8 @@ export default function PharmapolisLabelSvg({
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       width="100%"
       height="100%"
+      textRendering="geometricPrecision"
+      shapeRendering="crispEdges"
       style={{ display: 'block', background: '#ffffff', borderRadius: '4px' }}
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -1238,24 +1258,24 @@ export default function PharmapolisLabelSvg({
 
       {/* ── HEADER ── */}
       <g transform={`translate(60, ${headerY})`}>
-        <text x="0" y="34" fontFamily="Arial, Helvetica, sans-serif" fontSize={dynHeaderTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">{pharmacyName}</text>
-        <text x="0" y="62" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#475569">{pharmacyAddress}</text>
+        <text x="0" y="34" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={dynHeaderTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">{pharmacyName}</text>
+        <text x="0" y="62" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={headerSubSize} fontWeight="500" fill={isMono ? '#333333' : '#475569'}>{pharmacyAddress}</text>
       </g>
 
       {/* MICRO-QR (IF ENABLED): Guaranteed zero overlap with patient box */}
       {withMicroQr && (
         <g transform={`translate(${microQrX}, ${microQrY})`}>
-          <rect x="0" y="0" width={microQrWidth} height={microQrHeight} fill="#ffffff" stroke="#003666" strokeWidth="2.2" rx="8" />
+          <rect x="0" y="0" width={microQrWidth} height={microQrHeight} fill="#ffffff" stroke={isMono ? '#000000' : '#003666'} strokeWidth="2.2" rx="8" />
           <svg x={Math.round((microQrWidth - qrInnerSize) / 2)} y="8" width={qrInnerSize} height={qrInnerSize} viewBox={`0 0 ${qrInnerSize} ${qrInnerSize}`}>
             <QRCodeSVG
               value={targetRxUrl}
               size={qrInnerSize}
               level="M"
-              fgColor="#003666"
+              fgColor={isMono ? '#000000' : '#003666'}
               bgColor="#ffffff"
             />
           </svg>
-          <text x={Math.round(microQrWidth / 2)} y={scanRxY} fontFamily="Arial, Helvetica, sans-serif" fontSize={scanRxSize} fontWeight="900" fill="#003666" textAnchor="middle" letterSpacing="0.8">
+          <text x={Math.round(microQrWidth / 2)} y={scanRxY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={scanRxSize} fontWeight="900" fill={isMono ? '#000000' : '#003666'} textAnchor="middle" letterSpacing="0.8">
             SCAN RX
           </text>
         </g>
@@ -1263,8 +1283,8 @@ export default function PharmapolisLabelSvg({
 
       {/* ── PATIENT BOX ── */}
       <g transform={`translate(60, ${patientBoxY})`}>
-        <rect x="0" y="0" width="1380" height={patientBoxHeight} fill="#f8fafc" stroke="#000000" strokeWidth="2.2" rx="4" />
-        <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
+        <rect x="0" y="0" width="1380" height={patientBoxHeight} fill={isMono ? '#ffffff' : '#f8fafc'} stroke="#000000" strokeWidth="2.2" rx="4" />
+        <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
           PATIENT: <tspan fontWeight="800" fontSize={patientNameFontSize}>{patientName}</tspan>
         </text>
         {headerBadgeText ? (
@@ -1274,7 +1294,7 @@ export default function PharmapolisLabelSvg({
               x={Math.round(badgeWidth / 2)}
               y={isShort ? 25 : 29}
               textAnchor="middle"
-              fontFamily="Arial, Helvetica, sans-serif"
+              fontFamily="Arial, Helvetica, -apple-system, sans-serif"
               fontSize={badgeFontSize}
               fontWeight="900"
               fill={badgeTheme.text || "#ffffff"}
@@ -1287,7 +1307,7 @@ export default function PharmapolisLabelSvg({
       </g>
 
       {/* ── PRODUCT TITLE ── */}
-      <text x="60" y={titleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={titleFontSize} fontWeight="900" fill="#000000">
+      <text x="60" y={titleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={titleFontSize} fontWeight="900" fill="#000000">
         {productTitle}
       </text>
 
@@ -1297,10 +1317,10 @@ export default function PharmapolisLabelSvg({
           key={`f-${idx}`}
           x="60"
           y={formulaStartY + (idx * formulaLineGap)}
-          fontFamily="Arial, Helvetica, sans-serif"
+          fontFamily="Arial, Helvetica, -apple-system, sans-serif"
           fontSize={formulaFontSize}
           fontWeight="700"
-          fill="#0f172a"
+          fill={isMono ? '#000000' : '#0f172a'}
         >
           {line}
         </text>
@@ -1312,23 +1332,23 @@ export default function PharmapolisLabelSvg({
           <text
             x="60"
             y={directionsStartY}
-            fontFamily="Arial, Helvetica, sans-serif"
+            fontFamily="Arial, Helvetica, -apple-system, sans-serif"
             fontSize={dirFontSize}
             fontWeight="900"
-            fill="#0284c7"
+            fill={isMono ? '#000000' : '#0284c7'}
             letterSpacing="0.4"
           >
-            Directions for use: <tspan fontWeight="700" fill="#0f172a">{directionLines[0]}</tspan>
+            Directions for use: <tspan fontWeight="700" fill={isMono ? '#000000' : '#0f172a'}>{directionLines[0]}</tspan>
           </text>
           {directionLines.slice(1).map((line, idx) => (
             <text
               key={`d-${idx}`}
               x="60"
               y={directionsStartY + (idx + 1) * dirLineGap}
-              fontFamily="Arial, Helvetica, sans-serif"
+              fontFamily="Arial, Helvetica, -apple-system, sans-serif"
               fontSize={dirFontSize}
               fontWeight="600"
-              fill="#0f172a"
+              fill={isMono ? '#000000' : '#0f172a'}
             >
               {line}
             </text>
@@ -1341,11 +1361,11 @@ export default function PharmapolisLabelSvg({
 
       {/* ── FOOTER ROW: COMPACT EU GMP SPECS (Dates on left, Storage on right in clean technical font) ── */}
       <g transform={`translate(60, ${footerTextY})`}>
-        <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
+        <text x="0" y="0" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
           Mfg: <tspan fontWeight="400">{prodDate}</tspan> • Exp: <tspan fontWeight="400">{expDate}</tspan>
         </text>
-        <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#475569">
-          Storage: <tspan fontWeight="500" fill="#0f172a">{storage}</tspan>
+        <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={footerFontSize} fontWeight="700" fill={isMono ? '#333333' : '#475569'}>
+          Storage: <tspan fontWeight="500" fill={isMono ? '#000000' : '#0f172a'}>{storage}</tspan>
         </text>
       </g>
 

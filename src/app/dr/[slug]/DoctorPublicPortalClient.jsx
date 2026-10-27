@@ -5723,9 +5723,6 @@ export default function DoctorPublicPortalClient({
             {/* Section Breadcrumb, Clean Title & 1-Click Workspace Switcher */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.74rem', color: '#5f6368', fontWeight: 500 }}>
-                  {isAuthorizedViewer ? `Dr. Portal · ${doctor.name}` : `Clinical Portal · Practice ${opaqueCode}`}
-                </span>
                 <span style={{ fontSize: '0.64rem', background: '#e8f0fe', color: '#1a73e8', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
                   {isAuthorizedViewer ? (doctor.license || 'DHA Verified') : 'DHA Verified'}
                 </span>

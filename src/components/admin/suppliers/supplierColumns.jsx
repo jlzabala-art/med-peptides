@@ -272,7 +272,13 @@ export const getSupplierColumns = ({
       header: 'Categories',
       render: (val, row) => {
         const item = resolveRecord(val, row);
-        const rawCats = item.categoryIds || (Array.isArray(val) ? val : (item.categoryId ? [item.categoryId] : []));
+        const rawCats = (Array.isArray(item.categoryIds) && item.categoryIds.length > 0)
+          ? item.categoryIds
+          : ((Array.isArray(item.productCategories) && item.productCategories.length > 0)
+            ? item.productCategories
+            : ((Array.isArray(item.categories) && item.categories.length > 0)
+              ? item.categories
+              : (Array.isArray(val) && val.length > 0 ? val : (item.categoryId ? [item.categoryId] : []))));
         const categoryIds = Array.isArray(rawCats) ? rawCats : [];
         return (
           <CategoryPills

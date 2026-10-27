@@ -2309,13 +2309,13 @@ export default function PublicDatasheetView({
                   </div>
                   <div>
                     <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {lang === 'es' ? 'Tiempo de Respuesta' : 'Clinical Turnaround'}
+                      {lang === 'es' ? 'Laboratorio Central' : 'Central Laboratory'}
                     </div>
                     <div style={{ fontSize: '0.82rem', fontWeight: 750, color: '#0f172a', marginTop: '2px' }}>
-                      5–7 {lang === 'es' ? 'Días Hábiles' : 'Business Days'}
+                      LifeLab1 Central Lab
                     </div>
                     <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px' }}>
-                      Vilnius Central Lab (EU)
+                      Vilnius (EU) · ISO 15189
                     </div>
                   </div>
                 </div>
@@ -2678,19 +2678,12 @@ export default function PublicDatasheetView({
           </div>
         )}
         {isBloodoDiagnostic ? (
-          <>
-            <BloodoDiagnosticOverviewCard
-              product={product}
-              lang={lang}
-              onUnlockRequest={() => setIsUnlockModalOpen(true)}
-              onSelectSection={handleSelectSection}
-            />
-            <BloodoSectionStepBar
-              currentSectionId="overview"
-              lang={lang}
-              onSelectSection={handleSelectSection}
-            />
-          </>
+          <BloodoDiagnosticOverviewCard
+            product={product}
+            lang={lang}
+            onUnlockRequest={() => setIsUnlockModalOpen(true)}
+            onSelectSection={handleSelectSection}
+          />
         ) : description && (
           <div className="pds-description-card" style={{ marginTop: '1.25rem', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -2778,19 +2771,12 @@ export default function PublicDatasheetView({
         <div className="pds-single-section-view">
 
           {effectiveActiveSection === 'when-to-test' && (
-            <>
-              <BloodoWhenToTestSection
-                product={product}
-                lang={lang}
-                onSelectSection={handleSelectSection}
-                onUnlockRequest={() => setIsUnlockModalOpen(true)}
-              />
-              <BloodoSectionStepBar
-                currentSectionId="when-to-test"
-                lang={lang}
-                onSelectSection={handleSelectSection}
-              />
-            </>
+            <BloodoWhenToTestSection
+              product={product}
+              lang={lang}
+              onSelectSection={handleSelectSection}
+              onUnlockRequest={() => setIsUnlockModalOpen(true)}
+            />
           )}
 
           {effectiveActiveSection === 'presentations-matrix' && (
@@ -2869,19 +2855,24 @@ export default function PublicDatasheetView({
       {effectiveActiveSection === 'specs-section' && !isCorporateService && !isCosmeticProduct && (
         <section id="specs-section" className="pds-traceability-wrapper">
           {isBloodoDiagnostic ? (
-            <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <BloodoLabStandardsDownloadsSection
                 product={product}
                 lang={lang}
                 onSelectSection={handleSelectSection}
                 onUnlockRequest={() => setIsUnlockModalOpen(true)}
               />
-              <BloodoSectionStepBar
-                currentSectionId="specs-section"
+              <ProductRegulatoryWarningsSection
+                product={product}
                 lang={lang}
-                onSelectSection={handleSelectSection}
+                isCosmeticProduct={isCosmeticProduct}
+                isDiagnosticKit={true}
+                isSolventProduct={isSolventProduct}
+                isCorporateService={isCorporateService}
+                isSupplementProduct={isSupplementProduct}
+                supplierName={supplierName}
               />
-            </>
+            </div>
           ) : (
             <>
               <ProductTraceabilityCard
@@ -3117,13 +3108,6 @@ export default function PublicDatasheetView({
                 <BloodoClinicalAdvantageCard lang={lang} />
               </>
             )}
-            {isBloodoDiagnostic && (
-              <BloodoSectionStepBar
-                currentSectionId="clinical-synergy"
-                lang={lang}
-                onSelectSection={handleSelectSection}
-              />
-            )}
           </div>
         )}
 
@@ -3131,11 +3115,6 @@ export default function PublicDatasheetView({
         {effectiveActiveSection === 'bloodo-suite' && isBloodoDiagnostic && (
           <section id="bloodo-suite" className="pds-section-card">
             <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
-            <BloodoSectionStepBar
-              currentSectionId="bloodo-suite"
-              lang={lang}
-              onSelectSection={handleSelectSection}
-            />
           </section>
         )}
 
@@ -3172,13 +3151,6 @@ export default function PublicDatasheetView({
               lang={lang}
               activeSection={effectiveActiveSection}
             />
-            {isBloodoDiagnostic && (
-              <BloodoSectionStepBar
-                currentSectionId={effectiveActiveSection}
-                lang={lang}
-                onSelectSection={handleSelectSection}
-              />
-            )}
           </section>
         )}
 
@@ -3203,7 +3175,7 @@ export default function PublicDatasheetView({
     )}
 
     {/* ── Block 8: Product Regulatory Warnings & Safety Governance (Overview or Safety Section) ── */}
-    {(effectiveActiveSection === 'overview' || effectiveActiveSection === 'regulatory-warnings' || effectiveActiveSection === 'safety-governance') && (
+    {(!isBloodoDiagnostic && (effectiveActiveSection === 'overview' || effectiveActiveSection === 'regulatory-warnings' || effectiveActiveSection === 'safety-governance')) && (
       <>
         <ProductRegulatoryWarningsSection
           product={product}

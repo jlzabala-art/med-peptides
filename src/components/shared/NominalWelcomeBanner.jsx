@@ -90,7 +90,9 @@ export default function NominalWelcomeBanner({
   const isPatient = role === 'patient';
   const isWholesale = role === 'wholesaler';
 
-  const cleanTitle = isDoc
+  const isInstitution = /(clinic|hospital|center|centre|medical|health|group|polyclinic|llc|inc|s\.l\.|corp|practice|labs|farmacia)/i.test(recipientName);
+
+  const cleanTitle = (isDoc && !isInstitution)
     ? (recipientName.startsWith('Dr.') ? recipientName : `Dr. ${recipientName}`)
     : recipientName;
 

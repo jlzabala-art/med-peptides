@@ -94,6 +94,8 @@ export default function PrescriptionDetailSidebar({
   const [showWhatsAppPrompt, setShowWhatsAppPrompt] = useState(false);
   const [whatsAppInput, setWhatsAppInput] = useState(initialPhone);
 
+  const phoneInputRef = useRef(null);
+
   useEffect(() => {
     const currentP = patient?.phone || rx?.patientPhone || '';
     const currentE = (patient?.email && !patient.email.includes('paciente@atlas-rx.com')) ? patient.email : (rx?.patientEmail || '');
@@ -107,6 +109,8 @@ export default function PrescriptionDetailSidebar({
       setEmailInput(currentE);
     }
   }, [patient?.phone, patient?.email, rx?.patientPhone, rx?.patientEmail]);
+
+  const hasPhone = Boolean(patientPhone && String(patientPhone).replace(/[^0-9]/g, '').length >= 7);
 
   const handleSaveContact = async (overridePhone = null) => {
     const targetPhone = overridePhone !== null ? overridePhone : phoneInput;
@@ -139,7 +143,7 @@ export default function PrescriptionDetailSidebar({
         if (targetEmail?.trim()) setPatientEmail(targetEmail.trim());
         setIsEditingContact(false);
         setShowWhatsAppPrompt(false);
-        toast.success(isEs ? 'Contacto guardado y base de datos enriquecida ✓' : 'Patient contact saved & synced ✓');
+        toast.success(isEs ? 'Datos del paciente guardados ✓' : 'Patient details saved ✓');
         onPatientContactUpdated?.({
           phone: targetPhone?.trim() || '',
           email: targetEmail?.trim() || ''
@@ -160,7 +164,13 @@ export default function PrescriptionDetailSidebar({
   const handleSendWhatsApp = (phoneToSend = null) => {
     const rawPhone = String(phoneToSend || patientPhone || '').replace(/[^0-9]/g, '');
     if (!rawPhone || rawPhone.length < 7) {
-      setShowWhatsAppPrompt(true);
+      triggerHaptic('selection');
+      setIsEditingContact(true);
+      setShowWhatsAppPrompt(false);
+      toast(isEs ? 'Indica el móvil del paciente para enviarle la pauta por WhatsApp' : 'Please provide patient mobile number to send via WhatsApp', {
+        icon: '📱'
+      });
+      setTimeout(() => phoneInputRef.current?.focus(), 120);
       return;
     }
 
@@ -396,10 +406,14 @@ export default function PrescriptionDetailSidebar({
                     type="button"
                     onClick={() => {
                       triggerHaptic('selection');
-                      setIsEditingContact(prev => !prev);
+                      setIsEditingContact(prev => {
+                        const next = !prev;
+                        if (next) setTimeout(() => phoneInputRef.current?.focus(), 120);
+                        return next;
+                      });
                       setShowWhatsAppPrompt(false);
                     }}
-                    title={isEs ? 'Añadir o editar teléfono y email del paciente' : 'Add or edit patient phone and email'}
+                    title={isEs ? 'Completar o editar teléfono y email del paciente actual' : 'Complete or edit contact details for this patient'}
                     style={{
                       background: 'none',
                       border: 'none',
@@ -416,7 +430,7 @@ export default function PrescriptionDetailSidebar({
                     }}
                   >
                     <Edit2 size={11} style={{ opacity: 0.75, flexShrink: 0 }} />
-                    <span>{isEs ? (patientPhone || patientEmail ? 'Editar' : '+ Contacto') : (patientPhone || patientEmail ? 'Edit' : '+ Contact')}</span>
+                    <span>{isEs ? (patientPhone || patientEmail ? 'Editar datos' : 'Completar datos') : (patientPhone || patientEmail ? 'Edit details' : 'Complete details')}</span>
                   </button>
                 )}
               </div>
@@ -470,19 +484,25 @@ export default function PrescriptionDetailSidebar({
           {isEditingContact && (
             <div style={{
               background: '#f8fafc',
-              border: '1px solid #cbd5e1',
+              border: '1.5px solid #bae6fd',
               borderRadius: '6px',
               padding: '8px 10px',
               display: 'flex',
               flexDirection: 'column',
               gap: '6px'
             }}>
-              <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                {isEs ? 'Datos de Contacto del Paciente' : 'Patient Contact Info'}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                <span style={{ fontSize: '0.64rem', fontWeight: 750, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  {isEs ? 'Completar Datos del Paciente Actual' : 'Complete Current Patient Details'}
+                </span>
+                <span style={{ fontSize: '0.60rem', color: '#64748b' }}>
+                  {patientName?.split(' ')[0] || ''}
+                </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Phone size={12} color="#64748b" style={{ flexShrink: 0 }} />
+                <Phone size={12} color="#0284c7" style={{ flexShrink: 0 }} />
                 <input
+                  ref={phoneInputRef}
                   type="tel"
                   value={phoneInput}
                   onChange={(e) => setPhoneInput(e.target.value)}
@@ -566,25 +586,28 @@ export default function PrescriptionDetailSidebar({
                   onClick={() => {
                     triggerHaptic('selection');
                     setIsEditingContact(true);
+                    setTimeout(() => phoneInputRef.current?.focus(), 120);
                   }}
+                  title={isEs ? 'Completar teléfono y email del paciente actual' : 'Complete phone and email for this patient'}
                   style={{
                     flex: 1,
-                    padding: '5px 8px',
+                    padding: '6px 8px',
                     borderRadius: '6px',
                     background: '#f8fafc',
-                    color: '#334155',
-                    border: '1px solid #dadce0',
-                    fontWeight: 600,
+                    color: '#1e293b',
+                    border: '1px solid #cbd5e1',
+                    fontWeight: 650,
                     fontSize: '0.70rem',
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '4px'
+                    gap: '4px',
+                    transition: 'all 0.15s ease'
                   }}
                 >
-                  <Phone size={11} color="#64748b" />
-                  <span>{isEs ? '+ Añadir contacto' : '+ Add contact'}</span>
+                  <Phone size={11} color="#0284c7" />
+                  <span>{isEs ? 'Completar datos' : 'Complete patient info'}</span>
                 </button>
               )}
               <button
@@ -593,13 +616,14 @@ export default function PrescriptionDetailSidebar({
                   triggerHaptic('selection');
                   handleSendWhatsApp();
                 }}
+                title={hasPhone ? (isEs ? 'Enviar pauta directamente por WhatsApp' : 'Send regimen directly via WhatsApp') : (isEs ? 'Añadir teléfono para enviar por WhatsApp' : 'Add phone to send via WhatsApp')}
                 style={{
                   flex: 1,
-                  padding: '5px 8px',
+                  padding: '6px 8px',
                   borderRadius: '6px',
-                  background: '#f0fdf4',
-                  color: '#15803d',
-                  border: '1px solid #bbf7d0',
+                  background: hasPhone ? '#f0fdf4' : '#f8fafc',
+                  color: hasPhone ? '#15803d' : '#64748b',
+                  border: hasPhone ? '1px solid #bbf7d0' : '1px dashed #cbd5e1',
                   fontWeight: 650,
                   fontSize: '0.70rem',
                   cursor: 'pointer',
@@ -607,11 +631,15 @@ export default function PrescriptionDetailSidebar({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '5px',
-                  transition: 'background 0.15s ease'
+                  transition: 'all 0.15s ease'
                 }}
               >
-                <MessageCircle size={12} color="#16a34a" />
-                <span>{isEs ? 'Enviar por WhatsApp' : 'Send via WhatsApp'}</span>
+                <MessageCircle size={12} color={hasPhone ? '#16a34a' : '#94a3b8'} />
+                <span>
+                  {hasPhone 
+                    ? (isEs ? 'Enviar por WhatsApp' : 'Send via WhatsApp') 
+                    : (isEs ? 'WhatsApp (requiere móvil)' : 'WhatsApp (add phone)')}
+                </span>
               </button>
             </div>
           )}
@@ -1207,24 +1235,31 @@ export default function PrescriptionDetailSidebar({
                 {isAuthorizedViewer && (
                   <button
                     type="button"
-                    onClick={() => handleSendWhatsApp()}
+                    onClick={() => {
+                      setIsMobileDrawerOpen(false);
+                      handleSendWhatsApp();
+                    }}
                     style={{
                       marginTop: '6px',
-                      padding: '5px 8px',
-                      borderRadius: '4px',
-                      background: '#25D366',
-                      color: '#ffffff',
-                      border: 'none',
-                      fontSize: '0.70rem',
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      background: hasPhone ? '#16a34a' : '#f8fafc',
+                      color: hasPhone ? '#ffffff' : '#475569',
+                      border: hasPhone ? 'none' : '1px dashed #cbd5e1',
+                      fontSize: '0.72rem',
                       fontWeight: 700,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px'
+                      gap: '5px'
                     }}
                   >
-                    <MessageCircle size={12} />
-                    <span>{isEs ? 'Enviar WhatsApp' : 'Send WhatsApp'}</span>
+                    <MessageCircle size={13} color={hasPhone ? '#ffffff' : '#64748b'} />
+                    <span>
+                      {hasPhone 
+                        ? (isEs ? 'Enviar WhatsApp' : 'Send WhatsApp') 
+                        : (isEs ? 'Completar móvil WhatsApp' : 'Add phone for WhatsApp')}
+                    </span>
                   </button>
                 )}
                 {!isAuthorizedViewer && (

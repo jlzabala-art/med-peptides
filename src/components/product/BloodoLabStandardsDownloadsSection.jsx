@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   ShieldCheck, 
   FileText, 
@@ -14,17 +14,18 @@ import {
   Sparkles
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 
 /**
  * BloodoLabStandardsDownloadsSection
  * ─────────────────────────────────────────────────────────────────────────────
  * Section 5: "Lab Standards & Clinical Downloads" (Acreditación ISO y Descargas)
  * Displays European central laboratory accreditations (LifeLab1, ISO 15189:2022, 
- * CE-IVDR Regulation EU 2017/746), validated chain of custody, and direct 
- * PDF downloads for:
+ * CE-IVDR Regulation EU 2017/746), validated chain of custody, and in-app 
+ * PDF preview & download for:
  * 1. Official Sample Clinical Report (real patient specimen simulation)
  * 2. Bloodo™ 2026 Comprehensive Product Catalog & Clinician Dossier
- * 3. ISO 15189 Traceability & Standards Summary
+ * 3. Sample Collection Instructions (IFU)
  */
 export default function BloodoLabStandardsDownloadsSection({
   product = {},
@@ -34,6 +35,7 @@ export default function BloodoLabStandardsDownloadsSection({
 }) {
   const isEs = lang === 'es';
   const slug = (product?.slug || product?.id || '').toLowerCase();
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   // Resolve analyte-specific sample report and title
   let reportPdf = '/docs/bloodo-report-nad.pdf';
@@ -237,10 +239,17 @@ export default function BloodoLabStandardsDownloadsSection({
               </p>
             </div>
 
-            <a
-              href={reportPdf}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                setPreviewDoc({
+                  fileUrl: reportPdf,
+                  downloadName: reportPdf.split('/').pop() || 'sample-clinical-report.pdf',
+                  title: isEs ? `Informe Clínico de Muestra (${reportName})` : `Official Sample Clinical Report (${reportName})`,
+                  subtitle: isEs ? 'Simulación oficial de informe analítico cuantitativo LifeLab1' : 'LifeLab1 quantitative clinical specimen report simulation'
+                });
+              }}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -249,18 +258,18 @@ export default function BloodoLabStandardsDownloadsSection({
                 padding: '8px 14px',
                 background: '#0d9488',
                 color: '#ffffff',
+                border: 'none',
                 borderRadius: '6px',
-                textDecoration: 'none',
                 fontSize: '0.78rem',
                 fontWeight: 700,
+                cursor: 'pointer',
                 boxShadow: '0 1px 3px rgba(13, 148, 136, 0.25)',
                 transition: 'background 0.15s ease'
               }}
             >
               <FileText size={14} />
-              <span>{isEs ? 'Ver / Descargar Informe Clínico (PDF)' : 'View / Download Sample Report (PDF)'}</span>
-              <ExternalLink size={13} />
-            </a>
+              <span>{isEs ? 'Ver Informe Clínico (PDF)' : 'Preview Sample Report (PDF)'}</span>
+            </button>
           </div>
 
           {/* Card B: Official Sample Collection Instructions (IFU) */}
@@ -293,11 +302,17 @@ export default function BloodoLabStandardsDownloadsSection({
               </p>
             </div>
 
-            <a
-              href="/docs/bloodo-nad-ifu.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              download="Bloodo_NAD_IFU.pdf"
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                setPreviewDoc({
+                  fileUrl: '/docs/bloodo-nad-ifu.pdf',
+                  downloadName: 'Bloodo_NAD_IFU.pdf',
+                  title: isEs ? 'Instrucciones de Toma de Muestra (IFU)' : 'Sample Collection Instructions (IFU)',
+                  subtitle: isEs ? 'Protocolo oficial de punción, secado y envío Whatman 903' : 'Whatman 903 DBS finger-prick, drying and mailer protocol'
+                });
+              }}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -306,17 +321,18 @@ export default function BloodoLabStandardsDownloadsSection({
                 padding: '8px 14px',
                 background: '#0d9488',
                 color: '#ffffff',
+                border: 'none',
                 borderRadius: '6px',
-                textDecoration: 'none',
                 fontSize: '0.78rem',
                 fontWeight: 700,
+                cursor: 'pointer',
                 boxShadow: '0 1px 3px rgba(13, 148, 136, 0.25)',
                 transition: 'background 0.15s ease'
               }}
             >
-              <Download size={14} />
-              <span>{isEs ? 'Descargar Instrucciones de Toma de Muestra (PDF)' : 'Download Sample Collection Instructions (PDF)'}</span>
-            </a>
+              <FileText size={14} />
+              <span>{isEs ? 'Ver Instrucciones de Muestreo (PDF)' : 'Preview Collection Guide (PDF)'}</span>
+            </button>
           </div>
 
           {/* Card C: Bloodo 2026 Comprehensive Catalog */}
@@ -349,11 +365,17 @@ export default function BloodoLabStandardsDownloadsSection({
               </p>
             </div>
 
-            <a
-              href={catalogPdf}
-              target="_blank"
-              rel="noopener noreferrer"
-              download="bloodo-product-catalog-2026.pdf"
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                setPreviewDoc({
+                  fileUrl: catalogPdf,
+                  downloadName: 'bloodo-product-catalog-2026.pdf',
+                  title: isEs ? 'Catálogo Bloodo™ 2026 y Ficha Técnica' : 'Bloodo™ 2026 Product Catalog & Technical Dossier',
+                  subtitle: isEs ? 'Catálogo completo de los 6 paneles analíticos DBS y guía médica' : 'Complete 6-test DBS analytical portfolio and clinician guide'
+                });
+              }}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -364,20 +386,20 @@ export default function BloodoLabStandardsDownloadsSection({
                 color: '#003666',
                 border: '1px solid #cbd5e1',
                 borderRadius: '6px',
-                textDecoration: 'none',
                 fontSize: '0.78rem',
                 fontWeight: 700,
+                cursor: 'pointer',
                 transition: 'all 0.15s ease'
               }}
             >
               <Download size={14} />
-              <span>{isEs ? 'Descargar Catálogo Completo 2026 (PDF)' : 'Download Full 2026 Catalog (PDF)'}</span>
-            </a>
+              <span>{isEs ? 'Ver Catálogo Completo 2026 (PDF)' : 'Preview Full 2026 Catalog (PDF)'}</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* ── Practitioner Pricing & Next Navigation ── */}
+      {/* ── Practitioner Pricing ── */}
       <div style={{
         background: '#f8fafc',
         borderRadius: '8px',
@@ -417,33 +439,19 @@ export default function BloodoLabStandardsDownloadsSection({
             {isEs ? 'Precios exclusivos para clínicas y médicos autorizados.' : 'Exclusively for verified clinics, doctors, and institutions.'}
           </span>
         </div>
-
-        {onSelectSection && (
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('light');
-              onSelectSection('bloodo-suite');
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: '#0d9488',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '6px 14px',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              cursor: 'pointer'
-            }}
-          >
-            <span>{isEs ? 'Siguiente: 6. Suite Diagnóstica Bloodo™' : 'Next: 6. Bloodo™ Diagnostic Suite'}</span>
-            <ArrowRight size={13} />
-          </button>
-        )}
       </div>
+
+      {/* Interactive In-App Document Preview Modal with Download & Print */}
+      <DocumentPreviewModal
+        isOpen={Boolean(previewDoc)}
+        onClose={() => setPreviewDoc(null)}
+        fileUrl={previewDoc?.fileUrl}
+        downloadUrl={previewDoc?.fileUrl}
+        downloadName={previewDoc?.downloadName}
+        title={previewDoc?.title || 'Document Preview'}
+        subtitle={previewDoc?.subtitle}
+        printable={true}
+      />
     </section>
   );
 }
