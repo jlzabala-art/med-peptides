@@ -34,7 +34,7 @@ export async function GET(request) {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${downloadName}"`,
         'Content-Length': fileBuffer.length.toString(),
-        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800'
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0'
       }
     });
   } catch (error) {

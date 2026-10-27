@@ -1140,7 +1140,7 @@ export default function BrandCollectionPage({
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {(brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology' || brandSlug === 'trichotest') && (
                   <a
-                    href={isEs ? "/docs/trichotest/Atlas-TrichoTest-Hair-Treatments-Dossier-ES.pdf" : "/docs/trichotest/Atlas-TrichoTest-Hair-Treatments-Dossier-EN.pdf"}
+                    href={isEs ? "/docs/trichotest/Atlas-TrichoTest-Hair-Treatments-Dossier-ES.pdf?v=2" : "/docs/trichotest/Atlas-TrichoTest-Hair-Treatments-Dossier-EN.pdf?v=2"}
                     download={isEs ? "Atlas-TrichoTest-Tratamientos-Capilares-Dossier-Clinico.pdf" : "Atlas-TrichoTest-Hair-Treatments-Clinical-Dossier.pdf"}
                     target="_blank"
                     rel="noopener noreferrer"
