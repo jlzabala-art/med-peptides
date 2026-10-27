@@ -34,7 +34,7 @@ import {
   Search, SlidersHorizontal, LayoutGrid, List, Sparkles, Shield, Activity,
   Zap, HeartPulse, Check, ArrowRight, ExternalLink, Dna,
   Droplets, Microscope, FileText, FlaskConical, Award, ShieldCheck, CheckCircle2, ChevronRight,
-  ChevronDown, Layers, Eye, Lock, LogIn, User, MessageSquare, BookOpen, Package, Mail
+  ChevronDown, Layers, Eye, Lock, LogIn, User, MessageSquare, BookOpen, Package, Mail, Download
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import { getTeletestCatalog } from '../data/teletestRegistry';
