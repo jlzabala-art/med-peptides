@@ -30,6 +30,17 @@ export default function MonographPreviewModal({
   isCosmetic = false,
   initialTab = 'monograph',
 }) {
+  const isDiagnostic = Boolean(
+    String(product?.category || '').toLowerCase().includes('diagnostic') ||
+    String(product?.productType || '').toLowerCase().includes('diagnostic') ||
+    String(product?.format || '').toLowerCase().includes('blood_test') ||
+    String(product?.presentation || '').toLowerCase().includes('blood_test') ||
+    String(product?.slug || slug || '').toLowerCase().includes('bloodo') ||
+    String(product?.slug || slug || '').toLowerCase().includes('teletest') ||
+    String(product?.slug || slug || '').toLowerCase().includes('eterna') ||
+    Boolean(product?.sampleType)
+  );
+
   const [activeTab, setActiveTab] = useState(initialTab || 'monograph');
   const [selectedLabelFormatId, setSelectedLabelFormatId] = useState(activeFormat?.id || availableFormats?.[0]?.id || 'vial');
   const [copied, setCopied] = useState(false);
@@ -55,6 +66,9 @@ export default function MonographPreviewModal({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
+
+  // Hard safety guard: Never render vial reconstitution or 38x90mm vial labels for diagnostic test kits
+  if (!isOpen || !product || isDiagnostic) return null;
 
   // Computed values needed by the second useEffect — must be derived before any hooks
   const _monographPdfUrl = isOpen && product

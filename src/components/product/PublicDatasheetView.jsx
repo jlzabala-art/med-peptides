@@ -503,6 +503,10 @@ export default function PublicDatasheetView({
     return sId.includes('teletest') || sName.includes('teletest') || pSlug.includes('teletest') || pName.includes('teletest') || pSlug.includes('htma') || pSlug.includes('mineralograma');
   }, [product, slug]);
 
+  const isAnyDiagnostic = useMemo(() => {
+    return Boolean(isDiagnosticKit || isBloodoDiagnostic || isTeletestDiagnostic || isEternaDiagnostic);
+  }, [isDiagnosticKit, isBloodoDiagnostic, isTeletestDiagnostic, isEternaDiagnostic]);
+
   const isIvDrip = useMemo(() => {
     const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
     const cat = (product?.category || product?.categoryId || '').toLowerCase();
@@ -1906,6 +1910,130 @@ export default function PublicDatasheetView({
           '/images/products/lotusland/bpc-157.png'
         ));
 
+  // Comprehensive Context Anchor for Atlas AI Drawer (Unified across sticky bar and direct triggers)
+  const atlasAiDrawerProps = useMemo(() => {
+    return {
+      lang,
+      hideFloatingTrigger: true,
+      contextType: isSpainResidency
+        ? 'corporate_residency'
+        : isCompoundingService
+        ? 'compounding_service'
+        : isPeptideSupplyService
+        ? 'peptide_supply_service'
+        : isAnyDiagnostic
+        ? 'diagnostic_test'
+        : isCosmeticProduct
+        ? 'cosmetic_product'
+        : 'monograph',
+      contextAnchor: {
+        name: isSpainResidency
+          ? 'Spanish Corporate Acquisition & Law 14/2013 Residence Program'
+          : isCompoundingService
+          ? 'European Pharmaceutical Compounding & Custom Formulation Service'
+          : isPeptideSupplyService
+          ? 'B2B Peptide Supply Chain & Dedicated Inventory Management Service'
+          : isAnyDiagnostic
+          ? (product?.canonicalName || product?.name || 'Bloodo™ CE-IVDR Intracellular NAD+ Blood Test Kit')
+          : (product?.canonicalName || product?.name || 'Peptide Monograph'),
+        slug: slug,
+        cas: product?.cas || (isCompoundingService ? 'EU GMP / Ph. Eur.' : isPeptideSupplyService ? 'B2B Certified Stock' : isAnyDiagnostic ? 'CE-IVDR / Whatman 903' : 'N/A'),
+        purity: isSpainResidency
+          ? '100% S.L. Legal Ownership & Clean Due Diligence'
+          : isCompoundingService
+          ? 'EU GMP & Ph. Eur. Certified Compounding Pharmacy'
+          : isPeptideSupplyService
+          ? '≥ 99.0% (HPLC & Mass Spectrometry Certified In-Stock Inventory)'
+          : isAnyDiagnostic
+          ? 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)'
+          : (product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'),
+        category: isSpainResidency
+          ? 'Corporate Services'
+          : isCompoundingService
+          ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding')
+          : isPeptideSupplyService
+          ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management')
+          : isAnyDiagnostic
+          ? 'Diagnostic Kits'
+          : (product?.category || 'Peptides'),
+        brand: isBloodoDiagnostic ? 'Bloodo Diagnostics' : (product?.brand || 'Atlas Health'),
+        sampleType: product?.sampleType || (isAnyDiagnostic ? 'Capillary Dried Blood Spot (DBS)' : null),
+        laboratory: isBloodoDiagnostic ? 'LifeLab1 (Vilnius, EU) · ISO 15189' : undefined,
+        faq: product?.clinical_faq || product?.faq || [],
+        associatedProtocols: (associatedProtocols || []).map(p => ({
+          name: p.name || p.title,
+          slug: p.slug,
+          url: `/proto/${p.slug}`,
+          goal: p.goal || p.category,
+          duration: p.duration
+        })),
+        details: isSpainResidency ? {
+          program: 'Spanish Corporate Acquisition & Law 14/2013 Residence',
+          statutoryBasis: 'Law 14/2013 of September 27 (Articles 68 to 72)',
+          resolutionWindow: '20 business days statutory decision window (UGE-CE)',
+          initialPermit: '3 full years initial residence card (renewable +2 years)',
+          schengenMobility: '29 Schengen countries free visa-free border mobility',
+          ownership: '100% legal ownership of an existing debt-free Spanish S.L. (Sociedad Limitada)',
+          physicalPresence: 'No strict 183-day stay required to maintain/renew permit',
+          remoteExecution: 'Full remote execution through consular Power of Attorney (PoA)',
+        } : isCompoundingService ? {
+          service: 'European Pharmaceutical Compounding & Custom Formulation',
+          pharmacyStandards: 'EU Ph. Eur. & GMP Certified European Compounding Laboratory',
+          orderChannels: 'Dedicated Mobile Application or Direct Email to kasia@mediluxeme.com / business@atlas-services.com',
+          turnaroundTime: '5 to 7 working days from European compounding facility to destination',
+          invoicingFlexibility: 'Clinic Wholesale Price (if clinic pays) vs Recommended Patient Price RRP (if patient pays directly)',
+          destinationFlexibility: 'Shipped directly to Clinic or dropshipped to Patient home address with validated cold-chain',
+          shippingFeeRules: '200 to 400 AED standard shipping; 100% Free Shipping on orders of 10 or more products',
+          paymentOptions: 'European Bank SEPA / Wire or Secure Payment Link via email, EUR currency (converted to AED on invoice date)'
+        } : isPeptideSupplyService ? {
+          service: 'B2B Peptide Supply Chain & Dedicated Inventory Management',
+          stockStatus: 'Pre-certified in-stock HPLC ≥99% inventory ready for immediate allocation with ZERO manufacturing delay (24-48h dispatch)',
+          accountManager: 'Dedicated personal Account Manager assigned to every clinic as clinical and logistical concierge',
+          lotLocking: 'Lot-locking guarantee ensuring consistent lot number for patient multi-month cycles',
+          invoicingFlexibility: 'Clinic B2B Wholesale Billing vs Direct Patient RRP Invoicing',
+          deliveryFlexibility: 'Bulk refrigerated delivery to Clinic OR individual cold dropship to Patient residence',
+          shippingFeeRules: '100% Free Complimentary Air Freight on orders of 10 or more vials (200-400 AED on smaller orders)',
+          directHotline: 'VIP WhatsApp and telephone concierge'
+        } : isAnyDiagnostic ? {
+          sampleType: 'Capillary Dried Blood Spot (DBS - Whatman 903)',
+          regulatory: 'CE-IVDR Certified (EU Regulation 2017/746)',
+          labStandard: 'ISO 15189 Accredited Laboratory (LifeLab1, Vilnius, EU)',
+          turnaroundTime: '5–7 business days from laboratory sample receipt',
+          reconstitutionRequired: false,
+          posologyRequired: false,
+          isDiagnosticTest: true
+        } : {
+          category: isSolventProduct ? 'Sterile Reconstitution Solvent' : (product?.category || 'Peptides'),
+          targetReceptorAxis: targetSystem || 'Pharmacological target receptors',
+          overview: description || '',
+          storage: isSolventProduct ? '2-25°C unopened, 2-8°C refrigerated after puncture. Discard after 28 days.' : '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C, discard after 28 days',
+          reconstitution: isSolventProduct ? 'Pure diluent solvent for lyophilized peptide reconstitution' : '1.0mL - 2.0mL sterile bacteriostatic water (0.9% benzyl alcohol)',
+          activeSupplier: displaySupplierName || 'Lotusland Limited / Atlas Services',
+          availableFormulations: (matrixRows || []).slice(0, 8).map(r => ({
+            strength: r.strengthName,
+            format: r.formatName,
+            diluent: r.diluentText,
+            concentration: r.concText,
+            route: r.adminText,
+            purity: r.purity,
+            laboratory: r.supplierName
+          })),
+          indexedClinicalPublications: (product?.articles || product?.publications || []).map(a => ({
+            title: a.title,
+            journal: a.journal,
+            year: a.year,
+            pmid: a.pmid,
+            keyFindings: a.keyFindings || a.clinicalSummary || a.abstract || ''
+          }))
+        }
+      },
+      storageKey: isAnyDiagnostic ? `diagnostic_${slug}` : `monograph_${slug}`,
+      onOpenRegisterModal: () => {
+        window.open('/auth/login?register=true', '_blank');
+      }
+    };
+  }, [lang, isSpainResidency, isCompoundingService, isPeptideSupplyService, isAnyDiagnostic, isCosmeticProduct, isBloodoDiagnostic, isSolventProduct, product, slug, associatedProtocols, targetSystem, description, displaySupplierName, matrixRows]);
+
   return (
     <div className="public-datasheet-root">
       {/* ── Schema.org Clinical Structured Data (Rich Snippets) ── */}
@@ -2210,63 +2338,65 @@ export default function PublicDatasheetView({
                 </div>
               )}
 
-              {/* ── Google Cloud UX Action Buttons Strip ── */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginTop: '0.45rem',
-                marginBottom: '0.65rem',
-                flexWrap: 'wrap'
-              }}>
-                <button
-                  type="button"
-                  onClick={handleCopyMonographSpecs}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '5px 12px',
-                    borderRadius: '6px',
-                    background: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    color: '#1e293b',
-                    fontSize: '0.74rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                    transition: 'all 0.15s ease'
-                  }}
-                  title={lang === 'es' ? 'Copiar ficha técnica monográfica al portapapeles' : 'Copy technical monograph to clipboard'}
-                >
-                  {copiedMonograph ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
-                  <span>{copiedMonograph ? (lang === 'es' ? 'Copiado ✓' : 'Copied ✓') : (lang === 'es' ? 'Copiar Ficha Técnica' : 'Copy Spec Sheet')}</span>
-                </button>
+              {/* ── Google Cloud UX Action Buttons Strip (Hidden for Diagnostic Kits & Corporate) ── */}
+              {!isAnyDiagnostic && !isCorporateService && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginTop: '0.45rem',
+                  marginBottom: '0.65rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <button
+                    type="button"
+                    onClick={handleCopyMonographSpecs}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '5px 12px',
+                      borderRadius: '6px',
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      color: '#1e293b',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={lang === 'es' ? 'Copiar ficha técnica monográfica al portapapeles' : 'Copy technical monograph to clipboard'}
+                  >
+                    {copiedMonograph ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
+                    <span>{copiedMonograph ? (lang === 'es' ? 'Copiado ✓' : 'Copied ✓') : (lang === 'es' ? 'Copiar Ficha Técnica' : 'Copy Spec Sheet')}</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => setIsPreviewModalOpen(true)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '5px 12px',
-                    borderRadius: '6px',
-                    background: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    color: '#1e293b',
-                    fontSize: '0.74rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                    transition: 'all 0.15s ease'
-                  }}
-                  title={lang === 'es' ? 'Imprimir o guardar ficha técnica en PDF' : 'Print or save technical monograph to PDF'}
-                >
-                  <Printer size={13} />
-                  <span>{lang === 'es' ? 'Ficha Imprimible (PDF)' : 'Print / PDF Monograph'}</span>
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsPreviewModalOpen(true)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '5px 12px',
+                      borderRadius: '6px',
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      color: '#1e293b',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={lang === 'es' ? 'Imprimir o guardar ficha técnica en PDF' : 'Print or save technical monograph to PDF'}
+                  >
+                    <Printer size={13} />
+                    <span>{lang === 'es' ? 'Ficha Imprimible (PDF)' : 'Print / PDF Monograph'}</span>
+                  </button>
+                </div>
+              )}
             </>
           }
           meta={
@@ -2768,11 +2898,11 @@ export default function PublicDatasheetView({
       )}
 
       {/* ── Clinical Safety Profile: Contraindications & Precautions ── */}
-      {effectiveActiveSection === 'contraindications-section' && !isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && (
+      {effectiveActiveSection === 'contraindications-section' && !isCorporateService && !isAnyDiagnostic && !isSolventProduct && !isCosmeticProduct && (
         <PeptideContraindicationsSection product={product} lang={lang} />
       )}
 
-      {effectiveActiveSection === 'labels-section' && !isDiagnosticKit && !isCorporateService && !isCosmeticProduct && (
+      {effectiveActiveSection === 'labels-section' && !isAnyDiagnostic && !isCorporateService && !isCosmeticProduct && (
         <section id="labels-section" className="pds-section-card">
             <div className="pds-section-header">
               <div className="pds-section-header-left">
@@ -3208,91 +3338,6 @@ export default function PublicDatasheetView({
         variant={selectedStrength}
       />
 
-      {/* Sandboxed Public Atlas AI Research Copilot */}
-      <PublicAtlasAIDrawer
-        lang={lang}
-        hideFloatingTrigger={true}
-        contextType={isSpainResidency ? "corporate_residency" : isCompoundingService ? "compounding_service" : isPeptideSupplyService ? "peptide_supply_service" : isDiagnosticKit ? "diagnostic_test" : "monograph"}
-        contextAnchor={{
-          name: isSpainResidency 
-            ? 'Spanish Corporate Acquisition & Law 14/2013 Residence Program'
-            : isCompoundingService
-            ? 'European Pharmaceutical Compounding & Custom Formulation Service'
-            : isPeptideSupplyService
-            ? 'B2B Peptide Supply Chain & Dedicated Inventory Management Service'
-            : isDiagnosticKit
-            ? (product?.canonicalName || product?.name || 'Bloodo™ CE-IVDR Intracellular NAD+ Blood Test Kit')
-            : (product?.canonicalName || product?.name || 'Peptide Monograph'),
-          slug: slug,
-          cas: product?.cas || (isCompoundingService ? 'EU GMP / Ph. Eur.' : isPeptideSupplyService ? 'B2B Certified Stock' : isDiagnosticKit ? 'CE-IVDR / Whatman 903' : 'N/A'),
-          purity: isSpainResidency ? '100% S.L. Legal Ownership & Clean Due Diligence' : isCompoundingService ? 'EU GMP & Ph. Eur. Certified Compounding Pharmacy' : isPeptideSupplyService ? '≥ 99.0% (HPLC & Mass Spectrometry Certified In-Stock Inventory)' : isDiagnosticKit ? 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)' : (product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'),
-          category: isSpainResidency ? 'Corporate Services' : isCompoundingService ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding') : isPeptideSupplyService ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management') : isDiagnosticKit ? 'Diagnostic Kits' : (product?.category || 'Peptides'),
-          faq: product?.clinical_faq || product?.faq || [],
-          associatedProtocols: (associatedProtocols || []).map(p => ({
-            name: p.name || p.title,
-            slug: p.slug,
-            url: `/proto/${p.slug}`,
-            goal: p.goal || p.category,
-            duration: p.duration
-          })),
-          details: isSpainResidency ? {
-            program: 'Spanish Corporate Acquisition & Law 14/2013 Residence',
-            statutoryBasis: 'Law 14/2013 of September 27 (Articles 68 to 72)',
-            resolutionWindow: '20 business days statutory decision window (UGE-CE)',
-            initialPermit: '3 full years initial residence card (renewable +2 years)',
-            schengenMobility: '29 Schengen countries free visa-free border mobility',
-            ownership: '100% legal ownership of an existing debt-free Spanish S.L. (Sociedad Limitada)',
-            physicalPresence: 'No strict 183-day stay required to maintain/renew permit',
-            remoteExecution: 'Full remote execution through consular Power of Attorney (PoA)',
-          } : isCompoundingService ? {
-            service: 'European Pharmaceutical Compounding & Custom Formulation',
-            pharmacyStandards: 'EU Ph. Eur. & GMP Certified European Compounding Laboratory',
-            orderChannels: 'Dedicated Mobile Application or Direct Email to kasia@mediluxeme.com / business@atlas-services.com',
-            turnaroundTime: '5 to 7 working days from European compounding facility to destination',
-            invoicingFlexibility: 'Clinic Wholesale Price (if clinic pays) vs Recommended Patient Price RRP (if patient pays directly)',
-            destinationFlexibility: 'Shipped directly to Clinic or dropshipped to Patient home address with validated cold-chain',
-            shippingFeeRules: '200 to 400 AED standard shipping; 100% Free Shipping on orders of 10 or more products',
-            paymentOptions: 'European Bank SEPA / Wire or Secure Payment Link via email, EUR currency (converted to AED on invoice date)'
-          } : isPeptideSupplyService ? {
-            service: 'B2B Peptide Supply Chain & Dedicated Inventory Management',
-            stockStatus: 'Pre-certified in-stock HPLC ≥99% inventory ready for immediate allocation with ZERO manufacturing delay (24-48h dispatch)',
-            accountManager: 'Dedicated personal Account Manager assigned to every clinic as clinical and logistical concierge',
-            lotLocking: 'Lot-locking guarantee ensuring consistent lot number for patient multi-month cycles',
-            invoicingFlexibility: 'Clinic B2B Wholesale Billing vs Direct Patient RRP Invoicing',
-            deliveryFlexibility: 'Bulk refrigerated delivery to Clinic OR individual cold dropship to Patient residence',
-            shippingFeeRules: '100% Free Complimentary Air Freight on orders of 10 or more vials (200-400 AED on smaller orders)',
-            directHotline: 'VIP WhatsApp and telephone concierge'
-          } : {
-            category: isSolventProduct ? 'Sterile Reconstitution Solvent' : isDiagnosticKit ? 'CE-IVDR Clinical Diagnostic Test' : (product?.category || 'Peptides'),
-            targetReceptorAxis: targetSystem || 'Pharmacological target receptors',
-            overview: description || '',
-            storage: isSolventProduct ? '2-25°C unopened, 2-8°C refrigerated after puncture. Discard after 28 days.' : isDiagnosticKit ? 'Ambient 15-25°C dry storage. Dried blood spot stable up to 14 days at room temp.' : '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C, discard after 28 days',
-            reconstitution: isSolventProduct ? 'Pure diluent solvent for lyophilized peptide reconstitution' : isDiagnosticKit ? 'No reconstitution required. Direct capillary dried blood spot (DBS) collection.' : '1.0mL - 2.0mL sterile bacteriostatic water (0.9% benzyl alcohol)',
-            activeSupplier: displaySupplierName || (isDiagnosticKit ? 'LifeLab1 / Bloodo' : 'Lotusland Limited / Atlas Services'),
-            availableFormulations: (matrixRows || []).slice(0, 8).map(r => ({
-              strength: r.strengthName,
-              format: r.formatName,
-              diluent: r.diluentText,
-              concentration: r.concText,
-              route: r.adminText,
-              purity: r.purity,
-              laboratory: r.supplierName
-            })),
-            indexedClinicalPublications: (product?.articles || product?.publications || []).map(a => ({
-              title: a.title,
-              journal: a.journal,
-              year: a.year,
-              pmid: a.pmid,
-              keyFindings: a.keyFindings || a.clinicalSummary || a.abstract || ''
-            }))
-          }
-        }}
-        storageKey={isDiagnosticKit ? `diagnostic_${slug}` : `monograph_${slug}`}
-        onOpenRegisterModal={() => {
-          window.open('/auth/login?register=true', '_blank');
-        }}
-      />
-
       {/* Context-Aware Inquiry Drawer: Dedicated Visa Questionnaire for Corporate, Clinical Drawer for Peptides */}
       {isSpainResidency ? (
         <CorporateResidencyInquiryDrawer
@@ -3338,6 +3383,7 @@ export default function PublicDatasheetView({
 
       {/* Unified Persistent Sticky Bottom Action Bar (GCP Standard) */}
       <PublicStickyActionBar
+        drawerProps={atlasAiDrawerProps}
         title={
           isSpainResidency
             ? (lang === 'es' ? 'Programa de Residencia y Adquisición Corporativa (Ley 14/2013)' : 'Spanish Corporate Acquisition & Law 14/2013 Residence Program')

@@ -459,6 +459,23 @@ export default function PublicStickyActionBar({
                 <Sparkles size={14} className="public-sticky-action-bar__sparkle-icon" />
                 <span className="public-sticky-action-bar__ai-label-full">Atlas AI</span>
                 <span className="public-sticky-action-bar__ai-label-short">AI</span>
+                {typeof quota?.remaining === 'number' && (
+                  <span
+                    style={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.64rem',
+                      fontWeight: 800,
+                      backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                      padding: '1px 5px',
+                      borderRadius: '10px',
+                      marginLeft: '2px',
+                      letterSpacing: '0.02em',
+                    }}
+                    title={`${quota.remaining} of ${quota.limit || 5} free inquiries available`}
+                  >
+                    {quota.remaining} free
+                  </span>
+                )}
               </button>
             )}
 

@@ -105,7 +105,8 @@ export default function PublicAtlasAIDrawer({
     setInternalIsOpen(true);
   };
   const { user, activeRole } = useAuth();
-  const isAuthenticated = Boolean(user?.uid || user?.email);
+  // True authentication requires a valid non-anonymous registered user with email and non-guest role
+  const isAuthenticated = Boolean(user && !user.isAnonymous && user.email && activeRole !== 'guest');
   const [copiedIndex, setCopiedIndex] = useState(null);
 
   const [message, setMessage] = useState('');
@@ -941,13 +942,17 @@ ${contextAnchor.mechanisms}
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <ShieldCheck size={11} color="#16a34a" />
             <span>
-              {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
+              {contextType === 'diagnostic_test'
+                ? 'CE-IVDR Certified • ISO 15189 Laboratory Standard'
+                : contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
                 ? 'DHA Licensed Physician & Compounding Dispensary'
                 : 'Dual-Stage RP-HPLC & LC-MS Verified'}
             </span>
           </div>
           <span>
-            {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
+            {contextType === 'diagnostic_test'
+              ? 'Certified Diagnostic Kit'
+              : contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
               ? 'Verified Medical Prescription'
               : 'Analytical Grade Standard'}
           </span>
@@ -1096,17 +1101,17 @@ ${contextAnchor.mechanisms}
                   />
                   {isAuthenticated ? (
                     <span style={{ fontWeight: 800 }}>
-                      {lang === 'es' ? 'Acceso Ilimitado' : 'Unlimited Access'}
+                      {lang === 'es' ? 'Acceso Verificado' : 'Verified Access'}
                     </span>
                   ) : (
-                    <>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <span style={{ fontFamily: 'monospace', fontWeight: 800 }}>
                         {isBlocked ? `0/${limit}` : `${remaining}/${limit}`}
                       </span>
-                      <span style={{ opacity: 0.85, fontSize: '0.66rem', textTransform: 'uppercase' }}>
-                        {lang === 'es' ? 'CONSULTAS' : 'QUERIES'}
+                      <span style={{ opacity: 0.9, fontSize: '0.66rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        {lang === 'es' ? 'Consultas Gratis' : 'Free Queries'}
                       </span>
-                    </>
+                    </div>
                   )}
                 </div>
                 <button
@@ -1634,7 +1639,11 @@ ${contextAnchor.mechanisms}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                     <FlaskConical size={16} color="#003666" />
                     <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#00284d' }}>
-                      Active Formulation Monograph Specifications
+                      {contextType === 'diagnostic_test'
+                        ? (lang === 'es' ? 'Especificaciones del Test Diagnóstico' : 'Diagnostic Test Kit Specifications')
+                        : contextType === 'cosmetic_product'
+                        ? (lang === 'es' ? 'Especificaciones Dermocosméticas' : 'Dermocosmetic Product Specifications')
+                        : (lang === 'es' ? 'Especificaciones Monográficas de Formulación' : 'Active Formulation Monograph Specifications')}
                     </span>
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: '4px' }}>
