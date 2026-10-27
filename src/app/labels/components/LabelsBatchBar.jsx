@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Layers, X, CheckCircle, ShieldCheck, Share2, Check } from '@/lib/icons';
+import { Layers, X, CheckCircle, ShieldCheck } from '@/lib/icons';
 
 export default function LabelsBatchBar({
   patientQueue,
@@ -10,8 +10,6 @@ export default function LabelsBatchBar({
   onSwitchActivePatient,
   onRemoveFromQueue,
   onBatchApprove,
-  onShareBatch,
-  copiedShareLink = false,
   isBatchApproving = false,
   totalLabeledCount = 0,
   isPatientFullyLabeled = null,
@@ -45,22 +43,6 @@ export default function LabelsBatchBar({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto', flexWrap: 'nowrap' }}>
-          {/* Share entire batch link */}
-          {patientQueue.length > 0 && onShareBatch && (
-            <button
-              type="button"
-              onClick={() => onShareBatch(false)}
-              className={`pls-batch-share-btn ${copiedShareLink ? 'copied' : ''}`}
-              title={isEs ? 'Compartir enlace con todo el lote de recetas precargadas' : 'Share link with all preloaded batch prescriptions'}
-            >
-              {copiedShareLink ? <Check size={13} color="#16a34a" /> : <Share2 size={13} />}
-              <span>
-                {copiedShareLink
-                  ? (isEs ? 'Lote copiado ✓' : 'Batch Link Copied ✓')
-                  : (isEs ? `Compartir lote (${patientQueue.length})` : `Share Batch (${patientQueue.length})`)}
-              </span>
-            </button>
-          )}
 
           {/* 1-Click Batch Approval for all pending prescriptions in queue (Reimi / Kasia Studio) */}
           {pendingApprovalCount > 0 && onBatchApprove && (

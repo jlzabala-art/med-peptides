@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Sparkles, 
   ShieldCheck, 
@@ -17,6 +17,7 @@ import {
   Clock
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 
 /**
  * BloodoDiagnosticOverviewCard
@@ -66,6 +67,8 @@ export default function BloodoDiagnosticOverviewCard({
     catalogPdf = '/docs/teletest-report-htma.pdf';
     testName = 'HTMA Mineralogram';
   }
+
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   return (
     <div 
@@ -283,11 +286,20 @@ export default function BloodoDiagnosticOverviewCard({
             <span>{isEs ? 'Iniciar Sesión para Consultar Tarifas' : 'Sign In to View Clinical Pricing'}</span>
           </button>
 
-          {/* Direct Sample Report PDF */}
-          <a
-            href={reportPdf}
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* 1. Official Sample Report PDF Preview */}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('light');
+              setPreviewDoc({
+                fileUrl: reportPdf,
+                downloadName: reportPdf.split('/').pop() || 'bloodo-report-sample.pdf',
+                title: isEs ? 'Informe Clínico Muestra (PDF)' : 'Sample Clinical Report (PDF)',
+                subtitle: isEs
+                  ? `Bloodo Diagnostics • Simulación de Informe Clínico Real (${testName})`
+                  : `Bloodo Diagnostics • Official Specimen Report Simulation (${testName})`
+              });
+            }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -297,23 +309,31 @@ export default function BloodoDiagnosticOverviewCard({
               color: '#0d9488',
               border: '1px solid #99f6e4',
               borderRadius: '6px',
-              textDecoration: 'none',
               fontSize: '0.75rem',
               fontWeight: 700,
+              cursor: 'pointer',
               transition: 'all 0.15s ease'
             }}
-            title={isEs ? 'Descargar informe clínico de muestra real en PDF' : 'View or download official sample clinical report in PDF'}
+            title={isEs ? 'Ver vista previa del informe clínico de muestra real en PDF' : 'Preview official sample clinical report in PDF'}
           >
             <FileText size={13} />
             <span>{isEs ? 'Informe Clínico Muestra (PDF)' : 'Sample Clinical Report (PDF)'}</span>
-          </a>
+          </button>
 
-          {/* Direct Sample Collection Instructions (IFU) */}
-          <a
-            href="/docs/bloodo-nad-ifu.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            download="Bloodo_NAD_IFU.pdf"
+          {/* 2. Direct Sample Collection Instructions (IFU) Preview */}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('light');
+              setPreviewDoc({
+                fileUrl: '/docs/bloodo-nad-ifu.pdf',
+                downloadName: 'Bloodo_NAD_IFU.pdf',
+                title: isEs ? 'Instrucciones de Toma de Muestra (PDF)' : 'Collection Guide (PDF)',
+                subtitle: isEs
+                  ? 'Guía oficial paso a paso para la recolección de muestra capilar de sangre (IFU)'
+                  : 'Official Step-by-Step Blood Sample Collection Instructions (IFU)'
+              });
+            }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -323,23 +343,31 @@ export default function BloodoDiagnosticOverviewCard({
               color: '#0d9488',
               border: '1px solid #99f6e4',
               borderRadius: '6px',
-              textDecoration: 'none',
               fontSize: '0.75rem',
               fontWeight: 700,
+              cursor: 'pointer',
               transition: 'all 0.15s ease'
             }}
-            title={isEs ? 'Descargar instrucciones oficiales de toma de muestra (IFU PDF)' : 'Download official sample collection instructions (IFU PDF)'}
+            title={isEs ? 'Ver vista previa de instrucciones de muestreo (IFU PDF)' : 'Preview official sample collection instructions (IFU PDF)'}
           >
             <Download size={13} />
             <span>{isEs ? 'Instrucciones Muestreo (PDF)' : 'Collection Guide (PDF)'}</span>
-          </a>
+          </button>
 
-          {/* Direct Catalog PDF */}
-          <a
-            href={catalogPdf}
-            target="_blank"
-            rel="noopener noreferrer"
-            download={catalogPdf.split('/').pop()}
+          {/* 3. Direct Catalog PDF Preview */}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('light');
+              setPreviewDoc({
+                fileUrl: catalogPdf,
+                downloadName: catalogPdf.split('/').pop() || 'bloodo-product-catalog-2026.pdf',
+                title: isEs ? 'Catálogo 2026 (PDF)' : 'Brochure / Catalog (PDF)',
+                subtitle: isEs
+                  ? 'Catálogo Diagnóstico Bloodo 2026 • Portafolio Clínico Completo'
+                  : 'Bloodo 2026 Diagnostic Catalog • Complete Clinical Test Portfolio'
+              });
+            }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -349,16 +377,16 @@ export default function BloodoDiagnosticOverviewCard({
               color: '#334155',
               border: '1px solid #cbd5e1',
               borderRadius: '6px',
-              textDecoration: 'none',
               fontSize: '0.74rem',
               fontWeight: 600,
+              cursor: 'pointer',
               transition: 'all 0.15s ease'
             }}
-            title={isEs ? 'Descargar catálogo Bloodo 2026' : 'Download complete 2026 Bloodo catalog'}
+            title={isEs ? 'Ver vista previa del catálogo Bloodo 2026' : 'Preview complete 2026 Bloodo catalog'}
           >
             <Download size={13} />
             <span>{isEs ? 'Catálogo 2026 (PDF)' : 'Brochure / Catalog'}</span>
-          </a>
+          </button>
         </div>
 
         {onSelectSection && (
@@ -386,6 +414,18 @@ export default function BloodoDiagnosticOverviewCard({
           </button>
         )}
       </div>
+
+      {/* Interactive Document Preview Modal with Download & Print (GCP Standards) */}
+      <DocumentPreviewModal
+        isOpen={Boolean(previewDoc)}
+        onClose={() => setPreviewDoc(null)}
+        fileUrl={previewDoc?.fileUrl}
+        downloadUrl={previewDoc?.fileUrl}
+        downloadName={previewDoc?.downloadName}
+        title={previewDoc?.title || 'Document Preview'}
+        subtitle={previewDoc?.subtitle}
+        printable={true}
+      />
     </div>
   );
 }

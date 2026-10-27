@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, X, Printer, Upload, Share2, Check, ChevronDown, User } from '@/lib/icons';
+import { Search, X, Printer, Upload, Share2, Check, ChevronDown, User, FileText, Layers, ExternalLink } from '@/lib/icons';
 import { useAuth } from '@/context/AuthContext';
 import UserDropdown from '@/navigation/UserDropdown';
 
@@ -18,16 +18,41 @@ export default function LabelsHeader({
   setLang,
   isGeneratingBatchPdf,
   batchPdfProgress,
-  patientQueue,
+  patientQueue = [],
   onDownloadA4BatchPdf,
   onOpenImport,
   onShare,
+  onShareType,
   copiedShareLink,
+  copiedShareType,
+  activeCode,
+  patientName,
   onKeyDownSearch,
   children
 }) {
   const { user, userProfile, activeRole, logout, isProfessional, isAdmin } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
+  const shareContainerRef = useRef(null);
+
+  // Close share menu on outside click or Escape
+  useEffect(() => {
+    if (!isShareMenuOpen) return;
+    const handleClickOutside = (e) => {
+      if (shareContainerRef.current && !shareContainerRef.current.contains(e.target)) {
+        setIsShareMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsShareMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isShareMenuOpen]);
 
   // Derived user display details
   const userDisplayName = user?.displayName || (userProfile?.firstName ? `${userProfile.firstName} ${userProfile?.lastName || ''}`.trim() : null) || user?.email?.split('@')[0] || 'User';
@@ -167,22 +192,161 @@ export default function LabelsHeader({
             <span className="pls-btn-label">{isEs ? 'Importar Datos' : 'Import Data'}</span>
           </button>
 
-          {/* Share Button */}
-          <button
-            type="button"
-            className="pls-btn-share"
-            onClick={onShare}
-            style={{
-              borderColor: copiedShareLink ? '#ceead6' : '#dadce0',
-              background: copiedShareLink ? '#e6f4ea' : '#ffffff',
-              color: copiedShareLink ? '#137333' : '#3c4043'
-            }}
-            title={isEs ? 'Compartir enlace público del estudio' : 'Share public studio link'}
-            aria-label={isEs ? 'Compartir enlace público del estudio' : 'Share public studio link'}
-          >
-            {copiedShareLink ? <Check size={14} color="#137333" /> : <Share2 size={14} />}
-            <span className="pls-btn-share-label">{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
-          </button>
+          {/* Unified Share Dropdown Button (Google Cloud UX Standards) */}
+          <div className="pls-share-container" ref={shareContainerRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              className="pls-btn-share"
+              onClick={() => setIsShareMenuOpen(prev => !prev)}
+              style={{
+                borderColor: (copiedShareLink || copiedShareType) ? '#ceead6' : (isShareMenuOpen ? '#1a73e8' : '#dadce0'),
+                background: (copiedShareLink || copiedShareType) ? '#e6f4ea' : (isShareMenuOpen ? '#f8fafd' : '#ffffff'),
+                color: (copiedShareLink || copiedShareType) ? '#137333' : (isShareMenuOpen ? '#1a73e8' : '#3c4043')
+              }}
+              title={isEs ? 'Opciones para compartir' : 'Share options'}
+              aria-label={isEs ? 'Opciones para compartir' : 'Share options'}
+              aria-haspopup="menu"
+              aria-expanded={isShareMenuOpen}
+            >
+              {(copiedShareLink || copiedShareType) ? <Check size={14} color="#137333" /> : <Share2 size={14} />}
+              <span className="pls-btn-share-label">
+                {(copiedShareLink || copiedShareType)
+                  ? (isEs ? 'Copiado ✓' : 'Copied ✓')
+                  : (isEs ? 'Compartir' : 'Share')}
+              </span>
+              <ChevronDown
+                size={12}
+                style={{
+                  transform: isShareMenuOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.15s ease',
+                  opacity: 0.7
+                }}
+              />
+            </button>
+
+            {/* Dropdown Popover */}
+            {isShareMenuOpen && (
+              <div className="pls-share-dropdown-menu" role="menu">
+                <div className="pls-share-menu-header">
+                  {isEs ? 'Compartir Espacio de Trabajo' : 'Share Workspace'}
+                </div>
+
+                {/* Option 1: Prescripción Activa */}
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="pls-share-menu-item"
+                  disabled={!activeCode}
+                  onClick={() => {
+                    if (onShareType) onShareType('active');
+                    else if (onShare) onShare();
+                    setIsShareMenuOpen(false);
+                  }}
+                >
+                  <div className="pls-share-item-icon">
+                    <FileText size={16} />
+                  </div>
+                  <div className="pls-share-item-body">
+                    <div className="pls-share-item-title-row">
+                      <span className="pls-share-item-title">
+                        {isEs ? 'Prescripción activa' : 'Active prescription'}
+                      </span>
+                      {copiedShareType === 'active' && (
+                        <span className="pls-share-item-badge copied">
+                          <Check size={11} style={{ marginRight: 3 }} />
+                          {isEs ? 'Copiado' : 'Copied'}
+                        </span>
+                      )}
+                    </div>
+                    <span className="pls-share-item-desc">
+                      {activeCode
+                        ? `#${activeCode} · ${patientName || (isEs ? 'Paciente' : 'Patient')}`
+                        : (isEs ? 'Ninguna receta cargada' : 'No prescription loaded')}
+                    </span>
+                  </div>
+                </button>
+
+                {/* Option 2: Lote Completo en Curso */}
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="pls-share-menu-item"
+                  disabled={!patientQueue || patientQueue.length === 0}
+                  onClick={() => {
+                    if (onShareType) onShareType('batch');
+                    else if (onShare) onShare();
+                    setIsShareMenuOpen(false);
+                  }}
+                >
+                  <div className="pls-share-item-icon" style={{ color: '#0284c7' }}>
+                    <Layers size={16} />
+                  </div>
+                  <div className="pls-share-item-body">
+                    <div className="pls-share-item-title-row">
+                      <span className="pls-share-item-title">
+                        {isEs
+                          ? `Lote en curso (${patientQueue.length})`
+                          : `Current batch (${patientQueue.length})`}
+                      </span>
+                      {copiedShareType === 'batch' && (
+                        <span className="pls-share-item-badge copied">
+                          <Check size={11} style={{ marginRight: 3 }} />
+                          {isEs ? 'Copiado' : 'Copied'}
+                        </span>
+                      )}
+                    </div>
+                    <span className="pls-share-item-desc">
+                      {isEs
+                        ? 'Enlace que precarga todas las recetas del lote simultáneamente'
+                        : 'Preloads all queued prescriptions simultaneously'}
+                    </span>
+                  </div>
+                </button>
+
+                <div className="pls-share-menu-divider" />
+
+                {/* Option 3: Estudio en Blanco (Limpio) */}
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="pls-share-menu-item"
+                  onClick={() => {
+                    if (onShareType) onShareType('clean');
+                    else if (onShare) onShare();
+                    setIsShareMenuOpen(false);
+                  }}
+                >
+                  <div className="pls-share-item-icon" style={{ color: '#64748b' }}>
+                    <ExternalLink size={16} />
+                  </div>
+                  <div className="pls-share-item-body">
+                    <div className="pls-share-item-title-row">
+                      <span className="pls-share-item-title">
+                        {isEs ? 'Estudio en blanco (Limpio)' : 'Clean studio workspace'}
+                      </span>
+                      {copiedShareType === 'clean' && (
+                        <span className="pls-share-item-badge copied">
+                          <Check size={11} style={{ marginRight: 3 }} />
+                          {isEs ? 'Copiado' : 'Copied'}
+                        </span>
+                      )}
+                    </div>
+                    <span className="pls-share-item-desc">
+                      {isEs
+                        ? 'Abre el estudio limpio, sin ninguna receta precargada'
+                        : 'Opens the studio clean without preloaded data'}
+                    </span>
+                  </div>
+                </button>
+
+                <div className="pls-share-menu-footer">
+                  {isEs
+                    ? 'Copia el enlace al portapapeles o activa compartir nativo en móvil.'
+                    : 'Copies link to clipboard or triggers mobile system share.'}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Language Switcher */}
           <div className="pls-lang-toggle" role="group" aria-label="Language selection">

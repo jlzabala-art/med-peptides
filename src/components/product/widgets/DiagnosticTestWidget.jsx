@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   ShieldCheck, 
   FlaskConical, 
@@ -12,6 +12,7 @@ import {
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import CopyableId from '@/components/ui/CopyableId';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 
 /**
  * DiagnosticTestWidget
@@ -77,6 +78,8 @@ export default function DiagnosticTestWidget({
     catalogPdf = '/documents/ETERNA_Genetic_Risk_Analysis_Sample_Report.pdf';
     catalogLabel = isEs ? 'Dossier ETERNA (PDF)' : 'ETERNA Dossier (PDF)';
   }
+
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginTop: '1rem' }}>
@@ -197,12 +200,18 @@ export default function DiagnosticTestWidget({
 
         {/* ── Action Buttons: Sample Report & Product Catalog ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '0.85rem' }}>
-          {/* 1. Official Sample Clinical Report PDF */}
-          <a
-            href={reportPdf}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => triggerHaptic('selection')}
+          {/* 1. Official Sample Clinical Report PDF Preview */}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              setPreviewDoc({
+                fileUrl: reportPdf,
+                downloadName: reportPdf.split('/').pop() || 'sample-clinical-report.pdf',
+                title: reportLabel,
+                subtitle: isEs ? 'Simulación oficial de informe clínico de laboratorio' : 'Official clinical laboratory specimen report'
+              });
+            }}
             style={{
               width: '100%',
               display: 'flex',
@@ -214,9 +223,9 @@ export default function DiagnosticTestWidget({
               color: '#ffffff',
               border: '1px solid #0f766e',
               borderRadius: '6px',
-              textDecoration: 'none',
               fontSize: '0.75rem',
               fontWeight: 700,
+              cursor: 'pointer',
               boxShadow: '0 1px 3px rgba(13, 148, 136, 0.25)',
               transition: 'all 0.15s ease'
             }}
@@ -230,15 +239,20 @@ export default function DiagnosticTestWidget({
           >
             <FileText size={14} color="#ffffff" />
             <span>{reportLabel}</span>
-          </a>
+          </button>
 
-          {/* 2. Official Product Catalog PDF */}
-          <a
-            href={catalogPdf}
-            target="_blank"
-            rel="noopener noreferrer"
-            download={catalogPdf.split('/').pop()}
-            onClick={() => triggerHaptic('selection')}
+          {/* 2. Official Product Catalog PDF Preview */}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              setPreviewDoc({
+                fileUrl: catalogPdf,
+                downloadName: catalogPdf.split('/').pop() || 'diagnostic-catalog.pdf',
+                title: catalogLabel,
+                subtitle: isEs ? 'Catálogo oficial de pruebas y paneles diagnósticos' : 'Official diagnostic panels & tests catalog'
+              });
+            }}
             style={{
               width: '100%',
               display: 'flex',
@@ -250,9 +264,9 @@ export default function DiagnosticTestWidget({
               color: '#0f172a',
               border: '1px solid #cbd5e1',
               borderRadius: '6px',
-              textDecoration: 'none',
               fontSize: '0.74rem',
               fontWeight: 600,
+              cursor: 'pointer',
               boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
               transition: 'all 0.15s ease'
             }}
@@ -264,13 +278,25 @@ export default function DiagnosticTestWidget({
               e.currentTarget.style.background = '#ffffff';
               e.currentTarget.style.borderColor = '#cbd5e1';
             }}
-            title={isEs ? 'Descargar Catálogo Completo en PDF' : 'Download Complete Product Catalog in PDF'}
+            title={isEs ? 'Ver Vista Previa del Catálogo Completo' : 'Preview Complete Product Catalog'}
           >
             <Download size={13} color="#003666" />
             <span>{catalogLabel}</span>
-          </a>
+          </button>
         </div>
       </div>
+
+      {/* Interactive Document Preview Modal with Download & Print */}
+      <DocumentPreviewModal
+        isOpen={Boolean(previewDoc)}
+        onClose={() => setPreviewDoc(null)}
+        fileUrl={previewDoc?.fileUrl}
+        downloadUrl={previewDoc?.fileUrl}
+        downloadName={previewDoc?.downloadName}
+        title={previewDoc?.title || 'Document Preview'}
+        subtitle={previewDoc?.subtitle}
+        printable={true}
+      />
     </div>
   );
 }

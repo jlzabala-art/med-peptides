@@ -231,6 +231,7 @@ export default function PublicLabelsAppClient({
   const [isLoadingRx, setIsLoadingRx] = useState(false);
   const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
+  const [copiedShareType, setCopiedShareType] = useState(null);
   const [showImport, setShowImport] = useState(false);
   const [isApprovingRx, setIsApprovingRx] = useState(false);
   const [isBatchApproving, setIsBatchApproving] = useState(false);
@@ -974,25 +975,51 @@ export default function PublicLabelsAppClient({
     return `${origin}/labels?rx=${encodeURIComponent(activeCode)}${phaseParam}&edit=true&lang=${lang}`;
   };
 
-  // Native Web Share with Clipboard fallback (GCP mobile-friendly)
-  const handleShare = async () => {
+  // Unified Share Handler with 3 Modes (GCP Console UX): 'active' | 'batch' | 'clean'
+  const handleShareType = async (type = 'active') => {
     if (typeof window === 'undefined') return;
-    const url = getShareUrl();
-    const currentLabel = labels[labelIndex] || {};
-    const formulaTitle = currentLabel.productTitle || currentLabel.productName || currentRx?.treatmentTitle || 'Compounded Pharmaceutical Formula';
-    const partInfo = labels.length > 1 ? ` (Part ${labelIndex + 1}/${labels.length})` : '';
+    const origin = window.location.origin;
+    let url = '';
+    let title = '';
+    let text = '';
 
-    const shareData = {
-      title: `${patientName} • #${rxCode} Compounding Label`,
-      text: isEs
+    if (type === 'clean') {
+      url = `${origin}/labels`;
+      title = isEs ? 'Compounding Label Studio • Atlas Health' : 'Compounding Label Studio • Atlas Health';
+      text = isEs
+        ? '🏷️ Atlas Compounding Studio — Espacio de trabajo para formulación magistral.'
+        : '🏷️ Atlas Compounding Studio — Compounding workspace.';
+    } else if (type === 'batch') {
+      if (!patientQueue.length) return;
+      const allCodes = patientQueue.map(p => p.code).filter(Boolean).join(',');
+      url = `${origin}/labels?rx=${encodeURIComponent(allCodes)}&edit=true&lang=${lang}`;
+      const names = patientQueue.map(p => p.rx?.patientName || p.code).join(', ');
+      title = `Atlas Compounding Studio • ${patientQueue.length} ${isEs ? 'Prescripciones' : 'Prescriptions'}`;
+      text = isEs
+        ? `🏷️ Atlas Compounding Studio • Lote de ${patientQueue.length} prescripciones: ${names}`
+        : `🏷️ Atlas Compounding Studio • Batch of ${patientQueue.length} prescriptions: ${names}`;
+    } else {
+      // 'active'
+      url = getShareUrl();
+      const currentLabel = labels[labelIndex] || {};
+      const formulaTitle = currentLabel.productTitle || currentLabel.productName || currentRx?.treatmentTitle || 'Compounded Pharmaceutical Formula';
+      const partInfo = labels.length > 1 ? ` (Part ${labelIndex + 1}/${labels.length})` : '';
+      title = `${patientName} • #${rxCode} Compounding Label`;
+      text = isEs
         ? `🏷️ Atlas Compounding Studio • Paciente: ${patientName} • Prescripción: #${rxCode} • Fórmula${partInfo}: ${formulaTitle}`
-        : `🏷️ Atlas Compounding Studio • Patient: ${patientName} • Prescription: #${rxCode} • Formula${partInfo}: ${formulaTitle}`,
-      url: url,
-    };
+        : `🏷️ Atlas Compounding Studio • Patient: ${patientName} • Prescription: #${rxCode} • Formula${partInfo}: ${formulaTitle}`;
+    }
 
-    if (navigator?.share && typeof navigator.canShare === 'function' && navigator.canShare(shareData)) {
+    // Try native share first on mobile
+    if (navigator?.share && typeof navigator.canShare === 'function' && navigator.canShare({ title, text, url })) {
       try {
-        await navigator.share(shareData);
+        await navigator.share({ title, text, url });
+        setCopiedShareType(type);
+        setCopiedShareLink(true);
+        setTimeout(() => {
+          setCopiedShareType(null);
+          setCopiedShareLink(false);
+        }, 2500);
         return;
       } catch (err) {
         if (err.name !== 'AbortError') {
@@ -1001,46 +1028,24 @@ export default function PublicLabelsAppClient({
       }
     }
 
+    // Clipboard fallback
     if (navigator?.clipboard) {
-      navigator.clipboard.writeText(url);
-      setCopiedShareLink(true);
-      setTimeout(() => setCopiedShareLink(false), 2500);
-    }
-  };
-
-  // Share all prescriptions in the batch queue as a single deep-link
-  const handleShareBatch = async () => {
-    if (typeof window === 'undefined' || !patientQueue.length) return;
-    const origin = window.location.origin;
-    const allCodes = patientQueue.map(p => p.code).filter(Boolean).join(',');
-    const batchUrl = `${origin}/labels?rx=${encodeURIComponent(allCodes)}&edit=true&lang=${lang}`;
-    const names = patientQueue.map(p => p.rx?.patientName || p.code).join(', ');
-
-    const shareData = {
-      title: `Atlas Compounding Studio • ${patientQueue.length} Prescriptions`,
-      text: isEs
-        ? `🏷️ Atlas Compounding Studio • Lote de ${patientQueue.length} prescripciones: ${names}`
-        : `🏷️ Atlas Compounding Studio • Batch of ${patientQueue.length} prescriptions: ${names}`,
-      url: batchUrl,
-    };
-
-    if (navigator?.share && typeof navigator.canShare === 'function' && navigator.canShare(shareData)) {
       try {
-        await navigator.share(shareData);
-        return;
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.warn('Web Share API batch error:', err);
-        }
+        await navigator.clipboard.writeText(url);
+        setCopiedShareType(type);
+        setCopiedShareLink(true);
+        setTimeout(() => {
+          setCopiedShareType(null);
+          setCopiedShareLink(false);
+        }, 2500);
+      } catch (clipErr) {
+        console.warn('Clipboard writeText failed:', clipErr);
       }
     }
-
-    if (navigator?.clipboard) {
-      navigator.clipboard.writeText(batchUrl);
-      setCopiedShareLink(true);
-      setTimeout(() => setCopiedShareLink(false), 2500);
-    }
   };
+
+  // Default handler for active prescription (backwards-compatible)
+  const handleShare = () => handleShareType('active');
 
   // Copy prescription code
   const handleCopyCode = () => {
@@ -1072,7 +1077,11 @@ export default function PublicLabelsAppClient({
         onDownloadA4BatchPdf={handleDownloadA4BatchPdf}
         onOpenImport={() => setShowImport(true)}
         onShare={handleShare}
+        onShareType={handleShareType}
         copiedShareLink={copiedShareLink}
+        copiedShareType={copiedShareType}
+        activeCode={activeCode}
+        patientName={patientName}
         onKeyDownSearch={handleKeyDownSearch}
       >
         <LabelsSearchDropdown
@@ -1100,8 +1109,6 @@ export default function PublicLabelsAppClient({
           onSwitchActivePatient={handleSwitchActivePatient}
           onRemoveFromQueue={handleRemoveFromQueue}
           onBatchApprove={handleBatchApprove}
-          onShareBatch={handleShareBatch}
-          copiedShareLink={copiedShareLink}
           isBatchApproving={isBatchApproving}
           totalLabeledCount={totalLabeledCount}
           isPatientFullyLabeled={isPatientFullyLabeled}
