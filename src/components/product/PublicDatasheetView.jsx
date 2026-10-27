@@ -169,7 +169,14 @@ export default function PublicDatasheetView({
       if (window.history?.replaceState) {
         window.history.replaceState(null, '', `#${targetId}`);
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Instant reset + smooth settle to top of page without requiring user to scroll up
+      window.scrollTo(0, 0);
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 50);
     }
   }, []);
 
@@ -180,8 +187,10 @@ export default function PublicDatasheetView({
       const hash = window.location.hash.replace('#', '').trim();
       if (hash) {
         setActiveSection(hash);
+        window.scrollTo(0, 0);
       } else {
         setActiveSection('overview');
+        window.scrollTo(0, 0);
       }
     };
 

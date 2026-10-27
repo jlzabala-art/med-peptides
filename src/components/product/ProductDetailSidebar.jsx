@@ -176,7 +176,13 @@ export default function ProductDetailSidebar({
         window.history.replaceState(null, '', `#${targetId}`);
       }
       onSelectSection(targetId);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo(0, 0);
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 60);
       return;
     }
 
