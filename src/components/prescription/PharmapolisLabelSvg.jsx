@@ -104,13 +104,93 @@ export function computeDefaultHeaderBadge(labelData = {}, fallbackPartIndex = 0,
   return '';
 }
 
+function VectorGlyph({ type, size = 16, fill = '#ffffff' }) {
+  if (type === 'sun') {
+    return (
+      <g transform={`scale(${size / 24})`}>
+        <circle cx="12" cy="12" r="5" fill={fill} />
+        <path d="M12 1v3m0 16v3M4.22 4.22l2.12 2.12m11.32 11.32l2.12 2.12M1 12h3m16 0h3M4.22 19.78l2.12-2.12m11.32-11.32l2.12-2.12" stroke={fill} strokeWidth="2.5" strokeLinecap="round" />
+      </g>
+    );
+  }
+  if (type === 'moon') {
+    return (
+      <g transform={`scale(${size / 24})`}>
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill={fill} />
+      </g>
+    );
+  }
+  if (type === 'capsule') {
+    return (
+      <g transform={`scale(${size / 24})`}>
+        <rect x="5" y="4" width="14" height="16" rx="7" fill="none" stroke={fill} strokeWidth="2.5" />
+        <line x1="5" y1="12" x2="19" y2="12" stroke={fill} strokeWidth="2" />
+        <path d="M5 11h14V9a5 5 0 0 0-5-5H10a5 5 0 0 0-5 5v2z" fill={fill} />
+      </g>
+    );
+  }
+  if (type === 'dropper') {
+    return (
+      <g transform={`scale(${size / 24})`}>
+        <path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z" fill="none" stroke={fill} strokeWidth="2" />
+        <path d="m5 2 5 5" stroke={fill} strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx="12" cy="19" r="2" fill={fill} />
+      </g>
+    );
+  }
+  return null;
+}
+
 /**
- * Renders an active ingredient line with tabular/high-contrast dosage formatting.
- * The molecule name is rendered in slate-800 (#1e293b), while the strength/dosage
- * (e.g., 500 mcg, 25 mg, 4%, etc.) is rendered in bold dark blue (#0284c7) for instant recognition.
+ * Renders an active ingredient line with tabular dot-leader dosage formatting.
+ * The molecule name is rendered on the left, the dosage/strength is pinned strictly
+ * to the right edge with text-anchor="end", and a dotted connecting line prevents eye-slip.
  */
-function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a', isMono = true) {
-  const match = String(line).match(/^(.*?\s+)([\d.,]+[\s\u00A0]*(?:mcg|mg|g|%|iu|fu|spu|ml|capsules?|drops?)(?:[\s\u00A0]*\/[\s\u00A0]*(?:ml|g|cap|dose))?(?:[\s\u00A0]*(?:topical|oral))?(?:[\s\u00A0]*\([^)]+\))?)\s*$/i);
+function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a', isMono = true, lineWidth = 0) {
+  let cleanLine = String(line).replace(/^[•*-]\s*/, '').trim();
+  const match = cleanLine.match(/^(.*?\s+)([\d.,]+[\s\u00A0]*(?:mcg|mg|g|%|iu|fu|spu|ml|capsules?|drops?)(?:[\s\u00A0]*\/[\s\u00A0]*(?:ml|g|cap|dose))?(?:[\s\u00A0]*(?:topical|oral))?(?:[\s\u00A0]*\([^)]+\))?)\s*$/i);
+
+  if (match && lineWidth > 220) {
+    const namePart = match[1].trim();
+    const dosePart = match[2].trim();
+    const estNameW = Math.round(namePart.length * (fontSize * 0.58) + 24);
+    const estDoseW = Math.round(dosePart.length * (fontSize * 0.62) + 12);
+    const dotStartX = x + estNameW + 8;
+    const dotEndX = x + lineWidth - estDoseW - 8;
+
+    return (
+      <g key={key}>
+        <text x={x} y={y} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={fontSize} textRendering="geometricPrecision">
+          <tspan fill={isMono ? '#000000' : '#0284c7'} fontWeight="900">• </tspan>
+          <tspan fontWeight="700" fill={isMono ? '#000000' : '#1e293b'}>{namePart}</tspan>
+        </text>
+        {dotEndX > dotStartX + 24 ? (
+          <line
+            x1={dotStartX}
+            y1={y - Math.round(fontSize * 0.28)}
+            x2={dotEndX}
+            y2={y - Math.round(fontSize * 0.28)}
+            stroke={isMono ? '#666666' : '#cbd5e1'}
+            strokeWidth="1.6"
+            strokeDasharray="2,5"
+          />
+        ) : null}
+        <text
+          x={x + lineWidth}
+          y={y}
+          textAnchor="end"
+          fontFamily="Arial, Helvetica, -apple-system, sans-serif"
+          fontSize={fontSize}
+          fontWeight="900"
+          fill={isMono ? '#000000' : '#0284c7'}
+          textRendering="geometricPrecision"
+        >
+          {dosePart}
+        </text>
+      </g>
+    );
+  }
+
   if (match) {
     const namePart = match[1];
     const dosePart = match[2];
@@ -121,6 +201,7 @@ function renderIngredientLine(line, x, y, fontSize, key, defaultFill = '#0f172a'
       </text>
     );
   }
+
   return (
     <text key={key} x={x} y={y} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={fontSize} fontWeight="800" fill={isMono ? '#000000' : defaultFill} textRendering="geometricPrecision">
       {line}
@@ -253,26 +334,38 @@ export default function PharmapolisLabelSvg({
 
   // Clinical Color Theme for Time of Day & Part indicator
   const badgeTheme = React.useMemo(() => {
-    if (isMono) {
-      return { fill: '#000000', text: '#ffffff', border: '#000000', accent: '#000000', icon: '' };
-    }
     const effectiveUpper = (headerBadgeText || timeOfDay || '').toUpperCase();
-    if (effectiveUpper.includes('MORNING') || effectiveUpper.includes('MAÑANA')) {
-      return { fill: '#b45309', text: '#ffffff', border: '#d97706', accent: '#f59e0b', icon: '☀️' }; // Warm amber gold
+    let glyph = null;
+    if (effectiveUpper.includes('MORNING') || effectiveUpper.includes('MAÑANA') || effectiveUpper.includes('AM')) {
+      glyph = 'sun';
+    } else if (effectiveUpper.includes('NIGHT') || effectiveUpper.includes('BEDTIME') || effectiveUpper.includes('NOCHE') || effectiveUpper.includes('SLEEP')) {
+      glyph = 'moon';
+    } else if (effectiveUpper.includes('PRE-WASH') || effectiveUpper.includes('SCALP') || effectiveUpper.includes('TOPICAL') || effectiveUpper.includes('DROPS')) {
+      glyph = 'dropper';
+    } else if (effectiveUpper.includes('CAPSULE') || effectiveUpper.includes('ORAL') || effectiveUpper.includes('DAILY')) {
+      glyph = 'capsule';
     }
-    if (effectiveUpper.includes('NIGHT') || effectiveUpper.includes('BEDTIME') || effectiveUpper.includes('NOCHE')) {
-      return { fill: '#1e1b4b', text: '#ffffff', border: '#312e81', accent: '#6366f1', icon: '🌙' }; // Midnight indigo
+
+    if (isMono) {
+      return { fill: '#000000', text: '#ffffff', border: '#000000', accent: '#000000', glyph };
     }
-    if (effectiveUpper.includes('EVENING') || effectiveUpper.includes('TARDE')) {
-      return { fill: '#0f766e', text: '#ffffff', border: '#14b8a6', accent: '#2dd4bf', icon: '🌅' }; // Evening teal
+    if (glyph === 'sun') {
+      return { fill: '#b45309', text: '#ffffff', border: '#d97706', accent: '#f59e0b', glyph }; // Warm amber gold
     }
-    return { fill: '#003666', text: '#ffffff', border: '#0284c7', accent: '#38bdf8', icon: '' }; // Clinical dispensary navy
+    if (glyph === 'moon') {
+      return { fill: '#1e1b4b', text: '#ffffff', border: '#312e81', accent: '#6366f1', glyph }; // Midnight indigo
+    }
+    if (glyph === 'dropper') {
+      return { fill: '#0f766e', text: '#ffffff', border: '#14b8a6', accent: '#2dd4bf', glyph }; // Evening teal
+    }
+    return { fill: '#003666', text: '#ffffff', border: '#0284c7', accent: '#38bdf8', glyph }; // Clinical dispensary navy
   }, [isMono, headerBadgeText, timeOfDay]);
 
   // Header badge sizing and right-aligned position (guaranteed zero overlap with patientName)
   const badgeCharCount = headerBadgeText.length;
   const badgeFontSize = isShort ? (badgeCharCount > 24 ? 13 : 15) : (badgeCharCount > 24 ? 15 : 17);
-  const badgeWidth = Math.max(120, Math.round(badgeCharCount * (badgeFontSize * 0.64) + 36));
+  const hasGlyph = Boolean(badgeTheme.glyph);
+  const badgeWidth = Math.max(120, Math.round(badgeCharCount * (badgeFontSize * 0.64) + (hasGlyph ? 56 : 36)));
   const badgeX = 1380 - badgeWidth - 16;
   const badgeHeight = isShort ? 38 : 44;
   const badgeY = isShort ? 13 : 15;
@@ -740,8 +833,8 @@ export default function PharmapolisLabelSvg({
     const rightColWidth = 1440 - rightColX;
     const innerUsableWidth = rightColWidth - 48;
 
-    // Compact QR size: 165 units (150 in short mode) - perfectly scannable at ~8.5mm physical
-    const backQrSize = isShort ? 150 : 165;
+    // Integer module snapped QR size (145 = 29x5 px, 174 = 29x6 px) for zero-interpolation thermal printheads
+    const backQrSize = isShort ? 145 : 174;
     const qrX = Math.round((leftColWidth - backQrSize) / 2);
     const qrY = isShort ? 14 : 18;
 
@@ -786,8 +879,13 @@ export default function PharmapolisLabelSvg({
           {headerBadgeText ? (
             <g transform={`translate(${badgeX}, ${badgeY})`}>
               <rect x="0" y="0" width={badgeWidth} height={badgeHeight} fill={badgeTheme.fill} stroke={badgeTheme.border} strokeWidth="1.2" rx="6" />
+              {badgeTheme.glyph ? (
+                <g transform={`translate(12, ${isShort ? 10 : 12})`}>
+                  <VectorGlyph type={badgeTheme.glyph} size={isShort ? 16 : 19} fill={badgeTheme.text || '#ffffff'} />
+                </g>
+              ) : null}
               <text
-                x={Math.round(badgeWidth / 2)}
+                x={badgeTheme.glyph ? Math.round((badgeWidth + 20) / 2) : Math.round(badgeWidth / 2)}
                 y={isShort ? 25 : 29}
                 textAnchor="middle"
                 fontFamily="Arial, Helvetica, -apple-system, sans-serif"
@@ -807,12 +905,13 @@ export default function PharmapolisLabelSvg({
         <g transform={`translate(60, ${colY})`}>
           <rect x="0" y="0" width={leftColWidth} height={colHeight} fill="#ffffff" stroke={isMono ? '#000000' : '#cbd5e1'} strokeWidth="2" rx="8" />
           
-          {/* Snug QR Code with balanced 27px side margins */}
+          {/* Snug QR Code with integer module snapping & 4-module quiet zone */}
           <svg x={qrX} y={qrY} width={backQrSize} height={backQrSize} viewBox={`0 0 ${backQrSize} ${backQrSize}`}>
             <QRCodeSVG
               value={targetRxUrl}
               size={backQrSize}
               level="M"
+              includeMargin={true}
               fgColor={isMono ? '#000000' : '#003666'}
               bgColor="#ffffff"
             />
@@ -990,7 +1089,7 @@ export default function PharmapolisLabelSvg({
             const colWidth = Math.floor((innerUsableWidth - 36) / 2);
 
             const multiColFontSize = isShort ? 16 : isMediumHeight ? 18 : 22;
-            const multiColLineGap = Math.round(multiColFontSize * 1.32);
+            const multiColLineGap = Math.round(multiColFontSize * 1.42);
             const multiColMaxChars = Math.max(20, Math.floor((colWidth - 20) / (multiColFontSize * 0.68)));
 
             const col1Lines = isMultiColumn ? col1Items.flatMap(it => wrapLines(`• ${it}`, multiColMaxChars)) : [];
@@ -1007,7 +1106,7 @@ export default function PharmapolisLabelSvg({
               : isMediumHeight
                 ? (isUltraSparse ? 26 : isSparse ? 23 : 21)
                 : (isUltraSparse ? 31 : isSparse ? 26 : 24);
-            const ingLineGap = Math.round(ingFontSize * 1.32);
+            const ingLineGap = Math.round(ingFontSize * 1.45);
             const ingMaxChars = Math.max(24, Math.floor((innerUsableWidth - 48) / (ingFontSize * 0.65)));
             const singleIngLines = activeIngredientsList.flatMap(it => wrapLines(`• ${it}`, ingMaxChars));
             const ingLines = singleIngLines.length > 0 ? singleIngLines : wrapLines(`• ${activeIngredientsList.join(' — ')}`, ingMaxChars);
@@ -1018,7 +1117,7 @@ export default function PharmapolisLabelSvg({
               : isMediumHeight
                 ? (isUltraSparse ? 18.5 : isSparse ? 17 : 15.5)
                 : (isUltraSparse ? 22 : isSparse ? 19.5 : 18);
-            const baseLineGap = Math.round(baseFontSize * 1.32);
+            const baseLineGap = Math.round(baseFontSize * 1.40);
             const baseMaxChars = Math.max(26, Math.floor((innerUsableWidth - 48) / (baseFontSize * 0.65)));
             const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, baseMaxChars);
 
@@ -1028,7 +1127,7 @@ export default function PharmapolisLabelSvg({
               : isMediumHeight
                 ? (isUltraSparse ? 24 : isSparse ? 21 : 18.5)
                 : (isUltraSparse ? 28 : isSparse ? 24 : 21);
-            const posLineGap = Math.round(posFontSize * 1.32);
+            const posLineGap = Math.round(posFontSize * 1.48);
             const posMaxChars = Math.max(24, Math.floor((innerUsableWidth - 64) / (posFontSize * 0.68)));
             const posologyLines = wrapLines(directions, posMaxChars);
 
@@ -1102,16 +1201,16 @@ export default function PharmapolisLabelSvg({
                     <g>
                       {/* Column 1 */}
                       {col1Lines.map((line, lIdx) => 
-                        renderIngredientLine(line, 0, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing1-${lIdx}`, '#000000', isMono)
+                        renderIngredientLine(line, 0, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing1-${lIdx}`, '#000000', isMono, colWidth)
                       )}
                       {/* Column 2 */}
                       {col2Lines.map((line, lIdx) => 
-                        renderIngredientLine(line, colWidth + 36, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing2-${lIdx}`, '#000000', isMono)
+                        renderIngredientLine(line, colWidth + 36, firstIngLineY + (lIdx * multiColLineGap), multiColFontSize, `ing2-${lIdx}`, '#000000', isMono, colWidth)
                       )}
                     </g>
                   ) : (
                     ingLines.map((line, lIdx) => 
-                      renderIngredientLine(line, 0, firstIngLineY + (lIdx * ingLineGap), ingFontSize, `ing-${lIdx}`, '#000000', isMono)
+                      renderIngredientLine(line, 0, firstIngLineY + (lIdx * ingLineGap), ingFontSize, `ing-${lIdx}`, '#000000', isMono, innerUsableWidth)
                     )
                   )}
 
@@ -1136,7 +1235,7 @@ export default function PharmapolisLabelSvg({
                   <rect x="0" y="0" width="8" height={posBoxHeight} fill={isMono ? '#000000' : (badgeTheme.fill || '#0284c7')} rx="4" />
                   
                   <text x="22" y={posHeaderTitleY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 14 : 16} fontWeight="900" fill={isMono ? '#000000' : '#0369a1'} letterSpacing="0.8">
-                    {(!isMono && badgeTheme.icon) ? `${badgeTheme.icon} ` : ''}DIRECTIONS FOR USE / PRESCRIBED POSOLOGY
+                    {(!isMono && badgeTheme.glyph) ? <VectorGlyph type={badgeTheme.glyph} size={14} fill={badgeTheme.accent || '#0369a1'} /> : null} DIRECTIONS FOR USE / PRESCRIBED POSOLOGY
                   </text>
 
                   {posologyLines.map((pLine, pIdx) => (
@@ -1154,11 +1253,26 @@ export default function PharmapolisLabelSvg({
                   ))}
                 </g>
 
-                {/* Block 4: Mandatory Precaution & Prescriber (High-Contrast Bottom Anchored) */}
+                {/* Block 4: Mandatory Precaution & Prescriber (Inverted High-Contrast Knockout Banner) */}
                 <g transform="translate(24, 0)">
-                  <line x1="0" y1={bCautionDividerY} x2={innerUsableWidth} y2={bCautionDividerY} stroke={isMono ? '#000000' : '#cbd5e1'} strokeWidth="1.8" />
-                  <text x="0" y={bCautionY} fontFamily="Arial, Helvetica, -apple-system, sans-serif" fontSize={isShort ? 15.5 : 19} fontWeight="900" fill={isMono ? '#000000' : '#b91c1c'} letterSpacing="0.4">
-                    {cautionText}
+                  <rect
+                    x="-4"
+                    y={bCautionY - (isShort ? 18 : 22)}
+                    width={innerUsableWidth + 8}
+                    height={isShort ? 25 : 30}
+                    fill="#000000"
+                    rx="3"
+                  />
+                  <text
+                    x="8"
+                    y={bCautionY - (isShort ? 18 : 22) + (isShort ? 17 : 21)}
+                    fontFamily="Arial, Helvetica, -apple-system, sans-serif"
+                    fontSize={isShort ? 12.5 : 15}
+                    fontWeight="900"
+                    fill="#ffffff"
+                    letterSpacing="0.5"
+                  >
+                    ⚠️ {cautionText}
                   </text>
                   <text
                     x="0"

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye, Pill, ChevronLeft, ChevronRight, Share2, AlertTriangle } from '@/lib/icons';
+import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye, Pill, ChevronLeft, ChevronRight, Share2, AlertTriangle, Printer } from '@/lib/icons';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { labelsRepository } from '@/repositories/labelsRepository';
 import PharmapolisLabelSvg, { computeDefaultHeaderBadge } from './PharmapolisLabelSvg';
@@ -10,6 +10,7 @@ import { formatApisForEditor, labelToMarkdown, parseMarkdownToLabel } from '@/ut
 import ClinicPicker from '@/components/admin/patients/ClinicPicker';
 import PhysicianPicker from '@/components/admin/patients/PhysicianPicker';
 import { canvasToPngBlobWithDpi } from '@/utils/pngDpi';
+import { generateLabelZpl } from '@/utils/labels/zplGenerator';
 
 /**
  * Optical Print Legibility Pill Badge
@@ -109,6 +110,8 @@ export default function PharmacyLabelsModal({
   };
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
+  const [copiedZpl, setCopiedZpl] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
   const [exportFormat, setExportFormat] = useState('png'); // 'png' | 'pdf' (Default to PNG as requested)
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -202,6 +205,12 @@ export default function PharmacyLabelsModal({
 
   const baseItem = labels[selectedProductIdx] || labels[0];
   const currentItem = editedOverrides[selectedProductIdx] || baseItem;
+
+  // Real-data batch verification & GMP format validation
+  const realDbBatch = baseItem.batchCode || baseItem.lote || baseItem.dispensingBatch || baseItem.lotNumber || null;
+  const currentBatch = String(currentItem.batchCode || currentItem.lote || '').trim();
+  const isRealVerifiedBatch = Boolean(realDbBatch && currentBatch && (currentBatch === baseItem.batchCode || currentBatch === baseItem.lote));
+  const isBatchFormatValid = Boolean(currentBatch && currentBatch.length >= 6 && /^[a-zA-Z0-9_-]+$/.test(currentBatch));
 
   const handleFieldChange = (key, val) => {
     const updated = { ...currentItem, [key]: val };
@@ -361,6 +370,30 @@ export default function PharmacyLabelsModal({
 
     const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(waUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleDownloadZpl = () => {
+    const zplString = generateLabelZpl(currentItem, dpi);
+    const blob = new Blob([zplString], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const rawPatient = currentItem.patientName || 'PATIENT';
+    const cleanPatient = String(rawPatient).replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+    link.href = url;
+    link.download = `PHARMAPOLIS_LABEL_${cleanPatient}_${currentItem.batchCode || 'LOT'}.zpl`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopyZpl = () => {
+    const zplString = generateLabelZpl(currentItem, dpi);
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(zplString);
+      setCopiedZpl(true);
+      setTimeout(() => setCopiedZpl(false), 2500);
+    }
   };
 
   const handleSaveToFirebase = async (explicitStatus = null) => {
@@ -1944,7 +1977,18 @@ export default function PharmacyLabelsModal({
                 {currentItem.batchCode && (
                   <div className="gcp-resource-detail-item">
                     <span className="gcp-detail-tag">{isEs ? 'Lote:' : 'Batch:'}</span>
-                    <span className="gcp-detail-text">🏷️ {currentItem.batchCode}</span>
+                    <span className="gcp-detail-text" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      🏷️ {currentItem.batchCode}
+                      {isRealVerifiedBatch ? (
+                        <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '1px 5px', borderRadius: '4px', fontSize: '0.62rem', fontWeight: 750 }} title={isEs ? 'Lote real verificado en base de datos' : 'Real verified lot in database'}>
+                          ✓ {isEs ? 'Verificado' : 'Verified'}
+                        </span>
+                      ) : (
+                        <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 5px', borderRadius: '4px', fontSize: '0.62rem', fontWeight: 750 }} title={isEs ? 'Lote sugerido GMP auto-generado' : 'Auto-generated GMP batch'}>
+                          ⚡ {isEs ? 'Auto' : 'Auto'}
+                        </span>
+                      )}
+                    </span>
                   </div>
                 )}
               </div>
@@ -2152,7 +2196,7 @@ export default function PharmacyLabelsModal({
               </div>
             </div>
 
-            {/* Bottom Row: Tool Actions (Edit, Share) */}
+            {/* Bottom Row: Tool Actions (Edit) */}
             <div className="gcp-toolbar-row-bottom">
               {/* Field 6: Online Label Editor Toggle */}
               <button
@@ -2176,24 +2220,6 @@ export default function PharmacyLabelsModal({
                   display: 'inline-block'
                 }} />
               </button>
-
-              {/* Field 7: Compartir Editor (Enlace Directo) */}
-              <button
-                type="button"
-                onClick={handleShareEditor}
-                className="gcp-toolbar-btn"
-                style={{
-                  border: copiedShareLink ? '1px solid #137333' : '1px solid #dadce0',
-                  background: copiedShareLink ? '#e6f4ea' : '#ffffff',
-                  color: copiedShareLink ? '#137333' : '#3c4043'
-                }}
-                title={isEs ? 'Copiar enlace directo del editor para compartir con un tercero' : 'Copy direct link to share editor with third party'}
-              >
-                {copiedShareLink ? <Check size={13} color="#137333" /> : <Share2 size={13} />}
-                <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
-              </button>
-
-
             </div>
           </div>
 
@@ -2443,39 +2469,78 @@ export default function PharmacyLabelsModal({
                     </div>
 
                     <div className="gcp-col-3 gcp-field-wrap">
-                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <label className="gcp-form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <span>{isEs ? 'Lote (Batch)' : 'Dispensing Batch'}</span>
-                          <span style={{ color: '#dc2626', marginLeft: '3px', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                          <span style={{ color: '#dc2626', fontWeight: 700 }} title={isEs ? 'Campo obligatorio' : 'Required field'}>*</span>
+                          {isRealVerifiedBatch ? (
+                            <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '1px 5px', borderRadius: '4px', fontSize: '0.64rem', fontWeight: 750 }} title={isEs ? 'Lote verificado y trazable en base de datos oficial' : 'Verified and traceable lot from official database'}>
+                              ✓ {isEs ? 'Verificado' : 'Verified'}
+                            </span>
+                          ) : (
+                            <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 5px', borderRadius: '4px', fontSize: '0.64rem', fontWeight: 750 }} title={isEs ? 'Lote sugerido compounding auto-generado' : 'Auto-generated compounding lot'}>
+                              ⚡ {isEs ? 'Auto' : 'Auto'}
+                            </span>
+                          )}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newLot = generateAutoLot(currentItem.fileNumber || currentItem.rxCode || currentItem.code);
-                            handleFieldChange('batchCode', newLot);
-                          }}
-                          style={{
-                            border: '1px solid #a7f3d0',
-                            background: '#ecfdf5',
-                            color: '#047857',
-                            borderRadius: '4px',
-                            fontSize: '0.66rem',
-                            fontWeight: 750,
-                            padding: '1px 6px',
-                            cursor: 'pointer'
-                          }}
-                          title={isEs ? 'Generar código de lote con fecha de hoy' : 'Generate batch code with today date'}
-                        >
-                          ⚡ {isEs ? 'Lote Hoy' : 'Auto LOT'}
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          {realDbBatch && currentBatch !== realDbBatch && (
+                            <button
+                              type="button"
+                              onClick={() => handleFieldChange('batchCode', realDbBatch)}
+                              style={{
+                                border: '1px solid #93c5fd',
+                                background: '#eff6ff',
+                                color: '#1d4ed8',
+                                borderRadius: '4px',
+                                fontSize: '0.64rem',
+                                fontWeight: 700,
+                                padding: '1px 5px',
+                                cursor: 'pointer'
+                              }}
+                              title={isEs ? `Restaurar lote oficial de base de datos (${realDbBatch})` : `Restore official database lot (${realDbBatch})`}
+                            >
+                              ↺ {isEs ? 'Real' : 'Real'}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newLot = generateAutoLot(currentItem.fileNumber || currentItem.rxCode || currentItem.code);
+                              handleFieldChange('batchCode', newLot);
+                            }}
+                            style={{
+                              border: '1px solid #a7f3d0',
+                              background: '#ecfdf5',
+                              color: '#047857',
+                              borderRadius: '4px',
+                              fontSize: '0.64rem',
+                              fontWeight: 750,
+                              padding: '1px 5px',
+                              cursor: 'pointer'
+                            }}
+                            title={isEs ? 'Generar código de lote estandarizado GMP con fecha de hoy' : 'Generate standardized GMP batch code with today date'}
+                          >
+                            ⚡ {isEs ? 'Lote Hoy' : 'Auto LOT'}
+                          </button>
+                        </div>
                       </label>
                       <input
                         type="text"
                         value={currentItem.batchCode || currentItem.lote || currentItem.fileNumber || ''}
                         onChange={(e) => handleFieldChange('batchCode', e.target.value)}
                         className="gcp-form-input"
+                        style={{
+                          borderColor: !isBatchFormatValid ? '#f87171' : isRealVerifiedBatch ? '#86efac' : '#dadce0',
+                          background: !isBatchFormatValid ? '#fff5f5' : '#ffffff'
+                        }}
                         placeholder="PHARM-2026-..."
                       />
+                      {!isBatchFormatValid && (
+                        <span style={{ fontSize: '0.65rem', color: '#dc2626', fontWeight: 600, marginTop: '2px', display: 'block' }}>
+                          ⚠️ {isEs ? 'El lote debe tener al menos 6 caracteres (GMP standard)' : 'Batch must have at least 6 chars (GMP standard)'}
+                        </span>
+                      )}
                     </div>
 
                     <div className="gcp-col-3 gcp-field-wrap">
@@ -3510,40 +3575,173 @@ export default function PharmacyLabelsModal({
               </button>
             )}
 
-            {/* Secondary Actions (Share & QR Link Grid) */}
-            <div className="gcp-footer-secondary-grid">
+            {/* Direct Zebra ZPL II Thermal Printer Export */}
+            <button
+              type="button"
+              className="gcp-btn-secondary"
+              onClick={handleDownloadZpl}
+              title={isEs ? 'Descargar código nativo Zebra ZPL II para impresoras térmicas' : 'Download native Zebra ZPL II code for thermal printers'}
+              style={{
+                color: '#1e293b',
+                background: '#ffffff',
+                borderColor: '#cbd5e1',
+                fontWeight: 600
+              }}
+            >
+              <Printer size={14} />
+              <span>ZPL (Zebra)</span>
+            </button>
+
+            {/* UNIFIED SINGLE SHARE ACTION (Golden Rule: Single Unified Share UI) */}
+            <div style={{ position: 'relative' }}>
               <button
                 type="button"
                 className="gcp-btn-secondary"
-                onClick={handleShareEditor}
+                onClick={() => setShowShareMenu(prev => !prev)}
                 style={{
-                  color: copiedShareLink ? '#137333' : '#3c4043',
-                  background: copiedShareLink ? '#e6f4ea' : '#ffffff',
-                  borderColor: copiedShareLink ? '#ceead6' : '#dadce0'
+                  color: (copiedShareLink || copiedLink || copiedZpl) ? '#137333' : '#3c4043',
+                  background: (copiedShareLink || copiedLink || copiedZpl) ? '#e6f4ea' : '#ffffff',
+                  borderColor: (copiedShareLink || copiedLink || copiedZpl) ? '#ceead6' : '#dadce0',
+                  fontWeight: 600
                 }}
-                title={isEs ? 'Copiar enlace directo del editor para compartir con un tercero' : 'Copy direct link to share editor with a third party'}
+                title={isEs ? 'Compartir editor, enlace QR del paciente o WhatsApp' : 'Share editor, patient QR link or WhatsApp'}
               >
-                {copiedShareLink ? <Check size={14} color="#137333" /> : <Share2 size={14} />}
-                <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
+                {(copiedShareLink || copiedLink || copiedZpl) ? <Check size={14} color="#137333" /> : <Share2 size={14} />}
+                <span>{(copiedShareLink || copiedLink || copiedZpl) ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
               </button>
 
-
-
-              {currentItem.targetRxUrl && (
-                <button
-                  type="button"
-                  className="gcp-btn-secondary gcp-btn-copy"
-                  onClick={handleCopyLink}
+              {showShareMenu && (
+                <div
                   style={{
-                    color: copiedLink ? '#137333' : '#3c4043',
-                    background: copiedLink ? '#e6f4ea' : '#ffffff',
-                    borderColor: copiedLink ? '#ceead6' : '#dadce0'
+                    position: 'absolute',
+                    bottom: 'calc(100% + 8px)',
+                    right: 0,
+                    background: '#ffffff',
+                    border: '1px solid #dadce0',
+                    borderRadius: '8px',
+                    boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
+                    minWidth: '240px',
+                    padding: '6px',
+                    zIndex: 1000,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px'
                   }}
-                  title={currentItem.targetRxUrl}
                 >
-                  {copiedLink ? <Check size={14} color="#137333" /> : <ExternalLink size={14} />}
-                  <span>{copiedLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar QR' : 'Copy QR Link')}</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleShareEditor();
+                      setShowShareMenu(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 10px',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      color: '#1a73e8',
+                      background: 'transparent',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      width: '100%'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <Share2 size={14} />
+                    <span>{isEs ? 'Copiar Enlace del Editor (Studio)' : 'Copy Studio Editor Link'}</span>
+                  </button>
+
+                  {currentItem.targetRxUrl && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleCopyLink();
+                        setShowShareMenu(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 10px',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        color: '#334155',
+                        background: 'transparent',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        width: '100%'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <ExternalLink size={14} />
+                      <span>{isEs ? 'Copiar Enlace QR del Paciente' : 'Copy Patient QR Link'}</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleShareWhatsApp();
+                      setShowShareMenu(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 10px',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      color: '#047857',
+                      background: 'transparent',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      width: '100%'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#ecfdf5'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <span style={{ fontSize: '14px' }}>💬</span>
+                    <span>{isEs ? 'Compartir por WhatsApp' : 'Share via WhatsApp'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleCopyZpl();
+                      setShowShareMenu(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 10px',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      color: '#334155',
+                      background: 'transparent',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      width: '100%'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <Printer size={14} />
+                    <span>{isEs ? 'Copiar Código Zebra (ZPL II)' : 'Copy Zebra ZPL II Code'}</span>
+                  </button>
+                </div>
               )}
             </div>
           </div>
