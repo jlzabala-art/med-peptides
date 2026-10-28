@@ -2471,7 +2471,12 @@ export default function BrandCollectionPage({
                         {/* UltraPerson / Ultraman 3-Tier Capsule Selector & Galenic Spec */}
                         {(brandSlug === 'ultraperson' || brandSlug === 'ultraman') && (() => {
                           const currentCaps = selectedCapsulesMap[product.id] || 60;
-                          const physicalCap = resolvePhysicalCapsuleSize(product.activeIngredients || product.ingredients || []);
+                          const activeIngredientsList = Array.isArray(product.activeIngredients)
+                            ? product.activeIngredients
+                            : Array.isArray(product.ingredients)
+                            ? product.ingredients
+                            : [];
+                          const physicalCap = resolvePhysicalCapsuleSize(activeIngredientsList);
 
                           return (
                             <div style={{ marginBottom: '0.65rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>

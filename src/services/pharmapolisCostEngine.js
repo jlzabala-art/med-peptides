@@ -48,19 +48,43 @@ export const CAPSULE_BOTTLE_SIZES = [
  * based on the cumulative active milligrams per single capsule.
  */
 export function resolvePhysicalCapsuleSize(activeIngredients = []) {
-  const totalDoseMg = (activeIngredients || []).reduce((acc, item) => {
-    let mg = Number(item.amount || item.doseMg || item.dose || 0);
-    if (!mg && typeof item.dose === 'string') {
-      const parsed = parseFloat(item.dose.replace(',', '.'));
-      if (!isNaN(parsed)) mg = parsed;
+  let totalDoseMg = 0;
+
+  if (typeof activeIngredients === 'number' && !isNaN(activeIngredients)) {
+    totalDoseMg = activeIngredients;
+  } else if (typeof activeIngredients === 'string') {
+    const parsed = parseFloat(activeIngredients.replace(',', '.'));
+    if (!isNaN(parsed)) totalDoseMg = parsed;
+  } else if (Array.isArray(activeIngredients)) {
+    totalDoseMg = activeIngredients.reduce((acc, item) => {
+      if (!item) return acc;
+      if (typeof item === 'number') return acc + (isNaN(item) ? 0 : item);
+      let mg = Number(item.amount || item.doseMg || item.dose || 0);
+      if (!mg && typeof item.dose === 'string') {
+        const parsed = parseFloat(item.dose.replace(',', '.'));
+        if (!isNaN(parsed)) mg = parsed;
+      }
+      // If given per daily dose (e.g. 2 capsules daily), divide by 2 if perCapsule is specified
+      if (item.perCapsule && typeof item.perCapsule === 'string') {
+        const parsedPerCap = parseFloat(item.perCapsule.replace(',', '.'));
+        if (!isNaN(parsedPerCap)) mg = parsedPerCap;
+      } else if (typeof item.perCapsule === 'number' && !isNaN(item.perCapsule)) {
+        mg = item.perCapsule;
+      }
+      return acc + (isNaN(mg) ? 0 : mg);
+    }, 0);
+  } else if (activeIngredients && typeof activeIngredients === 'object') {
+    if (Array.isArray(activeIngredients.activeIngredients)) {
+      return resolvePhysicalCapsuleSize(activeIngredients.activeIngredients);
     }
-    // If given per daily dose (e.g. 2 capsules daily), divide by 2 if perCapsule is specified
-    if (item.perCapsule && typeof item.perCapsule === 'string') {
-      const parsedPerCap = parseFloat(item.perCapsule.replace(',', '.'));
-      if (!isNaN(parsedPerCap)) mg = parsedPerCap;
+    if (Array.isArray(activeIngredients.ingredients)) {
+      return resolvePhysicalCapsuleSize(activeIngredients.ingredients);
     }
-    return acc + mg;
-  }, 0);
+    const singleMg = Number(activeIngredients.totalMg || activeIngredients.amount || activeIngredients.doseMg || activeIngredients.dose || 0);
+    if (!isNaN(singleMg)) {
+      totalDoseMg = singleMg;
+    }
+  }
 
   if (totalDoseMg <= 350) {
     return {
@@ -185,8 +209,23 @@ export function calculatePharmapolisCost({
   const margin = typeof grossMargin === 'number' ? grossMargin : COST_STANDARDS.DEFAULT_GROSS_MARGIN;
   const divisor = Math.max(0.1, 1 - margin); // e.g. 0.85 for 15% margin, 0.90 for 10%
 
+  const safeIngredients = Array.isArray(activeIngredients) ? activeIngredients : [];
+
   // ─── 1. RAW MATERIALS CALCULATION ──────────────────────────────────────────
-  const ingredientsBreakdown = activeIngredients.map((item, idx) => {
+  const ingredientsBreakdown = safeIngredients.map((item, idx) => {
+    if (!item || typeof item !== 'object') {
+      return {
+        name: `Ingredient #${idx + 1}`,
+        matchedApiId: null,
+        matchedApiName: '(Invalid item)',
+        spec: 'N/A',
+        doseMg: 0,
+        totalGramsNeeded: 0,
+        priceEurGram: 0,
+        rawCostEur: 0,
+        isEstimated: true
+      };
+    }
     const rawName = item.name || `Ingredient #${idx + 1}`;
     const matchedApi = resolvePharmapolisApi(item.apiId || rawName, apisCatalog);
 
@@ -232,7 +271,7 @@ export function calculatePharmapolisCost({
 
   // ─── 2. CAPSULE PREPARATION COST (CAT-CAP v1.1) ─────────────────────────────
   // Formula components count (APIs + 1 diluent like DiluCap)
-  const solidComponentsCount = Math.max(2, activeIngredients.length + 1);
+  const solidComponentsCount = Math.max(2, safeIngredients.length + 1);
   const extraComponents = Math.max(0, solidComponentsCount - 2);
 
   // Labour breakdown
