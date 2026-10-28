@@ -86,8 +86,14 @@ export async function GET(request) {
         pMatches.some(m => m.includes(qLower)) ||
         patMatches.some(m => m.includes(qLower));
 
-      if (isMatch && !seenCodes.has(normalizeCode(item.fileNumber))) {
-        seenCodes.add(normalizeCode(item.fileNumber));
+      const normFileNo = normalizeCode(item.fileNumber);
+      if (isMatch && !seenCodes.has(normFileNo)) {
+        // Register primary code and all associated aliases so secondary matches don't produce duplicate rows
+        seenCodes.add(normFileNo);
+        (item.prescriptionMatches || []).forEach(m => {
+          seenCodes.add(normalizeCode(m));
+        });
+
         results.push({
           id: item.fileNumber || item.id,
           code: item.fileNumber,

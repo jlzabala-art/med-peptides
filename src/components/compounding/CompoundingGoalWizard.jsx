@@ -160,33 +160,35 @@ export default function CompoundingGoalWizard({
       };
     };
 
-    const calculateProposalGalenics = (totalMg) => {
+    const calculateProposalGalenics = (totalMg, defaultBottleSize = 60) => {
       const capsPerDay = Math.max(1, Math.ceil(totalMg / 750));
       const mgPerCap = totalMg / capsPerDay;
       const sizeObj = resolvePhysicalCapsuleSize([{ amount: mgPerCap }]);
+      const supplyDays = Math.floor(defaultBottleSize / capsPerDay);
       return {
         size: sizeObj,
         capsPerDay,
-        mgPerCap: Math.round(mgPerCap)
+        mgPerCap: Math.round(mgPerCap),
+        supplyDays
       };
     };
 
     // 1. Proposal A: Essential Core (1-2 caps max, targeted top 2-3 actives)
     const coreActives = pool.slice(0, routineVolume === 'minimalist' ? 2 : 3).map(resolveItem);
     const coreLoad = coreActives.reduce((sum, i) => sum + i.doseMg, 0);
-    const coreGalenics = calculateProposalGalenics(coreLoad);
+    const coreGalenics = calculateProposalGalenics(coreLoad, 60);
 
     // 2. Proposal B: Clinical Synergy Stack (3-4 caps, 4-5 actives with enhancers like Piperine or cofactors)
     const synergyActives = pool.slice(0, 5).map(resolveItem);
     const synergyLoad = synergyActives.reduce((sum, i) => sum + i.doseMg, 0);
-    const synergyGalenics = calculateProposalGalenics(synergyLoad);
+    const synergyGalenics = calculateProposalGalenics(synergyLoad, 90);
 
     // 3. Proposal C: Day/Night Chronobiology Protocol (Biphasic activation and repair)
     const dayPool = pool.filter(a => !['Melatonin', 'Valerian Root Extract', 'Ashwagandha Extract'].includes(a.name));
     const nightPool = pool.filter(a => ['Magnesium (Glycinate)', 'Valerian Root Extract', 'Melatonin', 'L-Theanine'].includes(a.name));
     const biphasicActives = (dayPool.slice(0, 3).concat(nightPool.length ? nightPool : pool.slice(3, 5))).map(resolveItem);
     const biphasicLoad = biphasicActives.reduce((sum, i) => sum + i.doseMg, 0);
-    const biphasicGalenics = calculateProposalGalenics(biphasicLoad);
+    const biphasicGalenics = calculateProposalGalenics(biphasicLoad, 120);
 
     return [
       {
@@ -443,6 +445,7 @@ export default function CompoundingGoalWizard({
                       <div className="cmp-wizard-prop-meta">
                         <span>{isEs ? 'Cápsula' : 'Capsule'}: <strong>{prop.galenics?.size?.size || prop.galenics?.size || 'Size 0'} HPMC</strong></span>
                         <span>{isEs ? 'Toma' : 'Intake'}: <strong>{prop.galenics?.capsPerDay || 1} {isEs ? 'caps/día' : 'caps/day'}</strong></span>
+                        <span>{isEs ? 'Duración' : 'Supply'}: <strong>{prop.galenics?.supplyDays ? `${prop.galenics.supplyDays} ${isEs ? 'días' : 'days'}` : '30 days'}</strong> ({prop.capsPerBottle} caps)</span>
                         <span>{isEs ? 'Carga' : 'Load'}: <strong>{prop.totalLoad} mg/día</strong></span>
                       </div>
                       <button

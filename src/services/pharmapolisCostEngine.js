@@ -206,8 +206,10 @@ export function calculatePharmapolisCost({
   options = {}
 }) {
   const caps = Math.max(1, Number(capsPerBottle) || 60);
-  const margin = typeof grossMargin === 'number' ? grossMargin : COST_STANDARDS.DEFAULT_GROSS_MARGIN;
-  const divisor = Math.max(0.1, 1 - margin); // e.g. 0.85 for 15% margin, 0.90 for 10%
+  const rawMargin = typeof grossMargin === 'number' && !isNaN(grossMargin) ? grossMargin : COST_STANDARDS.DEFAULT_GROSS_MARGIN;
+  // Normalize percentage margins passed as whole numbers (e.g. 15 instead of 0.15)
+  const normalizedMargin = rawMargin > 1 ? rawMargin / 100 : Math.max(0, Math.min(0.9, rawMargin));
+  const divisor = Math.max(0.1, 1 - normalizedMargin); // e.g. 0.85 for 15% margin, 0.90 for 10%
 
   const safeIngredients = Array.isArray(activeIngredients) ? activeIngredients : [];
 
@@ -336,7 +338,7 @@ export function calculatePharmapolisCost({
     },
     totalProductionCostEur: Number(totalProductionCostEur.toFixed(2)),
     margin: {
-      percentage: Number((margin * 100).toFixed(1)),
+      percentage: Number((normalizedMargin * 100).toFixed(1)),
       divisor: Number(divisor.toFixed(2)),
       pharmapolisProfitEur: Number((manufacturingSellingPriceNetEur - totalProductionCostEur).toFixed(2))
     },
