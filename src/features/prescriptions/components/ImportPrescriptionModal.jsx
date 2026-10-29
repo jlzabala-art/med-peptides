@@ -200,8 +200,8 @@ export default function ImportPrescriptionModal({
 
       toast.success(
         isLab
-          ? '¡Analítica de laboratorio detectada! Revisa los valores.'
-          : 'Extracción completada. Revisa los datos y previsualiza las etiquetas.',
+          ? 'Lab diagnostic detected! Please review the biomarker values.'
+          : 'Extraction completed. Review data and preview labels before confirming.',
         { id: 'upload-toast' }
       );
     } catch (error) {
@@ -357,7 +357,7 @@ export default function ImportPrescriptionModal({
 
         await setDoc(docRef, payload, { merge: true });
 
-        toast.success(`¡Informe de laboratorio #${cleanCode} (${reviewData.labValue} ${reviewData.labUnit}) importado con éxito!`, { id: 'save-toast' });
+        toast.success(`Lab report #${cleanCode} (${reviewData.labValue} ${reviewData.labUnit}) successfully imported!`, { id: 'save-toast' });
         if (onImported) {
           onImported([{ id: docId, code: cleanCode, patientName: reviewData.patientName, isLabResult: true }]);
         }
@@ -540,13 +540,13 @@ export default function ImportPrescriptionModal({
       }
 
       const baseMsg = effectiveBlocks.length > 1
-        ? `${effectiveBlocks.length} formulaciones importadas (${effectiveBlocks.map(b => b.treatmentType).join(', ')})`
-        : 'Prescripción importada con éxito';
+        ? `${effectiveBlocks.length} formulations successfully imported (${effectiveBlocks.map(b => b.treatmentType).join(', ')})`
+        : 'Prescription successfully imported';
       const matchMsg = totalMatchedCatalog > 0
-        ? ` · ${totalMatchedCatalog} API${totalMatchedCatalog > 1 ? 's' : ''} en catálogo`
+        ? ` · ${totalMatchedCatalog} catalog API${totalMatchedCatalog > 1 ? 's' : ''}`
         : '';
       const placeholderMsg = totalNewPlaceholders > 0
-        ? ` · ${totalNewPlaceholders} personalizado${totalNewPlaceholders > 1 ? 's' : ''}`
+        ? ` · ${totalNewPlaceholders} custom item${totalNewPlaceholders > 1 ? 's' : ''}`
         : '';
 
       toast.success(`${baseMsg}${matchMsg}${placeholderMsg}`, { id: 'save-toast' });
@@ -554,7 +554,7 @@ export default function ImportPrescriptionModal({
       handleClose();
     } catch (error) {
       console.error("Save error:", error);
-      toast.error(error.message || 'Error al guardar prescripción', { id: 'save-toast' });
+      toast.error(error.message || 'Error saving prescription', { id: 'save-toast' });
     } finally {
       setIsSaving(false);
     }
@@ -614,17 +614,17 @@ export default function ImportPrescriptionModal({
           gap: '1rem'
         }}>
           <AIContextBadge
-            title={reviewData ? (reviewData.isLabResult ? 'Review & Confirm Lab Result' : 'Review, Edit & Previsualize Prescription') : title}
+            title={reviewData ? (reviewData.isLabResult ? 'Review & Confirm Lab Result' : 'Review, Edit & Preview Prescription') : title}
             subtitle={reviewData 
               ? (reviewData.isLabResult
-                  ? 'Verifica los biomarcadores, paciente y médico antes de archivar en la sección de analíticas.'
-                  : 'Revisa y edita los principios activos vinculados a Algolia, y previsualiza las etiquetas antes de importar.')
-              : 'Multimodal AI parses clinical scripts, lab reports, and doctor signatures into official records'}
+                  ? 'Verify biomarkers, patient, and prescribing physician before filing into laboratory records.'
+                  : 'Review and verify active ingredients matched with the catalog, and inspect regulatory vial labels before import.')
+              : 'Clinical AI parses prescriptions, genetic reports, and provider signatures into official records'}
             contextPill={reviewData?.isLabResult 
               ? `Biomarker: ${reviewData.labBiomarker || 'NAD+'} · #${reviewData.protocolNumber || 'Lab'}` 
               : (reviewData?.testName ? `${reviewData.testName}${reviewData.boxId ? ` · #${reviewData.boxId}` : ''}` : (context?.patientName ? `Patient: ${context.patientName}` : "Target: Official Rx Engine"))}
             accentColor={reviewData?.isLabResult ? "#2563eb" : "#0d9488"}
-            model="Gemini 2.5 Flash • Resilient Router"
+            model="Active Intelligence"
           />
           <button 
             onClick={handleClose}
@@ -674,7 +674,7 @@ export default function ImportPrescriptionModal({
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#1e40af', letterSpacing: '0.04em' }}>
-                          Analítica de Laboratorio DBS
+                          DBS Laboratory Analytics
                         </span>
                         <span style={{ fontSize: '0.68rem', background: '#dbeafe', color: '#1d4ed8', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
                           Protocol #{reviewData.protocolNumber || 'N/A'}
@@ -732,7 +732,7 @@ export default function ImportPrescriptionModal({
                       }}
                     >
                       <Edit3 size={14} />
-                      <span>1. Datos Clínicos &amp; Fórmulas</span>
+                      <span>1. Clinical Data &amp; Formulas</span>
                     </button>
 
                     <button
@@ -754,7 +754,7 @@ export default function ImportPrescriptionModal({
                       }}
                     >
                       <Eye size={14} />
-                      <span>2. Previsualizar Etiquetas</span>
+                      <span>2. Preview Labels</span>
                       <span style={{
                         fontSize: '0.68rem',
                         background: activeTab === 'preview' ? '#0284c7' : '#94a3b8',
@@ -781,7 +781,7 @@ export default function ImportPrescriptionModal({
                       gap: '4px'
                     }}>
                       <CheckCircle2 size={12} />
-                      {reviewData.extractedData.confidenceScore}% Precisión OCR
+                      {reviewData.extractedData.confidenceScore}% OCR Accuracy
                     </span>
                   )}
                 </div>
@@ -802,7 +802,7 @@ export default function ImportPrescriptionModal({
                     gap: '12px'
                   }}>
                     <div style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', color: '#475569', letterSpacing: '0.04em' }}>
-                      Identificación Clínica del Paciente y Médico
+                      Patient &amp; Prescribing Provider Identification
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
@@ -810,7 +810,7 @@ export default function ImportPrescriptionModal({
                       <div>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
                           <User size={13} color="#64748b" />
-                          <span>Nombre del Paciente / Patient Name</span>
+                          <span>Patient Name</span>
                           <span style={{ color: '#dc2626' }}>*</span>
                         </label>
                         <input
@@ -822,7 +822,7 @@ export default function ImportPrescriptionModal({
                             border: '1px solid #cbd5e1', padding: '0 12px',
                             fontSize: '0.88rem', color: '#0f172a', boxSizing: 'border-box'
                           }}
-                          placeholder="Nombre y Apellidos del Paciente"
+                          placeholder="Full Patient Legal Name"
                         />
                       </div>
 
@@ -830,7 +830,7 @@ export default function ImportPrescriptionModal({
                       <div>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
                           <FileText size={13} color="#64748b" />
-                          <span>Nº Historia / Protocolo / Rx #</span>
+                          <span>Medical File / Protocol / Rx #</span>
                         </label>
                         <input
                           type="text"
@@ -841,7 +841,7 @@ export default function ImportPrescriptionModal({
                             border: '1px solid #cbd5e1', padding: '0 12px',
                             fontSize: '0.88rem', color: '#0f172a', boxSizing: 'border-box'
                           }}
-                          placeholder="ej. 51861 o BOX01399AATRI"
+                          placeholder="e.g. 51861 or BOX03509AATRI"
                         />
                       </div>
                     </div>
@@ -852,13 +852,13 @@ export default function ImportPrescriptionModal({
                       <div>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
                           <Building2 size={13} color="#64748b" />
-                          <span>Clínica / Centro Médico</span>
+                          <span>Clinic / Medical Facility</span>
                         </label>
                         <ClinicPicker
                           value={reviewData.clinicId || ''}
                           clinicName={reviewData.clinicName || ''}
                           allowCustom={true}
-                          placeholder="Seleccionar o buscar clínica en Atlas..."
+                          placeholder="Select or search clinic in Atlas..."
                           onChange={({ clinicId, clinicName }) => {
                             setReviewData(prev => ({
                               ...prev,
@@ -873,7 +873,7 @@ export default function ImportPrescriptionModal({
                       <div>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
                           <Stethoscope size={13} color="#64748b" />
-                          <span>Médico Prescriptor</span>
+                          <span>Prescribing Physician</span>
                           <span style={{ color: '#dc2626' }}>*</span>
                         </label>
                         <PhysicianPicker
@@ -883,7 +883,7 @@ export default function ImportPrescriptionModal({
                           clinicName={reviewData.clinicName || ''}
                           strictClinic={Boolean(reviewData.clinicId || reviewData.clinicName)}
                           allowCustom={true}
-                          placeholder="Elegir doctor de la clínica o escribir..."
+                          placeholder="Select clinic physician or enter custom name..."
                           onChange={({ doctorId, doctorName, license }) => {
                             setReviewData(prev => ({
                               ...prev,
@@ -901,11 +901,11 @@ export default function ImportPrescriptionModal({
                       <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <Calendar size={13} color="#64748b" />
-                          <span>Fecha de Fabricación / Informe Genético</span>
+                          <span>Manufacturing / Genetic Report Date</span>
                           <span style={{ color: '#dc2626' }}>*</span>
                         </div>
                         <span style={{ fontSize: '0.66rem', color: '#059669', fontWeight: 600 }}>
-                          Tomada del informe o firma médica (no fecha de subida)
+                          Sourced from document or clinical signature (not upload date)
                         </span>
                       </label>
                       <input
@@ -917,7 +917,7 @@ export default function ImportPrescriptionModal({
                           border: '1px solid #cbd5e1', padding: '0 12px',
                           fontSize: '0.88rem', color: '#0f172a', boxSizing: 'border-box'
                         }}
-                        placeholder="YYYY-MM-DD (ej. 2025-12-15)"
+                        placeholder="YYYY-MM-DD (e.g. 2026-10-29)"
                       />
                     </div>
                   </div>
@@ -929,11 +929,11 @@ export default function ImportPrescriptionModal({
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <Pill size={16} color="#0d9488" />
                           <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
-                            Formulaciones y Principios Activos ({reviewData.blocks.length})
+                            Formulations &amp; Active Ingredients ({reviewData.blocks.length})
                           </span>
                         </div>
                         <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                          Busca cada principio activo en Algolia para vincularlo al catálogo oficial.
+                          Search each API to match with the official compounding catalog.
                         </span>
                       </div>
 
@@ -973,10 +973,10 @@ export default function ImportPrescriptionModal({
                                   padding: '2px 8px',
                                   borderRadius: '4px'
                                 }}>
-                                  FÓRMULA {bIdx + 1}
+                                  FORMULA {bIdx + 1}
                                 </span>
                                 <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
-                                  {block.treatmentType || `Formulación ${bIdx + 1}`}
+                                  {block.treatmentType || `Formula ${bIdx + 1}`}
                                 </span>
                                 {block.volume && (
                                   <span style={{ fontSize: '0.72rem', color: '#64748b', background: '#e2e8f0', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
@@ -987,7 +987,7 @@ export default function ImportPrescriptionModal({
 
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600 }}>
-                                  {(block.items || []).length} activo{(block.items || []).length === 1 ? '' : 's'}
+                                  {(block.items || []).length} active{(block.items || []).length === 1 ? '' : 's'}
                                 </span>
                                 {isExpanded ? <ChevronUp size={16} color="#64748b" /> : <ChevronDown size={16} color="#64748b" />}
                               </div>
@@ -1000,40 +1000,40 @@ export default function ImportPrescriptionModal({
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
                                   <div>
                                     <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#475569', marginBottom: '3px', textTransform: 'uppercase' }}>
-                                      Nombre de la Fórmula
+                                      Formula Name
                                     </label>
                                     <input
                                       type="text"
                                       value={block.treatmentType}
                                       onChange={(e) => handleUpdateBlockField(bIdx, 'treatmentType', e.target.value)}
                                       style={{ width: '100%', height: '34px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 8px', fontSize: '0.82rem', boxSizing: 'border-box' }}
-                                      placeholder="ej. TrichoSol Solución Tópica"
+                                      placeholder="e.g. TrichoSol Topical Solution"
                                     />
                                   </div>
 
                                   <div>
                                     <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#475569', marginBottom: '3px', textTransform: 'uppercase' }}>
-                                      Forma Galénica
+                                      Galenic Dosage Form
                                     </label>
                                     <input
                                       type="text"
                                       value={block.dispensingForm}
                                       onChange={(e) => handleUpdateBlockField(bIdx, 'dispensingForm', e.target.value)}
                                       style={{ width: '100%', height: '34px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 8px', fontSize: '0.82rem', boxSizing: 'border-box' }}
-                                      placeholder="ej. Solución Tópica, Cápsulas"
+                                      placeholder="e.g. Topical Solution, Oral Capsules"
                                     />
                                   </div>
 
                                   <div>
                                     <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#475569', marginBottom: '3px', textTransform: 'uppercase' }}>
-                                      Volumen / Envase
+                                      Volume / Packaging
                                     </label>
                                     <input
                                       type="text"
                                       value={block.volume}
                                       onChange={(e) => handleUpdateBlockField(bIdx, 'volume', e.target.value)}
                                       style={{ width: '100%', height: '34px', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '0 8px', fontSize: '0.82rem', boxSizing: 'border-box' }}
-                                      placeholder="ej. 100 mL o 60 Cápsulas"
+                                      placeholder="e.g. 100 mL or 60 Capsules"
                                     />
                                   </div>
                                 </div>
@@ -1041,14 +1041,14 @@ export default function ImportPrescriptionModal({
                                 {/* Posology Instructions */}
                                 <div>
                                   <label style={{ display: 'block', fontSize: '0.70rem', fontWeight: 700, color: '#475569', marginBottom: '3px', textTransform: 'uppercase' }}>
-                                    Posología e Instrucciones de Uso
+                                    Posology &amp; Directions for Use
                                   </label>
                                   <textarea
                                     rows={2}
                                     value={block.posology}
                                     onChange={(e) => handleUpdateBlockField(bIdx, 'posology', e.target.value)}
                                     style={{ width: '100%', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '6px 10px', fontSize: '0.80rem', resize: 'vertical', boxSizing: 'border-box' }}
-                                    placeholder="ej. Aplicar 1 mL cada 24 horas sobre el cuero cabelludo seco..."
+                                    placeholder="e.g. Apply 1 mL every 24 hours on dry scalp..."
                                   />
                                 </div>
 
@@ -1056,7 +1056,7 @@ export default function ImportPrescriptionModal({
                                 <div>
                                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                                     <label style={{ fontSize: '0.70rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                                      Principios Activos (Búsqueda Algolia / Catálogo)
+                                      Active Pharmaceutical Ingredients (Catalog Match)
                                     </label>
                                     <button
                                       type="button"
@@ -1076,7 +1076,7 @@ export default function ImportPrescriptionModal({
                                       }}
                                     >
                                       <Plus size={12} />
-                                      <span>Añadir Principio Activo</span>
+                                      <span>Add Ingredient</span>
                                     </button>
                                   </div>
 
@@ -1192,7 +1192,7 @@ export default function ImportPrescriptionModal({
                             whiteSpace: 'nowrap'
                           }}
                         >
-                          Fase {idx + 1}: {b.treatmentType || `Fórmula ${idx + 1}`}
+                          Phase {idx + 1}: {b.treatmentType || `Formula ${idx + 1}`}
                         </button>
                       ))}
                     </div>
@@ -1224,7 +1224,7 @@ export default function ImportPrescriptionModal({
                           code: reviewData.protocolNumber || 'RX-PENDING',
                           productName: currentPreviewBlock.treatmentType || 'Compounded Pharmaceutical Formula',
                           ingredients: currentPreviewIngredients,
-                          directions: currentPreviewBlock.posology || 'Aplicar según prescripción médica.',
+                          directions: currentPreviewBlock.posology || 'Use as clinically directed by prescribing physician.',
                           prescriberName: reviewData.doctorName || 'Prescribing Physician',
                           date: reviewData.mfgDate || new Date().toISOString().split('T')[0],
                           volume: currentPreviewBlock.volume || '100 mL'
@@ -1236,7 +1236,7 @@ export default function ImportPrescriptionModal({
                     </div>
 
                     <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'center', maxWidth: '420px', lineHeight: 1.4 }}>
-                      Previsualización en tiempo real de la etiqueta reglamentaria (75 mm × 45 mm) con principios activos, posología, lote, código QR y datos del médico.
+                      Real-time regulatory label preview (75 mm × 45 mm) with active ingredients, posology, lot, 2D DataMatrix code, and prescriber credentials.
                     </div>
                   </div>
                 </div>
@@ -1321,12 +1321,12 @@ export default function ImportPrescriptionModal({
                     {isSaving ? (
                       <>
                         <Activity size={14} className="spin" />
-                        <span>Guardando en Atlas...</span>
+                        <span>Saving to Records...</span>
                       </>
                     ) : (
                       <>
                         <Check size={16} />
-                        <span>{reviewData.isLabResult ? 'Confirmar e Importar Analítica' : 'Confirmar e Importar Prescripción'}</span>
+                        <span>{reviewData.isLabResult ? 'Confirm & Import Lab Result' : 'Confirm & Import Prescription'}</span>
                       </>
                     )}
                   </button>
@@ -1358,7 +1358,7 @@ export default function ImportPrescriptionModal({
                     <Activity size={48} color="#0ea5e9" style={{ marginBottom: '16px', animation: 'pulse 2s infinite' }} />
                     <h3 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1rem' }}>Processing Document...</h3>
                     <p style={{ margin: 0, color: '#64748b', textAlign: 'center', fontSize: '0.85rem' }}>
-                      Please wait while Atlas Multimodal AI extracts clinical formulas and attributions.
+                      Please wait while Clinical AI extracts formulations and patient records.
                     </p>
                   </>
                 ) : (
@@ -1382,7 +1382,7 @@ export default function ImportPrescriptionModal({
                         alignItems: 'center',
                         gap: '5px'
                       }}>
-                        <Pill size={13} /> Prescripciones (TrichoTest, BHRT)
+                        <Pill size={13} /> Prescriptions (TrichoTest, BHRT)
                       </div>
                       <div style={{
                         background: '#eff6ff',
@@ -1396,7 +1396,7 @@ export default function ImportPrescriptionModal({
                         alignItems: 'center',
                         gap: '5px'
                       }}>
-                        <FlaskConical size={13} /> Analíticas Lab (Bloodo NAD+, DBS)
+                        <FlaskConical size={13} /> Lab Diagnostics (Bloodo NAD+, DBS)
                       </div>
                     </div>
 
@@ -1429,7 +1429,7 @@ export default function ImportPrescriptionModal({
               }}>
                 <AlertCircle size={18} color="#64748b" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: '1.5' }}>
-                  <strong>Acceso Clínico:</strong> {note || 'Módulo exclusivo para médicos colegiados y administradores de Atlas. Los archivos se procesan mediante IA multimodal para permitir la revisión y edición de fórmulas antes de generar registros oficiales.'}
+                  <strong>Clinical Access:</strong> {note || 'Restricted to licensed physicians and administrators. Files are parsed via clinical intelligence to enable formulation verification before official records are committed.'}
                 </div>
               </div>
             </>
