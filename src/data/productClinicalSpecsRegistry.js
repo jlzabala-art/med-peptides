@@ -184,6 +184,160 @@ const ULTRAPERSON_ACTIVES_DB = {
     capsuleSpecs: 'Delayed-Release Acid-Resistant Vegan HPMC · Protects Polyamines',
     purity: 'Medical-Grade Purity · Heavy Metal Screened (< 0.005 ppm Pb/Cd/Hg/As)',
     synergy: 'Engineered for synergy with Epithalon, GHK-Cu, and FoxO4-DRI protocols'
+  },
+
+  // ── 9 Official UltraMan Chronotherapeutic AM/PM Formulations ──
+  'ultraperson-am-pm-vitality-sleep': {
+    title: 'UltraMan™ Circadian Vitality & Neuro-Restorative Sleep Duo',
+    actives: [
+      { name: '[AM] Vitamin D3 (Cholecalciferol)', amount: '2,000 IU', role: 'Immune modulation and circadian diurnal gene expression' },
+      { name: '[AM] Vitamin C (Ascorbic Acid)', amount: '200 mg', role: 'Adrenal antioxidant support and catecholamine synthesis' },
+      { name: '[AM] Zinc Gluconate', amount: '15 mg', role: 'DNA polymerase cofactor and metabolic enzyme activation' },
+      { name: '[AM] Niacin (Nicotinic Acid)', amount: '50 mg', role: 'NAD+/NADH ratio precursor and microvascular perfusion' },
+      { name: '[AM] Vitamin B6 (P-5-P)', amount: '25 mg', role: 'Active coenzyme for dopamine and serotonin biosynthesis' },
+      { name: '[PM] N-Acetylcysteine (NAC)', amount: '250 mg', role: 'Intracellular glutathione substrate and nocturnal lung/hepatic detox' },
+      { name: '[PM] Valerian Root Extract', amount: '300 mg', role: 'Allosteric GABA-A receptor agonist and slow-wave sleep facilitator' },
+      { name: '[PM] Vitamin B12 (Methylcobalamin)', amount: '500 mcg', role: 'Nocturnal methylation and myelin sheath metabolic maintenance' },
+      { name: '[PM] Vitamin E (Mixed Tocopherols)', amount: '100 IU (67 mg)', role: 'Lipophilic membrane antioxidant preventing nocturnal lipid peroxidation' },
+      { name: '[PM] Manganese', amount: '2 mg', role: 'Mitochondrial superoxide dismutase (MnSOD) essential trace mineral' }
+    ],
+    capsuleSpecs: 'AM: Size 1 Vegan HPMC · PM: Size 00 Delayed-Release Acid-Resistant HPMC',
+    purity: 'Pharmaceutical-Grade USP/EP · Non-GMO · Zero Titanium Dioxide · Heavy Metals < 0.01 ppm',
+    synergy: 'Calibrated for co-administration with DSIP, Epithalon, and CJC-1295 protocols'
+  },
+  'ultraperson-am-pm-detox-cardio': {
+    title: 'UltraMan™ Hepato-Cellular Detox & Cardiovascular Shield Duo',
+    actives: [
+      { name: '[AM] Vitamin D3 (Cholecalciferol)', amount: '2,000 IU', role: 'Vascular endothelial VDR receptor signaling' },
+      { name: '[AM] Vitamin C (Ascorbic Acid)', amount: '200 mg', role: 'Protects tetrahydrobiopterin (BH4) to sustain eNOS uncoupling' },
+      { name: '[AM] Zinc Gluconate', amount: '15 mg', role: 'Metallothionein synthesis and antioxidant enzyme stabilization' },
+      { name: '[AM] Vitamin B9 (Methylfolate)', amount: '400 mcg', role: 'Lowers plasma homocysteine to protect coronary microvasculature' },
+      { name: '[AM] Algal Omega-3 (EPA/DHA)', amount: '300 mg', role: 'Bioactive plant-derived polyunsaturated fatty acids for cell membrane fluidity' },
+      { name: '[PM] N-Acetylcysteine (NAC)', amount: '250 mg', role: 'Rate-limiting precursor for nocturnal glutathione replenishment' },
+      { name: '[PM] Taurine', amount: '250 mg', role: 'Bile acid conjugation, myocardial calcium handling, and osmoprotection' },
+      { name: '[PM] Trans-Resveratrol', amount: '150 mg', role: 'SIRT-1 activator and vascular anti-inflammatory polyphenol' },
+      { name: '[PM] Silibin (Milk Thistle)', amount: '140 mg', role: 'Inhibits lipid peroxidation and stabilizes hepatocyte cell membranes' },
+      { name: '[PM] Vitamin E (Mixed Tocopherols)', amount: '100 IU (67 mg)', role: 'Synergistic lipophilic antioxidant network' }
+    ],
+    capsuleSpecs: 'AM: Size 0 Vegan HPMC · PM: Size 00 Delayed-Release Acid-Resistant HPMC',
+    purity: 'Pharmaceutical-Grade USP/EP · Non-GMO · Allergen-Free · Heavy Metals < 0.01 ppm',
+    synergy: 'Pairs synergistically with BPC-157 and GHK-Cu cardiovascular protocols'
+  },
+  'ultraperson-am-pm-mitoshield-antiox': {
+    title: 'UltraMan™ Mitochondrial Shield & Master Glutathione Booster Duo',
+    actives: [
+      { name: '[AM] Coenzyme Q10 (Ubiquinol)', amount: '100 mg', role: 'Reduced active electron carrier for mitochondrial respiratory chain' },
+      { name: '[AM] Vitamin K2 (MK-7)', amount: '100 mcg', role: 'Activates osteocalcin and matrix Gla-protein (MGP) preventing arterial calcification' },
+      { name: '[AM] Algal Omega-3 (EPA/DHA)', amount: '300 mg', role: 'Mitochondrial cristae cardiolipin phospholipid support' },
+      { name: '[AM] Astaxanthin', amount: '8 mg', role: 'Super-antioxidant spanning the entire lipid bilayer membrane' },
+      { name: '[AM] Vitamin B9 (Methylfolate)', amount: '400 mcg', role: 'Direct donor for mitochondrial one-carbon folate cycle' },
+      { name: '[PM] Curcumin (Cureit)', amount: '250 mg', role: '100% natural turmeric matrix with 10x bioavailability; downregulates NF-kB' },
+      { name: '[PM] N-Acetylcysteine (NAC)', amount: '250 mg', role: 'Sustains de novo cysteine supply for glutathione synthesis' },
+      { name: '[PM] Reduced Glutathione', amount: '250 mg', role: 'Master intracellular antioxidant neutralizer of reactive oxygen species (ROS)' },
+      { name: '[PM] Taurine', amount: '250 mg', role: 'Mitochondrial tRNA hypoxanthine taurinomethylation cofactor' },
+      { name: '[PM] Zinc Gluconate', amount: '15 mg', role: 'Superoxide dismutase (Cu/Zn SOD) prosthetic co-factor' }
+    ],
+    capsuleSpecs: 'AM: Size 0 Vegan HPMC · PM: Size 00 Delayed-Release Acid-Resistant HPMC',
+    purity: 'Phytosome Standardized · 100% Vegan · Gluten-Free · Heavy Metals < 0.005 ppm',
+    synergy: 'Engineered for direct synergy with MOTS-c, SS-31, and NAD+ bioregulators'
+  },
+  'ultraperson-am-pm-longevity-sirtuin': {
+    title: 'UltraMan™ Advanced Longevity Sirtuin & Telomere Defense Duo',
+    actives: [
+      { name: '[AM] Coenzyme Q10 (Ubiquinol)', amount: '100 mg', role: 'Mitochondrial electron transport and anti-aging energy donor' },
+      { name: '[AM] Mitocondrin', amount: '250 mg', role: 'Specialized mitochondrial protective complex stimulating biogenesis' },
+      { name: '[AM] CitrusiM', amount: '250 mg', role: 'Red orange anthocyanin and flavanone complex for metabolic AMPK stimulation' },
+      { name: '[AM] Brocophanus', amount: '250 mg', role: 'Glucoraphanin & myrosinase sulforaphane generator; master Nrf2 activator' },
+      { name: '[AM] Astaxanthin', amount: '8 mg', role: 'Protects nuclear and mitochondrial DNA from oxidative double-strand breaks' },
+      { name: '[PM] Curcumin (Cureit)', amount: '250 mg', role: 'Epigenetic histone deacetylase (HDAC) and NF-kB inhibitor' },
+      { name: '[PM] Trans-Resveratrol', amount: '150 mg', role: 'Direct allosteric activator of SIRT1 longevity gene' },
+      { name: '[PM] Reduced Glutathione', amount: '250 mg', role: 'Nocturnal cellular nucleophilic scavenger of reactive electrophiles' },
+      { name: '[PM] Miodesin', amount: '250 mg', role: 'Potent botanical anti-inflammatory matrix targeting somatic cellular aging' },
+      { name: '[PM] SiliciuMax', amount: '10 mg', role: 'Monomeric bioavailable orthosilicic acid for extracellular matrix crosslinking' }
+    ],
+    capsuleSpecs: 'AM: Size 00 Delayed-Release Vegan HPMC · PM: Size 00 Delayed-Release HPMC',
+    purity: 'Patented Botanical Extracts · Non-GMO · Titanium Dioxide Free · ISO 22000',
+    synergy: 'Synergistic with Epithalon, FoxO4-DRI, and GHK-Cu cellular reprogramming'
+  },
+  'ultraperson-am-pm-dermal-matrix': {
+    title: 'UltraMan™ Dermal Matrix & Hair Follicle Regeneration Duo',
+    actives: [
+      { name: '[AM] Biotin', amount: '5,000 mcg', role: 'Essential carboxylase cofactor for keratin matrix structural protein synthesis' },
+      { name: '[AM] SiliciuMax', amount: '10 mg', role: 'Orthosilicic acid activates prolyl hydroxylase for collagen fibril crosslinking' },
+      { name: '[AM] Horsetail Extract', amount: '300 mg', role: 'High organic silica plant extract strengthening hair shaft tensile durability' },
+      { name: '[AM] Zinc Gluconate', amount: '30 mg', role: 'Inhibits 5-alpha reductase and accelerates follicle matrix cell division' },
+      { name: '[AM] Vitamin D3 (Cholecalciferol)', amount: '4,000 IU', role: 'Stimulates hair follicle cycling and activates dormant stem cell niches' },
+      { name: '[PM] Algal Omega-3 (EPA/DHA)', amount: '300 mg', role: 'Normalizes scalp sebum fatty acid profiles and dampens perifollicular erythema' },
+      { name: '[PM] N-Acetylcysteine (NAC)', amount: '250 mg', role: 'Supplies cysteine for disulfide bond formation in hard hair keratin' },
+      { name: '[PM] Vitamin C (Ascorbic Acid)', amount: '200 mg', role: 'Rate-limiting cofactor for lysine and proline collagen hydroxylation' },
+      { name: '[PM] Silibin (Milk Thistle)', amount: '140 mg', role: 'Protects microvascular capillaries from oxidative lipid breakdown' },
+      { name: '[PM] Panax Ginseng Extract', amount: '200 mg', role: 'Ginsenoside Rg3/Rb1 promotes dermal papilla cell proliferation and VEGF expression' }
+    ],
+    capsuleSpecs: 'AM: Size 1 Vegan HPMC · PM: Size 00 Delayed-Release Acid-Resistant HPMC',
+    purity: 'Trichology-Grade Pure Actives · Zero Synthetic Excipients · Heavy Metals < 0.01 ppm',
+    synergy: 'Formulated for clinical co-administration with GHK-Cu and Colway Atelocollagen regimens'
+  },
+  'ultraperson-am-pm-hepato-neuro': {
+    title: 'UltraMan™ Hepato-Biliary Detox & Neuro-Restoration Duo',
+    actives: [
+      { name: '[AM] Artichoke Extract (Cynara)', amount: '300 mg', role: 'Standardized 5% cynarin stimulating choleresis and gallbladder emptying' },
+      { name: '[AM] Copper (Bisglycinate)', amount: '2 mg', role: 'Ceruloplasmin and cytochrome c oxidase essential trace element' },
+      { name: '[AM] Vitamin B5 (Pantothenic Acid)', amount: '100 mg', role: 'Coenzyme A (CoA) precursor for fatty acid oxidation and acetylation' },
+      { name: '[AM] Vitamin A (Retinol)', amount: '2,500 IU', role: 'Biliary epithelial lining and immune mucosal barrier maintenance' },
+      { name: '[AM] Vitamin E (Mixed Tocopherols)', amount: '100 IU (67 mg)', role: 'Protects bile canalicular membranes from surfactant bile salt damage' },
+      { name: '[PM] Taurine', amount: '250 mg', role: 'Essential for conjugating hydrophobic bile acids into water-soluble taurocholate' },
+      { name: '[PM] Silibin (Milk Thistle)', amount: '140 mg', role: 'Stimulates nucleolar RNA polymerase I, accelerating hepatocyte ribosomal protein repair' },
+      { name: '[PM] Valerian Root Extract', amount: '300 mg', role: 'Inhibits GABA transaminase to enhance cerebral parasympathetic relaxation' },
+      { name: '[PM] Vitamin B12 (Methylcobalamin)', amount: '500 mcg', role: 'Supplies methyl groups for neurological myelin sheath repair' },
+      { name: '[PM] N-Acetylcysteine (NAC)', amount: '250 mg', role: 'Chelates divalent toxic heavy metals and replenishes hepatic glutathione' }
+    ],
+    capsuleSpecs: 'AM: Size 0 Vegan HPMC · PM: Size 00 Delayed-Release Acid-Resistant HPMC',
+    purity: 'Pharma-Grade Raw Actives · 100% Plant-Derived · GMP Certified Compounding',
+    synergy: 'Pairs with Selank, DSIP, and BPC-157 restorative regimens'
+  },
+  'ultraperson-am-pm-cardio-stress': {
+    title: 'UltraMan™ Essential Cardiometabolic & Adaptogenic Calm Duo',
+    actives: [
+      { name: '[AM] Vitamin D3 (Cholecalciferol)', amount: '2,000 IU', role: 'Renin-angiotensin-aldosterone system (RAAS) downregulatory hormone' },
+      { name: '[AM] Vitamin C (Ascorbic Acid)', amount: '200 mg', role: 'Scavenges peroxynitrite radicals in coronary endothelium' },
+      { name: '[AM] Zinc Gluconate', amount: '15 mg', role: 'Essential for insulin storage in pancreatic beta-cell hexamers' },
+      { name: '[AM] Vitamin B9 (Methylfolate)', amount: '400 mcg', role: 'Essential co-factor for remethylation of homocysteine to methionine' },
+      { name: '[AM] Algal Omega-3 (EPA/DHA)', amount: '300 mg', role: 'Decreases triglyceride synthesis and suppresses pro-inflammatory eicosanoids' },
+      { name: '[PM] N-Acetylcysteine (NAC)', amount: '250 mg', role: 'Reduces vascular cell adhesion molecules (VCAM-1) and buffers arterial wall stress' },
+      { name: '[PM] Taurine', amount: '250 mg', role: 'Calms sympathetic overactivity and optimizes vascular smooth muscle tonus' },
+      { name: '[PM] Valerian Root Extract', amount: '300 mg', role: 'Reduces sleep latency and elevates restorative delta-wave sleep' }
+    ],
+    capsuleSpecs: 'AM: Size 0 Vegan HPMC · PM: Size 00 Delayed-Release Acid-Resistant HPMC',
+    purity: 'Non-GMO · Heavy Metal Screened · Zero Preservatives',
+    synergy: 'Complements Selank, Semax, and Epithalon protocols'
+  },
+  'ultraperson-am-pm-gut-inflammation': {
+    title: 'UltraMan™ Systemic Anti-Inflammatory & Microbiome Barrier Duo',
+    actives: [
+      { name: '[AM] Vitamin D3 (Cholecalciferol)', amount: '3,000 IU', role: 'Upregulates occludin and claudin tight junction protein expression' },
+      { name: '[AM] Curcumin (Cureit)', amount: '250 mg', role: 'Bioavailable turmeric matrix blocking I-kappa-B kinase (IKK) activation' },
+      { name: '[AM] Resveratrol', amount: '100 mg', role: 'SIRT-1 activator protecting intestinal epithelial monolayer from apoptotic stress' },
+      { name: '[AM] Alpha-Lipoic Acid (ALA)', amount: '300 mg', role: 'Universal hydrophilic/lipophilic antioxidant recharging Vitamin C and E' },
+      { name: '[PM] Valerian Root Extract', amount: '300 mg', role: 'Antispasmodic action on enteric smooth muscle and enteric nervous system calm' },
+      { name: '[PM] Biointestil', amount: '300 mg', role: 'Patented geraniol-gingerol phytocomplex selectively targeting gut dysbiosis and bloating' }
+    ],
+    capsuleSpecs: 'AM: Size 00 Vegan HPMC · PM: Size 00 Delayed-Release Acid-Resistant HPMC',
+    purity: 'Patented Phyto-Complexes · 0% Allergens · Certified Heavy Metal Clean',
+    synergy: 'Highly synergistic with BPC-157, KPV, and Larazotide gut healing protocols'
+  },
+  'ultraperson-am-pm-neuro-metabolic': {
+    title: 'UltraMan™ Neuro-Metabolic Synaptic & Insulin Sensitivity Duo',
+    actives: [
+      { name: '[AM] Vitamin B12 (Methylcobalamin)', amount: '1,000 mcg', role: 'Bioactive cobalamin cofactor for methionine synthase and homocysteine clearance' },
+      { name: '[AM] Vitamin D3 (Cholecalciferol)', amount: '2,000 IU', role: 'Enhances neurotrophic factor synthesis (NGF, BDNF) in hippocampal neurons' },
+      { name: '[AM] Zinc Gluconate', amount: '15 mg', role: 'Modulates synaptic glutamatergic NMDA and AMPA receptor transmission' },
+      { name: '[AM] Algal Omega-3 (EPA/DHA)', amount: '250 mg', role: 'Essential structural component of synaptic dendritic membranes' },
+      { name: '[PM] Taurine', amount: '250 mg', role: 'Neuroprotective amino acid supporting hippocampal neurogenesis and calcium homeostasis' },
+      { name: '[PM] Myo-Inositol', amount: '250 mg', role: 'Precursor of inositol triphosphate (IP3) second messenger; improves cellular insulin sensitivity' }
+    ],
+    capsuleSpecs: 'AM: Size 1 Vegan HPMC · PM: Size 0 Delayed-Release Acid-Resistant HPMC',
+    purity: 'High-Bioavailability Bioactive Forms · Non-GMO · ISO 22000 GMP Compliant',
+    synergy: 'Calibrated for co-administration with Semax, MOTS-c, and GLP-1 analogues'
   }
 };
 
