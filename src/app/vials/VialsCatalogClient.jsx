@@ -53,17 +53,16 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState(null);
 
-  // Active referral tracking
-  const activeWholesalerId = referralInfo?.wholesalerId || null;
-  const activeReferralCode = referralInfo?.referralCode || activeWholesalerId;
+  // Active opaque referral code tracking (strictly white-label on client)
+  const activeReferralCode = referralInfo?.referralCode || 'CAT-RX-7482';
 
-  // Track visit on mount if referral is active
+  // Track visit on mount if referral code is active
   useEffect(() => {
-    if (activeWholesalerId) {
+    if (activeReferralCode) {
       try {
-        localStorage.setItem('atlas_wholesaler_ref', activeWholesalerId);
+        localStorage.setItem('atlas_catalog_ref', activeReferralCode);
         trackReferralVisitAction({
-          wholesalerId: activeWholesalerId,
+          wholesalerId: activeReferralCode,
           referralCode: activeReferralCode,
           collection: activeCollection,
           userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : ''
@@ -72,7 +71,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
         // Safe localStorage fallback
       }
     }
-  }, [activeWholesalerId, activeReferralCode, activeCollection]);
+  }, [activeReferralCode, activeCollection]);
 
   const handleSwitchCollection = async (slug) => {
     if (slug === activeCollection) return;
@@ -97,18 +96,18 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
 
   // Read stored referral fallback from localStorage if missing in URL
   const [persistedRef] = useState(() => {
-    if (activeWholesalerId) return activeWholesalerId;
+    if (activeReferralCode) return activeReferralCode;
     if (typeof window !== 'undefined') {
       try {
-        return localStorage.getItem('atlas_wholesaler_ref') || null;
+        return localStorage.getItem('atlas_catalog_ref') || 'CAT-RX-7482';
       } catch {
-        return null;
+        return 'CAT-RX-7482';
       }
     }
-    return null;
+    return 'CAT-RX-7482';
   });
 
-  const finalWholesalerId = activeWholesalerId || persistedRef;
+  const finalReferralCode = activeReferralCode || persistedRef;
 
   // Filtered vials
   const filteredVials = useMemo(() => {
@@ -197,8 +196,8 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
     };
   }, [cartItemsArray]);
 
-  const activeCurrency = activeCollection === 'vials' ? 'EUR' : 'USD';
-  const activeCurrencySymbol = activeCollection === 'vials' ? '€' : '$';
+  const activeCurrency = 'USD';
+  const activeCurrencySymbol = '$';
   const grandTotal = Math.round((subtotal + (totalUnits > 0 ? selectedShipping.cost : 0)) * 100) / 100;
 
   // Checkout submission
@@ -231,8 +230,6 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
           dosage: vial.dosage,
           presentation: vial.presentation,
           quantity,
-          baseCost: vial.baseCost || 0,
-          mediluxePrice: vial.mediluxePrice || 0,
           price: effectiveUnitPrice,
           unitPrice: effectiveUnitPrice,
           tier10UnitPrice: vial.tier10UnitPrice,
@@ -258,16 +255,11 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
           currency: activeCurrency,
           currencySymbol: activeCurrencySymbol,
           totalUnits,
-          priceTier: 'wholeseller_mediluxe15_plus_nikolas15',
-          priceTierLabel: 'Wholeseller Schedule (+15% Mediluxe +15% Nikolas)',
+          priceTier: 'wholesale',
+          priceTierLabel: 'Verified Wholesale Schedule',
           priceSource: 'wholeseller',
           priceMarkupPercent: 15,
-          mediluxeMarkupPercent: 15,
-          wholesalerId: finalWholesalerId || 'np-labs-international',
-          wholesalerName: referralInfo?.partnerName || 'Nikolaos Psathas (NP Labs)',
-          wholesalerEmail: referralInfo?.partnerEmail || 'nikpsathas@gmail.com',
-          attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)',
-          referralCode: activeReferralCode || finalWholesalerId || 'CAT-RX-7482',
+          referralCode: finalReferralCode || 'CAT-RX-7482',
           catalogId: 'CAT-RX-7482',
           collection: activeCollection,
           paymentMethod: 'payment_link_24h',
@@ -443,68 +435,25 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
         {(() => {
           const colInfo = SUPPORTED_COLLECTIONS[activeCollection] || SUPPORTED_COLLECTIONS.vials;
           return (
-            <>
-              <div style={{
-                backgroundColor: '#eff6ff',
-                border: '1px solid #bfdbfe',
-                borderRadius: '12px',
-                padding: '14px 18px',
-                marginBottom: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '16px',
-                flexWrap: 'wrap'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <ShieldCheck size={22} color="#1d4ed8" style={{ flexShrink: 0 }} />
-                  <div style={{ fontSize: '0.85rem', color: '#1e3a8a', lineHeight: 1.45 }}>
-                    <strong>{colInfo.title}:</strong> {colInfo.badge}. {colInfo.deliveryPledge} <strong>No upfront card payment required today</strong> — a verified secure payment link will be issued to your email and WhatsApp within 24 hours of placing your request.
-                  </div>
+            <div style={{
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '12px',
+              padding: '14px 18px',
+              marginBottom: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '16px',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <ShieldCheck size={22} color="#1d4ed8" style={{ flexShrink: 0 }} />
+                <div style={{ fontSize: '0.85rem', color: '#1e3a8a', lineHeight: 1.45 }}>
+                  <strong>{colInfo.title}:</strong> {colInfo.badge}. {colInfo.deliveryPledge} <strong>No upfront card payment required today</strong> — a verified secure payment link will be issued to your email and WhatsApp within 24 hours of placing your request.
                 </div>
               </div>
-
-              {activeCollection === 'vials' && (
-                <div style={{
-                  backgroundColor: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  borderRadius: '12px',
-                  padding: '12px 18px',
-                  marginBottom: '24px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '12px',
-                  flexWrap: 'wrap'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                    <span style={{
-                      backgroundColor: '#16a34a',
-                      color: '#ffffff',
-                      fontSize: '0.7rem',
-                      fontWeight: 800,
-                      padding: '3px 9px',
-                      borderRadius: '9999px',
-                      letterSpacing: '0.03em',
-                      textTransform: 'uppercase'
-                    }}>
-                      Wholeseller Schedule (+15% Mediluxe · +15% Partner)
-                    </span>
-                    <span style={{ fontSize: '0.82rem', color: '#14532d', fontWeight: 700 }}>
-                      Por atención de: {referralInfo?.partnerName || 'Nikolaos Psathas · NP Labs International'}
-                    </span>
-                    <span style={{ fontSize: '0.78rem', color: '#166534' }}>
-                      • Precios en EUR (€): <strong>Coste NPLAB + 15% Mediluxe + 15% Wholeseller</strong>.
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.74rem', color: '#166534', fontWeight: 600 }}>Partner Links:</span>
-                    <CopyableId value={referralInfo?.shortCatalogUrl || 'https://www.atlashealth-services.com/c/CAT-RX-7482'} />
-                    <CopyableId value={referralInfo?.referenceUrl || 'https://www.atlashealth-services.com/vials?ref=np-labs-international'} />
-                  </div>
-                </div>
-              )}
-            </>
+            </div>
           );
         })()}
 
@@ -726,19 +675,6 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                         <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
                           / {(vial.unitNoun || 'vial').toLowerCase()}
                         </span>
-                        {vial.baseCost > 0 && (
-                          <span style={{
-                            fontSize: '0.68rem',
-                            fontWeight: 700,
-                            color: '#0369a1',
-                            backgroundColor: '#f0f9ff',
-                            border: '1px solid #bae6fd',
-                            borderRadius: '4px',
-                            padding: '1px 6px'
-                          }}>
-                            Cost {vial.currencySymbol || activeCurrencySymbol}{Number(vial.baseCost).toFixed(2)} → +15% Mediluxe ({vial.currencySymbol || activeCurrencySymbol}{Number(vial.mediluxePrice || (vial.baseCost * 1.15)).toFixed(2)}) → +15% Wholeseller
-                          </span>
-                        )}
                       </div>
 
                       <div style={{

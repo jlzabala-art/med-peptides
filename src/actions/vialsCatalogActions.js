@@ -26,24 +26,26 @@ function sanitizeBrandName(text) {
 
 /**
  * Resolves wholesale prices for a variant or item.
- * For NPLAB peptide formulations (Nikolas / NP Labs wholeseller partner schedule), applies:
- *   1. +15% Mediluxe Margin over NPLAB base cost: mediluxePrice = round(costEur * 1.15, 2)
- *   2. +15% Nikolas Wholeseller Margin over Mediluxe price: unitPrice = round(mediluxePrice * 1.15, 2)
- *   Effective compound factor = 1.15 * 1.15 = 1.3225 (+32.25% over NPLAB base cost) in EUR (€).
+ * For Lotusland lyophilized peptide vials (sold via Wholeseller schedule), applies:
+ *   1. +15% Mediluxe Margin over Lotusland base cost: mediluxePrice = round2(baseCost * 1.15)
+ *   2. +15% Wholeseller Margin over Mediluxe price: unitPrice = round2(mediluxePrice * 1.15)
+ *   Effective compound factor = 1.15 * 1.15 = 1.3225 (+32.25% over Lotusland base cost).
+ *   Zero internal cost or margin fields are exposed to the public client.
  */
 function resolveWholesalePricing(variant, defaultPrice = 35.0, markupPercent = 15) {
+  const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
   const vSupp = String(variant?.supplierId || variant?.supplier_id || variant?.supplier || variant?.supplierName || '').toLowerCase();
-  const isNpLabs = vSupp.includes('nplab') || vSupp.includes('np-lab') || vSupp.includes('np lab');
+  const isLotusland = vSupp.includes('lotusland') || variant?.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
 
-  if (isNpLabs) {
+  if (isLotusland) {
     const baseCost = Number(
-      variant.price_eur ??
+      variant.cost_tiers?.cost_1 ??
+      variant.cost_1 ??
       variant.cost ??
       variant.pricing?.master?.perUnit ??
       variant.unit_price ??
       defaultPrice
     );
-    const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
     const mediluxeMarkup = 15;
     const wholesalerMarkup = Number(markupPercent || 15);
     const mediluxePrice = round2(baseCost * (1 + mediluxeMarkup / 100));
@@ -52,16 +54,11 @@ function resolveWholesalePricing(variant, defaultPrice = 35.0, markupPercent = 1
     const pack10Price = round2(tier10UnitPrice * 10);
 
     return {
-      baseCost: round2(baseCost),
-      mediluxePrice,
-      mediluxeMarkupPercent: mediluxeMarkup,
-      wholesalerMarkupPercent: wholesalerMarkup,
-      markupPercent: Math.round(((1 + mediluxeMarkup / 100) * (1 + wholesalerMarkup / 100) - 1) * 10000) / 100,
       unitPrice,
       tier10UnitPrice,
       pack10Price,
-      currency: 'EUR',
-      currencySymbol: '€'
+      currency: 'USD',
+      currencySymbol: '$'
     };
   }
 
@@ -78,14 +75,13 @@ function resolveWholesalePricing(variant, defaultPrice = 35.0, markupPercent = 1
     defaultPrice
   );
 
+  const mediluxePrice = round2(baseCost * 1.15);
   const factor = 1 + (Number(markupPercent || 15) / 100);
-  const unitPrice = Math.round((baseCost * factor) * 100) / 100;
-  const tier10UnitPrice = Math.round((unitPrice * 0.85) * 100) / 100;
-  const pack10Price = Math.round((tier10UnitPrice * 10) * 100) / 100;
+  const unitPrice = round2(mediluxePrice * factor);
+  const tier10UnitPrice = round2(unitPrice * 0.85);
+  const pack10Price = round2(tier10UnitPrice * 10);
 
   return {
-    baseCost: Math.round(baseCost * 100) / 100,
-    markupPercent: Number(markupPercent || 15),
     unitPrice,
     tier10UnitPrice,
     pack10Price,
@@ -135,11 +131,11 @@ export async function fetchLotuslandVialsAction(referralRef = null) {
   return fetchCollectionProductsAction('vials', referralRef);
 }
 
-/** 1. Peptides & Vials Fetcher (NPLAB Peptide Formulations at +15% over NPLAB Cost) */
+/** 1. Peptides & Vials Fetcher (Lotusland Finished Peptide Vials at +15% Mediluxe + 15% Wholeseller) */
 async function fetchLotuslandVials() {
   if (!adminDb) return [];
   const snapshot = await adminDb.collection('products')
-    .where('supplierIds', 'array-contains', 'supplier-nplabs')
+    .where('supplierIds', 'array-contains', 'supplier-lotusland')
     .limit(150)
     .get();
 
@@ -150,18 +146,23 @@ async function fetchLotuslandVials() {
 
     if (data.status === 'archived' || data.status === 'hidden') continue;
     if (data.productType === 'raw_material' || data.category === 'raw_material') continue;
+    const pNameLower = String(data.canonicalName || data.name || '').toLowerCase();
+    if (pNameLower.includes('bulk api') || pNameLower.includes('benzocaine')) continue;
+
     const docVariants = Array.isArray(data.variants) ? data.variants : [];
     if (docVariants.length === 0) continue;
 
     const cleanVariants = filterProductVariantsStrictly(
       { ...data, id: productId, variants: deduplicateVariants(docVariants) },
-      { supplierFilter: 'supplier-nplabs' }
+      { supplierFilter: 'supplier-lotusland' }
     );
 
     for (const v of cleanVariants) {
       if (isApiOrRawMaterialVariant(v, data)) continue;
+      const vDoseStr = String(v.dosage || v.dose || v.presentation || v.format || '').toLowerCase();
+      if (vDoseStr.includes('bulk') || vDoseStr.includes('powder') || vDoseStr.includes('000g')) continue;
 
-      const pricing = resolveWholesalePricing(v, 50.0, 15);
+      const pricing = resolveWholesalePricing(v, 30.0, 15);
       if (!pricing.unitPrice || pricing.unitPrice <= 0) continue;
 
       const cleanName = sanitizeBrandName(v.name || data.canonicalName || data.name || 'Clinical Peptide');
@@ -174,8 +175,10 @@ async function fetchLotuslandVials() {
           ? 'Intranasal Spray'
           : presLower.includes('drop') || presLower.includes('sublingual')
             ? 'Sublingual Drops'
-            : 'Lyophilized Vial (10R)';
-      const unitNoun = presLower.includes('cap')
+            : presLower.includes('bottle')
+              ? 'Sterile Multi-Dose Bottle'
+              : 'Lyophilized Vial (10R)';
+      const unitNoun = presLower.includes('cap') || presLower.includes('bottle')
         ? 'Bottle'
         : presLower.includes('spray')
           ? 'Spray'
@@ -197,11 +200,6 @@ async function fetchLotuslandVials() {
         primaryGoal: data.primaryGoal || 'general_health',
         goals: Array.isArray(data.goals) ? data.goals : ['general_health'],
         description: cleanDesc,
-        baseCost: pricing.baseCost,
-        mediluxePrice: pricing.mediluxePrice || pricing.baseCost,
-        mediluxeMarkupPercent: pricing.mediluxeMarkupPercent || 15,
-        wholesalerMarkupPercent: pricing.wholesalerMarkupPercent || 15,
-        markupPercent: pricing.markupPercent,
         unitPrice: pricing.unitPrice,
         tier10UnitPrice: pricing.tier10UnitPrice,
         pack10Price: pricing.pack10Price,
@@ -510,7 +508,7 @@ export async function trackReferralVisitAction({ wholesalerId, referralCode, col
       collection: cleanCollection,
       userAgent: userAgent ? String(userAgent).substring(0, 200) : null,
       visitedAt: now
-    }).catch(() => {});
+    }).catch(() => { });
 
     // Also mirror to catalog_generation_logs & shared_catalog_links if Nikolas / CAT-RX-7482
     if (isNikolas || cleanCode === 'CAT-RX-7482') {
@@ -519,14 +517,14 @@ export async function trackReferralVisitAction({ wholesalerId, referralCode, col
         lastVisitedAt: now,
         readStatus: 'read',
         attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)'
-      }, { merge: true }).catch(() => {});
+      }, { merge: true }).catch(() => { });
 
       await adminDb.collection('catalog_generation_logs').doc('CAT-RX-7482').set({
         viewCount: FieldValue.increment(1),
         lastViewedAt: now,
         attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)',
         updatedAt: now
-      }, { merge: true }).catch(() => {});
+      }, { merge: true }).catch(() => { });
     }
 
     return { success: true };

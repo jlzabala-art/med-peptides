@@ -84,7 +84,7 @@ export async function generateMetadata({ params, searchParams }) {
   const hasFilter = filterSummary.length > 0;
 
   const hasSpecificProductIds = Array.isArray(catalogData.productIds) && catalogData.productIds.length > 0;
-  const isColwayOrCosmeticMeta = 
+  const isColwayOrCosmeticMeta =
     catalogData.category === 'cosmetics' ||
     String(catalogData.title || '').toLowerCase().includes('colway') ||
     (hasSpecificProductIds && catalogData.productIds.every(id => String(id).toLowerCase().includes('colway')));
@@ -178,10 +178,9 @@ function resolveCanonicalPrice(variant, { canonicalTier, markupFactor, markupPer
   let unitPrice = resolved?.perUnit ?? 0;
 
   // Apply markup when using master cost tier OR wholesale tier (e.g. Mediluxe +15% base + Nikolas +15% wholeseller margin)
-  const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
   const shouldApplyMarkup = markupPercent > 0 && (canonicalTier === PRICING_TIER.MASTER || canonicalTier === PRICING_TIER.WHOLESALE);
   if (shouldApplyMarkup && unitPrice > 0) {
-    unitPrice = round2(unitPrice * markupFactor);
+    unitPrice = Math.round(unitPrice * markupFactor * 100) / 100;
   }
 
   // Kit price: prefer canonical resolved.kit (pricing.{tier}.kit) first.
@@ -196,30 +195,30 @@ function resolveCanonicalPrice(variant, { canonicalTier, markupFactor, markupPer
     // Schema-compliant: kit is the total price for a pack of 10
     let markedKit = Number(canonicalKit);
     if (shouldApplyMarkup) {
-      markedKit = round2(markedKit * markupFactor);
+      markedKit = Math.round(markedKit * markupFactor * 100) / 100;
     }
     // Determine if kit is stored as per-unit or as pack-total
     if (markedKit > unitPrice * 2) {
       // Stored as full pack price (e.g. $1,300 for 10 units)
       kitTotalPrice = markedKit;
-      tier10UnitPrice = round2(markedKit / 10);
+      tier10UnitPrice = Math.round((markedKit / 10) * 100) / 100;
     } else {
       // Stored as discounted per-unit price (e.g. $130/unit for 10+)
       tier10UnitPrice = markedKit;
-      kitTotalPrice = round2(markedKit * 10);
+      kitTotalPrice = Math.round((markedKit * 10) * 100) / 100;
     }
   } else if (legacyCost10 != null && Number(legacyCost10) > 0) {
     // Legacy fallback: cost_tiers.cost_10 is always a per-unit discounted price
     let marked10 = Number(legacyCost10);
     if (shouldApplyMarkup) {
-      marked10 = round2(marked10 * markupFactor);
+      marked10 = Math.round(marked10 * markupFactor * 100) / 100;
     }
     tier10UnitPrice = marked10;
-    kitTotalPrice = round2(marked10 * 10);
+    kitTotalPrice = Math.round((marked10 * 10) * 100) / 100;
   } else if (unitPrice > 0) {
     // No kit price at all: apply standard 15% volume discount for 10+ units
-    tier10UnitPrice = round2(unitPrice * 0.85);
-    kitTotalPrice = round2(tier10UnitPrice * 10);
+    tier10UnitPrice = Math.round((unitPrice * 0.85) * 100) / 100;
+    kitTotalPrice = Math.round((tier10UnitPrice * 10) * 100) / 100;
   }
 
   return { unitPrice, tier10UnitPrice, kitTotalPrice };
@@ -410,7 +409,7 @@ async function verifyRevocationAndRecordVisit(catalogId, resolvedDoc) {
           linkDocRef.set({
             visitsCount: newVisitsCount,
             lastVisitedAt: now
-          }, { merge: true }).catch(() => {});
+          }, { merge: true }).catch(() => { });
 
           // If this catalog belongs to a wholesaler (such as Nikolas / NP Labs CAT-RX-7482), also record the referral visit
           const wId = linkData.wholesalerId || (catalogId === 'CAT-RX-7482' ? 'np-labs-international' : null);
@@ -420,21 +419,21 @@ async function verifyRevocationAndRecordVisit(catalogId, resolvedDoc) {
             refDoc.set({
               wholesalerId: wId,
               wholesalerName: isNikolas ? 'Nikolaos Psathas (NP Labs)' : (linkData.recipientName || wId),
-              attributedTo: isNikolas ? 'Por atención de Nikolaos Psathas (NP Labs)' : `Referred by ${linkData.recipientName || wId}`,
+              attributedTo: isNikolas ? 'Attention of Nikolaos Psathas (NP Labs)' : `Referred by ${linkData.recipientName || wId}`,
               referralCode: catalogId,
               visitsCount: newVisitsCount,
               lastVisitedAt: now,
               updatedAt: now
-            }, { merge: true }).catch(() => {});
+            }, { merge: true }).catch(() => { });
 
             refDoc.collection('visits').add({
               wholesalerId: wId,
               wholesalerName: isNikolas ? 'Nikolaos Psathas (NP Labs)' : (linkData.recipientName || wId),
-              attributedTo: isNikolas ? 'Por atención de Nikolaos Psathas (NP Labs)' : `Referred by ${linkData.recipientName || wId}`,
+              attributedTo: isNikolas ? 'Attention of Nikolaos Psathas (NP Labs)' : `Referred by ${linkData.recipientName || wId}`,
               referralCode: catalogId,
               source: 'shared_catalog_ssr',
               visitedAt: now
-            }).catch(() => {});
+            }).catch(() => { });
           }
         }
       }
@@ -504,8 +503,8 @@ export default async function SharedCatalogPage({ params }) {
             {verification.revoked
               ? 'This shared price list has been revoked or updated by the account manager. Please request a new access link.'
               : verification.expired
-              ? 'This shared product portfolio link has exceeded its validity period. Please contact your account manager to request an updated access link.'
-              : 'The security signature on this catalog link is invalid or has been revoked.'}
+                ? 'This shared product portfolio link has exceeded its validity period. Please contact your account manager to request an updated access link.'
+                : 'The security signature on this catalog link is invalid or has been revoked.'}
           </p>
         </div>
       </div>
@@ -556,21 +555,21 @@ export default async function SharedCatalogPage({ params }) {
   // Live Firestore linkData takes precedence over JWT token payload
   const catalogMeta = { ...payload, ...linkData, catalogId };
 
-  const priceSource     = catalogMeta.priceSource || 'cost';
-  const includePrices   = catalogMeta.includePrices !== false;
-  const currency        = catalogMeta.currency || 'USD';
-  const supplierId      = catalogMeta.supplierId;
+  const priceSource = catalogMeta.priceSource || 'cost';
+  const includePrices = catalogMeta.includePrices !== false;
+  const currency = catalogMeta.currency || 'USD';
+  const supplierId = catalogMeta.supplierId;
   const catalogueFilter = catalogMeta.catalogueFilter || null;
-  const category        = catalogMeta.category || 'all';
-  const markupPercent   = Number(catalogMeta.priceMarkupPercent) || 0;
-  const markupFactor    = markupPercent > 0 ? (1 + markupPercent / 100) : 1;
+  const category = catalogMeta.category || 'all';
+  const markupPercent = Number(catalogMeta.priceMarkupPercent) || 0;
+  const markupFactor = markupPercent > 0 ? (1 + markupPercent / 100) : 1;
 
   // Map priceSource → canonical PRICING_TIER constant
   const canonicalTier = priceSource === 'wholeseller' ? PRICING_TIER.WHOLESALE
-    : priceSource === 'clinic'      ? PRICING_TIER.CLINIC
-    : priceSource === 'retail'      ? PRICING_TIER.RETAIL
-    : priceSource === 'cost'        ? PRICING_TIER.MASTER
-    : PRICING_TIER.WHOLESALE;
+    : priceSource === 'clinic' ? PRICING_TIER.CLINIC
+      : priceSource === 'retail' ? PRICING_TIER.RETAIL
+        : priceSource === 'cost' ? PRICING_TIER.MASTER
+          : PRICING_TIER.WHOLESALE;
 
   // F-D: Use cached Firestore fetch + pre-aggregated _meta/catalog_facets for Golden Rule #22 Server-side KPIs
   const hasSpecificProductIds = Array.isArray(catalogMeta.productIds) && catalogMeta.productIds.length > 0;
@@ -631,14 +630,14 @@ export default async function SharedCatalogPage({ params }) {
     const variants = (hasSpecificProductIds && (!supplierId || supplierId === 'all'))
       ? (productVariants.length > 0 ? productVariants : [data])
       : filterProductVariantsStrictly(
-          { ...data, variants: productVariants },
-          { 
-            supplierId, 
-            supplierFilter: supplierId,
-            catalogueFilter,
-            categoryFilter: category !== 'all' ? category : null 
-          }
-        );
+        { ...data, variants: productVariants },
+        {
+          supplierId,
+          supplierFilter: supplierId,
+          catalogueFilter,
+          categoryFilter: category !== 'all' ? category : null
+        }
+      );
 
     const isExplicitApiCatalog = catalogueFilter === 'raw_material' || catalogueFilter === 'api' || category === 'raw_material';
     const cleanVariants = isExplicitApiCatalog ? variants : variants.filter(v => !isApiOrRawMaterialVariant(v, data));
@@ -664,23 +663,23 @@ export default async function SharedCatalogPage({ params }) {
       });
 
       // Stock: prefer structured stock.available/quantity, fall back to legacy
-      const stockObj   = typeof v.stock === 'object' ? v.stock : null;
-      const stockQty   = stockObj?.quantity ?? (typeof v.stock === 'number' ? v.stock : null)
+      const stockObj = typeof v.stock === 'object' ? v.stock : null;
+      const stockQty = stockObj?.quantity ?? (typeof v.stock === 'number' ? v.stock : null)
         ?? (data.inStock ? 50 : 0);
-      const inStock     = stockObj?.available !== false && stockQty !== 0;
+      const inStock = stockObj?.available !== false && stockQty !== 0;
 
       return {
-        id:              v.id,
-        name:            v.name || data.canonicalName || 'Standard Variant',
-        dosage:          v.dosage || data.dosage || 'Standard Dose',
-        presentation:    v.presentation || v.format || 'Vial',
-        route:           v.route || null, // Phase 3 route filter support
-        purity:          isCosmeticOrHair ? (v.purity || null) : (v.purity || data.purity || '≥ 99.0% (HPLC Verified)'),
-        stock:           inStock ? stockQty : 0,
-        coaUrl:          v.coaUrl || data.coaUrl || null,
-        price:           unitPrice > 0 ? Number(unitPrice.toFixed(2)) : 0,
+        id: v.id,
+        name: v.name || data.canonicalName || 'Standard Variant',
+        dosage: v.dosage || data.dosage || 'Standard Dose',
+        presentation: v.presentation || v.format || 'Vial',
+        route: v.route || null, // Phase 3 route filter support
+        purity: isCosmeticOrHair ? (v.purity || null) : (v.purity || data.purity || '≥ 99.0% (HPLC Verified)'),
+        stock: inStock ? stockQty : 0,
+        coaUrl: v.coaUrl || data.coaUrl || null,
+        price: unitPrice > 0 ? Number(unitPrice.toFixed(2)) : 0,
         tier10UnitPrice: tier10UnitPrice ? Number(tier10UnitPrice.toFixed(2)) : null,
-        kitPrice:        kitTotalPrice ? Number(kitTotalPrice.toFixed(2)) : null,
+        kitPrice: kitTotalPrice ? Number(kitTotalPrice.toFixed(2)) : null,
         currency
       };
     });
@@ -696,22 +695,22 @@ export default async function SharedCatalogPage({ params }) {
     const maxPrice = includePrices ? Math.max(...uniqueVariants.map(v => v.price)) : 0;
 
     products.push({
-      id:               data.id,
-      slug:             data.slug || data.id,
-      canonicalName:    data.canonicalName || data.name || 'Product',
-      description:      data.aiDescription || data.description || '',
-      category:         data.categoryId || data.category || 'Peptides',
-      purity:           isCosmeticOrHair ? (data.purity || null) : (data.purity || '≥ 99.0% HPLC'),
-      supplierId:       data.supplierId || null,
-      productType:      data.productType || null,
-      hasCOA:           Boolean(data.hasCOA),
-      coaUrl:           data.coaUrl || null,
+      id: data.id,
+      slug: data.slug || data.id,
+      canonicalName: data.canonicalName || data.name || 'Product',
+      description: data.aiDescription || data.description || '',
+      category: data.categoryId || data.category || 'Peptides',
+      purity: isCosmeticOrHair ? (data.purity || null) : (data.purity || '≥ 99.0% HPLC'),
+      supplierId: data.supplierId || null,
+      productType: data.productType || null,
+      hasCOA: Boolean(data.hasCOA),
+      coaUrl: data.coaUrl || null,
       requiresColdChain: Boolean(data.requiresColdChain),
-      goals:            Array.isArray(data.goals) ? data.goals : [],
-      tags:             Array.isArray(data.tags) ? data.tags : [],
+      goals: Array.isArray(data.goals) ? data.goals : [],
+      tags: Array.isArray(data.tags) ? data.tags : [],
       minPrice,
       maxPrice,
-      variants:         sortVariantsAscending(uniqueVariants)
+      variants: sortVariantsAscending(uniqueVariants)
     });
   }
 
@@ -738,8 +737,8 @@ export default async function SharedCatalogPage({ params }) {
       ...(Array.isArray(p.products) ? p.products.map(pr => String(pr.id || pr.productId || pr.name || '').toLowerCase()) : []),
       ...(Array.isArray(p.drugs) ? p.drugs.map(d => String(d.id || d.name || d).toLowerCase()) : [])
     ];
-    return protoItems.some(item => 
-      productIdsSet.has(item) || 
+    return protoItems.some(item =>
+      productIdsSet.has(item) ||
       productNamesSet.has(item) ||
       [...productIdsSet].some(pid => item.includes(pid)) ||
       [...productNamesSet].some(pname => pname.length > 4 && item.includes(pname))
@@ -747,19 +746,19 @@ export default async function SharedCatalogPage({ params }) {
   });
 
   const protocols = filteredProtoDocs.map(p => ({
-    id:                  p.id,
-    title:               p.title || p.name || 'Clinical Protocol',
-    goal:                p.goal || p.category || 'Therapeutic Optimization',
-    targetSystem:        p.targetSystem || p.indication || 'Cellular System',
-    duration:            p.duration || '8 – 12 Weeks',
-    compounds:           Array.isArray(p.compounds) ? p.compounds : (Array.isArray(p.drugs) ? p.drugs : []),
-    description:         p.summary || p.description || p.clinicalRationale || '',
-    phasesCount:         Array.isArray(p.phases) ? p.phases.length : 1,
-    phases:              Array.isArray(p.phases) ? p.phases : [],
-    dosage:              p.dosage || p.dose || '',
-    frequency:           p.frequency || p.schedule || '',
+    id: p.id,
+    title: p.title || p.name || 'Clinical Protocol',
+    goal: p.goal || p.category || 'Therapeutic Optimization',
+    targetSystem: p.targetSystem || p.indication || 'Cellular System',
+    duration: p.duration || '8 – 12 Weeks',
+    compounds: Array.isArray(p.compounds) ? p.compounds : (Array.isArray(p.drugs) ? p.drugs : []),
+    description: p.summary || p.description || p.clinicalRationale || '',
+    phasesCount: Array.isArray(p.phases) ? p.phases.length : 1,
+    phases: Array.isArray(p.phases) ? p.phases : [],
+    dosage: p.dosage || p.dose || '',
+    frequency: p.frequency || p.schedule || '',
     administrationRoute: p.administrationRoute || p.route || 'Subcutaneous (SubQ)',
-    cautions:            p.cautions || p.contraindications || '',
+    cautions: p.cautions || p.contraindications || '',
     scientificRationale: p.scientificRationale || p.mechanism || ''
   }));
 
@@ -946,9 +945,33 @@ export default async function SharedCatalogPage({ params }) {
     updatedAt: metaFacets?.updatedAt || new Date().toISOString()
   };
 
+  // Strict White-Label Sanitization for Client View:
+  // Never expose Nikolas, NP Labs, NPLAB, Lotusland, or wholesaler identity in the public client payload.
+  const clientSafeCatalogMeta = { ...catalogMeta };
+  const sensitivePattern = /nikol|psathas|nplab|np\s*lab|lotusland|lotus\s*land/i;
+  if (
+    catalogId === 'CAT-RX-7482' ||
+    sensitivePattern.test(String(clientSafeCatalogMeta.recipientName || '')) ||
+    sensitivePattern.test(String(clientSafeCatalogMeta.wholesalerName || '')) ||
+    sensitivePattern.test(String(clientSafeCatalogMeta.wholesalerId || ''))
+  ) {
+    clientSafeCatalogMeta.recipientName = '';
+    clientSafeCatalogMeta.recipientEmail = '';
+    clientSafeCatalogMeta.recipientUserId = '';
+    clientSafeCatalogMeta.wholesalerName = '';
+    clientSafeCatalogMeta.wholesalerEmail = '';
+    clientSafeCatalogMeta.wholesalerId = '';
+    clientSafeCatalogMeta.internalWholesalerName = undefined;
+    clientSafeCatalogMeta.attributedTo = undefined;
+    clientSafeCatalogMeta.supplierId = '';
+    if (sensitivePattern.test(String(clientSafeCatalogMeta.title || ''))) {
+      clientSafeCatalogMeta.title = 'Clinical Peptide Formulations Directory';
+    }
+  }
+
   return (
     <SharedCatalogClientView
-      catalogMeta={sanitizeForClient(catalogMeta)}
+      catalogMeta={sanitizeForClient(clientSafeCatalogMeta)}
       products={sanitizeForClient(products)}
       protocols={sanitizeForClient(protocols)}
       currency={currency}

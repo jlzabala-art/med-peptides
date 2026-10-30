@@ -56,7 +56,11 @@ export default function SharedCatalogHeader({
   const [showShareDropdown, setShowShareDropdown] = useState(false);
   const [includeFiltersInQr, setIncludeFiltersInQr] = useState(true);
 
-  const rawRecipientName = catalogMeta?.recipientName || '';
+  const rawRecipientName = String(catalogMeta?.recipientName || '')
+    .replace(/\b(?:lotusland|lotus\s*land|nplabs|np\s*labs|nplab|regenpept|psathas|nikolaos|nikolas)\b/gi, '')
+    .replace(/\s*[•·\-–]\s*$/g, '')
+    .replace(/^\s*[•·\-–]\s*/g, '')
+    .trim();
   const isWholesaler = catalogMeta?.recipientType === 'wholeseller' || catalogMeta?.recipientType === 'wholesaler';
   const cleanRecipientName = isWholesaler && rawRecipientName.includes('·')
     ? rawRecipientName.split('·')[0].trim()
@@ -604,7 +608,7 @@ export default function SharedCatalogHeader({
                   checked={includeFiltersInQr}
                   onChange={(e) => setIncludeFiltersInQr(e.target.checked)}
                 />
-                <span>Incluir filtros actuales en el código QR y enlace</span>
+                <span>Include active filters in QR code and link</span>
               </label>
             )}
 
@@ -635,7 +639,7 @@ export default function SharedCatalogHeader({
                   }}
                 >
                   <Filter size={13} />
-                  <span>{copiedType === 'filtered' ? 'Enlace con Filtros Copiado ✓' : 'Copiar con Filtros'}</span>
+                  <span>{copiedType === 'filtered' ? 'Filtered Link Copied ✓' : 'Copy with Filters'}</span>
                 </button>
               )}
 
@@ -659,7 +663,7 @@ export default function SharedCatalogHeader({
                 }}
               >
                 <Copy size={13} />
-                <span>{copiedType === 'base' ? 'Enlace Base Copiado ✓' : 'Copiar Catálogo Base'}</span>
+                <span>{copiedType === 'base' ? 'Base Link Copied ✓' : 'Copy Base Catalog'}</span>
               </button>
             </div>
 

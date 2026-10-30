@@ -449,31 +449,36 @@ export function resolveVariantPrice(variant, {
   }
   pricing = normalisePricingKeys(pricing);
 
-  // Apply B2B pricing calculations for NPLAB supplier:
-  // - Master (NPLAB Base Cost): costEur
-  // - Wholesale (Mediluxe +15% over NPLAB Cost): round(costEur * 1.15, 2)
-  // - Clinic / Nikolas Wholeseller Public Link (+15% Mediluxe + +15% Nikolas over Mediluxe = costEur * 1.15 * 1.15): round(wholesalePrice * 1.15, 2)
-  // - Retail (+50% over NPLAB Cost): round(costEur * 1.50, 2)
+  // Apply B2B wholeseller pricing calculations for Lotusland & NPLAB peptide vials:
+  // - Master (Supplier Base Cost): baseCost
+  // - Wholesale (Mediluxe +15% over Supplier Cost): round2(baseCost * 1.15)
+  // - Clinic / Wholeseller Public Link (+15% Mediluxe + +15% Wholeseller over Mediluxe = baseCost * 1.15 * 1.15): round2(wholesalePrice * 1.15)
+  // - Retail (+50% over Supplier Cost): round2(baseCost * 1.50)
   const vSuppStr = String(variant?.supplierId || variant?.supplier_id || variant?.supplier || variant?.supplierName || '').toLowerCase();
-  if (pricing && variant && (vSuppStr.includes('nplab') || vSuppStr.includes('np-lab') || vSuppStr.includes('np lab'))) {
-    const baseCostEur = Number(
-      variant.price_eur ??
+  const isLotusland = vSuppStr.includes('lotusland') || variant?.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
+  const isNpLabs = vSuppStr.includes('nplab') || vSuppStr.includes('np-lab') || vSuppStr.includes('np lab');
+  if (pricing && variant && (isLotusland || isNpLabs)) {
+    const baseCost = Number(
+      variant.cost_tiers?.cost_1 ??
+      variant.cost_1 ??
       variant.cost ??
+      variant.price_eur ??
       pricing.master?.perUnit ??
       variant.unit_price ??
       0
     );
 
-    if (baseCostEur > 0) {
+    if (baseCost > 0) {
       const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
-      const masterPrice = round2(baseCostEur);
-      const masterKit = round2(baseCostEur * 0.85 * 10);
+      const cur = isNpLabs ? 'EUR' : (variant.currency || pricing.master?.currency || 'USD');
+      const masterPrice = round2(baseCost);
+      const masterKit = round2(masterPrice * 0.85 * 10);
 
-      // Tier 1: Mediluxe Wholesale Price (+15% over NPLAB Cost)
+      // Tier 1: Mediluxe Wholesale Price (+15% over Base Cost)
       const wholesalePrice = round2(masterPrice * 1.15);
       const wholesaleKit = round2(wholesalePrice * 0.85 * 10);
 
-      // Tier 2: Nikolas Wholeseller Public Client Price (+15% over Mediluxe's +15% price = Cost * 1.15 * 1.15)
+      // Tier 2: Wholeseller Public Client Price (+15% over Mediluxe's +15% price = Cost * 1.15 * 1.15)
       const clinicPrice = round2(wholesalePrice * 1.15);
       const clinicKit = round2(clinicPrice * 0.85 * 10);
 
@@ -486,25 +491,25 @@ export function resolveVariantPrice(variant, {
           ...pricing.master,
           perUnit: masterPrice,
           kit: masterKit,
-          currency: 'EUR'
+          currency: cur
         },
         wholesale: {
           ...pricing.wholesale,
           perUnit: wholesalePrice,
           kit: wholesaleKit,
-          currency: 'EUR'
+          currency: cur
         },
         clinic: {
           ...pricing.clinic,
           perUnit: clinicPrice,
           kit: clinicKit,
-          currency: 'EUR'
+          currency: cur
         },
         retail: {
           ...pricing.retail,
           perUnit: retailPrice,
           kit: retailKit,
-          currency: 'EUR'
+          currency: cur
         }
       };
     }

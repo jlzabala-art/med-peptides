@@ -8,6 +8,7 @@ import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Package from "lucide-react/dist/esm/icons/package";
 import Download from "lucide-react/dist/esm/icons/download";
 import Tags from "lucide-react/dist/esm/icons/tags";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Link from 'next/link';
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, getDocs, doc, updateDoc, limit, startAfter, getCountFromServer, orderBy, where } from 'firebase/firestore';
@@ -201,10 +202,20 @@ export default function AdminLogisticsTab() {
             <Link
               href="/admin/labels"
               className="btn btn-primary"
-              title="Open Compounding Labels Studio in Logistics"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none' }}
+              title="Open Shipping & Compounding Labels Studio"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                textDecoration: 'none',
+                background: '#0284c7',
+                color: '#ffffff',
+                fontWeight: 700,
+                padding: '7px 14px',
+                borderRadius: '6px'
+              }}
             >
-              <Tags size={15} /> Compounding Labels
+              <Tags size={16} /> 🏷️ Shipping & Vials Labels Studio
             </Link>
             <button
               className="btn btn-outline"
@@ -217,6 +228,76 @@ export default function AdminLogisticsTab() {
           </div>
         }
       />
+
+      {/* ── Subtab Navigation Bar (Shipments vs Labels) ── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        borderBottom: '1px solid #e2e8f0',
+        paddingBottom: '10px',
+        marginBottom: '1.25rem',
+        flexWrap: 'wrap'
+      }}>
+        <button
+          onClick={() => setActiveTab('supplier_shipments')}
+          style={{
+            padding: '7px 14px',
+            borderRadius: '6px',
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            border: '1px solid',
+            cursor: 'pointer',
+            background: activeTab === 'supplier_shipments' ? '#0f172a' : '#ffffff',
+            color: activeTab === 'supplier_shipments' ? '#ffffff' : '#475569',
+            borderColor: activeTab === 'supplier_shipments' ? '#0f172a' : '#cbd5e1',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <Truck size={14} /> Supplier Shipments
+        </button>
+        <button
+          onClick={() => setActiveTab('agency_rfqs')}
+          style={{
+            padding: '7px 14px',
+            borderRadius: '6px',
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            border: '1px solid',
+            cursor: 'pointer',
+            background: activeTab === 'agency_rfqs' ? '#0f172a' : '#ffffff',
+            color: activeTab === 'agency_rfqs' ? '#ffffff' : '#475569',
+            borderColor: activeTab === 'agency_rfqs' ? '#0f172a' : '#cbd5e1',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <Package size={14} /> Agency RFQs
+        </button>
+        <Link
+          href="/admin/labels"
+          style={{
+            padding: '7px 14px',
+            borderRadius: '6px',
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            border: '1px solid #bae6fd',
+            cursor: 'pointer',
+            background: '#f0f9ff',
+            color: '#0284c7',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+          title="Direct link to Full Labels Studio"
+        >
+          <Tags size={14} /> 🏷️ Labels Studio & Printing <ArrowRight size={12} />
+        </Link>
+      </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
         <KpiScopeBar

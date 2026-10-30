@@ -86,8 +86,8 @@ export default function CatalogRightSidebar({
         setCopiedType(type);
         toast.success(
           type === 'filtered' && hasActiveFilters
-            ? 'Enlace con filtros activos copiado al portapapeles ✓'
-            : 'Enlace base del catálogo copiado al portapapeles ✓'
+            ? 'Filtered catalog link copied to clipboard ✓'
+            : 'Base catalog link copied to clipboard ✓'
         );
         setTimeout(() => setCopiedType(null), 2000);
       }

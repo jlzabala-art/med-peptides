@@ -49,7 +49,7 @@ import InlineEditableCell from '@/components/ui/InlineEditableCell';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import './ColwayPriceList.css';
 
-export default function ColwayPriceListClient({ initialProducts = [] }) {
+export default function ColwayPriceListClient({ initialProducts = [], initialCategory = 'all', isHairLineFocus = false }) {
   const router = useRouter();
   const { user } = useAuth();
   const { is, effectiveRole } = useRoleAccess();
@@ -64,7 +64,7 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
   const [currency, setCurrency] = useState('AED'); // AED, USD, EUR
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'cards'
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22 Scope Switcher)
   const [copied, setCopied] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -820,6 +820,61 @@ export default function ColwayPriceListClient({ initialProducts = [] }) {
             </div>
           </div>
         </header>
+
+        {/* ── Role Banner (Informed Login UX) ── */}
+        <div className="no-print" style={{
+          marginBottom: '1rem',
+          padding: '10px 14px',
+          borderRadius: '8px',
+          background: isGuest ? '#fffbeb' : (isClinicOrDoctor ? '#f0fdfa' : '#f8fafc'),
+          border: `1px solid ${isGuest ? '#fef3c7' : (isClinicOrDoctor ? '#ccfbf1' : '#e2e8f0')}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {isGuest ? (
+              <Lock size={16} className="text-amber-600" />
+            ) : (
+              <ShieldCheck size={16} className={isClinicOrDoctor ? 'text-teal-600' : 'text-slate-600'} />
+            )}
+            <span style={{ fontSize: '0.80rem', color: isGuest ? '#92400e' : '#334155', fontWeight: 600 }}>
+              {isGuest && (
+                <>
+                  Viewing <strong>Public Retail MSRP Schedule</strong>. Are you a registered clinic, trichologist or wholesaler?{' '}
+                  <Link href="/login?redirect=/pricing/colway" style={{ color: '#0284c7', textDecoration: 'underline', fontWeight: 700 }}>
+                    Sign in here
+                  </Link>{' '}
+                  to view verified professional B2B pricing.
+                </>
+              )}
+              {!isGuest && isClinicOrDoctor && !isWholesaler && (
+                <>
+                  Authenticated as <strong>Doctor / Clinic Practitioner</strong>. Professional Clinic Price Schedule is unlocked.
+                </>
+              )}
+              {!isGuest && isWholesaler && (
+                <>
+                  Authenticated as <strong>Wholesaler / Distributor</strong>. Volume B2B Wholesale Pricing is unlocked.
+                </>
+              )}
+            </span>
+          </div>
+
+          <span style={{
+            fontSize: '0.70rem',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            padding: '2px 8px',
+            borderRadius: '4px',
+            background: isGuest ? '#fef3c7' : '#e0f2fe',
+            color: isGuest ? '#b45309' : '#0369a1'
+          }}>
+            Active Tier: {isGuest ? 'Retail (Public)' : (isWholesaler ? 'Wholesaler B2B' : 'Clinic / Doctor')}
+          </span>
+        </div>
 
         {/* ── Scope Indicator & Switcher (Golden Rule #22) ── */}
         <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>

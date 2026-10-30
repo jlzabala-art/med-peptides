@@ -252,7 +252,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
         snap.forEach(d => {
           const data = d.data();
           if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
-          const str = (d.id + ' ' + (data.name||'') + ' ' + (data.title||'') + ' ' + (data.supplier||'') + ' ' + (data.brand||'') + ' ' + (data.category||'') + ' ' + JSON.stringify(data.keywords||[])).toLowerCase();
+          const str = (d.id + ' ' + (data.name || '') + ' ' + (data.title || '') + ' ' + (data.supplier || '') + ' ' + (data.brand || '') + ' ' + (data.category || '') + ' ' + JSON.stringify(data.keywords || [])).toLowerCase();
           if (str.includes('teletest') || d.id.startsWith('teletest-') || data.supplierId === 'supplier-teletest') {
             list.push({ id: d.id, ...data });
           }
@@ -286,10 +286,9 @@ async function fetchTargetedBrandProducts(brandSlug) {
             const vSupp = String(v.supplierId || v.supplier_id || v.supplier || v.supplierName || '').toLowerCase();
             return vSupp.includes('nplab') || vSupp.includes('np-lab') || vSupp.includes('np lab');
           }).map(v => {
-            const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
-            const costEur = round2(v.price_eur ?? v.cost ?? v.pricing?.master?.perUnit ?? v.unit_price ?? 50);
-            const mediluxePriceEur = round2(costEur * 1.15);
-            const nikolasPublicPriceEur = round2(mediluxePriceEur * 1.15);
+            const costEur = Number(v.price_eur ?? v.cost ?? v.pricing?.master?.perUnit ?? v.unit_price ?? 50);
+            const mediluxePriceEur = Number((costEur * 1.15).toFixed(2));
+            const nikolasPublicPriceEur = Number((mediluxePriceEur * 1.15).toFixed(2));
             return {
               ...v,
               cost: costEur,
@@ -376,7 +375,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
           });
         }
       });
-    } catch (err) {}
+    } catch (err) { }
 
     const hairPeptidesList = [];
     try {
@@ -403,7 +402,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
           });
         }
       });
-    } catch (err) {}
+    } catch (err) { }
 
     return [
       ...compoundedList,
@@ -431,7 +430,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
           if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
           const id = (d.id || '').toLowerCase();
           const name = (data.name || data.title || '').toLowerCase();
-          const str = (id + ' ' + name + ' ' + (data.category||'') + ' ' + JSON.stringify(data.keywords||[])).toLowerCase();
+          const str = (id + ' ' + name + ' ' + (data.category || '') + ' ' + JSON.stringify(data.keywords || [])).toLowerCase();
 
           const isIncretinOrLipolytic = id.includes('semaglutide') || id.includes('tirzepatide') || id.includes('retatrutide') || id.includes('tesamorelin') || id.includes('aod') || id.includes('cagrilintide') || id.includes('mots') || id.includes('tesofensine');
           const isNutrigen = id.includes('nutrigen') || str.includes('nutrigen') || str.includes('berberine');
@@ -468,7 +467,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
           }
         }
       });
-    } catch (err) {}
+    } catch (err) { }
     return fallbackList;
   }
 
@@ -483,7 +482,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
           if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
           const id = (d.id || '').toLowerCase();
           const name = (data.name || data.title || '').toLowerCase();
-          const str = (id + ' ' + name + ' ' + (data.category||'')).toLowerCase();
+          const str = (id + ' ' + name + ' ' + (data.category || '')).toLowerCase();
 
           const isRepairPeptide = id.includes('bpc') || id.includes('tb-500') || id.includes('tb500') || id.includes('kpv');
           const isColwayRepair = str.includes('colway') && (str.includes('colvita') || str.includes('vege') || str.includes('wash'));
@@ -494,7 +493,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
         });
         if (list.length > 0) return list;
       }
-    } catch (e) {}
+    } catch (e) { }
 
     const fallbackList = [];
     try {
@@ -504,7 +503,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
         const pid = (p.id || '').toLowerCase();
         if (pid.includes('bpc') || pid.includes('tb-500')) fallbackList.push(p);
       });
-    } catch (err) {}
+    } catch (err) { }
     return fallbackList;
   }
 
@@ -518,14 +517,14 @@ async function fetchTargetedBrandProducts(brandSlug) {
           const data = d.data();
           if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
           const id = (d.id || '').toLowerCase();
-          const str = (id + ' ' + (data.name||'') + ' ' + (data.title||'')).toLowerCase();
+          const str = (id + ' ' + (data.name || '') + ' ' + (data.title || '')).toLowerCase();
 
           const isLongevity = id.includes('epithalon') || id.includes('mots') || id.includes('foxo') || id.includes('nad') || id.includes('eterna') || str.includes('longevity');
           if (isLongevity) list.push({ id: d.id, ...data });
         });
         if (list.length > 0) return list;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Neuro-Performance & Sleep: Semax, Selank, DSIP, Cortisol
@@ -538,14 +537,14 @@ async function fetchTargetedBrandProducts(brandSlug) {
           const data = d.data();
           if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
           const id = (d.id || '').toLowerCase();
-          const str = (id + ' ' + (data.name||'') + ' ' + (data.title||'')).toLowerCase();
+          const str = (id + ' ' + (data.name || '') + ' ' + (data.title || '')).toLowerCase();
 
           const isNeuro = id.includes('semax') || id.includes('selank') || id.includes('dsip') || str.includes('cortisol') || str.includes('focus') || str.includes('sleep');
           if (isNeuro) list.push({ id: d.id, ...data });
         });
         if (list.length > 0) return list;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Dermal Aesthetics: Colway Blue Diamond, GHK-Cu, Colvita
@@ -558,14 +557,14 @@ async function fetchTargetedBrandProducts(brandSlug) {
           const data = d.data();
           if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
           const id = (d.id || '').toLowerCase();
-          const str = (id + ' ' + (data.name||'') + ' ' + (data.title||'')).toLowerCase();
+          const str = (id + ' ' + (data.name || '') + ' ' + (data.title || '')).toLowerCase();
 
           const isDermal = id.includes('diamond') || id.includes('ghk') || id.includes('vege') || id.includes('colvita') || str.includes('dermal') || str.includes('peeling');
           if (isDermal) list.push({ id: d.id, ...data });
         });
         if (list.length > 0) return list;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   if (!adminDb) return [];
@@ -575,7 +574,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
     snap.forEach(d => {
       const data = d.data();
       if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
-      const str = (d.id + ' ' + (data.name||'') + ' ' + (data.title||'') + ' ' + (data.supplier||'') + ' ' + (data.brand||'') + ' ' + (data.category||'') + ' ' + JSON.stringify(data.keywords||[])).toLowerCase();
+      const str = (d.id + ' ' + (data.name || '') + ' ' + (data.title || '') + ' ' + (data.supplier || '') + ' ' + (data.brand || '') + ' ' + (data.category || '') + ' ' + JSON.stringify(data.keywords || [])).toLowerCase();
 
       let matches = false;
       if (s === 'colway') {
@@ -617,7 +616,7 @@ export default async function NextCollectionPage({ params, searchParams }) {
       wholesalerId: ref,
       referralCode: code,
       collection: slug
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   const ALL_TARGETED_SLUGS = [

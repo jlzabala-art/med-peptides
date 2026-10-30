@@ -59,6 +59,8 @@ export const PORTAL_CONFIG = {
   wholesaler: [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/wholesaler', category: 'Dashboard' },
     { id: 'catalogs', label: 'Bulk Catalogs', icon: Package, path: '/wholesaler/catalogs', category: 'Commerce' },
+    { id: 'peptides-pricing', label: 'Peptide Vials Prices', icon: DollarSign, path: '/pricing/peptides', category: 'Commerce' },
+    { id: 'genomics-pricing', label: '24Genetics DNA Prices', icon: DollarSign, path: '/pricing/24genetics', category: 'Commerce' },
     { id: 'colway-pricing', label: 'Colway UAE Prices', icon: DollarSign, path: '/pricing/colway', category: 'Commerce' },
     { id: 'bulk-orders', label: 'Bulk Orders', icon: FileText, path: '/wholesaler/bulk-orders', category: 'Commerce' },
     { id: 'rx-inbox', label: 'Rx Inbox', icon: Database, path: '/wholesaler/rx-inbox', category: 'Commerce' },

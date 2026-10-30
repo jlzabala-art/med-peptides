@@ -1,4 +1,4 @@
-import { LayoutDashboard, Activity, MessageSquare, Calendar, Bell, Users, Stethoscope, HeartPulse, FileText, Bot, Package, Search, Eye, TrendingUp, Tags, ShieldCheck, Database, ShoppingBag, Building, MapPin, Receipt, CreditCard, Users2, LineChart, Truck, ThermometerSnowflake, Navigation, ClipboardList, Mail, Newspaper, Share2, Ticket, PieChart, BrainCircuit, Sparkles, TerminalSquare, LayoutTemplate, ShieldAlert, Settings, Factory, CheckSquare } from '@/lib/icons';
+import { LayoutDashboard, Activity, MessageSquare, Calendar, Bell, Users, Stethoscope, HeartPulse, FileText, Bot, Package, Search, Eye, TrendingUp, Tags, ShieldCheck, Database, ShoppingBag, Building, MapPin, Receipt, CreditCard, Users2, LineChart, Truck, ThermometerSnowflake, Navigation, ClipboardList, Mail, Newspaper, Share2, Ticket, PieChart, BrainCircuit, Sparkles, TerminalSquare, LayoutTemplate, ShieldAlert, Settings, Factory, CheckSquare, FileSpreadsheet } from '@/lib/icons';
 
 // Helper icons
 const HandshakeIcon = Users2;
@@ -67,6 +67,12 @@ export const NAVIGATION_REGISTRY = [
         icon: Search,
         roles: ['admin', 'pharmacist', 'medical_director', 'sales', 'operations'],
         // Absorbed: pricing-visibility, alternatives (rendered as tabs within the view)
+      },
+      {
+        id: 'price-schedules',
+        label: 'B2B Price Schedules',
+        icon: FileSpreadsheet,
+        roles: ['admin', 'pharmacist', 'medical_director', 'doctor', 'sales', 'operations'],
       },
       {
         id: 'competitors',
@@ -176,14 +182,14 @@ export const NAVIGATION_REGISTRY = [
     id: 'logistics',
     label: 'Logistics',
     icon: Truck,
-    roles: ['admin', 'operations', 'supplier'],
+    roles: ['admin', 'operations', 'supplier', 'pharmacist', 'sales'],
     items: [
-      { id: 'shipping',          label: 'Shipping',          icon: Truck,               roles: ['admin', 'operations'] },
-      { id: 'labels',            label: 'Compounding Labels',icon: Tags,                roles: ['admin', 'operations', 'pharmacist'] },
-      { id: 'shipping-network',  label: 'Shipping Network',  icon: MapPin,              roles: ['admin', 'operations'] },
-      { id: 'logistics-tracker', label: 'Logistics Tracker', icon: Navigation,          roles: ['admin', 'operations'] },
-      { id: 'cold-chain',        label: 'Cold Chain',        icon: ThermometerSnowflake,roles: ['admin', 'operations'] },
-      { id: 'shipment-status',   label: 'Shipment Status',   icon: Truck,               roles: ['admin', 'operations', 'supplier'] },
+      { id: 'shipping',          label: 'Shipping',                  icon: Truck,               roles: ['admin', 'operations', 'supplier', 'pharmacist', 'sales'] },
+      { id: 'labels',            label: 'Shipping & Vials Labels',   icon: Tags,                roles: ['admin', 'operations', 'supplier', 'pharmacist', 'sales'] },
+      { id: 'shipping-network',  label: 'Shipping Network',          icon: MapPin,              roles: ['admin', 'operations'] },
+      { id: 'logistics-tracker', label: 'Logistics Tracker',         icon: Navigation,          roles: ['admin', 'operations'] },
+      { id: 'cold-chain',        label: 'Cold Chain',                icon: ThermometerSnowflake,roles: ['admin', 'operations'] },
+      { id: 'shipment-status',   label: 'Shipment Status',           icon: Truck,               roles: ['admin', 'operations', 'supplier'] },
     ]
   },
 
@@ -296,10 +302,17 @@ export const getNavigationForRole = (role) => {
  */
 export const ROUTE_ALIASES = {
   // Catalog
+  'pricing':             'price-schedules',
+  'b2b-prices':          'price-schedules',
+  'pricing-schedules':   'price-schedules',
   'pricing-visibility':  'catalog',
   'alternatives':        'catalog',
   'certificates':        'inventory',
   'catalog-enrichment':  'inventory',
+  // Logistics & Labels
+  'compounding-labels':  'labels',
+  'shipping-labels':     'labels',
+  'etiquetas':           'labels',
   // Sales
   'sales-orders':        'orders',
   'patient-orders':      'orders',
