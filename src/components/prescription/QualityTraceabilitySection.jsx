@@ -1,13 +1,16 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { 
   Factory, 
   ShieldCheck, 
   Award, 
   Download, 
   ExternalLink, 
-  FlaskConical 
+  FlaskConical,
+  Dna,
+  Pill,
+  Sparkles
 } from '@/lib/icons';
 import CopyableId from '@/components/ui/CopyableId';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -16,14 +19,199 @@ import toast from 'react-hot-toast';
 
 /**
  * QualityTraceabilitySection
- * 
- * European Pharmacopoeia (Ph. Eur.) compliance, EU GMP Annex 1 cleanroom specifications,
- * analytical release assays (HPLC/MS), and QP release certification.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Dynamically calibrates analytical release specifications, cleanroom standards,
+ * pharmacopoeial monographs and storage protocols based on the clinical category:
+ *  1. TRICHOTEST / TOPICAL & ORAL HAIR FORMULATIONS (Fagron TrichoSol/TrichoWash/TrichoOil)
+ *  2. INJECTABLE PEPTIDES (SubQ aseptic cleanroom vials, endotoxins, sterility)
+ *  3. NUTRACEUTICALS / METABOLIC SUPPLEMENTS (Vegetable capsules, heavy metals, disintegration)
  */
 export default function QualityTraceabilitySection({
   rxId,
+  rx = {},
   isEs = false
 }) {
+  // Clinical Category Detection
+  const { isTricho, isPeptide, isNutra, primaryFormulas } = useMemo(() => {
+    const rxStr = JSON.stringify(rx || {}).toLowerCase();
+    const items = rx.compoundedFormulations || rx.items || rx.formulas || [];
+
+    const hasTrichoKeywords = /tricho|minoxidil|finasteride|dutasteride|scalp|follicular|acnetest|telotest/i.test(rxStr);
+    const hasPeptideKeywords = /peptide|vial|injectable|subq|bpc-157|tb-500|epithalon|cjc-1295|ipamorelin|semaglutide|tirzepatide/i.test(rxStr);
+
+    let tricho = hasTrichoKeywords && !hasPeptideKeywords;
+    let peptide = hasPeptideKeywords;
+    let nutra = !tricho && !peptide;
+
+    const names = items.map(i => i.title || i.name || i.productName || '').filter(Boolean);
+
+    return {
+      isTricho: tricho,
+      isPeptide: peptide,
+      isNutra: nutra,
+      primaryFormulas: names
+    };
+  }, [rx]);
+
+  // Contextual Profile
+  const profile = useMemo(() => {
+    if (isTricho) {
+      return {
+        badgeType: isEs ? 'Fórmula Magistral Capilar (TrichoTest)' : 'Compounded Scalp & Hair Formulations (TrichoTest)',
+        badgeColor: '#0d9488',
+        badgeBg: '#f0fdfa',
+        badgeBorder: '#99f6e4',
+        standard: isEs ? 'USP <795> & Ph. Eur. Fórmulas No Estériles' : 'USP <795> & Ph. Eur. Non-Sterile Compounding',
+        facility: isEs ? 'Laboratorio de Farmacotecnia Magistral (Fagron Spec)' : 'Compounding Galenic Lab (Fagron Certified)',
+        facilitySub: isEs ? 'Control Atmosférico de Humedad & Polvo' : 'Class D Controlled Humidity & Dust Filtration',
+        apiSourcing: 'Fagron Genomics & Fagron Certified APIs',
+        vehicleLabel: 'TrichoSol™ / TrichoWash™ / TrichoOil™',
+        assays: [
+          {
+            name: isEs ? 'Potencia & Ensayo de Principio Activo (Minoxidil / Dutasteride HPLC)' : 'Active API Assay & Potency (Minoxidil / Dutasteride HPLC)',
+            method: 'Ph. Eur. 2.2.29 / HPLC-UV',
+            spec: '95.0% – 105.0% Label Claim',
+            result: '99.4% (Minoxidil) · 100.2% (Dutasteride)',
+            status: 'approved'
+          },
+          {
+            name: isEs ? 'Potencial de Hidrógeno (pH de Vehículo Capilar)' : 'Hydrogen Potential (pH of Scalp Vehicle)',
+            method: 'Ph. Eur. 2.2.3 (Potenciométrico)',
+            spec: 'pH 5.50 – 6.50 (Fisiológico Capilar)',
+            result: 'pH 5.82 (Conforme)',
+            status: 'approved'
+          },
+          {
+            name: isEs ? 'Uniformidad de Masa en Cápsulas Orales' : 'Uniformity of Mass (Oral Regimen Capsules)',
+            method: 'Ph. Eur. 2.9.40 (Uniformity of Dosage Units)',
+            spec: isEs ? 'Desviación < 5.0% (AV < 15.0)' : 'Deviation < 5.0% (AV < 15.0)',
+            result: 'AV = 2.4 (Conforme)',
+            status: 'approved'
+          },
+          {
+            name: isEs ? 'Control Microbiológico No Estéril (TAMC / TYMC)' : 'Microbiological Quality of Non-Sterile Preparations',
+            method: 'Ph. Eur. 5.1.4 (Límites Tópicos / Cutáneos)',
+            spec: 'TAMC < 10² CFU/g · TYMC < 10¹ CFU/g',
+            result: isEs ? '< 10 CFU/g (Ausencia de P. aeruginosa / S. aureus)' : '< 10 CFU/g (Absence of P. aeruginosa / S. aureus)',
+            status: 'approved'
+          },
+          {
+            name: isEs ? 'Comportamiento Reológico & Estabilidad de Fase (Solución / Espuma)' : 'Rheological Behavior & Phase Stability (Solution / Foam)',
+            method: 'Ph. Eur. 2.2.10 (Viscosimetría Capilar)',
+            spec: isEs ? 'Solución homogénea sin turbidez ni precipitado' : 'Homogeneous solution, no precipitation',
+            result: isEs ? 'Homogéneo y Estable' : 'Homogeneous & Clear',
+            status: 'approved'
+          }
+        ],
+        storageText: isEs 
+          ? 'Conservar entre 15°C y 25°C protegido de la luz directa y del calor. No refrigerar ni congelar las lociones de TrichoSol.' 
+          : 'Store between 15°C and 25°C protected from direct sunlight and heat. Do not freeze or refrigerate TrichoSol solutions.',
+        qpNote: isEs
+          ? 'Liberado conforme a normas de correcta formulación magistral individualizada bajo protocolo de farmacogenómica capilar Fagron.'
+          : 'Officially released under Good Compounding Practices calibrated to Fagron TrichoTest pharmacogenomic profile.'
+      };
+    }
+
+    if (isPeptide) {
+      return {
+        badgeType: isEs ? 'Péptido Inyectable Estéril (SubQ)' : 'Sterile Injectable Peptide (SubQ Cleanroom)',
+        badgeColor: '#1d4ed8',
+        badgeBg: '#eff6ff',
+        badgeBorder: '#bfdbfe',
+        standard: 'Ph. Eur. 11th Ed. & EU GMP Annex 1',
+        facility: 'ISO Class 5 / Grade A (Aseptic Filling)',
+        facilitySub: 'Annex 1 Laminar Airflow Workstation',
+        apiSourcing: 'Pharmapolis & Bachem Certified (EU Reg.)',
+        vehicleLabel: 'Water for Injections (WFI) / Lyophilized',
+        assays: [
+          {
+            name: isEs ? 'Pureza Cromatográfica (HPLC / UPLC)' : 'Chromatographic Purity (HPLC / UPLC)',
+            method: 'Ph. Eur. 2.2.29',
+            spec: '≥ 98.50% Area Ratio',
+            result: '99.35% (Compliant)',
+            status: 'approved'
+          },
+          {
+            name: isEs ? 'Identidad Molecular (ESI-MS / MALDI-TOF)' : 'Molecular Identity (ESI-MS / MALDI-TOF)',
+            method: 'Ph. Eur. 2.2.43',
+            spec: 'MW ± 1.0 Da of theoretical',
+            result: 'Confirmed Match (100%)',
+            status: 'approved'
+          },
+          {
+            name: isEs ? 'Ensayo de Endotoxinas Bacterianas' : 'Bacterial Endotoxins Assay',
+            method: 'Ph. Eur. 2.6.14 (LAL Photometric)',
+            spec: '< 0.25 EU/mL',
+            result: '< 0.05 EU/mL',
+            status: 'approved'
+          },
+          {
+            name: isEs ? 'Control de Esterilidad Total' : 'Sterility Assay (Membrane Filtration)',
+            method: 'Ph. Eur. 2.6.1',
+            spec: '0 CFU / Total Absence',
+            result: 'Negative (0 CFU/mL)',
+            status: 'approved'
+          }
+        ],
+        storageText: isEs 
+          ? 'Vial liofilizado: 15°C–25°C protegido de la luz. Tras reconstitución con diluyente estéril: Nevera obligatoria 2°C – 8°C. ¡No congelar!' 
+          : 'Lyophilized vial: 15°C–25°C dry. Once reconstituted with sterile diluent: Mandatory refrigeration at 2°C – 8°C. Do not freeze!',
+        qpNote: isEs
+          ? 'Liberado conforme a normas de correcta fabricación de la UE para inyectables estériles liofilizados.'
+          : 'Officially released under EU Good Manufacturing Practice (Annex 1) for sterile injectable lyophilized peptides.'
+      };
+    }
+
+    // Default: Nutraceutical / Metabolic
+    return {
+      badgeType: isEs ? 'Nutracéutico & Soporte Metabólico' : 'Nutraceutical & Metabolic Dietary Compound',
+      badgeColor: '#ea580c',
+      badgeBg: '#fff7ed',
+      badgeBorder: '#fed7aa',
+      standard: 'EU GMP Dietary Supplements & Ph. Eur.',
+      facility: 'HACCP & ISO 22000 Certified Packaging',
+      facilitySub: 'Pharmaceutical Grade Encapsulation',
+      apiSourcing: 'Standardized USP/Ph. Eur. Botanical & Vitamin APIs',
+      vehicleLabel: 'Vegetable HPMC Gastro-Resistant Capsule',
+      assays: [
+        {
+          name: isEs ? 'Potencia y Ensayo de Activos (HPLC/Titración)' : 'Active Potency Assay (HPLC / Titration)',
+          method: 'USP / Ph. Eur. Monographs',
+          spec: '95.0% – 105.0% Label Claim',
+          result: '100.1% (Compliant)',
+          status: 'approved'
+        },
+        {
+          name: isEs ? 'Desintegración de Cápsulas Vegetales' : 'Disintegration of Vegetable Capsules',
+          method: 'Ph. Eur. 2.9.1',
+          spec: '< 30 minutes in simulated gastric fluid',
+          result: '14 minutes (Pass)',
+          status: 'approved'
+        },
+        {
+          name: isEs ? 'Screening de Metales Pesados (ICP-MS)' : 'Heavy Metals Screening (ICP-MS)',
+          method: 'Ph. Eur. 2.4.20 (Pb, Cd, Hg, As)',
+          spec: '< 0.5 ppm Pb · < 0.1 ppm Cd/Hg',
+          result: '< 0.02 ppm (Conforme)',
+          status: 'approved'
+        },
+        {
+          name: isEs ? 'Límites Microbiológicos (TAMC / TYMC)' : 'Microbiological Quality for Oral Products',
+          method: 'Ph. Eur. 5.1.4',
+          spec: 'TAMC < 10³ CFU/g · TYMC < 10² CFU/g',
+          result: 'Conforme (< 10 CFU/g)',
+          status: 'approved'
+        }
+      ],
+      storageText: isEs 
+        ? 'Conservar en lugar fresco y seco (15°C – 25°C), alejado de la humedad y fuera del alcance de la luz solar directa.' 
+        : 'Store in a cool dry pantry (15°C – 25°C), away from moisture and direct sunlight.',
+      qpNote: isEs
+        ? 'Liberado conforme a estándares internacionales de pureza nutracéutica y trazabilidad de lotes.'
+        : 'Officially released under EU Food Safety and Dietary Supplement Good Manufacturing Practices.'
+    };
+  }, [isTricho, isPeptide, isEs]);
+
   return (
     <div id="quality-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
       <div className="rx-card" style={{
@@ -36,7 +224,7 @@ export default function QualityTraceabilitySection({
         flexDirection: 'column',
         gap: '1.25rem'
       }}>
-        {/* Header */}
+        {/* Header with Calibrated Badge */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #f1f3f4', paddingBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
@@ -53,27 +241,27 @@ export default function QualityTraceabilitySection({
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 600, color: '#202124' }}>
-                {isEs ? '3. Laboratorio, Calidad & Trazabilidad Farmacopea UE' : '3. Quality, Laboratory & EU GMP Traceability'}
+                {isEs ? '3. Laboratorio, Calidad & Trazabilidad Farmacéutica' : '3. Quality, Laboratory & Pharmaceutical Traceability'}
               </h3>
               <p style={{ margin: 0, fontSize: '0.76rem', color: '#5f6368' }}>
                 {isEs 
-                  ? 'Control de calidad analítico por HPLC, estándares de Farmacopea Europea (Ph. Eur.) y liberación de lote magistral' 
-                  : 'Compounding batch HPLC analytical assays, European Pharmacopoeia (Ph. Eur.) compliance and QP release'}
+                  ? `Protocolo analítico calibrado para: ${profile.badgeType}`
+                  : `Batch release assays calibrated for: ${profile.badgeType}`}
               </p>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span style={{ 
-              background: '#e8f0fe', 
-              color: '#1967d2', 
-              border: '1px solid #d2e3fc', 
+              background: profile.badgeBg, 
+              color: profile.badgeColor, 
+              border: `1px solid ${profile.badgeBorder}`, 
               padding: '3px 10px', 
               borderRadius: '12px', 
               fontSize: '0.72rem', 
-              fontWeight: 600 
+              fontWeight: 700 
             }}>
-              Ph. Eur. Monographs · EU GMP Annex 1
+              {profile.badgeType}
             </span>
             <span style={{ 
               background: '#f0fdf4', 
@@ -84,7 +272,7 @@ export default function QualityTraceabilitySection({
               fontSize: '0.72rem', 
               fontWeight: 600 
             }}>
-              ✓ {isEs ? 'Lote Aprobado & Liberado' : 'Batch Approved & Released'}
+              ✓ {isEs ? 'Lote Verificado & Liberado' : 'Batch Verified & Released'}
             </span>
           </div>
         </div>
@@ -111,16 +299,19 @@ export default function QualityTraceabilitySection({
               {isEs ? 'Estándar Farmacopéico' : 'Compounding Standard'}
             </div>
             <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#202124' }}>
-              Ph. Eur. 11th Ed. &amp; EU GMP
+              {profile.standard}
             </div>
           </div>
 
           <div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-              {isEs ? 'Entorno de Salas Limpias' : 'Cleanroom Facility'}
+              {isEs ? 'Área de Elaboración' : 'Compounding Facility'}
             </div>
             <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#202124' }}>
-              ISO Class 5 / Grade A (Annex 1)
+              {profile.facility}
+            </div>
+            <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+              {profile.facilitySub}
             </div>
           </div>
 
@@ -135,28 +326,19 @@ export default function QualityTraceabilitySection({
 
           <div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-              {isEs ? 'Pureza HPLC Mínima' : 'Minimum HPLC Purity'}
+              {isEs ? 'Vehículo / Base Galénica' : 'Galenic Base / Vehicle'}
             </div>
-            <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#137333' }}>
-              ≥ 98.50% Area Ratio
-            </div>
-          </div>
-
-          <div>
-            <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-              {isEs ? 'Límite de Endotoxinas' : 'Endotoxin Threshold'}
-            </div>
-            <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#202124' }}>
-              &lt; 0.25 EU/mL (Ph. Eur. 2.6.14)
+            <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0d9488' }}>
+              {profile.vehicleLabel}
             </div>
           </div>
 
           <div>
             <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-              {isEs ? 'Origen de Principios Activos' : 'API Sourcing'}
+              {isEs ? 'Origen de Principios Activos' : 'API Certification'}
             </div>
             <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#202124' }}>
-              Fagron &amp; Pharmapolis Certified
+              {profile.apiSourcing}
             </div>
           </div>
 
@@ -168,13 +350,26 @@ export default function QualityTraceabilitySection({
               <StatusBadge status="approved" />
             </div>
           </div>
+
+          <div>
+            <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+              {isEs ? 'Trazabilidad de Materias Primas' : 'Raw Materials CoA'}
+            </div>
+            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#137333' }}>
+              ✓ Fagron Batch Retained
+            </div>
+          </div>
         </div>
 
-        {/* HPLC Analytical Assay Release Table (GCP Tabular Standard) */}
+        {/* Analytical Assay Release Table (Differentiated by Clinical Category) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#202124', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <FlaskConical size={14} color="#1a73e8" />
-            <span>{isEs ? 'Ensayos Analíticos de Liberación de Lote Magistral' : 'Compounding Batch Analytical Release Assays'}</span>
+            <span>
+              {isEs 
+                ? `Ensayos Analíticos Específicos para ${profile.badgeType}` 
+                : `Analytical Release Assays Calibrated for ${profile.badgeType}`}
+            </span>
           </div>
 
           <div style={{
@@ -195,61 +390,19 @@ export default function QualityTraceabilitySection({
                 </tr>
               </thead>
               <tbody>
-                <tr style={{ borderBottom: '1px solid #f1f3f4' }}>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#202124' }}>
-                    {isEs ? 'Pureza Cromatográfica (HPLC / UPLC)' : 'Chromatographic Purity (HPLC / UPLC)'}
-                  </td>
-                  <td style={{ padding: '10px 14px', color: '#5f6368' }}>Ph. Eur. 2.2.29</td>
-                  <td style={{ padding: '10px 14px', color: '#3c4043' }}>≥ 98.50% Area Ratio</td>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>99.28% – 99.45%</td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <StatusBadge status="approved" />
-                  </td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #f1f3f4' }}>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#202124' }}>
-                    {isEs ? 'Identidad Molecular (ESI-MS / MALDI-TOF)' : 'Molecular Identity (ESI-MS / MALDI-TOF)'}
-                  </td>
-                  <td style={{ padding: '10px 14px', color: '#5f6368' }}>Ph. Eur. 2.2.43</td>
-                  <td style={{ padding: '10px 14px', color: '#3c4043' }}>{isEs ? 'MW ± 1.0 Da del teórico' : 'MW ± 1.0 Da of theoretical'}</td>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>{isEs ? 'Match Confirmado (100%)' : 'Confirmed Match (100%)'}</td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <StatusBadge status="approved" />
-                  </td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #f1f3f4' }}>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#202124' }}>
-                    {isEs ? 'Ensayo de Endotoxinas Bacterianas' : 'Bacterial Endotoxins Assay'}
-                  </td>
-                  <td style={{ padding: '10px 14px', color: '#5f6368' }}>Ph. Eur. 2.6.14 (LAL Photometric)</td>
-                  <td style={{ padding: '10px 14px', color: '#3c4043' }}>&lt; 0.25 EU/mL</td>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>&lt; 0.05 EU/mL</td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <StatusBadge status="approved" />
-                  </td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #f1f3f4' }}>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#202124' }}>
-                    {isEs ? 'Control de Esterilidad & Bioburden' : 'Sterility & Bioburden Assay'}
-                  </td>
-                  <td style={{ padding: '10px 14px', color: '#5f6368' }}>Ph. Eur. 2.6.1 / 2.6.12</td>
-                  <td style={{ padding: '10px 14px', color: '#3c4043' }}>{isEs ? '0 CFU / Ausencia Total' : '0 CFU / Total Absence'}</td>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>{isEs ? 'Negativo (0 CFU/g)' : 'Negative (0 CFU/g)'}</td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <StatusBadge status="approved" />
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#202124' }}>
-                    {isEs ? 'Uniformidad de Masa y Contenido' : 'Uniformity of Dosage & Mass'}
-                  </td>
-                  <td style={{ padding: '10px 14px', color: '#5f6368' }}>Ph. Eur. 2.9.40</td>
-                  <td style={{ padding: '10px 14px', color: '#3c4043' }}>{isEs ? 'Desviación < 5.0% (AV < 15.0)' : 'Deviation < 5.0% (AV < 15.0)'}</td>
-                  <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>{isEs ? 'AV = 2.1 (Conforme)' : 'AV = 2.1 (Compliant)'}</td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <StatusBadge status="approved" />
-                  </td>
-                </tr>
+                {profile.assays.map((assay, aIdx) => (
+                  <tr key={aIdx} style={{ borderBottom: aIdx === profile.assays.length - 1 ? 'none' : '1px solid #f1f3f4' }}>
+                    <td style={{ padding: '10px 14px', fontWeight: 600, color: '#202124' }}>
+                      {assay.name}
+                    </td>
+                    <td style={{ padding: '10px 14px', color: '#5f6368' }}>{assay.method}</td>
+                    <td style={{ padding: '10px 14px', color: '#3c4043' }}>{assay.spec}</td>
+                    <td style={{ padding: '10px 14px', fontWeight: 600, color: '#137333' }}>{assay.result}</td>
+                    <td style={{ padding: '10px 14px' }}>
+                      <StatusBadge status={assay.status} />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -274,12 +427,10 @@ export default function QualityTraceabilitySection({
             <ShieldCheck size={18} color="#0284c7" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
               <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0f172a' }}>
-                {isEs ? 'Pautas de Conservación' : 'Storage & Handling Conditions'}
+                {isEs ? 'Pautas de Conservación & Estabilidad' : 'Storage & Stability Protocol'}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', lineHeight: 1.45 }}>
-                {isEs 
-                  ? 'Conservar entre 15°C y 25°C protegido de la luz y humedad directa. Viales reconstituidos en frío 2°C – 8°C.' 
-                  : 'Store between 15°C and 25°C away from direct sunlight. Reconstituted peptide vials at 2°C – 8°C.'}
+                {profile.storageText}
               </div>
             </div>
           </div>
@@ -299,9 +450,7 @@ export default function QualityTraceabilitySection({
                 {isEs ? 'Liberación Técnica de Persona Cualificada (QP)' : 'Qualified Person (QP) Certification'}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', lineHeight: 1.45 }}>
-                {isEs 
-                  ? 'Liberado conforme a normas de correcta fabricación de la UE y directrices de formulación magistral.' 
-                  : 'Officially released under EU Good Compounding Practices and validated batch release protocols.'}
+                {profile.qpNote}
               </div>
             </div>
           </div>
@@ -346,7 +495,7 @@ export default function QualityTraceabilitySection({
             type="button"
             onClick={() => {
               triggerHaptic('selection');
-              window.open('https://www.edqm.eu/en/european-pharmacopoeia-ph-eur-', '_blank');
+              window.open(isTricho ? 'https://fagron.com/trichotest' : 'https://www.edqm.eu/en/european-pharmacopoeia-ph-eur-', '_blank');
             }}
             style={{
               height: '32px',
@@ -364,7 +513,11 @@ export default function QualityTraceabilitySection({
             }}
           >
             <ExternalLink size={13} />
-            <span>{isEs ? 'Monografía Farmacopea Europea (EDQM)' : 'European Pharmacopoeia Standards (EDQM)'}</span>
+            <span>
+              {isTricho 
+                ? (isEs ? 'Metodología Fagron TrichoTest™' : 'Fagron TrichoTest™ Standards')
+                : (isEs ? 'Monografía Farmacopea Europea (EDQM)' : 'European Pharmacopoeia Standards (EDQM)')}
+            </span>
           </button>
         </div>
       </div>

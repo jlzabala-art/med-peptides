@@ -86,6 +86,7 @@ export default function PharmacyLabelsModal({
   isStandalone = false,
   hideInternalPartsSwitcher = false,
   hideShippingLabel = false,
+  hideBottomShare = false,
   onPrescriptionUpdated = null,
   onLabelIndexChange = null,
   onConfigChange = null,
@@ -3593,7 +3594,8 @@ export default function PharmacyLabelsModal({
             </button>
 
             {/* UNIFIED SINGLE SHARE ACTION (Golden Rule: Single Unified Share UI) */}
-            <div style={{ position: 'relative' }}>
+            {!hideBottomShare && (
+              <div style={{ position: 'relative' }}>
               <button
                 type="button"
                 className="gcp-btn-secondary"
@@ -3744,6 +3746,7 @@ export default function PharmacyLabelsModal({
                 </div>
               )}
             </div>
+            )}
           </div>
         </div>
       </div>

@@ -28,6 +28,7 @@ export default function LabelsHeader({
   activeCode,
   patientName,
   onKeyDownSearch,
+  embedded = false,
   children
 }) {
   const { user, userProfile, activeRole, logout, isProfessional, isAdmin } = useAuth();
@@ -105,17 +106,43 @@ export default function LabelsHeader({
         />
       )}
 
-      <header className="pls-header">
-        {/* Brand */}
-        <Link href="/labels" className="pls-brand-link">
-          <div className="pls-brand-icon">
-            <span>℞</span>
+      <header
+        className="pls-header"
+        style={embedded ? {
+          position: 'sticky',
+          top: 0,
+          zIndex: 15,
+          borderRadius: '10px 10px 0 0',
+          borderBottom: '1px solid #e2e8f0',
+          background: '#ffffff'
+        } : undefined}
+      >
+        {/* Brand (Standalone Mode) or B2B Logistics Badge (Embedded Portal Mode) */}
+        {!embedded ? (
+          <Link href="/labels" className="pls-brand-link">
+            <div className="pls-brand-icon">
+              <span>℞</span>
+            </div>
+            <div className="pls-brand-text">
+              <span className="pls-brand-title">Compounding Label Studio</span>
+              <span className="pls-brand-subtitle">Atlas Health Services • Compounding Studio</span>
+            </div>
+          </Link>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <div className="pls-brand-icon" style={{ width: '28px', height: '28px', fontSize: '0.85rem' }}>
+              <span>℞</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+                {isEs ? 'Etiquetas de Formulación' : 'Compounding Labels'}
+              </span>
+              <span style={{ fontSize: '0.64rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                {isEs ? 'Logística B2B • Dispensación' : 'B2B Logistics • Dispensary'}
+              </span>
+            </div>
           </div>
-          <div className="pls-brand-text">
-            <span className="pls-brand-title">Compounding Label Studio</span>
-            <span className="pls-brand-subtitle">Atlas Health Services • Compounding Studio</span>
-          </div>
-        </Link>
+        )}
 
         {/* Instant Search Container */}
         <div className="pls-search-container" ref={searchBoxRef}>
@@ -366,91 +393,117 @@ export default function LabelsHeader({
             </button>
           </div>
 
-          {/* Authenticated Operator Profile (GCP Console UX) */}
-          <div className="pls-user-profile-wrap" style={{ position: 'relative' }}>
-            {user ? (
-              <button
-                type="button"
-                onClick={() => setIsUserMenuOpen(prev => !prev)}
-                className="pls-user-profile-btn"
-                title={`${userDisplayName} (${roleDisplay})`}
-                aria-expanded={isUserMenuOpen}
-                aria-haspopup="menu"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  background: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '24px',
-                  padding: '3px 10px 3px 4px',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <div
+          {/* Authenticated Operator Profile (Standalone Kiosk Mode) or Standalone Kiosk Launcher (Embedded B2B Portal Mode) */}
+          {embedded ? (
+            <Link
+              href={activeCode ? `/labels?rx=${encodeURIComponent(activeCode)}&edit=true&lang=${lang}` : '/labels'}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={isEs ? 'Abrir versión de pantalla completa independiente (Modo Quiosco)' : 'Open standalone fullscreen kiosk version (/labels)'}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#003666',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <ExternalLink size={13} />
+              <span>{isEs ? 'Modo Quiosco' : 'Kiosk View'}</span>
+            </Link>
+          ) : (
+            <div className="pls-user-profile-wrap" style={{ position: 'relative' }}>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen(prev => !prev)}
+                  className="pls-user-profile-btn"
+                  title={`${userDisplayName} (${roleDisplay})`}
+                  aria-expanded={isUserMenuOpen}
+                  aria-haspopup="menu"
                   style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #003666 0%, #0284c7 100%)',
-                    color: '#ffffff',
-                    fontSize: '0.74rem',
-                    fontWeight: 700,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 1px 3px rgba(0, 54, 102, 0.25)'
+                    gap: '8px',
+                    background: '#f8fafc',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '24px',
+                    padding: '3px 10px 3px 4px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
                   }}
                 >
-                  {userInitials}
-                </div>
-                <div className="pls-user-profile-text" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.15 }}>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {userDisplayName}
-                  </span>
-                  <span style={{ fontSize: '0.64rem', fontWeight: 650, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                    {roleDisplay}
-                  </span>
-                </div>
-                <ChevronDown size={13} color="#64748b" style={{ transform: isUserMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
-              </button>
-            ) : (
-              <Link
-                href="/login?redirect=/labels"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '5px 12px',
-                  borderRadius: '6px',
-                  background: '#003666',
-                  color: '#ffffff',
-                  fontSize: '0.78rem',
-                  fontWeight: 650,
-                  textDecoration: 'none'
-                }}
-              >
-                <User size={14} />
-                <span>{isEs ? 'Iniciar Sesión' : 'Sign In'}</span>
-              </Link>
-            )}
+                  <div
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #003666 0%, #0284c7 100%)',
+                      color: '#ffffff',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 1px 3px rgba(0, 54, 102, 0.25)'
+                    }}
+                  >
+                    {userInitials}
+                  </div>
+                  <div className="pls-user-profile-text" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.15 }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {userDisplayName}
+                    </span>
+                    <span style={{ fontSize: '0.64rem', fontWeight: 650, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                      {roleDisplay}
+                    </span>
+                  </div>
+                  <ChevronDown size={13} color="#64748b" style={{ transform: isUserMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                </button>
+              ) : (
+                <Link
+                  href="/login?redirect=/labels"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    background: '#003666',
+                    color: '#ffffff',
+                    fontSize: '0.78rem',
+                    fontWeight: 650,
+                    textDecoration: 'none'
+                  }}
+                >
+                  <User size={14} />
+                  <span>{isEs ? 'Iniciar Sesión' : 'Sign In'}</span>
+                </Link>
+              )}
 
-            {isUserMenuOpen && user && (
-              <UserDropdown
-                user={user}
-                userProfile={userProfile}
-                isProfessional={isProfessional}
-                isAdmin={isAdmin}
-                onClose={() => setIsUserMenuOpen(false)}
-                onLogout={async () => {
-                  setIsUserMenuOpen(false);
-                  if (logout) await logout();
-                  window.location.href = '/login';
-                }}
-              />
-            )}
-          </div>
+              {isUserMenuOpen && user && (
+                <UserDropdown
+                  user={user}
+                  userProfile={userProfile}
+                  isProfessional={isProfessional}
+                  isAdmin={isAdmin}
+                  onClose={() => setIsUserMenuOpen(false)}
+                  onLogout={async () => {
+                    setIsUserMenuOpen(false);
+                    if (logout) await logout();
+                    window.location.href = '/login';
+                  }}
+                />
+              )}
+            </div>
+          )}
         </div>
       </header>
     </>

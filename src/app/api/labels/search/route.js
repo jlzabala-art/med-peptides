@@ -20,14 +20,30 @@ export async function GET(request) {
 
     const results = [];
     const seenCodes = new Set();
+    const seenPatientCodes = new Set();
 
-    // Normalize codes for deduplication: strip RX- prefix, whitespace, lowercase
-    // This prevents duplicates like 'RX-51864' vs '51864' from different sources
+    // Helper to extract clean alphanumeric prescription code
+    const cleanCodeStr = (raw) => {
+      if (!raw) return '';
+      const str = String(raw).trim();
+      const boxMatch = str.match(/\b(BOX[0-9]{4,6}[A-Z0-9]+)\b/i);
+      if (boxMatch) return boxMatch[1].toUpperCase();
+      const rxMatch = str.match(/\b(RX-[A-Z0-9-]+)\b/i);
+      if (rxMatch) return rxMatch[1].toUpperCase();
+      return str.replace(/\s*\(.*?\)/g, '').split(/[;,\n]/)[0].trim();
+    };
+
+    // Normalize codes for deduplication: strip RX- prefix, non-alphanumeric, lowercase
     const normalizeCode = (raw) => {
-      return String(raw || '')
+      return cleanCodeStr(raw)
         .toLowerCase()
-        .replace(/\s+/g, '')
-        .replace(/^rx-/, '');
+        .replace(/[^a-z0-9]/g, '');
+    };
+
+    // Clean clinical title to remove extraction artifacts
+    const cleanTitle = (raw) => {
+      if (!raw) return 'Compounded Prescription';
+      return String(raw).replace(/\s*\(Sample Code.*?\)/gi, '').trim() || 'Compounded Prescription';
     };
 
     // Helper to format/extract date cleanly
@@ -45,28 +61,71 @@ export async function GET(request) {
       return null;
     };
 
-    // ── 1. If query is empty, return popular / recent prescriptions ──
+    // ── 1. If query is empty, return latest ingested prescriptions from Firestore ordered by date ──
     if (!query) {
-      // Return top clinical cases from registry
-      const topCases = [
-        { code: '51812', name: 'Abdulla Sultan Mohamed Ahmed Alotaiba', title: 'Metabolic & Longevity Protocol (Parts 1 & 2)', date: '04-10-2026' },
-        { code: '51857', name: 'Amna Sultan Mohamed Ahmed Alotaiba', title: 'Metabolic & Lipid Optimization (Parts 1 & 2)', date: '04-10-2026' },
-        { code: '50957', name: 'Alan Maclean Rutledge', title: 'Proteolytic & Mitochondrial Anti-Inflammatory', date: '28-09-2026' },
-        { code: '51861', name: 'Basma Haitham K Bouzo', title: 'Topical Scalp & Metabolic Restoration', date: '05-10-2026' },
-        { code: '51811', name: 'Sarah Al Nuaimi', title: 'Hormonal & Transdermal Longevity', date: '04-10-2026' },
-      ];
+      if (adminDb) {
+        try {
+          const snap = await adminDb.collection('prescriptions')
+            .orderBy('createdAt', 'desc')
+            .limit(12)
+            .get();
 
-      for (const item of topCases) {
-        seenCodes.add(normalizeCode(item.code));
-        results.push({
-          id: item.code,
-          code: item.code,
-          fileNumber: item.code,
-          patientName: item.name,
-          title: item.title,
-          date: item.date,
-          source: 'featured'
-        });
+          snap.forEach(docSnap => {
+            const d = docSnap.data();
+            const rawCode = d.prescriptionNumber || d.code || d.fileNumber || docSnap.id;
+            const code = cleanCodeStr(rawCode);
+            const normCode = normalizeCode(code);
+            const patName = d.patientName || d.patient?.name || 'Patient';
+            const patKey = `${patName.toLowerCase().trim()}::${normCode}`;
+
+            if (normCode && !seenCodes.has(normCode) && !seenPatientCodes.has(patKey)) {
+              seenCodes.add(normCode);
+              seenPatientCodes.add(patKey);
+              results.push({
+                id: docSnap.id,
+                code: String(code),
+                fileNumber: d.fileNumber || String(code),
+                patientName: patName,
+                doctorName: d.doctorName || d.treatingDoctor?.name || 'Treating Physician',
+                clinicName: d.clinicName || d.clinic || '',
+                title: cleanTitle(d.treatmentTitle || d.title || d.formulaName),
+                date: extractDate(d.createdAt || d.uploadedAt || d.importedAt || d.prescriptionDate || d.date),
+                a4PrintCount: d.a4PrintCount || d.printCount || 0,
+                source: 'firestore_latest'
+              });
+            }
+          });
+        } catch (err) {
+          console.warn('[api/labels/search] Error fetching latest prescriptions:', err.message);
+        }
+      }
+
+      // If Firestore empty or results < 5, fallback to curated registry
+      if (results.length < 5) {
+        const topCases = [
+          { code: '51812', name: 'Abdulla Sultan Mohamed Ahmed Alotaiba', title: 'Metabolic & Longevity Protocol (Parts 1 & 2)', date: '2026-10-04' },
+          { code: '51857', name: 'Amna Sultan Mohamed Ahmed Alotaiba', title: 'Metabolic & Lipid Optimization (Parts 1 & 2)', date: '2026-10-04' },
+          { code: '50957', name: 'Alan Maclean Rutledge', title: 'Proteolytic & Mitochondrial Anti-Inflammatory', date: '2026-09-28' },
+          { code: '51861', name: 'Basma Haitham K Bouzo', title: 'Topical Scalp & Metabolic Restoration', date: '2026-10-05' },
+          { code: '51811', name: 'Sarah Al Nuaimi', title: 'Hormonal & Transdermal Longevity', date: '2026-10-04' },
+        ];
+
+        for (const item of topCases) {
+          const normCode = normalizeCode(item.code);
+          if (!seenCodes.has(normCode)) {
+            seenCodes.add(normCode);
+            results.push({
+              id: item.code,
+              code: item.code,
+              fileNumber: item.code,
+              patientName: item.name,
+              title: item.title,
+              date: item.date,
+              a4PrintCount: 0,
+              source: 'featured'
+            });
+          }
+        }
       }
 
       return NextResponse.json({ success: true, results });
@@ -116,17 +175,23 @@ export async function GET(request) {
       
       const rxHits = algoliaRes.prescriptions || [];
       for (const hit of rxHits) {
-        const code = hit.code || hit.fileNumber || hit.prescriptionNumber || hit.objectID;
-        if (code && !seenCodes.has(normalizeCode(code))) {
-          seenCodes.add(normalizeCode(code));
+        const rawCode = hit.code || hit.prescriptionNumber || hit.fileNumber || hit.objectID;
+        const code = cleanCodeStr(rawCode);
+        const normCode = normalizeCode(code);
+        const patName = hit.patientName || hit.patient?.name || 'Patient';
+        const patKey = `${patName.toLowerCase().trim()}::${normCode}`;
+
+        if (normCode && !seenCodes.has(normCode) && !seenPatientCodes.has(patKey)) {
+          seenCodes.add(normCode);
+          seenPatientCodes.add(patKey);
           results.push({
             id: hit.objectID || code,
             code: String(code),
             fileNumber: hit.fileNumber || String(code),
-            patientName: hit.patientName || hit.patient?.name || 'Patient',
+            patientName: patName,
             doctorName: hit.doctorName || hit.treatingDoctor?.name || 'Treating Physician',
             clinicName: hit.clinicName || hit.clinic || '',
-            title: hit.treatmentTitle || hit.title || hit.formulaName || 'Compounded Prescription',
+            title: cleanTitle(hit.treatmentTitle || hit.title || hit.formulaName),
             date: extractDate(hit.prescriptionDate || hit.date || hit.dispensedDate || hit.createdAt || hit.created_at),
             source: 'algolia'
           });
@@ -142,20 +207,23 @@ export async function GET(request) {
         const snap = await adminDb.collection('prescriptions').limit(150).get();
         snap.forEach(docSnap => {
           const d = docSnap.data();
-          const code = d.code || d.fileNumber || d.prescriptionNumber || docSnap.id;
-          const pName = String(d.patientName || d.patient?.name || '').toLowerCase();
-          const cNorm = normalizeCode(code);
+          const rawCode = d.code || d.prescriptionNumber || d.fileNumber || docSnap.id;
+          const code = cleanCodeStr(rawCode);
+          const pName = String(d.patientName || d.patient?.name || '').trim();
+          const normCode = normalizeCode(code);
+          const patKey = `${pName.toLowerCase()}::${normCode}`;
 
-          if ((pName.includes(qLower) || String(code).toLowerCase().includes(qLower)) && !seenCodes.has(cNorm)) {
-            seenCodes.add(cNorm);
+          if ((pName.toLowerCase().includes(qLower) || normCode.includes(qLower)) && !seenCodes.has(normCode) && !seenPatientCodes.has(patKey)) {
+            seenCodes.add(normCode);
+            seenPatientCodes.add(patKey);
             results.push({
               id: docSnap.id,
               code: String(code),
               fileNumber: d.fileNumber || String(code),
-              patientName: d.patientName || d.patient?.name || 'Patient',
+              patientName: pName || 'Patient',
               doctorName: d.doctorName || d.treatingDoctor?.name || 'Treating Physician',
               clinicName: d.clinicName || d.clinic || '',
-              title: d.treatmentTitle || d.title || 'Compounded Prescription',
+              title: cleanTitle(d.treatmentTitle || d.title),
               date: extractDate(d.prescriptionDate || d.date || d.dispensedDate || d.createdAt || d.created_at),
               source: 'firestore'
             });

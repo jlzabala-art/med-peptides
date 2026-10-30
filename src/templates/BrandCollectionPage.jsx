@@ -17,6 +17,7 @@ import ColwayMainSections from '../components/collection/ColwayMainSections';
 import PublicInstitutionalInquiryDrawer from '../components/shared/PublicInstitutionalInquiryDrawer';
 import PublicAtlasAIDrawer from '../components/shared/PublicAtlasAIDrawer';
 import ColwayTrichologyStemCellShowcase from '../components/product/ColwayTrichologyStemCellShowcase';
+import EternaProAgeProGenSection from '../components/product/EternaProAgeProGenSection';
 import ClinicalPortfolioSuiteSwitcher from '../components/navigation/ClinicalPortfolioSuiteSwitcher';
 import GenericCollectionSidebar from '../components/diagnostic/GenericCollectionSidebar';
 import ProductTechnicalDetailsPanel from '../components/collection/ProductTechnicalDetailsPanel';
@@ -117,22 +118,23 @@ const BRAND_CONFIGS = {
   },
   eterna: {
     name: 'ETERNA® Longevity DX',
-    title: 'ETERNA® Multi-Omics Diagnostics & Organ Proteomics',
+    title: 'ETERNA® Multi-Omics Diagnostics • ProAge™ (Biological Age) & ProGen™ (+700k SNPs)',
+    tagline: '1. ETERNA ProAge™ (5-Organ Biological Age Clock · 6 Active Clients) • 2. ETERNA ProGen™ (+700,000 SNPs Saliva DNA · 0 Clients)',
     badge: 'High-Throughput Multi-Omics Platform',
     badgeColor: '#0284c7',
-    subtitle: 'Integrated longevity platform combining fixed genomic baseline (+700,000 SNPs), organ-specific biological age proteomics, and longitudinal blood telemetry processed by Eurofins.',
+    subtitle: 'Integrated longevity platform combining two distinct clinical modalities processed by Eurofins Genomics: ETERNA ProAge™ (dynamic biological age & 5-organ serum proteomics with 6 active clients) and ETERNA ProGen™ (fixed lifetime +700,000 SNPs genomic predisposition microarray).',
     heroImage: '/images/products/eterna/eterna-kit-box.png',
     accentColor: '#0284c7',
     kpis: [
-      { label: 'Genetic Scope', value: '+700,000 SNPs', sub: 'High-Throughput Saliva DNA Array', icon: Dna, color: '#0284c7' },
-      { label: 'Organ Proteomics', value: 'Blood Serum/Plasma', sub: 'Organ-Specific Biological Age Clocks', icon: Droplets, color: '#e11d48' },
+      { label: 'ETERNA ProAge™', value: '6 Active Clients', sub: '5-Organ Biological Age Clock (Blood)', icon: Droplets, color: '#0284c7' },
+      { label: 'ETERNA ProGen™', value: '0 Clients (Ready)', sub: '+700,000 SNPs Saliva DNA Array', icon: Dna, color: '#7c3aed' },
       { label: 'Laboratory Partner', value: 'Eurofins Genomics', sub: 'ISO 17025 Clinical NGS Processing', icon: Award, color: '#16a34a' },
-      { label: 'Wearable Sync', value: 'Continuous Telemetry', sub: 'Apple Health, Oura, Garmin Integration', icon: HeartPulse, color: '#7c3aed' }
+      { label: 'Zoho Bigin CRM', value: '100% Synced', sub: 'Dubai & Abu Dhabi Partner Clinics', icon: HeartPulse, color: '#e11d48' }
     ],
     categories: [
-      { id: 'all', label: 'All Tests & Services' },
-      { id: 'genomics', label: 'Genomics & Saliva DNA' },
-      { id: 'proteomics', label: 'Organ Proteomics & Blood' },
+      { id: 'all', label: 'All ETERNA Tests & Services' },
+      { id: 'proteomics', label: '1. ETERNA ProAge™ (Biological Age & Organ Proteomics)' },
+      { id: 'genomics', label: '2. ETERNA ProGen™ (+700k SNPs Saliva DNA)' },
       { id: 'platform', label: 'Digital Platform & Pro' }
     ]
   },
@@ -184,51 +186,49 @@ const BRAND_CONFIGS = {
   },
   'hair-treatments': {
     name: 'Hair Treatments & Clinical Trichology',
-    title: 'Hair Treatments & Clinical Trichology • Integrated Follicular Protocols',
-    tagline: 'Colway® Scalp Stem Cells, Bioactive Copper Peptides & HTMA Diagnostics',
-    badge: 'Integrated Clinical Trichology & Scalp Regeneration',
+    title: 'Hair Treatments & Clinical Trichology • TrichoTest™, Peptides & Colway®',
+    tagline: '6 TrichoTest™ Compounded Formulations • Hair Peptides (GHK-Cu / TB-500) • 2 Colway® Hair Care Products',
+    badge: 'Integrated Clinical Trichology & Follicular Compounding',
     badgeColor: '#0d9488',
-    subtitle: 'Comprehensive multi-modal trichological ecosystem uniting Colway® Baicapil™ stem cell topicals & native tropocollagen, Lotusland GHK-Cu & Zinc Thymulin peptide mesotherapy, and TeleTest® HTMA intracellular trace element diagnostics.',
+    subtitle: 'Focused clinical trichology portfolio structured into 3 specialized sections: (1) 6 TrichoTest™-guided magistral formulations in TrichoSol™, TrichoFoam™ & TrichoOil™; (2) Lyophilized follicular regeneration peptides (GHK-Cu & TB-500); and (3) Colway® Baicapil™ Strengthening Shampoo & Conditioner.',
     heroImage: '/images/products/colway/colway-trichology-banner.jpg',
     accentColor: '#0d9488',
     isAreaCollection: true,
     kpis: [
-      { label: 'Hair Loss Arrest', value: '−60.6%', sub: 'Documented in 84-Day Baicapil In-Vivo RCT', icon: Zap, color: '#0d9488' },
-      { label: 'Density & Anagen', value: '+49% Density', sub: 'Anagen/Telogen Ratio Improved 2.3 ➔ 4.7', icon: Sparkles, color: '#2563eb' },
-      { label: 'Bioactive Peptides', value: 'GHK-Cu & ZT', sub: 'VEGF Follicular Angiogenesis & Pigment', icon: Dna, color: '#7c3aed' },
-      { label: 'Regulatory & Lab', value: 'EU CPNP & ISO', sub: 'CPNP Cosmetic Reg. & ISO 17025 HTMA Lab', icon: ShieldCheck, color: '#16a34a' }
+      { label: 'TrichoTest™ Formulas', value: '6 Formulas', sub: 'TrichoSol™, TrichoFoam™ & TrichoOil™', icon: Dna, color: '#0d9488' },
+      { label: 'Follicular Peptides', value: 'GHK-Cu / TB-500', sub: 'HPLC ≥99.0% Lyophilized Vials', icon: Sparkles, color: '#7c3aed' },
+      { label: 'Colway® Hair System', value: '2 Topicals', sub: 'Baicapil™ 2% Shampoo & Conditioner', icon: Zap, color: '#2563eb' },
+      { label: 'B2B Cost-Plus Tier', value: '+20% / +30%', sub: 'Wholeseller (+20%) & Clinic (+30%) on Cost', icon: ShieldCheck, color: '#16a34a' }
     ],
     categories: [
-      { id: 'all', label: 'All Treatments & Diagnostics' },
-      { id: 'colway-trichology', label: 'Colway® Topical Trichology' },
-      { id: 'peptides', label: 'Bioactive Peptides (GHK-Cu)' },
-      { id: 'diagnostic', label: 'HTMA Hair Mineral Diagnostics' },
-      { id: 'nutricosmetics', label: 'Systemic Matrix (Colvita)' },
-      { id: 'bundles', label: 'Clinical Protocol Bundles' }
+      { id: 'all', label: 'All Hair Treatments' },
+      { id: 'trichotest-compounding', label: '1. TrichoTest™ Compounding (6)' },
+      { id: 'peptides', label: '2. Hair Peptides (GHK-Cu / TB-500)' },
+      { id: 'colway-hair', label: '3. Colway® Hair Care (2)' }
     ]
   },
   'weight-loss': {
-    name: 'Weight Loss & Metabolic Health',
-    title: 'Weight Loss & Metabolic Health • Incretin Agonists & Body Composition',
-    tagline: 'Dual/Triple GLP-1/GIP Incretins, Selective Lipolysis & HbA1c Telemetry',
-    badge: 'Clinical Incretin Agonists & Metabolic Architecture',
+    name: 'Weight Management & Metabolic Health',
+    title: 'Weight Management & Metabolic Health • Incretin Agonists & Fagron NutriGen™',
+    tagline: 'Dual/Triple GLP-1/GIP Incretins, Lipolytics & Fagron NutriGen™ Oral Capsules',
+    badge: 'Clinical Incretin Agonists & Fagron NutriGen™',
     badgeColor: '#16a34a',
-    subtitle: 'Comprehensive medical weight management ecosystem integrating dual/triple incretin mimetics (Tirzepatide, Semaglutide, Retatrutide), visceral lipolytic peptides (Tesamorelin, AOD-9604), and CE-IVDR capillary glycation diagnostics (Bloodo™ HbA1c).',
-    heroImage: '/images/products/bloodo/nad.jpg',
+    subtitle: 'Comprehensive medical weight management ecosystem integrating dual/triple incretin mimetics (Tirzepatide, Semaglutide, Retatrutide, AOD-9604, Tesofensine), Fagron Genomics NutriGen™ compounded oral vegan capsules (Dihydroberberine, EGCG, Capsimax, 5-HTP, Inositol), and CE-IVDR glycation telemetry (Bloodo™ HbA1c).',
+    heroImage: '/images/products/compounding/nutrigen-capsule-bottle.svg',
     accentColor: '#16a34a',
     isAreaCollection: true,
     kpis: [
       { label: 'Weight Reduction', value: 'Up to −20.9%', sub: 'SURMOUNT-1 Phase 3 Tirzepatide (72w)', icon: Zap, color: '#16a34a' },
-      { label: 'Visceral Fat Loss', value: '−18% to −24%', sub: 'Selective VAT Reduction via Tesamorelin', icon: Sparkles, color: '#2563eb' },
-      { label: 'Lean Mass Sparing', value: 'Zero Sarcopenia', sub: 'Preserves Skeletal Muscle & Bone Density', icon: ShieldCheck, color: '#0d9488' },
-      { label: 'Glycation Control', value: 'HbA1c & CE-IVDR', sub: '90-Day Integrated Insulin Sensitivity', icon: Microscope, color: '#dc2626' }
+      { label: 'NutriGen™ Precision', value: '384 SNPs', sub: 'Targeted TCF7L2, FTO, ADRB2 & PPARG', icon: Dna, color: '#7c3aed' },
+      { label: 'Visceral Fat Loss', value: '−18% to −24%', sub: 'Selective VAT Reduction via Incretins & AOD', icon: Sparkles, color: '#2563eb' },
+      { label: 'Glycation Control', value: 'HbA1c & CE-IVDR', sub: '90-Day Integrated Insulin Sensitivity', icon: ShieldCheck, color: '#0d9488' }
     ],
     categories: [
       { id: 'all', label: 'All Formulations & Tests' },
-      { id: 'dual-incretins', label: 'Dual & Triple Agonists (Tirzepatide / Retatrutide)' },
-      { id: 'glp1', label: 'GLP-1 Agonists (Semaglutide)' },
-      { id: 'lipolytic', label: 'Visceral Lipolysis (Tesamorelin / AOD-9604)' },
-      { id: 'metabolic-diagnostics', label: 'Metabolic Diagnostics (Bloodo™ HbA1c)' }
+      { id: 'dual-incretins', label: 'Incretin Peptides (Tirzepatide / Retatrutide / Semaglutide)' },
+      { id: 'nutrigen-capsules', label: 'NutriGen™ Compounded Formulations (Oral Vegan Capsules)' },
+      { id: 'lipolytic', label: 'Visceral Lipolysis & Exercise Mimetics (AOD-9604 / MOTS-c)' },
+      { id: 'metabolic-diagnostics', label: 'Metabolic Diagnostics & DNA (Bloodo™ HbA1c & NutriGen™)' }
     ]
   },
   'tissue-repair': {
@@ -334,6 +334,8 @@ BRAND_CONFIGS['trichology'] = BRAND_CONFIGS['hair-treatments'];
 BRAND_CONFIGS['hair'] = BRAND_CONFIGS['hair-treatments'];
 BRAND_CONFIGS['trichotest'] = BRAND_CONFIGS['hair-treatments'];
 BRAND_CONFIGS['weight'] = BRAND_CONFIGS['weight-loss'];
+BRAND_CONFIGS['weight-management'] = BRAND_CONFIGS['weight-loss'];
+BRAND_CONFIGS['nutrigen'] = BRAND_CONFIGS['weight-loss'];
 BRAND_CONFIGS['metabolic'] = BRAND_CONFIGS['weight-loss'];
 BRAND_CONFIGS['repair'] = BRAND_CONFIGS['tissue-repair'];
 BRAND_CONFIGS['recovery'] = BRAND_CONFIGS['tissue-repair'];
@@ -413,6 +415,15 @@ function resolveBrandProductImage(product, brandSlug) {
     return '/images/products/eterna/eterna-kit-box.png';
   }
 
+  if (brandSlug === 'weight-loss' || brandSlug === 'weight-management' || brandSlug === 'weight' || brandSlug === 'metabolic' || brandSlug === 'nutrigen') {
+    if (product.image) return product.image;
+    if (id.includes('nutrigen') || name.includes('nutrigen') || id.includes('glyco') || id.includes('satiety') || id.includes('detox')) return '/images/products/compounding/nutrigen-capsule-bottle.svg';
+    if (id.includes('thermo') || id.includes('burner')) return '/images/products/compounding/metabolic-capsules-amber.svg';
+    if (id.includes('tirzepatide') || id.includes('semaglutide') || id.includes('retatrutide') || id.includes('aod') || id.includes('mots')) return '/images/products/compounding/metabolic-peptide-vial.svg';
+    if (id.includes('hba1c') || id.includes('bloodo')) return '/images/products/bloodo/hba1c.jpg';
+    return '/images/products/compounding/nutrigen-capsule-bottle.svg';
+  }
+
   return '/images/longevity_supps.png';
 }
 
@@ -458,6 +469,9 @@ function getItemUnitLabel(slug, count, isEs) {
   const isOne = count === 1;
   if (slug === 'hair-treatments' || slug === 'hair' || slug === 'trichology' || slug === 'trichotest') {
     return isOne ? (isEs ? 'tratamiento' : 'treatment') : (isEs ? 'tratamientos' : 'treatments');
+  }
+  if (slug === 'weight-loss' || slug === 'weight-management' || slug === 'weight' || slug === 'nutrigen' || slug === 'metabolic') {
+    return isOne ? (isEs ? 'formulación' : 'formulation') : (isEs ? 'formulaciones' : 'formulations');
   }
   if (slug === 'colway' || slug === 'ultraperson' || slug === 'ultraman') {
     return isOne ? (isEs ? 'formulación' : 'formulation') : (isEs ? 'formulaciones' : 'formulations');
@@ -575,6 +589,11 @@ export default function BrandCollectionPage({
         ? products.length
         : products.filter(p => {
             const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''} ${p.description || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
+            if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology' || brandSlug === 'trichotest') {
+              if (catId === 'trichotest-compounding') return Boolean(p.isCompounded) || str.includes('tricho') || str.includes('trichosol') || str.includes('trichofoam') || str.includes('trichooil');
+              if (catId === 'peptides') return str.includes('ghk') || str.includes('tb-500') || str.includes('tb500') || p.category === 'peptides';
+              if (catId === 'colway-hair' || catId === 'colway-trichology') return (str.includes('shampoo') || str.includes('conditioner') || str.includes('colway')) && !str.includes('colvita');
+            }
             if (brandSlug === 'teletest') {
               if (catId === 'genomics') return str.includes('genom') || str.includes('hla') || str.includes('celiac') || str.includes('celiaca') || str.includes('gnt') || str.includes('autoimmun');
               if (catId === 'toxicology') return str.includes('toxic') || str.includes('mineral') || str.includes('htma') || str.includes('hair') || str.includes('cabello') || str.includes('metales') || str.includes('heavy metal');
@@ -795,7 +814,8 @@ export default function BrandCollectionPage({
       list = list.filter(p => {
         const str = `${p.id} ${p.name || ''} ${p.title || ''} ${p.category || ''} ${p.subcategory || ''} ${p.clinical_line || ''} ${p.description || ''} ${JSON.stringify(p.activeIngredients || [])}`.toLowerCase();
         if (brandSlug === 'hair-treatments' || brandSlug === 'hair' || brandSlug === 'trichology' || brandSlug === 'trichotest') {
-          if (cat === 'colway-trichology') return (str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('colway')) && !str.includes('colvita');
+          if (cat === 'trichotest-compounding') return Boolean(p.isCompounded) || str.includes('tricho') || str.includes('trichosol') || str.includes('trichofoam') || str.includes('trichooil');
+          if (cat === 'colway-hair' || cat === 'colway-trichology') return (str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('colway')) && !str.includes('colvita');
           if (cat === 'peptides') return str.includes('ghk') || str.includes('tb-500') || str.includes('tb500') || str.includes('bpc') || str.includes('peptide') || p.category === 'peptides';
           if (cat === 'diagnostic') return str.includes('htma') || str.includes('teletest') || str.includes('mineral') || str.includes('cabello');
           if (cat === 'nutricosmetics') return str.includes('colvita') || str.includes('capsule');
@@ -818,6 +838,12 @@ export default function BrandCollectionPage({
           if (cat === 'longevity') return str.includes('longevity') || str.includes('cellular') || str.includes('epithalon') || str.includes('mots') || str.includes('nad');
           if (cat === 'cognitive') return str.includes('cognitive') || str.includes('neuro') || str.includes('semax') || str.includes('selank') || str.includes('brain');
           if (cat === 'hormonal') return str.includes('hormon') || str.includes('cjc') || str.includes('ipamorelin') || str.includes('gh') || str.includes('growth hormone');
+        }
+        if (brandSlug === 'weight-loss' || brandSlug === 'weight-management' || brandSlug === 'weight' || brandSlug === 'metabolic' || brandSlug === 'nutrigen') {
+          if (cat === 'dual-incretins' || cat === 'glp1') return str.includes('tirzepatide') || str.includes('semaglutide') || str.includes('retatrutide') || str.includes('tesofensine') || str.includes('incretin');
+          if (cat === 'nutrigen-capsules') return str.includes('nutrigen') || str.includes('glyco') || str.includes('thermo') || str.includes('satiety') || str.includes('detox') || str.includes('berberine') || str.includes('capsule');
+          if (cat === 'lipolytic') return str.includes('aod') || str.includes('mots') || str.includes('tesamorelin') || str.includes('lipolytic');
+          if (cat === 'metabolic-diagnostics') return str.includes('bloodo') || str.includes('hba1c') || str.includes('nutrigen kit') || str.includes('glycat');
         }
         if (brandSlug === 'ultraperson' || brandSlug === 'ultraman') {
           if (cat === 'energy') return str.includes('energy') || str.includes('metabolic') || str.includes('coq10') || str.includes('pqq');
@@ -1257,10 +1283,10 @@ export default function BrandCollectionPage({
                 🧬 {filteredProducts.length} {brandSlug === 'colway' ? 'Formulations' : brandSlug === 'peptides' ? 'Peptides' : 'Items'}
               </span>
               <span style={{ fontSize: '0.68rem', fontWeight: 700, color: config.accentColor, background: `${config.accentColor}10`, border: `1px solid ${config.accentColor}30`, padding: '2px 8px', borderRadius: '4px' }}>
-                {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : brandSlug === 'peptides' ? '🏛️ Lotusland EU Lyophilization Hub' : brandSlug === 'teletest' ? '🏛️ Generalitat de Catalunya E08750211' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🏛️ Atlas Compounding Network' : '🏛️ LifeLab1 Diagnostics'}
+                {brandSlug === 'colway' ? '🏛️ Colway sp.j. (Poland / EU)' : brandSlug === 'eterna' ? '🏛️ Eurofins Genomics' : brandSlug === 'peptides' ? '🏛️ Lotusland EU Lyophilization Hub' : brandSlug === 'teletest' ? '🏛️ Generalitat de Catalunya E08750211' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🏛️ Atlas Compounding Network' : ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug) ? '🏛️ TrichoTest™ Compounding · Peptides · Colway®' : '🏛️ Atlas Clinical Network'}
               </span>
               <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
-                {brandSlug === 'colway' ? '🛡️ ISO 22716 & EU CPNP Compliant' : brandSlug === 'peptides' ? '🛡️ HPLC ≥99.0% & Endotoxin Tested' : brandSlug === 'teletest' ? '🛡️ ISO 17025 Accredited' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🛡️ EU GMP Certified' : '🛡️ CE-IVDR & ISO 15189'}
+                {brandSlug === 'colway' ? '🛡️ ISO 22716 & EU CPNP Compliant' : brandSlug === 'peptides' ? '🛡️ HPLC ≥99.0% & Endotoxin Tested' : brandSlug === 'teletest' ? '🛡️ ISO 17025 Accredited' : (brandSlug === 'ultraperson' || brandSlug === 'ultraman') ? '🛡️ EU GMP Certified' : ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug) ? '🛡️ EU GMP Compounding & CPNP Certified' : '🛡️ CE-IVDR & ISO 15189'}
               </span>
               {brandSlug === 'peptides' && (
                 <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#003666', background: '#e0f2fe', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
@@ -1390,6 +1416,8 @@ export default function BrandCollectionPage({
               }}
               totalCount={products.length}
               onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+              activePriceTier={adminSimulationTier}
+              onSelectPriceTier={setAdminSimulationTier}
             />
           )}
 
@@ -1576,6 +1604,12 @@ export default function BrandCollectionPage({
 
             {activeMainTab === 'products' && (
               <>
+            {brandSlug === 'eterna' && (
+              <EternaProAgeProGenSection
+                lang={lang}
+                onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+              />
+            )}
             {/* Google Cloud Filter Bar */}
             <div style={{
               background: '#ffffff',
@@ -1941,7 +1975,45 @@ export default function BrandCollectionPage({
                   </div>
                 )}
 
-                {filteredProducts.map(product => {
+                {filteredProducts.map((product, pIdx) => {
+                  const isHairCollection = ['hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest'].includes(brandSlug);
+                  const getHairSection = (p) => {
+                    const pid = `${p.id || ''} ${p.name || ''} ${p.category || ''}`.toLowerCase();
+                    if (p.isCompounded || pid.includes('tricho')) return 'trichotest';
+                    if (pid.includes('ghk') || pid.includes('tb-500') || pid.includes('tb500') || p.category === 'peptides') return 'peptides';
+                    return 'colway';
+                  };
+                  const currentHairSec = isHairCollection ? getHairSection(product) : null;
+                  const prevHairSec = (isHairCollection && pIdx > 0) ? getHairSection(filteredProducts[pIdx - 1]) : null;
+                  const showHairSectionHeader = isHairCollection && selectedCategory === 'all' && currentHairSec !== prevHairSec;
+
+                  const hairSecMeta = {
+                    trichotest: {
+                      badge: 'SECCIÓN 1 · COMPOUNDING',
+                      title: isEs ? '1. Formulaciones Magistrales para TrichoTest™ (6 Fórmulas)' : '1. TrichoTest™ Compounding Formulations (6 Formulas)',
+                      sub: isEs ? 'Fórmulas personalizadas en vehículos patentados TrichoSol™, TrichoFoam™ y TrichoOil™' : 'Personalized formulations in patented TrichoSol™, TrichoFoam™ & TrichoOil™ vehicles',
+                      color: '#0d9488',
+                      bg: '#f0fdfa',
+                      border: '#99f6e4'
+                    },
+                    peptides: {
+                      badge: 'SECCIÓN 2 · PEPTIDES',
+                      title: isEs ? '2. Péptidos Capilares Biorreguladores (GHK-Cu & TB-500)' : '2. Follicular Bioregulator Peptides (GHK-Cu & TB-500)',
+                      sub: isEs ? 'Viales liofilizados estériles 10R (pureza HPLC ≥99.0%) para angiogénesis y papila dérmica' : 'Sterile 10R lyophilized vials (HPLC ≥99.0% purity) for angiogenesis & dermal papilla',
+                      color: '#7c3aed',
+                      bg: '#f5f3ff',
+                      border: '#ddd6fe'
+                    },
+                    colway: {
+                      badge: 'SECCIÓN 3 · COLWAY HAIR',
+                      title: isEs ? '3. Productos Capilares Colway® (Champú & Acondicionador Anticaída)' : '3. Colway® Hair Care System (Strengthening Shampoo & Conditioner)',
+                      sub: isEs ? 'Cuidado folicular con Baicapil™ 2% y tropocolágeno nativo de pez de agua dulce' : 'Follicular care with Baicapil™ 2% & native freshwater fish tropocollagen',
+                      color: '#0284c7',
+                      bg: '#f0f9ff',
+                      border: '#bae6fd'
+                    }
+                  }[currentHairSec];
+
                   const imageSrc = resolveBrandProductImage(product, brandSlug);
                   const displayName = product.canonicalName || product.name || product.title || product.id;
                   const desc = product.overview_summary || product.description || product.desc || '';
@@ -1970,14 +2042,40 @@ export default function BrandCollectionPage({
 
                   if (viewMode === 'table') {
                     return (
-                      <div
-                        key={product.id}
-                        style={{
-                          background: '#ffffff',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '12px',
-                          overflow: 'hidden',
-                          display: 'flex',
+                      <React.Fragment key={product.id}>
+                        {showHairSectionHeader && hairSecMeta && (
+                          <div style={{
+                            marginTop: pIdx > 0 ? '1rem' : '0.25rem',
+                            padding: '10px 14px',
+                            borderRadius: '10px',
+                            background: hairSecMeta.bg,
+                            border: `1px solid ${hairSecMeta.border}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '8px'
+                          }}>
+                            <div>
+                              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: hairSecMeta.color, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                                {hairSecMeta.badge}
+                              </span>
+                              <h2 style={{ margin: '2px 0 0', fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                                {hairSecMeta.title}
+                              </h2>
+                              <p style={{ margin: '2px 0 0', fontSize: '0.74rem', color: '#475569' }}>
+                                {hairSecMeta.sub}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        <div
+                          style={{
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            overflow: 'hidden',
+                            display: 'flex',
                           flexDirection: 'column',
                           transition: 'all 0.15s ease',
                           boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
@@ -2259,14 +2357,41 @@ export default function BrandCollectionPage({
                           />
                         )}
                       </div>
+                      </React.Fragment>
                     );
                   }
 
                   return (
-                    <div
-                      key={product.id}
-                      className="gcp-collection-card"
-                    >
+                    <React.Fragment key={product.id}>
+                      {showHairSectionHeader && hairSecMeta && (
+                        <div style={{
+                          marginTop: pIdx > 0 ? '1rem' : '0.25rem',
+                          padding: '10px 14px',
+                          borderRadius: '10px',
+                          background: hairSecMeta.bg,
+                          border: `1px solid ${hairSecMeta.border}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '8px'
+                        }}>
+                          <div>
+                            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: hairSecMeta.color, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                              {hairSecMeta.badge}
+                            </span>
+                            <h2 style={{ margin: '2px 0 0', fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                              {hairSecMeta.title}
+                            </h2>
+                            <p style={{ margin: '2px 0 0', fontSize: '0.74rem', color: '#475569' }}>
+                              {hairSecMeta.sub}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      <div
+                        className="gcp-collection-card"
+                      >
                       {/* Card Visual / Showcase (Left Column on Desktop) */}
                       <div
                         className="gcp-collection-card-visual"
@@ -2617,6 +2742,7 @@ export default function BrandCollectionPage({
                         </div>
                       </div>
                     </div>
+                    </React.Fragment>
                   );
                 })}
               </div>
@@ -2747,6 +2873,8 @@ export default function BrandCollectionPage({
                   }}
                   totalCount={products.length}
                   onOpenInquiry={() => { setIsMobileSidebarOpen(false); setIsInquiryDrawerOpen(true); }}
+                  activePriceTier={adminSimulationTier}
+                  onSelectPriceTier={setAdminSimulationTier}
                 />
               )}
             </div>

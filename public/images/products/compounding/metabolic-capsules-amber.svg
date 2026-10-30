@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+    <linearGradient id="amberBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#78350f"/>
+      <stop offset="30%" stop-color="#b45309"/>
+      <stop offset="70%" stop-color="#92400e"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </linearGradient>
+    <linearGradient id="metalCap" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#18181b"/>
+      <stop offset="50%" stop-color="#3f3f46"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </linearGradient>
+    <linearGradient id="fireAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ea580c"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="480" rx="16" fill="url(#bg)"/>
+
+  <!-- Amber Apothecary Bottle -->
+  <g filter="url(#shadow)">
+    <!-- Black Metal Ribbed Cap -->
+    <rect x="150" y="80" width="100" height="42" rx="4" fill="url(#metalCap)"/>
+    <line x1="160" y1="80" x2="160" y2="122" stroke="#52525b" stroke-width="2"/>
+    <line x1="170" y1="80" x2="170" y2="122" stroke="#52525b" stroke-width="2"/>
+    <line x1="180" y1="80" x2="180" y2="122" stroke="#52525b" stroke-width="2"/>
+    <line x1="190" y1="80" x2="190" y2="122" stroke="#52525b" stroke-width="2"/>
+    <line x1="200" y1="80" x2="200" y2="122" stroke="#52525b" stroke-width="2"/>
+    <line x1="210" y1="80" x2="210" y2="122" stroke="#52525b" stroke-width="2"/>
+    <line x1="220" y1="80" x2="220" y2="122" stroke="#52525b" stroke-width="2"/>
+    <line x1="230" y1="80" x2="230" y2="122" stroke="#52525b" stroke-width="2"/>
+    <line x1="240" y1="80" x2="240" y2="122" stroke="#52525b" stroke-width="2"/>
+
+    <!-- Neck -->
+    <rect x="160" y="122" width="80" height="18" fill="#78350f"/>
+
+    <!-- Amber Body -->
+    <rect x="125" y="140" width="150" height="240" rx="16" fill="url(#amberBody)"/>
+    <rect x="127" y="142" width="14" height="236" rx="8" fill="#f59e0b" opacity="0.3"/>
+
+    <!-- Label -->
+    <rect x="135" y="165" width="130" height="195" rx="5" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+
+    <!-- Fire Top Accent -->
+    <rect x="135" y="165" width="130" height="8" rx="2" fill="url(#fireAccent)"/>
+
+    <!-- Label Content -->
+    <text x="200" y="190" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="800" fill="#c2410c" text-anchor="middle" letter-spacing="1.5">FAGRON NUTRIGEN™</text>
+    <text x="200" y="206" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="800" fill="#0f172a" text-anchor="middle">LIPOLYTIC BURNER</text>
+    <text x="200" y="219" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8" font-weight="600" fill="#64748b" text-anchor="middle">BAT &amp; Lipid Mobilizer</text>
+
+    <line x1="145" y1="228" x2="255" y2="228" stroke="#e2e8f0" stroke-width="1"/>
+
+    <text x="145" y="244" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#1e293b">• Green Tea EGCG 300mg</text>
+    <text x="145" y="258" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#1e293b">• Capsimax® 100mg</text>
+    <text x="145" y="272" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#1e293b">• L-Carnitine Tartrate 500mg</text>
+    <text x="145" y="286" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#1e293b">• Synephrine 6% 100mg</text>
+
+    <rect x="145" y="300" width="110" height="22" rx="4" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+    <text x="200" y="315" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8" font-weight="700" fill="#9a3412" text-anchor="middle">60 Acid-Resistant Caps</text>
+
+    <text x="200" y="342" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7" font-weight="700" fill="#475569" text-anchor="middle">GENES: ADRB2 • UCP1 • APOA2</text>
+  </g>
+</svg>

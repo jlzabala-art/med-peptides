@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#78350f"/>
+      <stop offset="35%" stop-color="#b45309"/>
+      <stop offset="70%" stop-color="#d97706"/>
+      <stop offset="90%" stop-color="#92400e"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </linearGradient>
+    <linearGradient id="glassReflection" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
+      <stop offset="30%" stop-color="rgba(255,255,255,0.1)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+    <linearGradient id="labelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#fefce8"/>
+    </linearGradient>
+    <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="400" height="400" fill="url(#bgGrad)" rx="20"/>
+
+  <ellipse cx="200" cy="358" rx="75" ry="12" fill="#000000" opacity="0.16"/>
+  <ellipse cx="200" cy="358" rx="45" ry="6" fill="#000000" opacity="0.22"/>
+
+  <!-- 30 mL Compact Dropper Bottle -->
+  <g filter="url(#dropShadow)">
+    <!-- Dropper Pipette Bulb -->
+    <path d="M 188 88 C 188 78 193 72 200 72 C 207 72 212 78 212 88 L 210 106 L 190 106 Z" fill="#1e293b"/>
+    <rect x="189" y="103" width="22" height="4" rx="1.5" fill="#334155"/>
+
+    <!-- Collar / Cap with Ribbing -->
+    <rect x="178" y="107" width="44" height="28" rx="3" fill="url(#capGrad)"/>
+    <line x1="183" y1="110" x2="183" y2="132" stroke="#475569" stroke-width="1.2"/>
+    <line x1="189" y1="110" x2="189" y2="132" stroke="#475569" stroke-width="1.2"/>
+    <line x1="195" y1="110" x2="195" y2="132" stroke="#475569" stroke-width="1.2"/>
+    <line x1="200" y1="110" x2="200" y2="132" stroke="#475569" stroke-width="1.2"/>
+    <line x1="205" y1="110" x2="205" y2="132" stroke="#475569" stroke-width="1.2"/>
+    <line x1="211" y1="110" x2="211" y2="132" stroke="#475569" stroke-width="1.2"/>
+    <line x1="217" y1="110" x2="217" y2="132" stroke="#475569" stroke-width="1.2"/>
+
+    <rect x="179" y="135" width="42" height="5" rx="1.5" fill="#0f172a"/>
+    <rect x="184" y="140" width="32" height="12" fill="url(#amberGrad)"/>
+
+    <!-- Bottle Body (30 mL Compact Dropper) -->
+    <path d="
+      M 184 152 
+      C 172 158 148 174 144 192
+      L 144 332
+      C 144 344 154 352 166 352
+      L 234 352
+      C 246 352 256 344 256 332
+      L 256 192
+      C 252 174 228 158 216 152
+      Z" 
+      fill="url(#amberGrad)"/>
+
+    <path d="
+      M 150 196
+      L 150 330
+      C 150 336 154 340 160 342
+      L 160 190
+      C 154 191 150 193 150 196
+      Z" 
+      fill="url(#glassReflection)"/>
+
+    <!-- Olive / Botanical Gold Prescription Label -->
+    <rect x="152" y="194" width="96" height="126" rx="4" fill="url(#labelGrad)" stroke="#cbd5e1" stroke-width="0.8"/>
+
+    <rect x="152" y="194" width="96" height="18" rx="4" fill="#65a30d"/>
+    <rect x="152" y="208" width="96" height="4" fill="#65a30d"/>
+    <text x="200" y="206" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8" font-weight="800" text-anchor="middle" letter-spacing="0.5">TRICHOOIL™</text>
+
+    <text x="200" y="222" fill="#0f172a" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="6.8" font-weight="750" text-anchor="middle">PRE-WASH NUTRIENT</text>
+    <text x="200" y="231" fill="#4d7c0f" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="5.8" font-weight="700" text-anchor="middle">CUTANEOUS LIPID BARRIER</text>
+
+    <line x1="160" y1="236" x2="240" y2="236" stroke="#e2e8f0" stroke-width="0.8"/>
+
+    <!-- Active Botanical Complex -->
+    <rect x="160" y="241" width="80" height="30" rx="3" fill="#f7fee7" stroke="#d9f99d" stroke-width="0.6"/>
+    <text x="200" y="251" fill="#3f6212" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="5.8" font-weight="700" text-anchor="middle">BOTANICAL LIPIDS</text>
+    <text x="200" y="260" fill="#475569" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="5.2" font-weight="600" text-anchor="middle">Ginseng 2% · Ginkgo 2.5%</text>
+    <text x="200" y="268" fill="#65a30d" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="5" font-weight="700" text-anchor="middle">Vitamin E (Tocopherol) 5%</text>
+
+    <rect x="160" y="276" width="80" height="13" rx="2.5" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.5"/>
+    <text x="166" y="285" fill="#64748b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="5.2" font-weight="600">VOL: 30 mL</text>
+    <text x="234" y="285" fill="#365314" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="5.2" font-weight="700" text-anchor="end">SCALP CARE</text>
+
+    <g transform="translate(168, 294)">
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#334155" stroke-width="1.2"/>
+      <line x1="4" y1="0" x2="4" y2="10" stroke="#334155" stroke-width="2.2"/>
+      <line x1="9" y1="0" x2="9" y2="10" stroke="#334155" stroke-width="1.0"/>
+      <line x1="14" y1="0" x2="14" y2="10" stroke="#334155" stroke-width="2.5"/>
+      <line x1="20" y1="0" x2="20" y2="10" stroke="#334155" stroke-width="1.0"/>
+      <line x1="26" y1="0" x2="26" y2="10" stroke="#334155" stroke-width="1.8"/>
+      <line x1="32" y1="0" x2="32" y2="10" stroke="#334155" stroke-width="2.0"/>
+      <line x1="38" y1="0" x2="38" y2="10" stroke="#334155" stroke-width="1.2"/>
+      <line x1="44" y1="0" x2="44" y2="10" stroke="#334155" stroke-width="2.8"/>
+      <line x1="50" y1="0" x2="50" y2="10" stroke="#334155" stroke-width="1.2"/>
+      <line x1="56" y1="0" x2="56" y2="10" stroke="#334155" stroke-width="2.0"/>
+      <line x1="62" y1="0" x2="62" y2="10" stroke="#334155" stroke-width="1.5"/>
+    </g>
+  </g>
+
+  <g transform="translate(308, 48)">
+    <circle cx="0" cy="0" r="28" fill="#ffffff" stroke="#65a30d" stroke-width="2" filter="url(#dropShadow)"/>
+    <circle cx="0" cy="0" r="24" fill="none" stroke="#bef264" stroke-width="1" stroke-dasharray="2 2"/>
+    <text x="0" y="-8" fill="#65a30d" font-family="-apple-system, sans-serif" font-size="7" font-weight="800" text-anchor="middle">30 mL</text>
+    <text x="0" y="2" fill="#0f172a" font-family="-apple-system, sans-serif" font-size="6.5" font-weight="800" text-anchor="middle">PRE-WASH</text>
+    <text x="0" y="12" fill="#4d7c0f" font-family="-apple-system, sans-serif" font-size="6" font-weight="700" text-anchor="middle">100% LIPID</text>
+  </g>
+</svg>

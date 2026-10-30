@@ -2,24 +2,24 @@
 
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { 
-  Building2, 
-  Stethoscope, 
-  User, 
-  ShieldCheck, 
-  Calendar, 
-  Clock, 
-  FileText, 
-  Share2, 
-  Copy, 
-  Check, 
-  Download, 
-  ExternalLink, 
-  Activity, 
-  FlaskConical, 
-  Droplets, 
-  CheckCircle2, 
-  Eye, 
+import {
+  Building2,
+  Stethoscope,
+  User,
+  ShieldCheck,
+  Calendar,
+  Clock,
+  FileText,
+  Share2,
+  Copy,
+  Check,
+  Download,
+  ExternalLink,
+  Activity,
+  FlaskConical,
+  Droplets,
+  CheckCircle2,
+  Eye,
   ArrowLeft,
   ArrowUpRight,
   Info,
@@ -91,6 +91,8 @@ import QualityTraceabilitySection from '@/components/prescription/QualityTraceab
 import PrescriptionModalsContainer from '@/components/prescription/PrescriptionModalsContainer';
 import CalendarSyncModal from '@/components/prescription/CalendarSyncModal';
 import PrescriptionDoctorContactModal from '@/components/prescription/PrescriptionDoctorContactModal';
+import DoctorValidationModal from '@/components/prescription/DoctorValidationModal';
+import PrescriptionPendingValidationView from '@/components/prescription/PrescriptionPendingValidationView';
 import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
 import { usePrescriptionData, getPosologyText } from '@/hooks/usePrescriptionData';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
@@ -99,6 +101,7 @@ import { fetchAuthorizedPrescriptionAction } from '@/actions/prescriptionsAction
 export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake: _onBackToIntake = null, initialView = null }) {
   const { user } = useAuth();
   const { can, is } = useRoleAccess();
+  const isAdmin = Boolean(is('admin') || user?.role === 'admin' || user?.isAdmin);
   const isAuthorizedViewer = Boolean(can('view:patients') || is('doctor') || is('medical_director') || is('admin') || is('clinic') || is('account_manager'));
 
   const [currentRx, setCurrentRx] = useState(rx || {});
@@ -142,6 +145,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [showPatientAuthModal, setShowPatientAuthModal] = useState(false);
   const [showCalendarSyncModal, setShowCalendarSyncModal] = useState(false);
   const [showDoctorContactModal, setShowDoctorContactModal] = useState(false);
+  const [showDoctorValidationModal, setShowDoctorValidationModal] = useState(false);
   const [doctorContactTopic, setDoctorContactTopic] = useState('posology');
 
   const handleOpenInquiry = useCallback((customEntity = null) => {
@@ -408,7 +412,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         if (docSnap && docSnap.exists()) {
           const data = docSnap.data();
           const newStatus = String(data.status || data.state || data.orderStatus || data.fagronStatus || '').toLowerCase().trim();
-          
+
           setCurrentRx(prev => {
             const prevStatus = String(prev.status || prev.state || prev.orderStatus || '').toLowerCase().trim();
             const isStatusChanged = newStatus && newStatus !== prevStatus;
@@ -520,8 +524,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       const res = exportPrescriptionToXlsx(rx, { lang });
       if (res && res.success) {
         toast.success(
-          isEs 
-            ? `Receta exportada a Excel: ${res.filename} (${res.itemCount} productos)` 
+          isEs
+            ? `Receta exportada a Excel: ${res.filename} (${res.itemCount} productos)`
             : `Prescription exported to Excel: ${res.filename} (${res.itemCount} items)`,
           { id: 'rx-excel' }
         );
@@ -566,7 +570,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     <div className="rx-dossier-main-wrapper">
       {/* ── Public Unified Header (GCP Standard with Login, Lang, Clinical AI) ───── */}
       {!embedded && (
-        <PublicUnifiedHeader 
+        <PublicUnifiedHeader
           track="protocols"
           lang={lang}
           onLangChange={(newLang) => setLang(newLang)}
@@ -633,1356 +637,1490 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         />
       )}
 
-      <div className="rx-dossier-inner-container" style={{ position: 'relative' }}>
-        {/* ── Background Clinical Trust Watermark (Patient vs Doctor Mode) ── */}
-        <PrescriptionTrustWatermark mode={isPatientView ? 'patient' : 'doctor'} />
+      {/* ── Unauthenticated Patient Holding Gate for Draft / Unvalidated Prescriptions ── */}
+      {!isAuthorizedViewer && isPatientView && (currentStatus === 'draft' || currentStatus === 'pending') ? (
+        <PrescriptionPendingValidationView
+          rx={currentRx}
+          rxId={rxId}
+          patientName={patientName}
+          doctorName={displayDoctorNameShort}
+          clinicName={clinic || doctorClinic || treatingDoc?.clinic}
+          doctorPhone={safeDoctorPhone}
+          isEs={isEs}
+        />
+      ) : (
+        <div className="rx-dossier-inner-container" style={{ position: 'relative' }}>
+          {/* ── Background Clinical Trust Watermark (Patient vs Doctor Mode) ── */}
+          <PrescriptionTrustWatermark mode={isPatientView ? 'patient' : 'doctor'} />
 
-        <div className="pds-content-with-sidebar" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            
-            {/* ── Master Header Card (Google Cloud Console High-Density Resource Header) ─────── */}
-            <PrescriptionMasterHeader
-              rx={rx}
-              rxId={rxId}
-              isEs={isEs}
-              isPatientView={isPatientView}
-              isAuthorizedViewer={isAuthorizedViewer}
-              onSwitchView={(mode) => {
-                triggerHaptic('selection');
-                setOverrideView(mode);
-              }}
-              currentStatus={currentStatus}
-              currentStatusMeta={currentStatusMeta}
-              setCurrentStatus={setCurrentStatus}
-              doctorName={displayDoctorNameShort}
-              doctorPublicUrl={doctorPublicUrl}
-              handleCopyLink={handleCopyLink}
-              copied={copied}
-              onOpenPatientShare={() => setShowPatientShareModal(true)}
-              onOpenInquiry={() => setShowDoctorContactModal(true)}
-              onSyncCalendar={() => setShowCalendarSyncModal(true)}
-              activeGcpTab={activeGcpTab}
-              setActiveGcpTab={setActiveGcpTab}
-              compoundedFormulations={compoundedFormulations}
-              genomicsData={genomicsData}
-              atlasRecs={atlasRecs}
-              setExpandedPhases={setExpandedPhases}
-              setSelectedPhase={setSelectedPhase}
-              setExpandedSections={setExpandedSections}
-            />
+          <div className="pds-content-with-sidebar" style={{ position: 'relative', zIndex: 1 }}>
+            <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-            {/* ── Patient Action & Refill Banner Card (Shown at top ONLY if refill is due or already dispensed) ── */}
-            {(!isPatientView || isDispensed || currentRx?.isRefillDue) && (
-              <PatientActionBannerCard
-                isPatientView={isPatientView}
-                isDispensed={isDispensed}
-                isEs={isEs}
-                rxId={rxId}
-                rx={currentRx}
-                doctorName={displayDoctorNameShort}
-                resolvedPrice={resolvedPrice}
-                isAuthenticated={isPatientAuthenticated}
-                onRequireAuth={() => setShowPatientAuthModal(true)}
-                onOpenInquiry={() => setShowDoctorContactModal(true)}
-              />
-            )}
-
-        {/* ── Sequential Roadmap Tab: MultiPartOverview & KPIs ────────────────────── */}
-        {activeGcpTab === 'roadmap' && (
-          <MultiPartOverview
-            formulations={compoundedFormulations}
-            onSelectPhase={(phaseId) => {
-              setSelectedPhase(phaseId);
-              setActiveGcpTab('treatment');
-              setExpandedPhases(prev => ({ ...prev, [phaseId]: true }));
-            }}
-          />
-        )}
-
-        {/* ── Compounded Formulations & Dedicated Posology Architecture (Patient vs Clinical) ──────────── */}
-        {activeGcpTab === 'treatment' && (
-          isPatientView ? (
-            <PatientPrescriptionGuide
-              rx={currentRx}
-              compoundedFormulations={compoundedFormulations}
-              isEs={isEs}
-              doctorName={displayDoctorNameShort}
-              doctorClinic={doctorClinic}
-              doctorPhone={safeDoctorPhone}
-              patientName={patientName}
-              rxId={rxId}
-              patientPublicUrl={patientPublicUrl}
-              onOpenQuotation={() => setShowAtlasQuotationModal(true)}
-              onOpenDoctorContact={() => setShowDoctorContactModal(true)}
-            />
-          ) : (
-            <CompoundedFormulationsSection
-              compoundedFormulations={compoundedFormulations}
-              isEs={isEs}
-              prescriptionLabels={prescriptionLabels}
-              expandedPhases={expandedPhases}
-              setExpandedPhases={setExpandedPhases}
-              setSelectedPhase={setSelectedPhase}
-              togglePhase={togglePhase}
-              setSelectedLabelIndex={setSelectedLabelIndex}
-              setShowLabelsModal={setShowLabelsModal}
-            />
-          )
-        )}
-
-        {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}
-        {activeGcpTab === 'roadmap' && (
-          <RoadmapMilestonesSection
-            timeline={timeline}
-            isEs={isEs}
-          />
-        )}
-
-        {/* ── Section: Quality, Laboratory & EU GMP Traceability (Authentic Dossier) ──────────────── */}
-        {activeGcpTab === 'traceability' && (
-          <QualityTraceabilitySection
-            rxId={rxId}
-            isEs={isEs}
-          />
-        )}
-
-        {/* ── Atlas Clinical Recommendations (Lotusland, UltraPerson, Bloodo & Colway) ── */}
-        {(activeGcpTab === 'recommendations') && (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway || atlasRecs?.teletestHairMineral) && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
-            <AtlasSynergyRecommendationsSection
-              atlasRecs={atlasRecs}
-              isEs={isEs}
-            />
-            {atlasRecs?.teletestHairMineral && (
-              <ComplementaryHairMineralCard
-                rx={currentRx}
-                lang={lang}
-                onOpenInquiry={handleOpenInquiry}
-                compact={false}
-              />
-            )}
-          </div>
-        )}
-
-        {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
-        {activeGcpTab === 'genomics' && genomicsData && (
-          <div id="genomics-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
-            <GenomicsPrescriptionGuidanceCard
-              genomicsData={genomicsData}
-              lang={lang}
-              rx={currentRx}
-              onOpenInquiry={handleOpenInquiry}
-            />
-          </div>
-        )}
-
-        {/* ── Section: Doctor & Patient Credentials (Activated from Sidebar or Sub-Tab) ── */}
-        {(activeGcpTab === 'credentials') && (
-          <div id="doctor-patient-credentials" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 18px',
-              background: '#ffffff',
-              borderRadius: '8px',
-              border: '1px solid #dadce0',
-              flexWrap: 'wrap',
-              gap: '8px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {/* ── Doctor Preview Mode Draft Notice Banner ── */}
+              {isAuthorizedViewer && isPatientView && (currentStatus === 'draft' || currentStatus === 'pending') && (
                 <div style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: '6px',
-                  background: '#e8f0fe',
-                  color: '#1a73e8',
+                  background: '#fffbeb',
+                  border: '1px solid #fef3c7',
+                  borderLeft: '4px solid #f59e0b',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '10px'
                 }}>
-                  <Stethoscope size={18} />
+                  <div style={{ fontSize: '0.78rem', color: '#92400e', lineHeight: 1.4 }}>
+                    <strong>{isEs ? 'Modo Previsualización de Paciente (Borrador)' : 'Patient Preview Mode (Draft Status)'}</strong>:
+                    {' '}{isEs
+                      ? 'Esta prescripción aún no ha sido certificada. Los pacientes no pueden acceder a esta vista hasta que pulse "Validar y Habilitar Paciente" en Vista Médico.'
+                      : 'This prescription is not certified yet. Patients will see a pending review notice until you click "Validate & Release to Patient" in Doctor View.'}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowDoctorValidationModal(true)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: '6px',
+                      background: '#059669',
+                      color: '#ffffff',
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span>{isEs ? 'Validar Ahora' : 'Validate Now'}</span>
+                  </button>
                 </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '0.94rem', fontWeight: 600, color: '#202124' }}>
-                      {isEs ? 'Acreditación Clínica · Médico Prescriptor y Paciente' : 'Clinical Credentials · Prescribing Physician & Patient'}
-                    </span>
-                    <span style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 500,
-                      padding: '2px 8px',
-                      borderRadius: '10px',
-                      background: '#e8f0fe',
-                      color: '#1a73e8',
-                      border: '1px solid #c2e7ff'
-                    }}>
-                      {isEs ? 'Expediente Oficial' : 'Official Dossier'}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
-                    {isEs
-                      ? 'Datos de colegiación médica, clínica prescriptora y filiación del paciente'
-                      : 'Medical license, prescribing clinic credentials and patient demographic registration'}
-                  </div>
-                </div>
-              </div>
+              )}
 
-              <span style={{
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                padding: '3px 10px',
-                borderRadius: '12px',
-                background: '#f0fdf4',
-                color: '#16a34a',
-                border: '1px solid #bbf7d0'
-              }}>
-                ✓ {isEs ? 'Facultativo & Paciente Verificados' : 'Verified Clinical Record'}
-              </span>
-            </div>
+              {/* ── Master Header Card (Google Cloud Console High-Density Resource Header) ─────── */}
+              <PrescriptionMasterHeader
+                rx={rx}
+                rxId={rxId}
+                isEs={isEs}
+                isPatientView={isPatientView}
+                isAuthorizedViewer={isAuthorizedViewer}
+                onSwitchView={(mode) => {
+                  triggerHaptic('selection');
+                  setOverrideView(mode);
+                  if (mode === 'patient' && activeGcpTab === 'recommendations') {
+                    setActiveGcpTab('treatment');
+                  }
+                }}
+                currentStatus={currentStatus}
+                currentStatusMeta={currentStatusMeta}
+                setCurrentStatus={setCurrentStatus}
+                doctorName={displayDoctorNameShort}
+                doctorPublicUrl={doctorPublicUrl}
+                handleCopyLink={handleCopyLink}
+                copied={copied}
+                onOpenPatientShare={() => setShowPatientShareModal(true)}
+                onOpenDoctorValidation={() => setShowDoctorValidationModal(true)}
+                onOpenInquiry={() => setShowDoctorContactModal(true)}
+                onSyncCalendar={() => setShowCalendarSyncModal(true)}
+                activeGcpTab={activeGcpTab}
+                setActiveGcpTab={setActiveGcpTab}
+                compoundedFormulations={compoundedFormulations}
+                genomicsData={genomicsData}
+                atlasRecs={atlasRecs}
+                setExpandedPhases={setExpandedPhases}
+                setSelectedPhase={setSelectedPhase}
+                setExpandedSections={setExpandedSections}
+              />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
-                {/* Panel 1: Prescribing Treating Physician (Full Width Line) */}
-                <div style={{
-                  background: '#ffffff',
-                  border: '1px solid #dadce0',
-                  borderRadius: '12px',
-                  padding: '18px 22px',
-                  boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '14px',
-                  width: '100%'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: 32, height: 32, borderRadius: '6px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <Stethoscope size={16} />
-                      </div>
-                      <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        {isEs ? 'Médico Prescriptor Tratante' : 'Prescribing Treating Physician'}
-                      </span>
-                    </div>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '3px 10px', borderRadius: '12px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>
-                      ✓ {isEs ? 'Prescriptor Clínico Verificado' : 'Verified Clinical Prescriber'}
-                    </span>
-                  </div>
+              {/* ── Patient Action & Refill Banner Card (Shown at top ONLY if refill is due or already dispensed) ── */}
+              {(!isPatientView || isDispensed || currentRx?.isRefillDue) && (
+                <PatientActionBannerCard
+                  isPatientView={isPatientView}
+                  isDispensed={isDispensed}
+                  isEs={isEs}
+                  rxId={rxId}
+                  rx={currentRx}
+                  doctorName={displayDoctorNameShort}
+                  resolvedPrice={resolvedPrice}
+                  isAuthenticated={isPatientAuthenticated}
+                  onRequireAuth={() => setShowPatientAuthModal(true)}
+                  onOpenInquiry={() => setShowDoctorContactModal(true)}
+                />
+              )}
 
-                  {hasTreatingDoctor ? (
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                      gap: '16px 24px',
-                      alignItems: 'start'
-                    }}>
-                      {/* Doctor Name & License */}
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                          {isEs ? 'Facultativo Colegiado' : 'Physician'}
-                        </div>
-                        <div style={{ fontSize: '1rem', fontWeight: 700, color: '#202124' }}>
-                          <Link
-                            href={doctorPublicUrl}
-                            title={isAuthorizedViewer ? (isEs ? `Ir al portal clínico del Dr/a. ${nominalDoctorName}` : `Go to Dr. ${nominalDoctorName}'s Clinical Portal`) : (isEs ? 'Ir al portal de la práctica médica' : 'Go to medical practice portal')}
-                            style={{ color: '#1a73e8', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                          >
-                            <span>{displayDoctorNameShort}</span>
-                            <ExternalLink size={13} color="#1a73e8" />
-                          </Link>
-                        </div>
-                        {isAuthorizedViewer ? (
-                          doctorLicense && (
-                            <div style={{ marginTop: '4px' }}>
-                              <CopyableId value={doctorLicense} displayValue={`Lic. ${doctorLicense}`} />
-                            </div>
-                          )
-                        ) : (
-                          <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#16a34a', fontWeight: 650 }}>
-                            ✓ {isEs ? 'Acreditado DHA' : 'DHA Accredited Practice'}
-                          </div>
-                        )}
-                      </div>
+              {/* ── Sequential Roadmap Tab: MultiPartOverview & KPIs ────────────────────── */}
+              {activeGcpTab === 'roadmap' && (
+                <MultiPartOverview
+                  formulations={compoundedFormulations}
+                  onSelectPhase={(phaseId) => {
+                    setSelectedPhase(phaseId);
+                    setActiveGcpTab('treatment');
+                    setExpandedPhases(prev => ({ ...prev, [phaseId]: true }));
+                  }}
+                />
+              )}
 
-                      {/* Specialty */}
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                          {isEs ? 'Especialidad Médica' : 'Medical Specialty'}
-                        </div>
-                        <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#3c4043' }}>
-                          {doctorSpecialty}
-                        </div>
-                      </div>
+              {/* ── Compounded Formulations & Dedicated Posology Architecture (Patient vs Clinical) ──────────── */}
+              {activeGcpTab === 'treatment' && (
+                isPatientView ? (
+                  <PatientPrescriptionGuide
+                    rx={currentRx}
+                    compoundedFormulations={compoundedFormulations}
+                    isEs={isEs}
+                    doctorName={displayDoctorNameShort}
+                    doctorClinic={doctorClinic}
+                    doctorPhone={safeDoctorPhone}
+                    patientName={patientName}
+                    rxId={rxId}
+                    patientPublicUrl={patientPublicUrl}
+                    onOpenQuotation={() => setShowAtlasQuotationModal(true)}
+                    onOpenDoctorContact={() => setShowDoctorContactModal(true)}
+                  />
+                ) : (
+                  <CompoundedFormulationsSection
+                    compoundedFormulations={compoundedFormulations}
+                    isEs={isEs}
+                    prescriptionLabels={prescriptionLabels}
+                    expandedPhases={expandedPhases}
+                    setExpandedPhases={setExpandedPhases}
+                    setSelectedPhase={setSelectedPhase}
+                    togglePhase={togglePhase}
+                    setSelectedLabelIndex={setSelectedLabelIndex}
+                    setShowLabelsModal={setShowLabelsModal}
+                    canManageLabels={isAdmin}
+                  />
+                )
+              )}
 
-                      {/* Clinic & Location */}
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                          {isEs ? 'Clínica & Centro' : 'Clinic & Practice'}
-                        </div>
-                        <div style={{ fontSize: '0.85rem', color: '#3c4043', lineHeight: 1.35 }}>
-                          {(doctorClinic || doctorAddress) ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                              📍 <strong>{doctorClinic}</strong>{doctorAddress ? ` · ${doctorAddress}` : ''}
-                            </span>
-                          ) : (
-                            <span style={{ color: '#9aa0a6' }}>—</span>
-                          )}
-                        </div>
-                      </div>
+              {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}
+              {activeGcpTab === 'roadmap' && (
+                <RoadmapMilestonesSection
+                  timeline={timeline}
+                  isEs={isEs}
+                />
+              )}
 
-                      {/* Contact Info */}
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                          {isEs ? 'Contacto Directo' : 'Direct Communications'}
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.82rem' }}>
-                          {doctorPhone && (
-                            <a href={`tel:${doctorPhone}`} style={{ color: '#1a73e8', textDecoration: 'none', fontWeight: 600 }}>
-                              📞 {doctorPhone}
-                            </a>
-                          )}
-                          {treatingDoc?.email && (
-                            <a href={`mailto:${treatingDoc.email}`} style={{ color: '#5f6368', textDecoration: 'none' }}>
-                              ✉️ {treatingDoc.email}
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div style={{ padding: '8px 10px', borderRadius: '6px', background: '#fffbeb', border: '1px dashed #fcd34d', fontSize: '0.78rem', color: '#92400e' }}>
-                      ⚠️ {isEs ? 'Sin médico asignado' : 'Pending Physician Assignment'}
-                    </div>
+              {/* ── Section: Quality, Laboratory & EU GMP Traceability (Authentic Dossier) ──────────────── */}
+              {activeGcpTab === 'traceability' && (
+                <QualityTraceabilitySection
+                  rxId={rxId}
+                  rx={currentRx}
+                  isEs={isEs}
+                />
+              )}
+
+              {/* ── Atlas Clinical Recommendations (Only visible in Doctor View; hidden from patient) ── */}
+              {(activeGcpTab === 'recommendations') && !isPatientView && (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway || atlasRecs?.teletestHairMineral) && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
+                  <AtlasSynergyRecommendationsSection
+                    atlasRecs={atlasRecs}
+                    isEs={isEs}
+                  />
+                  {atlasRecs?.teletestHairMineral && (
+                    <ComplementaryHairMineralCard
+                      rx={currentRx}
+                      lang={lang}
+                      onOpenInquiry={handleOpenInquiry}
+                      compact={false}
+                    />
                   )}
                 </div>
+              )}
 
-                {/* Panel 2: Registered Patient (Full Width Line) */}
-                <div style={{
-                  background: '#ffffff',
-                  border: '1px solid #dadce0',
-                  borderRadius: '12px',
-                  padding: '18px 22px',
-                  boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '14px',
-                  width: '100%'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+              {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
+              {activeGcpTab === 'genomics' && genomicsData && (
+                <div id="genomics-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
+                  <GenomicsPrescriptionGuidanceCard
+                    genomicsData={genomicsData}
+                    lang={lang}
+                    rx={currentRx}
+                    onOpenInquiry={handleOpenInquiry}
+                  />
+                </div>
+              )}
+
+              {/* ── Section: Doctor & Patient Credentials (Activated from Sidebar or Sub-Tab) ── */}
+              {(activeGcpTab === 'credentials') && (
+                <div id="doctor-patient-credentials" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 18px',
+                    background: '#ffffff',
+                    borderRadius: '8px',
+                    border: '1px solid #dadce0',
+                    flexWrap: 'wrap',
+                    gap: '8px'
+                  }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: 32, height: 32, borderRadius: '6px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <User size={16} />
-                      </div>
-                      <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        {isEs ? 'Paciente Registrado' : 'Registered Patient Demographics'}
-                      </span>
-                    </div>
-                    <span
-                      onClick={() => {
-                        navigator.clipboard?.writeText(rxId);
-                        toast.success(isEs ? 'Referencia copiada ✓' : 'Reference copied ✓');
-                      }}
-                      style={{
-                        fontSize: '0.70rem',
-                        fontFamily: 'monospace',
-                        color: '#1a73e8',
+                      <div style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: '6px',
                         background: '#e8f0fe',
-                        padding: '3px 8px',
-                        borderRadius: '12px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
+                        color: '#1a73e8',
+                        display: 'flex',
                         alignItems: 'center',
-                        gap: '4px',
-                        border: '1px solid #c2e7ff'
-                      }}
-                      title={isEs ? 'Copiar referencia' : 'Copy reference'}
-                    >
-                      Ref: {rxId}
-                      <Copy size={11} />
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <Stethoscope size={18} />
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '0.94rem', fontWeight: 600, color: '#202124' }}>
+                            {isEs ? 'Acreditación Clínica · Médico Prescriptor y Paciente' : 'Clinical Credentials · Prescribing Physician & Patient'}
+                          </span>
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 500,
+                            padding: '2px 8px',
+                            borderRadius: '10px',
+                            background: '#e8f0fe',
+                            color: '#1a73e8',
+                            border: '1px solid #c2e7ff'
+                          }}>
+                            {isEs ? 'Expediente Oficial' : 'Official Dossier'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
+                          {isEs
+                            ? 'Datos de colegiación médica, clínica prescriptora y filiación del paciente'
+                            : 'Medical license, prescribing clinic credentials and patient demographic registration'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <span style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      padding: '3px 10px',
+                      borderRadius: '12px',
+                      background: '#f0fdf4',
+                      color: '#16a34a',
+                      border: '1px solid #bbf7d0'
+                    }}>
+                      ✓ {isEs ? 'Facultativo & Paciente Verificados' : 'Verified Clinical Record'}
                     </span>
                   </div>
 
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                    gap: '16px 24px',
-                    alignItems: 'start'
-                  }}>
-                    {!isAuthorizedViewer && (
-                      <div style={{
-                        gridColumn: '1 / -1',
-                        padding: '12px 14px',
-                        background: '#f8fafc',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '6px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: '12px',
-                        flexWrap: 'wrap'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '1.05rem' }}>🔒</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+                    {/* Panel 1: Prescribing Treating Physician (Full Width Line) */}
+                    <div style={{
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '12px',
+                      padding: '18px 22px',
+                      boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '14px',
+                      width: '100%'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ width: 32, height: 32, borderRadius: '6px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Stethoscope size={16} />
+                          </div>
+                          <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            {isEs ? 'Médico Prescriptor Tratante' : 'Prescribing Treating Physician'}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '3px 10px', borderRadius: '12px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>
+                          ✓ {isEs ? 'Prescriptor Clínico Verificado' : 'Verified Clinical Prescriber'}
+                        </span>
+                      </div>
+
+                      {hasTreatingDoctor ? (
+                        <>
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                          gap: '16px 24px',
+                          alignItems: 'start'
+                        }}>
+                          {/* Doctor Name & License */}
                           <div>
-                            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
-                              DHA & HIPAA Protected Health Information (PHI)
+                            <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+                              {isEs ? 'Facultativo Colegiado' : 'Physician'}
                             </div>
-                            <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
-                              Patient demographic identities and private contact channels are codified for unauthenticated access.
+                            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#202124' }}>
+                              <Link
+                                href={doctorPublicUrl}
+                                title={isAuthorizedViewer ? (isEs ? `Ir al portal clínico del Dr/a. ${nominalDoctorName}` : `Go to Dr. ${nominalDoctorName}'s Clinical Portal`) : (isEs ? 'Ir al portal de la práctica médica' : 'Go to medical practice portal')}
+                                style={{ color: '#1a73e8', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                              >
+                                <span>{displayDoctorNameShort}</span>
+                                <ExternalLink size={13} color="#1a73e8" />
+                              </Link>
+                            </div>
+                            {isAuthorizedViewer ? (
+                              doctorLicense && (
+                                <div style={{ marginTop: '4px' }}>
+                                  <CopyableId value={doctorLicense} displayValue={`Lic. ${doctorLicense}`} />
+                                </div>
+                              )
+                            ) : (
+                              <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#16a34a', fontWeight: 650 }}>
+                                ✓ {isEs ? 'Acreditado DHA' : 'DHA Accredited Practice'}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Specialty */}
+                          <div>
+                            <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+                              {isEs ? 'Especialidad Médica' : 'Medical Specialty'}
+                            </div>
+                            <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#3c4043' }}>
+                              {doctorSpecialty}
+                            </div>
+                          </div>
+
+                          {/* Clinic & Location */}
+                          <div>
+                            <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+                              {isEs ? 'Clínica & Centro' : 'Clinic & Practice'}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: '#3c4043', lineHeight: 1.35 }}>
+                              {(doctorClinic || doctorAddress) ? (
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                  📍 <strong>{doctorClinic}</strong>{doctorAddress ? ` · ${doctorAddress}` : ''}
+                                </span>
+                              ) : (
+                                <span style={{ color: '#9aa0a6' }}>—</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Contact Info */}
+                          <div>
+                            <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+                              {isEs ? 'Contacto Directo' : 'Direct Communications'}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '0.82rem' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenInquiry()}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  background: '#f0fdf4',
+                                  border: '1px solid #86efac',
+                                  color: '#15803d',
+                                  fontSize: '0.76rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  width: 'fit-content',
+                                  marginBottom: '2px'
+                                }}
+                              >
+                                <MessageSquare size={13} />
+                                <span>{isEs ? '💬 Mensaje In-App al Médico' : '💬 In-App Clinical Message'}</span>
+                              </button>
+                              {doctorPhone && (
+                                <a href={`tel:${doctorPhone}`} style={{ color: '#1a73e8', textDecoration: 'none', fontWeight: 600 }}>
+                                  📞 {doctorPhone}
+                                </a>
+                              )}
+                              {treatingDoc?.email && (
+                                <a href={`mailto:${treatingDoc.email}`} style={{ color: '#5f6368', textDecoration: 'none' }}>
+                                  ✉️ {treatingDoc.email}
+                                </a>
+                              )}
                             </div>
                           </div>
                         </div>
-                        <Link
-                          href={`/login?redirect=/rx/${rxId}`}
-                          style={{
-                            padding: '6px 14px',
-                            borderRadius: '4px',
-                            background: '#003666',
-                            color: '#ffffff',
-                            fontSize: '0.74rem',
-                            fontWeight: 600,
-                            textDecoration: 'none',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                          <span>Doctor Sign In</span>
-                          <ArrowUpRight size={12} />
-                        </Link>
-                      </div>
-                    )}
 
-                    {/* Patient Name */}
-                    <div>
-                      <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span>{isEs ? 'Nombre Completo' : 'Full Name'}</span>
-                        {!isAuthorizedViewer && (
-                          <span style={{ fontSize: '0.58rem', background: '#e2e8f0', color: '#475569', padding: '1px 4px', borderRadius: '3px', fontWeight: 700 }}>
-                            CODIFIED
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: '1rem', fontWeight: 700, color: '#202124', wordBreak: 'break-word', lineHeight: 1.3 }}>
-                        {patientName} {isAuthorizedViewer ? patientAlias : ''}
-                      </div>
-                    </div>
-
-                    {/* Demographics */}
-                    <div>
-                      <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                        {isEs ? 'Filiación & Demografía' : 'Demographics'}
-                      </div>
-                      <div style={{ fontSize: '0.86rem', color: '#3c4043', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
-                        {!isAuthorizedViewer ? (
-                          <span style={{ color: '#64748b', fontSize: '0.80rem' }}>
-                            {patient.gender ? `${patient.gender} · ` : ''}Protected Medical Record
-                          </span>
-                        ) : (
-                          <>
-                            {patient.dob && (
-                              <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong>{patient.dob}</strong></span>
-                            )}
-                            {patient.age && (
-                              <>
-                                <span style={{ color: '#dadce0' }}>·</span>
-                                <span><strong>{patient.age}</strong> {isEs ? 'años' : 'yrs'}{patient.gender ? ` (${patient.gender})` : ''}</span>
-                              </>
-                            )}
-                            {patient.nationality && (
-                              <>
-                                <span style={{ color: '#dadce0' }}>·</span>
-                                <span><strong>{patient.nationality}</strong></span>
-                              </>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Identification / National ID */}
-                    <div>
-                      <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                        {isEs ? 'Identificación / Expediente' : 'National ID / Record'}
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: '#3c4043' }}>
-                        {!isAuthorizedViewer ? (
-                          <span style={{ color: '#64748b', fontSize: '0.80rem' }}>Confidential (Physician Access Only)</span>
-                        ) : patient.emiratesId ? (
-                          <span>National ID: <strong>{patient.emiratesId}</strong></span>
-                        ) : (
-                          <span style={{ color: '#5f6368' }}>{isEs ? 'Expediente Clínico Digital' : 'Digital Clinical File'}</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Prescriptions History link */}
-                    {isPatientView && (
-                      <div>
-                        <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                          {isEs ? 'Historial Clínico' : 'Clinical History'}
+                    {/* Permanent Medical Inquiry Audit Trail (Doctor ⇄ Patient) */}
+                      {clinicalInquiries && clinicalInquiries.length > 0 && (
+                        <div style={{
+                          marginTop: '12px',
+                          padding: '12px 14px',
+                          background: '#f8fafc',
+                          borderRadius: '8px',
+                          border: '1px solid #e2e8f0'
+                        }}>
+                          <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                              <MessageSquare size={14} color="#0d9488" />
+                              <span>{isEs ? `Historial de Mensajes Auditados (${clinicalInquiries.length})` : `Clinical Message Audit Trail (${clinicalInquiries.length})`}</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenInquiry()}
+                              style={{ background: 'none', border: 'none', color: '#1a73e8', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                            >
+                              {isEs ? '+ Nueva Consulta' : '+ New Message'}
+                            </button>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {clinicalInquiries.map((inq, idx) => (
+                              <div key={inq.id || idx} style={{ background: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.78rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.70rem', marginBottom: '4px' }}>
+                                  <strong>👤 {inq.patientName || patientName} ({isEs ? 'Paciente' : 'Patient'})</strong>
+                                  <span>{inq.createdAt ? new Date(inq.createdAt).toLocaleDateString() : 'Recorded'}</span>
+                                </div>
+                                <div style={{ color: '#1e293b', lineHeight: 1.4 }}>{inq.message || inq.notes || inq.subject}</div>
+                                {inq.reply ? (
+                                  <div style={{ marginTop: '8px', padding: '8px 10px', background: '#f0fdf4', borderRadius: '6px', borderLeft: '3px solid #16a34a', color: '#14532d' }}>
+                                    <div style={{ fontSize: '0.70rem', fontWeight: 700, marginBottom: '2px', color: '#15803d' }}>
+                                      ✓ {inq.repliedBy || displayDoctorNameShort} ({isEs ? 'Médico Prescriptor Certificado' : 'Certified Prescribing Physician'}):
+                                    </div>
+                                    <div style={{ fontSize: '0.76rem', lineHeight: 1.4 }}>{inq.reply}</div>
+                                  </div>
+                                ) : (
+                                  <div style={{ marginTop: '6px', fontSize: '0.70rem', color: '#d97706', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span>⏳</span>
+                                    <span>{isEs ? 'Pendiente de respuesta del médico' : 'Pending doctor clinical review'}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => { triggerHaptic('selection'); setShowPatientRxModal(true); }}
+                      )}
+                        </>
+                      ) : (
+                      <div style={{ padding: '8px 10px', borderRadius: '6px', background: '#fffbeb', border: '1px dashed #fcd34d', fontSize: '0.78rem', color: '#92400e' }}>
+                        ⚠️ {isEs ? 'Sin médico asignado' : 'Pending Physician Assignment'}
+                      </div>
+                  )}
+                    </div>
+
+                    {/* Panel 2: Registered Patient (Full Width Line) */}
+                    <div style={{
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
+                      borderRadius: '12px',
+                      padding: '18px 22px',
+                      boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '14px',
+                      width: '100%'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ width: 32, height: 32, borderRadius: '6px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <User size={16} />
+                          </div>
+                          <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            {isEs ? 'Paciente Registrado' : 'Registered Patient Demographics'}
+                          </span>
+                        </div>
+                        <span
+                          onClick={() => {
+                            navigator.clipboard?.writeText(rxId);
+                            toast.success(isEs ? 'Referencia copiada ✓' : 'Reference copied ✓');
+                          }}
                           style={{
-                            background: 'none',
-                            border: 'none',
-                            padding: 0,
+                            fontSize: '0.70rem',
+                            fontFamily: 'monospace',
                             color: '#1a73e8',
-                            fontSize: '0.82rem',
-                            fontWeight: 600,
+                            background: '#e8f0fe',
+                            padding: '3px 8px',
+                            borderRadius: '12px',
+                            fontWeight: 700,
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: 4
+                            gap: '4px',
+                            border: '1px solid #c2e7ff'
                           }}
+                          title={isEs ? 'Copiar referencia' : 'Copy reference'}
                         >
-                          <Layers size={13} color="#1a73e8" />
-                          <span>{isEs ? 'Ver todas las recetas de este paciente →' : 'View all prescriptions for this patient →'}</span>
-                        </button>
+                          Ref: {rxId}
+                          <Copy size={11} />
+                        </span>
                       </div>
-                    )}
-                  </div>
-                </div>
 
-                {/* Panel 3: Clinical Regimen & Scope (Full Width Line) */}
-                <div style={{
-                  background: '#ffffff',
-                  border: '1px solid #dadce0',
-                  borderRadius: '12px',
-                  padding: '18px 22px',
-                  boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '14px',
-                  width: '100%'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: 32, height: 32, borderRadius: '6px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <ShieldCheck size={16} />
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                        gap: '16px 24px',
+                        alignItems: 'start'
+                      }}>
+                        {!isAuthorizedViewer && (
+                          <div style={{
+                            gridColumn: '1 / -1',
+                            padding: '12px 14px',
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            flexWrap: 'wrap'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '1.05rem' }}>🔒</span>
+                              <div>
+                                <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                                  DHA & HIPAA Protected Health Information (PHI)
+                                </div>
+                                <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                                  Patient demographic identities and private contact channels are codified for unauthenticated access.
+                                </div>
+                              </div>
+                            </div>
+                            <Link
+                              href={`/login?redirect=/rx/${rxId}`}
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: '4px',
+                                background: '#003666',
+                                color: '#ffffff',
+                                fontSize: '0.74rem',
+                                fontWeight: 600,
+                                textDecoration: 'none',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <span>Doctor Sign In</span>
+                              <ArrowUpRight size={12} />
+                            </Link>
+                          </div>
+                        )}
+
+                        {/* Patient Name */}
+                        <div>
+                          <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span>{isEs ? 'Nombre Completo' : 'Full Name'}</span>
+                            {!isAuthorizedViewer && (
+                              <span style={{ fontSize: '0.58rem', background: '#e2e8f0', color: '#475569', padding: '1px 4px', borderRadius: '3px', fontWeight: 700 }}>
+                                CODIFIED
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '1rem', fontWeight: 700, color: '#202124', wordBreak: 'break-word', lineHeight: 1.3 }}>
+                            {patientName} {isAuthorizedViewer ? patientAlias : ''}
+                          </div>
+                        </div>
+
+                        {/* Demographics */}
+                        <div>
+                          <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+                            {isEs ? 'Filiación & Demografía' : 'Demographics'}
+                          </div>
+                          <div style={{ fontSize: '0.86rem', color: '#3c4043', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                            {!isAuthorizedViewer ? (
+                              <span style={{ color: '#64748b', fontSize: '0.80rem' }}>
+                                {patient.gender ? `${patient.gender} · ` : ''}Protected Medical Record
+                              </span>
+                            ) : (
+                              <>
+                                {patient.dob && (
+                                  <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong>{patient.dob}</strong></span>
+                                )}
+                                {patient.age && (
+                                  <>
+                                    <span style={{ color: '#dadce0' }}>·</span>
+                                    <span><strong>{patient.age}</strong> {isEs ? 'años' : 'yrs'}{patient.gender ? ` (${patient.gender})` : ''}</span>
+                                  </>
+                                )}
+                                {patient.nationality && (
+                                  <>
+                                    <span style={{ color: '#dadce0' }}>·</span>
+                                    <span><strong>{patient.nationality}</strong></span>
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Identification / National ID */}
+                        <div>
+                          <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+                            {isEs ? 'Identificación / Expediente' : 'National ID / Record'}
+                          </div>
+                          <div style={{ fontSize: '0.85rem', color: '#3c4043' }}>
+                            {!isAuthorizedViewer ? (
+                              <span style={{ color: '#64748b', fontSize: '0.80rem' }}>Confidential (Physician Access Only)</span>
+                            ) : patient.emiratesId ? (
+                              <span>National ID: <strong>{patient.emiratesId}</strong></span>
+                            ) : (
+                              <span style={{ color: '#5f6368' }}>{isEs ? 'Expediente Clínico Digital' : 'Digital Clinical File'}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Prescriptions History link */}
+                        {isPatientView && (
+                          <div>
+                            <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+                              {isEs ? 'Historial Clínico' : 'Clinical History'}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => { triggerHaptic('selection'); setShowPatientRxModal(true); }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                padding: 0,
+                                color: '#1a73e8',
+                                fontSize: '0.82rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4
+                              }}
+                            >
+                              <Layers size={13} color="#1a73e8" />
+                              <span>{isEs ? 'Ver todas las recetas de este paciente →' : 'View all prescriptions for this patient →'}</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        {isEs ? 'Alcance y Régimen Clínico' : 'Clinical Regimen & Dispensing Scope'}
-                      </span>
                     </div>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '3px 10px', borderRadius: '12px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>
-                      ✓ EU GMP Cleanroom Verified
-                    </span>
-                  </div>
 
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                    gap: '16px 24px',
-                    alignItems: 'start'
-                  }}>
-                    {/* Regimen Type */}
-                    <div>
-                      <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                        {isEs ? 'Formulación Principal' : 'Primary Formulation'}
-                      </div>
-                      <div style={{ fontSize: '0.96rem', fontWeight: 700, color: '#202124' }}>
-                        {rx.treatmentType || prescriptionTypeInfo.label || (isEs ? 'Protocolo Personalizado' : 'Personalized Clinical Protocol')}
-                      </div>
-                    </div>
-
-                    {/* Phases and Dispensing */}
-                    <div>
-                      <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                        {isEs ? 'Fases y Dispensación' : 'Phases & Dispensing'}
-                      </div>
-                      <div style={{ fontSize: '0.86rem', color: '#3c4043', fontWeight: 600 }}>
-                        {compoundedFormulations.length > 1
-                          ? `${compoundedFormulations.length} ${isEs ? 'Fases Secuenciales' : 'Sequential Phases'} · ${compoundedFormulations.map(f => f.volume || '').filter(Boolean).join(' + ') || (compoundedFormulations[0]?.dosageForm || 'Oral')}`
-                          : (compoundedFormulations[0]?.volume || rx.dispensingForm || (isEs ? 'Formulación Magistral' : 'Compounded Formulation'))}
-                      </div>
-                    </div>
-
-                    {/* Quality Release Standard */}
-                    <div>
-                      <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                        {isEs ? 'Estándar Farmacopéico' : 'Pharmacopeial Standard'}
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: '#137333', fontWeight: 600 }}>
-                        ✓ EU GMP Certified Dispensary · Pharmapolis &amp; Fagron Quality
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-          </div>
-        )}
-
-        {/* ── Section 5: Doctor & Clinical Care Hub (Dedicated Patient View Support) ── */}
-        {(activeGcpTab === 'patientSharing') && isPatientView && (
-        <div id="patient-sharing-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
-          <div className="rx-card" style={{
-            background: '#ffffff',
-            borderRadius: '8px',
-            border: '1px solid #dadce0',
-            padding: '1.5rem',
-            boxShadow: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1.25rem'
-          }}>
-            {/* Clean GCP Card Header */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingBottom: '1rem',
-              borderBottom: '1px solid #f1f3f4',
-              flexWrap: 'wrap',
-              gap: '8px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ 
-                  width: 34, 
-                  height: 34, 
-                  borderRadius: '6px', 
-                  background: isPatientView ? '#eff6ff' : '#ecfdf5', 
-                  color: isPatientView ? '#1d4ed8' : '#059669', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  flexShrink: 0 
-                }}>
-                  {isPatientView ? <Stethoscope size={18} /> : <Share2 size={18} />}
-                </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '0.94rem', fontWeight: 600, color: '#202124' }}>
-                      {isPatientView
-                        ? (isEs ? '5. Contacto Médico & Soporte Clínico' : '5. Doctor & Clinical Care Hub')
-                        : (isEs ? '5. Compartir con el Paciente & Acceso Móvil' : '5. Patient Communication & Mobile Access Hub')}
-                    </span>
-                    <span style={{ 
-                      fontSize: '0.68rem', 
-                      fontWeight: 500, 
-                      padding: '2px 8px', 
-                      borderRadius: '10px', 
-                      background: isPatientView ? '#eff6ff' : '#ecfdf5', 
-                      color: isPatientView ? '#1d4ed8' : '#047857', 
-                      border: isPatientView ? '1px solid #bfdbfe' : '1px solid #a7f3d0' 
-                    }}>
-                      {isPatientView 
-                        ? (isEs ? 'Atención Médica' : 'Direct Clinician Contact') 
-                        : (isEs ? 'Portal del Paciente' : 'Patient Safe View')}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
-                    {isPatientView
-                      ? (isEs 
-                          ? 'Comunicación directa con tu médico prescriptor y centro clínico autorizado' 
-                          : 'Direct communication with your prescribing physician and licensed medical practice')
-                      : (isEs 
-                          ? 'Enlace privado sin datos técnicos de laboratorio, código QR de consulta y envío directo por WhatsApp' 
-                          : 'Private patient dossier link, clinical QR code and direct WhatsApp sharing')}
-                  </div>
-                </div>
-              </div>
-
-              <span style={{
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                padding: '3px 10px',
-                borderRadius: '12px',
-                background: '#f0fdf4',
-                color: '#16a34a',
-                border: '1px solid #bbf7d0'
-              }}>
-                ✓ {isEs ? 'Canal Encriptado y Seguro' : 'Secure Clinical Channel'}
-              </span>
-            </div>
-              {isPatientView ? (
-                /* ── PATIENT VIEW: Dedicated Doctor & Clinical Support Hub ── */
-                <>
-                  <PatientExperienceHub
-                    rx={rx}
-                    isPatientView={true}
-                    lang={lang}
-                    doctorPhone={safeDoctorPhone}
-                    patientPublicUrl={patientPublicUrl}
-                    onOpenQuotation={() => setShowAtlasQuotationModal(true)}
-                    onOpenDoctorContact={(topicKey) => {
-                      setDoctorContactTopic(topicKey || 'posology');
-                      setShowDoctorContactModal(true);
-                    }}
-                    patientName={patientName}
-                    doctorName={displayDoctorNameShort}
-                    isAuthorizedViewer={isAuthorizedViewer}
-                    clinicalInquiries={clinicalInquiries}
-                  />
-
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '16px',
-                    marginTop: '8px'
-                  }}>
-                    {/* Physician & Licensed Practice Credentials */}
+                    {/* Panel 3: Clinical Regimen & Scope (Full Width Line) */}
                     <div style={{
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
+                      background: '#ffffff',
+                      border: '1px solid #dadce0',
                       borderRadius: '12px',
-                      padding: '18px',
+                      padding: '18px 22px',
+                      boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '12px'
+                      gap: '14px',
+                      width: '100%'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f3f4', paddingBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ width: 32, height: 32, borderRadius: '6px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <ShieldCheck size={16} />
+                          </div>
+                          <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            {isEs ? 'Alcance y Régimen Clínico' : 'Clinical Regimen & Dispensing Scope'}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '3px 10px', borderRadius: '12px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>
+                          ✓ EU GMP Cleanroom Verified
+                        </span>
+                      </div>
+
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                        gap: '16px 24px',
+                        alignItems: 'start'
+                      }}>
+                        {/* Regimen Type */}
+                        <div>
+                          <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+                            {isEs ? 'Formulación Principal' : 'Primary Formulation'}
+                          </div>
+                          <div style={{ fontSize: '0.96rem', fontWeight: 700, color: '#202124' }}>
+                            {rx.treatmentType || prescriptionTypeInfo.label || (isEs ? 'Protocolo Personalizado' : 'Personalized Clinical Protocol')}
+                          </div>
+                        </div>
+
+                        {/* Phases and Dispensing */}
+                        <div>
+                          <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+                            {isEs ? 'Fases y Dispensación' : 'Phases & Dispensing'}
+                          </div>
+                          <div style={{ fontSize: '0.86rem', color: '#3c4043', fontWeight: 600 }}>
+                            {compoundedFormulations.length > 1
+                              ? `${compoundedFormulations.length} ${isEs ? 'Fases Secuenciales' : 'Sequential Phases'} · ${compoundedFormulations.map(f => f.volume || '').filter(Boolean).join(' + ') || (compoundedFormulations[0]?.dosageForm || 'Oral')}`
+                              : (compoundedFormulations[0]?.volume || rx.dispensingForm || (isEs ? 'Formulación Magistral' : 'Compounded Formulation'))}
+                          </div>
+                        </div>
+
+                        {/* Quality Release Standard */}
+                        <div>
+                          <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+                            {isEs ? 'Estándar Farmacopéico' : 'Pharmacopeial Standard'}
+                          </div>
+                          <div style={{ fontSize: '0.85rem', color: '#137333', fontWeight: 600 }}>
+                            ✓ EU GMP Certified Dispensary · Pharmapolis &amp; Fagron Quality
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Section 5: Doctor & Clinical Care Hub (Dedicated Patient View Support) ── */}
+              {(activeGcpTab === 'patientSharing') && isPatientView && (
+                <div id="patient-sharing-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
+                  <div className="rx-card" style={{
+                    background: '#ffffff',
+                    borderRadius: '8px',
+                    border: '1px solid #dadce0',
+                    padding: '1.5rem',
+                    boxShadow: 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.25rem'
+                  }}>
+                    {/* Clean GCP Card Header */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      paddingBottom: '1rem',
+                      borderBottom: '1px solid #f1f3f4',
+                      flexWrap: 'wrap',
+                      gap: '8px'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: '50%',
-                          background: '#e0f2fe',
-                          color: '#0284c7',
+                          width: 34,
+                          height: 34,
+                          borderRadius: '6px',
+                          background: isPatientView ? '#eff6ff' : '#ecfdf5',
+                          color: isPatientView ? '#1d4ed8' : '#059669',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           flexShrink: 0
                         }}>
-                          <Stethoscope size={22} />
+                          {isPatientView ? <Stethoscope size={18} /> : <Share2 size={18} />}
                         </div>
                         <div>
-                          <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
-                            {displayDoctorNameShort}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '0.94rem', fontWeight: 600, color: '#202124' }}>
+                              {isPatientView
+                                ? (isEs ? '5. Contacto Médico & Soporte Clínico' : '5. Doctor & Clinical Care Hub')
+                                : (isEs ? '5. Compartir con el Paciente & Acceso Móvil' : '5. Patient Communication & Mobile Access Hub')}
+                            </span>
+                            <span style={{
+                              fontSize: '0.68rem',
+                              fontWeight: 500,
+                              padding: '2px 8px',
+                              borderRadius: '10px',
+                              background: isPatientView ? '#eff6ff' : '#ecfdf5',
+                              color: isPatientView ? '#1d4ed8' : '#047857',
+                              border: isPatientView ? '1px solid #bfdbfe' : '1px solid #a7f3d0'
+                            }}>
+                              {isPatientView
+                                ? (isEs ? 'Atención Médica' : 'Direct Clinician Contact')
+                                : (isEs ? 'Portal del Paciente' : 'Patient Safe View')}
+                            </span>
                           </div>
-                          <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                            {isAuthorizedViewer ? (doctorSpecialty || (isEs ? 'Médico Prescriptor Titular' : 'Prescribing Physician')) : (isEs ? 'Práctica Médica Colaboradora' : 'Collaborating Medical Practice')}
+                          <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
+                            {isPatientView
+                              ? (isEs
+                                ? 'Comunicación directa con tu médico prescriptor y centro clínico autorizado'
+                                : 'Direct communication with your prescribing physician and licensed medical practice')
+                              : (isEs
+                                ? 'Enlace privado sin datos técnicos de laboratorio, código QR de consulta y envío directo por WhatsApp'
+                                : 'Private patient dossier link, clinical QR code and direct WhatsApp sharing')}
                           </div>
-                          {isAuthorizedViewer && doctorLicense ? (
-                            <div style={{ fontSize: '0.70rem', color: '#0369a1', fontWeight: 600, marginTop: 2 }}>
-                              {formattedDoctorLicense || `Lic. ${doctorLicense}`}
-                            </div>
-                          ) : (
-                            <div style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 650, marginTop: 2 }}>
-                              ✓ {isEs ? 'Acreditación Oficial DHA' : 'Official DHA Accreditation'}
-                            </div>
-                          )}
                         </div>
                       </div>
 
-                      <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.78rem', color: '#334155' }}>
-                          <Building2 size={15} style={{ color: '#64748b', flexShrink: 0, marginTop: 2 }} />
-                          <div>
-                            <strong>{doctorClinic}</strong>
-                            {doctorAddress && <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 1 }}>{doctorAddress}</div>}
-                          </div>
-                        </div>
-                        {isAuthorizedViewer && doctorPhone && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#334155' }}>
-                            <Phone size={15} style={{ color: '#64748b', flexShrink: 0 }} />
-                            <a href={`tel:${doctorPhone}`} style={{ color: '#0284c7', fontWeight: 600, textDecoration: 'none' }}>
-                              {doctorPhone}
-                            </a>
-                          </div>
-                        )}
-                      </div>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        padding: '3px 10px',
+                        borderRadius: '12px',
+                        background: '#f0fdf4',
+                        color: '#16a34a',
+                        border: '1px solid #bbf7d0'
+                      }}>
+                        ✓ {isEs ? 'Canal Encriptado y Seguro' : 'Secure Clinical Channel'}
+                      </span>
                     </div>
-
-                    {/* Direct Patient Communication Channels */}
-                    <div style={{
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      padding: '18px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      gap: '12px'
-                    }}>
-                      <div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
-                          {isEs ? 'Canales Directos con la Consulta' : 'Direct Practice Channels'}
-                        </div>
-                        <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.45 }}>
-                          {isEs 
-                            ? 'Conéctate de forma segura con la consulta médica para resolver dudas de dosificación o coordinar visitas presenciales.' 
-                            : 'Connect securely with the clinical team to clarify protocol timing or schedule follow-up appointments.'}
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {/* Atlas In-App Clinical Desk Inquiry */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDoctorContactTopic('posology');
+                    {isPatientView ? (
+                      /* ── PATIENT VIEW: Dedicated Doctor & Clinical Support Hub ── */
+                      <>
+                        <PatientExperienceHub
+                          rx={rx}
+                          isPatientView={true}
+                          lang={lang}
+                          doctorPhone={safeDoctorPhone}
+                          patientPublicUrl={patientPublicUrl}
+                          onOpenQuotation={() => setShowAtlasQuotationModal(true)}
+                          onOpenDoctorContact={(topicKey) => {
+                            setDoctorContactTopic(topicKey || 'posology');
                             setShowDoctorContactModal(true);
                           }}
-                          style={{
-                            background: '#003666',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '8px',
-                            padding: '10px 16px',
-                            fontSize: '0.82rem',
-                            fontWeight: 700,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            cursor: 'pointer',
-                            boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)'
-                          }}
-                        >
-                          <Stethoscope size={16} />
-                          <span>{isEs ? 'Mesa Clínica Digital (Consultar al Médico)' : 'Atlas Clinical Desk (Consult Physician)'}</span>
-                        </button>
+                          patientName={patientName}
+                          doctorName={displayDoctorNameShort}
+                          isAuthorizedViewer={isAuthorizedViewer}
+                          clinicalInquiries={clinicalInquiries}
+                        />
 
-                        {/* Call Clinic Action */}
-                        {doctorPhone && (
-                          <a
-                            href={`tel:${doctorPhone}`}
-                            style={{
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                          gap: '16px',
+                          marginTop: '8px'
+                        }}>
+                          {/* Physician & Licensed Practice Credentials */}
+                          <div style={{
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            padding: '18px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div style={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: '50%',
+                                background: '#e0f2fe',
+                                color: '#0284c7',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0
+                              }}>
+                                <Stethoscope size={22} />
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                                  {displayDoctorNameShort}
+                                </div>
+                                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                                  {isAuthorizedViewer ? (doctorSpecialty || (isEs ? 'Médico Prescriptor Titular' : 'Prescribing Physician')) : (isEs ? 'Práctica Médica Colaboradora' : 'Collaborating Medical Practice')}
+                                </div>
+                                {isAuthorizedViewer && doctorLicense ? (
+                                  <div style={{ fontSize: '0.70rem', color: '#0369a1', fontWeight: 600, marginTop: 2 }}>
+                                    {formattedDoctorLicense || `Lic. ${doctorLicense}`}
+                                  </div>
+                                ) : (
+                                  <div style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 650, marginTop: 2 }}>
+                                    ✓ {isEs ? 'Acreditación Oficial DHA' : 'Official DHA Accreditation'}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.78rem', color: '#334155' }}>
+                                <Building2 size={15} style={{ color: '#64748b', flexShrink: 0, marginTop: 2 }} />
+                                <div>
+                                  <strong>{doctorClinic}</strong>
+                                  {doctorAddress && <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 1 }}>{doctorAddress}</div>}
+                                </div>
+                              </div>
+                              {isAuthorizedViewer && doctorPhone && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#334155' }}>
+                                  <Phone size={15} style={{ color: '#64748b', flexShrink: 0 }} />
+                                  <a href={`tel:${doctorPhone}`} style={{ color: '#0284c7', fontWeight: 600, textDecoration: 'none' }}>
+                                    {doctorPhone}
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Direct Patient Communication Channels */}
+                          <div style={{
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            padding: '18px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            gap: '12px'
+                          }}>
+                            <div>
+                              <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
+                                {isEs ? 'Canales Directos con la Consulta' : 'Direct Practice Channels'}
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.45 }}>
+                                {isEs
+                                  ? 'Conéctate de forma segura con la consulta médica para resolver dudas de dosificación o coordinar visitas presenciales.'
+                                  : 'Connect securely with the clinical team to clarify protocol timing or schedule follow-up appointments.'}
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                              {/* Atlas In-App Clinical Desk Inquiry */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDoctorContactTopic('posology');
+                                  setShowDoctorContactModal(true);
+                                }}
+                                style={{
+                                  background: '#003666',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  borderRadius: '8px',
+                                  padding: '10px 16px',
+                                  fontSize: '0.82rem',
+                                  fontWeight: 700,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '8px',
+                                  cursor: 'pointer',
+                                  boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)'
+                                }}
+                              >
+                                <Stethoscope size={16} />
+                                <span>{isEs ? 'Mesa Clínica Digital (Consultar al Médico)' : 'Atlas Clinical Desk (Consult Physician)'}</span>
+                              </button>
+
+                              {/* Call Clinic Action */}
+                              {doctorPhone && (
+                                <a
+                                  href={`tel:${doctorPhone}`}
+                                  style={{
+                                    background: '#ffffff',
+                                    color: '#0f172a',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '8px',
+                                    padding: '9px 16px',
+                                    fontSize: '0.80rem',
+                                    fontWeight: 600,
+                                    textDecoration: 'none',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px'
+                                  }}
+                                >
+                                  <Phone size={15} style={{ color: '#0284c7' }} />
+                                  <span>{isEs ? `Llamar a la Consulta (${doctorPhone})` : `Call Practice (${doctorPhone})`}</span>
+                                </a>
+                              )}
+
+                              {/* QR Modal for Patient Wallet */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  triggerHaptic('selection');
+                                  setShowQrModal(true);
+                                }}
+                                style={{
+                                  background: '#ffffff',
+                                  color: '#0284c7',
+                                  border: '1px solid #bae6fd',
+                                  borderRadius: '8px',
+                                  padding: '8px 16px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '6px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <QrCode size={15} />
+                                <span>{isEs ? 'Ver Código QR de Mi Receta' : 'View My Prescription QR Card'}</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      /* ── DOCTOR / ADMIN VIEW: Patient Communication & Mobile Sharing Hub ── */
+                      <>
+                        <PatientExperienceHub
+                          rx={rx}
+                          isPatientView={false}
+                          lang={lang}
+                          doctorPhone={safeDoctorPhone}
+                          patientPublicUrl={patientPublicUrl}
+                          patientName={patientName}
+                          doctorName={displayDoctorNameShort}
+                          isAuthorizedViewer={isAuthorizedViewer}
+                          clinicalInquiries={clinicalInquiries}
+                        />
+
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                          gap: '16px',
+                          marginTop: '8px'
+                        }}>
+                          {/* Column 1: QR & In-Clinic Scan */}
+                          <div style={{
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            textAlign: 'center',
+                            gap: '10px'
+                          }}>
+                            <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#334155' }}>
+                              📱 {isEs ? 'Código QR para Escaneo en Consulta' : 'In-Clinic Mobile QR Scan'}
+                            </div>
+                            <div style={{
                               background: '#ffffff',
-                              color: '#0f172a',
-                              border: '1px solid #cbd5e1',
-                              borderRadius: '8px',
-                              padding: '9px 16px',
-                              fontSize: '0.80rem',
-                              fontWeight: 600,
-                              textDecoration: 'none',
+                              padding: '12px',
+                              borderRadius: '10px',
+                              border: '1px solid #e2e8f0',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                            }}>
+                              <QRCodeSVG
+                                value={patientPublicUrl}
+                                size={150}
+                                level="M"
+                                includeMargin={false}
+                              />
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                              {isEs ? 'El paciente puede escanearlo directamente desde la pantalla' : 'The patient can scan this directly using their mobile camera'}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                triggerHaptic('selection');
+                                setShowQrModal(true);
+                              }}
+                              style={{
+                                background: '#ffffff',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '6px',
+                                padding: '6px 12px',
+                                color: '#0f172a',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px'
+                              }}
+                            >
+                              <Maximize2 size={13} />
+                              <span>{isEs ? 'Ampliar QR en Pantalla Completa' : 'Full Screen QR'}</span>
+                            </button>
+                          </div>
+
+                          {/* Column 2: Direct Share & WhatsApp */}
+                          <div style={{
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px'
+                          }}>
+                            <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#334155' }}>
+                              🔗 {isEs ? 'Enlace Directo del Paciente' : 'Direct Patient Link'}
+                            </div>
+
+                            <div style={{
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'center',
+                              background: '#ffffff',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '8px',
+                              padding: '6px 10px',
                               gap: '8px'
-                            }}
-                          >
-                            <Phone size={15} style={{ color: '#0284c7' }} />
-                            <span>{isEs ? `Llamar a la Consulta (${doctorPhone})` : `Call Practice (${doctorPhone})`}</span>
-                          </a>
-                        )}
+                            }}>
+                              <input
+                                type="text"
+                                readOnly
+                                value={patientPublicUrl}
+                                style={{
+                                  border: 'none',
+                                  outline: 'none',
+                                  width: '100%',
+                                  fontSize: '0.75rem',
+                                  color: '#334155',
+                                  background: 'transparent',
+                                  fontFamily: 'monospace'
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  triggerHaptic('selection');
+                                  if (navigator.clipboard) {
+                                    navigator.clipboard.writeText(patientPublicUrl);
+                                    toast.success(isEs ? 'Enlace del paciente copiado ✓' : 'Patient link copied ✓');
+                                  }
+                                }}
+                                style={{
+                                  background: '#0284c7',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  padding: '5px 10px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  flexShrink: 0
+                                }}
+                              >
+                                <Copy size={12} />
+                                <span>{isEs ? 'Copiar' : 'Copy'}</span>
+                              </button>
+                            </div>
 
-                        {/* QR Modal for Patient Wallet */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            triggerHaptic('selection');
-                            setShowQrModal(true);
-                          }}
-                          style={{
-                            background: '#ffffff',
-                            color: '#0284c7',
-                            border: '1px solid #bae6fd',
-                            borderRadius: '8px',
-                            padding: '8px 16px',
-                            fontSize: '0.78rem',
-                            fontWeight: 600,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '6px',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <QrCode size={15} />
-                          <span>{isEs ? 'Ver Código QR de Mi Receta' : 'View My Prescription QR Card'}</span>
-                        </button>
-                      </div>
-                    </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+                              <a
+                                href={`https://wa.me/?text=${encodeURIComponent(
+                                  isEs
+                                    ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por ${isAuthorizedViewer ? (nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`) : (isEs ? 'su práctica médica' : 'your medical practice')}:\n🔗 ${patientPublicUrl}`
+                                    : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by ${isAuthorizedViewer ? (nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`) : 'your medical practice'}:\n🔗 ${patientPublicUrl}`
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  background: '#25D366',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  borderRadius: '8px',
+                                  padding: '10px 14px',
+                                  fontSize: '0.80rem',
+                                  fontWeight: 700,
+                                  textDecoration: 'none',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '8px',
+                                  cursor: 'pointer',
+                                  boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)'
+                                }}
+                              >
+                                <span>💬 {isEs ? 'Enviar por WhatsApp al Paciente' : 'Share via WhatsApp with Patient'}</span>
+                              </a>
+
+                              <a
+                                href={patientPublicUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  background: '#ffffff',
+                                  color: '#0284c7',
+                                  border: '1px solid #0284c7',
+                                  borderRadius: '8px',
+                                  padding: '8px 14px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  textDecoration: 'none',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '6px'
+                                }}
+                              >
+                                <ExternalLink size={14} />
+                                <span>{isEs ? 'Abrir Vista de Paciente en Nueva Pestaña' : 'Open Patient View in New Tab'}</span>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
-                </>
-              ) : (
-                /* ── DOCTOR / ADMIN VIEW: Patient Communication & Mobile Sharing Hub ── */
-                <>
-                  <PatientExperienceHub
-                    rx={rx}
-                    isPatientView={false}
-                    lang={lang}
-                    doctorPhone={safeDoctorPhone}
-                    patientPublicUrl={patientPublicUrl}
-                    patientName={patientName}
-                    doctorName={displayDoctorNameShort}
-                    isAuthorizedViewer={isAuthorizedViewer}
-                    clinicalInquiries={clinicalInquiries}
-                  />
-
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '16px',
-                    marginTop: '8px'
-                  }}>
-                    {/* Column 1: QR & In-Clinic Scan */}
-                    <div style={{
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      padding: '16px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      textAlign: 'center',
-                      gap: '10px'
-                    }}>
-                      <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#334155' }}>
-                        📱 {isEs ? 'Código QR para Escaneo en Consulta' : 'In-Clinic Mobile QR Scan'}
-                      </div>
-                      <div style={{
-                        background: '#ffffff',
-                        padding: '12px',
-                        borderRadius: '10px',
-                        border: '1px solid #e2e8f0',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-                      }}>
-                        <QRCodeSVG
-                          value={patientPublicUrl}
-                          size={150}
-                          level="M"
-                          includeMargin={false}
-                        />
-                      </div>
-                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                        {isEs ? 'El paciente puede escanearlo directamente desde la pantalla' : 'The patient can scan this directly using their mobile camera'}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          triggerHaptic('selection');
-                          setShowQrModal(true);
-                        }}
-                        style={{
-                          background: '#ffffff',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '6px',
-                          padding: '6px 12px',
-                          color: '#0f172a',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px'
-                        }}
-                      >
-                        <Maximize2 size={13} />
-                        <span>{isEs ? 'Ampliar QR en Pantalla Completa' : 'Full Screen QR'}</span>
-                      </button>
-                    </div>
-
-                    {/* Column 2: Direct Share & WhatsApp */}
-                    <div style={{
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      padding: '16px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '12px'
-                    }}>
-                      <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#334155' }}>
-                        🔗 {isEs ? 'Enlace Directo del Paciente' : 'Direct Patient Link'}
-                      </div>
-
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        background: '#ffffff',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '8px',
-                        padding: '6px 10px',
-                        gap: '8px'
-                      }}>
-                        <input
-                          type="text"
-                          readOnly
-                          value={patientPublicUrl}
-                          style={{
-                            border: 'none',
-                            outline: 'none',
-                            width: '100%',
-                            fontSize: '0.75rem',
-                            color: '#334155',
-                            background: 'transparent',
-                            fontFamily: 'monospace'
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            triggerHaptic('selection');
-                            if (navigator.clipboard) {
-                              navigator.clipboard.writeText(patientPublicUrl);
-                              toast.success(isEs ? 'Enlace del paciente copiado ✓' : 'Patient link copied ✓');
-                            }
-                          }}
-                          style={{
-                            background: '#0284c7',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            padding: '5px 10px',
-                            fontSize: '0.72rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            flexShrink: 0
-                          }}
-                        >
-                          <Copy size={12} />
-                          <span>{isEs ? 'Copiar' : 'Copy'}</span>
-                        </button>
-                      </div>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
-                        <a
-                          href={`https://wa.me/?text=${encodeURIComponent(
-                            isEs
-                              ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por ${isAuthorizedViewer ? (nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`) : (isEs ? 'su práctica médica' : 'your medical practice')}:\n🔗 ${patientPublicUrl}`
-                              : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by ${isAuthorizedViewer ? (nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`) : 'your medical practice'}:\n🔗 ${patientPublicUrl}`
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            background: '#25D366',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '8px',
-                            padding: '10px 14px',
-                            fontSize: '0.80rem',
-                            fontWeight: 700,
-                            textDecoration: 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            cursor: 'pointer',
-                            boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)'
-                          }}
-                        >
-                          <span>💬 {isEs ? 'Enviar por WhatsApp al Paciente' : 'Share via WhatsApp with Patient'}</span>
-                        </a>
-
-                        <a
-                          href={patientPublicUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            background: '#ffffff',
-                            color: '#0284c7',
-                            border: '1px solid #0284c7',
-                            borderRadius: '8px',
-                            padding: '8px 14px',
-                            fontSize: '0.78rem',
-                            fontWeight: 600,
-                            textDecoration: 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '6px'
-                          }}
-                        >
-                          <ExternalLink size={14} />
-                          <span>{isEs ? 'Abrir Vista de Paciente en Nueva Pestaña' : 'Open Patient View in New Tab'}</span>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </>
+                </div>
               )}
-            </div>
-        </div>
-        )}
 
-        {/* ── Section 6: Request to Atlas Quotation ── */}
-        {(activeGcpTab === 'quotation') && !isPatientView && (
-        <div id="atlas-quotation-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
-          <div className="rx-card" style={{
-            background: '#ffffff',
-            borderRadius: '8px',
-            border: '1px solid #dadce0',
-            padding: '1.5rem',
-            boxShadow: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1.25rem'
-          }}>
-            {/* Clean GCP Card Header */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingBottom: '1rem',
-              borderBottom: '1px solid #f1f3f4',
-              flexWrap: 'wrap',
-              gap: '8px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: '6px',
-                  background: '#eff6ff',
-                  color: '#1a73e8',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <FileText size={18} />
-                </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '0.94rem', fontWeight: 600, color: '#202124' }}>
-                      {isEs ? '6. Solicitar Cotización de Elaboración a Atlas' : '6. Request to Atlas Quotation'}
-                    </span>
-                    <span style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 500,
-                      padding: '2px 8px',
-                      borderRadius: '10px',
-                      background: '#eff6ff',
-                      color: '#1d4ed8',
-                      border: '1px solid #bfdbfe'
-                    }}>
-                      Atlas Compounding Board
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
-                    {isEs 
-                      ? 'Petición directa de cotización de formulación magistral al equipo central de Atlas Health Services' 
-                      : 'Direct compounding quotation request to Atlas Health Services central operations'}
-                  </div>
-                </div>
-              </div>
-
-              <span style={{
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                padding: '3px 10px',
-                borderRadius: '12px',
-                background: '#eff6ff',
-                color: '#1d4ed8',
-                border: '1px solid #bfdbfe'
-              }}>
-                📄 {isEs ? 'Presupuesto Bajo Demanda' : 'On-Demand Pricing'}
-              </span>
-            </div>
-              {/* Summary Table of Formulations to Quote */}
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '14px 16px'
-              }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  {isEs ? 'Fórmulas y Presentaciones a Cotizar' : 'Compounding Formulations to Quote'}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {compoundedFormulations.map((form, idx) => (
-                    <div key={form.id || idx} style={{
+              {/* ── Section 6: Request to Atlas Quotation ── */}
+              {(activeGcpTab === 'quotation') && !isPatientView && (
+                <div id="atlas-quotation-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
+                  <div className="rx-card" style={{
+                    background: '#ffffff',
+                    borderRadius: '8px',
+                    border: '1px solid #dadce0',
+                    padding: '1.5rem',
+                    boxShadow: 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.25rem'
+                  }}>
+                    {/* Clean GCP Card Header */}
+                    <div style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      background: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      padding: '10px 12px',
-                      gap: '10px'
+                      paddingBottom: '1rem',
+                      borderBottom: '1px solid #f1f3f4',
+                      flexWrap: 'wrap',
+                      gap: '8px'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '50%',
+                        <div style={{
+                          width: 34,
+                          height: 34,
+                          borderRadius: '6px',
                           background: '#eff6ff',
-                          color: '#1d4ed8',
+                          color: '#1a73e8',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '0.72rem',
-                          fontWeight: 700
+                          flexShrink: 0
                         }}>
-                          {idx + 1}
-                        </span>
+                          <FileText size={18} />
+                        </div>
                         <div>
-                          <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#0f172a' }}>
-                            {form.vehicle?.name || form.title}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '0.94rem', fontWeight: 600, color: '#202124' }}>
+                              {isEs ? '6. Solicitar Cotización de Elaboración a Atlas' : '6. Request to Atlas Quotation'}
+                            </span>
+                            <span style={{
+                              fontSize: '0.68rem',
+                              fontWeight: 500,
+                              padding: '2px 8px',
+                              borderRadius: '10px',
+                              background: '#eff6ff',
+                              color: '#1d4ed8',
+                              border: '1px solid #bfdbfe'
+                            }}>
+                              Atlas Compounding Board
+                            </span>
                           </div>
-                          <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                            {Array.isArray(form.apis) ? form.apis.map(a => `${a.name} ${a.concentration || ''}`).join(' + ') : 'Compounded actives'}
+                          <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
+                            {isEs
+                              ? 'Petición directa de cotización de formulación magistral al equipo central de Atlas Health Services'
+                              : 'Direct compounding quotation request to Atlas Health Services central operations'}
                           </div>
                         </div>
                       </div>
-                      <div style={{
-                        background: '#f1f5f9',
-                        color: '#334155',
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        fontSize: '0.74rem',
+
+                      <span style={{
+                        fontSize: '0.72rem',
                         fontWeight: 600,
-                        flexShrink: 0
+                        padding: '3px 10px',
+                        borderRadius: '12px',
+                        background: '#eff6ff',
+                        color: '#1d4ed8',
+                        border: '1px solid #bfdbfe'
                       }}>
-                        {form.volume || form.vehicle?.volume || '3 months treatment'}
+                        📄 {isEs ? 'Presupuesto Bajo Demanda' : 'On-Demand Pricing'}
+                      </span>
+                    </div>
+                    {/* Summary Table of Formulations to Quote */}
+                    <div style={{
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      padding: '14px 16px'
+                    }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '8px' }}>
+                        {isEs ? 'Fórmulas y Presentaciones a Cotizar' : 'Compounding Formulations to Quote'}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {compoundedFormulations.map((form, idx) => (
+                          <div key={form.id || idx} style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            padding: '10px 12px',
+                            gap: '10px'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <span style={{
+                                width: '24px',
+                                height: '24px',
+                                borderRadius: '50%',
+                                background: '#eff6ff',
+                                color: '#1d4ed8',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.72rem',
+                                fontWeight: 700
+                              }}>
+                                {idx + 1}
+                              </span>
+                              <div>
+                                <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#0f172a' }}>
+                                  {form.vehicle?.name || form.title}
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                                  {Array.isArray(form.apis) ? form.apis.map(a => `${a.name} ${a.concentration || ''}`).join(' + ') : 'Compounded actives'}
+                                </div>
+                              </div>
+                            </div>
+                            <div style={{
+                              background: '#f1f5f9',
+                              color: '#334155',
+                              padding: '3px 8px',
+                              borderRadius: '6px',
+                              fontSize: '0.74rem',
+                              fontWeight: 600,
+                              flexShrink: 0
+                            }}>
+                              {form.volume || form.vehicle?.volume || '3 months treatment'}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
+
+                    {/* Requester Credentials Card */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                      gap: '12px',
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      padding: '14px 16px'
+                    }}>
+                      <div>
+                        <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
+                          {isEs ? 'Médico Prescriptor' : 'Prescribing Clinician'}
+                        </div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                          {doctorName}
+                        </div>
+                        {doctorSpecialty && (
+                          <div style={{ fontSize: '0.72rem', color: '#475569' }}>{doctorSpecialty}</div>
+                        )}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
+                          {isEs ? 'Centro / Clínica' : 'Practice / Clinic'}
+                        </div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                          {doctorClinic || clinic}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#475569' }}>{doctorPhone || treatingDoc.email || ''}</div>
+                      </div>
+                    </div>
+
+                    {/* Default Note */}
+                    <div style={{
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      padding: '10px 14px',
+                      fontSize: '0.78rem',
+                      color: '#475569'
+                    }}>
+                      <span style={{ fontWeight: 600, color: '#1e293b' }}>{isEs ? 'Nota predeterminada:' : 'Standard request note:'}</span>{' '}
+                      <span style={{ fontStyle: 'italic', color: '#0284c7' }}>"Please provide compounding quotation."</span>
+                    </div>
+
+                    {/* CTA Button */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('impact');
+                          setShowAtlasQuotationModal(true);
+                        }}
+                        style={{
+                          background: '#0284c7',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '10px 20px',
+                          fontSize: '0.85rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          boxShadow: '0 4px 12px rgba(2, 132, 199, 0.25)'
+                        }}
+                      >
+                        <FileText size={16} />
+                        <span>{isEs ? 'Solicitar cotización a Atlas' : 'Request to Atlas quotation'}</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Requester Credentials Card */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                gap: '12px',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '14px 16px'
-              }}>
-                <div>
-                  <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
-                    {isEs ? 'Médico Prescriptor' : 'Prescribing Clinician'}
-                  </div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                    {doctorName}
-                  </div>
-                  {doctorSpecialty && (
-                    <div style={{ fontSize: '0.72rem', color: '#475569' }}>{doctorSpecialty}</div>
-                  )}
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
-                    {isEs ? 'Centro / Clínica' : 'Practice / Clinic'}
-                  </div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                    {doctorClinic || clinic}
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: '#475569' }}>{doctorPhone || treatingDoc.email || ''}</div>
-                </div>
-              </div>
-
-              {/* Default Note */}
-              <div style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                padding: '10px 14px',
-                fontSize: '0.78rem',
-                color: '#475569'
-              }}>
-                <span style={{ fontWeight: 600, color: '#1e293b' }}>{isEs ? 'Nota predeterminada:' : 'Standard request note:'}</span>{' '}
-                <span style={{ fontStyle: 'italic', color: '#0284c7' }}>"Please provide compounding quotation."</span>
-              </div>
-
-              {/* CTA Button */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('impact');
-                    setShowAtlasQuotationModal(true);
-                  }}
-                  style={{
-                    background: '#0284c7',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '10px 20px',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    boxShadow: '0 4px 12px rgba(2, 132, 199, 0.25)'
-                  }}
-                >
-                  <FileText size={16} />
-                  <span>{isEs ? 'Solicitar cotización a Atlas' : 'Request to Atlas quotation'}</span>
-                </button>
-              </div>
-            </div>
-        </div>
-        )}
-
-            {/* Standardized Institutional Footer with Reference (Google Cloud Console Compliant) */}
-            <footer style={{
-              marginTop: '2rem',
-              borderTop: '1px solid #e2e8f0',
-              paddingTop: '1.25rem',
-              paddingBottom: '2rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.65rem',
-              textAlign: 'center'
-            }}>
-              <div style={{
-                display: 'inline-flex',
+              {/* Standardized Institutional Footer with Reference (Google Cloud Console Compliant) */}
+              <footer style={{
+                marginTop: '2rem',
+                borderTop: '1px solid #e2e8f0',
+                paddingTop: '1.25rem',
+                paddingBottom: '2rem',
+                display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '0.5rem',
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                padding: '4px 14px',
-                borderRadius: '9999px',
-                fontSize: '0.76rem'
+                gap: '0.65rem',
+                textAlign: 'center'
               }}>
-                <span style={{ color: '#64748b', fontWeight: 600 }}>Ref:</span>
-                <span style={{ color: '#0f172a', fontWeight: 800, fontFamily: 'monospace' }}>{rxId}</span>
-              </div>
-              <div style={{ color: '#64748b', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <span>Atlas Clinical Intelligence Infrastructure</span>
-                <span>•</span>
-                <span>ISO 15189 / 17025 Accredited</span>
-                <span>•</span>
-                <span>EU GMP Compounding Alliance</span>
-              </div>
-              <div style={{ color: '#94a3b8', fontSize: '0.70rem' }}>
-                Confidential Patient Prescription Dossier · Authorized Clinical Access Only
-              </div>
-            </footer>
-          </div>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                  padding: '4px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '0.76rem'
+                }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>Ref:</span>
+                  <span style={{ color: '#0f172a', fontWeight: 800, fontFamily: 'monospace' }}>{rxId}</span>
+                </div>
+                <div style={{ color: '#64748b', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <span>Atlas Clinical Intelligence Infrastructure</span>
+                  <span>•</span>
+                  <span>ISO 15189 / 17025 Accredited</span>
+                  <span>•</span>
+                  <span>EU GMP Compounding Alliance</span>
+                </div>
+                <div style={{ color: '#94a3b8', fontSize: '0.70rem' }}>
+                  Confidential Patient Prescription Dossier · Authorized Clinical Access Only
+                </div>
+              </footer>
+            </div>
 
-          {/* Persistent Sticky Prescription Sidebar (Desktop Sticky + Mobile Drawer) */}
-          <PrescriptionDetailSidebar
-            sections={tocSections}
-            formulations={compoundedFormulations}
-            phases={rx.phases || rx.treatmentPhases || []}
-            rxId={rxId}
-            patientName={patientName}
-            patient={patient}
-            rx={currentRx}
-            doctorName={doctorName}
-            doctorTitle={doctorSpecialty}
-            doctorLicense={doctorLicense}
-            doctorOffice={doctorAddress}
-            doctorPhone={doctorPhone}
-            doctorPublicUrl={doctorPublicUrl}
-            publicUrl={publicUrl}
-            onOpenPdf={() => setShowBrochureModal(true)}
-            onExportExcel={handleExportExcel}
-            activeGcpTab={activeGcpTab}
-            onSelectTab={setActiveGcpTab}
-            lang={lang}
-            isAuthorizedViewer={isAuthorizedViewer}
-            isPatientView={isPatientView}
-            onOpenQuotation={() => setShowAtlasQuotationModal(true)}
-            onPatientContactUpdated={({ phone, email }) => {
-              setCurrentRx(prev => ({
-                ...prev,
-                patientPhone: phone || prev?.patientPhone,
-                patientEmail: email || prev?.patientEmail,
-                patient: {
-                  ...(prev?.patient || {}),
-                  phone: phone || prev?.patient?.phone,
-                  email: email || prev?.patient?.email
-                }
-              }));
-            }}
-          />
+            {/* Persistent Sticky Prescription Sidebar (Desktop Sticky + Mobile Drawer) */}
+            <PrescriptionDetailSidebar
+              sections={tocSections}
+              formulations={compoundedFormulations}
+              phases={rx.phases || rx.treatmentPhases || []}
+              rxId={rxId}
+              patientName={patientName}
+              patient={patient}
+              rx={currentRx}
+              doctorName={doctorName}
+              doctorTitle={doctorSpecialty}
+              doctorLicense={doctorLicense}
+              doctorOffice={doctorAddress}
+              doctorPhone={doctorPhone}
+              doctorPublicUrl={doctorPublicUrl}
+              publicUrl={publicUrl}
+              onOpenPdf={() => setShowBrochureModal(true)}
+              onExportExcel={handleExportExcel}
+              activeGcpTab={activeGcpTab}
+              onSelectTab={setActiveGcpTab}
+              lang={lang}
+              isAuthorizedViewer={isAuthorizedViewer}
+              isPatientView={isPatientView}
+              onOpenQuotation={() => setShowAtlasQuotationModal(true)}
+              onPatientContactUpdated={({ phone, email }) => {
+                setCurrentRx(prev => ({
+                  ...prev,
+                  patientPhone: phone || prev?.patientPhone,
+                  patientEmail: email || prev?.patientEmail,
+                  patient: {
+                    ...(prev?.patient || {}),
+                    phone: phone || prev?.patient?.phone,
+                    email: email || prev?.patient?.email
+                  }
+                }));
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Google Cloud Console Standard Unified Footer ── */}
       <PublicUnifiedFooter lang={lang || 'en'} minimal={embedded} />
@@ -2004,23 +2142,23 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               : `${resolvedFormulaSummary || prescriptionTypeInfo.label} • Dr. ${nominalDoctorName || displayDoctorNameShort || 'Atlas Clinical'}`
           }
           badge={
-            <StatusBadge 
-              status={currentStatus || 'active'} 
+            <StatusBadge
+              status={currentStatus || 'active'}
               label={isPatientView ? (isEs ? 'Tratamiento Activo' : 'Active Treatment') : undefined}
             />
           }
           inquireLabel={
             isPatientView
               ? (
-                  !isPatientAuthenticated ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                      <Lock size={12} color="#fbbf24" />
-                      <span>{isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Pedir Medicación' : 'Order Prescription')}</span>
-                    </span>
-                  ) : (
-                    isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Pedir Medicación' : 'Order Prescription')
-                  )
+                !isPatientAuthenticated ? (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <Lock size={12} color="#fbbf24" />
+                    <span>{isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Pedir Medicación' : 'Order Prescription')}</span>
+                  </span>
+                ) : (
+                  isDispensed ? (isEs ? 'Solicitar Reposición' : 'Request Refill') : (isEs ? 'Pedir Medicación' : 'Order Prescription')
                 )
+              )
               : (isEs ? 'Consultar Laboratorio' : 'Inquire Lab Support')
           }
           onInquire={() => {
@@ -2156,7 +2294,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         </div>
                       </button>
 
-                      {prescriptionLabels.length > 0 && (
+                      {isAdmin && prescriptionLabels.length > 0 && (
                         <>
                           <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
                           <button
@@ -2213,11 +2351,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     const docSignature = isAuthorizedViewer ? (nominalDoctorName.startsWith('Dr') ? nominalDoctorName : `Dr. ${nominalDoctorName}`) : (isEs ? 'Su práctica médica' : 'Your medical practice');
                     const text = isProposal
                       ? (isEs
-                          ? `Estimado/a ${patientName},\n\n${docSignature} le remite su Propuesta de Tratamiento Personalizada:\n\n📋 Pauta: ${resolvedFormulaSummary}\n🆔 Ref: #${rxId}\n\nPuede revisar su formulación y confirmar la dispensación aquí:\n🔗 ${origin}/rx/${rxId}`
-                          : `Dear ${patientName},\n\n${docSignature} has prepared your personalized Clinical Treatment Proposal:\n\n📋 Regimen: ${resolvedFormulaSummary}\n🆔 Proposal Ref: #${rxId}\n\nYou can review your formulation and activate your order here:\n🔗 ${origin}/rx/${rxId}`)
+                        ? `Estimado/a ${patientName},\n\n${docSignature} le remite su Propuesta de Tratamiento Personalizada:\n\n📋 Pauta: ${resolvedFormulaSummary}\n🆔 Ref: #${rxId}\n\nPuede revisar su formulación y confirmar la dispensación aquí:\n🔗 ${origin}/rx/${rxId}`
+                        : `Dear ${patientName},\n\n${docSignature} has prepared your personalized Clinical Treatment Proposal:\n\n📋 Regimen: ${resolvedFormulaSummary}\n🆔 Proposal Ref: #${rxId}\n\nYou can review your formulation and activate your order here:\n🔗 ${origin}/rx/${rxId}`)
                       : (isEs
-                          ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por ${docSignature}:\n🔗 ${patientPublicUrl}`
-                          : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by ${docSignature}:\n🔗 ${patientPublicUrl}`);
+                        ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por ${docSignature}:\n🔗 ${patientPublicUrl}`
+                        : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by ${docSignature}:\n🔗 ${patientPublicUrl}`);
                     const waBase = cleanPhone ? `https://wa.me/${cleanPhone.replace('+', '')}` : 'https://wa.me/';
                     window.open(`${waBase}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
                   }}
@@ -2320,152 +2458,152 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     />
                   </button>
 
-                {showPatientDropdown && (
-                  <div style={{
-                    position: 'absolute',
-                    bottom: 'calc(100% + 12px)',
-                    right: 0,
-                    zIndex: 999,
-                    background: 'rgba(255, 255, 255, 0.96)',
-                    backdropFilter: 'blur(24px) saturate(190%)',
-                    WebkitBackdropFilter: 'blur(24px) saturate(190%)',
-                    borderRadius: '10px',
-                    boxShadow: '0 12px 32px rgba(15, 23, 42, 0.16)',
-                    border: '1px solid #cbd5e1',
-                    padding: '6px',
-                    minWidth: '280px',
-                    maxWidth: 'calc(100vw - 32px)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '4px',
-                    animation: 'fadeIn 0.15s ease-out'
-                  }}>
-                    {/* 1. Official Regimen Guide PDF */}
-                    <button
-                      type="button"
-                      onClick={() => { setShowPatientDropdown(false); setShowBrochureModal(true); }}
-                      className="rx-dock-drop-item"
-                    >
-                      <FileText size={15} color="#1a73e8" />
-                      <div>
-                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Guía de Tratamiento (PDF)' : 'Treatment Routine Guide (PDF)'}</div>
-                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Pauta de administración y descarga para viajes' : 'Daily administration schedule & travel PDF'}</div>
-                      </div>
-                    </button>
-
-                    {/* 2. Official QR Verification */}
-                    <button
-                      type="button"
-                      onClick={() => { setShowPatientDropdown(false); setShowQrModal(true); }}
-                      className="rx-dock-drop-item"
-                    >
-                      <QrCode size={15} color="#0284c7" />
-                      <div>
-                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Verificación Autenticidad QR' : 'Official QR Verification'}</div>
-                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Validación digital farmacéutica EU GMP' : 'EU GMP digital dispensing verification'}</div>
-                      </div>
-                    </button>
-
-                    {/* 3. Multi-Part Phase Switcher (if > 1 phase, e.g. RX-51812-A Morning vs Night) */}
-                    {compoundedFormulations.length > 1 && (
-                      <>
-                        <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
-                        <div style={{ fontSize: '0.66rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8', padding: '2px 8px' }}>
-                          {isEs ? 'Fórmulas del Tratamiento' : 'Regimen Formulas'}
+                  {showPatientDropdown && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 'calc(100% + 12px)',
+                      right: 0,
+                      zIndex: 999,
+                      background: 'rgba(255, 255, 255, 0.96)',
+                      backdropFilter: 'blur(24px) saturate(190%)',
+                      WebkitBackdropFilter: 'blur(24px) saturate(190%)',
+                      borderRadius: '10px',
+                      boxShadow: '0 12px 32px rgba(15, 23, 42, 0.16)',
+                      border: '1px solid #cbd5e1',
+                      padding: '6px',
+                      minWidth: '280px',
+                      maxWidth: 'calc(100vw - 32px)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                      animation: 'fadeIn 0.15s ease-out'
+                    }}>
+                      {/* 1. Official Regimen Guide PDF */}
+                      <button
+                        type="button"
+                        onClick={() => { setShowPatientDropdown(false); setShowBrochureModal(true); }}
+                        className="rx-dock-drop-item"
+                      >
+                        <FileText size={15} color="#1a73e8" />
+                        <div>
+                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Guía de Tratamiento (PDF)' : 'Treatment Routine Guide (PDF)'}</div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Pauta de administración y descarga para viajes' : 'Daily administration schedule & travel PDF'}</div>
                         </div>
-                        {compoundedFormulations.map((f, idx) => (
-                          <button
-                            key={f.id || idx}
-                            type="button"
-                            onClick={() => {
-                              setShowPatientDropdown(false);
-                              setSelectedPhase(f.id);
-                              setActiveGcpTab('treatment');
-                              setExpandedPhases(prev => ({ ...prev, [f.id]: true }));
-                              const elem = document.getElementById(f.id) || document.getElementById(`formulation-${idx}`);
-                              if (elem) elem.scrollIntoView({ behavior: 'smooth' });
-                            }}
-                            className="rx-dock-drop-item"
-                          >
-                            <Pill size={15} color={idx === 0 ? '#16a34a' : '#7c3aed'} />
-                            <div>
-                              <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>
-                                {f.title || (isEs ? `Fórmula ${idx + 1}` : `Formula ${idx + 1}`)}
+                      </button>
+
+                      {/* 2. Official QR Verification */}
+                      <button
+                        type="button"
+                        onClick={() => { setShowPatientDropdown(false); setShowQrModal(true); }}
+                        className="rx-dock-drop-item"
+                      >
+                        <QrCode size={15} color="#0284c7" />
+                        <div>
+                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Verificación Autenticidad QR' : 'Official QR Verification'}</div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Validación digital farmacéutica EU GMP' : 'EU GMP digital dispensing verification'}</div>
+                        </div>
+                      </button>
+
+                      {/* 3. Multi-Part Phase Switcher (if > 1 phase, e.g. RX-51812-A Morning vs Night) */}
+                      {compoundedFormulations.length > 1 && (
+                        <>
+                          <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
+                          <div style={{ fontSize: '0.66rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8', padding: '2px 8px' }}>
+                            {isEs ? 'Fórmulas del Tratamiento' : 'Regimen Formulas'}
+                          </div>
+                          {compoundedFormulations.map((f, idx) => (
+                            <button
+                              key={f.id || idx}
+                              type="button"
+                              onClick={() => {
+                                setShowPatientDropdown(false);
+                                setSelectedPhase(f.id);
+                                setActiveGcpTab('treatment');
+                                setExpandedPhases(prev => ({ ...prev, [f.id]: true }));
+                                const elem = document.getElementById(f.id) || document.getElementById(`formulation-${idx}`);
+                                if (elem) elem.scrollIntoView({ behavior: 'smooth' });
+                              }}
+                              className="rx-dock-drop-item"
+                            >
+                              <Pill size={15} color={idx === 0 ? '#16a34a' : '#7c3aed'} />
+                              <div>
+                                <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>
+                                  {f.title || (isEs ? `Fórmula ${idx + 1}` : `Formula ${idx + 1}`)}
+                                </div>
+                                <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
+                                  {f.dosageForm || (isEs ? 'Ver pauta y posología' : 'View formula details')}
+                                </div>
                               </div>
-                              <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
-                                {f.dosageForm || (isEs ? 'Ver pauta y posología' : 'View formula details')}
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </>
-                    )}
+                            </button>
+                          ))}
+                        </>
+                      )}
 
-                    {/* 4. In-App Direct Prescription Cycle Refill */}
-                    <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowPatientDropdown(false);
-                        setDoctorContactTopic('refill');
-                        setShowDoctorContactModal(true);
-                      }}
-                      className="rx-dock-drop-item"
-                    >
-                      <RefreshCw size={15} color="#0284c7" />
-                      <div>
-                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Solicitar Reposición de Ciclo' : 'Request Cycle Refill'}</div>
-                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Mesa clínica digital segura' : 'Secure practice clinical desk'}</div>
-                      </div>
-                    </button>
+                      {/* 4. In-App Direct Prescription Cycle Refill */}
+                      <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowPatientDropdown(false);
+                          setDoctorContactTopic('refill');
+                          setShowDoctorContactModal(true);
+                        }}
+                        className="rx-dock-drop-item"
+                      >
+                        <RefreshCw size={15} color="#0284c7" />
+                        <div>
+                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>{isEs ? 'Solicitar Reposición de Ciclo' : 'Request Cycle Refill'}</div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>{isEs ? 'Mesa clínica digital segura' : 'Secure practice clinical desk'}</div>
+                        </div>
+                      </button>
 
-                    {/* 5. In-App Direct Clinician Consultation */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowPatientDropdown(false);
-                        setDoctorContactTopic('posology');
-                        setShowDoctorContactModal(true);
-                      }}
-                      className="rx-dock-drop-item"
-                    >
-                      <Stethoscope size={15} color="#003666" />
-                      <div>
-                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>
-                          {isEs ? `Consultar con ${displayDoctorNameShort || 'Médico'}` : `Message ${displayDoctorNameShort || 'Physician'}`}
+                      {/* 5. In-App Direct Clinician Consultation */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowPatientDropdown(false);
+                          setDoctorContactTopic('posology');
+                          setShowDoctorContactModal(true);
+                        }}
+                        className="rx-dock-drop-item"
+                      >
+                        <Stethoscope size={15} color="#003666" />
+                        <div>
+                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>
+                            {isEs ? `Consultar con ${displayDoctorNameShort || 'Médico'}` : `Message ${displayDoctorNameShort || 'Physician'}`}
+                          </div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
+                            {isEs ? 'Dudas médicas sobre posología o revisión' : 'Clinical dosage or follow-up query'}
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
-                          {isEs ? 'Dudas médicas sobre posología o revisión' : 'Clinical dosage or follow-up query'}
-                        </div>
-                      </div>
-                    </button>
+                      </button>
 
-                    {/* 6. Submit New Prescription / Lab Report (Frictionless Ingestion) */}
-                    <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowPatientDropdown(false);
-                        window.location.href = `/rx/intake?from=${rxId}${treatingDoc?.opaqueCode ? `&refDoctor=${treatingDoc.opaqueCode}` : ''}`;
-                      }}
-                      className="rx-dock-drop-item"
-                    >
-                      <Upload size={15} color="#003666" />
-                      <div>
-                        <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>
-                          {isEs ? 'Subir Nueva Receta o Analítica' : 'Submit New Rx or Lab'}
+                      {/* 6. Submit New Prescription / Lab Report (Frictionless Ingestion) */}
+                      <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowPatientDropdown(false);
+                          window.location.href = `/rx/intake?from=${rxId}${treatingDoc?.opaqueCode ? `&refDoctor=${treatingDoc.opaqueCode}` : ''}`;
+                        }}
+                        className="rx-dock-drop-item"
+                      >
+                        <Upload size={15} color="#003666" />
+                        <div>
+                          <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>
+                            {isEs ? 'Subir Nueva Receta o Analítica' : 'Submit New Rx or Lab'}
+                          </div>
+                          <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
+                            {isEs ? 'Digitalización autónoma multimodal' : 'Autonomous multimodal AI intake'}
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>
-                          {isEs ? 'Digitalización autónoma multimodal' : 'Autonomous multimodal AI intake'}
-                        </div>
-                      </div>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
-          )
-        }
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )
+          }
         />
       )}
 
@@ -2544,7 +2682,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         handleDownloadQrPng={handleDownloadQrPng}
         previewDoc={previewDoc}
         setPreviewDoc={setPreviewDoc}
-        showLabelsModal={showLabelsModal}
+        showLabelsModal={isAdmin && showLabelsModal}
         setShowLabelsModal={setShowLabelsModal}
         selectedLabelIndex={selectedLabelIndex}
         setSelectedLabelIndex={setSelectedLabelIndex}
@@ -2624,6 +2762,32 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               email: email || prev?.patient?.email
             }
           }));
+        }}
+      />
+
+      {/* ── Google Cloud UX Doctor Pre-Flight Certification & Patient Release Modal ── */}
+      <DoctorValidationModal
+        isOpen={showDoctorValidationModal}
+        onClose={() => setShowDoctorValidationModal(false)}
+        rx={currentRx}
+        rxId={rxId}
+        doctorName={nominalDoctorName || displayDoctorNameShort}
+        clinicName={clinic || doctorClinic || treatingDoc?.clinic}
+        patientName={patientName}
+        compoundedFormulations={compoundedFormulations}
+        atlasRecs={atlasRecs}
+        isEs={isEs}
+        onValidationSuccess={(patientConfig) => {
+          setCurrentStatus('approved');
+          setCurrentRx(prev => ({
+            ...prev,
+            status: 'approved',
+            validationStatus: 'Ready',
+            patientConfig
+          }));
+          setTimeout(() => {
+            setShowPatientShareModal(true);
+          }, 350);
         }}
       />
     </div>

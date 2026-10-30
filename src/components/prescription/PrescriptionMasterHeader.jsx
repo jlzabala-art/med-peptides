@@ -46,6 +46,7 @@ export default function PrescriptionMasterHeader({
   handleCopyLink,
   copied = false,
   onOpenPatientShare = null,
+  onOpenDoctorValidation = null,
   activeGcpTab = 'treatment',
   setActiveGcpTab = null,
   compoundedFormulations = [],
@@ -64,7 +65,9 @@ export default function PrescriptionMasterHeader({
     const tabs = [
       {
         id: 'treatment',
-        label: isEs ? 'Fórmulas y Posología' : 'Formulations & Posology',
+        label: isPatientView
+          ? (isEs ? 'Mi Tratamiento y Posología' : 'My Treatment & Posology')
+          : (isEs ? 'Fórmulas y Posología' : 'Formulations & Posology'),
         icon: FlaskConical,
         badge: compoundedFormulations?.length > 0 ? String(compoundedFormulations.length) : null
       }
@@ -80,34 +83,42 @@ export default function PrescriptionMasterHeader({
 
     tabs.push({
       id: 'roadmap',
-      label: isEs ? 'Roadmap 90 Días' : '90-Day Roadmap',
+      label: isPatientView
+        ? (isEs ? 'Plan 90 Días' : '90-Day Plan')
+        : (isEs ? 'Roadmap 90 Días' : '90-Day Roadmap'),
       icon: Calendar
     });
 
     tabs.push({
       id: 'traceability',
-      label: isEs ? 'Calidad EU GMP' : 'EU GMP Quality',
+      label: isPatientView
+        ? (isEs ? 'Garantía EU GMP' : 'EU GMP Quality')
+        : (isEs ? 'Calidad EU GMP' : 'EU GMP Quality'),
       icon: ShieldCheck
     });
 
-    if (hasRecommendations) {
+    // Medical Ethics & Doctor Autonomy: Recommendations are ONLY visible to the physician.
+    // Never expose unprescribed adjuvant peptides or supplements to the patient without doctor sign-off.
+    if (hasRecommendations && !isPatientView) {
       tabs.push({
         id: 'recommendations',
-        label: isEs ? 'Sinergias Atlas' : 'Atlas Synergies',
+        label: isEs ? 'Sinergias Clínicas (Médico)' : 'Clinical Synergies (Doctor)',
         icon: Sparkles
       });
     }
 
-    tabs.push({
-      id: 'credentials',
-      label: isEs ? 'Acreditación' : 'Credentials',
-      icon: Stethoscope
-    });
+    if (!isPatientView) {
+      tabs.push({
+        id: 'credentials',
+        label: isEs ? 'Acreditación' : 'Credentials',
+        icon: Stethoscope
+      });
+    }
 
     if (isPatientView) {
       tabs.push({
         id: 'patientSharing',
-        label: isEs ? 'Soporte Clínico' : 'Clinic Support',
+        label: isEs ? 'Contactar con mi Médico' : 'Contact My Doctor',
         icon: MessageSquare
       });
     }
@@ -193,10 +204,45 @@ export default function PrescriptionMasterHeader({
           {/* DOCTOR VIEW ACTIONS */}
           {!isPatientView && (
             <div className="rx-gcp-header-actions-cluster">
+              {/* If Draft, primary CTA is to Validate & Certify */}
+              {(currentStatus === 'draft' || currentStatus === 'pending') && onOpenDoctorValidation && (
+                <button
+                  type="button"
+                  onClick={onOpenDoctorValidation}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 14px',
+                    borderRadius: '6px',
+                    background: '#059669',
+                    color: '#ffffff',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(5, 150, 105, 0.25)',
+                    transition: 'background 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#047857'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#059669'}
+                  title={isEs ? 'Revisar, personalizar y certificar la prescripción antes de enviar al paciente' : 'Review, customize and certify prescription before patient release'}
+                >
+                  <ShieldCheck size={14} />
+                  <span>{isEs ? 'Validar y Habilitar Paciente' : 'Validate & Release to Patient'}</span>
+                </button>
+              )}
+
               {onOpenPatientShare && (
                 <button
                   type="button"
-                  onClick={onOpenPatientShare}
+                  onClick={() => {
+                    if ((currentStatus === 'draft' || currentStatus === 'pending') && onOpenDoctorValidation) {
+                      onOpenDoctorValidation();
+                    } else {
+                      onOpenPatientShare();
+                    }
+                  }}
                   className="rx-action-btn-tonal-green rx-action-btn-desktop-only"
                   title={isEs ? 'Compartir pauta segura con el paciente (QR / WhatsApp)' : 'Share safe regimen with patient (QR / WhatsApp)'}
                 >

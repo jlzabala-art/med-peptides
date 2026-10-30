@@ -31,6 +31,7 @@ const UserProfileTab = dynamic(() => import('../../../components/shared/UserProf
 const AdminCatalogTabClient = dynamic(() => import('../../../components/admin/AdminCatalogTabClient'), { ssr: false });
 const DoctorSharedInfoWidget = dynamic(() => import('../../../components/doctor/DoctorSharedInfoWidget'), { ssr: false });
 const DoctorMembershipTab = dynamic(() => import('../../../components/doctor/DoctorMembershipTab'), { ssr: false });
+const CompoundingPage = dynamic(() => import('../../../templates/CompoundingPage'), { ssr: false });
 
 // ── Bridge wrappers ──────────────────────────────────────────────────────────
 function OverviewWrapper() {
@@ -210,6 +211,25 @@ function MembershipWrapper() {
   return <DoctorMembershipTab />;
 }
 
+function DoctorCompoundingWrapper() {
+  const { doctorId, doctorMeta, patients } = useContext(DoctorContext) || {};
+  const router = useRouter();
+  return (
+    <div style={{ width: '100%', boxSizing: 'border-box' }}>
+      <CompoundingPage
+        embedded={true}
+        initialLang="en"
+        doctorId={doctorId}
+        doctorMeta={doctorMeta}
+        patients={patients}
+        onPrescriptionIssued={(rx) => {
+          router.push(`/doctor/prescriptions-history?highlight=${rx?.id || rx?.code}`);
+        }}
+      />
+    </div>
+  );
+}
+
 // ── Main Dynamic Router ──────────────────────────────────────────────────────
 export default function DynamicRoute({ params }) {
   const resolvedParams = React.use(params);
@@ -224,6 +244,8 @@ export default function DynamicRoute({ params }) {
     case 'plans': return <MembershipWrapper />;
     case 'shared':
     case 'shared-info': return <SharedInfoWrapper />;
+    case 'compounding':
+    case 'tools/compounding': return <DoctorCompoundingWrapper />;
     case 'catalog':
     case 'products': return <DoctorCatalogWrapper />;
     case 'new-prescription': return <NewPrescriptionWrapper />;

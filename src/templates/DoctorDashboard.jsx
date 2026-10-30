@@ -72,6 +72,7 @@ const ALL_TABS = [
   { id: 'new-prescription',      label: 'New Prescription',      icon: Plus,            alwaysOn: true },
   { id: 'prescriptions-history', label: 'Prescriptions History', icon: History,         alwaysOn: true },
   { id: 'patients',              label: 'My Patients',           icon: Users,           alwaysOn: true },
+  { id: 'compounding',           label: 'Compounding Lab',       icon: FlaskConical,    alwaysOn: true },
   { id: 'appointments',          label: 'Appointments',          icon: Calendar,        alwaysOn: true },
   { id: 'lab-results',           label: 'Lab Results',           icon: Beaker,          alwaysOn: true },
   { id: 'research',              label: 'Research',              icon: FlaskConical,    alwaysOn: true },
@@ -123,6 +124,14 @@ const INDIVIDUAL_DOCTOR_NAV_GROUPS = [
     ],
   },
   {
+    id: 'tools',
+    label: 'Clinical Tools',
+    emoji: '🧪',
+    items: [
+      { id: 'compounding', label: 'Compounding Lab', icon: FlaskConical },
+    ],
+  },
+  {
     id: 'knowledge',
     label: 'Formulary & Knowledge',
     emoji: '🧬',
@@ -164,6 +173,14 @@ const DOCTOR_NAV_GROUPS = [
       { id: 'appointments', label: 'Consultations', icon: Calendar },
       { id: 'lab-results', label: 'Lab Results', icon: Beaker },
       { id: 'recommendations', label: 'Recommendations', icon: ClipboardList },
+    ],
+  },
+  {
+    id: 'tools',
+    label: 'Clinical Tools',
+    emoji: '🧪',
+    items: [
+      { id: 'compounding', label: 'Compounding Lab', icon: FlaskConical },
     ],
   },
   {

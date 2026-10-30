@@ -14,6 +14,21 @@
 
 .cmp-container { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
 
+/* Embedded Doctor Portal Mode */
+.cmp-page.is-embedded {
+  background: transparent;
+  min-height: auto;
+  color: var(--cmp-text);
+}
+.cmp-page.is-embedded .cmp-container {
+  max-width: 100%;
+  padding: 0;
+}
+.cmp-page.is-embedded .cmp-main {
+  padding-top: 0;
+  padding-bottom: 30px;
+}
+
 /* Hero */
 .cmp-hero { background: linear-gradient(135deg, #f5f3ff 0%, #eff6ff 60%, #f8fafc 100%); border-bottom: 1px solid var(--cmp-border); padding: 28px 0 22px; }
 .cmp-hero-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

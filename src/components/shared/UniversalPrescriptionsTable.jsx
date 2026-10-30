@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { FileText, FilePlus, ScanText, Stethoscope, Box, Download, RefreshCw, Share2, Phone, Sparkles, Merge } from 'lucide-react';
+import { FileText, FilePlus, ScanText, Stethoscope, Box, Download, RefreshCw, Share2, Phone, Sparkles, Merge, FlaskConical } from 'lucide-react';
 import PrescriptionDetailModal from '../../features/prescriptions/components/PrescriptionDetailModal';
 import ProtocolDrawerContent from '../admin/protocols/ProtocolDrawerContent';
 import ProductDetailsDrawer from '../admin/products/ProductDetailsDrawer';
@@ -1405,6 +1405,19 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
                 }
               }}
               dropdownActions={[
+                {
+                  id: 'custom-compounding',
+                  label: "Compounding Lab",
+                  icon: <FlaskConical size={16} style={{ color: '#0d9488' }} />,
+                  description: "Personalized capsules & 24Genetics DNA dosing",
+                  onClick: () => {
+                    if (viewMode === 'doctor') {
+                      router.push('/doctor/compounding');
+                    } else {
+                      router.push('/compounding');
+                    }
+                  }
+                },
                 {
                   id: 'import-ai',
                   label: "Import from AI",

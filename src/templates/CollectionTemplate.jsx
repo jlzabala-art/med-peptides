@@ -169,6 +169,8 @@ export default function CollectionTemplate({
     'trichology': 'hair-treatments',
     'hair': 'hair-treatments',
     'weight': 'weight-loss',
+    'weight-management': 'weight-loss',
+    'nutrigen': 'weight-loss',
     'metabolic': 'weight-loss',
     'metabolic-weight': 'weight-loss',
     'repair': 'tissue-repair',

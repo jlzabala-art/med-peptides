@@ -400,8 +400,8 @@ export default function PrescriptionDetailSidebar({
                   )}
                 </div>
 
-                {/* Inline Edit Trigger (Golden Rule #5) */}
-                {isAuthorizedViewer && (
+                {/* Inline Edit Trigger (Golden Rule #5 - Doctor View only) */}
+                {isAuthorizedViewer && !isPatientView && (
                   <button
                     type="button"
                     onClick={() => {
@@ -577,8 +577,8 @@ export default function PrescriptionDetailSidebar({
             </div>
           )}
 
-          {/* Tonal Secondary Action Row (No competing neon buttons; clean GCP secondary actions) */}
-          {isAuthorizedViewer && !isEditingContact && !showWhatsAppPrompt && (
+          {/* Tonal Secondary Action Row (No competing neon buttons; clean GCP secondary actions - Doctor View only) */}
+          {isAuthorizedViewer && !isPatientView && !isEditingContact && !showWhatsAppPrompt && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {!patientPhone && !patientEmail && (
                 <button

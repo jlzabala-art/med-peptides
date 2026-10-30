@@ -115,6 +115,10 @@ const DoctorServicesMembershipModal = dynamic(
   () => import('@/components/doctor/DoctorServicesMembershipModal'),
   { ssr: false }
 );
+const DoctorPatientShareModal = dynamic(
+  () => import('@/components/doctor/DoctorPatientShareModal'),
+  { ssr: false }
+);
 const DoctorPracticeSearchModal = dynamic(
   () => import('@/components/doctor/modals/DoctorPracticeSearchModal'),
   { ssr: false }
@@ -736,6 +740,7 @@ export default function DoctorPublicPortalClient({
   // Modal for Viewing Pharmacy Labels Directly from Doctor Portal
   const [activeLabelRx, setActiveLabelRx] = useState(null);
   const [isLabelsModalOpen, setIsLabelsModalOpen] = useState(false);
+  const [isPatientShareModalOpen, setIsPatientShareModalOpen] = useState(false);
   const [isCredentialsModalOpen, setIsCredentialsModalOpen] = useState(false);
   const [isPracticeSearchOpen, setIsPracticeSearchOpen] = useState(false);
   const [isServicesModalOpen, setIsServicesModalOpen] = useState(false);
@@ -2962,7 +2967,16 @@ export default function DoctorPublicPortalClient({
         const isProposal = rx.status === 'proposal_pending' || rx.isTreatmentProposal || rx.orderStatus === 'Offer Not Accepted';
         const rawInvoice = rx.invoiceRef ? String(rx.invoiceRef).trim() : '';
         const isLegitInvoice = rawInvoice && !/(proposal|unaccepted|propuesta|offer|sin pedido)/i.test(rawInvoice);
-        const patientPhone = rx.patientPhone || rx.phone || rx.mobile || rx.patient?.phone || rx.patient?.mobile;
+        // Clean single-line contact (strips OCR/AI commentary, notes, and paragraphs)
+        const rawPhone = rx.patientPhone || rx.phone || rx.mobile || rx.patient?.phone || rx.patient?.mobile;
+        const cleanPhone = (typeof rawPhone === 'string' && rawPhone.trim().length <= 25 && !/(email|provided|reference|note|found|gender|dob|clinic)/i.test(rawPhone))
+          ? rawPhone.trim()
+          : null;
+
+        const rawEmail = rx.patientEmail || rx.email || rx.patient?.email;
+        const cleanEmail = (!cleanPhone && typeof rawEmail === 'string' && rawEmail.trim().length <= 30 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail.trim()))
+          ? rawEmail.trim()
+          : null;
 
         // Resolve codified patient token uniquely per patient
         const codifiedId = getCodifiedPatientId(rx.patientName || rx.patient?.name, rx.prescriptionNumber || rx.code || rx.id);
@@ -3040,10 +3054,19 @@ export default function DoctorPublicPortalClient({
                 </span>
               )}
             </div>
-            {isAuthorizedViewer && patientPhone ? (
+            {isAuthorizedViewer && cleanPhone ? (
               <div style={{ fontSize: '0.72rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
                 <Phone size={11} style={{ color: '#059669', flexShrink: 0 }} />
-                <span>{patientPhone}</span>
+                <span>{cleanPhone}</span>
+              </div>
+            ) : isAuthorizedViewer && cleanEmail ? (
+              <div style={{ fontSize: '0.72rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
+                <Mail size={11} style={{ color: '#0284c7', flexShrink: 0 }} />
+                <span>{cleanEmail}</span>
+              </div>
+            ) : isAuthorizedViewer && rx.patient?.dob ? (
+              <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                DOB: {rx.patient.dob}
               </div>
             ) : !isAuthorizedViewer ? (
               <div
@@ -3072,11 +3095,6 @@ export default function DoctorPublicPortalClient({
                 No phone on file
               </div>
             ) : null}
-            {isAuthorizedViewer && rx.patient?.dob && (
-              <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
-                DOB: {rx.patient.dob}
-              </div>
-            )}
           </div>
         );
       }
@@ -3669,36 +3687,38 @@ export default function DoctorPublicPortalClient({
                   <span>Contact Atlas on WhatsApp</span>
                 </button>
 
-                {/* 4. Official Bottle Labels */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveActionsMenuRxId(null);
-                    handleOpenLabelsModal(rx);
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '8px 10px',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    color: '#334155',
-                    background: 'transparent',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    width: '100%',
-                    textAlign: 'left',
-                    transition: 'background 0.1s'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                >
-                  <Tag size={14} style={{ color: '#d97706' }} />
-                  <span>Official Bottle Labels</span>
-                </button>
+                {/* 4. Official Bottle Labels (Admin Only) */}
+                {Boolean(isAdmin || activeRole === 'admin') && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveActionsMenuRxId(null);
+                      handleOpenLabelsModal(rx);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 10px',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#334155',
+                      background: 'transparent',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      width: '100%',
+                      textAlign: 'left',
+                      transition: 'background 0.1s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <Tag size={14} style={{ color: '#d97706' }} />
+                    <span>Official Bottle Labels</span>
+                  </button>
+                )}
 
                 {/* 5. Protocol Reference (if present) */}
                 {(rx.protocolUrl || rx.protocolSlug) && (
@@ -6044,6 +6064,31 @@ export default function DoctorPublicPortalClient({
                   </div>
                 )}
               </div>
+
+              {/* Share Patient Intake Link Button */}
+              <button
+                type="button"
+                onClick={() => setIsPatientShareModalOpen(true)}
+                style={{
+                  height: '34px',
+                  padding: '0 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#1a73e8',
+                  fontSize: '0.80rem',
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.08)'
+                }}
+                title="Share patient intake registration link via WhatsApp, direct link, or QR code"
+              >
+                <Share2 size={14} />
+                <span>Share Patient Link</span>
+              </button>
 
               {/* Primary Action Button: New Prescription */}
               <button
@@ -9643,51 +9688,39 @@ export default function DoctorPublicPortalClient({
         </main>
       </div>
 
-      {/* ── Universal Public Sticky Action Bar (Always visible; data and actions strictly filtered by permission role) ── */}
-      <PublicStickyActionBar
-        compactMobile={true}
-        overflowMobile={true}
-        title={doctor?.name || `Doctor ${opaqueCode}`}
-        subtitle={
-          isAuthorizedViewer
-            ? `${doctor?.clinic || (lang === 'es' ? 'Consulta Médica Verificada' : 'Verified Medical Practice')} • ${allPrescriptions.length} ${lang === 'es' ? 'Prescripciones' : 'Prescriptions'} • ${doctorPatientsList.length} ${lang === 'es' ? 'Pacientes' : 'Patients'}`
-            : `${doctor?.clinic || (lang === 'es' ? 'Consulta Médica Verificada' : 'Verified Medical Practice')} • ${doctor?.specialty || (lang === 'es' ? 'Medicina Regenerativa y Longevidad' : 'Regenerative & Precision Medicine')}`
-        }
-        badge={
-          isAuthorizedViewer
-            ? (lang === 'es' ? 'CONSOLA MÉDICA' : 'PHYSICIAN CONSOLE')
-            : (lang === 'es' ? 'MÉDICO VERIFICADO' : 'VERIFIED PHYSICIAN')
-        }
-        badgeType="protocol"
-        inquireLabel={
-          isAuthorizedViewer
-            ? (lang === 'es' ? 'Nueva Prescripción' : 'New Prescription')
-            : (lang === 'es' ? 'Enviar Receta a este Doctor ➔' : 'Submit Rx to this Doctor ➔')
-        }
-        onInquire={
-          isAuthorizedViewer
-            ? handleOpenNewPrescriptionIntake
-            : () => {
-                window.location.href = `/rx/intake?refDoctor=${doctor?.opaqueCode || slug}`;
-              }
-        }
-        showClinicalAI={true}
-        aiCategory={isAuthorizedViewer ? 'Physician Console' : 'Doctor Practice'}
-        aiContextQuery={
-          isAuthorizedViewer
-            ? (lang === 'es'
-                ? `Copiloto clínico para ${doctor?.name || 'médico'}: ¿Cómo estructurar un nuevo protocolo o prescripción de longevidad para mis pacientes?`
-                : `Clinical copilot for ${doctor?.name || 'physician'}: How can I structure a new longevity regimen or compounding prescription for my patients?`)
-            : (lang === 'es'
-                ? `¿Qué áreas de especialidad, tratamientos y protocolos médicos ofrece la consulta del Dr/a. ${doctor?.name || 'este especialista'}?`
-                : `What medical specialties, treatments, and clinical protocols does ${doctor?.name || 'this specialist'} provide?`)
-        }
-        onOpenClinicalAI={() => {
-          triggerHaptic('selection');
-          setIsAtlasAiOpen(true);
-        }}
-        lang={lang}
-      />
+      {/* ── Universal Public Sticky Action Bar (Only visible for unauthenticated public visitors; hidden when doctor is logged in) ── */}
+      {!isAuthorizedViewer && (
+        <PublicStickyActionBar
+          compactMobile={true}
+          overflowMobile={true}
+          title={doctor?.name || `Doctor ${opaqueCode}`}
+          subtitle={
+            `${doctor?.clinic || (lang === 'es' ? 'Consulta Médica Verificada' : 'Verified Medical Practice')} • ${doctor?.specialty || (lang === 'es' ? 'Medicina Regenerativa y Longevidad' : 'Regenerative & Precision Medicine')}`
+          }
+          badge={
+            lang === 'es' ? 'MÉDICO VERIFICADO' : 'VERIFIED PHYSICIAN'
+          }
+          badgeType="protocol"
+          inquireLabel={
+            lang === 'es' ? 'Enviar Receta a este Doctor ➔' : 'Submit Rx to this Doctor ➔'
+          }
+          onInquire={() => {
+            window.location.href = `/rx/intake?refDoctor=${doctor?.opaqueCode || slug}`;
+          }}
+          showClinicalAI={true}
+          aiCategory="Doctor Practice"
+          aiContextQuery={
+            lang === 'es'
+              ? `¿Qué áreas de especialidad, tratamientos y protocolos médicos ofrece la consulta del Dr/a. ${doctor?.name || 'este especialista'}?`
+              : `What medical specialties, treatments, and clinical protocols does ${doctor?.name || 'this specialist'} provide?`
+          }
+          onOpenClinicalAI={() => {
+            triggerHaptic('selection');
+            setIsAtlasAiOpen(true);
+          }}
+          lang={lang}
+        />
+      )}
 
       {/* ── Google Cloud Console Standard Unified Footer (100% Full-Width) ── */}
       <PublicUnifiedFooter lang={lang || 'en'} minimal={isAuthorizedViewer} />
@@ -9743,6 +9776,16 @@ export default function DoctorPublicPortalClient({
         />
       )}
 
+      {/* ── Doctor & Patient Intake Share Modal ── */}
+      <DoctorPatientShareModal
+        isOpen={isPatientShareModalOpen}
+        onClose={() => setIsPatientShareModalOpen(false)}
+        doctor={doctor}
+        opaqueCode={opaqueCode}
+        isAdmin={Boolean(isAdmin || activeRole === 'admin')}
+        lang={lang}
+      />
+
       {/* ── Quick Action Sheet for Prescriptions (Mobile & Desktop GCP Standard) ── */}
       <MobileActionSheet
         isOpen={Boolean(mobileActionRx)}
@@ -9777,7 +9820,7 @@ export default function DoctorPublicPortalClient({
               handleReprescribeFormula(target);
             }
           },
-          {
+          ...(Boolean(isAdmin || activeRole === 'admin') ? [{
             label: 'Official Bottle Labels',
             icon: Tag,
             onClick: () => {
@@ -9785,7 +9828,7 @@ export default function DoctorPublicPortalClient({
               setMobileActionRx(null);
               handleOpenLabelsModal(target);
             }
-          },
+          }] : []),
           {
             label: 'Contact Atlas on WhatsApp',
             icon: MessageCircle,
@@ -11978,7 +12021,7 @@ export default function DoctorPublicPortalClient({
                       <ExternalLink size={14} />
                     </Link>
                   )}
-                  {rx && (
+                  {Boolean(isAdmin || activeRole === 'admin') && rx && (
                     <button
                       type="button"
                       onClick={() => handleOpenLabelsModal(rx)}
@@ -12481,7 +12524,7 @@ export default function DoctorPublicPortalClient({
                       </button>
                     </div>
 
-                    {rx && (
+                    {Boolean(isAdmin || activeRole === 'admin') && rx && (
                       <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '6px', padding: '14px 16px' }}>
                         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase', marginBottom: '6px' }}>
                           Prescription Bottle Label

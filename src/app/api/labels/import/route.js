@@ -3,6 +3,7 @@ import { adminDb, admin } from '@/lib/firebaseAdmin';
 import { invalidateRxCache } from '@/lib/rxCache';
 import { checkRateLimit, rateLimitExceededResponse } from '@/utils/rateLimiter';
 import { processPrescriptionZohoOnImport } from '@/actions/zohoAutoIngestMatcher';
+import { notifyPrescriptionImported } from '@/lib/prescriptionImportNotifier';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,6 +98,15 @@ export async function POST(request) {
         userEmail: 'labels_public_import'
       }).catch(err => {
         console.warn('[api/labels/import] Zoho matching error:', err.message);
+      });
+
+      // Automated email notification to jose@mediluxeme.com on prescription import
+      notifyPrescriptionImported({
+        prescriptionId: c.id,
+        rxData: { ...rx, id: c.id, code: c.code, patientName: c.patientName, status: 'draft' },
+        importChannel: 'public_labels_account_manager'
+      }).catch(err => {
+        console.warn('[api/labels/import] Prescription import email notification error:', err.message);
       });
     });
 

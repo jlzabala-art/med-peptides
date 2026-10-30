@@ -162,6 +162,12 @@ export function sanitizePrescriptionPayload(rx, { isAuthorized = false } = {}) {
   const codifiedToken = getCodifiedPatientId(rawName, cleanCode);
   const codifiedName = `Patient ${codifiedToken}`;
 
+  // Legal Clinical Rule: The registered patient opening their official prescription dossier
+  // or viewing their assigned treatment must see their verified name, not an impersonal token.
+  // Only truly missing / generic names fall back to the codified token.
+  const isGenericPatient = !rawName || rawName === 'Patient' || rawName === 'Paciente';
+  const resolvedPatientName = isGenericPatient ? codifiedName : rawName;
+
   const clean = {
     ...rx,
     id: cleanCode,
@@ -173,15 +179,18 @@ export function sanitizePrescriptionPayload(rx, { isAuthorized = false } = {}) {
     originalPrescriptionId: cleanCode,
     documentId: cleanCode,
     fileNumber: sanitizePrescriptionCode(rx.fileNumber || cleanCode, rawName),
-    patientName: codifiedName,
+    patientName: resolvedPatientName,
     patient: {
-      name: codifiedName,
-      isCodified: true,
+      ...(rx.patient && typeof rx.patient === 'object' ? rx.patient : {}),
+      name: resolvedPatientName,
+      isCodified: isGenericPatient,
       codifiedId: codifiedToken,
-      gender: rx.patient?.gender || rx.gender || null,
-      age: rx.patient?.age || rx.age || null
+      gender: rx.patient?.gender || rx.patientGender || rx.gender || null,
+      age: rx.patient?.age || rx.patientAge || rx.age || null,
+      dob: rx.patient?.dob || rx.patientDob || rx.dob || null,
+      nationality: rx.patient?.nationality || rx.nationality || null
     },
-    // Redact all sensitive contact information
+    // Redact sensitive personal direct contact channels from unauthenticated public payload
     patientPhone: '',
     patientEmail: '',
     phone: '',
@@ -192,53 +201,42 @@ export function sanitizePrescriptionPayload(rx, { isAuthorized = false } = {}) {
     shippingAddress: null,
     notes: '',
     patientNotes: '',
-    // Strict HIPAA / DHA Physician De-identification:
-    // Never expose doctor nominal identity or personal direct phone to unauthenticated viewers.
-    treatingDoctor: 'Licensed Clinical Practice',
-    doctorName: 'Licensed Clinical Practice',
-    prescribingDoctor: 'Licensed Clinical Practice',
+    // Preserve prescribing clinical doctor context for patient transparency & legal validity
+    treatingDoctor: rx.treatingDoctor || rx.doctorName || 'Licensed Clinical Practice',
+    doctorName: rx.doctorName || rx.treatingDoctor || 'Licensed Clinical Practice',
+    prescribingDoctor: rx.prescribingDoctor || rx.doctorName || 'Licensed Clinical Practice',
     doctor: {
-      name: 'Licensed Clinical Practice',
+      ...(rx.doctor && typeof rx.doctor === 'object' ? rx.doctor : {}),
+      name: rx.doctor?.name || rx.doctorName || 'Licensed Clinical Practice',
       clinic: rx.clinic || rx.clinicName || 'Atlas Partner Practice',
-      isCodified: true
+      isCodified: false
     },
     doctorPhone: '',
     doctorEmail: '',
     doctorAddress: '',
     pharmacyLabels: (rx.pharmacyLabels || []).map((l) => ({
       ...l,
-      patientName: codifiedName,
-      doctorName: 'Licensed Clinical Practice',
-      physician: 'Licensed Clinical Practice'
+      patientName: l.patientName && !l.patientName.startsWith('Patient PT-') ? l.patientName : resolvedPatientName,
+      doctorName: l.doctorName || rx.doctorName || 'Licensed Clinical Practice',
+      physician: l.physician || rx.doctorName || 'Licensed Clinical Practice'
     })),
     timeline: (rx.timeline || []).map((t) => {
       let note = String(t.note || '');
-      if (rawName && rawName.length > 2) {
-        note = note.replace(new RegExp(rawName, 'gi'), codifiedName);
-      }
       if (rx.id || rx.code) {
         note = note.replace(new RegExp(rx.id || rx.code, 'gi'), cleanCode);
       }
       return { ...t, note };
     }),
     orderId: String(rx.orderId || '').replace(new RegExp(rx.id || rx.code || 'UNKNOWN', 'gi'), cleanCode),
-    isCodifiedView: true
+    isCodifiedView: isGenericPatient
   };
 
-  // Final deep scrub: Ensure no raw patient name or un-sanitized rx ID leaks anywhere in serialized payload
+  // Deep scrub only un-sanitized rx ID leaks in serialized payload (preserving patient name)
   const rawId = rx.id || rx.code || '';
-  if ((rawName && rawName.length > 2 && rawName !== 'Patient') || (rawId && rawId !== cleanCode)) {
+  if (rawId && rawId !== cleanCode) {
     try {
       let serialized = JSON.stringify(clean);
-      if (rawId && rawId !== cleanCode) {
-        serialized = serialized.replace(new RegExp(rawId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), cleanCode);
-      }
-      if (rawName && rawName.length > 2 && rawName !== 'Patient') {
-        const parts = rawName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().split(/\s+/).filter(p => p.length >= 3);
-        for (const part of parts) {
-          serialized = serialized.replace(new RegExp(part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), codifiedToken);
-        }
-      }
+      serialized = serialized.replace(new RegExp(rawId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), cleanCode);
       return JSON.parse(serialized);
     } catch {
       return clean;

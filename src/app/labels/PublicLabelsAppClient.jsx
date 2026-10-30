@@ -74,11 +74,72 @@ function getInitialLabeledSet() {
   }
 }
 
+function sanitizeRecentCode(raw) {
+  if (!raw) return '';
+  const str = String(raw).trim();
+  const boxMatch = str.match(/\b(BOX[0-9]{4,6}[A-Z0-9]+)\b/i);
+  if (boxMatch) return boxMatch[1].toUpperCase();
+  const rxMatch = str.match(/\b(RX-[A-Z0-9-]+)\b/i);
+  if (rxMatch) return rxMatch[1].toUpperCase();
+  const digitMatch = str.match(/\b\d{4,8}\b/);
+  if (digitMatch) return digitMatch[0];
+  return str.replace(/\s*\(.*?\)/g, '').split(/[;,\n]/)[0].trim().slice(0, 24);
+}
+
+function cleanRecentTitle(raw) {
+  if (!raw) return 'Compounded Formula';
+  return String(raw)
+    .replace(/\s*\(Sample Code.*?\)/gi, '')
+    .replace(/No specific Rx number.*$/gi, '')
+    .trim() || 'Compounded Formula';
+}
+
 function getRecentPrescriptions() {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(RECENT_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return [];
+
+    // Sanitize codes, clean titles, and deduplicate by patient name & code
+    const seenPatients = new Map();
+    for (const item of list) {
+      if (!item) continue;
+      const cleanCode = sanitizeRecentCode(item.code);
+      const cleanName = String(item.patientName || item.name || 'Patient').trim();
+      const normName = cleanName.toLowerCase();
+      
+      // If we already have this patient, prefer the cleaner prescription code (e.g. BOX... over raw Firestore ID)
+      if (seenPatients.has(normName)) {
+        const existing = seenPatients.get(normName);
+        if (cleanCode.startsWith('BOX') && !existing.code.startsWith('BOX')) {
+          seenPatients.set(normName, {
+            ...item,
+            code: cleanCode,
+            patientName: cleanName,
+            title: cleanRecentTitle(item.title)
+          });
+        }
+      } else {
+        seenPatients.set(normName, {
+          ...item,
+          code: cleanCode,
+          patientName: cleanName,
+          title: cleanRecentTitle(item.title)
+        });
+      }
+    }
+
+    const cleaned = Array.from(seenPatients.values()).slice(0, 5);
+
+    // Self-healing migration: update localStorage with sanitized clean items
+    if (JSON.stringify(cleaned) !== raw) {
+      try {
+        localStorage.setItem(RECENT_KEY, JSON.stringify(cleaned));
+      } catch {}
+    }
+    return cleaned;
   } catch {
     return [];
   }
@@ -88,12 +149,21 @@ function saveRecentPrescription(item) {
   if (typeof window === 'undefined' || !item?.code) return [];
   try {
     const list = getRecentPrescriptions();
-    const filtered = list.filter(p => String(p.code) !== String(item.code));
+    const cleanCode = sanitizeRecentCode(item.code);
+    const cleanName = String(item.patientName || item.name || 'Patient').trim();
+    const cleanTitle = cleanRecentTitle(item.title || item.treatmentTitle);
+
+    const filtered = list.filter(p => {
+      const pCode = sanitizeRecentCode(p.code);
+      const pName = String(p.patientName || p.name || '').trim().toLowerCase();
+      return pCode !== cleanCode && pName !== cleanName.toLowerCase();
+    });
+
     const updated = [
       {
-        code: String(item.code),
-        patientName: item.patientName || item.name || 'Patient',
-        title: item.title || item.treatmentTitle || 'Compounded Formula',
+        code: cleanCode,
+        patientName: cleanName,
+        title: cleanTitle,
         date: item.date || item.prodDate || item.prescriptionDate || null,
         timestamp: Date.now()
       },
@@ -142,8 +212,10 @@ export default function PublicLabelsAppClient({
   initialQueue = [],
   initialEditMode = true,
   initialLabelIndex = 0,
-  initialLang = 'en'
+  initialLang = 'en',
+  embedded = false
 }) {
+  const baseRoute = embedded ? '/admin/labels' : '/labels';
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -236,6 +308,34 @@ export default function PublicLabelsAppClient({
   const [isApprovingRx, setIsApprovingRx] = useState(false);
   const [isBatchApproving, setIsBatchApproving] = useState(false);
   const [labeledMap, setLabeledMap] = useState(getInitialLabeledSet);
+
+  // Dynamic Clinical & Print Audit KPIs from Firestore (Golden Rule #22)
+  const [labelsKpis, setLabelsKpis] = useState({
+    totalPrescriptions: 339,
+    totalPrintedA4Count: 0,
+    uploadedThisWeek: 0,
+    printCountsByCode: {}
+  });
+  const [printCountsMap, setPrintCountsMap] = useState({});
+
+  // Load KPIs and per-prescription print counters on mount
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/labels/kpis')
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.success) {
+          setLabelsKpis(data);
+          if (data.printCountsByCode) {
+            setPrintCountsMap(data.printCountsByCode);
+          }
+        }
+      })
+      .catch((err) => console.warn('Could not load labels KPIs:', err));
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const searchBoxRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -406,11 +506,22 @@ export default function PublicLabelsAppClient({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Perform search query (debounced)
+  // Perform search query (debounced) or load default latest loaded prescriptions
   useEffect(() => {
     if (!searchQuery.trim()) {
       setIsSearching(false);
-      return;
+      let isMounted = true;
+      fetch('/api/labels/search')
+        .then((res) => res.json())
+        .then((data) => {
+          if (isMounted && data?.success && Array.isArray(data.results)) {
+            setSearchResults(data.results);
+          }
+        })
+        .catch((err) => console.warn('Default prescriptions fetch error:', err));
+      return () => {
+        isMounted = false;
+      };
     }
 
     const timer = setTimeout(async () => {
@@ -440,7 +551,7 @@ export default function PublicLabelsAppClient({
     const codesParam = queue.map(p => p.code).join(',');
     const activeItem = queue[activeIdx] || queue[0];
     const phaseParam = (typeof activeItem?.selectedPartIndex === 'number') ? `&phase=${activeItem.selectedPartIndex + 1}` : '&phase=1';
-    const newUrl = `/labels?rx=${encodeURIComponent(codesParam)}${phaseParam}&edit=true&lang=${lang}`;
+    const newUrl = `${baseRoute}?rx=${encodeURIComponent(codesParam)}${phaseParam}&edit=true&lang=${lang}`;
     window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
     try {
       if (activeItem?.code) localStorage.setItem(ACTIVE_RX_KEY, activeItem.code);
@@ -928,6 +1039,33 @@ export default function PublicLabelsAppClient({
           setBatchPdfProgress(prog);
         }
       });
+
+      // Record A4 print event in Firestore atomically and update UI audit state
+      try {
+        const printedCodes = patientQueue.map((p) => p.code).filter(Boolean);
+        if (printedCodes.length > 0) {
+          fetch('/api/labels/kpis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ codes: printedCodes })
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                if (data.printCountsByCode) {
+                  setPrintCountsMap((prev) => ({ ...prev, ...data.printCountsByCode }));
+                }
+                setLabelsKpis((prev) => ({
+                  ...prev,
+                  totalPrintedA4Count: data.totalPrintedA4Count ?? (prev.totalPrintedA4Count + printedCodes.length)
+                }));
+              }
+            })
+            .catch((e) => console.warn('KPI print count increment failed:', e));
+        }
+      } catch (errKpi) {
+        console.warn('Error reporting A4 print event:', errKpi);
+      }
     } catch (err) {
       console.error('Error generating A4 batch PDF:', err);
       toast.error(isEs ? `Error al generar PDF A4: ${err.message}` : `Failed to generate A4 PDF: ${err.message}`);
@@ -940,6 +1078,13 @@ export default function PublicLabelsAppClient({
   // Helper to format result dates cleanly
   const formatResultDate = (rawDate) => {
     if (!rawDate) return '';
+    if (rawDate instanceof Date) {
+      return rawDate.toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    if (typeof rawDate === 'object' && rawDate.seconds) {
+      const d = new Date(rawDate.seconds * 1000);
+      return d.toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
     if (typeof rawDate === 'string') {
       const trimmed = rawDate.trim();
       const ddmmyyyy = trimmed.match(/^(\d{2})[-/](\d{2})[-/](\d{4})$/);
@@ -1057,7 +1202,16 @@ export default function PublicLabelsAppClient({
   };
 
   return (
-    <div className="public-label-studio-root">
+    <div
+      className="public-label-studio-root"
+      style={embedded ? {
+        minHeight: 'calc(100vh - 68px)',
+        borderRadius: '12px',
+        border: '1px solid #e2e8f0',
+        overflow: 'hidden',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+      } : undefined}
+    >
 
 
       {/* ── 1. Google Cloud Console Header with Search & Actions ── */}
@@ -1083,6 +1237,7 @@ export default function PublicLabelsAppClient({
         activeCode={activeCode}
         patientName={patientName}
         onKeyDownSearch={handleKeyDownSearch}
+        embedded={embedded}
       >
         <LabelsSearchDropdown
           searchQuery={searchQuery}
@@ -1151,42 +1306,42 @@ export default function PublicLabelsAppClient({
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingBottom: '48px' }}>
         {patientQueue.length === 0 ? (
           <div className="pls-gcp-home">
-            {/* ── 4 Google Cloud KPI Metric Cards (Golden Rule #22) ── */}
+            {/* ── 4 Real Clinical & Print Audit KPI Metric Cards (Golden Rule #22) ── */}
             <div className="pls-gcp-kpis">
               <div className="pls-gcp-kpi-card">
                 <div className="pls-gcp-kpi-top">
+                  <span>{isEs ? "Prescripciones Disponibles" : "Available Prescriptions"}</span>
+                  <Database size={15} color="#1a73e8" />
+                </div>
+                <div className="pls-gcp-kpi-val">{labelsKpis.totalPrescriptions || 339} {isEs ? "Recetas" : "Dossiers"}</div>
+                <div className="pls-gcp-kpi-sub">{isEs ? "Base de datos clínica centralizada" : "Centralized clinical database"}</div>
+              </div>
+
+              <div className="pls-gcp-kpi-card">
+                <div className="pls-gcp-kpi-top">
                   <span>{isEs ? "Cola de Impresión" : "Batch Print Queue"}</span>
-                  <Printer size={15} color="#1a73e8" />
+                  <Printer size={15} color="#0d9488" />
                 </div>
-                <div className="pls-gcp-kpi-val">{patientQueue.length} {isEs ? "Recetas" : "Queued"}</div>
-                <div className="pls-gcp-kpi-sub">{isEs ? "Impresión múltiple A4 y Térmica" : "Multi-label A4 & Thermal ready"}</div>
+                <div className="pls-gcp-kpi-val">{patientQueue.length} {isEs ? "En cola" : "Queued"}</div>
+                <div className="pls-gcp-kpi-sub">{isEs ? "Impresión combinada A4 y térmica" : "Multi-label A4 & Thermal ready"}</div>
               </div>
 
               <div className="pls-gcp-kpi-card">
                 <div className="pls-gcp-kpi-top">
-                  <span>{isEs ? "Formatos de Etiqueta" : "Label Formats"}</span>
-                  <Layers size={15} color="#0d9488" />
-                </div>
-                <div className="pls-gcp-kpi-val">Zebra & A4 PDF</div>
-                <div className="pls-gcp-kpi-sub">{isEs ? "Frasco (75×45 / 90×50) y Envío" : "Bottle (75×45 / 90×50) & Shipping"}</div>
-              </div>
-
-              <div className="pls-gcp-kpi-card">
-                <div className="pls-gcp-kpi-top">
-                  <span>{isEs ? "Estándar Farmacéutico" : "Compliance Standard"}</span>
+                  <span>{isEs ? "Etiquetas A4 Impresas" : "A4 Labels Printed"}</span>
                   <ShieldCheck size={15} color="#16a34a" />
                 </div>
-                <div className="pls-gcp-kpi-val">EU GMP & QR</div>
-                <div className="pls-gcp-kpi-sub">{isEs ? "Trazabilidad y posología verificada" : "Verified posology & QR link"}</div>
+                <div className="pls-gcp-kpi-val">{labelsKpis.totalPrintedA4Count} {isEs ? "Impresas" : "Printed"}</div>
+                <div className="pls-gcp-kpi-sub">{isEs ? "Trazabilidad de impresión por lote" : "Cumulative A4 batch audit trail"}</div>
               </div>
 
               <div className="pls-gcp-kpi-card">
                 <div className="pls-gcp-kpi-top">
-                  <span>{isEs ? "Pacientes de Muestra" : "Ready Clinical Cases"}</span>
-                  <FileText size={15} color="#7c3aed" />
+                  <span>{isEs ? "Cargas Recientes (7 Días)" : "Ingested (Last 7 Days)"}</span>
+                  <Clock size={15} color="#7c3aed" />
                 </div>
-                <div className="pls-gcp-kpi-val">{FEATURED_PATIENTS.length} {isEs ? "Casos" : "Dossiers"}</div>
-                <div className="pls-gcp-kpi-sub">{isEs ? "Acceso instantáneo en 1 clic" : "1-Click instant label preview"}</div>
+                <div className="pls-gcp-kpi-val">{labelsKpis.uploadedThisWeek} {isEs ? "Nuevas" : "New RXs"}</div>
+                <div className="pls-gcp-kpi-sub">{isEs ? "Prescripciones sincronizadas esta semana" : "Prescriptions ingested this week"}</div>
               </div>
             </div>
 
@@ -1252,38 +1407,81 @@ export default function PublicLabelsAppClient({
                         {isEs ? "Limpiar" : "Clear"}
                       </button>
                     </div>
-                    {recentPrescriptions.map((r) => (
-                      <div
-                        key={"recent-" + r.code}
-                        className="pls-gcp-patient-row"
-                        onClick={() => handleSelectOrAddPatient(r.code, true)}
-                      >
-                        <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                            <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "#202124" }}>{r.patientName}</span>
-                            <span style={{ fontSize: "0.72rem", fontFamily: "monospace", fontWeight: 700, color: "#1a73e8", background: "#e8f0fe", padding: "1px 7px", borderRadius: "4px" }}>
-                              #{r.code}
-                            </span>
+                    {recentPrescriptions.map((r) => {
+                      const dateStr = formatResultDate(r.date || r.createdAt || r.uploadedAt);
+                      const pCode = sanitizeRecentCode(r.code);
+                      const printCount = printCountsMap[pCode] || printCountsMap[r.code] || r.a4PrintCount || 0;
+                      return (
+                        <div
+                          key={"recent-" + r.code}
+                          className="pls-gcp-patient-row"
+                          onClick={() => handleSelectOrAddPatient(r.code, true)}
+                        >
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                              <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "#202124" }}>{r.patientName}</span>
+                              <span style={{ fontSize: "0.72rem", fontFamily: "monospace", fontWeight: 700, color: "#1a73e8", background: "#e8f0fe", padding: "1px 7px", borderRadius: "4px" }}>
+                                #{sanitizeRecentCode(r.code)}
+                              </span>
+                              {dateStr && (
+                                <span style={{ fontSize: "0.70rem", color: "#5f6368", display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                                  📅 {dateStr}
+                                </span>
+                              )}
+                              {printCount > 0 ? (
+                                <span
+                                  style={{
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    color: '#137333',
+                                    background: '#e6f4ea',
+                                    border: '1px solid #ceead6',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px'
+                                  }}
+                                  title={isEs ? `Se ha generado etiqueta A4 ${printCount} vez/veces` : `A4 label generated ${printCount} time(s)`}
+                                >
+                                  🖨️ A4 ({printCount}×)
+                                </span>
+                              ) : (
+                                <span
+                                  style={{
+                                    fontSize: '0.68rem',
+                                    fontWeight: 600,
+                                    color: '#64748b',
+                                    background: '#f1f5f9',
+                                    border: '1px solid #e2e8f0',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px'
+                                  }}
+                                >
+                                  ○ {isEs ? 'Sin imprimir' : 'Unprinted'}
+                                </span>
+                              )}
+                            </div>
+                            <span style={{ fontSize: "0.76rem", color: "#5f6368" }}>{r.title}</span>
                           </div>
-                          <span style={{ fontSize: "0.76rem", color: "#5f6368" }}>{r.title}</span>
+                          <span style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            background: "#1a73e8",
+                            color: "#ffffff",
+                            fontSize: "0.76rem",
+                            fontWeight: 650,
+                            flexShrink: 0
+                          }}>
+                            <span>{isEs ? "Abrir Etiqueta" : "Open Label"}</span>
+                            <ChevronRight size={13} />
+                          </span>
                         </div>
-                        <span style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          padding: "6px 12px",
-                          borderRadius: "6px",
-                          background: "#1a73e8",
-                          color: "#ffffff",
-                          fontSize: "0.76rem",
-                          fontWeight: 650,
-                          flexShrink: 0
-                        }}>
-                          <span>{isEs ? "Abrir Etiqueta" : "Open Label"}</span>
-                          <ChevronRight size={13} />
-                        </span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
 
@@ -1301,41 +1499,83 @@ export default function PublicLabelsAppClient({
                   }}>
                     {isEs ? "Recetas Listas para Previsualizar e Imprimir (1 Clic)" : "Ready Prescriptions — Click to Preview & Print"}
                   </div>
-                  {FEATURED_PATIENTS
+                  {(searchResults.length > 0 && !searchQuery.trim() ? searchResults : FEATURED_PATIENTS)
                     .filter(p => !recentPrescriptions.some(r => String(r.code).toUpperCase() === String(p.code).toUpperCase()))
-                    .map((p) => (
-                    <div
-                      key={p.code}
-                      className="pls-gcp-patient-row"
-                      onClick={() => handleSelectOrAddPatient(p.code, true)}
-                    >
-                      <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                          <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "#202124" }}>{p.name}</span>
-                          <span style={{ fontSize: "0.72rem", fontFamily: "monospace", fontWeight: 700, color: "#1a73e8", background: "#e8f0fe", padding: "1px 7px", borderRadius: "4px" }}>
-                            #{p.code}
+                    .map((p) => {
+                      const dateStr = formatResultDate(p.date || p.createdAt || p.uploadedAt);
+                      const printCount = printCountsMap[p.code] || p.a4PrintCount || 0;
+                      return (
+                        <div
+                          key={p.code}
+                          className="pls-gcp-patient-row"
+                          onClick={() => handleSelectOrAddPatient(p.code, true)}
+                        >
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                              <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "#202124" }}>{p.name || p.patientName}</span>
+                              <span style={{ fontSize: "0.72rem", fontFamily: "monospace", fontWeight: 700, color: "#1a73e8", background: "#e8f0fe", padding: "1px 7px", borderRadius: "4px" }}>
+                                #{p.code}
+                              </span>
+                              {dateStr && (
+                                <span style={{ fontSize: "0.70rem", color: "#5f6368", display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                                  📅 {dateStr}
+                                </span>
+                              )}
+                              {printCount > 0 ? (
+                                <span
+                                  style={{
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    color: '#137333',
+                                    background: '#e6f4ea',
+                                    border: '1px solid #ceead6',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px'
+                                  }}
+                                  title={isEs ? `Se ha generado etiqueta A4 ${printCount} vez/veces` : `A4 label generated ${printCount} time(s)`}
+                                >
+                                  🖨️ A4 ({printCount}×)
+                                </span>
+                              ) : (
+                                <span
+                                  style={{
+                                    fontSize: '0.68rem',
+                                    fontWeight: 600,
+                                    color: '#64748b',
+                                    background: '#f1f5f9',
+                                    border: '1px solid #e2e8f0',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px'
+                                  }}
+                                >
+                                  ○ {isEs ? 'Sin imprimir' : 'Unprinted'}
+                                </span>
+                              )}
+                            </div>
+                            <span style={{ fontSize: "0.76rem", color: "#5f6368" }}>{p.title || p.treatmentTitle || 'Prescription protocol'}</span>
+                          </div>
+                          <span style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            background: "#ffffff",
+                            border: "1px solid #dadce0",
+                            color: "#1a73e8",
+                            fontSize: "0.76rem",
+                            fontWeight: 650,
+                            flexShrink: 0
+                          }}>
+                            <span>{isEs ? "Abrir Etiqueta" : "Open Label"}</span>
+                            <ChevronRight size={13} />
                           </span>
                         </div>
-                        <span style={{ fontSize: "0.76rem", color: "#5f6368" }}>{p.title}</span>
-                      </div>
-                      <span style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "4px",
-                        padding: "6px 12px",
-                        borderRadius: "6px",
-                        background: "#ffffff",
-                        border: "1px solid #dadce0",
-                        color: "#1a73e8",
-                        fontSize: "0.76rem",
-                        fontWeight: 650,
-                        flexShrink: 0
-                      }}>
-                        <span>{isEs ? "Abrir Etiqueta" : "Open Label"}</span>
-                        <ChevronRight size={13} />
-                      </span>
-                    </div>
-                  ))}
+                      );
+                    })}
                 </div>
               </section>
 
@@ -1413,35 +1653,6 @@ export default function PublicLabelsAppClient({
                     </button>
                   </div>
                 </div>
-
-                {/* Quick Link to Public Custom Compounding Builder (/compounding) */}
-                <div className="pls-gcp-card" style={{ padding: "16px 20px", background: "#f8fafd", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "#202124", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <Sparkles size={15} color="#7c3aed" />
-                    <span>{isEs ? "Laboratorio de Formulación (/compounding)" : "Custom Compounding Lab (/compounding)"}</span>
-                  </div>
-                  <p style={{ fontSize: "0.75rem", color: "#5f6368", margin: 0, lineHeight: 1.45 }}>
-                    {isEs
-                      ? "¿Quieres configurar una fórmula personalizada en cápsulas veganas HPMC paso a paso?"
-                      : "Need to configure a custom vegan HPMC capsule formula step by step?"}
-                  </p>
-                  <Link
-                    href="/compounding"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      fontSize: "0.78rem",
-                      fontWeight: 700,
-                      color: "#1a73e8",
-                      textDecoration: "none",
-                      marginTop: "2px"
-                    }}
-                  >
-                    <span>{isEs ? "Abrir Configurador de Fórmulas" : "Open Custom Formula Builder"}</span>
-                    <ChevronRight size={14} />
-                  </Link>
-                </div>
               </aside>
             </div>
           </div>
@@ -1458,6 +1669,7 @@ export default function PublicLabelsAppClient({
               labels={labels}
               initialLabelIndex={labelIndex}
               hideInternalPartsSwitcher={true}
+              hideBottomShare={true}
               onLabelIndexChange={(newIdx) => {
                 setLabelIndex(newIdx);
                 const newUrl = `/labels?rx=${encodeURIComponent(activeCode)}&phase=${newIdx + 1}&edit=true&lang=${lang}`;
@@ -1538,17 +1750,19 @@ export default function PublicLabelsAppClient({
         }}
       />
 
-      {/* ── Fixed Bottom Atlas Copilot Dock (GCP Sticky Dock) ── */}
-      <LabelsAtlasDock
-        isEs={isEs}
-        patientQueue={patientQueue}
-        activeRx={currentRx}
-        onOpenSearch={() => {
-          setSearchOpen(true);
-          searchInputRef.current?.focus();
-        }}
-        onAddFeaturedPatient={(code) => handleSelectOrAddPatient(code, true)}
-      />
+      {/* ── Fixed Bottom Atlas Copilot Dock (GCP Sticky Dock — Standalone Kiosk Only) ── */}
+      {!embedded && (
+        <LabelsAtlasDock
+          isEs={isEs}
+          patientQueue={patientQueue}
+          activeRx={currentRx}
+          onOpenSearch={() => {
+            setSearchOpen(true);
+            searchInputRef.current?.focus();
+          }}
+          onAddFeaturedPatient={(code) => handleSelectOrAddPatient(code, true)}
+        />
+      )}
     </div>
   );
 }

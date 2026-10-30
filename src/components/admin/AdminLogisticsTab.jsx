@@ -7,6 +7,8 @@ import Clock from "lucide-react/dist/esm/icons/clock";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Package from "lucide-react/dist/esm/icons/package";
 import Download from "lucide-react/dist/esm/icons/download";
+import Tags from "lucide-react/dist/esm/icons/tags";
+import Link from 'next/link';
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, getDocs, doc, updateDoc, limit, startAfter, getCountFromServer, orderBy, where } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -195,14 +197,24 @@ export default function AdminLogisticsTab() {
         subtitle="Global control center for tracking and managing operations."
         icon={Truck}
         actions={
-          <button
-            className="btn btn-outline"
-            onClick={handleExportLogistics}
-            title="Export logistics records to CSV"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-          >
-            <Download size={15} /> Export
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <Link
+              href="/admin/labels"
+              className="btn btn-primary"
+              title="Open Compounding Labels Studio in Logistics"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none' }}
+            >
+              <Tags size={15} /> Compounding Labels
+            </Link>
+            <button
+              className="btn btn-outline"
+              onClick={handleExportLogistics}
+              title="Export logistics records to CSV"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Download size={15} /> Export
+            </button>
+          </div>
         }
       />
 

@@ -55,22 +55,33 @@ export default async function VialsPublicPage({ searchParams }) {
   const rawCollection = String(resolvedSearch?.collection || resolvedSearch?.c || 'vials').toLowerCase();
   const collection = rawCollection === 'ultraperson' ? 'ultraman' : (SUPPORTED_COLLECTIONS[rawCollection] ? rawCollection : 'vials');
   
-  const ref = resolvedSearch?.ref || resolvedSearch?.referral || null;
-  const code = resolvedSearch?.code || ref;
+  const rawRef = resolvedSearch?.ref || resolvedSearch?.referral || null;
+  const isNikolasAlias = !rawRef || ['np-labs-international', 'nikolaos-psathas', 'nplabs', 'nplab', 'cat-rx-7482', 'nikolas'].includes(String(rawRef).toLowerCase());
+  const ref = isNikolasAlias && collection === 'vials' ? (rawRef || 'np-labs-international') : rawRef;
+  const code = resolvedSearch?.code || (isNikolasAlias ? 'CAT-RX-7482' : ref);
 
   // Track referral visit asynchronously on server
   if (ref) {
     trackReferralVisitAction({
-      wholesalerId: ref,
+      wholesalerId: isNikolasAlias ? 'np-labs-international' : ref,
       referralCode: code,
       collection
     }).catch(() => {});
   }
 
   // Pre-fetch collection products directly on server
-  const initialProducts = await fetchCollectionProductsAction(collection);
+  const initialProducts = await fetchCollectionProductsAction(collection, ref);
 
-  const referralInfo = ref ? { wholesalerId: ref, referralCode: code, collection } : null;
+  const referralInfo = ref ? {
+    wholesalerId: isNikolasAlias ? 'np-labs-international' : ref,
+    referralCode: code,
+    partnerName: isNikolasAlias ? 'Nikolaos Psathas · NP Labs International' : ref,
+    partnerEmail: isNikolasAlias ? 'nikpsathas@gmail.com' : '',
+    markupPercent: 15,
+    referenceUrl: 'https://www.atlashealth-services.com/vials?ref=np-labs-international',
+    shortCatalogUrl: 'https://www.atlashealth-services.com/c/CAT-RX-7482',
+    collection
+  } : null;
 
   return (
     <VialsCatalogClient

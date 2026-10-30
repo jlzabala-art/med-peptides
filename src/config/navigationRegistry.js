@@ -121,6 +121,12 @@ export const NAVIGATION_REGISTRY = [
         // Customer orders (B2B and B2C)
       },
       {
+        id: 'shopify',
+        label: 'Shopify Storefront (UAE)',
+        icon: ShoppingBag,
+        roles: ['admin', 'ceo', 'operations'],
+      },
+      {
         id: 'account-managers',
         label: 'Account Managers',
         icon: HandshakeIcon,
@@ -173,6 +179,7 @@ export const NAVIGATION_REGISTRY = [
     roles: ['admin', 'operations', 'supplier'],
     items: [
       { id: 'shipping',          label: 'Shipping',          icon: Truck,               roles: ['admin', 'operations'] },
+      { id: 'labels',            label: 'Compounding Labels',icon: Tags,                roles: ['admin', 'operations', 'pharmacist'] },
       { id: 'shipping-network',  label: 'Shipping Network',  icon: MapPin,              roles: ['admin', 'operations'] },
       { id: 'logistics-tracker', label: 'Logistics Tracker', icon: Navigation,          roles: ['admin', 'operations'] },
       { id: 'cold-chain',        label: 'Cold Chain',        icon: ThermometerSnowflake,roles: ['admin', 'operations'] },

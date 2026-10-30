@@ -1,0 +1,411 @@
+He incorporado Atlas Health como parte central de la arquitectura, no como una integración secundaria. La idea es que Antigravity conecte Shopify con Atlas, utilizando Atlas como plataforma de gestión y selección de productos, mientras Shopify funciona como canal de venta online.
+
+El objetivo es evitar duplicidades y permitir que los productos y colecciones que selecciones en Atlas puedan prepararse para su publicación en mediluxegulf.com, siempre bajo tu aprobación.
+
+Prompt maestro actualizado para Antigravity
+
+MEDILUXE HEALTH SOLUTIONS
+
+SHOPIFY + ATLAS HEALTH INTEGRATION
+
+Master Implementation Prompt for Google Antigravity
+
+You are acting as a senior software architect, Shopify integration specialist, and full-stack developer working within the existing Atlas Health project.
+
+1. PROJECT OBJECTIVE
+
+Integrate the existing Atlas Health platform with the Shopify store:
+
+Shopify storefront: mediluxegulf.com
+Existing platform: Atlas Health
+Atlas URL: <https://www.atlashealth-services.com>
+Business: Mediluxe Health Solutions
+Primary market: UAE
+Currency: AED
+
+The objective is to allow Mediluxe to selectively manage and synchronize approved products and collections between Atlas Health and Shopify.
+
+CRITICAL REQUIREMENT: This integration must be developed within the existing Atlas Health project, not as a separate standalone application.
+
+Reuse the existing Atlas architecture, database, authentication, administration interface, and product management infrastructure wherever technically appropriate.
+
+Do not create a parallel product management system unnecessarily.
+
+⸻
+
+1. ATLAS HEALTH AS THE CENTRAL PLATFORM
+
+Atlas Health should serve as the central management interface for this integration.
+
+Shopify will operate as the online sales channel.
+
+The intended architecture is:
+
+ATLAS HEALTH
+↓
+Product and Collection Management
+↓
+Product Selection and Approval
+↓
+Shopify Integration Layer
+↓
+SHOPIFY — mediluxegulf.com
+
+Before implementation, inspect the existing Atlas project to identify its current product data models, collections, database, authentication, APIs, and administrative workflows.
+
+Determine which system currently owns each type of data. Do not assume that Atlas already contains all required information.
+
+Avoid duplicating existing functionality.
+
+1. OFFICIAL SHOPIFY CONNECTIVITY
+
+Review Shopify’s official documentation concerning:
+
+* Shopify AI Toolkit
+* Shopify Connector for Gemini
+* Shopify Admin GraphQL API
+* Shopify CLI
+* Product and collection management
+* Shopify authentication and authorization
+
+Determine the most appropriate officially supported method to connect Atlas Health with Shopify using the Antigravity development environment.
+
+Use secure authentication and Shopify-supported APIs.
+
+Do not assume that the Gemini connector provides direct integration capabilities for Atlas.
+
+Never expose API credentials in frontend code or application logs.
+
+Use server-side credential management and the minimum necessary permissions.
+
+1. ATLAS ADMINISTRATION INTERFACE
+
+Extend the existing Atlas administration interface with a new section:
+
+Shopify Integration
+
+This section should allow authorized Mediluxe administrators to:
+
+1. View existing Shopify products.
+2. View existing Shopify collections.
+3. Select Atlas products for synchronization.
+4. Select Atlas collections for synchronization.
+5. Create draft Shopify products.
+6. Update existing Shopify products.
+7. Assign products to Shopify collections.
+8. Review prices and inventory.
+9. Preview proposed changes.
+10. Approve publication.
+11. Review synchronization history.
+12. Identify synchronization errors.
+
+Follow the existing Atlas design system and user experience.
+
+Do not redesign unrelated sections of Atlas.
+
+1. PRODUCT SYNCHRONIZATION
+
+Create a product synchronization workflow between Atlas and Shopify.
+
+Supported information should include:
+
+* Product ID
+* Shopify Product ID
+* Product name
+* SKU
+* Brand
+* Manufacturer
+* Product description
+* Product category
+* Product images
+* Variants
+* Packaging
+* Prices
+* Currency
+* Inventory
+* Regulatory classification
+* Collection assignments
+* SEO information
+* Publication status
+
+Create a reliable mapping between Atlas product identifiers and Shopify product identifiers.
+
+Prevent duplicate products.
+
+Preserve existing Shopify data unless changes are explicitly approved.
+
+Important
+
+Do not automatically synchronize every Atlas product.
+
+Only products explicitly selected and approved by Mediluxe should be eligible for Shopify synchronization.
+
+1. COLLECTION SYNCHRONIZATION
+
+Allow Mediluxe administrators to select Atlas collections and prepare corresponding Shopify collections.
+
+The system should support:
+
+* Creating new Shopify collections.
+* Linking Atlas collections to existing Shopify collections.
+* Adding selected products.
+* Removing selected products.
+* Updating descriptions.
+* Managing collection images.
+* Managing collection visibility.
+* Reviewing publication status.
+
+Collection synchronization must not automatically publish every product within an Atlas collection.
+
+Each product must independently satisfy the required approval conditions.
+
+1. REGULATORY AND COMMERCIAL CONTROL
+
+Atlas manages products across several healthcare categories, including:
+
+* Nutritional supplements
+* Longevity products
+* Hair and scalp treatments
+* Dermatological products
+* Diagnostic tests
+* Pharmaceutical products
+* Peptides
+* Compounded preparations
+
+Not every product is suitable or authorized for direct online sale.
+
+Implement a regulatory review mechanism before publication.
+
+The system should distinguish between:
+
+A. Retail products
+
+Products approved for direct online sale.
+
+B. Professional B2B products
+
+Products intended for healthcare professionals, clinics, pharmacies, or authorized distributors.
+
+C. Restricted products
+
+Products requiring additional regulatory review, prescription, authorization, or specific distribution controls.
+
+Restricted products must not be automatically published or made purchasable.
+
+Do not infer regulatory approval from the presence of a product in Atlas.
+
+1. PRODUCT DATA OWNERSHIP
+
+Avoid creating conflicting product records.
+
+Establish clear rules defining which system controls each field.
+
+Proposed starting model:
+
+Data Preferred System
+Master product information Atlas
+Technical specifications Atlas
+Regulatory classification Atlas
+Product eligibility Atlas
+Shopify product ID Shopify, referenced in Atlas
+Online selling price Explicitly configured and approved
+Shopify publication status Shopify
+Online inventory Existing inventory system, to be identified
+Customer orders Shopify
+Synchronization logs Atlas
+
+These are proposed responsibilities.
+
+Validate them against the existing Atlas and Shopify architecture before implementation.
+
+Do not overwrite existing pricing or inventory systems without authorization.
+
+1. ATLAS-SHOPIFY SYNCHRONIZATION ENGINE
+
+Design a secure integration layer supporting:
+
+* Product creation
+* Product updates
+* Collection creation
+* Collection updates
+* Product-to-collection assignments
+* Publication management
+* Synchronization status
+* Error handling
+* Audit logs
+
+Use Shopify Admin GraphQL API where appropriate.
+
+Implement:
+
+* Idempotent operations
+* Duplicate prevention
+* Rate-limit handling
+* Retry mechanisms
+* API error reporting
+* Secure credential storage
+* Product ID mapping
+* Change history
+
+Do not implement automatic bidirectional synchronization until ownership rules and conflict resolution are approved.
+
+ 1. APPROVAL WORKFLOW
+
+All modifications must follow:
+
+SELECT → REVIEW → APPROVE → SYNCHRONIZE → VERIFY
+
+The administrator must be able to review:
+
+* Selected products
+* Destination collections
+* Proposed descriptions
+* Prices
+* Images
+* Regulatory warnings
+* Existing Shopify records
+* Proposed modifications
+
+No product should be published without explicit authorization.
+
+Provide a dry-run mode that previews changes without modifying Shopify.
+
+ 1. ATLAS USER ROLES
+
+Reuse Atlas’s existing authentication and permissions system.
+
+Determine which existing user roles should be allowed to:
+
+* View Shopify data
+* Prepare synchronization
+* Modify product information
+* Approve publication
+* Execute synchronization
+* Access integration settings
+
+Only authorized administrators should be permitted to publish products or change commercial settings.
+
+Do not expose Shopify administrative credentials to doctors, wholesalers, or other external users.
+
+ 1. FUTURE SCALABILITY
+
+Design the integration to support potential future requirements without implementing them prematurely.
+
+These may include:
+
+* Multiple Shopify stores
+* Different regional catalogs
+* Country-specific prices
+* Wholesale and retail pricing
+* Multilingual product descriptions
+* Inventory synchronization
+* Order synchronization
+* Analytics and sales reporting
+
+The initial implementation must focus exclusively on the existing Mediluxe Shopify store.
+
+ 1. DEVELOPMENT REQUIREMENTS
+
+Before writing code:
+
+1. Inspect the existing Atlas repository.
+2. Identify the application framework.
+3. Identify the database and product models.
+4. Review existing authentication and permissions.
+5. Identify current collection structures.
+6. Review existing API integrations.
+7. Identify the deployment environment.
+8. Review Shopify’s current API documentation.
+
+Preserve existing functionality.
+
+Follow Atlas coding conventions.
+
+Avoid unnecessary dependencies.
+
+Do not introduce breaking database changes.
+
+Use a staging or development environment for initial testing.
+
+ 1. IMPLEMENTATION PHASES
+
+PHASE 1 — Architecture Audit
+
+Inspect Atlas and Shopify integration requirements.
+
+Deliver a technical architecture proposal.
+
+PHASE 2 — Secure Shopify Connection
+
+Configure and verify Shopify authentication.
+
+Test read-only access.
+
+PHASE 3 — Atlas Administration Interface
+
+Add the Shopify Integration section to the existing Atlas administration portal.
+
+PHASE 4 — Product Mapping
+
+Connect Atlas product records with Shopify product identifiers.
+
+PHASE 5 — Collection Mapping
+
+Connect Atlas collections with Shopify collections.
+
+PHASE 6 — Preview and Approval
+
+Implement product selection, change previews, and administrator approvals.
+
+PHASE 7 — Controlled Synchronization
+
+Test with a small number of explicitly approved products.
+
+PHASE 8 — Validation
+
+Verify data integrity, product status, prices, collection membership, and storefront behavior.
+
+PHASE 9 — Production Deployment
+
+Deploy only after successful testing and explicit authorization.
+
+ 1. FIRST INSTRUCTION — START HERE
+
+Begin by examining the existing Atlas Health project.
+
+Do not create a new project.
+
+Do not modify the production database.
+
+Do not publish or update Shopify products.
+
+First, produce a technical assessment covering:
+
+1. Current Atlas architecture.
+2. Existing product and collection management.
+3. Available Shopify integration options.
+4. Required API permissions.
+5. Proposed database changes.
+6. Proposed administration interface.
+7. Data synchronization architecture.
+8. Security and regulatory considerations.
+9. Estimated implementation phases.
+10. Potential technical risks.
+
+Explain how the Shopify integration can be incorporated into Atlas while preserving the existing platform.
+
+Wait for my approval of the architecture before implementing any changes.
+
+FINAL PRINCIPLE
+
+Atlas Health is the central Mediluxe product management platform. Shopify is an integrated sales channel, not a separate product management system.
+
+All product and collection synchronization must remain selective, controlled, traceable, and subject to explicit administrator approval.
+
+Una mejora adicional que considero importante
+
+Atlas ya contempla diferentes perfiles profesionales y comerciales. Por tanto, diseñaría la integración de manera que un producto pueda estar disponible en Atlas para médicos o distribuidores sin estar necesariamente publicado en Shopify.
+
+Esto te permitirá gestionar un catálogo profesional más amplio que el catálogo de venta online, sin mezclar productos regulados con productos destinados al consumidor final.
+
+El primer paso en Antigravity debe ser analizar el proyecto Atlas existente y proponer la arquitectura de conexión. No debería empezar a modificar código ni productos hasta que apruebes esa propuesta.

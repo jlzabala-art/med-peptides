@@ -43,9 +43,10 @@ export function getPosologyText(pos) {
 export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPatientView = false, atlasRecs = null, isAuthorizedViewer = false } = {}) {
   const posology = rx.structuredPosology || {};
   const patient = rx.patient || {};
-  // Golden rule: If viewer is authorized (Admin/Doctor/Clinic) and NOT in explicit patient preview mode,
-  // do NOT codify or de-identify patient and doctor data!
-  const isCodified = isPatientView || !isAuthorizedViewer;
+  // Golden rule: If viewer is authorized (Admin/Doctor/Clinic) or accessing an issued prescription dossier,
+  // do NOT codify or anonymize the patient's legal clinical identity!
+  // Patient should always see their real name on their own prescription.
+  const isCodified = false;
 
   const authClinical = useMemo(() => {
     try {
@@ -56,17 +57,15 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
   }, [rx]);
 
   const rawCandidatePatient = rx.pharmacyLabels?.[0]?.patientName || patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
-  const rawPatientName = (!isCodified && authClinical.patientName && (rawCandidatePatient.startsWith('Patient PT-') || rawCandidatePatient === 'Patient'))
+  const rawPatientName = (authClinical.patientName && (rawCandidatePatient.startsWith('Patient PT-') || rawCandidatePatient === 'Patient'))
     ? authClinical.patientName
     : rawCandidatePatient;
-  const patientName = isCodified
-    ? (rawPatientName.startsWith('Patient PT-') || rawPatientName.startsWith('Paciente PT-')
-        ? rawPatientName
-        : `${isEs ? 'Paciente' : 'Patient'} ${getCodifiedPatientId(rawPatientName, rx.id || rx.code)}`)
-    : (rawPatientName.startsWith('Patient PT-') && authClinical.patientName ? authClinical.patientName : rawPatientName);
-  const rawRxId = rx.id || rx.prescriptionNumber || rx.code || 'RX-PRESCRIPTION';
-  const rxId = isCodified ? sanitizePrescriptionCode(rawRxId, rawPatientName) : rawRxId;
-  const patientAlias = (isCodified ? '' : (rx.patientAlias || patient.alias ? ` (${rx.patientAlias || patient.alias})` : ''));
+  const patientName = rawPatientName.startsWith('Patient PT-') && authClinical.patientName 
+    ? authClinical.patientName 
+    : rawPatientName;
+  const rawRxId = rx.prescriptionNumber || rx.code || rx.id || 'RX-PRESCRIPTION';
+  const rxId = rawRxId;
+  const patientAlias = (rx.patientAlias || patient.alias ? ` (${rx.patientAlias || patient.alias})` : '');
 
   // ── Two-Doctor Clinical Architecture (Strict Segregation) ───────────────────
   const isInternalProdDoc = (name) => {
@@ -884,7 +883,7 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       icon: 'shield'
     });
 
-    if (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway) {
+    if (!isPatientView && (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway)) {
       list.push({ 
         id: 'atlas-recommendations-card', 
         label: isEs ? 'Recomendaciones Atlas' : 'Atlas Recommendations',

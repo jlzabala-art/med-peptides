@@ -67,12 +67,46 @@ export function resolveProductTierPricing(product, capsCount = 60) {
     retailPrice = Math.round((product.retailPriceAed / 3.97) * 100) / 100;
   }
 
+  // Direct costPriceEur, costPrice or cost (e.g. from Compounding / TrichoTest / Peptides / Colway registry)
+  if (typeof product.costPriceEur === 'number' && product.costPriceEur > 0) {
+    landedCost = product.costPriceEur;
+  } else if (typeof product.costPrice === 'number' && product.costPrice > 0) {
+    landedCost = product.costPrice;
+  } else if (typeof product.cost === 'number' && product.cost > 0) {
+    landedCost = product.cost;
+  }
+
   // Direct pricing object in Firestore schema
   if (product.pricing && typeof product.pricing === 'object') {
-    if (typeof product.pricing.clinic === 'number' && product.pricing.clinic > 0) clinicPrice = product.pricing.clinic;
-    if (typeof product.pricing.wholesale === 'number' && product.pricing.wholesale > 0) wholesalePrice = product.pricing.wholesale;
-    if (typeof product.pricing.retail === 'number' && product.pricing.retail > 0) retailPrice = product.pricing.retail;
     if (typeof product.pricing.supplierCost === 'number' && product.pricing.supplierCost > 0) landedCost = product.pricing.supplierCost;
+    if (typeof product.pricing.retail === 'number' && product.pricing.retail > 0) retailPrice = product.pricing.retail;
+  }
+
+  // Cost-Plus Rule: When cost price is registered:
+  // - Wholeseller: +20% over cost (cost * 1.20)
+  // - Clinic / Doctor: +30% over cost (cost * 1.30)
+  if (landedCost && landedCost > 0) {
+    wholesalePrice = Math.round(landedCost * 1.20 * 100) / 100;
+    clinicPrice = Math.round(landedCost * 1.30 * 100) / 100;
+    if (!retailPrice) {
+      retailPrice = (typeof product.priceEur === 'number' && product.priceEur > clinicPrice)
+        ? product.priceEur
+        : (typeof product.price === 'number' && product.price > clinicPrice)
+        ? product.price
+        : Math.round(landedCost * 1.60 * 100) / 100;
+    }
+
+    return {
+      cost: landedCost,
+      wholesaler: wholesalePrice,
+      clinic: clinicPrice,
+      retail: retailPrice,
+      isCompounded: Boolean(product.isCompounded)
+    };
+  }
+
+  if (typeof product.priceEur === 'number' && product.priceEur > 0) {
+    clinicPrice = product.priceEur;
   }
 
   // Direct EUR / base price overrides
@@ -257,7 +291,7 @@ export default function TieredPriceShield({
   }
 
   // Determine user authorization & role hierarchy
-  const isAuthenticated = Boolean(user) || Boolean(localPreview);
+  const isAuthenticated = Boolean(user) || Boolean(localPreview) || Boolean(adminSimulationTier);
   const isAdmin = is('admin') || is('medical_director') || (localPreview?.role === 'admin');
   const isWholesaler = is('wholesaler') || is('supplier') || is('distributor') || (localPreview?.role === 'wholesaler');
   const isDoctor = is('doctor') || is('clinic') || is('medical_director') || is('fagron_clinic') || is('compounding_pharmacy') || (localPreview?.role === 'clinic');
@@ -265,16 +299,14 @@ export default function TieredPriceShield({
 
   // Determine which tier to display based on canonical role
   let activeTierKey = 'clinic';
-  if (isAdmin && adminSimulationTier) {
-    activeTierKey = adminSimulationTier;
-  } else if (isAdmin) {
-    activeTierKey = adminSimulationTier || 'clinic';
-  } else if (isWholesaler) {
+  if (isWholesaler && !adminSimulationTier) {
     activeTierKey = 'wholesaler';
-  } else if (isDoctor) {
+  } else if (isDoctor && !adminSimulationTier) {
     activeTierKey = 'clinic';
-  } else if (isPatient) {
+  } else if (isPatient && !adminSimulationTier) {
     activeTierKey = 'retail';
+  } else if (adminSimulationTier) {
+    activeTierKey = adminSimulationTier;
   }
 
   const tierMeta = {
@@ -288,26 +320,26 @@ export default function TieredPriceShield({
       amount: tiers.cost
     },
     wholesaler: {
-      label: isEs ? 'TARIFA MAYORISTA B2B (EXW)' : 'WHOLESALER B2B (EXW)',
-      badge: isEs ? 'Mayorista (-20%)' : 'Wholesale Tier',
+      label: isEs ? 'TARIFA MAYORISTA (+20% COSTE)' : 'WHOLESELLER TIER (+20% COST)',
+      badge: isEs ? 'Mayorista (+20%)' : 'Wholeseller (+20%)',
       badgeBg: '#fff7ed',
       badgeColor: '#c2410c',
       badgeBorder: '#ffedd5',
-      incoterm: 'Ex-Works (EXW)',
+      incoterm: '+20% Cost-Plus',
       amount: tiers.wholesaler
     },
     clinic: {
-      label: isEs ? 'PRACTITIONER B2B (EXW)' : 'PRACTITIONER B2B (EXW)',
-      badge: 'Ex-Works (EXW)',
+      label: isEs ? 'TARIFA CLÍNICA / MÉDICO (+30% COSTE)' : 'CLINIC / DOCTOR TIER (+30% COST)',
+      badge: isEs ? 'Clínica / Médico (+30%)' : 'Clinic / Doctor (+30%)',
       badgeBg: '#f0fdfa',
       badgeColor: '#0d9488',
       badgeBorder: '#ccfbf1',
-      incoterm: 'Ex-Works (EXW)',
+      incoterm: '+30% Cost-Plus',
       amount: tiers.clinic
     },
     retail: {
       label: isEs ? 'PVP RECOMENDADO (RRP)' : 'RECOMMENDED RETAIL (RRP)',
-      badge: isEs ? 'IVA / Taxes Inc.' : 'MSRP / Retail',
+      badge: isEs ? 'PVP Ref.' : 'MSRP / Retail',
       badgeBg: '#f5f3ff',
       badgeColor: '#7c3aed',
       badgeBorder: '#ede9fe',

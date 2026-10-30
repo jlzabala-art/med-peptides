@@ -374,7 +374,7 @@ async function resolveTokenVerification(token) {
           } else if (resolvedDoc.token) {
             const v = verifySignedQuoteToken(resolvedDoc.token);
             if (v.valid) {
-              verification = v;
+              verification = { valid: true, payload: { ...(v.payload || {}), ...resolvedDoc } };
             } else {
               verification = { valid: true, payload: resolvedDoc };
             }
@@ -524,7 +524,8 @@ export default async function SharedCatalogPage({ params }) {
     );
   }
 
-  const catalogMeta = { ...linkData, ...payload, catalogId };
+  // Live Firestore linkData takes precedence over JWT token payload
+  const catalogMeta = { ...payload, ...linkData, catalogId };
 
   const priceSource     = catalogMeta.priceSource || 'cost';
   const includePrices   = catalogMeta.includePrices !== false;

@@ -17,9 +17,24 @@ export default function LabelsSearchDropdown({
   isEs,
   highlightedIndex = -1
 }) {
-  const itemsToRender = searchQuery.trim()
+  const rawItems = searchQuery.trim()
     ? searchResults
-    : (recentPrescriptions.length > 0 ? recentPrescriptions : featuredPatients);
+    : (searchResults && searchResults.length > 0 ? searchResults : (recentPrescriptions.length > 0 ? recentPrescriptions : featuredPatients));
+
+  // Client-side safety deduplication by normalized code and patient name
+  const itemsToRender = React.useMemo(() => {
+    const seen = new Set();
+    return (rawItems || []).filter(item => {
+      const codeKey = String(item.code || item.id || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      const nameKey = String(item.patientName || item.name || '').trim().toLowerCase();
+      const compositeKey = `${codeKey}::${nameKey}`;
+      if (codeKey && seen.has(codeKey)) return false;
+      if (seen.has(compositeKey)) return false;
+      if (codeKey) seen.add(codeKey);
+      seen.add(compositeKey);
+      return true;
+    });
+  }, [rawItems]);
 
   return (
     <div className="pls-search-dropdown" role="listbox" id="pls-search-results-listbox">
@@ -35,10 +50,12 @@ export default function LabelsSearchDropdown({
       <div className="pls-search-dropdown-header">
         <span className="pls-search-dropdown-title">
           {searchQuery
-            ? (isEs ? 'Resultados de Algolia y Portal (Selecciona o añade al lote)' : 'Algolia & Portal Matches (Select or Add to Batch)')
-            : (recentPrescriptions.length > 0
-                ? (isEs ? '🕒 Últimos 5 consultados' : '🕒 Recently Consulted (Last 5)')
-                : (isEs ? 'Prescripciones Destacadas' : 'Featured Prescriptions'))}
+            ? (isEs ? 'Resultados de Búsqueda (Selecciona o añade al lote)' : 'Search Matches (Select or Add to Batch)')
+            : (searchResults && searchResults.length > 0
+                ? (isEs ? '📅 Prescripciones Recientes (Ordenadas por Carga)' : '📅 Recent Prescriptions (Ordered by Upload)')
+                : (recentPrescriptions.length > 0
+                    ? (isEs ? '🕒 Últimos 5 consultados' : '🕒 Recently Consulted (Last 5)')
+                    : (isEs ? 'Prescripciones Destacadas' : 'Featured Prescriptions')))}
         </span>
         {searchQuery ? (
           isSearching ? (
@@ -129,10 +146,29 @@ export default function LabelsSearchDropdown({
                     </span>
                   )}
                   {dateStr && (
-                    <span className="pls-search-item-date" title={isEs ? 'Fecha de Prescripción' : 'Prescription Date'}>
+                    <span className="pls-search-item-date" title={isEs ? 'Fecha de Prescripción / Carga' : 'Prescription Upload Date'}>
                       📅 {dateStr}
                     </span>
                   )}
+                  {item.a4PrintCount > 0 ? (
+                    <span
+                      style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        color: '#137333',
+                        background: '#e6f4ea',
+                        border: '1px solid #ceead6',
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px'
+                      }}
+                      title={isEs ? `Se ha generado etiqueta A4 ${item.a4PrintCount} vez/veces` : `A4 label generated ${item.a4PrintCount} time(s)`}
+                    >
+                      🖨️ A4 ({item.a4PrintCount}×)
+                    </span>
+                  ) : null}
                   {isRecent && (
                     <span className="pls-batch-tag recent">
                       {isEs ? 'Reciente' : 'Recent'}

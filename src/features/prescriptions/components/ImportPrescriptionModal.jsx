@@ -384,14 +384,57 @@ export default function ImportPrescriptionModal({
       const effectiveBlocks = Array.isArray(blocks) && blocks.length > 0 ? blocks : [];
       let totalNewPlaceholders = 0;
       let totalMatchedCatalog = 0;
-      const sessionId = effectiveBlocks.length > 1 ? crypto.randomUUID() : null;
       const pendingDocs = [];
       const created = [];
+
+      // 1. Clean code to ONLY the alphanumeric identifier (max 24 chars, no notes/sentences)
+      const cleanPatientName = patientName.trim() || 'Unknown Patient';
+      const rawCode = String(protocolNumber || reviewData.patientCode || reviewData.boxId || Date.now()).trim();
+      let cleanCode = rawCode.replace(/^#/, '');
+      const boxMatch = cleanCode.match(/\b(BOX[0-9]{4,6}[A-Z0-9]+)\b/i);
+      if (boxMatch) {
+        cleanCode = boxMatch[1].toUpperCase();
+      } else {
+        const rxMatch = cleanCode.match(/\b(RX-[A-Z0-9-]+)\b/i);
+        if (rxMatch) {
+          cleanCode = rxMatch[1].toUpperCase();
+        } else {
+          const digitMatch = cleanCode.match(/\b\d{4,8}\b/);
+          if (digitMatch) {
+            cleanCode = digitMatch[0];
+          } else {
+            cleanCode = cleanCode.replace(/\(.*?\)/g, '').split(/[.;,\n]/)[0].trim().slice(0, 24);
+          }
+        }
+      }
+
+      // 2. Doctor / Clinic auto-matching (e.g. My London Skin Clinic -> Dr. Sobia Mirza)
+      let finalDoctorName = doctorName.trim() || 'Unknown Doctor';
+      let finalDoctorId = doctorId || null;
+      let finalDoctorSlug = doctorId || 'dr-sobia';
+      let finalDoctorLicense = doctorLicense || null;
+      let finalClinicName = clinicName || null;
+      let finalClinicId = clinicId || null;
+
+      const clinicLower = (clinicName || '').toLowerCase();
+      const docLower = (doctorName || '').toLowerCase();
+      if (clinicLower.includes('my london') || clinicLower.includes('london skin') || docLower.includes('sobia')) {
+        finalDoctorName = 'Dr. Sobia Mirza';
+        finalDoctorId = 'dr-sobia';
+        finalDoctorSlug = 'dr-sobia';
+        finalDoctorLicense = 'DHA Registered';
+        finalClinicName = 'My London Skin Clinic';
+        finalClinicId = 'IdDU1oK1VuAVVYrGz6E7';
+      }
+
+      // 3. Map all items per block and construct consolidated parts
+      const allMappedItems = [];
+      const parts = [];
 
       for (let bIdx = 0; bIdx < effectiveBlocks.length; bIdx++) {
         const block = effectiveBlocks[bIdx];
         const blockItems = Array.isArray(block.items) ? block.items : [];
-        const mappedItems = [];
+        const mappedBlockItems = [];
 
         for (let itIdx = 0; itIdx < blockItems.length; itIdx++) {
           const item = blockItems[itIdx];
@@ -421,8 +464,10 @@ export default function ImportPrescriptionModal({
           if (isPlace) totalNewPlaceholders++;
           if (prodId && !isPlace) totalMatchedCatalog++;
 
-          mappedItems.push({
+          const itemObj = {
             id: `ai_item_${Date.now()}_${bIdx}_${itIdx}`,
+            formulationIndex: bIdx + 1,
+            formulationBlock: block.treatmentType || `Part ${bIdx + 1}`,
             productId: prodId,
             variantId: null,
             productName: matchedName || item.name,
@@ -441,89 +486,119 @@ export default function ImportPrescriptionModal({
             _isPlaceholder: isPlace,
             _needsProductMapping: !prodId || isPlace,
             status: 'Pending'
-          });
+          };
+          mappedBlockItems.push(itemObj);
+          allMappedItems.push(itemObj);
         }
 
-        const cleanPatientName = patientName.trim() || 'Unknown Patient';
-        const cleanDoctorName = doctorName.trim() || 'Unknown Doctor';
-        const rawCode = String(protocolNumber || reviewData.patientCode || reviewData.boxId || Date.now()).trim();
-        const baseCode = rawCode.replace(/^#/, '');
-        const cleanCode = effectiveBlocks.length > 1 ? `${baseCode}-${bIdx + 1}` : baseCode;
-
-        const newRx = {
-          ...prescriptionSchema,
-          ...context,
-          code: cleanCode,
-          rxCode: cleanCode,
-          fileNumber: cleanCode,
-          patientName: cleanPatientName,
-          patient: typeof reviewData.extractedData?.patient === 'object' ? {
-            ...reviewData.extractedData.patient,
-            name: cleanPatientName,
-            code: cleanCode
-          } : { name: cleanPatientName, code: cleanCode },
-          doctorName: cleanDoctorName,
-          doctorId: doctorId || null,
-          doctor: typeof reviewData.extractedData?.doctor === 'object' ? {
-            ...reviewData.extractedData.doctor,
-            name: cleanDoctorName,
-            id: doctorId || null,
-            licenseNumber: doctorLicense || null
-          } : { name: cleanDoctorName, id: doctorId || null },
-          clinicName: clinicName || null,
-          clinicId: clinicId || null,
-          doctorLicense: doctorLicense || null,
-          sourceType: 'fagron_genomics',
-          source: 'fagron',
-          status: 'draft',
-          validationStatus: mappedItems.some(i => i._needsProductMapping) ? 'Needs Review' : 'Ready',
-          sessionId,
+        parts.push({
+          partIndex: bIdx + 1,
+          phaseNumber: bIdx + 1,
+          title: block.treatmentType || `Part ${bIdx + 1}`,
+          treatmentType: block.treatmentType || `Part ${bIdx + 1}`,
           treatmentProgram: block.treatmentProgram || 'Compounding',
-          treatmentType: block.treatmentType || 'Compounding Formula',
-          treatmentTitle: block.treatmentType || 'Compounding Formula',
-          importSource: 'fagron_genomics',
-          posology: block.posology || '',
-          clinicalIndication: block.posology || '',
           volume: block.volume || '100 mL',
-          dispensingForm: block.dispensingForm || 'Magistral Solution',
-          prescriptionDate: mfgDate || prescriptionDate || new Date().toISOString().split('T')[0],
-          items: mappedItems,
-          prescriptionLines: mappedItems,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        };
+          dispensingForm: block.dispensingForm || block.treatmentType || 'Magistral Formulation',
+          posology: block.posology || '',
+          instructions: block.posology || '',
+          items: mappedBlockItems
+        });
+      }
 
-        if (persistEndpoint) {
-          pendingDocs.push(newRx);
-        } else {
-          const docRef = await addDoc(collection(db, 'prescriptions'), newRx);
-          created.push({ id: docRef.id, code: cleanCode, patientName: cleanPatientName });
+      // 4. Construct ONE single prescription document containing all parts
+      const newRx = {
+        ...prescriptionSchema,
+        ...context,
+        code: cleanCode,
+        rxCode: cleanCode,
+        prescriptionNumber: cleanCode,
+        fileNumber: cleanCode,
+        patientName: cleanPatientName,
+        patient: typeof reviewData.extractedData?.patient === 'object' ? {
+          ...reviewData.extractedData.patient,
+          name: cleanPatientName,
+          code: cleanCode
+        } : { name: cleanPatientName, code: cleanCode },
+        doctorName: finalDoctorName,
+        doctorId: finalDoctorId,
+        doctorSlug: finalDoctorSlug,
+        doctorLicense: finalDoctorLicense,
+        doctor: {
+          id: finalDoctorId,
+          name: finalDoctorName,
+          displayName: finalDoctorName,
+          license: finalDoctorLicense,
+          clinic: finalClinicName,
+          clinicName: finalClinicName
+        },
+        clinicName: finalClinicName,
+        clinic: finalClinicName,
+        clinicId: finalClinicId,
+        sourceType: 'fagron_genomics',
+        source: 'fagron',
+        status: 'draft',
+        validationStatus: allMappedItems.some(i => i._needsProductMapping) ? 'Needs Review' : 'Ready',
+        treatmentProgram: parts[0]?.treatmentProgram || 'Compounding',
+        treatmentType: parts.length > 1 ? `${parts.length}-Part Multi-Formula Regimen` : (parts[0]?.treatmentType || 'Compounding Formula'),
+        treatmentTitle: parts.length > 1 ? `${parts.length}-Part Multi-Formula Regimen` : (parts[0]?.treatmentType || 'Compounding Formula'),
+        importSource: 'fagron_genomics',
+        posology: parts[0]?.posology || '',
+        volume: parts[0]?.volume || '100 mL',
+        dispensingForm: parts[0]?.dispensingForm || 'Magistral Formulation',
+        prescriptionDate: mfgDate || prescriptionDate || new Date().toISOString().split('T')[0],
+        parts: parts,
+        formulationBlocks: parts,
+        partsCount: parts.length,
+        isMultiPart: parts.length > 1,
+        items: allMappedItems,
+        prescriptionLines: allMappedItems,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
 
-          // Non-blocking Algolia synchronization
-          syncPrescriptionToAlgolia({ ...newRx, id: docRef.id }).catch(err => {
-            console.warn('[ImportPrescriptionModal] Algolia rx sync error:', err);
-          });
-          if (newRx.patient?.name) {
-            syncPatientToAlgolia({
-              id: docRef.id,
-              name: newRx.patient.name,
-              code: newRx.code,
-              doctorName: newRx.doctorName,
-              clinicName: newRx.clinicName
-            }).catch(err => {
-              console.warn('[ImportPrescriptionModal] Algolia patient sync error:', err);
-            });
-          }
+      if (persistEndpoint) {
+        pendingDocs.push(newRx);
+      } else {
+        const docRef = await addDoc(collection(db, 'prescriptions'), newRx);
+        created.push({ id: docRef.id, code: cleanCode, patientName: cleanPatientName });
 
-          // Zoho auto-ingest pipeline
-          processPrescriptionZohoOnImport({
-            prescriptionId: docRef.id,
-            rxData: newRx,
-            userEmail: 'import_modal'
+        // Non-blocking Algolia synchronization
+        syncPrescriptionToAlgolia({ ...newRx, id: docRef.id }).catch(err => {
+          console.warn('[ImportPrescriptionModal] Algolia rx sync error:', err);
+        });
+        if (newRx.patient?.name) {
+          syncPatientToAlgolia({
+            id: docRef.id,
+            name: newRx.patient.name,
+            code: newRx.code,
+            doctorName: newRx.doctorName,
+            clinicName: newRx.clinicName
           }).catch(err => {
-            console.warn('[ImportPrescriptionModal] Zoho auto-ingest error:', err);
+            console.warn('[ImportPrescriptionModal] Algolia patient sync error:', err);
           });
         }
+
+        // Zoho auto-ingest pipeline
+        processPrescriptionZohoOnImport({
+          prescriptionId: docRef.id,
+          rxData: newRx,
+          userEmail: 'import_modal'
+        }).catch(err => {
+          console.warn('[ImportPrescriptionModal] Zoho auto-ingest error:', err);
+        });
+
+        // Automated email notification to jose@mediluxeme.com on prescription import
+        fetch('/api/prescriptions/notify-import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prescriptionId: docRef.id,
+            rxData: { ...newRx, id: docRef.id, code: cleanCode, patientName: cleanPatientName },
+            importChannel: 'portal_import_modal'
+          })
+        }).catch(err => {
+          console.warn('[ImportPrescriptionModal] Email notification error:', err);
+        });
       }
 
       if (persistEndpoint && pendingDocs.length > 0) {
@@ -1116,7 +1191,7 @@ export default function ImportPrescriptionModal({
                                           type="text"
                                           value={item.dose || ''}
                                           onChange={(e) => handleUpdateIngredient(bIdx, itIdx, { dose: e.target.value })}
-                                          placeholder="Dosis (ej. 5% o 2 mg)"
+                                          placeholder="Dose (e.g. 5% or 2 mg)"
                                           style={{
                                             height: '36px',
                                             borderRadius: '6px',
@@ -1141,7 +1216,7 @@ export default function ImportPrescriptionModal({
                                         <button
                                           type="button"
                                           onClick={() => handleDeleteIngredient(bIdx, itIdx)}
-                                          title="Eliminar principio activo"
+                                          title="Remove active ingredient"
                                           style={{
                                             background: 'none',
                                             border: 'none',
@@ -1272,7 +1347,7 @@ export default function ImportPrescriptionModal({
                   }}
                 >
                   <ArrowLeft size={14} />
-                  <span>Subir Otro Documento</span>
+                  <span>Upload Another Document</span>
                 </button>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1295,7 +1370,7 @@ export default function ImportPrescriptionModal({
                       }}
                     >
                       <Eye size={14} />
-                      <span>Ver Etiqueta</span>
+                      <span>Preview Label</span>
                     </button>
                   )}
 

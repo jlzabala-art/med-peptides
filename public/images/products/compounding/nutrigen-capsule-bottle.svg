@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+    <linearGradient id="bottleBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="30%" stop-color="#f8fafc"/>
+      <stop offset="70%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="labelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="480" rx="16" fill="url(#bg)"/>
+
+  <!-- Bottle Container -->
+  <g filter="url(#shadow)">
+    <!-- Ribbed Cap -->
+    <rect x="150" y="80" width="100" height="40" rx="4" fill="url(#capGrad)"/>
+    <line x1="160" y1="80" x2="160" y2="120" stroke="#475569" stroke-width="2"/>
+    <line x1="170" y1="80" x2="170" y2="120" stroke="#475569" stroke-width="2"/>
+    <line x1="180" y1="80" x2="180" y2="120" stroke="#475569" stroke-width="2"/>
+    <line x1="190" y1="80" x2="190" y2="120" stroke="#475569" stroke-width="2"/>
+    <line x1="200" y1="80" x2="200" y2="120" stroke="#475569" stroke-width="2"/>
+    <line x1="210" y1="80" x2="210" y2="120" stroke="#475569" stroke-width="2"/>
+    <line x1="220" y1="80" x2="220" y2="120" stroke="#475569" stroke-width="2"/>
+    <line x1="230" y1="80" x2="230" y2="120" stroke="#475569" stroke-width="2"/>
+    <line x1="240" y1="80" x2="240" y2="120" stroke="#475569" stroke-width="2"/>
+
+    <!-- Neck -->
+    <rect x="160" y="120" width="80" height="20" fill="#e2e8f0"/>
+
+    <!-- Bottle Body -->
+    <rect x="125" y="140" width="150" height="240" rx="14" fill="url(#bottleBody)"/>
+    
+    <!-- White Clinical Label -->
+    <rect x="133" y="160" width="134" height="200" rx="6" fill="url(#labelGrad)" stroke="#cbd5e1" stroke-width="1"/>
+    
+    <!-- Top Green Accent Line -->
+    <rect x="133" y="160" width="134" height="8" rx="2" fill="url(#accent)"/>
+
+    <!-- Label Text -->
+    <text x="200" y="186" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="800" fill="#059669" text-anchor="middle" letter-spacing="1.5">FAGRON NUTRIGEN™</text>
+    <text x="200" y="202" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#0f172a" text-anchor="middle">GLYCO-METABOLIC</text>
+    <text x="200" y="215" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="600" fill="#475569" text-anchor="middle">Carb &amp; Insulin Shield</text>
+
+    <!-- Divider -->
+    <line x1="145" y1="225" x2="255" y2="225" stroke="#e2e8f0" stroke-width="1"/>
+
+    <!-- API List on Label -->
+    <text x="145" y="242" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#1e293b">• Dihydroberberine 150mg</text>
+    <text x="145" y="256" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#1e293b">• R-Alpha Lipoic Acid 200mg</text>
+    <text x="145" y="270" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#1e293b">• Chromium Picolinate 200mcg</text>
+    <text x="145" y="284" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#1e293b">• Cinnamic Acid 100mg</text>
+
+    <!-- Capsule Badge -->
+    <rect x="145" y="300" width="110" height="22" rx="4" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+    <text x="200" y="315" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8" font-weight="700" fill="#065f46" text-anchor="middle">60 Vegan HPMC Capsules</text>
+
+    <!-- Bottom QR / GMP stamp -->
+    <rect x="145" y="332" width="20" height="20" fill="#0f172a" rx="2"/>
+    <rect x="148" y="335" width="6" height="6" fill="#ffffff"/>
+    <rect x="156" y="343" width="6" height="6" fill="#ffffff"/>
+    <text x="172" y="342" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7" font-weight="700" fill="#334155">EU GMP CLINICAL</text>
+    <text x="172" y="351" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="6.5" font-weight="600" fill="#64748b">TCF7L2 / PPARG</text>
+  </g>
+
+  <!-- Capsule Graphic Overlay at bottom right -->
+  <g transform="translate(255, 360) rotate(-35)">
+    <rect x="0" y="0" width="20" height="42" rx="10" fill="#10b981" opacity="0.95"/>
+    <rect x="0" y="21" width="20" height="21" rx="10" fill="#ffffff" stroke="#10b981" stroke-width="1"/>
+  </g>
+</svg>

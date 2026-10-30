@@ -25,6 +25,7 @@ import { ULTRAMAN_APIS_MASTER } from '../data/ultramanApisMaster';
 import { getClinicalDosageProfile, getDoseAssessment } from '../data/clinicalDosageRegistry';
 import { resolvePhysicalCapsuleSize, CAPSULE_BOTTLE_SIZES, calculatePharmapolisCost } from '../services/pharmapolisCostEngine';
 import CompoundingGoalWizard from '../components/compounding/CompoundingGoalWizard';
+import PageHeader from '@/components/ui/PageHeader';
 import { triggerHaptic } from '../utils/haptics';
 import {
   FlaskConical, ShieldCheck, Award, Zap, Search, X, Plus, Minus, Download, Sparkles,
@@ -307,8 +308,15 @@ function parseFormulaFromUrl(catalog) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
-export default function CompoundingPage() {
-  const [lang, setLang] = useState('en');
+export default function CompoundingPage({
+  embedded = false,
+  initialLang = null,
+  doctorId = null,
+  doctorMeta = null,
+  patients = [],
+  onPrescriptionIssued = null
+}) {
+  const [lang, setLang] = useState(initialLang || 'en');
   const t = T[lang] || T.en;
 
   const [catalog, setCatalog] = useState(ULTRAMAN_APIS_MASTER);
@@ -316,6 +324,8 @@ export default function CompoundingPage() {
   const [items, setItems] = useState([]);
   const [capsPerBottle, setCapsPerBottle] = useState(60);
   const [formulaName, setFormulaName] = useState('');
+  const [activeGeneticProfile, setActiveGeneticProfile] = useState(null);
+  const [activeFineTuningNotes, setActiveFineTuningNotes] = useState([]);
   const [query, setQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
@@ -332,6 +342,18 @@ export default function CompoundingPage() {
     return 'grid'; // Default 'grid' per user preference
   });
   const [isGoalsWizardOpen, setIsGoalsWizardOpen] = useState(false);
+
+  // Doctor Clinical Integration State
+  const [selectedPatientId, setSelectedPatientId] = useState(() => patients?.[0]?.id || '');
+  const [isNewPatientInline, setIsNewPatientInline] = useState(false);
+  const [newPatientName, setNewPatientName] = useState('');
+  const [newPatientDob, setNewPatientDob] = useState('');
+  const [newPatientGender, setNewPatientGender] = useState('Male');
+  const [newPatientEmail, setNewPatientEmail] = useState('');
+  const [newPatientPhone, setNewPatientPhone] = useState('');
+  const [clinicalIndications, setClinicalIndications] = useState('');
+  const [isIssuingPrescription, setIsIssuingPrescription] = useState(false);
+
   const hydratedRef = useRef(false);
   const searchWrapRef = useRef(null);
 
@@ -427,6 +449,13 @@ export default function CompoundingPage() {
       if (proposal.capsPerBottle) setCapsPerBottle(proposal.capsPerBottle);
       setIsSplitProtocol(Boolean(proposal.isSplit));
       setActiveBlueprint('blank');
+      if (proposal.geneticProfile) {
+        setActiveGeneticProfile(proposal.geneticProfile);
+        setActiveFineTuningNotes(proposal.fineTuningNotes || []);
+      } else {
+        setActiveGeneticProfile(null);
+        setActiveFineTuningNotes([]);
+      }
       toast.success(
         lang === 'es'
           ? `Fórmula cargada con éxito: ${proposal.name} (${resolved.length} activos)`
@@ -649,6 +678,112 @@ export default function CompoundingPage() {
     setIsInquiryOpen(true);
   }, [items.length, t]);
 
+  const handleIssueDoctorPrescription = useCallback(async () => {
+    if (!items.length) {
+      toast.error(lang === 'es' ? 'Añade al menos un principio activo a la fórmula' : 'Add at least one active ingredient to the formula');
+      return;
+    }
+
+    const chosenPatient = isNewPatientInline
+      ? {
+          name: newPatientName.trim(),
+          dob: newPatientDob || '1985-06-15',
+          gender: newPatientGender || 'Male',
+          email: newPatientEmail || '',
+          phone: newPatientPhone || ''
+        }
+      : (patients.find(p => String(p.id) === String(selectedPatientId)) || {
+          id: selectedPatientId || 'pat-selected',
+          name: patients.find(p => String(p.id) === String(selectedPatientId))?.name || 'Assigned Patient'
+        });
+
+    if (!chosenPatient?.name) {
+      toast.error(lang === 'es' ? 'Selecciona o escribe el nombre del paciente asignado' : 'Select or enter the assigned patient name');
+      return;
+    }
+
+    setIsIssuingPrescription(true);
+    triggerHaptic('medium');
+    try {
+      const res = await fetch('/api/prescriptions/create-compounded', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          doctorId: doctorId || doctorMeta?.id || 'dr-marina-cordeiro-fernandes',
+          doctorMeta: {
+            name: doctorMeta?.name || 'Dr. Marina Cordeiro Fernandes',
+            license: doctorMeta?.license || doctorMeta?.licenseNumber || 'DHA-91105367',
+            clinicName: doctorMeta?.clinicName || doctorMeta?.clinic || 'NOVA Aesthetics & Wellness',
+            specialty: doctorMeta?.specialty || 'General Practitioner · Longevity & Aesthetic Medicine',
+            email: doctorMeta?.email || 'dr.marina@novaclinic.ae',
+            phone: doctorMeta?.phone || '+971 4 384 5678'
+          },
+          patient: chosenPatient,
+          formulaName: formulaName || (activeBlueprint && activeBlueprint !== 'blank' ? activeBlueprint.title : 'Custom Compounded Formula'),
+          items: items.map(it => ({
+            name: it.name,
+            doseMg: it.doseMg,
+            unit: it.unit || 'mg',
+            activeIngredient: it.activeIngredient || it.name,
+            category: it.category || 'Compounded Active',
+            role: it.role || ''
+          })),
+          capsuleDetails: {
+            capsPerBottle,
+            size: galenics?.size?.size || 'Size 0',
+            totalMgPerCap: totalMg,
+            capsPerDay: galenics?.capsPerDay || 2
+          },
+          nutrigenomics: activeGeneticProfile ? {
+            source: activeGeneticProfile.source || '24Genetics Nutrition Report',
+            sampleCode: activeGeneticProfile.sampleCode || '',
+            fineTuningNotes: activeFineTuningNotes || []
+          } : null,
+          clinicalNotes: clinicalIndications || ''
+        })
+      });
+
+      const data = await res.json();
+      if (data.success && data.prescription) {
+        toast.success(
+          lang === 'es'
+            ? `¡Prescripción #${data.prescription.prescriptionNumber || data.prescription.code} emitida y registrada con éxito!`
+            : `Prescription #${data.prescription.prescriptionNumber || data.prescription.code} issued successfully!`,
+          { duration: 5000, icon: '📜' }
+        );
+        onPrescriptionIssued?.(data.prescription);
+      } else {
+        throw new Error(data.error || 'Failed to issue prescription');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Error issuing compounded prescription');
+    } finally {
+      setIsIssuingPrescription(false);
+    }
+  }, [
+    items,
+    isNewPatientInline,
+    newPatientName,
+    newPatientDob,
+    newPatientGender,
+    newPatientEmail,
+    newPatientPhone,
+    patients,
+    selectedPatientId,
+    doctorId,
+    doctorMeta,
+    formulaName,
+    activeBlueprint,
+    capsPerBottle,
+    galenics,
+    totalMg,
+    activeGeneticProfile,
+    activeFineTuningNotes,
+    clinicalIndications,
+    lang,
+    onPrescriptionIssued
+  ]);
+
   const handleExportPdf = useCallback(async () => {
     if (!items.length || isExporting) return;
     setIsExporting(true);
@@ -721,33 +856,292 @@ export default function CompoundingPage() {
 
   /* ═══════════════════════════════════════════════════════════════════════ */
   return (
-    <div className="cmp-page">
-      <PublicUnifiedHeader track="compounds" lang={lang} onLangChange={handleLangChange} copyUrl={shareUrl} />
+    <div className={`cmp-page ${embedded ? 'is-embedded' : ''}`}>
+      {!embedded && (
+        <PublicUnifiedHeader track="compounds" lang={lang} onLangChange={handleLangChange} copyUrl={shareUrl} />
+      )}
 
-      {/* ── Hero ── */}
-      <header className="cmp-hero">
-        <div className="cmp-container">
-          <div className="cmp-hero-badges">
-            <span className="cmp-badge"><FlaskConical size={13} /> {t.badge}</span>
-            <span className="cmp-badge is-regulatory"><ShieldCheck size={13} /> {t.regulatoryBadge}</span>
-          </div>
-          <h1 className="cmp-title">{t.title}</h1>
-          <p className="cmp-subtitle">{t.subtitle}</p>
+      {/* ── Public Hero (Hidden when embedded in Doctor Portal) ── */}
+      {!embedded && (
+        <header className="cmp-hero">
+          <div className="cmp-container">
+            <div className="cmp-hero-badges">
+              <span className="cmp-badge"><FlaskConical size={13} /> {t.badge}</span>
+              <span className="cmp-badge is-regulatory"><ShieldCheck size={13} /> {t.regulatoryBadge}</span>
+            </div>
+            <h1 className="cmp-title">{t.title}</h1>
+            <p className="cmp-subtitle">{t.subtitle}</p>
 
-          <div className="cmp-kpis">
-            {[ShieldCheck, Pill, FlaskConical, Zap].map((Icon, idx) => (
-              <div key={idx} className="cmp-kpi">
-                <div className="cmp-kpi-head">
-                  <span>{t.kpis[idx].label}</span>
-                  <Icon size={15} />
+            <div className="cmp-kpis">
+              {[ShieldCheck, Pill, FlaskConical, Zap].map((Icon, idx) => (
+                <div key={idx} className="cmp-kpi">
+                  <div className="cmp-kpi-head">
+                    <span>{t.kpis[idx].label}</span>
+                    <Icon size={15} />
+                  </div>
+                  <div className="cmp-kpi-value">{t.kpis[idx].value}</div>
+                  <div className="cmp-kpi-sub">{t.kpis[idx].sub}</div>
                 </div>
-                <div className="cmp-kpi-value">{t.kpis[idx].value}</div>
-                <div className="cmp-kpi-sub">{t.kpis[idx].sub}</div>
+              ))}
+            </div>
+          </div>
+        </header>
+      )}
+
+      {/* ── Embedded Doctor Portal Header & 4 GCP KPIs (Golden Rule #9, #22) ── */}
+      {embedded && (
+        <div className="cmp-container" style={{ paddingTop: '10px' }}>
+          <PageHeader
+            title={lang === 'es' ? 'Laboratorio de Fórmulas Magistrales' : 'Compounding Laboratory'}
+            subtitle={lang === 'es'
+              ? 'Formulación personalizada en cápsulas veganas HPMC (Ph. Eur.) certificadas con ajuste nutrigenómico'
+              : 'Personalized vegan HPMC capsule compounding (Ph. Eur.) with optional 24Genetics DNA fine-tuning'}
+            panel="doctor"
+            breadcrumbs={[
+              { label: 'Doctor', href: '/doctor' },
+              { label: 'Clinical Tools', href: '/doctor/tools' },
+              { label: 'Compounding Lab' }
+            ]}
+          />
+
+          {/* 4 GCP KPIs */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '12px',
+            marginTop: '14px',
+            marginBottom: '16px'
+          }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.70rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
+                <span>{lang === 'es' ? 'Principios Activos' : 'Active Ingredients'}</span>
+                <FlaskConical size={14} color="#0d9488" />
               </div>
-            ))}
+              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
+                {items.length} / {MAX_ACTIVES} {lang === 'es' ? 'Activos' : 'Actives'}
+              </div>
+              <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                Ph. Eur. / USP Active Pool
+              </div>
+            </div>
+
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.70rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
+                <span>{lang === 'es' ? 'Cápsula Galénica' : 'Capsule Architecture'}</span>
+                <Pill size={14} color="#1a73e8" />
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
+                {galenics?.size?.size || 'Size 0'} · {totalMg} mg
+              </div>
+              <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                {capsPerBottle} caps · Vegan HPMC
+              </div>
+            </div>
+
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.70rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
+                <span>{lang === 'es' ? 'Pauta y Posología' : 'Daily Regimen'}</span>
+                <Sun size={14} color="#ea580c" />
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
+                {galenics?.capsPerDay || 2} {lang === 'es' ? 'cápsulas / día' : 'caps / day'}
+              </div>
+              <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                {isSplitProtocol ? (lang === 'es' ? 'Doble fase (Día/Noche)' : 'Dual Phase (Day/Night)') : (lang === 'es' ? 'Toma matutina' : 'Morning Intake')}
+              </div>
+            </div>
+
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.70rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
+                <span>{lang === 'es' ? 'Nutrigenómica' : 'Genomic Tuning'}</span>
+                <Dna size={14} color="#7c3aed" />
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: activeGeneticProfile ? '#7c3aed' : '#0f172a', marginTop: '4px' }}>
+                {activeGeneticProfile ? (lang === 'es' ? 'Calibrado 24Genetics ✓' : '24Genetics Tuned ✓') : (lang === 'es' ? 'Estándar Ph. Eur.' : 'Standard Baseline')}
+              </div>
+              <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                {activeGeneticProfile ? `${activeFineTuningNotes.length} ${lang === 'es' ? 'ajustes genéticos' : 'DNA biomarker rules'}` : (lang === 'es' ? 'Sin informe genético cargado' : 'No DNA report loaded')}
+              </div>
+            </div>
+          </div>
+
+          {/* Prescribing Doctor & Patient Assignment Bar */}
+          <div style={{
+            background: '#ffffff',
+            border: '1px solid #cbd5e1',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            marginBottom: '16px',
+            boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '1.15rem' }}>👨‍⚕️</span>
+                <div>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 750, color: '#0f172a' }}>
+                    {doctorMeta?.name || 'Dr. Marina Cordeiro Fernandes'}
+                  </span>
+                  <span style={{ fontSize: '0.74rem', color: '#64748b', marginLeft: '6px' }}>
+                    · Lic. {doctorMeta?.license || 'DHA-91105367'} · {doctorMeta?.clinicName || doctorMeta?.clinic || 'NOVA Aesthetics & Wellness'}
+                  </span>
+                </div>
+              </div>
+              <span style={{
+                fontSize: '0.70rem',
+                background: '#f0fdf4',
+                color: '#166534',
+                border: '1px solid #bbf7d0',
+                padding: '3px 8px',
+                borderRadius: '12px',
+                fontWeight: 700
+              }}>
+                ✓ {lang === 'es' ? 'Prescriptor Acreditado' : 'Verified Prescriber'}
+              </span>
+            </div>
+
+            {/* Patient Assignment Row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 280px' }}>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  {lang === 'es' ? 'Paciente Asignado' : 'Assigned Patient'}
+                </label>
+                {!isNewPatientInline ? (
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <select
+                      value={selectedPatientId}
+                      onChange={(e) => setSelectedPatientId(e.target.value)}
+                      style={{
+                        flex: 1,
+                        height: '38px',
+                        padding: '0 10px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        background: '#ffffff',
+                        fontSize: '0.85rem',
+                        color: '#0f172a',
+                        outline: 'none'
+                      }}
+                    >
+                      {patients && patients.length > 0 ? (
+                        patients.map(p => (
+                          <option key={p.id} value={p.id}>
+                            {p.name || p.fullName} {p.dob ? `· DOB: ${p.dob}` : ''} {p.gender ? `(${p.gender})` : ''}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="pat-carlos-mendez">Carlos Méndez (DOB: 1980-04-12 · 46 yrs)</option>
+                      )}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setIsNewPatientInline(true)}
+                      style={{
+                        padding: '0 12px',
+                        height: '38px',
+                        background: '#f1f5f9',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '6px',
+                        fontSize: '0.76rem',
+                        fontWeight: 650,
+                        color: '#334155',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      + {lang === 'es' ? 'Nuevo' : 'New'}
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <input
+                      type="text"
+                      placeholder={lang === 'es' ? 'Nombre completo' : 'Full name'}
+                      value={newPatientName}
+                      onChange={(e) => setNewPatientName(e.target.value)}
+                      style={{
+                        flex: '2 1 140px',
+                        height: '38px',
+                        padding: '0 10px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.84rem'
+                      }}
+                    />
+                    <input
+                      type="date"
+                      value={newPatientDob}
+                      onChange={(e) => setNewPatientDob(e.target.value)}
+                      style={{
+                        flex: '1 1 110px',
+                        height: '38px',
+                        padding: '0 8px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.80rem'
+                      }}
+                    />
+                    <select
+                      value={newPatientGender}
+                      onChange={(e) => setNewPatientGender(e.target.value)}
+                      style={{
+                        flex: '1 1 70px',
+                        height: '38px',
+                        padding: '0 6px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.80rem'
+                      }}
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setIsNewPatientInline(false)}
+                      style={{
+                        padding: '0 8px',
+                        height: '38px',
+                        background: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '6px',
+                        fontSize: '0.74rem',
+                        color: '#64748b',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ flex: '1 1 260px' }}>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  {lang === 'es' ? 'Indicación Clínica / Objetivos' : 'Clinical Indications / Target'}
+                </label>
+                <input
+                  type="text"
+                  placeholder={lang === 'es' ? 'Ej. Apoyo mitocondrial, longevidad y control metabólico' : 'E.g. Mitochondrial bioenergetics & metabolic regulation'}
+                  value={clinicalIndications}
+                  onChange={(e) => setClinicalIndications(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '38px',
+                    boxSizing: 'border-box',
+                    padding: '0 10px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.84rem'
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
-      </header>
+      )}
 
       <main className="cmp-container cmp-main">
         {/* ── Step 1: Blueprints (High-Density Chips + Grid Toggle) ── */}
@@ -1216,6 +1610,41 @@ export default function CompoundingPage() {
               onChange={(e) => setFormulaName(e.target.value)}
             />
 
+            {activeGeneticProfile && (
+              <div style={{
+                marginTop: '12px',
+                marginBottom: '16px',
+                padding: '12px 14px',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Dna size={15} color="#16a34a" />
+                    <strong style={{ fontSize: '0.78rem', color: '#166534' }}>
+                      {lang === 'es' ? `Perfil 24Genetics: ${activeGeneticProfile.patientName} (${activeGeneticProfile.sampleCode})` : `24Genetics DNA Profile: ${activeGeneticProfile.patientName} (${activeGeneticProfile.sampleCode})`}
+                    </strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setActiveGeneticProfile(null); setActiveFineTuningNotes([]); }}
+                    style={{ border: 'none', background: 'transparent', color: '#64748b', fontSize: '0.70rem', cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    {lang === 'es' ? 'Quitar' : 'Remove'}
+                  </button>
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#166534', lineHeight: 1.4 }}>
+                  {lang === 'es'
+                    ? `Fórmula calibrada para dieta ${activeGeneticProfile.dietAndWeight?.effectiveDietType?.toUpperCase()}, sensibilidad a carbohidratos ${activeGeneticProfile.dietAndWeight?.carbSensitivity} y metabolismo de cafeína ${activeGeneticProfile.metabolism?.caffeineMetabolism}.`
+                    : `Formula tuned for ${activeGeneticProfile.dietAndWeight?.effectiveDietType?.toUpperCase()} diet, ${activeGeneticProfile.dietAndWeight?.carbSensitivity} carb sensitivity and ${activeGeneticProfile.metabolism?.caffeineMetabolism} caffeine metabolism.`}
+                </div>
+              </div>
+            )}
+
             {galenics ? (
               <>
                 <div className="cmp-capsule" style={{ '--cap-color': galenics.size.badgeColor }}>
@@ -1320,9 +1749,40 @@ export default function CompoundingPage() {
             <p className="cmp-price-note"><Award size={13} /> {t.priceNote}</p>
 
             <div className="cmp-actions">
-              <button type="button" className="cmp-primary-btn" onClick={handleRequest} disabled={!items.length}>
-                <Send size={15} /> {t.request}
-              </button>
+              {embedded ? (
+                <button
+                  type="button"
+                  className="cmp-primary-btn"
+                  onClick={handleIssueDoctorPrescription}
+                  disabled={!items.length || isIssuingPrescription}
+                  style={{
+                    background: '#0d9488',
+                    color: '#ffffff',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    fontWeight: 800,
+                    fontSize: '0.86rem',
+                    padding: '12px 18px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: items.length && !isIssuingPrescription ? 'pointer' : 'not-allowed',
+                    boxShadow: '0 2px 8px rgba(13, 148, 136, 0.25)'
+                  }}
+                >
+                  <ShieldCheck size={16} />
+                  <span>
+                    {isIssuingPrescription
+                      ? (lang === 'es' ? 'Emitiendo prescripción…' : 'Issuing prescription…')
+                      : (lang === 'es' ? 'Emitir Prescripción Oficial Certificada' : 'Issue Certified Official Prescription')}
+                  </span>
+                </button>
+              ) : (
+                <button type="button" className="cmp-primary-btn" onClick={handleRequest} disabled={!items.length}>
+                  <Send size={15} /> {t.request}
+                </button>
+              )}
               <button type="button" className="cmp-secondary-btn" onClick={handleExportPdf} disabled={!items.length || isExporting}>
                 <Download size={14} /> {isExporting ? (lang === 'es' ? 'Generando…' : 'Generating…') : t.pdf}
               </button>
@@ -1377,22 +1837,24 @@ export default function CompoundingPage() {
         onApplyProposal={handleApplyProposal}
       />
 
-      <PublicUnifiedFooter lang={lang} />
+      {!embedded && <PublicUnifiedFooter lang={lang} />}
 
-      <PublicStickyActionBar
-        title={displayName}
-        subtitle={items.length
-          ? `${items.length} ${t.actives}${galenics ? ` · ${galenics.size.size} · ${galenics.capsPerDay} ${t.capsDay}` : ''}`
-          : t.title}
-        badge="Compounding"
-        badgeType="protocol"
-        inquireLabel={t.request}
-        onInquire={handleRequest}
-        showClinicalAI={true}
-        aiContextQuery={aiContextQuery}
-        aiCategory="compounding"
-        lang={lang}
-      />
+      {!embedded && (
+        <PublicStickyActionBar
+          title={displayName}
+          subtitle={items.length
+            ? `${items.length} ${t.actives}${galenics ? ` · ${galenics.size.size} · ${galenics.capsPerDay} ${t.capsDay}` : ''}`
+            : t.title}
+          badge="Compounding"
+          badgeType="protocol"
+          inquireLabel={t.request}
+          onInquire={handleRequest}
+          showClinicalAI={true}
+          aiContextQuery={aiContextQuery}
+          aiCategory="compounding"
+          lang={lang}
+        />
+      )}
     </div>
   );
 }

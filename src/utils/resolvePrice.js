@@ -449,53 +449,58 @@ export function resolveVariantPrice(variant, {
   }
   pricing = normalisePricingKeys(pricing);
 
-  // Apply B2B pricing calculations for NPLAB supplier (EUR->USD and tier multipliers)
-  if (pricing && variant && (variant.supplier === 'NPLAB' || variant.supplier === 'nplab')) {
-    const isEur = pricing.retail?.currency === 'EUR' || pricing.currency === 'EUR';
-    let retailPrice = pricing.retail?.perUnit ?? null;
-    let retailKit = pricing.retail?.kit ?? null;
+  // Apply B2B pricing calculations for NPLAB supplier (+15% Wholesale, +30% Clinic, +50% Retail over EUR cost)
+  const vSuppStr = String(variant?.supplierId || variant?.supplier_id || variant?.supplier || variant?.supplierName || '').toLowerCase();
+  if (pricing && variant && (vSuppStr.includes('nplab') || vSuppStr.includes('np-lab') || vSuppStr.includes('np lab'))) {
+    const baseCostEur = Number(
+      variant.price_eur ??
+      variant.cost ??
+      pricing.master?.perUnit ??
+      variant.unit_price ??
+      0
+    );
 
-    if (isEur) {
-      if (retailPrice != null) retailPrice = retailPrice * 1.10;
-      if (retailKit != null) retailKit = retailKit * 1.10;
+    if (baseCostEur > 0) {
+      const masterPrice = baseCostEur;
+      const masterKit = Number((baseCostEur * 0.85 * 10).toFixed(2));
+
+      const wholesalePrice = Number((masterPrice * 1.15).toFixed(2));
+      const wholesaleKit = Number((wholesalePrice * 0.85 * 10).toFixed(2));
+
+      const clinicPrice = Number((masterPrice * 1.30).toFixed(2));
+      const clinicKit = Number((clinicPrice * 0.85 * 10).toFixed(2));
+
+      const retailPrice = Number((masterPrice * 1.50).toFixed(2));
+      const retailKit = Number((retailPrice * 0.85 * 10).toFixed(2));
+
+      pricing = {
+        ...pricing,
+        master: {
+          ...pricing.master,
+          perUnit: masterPrice,
+          kit: masterKit,
+          currency: 'EUR'
+        },
+        wholesale: {
+          ...pricing.wholesale,
+          perUnit: wholesalePrice,
+          kit: wholesaleKit,
+          currency: 'EUR'
+        },
+        clinic: {
+          ...pricing.clinic,
+          perUnit: clinicPrice,
+          kit: clinicKit,
+          currency: 'EUR'
+        },
+        retail: {
+          ...pricing.retail,
+          perUnit: retailPrice,
+          kit: retailKit,
+          currency: 'EUR'
+        }
+      };
     }
-
-    const masterPrice = retailPrice != null ? retailPrice / 1.5 : null;
-    const masterKit = retailKit != null ? retailKit / 1.5 : null;
-
-    const wholesalePrice = masterPrice != null ? masterPrice * 1.2 : null;
-    const wholesaleKit = masterKit != null ? masterKit * 1.2 : null;
-
-    const clinicPrice = masterPrice != null ? masterPrice * 1.3 : null;
-    const clinicKit = masterKit != null ? masterKit * 1.3 : null;
-
-    pricing = {
-      ...pricing,
-      retail: {
-        ...pricing.retail,
-        ...(retailPrice != null ? { perUnit: retailPrice } : {}),
-        ...(retailKit != null ? { kit: retailKit } : {}),
-        currency: 'USD'
-      },
-      master: {
-        ...pricing.master,
-        ...(masterPrice != null ? { perUnit: masterPrice } : {}),
-        ...(masterKit != null ? { kit: masterKit } : {}),
-        currency: 'USD'
-      },
-      wholesale: {
-        ...pricing.wholesale,
-        ...(wholesalePrice != null ? { perUnit: wholesalePrice } : {}),
-        ...(wholesaleKit != null ? { kit: wholesaleKit } : {}),
-        currency: 'USD'
-      },
-      clinic: {
-        ...pricing.clinic,
-        ...(clinicPrice != null ? { perUnit: clinicPrice } : {}),
-        ...(clinicKit != null ? { kit: clinicKit } : {}),
-        currency: 'USD'
-      }
-    };
   }
 
   // ── Validate + fallback tier ──

@@ -33,7 +33,8 @@ export default function CompoundedFormulationsSection({
   setSelectedPhase,
   togglePhase,
   setSelectedLabelIndex,
-  setShowLabelsModal
+  setShowLabelsModal,
+  canManageLabels = false
 }) {
   if (!compoundedFormulations || compoundedFormulations.length === 0) return null;
 
@@ -209,7 +210,7 @@ export default function CompoundedFormulationsSection({
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-                {phaseLabel && (
+                {canManageLabels && phaseLabel && (
                   <button
                     type="button"
                     onClick={(e) => {

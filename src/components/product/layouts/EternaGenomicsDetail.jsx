@@ -54,6 +54,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import CopyableId from '@/components/ui/CopyableId';
 import DataTable from '@/components/ui/DataTable';
 import EternaRiskScoreBar from '@/components/diagnostic/eterna/EternaRiskScoreBar';
+import EternaProAgeProGenSection from '@/components/product/EternaProAgeProGenSection';
 import './EternaGenomicsDetail.css';
 
 // Master ETERNA Video Assets (Cloud Hosted via Firebase / Google Cloud Storage + Local Fallback)
@@ -90,6 +91,7 @@ export default function EternaGenomicsDetail({
   // Reorganized Physician-Directed Sections
   const eternaSections = useMemo(() => [
     { id: 'overview', label: isEs ? 'Visión General' : 'Overview & Diagnostic Stage', icon: Sparkles },
+    { id: 'proage-progen', label: isEs ? 'ProAge™ vs ProGen™ & Clientes (6)' : 'ProAge™ vs. ProGen™ & Clients (6)', icon: Users, badge: 'COHORT' },
     { id: 'video', label: isEs ? 'Video del Ecosistema' : 'Ecosystem Video Walkthrough', icon: Video, badge: 'HD' },
     { id: 'flujo-clinico', label: isEs ? 'Flujo de Prescripción (5 Pasos)' : 'Clinical Prescribing Flow', icon: Clock },
     { id: 'pilares', label: isEs ? '5 Pilares Genómicos' : '5 Clinical Pillars', icon: Layers },
@@ -884,9 +886,21 @@ export default function EternaGenomicsDetail({
             </div>
           )}
 
+          {/* ── Dedicated Section: ProAge vs ProGen & 6 Active ProAge Clients ── */}
+          {effectiveActiveTab === 'proage-progen' && (
+            <EternaProAgeProGenSection
+              lang={lang}
+              onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+            />
+          )}
+
           {/* ── Section 1: Overview & Diagnostic Stage ── */}
           {effectiveActiveTab === 'overview' && (
             <>
+              <EternaProAgeProGenSection
+                lang={lang}
+                onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+              />
               {/* ── 1. Hero Section: Tri-Device 3D Mockup with Physician Framing ── */}
               <section id="overview" className="eterna-hero-section">
                 <div className="eterna-pill-tag">

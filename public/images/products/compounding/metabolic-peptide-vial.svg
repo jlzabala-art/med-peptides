@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+    <linearGradient id="vialGlass" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="25%" stop-color="#f0f9ff" stop-opacity="0.6"/>
+      <stop offset="75%" stop-color="#e0f2fe" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#bae6fd" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="flipCap" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="crimp" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#cbd5e1"/>
+      <stop offset="50%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <linearGradient id="liquid" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.7"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="480" rx="16" fill="url(#bg)"/>
+
+  <!-- Vial Assembly -->
+  <g filter="url(#shadow)">
+    <!-- Cyan / Blue Flip-Off Plastic Cap -->
+    <rect x="160" y="85" width="80" height="18" rx="5" fill="url(#flipCap)"/>
+    
+    <!-- Aluminum Crimp Seal -->
+    <rect x="165" y="103" width="70" height="24" rx="2" fill="url(#crimp)"/>
+    <line x1="165" y1="115" x2="235" y2="115" stroke="#94a3b8" stroke-width="1.5"/>
+
+    <!-- Rubber Stopper Visible in Crimp Neck -->
+    <rect x="175" y="127" width="50" height="15" fill="#475569"/>
+
+    <!-- Glass Shoulder -->
+    <path d="M 175 142 C 160 148, 140 160, 140 180 L 140 370 C 140 382, 150 390, 162 390 L 238 390 C 250 390, 260 382, 260 370 L 260 180 C 260 160, 240 148, 225 142 Z" fill="url(#vialGlass)" stroke="#93c5fd" stroke-width="1.5"/>
+
+    <!-- Lyophilized Cake / Liquid at Bottom -->
+    <path d="M 144 320 C 144 320, 170 315, 200 315 C 230 315, 256 320, 256 320 L 256 368 C 256 378, 248 386, 238 386 L 162 386 C 152 386, 144 378, 144 368 Z" fill="url(#liquid)"/>
+
+    <!-- High-Resolution Clinical Label -->
+    <rect x="146" y="185" width="108" height="140" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    
+    <!-- Top Blue Accent -->
+    <rect x="146" y="185" width="108" height="6" fill="#0284c7"/>
+
+    <!-- Label Content -->
+    <text x="200" y="204" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8" font-weight="800" fill="#0369a1" text-anchor="middle" letter-spacing="1">METABOLIC INCRETIN</text>
+    <text x="200" y="220" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11.5" font-weight="800" fill="#0f172a" text-anchor="middle">TIRZEPATIDE</text>
+    <text x="200" y="233" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="700" fill="#0284c7" text-anchor="middle">+ B12 500 mcg</text>
+    <text x="200" y="244" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="600" fill="#64748b" text-anchor="middle">GLP-1 / GIP Dual Agonist</text>
+
+    <line x1="154" y1="252" x2="246" y2="252" stroke="#e2e8f0" stroke-width="1"/>
+
+    <text x="154" y="266" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7" font-weight="700" fill="#1e293b">STRENGTH: 10 mg / 2 mL</text>
+    <text x="154" y="278" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7" font-weight="700" fill="#1e293b">VEHICLE: Sterile Bacteriostatic</text>
+    <text x="154" y="290" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7" font-weight="700" fill="#1e293b">PURITY: &gt; 99.4% (HPLC/MS)</text>
+
+    <!-- Subcutaneous / Troche Badge -->
+    <rect x="154" y="298" width="92" height="18" rx="3" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1"/>
+    <text x="200" y="310" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#0369a1" text-anchor="middle">Multi-Dose Sterile Vial</text>
+
+    <!-- Glass Gloss Reflection -->
+    <path d="M 148 185 L 148 365" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  </g>
+</svg>

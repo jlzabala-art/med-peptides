@@ -26,43 +26,58 @@ function sanitizeBrandName(text) {
 
 /**
  * Resolves wholesale prices for a variant or item.
+ * For NPLAB peptide formulations (Nikolas / NP Labs partner schedule), applies
+ * exact +15% markup over our NPLAB cost price (costEur * 1.15) in EUR (€).
  */
-function resolveWholesalePricing(variant, defaultPrice = 35.0) {
+function resolveWholesalePricing(variant, defaultPrice = 35.0, markupPercent = 15) {
+  const vSupp = String(variant?.supplierId || variant?.supplier_id || variant?.supplier || variant?.supplierName || '').toLowerCase();
+  const isNpLabs = vSupp.includes('nplab') || vSupp.includes('np-lab') || vSupp.includes('np lab');
+
+  if (isNpLabs) {
+    const baseCost = Number(
+      variant.price_eur ??
+      variant.cost ??
+      variant.pricing?.master?.perUnit ??
+      variant.unit_price ??
+      defaultPrice
+    );
+    const factor = 1 + (Number(markupPercent || 15) / 100);
+    const unitPrice = Math.round((baseCost * factor) * 100) / 100;
+    const tier10UnitPrice = Math.round((unitPrice * 0.85) * 100) / 100;
+    const pack10Price = Math.round((tier10UnitPrice * 10) * 100) / 100;
+
+    return {
+      baseCost: Math.round(baseCost * 100) / 100,
+      markupPercent: Number(markupPercent || 15),
+      unitPrice,
+      tier10UnitPrice,
+      pack10Price,
+      currency: 'EUR',
+      currencySymbol: '€'
+    };
+  }
+
   const resolved = resolveVariantPrice(variant, {
-    tier: PRICING_TIER.WHOLESALE,
+    tier: PRICING_TIER.MASTER,
     targetCurrency: 'USD'
   });
 
-  let unitPrice = Number(resolved?.price || resolved?.amount || variant.wholesalePrice || variant.cost || variant.price || 0);
+  const baseCost = Number(
+    variant.cost ??
+    variant.pricing?.master?.perUnit ??
+    resolved?.perUnit ??
+    variant.unit_price ??
+    defaultPrice
+  );
 
-  if (!unitPrice && variant.pricing?.wholesale?.perUnit) {
-    unitPrice = Number(variant.pricing.wholesale.perUnit);
-  }
-
-  if (unitPrice <= 0 && variant.pricing?.retail?.perUnit) {
-    unitPrice = Number(variant.pricing.retail.perUnit) * 0.7;
-  }
-
-  if (unitPrice <= 0) {
-    unitPrice = defaultPrice;
-  }
-
-  unitPrice = Math.round(unitPrice * 100) / 100;
-
-  // 10-pack volume pricing (15% volume discount standard)
-  let tier10UnitPrice;
-  if (variant.cost_tiers?.cost_10 && Number(variant.cost_tiers.cost_10) > 0) {
-    tier10UnitPrice = Number(variant.cost_tiers.cost_10);
-  } else if (variant.pricing?.wholesale?.kit && Number(variant.pricing.wholesale.kit) > 0) {
-    const kit = Number(variant.pricing.wholesale.kit);
-    tier10UnitPrice = kit > unitPrice * 2 ? kit / 10 : kit;
-  } else {
-    tier10UnitPrice = Math.round((unitPrice * 0.85) * 100) / 100;
-  }
-
+  const factor = 1 + (Number(markupPercent || 15) / 100);
+  const unitPrice = Math.round((baseCost * factor) * 100) / 100;
+  const tier10UnitPrice = Math.round((unitPrice * 0.85) * 100) / 100;
   const pack10Price = Math.round((tier10UnitPrice * 10) * 100) / 100;
 
   return {
+    baseCost: Math.round(baseCost * 100) / 100,
+    markupPercent: Number(markupPercent || 15),
     unitPrice,
     tier10UnitPrice,
     pack10Price,
@@ -75,13 +90,13 @@ function resolveWholesalePricing(variant, defaultPrice = 35.0) {
  * Unified Collection Fetcher: Supports vials, bloodo, colway, ultraman/ultraperson, and teletest.
  * Sourced dynamically from Firestore (Golden Rule #2) with high-fidelity registry fallbacks.
  */
-export async function fetchCollectionProductsAction(collectionSlug = 'vials') {
+export async function fetchCollectionProductsAction(collectionSlug = 'vials', referralRef = null) {
   const normSlug = String(collectionSlug || 'vials').toLowerCase().trim();
   const targetCollection = normSlug === 'ultraperson' ? 'ultraman' : (SUPPORTED_COLLECTIONS[normSlug] ? normSlug : 'vials');
 
   try {
     if (targetCollection === 'vials') {
-      return await fetchLotuslandVials();
+      return await fetchLotuslandVials(referralRef);
     }
 
     if (targetCollection === 'bloodo') {
@@ -100,7 +115,7 @@ export async function fetchCollectionProductsAction(collectionSlug = 'vials') {
       return await fetchTeleTestProducts();
     }
 
-    return await fetchLotuslandVials();
+    return await fetchLotuslandVials(referralRef);
   } catch (error) {
     console.error(`[fetchCollectionProductsAction] Error loading ${targetCollection}:`, error);
     return [];
@@ -108,15 +123,15 @@ export async function fetchCollectionProductsAction(collectionSlug = 'vials') {
 }
 
 /** Backward compatibility alias */
-export async function fetchLotuslandVialsAction() {
-  return fetchCollectionProductsAction('vials');
+export async function fetchLotuslandVialsAction(referralRef = null) {
+  return fetchCollectionProductsAction('vials', referralRef);
 }
 
-/** 1. Vials Fetcher (Lotusland Lyophilized Vials) */
+/** 1. Peptides & Vials Fetcher (NPLAB Peptide Formulations at +15% over NPLAB Cost) */
 async function fetchLotuslandVials() {
   if (!adminDb) return [];
   const snapshot = await adminDb.collection('products')
-    .where('status', 'in', ['active', 'published'])
+    .where('supplierIds', 'array-contains', 'supplier-nplabs')
     .limit(150)
     .get();
 
@@ -125,25 +140,41 @@ async function fetchLotuslandVials() {
     const data = doc.data();
     const productId = doc.id;
 
+    if (data.status === 'archived' || data.status === 'hidden') continue;
     if (data.productType === 'raw_material' || data.category === 'raw_material') continue;
     const docVariants = Array.isArray(data.variants) ? data.variants : [];
     if (docVariants.length === 0) continue;
 
     const cleanVariants = filterProductVariantsStrictly(
       { ...data, id: productId, variants: deduplicateVariants(docVariants) },
-      { supplierFilter: 'supplier-lotusland' }
+      { supplierFilter: 'supplier-nplabs' }
     );
 
     for (const v of cleanVariants) {
       if (isApiOrRawMaterialVariant(v, data)) continue;
-      const pres = String(v.presentation || v.format || '').toLowerCase();
-      const vName = String(v.name || '').toLowerCase();
-      if (pres.includes('pen') || vName.includes('pen') || pres.includes('cartridge') || pres.includes('spray')) continue;
 
-      const pricing = resolveWholesalePricing(v, 35.0);
+      const pricing = resolveWholesalePricing(v, 50.0, 15);
+      if (!pricing.unitPrice || pricing.unitPrice <= 0) continue;
+
       const cleanName = sanitizeBrandName(v.name || data.canonicalName || data.name || 'Clinical Peptide');
-      const cleanDosage = String(v.dosage || data.dosage || '10 mg').trim();
-      const cleanDesc = sanitizeBrandName(data.description || data.clinicalSummary || 'Certified analytical-grade lyophilized peptide vial for clinical reconstituted administration.');
+      const cleanDosage = String(v.dosage || v.dose || data.dosage || '10 mg').trim();
+      const rawPres = String(v.presentation || v.presentationName || v.format || 'Vial').trim();
+      const presLower = rawPres.toLowerCase();
+      const presentationLabel = presLower.includes('cap')
+        ? `Oral Capsules (${v.pack_size || v.pieces_per_kit || 30} caps)`
+        : presLower.includes('spray') || presLower.includes('nasal')
+          ? 'Intranasal Spray'
+          : presLower.includes('drop') || presLower.includes('sublingual')
+            ? 'Sublingual Drops'
+            : 'Lyophilized Vial (10R)';
+      const unitNoun = presLower.includes('cap')
+        ? 'Bottle'
+        : presLower.includes('spray')
+          ? 'Spray'
+          : presLower.includes('drop')
+            ? 'Dropper'
+            : 'Vial';
+      const cleanDesc = sanitizeBrandName(data.description || data.clinicalSummary || 'Certified analytical-grade peptide formulation with ≥99.0% HPLC purity verification.');
 
       vials.push({
         id: `${productId}_${v.id || v.sku || cleanDosage.replace(/\s+/g, '_')}`,
@@ -152,19 +183,21 @@ async function fetchLotuslandVials() {
         collection: 'vials',
         productName: cleanName,
         dosage: cleanDosage,
-        presentation: 'Lyophilized Vial (10R)',
+        presentation: presentationLabel,
         purity: v.purity || data.purity || '≥99.0% (HPLC Verified)',
         category: 'peptide',
         primaryGoal: data.primaryGoal || 'general_health',
         goals: Array.isArray(data.goals) ? data.goals : ['general_health'],
         description: cleanDesc,
+        baseCost: pricing.baseCost,
+        markupPercent: pricing.markupPercent,
         unitPrice: pricing.unitPrice,
         tier10UnitPrice: pricing.tier10UnitPrice,
         pack10Price: pricing.pack10Price,
         currency: pricing.currency,
         currencySymbol: pricing.currencySymbol,
         inStock: v.stock !== 0,
-        unitNoun: 'Vial'
+        unitNoun
       });
     }
   }

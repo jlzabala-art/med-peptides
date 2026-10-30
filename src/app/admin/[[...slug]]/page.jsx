@@ -58,6 +58,8 @@ const getTabComponent = async (tabId) => {
     case 'competitors':        return (await import('../../../components/admin/AdminCompetitorsTab')).default;
     case 'import-prices':      return (await import('../../../components/admin/AdminImportPricesTab')).default;
     case 'catalog-enrichment': return (await import('../../../components/admin/AdminCatalogEnrichmentTab')).default;
+    case 'shopify':
+    case 'shopify-integration': return (await import('../../../components/admin/shopify/AdminShopifyTab')).default;
     case 'inventory':          return (await import('../../../components/admin/AdminPlaceholderTab')).default;
     case 'knowledge-base':     return (await import('../../../components/admin/AdminStorageTab')).default;
 
@@ -85,6 +87,8 @@ const getTabComponent = async (tabId) => {
     // Logistics
     case 'shipping':
     case 'logistics-tracker':  return (await import('../../../components/admin/AdminLogisticsTab')).default;
+    case 'labels':
+    case 'compounding-labels': return (await import('../../../components/admin/AdminLabelsStudioTab')).default;
 
     // Finance
     case 'transactions':

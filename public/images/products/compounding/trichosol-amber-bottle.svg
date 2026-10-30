@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#78350f"/>
+      <stop offset="35%" stop-color="#b45309"/>
+      <stop offset="70%" stop-color="#d97706"/>
+      <stop offset="90%" stop-color="#92400e"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </linearGradient>
+    <linearGradient id="glassReflection" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
+      <stop offset="30%" stop-color="rgba(255,255,255,0.1)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+    <linearGradient id="labelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+    <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Clean Background Canvas -->
+  <rect width="400" height="400" fill="url(#bgGrad)" rx="20"/>
+
+  <!-- Subtle Radial Ground Shadow -->
+  <ellipse cx="200" cy="358" rx="85" ry="14" fill="#000000" opacity="0.16"/>
+  <ellipse cx="200" cy="358" rx="55" ry="7" fill="#000000" opacity="0.22"/>
+
+  <!-- Bottle Group with Shadow -->
+  <g filter="url(#dropShadow)">
+    <!-- Dropper Pipette Bulb (Rubber Top) -->
+    <path d="M 186 62 C 186 50 192 44 200 44 C 208 44 214 50 214 62 L 212 82 L 188 82 Z" fill="#1e293b"/>
+    <rect x="187" y="78" width="26" height="5" rx="2" fill="#334155"/>
+
+    <!-- Dropper Collar / Cap with Ribbing -->
+    <rect x="174" y="83" width="52" height="34" rx="4" fill="url(#capGrad)"/>
+    <!-- Ribbing Lines on Cap -->
+    <line x1="179" y1="86" x2="179" y2="114" stroke="#475569" stroke-width="1.5"/>
+    <line x1="185" y1="86" x2="185" y2="114" stroke="#475569" stroke-width="1.5"/>
+    <line x1="192" y1="86" x2="192" y2="114" stroke="#475569" stroke-width="1.5"/>
+    <line x1="200" y1="86" x2="200" y2="114" stroke="#475569" stroke-width="1.5"/>
+    <line x1="208" y1="86" x2="208" y2="114" stroke="#475569" stroke-width="1.5"/>
+    <line x1="215" y1="86" x2="215" y2="114" stroke="#475569" stroke-width="1.5"/>
+    <line x1="221" y1="86" x2="221" y2="114" stroke="#475569" stroke-width="1.5"/>
+
+    <!-- Tamper Evident Ring -->
+    <rect x="176" y="117" width="48" height="6" rx="2" fill="#0f172a"/>
+
+    <!-- Bottle Neck -->
+    <rect x="182" y="123" width="36" height="15" fill="url(#amberGrad)"/>
+
+    <!-- Bottle Shoulders & Body (100 mL Amber Glass Dropper) -->
+    <path d="
+      M 182 138 
+      C 170 144 140 162 136 182
+      L 136 332
+      C 136 344 146 352 160 352
+      L 240 352
+      C 254 352 264 344 264 332
+      L 264 182
+      C 260 162 230 144 218 138
+      Z" 
+      fill="url(#amberGrad)"/>
+
+    <!-- Amber Glass Highlights / Gloss Sheen -->
+    <path d="
+      M 144 186
+      L 144 328
+      C 144 336 148 342 156 344
+      L 156 178
+      C 148 180 144 183 144 186
+      Z" 
+      fill="url(#glassReflection)"/>
+
+    <!-- Pharmaceutical Prescription Label -->
+    <rect x="144" y="184" width="112" height="136" rx="4" fill="url(#labelGrad)" stroke="#cbd5e1" stroke-width="0.8"/>
+
+    <!-- Teal Medical Header Strip -->
+    <rect x="144" y="184" width="112" height="20" rx="4" fill="#0d9488"/>
+    <!-- Strip Flatten bottom border -->
+    <rect x="144" y="200" width="112" height="4" fill="#0d9488"/>
+    <text x="200" y="197" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="800" text-anchor="middle" letter-spacing="0.5">TRICHOSOL™</text>
+
+    <!-- Label Subtitle & Clinical Details -->
+    <text x="200" y="214" fill="#0f172a" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="750" text-anchor="middle">PRECISION SOLUTION</text>
+    <text x="200" y="224" fill="#047857" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="6.5" font-weight="700" text-anchor="middle">0% ALCOHOL · 0% PPG</text>
+
+    <line x1="152" y1="229" x2="248" y2="229" stroke="#e2e8f0" stroke-width="0.8"/>
+
+    <!-- Magistral / Compounded Formula Badge -->
+    <rect x="153" y="234" width="94" height="28" rx="3" fill="#f0fdfa" stroke="#99f6e4" stroke-width="0.7"/>
+    <text x="200" y="244" fill="#0f766e" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="6.2" font-weight="700" text-anchor="middle">MAGISTRAL COMPOUNDING</text>
+    <text x="200" y="255" fill="#475569" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="5.8" font-weight="600" text-anchor="middle">TRICHOTEST™ PHARMACOGENOMIC</text>
+
+    <!-- Batch / Spec / Volume Footer on Label -->
+    <rect x="153" y="267" width="94" height="15" rx="3" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.5"/>
+    <text x="160" y="277" fill="#64748b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="5.5" font-weight="600">VOL: 100 mL</text>
+    <text x="240" y="277" fill="#0f172a" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="5.5" font-weight="700" text-anchor="end">Rx ONLY</text>
+
+    <!-- Simulated Barcode -->
+    <g transform="translate(162, 288)">
+      <line x1="0" y1="0" x2="0" y2="12" stroke="#334155" stroke-width="1.2"/>
+      <line x1="4" y1="0" x2="4" y2="12" stroke="#334155" stroke-width="2.2"/>
+      <line x1="9" y1="0" x2="9" y2="12" stroke="#334155" stroke-width="1.0"/>
+      <line x1="14" y1="0" x2="14" y2="12" stroke="#334155" stroke-width="2.5"/>
+      <line x1="20" y1="0" x2="20" y2="12" stroke="#334155" stroke-width="1.0"/>
+      <line x1="24" y1="0" x2="24" y2="12" stroke="#334155" stroke-width="1.8"/>
+      <line x1="30" y1="0" x2="30" y2="12" stroke="#334155" stroke-width="2.0"/>
+      <line x1="36" y1="0" x2="36" y2="12" stroke="#334155" stroke-width="1.2"/>
+      <line x1="42" y1="0" x2="42" y2="12" stroke="#334155" stroke-width="2.8"/>
+      <line x1="48" y1="0" x2="48" y2="12" stroke="#334155" stroke-width="1.2"/>
+      <line x1="54" y1="0" x2="54" y2="12" stroke="#334155" stroke-width="2.0"/>
+      <line x1="60" y1="0" x2="60" y2="12" stroke="#334155" stroke-width="1.0"/>
+      <line x1="66" y1="0" x2="66" y2="12" stroke="#334155" stroke-width="2.2"/>
+      <line x1="72" y1="0" x2="72" y2="12" stroke="#334155" stroke-width="1.5"/>
+      <text x="38" y="21" fill="#64748b" font-family="monospace" font-size="5" text-anchor="middle">ES-FARMA-TRICHO</text>
+    </g>
+
+    <!-- Side Calibration Markings on Glass -->
+    <line x1="138" y1="210" x2="142" y2="210" stroke="#fcd34d" stroke-width="1"/>
+    <line x1="138" y1="240" x2="143" y2="240" stroke="#fcd34d" stroke-width="1.5"/>
+    <line x1="138" y1="270" x2="142" y2="270" stroke="#fcd34d" stroke-width="1"/>
+    <line x1="138" y1="300" x2="143" y2="300" stroke="#fcd34d" stroke-width="1.5"/>
+  </g>
+
+  <!-- Clinical Quality Watermark / Stamp -->
+  <g transform="translate(308, 48)">
+    <circle cx="0" cy="0" r="28" fill="#ffffff" stroke="#0d9488" stroke-width="2" filter="url(#dropShadow)"/>
+    <circle cx="0" cy="0" r="24" fill="none" stroke="#99f6e4" stroke-width="1" stroke-dasharray="2 2"/>
+    <text x="0" y="-8" fill="#0d9488" font-family="-apple-system, sans-serif" font-size="7" font-weight="800" text-anchor="middle">100 mL</text>
+    <text x="0" y="2" fill="#0f172a" font-family="-apple-system, sans-serif" font-size="6.5" font-weight="800" text-anchor="middle">TOPICAL</text>
+    <text x="0" y="12" fill="#059669" font-family="-apple-system, sans-serif" font-size="6" font-weight="700" text-anchor="middle">TRICHOTECH™</text>
+  </g>
+</svg>

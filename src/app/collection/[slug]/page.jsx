@@ -93,12 +93,19 @@ const BRAND_METADATA = {
     section: 'Clinical Trichology & Follicular Hair Treatments',
     keywords: ['Hair Treatments', 'Trichology', 'Colway Shampoo', 'Colway Conditioner', 'Baicapil', 'GHK-Cu', 'Copper Peptides', 'HTMA', 'Hair Loss', 'Alopecia']
   },
+  'weight-management': {
+    title: 'Precision Weight Management & Metabolic Health | Peptides & Fagron NutriGen™ | Atlas Collection',
+    description: 'Evidence-based precision clinical weight management: Dual/triple incretin mimetics (Tirzepatide, Semaglutide, Retatrutide, AOD-9604, Tesofensine), Fagron Genomics NutriGen™ compounded oral formulations, and CE-IVDR Bloodo™ HbA1c telemetry.',
+    image: `${BASE_URL}/images/products/compounding/nutrigen-capsule-bottle.svg`,
+    section: 'Precision Weight Management & Metabolic Compounding',
+    keywords: ['Weight Management', 'Incretin Agonists', 'Tirzepatide', 'Semaglutide', 'Retatrutide', 'AOD-9604', 'Tesofensine', 'NutriGen', 'Berberine', 'Fagron Genomics', 'HbA1c']
+  },
   'weight-loss': {
-    title: 'Weight Loss & Metabolic Health | Incretin Agonists & Glycation Telemetry | Atlas Collection',
-    description: 'Evidence-based clinical weight management: Dual/triple incretins (Tirzepatide, Semaglutide, Retatrutide), visceral fat lipolytics (Tesamorelin, AOD-9604), and CE-IVDR Bloodo™ HbA1c 90-day telemetry.',
-    image: `${BASE_URL}/images/products/bloodo/nad.jpg`,
-    section: 'Clinical Metabolic Health & Weight Optimization',
-    keywords: ['Weight Loss', 'Metabolic Health', 'Tirzepatide', 'Semaglutide', 'Retatrutide', 'Tesamorelin', 'AOD-9604', 'HbA1c', 'GLP-1', 'GIP']
+    title: 'Precision Weight Management & Metabolic Health | Peptides & Fagron NutriGen™ | Atlas Collection',
+    description: 'Evidence-based precision clinical weight management: Dual/triple incretin mimetics (Tirzepatide, Semaglutide, Retatrutide, AOD-9604, Tesofensine), Fagron Genomics NutriGen™ compounded oral formulations, and CE-IVDR Bloodo™ HbA1c telemetry.',
+    image: `${BASE_URL}/images/products/compounding/nutrigen-capsule-bottle.svg`,
+    section: 'Precision Weight Management & Metabolic Compounding',
+    keywords: ['Weight Management', 'Incretin Agonists', 'Tirzepatide', 'Semaglutide', 'Retatrutide', 'AOD-9604', 'Tesofensine', 'NutriGen', 'Berberine', 'Fagron Genomics', 'HbA1c']
   },
   'tissue-repair': {
     title: 'Tissue Repair & Rapid Recovery | BPC-157, TB-500 & Native Tropocollagen | Atlas Collection',
@@ -136,8 +143,10 @@ BRAND_METADATA['hair-treatment'] = BRAND_METADATA['hair-treatments'];
 BRAND_METADATA['trichology'] = BRAND_METADATA['hair-treatments'];
 BRAND_METADATA['hair'] = BRAND_METADATA['hair-treatments'];
 BRAND_METADATA['trichotest'] = BRAND_METADATA['hair-treatments'];
-BRAND_METADATA['weight'] = BRAND_METADATA['weight-loss'];
-BRAND_METADATA['metabolic'] = BRAND_METADATA['weight-loss'];
+BRAND_METADATA['weight'] = BRAND_METADATA['weight-management'];
+BRAND_METADATA['weight-loss'] = BRAND_METADATA['weight-management'];
+BRAND_METADATA['metabolic'] = BRAND_METADATA['weight-management'];
+BRAND_METADATA['nutrigen'] = BRAND_METADATA['weight-management'];
 BRAND_METADATA['repair'] = BRAND_METADATA['tissue-repair'];
 BRAND_METADATA['recovery'] = BRAND_METADATA['tissue-repair'];
 BRAND_METADATA['longevity'] = BRAND_METADATA['longevity-cellular'];
@@ -258,39 +267,56 @@ async function fetchTargetedBrandProducts(brandSlug) {
     return getTeletestCatalog();
   }
 
-  // Lotusland Peptides: strictly filter products & variants supplied by Lotusland
-  if (targetBrand === 'peptides') {
+  // Clinical Peptides Collection: NPLAB (+15% over NPLAB cost) & Lyophilized Formulations
+  if (targetBrand === 'peptides' || targetBrand === 'nplabs' || targetBrand === 'nplab') {
     try {
       if (adminDb) {
-        const snap = await adminDb.collection('products').limit(300).get();
+        const snap = await adminDb.collection('products')
+          .where('supplierIds', 'array-contains', 'supplier-nplabs')
+          .limit(150)
+          .get();
         const list = [];
         snap.forEach(d => {
           const data = d.data();
           if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
           if (data.productType === 'raw_material' || data.category === 'raw_material') return;
 
-          const str = (d.id + ' ' + (data.name||'') + ' ' + (data.title||'') + ' ' + (data.supplier||'') + ' ' + (data.supplierName||'') + ' ' + (data.supplierId||'') + ' ' + (data.brand||'')).toLowerCase();
           const variants = Array.isArray(data.variants) ? data.variants : [];
-
-          const hasLotusVariant = variants.some(v => {
-            const vSupp = String(v.supplierId || v.supplier || v.supplierName || '').toLowerCase();
-            return vSupp.includes('lotusland') || vSupp === 'supplier-lotusland' || v.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
+          const nplabVariants = variants.filter(v => {
+            const vSupp = String(v.supplierId || v.supplier_id || v.supplier || v.supplierName || '').toLowerCase();
+            return vSupp.includes('nplab') || vSupp.includes('np-lab') || vSupp.includes('np lab');
+          }).map(v => {
+            const costEur = Number(v.price_eur ?? v.cost ?? v.pricing?.master?.perUnit ?? v.unit_price ?? 50);
+            const price15Eur = Number((costEur * 1.15).toFixed(2));
+            return {
+              ...v,
+              cost: costEur,
+              costPrice: costEur,
+              price_eur: costEur,
+              wholesalePrice: price15Eur,
+              price: price15Eur,
+              unit_price: price15Eur,
+              currency: 'EUR'
+            };
           });
 
-          const isLotusDirect = str.includes('lotusland') || data.supplierId === 'supplier-lotusland' || data.supplierId === 'OLlBbQjgrj6tY7GmM2Jo' || (Array.isArray(data.supplierIds) && data.supplierIds.includes('supplier-lotusland'));
-
-          if (isLotusDirect || hasLotusVariant) {
-            const lotusVariants = variants.filter(v => {
-              const vSupp = String(v.supplierId || v.supplier || v.supplierName || '').toLowerCase();
-              return !vSupp || vSupp.includes('lotusland') || vSupp === 'supplier-lotusland' || v.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
-            });
-
+          if (nplabVariants.length > 0) {
+            const primaryVar = nplabVariants[0];
             list.push({
               id: d.id,
               ...data,
-              variants: lotusVariants.length > 0 ? lotusVariants : variants,
-              supplierId: 'supplier-lotusland',
-              supplierName: 'Lotusland'
+              costPrice: primaryVar.costPrice,
+              cost: primaryVar.cost,
+              wholesalePrice: primaryVar.wholesalePrice,
+              price: primaryVar.price,
+              priceEur: primaryVar.price,
+              currency: 'EUR',
+              variants: nplabVariants,
+              supplierId: 'supplier-nplabs',
+              supplierName: 'NP Labs International',
+              referralPartner: 'Nikolaos Psathas (NP Labs)',
+              referralLink: 'https://www.atlashealth-services.com/c/CAT-RX-7482',
+              referralMarkupPercent: 15
             });
           }
         });
@@ -305,71 +331,89 @@ async function fetchTargetedBrandProducts(brandSlug) {
     return getLotuslandPeptidesCatalog();
   }
 
-  // Hair Treatments Collection: Colway Trichology + Lotusland Peptides (GHK-Cu, TB-500, BPC-157) + TeleTest HTMA
+  // Hair Treatments Collection: Strictly 3 Sections:
+  // 1) 6 TrichoTest Compounded Formulations
+  // 2) Hair Peptides (GHK-Cu & TB-500)
+  // 3) 2 Colway Hair Products (Strengthening Anti-Hair Loss Shampoo & Conditioner)
   if (targetBrand === 'hair-treatments' || targetBrand === 'hair-treatment' || targetBrand === 'trichology' || targetBrand === 'hair' || targetBrand === 'trichotest') {
+    let compoundedList = [];
     try {
-      if (adminDb) {
-        const snap = await adminDb.collection('products').get();
-        const list = [];
-        snap.forEach(d => {
-          const data = d.data();
-          if (data.status === 'archived' || data.status === 'hidden' || data.isActive === false) return;
-          const id = (d.id || '').toLowerCase();
-          const name = (data.name || data.title || '').toLowerCase();
-          const str = (id + ' ' + name + ' ' + (data.supplier||'') + ' ' + (data.category||'') + ' ' + JSON.stringify(data.keywords||[])).toLowerCase();
-
-          const isColwayTrich = str.includes('colway') && (str.includes('shampoo') || str.includes('conditioner') || str.includes('trichology') || str.includes('colvita'));
-          const isHairPeptide = id.includes('ghk') || name.includes('ghk') || id.includes('tb-500') || id.includes('tb500') || (id.includes('bpc-157') && !id.includes('nasal'));
-          const isHtma = id.includes('teletest') && (str.includes('cabello') || str.includes('hair') || str.includes('htma') || str.includes('mineralograma'));
-
-          if (isColwayTrich || isHairPeptide || isHtma) {
-            list.push({ id: d.id, ...data });
-          }
-        });
-        if (list.length > 0) return list;
-      }
+      const { getTrichoCompoundedCatalog } = await import('../../../data/trichoCompoundedRegistry');
+      compoundedList = getTrichoCompoundedCatalog();
     } catch (e) {
-      console.warn('[fetchTargetedBrandProducts] Hair Treatments Firestore error, falling back to registries:', e.message);
+      console.warn('[fetchTargetedBrandProducts] Tricho compounding registry load error:', e);
     }
 
-    const fallbackList = [];
+    const colwayHairItems = [];
     try {
       const { COLWAY_PRODUCTS_INCI_REGISTRY } = await import('../../../data/colwayInciRegistry');
-      const trichKeys = ['colway-strengthening-shampoo', 'colway-strengthening-conditioner', 'colway-trichology', 'colway-colvita'];
-      trichKeys.forEach(k => {
-        if (COLWAY_PRODUCTS_INCI_REGISTRY[k]) {
-          fallbackList.push({ id: k, ...COLWAY_PRODUCTS_INCI_REGISTRY[k], supplier: 'Colway', brand: 'Colway' });
+      const trichKeys = [
+        { key: 'colway-strengthening-shampoo', costEur: 22.00, retailEur: 39.00 },
+        { key: 'colway-strengthening-conditioner', costEur: 24.00, retailEur: 42.00 }
+      ];
+      trichKeys.forEach(({ key, costEur, retailEur }) => {
+        if (COLWAY_PRODUCTS_INCI_REGISTRY[key]) {
+          colwayHairItems.push({
+            id: key,
+            ...COLWAY_PRODUCTS_INCI_REGISTRY[key],
+            supplier: 'Colway',
+            brand: 'Colway',
+            category: 'colway-hair',
+            costPriceEur: costEur,
+            costPrice: costEur,
+            wholesalePriceEur: Math.round(costEur * 1.20 * 100) / 100,
+            clinicPriceEur: Math.round(costEur * 1.30 * 100) / 100,
+            priceEur: retailEur,
+            price: retailEur
+          });
         }
       });
     } catch (err) {}
 
+    const hairPeptidesList = [];
     try {
       const { getLotuslandPeptidesCatalog } = await import('../../../data/lotuslandPeptidesRegistry');
       const peps = getLotuslandPeptidesCatalog();
       peps.forEach(p => {
         const pid = (p.id || '').toLowerCase();
-        if (pid.includes('ghk') || pid.includes('tb-500') || pid === 'bpc-157-5mg') {
-          fallbackList.push(p);
+        const pname = (p.name || p.title || '').toLowerCase();
+        if (pid.includes('ghk') || pname.includes('ghk') || pid.includes('tb-500') || pid.includes('tb500')) {
+          const isGhk100 = pid.includes('100') || pname.includes('100');
+          const isTb500 = pid.includes('tb-500') || pid.includes('tb500');
+          const defaultCost = isGhk100 ? 38.00 : isTb500 ? 28.00 : 24.00;
+          const defaultRetail = isGhk100 ? 65.00 : isTb500 ? 48.00 : 42.00;
+          const cost = Number(p.costPriceEur || p.costPrice || p.cost || defaultCost);
+          hairPeptidesList.push({
+            ...p,
+            category: 'peptides',
+            costPriceEur: cost,
+            costPrice: cost,
+            wholesalePriceEur: Math.round(cost * 1.20 * 100) / 100,
+            clinicPriceEur: Math.round(cost * 1.30 * 100) / 100,
+            priceEur: Number(p.priceEur || p.price || defaultRetail),
+            price: Number(p.priceEur || p.price || defaultRetail)
+          });
         }
       });
     } catch (err) {}
 
-    try {
-      const { getTeletestCatalog } = await import('../../../data/teletestRegistry');
-      const tests = getTeletestCatalog();
-      tests.forEach(t => {
-        const tid = (t.id || '').toLowerCase();
-        if (tid.includes('cabello') || tid.includes('htma')) {
-          fallbackList.push(t);
-        }
-      });
-    } catch (err) {}
-
-    return fallbackList;
+    return [
+      ...compoundedList,
+      ...hairPeptidesList,
+      ...colwayHairItems
+    ];
   }
 
-  // Weight Loss & Metabolic Optimization Collection: Incretins + Lipolytics + Bloodo HbA1c
-  if (targetBrand === 'weight-loss' || targetBrand === 'weight' || targetBrand === 'metabolic') {
+  // Weight Management & Metabolic Health Collection: Incretins + Lipolytics + Fagron NutriGen Oral Compounding
+  if (targetBrand === 'weight-management' || targetBrand === 'weight-loss' || targetBrand === 'weight' || targetBrand === 'metabolic' || targetBrand === 'nutrigen') {
+    let compoundedWeightList = [];
+    try {
+      const { getWeightManagementCompoundedCatalog } = await import('../../../data/weightManagementCompoundedRegistry');
+      compoundedWeightList = getWeightManagementCompoundedCatalog();
+    } catch (e) {
+      console.warn('[fetchTargetedBrandProducts] Weight compounding registry load error:', e);
+    }
+
     try {
       if (adminDb) {
         const snap = await adminDb.collection('products').get();
@@ -381,28 +425,39 @@ async function fetchTargetedBrandProducts(brandSlug) {
           const name = (data.name || data.title || '').toLowerCase();
           const str = (id + ' ' + name + ' ' + (data.category||'') + ' ' + JSON.stringify(data.keywords||[])).toLowerCase();
 
-          const isIncretinOrLipolytic = id.includes('semaglutide') || id.includes('tirzepatide') || id.includes('retatrutide') || id.includes('tesamorelin') || id.includes('aod') || id.includes('cagrilintide') || id.includes('mots');
+          const isIncretinOrLipolytic = id.includes('semaglutide') || id.includes('tirzepatide') || id.includes('retatrutide') || id.includes('tesamorelin') || id.includes('aod') || id.includes('cagrilintide') || id.includes('mots') || id.includes('tesofensine');
+          const isNutrigen = id.includes('nutrigen') || str.includes('nutrigen') || str.includes('berberine');
           const isMetabolicTest = id.includes('bloodo-hba1c') || str.includes('hba1c') || str.includes('glycat');
           const isMetabolicSupp = (id.includes('ultraperson') || id.includes('ultraman')) && (str.includes('coq10') || str.includes('energy') || str.includes('metabolic'));
 
-          if (isIncretinOrLipolytic || isMetabolicTest || isMetabolicSupp) {
+          if (isIncretinOrLipolytic || isNutrigen || isMetabolicTest || isMetabolicSupp) {
             list.push({ id: d.id, ...data });
           }
         });
+
+        // Ensure all 9 precision compounded weight management formulations are included
+        compoundedWeightList.forEach(c => {
+          if (!list.some(item => item.id === c.id || item.slug === c.slug)) {
+            list.unshift(c);
+          }
+        });
+
         if (list.length > 0) return list;
       }
     } catch (e) {
       console.warn('[fetchTargetedBrandProducts] Weight Loss Firestore error:', e.message);
     }
 
-    const fallbackList = [];
+    const fallbackList = [...compoundedWeightList];
     try {
       const { getLotuslandPeptidesCatalog } = await import('../../../data/lotuslandPeptidesRegistry');
       const peps = getLotuslandPeptidesCatalog();
       peps.forEach(p => {
         const pid = (p.id || '').toLowerCase();
         if (pid.includes('semaglutide') || pid.includes('tirzepatide') || pid.includes('retatrutide') || pid.includes('tesamorelin') || pid.includes('aod') || pid.includes('mots')) {
-          fallbackList.push(p);
+          if (!fallbackList.some(item => item.id === p.id)) {
+            fallbackList.push(p);
+          }
         }
       });
     } catch (err) {}
@@ -560,7 +615,7 @@ export default async function NextCollectionPage({ params, searchParams }) {
   const ALL_TARGETED_SLUGS = [
     'colway', 'bloodo', 'ultraperson', 'eterna', 'teletest', 'peptides',
     'hair-treatments', 'hair-treatment', 'trichology', 'hair', 'trichotest',
-    'weight-loss', 'weight', 'metabolic',
+    'weight-management', 'weight-loss', 'weight', 'metabolic', 'nutrigen',
     'tissue-repair', 'repair', 'recovery',
     'longevity-cellular', 'longevity',
     'neuro-performance', 'neuro', 'cognitive',

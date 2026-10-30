@@ -17,7 +17,11 @@ export const CLINICAL_DOSAGE_REGISTRY = {
       es: 'Dosis clínica óptima de 5 mg (5.000 mcg) para acelerar el anclaje folicular y síntesis de queratina sin saturar transportadores SMVT.',
       en: 'Optimal 5 mg (5,000 mcg) clinical dose for hair follicle anchorage and keratin matrix synthesis without SMVT transporter saturation.'
     },
-    yieldNote: { es: 'D-Biotina 98% USP: 5 mg aportan 4.9 mg de biotina pura.', en: 'D-Biotin 98% USP: 5 mg yields 4.9 mg pure biotin.' }
+    yieldNote: { es: 'D-Biotina 98% USP: 5 mg aportan 4.9 mg de biotina pura.', en: 'D-Biotin 98% USP: 5 mg yields 4.9 mg pure biotin.' },
+    counselingAlert: {
+      es: '⚠️ Advertencia analítica obligatoria: La biotina a dosis ≥ 2.500 mcg interfiere con inmunoensayos de laboratorio (falsos resultados de TSH tiroidea y troponina cardíaca). Suspender 48–72 horas antes de análisis de sangre.',
+      en: '⚠️ Mandatory lab interference warning: Biotin at ≥ 2.5 mg causes false results in streptavidin immunoassays (falsely low TSH, inaccurate cardiac troponin). Discontinue 48–72 hours prior to bloodwork.'
+    }
   },
   'beta-carotene': {
     min: 50, standard: 100, max: 150, step: 25, unit: 'mg',
@@ -74,7 +78,11 @@ export const CLINICAL_DOSAGE_REGISTRY = {
       es: '10 mg de polvo MK-7 al 1.3% aportan 130 mcg de menaquinona-7 trans-bioactiva, dirigiendo el calcio hacia hueso y evitando calcificación arterial.',
       en: '10 mg of 1.3% MK-7 powder delivers 130 mcg active menaquinone-7, directing calcium to bones away from vessels.'
     },
-    yieldNote: { es: '1.3% MK-7: 10 mg = 130 mcg K2 activa.', en: '1.3% MK-7: 10 mg = 130 mcg active K2.' }
+    yieldNote: { es: '1.3% MK-7: 10 mg = 130 mcg K2 activa.', en: '1.3% MK-7: 10 mg = 130 mcg active K2.' },
+    counselingAlert: {
+      es: '⚠️ Anticoagulación (AVK): La Vitamina K2 antagoniza directamente el mecanismo de anticoagulantes como warfarina o acenocumarol (Sintrom). Contraindicado en pacientes bajo terapia AVK sin monitorización estricta de INR.',
+      en: '⚠️ Anticoagulation alert: Vitamin K2 directly antagonizes vitamin K antagonist drugs (warfarin/acenocoumarol). Contraindicated in patients on VKAs without strict INR monitoring.'
+    }
   },
   'vitamin b complex methylated': {
     min: 25, standard: 50, max: 100, step: 25, unit: 'mg',
@@ -113,7 +121,11 @@ export const CLINICAL_DOSAGE_REGISTRY = {
     min: 0.4, standard: 0.8, max: 1.5, step: 0.1, unit: 'mg',
     category: 'vitamin',
     indication: { es: 'Donante de monocarbonos y remetilación de homocisteína', en: 'One-carbon donor & homocysteine remethylation' },
-    clinicalRationale: { es: '0.8 mg (800 mcg) de L-5-MTHF atraviesa la barrera hematoencefálica y compensa polimorfismos MTHFR C677T/A1298C.', en: '0.8 mg (800 mcg) L-5-MTHF crosses BBB, directly remethylating homocysteine regardless of MTHFR SNPs.' }
+    clinicalRationale: { es: '0.8 mg (800 mcg) de L-5-MTHF atraviesa la barrera hematoencefálica y compensa polimorfismos MTHFR C677T/A1298C.', en: '0.8 mg (800 mcg) L-5-MTHF crosses BBB, directly remethylating homocysteine regardless of MTHFR SNPs.' },
+    pairingRequirement: {
+      es: '⚠️ Co-prescripción requerida: El metilfolato debe acompañarse siempre de Vitamina B12 (Metilcobalamina ≥ 500 mcg) para prevenir el enmascaramiento de anemia por déficit de B12 y evitar la progresión de daño neurológico.',
+      en: '⚠️ Mandatory pairing: Methylfolate must always be co-prescribed with Vitamin B12 (Methylcobalamin ≥ 500 mcg) to prevent masking B12 deficiency anemia and irreversible neurological subacute degeneration.'
+    }
   },
   'vitamin b12 (methylcobalamin)': {
     min: 0.5, standard: 1.0, max: 2.0, step: 0.1, unit: 'mg',
@@ -136,6 +148,10 @@ export const CLINICAL_DOSAGE_REGISTRY = {
     clinicalRationale: {
       es: '30 mg de gluconato de zinc aporta ~4.3 mg de zinc elemental quelado, seguro para uso continuado sin competir con el transporte de cobre.',
       en: '30 mg zinc gluconate provides ~4.3 mg elemental zinc, safe for chronic use without copper depletion.'
+    },
+    yieldNote: {
+      es: 'Gluconato de zinc: 14.3% zinc elemental. 15 mg de sal = 2.1 mg elemental (subterapéutico); 30 mg = 4.3 mg elemental; 105 mg de sal = 15 mg elemental. Preferir Zinc Bisglicinato (TRAACS®) para 15–25 mg de zinc elemental neto.',
+      en: 'Zinc gluconate: 14.3% elemental zinc. 15 mg salt = 2.1 mg elemental (sub-therapeutic); 30 mg salt = 4.3 mg elemental; 105 mg salt = 15 mg elemental. Prefer Zinc Bisglycinate for 15–25 mg net elemental zinc.'
     }
   },
   'copper (bisglycinate)': {
@@ -288,7 +304,11 @@ export const CLINICAL_DOSAGE_REGISTRY = {
     min: 100, standard: 250, max: 500, step: 25, unit: 'mg',
     category: 'mitochondrial',
     indication: { es: 'Antioxidante maestro intracelular y detoxificación hepática', en: 'Master intracellular antioxidant & hepatic phase II detox' },
-    clinicalRationale: { es: '250 mg apoya la neutralización de peróxidos lipídicos y la conjugación de xenobióticos hepáticos.', en: '250 mg supports hepatic phase II conjugation and quenches lipid peroxides.' }
+    clinicalRationale: { es: '250 mg apoya la neutralización de peróxidos lipídicos y la conjugación de xenobióticos hepáticos.', en: '250 mg supports hepatic phase II conjugation and quenches lipid peroxides.' },
+    bioavailabilityNote: {
+      es: 'Biodisponibilidad oral: El glutatión reducido oral convencional sufre degradación gástrica e hidrólisis intestinal. Se aconseja especificar forma liposomal o S-acetil-glutatión, o combinar con NAC 300–600 mg para síntesis intracelular.',
+      en: 'Oral bioavailability note: Plain reduced glutathione undergoes extensive first-pass intestinal degradation. Recommend specifying liposomal or S-acetyl form, or pairing with NAC 300–600 mg.'
+    }
   },
   'cycloastragenol': {
     min: 5, standard: 10, max: 25, step: 2.5, unit: 'mg',
@@ -313,8 +333,49 @@ export const CLINICAL_DOSAGE_REGISTRY = {
   'panax ginseng extract': {
     min: 100, standard: 200, max: 400, step: 25, unit: 'mg',
     category: 'botanical',
+    chronopharmacology: 'AM_ONLY',
     indication: { es: 'Adaptógeno adrenal y proliferación de la papila dérmica', en: 'Adrenal adaptogen & dermal papilla proliferation' },
-    clinicalRationale: { es: '200 mg de ginsenósidos estimula el eje HPA y sobreexpresa VEGF en el bulbo piloso.', en: '200 mg ginsenosides modulates HPA resilience and upregulates follicular VEGF.' }
+    clinicalRationale: { es: '200 mg de ginsenósidos estimula el eje HPA y sobreexpresa VEGF en el bulbo piloso.', en: '200 mg ginsenosides modulates HPA resilience and upregulates follicular VEGF.' },
+    counselingAlert: {
+      es: '⚠️ Cronofarmacología obligatoria: Tomar exclusivamente en la Mañana (AM). El ginseng estimula el eje suprarrenal y catecolaminas; su administración de noche (PM) produce insomnio y alteración del sueño profundo.',
+      en: '⚠️ Mandatory morning chronopharmacology (AM): Modulates adrenal cortisol and catecholamines. Taking it in the evening (PM) disrupts sleep latency and delta non-REM architecture.'
+    }
+  },
+  'mitocondrin': {
+    min: 150, standard: 300, max: 500, step: 50, unit: 'mg',
+    category: 'mitochondrial',
+    indication: { es: 'Biogénesis mitocondrial PGC-1α y energía celular (Fagron)', en: 'Mitochondrial biogenesis PGC-1α and cellular energy (Fagron)' },
+    clinicalRationale: {
+      es: '300 mg de Mitocondrin® (extracto bioactivo de Ashitaba + Ginseng rojo Fagron) induce PGC-1α y ATP mitocondrial. Se corrige formalmente la prescripción legacy ambigua "1 cápsula" a 300 mg netos.',
+      en: '300 mg Mitocondrin® (Fagron Ashitaba + Red Ginseng blend) induces PGC-1α and mitochondrial ATP. Corrects legacy ambiguous "1 capsule" notation to 300 mg net label claim.'
+    }
+  },
+  'citrusim': {
+    min: 250, standard: 500, max: 1000, step: 50, unit: 'mg',
+    category: 'botanical',
+    indication: { es: 'Composición corporal, metabolismo lipídico y adipogénesis (Fagron)', en: 'Body composition, lipid metabolism and adipokines (Fagron)' },
+    clinicalRationale: {
+      es: '500 mg de Citrus sinensis estandarizado (Fagron) es la dosis clínica validada en ensayos humanos para reducción de grasa visceral y modulación de adipocinas (250 mg es subtasa de mantenimiento).',
+      en: '500 mg standardized Citrus sinensis extract (Fagron) is the clinically validated human trial dose for visceral fat and adipokines (250 mg is sub-maintenance).'
+    }
+  },
+  'brocophanus': {
+    min: 100, standard: 100, max: 250, step: 25, unit: 'mg',
+    category: 'botanical',
+    indication: { es: 'Inducción de Nrf2 y enzimas detoxificantes de fase II (Fagron)', en: 'Nrf2 activation and phase II detox enzymes (Fagron)' },
+    clinicalRationale: {
+      es: '100 mg aporta sulforafano (1%) y mirosinasa activa (0.5%), la dosis unitaria estándar de Fagron para detoxificación celular y protección genómica (evitar 250 mg sin validar tolerancia digestiva).',
+      en: '100 mg provides standardized sulforaphane (1%) and active myrosinase (0.5%), standard Fagron unit dose (caution above 100 mg for GI tolerance).'
+    }
+  },
+  'miodesin': {
+    min: 100, standard: 250, max: 500, step: 25, unit: 'mg',
+    category: 'botanical',
+    indication: { es: 'Inhibición de NF-κB y modulación antiinflamatoria (Fagron)', en: 'NF-κB inhibition and anti-inflammatory modulation (Fagron)' },
+    clinicalRationale: {
+      es: '250 mg del fitocomplejo Miodesin® (Fagron) bloquea la translocación de NF-κB. Precaución en enfermedades autoinmunes o pacientes inmunosuprimidos debido a la actividad inmunoestimulante de Uncaria tomentosa.',
+      en: '250 mg Miodesin® (Fagron) blocks NF-κB nuclear translocation. Flag caution in autoimmune disease or immunosuppressive therapy due to Uncaria tomentosa immunostimulation.'
+    }
   },
   'green tea extract (egcg)': {
     min: 100, standard: 200, max: 400, step: 25, unit: 'mg',

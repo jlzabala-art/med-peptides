@@ -170,9 +170,9 @@ export default function PatientPrescriptionGuide({
         type: 'compounding',
         badge: isEs ? 'FÓRMULA MAGISTRAL' : 'COMPOUNDED FORMULA',
         icon: '🧪',
-        color: '#003666',
-        bg: '#eff6ff',
-        border: '#bfdbfe',
+        color: '#1a73e8',
+        bg: '#f8fafc',
+        border: '#dadce0',
         storageNote: isEs ? 'Conservar a temperatura ambiente protegida de la luz' : 'Store at room temperature protected from light'
       };
 
@@ -181,10 +181,10 @@ export default function PatientPrescriptionGuide({
           type: 'peptide',
           badge: isEs ? 'PÉPTIDO INYECTABLE (SUBQ)' : 'INJECTABLE PEPTIDE (SUBQ)',
           icon: '💉',
-          color: '#2563eb',
-          bg: '#eff6ff',
-          border: '#bfdbfe',
-          storageNote: isEs ? '❄️ Requiere Nevera Obligatoria (2°C – 8°C). ¡No congelar!' : '❄️ Mandatory Refrigeration (2°C – 8°C). Do Not Freeze!',
+          color: '#1a73e8',
+          bg: '#f8fafc',
+          border: '#dadce0',
+          storageNote: isEs ? '❄️ Requiere Nevera (2°C – 8°C). ¡No congelar!' : '❄️ Mandatory Refrigeration (2°C – 8°C). Do Not Freeze!',
           requiresReconstitution: true
         };
       } else if (isSupplement) {
@@ -192,10 +192,10 @@ export default function PatientPrescriptionGuide({
           type: 'supplement',
           badge: isEs ? 'SUPLEMENTO / NUTRACÉUTICO ORAL' : 'ORAL SUPPLEMENT / NUTRACEUTICAL',
           icon: '💊',
-          color: '#ea580c',
-          bg: '#fff7ed',
-          border: '#fed7aa',
-          storageNote: isEs ? 'Conservar en despensa fresca y seca (sin refrigeración)' : 'Store in a cool dry pantry (no refrigeration needed)',
+          color: '#334155',
+          bg: '#f8fafc',
+          border: '#dadce0',
+          storageNote: isEs ? 'Conservar en despensa fresca y seca' : 'Store in a cool dry pantry (no refrigeration needed)',
           requiresReconstitution: false
         };
       } else if (isTopical) {
@@ -204,9 +204,9 @@ export default function PatientPrescriptionGuide({
           badge: isEs ? 'LOCIÓN CAPILAR / TÓPICA' : 'TOPICAL SCALP / DERMAL LOTION',
           icon: '🧴',
           color: '#0d9488',
-          bg: '#f0fdfa',
-          border: '#99f6e4',
-          storageNote: isEs ? 'Conservar a temperatura ambiente. Agitar suavemente antes de usar' : 'Store at room temperature. Shake gently before use',
+          bg: '#f8fafc',
+          border: '#dadce0',
+          storageNote: isEs ? 'Conservar a temperatura ambiente. Agitar suavemente' : 'Store at room temperature. Shake gently before use',
           requiresReconstitution: false
         };
       } else if (isTransdermal) {
@@ -214,9 +214,9 @@ export default function PatientPrescriptionGuide({
           type: 'transdermal',
           badge: isEs ? 'CREMA TRANSDÉRMICA (BHRT)' : 'TRANSDERMAL CREAM (BHRT)',
           icon: '⚡',
-          color: '#7c3aed',
-          bg: '#f5f3ff',
-          border: '#ddd6fe',
+          color: '#334155',
+          bg: '#f8fafc',
+          border: '#dadce0',
           storageNote: isEs ? 'Conservar protegido del calor y la luz directa' : 'Store protected from heat and direct sunlight',
           requiresReconstitution: false
         };
@@ -285,18 +285,18 @@ export default function PatientPrescriptionGuide({
               id={`patient-${item.id}`}
               style={{
                 background: '#ffffff',
-                border: `1px solid ${item.category.border || '#cbd5e1'}`,
-                borderRadius: '12px',
+                border: '1px solid #dadce0',
+                borderRadius: '10px',
                 overflow: 'hidden',
-                boxShadow: '0 2px 10px rgba(15, 23, 42, 0.04)'
+                boxShadow: '0 1px 3px rgba(60, 64, 67, 0.08)'
               }}
             >
               {/* Header Bar: Category Badge + Product Name */}
               <div
                 style={{
-                  background: item.category.bg || '#f8fafc',
-                  borderBottom: `1px solid ${item.category.border || '#e2e8f0'}`,
-                  padding: '14px 18px',
+                  background: '#f8fafc',
+                  borderBottom: '1px solid #dadce0',
+                  padding: '12px 16px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -304,34 +304,35 @@ export default function PatientPrescriptionGuide({
                   gap: '12px'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 300px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 280px' }}>
                   <div
                     style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: '10px',
-                      background: item.category.color,
-                      color: '#ffffff',
+                      width: 36,
+                      height: 36,
+                      borderRadius: '8px',
+                      background: '#f1f5f9',
+                      border: '1px solid #e2e8f0',
+                      color: '#1e293b',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '1.25rem',
-                      flexShrink: 0,
-                      boxShadow: `0 2px 8px ${item.category.color}40`
+                      fontSize: '1.15rem',
+                      flexShrink: 0
                     }}
                   >
                     {item.category.icon}
                   </div>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '3px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
                       <span
                         style={{
                           fontSize: '0.68rem',
-                          fontWeight: 800,
+                          fontWeight: 700,
                           textTransform: 'uppercase',
                           letterSpacing: '0.04em',
-                          color: '#ffffff',
-                          background: item.category.color,
+                          color: '#334155',
+                          background: '#ffffff',
+                          border: '1px solid #dadce0',
                           padding: '2px 8px',
                           borderRadius: '4px'
                         }}
@@ -341,18 +342,18 @@ export default function PatientPrescriptionGuide({
                       <span
                         style={{
                           fontSize: '0.70rem',
-                          fontWeight: 700,
-                          color: '#334155',
+                          fontWeight: 600,
+                          color: '#5f6368',
                           background: '#ffffff',
-                          border: '1px solid #cbd5e1',
-                          padding: '1px 8px',
+                          border: '1px solid #dadce0',
+                          padding: '2px 8px',
                           borderRadius: '4px'
                         }}
                       >
                         📦 {item.volume}
                       </span>
                     </div>
-                    <h3 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 800, color: '#0f172a' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 700, color: '#202124' }}>
                       {item.title}
                     </h3>
                   </div>
@@ -361,13 +362,13 @@ export default function PatientPrescriptionGuide({
                 {/* Storage Pill */}
                 <div
                   style={{
-                    background: item.category.type === 'peptide' ? '#ecfdf5' : '#f8fafc',
-                    border: `1px solid ${item.category.type === 'peptide' ? '#a7f3d0' : '#cbd5e1'}`,
-                    color: item.category.type === 'peptide' ? '#047857' : '#475569',
+                    background: '#ffffff',
+                    border: '1px solid #dadce0',
+                    color: '#5f6368',
                     padding: '4px 10px',
                     borderRadius: '6px',
-                    fontSize: '0.74rem',
-                    fontWeight: 700,
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px'
@@ -378,13 +379,13 @@ export default function PatientPrescriptionGuide({
               </div>
 
               {/* Card Body */}
-              <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 
                 {/* 1. ¿Para qué me lo han recetado? (Objetivo Terapéutico en Lenguaje Humano) */}
                 <div
                   style={{
-                    background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
+                    background: '#ffffff',
+                    border: '1px solid #dadce0',
                     borderRadius: '8px',
                     padding: '12px 14px',
                     display: 'flex',
@@ -392,12 +393,12 @@ export default function PatientPrescriptionGuide({
                     gap: '10px'
                   }}
                 >
-                  <span style={{ fontSize: '1.2rem', marginTop: '1px' }}>🎯</span>
+                  <ShieldCheck size={18} style={{ color: '#1a73e8', flexShrink: 0, marginTop: '2px' }} />
                   <div>
-                    <div style={{ fontSize: '0.70rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#475569' }}>
-                      {isEs ? '¿Para qué sirve este tratamiento?' : 'What is this treatment prescribed for?'}
+                    <div style={{ fontSize: '0.70rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#5f6368' }}>
+                      {isEs ? 'Objetivo Terapéutico' : 'Clinical Objective'}
                     </div>
-                    <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', marginTop: '2px', lineHeight: 1.45 }}>
+                    <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124', marginTop: '2px', lineHeight: 1.45 }}>
                       {item.plainClinicalGoal}
                     </div>
                     {item.apis && item.apis.length > 0 && (
@@ -408,9 +409,9 @@ export default function PatientPrescriptionGuide({
                             style={{
                               fontSize: '0.70rem',
                               fontWeight: 600,
-                              color: '#1e293b',
-                              background: '#ffffff',
-                              border: '1px solid #cbd5e1',
+                              color: '#3c4043',
+                              background: '#f8fafc',
+                              border: '1px solid #dadce0',
                               padding: '2px 7px',
                               borderRadius: '4px'
                             }}
@@ -426,10 +427,10 @@ export default function PatientPrescriptionGuide({
                 {/* 2. Posología Ultra Clara y Específica */}
                 <div
                   style={{
-                    background: item.category.type === 'peptide' ? '#eff6ff' : (item.category.type === 'supplement' ? '#fff7ed' : '#f0fdfa'),
-                    border: `1px solid ${item.category.border}`,
-                    borderRadius: '10px',
-                    padding: '16px',
+                    background: '#f8fafc',
+                    border: '1px solid #dadce0',
+                    borderRadius: '8px',
+                    padding: '14px',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '12px'
@@ -441,9 +442,9 @@ export default function PatientPrescriptionGuide({
                         style={{
                           width: 32,
                           height: 32,
-                          borderRadius: '8px',
-                          background: item.category.color,
-                          color: '#ffffff',
+                          borderRadius: '6px',
+                          background: '#e8f0fe',
+                          color: '#1a73e8',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -453,10 +454,10 @@ export default function PatientPrescriptionGuide({
                         <Clock size={16} />
                       </div>
                       <div>
-                        <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: item.category.color }}>
-                          {isEs ? 'PAUTA Y POSOLOGÍA CLARA' : 'EXACT DOSING INSTRUCTIONS'}
+                        <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#1a73e8' }}>
+                          {isEs ? 'PAUTA Y POSOLOGÍA RECOMENDADA' : 'DOSING & SCHEDULE'}
                         </div>
-                        <h4 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                        <h4 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 700, color: '#202124' }}>
                           {item.posology?.title || (isEs ? 'Pauta de Administración' : 'Dosing Protocol')}
                         </h4>
                       </div>
@@ -466,12 +467,12 @@ export default function PatientPrescriptionGuide({
                     <div
                       style={{
                         background: '#ffffff',
-                        border: `1px solid ${item.category.color}`,
-                        color: item.category.color,
+                        border: '1px solid #dadce0',
+                        color: '#202124',
                         padding: '4px 12px',
-                        borderRadius: '20px',
-                        fontSize: '0.82rem',
-                        fontWeight: 800
+                        borderRadius: '16px',
+                        fontSize: '0.80rem',
+                        fontWeight: 700
                       }}
                     >
                       {String(item.posology?.regimen || (isEs ? 'Consultar pauta' : 'Follow prescription'))}
@@ -484,41 +485,41 @@ export default function PatientPrescriptionGuide({
                     <div
                       style={{
                         background: '#ffffff',
-                        border: '1px solid #bfdbfe',
-                        borderRadius: '8px',
+                        border: '1px solid #dadce0',
+                        borderRadius: '6px',
                         padding: '12px 14px',
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                         gap: '12px'
                       }}
                     >
                       <div>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
                           {isEs ? '💉 Dosis por Inyección:' : '💉 Dose per Injection:'}
                         </div>
-                        <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1d4ed8' }}>
+                        <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#1a73e8' }}>
                           {item.estimatedDoseMcg} mcg{' '}
-                          <span style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600 }}>
-                            (aprox. 10 unidades en jeringa U-100)
+                          <span style={{ fontSize: '0.76rem', color: '#5f6368', fontWeight: 500 }}>
+                            (aprox. 10 unidades en U-100)
                           </span>
                         </div>
                       </div>
 
                       <div>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
                           {isEs ? '🕒 Momento / Frecuencia:' : '🕒 Timing & Schedule:'}
                         </div>
-                        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
                           {item.posology?.timing || (isEs ? 'Por la noche, rotando sitios en abdomen' : 'At bedtime, rotating abdominal sites')}
                         </div>
                       </div>
 
                       <div>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
                           {isEs ? '📍 Zona de Aplicación:' : '📍 Injection Site:'}
                         </div>
-                        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>
-                          {isEs ? 'Tejido graso subcutáneo del abdomen (pellizco a 5 cm del ombligo)' : 'Subcutaneous abdominal fat (5 cm away from navel)'}
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
+                          {isEs ? 'Tejido graso subcutáneo del abdomen' : 'Subcutaneous abdominal fat'}
                         </div>
                       </div>
                     </div>
@@ -527,37 +528,37 @@ export default function PatientPrescriptionGuide({
                     <div
                       style={{
                         background: '#ffffff',
-                        border: '1px solid #fed7aa',
-                        borderRadius: '8px',
+                        border: '1px solid #dadce0',
+                        borderRadius: '6px',
                         padding: '12px 14px',
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                         gap: '12px'
                       }}
                     >
                       <div>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
                           {isEs ? '💊 Toma Diaria:' : '💊 Daily Intake:'}
                         </div>
-                        <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ea580c' }}>
+                        <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#202124' }}>
                           {item.posology?.regimen || (isEs ? '1–2 cápsulas con agua' : '1–2 capsules with water')}
                         </div>
                       </div>
 
                       <div>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
                           {isEs ? '🕒 Momento del Día:' : '🕒 Best Time:'}
                         </div>
-                        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
                           {item.posology?.timing || (isEs ? 'Con el desayuno o cena' : 'With breakfast or dinner')}
                         </div>
                       </div>
 
                       <div>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
                           {isEs ? '💡 Recomendación:' : '💡 Tip:'}
                         </div>
-                        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
                           {isEs ? 'Acompañar siempre de un vaso completo de agua' : 'Always take with a full glass of water'}
                         </div>
                       </div>
@@ -567,37 +568,37 @@ export default function PatientPrescriptionGuide({
                     <div
                       style={{
                         background: '#ffffff',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '8px',
+                        border: '1px solid #dadce0',
+                        borderRadius: '6px',
                         padding: '12px 14px',
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                         gap: '12px'
                       }}
                     >
                       <div>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
                           {isEs ? '🧴 Cantidad por Aplicación:' : '🧴 Dose Volume:'}
                         </div>
-                        <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0d9488' }}>
+                        <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#202124' }}>
                           {item.posology?.regimen || '1.0 mL'}
                         </div>
                       </div>
 
                       <div>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
                           {isEs ? '🕒 Momento y Frecuencia:' : '🕒 Timing & Application:'}
                         </div>
-                        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
                           {item.posology?.timing || (isEs ? 'Por la noche sobre piel limpia y seca' : 'Nightly on clean and dry skin')}
                         </div>
                       </div>
 
                       <div>
-                        <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                          {isEs ? '💆‍♂️ Modo de Empleo:' : '💆‍♂️ Application Method:'}
+                        <div style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 700, textTransform: 'uppercase' }}>
+                          {isEs ? '💆 Modo de Empleo:' : '💆 Application Method:'}
                         </div>
-                        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
                           {isEs ? 'Masajear suavemente con la yema de los dedos hasta absorción' : 'Gently massage with fingertips until absorbed'}
                         </div>
                       </div>
@@ -890,11 +891,11 @@ export default function PatientPrescriptionGuide({
         className="rx-card patient-compounding-fulfillment-card"
         style={{
           background: '#ffffff',
-          borderRadius: '12px',
-          border: '1px solid #bfdbfe',
-          borderLeft: '5px solid #003666',
+          borderRadius: '10px',
+          border: '1px solid #dadce0',
+          borderLeft: '4px solid #1a73e8',
           padding: '1.25rem 1.5rem',
-          boxShadow: '0 2px 8px -2px rgba(0, 54, 102, 0.08), 0 1px 3px rgba(0,0,0,0.04)',
+          boxShadow: '0 1px 3px rgba(60, 64, 67, 0.06)',
           display: 'flex',
           flexDirection: 'column',
           gap: '1rem',
@@ -908,26 +909,26 @@ export default function PatientPrescriptionGuide({
               <span
                 style={{
                   fontSize: '0.68rem',
-                  fontWeight: 800,
+                  fontWeight: 700,
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
                   padding: '2px 8px',
                   borderRadius: '4px',
-                  background: '#eff6ff',
-                  color: '#1e40af',
-                  border: '1px solid #dbeafe',
+                  background: '#e8f0fe',
+                  color: '#1a73e8',
+                  border: '1px solid #d2e3fc',
                 }}
               >
                 {isEs ? 'Preparación en Laboratorio Homologado' : 'Authorized Pharmaceutical Compounding'}
               </span>
-              <span style={{ fontSize: '0.70rem', color: '#64748b', fontFamily: 'monospace' }}>
+              <span style={{ fontSize: '0.70rem', color: '#5f6368', fontFamily: 'monospace' }}>
                 Ref: #{rxId}
               </span>
             </div>
-            <h3 style={{ margin: '0 0 0.35rem 0', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+            <h3 style={{ margin: '0 0 0.35rem 0', fontSize: '1.05rem', fontWeight: 700, color: '#202124' }}>
               {isEs ? '¿Deseas recibir tu medicación personalizada en casa?' : 'Receive Your Physician-Prescribed Formulations'}
             </h3>
-            <p style={{ margin: 0, fontSize: '0.80rem', color: '#475569', lineHeight: 1.5, maxWidth: '640px' }}>
+            <p style={{ margin: 0, fontSize: '0.80rem', color: '#5f6368', lineHeight: 1.5, maxWidth: '640px' }}>
               {isEs
                 ? 'Tu médico ha autorizado la preparación de esta pauta en laboratorio especializado bajo normativa EU GMP cleanroom. Puedes solicitar la dispensación oficial y el envío con control térmico a tu domicilio o clínica.'
                 : 'Your physician has authorized official compounding for this custom formula under certified EU GMP cleanroom standards. Request pharmaceutical preparation with direct cold-chain delivery.'}
@@ -946,14 +947,14 @@ export default function PatientPrescriptionGuide({
                 alignItems: 'center',
                 gap: '8px',
                 padding: '9px 18px',
-                borderRadius: '8px',
-                background: '#003666',
+                borderRadius: '6px',
+                background: '#1a73e8',
                 color: '#ffffff',
                 border: 'none',
                 fontSize: '0.82rem',
                 fontWeight: 700,
                 cursor: 'pointer',
-                boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)',
+                boxShadow: '0 1px 2px rgba(26, 115, 232, 0.3)',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -974,12 +975,12 @@ export default function PatientPrescriptionGuide({
                 alignItems: 'center',
                 gap: '6px',
                 padding: '9px 14px',
-                borderRadius: '8px',
-                background: '#f8fafc',
-                color: '#334155',
-                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                background: '#ffffff',
+                color: '#3c4043',
+                border: '1px solid #dadce0',
                 fontSize: '0.80rem',
-                fontWeight: 650,
+                fontWeight: 600,
                 cursor: 'pointer',
               }}
             >
@@ -992,8 +993,8 @@ export default function PatientPrescriptionGuide({
       {/* ── Compartir con el Médico & Código QR (Orientado a la Consulta) ── */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
-          border: '1px solid #bfdbfe',
+          background: '#f8fafc',
+          border: '1px solid #dadce0',
           borderRadius: '10px',
           padding: '16px 20px',
           display: 'flex',
@@ -1010,8 +1011,8 @@ export default function PatientPrescriptionGuide({
               width: 40,
               height: 40,
               borderRadius: '8px',
-              background: '#1e3a8a',
-              color: '#ffffff',
+              background: '#e8f0fe',
+              color: '#1a73e8',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -1021,10 +1022,10 @@ export default function PatientPrescriptionGuide({
             <ShieldCheck size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
+            <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#202124' }}>
               {isEs ? 'Compartir Prescripción con tu Médico o Consulta' : 'Share Prescription with Your Doctor or Clinic'}
             </div>
-            <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.74rem', color: '#5f6368', marginTop: '2px' }}>
               {isEs
                 ? 'Muestra esta página en tu consulta médica o comparte el enlace directo para que tu doctor revise tu pauta y adherencia.'
                 : 'Show this page during your medical consultation or share the direct link for your physician to review adherence.'}
@@ -1046,9 +1047,9 @@ export default function PatientPrescriptionGuide({
               height: '34px',
               padding: '0 14px',
               borderRadius: '6px',
-              border: '1px solid #cbd5e1',
+              border: '1px solid #dadce0',
               background: '#ffffff',
-              color: '#003666',
+              color: '#1a73e8',
               fontSize: '0.76rem',
               fontWeight: 700,
               cursor: 'pointer',
@@ -1073,7 +1074,7 @@ export default function PatientPrescriptionGuide({
               padding: '0 14px',
               borderRadius: '6px',
               border: 'none',
-              background: '#003666',
+              background: '#1a73e8',
               color: '#ffffff',
               fontSize: '0.76rem',
               fontWeight: 700,

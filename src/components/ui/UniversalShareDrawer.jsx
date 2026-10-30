@@ -78,12 +78,12 @@ export default function UniversalShareDrawer({
   const [isGeneratingMagicLink, setIsGeneratingMagicLink] = useState(false);
   const [magicLinkData, setMagicLinkData] = useState(null);
 
-  // Language state
+  // Language state - Defaults to English ('en') per GCP UX Standard
   const [messageLang, setMessageLang] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('share_message_lang') || 'es';
+      return localStorage.getItem('share_message_lang') || 'en';
     }
-    return 'es';
+    return 'en';
   });
 
   const handleLanguageChange = (lang) => {
@@ -117,11 +117,13 @@ export default function UniversalShareDrawer({
       phone = d.phone || d.mobile || '';
       company = d.clinicName || d.clinic || '';
       const slug = d.slug || d.id || '';
+      const isEs = messageLang === 'es';
       defaultUrl = `${origin}/dr/${encodeURIComponent(slug)}`;
-      autoTitle = autoTitle || `Compartir Perfil Médico / Acceso 1-Tap`;
-      autoSubtitle = autoSubtitle || `Enlace directo al perfil público y credencial 1-Tap para ${name}`;
+      autoTitle = autoTitle || (isEs ? `Compartir Perfil Médico / Acceso 1-Tap` : `Share Clinical Profile / 1-Tap Access`);
+      autoSubtitle = autoSubtitle || (isEs ? `Enlace directo al perfil público y credencial 1-Tap para ${name}` : `Direct link to public clinical profile and 1-Tap credential for ${name}`);
       label = label || `Dr. ${name}`;
     } else if (resolvedEntityType === 'prescription' && resolvedEntity) {
+      const isEs = messageLang === 'es';
       const p = resolvedEntity;
       type = 'prescription';
       recType = 'patient';
@@ -131,10 +133,11 @@ export default function UniversalShareDrawer({
       phone = p.patient?.phone || p.patientPhone || '';
       const rxCode = p.prescriptionNumber || p.code || p.id || '';
       defaultUrl = rxCode ? `${origin}/rx/${encodeURIComponent(rxCode)}` : `${origin}/rx/intake`;
-      autoTitle = autoTitle || `Compartir Expediente de Prescripción`;
-      autoSubtitle = autoSubtitle || `Expediente clínico #${rxCode} verificado con pautas posológicas`;
+      autoTitle = autoTitle || (isEs ? `Compartir Expediente de Prescripción` : `Share Prescription Record`);
+      autoSubtitle = autoSubtitle || (isEs ? `Expediente clínico #${rxCode} verificado con pautas posológicas` : `Clinical dossier #${rxCode} verified with posology guidelines`);
       label = label || `Prescripción #${rxCode}`;
     } else if (resolvedEntityType === 'wholesaler' && resolvedEntity) {
+      const isEs = messageLang === 'es';
       const w = resolvedEntity;
       type = 'wholesaler';
       recType = 'wholeseller';
@@ -144,10 +147,11 @@ export default function UniversalShareDrawer({
       phone = w.contactPhone || w.phone || '';
       company = w.companyName || w.company || '';
       defaultUrl = `${origin}/vials?ref=${encodeURIComponent(w.id || '')}`;
-      autoTitle = autoTitle || `Compartir Catálogo Mayorista B2B`;
-      autoSubtitle = autoSubtitle || `Catálogo de viales con margen y comisiones para ${name}`;
+      autoTitle = autoTitle || (isEs ? `Compartir Catálogo Mayorista B2B` : `Share Wholesaler B2B Catalog`);
+      autoSubtitle = autoSubtitle || (isEs ? `Catálogo de viales con margen y comisiones para ${name}` : `Vial catalog with tiered wholesale pricing and margins for ${name}`);
       label = label || name;
     } else if (resolvedEntityType === 'patient' && resolvedEntity) {
+      const isEs = messageLang === 'es';
       const pt = resolvedEntity;
       type = 'patient';
       recType = 'patient';
@@ -157,11 +161,12 @@ export default function UniversalShareDrawer({
       phone = pt.phone || '';
       const lastRx = pt.lastRxCode || (Array.isArray(pt.prescriptions) && pt.prescriptions[0]) || '';
       defaultUrl = lastRx ? `${origin}/rx/${encodeURIComponent(lastRx)}` : `${origin}/rx/intake`;
-      autoTitle = autoTitle || `Compartir Portal de Paciente`;
-      autoSubtitle = autoSubtitle || `Acceso directo al portal clínico y recetas activas de ${name}`;
+      autoTitle = autoTitle || (isEs ? `Compartir Portal de Paciente` : `Share Patient Portal`);
+      autoSubtitle = autoSubtitle || (isEs ? `Acceso directo al portal clínico y recetas activas de ${name}` : `Direct access to clinical portal and active treatment plans for ${name}`);
       label = label || name;
     }
 
+    const isEs = messageLang === 'es';
     return {
       type,
       recType,
@@ -172,10 +177,10 @@ export default function UniversalShareDrawer({
       company,
       defaultUrl,
       autoTitle: autoTitle || `Share ${type.toUpperCase()}`,
-      autoSubtitle: autoSubtitle || 'Seleccione el destinatario y comparta vía WhatsApp, Email o Enlace.',
+      autoSubtitle: autoSubtitle || (isEs ? 'Seleccione el destinatario y comparta vía WhatsApp, Email o Enlace.' : 'Select recipient and share via WhatsApp, Email, or Direct Link.'),
       label,
     };
-  }, [resolvedEntityType, resolvedEntity, incomingDocType, initialRecipientName, initialRecipientEmail, initialRecipientPhone, incomingShareUrl, docUrl, incomingTitle, incomingSubtitle, incomingItemName, origin]);
+  }, [resolvedEntityType, resolvedEntity, incomingDocType, initialRecipientName, initialRecipientEmail, initialRecipientPhone, incomingShareUrl, docUrl, incomingTitle, incomingSubtitle, incomingItemName, origin, messageLang]);
 
   // Recipient state
   const [recipient, setRecipient] = useState({
@@ -221,11 +226,19 @@ export default function UniversalShareDrawer({
 
   // Base raw share URL before tracking
   const rawShareUrl = useMemo(() => {
-    if (resolvedEntityType === 'doctor' && useMagicLink && magicLinkData?.accessUrl) {
-      return magicLinkData.accessUrl;
+    if (resolvedEntityType === 'doctor') {
+      const d = resolvedEntity;
+      const slug = d?.slug || d?.id || '';
+      // When sharing with a patient, strictly route to patient intake/view — never provide doctor 1-Tap credentials!
+      if (recipient.type === 'patient') {
+        return `${origin}/rx/intake?refDoctor=${encodeURIComponent(slug)}`;
+      }
+      if (useMagicLink && magicLinkData?.accessUrl) {
+        return magicLinkData.accessUrl;
+      }
     }
     return derivedDefaults.defaultUrl || incomingShareUrl || docUrl || '';
-  }, [resolvedEntityType, useMagicLink, magicLinkData, derivedDefaults.defaultUrl, incomingShareUrl, docUrl]);
+  }, [resolvedEntityType, recipient.type, resolvedEntity, useMagicLink, magicLinkData, derivedDefaults.defaultUrl, incomingShareUrl, docUrl, origin]);
 
   // Handle generating Doctor 1-Tap Magic Link
   const handleGenerateDoctorMagicLink = async () => {
@@ -346,8 +359,42 @@ export default function UniversalShareDrawer({
 
     // 1. Doctor Profile / 1-Tap Access Template
     if (resolvedEntityType === 'doctor') {
-      const docName = recipient.name || 'Doctor';
-      const cleanTitle = docName.startsWith('Dr.') ? docName : `Dr. ${docName}`;
+      const d = resolvedEntity;
+      const docName = d?.displayName || d?.name || 'Dr. Sobia Mirza';
+      const cleanDocTitle = docName.startsWith('Dr.') ? docName : `Dr. ${docName}`;
+      const clinicName = d?.clinicName || d?.clinic || 'My London Skin Clinic';
+
+      // ── Patient Recipient: Safe Public Intake & Care Portal ──
+      if (recipient.type === 'patient') {
+        const patName = recipient.name || (isEs ? 'Estimado/a paciente' : 'Dear Patient');
+        if (isEs) {
+          return `🏥 *Atlas Health Services — Portal de Atención al Paciente*
+
+Estimado/a ${patName},
+
+Le facilitamos su enlace personal al portal de atención médica y prescripción digital con ${cleanDocTitle} (${clinicName}).
+
+A través de este canal seguro puede completar su ficha médica, cargar informes previos y consultar sus fórmulas magistrales prescritas:
+👉 ${effectiveUrl}
+
+🔒 *Canal Clínico Protegido*: Confidencialidad bajo estándares DHA y formulación EU GMP.`;
+        }
+
+        return `🏥 *Atlas Health Services — Patient Care Portal*
+
+Dear ${patName},
+
+Here is your direct access to the clinical care and digital prescription portal with ${cleanDocTitle} (${clinicName}).
+
+Through this secure link you can submit your patient intake, review your clinical regimen, and track your personalized compounded prescriptions:
+👉 ${effectiveUrl}
+
+🔒 *Certified Patient Portal*: Compliant with EU GMP and DHA healthcare privacy standards.`;
+      }
+
+      // ── Doctor / Clinic Recipient: 1-Tap Access ──
+      const recDocName = recipient.name || 'Doctor';
+      const cleanTitle = recDocName.startsWith('Dr.') ? recDocName : `Dr. ${recDocName}`;
 
       if (isEs) {
         return `🩺 *Atlas Health Services — Acceso Clínico 1-Tap*
@@ -574,88 +621,116 @@ Here is your direct secure access link to view your active treatment plans, poso
             cursor: 'pointer',
           }}
         >
-          Hecho / Cerrar
+          {messageLang === 'es' ? 'Hecho / Cerrar' : 'Done / Close'}
         </button>
       }
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-        {/* Doctor-Specific: 1-Tap Access Magic Link Config */}
+        {/* Doctor-Specific: 1-Tap Access Magic Link Config or Patient Safe Mode */}
         {resolvedEntityType === 'doctor' && (
-          <div style={{
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: 10,
-            padding: '12px 14px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 10,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          recipient.type === 'patient' ? (
+            <div style={{
+              background: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: 10,
+              padding: '12px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4
+            }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Key size={16} color="#16a34a" />
-                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#166534' }}>
-                  Acceso Seguro 1-Tap (Sin Contraseña)
+                <ShieldCheck size={16} color="#0284c7" />
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                  {messageLang === 'es' ? 'Modo Paciente Seguro (Admisión y Consulta)' : 'Patient Safe Mode (Intake & Dossier)'}
                 </span>
               </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', cursor: 'pointer', color: '#166534', fontWeight: 600 }}>
-                <input
-                  type="checkbox"
-                  checked={useMagicLink}
-                  onChange={(e) => setUseMagicLink(e.target.checked)}
-                />
-                Activar 1-Tap
-              </label>
+              <p style={{ margin: '2px 0 0', fontSize: '0.74rem', color: '#475569', lineHeight: 1.4 }}>
+                {messageLang === 'es'
+                  ? 'El paciente recibirá su enlace directo a la ficha de admisión y recetas prescritas. El acceso administrativo 1-Tap del médico queda protegido y desactivado.'
+                  : 'The patient will receive a direct link to patient intake and prescribed formulas. The physician’s 1-Tap administrative access is protected and disabled.'}
+              </p>
             </div>
+          ) : (
+            <div style={{
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: 10,
+              padding: '12px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Key size={16} color="#16a34a" />
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#166534' }}>
+                    {messageLang === 'es' ? 'Acceso Seguro 1-Tap (Sin Contraseña)' : 'Secure 1-Tap Access (Passwordless)'}
+                  </span>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', cursor: 'pointer', color: '#166534', fontWeight: 600 }}>
+                  <input
+                    type="checkbox"
+                    checked={useMagicLink}
+                    onChange={(e) => setUseMagicLink(e.target.checked)}
+                  />
+                  {messageLang === 'es' ? 'Activar 1-Tap' : 'Enable 1-Tap'}
+                </label>
+              </div>
 
-            {useMagicLink && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingTop: 4 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: '0.73rem', color: '#15803d' }}>Validez enlace:</span>
-                  <select
-                    value={magicLinkDuration}
-                    onChange={(e) => setMagicLinkDuration(Number(e.target.value))}
+              {useMagicLink && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingTop: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: '0.73rem', color: '#15803d' }}>
+                      {messageLang === 'es' ? 'Validez enlace:' : 'Link validity:'}
+                    </span>
+                    <select
+                      value={magicLinkDuration}
+                      onChange={(e) => setMagicLinkDuration(Number(e.target.value))}
+                      style={{
+                        fontSize: '0.75rem',
+                        padding: '3px 8px',
+                        borderRadius: 6,
+                        border: '1px solid #86efac',
+                        background: '#ffffff',
+                        fontWeight: 600,
+                        color: '#166534',
+                      }}
+                    >
+                      <option value={24}>{messageLang === 'es' ? '24 horas' : '24 hours'}</option>
+                      <option value={72}>{messageLang === 'es' ? '72 horas (3 días)' : '72 hours (3 days)'}</option>
+                      <option value={168}>{messageLang === 'es' ? '7 días' : '7 days'}</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleGenerateDoctorMagicLink}
+                    disabled={isGeneratingMagicLink}
                     style={{
-                      fontSize: '0.75rem',
-                      padding: '3px 8px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      padding: '4px 10px',
                       borderRadius: 6,
-                      border: '1px solid #86efac',
-                      background: '#ffffff',
-                      fontWeight: 600,
-                      color: '#166534',
+                      border: 'none',
+                      background: '#16a34a',
+                      color: '#ffffff',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(22, 163, 74, 0.2)'
                     }}
                   >
-                    <option value={24}>24 horas</option>
-                    <option value={72}>72 horas (3 días)</option>
-                    <option value={168}>7 días</option>
-                  </select>
+                    {isGeneratingMagicLink ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                    {magicLinkData
+                      ? (messageLang === 'es' ? 'Regenerar Token' : 'Regenerate Token')
+                      : (messageLang === 'es' ? 'Generar Token' : 'Generate Token')}
+                  </button>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleGenerateDoctorMagicLink}
-                  disabled={isGeneratingMagicLink}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    padding: '4px 10px',
-                    borderRadius: 6,
-                    border: 'none',
-                    background: '#16a34a',
-                    color: '#ffffff',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    boxShadow: '0 1px 2px rgba(22, 163, 74, 0.2)'
-                  }}
-                >
-                  {isGeneratingMagicLink ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                  {magicLinkData ? 'Regenerar Token' : 'Generar Token'}
-                </button>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )
         )}
 
         {/* Hierarchical Recipient Selector (Type -> Search/Edit Contact) */}
@@ -668,7 +743,8 @@ Here is your direct secure access link to view your active treatment plans, poso
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
             <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <User size={14} color="#003666" /> Destinatario Registrado
+              <User size={14} color="#003666" />
+              {messageLang === 'es' ? 'Destinatario Registrado' : 'Registered Recipient'}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <EngagementBadge
@@ -679,7 +755,7 @@ Here is your direct secure access link to view your active treatment plans, poso
                 size="xs"
               />
               <span style={{ fontSize: '0.70rem', color: '#64748b', background: '#f1f5f9', padding: '2px 6px', borderRadius: 4 }}>
-                Rol: <strong>{recipient.type}</strong>
+                {messageLang === 'es' ? 'Rol: ' : 'Role: '}<strong>{recipient.type}</strong>
               </span>
             </div>
           </div>
@@ -702,26 +778,9 @@ Here is your direct secure access link to view your active treatment plans, poso
           boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
         }}>
           <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
-            🌐 Idioma del Mensaje / Language
+            🌐 {messageLang === 'es' ? 'Idioma del Mensaje / Language' : 'Message Language / Idioma'}
           </span>
           <div style={{ display: 'flex', gap: 4, background: '#f1f5f9', padding: '3px', borderRadius: 6 }}>
-            <button
-              type="button"
-              onClick={() => handleLanguageChange('es')}
-              style={{
-                padding: '3px 10px',
-                fontSize: '0.75rem',
-                fontWeight: messageLang === 'es' ? 700 : 500,
-                borderRadius: 4,
-                border: 'none',
-                background: messageLang === 'es' ? 'var(--color-primary, #003666)' : 'transparent',
-                color: messageLang === 'es' ? '#ffffff' : '#64748b',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              🇪🇸 Español
-            </button>
             <button
               type="button"
               onClick={() => handleLanguageChange('en')}
@@ -738,6 +797,23 @@ Here is your direct secure access link to view your active treatment plans, poso
               }}
             >
               🇬🇧 English
+            </button>
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('es')}
+              style={{
+                padding: '3px 10px',
+                fontSize: '0.75rem',
+                fontWeight: messageLang === 'es' ? 700 : 500,
+                borderRadius: 4,
+                border: 'none',
+                background: messageLang === 'es' ? 'var(--color-primary, #003666)' : 'transparent',
+                color: messageLang === 'es' ? '#ffffff' : '#64748b',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              🇪🇸 Español
             </button>
           </div>
         </div>
@@ -763,9 +839,13 @@ Here is your direct secure access link to view your active treatment plans, poso
               <MessageSquare size={19} />
             </div>
             <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#14532d' }}>Compartir por WhatsApp</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#14532d' }}>
+                {messageLang === 'es' ? 'Compartir por WhatsApp' : 'Share via WhatsApp'}
+              </div>
               <div style={{ fontSize: '0.73rem', color: '#15803d' }}>
-                {recipient.phone ? `Chat directo a ${recipient.phone}` : 'Abre WhatsApp con mensaje oficial pre-rellenado'}
+                {recipient.phone 
+                  ? (messageLang === 'es' ? `Chat directo a ${recipient.phone}` : `Direct chat to ${recipient.phone}`)
+                  : (messageLang === 'es' ? 'Abre WhatsApp con mensaje oficial pre-rellenado' : 'Opens WhatsApp with pre-filled clinical message')}
               </div>
             </div>
           </div>
@@ -792,9 +872,13 @@ Here is your direct secure access link to view your active treatment plans, poso
               <Mail size={19} />
             </div>
             <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e3a8a' }}>Enviar por Correo Electrónico</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e3a8a' }}>
+                {messageLang === 'es' ? 'Enviar por Correo Electrónico' : 'Send via Email'}
+              </div>
               <div style={{ fontSize: '0.73rem', color: '#1d4ed8' }}>
-                {recipient.email ? `Dirigido a ${recipient.email}` : 'Abre el cliente de correo con plantilla y firma'}
+                {recipient.email 
+                  ? (messageLang === 'es' ? `Dirigido a ${recipient.email}` : `Addressed to ${recipient.email}`)
+                  : (messageLang === 'es' ? 'Abre el cliente de correo con plantilla y firma' : 'Opens mail client with official template and signature')}
               </div>
             </div>
           </div>
@@ -810,7 +894,8 @@ Here is your direct secure access link to view your active treatment plans, poso
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Copy size={15} color="var(--color-primary, #003666)" /> Enlace Directo Trazado
+              <Copy size={15} color="var(--color-primary, #003666)" />
+              {messageLang === 'es' ? 'Enlace Directo Trazado' : 'Direct Tracked Link'}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <button
@@ -832,7 +917,9 @@ Here is your direct secure access link to view your active treatment plans, poso
                 }}
               >
                 {copied ? <Check size={13} /> : <Copy size={13} />}
-                {copied ? '¡Copiado!' : 'Copiar Enlace'}
+                {copied 
+                  ? (messageLang === 'es' ? '¡Copiado!' : 'Copied!') 
+                  : (messageLang === 'es' ? 'Copiar Enlace' : 'Copy Link')}
               </button>
             </div>
           </div>
@@ -848,7 +935,7 @@ Here is your direct secure access link to view your active treatment plans, poso
             maxHeight: 52,
             overflowY: 'auto',
           }}>
-            {rawShareUrl || 'Generando enlace...'}
+            {rawShareUrl || (messageLang === 'es' ? 'Generando enlace...' : 'Generating link...')}
           </div>
         </div>
 
@@ -865,10 +952,14 @@ Here is your direct secure access link to view your active treatment plans, poso
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <QrCode size={16} color="var(--color-primary, #003666)" />
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>Código QR para Móvil</span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                {messageLang === 'es' ? 'Código QR para Móvil' : 'Mobile / Clinic QR Code'}
+              </span>
             </div>
             <span style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>
-              {showQr ? 'Ocultar QR' : 'Mostrar QR'}
+              {showQr 
+                ? (messageLang === 'es' ? 'Ocultar QR' : 'Hide QR') 
+                : (messageLang === 'es' ? 'Mostrar QR' : 'Show QR')}
             </span>
           </div>
 
