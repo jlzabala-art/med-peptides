@@ -449,7 +449,11 @@ export function resolveVariantPrice(variant, {
   }
   pricing = normalisePricingKeys(pricing);
 
-  // Apply B2B pricing calculations for NPLAB supplier (+15% Wholesale, +30% Clinic, +50% Retail over EUR cost)
+  // Apply B2B pricing calculations for NPLAB supplier:
+  // - Master (NPLAB Base Cost): costEur
+  // - Wholesale (Mediluxe +15% over NPLAB Cost): round(costEur * 1.15, 2)
+  // - Clinic / Nikolas Wholeseller Public Link (+15% Mediluxe + +15% Nikolas over Mediluxe = costEur * 1.15 * 1.15): round(wholesalePrice * 1.15, 2)
+  // - Retail (+50% over NPLAB Cost): round(costEur * 1.50, 2)
   const vSuppStr = String(variant?.supplierId || variant?.supplier_id || variant?.supplier || variant?.supplierName || '').toLowerCase();
   if (pricing && variant && (vSuppStr.includes('nplab') || vSuppStr.includes('np-lab') || vSuppStr.includes('np lab'))) {
     const baseCostEur = Number(
@@ -461,17 +465,20 @@ export function resolveVariantPrice(variant, {
     );
 
     if (baseCostEur > 0) {
-      const masterPrice = baseCostEur;
-      const masterKit = Number((baseCostEur * 0.85 * 10).toFixed(2));
+      const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+      const masterPrice = round2(baseCostEur);
+      const masterKit = round2(baseCostEur * 0.85 * 10);
 
-      const wholesalePrice = Number((masterPrice * 1.15).toFixed(2));
-      const wholesaleKit = Number((wholesalePrice * 0.85 * 10).toFixed(2));
+      // Tier 1: Mediluxe Wholesale Price (+15% over NPLAB Cost)
+      const wholesalePrice = round2(masterPrice * 1.15);
+      const wholesaleKit = round2(wholesalePrice * 0.85 * 10);
 
-      const clinicPrice = Number((masterPrice * 1.30).toFixed(2));
-      const clinicKit = Number((clinicPrice * 0.85 * 10).toFixed(2));
+      // Tier 2: Nikolas Wholeseller Public Client Price (+15% over Mediluxe's +15% price = Cost * 1.15 * 1.15)
+      const clinicPrice = round2(wholesalePrice * 1.15);
+      const clinicKit = round2(clinicPrice * 0.85 * 10);
 
-      const retailPrice = Number((masterPrice * 1.50).toFixed(2));
-      const retailKit = Number((retailPrice * 0.85 * 10).toFixed(2));
+      const retailPrice = round2(masterPrice * 1.50);
+      const retailKit = round2(retailPrice * 0.85 * 10);
 
       pricing = {
         ...pricing,

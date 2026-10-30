@@ -26,8 +26,10 @@ function sanitizeBrandName(text) {
 
 /**
  * Resolves wholesale prices for a variant or item.
- * For NPLAB peptide formulations (Nikolas / NP Labs partner schedule), applies
- * exact +15% markup over our NPLAB cost price (costEur * 1.15) in EUR (€).
+ * For NPLAB peptide formulations (Nikolas / NP Labs wholeseller partner schedule), applies:
+ *   1. +15% Mediluxe Margin over NPLAB base cost: mediluxePrice = round(costEur * 1.15, 2)
+ *   2. +15% Nikolas Wholeseller Margin over Mediluxe price: unitPrice = round(mediluxePrice * 1.15, 2)
+ *   Effective compound factor = 1.15 * 1.15 = 1.3225 (+32.25% over NPLAB base cost) in EUR (€).
  */
 function resolveWholesalePricing(variant, defaultPrice = 35.0, markupPercent = 15) {
   const vSupp = String(variant?.supplierId || variant?.supplier_id || variant?.supplier || variant?.supplierName || '').toLowerCase();
@@ -41,14 +43,20 @@ function resolveWholesalePricing(variant, defaultPrice = 35.0, markupPercent = 1
       variant.unit_price ??
       defaultPrice
     );
-    const factor = 1 + (Number(markupPercent || 15) / 100);
-    const unitPrice = Math.round((baseCost * factor) * 100) / 100;
-    const tier10UnitPrice = Math.round((unitPrice * 0.85) * 100) / 100;
-    const pack10Price = Math.round((tier10UnitPrice * 10) * 100) / 100;
+    const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+    const mediluxeMarkup = 15;
+    const wholesalerMarkup = Number(markupPercent || 15);
+    const mediluxePrice = round2(baseCost * (1 + mediluxeMarkup / 100));
+    const unitPrice = round2(mediluxePrice * (1 + wholesalerMarkup / 100));
+    const tier10UnitPrice = round2(unitPrice * 0.85);
+    const pack10Price = round2(tier10UnitPrice * 10);
 
     return {
-      baseCost: Math.round(baseCost * 100) / 100,
-      markupPercent: Number(markupPercent || 15),
+      baseCost: round2(baseCost),
+      mediluxePrice,
+      mediluxeMarkupPercent: mediluxeMarkup,
+      wholesalerMarkupPercent: wholesalerMarkup,
+      markupPercent: Math.round(((1 + mediluxeMarkup / 100) * (1 + wholesalerMarkup / 100) - 1) * 10000) / 100,
       unitPrice,
       tier10UnitPrice,
       pack10Price,
@@ -190,6 +198,9 @@ async function fetchLotuslandVials() {
         goals: Array.isArray(data.goals) ? data.goals : ['general_health'],
         description: cleanDesc,
         baseCost: pricing.baseCost,
+        mediluxePrice: pricing.mediluxePrice || pricing.baseCost,
+        mediluxeMarkupPercent: pricing.mediluxeMarkupPercent || 15,
+        wholesalerMarkupPercent: pricing.wholesalerMarkupPercent || 15,
         markupPercent: pricing.markupPercent,
         unitPrice: pricing.unitPrice,
         tier10UnitPrice: pricing.tier10UnitPrice,
@@ -468,14 +479,19 @@ export async function trackReferralVisitAction({ wholesalerId, referralCode, col
   if (!wholesalerId || !adminDb) return { success: false };
 
   try {
-    const cleanId = String(wholesalerId).trim();
-    const cleanCode = String(referralCode || cleanId).trim();
+    const rawId = String(wholesalerId).trim();
+    const isNikolas = ['np-labs-international', 'nikolaos-psathas', 'nplabs', 'nplab', 'cat-rx-7482', 'nikolas'].includes(rawId.toLowerCase());
+    const cleanId = isNikolas ? 'np-labs-international' : rawId;
+    const cleanCode = String(referralCode || (isNikolas ? 'CAT-RX-7482' : cleanId)).trim();
     const cleanCollection = String(collection || 'vials').toLowerCase();
     const now = new Date().toISOString();
 
     const refDocRef = adminDb.collection('wholesaler_referrals').doc(cleanId);
     await refDocRef.set({
       wholesalerId: cleanId,
+      wholesalerName: isNikolas ? 'Nikolaos Psathas (NP Labs)' : cleanId,
+      wholesalerEmail: isNikolas ? 'nikpsathas@gmail.com' : '',
+      attributedTo: isNikolas ? 'Por atención de Nikolaos Psathas (NP Labs)' : `Referred by ${cleanId}`,
       referralCode: cleanCode,
       visitsCount: FieldValue.increment(1),
       lastVisitedAt: now,
@@ -484,6 +500,34 @@ export async function trackReferralVisitAction({ wholesalerId, referralCode, col
       lastUserAgent: userAgent ? String(userAgent).substring(0, 200) : null,
       updatedAt: now
     }, { merge: true });
+
+    // Record granular visit log in subcollection for audit trail
+    await refDocRef.collection('visits').add({
+      wholesalerId: cleanId,
+      wholesalerName: isNikolas ? 'Nikolaos Psathas (NP Labs)' : cleanId,
+      attributedTo: isNikolas ? 'Por atención de Nikolaos Psathas (NP Labs)' : `Referred by ${cleanId}`,
+      referralCode: cleanCode,
+      collection: cleanCollection,
+      userAgent: userAgent ? String(userAgent).substring(0, 200) : null,
+      visitedAt: now
+    }).catch(() => {});
+
+    // Also mirror to catalog_generation_logs & shared_catalog_links if Nikolas / CAT-RX-7482
+    if (isNikolas || cleanCode === 'CAT-RX-7482') {
+      await adminDb.collection('shared_catalog_links').doc('CAT-RX-7482').set({
+        visitsCount: FieldValue.increment(1),
+        lastVisitedAt: now,
+        readStatus: 'read',
+        attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)'
+      }, { merge: true }).catch(() => {});
+
+      await adminDb.collection('catalog_generation_logs').doc('CAT-RX-7482').set({
+        viewCount: FieldValue.increment(1),
+        lastViewedAt: now,
+        attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)',
+        updatedAt: now
+      }, { merge: true }).catch(() => {});
+    }
 
     return { success: true };
   } catch (err) {

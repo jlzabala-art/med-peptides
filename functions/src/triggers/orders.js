@@ -61,9 +61,9 @@ module.exports = (gmailUser, gmailAppPass) => onDocumentCreated(
         .filter(isDeliverableEmail);
     }
 
-    // Default to primary administrator if no deliverable admins found
-    if (adminEmails.length === 0) {
-      adminEmails = ["jose@mediluxeme.com"];
+    // Always ensure jose@mediluxeme.com receives every order notification
+    if (!adminEmails.some((e) => String(e).toLowerCase() === "jose@mediluxeme.com")) {
+      adminEmails.unshift("jose@mediluxeme.com");
     }
 
     const { subject, html } = buildOrderEmail(orderData);

@@ -73,8 +73,85 @@ module.exports.onOrderCreatedForRx = onDocumentCreated(
 
     const orderId   = event.params.orderId;
     const orderData = snap.data();
+    const db = getFirestore();
 
-    // Only process orders that came from a prescription
+    // ── A0. Always notify jose@mediluxeme.com when ANY order is created (if not already notified by API route) ──
+    if (!orderData.adminEmailNotifiedAt) {
+      try {
+        const userEmail = gmailUser.value();
+        const userPass = gmailAppPass.value();
+        if (userEmail && userPass) {
+          const transporter = nodemailer.createTransport({
+            host:   'smtp.gmail.com',
+            port:   587,
+            secure: false,
+            auth:   { user: userEmail, pass: userPass },
+          });
+
+          const orderCode = orderData.orderId || orderData.code || orderId;
+          const customerName = orderData.customerName || orderData.clientName || 'Clinical Client';
+          const currency = orderData.currency || 'EUR';
+          const sym = orderData.currencySymbol || (currency === 'EUR' ? '€' : '$');
+          const grandTotal = Number(orderData.grandTotal || orderData.total || 0);
+          const isNikolas =
+            orderData.wholesalerId === 'np-labs-international' ||
+            orderData.referralCode === 'CAT-RX-7482' ||
+            orderData.catalogId === 'CAT-RX-7482';
+          const attributedTo = isNikolas
+            ? 'Por atención de: Nikolaos Psathas · NP Labs International (#CAT-RX-7482)'
+            : (orderData.attributedTo || orderData.wholesalerName || 'Pedido Directo Atlas');
+
+          const items = Array.isArray(orderData.items) ? orderData.items : [];
+          const rowsHtml = items.map((it, i) => `
+            <tr>
+              <td style="padding:8px 10px;border-bottom:1px solid #e2e8f0;font-weight:700;">${i + 1}. ${it.productName || it.name || 'Item'} ${it.dosage || ''}</td>
+              <td style="padding:8px 10px;border-bottom:1px solid #e2e8f0;text-align:center;">${it.quantity || 1}</td>
+              <td style="padding:8px 10px;border-bottom:1px solid #e2e8f0;text-align:right;">${sym}${Number(it.unitPrice || it.price || 0).toFixed(2)}</td>
+              <td style="padding:8px 10px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">${sym}${Number(it.totalPrice || it.total || 0).toFixed(2)}</td>
+            </tr>
+          `).join('');
+
+          const adminHtml = `
+            <div style="font-family:Inter,Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#f8fafc;border-radius:14px;border:1px solid #e2e8f0;">
+              <div style="background:#003666;color:#fff;padding:18px 22px;border-radius:10px;margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#93c5fd;">Atlas Health · Notificación de Pedido</div>
+                <h2 style="margin:4px 0 0;font-size:18px;font-weight:800;">🚨 Nuevo Pedido #${orderCode} · ${sym}${grandTotal.toFixed(2)} ${currency}</h2>
+              </div>
+              <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#14532d;font-weight:700;">
+                🤝 Atribución: ${attributedTo}
+              </div>
+              <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:16px;font-size:13px;">
+                <tr><td style="padding:8px 12px;color:#64748b;width:35%;">Cliente</td><td style="padding:8px 12px;font-weight:700;">${customerName}</td></tr>
+                <tr><td style="padding:8px 12px;color:#64748b;">Email / Teléfono</td><td style="padding:8px 12px;">${orderData.customerEmail || '—'} · ${orderData.customerPhone || '—'}</td></tr>
+                <tr><td style="padding:8px 12px;color:#64748b;">Dirección</td><td style="padding:8px 12px;">${orderData.customerAddress || orderData.deliveryAddress || '—'}</td></tr>
+              </table>
+              <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:16px;font-size:12px;">
+                <thead><tr style="background:#f1f5f9;"><th style="padding:8px 10px;text-align:left;">Producto</th><th style="padding:8px 10px;">Cant.</th><th style="padding:8px 10px;text-align:right;">P. Unit</th><th style="padding:8px 10px;text-align:right;">Total</th></tr></thead>
+                <tbody>${rowsHtml}</tbody>
+              </table>
+              <a href="https://www.atlashealth-services.com/admin?tab=orders&orderId=${encodeURIComponent(orderId)}" style="display:inline-block;padding:10px 18px;background:#003666;color:#fff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:700;">Abrir Pedido en Panel Admin</a>
+            </div>
+          `;
+
+          await transporter.sendMail({
+            from: `"Atlas Health Orders Desk" <${userEmail}>`,
+            to: 'jose@mediluxeme.com',
+            subject: `🚨 [Nuevo Pedido Atlas] #${orderCode} · ${customerName} (${sym}${grandTotal.toFixed(2)} ${currency})${isNikolas ? ' · Por atención de Nikolas (NPLAB)' : ''}`,
+            html: adminHtml,
+          });
+
+          await snap.ref.set({
+            adminEmailNotifiedAt: new Date().toISOString(),
+            adminEmailNotifiedTo: 'jose@mediluxeme.com',
+            adminEmailNotifiedVia: 'cloud_function_trigger',
+          }, { merge: true });
+        }
+      } catch (adminMailErr) {
+        console.warn(`[onOrderCreatedForRx] Admin email notification warning for ${orderId}:`, adminMailErr.message);
+      }
+    }
+
+    // Only process Rx status updates for orders that came from a prescription
     const prescriptionId       = orderData.prescriptionId
       || orderData.cartOwnership?.recommendationId
       || orderData.metadata?.prescriptionId;
@@ -82,11 +159,9 @@ module.exports.onOrderCreatedForRx = onDocumentCreated(
       || orderData.cartOwnership?.supervisingPhysicianId;
 
     if (!prescriptionId && !supervisingDoctorId) {
-      console.log(`[onOrderCreatedForRx] Order ${orderId} has no prescription link — skipping.`);
+      console.log(`[onOrderCreatedForRx] Order ${orderId} has no prescription link — skipping Rx update.`);
       return;
     }
-
-    const db = getFirestore();
 
     // ── A. Update prescription status → ordered ──────────────────────────────
     if (prescriptionId) {

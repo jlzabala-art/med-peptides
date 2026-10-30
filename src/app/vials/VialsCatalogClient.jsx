@@ -231,6 +231,8 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
           dosage: vial.dosage,
           presentation: vial.presentation,
           quantity,
+          baseCost: vial.baseCost || 0,
+          mediluxePrice: vial.mediluxePrice || 0,
           price: effectiveUnitPrice,
           unitPrice: effectiveUnitPrice,
           tier10UnitPrice: vial.tier10UnitPrice,
@@ -256,12 +258,17 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
           currency: activeCurrency,
           currencySymbol: activeCurrencySymbol,
           totalUnits,
-          priceTier: 'wholesale_cost_plus_15',
-          priceTierLabel: 'Partner Cost +15% Schedule',
-          priceSource: 'cost',
+          priceTier: 'wholeseller_mediluxe15_plus_nikolas15',
+          priceTierLabel: 'Wholeseller Schedule (+15% Mediluxe +15% Nikolas)',
+          priceSource: 'wholeseller',
           priceMarkupPercent: 15,
+          mediluxeMarkupPercent: 15,
           wholesalerId: finalWholesalerId || 'np-labs-international',
+          wholesalerName: referralInfo?.partnerName || 'Nikolaos Psathas (NP Labs)',
+          wholesalerEmail: referralInfo?.partnerEmail || 'nikpsathas@gmail.com',
+          attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)',
           referralCode: activeReferralCode || finalWholesalerId || 'CAT-RX-7482',
+          catalogId: 'CAT-RX-7482',
           collection: activeCollection,
           paymentMethod: 'payment_link_24h',
           source: 'wholesaler_vials_public'
@@ -481,13 +488,13 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                       letterSpacing: '0.03em',
                       textTransform: 'uppercase'
                     }}>
-                      Verified Partner Schedule (+15% Cost-Plus)
+                      Wholeseller Schedule (+15% Mediluxe · +15% Partner)
                     </span>
                     <span style={{ fontSize: '0.82rem', color: '#14532d', fontWeight: 700 }}>
-                      Reference: {referralInfo?.partnerName || 'Nikolaos Psathas · NP Labs International'}
+                      Por atención de: {referralInfo?.partnerName || 'Nikolaos Psathas · NP Labs International'}
                     </span>
                     <span style={{ fontSize: '0.78rem', color: '#166534' }}>
-                      • All peptide prices reflect exact <strong>+15% over NPLAB base cost</strong> in EUR (€).
+                      • Precios en EUR (€): <strong>Coste NPLAB + 15% Mediluxe + 15% Wholeseller</strong>.
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -729,7 +736,7 @@ export default function VialsCatalogClient({ initialVials = [], initialCollectio
                             borderRadius: '4px',
                             padding: '1px 6px'
                           }}>
-                            Cost {vial.currencySymbol || activeCurrencySymbol}{Number(vial.baseCost).toFixed(2)} +15%
+                            Cost {vial.currencySymbol || activeCurrencySymbol}{Number(vial.baseCost).toFixed(2)} → +15% Mediluxe ({vial.currencySymbol || activeCurrencySymbol}{Number(vial.mediluxePrice || (vial.baseCost * 1.15)).toFixed(2)}) → +15% Wholeseller
                           </span>
                         )}
                       </div>

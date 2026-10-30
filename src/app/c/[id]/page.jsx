@@ -157,8 +157,53 @@ export default async function ShortCatalogRoute({ params }) {
             }, { merge: true }).catch(() => {});
           }
 
-          // Emit proactive read notification to Admin / Commercial desk on first view
-          if (!d.lastVisitedAt && adminDb) {
+          // Emit proactive read notification to Admin / Commercial desk on view
+          const isNikolasLink = id === 'CAT-RX-7482' || d.wholesalerId === 'np-labs-international' || d.recipientUserId === 'nikolaos-psathas';
+          if (isNikolasLink && adminDb) {
+            adminDb.collection('wholesaler_referrals').doc('np-labs-international').set({
+              wholesalerId: 'np-labs-international',
+              wholesalerName: 'Nikolaos Psathas (NP Labs)',
+              wholesalerEmail: 'nikpsathas@gmail.com',
+              attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)',
+              referralCode: id,
+              visitsCount,
+              lastVisitedAt: now,
+              updatedAt: now
+            }, { merge: true }).catch(() => {});
+
+            adminDb.collection('wholesaler_referrals').doc('np-labs-international').collection('visits').add({
+              wholesalerId: 'np-labs-international',
+              wholesalerName: 'Nikolaos Psathas (NP Labs)',
+              attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)',
+              referralCode: id,
+              route: `/c/${id}`,
+              visitedAt: now
+            }).catch(() => {});
+
+            adminDb.collection('catalog_generation_logs').doc(id).set({
+              viewCount: visitsCount,
+              lastViewedAt: now,
+              attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)',
+              status: d.status === 'converted' ? 'converted_to_order' : 'viewed',
+              updatedAt: now
+            }, { merge: true }).catch(() => {});
+
+            adminDb.collection('notifications').add({
+              title: '🔗 Enlace de Nikolas (NPLAB) Visitado',
+              message: `Se ha accedido al catálogo de péptidos por atención de Nikolaos Psathas (#${id} · Visita #${visitsCount}).`,
+              type: 'read_receipt',
+              link: `/c/${id}`,
+              targetRoles: ['admin', 'account_manager'],
+              read: false,
+              createdAt: now,
+              metadata: {
+                id,
+                wholesalerId: 'np-labs-international',
+                attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)',
+                visitsCount
+              }
+            }).catch(() => {});
+          } else if (!d.lastVisitedAt && adminDb) {
             const recipientName = d.recipientName || 'Un cliente';
             const docTitle = d.assetTitle || (isProto ? 'el catálogo de protocolos clínicos' : 'el catálogo comercial');
 

@@ -376,6 +376,25 @@ function buildOrderNotificationHtml(order) {
                 </tr>
               </table>
 
+              <!-- Wholesaler / Partner Attribution Banner (e.g. Nikolas / NP Labs CAT-RX-7482) -->
+              ${(order.wholesalerId || order.attributedTo || order.referralCode || order.catalogId === 'CAT-RX-7482') ? `
+              <div style="background:#f0fdf4;border-radius:10px;padding:16px 20px;margin-bottom:20px;border:1.5px solid #86efac;">
+                <p style="margin:0 0 6px;font-size:12px;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:0.8px;">
+                  🤝 Trazabilidad y Atribución Comercial del Enlace
+                </p>
+                <p style="margin:0;font-size:14px;font-weight:800;color:#14532d;">
+                  ${order.attributedTo || (order.wholesalerId === 'np-labs-international' || order.catalogId === 'CAT-RX-7482'
+                    ? 'Por atención de: Nikolaos Psathas · NP Labs International (Wholeseller · Enlace #CAT-RX-7482)'
+                    : `Por atención de: ${order.wholesalerName || order.wholesalerId} (${order.referralCode || order.catalogId || ''})`)}
+                </p>
+                <p style="margin:4px 0 0;font-size:12px;color:#166534;">
+                  <strong>Esquema de Precios:</strong> ${(order.wholesalerId === 'np-labs-international' || order.catalogId === 'CAT-RX-7482')
+                    ? 'Coste Base NPLAB + 15% Margen Mediluxe + 15% Margen Nikolas Wholeseller (×1.15 ×1.15 = +32.25%)'
+                    : `${order.priceTierLabel || order.priceTier || 'Wholesale Schedule'}`}
+                </p>
+              </div>
+              ` : ''}
+
               <!-- Origin Catalog & Applied Price Tier -->
               ${(order.catalogCode || order.catalogId || order.priceTierLabel || order.priceTier) ? `
               <div style="background:#eff6ff;border-radius:10px;padding:16px 20px;margin-bottom:24px;border:1px solid #bfdbfe;">
@@ -471,7 +490,7 @@ function buildOrderNotificationHtml(order) {
 
               <!-- CTA button -->
               <div style="text-align:center;margin-top:8px;">
-                <a href="https://atlas-health.com/admin?t=orders&orderId=${orderId}"
+                <a href="https://www.atlashealth-services.com/admin?tab=orders&orderId=${orderId}"
                    style="display:inline-block;background:linear-gradient(135deg,#003666 0%,#005a9c 100%);color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:10px;letter-spacing:0.3px;">
                   View Order #${orderId} in Admin →
                 </a>
@@ -504,9 +523,15 @@ function buildOrderNotificationHtml(order) {
  * @param {Object} order - The Firestore order document data.
  */
 function buildOrderEmail(order) {
-  const orderId = order.id || order.orderId || '—';
+  const orderId = order.orderId || order.code || order.id || '—';
+  const isNikolas =
+    order.wholesalerId === 'np-labs-international' ||
+    order.wholesalerId === 'nikolaos-psathas' ||
+    order.referralCode === 'CAT-RX-7482' ||
+    order.catalogId === 'CAT-RX-7482';
+  const custName = order.customerName || order.customer?.fullName || order.customer?.name || 'Client';
   return {
-    subject: `🛒 New order #${orderId} — Atlas Health`,
+    subject: `🚨 [Nuevo Pedido Atlas] #${orderId} · ${custName}${isNikolas ? ' · Por atención de Nikolas (NPLAB)' : ''}`,
     html: buildOrderNotificationHtml(order),
   };
 }

@@ -165,7 +165,8 @@ export async function generateMetadata({ params, searchParams }) {
  * Resolves the canonical unit price and kit price for a variant.
  * Uses resolveVariantPrice() as the SINGLE source of truth, reading from
  * variant.pricing.{tier}.perUnit and variant.pricing.{tier}.kit per schema.
- * Applies markup ONLY when priceSource === 'cost' (master tier = supplier cost).
+ * Applies markup when priceSource === 'cost' (master tier) OR when priceSource === 'wholeseller'
+ * (where wholesale tier already includes +15% Mediluxe margin, and markupPercent adds the wholeseller's own +15% margin).
  */
 function resolveCanonicalPrice(variant, { canonicalTier, markupFactor, markupPercent }) {
   const resolved = resolveVariantPrice(variant, {
@@ -176,10 +177,11 @@ function resolveCanonicalPrice(variant, { canonicalTier, markupFactor, markupPer
   // resolved.perUnit is already from pricing.{tier}.perUnit (schema-canonical)
   let unitPrice = resolved?.perUnit ?? 0;
 
-  // Apply markup ONLY if using the master cost tier as base
-  // (i.e., the priceSource is 'cost' and we need to derive a sell price)
-  if (markupPercent > 0 && canonicalTier === PRICING_TIER.MASTER && unitPrice > 0) {
-    unitPrice = unitPrice * markupFactor;
+  // Apply markup when using master cost tier OR wholesale tier (e.g. Mediluxe +15% base + Nikolas +15% wholeseller margin)
+  const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+  const shouldApplyMarkup = markupPercent > 0 && (canonicalTier === PRICING_TIER.MASTER || canonicalTier === PRICING_TIER.WHOLESALE);
+  if (shouldApplyMarkup && unitPrice > 0) {
+    unitPrice = round2(unitPrice * markupFactor);
   }
 
   // Kit price: prefer canonical resolved.kit (pricing.{tier}.kit) first.
@@ -193,31 +195,31 @@ function resolveCanonicalPrice(variant, { canonicalTier, markupFactor, markupPer
   if (canonicalKit != null && Number(canonicalKit) > 0) {
     // Schema-compliant: kit is the total price for a pack of 10
     let markedKit = Number(canonicalKit);
-    if (markupPercent > 0 && canonicalTier === PRICING_TIER.MASTER) {
-      markedKit = markedKit * markupFactor;
+    if (shouldApplyMarkup) {
+      markedKit = round2(markedKit * markupFactor);
     }
     // Determine if kit is stored as per-unit or as pack-total
     if (markedKit > unitPrice * 2) {
       // Stored as full pack price (e.g. $1,300 for 10 units)
       kitTotalPrice = markedKit;
-      tier10UnitPrice = markedKit / 10;
+      tier10UnitPrice = round2(markedKit / 10);
     } else {
       // Stored as discounted per-unit price (e.g. $130/unit for 10+)
       tier10UnitPrice = markedKit;
-      kitTotalPrice = markedKit * 10;
+      kitTotalPrice = round2(markedKit * 10);
     }
   } else if (legacyCost10 != null && Number(legacyCost10) > 0) {
     // Legacy fallback: cost_tiers.cost_10 is always a per-unit discounted price
     let marked10 = Number(legacyCost10);
-    if (markupPercent > 0 && canonicalTier === PRICING_TIER.MASTER) {
-      marked10 = marked10 * markupFactor;
+    if (shouldApplyMarkup) {
+      marked10 = round2(marked10 * markupFactor);
     }
     tier10UnitPrice = marked10;
-    kitTotalPrice = marked10 * 10;
+    kitTotalPrice = round2(marked10 * 10);
   } else if (unitPrice > 0) {
     // No kit price at all: apply standard 15% volume discount for 10+ units
-    tier10UnitPrice = unitPrice * 0.85;
-    kitTotalPrice = tier10UnitPrice * 10;
+    tier10UnitPrice = round2(unitPrice * 0.85);
+    kitTotalPrice = round2(tier10UnitPrice * 10);
   }
 
   return { unitPrice, tier10UnitPrice, kitTotalPrice };
@@ -403,10 +405,37 @@ async function verifyRevocationAndRecordVisit(catalogId, resolvedDoc) {
         if (linkData.status === 'revoked') {
           isRevoked = true;
         } else {
+          const now = new Date().toISOString();
+          const newVisitsCount = (linkData.visitsCount || 0) + 1;
           linkDocRef.set({
-            visitsCount: (linkData.visitsCount || 0) + 1,
-            lastVisitedAt: new Date().toISOString()
+            visitsCount: newVisitsCount,
+            lastVisitedAt: now
           }, { merge: true }).catch(() => {});
+
+          // If this catalog belongs to a wholesaler (such as Nikolas / NP Labs CAT-RX-7482), also record the referral visit
+          const wId = linkData.wholesalerId || (catalogId === 'CAT-RX-7482' ? 'np-labs-international' : null);
+          if (wId) {
+            const isNikolas = wId === 'np-labs-international' || catalogId === 'CAT-RX-7482';
+            const refDoc = adminDb.collection('wholesaler_referrals').doc(wId);
+            refDoc.set({
+              wholesalerId: wId,
+              wholesalerName: isNikolas ? 'Nikolaos Psathas (NP Labs)' : (linkData.recipientName || wId),
+              attributedTo: isNikolas ? 'Por atención de Nikolaos Psathas (NP Labs)' : `Referred by ${linkData.recipientName || wId}`,
+              referralCode: catalogId,
+              visitsCount: newVisitsCount,
+              lastVisitedAt: now,
+              updatedAt: now
+            }, { merge: true }).catch(() => {});
+
+            refDoc.collection('visits').add({
+              wholesalerId: wId,
+              wholesalerName: isNikolas ? 'Nikolaos Psathas (NP Labs)' : (linkData.recipientName || wId),
+              attributedTo: isNikolas ? 'Por atención de Nikolaos Psathas (NP Labs)' : `Referred by ${linkData.recipientName || wId}`,
+              referralCode: catalogId,
+              source: 'shared_catalog_ssr',
+              visitedAt: now
+            }).catch(() => {});
+          }
         }
       }
     } catch {

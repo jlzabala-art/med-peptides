@@ -267,7 +267,7 @@ async function fetchTargetedBrandProducts(brandSlug) {
     return getTeletestCatalog();
   }
 
-  // Clinical Peptides Collection: NPLAB (+15% over NPLAB cost) & Lyophilized Formulations
+  // Clinical Peptides Collection: NPLAB (+15% Mediluxe + +15% Nikolas Wholeseller = Cost * 1.15 * 1.15) & Lyophilized Formulations
   if (targetBrand === 'peptides' || targetBrand === 'nplabs' || targetBrand === 'nplab') {
     try {
       if (adminDb) {
@@ -286,16 +286,20 @@ async function fetchTargetedBrandProducts(brandSlug) {
             const vSupp = String(v.supplierId || v.supplier_id || v.supplier || v.supplierName || '').toLowerCase();
             return vSupp.includes('nplab') || vSupp.includes('np-lab') || vSupp.includes('np lab');
           }).map(v => {
-            const costEur = Number(v.price_eur ?? v.cost ?? v.pricing?.master?.perUnit ?? v.unit_price ?? 50);
-            const price15Eur = Number((costEur * 1.15).toFixed(2));
+            const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+            const costEur = round2(v.price_eur ?? v.cost ?? v.pricing?.master?.perUnit ?? v.unit_price ?? 50);
+            const mediluxePriceEur = round2(costEur * 1.15);
+            const nikolasPublicPriceEur = round2(mediluxePriceEur * 1.15);
             return {
               ...v,
               cost: costEur,
               costPrice: costEur,
               price_eur: costEur,
-              wholesalePrice: price15Eur,
-              price: price15Eur,
-              unit_price: price15Eur,
+              mediluxePrice: mediluxePriceEur,
+              wholesalePrice: mediluxePriceEur,
+              clinicPrice: nikolasPublicPriceEur,
+              price: nikolasPublicPriceEur,
+              unit_price: nikolasPublicPriceEur,
               currency: 'EUR'
             };
           });
@@ -307,7 +311,9 @@ async function fetchTargetedBrandProducts(brandSlug) {
               ...data,
               costPrice: primaryVar.costPrice,
               cost: primaryVar.cost,
+              mediluxePrice: primaryVar.mediluxePrice,
               wholesalePrice: primaryVar.wholesalePrice,
+              clinicPrice: primaryVar.clinicPrice,
               price: primaryVar.price,
               priceEur: primaryVar.price,
               currency: 'EUR',
@@ -316,7 +322,9 @@ async function fetchTargetedBrandProducts(brandSlug) {
               supplierName: 'NP Labs International',
               referralPartner: 'Nikolaos Psathas (NP Labs)',
               referralLink: 'https://www.atlashealth-services.com/c/CAT-RX-7482',
-              referralMarkupPercent: 15
+              mediluxeMarkupPercent: 15,
+              wholesalerMarkupPercent: 15,
+              referralMarkupPercent: 32.25
             });
           }
         });

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
+import { sendOrderCreatedNotificationEmail } from '@/lib/orderNotificationMailer';
 
 /**
  * POST /api/orders/create-draft
@@ -79,16 +80,32 @@ export async function POST(request) {
           const lData = linkSnap.data();
           const isWs = lData.recipientType === 'wholesaler' || lData.recipientType === 'wholeseller' || Boolean(lData.wholesalerId);
           if (isWs) {
-            effectiveWholesalerId = lData.recipientUserId || lData.wholesalerId || null;
+            effectiveWholesalerId = lData.wholesalerId || lData.recipientUserId || null;
             effectiveWholesalerName = lData.recipientName || lData.wholesalerName || null;
             effectiveWholesalerEmail = lData.recipientEmail || lData.wholesalerEmail || null;
-            effectiveReferralCode = effectiveReferralCode || effectiveWholesalerId || String(catalogId).trim();
+            effectiveReferralCode = effectiveReferralCode || String(catalogId).trim() || effectiveWholesalerId;
           }
         }
       } catch (wsLookupErr) {
         console.warn('[create-draft] Could not auto-resolve wholesaler from catalog link:', wsLookupErr.message);
       }
     }
+
+    const isNikolasOrder =
+      ['np-labs-international', 'nikolaos-psathas', 'nplabs', 'nplab', 'cat-rx-7482'].includes(String(effectiveWholesalerId || '').toLowerCase()) ||
+      String(catalogId || '').trim().toUpperCase() === 'CAT-RX-7482' ||
+      String(effectiveReferralCode || '').trim().toUpperCase() === 'CAT-RX-7482';
+
+    if (isNikolasOrder) {
+      effectiveWholesalerId = 'np-labs-international';
+      effectiveWholesalerName = effectiveWholesalerName || 'Nikolaos Psathas (NP Labs)';
+      effectiveWholesalerEmail = effectiveWholesalerEmail || 'nikpsathas@gmail.com';
+      effectiveReferralCode = effectiveReferralCode || 'CAT-RX-7482';
+    }
+
+    const attributedTo = isNikolasOrder
+      ? 'Por atención de Nikolaos Psathas (NP Labs)'
+      : (body.attributedTo || (effectiveWholesalerName ? `Por atención de ${effectiveWholesalerName}` : null));
 
     const formattedItems = cartItems.map(item => {
       const isBulk = item.quantity >= 10 && item.tier10UnitPrice && item.tier10UnitPrice > 0;
@@ -104,6 +121,8 @@ export async function POST(request) {
         quantity: Number(item.quantity) || 0,
         kits: Math.floor((item.quantity || 0) / 10),
         singleUnits: (item.quantity || 0) % 10,
+        baseCost: Number(item.baseCost || item.cost || 0),
+        mediluxePrice: Number(item.mediluxePrice || (item.baseCost ? Number((item.baseCost * 1.15).toFixed(2)) : 0)),
         unitPrice: Number(unitPrice) || 0,
         price: Number(unitPrice) || 0,
         totalPrice,
@@ -156,6 +175,7 @@ export async function POST(request) {
       referralCode: effectiveReferralCode,
       wholesalerName: effectiveWholesalerName,
       wholesalerEmail: effectiveWholesalerEmail,
+      attributedTo,
       collection: String(collection || 'vials').toLowerCase(),
       accountManagerName: String(accountManagerName || '').trim(),
       accountManagerEmail: String(accountManagerEmail || '').trim() || null,
@@ -238,10 +258,35 @@ export async function POST(request) {
 
     await adminDb.collection('notifications').add(notifData);
 
+    // Update catalog_generation_logs conversion status if order originated from a catalog link
+    const targetCatId = orderDocData.catalogId || (isNikolasOrder ? 'CAT-RX-7482' : null);
+    if (targetCatId) {
+      adminDb.collection('catalog_generation_logs').doc(targetCatId).set({
+        status: 'converted_to_order',
+        lastOrderCode: orderCode,
+        lastOrderAt: now.toISOString(),
+        attributedTo: attributedTo || 'Direct',
+        updatedAt: now.toISOString()
+      }, { merge: true }).catch(() => {});
+    }
+
+    // Send immediate email notification to jose@mediluxeme.com for every order placed
+    let emailNotification = null;
+    try {
+      emailNotification = await sendOrderCreatedNotificationEmail(
+        { ...orderDocData, firestoreId: orderRef.id },
+        'jose@mediluxeme.com'
+      );
+    } catch (emailErr) {
+      console.warn('[orders/create-draft] Email notification non-blocking warning:', emailErr.message);
+    }
+
     return NextResponse.json({
       success: true,
       orderId: orderRef.id,
       orderCode,
+      attributedTo,
+      emailNotification,
       message: 'Draft order successfully registered in portal.'
     });
   } catch (error) {

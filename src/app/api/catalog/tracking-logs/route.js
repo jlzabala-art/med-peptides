@@ -94,6 +94,7 @@ export async function POST(request) {
 
     if (body.event === 'view' || body.action === 'view' || (body.id && body.viewedAt)) {
       const targetId = body.id || body.catalogId;
+      const nowIso = body.viewedAt || new Date().toISOString();
       try {
         // Also update shared_catalog_links if exists
         const linkRef = adminDb.collection('shared_catalog_links').doc(targetId);
@@ -102,10 +103,37 @@ export async function POST(request) {
           const lData = linkSnap.data() || {};
           await linkRef.update({
             status: lData.status === 'converted' ? 'converted' : lData.status === 'engaged' ? 'engaged' : 'viewed',
-            lastVisitedAt: body.viewedAt || new Date().toISOString(),
+            lastVisitedAt: nowIso,
             visitsCount: FieldValue.increment(1),
             updatedAt: new Date().toISOString()
           });
+
+          const isNikolas = targetId === 'CAT-RX-7482' || lData.wholesalerId === 'np-labs-international' || lData.recipientUserId === 'nikolaos-psathas';
+          if (isNikolas) {
+            const wRef = adminDb.collection('wholesaler_referrals').doc('np-labs-international');
+            await wRef.set({
+              wholesalerId: 'np-labs-international',
+              wholesalerName: 'Nikolaos Psathas (NP Labs)',
+              wholesalerEmail: 'nikpsathas@gmail.com',
+              attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)',
+              referralCode: targetId,
+              visitsCount: FieldValue.increment(1),
+              lastVisitedAt: nowIso,
+              lastUserAgent: body.userAgent ? String(body.userAgent).slice(0, 150) : null,
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+
+            await wRef.collection('visits').add({
+              wholesalerId: 'np-labs-international',
+              wholesalerName: 'Nikolaos Psathas (NP Labs)',
+              attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)',
+              referralCode: targetId,
+              userAgent: body.userAgent ? String(body.userAgent).slice(0, 150) : null,
+              screen: body.screen || null,
+              referrer: body.referrer ? String(body.referrer).slice(0, 100) : null,
+              visitedAt: nowIso
+            });
+          }
         }
       } catch (err) {
         // Non-blocking

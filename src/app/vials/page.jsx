@@ -77,7 +77,9 @@ export default async function VialsPublicPage({ searchParams }) {
     referralCode: code,
     partnerName: isNikolasAlias ? 'Nikolaos Psathas · NP Labs International' : ref,
     partnerEmail: isNikolasAlias ? 'nikpsathas@gmail.com' : '',
-    markupPercent: 15,
+    mediluxeMarkupPercent: 15,
+    wholesalerMarkupPercent: 15,
+    markupPercent: 32.25,
     referenceUrl: 'https://www.atlashealth-services.com/vials?ref=np-labs-international',
     shortCatalogUrl: 'https://www.atlashealth-services.com/c/CAT-RX-7482',
     collection

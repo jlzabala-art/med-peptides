@@ -175,11 +175,12 @@ module.exports.onOrderCreatedForRx = onDocumentCreated(
   }
 );
 
-// ── Trigger 2: onPrescriptionCreated → stamp server-side price snapshot ────────
+// ── Trigger 2: onPrescriptionCreated → stamp server-side price snapshot & notify jose@mediluxeme.com ──
 module.exports.onPrescriptionCreated = onDocumentCreated(
   {
     document: 'prescriptions/{rxId}',
     region:   'europe-west1',
+    secrets:  [gmailUser, gmailAppPass],
   },
   async (event) => {
     const snap = event.data;
@@ -188,12 +189,81 @@ module.exports.onPrescriptionCreated = onDocumentCreated(
     const rxId  = event.params.rxId;
     const rxData = snap.data();
     const items  = rxData.items || [];
+    const db = getFirestore();
+
+    // ── A0. Notify jose@mediluxeme.com when a prescription is imported / created ──
+    if (!rxData.importEmailNotifiedAt) {
+      try {
+        const userEmail = gmailUser.value();
+        const userPass = gmailAppPass.value();
+        if (userEmail && userPass) {
+          const transporter = nodemailer.createTransport({
+            host:   'smtp.gmail.com',
+            port:   587,
+            secure: false,
+            auth:   { user: userEmail, pass: userPass },
+          });
+
+          const code = rxData.code || rxData.rxCode || rxData.prescriptionNumber || rxData.fileNumber || rxId;
+          const patientName = rxData.patientName || rxData.patient?.name || 'Unknown Patient';
+          const doctorName = rxData.doctorName || rxData.doctor?.name || 'Unknown Doctor';
+          const clinicName = rxData.clinicName || rxData.clinic || rxData.doctor?.clinicName || 'Atlas Partner Clinic';
+          const rawLines = Array.isArray(rxData.items) && rxData.items.length > 0
+            ? rxData.items
+            : (Array.isArray(rxData.prescriptionLines) ? rxData.prescriptionLines : []);
+          const itemRows = rawLines.slice(0, 20).map((it, idx) => {
+            const name = it.productName || it.drugName || it.name || it.activeIngredient || `Item ${idx + 1}`;
+            const dose = it.dosage || it.dose || it.concentration || '—';
+            const block = it.formulationBlock || `Formula ${it.formulationIndex || 1}`;
+            return `<tr><td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;">${block}</td><td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;font-weight:700;">${name}</td><td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;font-family:monospace;">${dose}</td></tr>`;
+          }).join('');
+
+          const html = `
+            <div style="font-family:Inter,Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#f8fafc;border-radius:14px;border:1px solid #e2e8f0;">
+              <div style="background:#003666;color:#fff;padding:18px 22px;border-radius:10px;margin-bottom:18px;">
+                <div style="font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#93c5fd;">Atlas Clinical Prescription Import Alert</div>
+                <h2 style="margin:4px 0 0;font-size:18px;font-weight:800;">New Prescription Imported · #${code}</h2>
+              </div>
+              <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:16px;font-size:13px;">
+                <tr><td style="padding:8px 12px;color:#64748b;font-weight:700;width:36%;">Prescription Code</td><td style="padding:8px 12px;color:#0f172a;font-weight:800;font-family:monospace;">#${code} (${rxId})</td></tr>
+                <tr><td style="padding:8px 12px;color:#64748b;font-weight:700;">Patient</td><td style="padding:8px 12px;color:#0f172a;font-weight:700;">${patientName}</td></tr>
+                <tr><td style="padding:8px 12px;color:#64748b;font-weight:700;">Prescribing Physician</td><td style="padding:8px 12px;color:#0f172a;">${doctorName}</td></tr>
+                <tr><td style="padding:8px 12px;color:#64748b;font-weight:700;">Clinic / Institution</td><td style="padding:8px 12px;color:#0f172a;">${clinicName}</td></tr>
+                <tr><td style="padding:8px 12px;color:#64748b;font-weight:700;">Channel / Status</td><td style="padding:8px 12px;color:#0f172a;">${rxData.importChannel || rxData.sourceType || 'portal'} · ${(rxData.status || 'draft').toUpperCase()}</td></tr>
+              </table>
+              ${itemRows ? `
+              <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:16px;font-size:12px;">
+                <thead><tr style="background:#f1f5f9;text-align:left;"><th style="padding:8px 10px;">Block</th><th style="padding:8px 10px;">Active Ingredient</th><th style="padding:8px 10px;">Dose</th></tr></thead>
+                <tbody>${itemRows}</tbody>
+              </table>` : ''}
+              <div style="margin-top:14px;">
+                <a href="https://www.atlashealth-services.com/rx/${encodeURIComponent(code)}" style="display:inline-block;padding:10px 16px;background:#003666;color:#fff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:700;margin-right:8px;">Open Prescription Dossier</a>
+                <a href="https://www.atlashealth-services.com/admin/labels?code=${encodeURIComponent(code)}" style="display:inline-block;padding:10px 16px;background:#0d9488;color:#fff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:700;">Open in Label Studio</a>
+              </div>
+            </div>
+          `;
+
+          await transporter.sendMail({
+            from: `"Atlas Health Clinical Operations" <${userEmail}>`,
+            to: 'jose@mediluxeme.com',
+            subject: `[Atlas Rx Imported] #${code} · ${patientName} (${doctorName})`,
+            html,
+          });
+
+          await snap.ref.set({
+            importEmailNotifiedAt: FieldValue.serverTimestamp(),
+            importEmailRecipient: 'jose@mediluxeme.com',
+          }, { merge: true });
+          console.log(`✅ [onPrescriptionCreated] Import email sent to jose@mediluxeme.com for Rx ${rxId}`);
+        }
+      } catch (emailErr) {
+        console.warn(`[onPrescriptionCreated] Non-fatal email error for Rx ${rxId}:`, emailErr.message);
+      }
+    }
 
     // Only process if any item is missing a server-verified price
     const needsPriceStamp = items.some(it => !it.pricePatientVerified);
     if (!needsPriceStamp) return;
-
-    const db = getFirestore();
 
     try {
       // Look up canonical prices from the products collection
