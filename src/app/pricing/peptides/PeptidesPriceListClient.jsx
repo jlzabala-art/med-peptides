@@ -1121,26 +1121,27 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                   </div>
                 </div>
 
-                {/* ── Section 3: Notes ── */}
-                <div>
-                  <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                    Order Notes / Compounding Specifications
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={orderForm.notes}
-                    onChange={e => setOrderForm(prev => ({ ...prev, notes: e.target.value }))}
-                    placeholder="Any specific batch, concentration, or delivery notes..."
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem',
-                      fontFamily: 'inherit'
-                    }}
-                  />
-                </div>
+                {/* ── Section 3: Notes & Submission ── */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                      Order Notes / Compounding Specifications
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={orderForm.notes}
+                      onChange={e => setOrderForm(prev => ({ ...prev, notes: e.target.value }))}
+                      placeholder="Any specific batch, concentration, or delivery notes..."
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.85rem',
+                        fontFamily: 'inherit'
+                      }}
+                    />
+                  </div>
 
                   <button
                     type="submit"
