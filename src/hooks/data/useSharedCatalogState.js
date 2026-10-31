@@ -20,6 +20,7 @@ import { sortVariantsAscending } from '@/utils/variantSorter';
 import { GOAL_TYPES, VALID_GOALS, GOAL_LABELS } from '@/constants/goalTypes';
 import { searchAlgolia } from '@/services/algoliaSearch';
 import { getFdaPeptideStatus, FDA_STATUS_TYPES } from '@/data/fdaPeptidesRegistry';
+import { safeReplaceState } from '@/hooks/useSafeUrlState';
 
 /**
  * Reads a URL search param safely (client-side only, SSR returns default).
@@ -49,7 +50,7 @@ function syncFiltersToUrl(filters) {
     set('fda',   filters.fdaFilter,     'all');
     const qs = params.toString();
     const newUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
-    window.history.replaceState(null, '', newUrl);
+    safeReplaceState(newUrl);
   } catch { /* non-blocking */ }
 }
 

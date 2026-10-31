@@ -10,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import QuickCreateDropdown from './QuickCreateDropdown';
 import { prefetchModuleData } from '../../../utils/speculativePrefetch';
+import { usePortalNavigation } from '../../../hooks/usePortalNavigation';
 import './AppSidebar.css';
 
 // ── Institutional Clinical Sidebar Palette (GCP / Medical Standard: Clean Neutral Monochrome) ──
@@ -34,7 +35,8 @@ export default function AppSidebar({
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { 
+  const { navigateTo: circuitBreakerNavigate } = usePortalNavigation();
+  const {
     expandedGroups, toggleGroup, setExpandedGroups,
     favorites, toggleFavorite,
     recents, addRecent
@@ -86,7 +88,7 @@ export default function AppSidebar({
     const currentSlug = parts.length > 1 ? parts.slice(1).join('/') : '';
     let activeGroupId = null;
     for (const group of filteredGroups) {
-      const hasActive = group.items?.some(item => 
+      const hasActive = group.items?.some(item =>
         item.id === currentSlug || (currentSlug === '' && (item.id === '' || item.id === 'dashboard' || item.id === 'overview'))
       );
       if (hasActive) {
@@ -101,7 +103,7 @@ export default function AppSidebar({
         setExpandedGroups([activeGroupId]);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, isMobile]);
 
   // Local visual expand/collapse with persistence and compact-laptop intelligence
@@ -131,7 +133,7 @@ export default function AppSidebar({
       const next = !prev;
       try {
         localStorage.setItem('atlas_sidebar_expanded', String(next));
-      } catch (e) {}
+      } catch (e) { }
       return next;
     });
   };
@@ -154,6 +156,8 @@ export default function AppSidebar({
   };
 
   const handleNavigate = (id, targetHref, e) => {
+    e?.preventDefault?.();
+
     // 1. Asynchronously persist to recents to avoid mid-event unmounting or state thrashing
     if (typeof requestAnimationFrame !== 'undefined') {
       requestAnimationFrame(() => addRecent(id));
@@ -165,14 +169,11 @@ export default function AppSidebar({
       onClose?.();
     }
 
-    // 2. Authoritative portal navigation via onNavigate (AdminDashboard navToTab with startTransition)
+    // 2. Authoritative portal navigation via onNavigate or Circuit Breaker
     if (typeof onNavigate === 'function') {
-      e?.preventDefault?.();
       onNavigate(id);
-    } else if (targetHref) {
-      // Direct router navigation if no onNavigate handler provided
-      e?.preventDefault?.();
-      router.push(targetHref);
+    } else {
+      circuitBreakerNavigate(id);
     }
   };
 
@@ -206,28 +207,28 @@ export default function AppSidebar({
     const targetHref = item.id === 'b2c-shop' ? '/' : `${portalBase}/${item.id === 'dashboard' || item.id === 'overview' ? '' : item.id}`;
 
     return (
-      <div 
-        key={`${prefix}${item.id}`} 
+      <div
+        key={`${prefix}${item.id}`}
         className={`sb-item ${isActive ? 'active' : ''} level-${level}`}
         data-tooltip={!expanded ? item.label : undefined}
         onMouseEnter={() => {
           try {
             router.prefetch(targetHref);
             prefetchModuleData(item.id, queryClient, effectiveRole);
-          } catch (e) {}
+          } catch (e) { }
         }}
 
       >
-        <Link 
+        <Link
           href={targetHref}
-          className="sb-item-btn" 
+          className="sb-item-btn"
           onClick={(e) => handleNavigate(item.id, targetHref, e)}
           prefetch={false}
         >
           <span className="sb-item-icon" style={{ position: 'relative' }}>
             {Icon && <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />}
             {!expanded && !isMobile && item.badge !== undefined && item.badge !== null && item.badge !== 0 && (
-              <span 
+              <span
                 style={{
                   position: 'absolute',
                   top: -2,
@@ -245,7 +246,7 @@ export default function AppSidebar({
             <span className="sb-item-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1, gap: '6px' }}>
               <span>{item.label}</span>
               {item.badge !== undefined && item.badge !== null && item.badge !== 0 && (
-                <span 
+                <span
                   style={{
                     fontSize: '0.68rem',
                     fontWeight: 700,
@@ -262,10 +263,10 @@ export default function AppSidebar({
             </span>
           )}
         </Link>
-        
+
         {(expanded || isMobile) && (
-          <button 
-            className={`sb-item-action ${isFav ? 'fav-active' : ''}`} 
+          <button
+            className={`sb-item-action ${isFav ? 'fav-active' : ''}`}
             onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id); }}
             title={isFav ? "Remove from Favorites" : "Add to Favorites"}
           >
@@ -279,8 +280,8 @@ export default function AppSidebar({
   return (
     <>
       {isMobile && isOpen && (
-        <div 
-          className="sb-mobile-overlay" 
+        <div
+          className="sb-mobile-overlay"
           onClick={onClose}
           style={{
             position: 'fixed',
@@ -292,201 +293,201 @@ export default function AppSidebar({
         />
       )}
       <aside className={`app-sidebar ${!expanded ? 'collapsed' : ''} ${isMobile && isOpen ? 'mobile-open' : ''}`}>
-      {/* Top Header Section */}
-      <div className="sb-header">
-        <div className="sb-brand">
-          <AtlasHealthLogo size={24} />
-          {(expanded || isMobile) && <span style={{ marginLeft: '8px', fontSize: '14px', fontWeight: 700, color: 'var(--sb-text)' }}>Atlas Health</span>}
-        </div>
-        {isMobile ? (
-          <button 
-            className="sb-close-btn" 
-            onClick={onClose}
-            aria-label="Close menu"
-            style={{ 
-              marginLeft: 'auto', 
-              background: 'transparent', 
-              border: 'none', 
-              cursor: 'pointer', 
-              width: '44px', 
-              height: '44px', 
-              minWidth: '44px',
-              minHeight: '44px',
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              color: 'var(--sb-text)',
-              borderRadius: '8px'
-            }}
-          >
-            <X size={20} />
-          </button>
-        ) : (
-          <button 
-            className="sb-hamburger" 
-            onClick={handleToggleExpanded}
-            style={{ marginLeft: expanded ? 'auto' : '0' }}
-            title={expanded ? "Collapse sidebar" : "Expand sidebar"}
-          >
-            {expanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-          </button>
-        )}
-      </div>
-
-      <nav className="sb-scroll">
-        
-        {/* Quick Create Dropdown */}
-        {expanded && (
-          <QuickCreateDropdown onNavigate={onNavigate} activeRole={effectiveRole} />
-        )}
-
-        {/* Simulation Badge */}
-        {expanded && simulatedRole && simulatedRoleData && (
-          <div
-            style={{
-              margin: '8px 12px',
-              padding: '8px 10px',
-              borderRadius: '8px',
-              background: `${simulatedRoleData.color}15`,
-              border: `1.5px solid ${simulatedRoleData.color}40`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '6px',
-            }}
-          >
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: simulatedRoleData.color, display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Eye size={13} /> {simulatedRoleData.emoji} {simulatedRoleData.label}
-            </span>
+        {/* Top Header Section */}
+        <div className="sb-header">
+          <div className="sb-brand">
+            <AtlasHealthLogo size={24} />
+            {(expanded || isMobile) && <span style={{ marginLeft: '8px', fontSize: '14px', fontWeight: 700, color: 'var(--sb-text)' }}>Atlas Health</span>}
+          </div>
+          {isMobile ? (
             <button
-              onClick={exitSimulation}
-              style={{ fontSize: '0.7rem', color: simulatedRoleData.color, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+              className="sb-close-btn"
+              onClick={onClose}
+              aria-label="Close menu"
+              style={{
+                marginLeft: 'auto',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                width: '44px',
+                height: '44px',
+                minWidth: '44px',
+                minHeight: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--sb-text)',
+                borderRadius: '8px'
+              }}
             >
-              Exit
+              <X size={20} />
+            </button>
+          ) : (
+            <button
+              className="sb-hamburger"
+              onClick={handleToggleExpanded}
+              style={{ marginLeft: expanded ? 'auto' : '0' }}
+              title={expanded ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              {expanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+            </button>
+          )}
+        </div>
+
+        <nav className="sb-scroll">
+
+          {/* Quick Create Dropdown */}
+          {expanded && (
+            <QuickCreateDropdown onNavigate={onNavigate} activeRole={effectiveRole} />
+          )}
+
+          {/* Simulation Badge */}
+          {expanded && simulatedRole && simulatedRoleData && (
+            <div
+              style={{
+                margin: '8px 12px',
+                padding: '8px 10px',
+                borderRadius: '8px',
+                background: `${simulatedRoleData.color}15`,
+                border: `1.5px solid ${simulatedRoleData.color}40`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '6px',
+              }}
+            >
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: simulatedRoleData.color, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Eye size={13} /> {simulatedRoleData.emoji} {simulatedRoleData.label}
+              </span>
+              <button
+                onClick={exitSimulation}
+                style={{ fontSize: '0.7rem', color: simulatedRoleData.color, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+              >
+                Exit
+              </button>
+            </div>
+          )}
+
+          {/* Favorites Section */}
+          {isMounted && expanded && favorites.length > 0 && (
+            <div className="sb-group">
+              <div className="sb-group-header">Favorites</div>
+              <div className="sb-group-items">
+                {favorites.map(id => renderItem(getItemById(id), 1, 'fav-'))}
+              </div>
+            </div>
+          )}
+
+          {/* Recents Section — always visible/open */}
+          {isMounted && recents.length > 0 && (
+            <div className="sb-group">
+              {expanded ? (
+                <div className="sb-group-header">Recent</div>
+              ) : (
+                <div
+                  className="sb-group-header-mini"
+                  title="Recent items"
+                  style={{ display: 'flex', justifyContent: 'center', padding: '6px 0', color: 'var(--sb-muted)' }}
+                >
+                  <History size={16} />
+                </div>
+              )}
+              <div className="sb-group-items">
+                {recents.slice(0, 4).map(id => renderItem(getItemById(id), 1, 'recent-'))}
+              </div>
+            </div>
+          )}
+
+          {/* Dynamic Groups — filtered by effective role */}
+          {filteredGroups.map((group) => {
+            const isGroupExpanded = isMobile
+              ? mobileExpandedGroups.includes(group.id)
+              : expandedGroups.includes(group.id);
+            const GroupIcon = group.icon;
+            const theme = GROUP_THEMES[group.id] || GROUP_THEMES.default;
+
+            const handleGroupToggle = () => {
+              if (isMobile) {
+                setMobileExpandedGroups(prev =>
+                  prev.includes(group.id) ? [] : [group.id]
+                );
+              } else {
+                if (!expanded) setExpanded(true);
+                // Single-open accordion: only THIS group can be open (all others closed)
+                setExpandedGroups(expandedGroups.includes(group.id) ? [] : [group.id]);
+              }
+            };
+
+            return (
+              <div key={group.id} className="sb-group hierarchical">
+                <button
+                  className="sb-group-toggle"
+                  onClick={handleGroupToggle}
+                  data-tooltip={!expanded ? group.label : undefined}
+                >
+                  {GroupIcon && (
+                    <span
+                      className="sb-group-icon-wrap"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 24,
+                        height: 24,
+                        borderRadius: 6,
+                        backgroundColor: isGroupExpanded ? (theme.activeBg || 'rgba(0, 54, 102, 0.08)') : 'transparent',
+                        color: isGroupExpanded ? (theme.activeColor || 'var(--color-primary, #003666)') : '#64748b',
+                        marginRight: expanded ? 8 : 0,
+                        flexShrink: 0,
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <GroupIcon size={16} strokeWidth={isGroupExpanded ? 2.2 : 1.8} style={{ color: 'inherit' }} />
+                    </span>
+                  )}
+                  {expanded && (
+                    <>
+                      <span
+                        className="sb-group-label"
+                        style={{
+                          flex: 1,
+                          textAlign: 'left',
+                          fontWeight: 700,
+                          fontSize: '0.78rem',
+                          letterSpacing: '0.04em',
+                          color: 'var(--sb-text, #0f172a)'
+                        }}
+                      >
+                        {group.label.toUpperCase()}
+                      </span>
+                      <span style={{ color: 'var(--sb-muted, #64748b)', display: 'flex', alignItems: 'center' }}>
+                        {isGroupExpanded ? <ChevronUp size={14} strokeWidth={2.5} /> : <ChevronDown size={14} strokeWidth={2.5} />}
+                      </span>
+                    </>
+                  )}
+                </button>
+
+                {/* Sub-items (Level 2) — ONLY render when this group is the one expanded! */}
+                {isGroupExpanded && (
+                  <div className="sb-group-items">
+                    {group.items?.map(item => renderItem(item, 2, `group-${group.id}-`))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+
+        {/* Bottom Footer Section */}
+        {footer && (
+          <div className="sb-footer">
+            <button className="sb-item sb-item-btn" onClick={footer.onClick} data-tooltip={!expanded ? footer.label : undefined}>
+              <span className="sb-item-icon"><LogOut size={18} /></span>
+              {expanded && <span className="sb-item-label">{footer.label}</span>}
             </button>
           </div>
         )}
-
-        {/* Favorites Section */}
-        {isMounted && expanded && favorites.length > 0 && (
-          <div className="sb-group">
-            <div className="sb-group-header">Favorites</div>
-            <div className="sb-group-items">
-              {favorites.map(id => renderItem(getItemById(id), 1, 'fav-'))}
-            </div>
-          </div>
-        )}
-
-        {/* Recents Section — always visible/open */}
-        {isMounted && recents.length > 0 && (
-          <div className="sb-group">
-            {expanded ? (
-              <div className="sb-group-header">Recent</div>
-            ) : (
-              <div 
-                className="sb-group-header-mini" 
-                title="Recent items"
-                style={{ display: 'flex', justifyContent: 'center', padding: '6px 0', color: 'var(--sb-muted)' }}
-              >
-                <History size={16} />
-              </div>
-            )}
-            <div className="sb-group-items">
-              {recents.slice(0, 4).map(id => renderItem(getItemById(id), 1, 'recent-'))}
-            </div>
-          </div>
-        )}
-
-        {/* Dynamic Groups — filtered by effective role */}
-        {filteredGroups.map((group) => {
-          const isGroupExpanded = isMobile
-            ? mobileExpandedGroups.includes(group.id)
-            : expandedGroups.includes(group.id);
-          const GroupIcon = group.icon;
-          const theme = GROUP_THEMES[group.id] || GROUP_THEMES.default;
-
-          const handleGroupToggle = () => {
-            if (isMobile) {
-              setMobileExpandedGroups(prev =>
-                prev.includes(group.id) ? [] : [group.id]
-              );
-            } else {
-              if (!expanded) setExpanded(true);
-              // Single-open accordion: only THIS group can be open (all others closed)
-              setExpandedGroups(expandedGroups.includes(group.id) ? [] : [group.id]);
-            }
-          };
-
-          return (
-            <div key={group.id} className="sb-group hierarchical">
-              <button 
-                className="sb-group-toggle"
-                onClick={handleGroupToggle}
-                data-tooltip={!expanded ? group.label : undefined}
-              >
-                {GroupIcon && (
-                  <span
-                    className="sb-group-icon-wrap"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: 24,
-                      height: 24,
-                      borderRadius: 6,
-                      backgroundColor: isGroupExpanded ? (theme.activeBg || 'rgba(0, 54, 102, 0.08)') : 'transparent',
-                      color: isGroupExpanded ? (theme.activeColor || 'var(--color-primary, #003666)') : '#64748b',
-                      marginRight: expanded ? 8 : 0,
-                      flexShrink: 0,
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    <GroupIcon size={16} strokeWidth={isGroupExpanded ? 2.2 : 1.8} style={{ color: 'inherit' }} />
-                  </span>
-                )}
-                {expanded && (
-                  <>
-                    <span 
-                      className="sb-group-label"
-                      style={{ 
-                        flex: 1, 
-                        textAlign: 'left', 
-                        fontWeight: 700, 
-                        fontSize: '0.78rem', 
-                        letterSpacing: '0.04em',
-                        color: 'var(--sb-text, #0f172a)' 
-                      }}
-                    >
-                      {group.label.toUpperCase()}
-                    </span>
-                    <span style={{ color: 'var(--sb-muted, #64748b)', display: 'flex', alignItems: 'center' }}>
-                      {isGroupExpanded ? <ChevronUp size={14} strokeWidth={2.5} /> : <ChevronDown size={14} strokeWidth={2.5} />}
-                    </span>
-                  </>
-                )}
-              </button>
-
-              {/* Sub-items (Level 2) — ONLY render when this group is the one expanded! */}
-              {isGroupExpanded && (
-                <div className="sb-group-items">
-                  {group.items?.map(item => renderItem(item, 2, `group-${group.id}-`))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </nav>
-
-      {/* Bottom Footer Section */}
-      {footer && (
-        <div className="sb-footer">
-          <button className="sb-item sb-item-btn" onClick={footer.onClick} data-tooltip={!expanded ? footer.label : undefined}>
-            <span className="sb-item-icon"><LogOut size={18} /></span>
-            {expanded && <span className="sb-item-label">{footer.label}</span>}
-          </button>
-        </div>
-      )}
-    </aside>
+      </aside>
     </>
   );
 }

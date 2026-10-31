@@ -6,6 +6,7 @@ import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import MetricCard from '@/components/ui/MetricCard';
+import { safeReplaceState } from '@/hooks/useSafeUrlState';
 
 export function UniformKPIs({ products, globalMetrics }) {
   const total = globalMetrics?.total ?? products.length;
@@ -39,8 +40,7 @@ export function UniformKPIs({ products, globalMetrics }) {
                 url.searchParams.set('status', s.filter);
               }
               const newUrl = `${url.pathname}${url.search ? url.search : ''}`;
-              const currentState = window.history.state || {};
-              window.history.replaceState({ ...currentState }, '', newUrl);
+              safeReplaceState(newUrl);
             }
           }}
           className="clickable-card"

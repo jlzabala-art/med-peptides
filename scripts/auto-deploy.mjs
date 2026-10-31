@@ -42,7 +42,11 @@ function getCmdOutput(cmd) {
   }
 }
 
-// 1. Comprobar estado de Git
+// 1. Validar integridad de rutas antes del despliegue
+console.log('🔍 [Auto Deploy] Validando consistencia de rutas en el portal...');
+runCmd('npm run test:routes');
+
+// 2. Comprobar estado de Git
 const currentBranch = getCmdOutput('git rev-parse --abbrev-ref HEAD') || 'main';
 const gitStatus = getCmdOutput('git status --porcelain');
 const unpushedCommits = getCmdOutput(`git log origin/${currentBranch}..HEAD --oneline 2>/dev/null`) || '';

@@ -4,6 +4,7 @@ import { CATEGORY_SUBCATEGORIES } from '../../../../config/categories';
 import { useCategories } from '../../../../hooks/admin/useCategories';
 import { PRESENTATION_LABELS } from '../../../../constants/presentationTypes';
 import { CLINICAL_GOALS, getGoalLabel } from '../../../../config/goals';
+import { safeReplaceState } from '../../../../hooks/useSafeUrlState';
 
 export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
   const searchParams = useSearchParams();
@@ -32,10 +33,7 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
     }
     const queryString = params.toString();
     const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
-    if (typeof window !== 'undefined') {
-      const currentState = window.history.state || {};
-      window.history.replaceState({ ...currentState }, '', newUrl);
-    }
+    safeReplaceState(newUrl);
     router.replace(newUrl, { scroll: false });
   }, [searchParams, pathname, router]);
 
@@ -79,8 +77,7 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
         else params.delete('q');
         const queryString = params.toString();
         const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
-        const currentState = window.history.state || {};
-        window.history.replaceState({ ...currentState }, '', newUrl);
+        safeReplaceState(newUrl);
         
         try {
           const currentPrefs = JSON.parse(localStorage.getItem('regenpept-admin-catalog-prefs') || '{}');
@@ -145,10 +142,7 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
     } catch {
       // ignore storage error
     }
-    if (typeof window !== 'undefined') {
-      const currentState = window.history.state || {};
-      window.history.replaceState({ ...currentState }, '', pathname);
-    }
+    safeReplaceState(pathname);
     router.replace(pathname, { scroll: false });
     router.refresh();
   }, [pathname, router]);

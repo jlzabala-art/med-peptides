@@ -19,6 +19,7 @@ const Omnibar = dynamic(() => import('../components/admin/Omnibar'), {
   ssr: false,
 });
 import { useRoleAccess } from '../hooks/useRoleAccess';
+import { usePortalNavigation } from '../hooks/usePortalNavigation';
 
 import GlobalNotificationCenter from '../components/shared/widgets/GlobalNotificationCenter';
 import MarketIntelligenceHub from '../components/admin/market/MarketIntelligenceHub';
@@ -37,11 +38,7 @@ import { ShieldCheck, ArrowLeft, Settings, Users, Database, Layers, PackageSearc
 
 // ── Always-visible pinned items (not inside accordion groups) ─────────────────
 const PINNED_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard KPIs', icon: LayoutDashboard },
-  { id: 'messages', label: 'Messages', icon: MessageSquare },
-  { id: 'operations-inbox', label: 'Inbox', icon: Inbox },
-  { id: 'calendar', label: 'Calendar', icon: Calendar },
-  { id: 'pending-apis', label: 'APIs Pendientes', icon: Database },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
 ];
 
 // ── Hooks ──────────────────────────────────────────────────────────────────────
@@ -306,28 +303,7 @@ export default function AdminDashboard({ children }) {
     isAdmin
   ]);
 
-  const [isPending, startTransition] = React.useTransition();
-
-  const navToTab = useCallback(
-    (tabId) => {
-      startTransition(() => {
-        if (tabId === 'b2c-shop') {
-          router.push('/');
-          return;
-        }
-        if (tabId === 'pending-apis') {
-          router.push('/admin/catalog?apiPlaceholder=Only APIs');
-          return;
-        }
-        if (tabId === 'dashboard' && isAccountManager) {
-          router.push('/admin/prescriptions');
-          return;
-        }
-        router.push(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
-      });
-    },
-    [router, isAccountManager]
-  );
+  const { navigateTo: navToTab, isPending } = usePortalNavigation();
 
   const handleLogout = () => {
     if (logout) logout();

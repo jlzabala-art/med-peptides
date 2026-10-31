@@ -14,6 +14,7 @@ import { useToast } from '../../../hooks/useToast';
 import notifier from '../../../services/NotificationService';
 import { useRoleAccess } from '../../../hooks/useRoleAccess';
 import { useAdminRoleSimulation } from '../../../hooks/admin/useAdminRoleSimulation';
+import { safeReplaceState } from '../../../hooks/useSafeUrlState';
 
 import PageHeader from '../../../components/ui/PageHeader';
 import GlobalSearchBar from '../../../components/ui/GlobalSearchBar';
@@ -93,7 +94,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       setIsCreateModalOpen(true);
       const url = new URL(window.location.href);
       url.searchParams.delete('new');
-      window.history.replaceState({}, '', url.toString());
+      safeReplaceState(url.toString());
     }
   }, [deepLinkNew]);
 
@@ -237,11 +238,9 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       selectAll(filteredUsers.map(u => u.id));
       
       // Clean up URL to prevent re-selection on subsequent navigation within the page
-      if (window.history && window.history.replaceState) {
-        const url = new URL(window.location.href);
-        url.searchParams.delete('preselect');
-        window.history.replaceState({}, '', url.toString());
-      }
+      const url = new URL(window.location.href);
+      url.searchParams.delete('preselect');
+      safeReplaceState(url.toString());
     }
   }, [deepLinkPreselect, filteredUsers, selectAll]);
 

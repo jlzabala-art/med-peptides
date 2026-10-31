@@ -11,6 +11,7 @@
     "build:webpack": "next build --webpack",
     "start": "next start",
     "lint": "eslint src",
+    "test:routes": "node scripts/validate-navigation-routes.mjs",
     "analyze": "ANALYZE=true next build",
     "deploy": "node scripts/auto-deploy.mjs",
     "clean:deploy": "rm -rf .next .firebase",

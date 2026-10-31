@@ -27,6 +27,7 @@ import { resolvePhysicalCapsuleSize, CAPSULE_BOTTLE_SIZES, calculatePharmapolisC
 import CompoundingGoalWizard from '../components/compounding/CompoundingGoalWizard';
 import PageHeader from '@/components/ui/PageHeader';
 import { triggerHaptic } from '../utils/haptics';
+import { safeReplaceState } from '../hooks/useSafeUrlState';
 import {
   FlaskConical, ShieldCheck, Award, Zap, Search, X, Plus, Minus, Download, Sparkles,
   Trash2, Pill, Brain, Moon, Leaf, HeartPulse, AlertTriangle, CheckCircle2, Send, Link2, RotateCcw, Dna,
@@ -402,7 +403,7 @@ export default function CompoundingPage({
       params.delete('f'); params.delete('caps'); params.delete('name');
     }
     const qs = params.toString();
-    window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
+    safeReplaceState(`${window.location.pathname}${qs ? `?${qs}` : ''}`);
   }, [items, capsPerBottle, formulaName]);
 
   /* Close search dropdown on outside click */

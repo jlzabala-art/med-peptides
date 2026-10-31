@@ -28,6 +28,7 @@ import EmptyState from '../components/ui/EmptyState';
 import TieredPriceShield from '../components/pricing/TieredPriceShield';
 import { resolvePhysicalCapsuleSize, CAPSULE_BOTTLE_SIZES } from '../services/pharmapolisCostEngine.js';
 import FrictionFreeUnlockModal from '../components/pricing/FrictionFreeUnlockModal';
+import { safeReplaceState } from '../hooks/useSafeUrlState';
 import InlineOrderButton from '../components/orders/InlineOrderButton';
 import UnifiedOrderDrawer from '../components/orders/UnifiedOrderDrawer';
 import { useAuth } from '../context/AuthContext';
@@ -885,7 +886,7 @@ export default function BrandCollectionPage({
     const qs = params.toString();
     const next = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`;
     if (next !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
-      window.history.replaceState(null, '', next);
+      safeReplaceState(next);
     }
   }, [searchQuery, selectedCategory, isUrlHydrated]);
 

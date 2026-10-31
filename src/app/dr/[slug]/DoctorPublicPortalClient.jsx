@@ -5,6 +5,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
 import { rememberDoctorSection } from '@/components/doctor/DoctorContinueBanner';
+import { safeReplaceState } from '@/hooks/useSafeUrlState';
 import {
   Stethoscope,
   Share2,
@@ -988,7 +989,7 @@ export default function DoctorPublicPortalClient({
     if (activeAnchor !== 'overview') params.set('tab', activeAnchor);
     const newSearch = params.toString() ? `?${params.toString()}` : '';
     if (window.location.search !== newSearch) {
-      window.history.replaceState(null, '', `${window.location.pathname}${newSearch}`);
+      safeReplaceState(`${window.location.pathname}${newSearch}`);
     }
   }, [searchQuery, statusFilter, quickRxFilter, patientFilterMode, taskFilter, temporalFilter, activeAnchor]);
 

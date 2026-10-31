@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FileText, Clock, Activity, CheckCircle2 } from '@/lib/icons';
 import { usePrescriptionAggregates } from '../../../hooks/data/usePrescriptionAggregates';
 import { MetricCard, KpiScopeBar } from '../../ui';
+import { safeReplaceState } from '@/hooks/useSafeUrlState';
 
 export default function PrescriptionsKPIs({ serverKPIs, filteredCount = null, isFiltered = false, doctorId = null }) {
   const { data: aggs, isLoading } = usePrescriptionAggregates({ doctorId, enabled: !serverKPIs });
@@ -54,8 +55,7 @@ export default function PrescriptionsKPIs({ serverKPIs, filteredCount = null, is
                   url.searchParams.set('status', s.filter);
                 }
                 const newUrl = `${url.pathname}${url.search ? url.search : ''}`;
-                const currentState = window.history.state || {};
-                window.history.replaceState({ ...currentState }, '', newUrl);
+                safeReplaceState(newUrl);
               }
             }}
             className="clickable-card"
