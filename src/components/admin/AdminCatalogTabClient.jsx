@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { Download, Plus, FileText, ChevronDown, BookOpen, Loader, Globe } from '@/lib/icons';
+import { useSearchParams } from 'next/navigation';
+import { Download, Plus, FileText, ChevronDown, BookOpen, Loader, Globe, ExternalLink } from '@/lib/icons';
 import { useDrawer } from '@/context/DrawerContext';
 import { toast } from 'react-hot-toast';
 import notifier from '@/services/NotificationService';
@@ -82,12 +83,59 @@ function CatalogExportDropdown({
   );
 }
 
+function PublicCatalogLinkButton({ supplier }) {
+  const searchParams = useSearchParams();
+  const currentSupplier = supplier || searchParams?.get('supplier') || '';
+
+  let targetUrl = '/';
+  let label = 'Live Store';
+
+  if (currentSupplier.toLowerCase().includes('24genetics')) {
+    targetUrl = '/pricing/24genetics';
+    label = '24Genetics Portal';
+  } else if (currentSupplier.toLowerCase().includes('colway')) {
+    targetUrl = '/pricing/colway';
+    label = 'Colway Portal';
+  }
+
+  return (
+    <a
+      href={targetUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="gcp-btn-secondary"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.35rem',
+        whiteSpace: 'nowrap',
+        textDecoration: 'none',
+        color: '#0f172a',
+        backgroundColor: '#ffffff',
+        border: '1px solid #cbd5e1',
+        padding: '0.4rem 0.65rem',
+        borderRadius: '6px',
+        fontSize: '0.82rem',
+        fontWeight: 600,
+        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+      }}
+      title={`Open public page in new tab: ${targetUrl}`}
+    >
+      <Globe size={14} color="#0284c7" />
+      <span className="btn-label">{label}</span>
+      <ExternalLink size={12} color="#64748b" />
+    </a>
+  );
+}
+
 /* ─────────────────────────────────────────────────────────────────
    Desktop Actions — Import, Export Dropdown, New Product
 ───────────────────────────────────────────────────────────────── */
 function DesktopCatalogActions(props) {
   return (
     <div className="catalog-header-actions-desktop" style={{ gap: '0.5rem', alignItems: 'center' }}>
+      <PublicCatalogLinkButton supplier={props.lockedSupplier || props.defaultSupplier} />
+
       <button
         onClick={props.onImportPriceList}
         className="gcp-btn-secondary"
@@ -117,6 +165,26 @@ function DesktopCatalogActions(props) {
 function MobileCatalogActions(props) {
   return (
     <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
+      <a
+        href={props.lockedSupplier?.toLowerCase?.()?.includes('24genetics') ? '/pricing/24genetics' : '/'}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="gcp-btn-secondary"
+        title="Open Live Public Store"
+        style={{
+          padding: '0.5rem',
+          minHeight: '44px',
+          minWidth: '44px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '10px',
+          textDecoration: 'none',
+          color: '#0284c7',
+        }}
+      >
+        <Globe size={18} />
+      </a>
       <button
         type="button"
         onClick={props.onNewProduct}

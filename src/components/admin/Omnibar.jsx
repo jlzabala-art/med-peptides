@@ -51,9 +51,15 @@ export default function Omnibar({ isOpen, onClose }) {
     if (query.startsWith('>')) {
       const commandQuery = query.substring(1).trim().toLowerCase();
       const systemCommands = [
-        { id: 'c1', title: 'Show delayed shipments', action: '/admin/logistics?filter=delayed', desc: 'Filters logistics view by delayed packages' },
-        { id: 'c2', title: 'Generate Q3 Revenue Report', action: '/admin/finance?report=q3', desc: 'Exports finance data to PDF' },
-        { id: 'c3', title: 'Analyze Lead Conversion Rate', action: '/admin/crm?action=analyze', desc: 'Triggers Atlas AI analysis on recent leads' }
+        { id: 'pub_store', title: 'Open Public B2C Storefront', action: '/', external: true, desc: 'Opens public shop in new tab' },
+        { id: 'pub_24g', title: 'Open 24Genetics Genomics Portal', action: '/pricing/24genetics', external: true, desc: 'Opens interactive genomic price list' },
+        { id: 'pub_colway', title: 'Open Colway Trichology Collection', action: '/pricing/colway', external: true, desc: 'Opens bio-peptides & stem cells portal' },
+        { id: 'pub_comp', title: 'Open Custom Compounding Lab', action: '/compounding', external: true, desc: 'Opens custom formulation capsule lab' },
+        { id: 'pub_proto', title: 'Open Public Clinical Protocols', action: '/proto', external: true, desc: 'Opens public formulary & dosages' },
+        { id: 'pub_labels', title: 'Open Label Studio Standalone', action: '/labels', external: true, desc: 'Opens direct warehouse label printer' },
+        { id: 'c1', title: 'Show delayed shipments', action: '/admin/shipping?filter=delayed', desc: 'Filters logistics view by delayed packages' },
+        { id: 'c2', title: 'Generate Q3 Revenue Report', action: '/admin/analytics?report=q3', desc: 'Exports finance data to PDF' },
+        { id: 'c3', title: 'Analyze Lead Conversion Rate', action: '/admin/customers?action=analyze', desc: 'Triggers Atlas AI analysis on recent leads' }
       ].filter(c => c.title.toLowerCase().includes(commandQuery));
       
       setResults({ patients: [], clinics: [], physicians: [], products: [], protocols: [], commands: systemCommands });
@@ -103,9 +109,13 @@ export default function Omnibar({ isOpen, onClose }) {
     };
   }, [query]);
 
-  const handleNavigate = (path) => {
+  const handleNavigate = (path, external = false) => {
     onClose();
-    router.push(path);
+    if (external) {
+      window.open(path, '_blank', 'noopener,noreferrer');
+    } else {
+      router.push(path);
+    }
   };
 
   if (!isOpen) return null;
@@ -140,7 +150,7 @@ export default function Omnibar({ isOpen, onClose }) {
                     key={cmd.id} 
                     className="hover-bg" 
                     onMouseEnter={() => setActivePreview({ type: 'command', data: cmd })}
-                    onClick={() => handleNavigate(cmd.action)}
+                    onClick={() => handleNavigate(cmd.action, cmd.external)}
                     style={{ 
                       padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer',
                       background: activePreview?.data?.id === cmd.id ? '#f5f3ff' : 'transparent'
@@ -336,8 +346,8 @@ export default function Omnibar({ isOpen, onClose }) {
                   <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#4c1d95' }}>{activePreview.data.title}</h3>
                   <p style={{ margin: 0, fontSize: '14px', color: '#7c3aed', lineHeight: '1.5' }}>{activePreview.data.desc}</p>
                 </div>
-                <button onClick={() => handleNavigate(activePreview.data.action)} style={{ padding: '10px 24px', background: '#8b5cf6', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginTop: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <Zap size={18} /> Execute Command
+                <button onClick={() => handleNavigate(activePreview.data.action, activePreview.data.external)} style={{ padding: '10px 24px', background: '#8b5cf6', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginTop: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <Zap size={18} /> {activePreview.data.external ? 'Open in New Tab' : 'Execute Command'}
                 </button>
               </div>
             ) : (

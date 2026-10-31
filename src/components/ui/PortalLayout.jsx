@@ -38,6 +38,8 @@ import PullToRefreshContainer from '../mobile/PullToRefreshContainer';
 import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles, Maximize2, List, Briefcase } from '@/lib/icons';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import WorkspaceTopBarControl from '../shared/workspaces/WorkspaceTopBarControl';
+import PublicPortalsTopBarMenu from '../shared/PublicPortalsTopBarMenu';
+import CustomerPreviewDrawer from '../shared/CustomerPreviewDrawer';
 import { useCart } from '../../context/CartProvider';
 import { useSimulationStore } from '../../stores/useSimulationStore';
 import MobileBottomNav from '../mobile/MobileBottomNav';
@@ -936,6 +938,7 @@ export default function PortalLayout({
             )}
           </div>
 
+          <PublicPortalsTopBarMenu iconBtnStyle={iconBtnStyle} />
           <WorkspaceTopBarControl iconBtnStyle={iconBtnStyle} />
 
           <style>{`
@@ -1085,6 +1088,7 @@ export default function PortalLayout({
           );
         }}
       />
+      <CustomerPreviewDrawer />
       <CopilotWorkspacePanel />
       <HelpDrawer isOpen={isHelpOpen} onClose={() => setHelpOpen(false)} />
       <MobileBottomNav 

@@ -14,6 +14,7 @@ import {
   Navigation,
   ChevronRight,
   Sparkles,
+  Globe,
 } from '@/lib/icons';
 import { useDrawer } from '../../context/DrawerContext';
 import { searchAlgoliaFederated } from '../../services/algoliaSearch';
@@ -31,9 +32,18 @@ const TRENDING_SUGGESTIONS = [
 ];
 
 const QUICK_ACTIONS = [
+  // ── Public Portals & Storefronts ──
+  { id: 'pub_store', label: '🌐 Open Public B2C Storefront', icon: Globe, route: '/', external: true },
+  { id: 'pub_24g', label: '🧬 Open 24Genetics Genomics Portal', icon: Globe, route: '/pricing/24genetics', external: true },
+  { id: 'pub_colway', label: '🌿 Open Colway Trichology Collection', icon: Globe, route: '/pricing/colway', external: true },
+  { id: 'pub_comp', label: '🧪 Open Custom Compounding Lab', icon: Globe, route: '/compounding', external: true },
+  { id: 'pub_proto', label: '📋 Open Clinical Protocols Formulary', icon: Globe, route: '/proto', external: true },
+  { id: 'pub_labels', label: '🏷️ Open Label Studio Standalone', icon: Globe, route: '/labels', external: true },
+
+  // ── Administrative Tools ──
   { id: 'go_finder', label: 'Guided Protocol Finder (Wizard)', icon: Navigation, route: '/protocol-finder' },
   { id: 'go_dash', label: 'Main Dashboard', icon: LayoutDashboard, route: '/admin' },
-  { id: 'go_prod', label: 'Peptides & Formulas Catalog', icon: Pill, route: '/admin/products' },
+  { id: 'go_prod', label: 'Peptides & Formulas Catalog', icon: Pill, route: '/admin/catalog' },
   { id: 'go_proto', label: 'Clinical Protocols Library', icon: TestTube, route: '/admin/protocols' },
   { id: 'go_pat', label: 'Patients Directory', icon: User, route: '/admin/patients' },
   { id: 'go_rx', label: 'Prescriptions & Treatments', icon: FileText, route: '/admin/prescriptions' },
@@ -135,7 +145,9 @@ export default function Omnibar() {
       });
     }
 
-    if (item.route) {
+    if (item.external && item.route) {
+      window.open(item.route, '_blank', 'noopener,noreferrer');
+    } else if (item.route) {
       router.push(item.route);
     } else if (item.action === 'rx-builder') {
       openDrawer('rx-builder', 'new');
