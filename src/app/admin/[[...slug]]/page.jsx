@@ -64,15 +64,18 @@ const getTabComponent = async (tabId) => {
     case 'shopify':
     case 'shopify-integration': return (await import('../../../components/admin/shopify/AdminShopifyTab')).default;
     case 'inventory':          return (await import('../../../components/admin/AdminPlaceholderTab')).default;
-    case 'knowledge-base':     return (await import('../../../components/admin/AdminStorageTab')).default;
+    case 'knowledge-base':
+    case 'documents':          return (await import('../../../components/admin/AdminStorageTab')).default;
 
     // Sales
-    case 'customers':          return (await import('../../../components/admin/AdminCustomersTab')).default;
+    case 'customers':
+    case 'segmentation':       return (await import('../../../components/admin/AdminCustomersTab')).default;
     case 'crm':                return (await import('../../../components/admin/AdminCrmTab')).default;
     case 'leads':              return (await import('../../../components/admin/AdminLeadsTabWrapper')).default;
     case 'clinics':            return (await import('../../../components/admin/AdminClinicsTabWrapper')).default;
     case 'account-managers':   return (await import('../../../components/admin/AdminAccountManagersTab')).default;
-    case 'quotations':         return (await import('../../../components/admin/quotations/AdminQuotationsTab')).default;
+    case 'quotations':
+    case 'coupons':            return (await import('../../../components/admin/quotations/AdminQuotationsTab')).default;
     case 'patient-orders':
     case 'sales-orders':
     case 'my-orders':
@@ -81,7 +84,8 @@ const getTabComponent = async (tabId) => {
     case 'revenue':            return (await import('../../../components/admin/AdminFinanceTab')).default;
 
     // Purchasing
-    case 'procurement':        return (await import('../../../components/admin/AdminProcurementTab')).default;
+    case 'procurement':
+    case 'production-queue':   return (await import('../../../components/admin/AdminProcurementTab')).default;
     case 'suppliers':          return (await import('../../../components/admin/AdminSuppliersTab')).default;
     case 'wholesellers':       return (await import('../../../components/admin/AdminWholesellersTab')).default;
     case 'rfqs':               return (await import('../../../components/admin/AdminRFQTab')).default;
@@ -89,8 +93,12 @@ const getTabComponent = async (tabId) => {
 
     // Logistics
     case 'shipping':
-    case 'logistics-tracker':  return (await import('../../../components/admin/AdminLogisticsTab')).default;
+    case 'logistics-tracker':
+    case 'shipping-network':
+    case 'cold-chain':
+    case 'shipment-status':    return (await import('../../../components/admin/AdminLogisticsTab')).default;
     case 'labels':
+    case 'shipping-labels':
     case 'compounding-labels': return (await import('../../../components/admin/AdminLabelsStudioTab')).default;
 
     // Finance
@@ -98,12 +106,14 @@ const getTabComponent = async (tabId) => {
     case 'invoices':
     case 'my-invoices':
     case 'payments':
-    case 'payments-received':  return (await import('../../../components/admin/AdminTransactionsTab')).default;
+    case 'payments-received':
+    case 'zoho-books':         return (await import('../../../components/admin/AdminTransactionsTab')).default;
     case 'approvals':          return (await import('../../../components/admin/AdminApprovalsTab')).default;
 
     // Marketing
     case 'email-campaigns':
     case 'newsletter':
+    case 'automation-campaigns':
     case 'templates':          return (await import('../../../components/admin/AdminEmailTemplatesTab')).default;
     case 'social-media':       return (await import('../../../components/admin/AdminMarketingTab')).default;
     case 'webshare-analytics':
@@ -112,7 +122,8 @@ const getTabComponent = async (tabId) => {
     // AI
     case 'atlas-ai':
     case 'my-assistant':
-    case 'ai-agents':          return (await import('../../../components/admin/AdminAIAgentsTab')).default;
+    case 'ai-agents':
+    case 'prompt-library':     return (await import('../../../components/admin/AdminAIAgentsTab')).default;
     case 'ai-insights':        return (await import('../../../components/admin/AdminAnalyticsTab')).default;
     case 'ai-logs':            return (await import('../../../components/admin/AdminAuditLogsTab')).default;
 
@@ -122,7 +133,8 @@ const getTabComponent = async (tabId) => {
     case 'data-hub':           return (await import('../../../components/admin/AdminDataHub')).default;
 
     // Administration (Legacy individual links, eventually redirect or remove)
-    case 'users':              return (await import('../../../components/admin/AdminUsersTab')).default;
+    case 'users':
+    case 'access-levels':      return (await import('../../../components/admin/AdminUsersTab')).default;
     case 'invitations':        return (await import('../../../components/admin/AdminInvitationsTab')).default;
     case 'profile':
     case 'my-profile':         return (await import('../../../components/shared/UserProfileTab')).default;

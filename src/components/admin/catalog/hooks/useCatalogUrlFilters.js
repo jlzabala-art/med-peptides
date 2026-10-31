@@ -33,8 +33,8 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
     const queryString = params.toString();
     const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', newUrl);
-      window.dispatchEvent(new Event('popstate'));
+      const currentState = window.history.state || {};
+      window.history.replaceState({ ...currentState }, '', newUrl);
     }
     router.replace(newUrl, { scroll: false });
   }, [searchParams, pathname, router]);
@@ -79,7 +79,8 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
         else params.delete('q');
         const queryString = params.toString();
         const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
-        window.history.replaceState(null, '', newUrl);
+        const currentState = window.history.state || {};
+        window.history.replaceState({ ...currentState }, '', newUrl);
         
         try {
           const currentPrefs = JSON.parse(localStorage.getItem('regenpept-admin-catalog-prefs') || '{}');
@@ -145,8 +146,8 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
       // ignore storage error
     }
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', pathname);
-      window.dispatchEvent(new Event('popstate'));
+      const currentState = window.history.state || {};
+      window.history.replaceState({ ...currentState }, '', pathname);
     }
     router.replace(pathname, { scroll: false });
     router.refresh();

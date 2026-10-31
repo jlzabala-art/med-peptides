@@ -40,6 +40,11 @@ export default function AppSidebar({
     recents, addRecent
   } = useNavigationStore();
 
+  const [isMounted, setIsMounted] = React.useState(false);
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
 
   const { simulatedRole, exitSimulation } = useSimulationStore();
   const simulatedRoleData = ALL_ROLES.find((r) => r.id === simulatedRole);
@@ -148,9 +153,27 @@ export default function AppSidebar({
     return null;
   };
 
-  const handleNavigate = (id) => {
-    addRecent(id);
-    onNavigate(id);
+  const handleNavigate = (id, targetHref, e) => {
+    // 1. Asynchronously persist to recents to avoid mid-event unmounting or state thrashing
+    if (typeof requestAnimationFrame !== 'undefined') {
+      requestAnimationFrame(() => addRecent(id));
+    } else {
+      addRecent(id);
+    }
+
+    if (isMobile) {
+      onClose?.();
+    }
+
+    // 2. Authoritative portal navigation via onNavigate (AdminDashboard navToTab with startTransition)
+    if (typeof onNavigate === 'function') {
+      e?.preventDefault?.();
+      onNavigate(id);
+    } else if (targetHref) {
+      // Direct router navigation if no onNavigate handler provided
+      e?.preventDefault?.();
+      router.push(targetHref);
+    }
   };
 
   const renderItem = (item, level = 1, prefix = '') => {
@@ -198,15 +221,8 @@ export default function AppSidebar({
         <Link 
           href={targetHref}
           className="sb-item-btn" 
-          onClick={(e) => {
-            // Let the Link handle navigation normally, but still record recents if needed
-            addRecent(item.id);
-            // We do NOT call preventDefault here so Next.js router handles the navigation
-            if (isMobile) {
-              onClose?.();
-            }
-          }}
-          prefetch={true}
+          onClick={(e) => handleNavigate(item.id, targetHref, e)}
+          prefetch={false}
         >
           <span className="sb-item-icon" style={{ position: 'relative' }}>
             {Icon && <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />}
@@ -352,7 +368,7 @@ export default function AppSidebar({
         )}
 
         {/* Favorites Section */}
-        {expanded && favorites.length > 0 && (
+        {isMounted && expanded && favorites.length > 0 && (
           <div className="sb-group">
             <div className="sb-group-header">Favorites</div>
             <div className="sb-group-items">
@@ -362,7 +378,7 @@ export default function AppSidebar({
         )}
 
         {/* Recents Section — always visible/open */}
-        {recents.length > 0 && (
+        {isMounted && recents.length > 0 && (
           <div className="sb-group">
             {expanded ? (
               <div className="sb-group-header">Recent</div>

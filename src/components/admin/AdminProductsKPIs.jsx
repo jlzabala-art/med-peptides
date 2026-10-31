@@ -38,8 +38,9 @@ export function UniformKPIs({ products, globalMetrics }) {
               } else {
                 url.searchParams.set('status', s.filter);
               }
-              window.history.pushState({}, '', url.toString());
-              window.dispatchEvent(new Event('popstate'));
+              const newUrl = `${url.pathname}${url.search ? url.search : ''}`;
+              const currentState = window.history.state || {};
+              window.history.replaceState({ ...currentState }, '', newUrl);
             }
           }}
           className="clickable-card"
