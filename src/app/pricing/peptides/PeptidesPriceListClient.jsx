@@ -199,28 +199,62 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
 
     setSubmittingOrder(true);
     try {
-      const itemsPayload = Object.values(cartItems).map(item => ({
-        id: item.product.id,
-        productId: item.product.productId,
-        name: item.product.productName,
-        dosage: item.product.dosage,
-        quantity1x: item.quantity1x,
-        quantity10x: item.quantity10x,
-        totalVials: item.quantity1x + (item.quantity10x * 10),
-        unitPriceUsd: item.product.unitPrice,
-        subtotalUsd: (item.quantity1x * item.product.unitPrice) + (item.quantity10x * (item.product.pack10Price || item.product.unitPrice * 8.5))
-      }));
+      const itemsPayload = Object.values(cartItems).map(item => {
+        const totalVials = item.quantity1x + (item.quantity10x * 10);
+        const packPrice = item.product.pack10Price || (item.product.unitPrice * 8.5);
+        const subtotal = (item.quantity1x * item.product.unitPrice) + (item.quantity10x * packPrice);
+        return {
+          id: item.product.id,
+          productId: item.product.productId,
+          name: item.product.productName,
+          productName: item.product.productName,
+          dosage: item.product.dosage,
+          presentation: item.product.presentation || 'Lyophilized Vial (10R)',
+          quantity: totalVials,
+          quantity1x: item.quantity1x,
+          quantity10x: item.quantity10x,
+          totalVials,
+          unitPrice: item.product.unitPrice,
+          unitPriceUsd: item.product.unitPrice,
+          tier10UnitPrice: packPrice / 10,
+          subtotal,
+          subtotalUsd: subtotal
+        };
+      });
+
+      const fullAddress = [
+        orderForm.addressLine1,
+        orderForm.addressLine2,
+        orderForm.city,
+        orderForm.state,
+        orderForm.postalCode,
+        orderForm.country
+      ].filter(Boolean).join(', ');
+
+      const totalUnits = itemsPayload.reduce((acc, i) => acc + i.totalVials, 0);
 
       const res = await fetch('/api/orders/create-draft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contact: orderForm,
+          cartItems: itemsPayload,
           items: itemsPayload,
-          referralCode,
+          contact: orderForm,
+          customerName: orderForm.name,
+          customerEmail: orderForm.email,
+          customerPhone: orderForm.phone,
+          customerAddress: fullAddress,
+          customerNotes: orderForm.notes,
+          shippingDestination: orderForm.country,
+          referralCode: referralCode || 'CAT-RX-7482',
           source: 'public_peptides_price_schedule',
+          collection: 'vials',
+          grandTotal: totalCartValueUsd,
+          subtotal: totalCartValueUsd,
           totalAmountUsd: totalCartValueUsd,
-          currency: 'USD'
+          totalUnits,
+          currency: 'USD',
+          currencySymbol: '$'
         })
       });
 

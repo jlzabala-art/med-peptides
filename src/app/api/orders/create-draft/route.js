@@ -11,21 +11,33 @@ import { sendOrderCreatedNotificationEmail } from '@/lib/orderNotificationMailer
 export async function POST(request) {
   try {
     const body = await request.json();
+    const contact = body.contact || {};
+    const rawCartItems = (Array.isArray(body.cartItems) && body.cartItems.length > 0)
+      ? body.cartItems
+      : (Array.isArray(body.items) && body.items.length > 0 ? body.items : []);
+
     const {
-      cartItems = [],
-      customerName,
-      customerEmail = '',
-      customerPhone = '',
-      customerAddress = '',
-      customerVat = '',
-      customerNotes = '',
-      shippingDestination = '',
-      shippingCode = '',
+      cartItems = rawCartItems,
+      customerName = contact.name || contact.contactName || contact.clinicName || 'Clinical Client',
+      customerEmail = contact.email || contact.workEmail || '',
+      customerPhone = contact.phone || '',
+      customerAddress = [
+        contact.addressLine1,
+        contact.addressLine2,
+        contact.city,
+        contact.state,
+        contact.postalCode,
+        contact.country
+      ].filter(Boolean).join(', ') || '',
+      customerVat = contact.vat || '',
+      customerNotes = contact.notes || '',
+      shippingDestination = contact.country || 'Standard Dispatch',
+      shippingCode = contact.countryCode || 'EU',
       shippingCost = 0,
       subtotal = 0,
-      grandTotal = 0,
-      currency = 'USD',
-      currencySymbol = '$',
+      grandTotal = Number(body.grandTotal || body.totalAmountUsd || body.totalAmountEur || body.total || 0),
+      currency = body.currency || 'USD',
+      currencySymbol = body.currencySymbol || (currency === 'EUR' ? '€' : '$'),
       totalUnits = 0,
       catalogId = '',
       catalogCode = '',
@@ -92,9 +104,10 @@ export async function POST(request) {
     }
 
     const isNikolasOrder =
-      ['np-labs-international', 'nikolaos-psathas', 'nplabs', 'nplab', 'cat-rx-7482'].includes(String(effectiveWholesalerId || '').toLowerCase()) ||
+      ['np-labs-international', 'nikolaos-psathas', 'nplabs', 'nplab', 'cat-rx-7482', 'nikolas', 'partner-7482'].includes(String(effectiveWholesalerId || '').toLowerCase()) ||
       String(catalogId || '').trim().toUpperCase() === 'CAT-RX-7482' ||
-      String(effectiveReferralCode || '').trim().toUpperCase() === 'CAT-RX-7482';
+      String(effectiveReferralCode || '').trim().toUpperCase() === 'CAT-RX-7482' ||
+      (!effectiveWholesalerId && (source === 'public_peptides_price_schedule' || source === 'peptides_schedule'));
 
     if (isNikolasOrder) {
       effectiveWholesalerId = 'np-labs-international';
@@ -108,26 +121,31 @@ export async function POST(request) {
       : (body.attributedTo || (effectiveWholesalerName ? `Por atención de ${effectiveWholesalerName}` : null));
 
     const formattedItems = cartItems.map(item => {
-      const isBulk = item.quantity >= 10 && item.tier10UnitPrice && item.tier10UnitPrice > 0;
-      const unitPrice = isBulk ? item.tier10UnitPrice : item.price;
-      const totalPrice = Number((item.quantity * unitPrice).toFixed(2));
+      const quantity1x = Number(item.quantity1x || 0);
+      const quantity10x = Number(item.quantity10x || 0);
+      const computedUnits = Number(item.quantity || item.totalVials || (quantity1x + (quantity10x * 10)) || 1);
+      const isBulk = item.isBulk ?? (computedUnits >= 10 && item.tier10UnitPrice && item.tier10UnitPrice > 0);
+      const unitPrice = item.unitPriceUsd ?? item.unitPriceEur ?? (isBulk ? item.tier10UnitPrice : (item.unitPrice || item.price || 0));
+      const lineTotal = item.subtotalUsd ?? item.subtotalEur ?? item.subtotal ?? Number((computedUnits * unitPrice).toFixed(2));
       return {
         id: item.id || '',
         name: String(item.productName || item.name || '').trim(),
         productName: String(item.productName || item.name || '').trim(),
         dosage: String(item.dosage || '').trim(),
-        presentation: String(item.presentation || 'vial').trim(),
-        variant: [item.dosage, item.presentation].filter(Boolean).join(' • '),
-        quantity: Number(item.quantity) || 0,
-        kits: Math.floor((item.quantity || 0) / 10),
-        singleUnits: (item.quantity || 0) % 10,
+        presentation: String(item.presentation || 'Lyophilized Vial (10R)').trim(),
+        variant: [item.dosage, item.presentation].filter(Boolean).join(' • ') || String(item.dosage || 'Standard'),
+        quantity: computedUnits,
+        quantity1x,
+        quantity10x,
+        kits: Math.floor(computedUnits / 10),
+        singleUnits: computedUnits % 10,
         baseCost: Number(item.baseCost || item.cost || 0),
         mediluxePrice: Number(item.mediluxePrice || (item.baseCost ? Number((item.baseCost * 1.15).toFixed(2)) : 0)),
         unitPrice: Number(unitPrice) || 0,
         price: Number(unitPrice) || 0,
-        totalPrice,
-        total: totalPrice,
-        lineTotal: totalPrice,
+        totalPrice: lineTotal,
+        total: lineTotal,
+        lineTotal: lineTotal,
         isBulk,
         apiItems: item.apiItems || item.apis || item.constituents || null,
         posology: item.posology || null

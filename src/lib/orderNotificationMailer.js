@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { adminDb } from './firebaseAdmin';
+import { adminDb } from './firebaseAdmin.js';
 
 const DEFAULT_RECIPIENT = 'jose@mediluxeme.com';
 
