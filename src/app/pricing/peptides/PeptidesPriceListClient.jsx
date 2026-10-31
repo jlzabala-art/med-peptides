@@ -33,6 +33,8 @@ import CopyableId from '@/components/ui/CopyableId';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import EmptyState from '@/components/ui/EmptyState';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
+import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
+import { COUNTRIES } from '@/data/countries';
 import '../colway/ColwayPriceList.css';
 
 const CATEGORY_MAP = {
@@ -69,7 +71,13 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
     clinicName: '',
     email: '',
     phone: '',
-    country: 'United Arab Emirates',
+    phoneCountryCode: 'es',
+    country: 'Spain',
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    postalCode: '',
     notes: ''
   });
 
@@ -180,6 +188,10 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
       toast.error('Please enter your name, email and phone number');
       return;
     }
+    if (!orderForm.addressLine1 || !orderForm.city || !orderForm.postalCode) {
+      toast.error('Please provide full shipping address (Street, City, Postal Code)');
+      return;
+    }
     if (Object.keys(cartItems).length === 0) {
       toast.error('Your order request is empty. Please select products first.');
       return;
@@ -227,7 +239,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
     }
   };
 
-  // DataTable columns (Strict Rule #30: explicit width, no horizontal scroll)
+  // DataTable columns (Strict Rule #30: explicit width, no horizontal scroll, Google Cloud UX)
   const columns = useMemo(() => [
     {
       key: 'itemNumber',
@@ -241,71 +253,40 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
       )
     },
     {
-      key: 'id',
-      label: 'SKU / REF',
-      width: '12%',
-      sortable: true,
-      render: (_, row) => {
-        const cleanSku = (row?.id || '').replace(/^vial_|^lotusland_/i, '');
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
-            <CopyableId value={cleanSku.slice(0, 18)} />
-            <span style={{
-              fontSize: '0.65rem',
-              fontWeight: 650,
-              color: row?.categoryMeta?.color,
-              background: row?.categoryMeta?.bg,
-              border: `1px solid ${row?.categoryMeta?.border}`,
-              padding: '1px 6px',
-              borderRadius: '4px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.03em'
-            }}>
-              {row?.categoryMeta?.label}
-            </span>
-          </div>
-        );
-      }
-    },
-    {
       key: 'productName',
       label: 'Peptide Formulation & Concentration',
-      width: '32%',
+      width: '42%',
       sortable: true,
       render: (_, row) => (
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: '0.90rem', color: '#0f172a' }}>
+          <div style={{ fontWeight: 700, fontSize: '0.94rem', color: '#0f172a', letterSpacing: '-0.01em' }}>
             {row.productName}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
             <span style={{
-              fontSize: '0.72rem',
-              fontWeight: 700,
+              fontSize: '0.78rem',
+              fontWeight: 750,
               color: '#0369a1',
               background: '#f0f9ff',
               border: '1px solid #bae6fd',
-              padding: '1px 6px',
-              borderRadius: '4px'
+              padding: '2px 8px',
+              borderRadius: '5px',
+              letterSpacing: '-0.01em'
             }}>
               {row.dosage}
             </span>
             <span style={{
               fontSize: '0.68rem',
-              fontWeight: 650,
-              color: '#16a34a',
-              background: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              padding: '1px 5px',
-              borderRadius: '4px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '3px'
+              fontWeight: 700,
+              color: row?.categoryMeta?.color,
+              background: row?.categoryMeta?.bg,
+              border: `1px solid ${row?.categoryMeta?.border}`,
+              padding: '2px 8px',
+              borderRadius: '5px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.03em'
             }}>
-              <CheckCircle2 size={10} />
-              {row.purity || '≥99.0% HPLC'}
-            </span>
-            <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-              {row.presentation || 'Lyophilized Sterile Vial'}
+              {row?.categoryMeta?.label}
             </span>
           </div>
         </div>
@@ -314,7 +295,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
     {
       key: 'unitPrice',
       label: 'Single Vial (1x)',
-      width: '16%',
+      width: '18%',
       sortable: true,
       render: (val, row) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -663,13 +644,13 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
 
             <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                Cold-Chain Dispatch
+                Analytical Quality
               </div>
               <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
-                48-72h
+                100% COA
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-                Insulated Thermal Express
+              <div style={{ fontSize: '0.72rem', color: '#0d9488', marginTop: '2px' }}>
+                Batch HPLC & Mass Spec Tested
               </div>
             </div>
           </div>
@@ -919,13 +900,14 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
 
               {/* Contact Form */}
               <form onSubmit={handleSubmitOrder}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Institutional Contact Details
+                {/* ── Section 1: Contact ── */}
+                <h4 style={{ fontSize: '0.80rem', fontWeight: 750, color: '#0f172a', marginBottom: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>1.</span> Institutional Contact
                 </h4>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.25rem' }}>
                   <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                    <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
                       Contact Name *
                     </label>
                     <input
@@ -944,28 +926,28 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                     />
                   </div>
 
-                  <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                      Practice / Clinic Name
-                    </label>
-                    <input
-                      type="text"
-                      value={orderForm.clinicName}
-                      onChange={e => setOrderForm(prev => ({ ...prev, clinicName: e.target.value }))}
-                      placeholder="Medical Clinic / Lab Name"
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.85rem'
-                      }}
-                    />
-                  </div>
-
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <div>
-                      <label style={{ fontSize: '0.75rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                      <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                        Practice / Clinic Name
+                      </label>
+                      <input
+                        type="text"
+                        value={orderForm.clinicName}
+                        onChange={e => setOrderForm(prev => ({ ...prev, clinicName: e.target.value }))}
+                        placeholder="Clinic / Lab Name"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.85rem'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
                         Work Email *
                       </label>
                       <input
@@ -983,17 +965,130 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                         }}
                       />
                     </div>
+                  </div>
 
+                  <div>
+                    <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                      Phone / WhatsApp (International) *
+                    </label>
+                    <InternationalPhoneInput
+                      value={orderForm.phone}
+                      onChange={(val) => setOrderForm(prev => ({ ...prev, phone: val }))}
+                      countryHint={orderForm.phoneCountryCode || 'ES'}
+                      placeholder="Phone number"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* ── Section 2: Delivery Destination ── */}
+                <h4 style={{ fontSize: '0.80rem', fontWeight: 750, color: '#0f172a', marginBottom: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>2.</span> Shipping & Delivery Destination
+                </h4>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.25rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                      Destination Country *
+                    </label>
+                    <select
+                      value={orderForm.country}
+                      onChange={e => {
+                        const selectedName = e.target.value;
+                        const match = COUNTRIES.find(c => c.name === selectedName);
+                        setOrderForm(prev => ({
+                          ...prev,
+                          country: selectedName,
+                          phoneCountryCode: match?.code || prev.phoneCountryCode
+                        }));
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.85rem',
+                        backgroundColor: '#ffffff',
+                        color: '#0f172a'
+                      }}
+                    >
+                      {COUNTRIES.map(c => (
+                        <option key={c.code} value={c.name}>
+                          {c.flag} {c.name} ({c.dial_code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                      Street Address Line 1 *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={orderForm.addressLine1}
+                      onChange={e => setOrderForm(prev => ({ ...prev, addressLine1: e.target.value }))}
+                      placeholder="Street address, building number, medical tower..."
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.85rem'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                      Suite / Floor / Department (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={orderForm.addressLine2}
+                      onChange={e => setOrderForm(prev => ({ ...prev, addressLine2: e.target.value }))}
+                      placeholder="Suite 400, Floor 3, Clinic Reception..."
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.85rem'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <div>
-                      <label style={{ fontSize: '0.75rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                        Phone / WhatsApp *
+                      <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                        City *
                       </label>
                       <input
-                        type="tel"
+                        type="text"
                         required
-                        value={orderForm.phone}
-                        onChange={e => setOrderForm(prev => ({ ...prev, phone: e.target.value }))}
-                        placeholder="+971 50 000 0000"
+                        value={orderForm.city}
+                        onChange={e => setOrderForm(prev => ({ ...prev, city: e.target.value }))}
+                        placeholder="City"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.85rem'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                        State / Province / Region
+                      </label>
+                      <input
+                        type="text"
+                        value={orderForm.state}
+                        onChange={e => setOrderForm(prev => ({ ...prev, state: e.target.value }))}
+                        placeholder="State or Region"
                         style={{
                           width: '100%',
                           padding: '8px 12px',
@@ -1006,14 +1101,15 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                      Delivery Country
+                    <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                      Postal Code / ZIP *
                     </label>
                     <input
                       type="text"
-                      value={orderForm.country}
-                      onChange={e => setOrderForm(prev => ({ ...prev, country: e.target.value }))}
-                      placeholder="United Arab Emirates, Saudi Arabia, Qatar..."
+                      required
+                      value={orderForm.postalCode}
+                      onChange={e => setOrderForm(prev => ({ ...prev, postalCode: e.target.value }))}
+                      placeholder="Postal / ZIP code"
                       style={{
                         width: '100%',
                         padding: '8px 12px',
@@ -1023,26 +1119,28 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                       }}
                     />
                   </div>
+                </div>
 
-                  <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
-                      Order Notes / Compounding Specifications
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={orderForm.notes}
-                      onChange={e => setOrderForm(prev => ({ ...prev, notes: e.target.value }))}
-                      placeholder="Any specific batch, concentration, or delivery notes..."
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.85rem',
-                        fontFamily: 'inherit'
-                      }}
-                    />
-                  </div>
+                {/* ── Section 3: Notes ── */}
+                <div>
+                  <label style={{ fontSize: '0.74rem', fontWeight: 650, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                    Order Notes / Compounding Specifications
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={orderForm.notes}
+                    onChange={e => setOrderForm(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Any specific batch, concentration, or delivery notes..."
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.85rem',
+                      fontFamily: 'inherit'
+                    }}
+                  />
+                </div>
 
                   <button
                     type="submit"
@@ -1068,7 +1166,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                   </button>
 
                   <p style={{ fontSize: '0.70rem', color: '#94a3b8', textAlign: 'center', margin: '4px 0 0 0' }}>
-                    Upon submission, our logistics team will issue an official B2B proforma invoice and cold-chain dispatch estimate.
+                    Upon submission, our medical logistics team will issue an official B2B proforma invoice with customs documentation and analytical COA verification.
                   </p>
                 </div>
               </form>
