@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   FileText,
   Download,
@@ -22,11 +21,13 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
+  Printer,
+  Plus,
+  Minus,
+  Trash2,
   X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAuth } from '@/context/AuthContext';
-import { useRoleAccess } from '@/hooks/useRoleAccess';
 import DataTable from '@/components/ui/DataTable';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import CopyableId from '@/components/ui/CopyableId';
@@ -48,20 +49,22 @@ const CATEGORY_MAP = {
 };
 
 export default function PeptidesPriceListClient({ initialProducts = [], referralCode = 'CAT-RX-7482' }) {
-  const router = useRouter();
-  const { user } = useAuth();
-  const { is, effectiveRole } = useRoleAccess();
-
-  const isAdmin = is('admin');
-  const isWholesaler = is('wholesaler') || isAdmin;
-  const isClinic = is('doctor') || is('clinic') || is('fagron_clinic') || is('medical_director') || isWholesaler;
-
   const [currency, setCurrency] = useState('USD'); // USD, EUR, AED
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22)
   const [copied, setCopied] = useState(false);
-  
+  const [hasRestoredCart, setHasRestoredCart] = useState(false);
+
+  // Debounce search query to keep main thread at 60fps on mobile (150ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // Order Drawer State
   const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
   const [cartItems, setCartItems] = useState({}); // { [productId]: { quantity1x: 0, quantity10x: 0, product } }
@@ -78,8 +81,65 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
     city: '',
     state: '',
     postalCode: '',
-    notes: ''
+    notes: '',
+    company_fax: '' // Anti-spam Honeypot (hidden from real users)
   });
+
+  // ── Cart & Contact Draft Persistence (Anti-abandonment) ──
+  const storageKey = `atlas_peptides_b2b_cart_${referralCode || 'CAT-RX-7482'}`;
+
+  // Hydrate cart & contact on initial mount (asynchronously to avoid cascading renders)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const timer = setTimeout(() => {
+      try {
+        const savedCart = localStorage.getItem(storageKey);
+        if (savedCart) {
+          const parsed = JSON.parse(savedCart);
+          if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+            setCartItems(parsed);
+            setHasRestoredCart(true);
+          }
+        }
+        const savedContact = localStorage.getItem('atlas_peptides_b2b_contact');
+        if (savedContact) {
+          const parsedContact = JSON.parse(savedContact);
+          if (parsedContact && typeof parsedContact === 'object') {
+            setOrderForm(prev => ({ ...prev, ...parsedContact, company_fax: '' }));
+          }
+        }
+      } catch (err) {
+        console.warn('Could not restore cached cart:', err);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [storageKey]);
+
+  // Sync cart to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      if (Object.keys(cartItems).length > 0) {
+        localStorage.setItem(storageKey, JSON.stringify(cartItems));
+      } else {
+        localStorage.removeItem(storageKey);
+      }
+    } catch (err) {
+      console.warn('Could not save cart:', err);
+    }
+  }, [cartItems, storageKey]);
+
+  // Sync contact info to localStorage (excluding honeypot)
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      const toSave = { ...orderForm };
+      delete toSave.company_fax;
+      localStorage.setItem('atlas_peptides_b2b_contact', JSON.stringify(toSave));
+    } catch (err) {
+      console.warn('Could not save contact draft:', err);
+    }
+  }, [orderForm]);
 
   // Currency conversions (Base USD)
   const fxRate = useMemo(() => {
@@ -132,10 +192,10 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
     });
   }, [initialProducts]);
 
-  // Filtering
+  // Filtering with debounced query (Keeps 60fps responsiveness on mobile devices)
   const filteredProducts = useMemo(() => {
     return processedProducts.filter(p => {
-      const q = searchQuery.toLowerCase().trim();
+      const q = debouncedSearchQuery.toLowerCase().trim();
       const matchesSearch = !q ||
         (p.productName || '').toLowerCase().includes(q) ||
         (p.dosage || '').toLowerCase().includes(q) ||
@@ -145,7 +205,38 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
       const matchesCat = selectedCategory === 'all' || p.categoryKey === selectedCategory;
       return matchesSearch && matchesCat;
     });
-  }, [processedProducts, searchQuery, selectedCategory]);
+  }, [processedProducts, debouncedSearchQuery, selectedCategory]);
+
+  // Cart quantity update & removal helpers
+  const updateItemQuantity = useCallback((productId, type, delta) => {
+    setCartItems(prev => {
+      const existing = prev[productId];
+      if (!existing) return prev;
+      const field = type === '10x' ? 'quantity10x' : 'quantity1x';
+      const nextVal = Math.max(0, (existing[field] || 0) + delta);
+      const otherField = type === '10x' ? 'quantity1x' : 'quantity10x';
+      if (nextVal === 0 && (existing[otherField] || 0) === 0) {
+        const copy = { ...prev };
+        delete copy[productId];
+        return copy;
+      }
+      return {
+        ...prev,
+        [productId]: {
+          ...existing,
+          [field]: nextVal
+        }
+      };
+    });
+  }, []);
+
+  const handlePrintProforma = useCallback(() => {
+    if (Object.keys(cartItems).length === 0) {
+      toast.error('Please select formulations before printing or saving a PDF proforma.');
+      return;
+    }
+    window.print();
+  }, [cartItems]);
 
   // Cart operations
   const handleAddToCart = (product, packType) => {
@@ -186,6 +277,17 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
     e.preventDefault();
     if (!orderForm.name || !orderForm.email || !orderForm.phone) {
       toast.error('Please enter your name, email and phone number');
+      return;
+    }
+    // Professional email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(orderForm.email.trim())) {
+      toast.error('Please enter a valid professional email address.');
+      return;
+    }
+    // International phone digits validation
+    const digits = (orderForm.phone || '').replace(/\D/g, '');
+    if (digits.length < 7 || digits.length > 15) {
+      toast.error('Please enter a valid international phone number with country code (e.g. +34 600 000 000).');
       return;
     }
     if (!orderForm.addressLine1 || !orderForm.city || !orderForm.postalCode) {
@@ -254,20 +356,27 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
           totalAmountUsd: totalCartValueUsd,
           totalUnits,
           currency: 'USD',
-          currencySymbol: '$'
+          currencySymbol: '$',
+          company_fax: orderForm.company_fax || '' // Honeypot field
         })
       });
 
       if (!res.ok) {
-        throw new Error('Could not submit order proforma');
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || 'Could not submit order proforma');
       }
 
       toast.success('Proforma request submitted successfully! Confirmation sent to your email.');
       setCartItems({});
+      try {
+        localStorage.removeItem(storageKey);
+      } catch (storageErr) {
+        console.warn('Could not clear storage cart:', storageErr);
+      }
       setIsOrderDrawerOpen(false);
     } catch (err) {
       console.error('Order submission error:', err);
-      toast.error('Unable to send order. Please try again or contact support.');
+      toast.error(err.message || 'Unable to send order. Please try again or contact support.');
     } finally {
       setSubmittingOrder(false);
     }
@@ -841,9 +950,59 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
             <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
               {/* Selected Items */}
               <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Selected Formulations ({totalCartCount} Vials)
-                </h4>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                  <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Selected Formulations ({totalCartCount} Vials)
+                  </h4>
+                  {Object.keys(cartItems).length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCartItems({});
+                        try {
+                          localStorage.removeItem(storageKey);
+                        } catch (clearErr) {
+                          console.warn('Could not clear cart storage:', clearErr);
+                        }
+                      }}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#ef4444',
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        padding: '2px 4px'
+                      }}
+                    >
+                      Clear All
+                    </button>
+                  )}
+                </div>
+
+                {hasRestoredCart && Object.keys(cartItems).length > 0 && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '6px 10px',
+                    background: '#ecfdf5',
+                    border: '1px solid #a7f3d0',
+                    borderRadius: '6px',
+                    fontSize: '0.72rem',
+                    color: '#065f46',
+                    marginBottom: '8px'
+                  }}>
+                    <span>Restored previous session draft ✓</span>
+                    <button
+                      type="button"
+                      onClick={() => setHasRestoredCart(false)}
+                      style={{ background: 'transparent', border: 'none', color: '#065f46', cursor: 'pointer', padding: 0 }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
 
                 {Object.keys(cartItems).length === 0 ? (
                   <div style={{
@@ -861,6 +1020,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {Object.values(cartItems).map(item => {
                       const p = item.product;
+                      const lineTotal = (item.quantity1x * p.unitPrice) + (item.quantity10x * (p.pack10Price || p.unitPrice * 8.5));
                       return (
                         <div
                           key={p.id}
@@ -870,44 +1030,109 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                             borderRadius: '6px',
                             border: '1px solid #e2e8f0',
                             display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
+                            flexDirection: 'column',
                             gap: '8px'
                           }}
                         >
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>
-                              {p.productName}
+                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>
+                                {p.productName}
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                                {p.dosage} • Lyophilized Vial (10R)
+                              </div>
                             </div>
-                            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                              {p.dosage} • {item.quantity1x > 0 ? `${item.quantity1x}x Vial ` : ''}
-                              {item.quantity10x > 0 ? `${item.quantity10x}x Pack ×10` : ''}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>
+                                {formatPrice(lineTotal)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCartItems(prev => {
+                                    const copy = { ...prev };
+                                    delete copy[p.id];
+                                    return copy;
+                                  });
+                                }}
+                                style={{
+                                  background: 'transparent',
+                                  border: 'none',
+                                  color: '#94a3b8',
+                                  cursor: 'pointer',
+                                  padding: '2px 4px'
+                                }}
+                                title="Remove item"
+                              >
+                                <Trash2 size={14} />
+                              </button>
                             </div>
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>
-                              {formatPrice((item.quantity1x * p.unitPrice) + (item.quantity10x * (p.pack10Price || p.unitPrice * 8.5)))}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setCartItems(prev => {
-                                  const copy = { ...prev };
-                                  delete copy[p.id];
-                                  return copy;
-                                });
-                              }}
-                              style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: '#ef4444',
-                                cursor: 'pointer',
-                                fontSize: '0.75rem',
-                                padding: '2px 4px'
-                              }}
-                            >
-                              <X size={14} />
-                            </button>
+                          {/* Incremental Controls inside Drawer */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '4px', borderTop: '1px dashed #e2e8f0' }}>
+                            {/* 1x Single Vial Controls */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>1x Vial:</span>
+                              <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '4px', background: '#ffffff' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => updateItemQuantity(p.id, '1x', -1)}
+                                  disabled={item.quantity1x <= 0}
+                                  style={{
+                                    border: 'none',
+                                    background: 'transparent',
+                                    padding: '3px 6px',
+                                    cursor: item.quantity1x <= 0 ? 'not-allowed' : 'pointer',
+                                    color: item.quantity1x <= 0 ? '#cbd5e1' : '#334155'
+                                  }}
+                                >
+                                  <Minus size={11} />
+                                </button>
+                                <span style={{ padding: '0 6px', fontSize: '0.74rem', fontFamily: 'monospace', fontWeight: 700 }}>
+                                  {item.quantity1x}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => updateItemQuantity(p.id, '1x', 1)}
+                                  style={{ border: 'none', background: 'transparent', padding: '3px 6px', cursor: 'pointer', color: '#334155' }}
+                                >
+                                  <Plus size={11} />
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* 10x Pack Controls */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '0.70rem', color: '#047857', fontWeight: 700 }}>Pack ×10:</span>
+                              <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid #a7f3d0', borderRadius: '4px', background: '#f0fdf4' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => updateItemQuantity(p.id, '10x', -1)}
+                                  disabled={item.quantity10x <= 0}
+                                  style={{
+                                    border: 'none',
+                                    background: 'transparent',
+                                    padding: '3px 6px',
+                                    cursor: item.quantity10x <= 0 ? 'not-allowed' : 'pointer',
+                                    color: item.quantity10x <= 0 ? '#cbd5e1' : '#047857'
+                                  }}
+                                >
+                                  <Minus size={11} />
+                                </button>
+                                <span style={{ padding: '0 6px', fontSize: '0.74rem', fontFamily: 'monospace', fontWeight: 700, color: '#047857' }}>
+                                  {item.quantity10x}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => updateItemQuantity(p.id, '10x', 1)}
+                                  style={{ border: 'none', background: 'transparent', padding: '3px 6px', cursor: 'pointer', color: '#047857' }}
+                                >
+                                  <Plus size={11} />
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       );
@@ -928,12 +1153,50 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                         {formatPrice(totalCartValueUsd)}
                       </span>
                     </div>
+
+                    {/* 1-Click Proforma PDF / Print button */}
+                    <button
+                      type="button"
+                      onClick={handlePrintProforma}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '6px',
+                        fontSize: '0.78rem',
+                        fontWeight: 650,
+                        color: '#334155',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        transition: 'all 0.15s ease'
+                      }}
+                      title="Generate official printable B2B proforma sheet"
+                    >
+                      <Printer size={14} />
+                      <span>Print / Save PDF Proforma Quote</span>
+                    </button>
                   </div>
                 )}
               </div>
 
               {/* Contact Form */}
               <form onSubmit={handleSubmitOrder}>
+                {/* ── Anti-Spam Bot Trap (Invisible to humans, catches automated bots) ── */}
+                <div style={{ display: 'none', position: 'absolute', left: '-9999px', opacity: 0 }} aria-hidden="true">
+                  <input
+                    type="text"
+                    name="company_fax"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={orderForm.company_fax || ''}
+                    onChange={e => setOrderForm(prev => ({ ...prev, company_fax: e.target.value }))}
+                  />
+                </div>
+
                 {/* ── Section 1: Contact ── */}
                 <h4 style={{ fontSize: '0.80rem', fontWeight: 750, color: '#0f172a', marginBottom: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>1.</span> Institutional Contact
@@ -1209,6 +1472,138 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
           </div>
         </div>
       )}
+
+      {/* ── Official Printable Proforma Document (@media print) ── */}
+      <div className="peptides-printable-proforma" style={{ display: 'none' }}>
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media print {
+            body * {
+              visibility: hidden !important;
+            }
+            .peptides-printable-proforma, .peptides-printable-proforma * {
+              visibility: visible !important;
+            }
+            .peptides-printable-proforma {
+              display: block !important;
+              position: absolute !important;
+              left: 0 !important;
+              top: 0 !important;
+              width: 100% !important;
+              padding: 2cm !important;
+              background: #ffffff !important;
+              color: #0f172a !important;
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+              font-size: 11pt !important;
+            }
+            @page {
+              size: A4;
+              margin: 1.5cm;
+            }
+          }
+        ` }} />
+
+        {/* Proforma Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #0284c7', paddingBottom: '16px', marginBottom: '20px' }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '18pt', fontWeight: 800, color: '#0284c7' }}>ATLAS HEALTH SERVICES</h1>
+            <p style={{ margin: '4px 0 0 0', fontSize: '9pt', color: '#64748b' }}>
+              MEDILUXE B2B CLINICAL DIVISION • OFFICIAL PROFORMA QUOTE
+            </p>
+            <p style={{ margin: '2px 0 0 0', fontSize: '8.5pt', color: '#64748b' }}>
+              Certified Lyophilized Peptides • ≥99.0% HPLC Analytical Purity
+            </p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '10pt', fontWeight: 700, color: '#0f172a' }}>
+              PROFORMA ESTIMATE
+            </div>
+            <div style={{ fontSize: '8.5pt', color: '#64748b', marginTop: '2px' }}>
+              Date: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+            </div>
+            <div style={{ fontSize: '8.5pt', color: '#0284c7', fontWeight: 700, marginTop: '2px' }}>
+              Attributed Wholesaler: Nikolaos Psathas (NP Labs)
+            </div>
+            <div style={{ fontSize: '8pt', fontFamily: 'monospace', color: '#64748b' }}>
+              Ref Code: {referralCode || 'CAT-RX-7482'}
+            </div>
+          </div>
+        </div>
+
+        {/* Client & Shipping Metadata */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px', padding: '12px 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+          <div>
+            <div style={{ fontSize: '8pt', textTransform: 'uppercase', fontWeight: 700, color: '#64748b' }}>INSTITUTIONAL CLIENT</div>
+            <div style={{ fontSize: '10pt', fontWeight: 700, marginTop: '2px' }}>{orderForm.name || 'Clinical Practitioner'}</div>
+            {orderForm.clinicName && <div style={{ fontSize: '9pt', color: '#334155' }}>{orderForm.clinicName}</div>}
+            <div style={{ fontSize: '8.5pt', color: '#64748b' }}>{orderForm.email || 'Email not specified'}</div>
+            <div style={{ fontSize: '8.5pt', color: '#64748b' }}>{orderForm.phone || 'Phone not specified'}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '8pt', textTransform: 'uppercase', fontWeight: 700, color: '#64748b' }}>DELIVERY DESTINATION</div>
+            <div style={{ fontSize: '9pt', color: '#0f172a', fontWeight: 600 }}>{orderForm.country || 'International'}</div>
+            <div style={{ fontSize: '8.5pt', color: '#334155' }}>{orderForm.addressLine1 || 'Pending delivery address'}</div>
+            {orderForm.addressLine2 && <div style={{ fontSize: '8.5pt', color: '#334155' }}>{orderForm.addressLine2}</div>}
+            <div style={{ fontSize: '8.5pt', color: '#64748b' }}>
+              {[orderForm.city, orderForm.state, orderForm.postalCode].filter(Boolean).join(', ')}
+            </div>
+          </div>
+        </div>
+
+        {/* Selected Items Table */}
+        {/* eslint-disable-next-line no-restricted-syntax */}
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '24px', fontSize: '9pt' }}>
+          <thead>
+            <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
+              <th style={{ padding: '8px 10px', width: '5%' }}>#</th>
+              <th style={{ padding: '8px 10px', width: '45%' }}>Formulation & Dosage</th>
+              <th style={{ padding: '8px 10px', width: '20%' }}>Packaging & Quantity</th>
+              <th style={{ padding: '8px 10px', width: '15%', textAlign: 'right' }}>Unit / Pack Price</th>
+              <th style={{ padding: '8px 10px', width: '15%', textAlign: 'right' }}>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.values(cartItems).map((item, idx) => {
+              const p = item.product;
+              const lineTotal = (item.quantity1x * p.unitPrice) + (item.quantity10x * (p.pack10Price || p.unitPrice * 8.5));
+              return (
+                <tr key={p.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '8px 10px', fontFamily: 'monospace', color: '#64748b' }}>{idx + 1}</td>
+                  <td style={{ padding: '8px 10px' }}>
+                    <div style={{ fontWeight: 700, color: '#0f172a' }}>{p.productName}</div>
+                    <div style={{ fontSize: '8pt', color: '#64748b' }}>{p.dosage} • Lyophilized Vial (10R) • ≥99.0% HPLC</div>
+                  </td>
+                  <td style={{ padding: '8px 10px' }}>
+                    {item.quantity1x > 0 && <div>{item.quantity1x}x Single Vial</div>}
+                    {item.quantity10x > 0 && <div style={{ color: '#047857', fontWeight: 600 }}>{item.quantity10x}x Pack ×10 (-15% Vol.)</div>}
+                  </td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right', fontFamily: 'monospace' }}>
+                    {item.quantity1x > 0 && <div>{formatPrice(p.unitPrice)}</div>}
+                    {item.quantity10x > 0 && <div style={{ color: '#047857' }}>{formatPrice(p.pack10Price || p.unitPrice * 8.5)}</div>}
+                  </td>
+                  <td style={{ padding: '8px 10px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 700 }}>
+                    {formatPrice(lineTotal)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          <tfoot>
+            <tr style={{ borderTop: '2px solid #0f172a' }}>
+              <td colSpan={4} style={{ padding: '10px', textAlign: 'right', fontWeight: 700, fontSize: '10pt' }}>
+                ESTIMATED PROFORMA TOTAL:
+              </td>
+              <td style={{ padding: '10px', textAlign: 'right', fontWeight: 800, fontSize: '11pt', color: '#0284c7', fontFamily: 'monospace' }}>
+                {formatPrice(totalCartValueUsd)}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+
+        {/* Cold-Chain Logistics & Quality Disclaimer */}
+        <div style={{ padding: '12px 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '8pt', color: '#64748b', lineHeight: 1.5 }}>
+          <strong>Cold-Chain & Regulatory Terms:</strong> All peptide vials are manufactured under cGMP standards with certified analytical purity (≥99.0% HPLC). Shipped with temperature-monitored cold-chain insulation (2–8°C thermal express). Official proforma invoice and customs COA documentation will be issued upon formal order confirmation.
+        </div>
+      </div>
 
       {/* Unified Public Footer */}
       <PublicUnifiedFooter />

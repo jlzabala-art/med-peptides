@@ -3,6 +3,25 @@ import { adminDb } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { sendOrderCreatedNotificationEmail } from '@/lib/orderNotificationMailer';
 
+// Simple in-memory sliding window rate limiter (max 10 requests per IP per hour)
+const ipRateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_REQUESTS_PER_WINDOW = 10;
+
+function isRateLimited(clientIp) {
+  if (!clientIp || clientIp === '127.0.0.1' || clientIp === '::1') return false;
+  const now = Date.now();
+  const timestamps = ipRateLimitMap.get(clientIp) || [];
+  const validTimestamps = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  if (validTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
+    ipRateLimitMap.set(clientIp, validTimestamps);
+    return true;
+  }
+  validTimestamps.push(now);
+  ipRateLimitMap.set(clientIp, validTimestamps);
+  return false;
+}
+
 /**
  * POST /api/orders/create-draft
  * Creates an incoming draft order from the shared catalog or public referral links.
@@ -10,8 +29,33 @@ import { sendOrderCreatedNotificationEmail } from '@/lib/orderNotificationMailer
  */
 export async function POST(request) {
   try {
+    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                     request.headers.get('x-real-ip') ||
+                     'unknown';
+
+    if (isRateLimited(clientIp)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a moment before submitting another proforma request.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const contact = body.contact || {};
+
+    // ── Anti-Spam Honeypot Verification ──
+    // Legitimate users will leave these invisible fields blank. Bots fill everything.
+    const honeypot = body.company_fax || body.bot_trap || body.website_url || contact.company_fax || contact.bot_trap || contact.website_url;
+    if (honeypot && String(honeypot).trim().length > 0) {
+      console.warn(`[create-draft] 🛡️ Honeypot bot trap triggered from IP ${clientIp}. Silently discarding.`);
+      return NextResponse.json({
+        success: true,
+        orderId: `PO-DRAFT-${Date.now().toString().slice(-6)}`,
+        status: 'draft',
+        message: 'Proforma request received.'
+      });
+    }
+
     const rawCartItems = (Array.isArray(body.cartItems) && body.cartItems.length > 0)
       ? body.cartItems
       : (Array.isArray(body.items) && body.items.length > 0 ? body.items : []);
@@ -65,6 +109,30 @@ export async function POST(request) {
     if (!cartItems || cartItems.length === 0) {
       return NextResponse.json(
         { error: 'Cannot create draft order with an empty cart.' },
+        { status: 400 }
+      );
+    }
+
+    // ── Server-Side Contact Validation ──
+    const trimmedEmail = String(customerEmail || '').trim();
+    if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      return NextResponse.json(
+        { error: 'A valid professional email address is required.' },
+        { status: 400 }
+      );
+    }
+
+    const cleanPhoneDigits = String(customerPhone || '').replace(/\D/g, '');
+    if (cleanPhoneDigits.length < 7) {
+      return NextResponse.json(
+        { error: 'A valid international phone number with country code is required.' },
+        { status: 400 }
+      );
+    }
+
+    if (source === 'public_peptides_price_schedule' && (!customerAddress || customerAddress.trim().length < 5)) {
+      return NextResponse.json(
+        { error: 'A complete delivery destination address is required for clinical logistics.' },
         { status: 400 }
       );
     }
