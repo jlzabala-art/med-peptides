@@ -21,6 +21,7 @@ import EternaProAgeProGenSection from '../components/product/EternaProAgeProGenS
 import ClinicalPortfolioSuiteSwitcher from '../components/navigation/ClinicalPortfolioSuiteSwitcher';
 import GenericCollectionSidebar from '../components/diagnostic/GenericCollectionSidebar';
 import ProductTechnicalDetailsPanel from '../components/collection/ProductTechnicalDetailsPanel';
+import ProductSpecsMasterDetailDrawer from '../components/collection/ProductSpecsMasterDetailDrawer';
 import CopyableId from '../components/ui/CopyableId';
 import StatusBadge from '../components/ui/StatusBadge';
 import GlobalSearchBar from '../components/ui/GlobalSearchBar';
@@ -647,6 +648,7 @@ export default function BrandCollectionPage({
   const [sortOption, setSortOption] = useState('featured');
   const [addedItem, setAddedItem] = useState(null);
   const [expandedDetails, setExpandedDetails] = useState({});
+  const [inspectingProduct, setInspectingProduct] = useState(null);
   const [scopeMode, setScopeMode] = useState('filtered'); // 'filtered' | 'global'
   const [isHeroExpanded, setIsHeroExpanded] = useState(false); // Fase 1: descripción colapsable en móvil
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -1051,6 +1053,31 @@ export default function BrandCollectionPage({
       ...prev,
       [productId]: !prev[productId]
     }));
+  };
+
+  const inspectingProductIndex = inspectingProduct
+    ? filteredProducts.findIndex(p => p.id === inspectingProduct.id)
+    : -1;
+
+  const handlePrevInspectingProduct = () => {
+    if (inspectingProductIndex > 0) {
+      setInspectingProduct(filteredProducts[inspectingProductIndex - 1]);
+    }
+  };
+
+  const handleNextInspectingProduct = () => {
+    if (inspectingProductIndex >= 0 && inspectingProductIndex < filteredProducts.length - 1) {
+      setInspectingProduct(filteredProducts[inspectingProductIndex + 1]);
+    }
+  };
+
+  const handleToggleSpecs = (product, e) => {
+    e?.stopPropagation();
+    if (inspectingProduct?.id === product.id) {
+      setInspectingProduct(null);
+    } else {
+      setInspectingProduct(product);
+    }
   };
 
   const handleProductClick = (product) => {
@@ -2025,7 +2052,7 @@ export default function BrandCollectionPage({
                     : brandSlug === 'peptides'
                     ? (product.dosage ? `${product.dosage} • 10R Lyophilized Vial` : (product.presentation || '10R Lyophilized Vial'))
                     : (product.sampleType || product.presentation || product.volume || 'Clinical Formulation');
-                  const isExpanded = !!expandedDetails[product.id];
+                  const isInspecting = inspectingProduct?.id === product.id;
                   const isAdded = addedItem === product.id;
 
                   const isColvita = brandSlug === 'colway' && (product.id?.toLowerCase().includes('colvita') || product.name?.toLowerCase().includes('colvita'));
@@ -2324,39 +2351,29 @@ export default function BrandCollectionPage({
 
                             <button
                               type="button"
-                              onClick={(e) => toggleExpand(product.id, e)}
+                              onClick={(e) => handleToggleSpecs(product, e)}
                               style={{
                                 padding: '5px 10px',
                                 height: '28px',
                                 borderRadius: '6px',
-                                border: isExpanded ? '1px solid #0d9488' : '1px solid #cbd5e1',
-                                background: isExpanded ? '#f0fdfa' : '#ffffff',
-                                color: isExpanded ? '#0d9488' : '#0f172a',
+                                border: isInspecting ? '1px solid #0d9488' : '1px solid #cbd5e1',
+                                background: isInspecting ? '#f0fdfa' : '#ffffff',
+                                color: isInspecting ? '#0d9488' : '#0f172a',
                                 fontSize: '0.74rem',
                                 fontWeight: 700,
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '4px',
+                                gap: '5px',
                                 transition: 'all 0.15s ease'
                               }}
-                              title={isEs ? 'Ver bioactivos, INCI y ficha técnica' : 'View bioactives, INCI & datasheet'}
+                              title={isEs ? 'Inspeccionar bioactivos, INCI y ficha técnica' : 'Inspect bioactives, INCI & datasheet'}
                             >
-                              <span>{isExpanded ? (isEs ? 'Ficha ▲' : 'Specs ▲') : (isEs ? 'Ficha ▾' : 'Specs ▾')}</span>
+                              <SlidersHorizontal size={12} color={isInspecting ? '#0d9488' : '#64748b'} />
+                              <span>{isEs ? 'Ficha' : 'Specs'}</span>
                             </button>
                           </div>
                         </div>
-
-                        {/* Inline Expandable Details in Table mode */}
-                        {isExpanded && (
-                          <ProductTechnicalDetailsPanel
-                            product={product}
-                            brandSlug={brandSlug}
-                            isEs={isEs}
-                            datasheet={resolveProductDatasheet(product, brandSlug)}
-                            onViewProduct={() => handleProductClick(product)}
-                          />
-                        )}
                       </div>
                       </React.Fragment>
                     );
@@ -2515,23 +2532,12 @@ export default function BrandCollectionPage({
                           lineHeight: 1.5,
                           margin: '0 0 1rem 0',
                           display: '-webkit-box',
-                          WebkitLineClamp: isExpanded ? 'unset' : 2,
+                          WebkitLineClamp: 2,
                           WebkitBoxOrient: 'vertical',
                           overflow: 'hidden'
                         }}>
                           {desc}
                         </p>
-
-                        {/* Master-Detail Expandable Drawer (Regla #4) */}
-                        {isExpanded && (
-                          <ProductTechnicalDetailsPanel
-                            product={product}
-                            brandSlug={brandSlug}
-                            isEs={isEs}
-                            datasheet={resolveProductDatasheet(product, brandSlug)}
-                            onViewProduct={() => handleProductClick(product)}
-                          />
-                        )}
 
                         {/* Colway Colvita 2-Tier Capsule Selector (Patrón Ultraman) */}
                         {isColvita && (() => {
@@ -2679,28 +2685,27 @@ export default function BrandCollectionPage({
                         <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
                           <button
                             type="button"
-                            onClick={(e) => toggleExpand(product.id, e)}
+                            onClick={(e) => handleToggleSpecs(product, e)}
                             style={{
-                              background: isExpanded ? '#f0fdfa' : '#f8fafc',
-                              border: isExpanded ? '1px solid #99f6e4' : '1px solid #e2e8f0',
+                              background: isInspecting ? '#f0fdfa' : '#f8fafc',
+                              border: isInspecting ? '1px solid #99f6e4' : '1px solid #e2e8f0',
                               borderRadius: '6px',
-                              color: isExpanded ? '#0d9488' : '#475569',
+                              color: isInspecting ? '#0d9488' : '#475569',
                               fontSize: '0.74rem',
                               fontWeight: 700,
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '4px',
-                              padding: '5px 9px',
+                              gap: '5px',
+                              padding: '5px 10px',
                               transition: 'all 0.15s ease'
                             }}
+                            title={isEs ? 'Inspeccionar bioactivos, INCI y ficha técnica' : 'Inspect bioactives, INCI & datasheet'}
                           >
+                            <SlidersHorizontal size={12} color={isInspecting ? '#0d9488' : '#64748b'} />
                             <span>
-                              {isExpanded
-                                ? (isEs ? 'Ocultar Ficha' : 'Hide Specs')
-                                : (isEs ? 'Ficha & INCI' : 'Specs & INCI')}
+                              {isEs ? 'Ficha & INCI' : 'Specs & INCI'}
                             </span>
-                            <ChevronDown size={13} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
                           </button>
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -3120,6 +3125,26 @@ export default function BrandCollectionPage({
 
       {/* ── Unified B2B Order Drawer (Single SSOT across all collections) ── */}
       <UnifiedOrderDrawer lang={lang} />
+
+      {/* ── Google Cloud Master-Detail Specs Drawer (SSOT) ── */}
+      <ProductSpecsMasterDetailDrawer
+        isOpen={Boolean(inspectingProduct)}
+        onClose={() => setInspectingProduct(null)}
+        product={inspectingProduct}
+        brandSlug={brandSlug}
+        isEs={isEs}
+        onPrevProduct={handlePrevInspectingProduct}
+        onNextProduct={handleNextInspectingProduct}
+        hasPrev={inspectingProductIndex > 0}
+        hasNext={inspectingProductIndex >= 0 && inspectingProductIndex < filteredProducts.length - 1}
+        onQuickAdd={(p) => handleQuickAdd(p)}
+        onWhatsAppInquiry={(p) => {
+          const url = getWhatsAppInquiryUrl(p);
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }}
+        onViewProduct={(p) => handleProductClick(p)}
+        regulatoryBadges={inspectingProduct ? resolveProductRegulatoryBadges(inspectingProduct, brandSlug) : []}
+      />
     </div>
   );
 }
