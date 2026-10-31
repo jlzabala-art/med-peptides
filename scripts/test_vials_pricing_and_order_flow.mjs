@@ -206,7 +206,9 @@ async function runTestSuite() {
     }
   ];
 
-  const grandTotal = 52.90 + 393.50; // $446.40
+  const subtotal = 52.90 + 393.50; // $446.40
+  const shippingCost = 65.22; // €60.00 base express cold-chain freight ($65.22 USD)
+  const grandTotal = Math.round((subtotal + shippingCost) * 100) / 100; // $511.62
   const totalUnits = 2 + 10; // 12 viales
 
   const clientContact = {
@@ -241,8 +243,9 @@ async function runTestSuite() {
     customerNotes: clientContact.notes,
     items: sampleItems,
     totalUnits: totalUnits,
-    subtotal: grandTotal,
-    shippingCost: 0,
+    subtotal: subtotal,
+    shippingCost: shippingCost,
+    shippingCostEur: 60,
     shippingDestination: clientContact.country,
     grandTotal: grandTotal,
     total: grandTotal,
@@ -350,6 +353,8 @@ async function runTestSuite() {
   assert(savedOrder.wholesalerEmail === 'nikpsathas@gmail.com', `wholesalerEmail es 'nikpsathas@gmail.com'`);
   assert(savedOrder.referralCode === 'CAT-RX-7482', `referralCode es 'CAT-RX-7482'`);
   assert(savedOrder.attributedTo === 'Por atención de Nikolaos Psathas (NP Labs)', `attributedTo es 'Por atención de Nikolaos Psathas (NP Labs)'`);
+  assert(savedOrder.subtotal === subtotal, `Subtotal de formulaciones es exacto ($${subtotal.toFixed(2)})`);
+  assert(savedOrder.shippingCost === shippingCost, `Coste de envío cold-chain es exacto ($${shippingCost.toFixed(2)} / €60 base)`);
   assert(savedOrder.grandTotal === grandTotal, `Importe total es exacto ($${grandTotal.toFixed(2)})`);
   assert(savedOrder.totalUnits === 12, `Total de viales es exacto (12 viales: 2 sueltos + 1 pack de 10)`);
 

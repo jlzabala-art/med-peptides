@@ -264,6 +264,22 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
     }, 0);
   }, [cartItems]);
 
+  // Cold-Chain Express Shipping (60 EUR base)
+  const _shippingCostEur = 60;
+  const shippingCostUsd = useMemo(() => {
+    return Math.round((60 / 0.92) * 100) / 100; // $65.22 USD
+  }, []);
+
+  const shippingCostCurrentCurrency = useMemo(() => {
+    if (currency === 'EUR') return 60;
+    if (currency === 'AED') return Math.round((60 / 0.92) * 3.6725 * 100) / 100; // 239.50 AED
+    return shippingCostUsd; // 65.22 USD
+  }, [currency, shippingCostUsd]);
+
+  const grandTotalCartValueUsd = useMemo(() => {
+    return totalCartCount > 0 ? (totalCartValueUsd + shippingCostUsd) : 0;
+  }, [totalCartCount, totalCartValueUsd, shippingCostUsd]);
+
   const handleShareSchedule = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
@@ -334,6 +350,9 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
       ].filter(Boolean).join(', ');
 
       const totalUnits = itemsPayload.reduce((acc, i) => acc + i.totalVials, 0);
+      const subtotalUsd = totalCartValueUsd;
+      const finalShippingUsd = totalUnits > 0 ? shippingCostUsd : 0;
+      const finalGrandTotalUsd = subtotalUsd + finalShippingUsd;
 
       const res = await fetch('/api/orders/create-draft', {
         method: 'POST',
@@ -347,13 +366,15 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
           customerPhone: orderForm.phone,
           customerAddress: fullAddress,
           customerNotes: orderForm.notes,
-          shippingDestination: orderForm.country,
+          shippingDestination: orderForm.country || 'International (Cold-Chain 2–8°C)',
           referralCode: referralCode || 'CAT-RX-7482',
           source: 'public_peptides_price_schedule',
           collection: 'vials',
-          grandTotal: totalCartValueUsd,
-          subtotal: totalCartValueUsd,
-          totalAmountUsd: totalCartValueUsd,
+          subtotal: subtotalUsd,
+          shippingCost: finalShippingUsd,
+          shippingCostEur: 60,
+          grandTotal: finalGrandTotalUsd,
+          totalAmountUsd: finalGrandTotalUsd,
           totalUnits,
           currency: 'USD',
           currencySymbol: '$',
@@ -1139,19 +1160,39 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                     })}
 
                     <div style={{
-                      marginTop: '0.5rem',
-                      padding: '10px 12px',
-                      background: '#f0f9ff',
-                      borderRadius: '6px',
-                      border: '1px solid #bae6fd',
+                      marginTop: '0.75rem',
+                      padding: '12px 14px',
+                      background: '#f8fafc',
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0',
                       display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
+                      flexDirection: 'column',
+                      gap: '8px'
                     }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0369a1' }}>Estimated Total:</span>
-                      <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '1.05rem', color: '#0369a1' }}>
-                        {formatPrice(totalCartValueUsd)}
-                      </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.80rem', color: '#475569' }}>
+                        <span>Subtotal Formulations ({totalCartCount} vials):</span>
+                        <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0f172a' }}>
+                          {formatPrice(totalCartValueUsd)}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.80rem', color: '#0369a1' }}>
+                        <span>Cold-Chain Express Freight (2–8°C · €60 base):</span>
+                        <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0284c7' }}>
+                          +{currencySymbol}{shippingCostCurrentCurrency.toFixed(2)}
+                        </span>
+                      </div>
+                      <div style={{
+                        paddingTop: '8px',
+                        borderTop: '1px solid #cbd5e1',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}>
+                        <span style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0f172a' }}>Estimated Total:</span>
+                        <span style={{ fontFamily: 'monospace', fontWeight: 900, fontSize: '1.10rem', color: '#0284c7' }}>
+                          {formatPrice(grandTotalCartValueUsd)}
+                        </span>
+                      </div>
                     </div>
 
                     {/* 1-Click Proforma PDF / Print button */}
@@ -1588,12 +1629,28 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
             })}
           </tbody>
           <tfoot>
+            <tr style={{ borderTop: '1px solid #cbd5e1' }}>
+              <td colSpan={4} style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 650, fontSize: '9pt', color: '#475569' }}>
+                SUBTOTAL FORMULATIONS:
+              </td>
+              <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, fontSize: '9.5pt', color: '#0f172a', fontFamily: 'monospace' }}>
+                {formatPrice(totalCartValueUsd)}
+              </td>
+            </tr>
+            <tr style={{ borderTop: '1px solid #f1f5f9' }}>
+              <td colSpan={4} style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 650, fontSize: '9pt', color: '#0369a1' }}>
+                INSULATED COLD-CHAIN FREIGHT (2–8°C THERMAL EXPRESS · €60.00 BASE):
+              </td>
+              <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, fontSize: '9.5pt', color: '#0284c7', fontFamily: 'monospace' }}>
+                +{currencySymbol}{shippingCostCurrentCurrency.toFixed(2)}
+              </td>
+            </tr>
             <tr style={{ borderTop: '2px solid #0f172a' }}>
-              <td colSpan={4} style={{ padding: '10px', textAlign: 'right', fontWeight: 700, fontSize: '10pt' }}>
+              <td colSpan={4} style={{ padding: '10px', textAlign: 'right', fontWeight: 800, fontSize: '10pt', color: '#0f172a' }}>
                 ESTIMATED PROFORMA TOTAL:
               </td>
-              <td style={{ padding: '10px', textAlign: 'right', fontWeight: 800, fontSize: '11pt', color: '#0284c7', fontFamily: 'monospace' }}>
-                {formatPrice(totalCartValueUsd)}
+              <td style={{ padding: '10px', textAlign: 'right', fontWeight: 900, fontSize: '11pt', color: '#0284c7', fontFamily: 'monospace' }}>
+                {formatPrice(grandTotalCartValueUsd)}
               </td>
             </tr>
           </tfoot>

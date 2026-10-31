@@ -146,18 +146,28 @@ async function runSuite() {
     wholesalerName: 'Nikolaos Psathas (NP Labs)',
     referralCode: 'CAT-RX-7482',
     attributedTo: 'Por atención de Nikolaos Psathas (NP Labs)',
-    grandTotal: 502.55,
+    subtotal: 502.55,
+    shippingCost: 65.22,
+    shippingCostEur: 60,
+    shippingDestination: 'Spain',
+    grandTotal: 567.77,
     currency: 'USD',
     currencySymbol: '$',
     items: [
       {
-        name: 'Semaglutide 5mg',
+        name: 'Semaglutide',
+        productName: 'Semaglutide',
+        dosage: '5 mg',
+        presentation: 'Lyophilized Vial (10R)',
         quantity: 10,
         unitPrice: 52.90,
         total: 449.65
       },
       {
-        name: 'BPC-157 5mg',
+        name: 'BPC-157',
+        productName: 'BPC-157',
+        dosage: '5 mg',
+        presentation: 'Lyophilized Vial (10R)',
         quantity: 2,
         unitPrice: 26.45,
         total: 52.90
@@ -175,6 +185,17 @@ async function runSuite() {
   assert(orderDoc.wholesalerId === 'np-labs-international', 'Atribución de Wholesaler ID es np-labs-international');
   assert(orderDoc.referralCode === 'CAT-RX-7482', 'Atribución de Referral Code es CAT-RX-7482');
   assert(orderDoc.attributedTo.includes('Nikolaos Psathas'), 'Etiqueta de atención incluye Nikolaos Psathas (NP Labs)');
+  assert(orderDoc.shippingCost === 65.22, 'Coste de shipping incluido en documento de orden ($65.22 USD / €60 base)');
+  assert(orderDoc.grandTotal === 567.77, 'Total de orden incluye subtotal + shipping ($502.55 + $65.22 = $567.77)');
+
+  // Test Verificación de Formato de Email (Dosage, Presentation y Shipping)
+  const { buildOrderNotificationHtml } = await import('../src/lib/orderNotificationMailer.js');
+  const renderedHtml = buildOrderNotificationHtml(orderDoc);
+
+  assert(renderedHtml.includes('5 mg'), 'El email contiene la dosificación explícita (5 mg)');
+  assert(renderedHtml.includes('Lyophilized Vial (10R)'), 'El email contiene el tipo de presentación (Lyophilized Vial (10R))');
+  assert(renderedHtml.includes('60.00 base'), 'El email desglosa el coste de envío cold-chain de 60 euros base');
+  assert(renderedHtml.includes('567.77'), 'El email calcula el gran total sumando el shipping ($567.77)');
 
   // Test Despacho de Notificación
   const mailResult = await sendOrderCreatedNotificationEmail(

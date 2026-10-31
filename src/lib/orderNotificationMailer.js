@@ -18,12 +18,6 @@ export function buildOrderNotificationHtml(order = {}) {
   const customerNotes = order.customerNotes || '—';
   const currency = order.currency || 'EUR';
   const sym = order.currencySymbol || (currency === 'EUR' ? '€' : '$');
-  const subtotal = Number(order.subtotal || 0);
-  const shippingCost = Number(order.shippingCost || 0);
-  const shippingDestination = order.shippingDestination || 'Standard Dispatch';
-  const grandTotal = Number(order.grandTotal || order.total || 0);
-  const totalUnits = Number(order.totalUnits || 0);
-  const createdAt = order.createdAt || new Date().toISOString();
 
   const isNikolas =
     order.wholesalerId === 'np-labs-international' ||
@@ -32,6 +26,18 @@ export function buildOrderNotificationHtml(order = {}) {
     order.catalogId === 'CAT-RX-7482' ||
     String(order.wholesalerName || '').toLowerCase().includes('nikol') ||
     String(order.wholesalerName || '').toLowerCase().includes('np lab');
+
+  // Shipping logic: standard clinical cold-chain freight is €60.00 base
+  const isVialsSchedule = order.collection === 'vials' || order.source === 'public_peptides_price_schedule' || isNikolas;
+  const defaultShippingCost = isVialsSchedule ? (currency === 'EUR' ? 60 : 65.22) : 0;
+  const rawShippingCost = Number(order.shippingCost ?? order.shipping ?? 0);
+  const shippingCost = rawShippingCost > 0 ? rawShippingCost : (isVialsSchedule ? defaultShippingCost : 0);
+  const shippingDestination = order.shippingDestination || 'Standard Dispatch';
+
+  const subtotal = Number(order.subtotal || 0);
+  const grandTotal = Number(order.grandTotal || (subtotal + shippingCost) || order.total || 0);
+  const totalUnits = Number(order.totalUnits || 0);
+  const createdAt = order.createdAt || new Date().toISOString();
 
   const attributedToText = isNikolas
     ? 'Referred by: Nikolaos Psathas · NP Labs International (Wholeseller · Referral #CAT-RX-7482)'
@@ -45,10 +51,11 @@ export function buildOrderNotificationHtml(order = {}) {
   const itemsRowsHtml = items.length > 0
     ? items.map((item, idx) => {
         const name = item.productName || item.name || `Item #${idx + 1}`;
-        const variant = item.variant || [item.dosage, item.presentation].filter(Boolean).join(' • ') || 'Standard';
-        const qty = Number(item.quantity || 1);
+        const dosage = item.dosage || (item.variant && item.variant.includes('•') ? item.variant.split('•')[0].trim() : item.variant) || 'Standard';
+        const presentation = item.presentation || (item.variant && item.variant.includes('•') ? item.variant.split('•')[1].trim() : 'Lyophilized Vial (10R)') || 'Lyophilized Vial (10R)';
+        const qty = Number(item.quantity || item.totalVials || 1);
         const unitPrice = Number(item.unitPrice || item.price || 0);
-        const lineTotal = Number(item.totalPrice || item.total || (qty * unitPrice));
+        const lineTotal = Number(item.totalPrice || item.total || item.subtotal || (qty * unitPrice));
         const baseCost = Number(item.baseCost || 0);
         const mediluxePrice = Number(item.mediluxePrice || (baseCost > 0 ? (baseCost * 1.15) : 0));
 
@@ -60,16 +67,25 @@ export function buildOrderNotificationHtml(order = {}) {
           <tr>
             <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#0f172a;font-weight:700;">
               ${idx + 1}. ${name}
-              <div style="font-size:11px;color:#64748b;font-weight:500;">${variant}</div>
               ${breakdownBadge}
             </td>
+            <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#0369a1;font-weight:700;text-align:center;">
+              <span style="display:inline-block;padding:3px 8px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:4px;">
+                ${dosage}
+              </span>
+            </td>
+            <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#334155;font-weight:600;text-align:center;">
+              <span style="display:inline-block;padding:3px 8px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:4px;">
+                ${presentation}
+              </span>
+            </td>
             <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#334155;text-align:center;font-weight:700;">${qty}</td>
-            <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#0f172a;text-align:right;">${sym}${unitPrice.toFixed(2)}</td>
-            <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#003666;text-align:right;font-weight:800;">${sym}${lineTotal.toFixed(2)}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#0f172a;text-align:right;font-family:monospace;">${sym}${unitPrice.toFixed(2)}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#003666;text-align:right;font-weight:800;font-family:monospace;">${sym}${lineTotal.toFixed(2)}</td>
           </tr>
         `;
       }).join('')
-    : `<tr><td colspan="4" style="padding:12px;text-align:center;color:#64748b;">No line items detailed</td></tr>`;
+    : `<tr><td colspan="6" style="padding:12px;text-align:center;color:#64748b;">No line items detailed</td></tr>`;
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
   const adminOrderUrl = `${appUrl}/admin?tab=orders${order.firestoreId ? `&orderId=${encodeURIComponent(order.firestoreId)}` : ''}`;
@@ -87,7 +103,7 @@ export function buildOrderNotificationHtml(order = {}) {
             🚨 New Order Received · #${orderCode}
           </h1>
           <div style="margin-top:6px;font-size:13px;color:#e0f2fe;">
-            Total: <strong>${sym}${grandTotal.toFixed(2)} ${currency}</strong> (${totalUnits} units) · Date: ${new Date(createdAt).toLocaleString('en-US', { timeZone: 'UTC' })} UTC
+            Total: <strong>${sym}${grandTotal.toFixed(2)} ${currency}</strong> (${totalUnits} units · incl. ${sym}${shippingCost.toFixed(2)} Shipping) · Date: ${new Date(createdAt).toLocaleString('en-US', { timeZone: 'UTC' })} UTC
           </div>
         </div>
 
@@ -150,7 +166,9 @@ export function buildOrderNotificationHtml(order = {}) {
           <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:20px;">
             <thead>
               <tr style="background:#f1f5f9;">
-                <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:#475569;">Product / Presentation</th>
+                <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:#475569;">Product</th>
+                <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;color:#475569;">Dosage</th>
+                <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;color:#475569;">Presentation</th>
                 <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;color:#475569;">Qty</th>
                 <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;color:#475569;">Unit Price</th>
                 <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;color:#475569;">Line Total</th>
@@ -161,16 +179,18 @@ export function buildOrderNotificationHtml(order = {}) {
             </tbody>
             <tfoot>
               <tr style="background:#f8fafc;">
-                <td colspan="3" style="padding:8px 12px;text-align:right;font-size:12px;color:#475569;">Subtotal Formulations:</td>
-                <td style="padding:8px 12px;text-align:right;font-size:13px;font-weight:700;color:#0f172a;">${sym}${subtotal.toFixed(2)}</td>
+                <td colspan="5" style="padding:8px 12px;text-align:right;font-size:12px;color:#475569;">Subtotal Formulations:</td>
+                <td style="padding:8px 12px;text-align:right;font-size:13px;font-weight:700;color:#0f172a;font-family:monospace;">${sym}${subtotal.toFixed(2)}</td>
               </tr>
               <tr style="background:#f8fafc;">
-                <td colspan="3" style="padding:8px 12px;text-align:right;font-size:12px;color:#475569;">Dispatch / Shipping (${shippingDestination}):</td>
-                <td style="padding:8px 12px;text-align:right;font-size:13px;font-weight:700;color:#0f172a;">+${sym}${shippingCost.toFixed(2)}</td>
+                <td colspan="5" style="padding:8px 12px;text-align:right;font-size:12px;color:#475569;">
+                  Insulated Cold-Chain Freight (2–8°C Thermal Express · €60.00 base · ${shippingDestination}):
+                </td>
+                <td style="padding:8px 12px;text-align:right;font-size:13px;font-weight:700;color:#0284c7;font-family:monospace;">+${sym}${shippingCost.toFixed(2)}</td>
               </tr>
               <tr style="background:#eff6ff;border-top:2px solid #bfdbfe;">
-                <td colspan="3" style="padding:12px;text-align:right;font-size:14px;font-weight:800;color:#003666;">ORDER TOTAL (${currency}):</td>
-                <td style="padding:12px;text-align:right;font-size:16px;font-weight:900;color:#003666;">${sym}${grandTotal.toFixed(2)} ${currency}</td>
+                <td colspan="5" style="padding:12px;text-align:right;font-size:14px;font-weight:800;color:#003666;">ORDER TOTAL (${currency}):</td>
+                <td style="padding:12px;text-align:right;font-size:16px;font-weight:900;color:#003666;font-family:monospace;">${sym}${grandTotal.toFixed(2)} ${currency}</td>
               </tr>
             </tfoot>
           </table>

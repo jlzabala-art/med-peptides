@@ -247,12 +247,21 @@ export async function POST(request) {
       customerNotes: String(customerNotes || '').trim(),
       items: formattedItems,
       totalUnits: Number(totalUnits) || formattedItems.reduce((acc, i) => acc + i.quantity, 0),
-      subtotal: Number(subtotal) || 0,
-      shippingCost: Number(shippingCost) || 0,
-      shippingDestination: String(shippingDestination || 'Standard Dispatch').trim(),
+      subtotal: Number(subtotal) > 0
+        ? Number(Number(subtotal).toFixed(2))
+        : Number(formattedItems.reduce((acc, i) => acc + (Number(i.lineTotal) || 0), 0).toFixed(2)),
+      shippingCost: Number(shippingCost) > 0
+        ? Number(Number(shippingCost).toFixed(2))
+        : (collection === 'vials' || source === 'public_peptides_price_schedule' || isNikolasOrder ? (currency === 'EUR' ? 60 : 65.22) : 0),
+      shippingCostEur: 60,
+      shippingDestination: String(shippingDestination || 'Insulated Cold-Chain (2–8°C Thermal Express)').trim(),
       shippingCode: String(shippingCode || 'EU').trim(),
-      grandTotal: Number(grandTotal) || 0,
-      total: Number(grandTotal || 0),
+      grandTotal: Number(grandTotal) > 0
+        ? Number(Number(grandTotal).toFixed(2))
+        : Number(((Number(subtotal) || formattedItems.reduce((acc, i) => acc + (Number(i.lineTotal) || 0), 0)) + (Number(shippingCost) || (currency === 'EUR' ? 60 : 65.22))).toFixed(2)),
+      total: Number(grandTotal) > 0
+        ? Number(Number(grandTotal).toFixed(2))
+        : Number(((Number(subtotal) || formattedItems.reduce((acc, i) => acc + (Number(i.lineTotal) || 0), 0)) + (Number(shippingCost) || (currency === 'EUR' ? 60 : 65.22))).toFixed(2)),
       totalAmount: Number(grandTotal || 0),
       paymentMethod: String(paymentMethod || 'payment_link_24h').trim(), // Default: payment link within 24h
       currency: String(currency || 'USD').toUpperCase(),
