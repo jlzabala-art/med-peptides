@@ -1163,10 +1163,10 @@ export default function QatarGenomicsPriceClient() {
                   <span>Clinical Translation Engine</span>
                 </div>
                 <h2 style={{ fontSize: '1.65rem', fontWeight: 850, color: '#003666', marginTop: '8px', margin: 0 }}>
-                  Case Simulation: Translating 24Genetics DNA Results into Custom Medicine
+                  Clinical Case Simulation: Translating 24Genetics DNA Results into Custom Medicine
                 </h2>
                 <p style={{ fontSize: '0.90rem', color: '#64748b', marginTop: '6px', lineHeight: 1.6 }}>
-                  Explore how Atlas AI™ ingests genetic findings from patient specimen <strong>24G-QA-90421</strong>, synthesizes deep biochemical rationale, and formulates a patient-specific compounded capsule protocol.
+                  Explore how Atlas Health&apos;s multidisciplinary clinical team (medical geneticists and compounding pharmacists) evaluates patient specimen <strong>24G-QA-90421</strong>, synthesizes deep biochemical rationale, and formulates an individualized treatment protocol with exact posology and duration.
                 </p>
               </div>
 
@@ -1264,9 +1264,9 @@ export default function QatarGenomicsPriceClient() {
                     </div>
 
                     <div style={{ backgroundColor: '#ffffff', border: '1px solid #99f6e4', borderRadius: '8px', padding: '1rem', marginTop: '1rem' }}>
-                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas AI™ Prescriptive Action:</strong>
+                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas Clinical Genetics Recommendation & Posology:</strong>
                       <div style={{ fontSize: '0.84rem', color: '#0f766e', fontWeight: 650, marginTop: '4px' }}>
-                        Strictly contraindicate synthetic folic acid. Prescribe <strong>L-Methylfolate (as Quatrefolic® [6S]-5-MTHF) 1,000 mcg</strong> + <strong>Methylcobalamin 1,000 mcg</strong> + <strong>P-5-P (Pyridoxal-5-Phosphate) 25 mg</strong> to bypass the blocked pathway entirely and normalize homocysteine within 4-6 weeks.
+                        Strictly contraindicate synthetic folic acid. Prescribe <strong>L-Methylfolate 1,000 mcg</strong> (500 mcg BID) + <strong>Methylcobalamin 1,000 mcg</strong> + <strong>Pyridoxal-5-Phosphate 25 mg</strong>. <em>Posology:</em> 1 capsule in the morning with breakfast and 1 capsule with dinner for <strong>60 days</strong> to bypass the blocked enzymatic pathway and normalize plasma homocysteine.
                       </div>
                     </div>
                   </div>
@@ -1300,9 +1300,9 @@ export default function QatarGenomicsPriceClient() {
                     </div>
 
                     <div style={{ backgroundColor: '#ffffff', border: '1px solid #99f6e4', borderRadius: '8px', padding: '1rem', marginTop: '1rem' }}>
-                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas AI™ Prescriptive Action:</strong>
+                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas Clinical Genetics Recommendation & Posology:</strong>
                       <div style={{ fontSize: '0.84rem', color: '#0f766e', fontWeight: 650, marginTop: '4px' }}>
-                        Elevate therapeutic serum 25-OH-D target from standard 30 ng/mL to <strong>60-80 ng/mL</strong>. Prescribe <strong>Vitamin D3 (Cholecalciferol) 5,000 IU</strong> co-formulated with <strong>Vitamin K2 (MK-7) 100 mcg</strong> (to direct calcium deposition into bone matrix and prevent arterial calcification) + <strong>Magnesium Bisglycinate 200 mg</strong> as enzymatic cofactor.
+                        Elevate therapeutic serum 25-OH-D target from standard 30 ng/mL to <strong>60-80 ng/mL</strong>. Prescribe <strong>Vitamin D3 (Cholecalciferol) 5,000 IU</strong> co-formulated with <strong>Vitamin K2 (MK-7) 100 mcg</strong> + <strong>Magnesium Bisglycinate 200 mg</strong>. <em>Posology:</em> Take once daily with breakfast (fat-containing meal) for an initial <strong>60-day protocol</strong>, followed by 25-OH-D blood level monitoring.
                       </div>
                     </div>
                   </div>
@@ -1336,9 +1336,9 @@ export default function QatarGenomicsPriceClient() {
                     </div>
 
                     <div style={{ backgroundColor: '#ffffff', border: '1px solid #99f6e4', borderRadius: '8px', padding: '1rem', marginTop: '1rem' }}>
-                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas AI™ Prescriptive Action:</strong>
+                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas Clinical Genetics Recommendation & Posology:</strong>
                       <div style={{ fontSize: '0.84rem', color: '#0f766e', fontWeight: 650, marginTop: '4px' }}>
-                        Establish strict dairy lactose exclusion. Prescribe <strong>Acid-Stable Microbial Lactase Enzyme (9,000 FCC ALU)</strong> for dining out. <strong>Critical Compounding Rule:</strong> Atlas Compounding Studio automatically flags and prohibits lactose monohydrate as a capsule binder, mandating microcrystalline cellulose and vegetable DRcaps®.
+                        Establish strict dietary lactose exclusion. For unverified meals or dining out, prescribe <strong>Acid-Stable Microbial Lactase Enzyme (9,000 FCC ALU)</strong> taken immediately prior to food. <em>Galenic Compounding Protocol:</em> The Atlas clinical compounding team mandates 100% lactose-free excipients (microcrystalline cellulose vehicle) in vegetable DRcaps® for all ongoing treatments.
                       </div>
                     </div>
                   </div>
@@ -1372,27 +1372,34 @@ export default function QatarGenomicsPriceClient() {
                     </div>
 
                     <div style={{ backgroundColor: '#ffffff', border: '1px solid #99f6e4', borderRadius: '8px', padding: '1rem', marginTop: '1rem' }}>
-                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas AI™ Prescriptive Action:</strong>
+                      <strong style={{ fontSize: '0.82rem', color: '#0d9488', textTransform: 'uppercase' }}>Atlas Clinical Genetics Recommendation & Posology:</strong>
                       <div style={{ fontSize: '0.84rem', color: '#0f766e', fontWeight: 650, marginTop: '4px' }}>
-                        Restrict glycemic load (&lt;40g net carbs/meal). Formulate <strong>Phytosome Berberine (Berbevis®) 250 mg</strong> (AMPK phosphorylation agonist) + <strong>Chromium Picolinate 200 mcg</strong> to enhance insulin receptor sensitivity and prevent progression to pre-diabetes.
+                        Restrict net meal carbs (&lt;40g net carbs/meal). Prescribe <strong>Standardized Berberine 250 mg</strong> + <strong>Chromium Picolinate 200 mcg</strong>. <em>Posology:</em> 1 capsule BID 15 minutes before breakfast and dinner for <strong>60 days</strong> to enhance insulin receptor sensitivity and prevent progression toward glycemic dysregulation.
                       </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Automated Compounded Formulation Box */}
+              {/* Clinical Compounding Formulation Box */}
               <div style={{ backgroundColor: '#ffffff', border: '2px solid #0d9488', borderRadius: '10px', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 4px 12px rgba(13, 148, 136, 0.1)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Pill size={20} className="text-teal-600" />
-                    <h3 style={{ fontSize: '1.15rem', fontWeight: 850, color: '#003666', margin: 0 }}>
-                      Atlas AI™ Generated Master Formulation: Formula QA-GEN-01
-                    </h3>
+                    <div>
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 850, color: '#003666', margin: 0 }}>
+                        Atlas Clinical Genomics & Compounding Team: Master Formulation QA-GEN-01
+                      </h3>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                        Formulated by Atlas Medical Geneticists & Compounding Pharmacists · Tailored to Specimen 24G-QA-90421
+                      </p>
+                    </div>
                   </div>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#0d9488', color: '#ffffff', padding: '4px 10px', borderRadius: '4px' }}>
-                    60-Day Supply · 120 DRcaps®
-                  </span>
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#0d9488', color: '#ffffff', padding: '4px 10px', borderRadius: '4px' }}>
+                      60-Day Initial Cycle · 120 DRcaps®
+                    </span>
+                  </div>
                 </div>
 
                 <div style={{ overflowX: 'auto' }}>
@@ -1402,52 +1409,67 @@ export default function QatarGenomicsPriceClient() {
                         <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Active Pharmacological Ingredient</th>
                         <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Bioavailable Chemical Form</th>
                         <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Dosage / Day</th>
-                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Targeted Variant</th>
+                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Posology & Administration</th>
+                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Targeted Genetic Pathway</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
                         <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>L-Methylfolate</td>
-                        <td style={{ padding: '10px 12px', color: '#475569' }}>Quatrefolic® [6S]-5-MTHF Glucosamine Salt</td>
+                        <td style={{ padding: '10px 12px', color: '#475569' }}>[6S]-5-MTHF Calcium Salt USP</td>
                         <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>1,000 mcg</td>
+                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>500 mcg BID (Morning & Evening)</td>
                         <td style={{ padding: '10px 12px', color: '#b91c1c', fontWeight: 650 }}>MTHFR C677T (TT)</td>
                       </tr>
-                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
                         <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Methylcobalamin</td>
                         <td style={{ padding: '10px 12px', color: '#475569' }}>Enzymatically active coenzyme B12</td>
                         <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>1,000 mcg</td>
+                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>500 mcg BID with meals</td>
                         <td style={{ padding: '10px 12px', color: '#b91c1c', fontWeight: 650 }}>Homocysteine Clearance</td>
                       </tr>
                       <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
                         <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Vitamin D3</td>
                         <td style={{ padding: '10px 12px', color: '#475569' }}>Cholecalciferol USP</td>
                         <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>5,000 IU</td>
+                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>In morning capsule with breakfast</td>
                         <td style={{ padding: '10px 12px', color: '#b45309', fontWeight: 650 }}>VDR FokI (CT)</td>
                       </tr>
-                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
                         <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Vitamin K2</td>
-                        <td style={{ padding: '10px 12px', color: '#475569' }}>Menaquinone-7 (MK-7 all-trans)</td>
+                        <td style={{ padding: '10px 12px', color: '#475569' }}>Menaquinone-7 (all-trans MK-7)</td>
                         <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>100 mcg</td>
+                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>50 mcg BID with fat-containing meal</td>
                         <td style={{ padding: '10px 12px', color: '#b45309', fontWeight: 650 }}>VDR Arterial Protection</td>
                       </tr>
                       <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
                         <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Magnesium Bisglycinate</td>
-                        <td style={{ padding: '10px 12px', color: '#475569' }}>TRAACS® Fully Chelated Glycinate</td>
+                        <td style={{ padding: '10px 12px', color: '#475569' }}>Fully Chelated Glycinate USP</td>
                         <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>200 mg</td>
-                        <td style={{ padding: '10px 12px', color: '#475569', fontWeight: 650 }}>Enzymatic Cofactor</td>
+                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>100 mg BID (morning + dinner)</td>
+                        <td style={{ padding: '10px 12px', color: '#475569', fontWeight: 650 }}>Enzymatic VDR Cofactor</td>
                       </tr>
-                      <tr>
-                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Phytosome Berberine</td>
-                        <td style={{ padding: '10px 12px', color: '#475569' }}>Berbevis® Phospholipid Complex (5x bioavailable)</td>
+                      <tr style={{ backgroundColor: '#f8fafc' }}>
+                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Standardized Berberine</td>
+                        <td style={{ padding: '10px 12px', color: '#475569' }}>High-Bioavailability Phospholipid Complex</td>
                         <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>250 mg</td>
+                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>125 mg BID 15 min before meals</td>
                         <td style={{ padding: '10px 12px', color: '#0f766e', fontWeight: 650 }}>TCF7L2 Glycemic Sensitivity</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
-                <div style={{ marginTop: '1rem', padding: '10px 14px', backgroundColor: '#f8fafc', borderRadius: '6px', fontSize: '0.78rem', color: '#475569' }}>
-                  <strong>Excipient Safety Check:</strong> 100% Lactose-Free Verified (MCM6 safety). Microcrystalline Cellulose vehicle, delayed-release acid-resistant hypromellose DRcaps®. Posology: 1 capsule with breakfast and 1 capsule with dinner.
+                <div style={{ marginTop: '1rem', padding: '12px 16px', backgroundColor: '#f8fafc', borderRadius: '8px', fontSize: '0.80rem', color: '#334155', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div>
+                    <strong>Prescribed Posology & Timing:</strong> Take <strong>1 capsule with breakfast</strong> and <strong>1 capsule with dinner</strong> with a full glass of water.
+                  </div>
+                  <div>
+                    <strong>Treatment Duration & Follow-Up:</strong> Initial cycle of <strong>60 days (120 DRcaps®)</strong>, followed by a serum 25-OH-D and plasma homocysteine check at day 45 to calibrate long-term maintenance.
+                  </div>
+                  <div>
+                    <strong>Galenic Excipient Safety Check:</strong> 100% Lactose-Free Certified (critical for patient&apos;s MCM6 non-persistence). Microcrystalline cellulose filler in delayed-release acid-resistant hypromellose DRcaps®.
+                  </div>
                 </div>
               </div>
 
@@ -1493,17 +1515,47 @@ export default function QatarGenomicsPriceClient() {
                 </div>
               </div>
 
-              {/* Doctor Talking Points */}
-              <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '1.25rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <Stethoscope size={18} className="text-blue-600" />
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1e3a8a', margin: 0 }}>
-                    Doctor Copilot: How the Doha Clinic Communicates this to the Patient
-                  </h4>
+              {/* Doctor Copilot Clinical Guidance */}
+              <div style={{ backgroundColor: '#eff6ff', border: '1.5px solid #93c5fd', borderRadius: '10px', padding: '1.5rem', boxShadow: '0 2px 8px rgba(30, 58, 138, 0.05)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Stethoscope size={20} className="text-blue-600" />
+                    <div>
+                      <h4 style={{ fontSize: '1.05rem', fontWeight: 850, color: '#1e3a8a', margin: 0 }}>
+                        Doctor Copilot: Clinical Prescribing Guide & Patient Communication
+                      </h4>
+                      <div style={{ fontSize: '0.76rem', color: '#3b82f6', fontWeight: 650 }}>
+                        Expert assistance for clinic doctors in Doha · How to explain the DNA results and prescribe the treatment
+                      </div>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 800, backgroundColor: '#dbeafe', color: '#1d4ed8', padding: '3px 8px', borderRadius: '4px' }}>
+                    Physician Prescribing Guidance
+                  </span>
                 </div>
-                <blockquote style={{ margin: 0, paddingLeft: '1rem', borderLeft: '3px solid #3b82f6', fontSize: '0.82rem', color: '#1e40af', fontStyle: 'italic', lineHeight: 1.6 }}>
-                  &ldquo;Mr. Al-Kuwari, your 24Genetics test revealed why regular vitamins weren&apos;t working for you. You have a common variation in your MTHFR gene that prevents your liver from activating standard supermarket folic acid. Instead of standard pills, Atlas Health has compounded an exclusive medical capsule specifically calibrated for your DNA: activated Quatrefolic® with high-potency Vitamin D3 and K2. You don&apos;t need to take 6 different generic bottles; everything your DNA needs is combined into this single custom daily regimen.&rdquo;
-                </blockquote>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginTop: '12px', marginBottom: '14px' }}>
+                  <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                    <strong style={{ fontSize: '0.78rem', color: '#1e3a8a', textTransform: 'uppercase' }}>1. What the Doctor Prescribes:</strong>
+                    <p style={{ fontSize: '0.80rem', color: '#1e40af', margin: '4px 0 0 0', lineHeight: 1.5 }}>
+                      Prescribe <strong>Formula QA-GEN-01 (120 DRcaps®)</strong>. Posology: 1 capsule with breakfast and 1 capsule with dinner. Treatment duration: <strong>60 days</strong>. At day 45, request fasting glucose, HbA1c, homocysteine, and 25-OH-D to calibrate the 12-month maintenance renewal.
+                    </p>
+                  </div>
+
+                  <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                    <strong style={{ fontSize: '0.78rem', color: '#1e3a8a', textTransform: 'uppercase' }}>2. Clinical Value for the Patient:</strong>
+                    <p style={{ fontSize: '0.80rem', color: '#1e40af', margin: '4px 0 0 0', lineHeight: 1.5 }}>
+                      Consolidates 6 individual generic supplements into 1 single compounded capsule calibrated to the patient&apos;s genetic bottlenecks (MTHFR methylation, VDR receptor resistance, and TCF7L2 carb sensitivity).
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: '#ffffff', padding: '12px 14px', borderRadius: '8px', borderLeft: '4px solid #2563eb' }}>
+                  <strong style={{ fontSize: '0.76rem', color: '#1e3a8a', textTransform: 'uppercase' }}>Recommended Doctor-to-Patient Script (In Consultation):</strong>
+                  <blockquote style={{ margin: '6px 0 0 0', fontSize: '0.82rem', color: '#1e40af', fontStyle: 'italic', lineHeight: 1.6 }}>
+                    &ldquo;Mr. Al-Kuwari, our Atlas clinical genetics and pharmacology team has thoroughly reviewed your 24Genetics panel. We identified why conventional multivitamins have not provided the energy and metabolic results you expected. Your liver possesses an MTHFR variation that cannot convert synthetic folic acid, while your cellular receptors require higher, bioavailable vitamin D3 and K2. Rather than having you purchase multiple separate bottles from a store, our medical compounding laboratory has formulated a single, personalized 60-day capsule regimen (Formula QA-GEN-01). You take one capsule in the morning and one at night, completely lactose-free, giving your cells exactly what your DNA requires.&rdquo;
+                  </blockquote>
+                </div>
               </div>
             </div>
           </div>

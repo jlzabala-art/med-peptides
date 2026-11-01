@@ -242,11 +242,11 @@ export default function PatientDnaPortalClient({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <Sparkles size={18} className="text-teal-600" />
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  What Your DNA Means for Your Daily Life
+                  Clinical Evaluation: What Your DNA Means for Your Health
                 </h3>
               </div>
               <p style={{ fontSize: '0.86rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>
-                Every person has unique genetic switches that control metabolism, vitamin activation, and cravings. Here are the 4 key insights from your test, translated into simple everyday facts:
+                This report has been evaluated and synthesized by the <strong>Atlas Health multidisciplinary clinical team of medical geneticists and compounding pharmacists</strong>. Every finding is paired with exact posology and an initial 60-day treatment cycle designed to restore optimal biochemical balance:
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.25rem' }}>
@@ -263,8 +263,9 @@ export default function PatientDnaPortalClient({
                   <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '4px 0 10px 0' }}>
                     Your liver has a natural variation that makes it 70% slower at activating regular synthetic folic acid found in cheap multivitamins. When your body cannot activate folate, you may experience mid-afternoon brain fog, sluggish recovery, and higher cardiovascular inflammation.
                   </p>
-                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '8px 12px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
-                    <strong>The Solution:</strong> Take already-activated <em>L-Methylfolate (1,000 mcg)</em> and <em>Methylcobalamin (B12)</em>. They enter your bloodstream ready to work immediately without requiring conversion.
+                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
+                    <div><strong>Clinical Recommendation:</strong> Take bioavailable <em>L-Methylfolate (1,000 mcg)</em> and <em>Methylcobalamin (B12, 1,000 mcg)</em>.</div>
+                    <div style={{ marginTop: '3px' }}><strong>Posology:</strong> 500 mcg BID (1 capsule with breakfast and 1 with dinner). <strong>Duration:</strong> 60-day cycle.</div>
                   </div>
                 </div>
 
@@ -281,8 +282,9 @@ export default function PatientDnaPortalClient({
                   <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '4px 0 10px 0' }}>
                     Even in a sunny environment like the Gulf/Qatar, your cell receptors take longer to recognize vitamin D. This can lead to low energy, muscle fatigue, and weaker bone density over time.
                   </p>
-                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '8px 12px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
-                    <strong>The Solution:</strong> Daily therapeutic <em>Vitamin D3 (5,000 IU)</em> combined with <em>Vitamin K2 (100 mcg)</em>. Vitamin K2 acts like a GPS, ensuring calcium goes into bones and teeth rather than sticking to blood vessel walls.
+                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
+                    <div><strong>Clinical Recommendation:</strong> Daily therapeutic <em>Vitamin D3 (5,000 IU)</em> combined with <em>Vitamin K2 (100 mcg)</em> and <em>Magnesium Bisglycinate (200 mg)</em>.</div>
+                    <div style={{ marginTop: '3px' }}><strong>Posology:</strong> Take once daily in the morning with a meal containing healthy fats. <strong>Duration:</strong> 60-day cycle.</div>
                   </div>
                 </div>
 
@@ -299,8 +301,9 @@ export default function PatientDnaPortalClient({
                   <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '4px 0 10px 0' }}>
                     Refined carbohydrates, white bread, pastries, and sweet beverages trigger an exaggerated insulin surge in your body. This makes you feel suddenly hungry again 90 minutes after eating and causes preferential fat storage around the abdomen.
                   </p>
-                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '8px 12px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
-                    <strong>The Solution:</strong> Include bioavailable <em>Berberine (250 mg)</em> and <em>Chromium Picolinate (200 mcg)</em> in your morning regimen. They naturally support cell insulin sensitivity and keep appetite steady throughout the day.
+                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
+                    <div><strong>Clinical Recommendation:</strong> High-bioavailability <em>Standardized Berberine (250 mg)</em> and <em>Chromium Picolinate (200 mcg)</em>.</div>
+                    <div style={{ marginTop: '3px' }}><strong>Posology:</strong> 125 mg Berberine BID taken 15 min before breakfast and dinner. <strong>Duration:</strong> 60-day cycle.</div>
                   </div>
                 </div>
 
@@ -317,8 +320,9 @@ export default function PatientDnaPortalClient({
                   <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '4px 0 10px 0' }}>
                     Your intestines produce negligible lactase enzyme. Consuming conventional cow milk, soft cheeses, or medicines containing lactose filler triggers bloating, gas, and hidden gut lining inflammation.
                   </p>
-                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '8px 12px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
-                    <strong>The Solution:</strong> Switch to plant-based or lactose-free dairy. Your personalized Atlas capsule is specifically verified to be <em>100% lactose-free</em> in acid-resistant vegetable DRcaps®.
+                  <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 650 }}>
+                    <div><strong>Clinical Recommendation:</strong> Strict dietary exclusion of unfermented dairy lactose. For unverified dining out, keep <em>Lactase Enzyme (9,000 FCC ALU)</em> available.</div>
+                    <div style={{ marginTop: '3px' }}><strong>Galenic Standard:</strong> Capsules are 100% lactose-free in acid-resistant DRcaps®. <strong>Duration:</strong> Permanent dietary protocol.</div>
                   </div>
                 </div>
               </div>
@@ -510,3 +514,4 @@ export default function PatientDnaPortalClient({
     </div>
   );
 }
+

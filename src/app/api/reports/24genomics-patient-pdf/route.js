@@ -103,24 +103,24 @@ export async function GET(request) {
 
     // Section 1: Welcome message
     y -= 30;
-    page1.drawText('How to Read Your DNA Recommendations', {
+    page1.drawText('Clinical Evaluation by Atlas Medical Geneticists & Pharmacists', {
       x: 36,
       y,
-      size: 12,
+      size: 11,
       font: helveticaBold,
       color: navyPrimary
     });
 
     y -= 16;
-    const introText = 'Your genetics do not define a disease; they act as a personal manual for your body. The findings below explain how your metabolism processes sugars, fats, vitamins, and everyday nutrients. Each recommendation is designed to give you clarity and can be taken directly to your clinic or compounding pharmacy.';
+    const introText = 'This clinical guidance has been synthesized by the Atlas Health multidisciplinary team of medical geneticists and compounding pharmacists. Your DNA profile has been translated into an individualized 60-day therapeutic protocol with exact posology, restoring biochemical balance without generic trial-and-error.';
     page1.drawText(introText, {
       x: 36,
       y,
-      size: 8.5,
+      size: 8,
       font: helvetica,
       color: darkSlate,
       maxWidth: p1Width - 72,
-      lineHeight: 12
+      lineHeight: 11.5
     });
 
     // 4 Visual Cards: What Your DNA Says & What To Do
@@ -132,32 +132,32 @@ export async function GET(request) {
         status: 'Requires Active Folate',
         statusColor: alertRed,
         bgColor: badgeRedBg,
-        patientWhy: 'Your body has a normal genetic variation that makes it hard to activate ordinary supermarket folic acid into the form your brain, heart, and cells need.',
-        simpleFix: 'Take bioavailable L-Methylfolate (active vitamin B9) and Vitamin B12. Avoid synthetic folic acid in cheap multivitamin tablets.'
+        patientWhy: 'Your liver has a natural variation that makes it 70% slower at activating regular synthetic folic acid found in cheap multivitamins.',
+        simpleFix: 'Prescription: L-Methylfolate 1,000 mcg + Methylcobalamin 1,000 mcg. Posology: 500 mcg BID with meals for 60 days.'
       },
       {
         gene: 'VDR Gene (Vitamin D Receptors)',
         status: 'Reduced Sensitivity',
         statusColor: amberDark,
         bgColor: rgb(254 / 255, 243 / 255, 199 / 255),
-        patientWhy: 'Your cell receptors absorb vitamin D more slowly than average, even if you spend time outdoors or live in a sunny climate.',
-        simpleFix: 'Maintain an optimal intake of high-potency Vitamin D3 paired with Vitamin K2 (to safely guide calcium into bones and away from arteries).'
+        patientWhy: 'Your cell receptors absorb vitamin D more slowly than average, requiring higher circulating levels to protect bones and cellular immunity.',
+        simpleFix: 'Prescription: Vitamin D3 5,000 IU + Vitamin K2 100 mcg + Magnesium 200 mg. Posology: 1 dose each morning with breakfast for 60 days.'
       },
       {
         gene: 'TCF7L2 Gene (Blood Sugar & Carbs)',
         status: 'Sensitive to Simple Sugars',
         statusColor: amberDark,
         bgColor: rgb(254 / 255, 243 / 255, 199 / 255),
-        patientWhy: 'Rapid-digesting carbs and sweets cause your blood sugar to spike quickly, triggering tiredness, hunger cravings, and easier fat storage around the waist.',
-        simpleFix: 'Choose low-glycemic, fiber-rich meals (Mediterranean style). A daily micro-dose of bioavailable Berberine and Chromium helps keep glucose stable.'
+        patientWhy: 'Rapid-digesting carbs and sweets trigger an exaggerated insulin surge, causing fatigue, sugar cravings, and abdominal fat storage.',
+        simpleFix: 'Prescription: Standardized Berberine 250 mg + Chromium 200 mcg. Posology: 125 mg BID 15 min prior to meals for 60 days.'
       },
       {
         gene: 'LCT / MCM6 Gene (Dairy & Digestion)',
         status: 'Lactose Sensitivity',
         statusColor: alertRed,
         bgColor: badgeRedBg,
-        patientWhy: 'Your digestive tract naturally produces less lactase enzyme, meaning regular milk and unfermented dairy can cause bloating and gut discomfort.',
-        simpleFix: 'Opt for lactose-free or plant milks. Ensure any prescription capsules are certified 100% lactose-free (vegetable DRcaps®).'
+        patientWhy: 'Your intestines produce negligible lactase enzyme; conventional milk or lactose capsule fillers cause gut dysbiosis and micro-inflammation.',
+        simpleFix: 'Protocol: Strict dairy lactose exclusion. Compounding Rule: 100% lactose-free vehicle in acid-resistant vegetable DRcaps®.'
       }
     ];
 
