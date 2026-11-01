@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import {
+  GALENIC_COMPATIBILITY_ANALYSIS,
+  CLINICAL_PILLARS,
+  THREE_CAPSULE_PROTOCOL,
+  CONCRETE_DIET_GUIDELINES,
+  TREATMENT_CYCLE
+} from '@/data/genomics/clinicalNutrigenomicEngine';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,17 +32,20 @@ export async function GET(request) {
     const alertRed = rgb(185 / 255, 28 / 255, 28 / 255);         // #b91c1c
     const badgeRedBg = rgb(254 / 255, 242 / 255, 242 / 255);     // #fef2f2
     const amberDark = rgb(180 / 255, 83 / 255, 9 / 255);         // #b45309
+    const amberBg = rgb(254 / 255, 243 / 255, 199 / 255);        // #fef3c7
+    const blueDark = rgb(2 / 255, 132 / 255, 199 / 255);         // #0284c7
+    const blueBg = rgb(224 / 255, 242 / 255, 254 / 255);         // #e0f2fe
     const emeraldDark = rgb(22 / 255, 163 / 255, 74 / 255);      // #16a34a
     const emeraldBg = rgb(240 / 255, 253 / 255, 244 / 255);     // #f0fdf4
     const white = rgb(1, 1, 1);
 
-    // ==========================================
-    // PAGE 1: PATIENT-FRIENDLY DNA INSIGHTS
-    // ==========================================
-    const page1 = pdfDoc.addPage([595.28, 841.89]); // A4
+    // =========================================================================
+    // PAGE 1: PATIENT DNA GUIDE (PLAIN ENGLISH, 4 PILLARS & CONCRETE DIET)
+    // =========================================================================
+    const page1 = pdfDoc.addPage([595.28, 841.89]); // A4 standard
     const { width: p1Width, height: p1Height } = page1.getSize();
 
-    // Top Brand Bar
+    // Top Brand Accent Strip
     page1.drawRectangle({
       x: 0,
       y: p1Height - 8,
@@ -45,8 +55,8 @@ export async function GET(request) {
     });
 
     // Header Area
-    let y = p1Height - 42;
-    page1.drawText('ATLAS HEALTH SERVICES', {
+    let y = p1Height - 40;
+    page1.drawText('ATLAS HEALTH SERVICES · CLINICAL GENOMICS', {
       x: 36,
       y,
       size: 13,
@@ -54,24 +64,25 @@ export async function GET(request) {
       color: navyPrimary
     });
 
-    page1.drawText('PATIENT DNA NUTRITION GUIDE', {
-      x: p1Width - 36 - helveticaBold.widthOfTextAtSize('PATIENT DNA NUTRITION GUIDE', 10),
+    const docTypeLabel = 'PATIENT GENOMIC PROTOCOL (EN)';
+    page1.drawText(docTypeLabel, {
+      x: p1Width - 36 - helveticaBold.widthOfTextAtSize(docTypeLabel, 9.5),
       y,
-      size: 10,
+      size: 9.5,
       font: helveticaBold,
       color: tealAccent
     });
 
     y -= 14;
-    page1.drawText('Personalized Dietary & Supplement Recommendations Based on Your DNA', {
+    page1.drawText('Personalized Dietary & Compounded Protocol Based on Your 24Genetics Clinical Panel', {
       x: 36,
       y,
-      size: 9,
+      size: 8.5,
       font: helvetica,
       color: mutedSlate
     });
 
-    y -= 12;
+    y -= 10;
     page1.drawLine({
       start: { x: 36, y },
       end: { x: p1Width - 36, y },
@@ -79,94 +90,95 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // Patient Dossier Box
-    y -= 54;
+    // Patient Dossier Mini-Banner
+    y -= 48;
     page1.drawRectangle({
       x: 36,
       y,
       width: p1Width - 72,
-      height: 46,
+      height: 42,
       color: lightBg,
       borderColor: cardBorder,
       borderWidth: 1
     });
 
-    // Box contents
-    page1.drawText('PATIENT NAME:', { x: 50, y: y + 28, size: 7.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText(patientName, { x: 50, y: y + 14, size: 10, font: helveticaBold, color: darkSlate });
+    page1.drawText('PATIENT NAME:', { x: 48, y: y + 25, size: 7, font: helveticaBold, color: mutedSlate });
+    page1.drawText(patientName, { x: 48, y: y + 12, size: 9.5, font: helveticaBold, color: darkSlate });
 
-    page1.drawText('SPECIMEN ID:', { x: 210, y: y + 28, size: 7.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText(sampleId, { x: 210, y: y + 14, size: 9.5, font: helvetica, color: darkSlate });
+    page1.drawText('SPECIMEN ID:', { x: 200, y: y + 25, size: 7, font: helveticaBold, color: mutedSlate });
+    page1.drawText(sampleId, { x: 200, y: y + 12, size: 9, font: helvetica, color: darkSlate });
 
-    page1.drawText('CLINICAL PARTNER:', { x: 340, y: y + 28, size: 7.5, font: helveticaBold, color: mutedSlate });
-    page1.drawText(clinicName, { x: 340, y: y + 14, size: 8.5, font: helvetica, color: navyPrimary });
+    page1.drawText('TREATMENT DURATION:', { x: 315, y: y + 25, size: 7, font: helveticaBold, color: mutedSlate });
+    page1.drawText('60-Day Initial Protocol', { x: 315, y: y + 12, size: 9, font: helveticaBold, color: tealAccent });
 
-    // Section 1: Welcome message
-    y -= 30;
-    page1.drawText('Clinical Evaluation by Atlas Medical Geneticists & Pharmacists', {
+    page1.drawText('SUPERVISING CLINIC:', { x: 435, y: y + 25, size: 7, font: helveticaBold, color: mutedSlate });
+    page1.drawText(clinicName.split('·')[0].trim(), { x: 435, y: y + 12, size: 8, font: helvetica, color: navyPrimary });
+
+    // Section 1 Header: The 4 Functional Pillars
+    y -= 26;
+    page1.drawText('The 4 DNA Pillars: What Your Genetics Mean in Plain Language', {
       x: 36,
       y,
-      size: 11,
+      size: 10.5,
       font: helveticaBold,
       color: navyPrimary
     });
 
-    y -= 16;
-    const introText = 'This clinical guidance has been synthesized by the Atlas Health multidisciplinary team of medical geneticists and compounding pharmacists. Your DNA profile has been translated into an individualized 60-day therapeutic protocol with exact posology, restoring biochemical balance without generic trial-and-error.';
+    y -= 14;
+    const introText = 'Evaluated by the Atlas Health multidisciplinary team of medical geneticists and compounding pharmacists. Your genetic variations do not mean illness; they reveal how your body handles sugar, vitamins, and digestion. To avoid biological conflicts, your therapy is separated into 3 dedicated daily capsules.';
     page1.drawText(introText, {
       x: 36,
       y,
-      size: 8,
+      size: 7.6,
       font: helvetica,
       color: darkSlate,
       maxWidth: p1Width - 72,
-      lineHeight: 11.5
+      lineHeight: 10.8
     });
 
-    // 4 Visual Cards: What Your DNA Says & What To Do
-    y -= 36;
-
-    const cards = [
+    // 4 Pillar Cards
+    y -= 28;
+    const pillarCardDefs = [
       {
-        pillar: 'PILAR 1: METABOLISMO & GLUCEMIA (TCF7L2 / FTO)',
-        gene: 'Metabolismo de Azúcares y Grasa Abdominal',
-        status: 'Sensibilidad a Glucosa',
+        pillarTag: 'PILLAR 1: GLYCEMIC METABOLISM & INSULIN (TCF7L2 / FTO)',
+        title: 'Carbohydrate Sensitivity & Abdominal Fat Storage',
+        status: 'GLUCOSE SPIKES',
         statusColor: alertRed,
-        bgColor: badgeRedBg,
-        patientWhy: 'Los carbohidratos refinados causan picos bruscos de azúcar, fatiga a media tarde y acumulación de grasa visceral.',
-        simpleFix: 'Prescripción: Berberina 250 mg + Cromo 200 mcg. Posología: 125 mg BID 15 min antes de comidas durante 60 días.'
+        statusBg: badgeRedBg,
+        why: 'Refined carbs cause quick insulin surges, causing mid-day energy crashes, sweet cravings, and abdominal fat accumulation.',
+        action: 'Prescribed: Standardized Berberine (250 mg) + Chromium (200 mcg). Posology: Split in Capsule B (breakfast) and Capsule C (dinner).'
       },
       {
-        pillar: 'PILAR 2: METILACIÓN CELULAR & ENERGÍA (MTHFR)',
-        gene: 'Reciclaje de Homocisteína & Folato Activo',
-        status: 'Requiere Folato Activo',
+        pillarTag: 'PILLAR 2: CELLULAR METHYLATION & ENERGY (MTHFR C677T)',
+        title: 'Active Folate & Homocysteine Recycling',
+        status: 'MTHFR PRIORITY',
         statusColor: alertRed,
-        bgColor: badgeRedBg,
-        patientWhy: 'Déficit del 70% en activar ácido fólico sintético. Afecta neurotransmisores, energía celular y salud vascular.',
-        simpleFix: 'Prescripción: L-Metilfolato 1.000 mcg + Metilcobalamina 1.000 mcg. Posología: 500 mcg BID con comidas durante 60 días.'
+        statusBg: badgeRedBg,
+        why: 'Your liver is 70% slower at activating synthetic supermarket folic acid, which impairs cellular detox and neurotransmitters.',
+        action: 'Prescribed: L-Methylfolate 1,000 mcg ([6S]-5-MTHF) + Methylcobalamin B12 1,000 mcg. Split between Capsule B and Capsule C.'
       },
       {
-        pillar: 'PILAR 3: MICROBIOTA & BARRERA INTESTINAL (MCM6 / FUT2)',
-        gene: 'Eje Intestinal, Microbioma & Tolerancia Láctea',
-        status: 'Microbiota & Sin Lactosa',
-        statusColor: tealAccent,
-        bgColor: rgb(240 / 255, 253 / 255, 250 / 255),
-        patientWhy: 'Intolerancia primaria a la lactosa y mayor permeabilidad mucosa; los lácteos fermentan produciendo disbiosis e inflamación.',
-        simpleFix: 'Prescripción: Probióticos 15B CFU + L-Glutamina 1g + Enzima Lactasa 9.000 ALU. Posología: 1 cap DRcaps® en ayunas por 60 días.'
+        pillarTag: 'PILLAR 3: GUT MICROBIOME & MUCOSAL BARRIER (MCM6 / FUT2)',
+        title: 'Lactose Intolerance & Gut Bacterial Diversity',
+        status: 'LACTOSE-FREE SHIELD',
+        statusColor: blueDark,
+        statusBg: blueBg,
+        why: 'Adult lactase deficiency causes dairy fermentation, intestinal permeability, and low-grade systemic inflammation.',
+        action: 'Prescribed: Multi-Strain Probiotics 15B CFU + L-Glutamine 500 mg + Lactase. Posology: Capsule A in fasting with water (DRcaps®).'
       },
       {
-        pillar: 'PILAR 4: INMUNIDAD & HUESO (VDR / VITAMINA D)',
-        gene: 'Sensibilidad de Receptores Nucleares Celulares',
-        status: 'Resistencia a Receptor',
+        pillarTag: 'PILLAR 4: CELLULAR IMMUNITY & BONE HEALTH (VDR FokI)',
+        title: 'Vitamin D Receptor Resistance',
+        status: 'VDR RESISTANCE',
         statusColor: amberDark,
-        bgColor: rgb(254 / 255, 243 / 255, 199 / 255),
-        patientWhy: 'Afinidad celular reducida; requiere niveles sanguíneos más altos (60-80 ng/mL) para mantener fuerza y defensas.',
-        simpleFix: 'Prescripción: Vitamina D3 5.000 UI + Vitamina K2 100 mcg + Magnesio 200 mg. Posología: 1 dosis matutina por 60 días.'
+        statusBg: amberBg,
+        why: 'Receptor gene variation requires higher circulating levels (60-80 ng/mL) to activate cellular defenses and maintain bone density.',
+        action: 'Prescribed: Vitamin D3 5,000 IU + Vitamin K2 (MK-7) 100 mcg in Capsule B (with fat-containing breakfast) + Magnesium in Capsule C.'
       }
     ];
 
-    cards.forEach((card) => {
-      const cardHeight = 76;
+    pillarCardDefs.forEach((p) => {
+      const cardHeight = 62;
       page1.drawRectangle({
         x: 36,
         y: y - cardHeight,
@@ -181,120 +193,128 @@ export async function GET(request) {
       page1.drawRectangle({
         x: 36,
         y: y - cardHeight,
-        width: 4,
+        width: 3.5,
         height: cardHeight,
-        color: card.statusColor
+        color: p.statusColor
       });
 
-      // Pillar Tag
-      page1.drawText(card.pillar, {
-        x: 48,
-        y: y - 13,
-        size: 7,
+      // Top Pillar Label
+      page1.drawText(p.pillarTag, {
+        x: 46,
+        y: y - 12,
+        size: 6.8,
         font: helveticaBold,
         color: tealAccent
       });
 
-      // Card Header
-      page1.drawText(card.gene, {
-        x: 48,
-        y: y - 24,
-        size: 9,
+      // Title
+      page1.drawText(p.title, {
+        x: 46,
+        y: y - 22,
+        size: 8.5,
         font: helveticaBold,
         color: darkSlate
       });
 
-      // Status pill on the right
-      const pillWidth = helveticaBold.widthOfTextAtSize(card.status, 7) + 12;
+      // Status Pill
+      const pillWidth = helveticaBold.widthOfTextAtSize(p.status, 6.5) + 10;
       page1.drawRectangle({
-        x: p1Width - 48 - pillWidth,
-        y: y - 22,
+        x: p1Width - 46 - pillWidth,
+        y: y - 20,
         width: pillWidth,
-        height: 13,
-        color: card.bgColor
+        height: 12,
+        color: p.statusBg
       });
-      page1.drawText(card.status, {
-        x: p1Width - 48 - pillWidth + 6,
-        y: y - 18,
-        size: 7,
+      page1.drawText(p.status, {
+        x: p1Width - 46 - pillWidth + 5,
+        y: y - 16,
+        size: 6.5,
         font: helveticaBold,
-        color: card.statusColor
+        color: p.statusColor
       });
 
-      // Patient Explanation
-      page1.drawText(`Hallazgo ADN: ${card.patientWhy}`, {
-        x: 48,
-        y: y - 37,
-        size: 7.6,
+      // Why Text
+      page1.drawText(`DNA Finding: ${p.why}`, {
+        x: 46,
+        y: y - 34,
+        size: 7.2,
         font: helvetica,
         color: darkSlate,
-        maxWidth: p1Width - 100,
-        lineHeight: 10.5
+        maxWidth: p1Width - 96,
+        lineHeight: 9.5
       });
 
-      // Simple Action Step
-      page1.drawText(`Acción Terapéutica: ${card.simpleFix}`, {
-        x: 48,
-        y: y - 59,
-        size: 7.6,
+      // Action Step
+      page1.drawText(`Clinical Action: ${p.action}`, {
+        x: 46,
+        y: y - 52,
+        size: 7.2,
         font: helveticaBold,
         color: navyPrimary,
-        maxWidth: p1Width - 100,
-        lineHeight: 10.5
+        maxWidth: p1Width - 96,
+        lineHeight: 9.5
       });
 
-      y -= cardHeight + 8;
+      y -= cardHeight + 6;
     });
 
-    // Practical Daily Rules Box (Dieta Concreta)
+    // Concrete Lifestyle & Diet Guidelines Box
     y -= 4;
     page1.drawRectangle({
       x: 36,
-      y: y - 94,
+      y: y - 96,
       width: p1Width - 72,
-      height: 94,
+      height: 96,
       color: rgb(240 / 255, 253 / 255, 250 / 255), // light teal
       borderColor: rgb(153 / 255, 246 / 255, 228 / 255),
       borderWidth: 1
     });
 
-    page1.drawText('PAUTAS DIETÉTICAS CONCRETAS PARA EL PACIENTE (DIETA DE ALTA ADHERENCIA)', {
-      x: 48,
-      y: y - 16,
-      size: 8,
+    page1.drawText('CONCRETE PATIENT DIETARY RULES (HIGH-ADHERENCE GUIDELINES)', {
+      x: 46,
+      y: y - 15,
+      size: 7.8,
       font: helveticaBold,
       color: tealAccent
     });
 
-    const tips = [
-      '1. Regla de Secuencia en el Plato: Come primero la verdura/fibra, luego la proteína/grasas y al final los hidratos de carbono. Aplana la glucosa hasta un 45%.',
-      '2. Límite de Carbohidratos Netos: Maximo 40g de hidratos netos por comida. Cero bebidas azucaradas o zumos comerciales.',
-      '3. Protección de Microbiota: Incluye aceite de oliva virgen extra y alimentos fermentados sin lactosa (kéfir de coco, chucrut). Cero leche convencional.',
-      '4. Ventana de Cafeína: Por metabolismo hepático gradual (CYP1A2), tomar café solo antes de las 14:00 hrs para evitar picos nocturnos de cortisol.'
+    const dietRules = [
+      '1. Plate Sequencing: Always eat vegetables and soluble fiber first, lean proteins/healthy fats second, and complex carbs last. Blunts glucose spikes by up to 45%.',
+      '2. Carbohydrate Limit: Cap net carbohydrates at <40g per meal. Strictly avoid sugary soft drinks, commercial fruit juices, and white flour pastries.',
+      '3. Microbiota Foods: Consume dairy-free fermented foods (coconut kefir, raw sauerkraut) and cold-resistant starch (cooked and cooled potatoes/rice) to produce gut butyrate.',
+      '4. Circadian Caffeine Window: Due to your gradual CYP1A2 caffeine clearance, stop all coffee and stimulants before 2:00 PM to protect nighttime sleep architecture.'
     ];
 
-    let tipY = y - 30;
-    tips.forEach(t => {
-      page1.drawText(t, { x: 48, y: tipY, size: 7.2, font: helvetica, color: darkSlate });
-      tipY -= 14;
+    let rY = y - 28;
+    dietRules.forEach(r => {
+      page1.drawText(r, {
+        x: 46,
+        y: rY,
+        size: 7,
+        font: helvetica,
+        color: darkSlate,
+        maxWidth: p1Width - 92,
+        lineHeight: 9.5
+      });
+      rY -= 16;
     });
 
     // Page 1 Footer
-    page1.drawText('Page 1 of 2 · Confidential Medical Genomic Report · Turn to Page 2 for Pharmacy Prescription Order', {
+    page1.drawText('Page 1 of 2 · Confidential Patient Genomic Guide · Turn to Page 2 for Licensed Compounding Pharmacy Prescription Order', {
       x: 36,
-      y: 20,
-      size: 7.5,
+      y: 18,
+      size: 7,
       font: helvetica,
       color: mutedSlate
     });
 
-    // ==========================================
-    // PAGE 2: PHARMACY COMPOUNDING PRESCRIPTION
-    // ==========================================
+    // =========================================================================
+    // PAGE 2: PHARMACY COMPOUNDING PRESCRIPTION (3 CAPSULES, COMPATIBILITY RATIONALE)
+    // =========================================================================
     const page2 = pdfDoc.addPage([595.28, 841.89]);
     const { width: p2Width, height: p2Height } = page2.getSize();
 
-    // Top Brand Bar
+    // Top Brand Accent Strip
     page2.drawRectangle({
       x: 0,
       y: p2Height - 8,
@@ -303,8 +323,8 @@ export async function GET(request) {
       color: navyPrimary
     });
 
-    let y2 = p2Height - 42;
-    page2.drawText('ATLAS HEALTH SERVICES · CLINICAL COMPOSITION', {
+    let y2 = p2Height - 40;
+    page2.drawText('ATLAS HEALTH SERVICES · MASTER COMPOUNDING PRESCRIPTION', {
       x: 36,
       y: y2,
       size: 13,
@@ -312,24 +332,25 @@ export async function GET(request) {
       color: navyPrimary
     });
 
-    page2.drawText('PHARMACY DIRECT ORDER', {
-      x: p2Width - 36 - helveticaBold.widthOfTextAtSize('PHARMACY DIRECT ORDER', 10),
+    const rxBadgeText = 'OFFICIAL RX: RX-DNA-COMP-8821';
+    page2.drawText(rxBadgeText, {
+      x: p2Width - 36 - helveticaBold.widthOfTextAtSize(rxBadgeText, 9.5),
       y: y2,
-      size: 10,
+      size: 9.5,
       font: helveticaBold,
       color: alertRed
     });
 
     y2 -= 14;
-    page2.drawText('Personalized Master Formulation · Prepared Exclusively For Licensed Compounding Pharmacies', {
+    page2.drawText('3-Capsule Individualized Protocol · Galenically Optimized for Pharmacokinetic Compatibility', {
       x: 36,
       y: y2,
-      size: 9,
+      size: 8.5,
       font: helvetica,
       color: mutedSlate
     });
 
-    y2 -= 12;
+    y2 -= 10;
     page2.drawLine({
       start: { x: 36, y: y2 },
       end: { x: p2Width - 36, y: y2 },
@@ -337,8 +358,125 @@ export async function GET(request) {
       color: cardBorder
     });
 
-    // Prescription Summary Box
-    y2 -= 60;
+    // Compatibility Notice Box
+    y2 -= 46;
+    page2.drawRectangle({
+      x: 36,
+      y: y2,
+      width: p2Width - 72,
+      height: 40,
+      color: lightBg,
+      borderColor: cardBorder,
+      borderWidth: 1
+    });
+
+    page2.drawText('GALENIC COMPATIBILITY & DISPENSING RATIONALE:', { x: 46, y: y2 + 26, size: 7.2, font: helveticaBold, color: navyPrimary });
+    const compatText = 'Active ingredients are compartmentalized into 3 distinct daily capsules to prevent botanical antimicrobial degradation of live probiotics by berberine, satisfy lipophilic vs fasting absorption kinetics, and ensure maximum patient compliance with swallowable capsule sizes.';
+    page2.drawText(compatText, {
+      x: 46,
+      y: y2 + 14,
+      size: 6.8,
+      font: helvetica,
+      color: darkSlate,
+      maxWidth: p2Width - 92,
+      lineHeight: 9
+    });
+
+    // 3 Capsule Formulation Cards
+    y2 -= 14;
+
+    THREE_CAPSULE_PROTOCOL.forEach((cap, idx) => {
+      const isDRcaps = cap.capsuleId === 'capsule_a';
+      const headerBg = isDRcaps ? tealAccent : (idx === 1 ? navyPrimary : rgb(30 / 255, 58 / 255, 138 / 255));
+      const cardHeight = 120;
+
+      y2 -= cardHeight;
+      page2.drawRectangle({
+        x: 36,
+        y: y2,
+        width: p2Width - 72,
+        height: cardHeight,
+        color: white,
+        borderColor: cardBorder,
+        borderWidth: 1
+      });
+
+      // Capsule Header Strip
+      page2.drawRectangle({
+        x: 36,
+        y: y2 + cardHeight - 20,
+        width: p2Width - 72,
+        height: 20,
+        color: headerBg
+      });
+
+      page2.drawText(cap.nameEn.toUpperCase(), {
+        x: 44,
+        y: y2 + cardHeight - 14,
+        size: 7.8,
+        font: helveticaBold,
+        color: white
+      });
+
+      const countPill = '60 Caps (60-Day Supply)';
+      page2.drawText(countPill, {
+        x: p2Width - 44 - helveticaBold.widthOfTextAtSize(countPill, 7),
+        y: y2 + cardHeight - 14,
+        size: 7,
+        font: helveticaBold,
+        color: white
+      });
+
+      // Timing and Vehicle Subheader
+      let subY = y2 + cardHeight - 32;
+      page2.drawText(`Timing & Administration: ${cap.timingEn}`, {
+        x: 44,
+        y: subY,
+        size: 7,
+        font: helveticaBold,
+        color: darkSlate,
+        maxWidth: p2Width - 92
+      });
+
+      subY -= 11;
+      page2.drawText(`Vehicle & Excipient Standard: ${cap.galenicVehicleEn}`, {
+        x: 44,
+        y: subY,
+        size: 6.8,
+        font: helveticaOblique,
+        color: mutedSlate,
+        maxWidth: p2Width - 92
+      });
+
+      // Ingredient Mini-Table
+      subY -= 14;
+      page2.drawRectangle({
+        x: 42,
+        y: subY - 4,
+        width: p2Width - 84,
+        height: 12,
+        color: lightBg
+      });
+
+      page2.drawText('INGREDIENT (GENERIC)', { x: 46, y: subY, size: 6.2, font: helveticaBold, color: mutedSlate });
+      page2.drawText('SPECIFICATION / CHEMICAL FORM', { x: 190, y: subY, size: 6.2, font: helveticaBold, color: mutedSlate });
+      page2.drawText('DOSE', { x: 380, y: subY, size: 6.2, font: helveticaBold, color: mutedSlate });
+      page2.drawText('CLINICAL PURPOSE', { x: 430, y: subY, size: 6.2, font: helveticaBold, color: mutedSlate });
+
+      subY -= 12;
+      cap.ingredients.forEach((ing) => {
+        page2.drawText(ing.apiEn, { x: 46, y: subY, size: 6.8, font: helveticaBold, color: darkSlate });
+        page2.drawText(ing.chemicalSpec, { x: 190, y: subY, size: 6.2, font: helvetica, color: mutedSlate, maxWidth: 180 });
+        page2.drawText(ing.dose, { x: 380, y: subY, size: 6.8, font: helveticaBold, color: tealAccent });
+        page2.drawText(ing.purposeEn, { x: 430, y: subY, size: 6.2, font: helvetica, color: darkSlate, maxWidth: 120 });
+        subY -= 11;
+      });
+
+      y2 -= 8;
+    });
+
+    // Prescribing Physician & Pharmacist Validation Block
+    y2 -= 52;
     page2.drawRectangle({
       x: 36,
       y: y2,
@@ -349,211 +487,26 @@ export async function GET(request) {
       borderWidth: 1
     });
 
-    page2.drawText('PATIENT IDENTIFIER:', { x: 50, y: y2 + 34, size: 7.5, font: helveticaBold, color: mutedSlate });
-    page2.drawText(patientName, { x: 50, y: y2 + 20, size: 9.5, font: helveticaBold, color: darkSlate });
-    page2.drawText(`Ref DNA: ${sampleId}`, { x: 50, y: y2 + 8, size: 7.5, font: helvetica, color: mutedSlate });
+    page2.drawText('CLINICAL & PHARMACEUTICAL AUTHORIZATION:', { x: 46, y: y2 + 38, size: 7.2, font: helveticaBold, color: mutedSlate });
 
-    page2.drawText('PRESCRIPTION RX CODE:', { x: 210, y: y2 + 34, size: 7.5, font: helveticaBold, color: mutedSlate });
-    page2.drawText('RX-DNA-COMP-8821', { x: 210, y: y2 + 20, size: 9.5, font: helveticaBold, color: navyPrimary });
-    page2.drawText('Oral Vegetable DRcaps®', { x: 210, y: y2 + 8, size: 7.5, font: helvetica, color: mutedSlate });
+    page2.drawText('Prescribing Medical Team:', { x: 46, y: y2 + 25, size: 6.8, font: helvetica, color: mutedSlate });
+    page2.drawText('Atlas Health Clinical Genetics & Compounding Pharmacy Council', { x: 46, y: y2 + 14, size: 7.5, font: helveticaBold, color: darkSlate });
+    page2.drawText('Accredited Partner: Ryhanh Medical Wellness (Doha, Qatar)', { x: 46, y: y2 + 4, size: 6.8, font: helvetica, color: tealAccent });
 
-    page2.drawText('TREATMENT DURATION:', { x: 350, y: y2 + 34, size: 7.5, font: helveticaBold, color: mutedSlate });
-    page2.drawText('60-Day Supply (120 Caps)', { x: 350, y: y2 + 20, size: 9.5, font: helveticaBold, color: darkSlate });
-    page2.drawText('Dosage: 1 cap bid (morning/night)', { x: 350, y: y2 + 8, size: 7.5, font: helvetica, color: tealAccent });
-
-    // Pharmacy Notice Pill
-    y2 -= 32;
-    page2.drawRectangle({
-      x: 36,
-      y: y2 - 20,
-      width: p2Width - 72,
-      height: 24,
-      color: emeraldBg,
-      borderColor: rgb(187 / 255, 247 / 255, 208 / 255),
-      borderWidth: 1
-    });
-
-    page2.drawText('PHARMACY INSTRUCTION: Dispense custom compounded capsules using USP/Ph. Eur. grade active ingredients.', {
-      x: 48,
-      y: y2 - 13,
-      size: 7.8,
-      font: helveticaBold,
-      color: emeraldDark
-    });
-
-    // Formulation Table Header
-    y2 -= 38;
-    page2.drawRectangle({
-      x: 36,
-      y: y2 - 18,
-      width: p2Width - 72,
-      height: 22,
-      color: navyPrimary
-    });
-
-    page2.drawText('ACTIVE PHARMACEUTICAL INGREDIENT (GENERIC)', { x: 44, y: y2 - 12, size: 7.5, font: helveticaBold, color: white });
-    page2.drawText('CHEMICAL FORM / SPECIFICATION', { x: 215, y: y2 - 12, size: 7.5, font: helveticaBold, color: white });
-    page2.drawText('DOSE / DAY', { x: 380, y: y2 - 12, size: 7.5, font: helveticaBold, color: white });
-    page2.drawText('TARGET PATHWAY', { x: 450, y: y2 - 12, size: 7.5, font: helveticaBold, color: white });
-
-    // Table rows
-    const formulaRows = [
-      {
-        api: 'L-Metilfolato ([6S]-5-MTHF)',
-        spec: 'Sal de Calcio Grado Farmacopea USP',
-        dose: '1.000 mcg',
-        target: 'Pilar 2: Metilación MTHFR (500 mcg BID)'
-      },
-      {
-        api: 'Metilcobalamina (Vitamina B12)',
-        spec: 'Coenzima Activa Pura (USP grade)',
-        dose: '1.000 mcg',
-        target: 'Pilar 2: Aclaramiento Homocisteína'
-      },
-      {
-        api: 'Vitamina D3 (Colecalciferol)',
-        spec: 'Polvo Cristalino Farmacéutico (USP)',
-        dose: '5.000 UI',
-        target: 'Pilar 4: Sensibilidad Receptor VDR'
-      },
-      {
-        api: 'Vitamina K2 (Menaquinona-7)',
-        spec: 'MK-7 all-trans de alta biodisponibilidad',
-        dose: '100 mcg',
-        target: 'Pilar 4: Protección Vascular & Hueso'
-      },
-      {
-        api: 'Bisglicinato de Magnesio',
-        spec: 'Magnesio Totalmente Quelado USP',
-        dose: '200 mg',
-        target: 'Pilar 4: Cofactor Enzimático VDR'
-      },
-      {
-        api: 'Extracto Estandarizado de Berberina',
-        spec: 'Complejo Fosfolipídico Estandarizado 97%',
-        dose: '250 mg',
-        target: 'Pilar 1: Glucemia TCF7L2 (125mg BID)'
-      },
-      {
-        api: 'Picolinato de Cromo',
-        spec: 'Grado Farmacéutico USP',
-        dose: '200 mcg',
-        target: 'Pilar 1: Sensibilización Receptor Insulina'
-      },
-      {
-        api: 'Complejo Probiótico + L-Glutamina',
-        spec: '15B CFU (Bifido/Lacto) + L-Glutamina 1g',
-        dose: '1 dosis/día',
-        target: 'Pilar 3: Microbiota & Barrera Mucosa'
-      },
-      {
-        api: 'Enzima Lactasa Microbiana',
-        spec: 'Lactasa Ácido-Estable (9.000 FCC ALU)',
-        dose: '9.000 ALU',
-        target: 'Pilar 3: Prevención Disbiosis MCM6'
-      }
-    ];
-
-    y2 -= 18;
-    formulaRows.forEach((row, idx) => {
-      const rowHeight = 20;
-      const isAlt = idx % 2 === 1;
-      if (isAlt) {
-        page2.drawRectangle({
-          x: 36,
-          y: y2 - rowHeight,
-          width: p2Width - 72,
-          height: rowHeight,
-          color: rgb(248 / 255, 250 / 255, 252 / 255)
-        });
-      }
-
-      page2.drawLine({
-        start: { x: 36, y: y2 - rowHeight },
-        end: { x: p2Width - 36, y: y2 - rowHeight },
-        thickness: 0.5,
-        color: cardBorder
-      });
-
-      page2.drawText(row.api, { x: 44, y: y2 - 13, size: 7.5, font: helveticaBold, color: darkSlate });
-      page2.drawText(row.spec, { x: 205, y: y2 - 13, size: 7, font: helvetica, color: mutedSlate });
-      page2.drawText(row.dose, { x: 375, y: y2 - 13, size: 7.5, font: helveticaBold, color: tealAccent });
-      page2.drawText(row.target, { x: 440, y: y2 - 13, size: 7, font: helvetica, color: darkSlate });
-
-      y2 -= rowHeight;
-    });
-
-    // Galenic Vehicle & Compounding Standards
-    y2 -= 16;
-    page2.drawRectangle({
-      x: 36,
-      y: y2 - 80,
-      width: p2Width - 72,
-      height: 80,
-      color: white,
-      borderColor: cardBorder,
-      borderWidth: 1
-    });
-
-    page2.drawText('GALENIC VEHICLE & COMPOUNDING SPECIFICATIONS', {
-      x: 50,
-      y: y2 - 16,
-      size: 8.5,
-      font: helveticaBold,
-      color: navyPrimary
-    });
-
-    const specs = [
-      '• Delivery System: Acid-resistant, delayed-release hypromellose vegetable capsules (DRcaps®).',
-      '• Excipient Standard: Microcrystalline cellulose NF / silica. 100% FREE of lactose monohydrate (MCM6 safety).',
-      '• Packaging: Sealed amber glass or high-barrier HDPE bottle with desiccant canister (protect from moisture & light).',
-      '• Storage: Store in a cool, dry place between 15°C - 25°C. No refrigeration required.'
-    ];
-
-    let specY = y2 - 32;
-    specs.forEach(s => {
-      page2.drawText(s, { x: 50, y: specY, size: 7.8, font: helvetica, color: darkSlate });
-      specY -= 13;
-    });
-
-    // Prescribing Physician / Pharmacist Validation Area
-    y2 -= 102;
-    page2.drawRectangle({
-      x: 36,
-      y: y2 - 68,
-      width: p2Width - 72,
-      height: 68,
-      color: lightBg,
-      borderColor: cardBorder,
-      borderWidth: 1
-    });
-
-    page2.drawText('CLINICAL & PHARMACEUTICAL AUTHORIZATION', {
-      x: 50,
-      y: y2 - 16,
-      size: 8,
-      font: helveticaBold,
-      color: mutedSlate
-    });
-
-    page2.drawText('Prescribing Doctor:', { x: 50, y: y2 - 32, size: 7.5, font: helvetica, color: mutedSlate });
-    page2.drawText('Medical Director, Genomic Wellness', { x: 50, y: y2 - 44, size: 8, font: helveticaBold, color: darkSlate });
-    page2.drawText('Atlas Health Partner Network', { x: 50, y: y2 - 56, size: 7.5, font: helvetica, color: mutedSlate });
-
-    page2.drawText('Dispensing Pharmacy Signature / Stamp:', { x: 300, y: y2 - 32, size: 7.5, font: helvetica, color: mutedSlate });
+    page2.drawText('Licensed Compounding Pharmacist Signature & Seal:', { x: 330, y: y2 + 25, size: 6.8, font: helvetica, color: mutedSlate });
     page2.drawLine({
-      start: { x: 300, y: y2 - 50 },
-      end: { x: p2Width - 50, y: y2 - 50 },
-      thickness: 1,
-      color: rgb(150 / 255, 150 / 255, 150 / 255)
+      start: { x: 330, y: y2 + 12 },
+      end: { x: p2Width - 46, y: y2 + 12 },
+      thickness: 0.8,
+      color: rgb(160 / 255, 160 / 255, 160 / 255)
     });
-    page2.drawText('Licensed Compounding Pharmacist & Date', { x: 300, y: y2 - 60, size: 7, font: helveticaOblique, color: mutedSlate });
+    page2.drawText('Authorized Pharmacist Verification · Date & Batch Lot Number', { x: 330, y: y2 + 3, size: 6.2, font: helveticaOblique, color: mutedSlate });
 
     // Page 2 Footer
-    page2.drawText('Page 2 of 2 · Official Compounding Prescription Document · Valid across accredited compounding pharmacies', {
+    page2.drawText('Page 2 of 2 · Official Pharmacy Compounding Order · Valid across licensed compounding pharmacies worldwide', {
       x: 36,
-      y: 20,
-      size: 7.5,
+      y: 18,
+      size: 7,
       font: helvetica,
       color: mutedSlate
     });
@@ -578,4 +531,3 @@ export async function GET(request) {
     );
   }
 }
-

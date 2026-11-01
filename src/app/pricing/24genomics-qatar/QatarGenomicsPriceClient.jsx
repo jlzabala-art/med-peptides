@@ -40,6 +40,13 @@ import {
 } from 'lucide-react';
 import PublicUnifiedFooter from '@/components/shared/PublicUnifiedFooter';
 import Breadcrumb from '@/components/ui/Breadcrumb';
+import {
+  GALENIC_COMPATIBILITY_ANALYSIS,
+  CLINICAL_PILLARS,
+  THREE_CAPSULE_PROTOCOL,
+  CONCRETE_DIET_GUIDELINES,
+  TREATMENT_CYCLE
+} from '@/data/genomics/clinicalNutrigenomicEngine';
 import '../colway/ColwayPriceList.css';
 
 const GENOMICS_PRODUCTS = [
@@ -205,8 +212,8 @@ export default function QatarGenomicsPriceClient() {
               actives: currentProd.keyGenes
             }
           ],
-          notes: `Official Commercial distributor quotation for 24Genetics CE-IVD testing kits (${currentTier.name}) generated via Atlas AI™ portal. Consignee: Ryhanh Medical Company (Ryhanh Group, Doha, Qatar). 100% advance wire transfer before Madrid laboratory dispatch.`,
-          source: 'atlas_ai_qatar_genomics'
+          notes: `Official Commercial distributor quotation for 24Genetics CE-IVD testing kits (${currentTier.name}) generated via Atlas Clinical Platform. Consignee: Ryhanh Medical Company (Ryhanh Group, Doha, Qatar). 100% advance wire transfer before Madrid laboratory dispatch.`,
+          source: 'atlas_qatar_genomics'
         })
       });
 
@@ -292,16 +299,16 @@ export default function QatarGenomicsPriceClient() {
         </div>
       </nav>
 
-      {/* ── Atlas AI™ Interactive Sticker Bar ── */}
+      {/* ── Atlas Clinical Hub Interactive Bar ── */}
       <div style={{ backgroundColor: '#022c22', color: '#ffffff', borderBottom: '1px solid rgba(45, 212, 191, 0.25)', padding: '0.65rem 1.5rem' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(45, 212, 191, 0.15)', border: '1px solid rgba(45, 212, 191, 0.4)', padding: '3px 9px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, color: '#2dd4bf', letterSpacing: '0.04em' }}>
               <Sparkles size={13} />
-              <span>ATLAS AI™ GENOMIC ENGINE</span>
+              <span>ATLAS CLINICAL GENOMICS PLATFORM</span>
             </div>
             <span style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>
-              Algorithmic Synergy: Saliva DNA Panel → Automated Personalized Compounding Formulations
+              Clinical Synergy: Saliva DNA Panel → Personalized 3-Capsule Compounding Prescriptions
             </span>
           </div>
 
@@ -323,7 +330,7 @@ export default function QatarGenomicsPriceClient() {
               }}
             >
               <Cpu size={14} className="text-teal-300" />
-              <span>{showAiInsight ? 'Hide AI Details ▲' : 'View Atlas AI Compounding Synergy ▼'}</span>
+              <span>{showAiInsight ? 'Hide Details ▲' : 'View Clinical Compounding Synergy ▼'}</span>
             </button>
 
             <button
@@ -350,17 +357,17 @@ export default function QatarGenomicsPriceClient() {
           </div>
         </div>
 
-        {/* Expandable Atlas AI Insight Box */}
+        {/* Expandable Clinical Synergy Insight Box */}
         {showAiInsight && (
           <div style={{ maxWidth: '1280px', margin: '0.75rem auto 0 auto', padding: '1rem', backgroundColor: 'rgba(6, 78, 59, 0.85)', border: '1px solid rgba(45, 212, 191, 0.3)', borderRadius: '8px', fontSize: '0.80rem', color: '#e2e8f0', lineHeight: 1.5 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#2dd4bf', marginBottom: '4px' }}>
               <Zap size={14} />
-              <span>How Atlas AI™ Powers Continuous Patient Revenue for Ryhanh Medical Company (Qatar):</span>
+              <span>How Atlas Clinical Synergy Powers Continuous Patient Care & Retention (Qatar Clinics):</span>
             </div>
             <div>
-              1. <strong>Gateway Diagnostics:</strong> The saliva test identifies mutations such as <strong>MTHFR (reduced methylation)</strong>, <strong>VDR (low Vitamin D receptor affinity)</strong>, and <strong>TCF7L2 (carbohydrate sensitivity)</strong>.<br />
-              2. <strong>Automated Therapy Prescription:</strong> Atlas AI instantly maps the genetic findings into customized clinical formulations, enabling clinics to prescribe compounded micronutrient and longevity capsules.<br />
-              3. <strong>Recurring Revenue:</strong> While the DNA test is performed once, it generates recurring 90-day subscription renewals for tailored nutraceutical therapies in Qatar clinics.
+              1. <strong>Gateway Diagnostics:</strong> The saliva panel identifies key polymorphisms: <strong>MTHFR (reduced methylation)</strong>, <strong>VDR (lower Vitamin D receptor affinity)</strong>, and <strong>TCF7L2 (carbohydrate sensitivity)</strong>.<br />
+              2. <strong>Personalized Compounding Therapy:</strong> The Atlas clinical team translates findings into a synchronized 3-capsule compounded protocol with strict pharmaceutical compatibility.<br />
+              3. <strong>Continuous Health Management:</strong> While the DNA test is performed once, it establishes 60-day cycles with laboratory follow-up at day 45 to calibrate long-term wellness.
             </div>
           </div>
         )}
@@ -461,7 +468,7 @@ export default function QatarGenomicsPriceClient() {
                 }}
               >
                 <Cpu size={15} />
-                <span>Atlas AI™ Genomic Suite</span>
+                <span>Clinical Genomic Suite</span>
               </button>
               <button
                 onClick={() => setActiveTab('sample-report')}
@@ -910,7 +917,7 @@ export default function QatarGenomicsPriceClient() {
         )}
 
         {/* ════════════════════════════════════════════════════════════════════
-            TAB 2: ATLAS AI™ GENOMIC SUITE
+            TAB 2: CLINICAL GENOMIC SUITE
         ════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'ai-services' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -918,13 +925,13 @@ export default function QatarGenomicsPriceClient() {
               <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', color: '#0f766e', padding: '3px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   <Sparkles size={13} />
-                  <span>Atlas AI™ Clinical Intelligence Platform</span>
+                  <span>Atlas Multidisciplinary Clinical Platform</span>
                 </div>
                 <h2 style={{ fontSize: '1.65rem', fontWeight: 850, color: '#003666', marginTop: '8px', margin: 0 }}>
-                  Empowering Qatar Doctors & Distributors with Generative Genomic Care
+                  Empowering Qatar Doctors & Clinics with Personalized Genomic Medicine
                 </h2>
                 <p style={{ fontSize: '0.90rem', color: '#64748b', marginTop: '6px', lineHeight: 1.6 }}>
-                  Standard genetic testing produces complex 40-page PDFs that overwhelm patients and clinical staff. Atlas AI™ translates raw SNP calls into instantaneous, actionable compounded prescription formulations, turning a one-time test into a lifetime of high-margin subscription renewals.
+                  Standard genetic testing produces complex 40-page PDFs that overwhelm patients and clinical staff. The Atlas multidisciplinary clinical team translates raw genetic findings into clear, patient-friendly guidance and actionable compounded prescription protocols.
                 </p>
               </div>
 
@@ -938,7 +945,7 @@ export default function QatarGenomicsPriceClient() {
                     1. Automated Genotype-to-Phenotype Translation
                   </h4>
                   <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
-                    Our AI parses Illumina GSA VCF calls in seconds, identifying critical SNPs in <strong>MTHFR</strong> (methylation), <strong>VDR</strong> (Vitamin D), <strong>FTO</strong> (adiposity), and <strong>MCM6</strong> (lactase) without requiring physician bioinformatics expertise.
+                    Our clinical engine parses Illumina GSA VCF calls in seconds, identifying critical SNPs in <strong>MTHFR</strong> (methylation), <strong>VDR</strong> (Vitamin D), <strong>FTO</strong> (adiposity), and <strong>MCM6</strong> (lactase) without requiring physician bioinformatics expertise.
                   </p>
                 </div>
 
@@ -947,10 +954,10 @@ export default function QatarGenomicsPriceClient() {
                     <Beaker size={20} />
                   </div>
                   <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
-                    2. AI Precision Compounding Studio
+                    2. Precision Compounding Formulation
                   </h4>
                   <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
-                    Atlas AI automatically maps variant deficiencies into tailored master formulations: e.g. bypassing impaired MTHFR by formulating methylated Quatrefolic® [6S]-5-MTHF instead of standard synthetic folic acid.
+                    Our compounding pharmacists map variant deficiencies into a synchronized 3-capsule master regimen: e.g. bypassing impaired MTHFR with bioavailable [6S]-5-MTHF while isolating fragile probiotics into acid-resistant DRcaps®.
                   </p>
                 </div>
 
@@ -1381,112 +1388,151 @@ export default function QatarGenomicsPriceClient() {
                 )}
               </div>
 
-              {/* Clinical Compounding Formulation Box */}
-              <div style={{ backgroundColor: '#ffffff', border: '2px solid #0d9488', borderRadius: '10px', padding: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 4px 12px rgba(13, 148, 136, 0.1)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {/* Galenic & Pharmacokinetic Compatibility Analysis Callout */}
+              <div style={{ backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Pill size={20} className="text-teal-600" />
+                    <ShieldCheck size={22} className="text-teal-700" />
                     <div>
-                      <h3 style={{ fontSize: '1.15rem', fontWeight: 850, color: '#003666', margin: 0 }}>
-                        Atlas Clinical Genomics & Compounding Team: Master Formulation QA-GEN-01
-                      </h3>
-                      <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
-                        Formulated by Atlas Medical Geneticists & Compounding Pharmacists · Tailored to Specimen 24G-QA-90421
+                      <h4 style={{ fontSize: '1.1rem', fontWeight: 850, color: '#0f766e', margin: 0 }}>
+                        Pharmacokinetic & Galenic Compatibility Analysis
+                      </h4>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: '#134e4a' }}>
+                        Evaluated by Atlas Medical Geneticists & Senior Compounding Pharmacists
                       </p>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#0d9488', color: '#ffffff', padding: '4px 10px', borderRadius: '4px' }}>
-                      60-Day Initial Cycle · 120 DRcaps®
-                    </span>
-                  </div>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#ccfbf1', color: '#0f766e', padding: '3px 9px', borderRadius: '4px' }}>
+                    Strict Galenic Partitioning
+                  </span>
                 </div>
 
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
-                    <thead>
-                      <tr style={{ backgroundColor: '#f0fdfa', borderBottom: '1px solid #99f6e4' }}>
-                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Active Pharmacological Ingredient</th>
-                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Bioavailable Chemical Form</th>
-                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Dosage / Day</th>
-                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Posology & Administration</th>
-                        <th style={{ padding: '8px 12px', color: '#0f766e', fontWeight: 750 }}>Targeted Genetic Pathway</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>L-Methylfolate</td>
-                        <td style={{ padding: '10px 12px', color: '#475569' }}>[6S]-5-MTHF Calcium Salt USP</td>
-                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>1,000 mcg</td>
-                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>500 mcg BID (Morning & Evening)</td>
-                        <td style={{ padding: '10px 12px', color: '#b91c1c', fontWeight: 650 }}>MTHFR C677T (TT)</td>
-                      </tr>
-                      <tr style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
-                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Methylcobalamin</td>
-                        <td style={{ padding: '10px 12px', color: '#475569' }}>Enzymatically active coenzyme B12</td>
-                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>1,000 mcg</td>
-                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>500 mcg BID with meals</td>
-                        <td style={{ padding: '10px 12px', color: '#b91c1c', fontWeight: 650 }}>Homocysteine Clearance</td>
-                      </tr>
-                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Vitamin D3</td>
-                        <td style={{ padding: '10px 12px', color: '#475569' }}>Cholecalciferol USP</td>
-                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>5,000 IU</td>
-                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>In morning capsule with breakfast</td>
-                        <td style={{ padding: '10px 12px', color: '#b45309', fontWeight: 650 }}>VDR FokI (CT)</td>
-                      </tr>
-                      <tr style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
-                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Vitamin K2</td>
-                        <td style={{ padding: '10px 12px', color: '#475569' }}>Menaquinone-7 (all-trans MK-7)</td>
-                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>100 mcg</td>
-                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>50 mcg BID with fat-containing meal</td>
-                        <td style={{ padding: '10px 12px', color: '#b45309', fontWeight: 650 }}>VDR Arterial Protection</td>
-                      </tr>
-                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Magnesium Bisglycinate</td>
-                        <td style={{ padding: '10px 12px', color: '#475569' }}>Fully Chelated Glycinate USP</td>
-                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>200 mg</td>
-                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>100 mg BID (morning + dinner)</td>
-                        <td style={{ padding: '10px 12px', color: '#475569', fontWeight: 650 }}>Enzymatic VDR Cofactor</td>
-                      </tr>
-                      <tr style={{ backgroundColor: '#f8fafc' }}>
-                        <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>Standardized Berberine</td>
-                        <td style={{ padding: '10px 12px', color: '#475569' }}>High-Bioavailability Phospholipid Complex</td>
-                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0d9488' }}>250 mg</td>
-                        <td style={{ padding: '10px 12px', color: '#0f172a', fontWeight: 650 }}>125 mg BID 15 min before meals</td>
-                        <td style={{ padding: '10px 12px', color: '#0f766e', fontWeight: 650 }}>TCF7L2 Glycemic Sensitivity</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <p style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.6, margin: '0 0 12px 0' }}>
+                  {GALENIC_COMPATIBILITY_ANALYSIS.rationale}
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.85rem' }}>
+                  {GALENIC_COMPATIBILITY_ANALYSIS.conflictsIdentified.map((conflict, idx) => (
+                    <div key={idx} style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #ccfbf1', padding: '12px 14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                        <strong style={{ fontSize: '0.80rem', color: '#0f766e' }}>{conflict.title}</strong>
+                        <span style={{ fontSize: '0.64rem', fontWeight: 800, backgroundColor: '#fef2f2', color: '#dc2626', padding: '1px 5px', borderRadius: '3px' }}>
+                          {conflict.severity}
+                        </span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.5 }}>
+                        {conflict.detail}
+                      </p>
+                    </div>
+                  ))}
                 </div>
 
-                <div style={{ marginTop: '1rem', padding: '12px 16px', backgroundColor: '#f8fafc', borderRadius: '8px', fontSize: '0.80rem', color: '#334155', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div>
-                    <strong>Prescribed Posology & Timing:</strong> Take <strong>1 capsule with breakfast</strong> and <strong>1 capsule with dinner</strong> with a full glass of water.
-                  </div>
-                  <div>
-                    <strong>Treatment Duration & Follow-Up:</strong> Initial cycle of <strong>60 days (120 DRcaps®)</strong>, followed by a serum 25-OH-D and plasma homocysteine check at day 45 to calibrate long-term maintenance.
-                  </div>
-                  <div>
-                    <strong>Galenic Excipient Safety Check:</strong> 100% Lactose-Free Certified (critical for patient&apos;s MCM6 non-persistence). Microcrystalline cellulose filler in delayed-release acid-resistant hypromellose DRcaps®.
-                  </div>
+                <div style={{ marginTop: '12px', padding: '9px 14px', backgroundColor: '#0f766e', color: '#ffffff', borderRadius: '6px', fontSize: '0.80rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={16} />
+                  <span>Clinical Formulation Standard: {GALENIC_COMPATIBILITY_ANALYSIS.resolvedArchitecture}</span>
                 </div>
               </div>
 
+              {/* 3 Compartmentalized Compounding Capsules Cards */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '1.5rem' }}>
+                {THREE_CAPSULE_PROTOCOL.map((capsule) => (
+                  <div
+                    key={capsule.capsuleId}
+                    style={{
+                      backgroundColor: '#ffffff',
+                      borderRadius: '10px',
+                      border: '1.5px solid #cbd5e1',
+                      padding: '1.5rem',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem', marginBottom: '1rem' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          <span style={{ fontSize: '0.74rem', fontWeight: 800, backgroundColor: '#003666', color: '#ffffff', padding: '3px 8px', borderRadius: '4px' }}>
+                            {capsule.code}
+                          </span>
+                          <h4 style={{ fontSize: '1.15rem', fontWeight: 850, color: '#003666', margin: 0 }}>
+                            {capsule.nameEn}
+                          </h4>
+                        </div>
+                        <div style={{ fontSize: '0.84rem', color: '#0d9488', fontWeight: 750 }}>
+                          ⏰ Timing & Posology: {capsule.timingEn}
+                        </div>
+                      </div>
+
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '4px 10px', borderRadius: '4px' }}>
+                          60 Capsules · 60-Day Initial Cycle
+                        </span>
+                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '4px' }}>
+                          {capsule.targetPillar}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Galenic Vehicle & Rationale */}
+                    <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '6px', fontSize: '0.80rem', color: '#334155', marginBottom: '1rem', border: '1px solid #e2e8f0', lineHeight: 1.5 }}>
+                      <div><strong>Galenic Delivery Vehicle:</strong> {capsule.galenicVehicleEn}</div>
+                      <div style={{ marginTop: '4px' }}><strong>Pharmacokinetic Rationale:</strong> {capsule.rationaleEn}</div>
+                    </div>
+
+                    {/* Active Ingredients Table */}
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
+                            <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>Active Pharmacological Ingredient (Generic API)</th>
+                            <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>Pharmacopeia Chemical Specification</th>
+                            <th style={{ padding: '8px 12px', fontWeight: 750, color: '#003666' }}>Target Dose</th>
+                            <th style={{ padding: '8px 12px', fontWeight: 750, color: '#0f172a' }}>Targeted Clinical Purpose</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {capsule.ingredients.map((ing, idx) => (
+                            <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: idx % 2 === 1 ? '#fafafa' : '#ffffff' }}>
+                              <td style={{ padding: '10px 12px', fontWeight: 750, color: '#0f172a' }}>{ing.apiEn}</td>
+                              <td style={{ padding: '10px 12px', color: '#475569' }}>{ing.chemicalSpec}</td>
+                              <td style={{ padding: '10px 12px', fontWeight: 800, color: '#0d9488' }}>{ing.dose}</td>
+                              <td style={{ padding: '10px 12px', color: '#334155' }}>{ing.purposeEn}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Treatment Cycle & Galenic Excipient Safety Notice */}
+              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#003666' }}>
+                    {TREATMENT_CYCLE.summaryEn}
+                  </span>
+                  <span style={{ fontSize: '0.74rem', fontWeight: 800, backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '4px' }}>
+                    100% Lactose-Free Excipients Verified
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.5 }}>
+                  {TREATMENT_CYCLE.followUpNoteEn}
+                </p>
+              </div>
+
               {/* Download Patient & Pharmacy Prescription PDF */}
-              <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '1.25rem 1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f0fdfa', border: '1.5px solid #99f6e4', borderRadius: '10px', padding: '1.25rem 1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <FileText size={18} className="text-teal-700" />
                     <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f766e' }}>
-                      Ready-to-Use Patient & Pharmacy Prescription PDF
+                      Ready-to-Use Patient & Pharmacy Prescription PDF (English)
                     </span>
                     <span style={{ fontSize: '0.68rem', fontWeight: 800, backgroundColor: '#ccfbf1', color: '#0f766e', padding: '2px 8px', borderRadius: '4px' }}>
                       2-Page Document
                     </span>
                   </div>
                   <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#334155', maxWidth: '640px', lineHeight: 1.5 }}>
-                    Page 1 translates DNA findings into clear, simple language for the patient. Page 2 provides the exact generic active ingredients (APIs), dosages, and galenic specs formatted for any compounding pharmacy.
+                    Page 1 translates DNA findings into clear, simple language for the patient. Page 2 provides the exact generic active ingredients (APIs), dosages, and 3-capsule partitioned galenic specs formatted for any compounding pharmacy.
                   </p>
                 </div>
 
@@ -1510,7 +1556,7 @@ export default function QatarGenomicsPriceClient() {
                     }}
                   >
                     <Download size={15} />
-                    <span>Download Prescription PDF</span>
+                    <span>Download Prescription PDF (English)</span>
                   </a>
                 </div>
               </div>
@@ -1525,7 +1571,7 @@ export default function QatarGenomicsPriceClient() {
                         Doctor Copilot: Clinical Prescribing Guide & Patient Communication
                       </h4>
                       <div style={{ fontSize: '0.76rem', color: '#3b82f6', fontWeight: 650 }}>
-                        Expert assistance for clinic doctors in Doha · How to explain the DNA results and prescribe the treatment
+                        Formulated by Atlas Medical Geneticists & Compounding Pharmacists · Guidance for Doha Clinics
                       </div>
                     </div>
                   </div>
@@ -1538,14 +1584,14 @@ export default function QatarGenomicsPriceClient() {
                   <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
                     <strong style={{ fontSize: '0.78rem', color: '#1e3a8a', textTransform: 'uppercase' }}>1. What the Doctor Prescribes:</strong>
                     <p style={{ fontSize: '0.80rem', color: '#1e40af', margin: '4px 0 0 0', lineHeight: 1.5 }}>
-                      Prescribe <strong>Formula QA-GEN-01 (120 DRcaps®)</strong>. Posology: 1 capsule with breakfast and 1 capsule with dinner. Treatment duration: <strong>60 days</strong>. At day 45, request fasting glucose, HbA1c, homocysteine, and 25-OH-D to calibrate the 12-month maintenance renewal.
+                      Prescribe <strong>Formula QA-GEN-01 (Synchronized 3-Capsule Daily Protocol: 60 Cap A + 60 Cap B + 60 Cap C)</strong>. Posology: Capsule A upon waking fasting, Capsule B with breakfast, Capsule C with dinner. Treatment duration: <strong>60 days</strong>. At day 45, request fasting glucose, HbA1c, homocysteine, and serum 25-OH-D to calibrate the long-term maintenance renewal.
                     </p>
                   </div>
 
                   <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
                     <strong style={{ fontSize: '0.78rem', color: '#1e3a8a', textTransform: 'uppercase' }}>2. Clinical Value for the Patient:</strong>
                     <p style={{ fontSize: '0.80rem', color: '#1e40af', margin: '4px 0 0 0', lineHeight: 1.5 }}>
-                      Consolidates 6 individual generic supplements into 1 single compounded capsule calibrated to the patient&apos;s genetic bottlenecks (MTHFR methylation, VDR receptor resistance, and TCF7L2 carb sensitivity).
+                      Strict pharmaceutical partitioning resolves ingredient antagonisms: isolates live fragile probiotics from antimicrobial berberine, times lipophilic vitamins D3/K2 with breakfast fats, and provides calming magnesium/5-HTP at dinner. Replaces 9 individual generic store bottles with zero pill fatigue.
                     </p>
                   </div>
                 </div>
@@ -1553,7 +1599,7 @@ export default function QatarGenomicsPriceClient() {
                 <div style={{ backgroundColor: '#ffffff', padding: '12px 14px', borderRadius: '8px', borderLeft: '4px solid #2563eb' }}>
                   <strong style={{ fontSize: '0.76rem', color: '#1e3a8a', textTransform: 'uppercase' }}>Recommended Doctor-to-Patient Script (In Consultation):</strong>
                   <blockquote style={{ margin: '6px 0 0 0', fontSize: '0.82rem', color: '#1e40af', fontStyle: 'italic', lineHeight: 1.6 }}>
-                    &ldquo;Mr. Al-Kuwari, our Atlas clinical genetics and pharmacology team has thoroughly reviewed your 24Genetics panel. We identified why conventional multivitamins have not provided the energy and metabolic results you expected. Your liver possesses an MTHFR variation that cannot convert synthetic folic acid, while your cellular receptors require higher, bioavailable vitamin D3 and K2. Rather than having you purchase multiple separate bottles from a store, our medical compounding laboratory has formulated a single, personalized 60-day capsule regimen (Formula QA-GEN-01). You take one capsule in the morning and one at night, completely lactose-free, giving your cells exactly what your DNA requires.&rdquo;
+                    &ldquo;Mr. Al-Kuwari, our Atlas clinical genetics and compounding pharmacy team has thoroughly analyzed your 24Genetics panel. We identified why conventional multivitamins have not provided the energy and metabolic results you expected. Your liver possesses an MTHFR variation that cannot convert synthetic folic acid, while your cellular receptors require higher, bioavailable vitamin D3 and K2. Rather than having you purchase 8 or 9 separate generic bottles from a store, our medical compounding laboratory has formulated a synchronized 3-capsule daily regimen for 60 days (Formula QA-GEN-01). You take Capsule A upon waking to protect your gut, Capsule B with breakfast to activate daytime metabolism, and Capsule C with dinner for evening recovery—all completely lactose-free and partitioned for maximum biological absorption.&rdquo;
                   </blockquote>
                 </div>
               </div>

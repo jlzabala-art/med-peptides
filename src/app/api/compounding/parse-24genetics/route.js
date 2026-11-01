@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
 import { checkRateLimit, rateLimitExceededResponse } from '@/utils/rateLimiter';
 import { generateWithResilientGemini, AI_TIER } from '@/lib/ai/geminiModelRouter';
+import {
+  GALENIC_COMPATIBILITY_ANALYSIS,
+  CLINICAL_PILLARS,
+  THREE_CAPSULE_PROTOCOL,
+  CONCRETE_DIET_GUIDELINES,
+  TREATMENT_CYCLE
+} from '@/data/genomics/clinicalNutrigenomicEngine';
 
 function getGeminiApiKey() {
   return (
@@ -34,40 +41,10 @@ export async function POST(request) {
         patientName: 'Hossam Ahmed',
         sampleCode: '24G-QA-90421',
         reportType: '24Genetics Nutrition & Clinical Nutrigenomics Report',
-        clinicalPillars: {
-          pillar1_metabolism: {
-            title: 'Metabolic & Glycemic Balance',
-            genes: 'TCF7L2, FTO, SLC2A2',
-            finding: 'High carbohydrate sensitivity and elevated glycemic spike predisposition',
-            recommendation: 'Standardized Berberine 250 mg + Chromium Picolinate 200 mcg',
-            posology: '125 mg BID 15 min prior to meals (breakfast and dinner)',
-            duration: '60 days'
-          },
-          pillar2_methylation: {
-            title: 'Cellular Methylation & Energy',
-            genes: 'MTHFR C677T (TT), MTR',
-            finding: 'Impaired MTHFR enzymatic conversion (~70% reduction); synthetic folic acid contraindicated',
-            recommendation: 'L-Methylfolate ([6S]-5-MTHF Calcium) 1,000 mcg + Methylcobalamin 1,000 mcg + Pyridoxal-5-Phosphate 25 mg',
-            posology: '500 mcg BID with meals',
-            duration: '60 days (homocysteine follow-up at day 45)'
-          },
-          pillar3_microbiota: {
-            title: 'Gut Microbiome & Mucosal Barrier',
-            genes: 'MCM6 / LCT (CC), FUT2 Secretor Status',
-            finding: 'Primary adult hypolactasia; mucosal sensitivity and reduced bifidobacteria diversity',
-            recommendation: 'Delayed-Release Multi-Strain Probiotics (15B CFU) + L-Glutamine 1,000 mg + Acid-Stable Lactase Enzyme (9,000 FCC ALU)',
-            posology: '1 capsule morning on empty stomach; 100% lactose-free vehicle in vegetable DRcaps®',
-            duration: '60 days continuous microbiome restoration'
-          },
-          pillar4_immunity_vitamins: {
-            title: 'Bone Density & Immune Receptors',
-            genes: 'VDR FokI (CT), CYP2R1',
-            finding: 'Subdued VDR nuclear receptor affinity requiring higher circulating 25-OH-D',
-            recommendation: 'Vitamin D3 (Cholecalciferol) 5,000 IU + Vitamin K2 (MK-7 all-trans) 100 mcg + Magnesium Bisglycinate 200 mg',
-            posology: 'Take once daily with morning meal containing healthy fats',
-            duration: '60 days (serum 25-OH-D test at day 45)'
-          }
-        },
+        clinicalPillars: CLINICAL_PILLARS,
+        galenicCompatibility: GALENIC_COMPATIBILITY_ANALYSIS,
+        threeCapsuleProtocol: THREE_CAPSULE_PROTOCOL,
+        treatmentCycle: TREATMENT_CYCLE,
         dietAndWeight: {
           effectiveDietType: 'low_carb',
           predispositionToOverweight: 'high',
@@ -94,20 +71,13 @@ export async function POST(request) {
           microbiomeDiversityTendency: 'reduced_bifidobacteria',
           mucosalPermeabilityRisk: 'elevated'
         },
-        concreteDietGuidelines: [
-          'Plate Sequencing Rule: Consume leafy vegetables and soluble fiber first, lean proteins/healthy fats second, and complex low-glycemic carbs last.',
-          'Carbohydrate Boundary: Cap net carbohydrates at <40g per meal; strictly avoid high-fructose syrups and liquid calories.',
-          'Microbiome Support: Introduce organic fermented foods (coconut kefir, kimchi, sauerkraut) and polyphenol-rich olive oil daily.',
-          'Dairy Exclusion: 100% strict elimination of unfermented cow milk and soft cheeses; choose almond, coconut, or certified lactose-free alternatives.',
-          'Circadian Caffeine Cutoff: Discontinue caffeine and adrenergic beverages after 2:00 PM to protect nighttime sleep architecture and avoid cortisol surges.'
-        ],
+        concreteDietGuidelines: CONCRETE_DIET_GUIDELINES.map(g => `${g.step}. ${g.titleEn}: ${g.ruleEn}`),
         clinicalNutrigenomicNotes: [
           'Evaluated by Atlas Health medical geneticists and compounding pharmacists.',
-          'High genetic predisposition to overweight (FTO/MC4R risk variant) best managed via Low-Carb Mediterranean protocol.',
-          'TCF7L2 sensitivity requires insulin receptor sensitization with bioavailable Berberine and Chromium.',
-          'Homozygous MTHFR requires bypassing synthetic folic acid with biologically active [6S]-5-MTHF.',
-          'Confirmed MCM6 lactase non-persistence mandates strict lactose exclusion and 100% lactose-free compounding excipients in DRcaps®.',
-          'Slow caffeine metabolism (CYP1A2*1F) warrants a strict early-afternoon cutoff.'
+          'Physical and biochemical compatibility requires a 3-capsule partitioned regimen rather than an unstable single mega-capsule.',
+          'Capsule A protects fragile live probiotics in acid-resistant DRcaps® taken fasting without botanical interference.',
+          'Capsule B activates daytime glycemic sensitivity (berberine/chromium) and micellar absorption of vitamin D3/K2 with breakfast fats.',
+          'Capsule C supports nighttime insulin stability, completes 1,000 mcg methylation, and promotes restorative sleep via chelated magnesium.'
         ]
       });
     }
