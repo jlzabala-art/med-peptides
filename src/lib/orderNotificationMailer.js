@@ -118,7 +118,7 @@ export function buildAdminOrderNotificationHtml(order = {}) {
   const itemsRowsHtml = buildItemsRowsHtml(items, sym);
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.atlashealth-services.com';
-  const adminOrderUrl = `${appUrl}/admin?tab=orders${order.firestoreId ? `&orderId=${encodeURIComponent(order.firestoreId)}` : ''}`;
+  const adminOrderUrl = `${appUrl}/admin/orders`;
 
   return `
     <!DOCTYPE html>
@@ -156,35 +156,52 @@ export function buildAdminOrderNotificationHtml(order = {}) {
             </div>
           </div>
 
-          <!-- Institutional Contact Card -->
-          <h3 style="margin:0 0 8px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#475569;">
-            Institutional Contact & Shipping Destination
-          </h3>
-          <table style="width:100%;border-collapse:collapse;margin-bottom:18px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
-            <tbody>
-              <tr>
-                <td style="padding:9px 12px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;width:34%;">Contact Lead</td>
-                <td style="padding:9px 12px;border-bottom:1px solid #e2e8f0;font-size:12.5px;font-weight:750;color:#0f172a;">${customerName} (${clinicName})</td>
-              </tr>
-              <tr>
-                <td style="padding:9px 12px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;">Work Email</td>
-                <td style="padding:9px 12px;border-bottom:1px solid #e2e8f0;font-size:12.5px;font-weight:600;color:#0284c7;">${customerEmail}</td>
-              </tr>
-              <tr>
-                <td style="padding:9px 12px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;">Phone / WhatsApp</td>
-                <td style="padding:9px 12px;border-bottom:1px solid #e2e8f0;font-size:12.5px;font-weight:600;color:#0f172a;">${customerPhone}</td>
-              </tr>
-              <tr>
-                <td style="padding:9px 12px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;">Delivery Address</td>
-                <td style="padding:9px 12px;border-bottom:1px solid #e2e8f0;font-size:12.5px;color:#334155;">${customerAddress}</td>
-              </tr>
-              ${customerNotes && customerNotes !== '—' ? `
-              <tr>
-                <td style="padding:9px 12px;font-size:12px;color:#64748b;">Order Notes</td>
-                <td style="padding:9px 12px;font-size:12.5px;color:#334155;">${customerNotes}</td>
-              </tr>` : ''}
-            </tbody>
+          <!-- Customer & Delivery 2-Column Grid (Shopify Style) -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+            <tr>
+              <td class="stack-cell" style="width:50%;vertical-align:top;padding-right:8px;padding-bottom:10px;">
+                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;box-sizing:border-box;">
+                  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#003666;margin-bottom:8px;">
+                    👤 Customer Information
+                  </div>
+                  <div style="font-size:13.5px;font-weight:750;color:#0f172a;margin-bottom:2px;">
+                    ${customerName}
+                  </div>
+                  ${clinicName && clinicName !== '—' ? `<div style="font-size:12px;color:#475569;font-weight:600;margin-bottom:4px;">🏥 ${clinicName}</div>` : ''}
+                  <div style="font-size:12px;color:#0284c7;margin-bottom:3px;">
+                    ✉️ ${customerEmail}
+                  </div>
+                  ${customerPhone && customerPhone !== '—' ? `<div style="font-size:12px;color:#475569;">📞 ${customerPhone}</div>` : ''}
+                </div>
+              </td>
+              <td class="stack-cell" style="width:50%;vertical-align:top;padding-left:8px;padding-bottom:10px;">
+                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;box-sizing:border-box;">
+                  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#003666;margin-bottom:8px;">
+                    📍 Shipping Destination
+                  </div>
+                  <div style="font-size:13.5px;font-weight:750;color:#0f172a;margin-bottom:4px;">
+                    ${clinicName || customerName}
+                  </div>
+                  <div style="font-size:12px;color:#334155;line-height:1.45;margin-bottom:8px;">
+                    ${customerAddress}
+                  </div>
+                  <div style="font-size:11px;font-weight:700;color:#0369a1;background:#e0f2fe;padding:2px 8px;border-radius:4px;display:inline-block;border:1px solid #bae6fd;">
+                    ✈️ Express Medical Courier
+                  </div>
+                </div>
+              </td>
+            </tr>
           </table>
+
+          ${customerNotes && customerNotes !== '—' ? `
+          <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:18px;">
+            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#92400e;margin-bottom:3px;">
+              📝 Delivery & Order Notes
+            </div>
+            <div style="font-size:12.5px;color:#78350f;">
+              ${customerNotes}
+            </div>
+          </div>` : ''}
 
           <!-- Products Table -->
           <h3 style="margin:0 0 8px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#475569;">
@@ -225,7 +242,7 @@ export function buildAdminOrderNotificationHtml(order = {}) {
           <!-- Admin Action CTA -->
           <div style="text-align:center;margin-top:20px;">
             <a href="${adminOrderUrl}" style="display:inline-block;padding:12px 24px;background:#003666;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;border-radius:6px;min-height:44px;line-height:20px;">
-              Open Order #${orderCode} in Admin Control Panel →
+              Manage Order in Admin →
             </a>
           </div>
         </div>
@@ -349,6 +366,13 @@ export function buildCustomerOrderConfirmationHtml(order = {}) {
               <li style="margin-bottom:4px;"><strong>Secure Direct Payment:</strong> You will receive a direct link to complete payment via Credit Card or international Bank Wire.</li>
               <li><strong>Express Dispatch:</strong> Upon payment receipt, formulations are vacuum-inspected, packed, and dispatched via certified medical courier with full analytical COA certificates.</li>
             </ol>
+          </div>
+
+          <!-- Customer Action CTA -->
+          <div style="text-align:center;margin:22px 0 16px;">
+            <a href="https://www.atlashealth-services.com/patient/orders" style="display:inline-block;padding:12px 24px;background:#0284c7;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;border-radius:6px;min-height:44px;line-height:20px;">
+              View Pro-Forma Summary →
+            </a>
           </div>
 
           <p style="margin:0;font-size:12px;color:#64748b;text-align:center;">
@@ -529,6 +553,13 @@ export function buildWholesalerReferralNotificationHtml(order = {}, partnerStats
               </tr>
             </tfoot>
           </table>
+
+          <!-- Wholesaler Action CTA -->
+          <div style="text-align:center;margin:20px 0 16px;">
+            <a href="https://www.atlashealth-services.com/wholesaler/commissions" style="display:inline-block;padding:12px 24px;background:#047857;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;border-radius:6px;min-height:44px;line-height:20px;">
+              View Commissions Ledger →
+            </a>
+          </div>
 
           <div style="background:#f8fafc;border-left:3px solid #047857;padding:10px 12px;font-size:11.5px;color:#475569;line-height:1.45;">
             <strong>Settlement Terms:</strong> Referral commissions are automatically updated on your partner balance and settled monthly into your NP Labs International account according to distribution terms.

@@ -57,8 +57,9 @@ module.exports = (gmailUser, gmailAppPass) => onDocumentCreated(
     let adminEmails = [];
     if (!adminSnap.empty) {
       adminEmails = adminSnap.docs
+        .filter((doc) => doc.data().emailNotifications !== false)
         .map((doc) => doc.data().email)
-        .filter(isDeliverableEmail);
+        .filter((email) => isDeliverableEmail(email) && !email.toLowerCase().includes('.test') && !email.toLowerCase().includes('regenpept.test'));
     }
 
     // Always ensure jose@mediluxeme.com receives every order notification
