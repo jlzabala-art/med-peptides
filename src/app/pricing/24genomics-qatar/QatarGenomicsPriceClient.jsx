@@ -184,8 +184,8 @@ export default function QatarGenomicsPriceClient() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clientName: 'Hossam Trading & Commercial Distribution W.L.L.',
-          contactPerson: 'Hossam',
+          clientName: 'Ryhanh Medical Company',
+          contactPerson: 'Hossam Ahmed',
           territory: 'State of Qatar',
           currency: 'QAR',
           subtotal: currentTier.totalPriceQar,
@@ -205,7 +205,7 @@ export default function QatarGenomicsPriceClient() {
               actives: currentProd.keyGenes
             }
           ],
-          notes: `Official Commercial distributor quotation for 24Genetics CE-IVD testing kits (${currentTier.name}) generated via Atlas AI™ portal. Consignee: Hossam Trading & Commercial Distribution W.L.L. (Doha, Qatar). 100% advance wire transfer before Madrid laboratory dispatch.`,
+          notes: `Official Commercial distributor quotation for 24Genetics CE-IVD testing kits (${currentTier.name}) generated via Atlas AI™ portal. Consignee: Ryhanh Medical Company (Ryhanh Group, Doha, Qatar). 100% advance wire transfer before Madrid laboratory dispatch.`,
           source: 'atlas_ai_qatar_genomics'
         })
       });
@@ -218,7 +218,7 @@ export default function QatarGenomicsPriceClient() {
       setGeneratedQuote({
         quotationNumber: `QT-QA-24G-${Math.floor(100000 + Math.random() * 900000)}`,
         grandTotal: currentTier.totalPriceQar,
-        clientName: 'Hossam Trading & Commercial Distribution W.L.L.',
+        clientName: 'Ryhanh Medical Company',
         currency: 'QAR',
         success: true
       });
@@ -279,7 +279,7 @@ export default function QatarGenomicsPriceClient() {
             </Link>
 
             <a
-              href="https://wa.me/971504789841?text=Hello%20Jose,%20regarding%20the%20Qatar%2024Genetics%20Nutrigenomics%20Distributor%20Schedule%20for%20Hossam%20Trading"
+              href="https://wa.me/971504789841?text=Hello%20Jose,%20regarding%20the%20Qatar%2024Genetics%20Nutrigenomics%20Distributor%20Schedule%20for%20Ryhanh%20Medical%20Company"
               target="_blank"
               rel="noopener noreferrer"
               className="action-btn action-whatsapp"
@@ -355,7 +355,7 @@ export default function QatarGenomicsPriceClient() {
           <div style={{ maxWidth: '1280px', margin: '0.75rem auto 0 auto', padding: '1rem', backgroundColor: 'rgba(6, 78, 59, 0.85)', border: '1px solid rgba(45, 212, 191, 0.3)', borderRadius: '8px', fontSize: '0.80rem', color: '#e2e8f0', lineHeight: 1.5 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#2dd4bf', marginBottom: '4px' }}>
               <Zap size={14} />
-              <span>How Atlas AI™ Powers Continuous Patient Revenue for Hossam Trading (Qatar):</span>
+              <span>How Atlas AI™ Powers Continuous Patient Revenue for Ryhanh Medical Company (Qatar):</span>
             </div>
             <div>
               1. <strong>Gateway Diagnostics:</strong> The saliva test identifies mutations such as <strong>MTHFR (reduced methylation)</strong>, <strong>VDR (low Vitamin D receptor affinity)</strong>, and <strong>TCF7L2 (carbohydrate sensitivity)</strong>.<br />
@@ -371,7 +371,7 @@ export default function QatarGenomicsPriceClient() {
         <Breadcrumb items={[
           { label: 'B2B Schedules', href: '/pricing' },
           { label: 'Qatar Exclusive Distribution', href: '/pricing/24genomics-qatar' },
-          { label: 'Hossam Trading · 24Genetics Nutrigenomics' }
+          { label: 'Ryhanh Medical Company · 24Genetics Nutrigenomics' }
         ]} />
 
         {/* ── Institutional Document Header ── */}
@@ -405,7 +405,7 @@ export default function QatarGenomicsPriceClient() {
               </div>
               <div className="stamp-item">
                 <span className="stamp-label">CONSIGNEE DISTRIBUTOR:</span>
-                <span className="stamp-value font-bold text-teal-700">Hossam Trading & Commercial Distribution W.L.L.</span>
+                <span className="stamp-value font-bold text-teal-700">Ryhanh Medical Company (Ryhanh Group, Doha, Qatar)</span>
               </div>
               <div className="stamp-item">
                 <span className="stamp-label">ACCREDITATION:</span>
@@ -603,7 +603,7 @@ export default function QatarGenomicsPriceClient() {
                     Quotation #{generatedQuote.quotationNumber}
                   </h3>
                   <div style={{ fontSize: '0.85rem', color: '#334155' }}>
-                    Consignee: <strong>{generatedQuote.clientName || 'Hossam Trading & Commercial Distribution W.L.L.'}</strong> · Total: <strong>{Number(generatedQuote.grandTotal || currentTier.totalPriceQar).toLocaleString()} QAR</strong> ({currentTier.name}).
+                    Consignee: <strong>{generatedQuote.clientName || 'Ryhanh Medical Company'}</strong> · Total: <strong>{Number(generatedQuote.grandTotal || currentTier.totalPriceQar).toLocaleString()} QAR</strong> ({currentTier.name}).
                   </div>
                   <div style={{ fontSize: '0.76rem', color: '#0d9488', marginTop: '4px', fontWeight: 650 }}>
                     ✓ Formal quotation record created in Atlas database and dispatched to Mediluxe executive management (jose@mediluxeme.com).
@@ -688,7 +688,7 @@ export default function QatarGenomicsPriceClient() {
                   </p>
                 </div>
                 <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488', backgroundColor: '#f0fdfa', border: '1px solid #99f6e4', padding: '3px 8px', borderRadius: '4px' }}>
-                  Target Consignee: Hossam Trading & Commercial Distribution W.L.L.
+                  Target Consignee: Ryhanh Medical Company (Ryhanh Group, Doha, Qatar)
                 </span>
               </div>
 
@@ -974,7 +974,7 @@ export default function QatarGenomicsPriceClient() {
                     4. Continuous 90-Day Refill & Retention
                   </h4>
                   <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
-                    The genetic test is performed once, but the personalized formulation creates an automatic 90-day subscription cycle, ensuring recurring wholesale orders for Hossam Trading from clinics across Qatar.
+                    The genetic test is performed once, but the personalized formulation creates an automatic 90-day subscription cycle, ensuring recurring wholesale orders for Ryhanh Medical Company from clinics across Qatar.
                   </p>
                 </div>
               </div>
@@ -1539,7 +1539,7 @@ export default function QatarGenomicsPriceClient() {
                 <strong style={{ color: '#15803d', display: 'block', marginBottom: '4px' }}>
                   1. Authorized Territory & Distribution Rights
                 </strong>
-                Pricing is exclusively granted to <strong>Hossam Trading & Commercial Distribution W.L.L.</strong> for B2B distribution to licensed clinics, wellness centers, aesthetic clinics, and private medical practices in Qatar.
+                Pricing is exclusively granted to <strong>Ryhanh Medical Company (Ryhanh Group)</strong> for B2B distribution to licensed clinics, wellness centers, aesthetic clinics, and private medical practices in Qatar.
               </div>
 
               <div style={{ padding: '1rem', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px' }}>

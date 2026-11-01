@@ -12,8 +12,8 @@ export async function POST(request) {
 
     const body = await request.json();
     const {
-      clientName = 'Hossam Trading & Commercial Distribution W.L.L.',
-      contactPerson = 'Hossam',
+      clientName = 'Ryhanh Medical Company',
+      contactPerson = 'Hossam Ahmed',
       contactEmail = 'jose@mediluxeme.com',
       territory = 'State of Qatar',
       currency = 'QAR',

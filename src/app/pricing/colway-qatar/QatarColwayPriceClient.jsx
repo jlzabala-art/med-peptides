@@ -68,8 +68,8 @@ export default function QatarColwayPriceClient() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clientName: 'Hossam Trading & Commercial Distribution W.L.L.',
-          contactPerson: 'Hossam',
+          clientName: 'Ryhanh Medical Company',
+          contactPerson: 'Hossam Ahmed',
           territory: 'State of Qatar',
           currency: 'QAR',
           subtotal: totalDistributorInvoiceQar,
@@ -112,7 +112,7 @@ export default function QatarColwayPriceClient() {
       setGeneratedQuote({
         quotationNumber: `QT-QA-COL-${Math.floor(100000 + Math.random() * 900000)}`,
         grandTotal: totalDistributorInvoiceQar,
-        clientName: 'Hossam Trading & Commercial Distribution W.L.L.',
+        clientName: 'Ryhanh Medical Company',
         currency: 'QAR',
         success: true
       });
@@ -176,7 +176,7 @@ export default function QatarColwayPriceClient() {
 
             {/* WhatsApp Contact */}
             <a
-              href="https://wa.me/971504789841?text=Hello%20Jose,%20regarding%20the%20Qatar%20Colway%20Hair%20Distributor%20Schedule%20for%20Hossam%20Trading"
+              href="https://wa.me/971504789841?text=Hello%20Jose,%20regarding%20the%20Qatar%20Colway%20Hair%20Distributor%20Schedule%20for%20Ryhanh%20Medical%20Company"
               target="_blank"
               rel="noopener noreferrer"
               className="action-btn action-whatsapp"
@@ -252,7 +252,7 @@ export default function QatarColwayPriceClient() {
           <div style={{ maxWidth: '1280px', margin: '0.75rem auto 0 auto', padding: '1rem', backgroundColor: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '8px', fontSize: '0.80rem', color: '#e2e8f0', lineHeight: 1.5 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: '#38bdf8', marginBottom: '4px' }}>
               <Zap size={14} />
-              <span>Atlas AI Strategic Commercial Intelligence for Hossam Trading (Qatar):</span>
+              <span>Atlas AI Strategic Commercial Intelligence for Ryhanh Medical Company (Qatar):</span>
             </div>
             <div>
               1. <strong>Factory Hedging:</strong> European procurement cost is anchored in origin at <strong>94.00 PLN</strong> per unit, yielding \$24.00 USD at baseline interbank rates.<br />
@@ -269,7 +269,7 @@ export default function QatarColwayPriceClient() {
         <Breadcrumb items={[
           { label: 'B2B Schedules', href: '/pricing' },
           { label: 'Qatar Exclusive Distribution', href: '/pricing/colway-qatar' },
-          { label: 'Hossam Trading · Colway Trichology' }
+          { label: 'Ryhanh Medical Company · Colway Trichology' }
         ]} />
 
         {/* ── Institutional Document Header (Exact Standard as /pricing/colway) ── */}
@@ -301,7 +301,7 @@ export default function QatarColwayPriceClient() {
               </div>
               <div className="stamp-item">
                 <span className="stamp-label">CONSIGNEE DISTRIBUTOR:</span>
-                <span className="stamp-value font-bold text-sky-700">Hossam Trading & Commercial Distribution W.L.L.</span>
+                <span className="stamp-value font-bold text-sky-700">Ryhanh Medical Company (Ryhanh Group, Doha, Qatar)</span>
               </div>
               <div className="stamp-item">
                 <span className="stamp-label">PRICING BASIS:</span>
@@ -443,7 +443,7 @@ export default function QatarColwayPriceClient() {
                     Quotation #{generatedQuote.quotationNumber}
                   </h3>
                   <div style={{ fontSize: '0.85rem', color: '#334155' }}>
-                    Consignee: <strong>{generatedQuote.clientName || 'Hossam Trading & Commercial Distribution W.L.L.'}</strong> · Total: <strong>8,960.00 QAR</strong> (\$2,435.11 USD).
+                    Consignee: <strong>{generatedQuote.clientName || 'Ryhanh Medical Company'}</strong> · Total: <strong>8,960.00 QAR</strong> (\$2,435.11 USD).
                   </div>
                   <div style={{ fontSize: '0.76rem', color: '#16a34a', marginTop: '4px', fontWeight: 650 }}>
                     ✓ Formal quotation record created in Atlas database and dispatched to Mediluxe executive management (jose@mediluxeme.com).
@@ -569,7 +569,7 @@ export default function QatarColwayPriceClient() {
                     Detailed Landed Cost & Commercial Architecture (80 Units)
                   </h3>
                   <p style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '3px' }}>
-                    Transparent reconciliation between European compounding origin, international courier freight, Mediluxe export margin, and Distributor wholesale revenue for <strong>Hossam Trading</strong>.
+                    Transparent reconciliation between European compounding origin, international courier freight, Mediluxe export margin, and Distributor wholesale revenue for <strong>Ryhanh Medical Company (Ryhanh Group)</strong>.
                   </p>
                 </div>
                 <span style={{ fontSize: '0.72rem', fontWeight: 700, backgroundColor: '#003666', color: '#ffffff', padding: '4px 10px', borderRadius: '4px' }}>
@@ -648,11 +648,11 @@ export default function QatarColwayPriceClient() {
                       <td style={{ padding: '12px 16px', textAlign: 'right', color: '#0369a1', fontWeight: 700 }}>+617.84 QAR</td>
                     </tr>
 
-                    {/* Official Price to Hossam */}
+                    {/* Official Price to Ryhanh Medical Company */}
                     <tr style={{ backgroundColor: '#003666', color: '#ffffff', fontWeight: 800 }}>
                       <td style={{ padding: '14px 16px', fontSize: '0.92rem' }}>
-                        <div>OFFICIAL SELLING PRICE TO DISTRIBUTOR (HOSSAM TRADING)</div>
-                        <div style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 500 }}>Price invoiced to Hossam Trading & Commercial Distribution W.L.L.</div>
+                        <div>OFFICIAL SELLING PRICE TO DISTRIBUTOR (RYHANH MEDICAL COMPANY)</div>
+                        <div style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 500 }}>Price invoiced to Ryhanh Medical Company (Ryhanh Group, Doha, Qatar)</div>
                       </td>
                       <td style={{ padding: '14px 16px', textAlign: 'center', color: '#93c5fd', fontSize: '0.78rem' }}>Agreed B2B Invoice</td>
                       <td style={{ padding: '14px 16px', textAlign: 'right', fontSize: '1rem' }}>$30.44</td>
@@ -676,7 +676,7 @@ export default function QatarColwayPriceClient() {
 
                     <tr style={{ backgroundColor: '#dcfce7', color: '#166534', fontWeight: 800 }}>
                       <td style={{ padding: '12px 16px' }}>
-                        <div>DISTRIBUTOR GROSS PROFIT FOR HOSSAM TRADING (40.1% MARGIN)</div>
+                        <div>DISTRIBUTOR GROSS PROFIT FOR RYHANH MEDICAL COMPANY (40.1% MARGIN)</div>
                         <div style={{ fontSize: '0.72rem', color: '#15803d', fontWeight: 500 }}>Gross margin before local distribution and collection costs</div>
                       </td>
                       <td style={{ padding: '12px 16px', textAlign: 'center' }}>Gross Margin (40.1%)</td>
@@ -918,7 +918,7 @@ export default function QatarColwayPriceClient() {
                 <strong style={{ color: '#15803d', display: 'block', marginBottom: '4px' }}>
                   1. Distributor Role & Territory Exclusivity
                 </strong>
-                This price schedule and commercial cost breakdown are strictly formulated for <strong>Hossam Trading & Commercial Distribution W.L.L.</strong> acting as the authorized commercial distributor in the State of Qatar. These privileged landed prices are confidential to the distributor entity.
+                This price schedule and commercial cost breakdown are strictly formulated for <strong>Ryhanh Medical Company (Ryhanh Group)</strong> acting as the authorized commercial distributor in the State of Qatar. These privileged landed prices are confidential to the distributor entity.
               </div>
 
               <div style={{ padding: '1rem', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px' }}>

@@ -79,8 +79,8 @@ const SCHEDULES = [
   {
     id: 'colway-qatar',
     title: 'Colway Hair Care • Qatar Distributor Schedule',
-    badge: 'Exclusive: Hossam Trading W.L.L. (Qatar)',
-    desc: 'Exclusive landed-cost schedule for Hair Strengthening Shampoo & Conditioner in Qatar. Baicapil™ 2% + native tropocollagen + micronized diosmin.',
+    badge: 'Exclusive: Ryhanh Medical Company (Qatar)',
+    desc: 'Exclusive landed-cost schedule for Hair Strengthening Shampoo & Conditioner in Qatar. Partner: Hossam Ahmed (Ryhanh Group). Baicapil™ 2% + native tropocollagen.',
     route: '/pricing/colway-qatar',
     badgeColor: '#15803d',
     badgeBg: '#f0fdf4',
@@ -90,8 +90,8 @@ const SCHEDULES = [
   {
     id: '24genomics-qatar',
     title: '24Genetics Clinical Genomics & Nutrigen • Qatar Schedule',
-    badge: 'Exclusive: Hossam Trading W.L.L. (Qatar)',
-    desc: 'Saliva-based DNA test panels covering Nutrigenetics (Nutrigen), Pharmacogenetics & All-in-One. Direct integration with customized compounded nutrient capsules.',
+    badge: 'Exclusive: Ryhanh Medical Company (Qatar)',
+    desc: 'Saliva-based DNA test panels covering Nutrigenetics (Nutrigen), Pharmacogenetics & All-in-One. Partner: Hossam Ahmed (Ryhanh Group, Doha).',
     route: '/pricing/24genomics-qatar',
     badgeColor: '#0f766e',
     badgeBg: '#f0fdfa',
