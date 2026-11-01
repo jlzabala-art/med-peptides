@@ -51,11 +51,12 @@ import EmailCampaignBuilder from '../components/wholesaler/EmailCampaignBuilder'
 import DemandForecastingWidget from '../components/wholesaler/DemandForecastingWidget';
 import WholesalerReferralDashboard from '../components/wholesaler/WholesalerReferralDashboard';
 import { Card, MetricCard } from '../components/ui';
-import { LayoutDashboard, Layers, Package, TrendingUp, Settings, LogOut, ChevronRight, ArrowRight, Clock, CheckCircle2, AlertCircle, Truck, Box, BarChart3, Laptop, Bell, MapPin, Paintbrush, Globe, MessageSquare, Brain, Mail, Sparkles, ChevronUp, ChevronDown, ClipboardList, Zap, Users, FileText } from '@/lib/icons';
+import { LayoutDashboard, Layers, Package, TrendingUp, Settings, LogOut, ChevronRight, ArrowRight, Clock, CheckCircle2, AlertCircle, Truck, Box, BarChart3, Laptop, Bell, MapPin, Paintbrush, Globe, MessageSquare, Brain, Mail, Sparkles, ChevronUp, ChevronDown, ClipboardList, Zap, Users, FileText, DollarSign } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 // ── Flat tab list (for reference) ────────────────────────────────────────────────────────────
 const TABS = [
   { id: 'overview',    label: 'Overview',    icon: LayoutDashboard },
+  { id: 'commissions', label: 'Commissions & Referrals', icon: DollarSign },
   { id: 'rx-inbox',    label: 'Rx Inbox',    icon: ClipboardList },
   { id: 'bulk-orders', label: 'Bulk Orders', icon: Layers },
   { id: 'geography',   label: 'Geography Areas', icon: MapPin },
@@ -77,6 +78,7 @@ const WHOLESALER_NAV_GROUPS = [
   {
     id: 'franchise', label: 'Franchise Partner',
     items: [
+      { id: 'commissions', label: 'Commissions & Referrals', icon: DollarSign },
       { id: 'geography',   label: 'Geography Areas', icon: MapPin },
       { id: 'branding',    label: 'Branding',    icon: Paintbrush },
       { id: 'domains',     label: 'Domains',     icon: Globe },

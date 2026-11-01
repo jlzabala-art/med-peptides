@@ -264,7 +264,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
     }, 0);
   }, [cartItems]);
 
-  // Cold-Chain Express Shipping (60 EUR base)
+  // Express Medical Logistics (60 EUR base)
   const _shippingCostEur = 60;
   const shippingCostUsd = useMemo(() => {
     return Math.round((60 / 0.92) * 100) / 100; // $65.22 USD
@@ -366,7 +366,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
           customerPhone: orderForm.phone,
           customerAddress: fullAddress,
           customerNotes: orderForm.notes,
-          shippingDestination: orderForm.country || 'International (Cold-Chain 2–8°C)',
+          shippingDestination: orderForm.country || 'International Express Medical Courier',
           referralCode: referralCode || 'CAT-RX-7482',
           source: 'public_peptides_price_schedule',
           collection: 'vials',
@@ -1176,7 +1176,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
                         </span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.80rem', color: '#0369a1' }}>
-                        <span>Cold-Chain Express Freight (2–8°C · €60 base):</span>
+                        <span>Express Medical Logistics (€60 base):</span>
                         <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0284c7' }}>
                           +{currencySymbol}{shippingCostCurrentCurrency.toFixed(2)}
                         </span>
@@ -1639,7 +1639,7 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
             </tr>
             <tr style={{ borderTop: '1px solid #f1f5f9' }}>
               <td colSpan={4} style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 650, fontSize: '9pt', color: '#0369a1' }}>
-                INSULATED COLD-CHAIN FREIGHT (2–8°C THERMAL EXPRESS · €60.00 BASE):
+                EXPRESS MEDICAL LOGISTICS & HANDLING (€60.00 BASE):
               </td>
               <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, fontSize: '9.5pt', color: '#0284c7', fontFamily: 'monospace' }}>
                 +{currencySymbol}{shippingCostCurrentCurrency.toFixed(2)}
@@ -1656,9 +1656,9 @@ export default function PeptidesPriceListClient({ initialProducts = [], referral
           </tfoot>
         </table>
 
-        {/* Cold-Chain Logistics & Quality Disclaimer */}
+        {/* Logistics & Quality Regulatory Terms */}
         <div style={{ padding: '12px 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '8pt', color: '#64748b', lineHeight: 1.5 }}>
-          <strong>Cold-Chain & Regulatory Terms:</strong> All peptide vials are manufactured under cGMP standards with certified analytical purity (≥99.0% HPLC). Shipped with temperature-monitored cold-chain insulation (2–8°C thermal express). Official proforma invoice and customs COA documentation will be issued upon formal order confirmation.
+          <strong>Logistics & Regulatory Terms:</strong> All peptide vials are manufactured under cGMP standards with certified analytical purity (≥99.0% HPLC). Lyophilized sterile formulations are vacuum-sealed for maximum room-temperature stability and dispatched via express medical courier. Official proforma invoice and analytical COA documentation will be issued upon formal order confirmation.
         </div>
       </div>
 

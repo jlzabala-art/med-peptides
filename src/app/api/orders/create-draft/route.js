@@ -254,7 +254,7 @@ export async function POST(request) {
         ? Number(Number(shippingCost).toFixed(2))
         : (collection === 'vials' || source === 'public_peptides_price_schedule' || isNikolasOrder ? (currency === 'EUR' ? 60 : 65.22) : 0),
       shippingCostEur: 60,
-      shippingDestination: String(shippingDestination || 'Insulated Cold-Chain (2–8°C Thermal Express)').trim(),
+      shippingDestination: String(shippingDestination || 'Express Medical Courier Dispatch').trim(),
       shippingCode: String(shippingCode || 'EU').trim(),
       grandTotal: Number(grandTotal) > 0
         ? Number(Number(grandTotal).toFixed(2))
@@ -270,6 +270,10 @@ export async function POST(request) {
       referralCode: effectiveReferralCode,
       wholesalerName: effectiveWholesalerName,
       wholesalerEmail: effectiveWholesalerEmail,
+      commissionRate: effectiveWholesalerId ? 0.15 : 0,
+      commissionAmount: effectiveWholesalerId
+        ? Number(((Number(subtotal) > 0 ? Number(subtotal) : formattedItems.reduce((acc, i) => acc + (Number(i.lineTotal) || 0), 0)) * 0.15).toFixed(2))
+        : 0,
       attributedTo,
       collection: String(collection || 'vials').toLowerCase(),
       accountManagerName: String(accountManagerName || '').trim(),
@@ -292,33 +296,48 @@ export async function POST(request) {
 
     const orderRef = await adminDb.collection('orders').add(orderDocData);
 
-    // Update Wholesaler Referral analytics in Firestore if attributed
+    // Update Wholesaler Referral analytics and commission ledger in Firestore if attributed
     if (orderDocData.wholesalerId) {
       try {
         const refDocRef = adminDb.collection('wholesaler_referrals').doc(orderDocData.wholesalerId);
         const colKey = orderDocData.collection;
+        const orderCommission = Number(orderDocData.commissionAmount || 0);
+
         await refDocRef.set({
           wholesalerId: orderDocData.wholesalerId,
           referralCode: orderDocData.referralCode || orderDocData.wholesalerId,
           ordersCount: FieldValue.increment(1),
           totalRevenue: FieldValue.increment(orderDocData.grandTotal),
           totalUnits: FieldValue.increment(orderDocData.totalUnits),
+          totalCommissions: FieldValue.increment(orderCommission),
+          pendingPayoutCommissions: FieldValue.increment(orderCommission),
+          commissionRate: 0.15,
           [`collections.${colKey}.ordersCount`]: FieldValue.increment(1),
           [`collections.${colKey}.totalRevenue`]: FieldValue.increment(orderDocData.grandTotal),
+          [`collections.${colKey}.totalCommissions`]: FieldValue.increment(orderCommission),
           lastOrderAt: now.toISOString(),
+          lastCommissionEarnedAt: now.toISOString(),
           updatedAt: now.toISOString()
         }, { merge: true });
 
-        // Also add to subcollection for individual referral order ledger
+        // Also add to subcollection for individual referral order ledger with master-detail items
         await refDocRef.collection('orders').doc(orderRef.id).set({
           orderId: orderRef.id,
           orderCode,
           collection: orderDocData.collection,
           customerName: clientDisplayName,
           customerEmail: orderDocData.customerEmail,
+          customerPhone: orderDocData.customerPhone || '',
+          deliveryAddress: orderDocData.deliveryAddress || '',
+          items: orderDocData.items || [],
           totalUnits: orderDocData.totalUnits,
+          subtotal: orderDocData.subtotal,
+          shippingCost: orderDocData.shippingCost,
           grandTotal: orderDocData.grandTotal,
           currency: orderDocData.currency,
+          commissionRate: 0.15,
+          commissionAmount: orderCommission,
+          payoutStatus: 'pending',
           status: 'draft',
           paymentMethod: orderDocData.paymentMethod,
           createdAt: now.toISOString()
